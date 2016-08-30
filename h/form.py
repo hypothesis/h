@@ -95,7 +95,7 @@ def configure_environment(config):  # pragma: no cover
     config.registry[ENVIRONMENT_KEY] = create_environment(base)
 
 
-def handle_form_submission(request, form, on_success, on_failure):
+def handle_form_submission(request, form, on_success, on_failure, **kwargs):
     """
     Handle the submission of the given form in a standard way.
 
@@ -134,13 +134,14 @@ def handle_form_submission(request, form, on_success, on_failure):
         if result is None:
             result = httpexceptions.HTTPFound(location=request.url)
 
-        request.session.flash(_("Success. We've saved your changes."),
-                              'success')
+        if not request.is_xhr:
+            request.session.flash(_("Success. We've saved your changes."),
+                                  'success')
 
-    return to_xhr_response(request, result, form)
+    return to_xhr_response(request, result, form, **kwargs)
 
 
-def to_xhr_response(request, non_xhr_result, form):
+def to_xhr_response(request, non_xhr_result, form, **kwargs):
     """
     Return an XHR response for the given ``form``, or ``non_xhr_result``.
 
@@ -165,7 +166,7 @@ def to_xhr_response(request, non_xhr_result, form):
         return non_xhr_result
 
     request.override_renderer = 'string'
-    return form.render()
+    return form.render(**kwargs)
 
 
 def includeme(config):  # pragma: no cover

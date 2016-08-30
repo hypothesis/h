@@ -2,6 +2,20 @@
 // -------------------------
 // Specs: https://goo.gl/pEV9E1
 
+// Backdrop which appears behind forms during inline editing
+.form__backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $zindex-modal-backdrop;
+
+  background-color: $white;
+  opacity: 0.5;
+}
+
 .form-header {
   margin-top: 55px;
   margin-bottom: 30px;

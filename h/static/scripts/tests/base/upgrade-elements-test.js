@@ -15,16 +15,4 @@ describe('upgradeElements', function () {
 
     root.remove();
   });
-
-  it('exposes controllers via the `.controllers` element property', function () {
-    function TestController() {}
-
-    var root = document.createElement('div');
-    root.classList.add('js-test');
-    document.body.appendChild(root);
-
-    upgradeElements(document.body, {'.js-test': TestController});
-    assert.equal(root.controllers.length, 1);
-    assert.instanceOf(root.controllers[0], TestController);
-  });
 });

@@ -18,3 +18,21 @@
   color: $grey-4;
   padding-left: 15px;
 }
+
+.form-actions__buttons {
+  .env-js-capable & {
+    display: none;
+  }
+
+  .env-js-capable &.is-visible,
+  .env-js-timeout & {
+    display: block;
+    z-index: $zindex-modal-content;
+    margin-top: 10px;
+  }
+}
+
+.form-actions__buttons.is-saving  .form-actions__btn {
+  opacity: .5;
+}
+
