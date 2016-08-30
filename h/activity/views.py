@@ -12,6 +12,8 @@ from pyramid.view import view_config
 from h.activity import query
 from h.paginator import paginate
 
+PAGE_SIZE = 20
+
 
 @view_config(route_name='activity.search',
              request_method='GET',
@@ -32,13 +34,13 @@ def search(request):
     query.check_url(request, q)
 
     # Fetch results
-    result = query.execute(request, q)
+    result = query.execute(request, q, page_size=PAGE_SIZE)
 
     return {
         'total': result.total,
         'aggregations': result.aggregations,
         'timeframes': result.timeframes,
-        'page': paginate(request, result.total),
+        'page': paginate(request, result.total, page_size=PAGE_SIZE),
     }
 
 
