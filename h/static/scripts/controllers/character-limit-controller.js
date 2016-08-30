@@ -1,29 +1,28 @@
 'use strict';
 
+var inherits = require('inherits');
+
+var Controller = require('../base/controller');
+var setElementState = require('../util/dom').setElementState;
+
 function CharacterLimitController(element) {
-  var counter = element.parentElement.querySelector(
-    '.js-character-limit-counter');
-  var input = element.querySelector('.js-character-limit-input');
-  var maxlength = parseInt(input.dataset.maxlength);
+  Controller.call(this, element);
 
-  counter.textContent = '';
-
-  function updateCounter() {
-    var length = input.value.length;
-
-    counter.textContent = length + '/' + maxlength;
-
-    if (length > maxlength) {
-      counter.classList.add('is-too-long');
-    } else {
-      counter.classList.remove('is-too-long');
-    }
-  }
-
-  updateCounter();
-  input.addEventListener('input', updateCounter);
-
-  counter.classList.add('is-ready');
+  var self = this;
+  this.refs.characterLimitInput.addEventListener('input', function () {
+    self.forceUpdate();
+  });
+  this.forceUpdate();
 }
+inherits(CharacterLimitController, Controller);
+
+CharacterLimitController.prototype.update = function () {
+  var input = this.refs.characterLimitInput;
+  var maxlength = parseInt(input.dataset.maxlength);
+  var counter = this.refs.characterLimitCounter;
+  counter.textContent = input.value.length + '/' + maxlength;
+  setElementState(counter, {tooLong: input.value.length > maxlength});
+  setElementState(this.refs.characterLimitCounter, {ready: true});
+};
 
 module.exports = CharacterLimitController;

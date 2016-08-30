@@ -32,6 +32,8 @@ $title-font-size: 19px;
 $input-font-size: 15px;
 
 // Z-index scale
+$zindex-modal-backdrop: 5; // Backdrop of a modal dialog or form
+$zindex-modal-content: 6;  // Content of a modal dialog or form
 $zindex-dropdown-menu: 10;
 $zindex-tooltip: 20;
 

@@ -4,14 +4,18 @@
 {% set field_css_class = 'form-input' %}
 {% endif %}
 
+{% if field.widget.template == 'textarea' and field.widget.max_length %}
+{% set ref = 'characterLimitInput' %}
+{% endif %}
+
 name="{{ field.name }}"
 value="{{ cstruct }}"
 id="{{ field.oid }}"
+data-ref="{{ ref }} formInput"
 class="{{field_css_class}}
       {% if field.widget.css_class %} {{ field.widget.css_class }} {% endif %}
       {% if field.widget.autofocus %} js-select-onfocus{% endif %}
-      {% if field.schema.hint %} has-hint {% endif %}
-      {% if field.widget.template == 'textarea' and field.widget.max_length %}js-character-limit-input{% endif %}"
+      {% if field.schema.hint %} has-hint {% endif %}"
 {%- if field.widget.size -%}
 size="{{ field.widget.size }}"
 {% endif -%}

@@ -566,10 +566,11 @@ class EditProfileController(object):
             self.request,
             self.form,
             on_success=self._update_user,
-            on_failure=self._template_data)
+            on_failure=self._template_data,
+            inline_editing=True)
 
     def _template_data(self):
-        return {'form': self.form.render()}
+        return {'form': self.form.render(inline_editing=True)}
 
     def _update_user(self, appstruct):
         user = self.request.authenticated_user
