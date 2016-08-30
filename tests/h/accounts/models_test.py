@@ -111,6 +111,13 @@ def test_check_password_false_with_null_password():
     assert not user.check_password('anything')
 
 
+def test_check_password_false_with_empty_password():
+    user = models.User(username='barnet')
+    user._password = ''
+
+    assert not user.check_password('')
+
+
 def test_check_password_true_with_matching_password():
     user = models.User(username='barnet', password='s3cr37')
 

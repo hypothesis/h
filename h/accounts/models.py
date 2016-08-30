@@ -215,7 +215,7 @@ class User(Base):
 
     def check_password(self, value):
         """Check the passed password for this user."""
-        if self.password is None:
+        if not self.password:
             return False
 
         # Old-style separate salt.
