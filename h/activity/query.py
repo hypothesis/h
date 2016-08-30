@@ -38,10 +38,8 @@ def extract(request, parse=parser.parse):
 
     If no query is present in the passed request, returns ``None``.
     """
-    if 'q' not in request.params:
-        return None
 
-    q = parse(request.params['q'])
+    q = parse(request.params.get('q', ''))
 
     # If the query sent to a {group, user} search page includes a {group,
     # user}, we override it, because otherwise we'll display the union of the

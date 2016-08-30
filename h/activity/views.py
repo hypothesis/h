@@ -27,8 +27,6 @@ def search(request):
         raise httpexceptions.HTTPNotFound()
 
     q = query.extract(request)
-    if q is None:
-        return {}
 
     # Check whether a redirect is required
     query.check_url(request, q)

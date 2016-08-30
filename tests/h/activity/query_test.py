@@ -15,17 +15,16 @@ from h.activity.query import (
 
 
 class TestExtract(object):
-    def test_returns_none_if_q_not_in_params(self, parse, pyramid_request):
-        result = extract(pyramid_request, parse=parse)
-
-        assert result is None
-
     def test_parses_param_value_with_parser(self, parse, pyramid_request):
         pyramid_request.GET['q'] = 'giraffe'
 
         extract(pyramid_request, parse=parse)
 
         parse.assert_called_once_with('giraffe')
+
+    def test_returns_empty_results_when_q_param_is_missing(self, parse, pyramid_request):
+        result = extract(pyramid_request, parse=parse)
+        assert result == parse.return_value
 
     def test_returns_parse_results(self, parse, pyramid_request):
         parse.return_value = {'foo': 'bar'}
