@@ -1,18 +1,28 @@
 'use strict';
 
 var inherits = require('inherits');
+var preact = require('preact');
 
 var Controller = require('../base/controller');
+
+var h = preact.h;
+
+function Tooltip(props) {
+  var tooltipStyle = {
+    visibility: props.active ? '' : 'hidden',
+    bottom: 'calc(100% + 5px)',
+  };
+  return h('div', {class: 'tooltip', style: tooltipStyle},
+    h('span', {class: 'tooltip-label'}, props.label)
+  );
+}
 
 /**
  * A custom tooltip similar to the one used in Google Docs which appears
  * instantly when activated on a target element.
  *
- * The tooltip is displayed and hidden by setting its target element.
- *
- *  var tooltip = new Tooltip(document.body);
- *  tooltip.setState({target: aWidget}); // Show tooltip
- *  tooltip.setState({target: null}); // Hide tooltip
+ * The tooltip appears when the container element is hovered with a mouse or
+ * tapped.
  *
  * The tooltip's label is derived from the target element's 'aria-label'
  * attribute.
@@ -30,37 +40,22 @@ function TooltipController(el) {
   // focus.
   // See http://www.codediesel.com/javascript/making-mouseover-event-work-on-an-ipad/
   el.addEventListener('mouseover', function () {
-    self.setState({target: el});
+    self.setState({active: true});
   });
 
   el.addEventListener('mouseout', function () {
-    self.setState({target: null});
+    self.setState({active: false});
   });
 
-  this._el = el.ownerDocument.createElement('div');
-  this._el.innerHTML = '<span class="tooltip-label js-tooltip-label"></span>';
-  this._el.className = 'tooltip';
-  el.appendChild(this._el);
-  this._labelEl = this._el.querySelector('.js-tooltip-label');
-
-  this.setState({target: null});
+  this.update({active: false});
 }
 inherits(TooltipController, Controller);
 
 TooltipController.prototype.update = function (state) {
-  if (!state.target) {
-    this._el.style.visibility = 'hidden';
-    return;
-  }
+  var label = this.element.getAttribute('aria-label');
 
-  var target = state.target;
-  var label = target.getAttribute('aria-label');
-  this._labelEl.textContent = label;
-
-  Object.assign(this._el.style, {
-    visibility: '',
-    bottom: 'calc(100% + 5px)',
-  });
+  preact.render(h(Tooltip, {active: state.active, label: label}),
+    this.element, this.element.lastChild);
 };
 
 module.exports = TooltipController;
