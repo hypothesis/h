@@ -81,7 +81,6 @@ def includeme(config):
         "tm.annotate_user": False,
     })
     config.include('pyramid_tm')
-    config.add_tween('h.tweens.debug_tm_tween_factory', under='pyramid_tm.tm_tween_factory')
 
     # Enable a Content Security Policy
     # This is initially copied from:
