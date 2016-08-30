@@ -37,7 +37,6 @@ def search(request):
     result = query.execute(request, q)
 
     return {
-        'q': request.params['q'],
         'total': result.total,
         'aggregations': result.aggregations,
         'timeframes': result.timeframes,
