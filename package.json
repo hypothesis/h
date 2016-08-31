@@ -21,6 +21,7 @@
     "gulp-svgmin": "^1.2.2",
     "gulp-util": "^3.0.7",
     "hypothesis": "^0.38.1",
+    "inherits": "^2.0.1",
     "is-equal-shallow": "^0.1.3",
     "jquery": "1.11.1",
     "js-polyfills": "^0.1.16",

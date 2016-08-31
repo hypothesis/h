@@ -22,12 +22,7 @@ function upgradeElements(root, controllers) {
     elements.forEach(function (el) {
       var ControllerClass = controllers[selector];
       try {
-        var ctrl = new ControllerClass(el);
-        if (!el.controllers) {
-          el.controllers = [ctrl];
-        } else {
-          el.controllers.push(ctrl);
-        }
+        new ControllerClass(el);
       } catch (err) {
         console.error('Failed to upgrade element %s with controller', el, ControllerClass, ':', err.toString());
 
