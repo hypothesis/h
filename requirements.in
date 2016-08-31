@@ -36,6 +36,10 @@ wsaccel
 ws4py
 zope.sqlalchemy
 
+# Version pin until https://github.com/zopefoundation/zope.interface/issues/53
+# is resolved
+zope.interface == 4.2.0
+
 # Version pin for known bug
 # https://github.com/repoze/repoze.sendmail/issues/31
 repoze.sendmail < 4.2
