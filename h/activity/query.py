@@ -99,9 +99,7 @@ def execute(request, query, page_size):
         search.append_aggregation(agg)
 
     query = query.copy()
-    page = request.params.get('page', '')
-    if not page:
-        page = 1
+    page = request.params.get('page', 1)
 
     try:
         page = int(page)
