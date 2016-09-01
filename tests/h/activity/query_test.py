@@ -250,7 +250,6 @@ class TestExecute(object):
         query = search.run.call_args[0][0]
         assert query['offset'] == offset
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('page', ('-1', '-3', '-2377'))
     def test_it_gets_the_first_page_of_results_if_page_arg_is_negative(
             self, pyramid_request, search, page):
@@ -262,7 +261,6 @@ class TestExecute(object):
         query = search.run.call_args[0][0]
         assert query['offset'] == 0
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('page', ('-23.7', 'foo'))
     def test_it_gets_the_first_page_of_results_if_page_arg_is_not_an_int(
             self, pyramid_request, search, page):
