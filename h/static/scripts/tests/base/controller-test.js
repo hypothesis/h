@@ -16,7 +16,7 @@ describe('Controller', function () {
 
   beforeEach(function () {
     var root = document.createElement('div');
-    root.dataset.ref = 'test';
+    root.innerHTML = '<div data-ref="test"></div>';
     document.body.appendChild(root);
     ctrl = new TestController(root);
   });
@@ -31,7 +31,7 @@ describe('Controller', function () {
   });
 
   it('exposes elements with "data-ref" attributes on the `refs` property', function () {
-    assert.deepEqual(ctrl.refs, {test: ctrl.element});
+    assert.deepEqual(ctrl.refs, {test: ctrl.element.children[0]});
   });
 
   describe('#setState', function () {
