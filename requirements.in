@@ -16,6 +16,7 @@ itsdangerous
 jsonpointer == 1.0
 jsonschema
 kombu
+newrelic
 passlib
 psycogreen
 psycopg2
