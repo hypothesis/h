@@ -4,7 +4,7 @@
 {% set field_css_class = 'form-input' %}
 {% endif %}
 
-{% if field.widget.template == 'textarea' and field.widget.max_length %}
+{% if field.widget.template in ('textinput', 'textarea') and field.widget.max_length %}
 {% set ref = 'characterLimitInput' %}
 {% endif %}
 
