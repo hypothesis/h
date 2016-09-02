@@ -362,9 +362,8 @@ class EditProfileSchema(CSRFSchema):
         missing=None,
         validator=colander.Length(max=250),
         widget=deform.widget.TextAreaWidget(
-            cols=60,
             max_length=250,
-            rows=2,
+            rows=4,
         ),
         title=_('Description'))
 
