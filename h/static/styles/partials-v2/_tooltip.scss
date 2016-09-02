@@ -35,6 +35,7 @@
   padding-top: 4px;
   padding-bottom: 4px;
   position: absolute;
+  left: calc(100% - 12px);
   width: 220px;
   z-index: $zindex-tooltip;
 

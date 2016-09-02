@@ -26,15 +26,16 @@
 {% endif -%}
 
 {%- if not (field.widget.hidden or field.widget.omit_label or field.widget.category == 'structural') -%}
-  <label class="{{ field_label_class }} {% if field.widget.label_css_class %} {{ field.widget.label_css_class }}{% endif %}"
+  <label class="{{ field_label_class }} {% if field.widget.label_css_class %} {{ field.widget.label_css_class }}{% endif %}
+                {%- if field.schema.hint and feature('activity_pages') -%}js-tooltip{% endif %}"
+         {%- if field.schema.hint %}aria-label="{{ field.schema.hint }}"{% endif %}
          {%- if field.description -%}
          title="{{ _(field.description) }}"
          {% endif %}
          for="{{ field.oid }}">
            {{ _(field.title) }}
            {%- if field.schema.hint and feature('activity_pages') -%}
-             <i class="form-input__hint-icon js-tooltip"
-               aria-label="{{ field.schema.hint }}">
+             <i class="form-input__hint-icon">
                {{ svg_icon('info_icon') }}
              </i>
            {% endif %}
