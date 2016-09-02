@@ -37,18 +37,23 @@
 #}
 {% macro search_result_bucket(bucket) %}
 <div class="search-result-bucket js-search-bucket">
-  <div class="search-result-bucket__domain">
-    {{ bucket.domain }}
-  </div>
-  <div class="search-result-bucket__content">
-    <div class="search-result-bucket__header" data-ref="header">
-      <div class="search-result-bucket__title">{{ bucket.title }}</div>
-      <div class="search-result-bucket__annotations-count">
-        <div class="search-result-bucket__annotations-count-container">
-          {{ bucket.annotations_count }}
-        </div>
+
+  {# The header is the clickable area that expands/collapses the bucket when
+     clicked #}
+  <div class="search-result-bucket__header" data-ref="header">
+    <div class="search-result-bucket__domain">
+      {{ bucket.domain }}
+    </div>
+    <div class="search-result-bucket__title">{{ bucket.title }}</div>
+    <div class="search-result-bucket__annotations-count">
+      <div class="search-result-bucket__annotations-count-container">
+        {{ bucket.annotations_count }}
       </div>
     </div>
+  </div>
+
+  {# The content is the area that appears / disappears on expand / collapse. #}
+  <div class="search-result-bucket__content">
     <div class="search-result-bucket__annotation-cards-container" data-ref="content">
       <ol class="search-result-bucket__annotation-cards">
         {% for result in bucket.annotations %}
