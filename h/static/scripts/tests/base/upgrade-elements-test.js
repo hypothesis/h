@@ -15,7 +15,28 @@ describe('upgradeElements', function () {
     root.innerHTML = '<div class="js-test"></div>';
 
     upgradeElements(root, {'.js-test': TestController});
+
     assert.instanceOf(root.children[0].controllers[0], TestController);
+  });
+
+  it('should unhide elements hidden until upgrade', function () {
+    var root = document.createElement('div');
+    root.innerHTML = '<div class="js-test is-hidden-when-loading"></div>';
+
+    upgradeElements(root, {'.js-test': TestController});
+
+    assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
+  });
+
+  it('should unhide child elements hidden until upgrade', function () {
+    var root = document.createElement('div');
+    root.innerHTML = '<div class="js-test">' +
+                     '<span class="is-hidden-when-loading"></span>' +
+                     '</div>';
+
+    upgradeElements(root, {'.js-test': TestController});
+
+    assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
   });
 
   describe('reload function', function () {

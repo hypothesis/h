@@ -14,7 +14,7 @@
   position: relative;
   z-index: $zindex-modal-content;
 
-  .env-js-capable &.is-hidden {
+  &.is-hidden {
     display: none;
   }
 }

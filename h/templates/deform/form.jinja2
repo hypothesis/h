@@ -20,7 +20,8 @@
     {{ field.renderer(field.widget.item_template, field=f, cstruct=cstruct.get(f.name, null)) }}
   {% endfor -%}
 
-  <div class="form-actions" data-ref="formActions">
+  <div class="form-actions {% if field.use_inline_editing %} is-hidden-when-loading {% endif %}"
+       data-ref="formActions">
     <div class="form__submit-error" data-ref="formSubmitError">
       <span>{% trans %}Unable to save changes: {% endtrans %}</span>
       <span data-ref="formSubmitErrorMessage"></span>

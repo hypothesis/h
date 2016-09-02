@@ -1,6 +1,18 @@
 'use strict';
 
 /**
+ * Mark an element as having been upgraded.
+ */
+function markReady(element) {
+  var HIDE_CLASS = 'is-hidden-when-loading';
+  var hideOnLoad = Array.from(element.querySelectorAll('.' + HIDE_CLASS));
+  hideOnLoad.forEach(function (el) {
+    el.classList.remove(HIDE_CLASS);
+  });
+  element.classList.remove(HIDE_CLASS);
+}
+
+/**
  * Upgrade elements on the page with additional functionality
  *
  * Controllers attached to upgraded elements are accessible via the `controllers`
@@ -37,6 +49,7 @@ function upgradeElements(root, controllers) {
         new ControllerClass(el, {
           reload: reload.bind(null, el),
         });
+        markReady(el);
       } catch (err) {
         console.error('Failed to upgrade element %s with controller', el, ControllerClass, ':', err.toString());
 
