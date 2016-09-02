@@ -88,14 +88,16 @@ class TestDocumentBucket(object):
         bucket = bucketing.DocumentBucket(document)
         assert bucket.domain == 'www.example.com'
 
-    def test_init_sets_None_domain_when_no_uri_is_set(self, db_session, document):
+    def test_init_sets_domain_to_local_file_when_no_uri_is_set(self,
+                                                               db_session,
+                                                               document):
         docuri_pdf = factories.DocumentURI(uri='urn:x-pdf:fingerprint',
                                            document=document)
         db_session.add(docuri_pdf)
         db_session.flush()
 
         bucket = bucketing.DocumentBucket(document)
-        assert bucket.domain is None
+        assert bucket.domain == 'Local file'
 
     def test_annotations_count_returns_count_of_annotations(self, db_session, document):
         bucket = bucketing.DocumentBucket(document)
