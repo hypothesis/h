@@ -1,0 +1,21 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}Your followers{% endblock page_title %}
+
+{% block styles %}
+{% for url in asset_urls("site_css") %}
+<link rel="stylesheet" href="{{url}}">
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+  <div class="content content--narrow">
+    {{ followers | safe }}
+  </div>
+{% endblock content %}
+
+{% block scripts %}
+{% for url in asset_urls("site_js") %}
+<script src="{{url}}"></script>
+{% endfor %}
+{% endblock scripts %}

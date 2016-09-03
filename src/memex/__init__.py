@@ -22,3 +22,5 @@ def includeme(config):
                      factory='memex.resources:AnnotationFactory',
                      traverse='/{id}')
     config.add_route('api.search', '/search')
+    config.add_route('api.followers', '/followers')
+    config.add_route('api.following', '/following')

@@ -25,3 +25,5 @@ node_modules/
 *.pyo
 
 *.log
+
+.venv/

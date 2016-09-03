@@ -30,6 +30,8 @@ from h.groups import models as groups_models
 from h.nipsa import models as nipsa_models
 from h.notification import models as notification_models
 from h.badge import models as badge_models
+from h.followers import models as follower_models
+from h.managers import models as manager_models
 
 __all__ = (
     'Activation',
@@ -45,6 +47,8 @@ __all__ = (
     'Subscriptions',
     'Token',
     'User',
+    'Follower',
+    'Manager'
 )
 
 
@@ -57,6 +61,8 @@ NipsaUser = nipsa_models.NipsaUser
 Token = auth_models.Token
 Subscriptions = notification_models.Subscriptions
 User = accounts_models.User
+Follower = follower_models.Follower
+Manager = manager_models.Manager
 
 
 # FIXME: Remove this. Temporary model for debugging.

@@ -29,6 +29,9 @@ from memex.presenters import AnnotationJSONLDPresenter
 from memex import search as search_lib
 from memex import schemas
 from memex import storage
+from memex import models
+from h import util
+from h import models as hmodels
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -126,6 +129,16 @@ def index(context, request):
                 'url': request.route_url('api.search'),
                 'desc': 'Basic search API'
             },
+            'followers': {
+                'method': 'GET',
+                'url': request.route_url('api.followers'),
+                'desc': 'Get a list of followers'
+            },
+            'following': {
+                'method': 'GET', 
+                'url': request.route_url('api.following'),
+                'desc': 'Get a list of people you follow'
+            }
         }
     }
 
@@ -267,6 +280,63 @@ def _publish_annotation_event(request,
     event = AnnotationEvent(request, annotation.id, action, annotation_dict)
     request.notify_after_commit(event)
 
+
+################ USER ###############
+@api_config(route_name='api.followers',
+            request_method=['GET', 'POST']
+           )
+def api_followers_ids(request):
+    if request.authenticated_userid is None:
+        return {"errors":[{"code":215,"message":"Bad Authentication data."}]}
+
+    uid = util.user.split_user(request.authenticated_userid)['username']
+    me = hmodels.User.get_by_username(request.db, uid)
+    followers = hmodels.Follower.get_followers(request.db, me)
+    
+    count = len(followers)
+
+    followers_list = []
+    for follower in followers:
+        follower_props = {}
+        user = hmodels.User.get_by_id(request.db, follower.me_id)
+        screen_name = user.username
+        user_id = user.id
+
+        follower_props['screen_name'] = screen_name
+        follower_props['user_id'] = user_id
+
+        followers_list.append(follower_props)
+
+    return {'count': count, 'followers': followers_list}
+
+@api_config(route_name='api.following',
+            request_method=['GET', 'POST']
+           )
+def api_following_ids(request):
+    if request.authenticated_userid is None:
+        return {"errors":[{"code":215,"message":"Bad Authentication data."}]}
+
+    uid = util.user.split_user(request.authenticated_userid)['username']
+    me = hmodels.User.get_by_username(request.db, uid)
+    following = hmodels.Follower.get_following(request.db, me)
+    
+    count = len(following)
+
+    following_list = []
+    for follow in following:
+        follow_props = {}
+        user = hmodels.User.get_by_id(request.db, follow.follow_id)
+        screen_name = user.username
+        user_id = user.id
+
+        follow_props['screen_name'] = screen_name
+        follow_props['user_id'] = user_id
+
+        following_list.append(follow_props)
+
+    return {'count': count, 'following': following_list}
+
+######################################
 
 def includeme(config):
     config.scan(__name__)

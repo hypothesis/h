@@ -287,6 +287,17 @@ class User(Base):
         uid = _username_to_uid(username)
         return session.query(cls).filter(cls.uid == uid).first()
 
+    @classmethod
+    def get_by_id(cls, session, id):
+        """Fetch a user by id."""
+        return session.query(cls).filter(cls.id == id).first()
+
+    @classmethod
+    def get_a_list_of_all_users(cls, session):
+        """Fetch a user by id."""
+        return session.query(cls).all()
+
+    @classmethod
     def __repr__(self):
         return '<User: %s>' % self.username
 
