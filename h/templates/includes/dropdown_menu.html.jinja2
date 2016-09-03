@@ -15,10 +15,10 @@
 #}
 {% macro dropdown_menu(items, title='', footer_item=None) -%}
 <div class="dropdown-menu js-dropdown-menu">
-  <span class="js-dropdown-menu-toggle">
+  <span data-ref="dropdownMenuToggle">
     {{ caller() }}
   </span>
-  <div class="dropdown-menu__menu js-dropdown-menu-content">
+  <div class="dropdown-menu__menu" data-ref="dropdownMenuContent">
     <h2 class="dropdown-menu__title">{{ title }}</h2>
     <ul>
       {% for item in items %}

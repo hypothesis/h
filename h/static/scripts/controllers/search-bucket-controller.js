@@ -2,21 +2,28 @@
 
 var scrollIntoView = require('scroll-into-view');
 
-function SearchBucketController(element) {
-  this.scrollTo = scrollIntoView;
+var Controller = require('../base/controller');
+var setElementState = require('../util/dom').setElementState;
 
-  var header = element.querySelector('.js-header');
-  var content = element.querySelector('.js-content');
-  var self = this;
+class SearchBucketController extends Controller {
+  constructor(element) {
+    super(element);
 
-  header.addEventListener('click', function () {
-    element.classList.toggle('is-expanded');
-    content.classList.toggle('is-expanded');
+    this.scrollTo = scrollIntoView;
 
-    if (element.classList.contains('is-expanded')) {
-      self.scrollTo(element);
+    this.refs.header.addEventListener('click', () => {
+      this.setState({expanded: !this.state.expanded});
+    });
+  }
+
+  update(state) {
+    setElementState(this.refs.content, {expanded: state.expanded});
+    setElementState(this.refs.header, {expanded: state.expanded});
+
+    if (state.expanded) {
+      this.scrollTo(this.element);
     }
-  });
+  }
 }
 
 module.exports = SearchBucketController;

@@ -204,8 +204,8 @@ class RegisterSchema(CSRFSchema):
             unblacklisted_username,
         ),
         title=_('Username'),
-        hint=_('between {min} and {max} characters, containing only letters, '
-               'numbers, periods, and underscores').format(
+        hint=_('Between {min} and {max} characters, containing only letters, '
+               'numbers, periods, and underscores.').format(
             min=USERNAME_MIN_LENGTH,
             max=USERNAME_MAX_LENGTH
         ),
@@ -259,7 +259,7 @@ class ResetPasswordSchema(CSRFSchema):
     user = colander.SchemaNode(
         ResetCode(),
         title=_('Reset code'),
-        hint=_('this will be emailed to you'),
+        hint=_('This will be emailed to you.'),
         widget=deform.widget.TextInputWidget(disable_autocomplete=True))
     password = new_password_node(
         title=_('New password'),
@@ -362,9 +362,8 @@ class EditProfileSchema(CSRFSchema):
         missing=None,
         validator=colander.Length(max=250),
         widget=deform.widget.TextAreaWidget(
-            cols=60,
             max_length=250,
-            rows=2,
+            rows=4,
         ),
         title=_('Description'))
 
@@ -387,7 +386,7 @@ class EditProfileSchema(CSRFSchema):
         missing=None,
         validator=validate_orcid,
         title=_('ORCID'),
-        hint=_('ORCID provides a persistent identifier for researchers (see http://orcid.org/)'))
+        hint=_('ORCID provides a persistent identifier for researchers (see orcid.org).'))
 
 
 class NotificationsSchema(CSRFSchema):

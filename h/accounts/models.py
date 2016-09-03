@@ -203,19 +203,19 @@ class User(Base):
         return self._password
 
     @password.setter
-    def password(self, value):
-        if len(value) < PASSWORD_MIN_LENGTH:
+    def password(self, secret):
+        if len(secret) < PASSWORD_MIN_LENGTH:
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
         # Remove any existing explicit salt (the password context salts the
         # password automatically).
         self.salt = None
-        self._password = text_type(password_context.encrypt(value))
+        self._password = text_type(password_context.encrypt(secret))
         self.password_updated = datetime.datetime.utcnow()
 
-    def check_password(self, value):
+    def check_password(self, secret):
         """Check the passed password for this user."""
-        if self.password is None:
+        if not self.password:
             return False
 
         # Old-style separate salt.
@@ -224,17 +224,17 @@ class User(Base):
         # users have updated their password by logging-in. (Check how many
         # users still have a non-null salt in the database.)
         if self.salt is not None:
-            verified = password_context.verify(value + self.salt,
+            verified = password_context.verify(secret + self.salt,
                                                self.password)
 
             # If the password is correct, take this opportunity to upgrade the
             # password and remove the salt.
             if verified:
-                self.password = value
+                self.password = secret
 
             return verified
 
-        verified, new_hash = password_context.verify_and_update(value,
+        verified, new_hash = password_context.verify_and_update(secret,
                                                                 self.password)
         if not verified:
             return False

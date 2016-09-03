@@ -38,10 +38,8 @@ def extract(request, parse=parser.parse):
 
     If no query is present in the passed request, returns ``None``.
     """
-    if 'q' not in request.params:
-        return None
 
-    q = parse(request.params['q'])
+    q = parse(request.params.get('q', ''))
 
     # If the query sent to a {group, user} search page includes a {group,
     # user}, we override it, because otherwise we'll display the union of the
@@ -94,12 +92,18 @@ def check_url(request, query, unparse=parser.unparse):
         raise HTTPFound(location=redirect)
 
 
-def execute(request, query):
+def execute(request, query, page_size):
     search = Search(request)
     search.append_filter(TopLevelAnnotationsFilter())
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 
+    query = query.copy()
+    page = request.params.get('page', '')
+    if not page:
+        page = '1'
+    query['limit'] = page_size
+    query['offset'] = (int(page) - 1) * page_size
     search_result = search.run(query)
     result = ActivityResults(total=search_result.total,
                              aggregations=search_result.aggregations,

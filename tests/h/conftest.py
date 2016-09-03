@@ -40,9 +40,13 @@ class DummyFeature(object):
 
     def __init__(self):
         self.flags = {}
+        self.loaded = False
 
     def __call__(self, name, *args, **kwargs):
         return self.flags.get(name, True)
+
+    def load(self):
+        self.loaded = True
 
 
 class DummySession(object):

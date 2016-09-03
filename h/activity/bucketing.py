@@ -20,7 +20,6 @@ class DocumentBucket(object):
         self.tags = set()
         self.users = set()
         self.uri = None
-        self.domain = None
 
         self.title = document.title
 
@@ -28,6 +27,8 @@ class DocumentBucket(object):
         if parsed:
             self.uri = parsed.geturl()
             self.domain = parsed.netloc
+        else:
+            self.domain = _('Local file')
 
         if annotations:
             self.update(annotations)

@@ -5,6 +5,8 @@ A module for sending email.
 This module defines a Celery task for sending emails in a worker process.
 """
 
+import smtplib
+
 import pyramid_mailer
 import pyramid_mailer.message
 
@@ -13,8 +15,8 @@ from h.celery import celery
 __all__ = ('send',)
 
 
-@celery.task
-def send(recipients, subject, body, html=None):
+@celery.task(bind=True, max_retries=3)
+def send(self, recipients, subject, body, html=None):
     """
     Send an email.
 
@@ -31,4 +33,10 @@ def send(recipients, subject, body, html=None):
                                            recipients=recipients,
                                            body=body,
                                            html=html)
-    pyramid_mailer.get_mailer(celery.request).send_immediately(email)
+    mailer = pyramid_mailer.get_mailer(celery.request)
+    try:
+        mailer.send_immediately(email)
+    except (smtplib.socket.error, smtplib.SMTPException) as exc:
+        # Exponential backoff in case the SMTP service is having problems.
+        countdown = self.default_retry_delay * 2 ** self.request.retries
+        self.retry(exc=exc, countdown=countdown)

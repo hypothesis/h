@@ -1,3 +1,7 @@
-<textarea
+<textarea {% if field.widget.rows -%}rows="{{ field.widget.rows }}"{% endif %}
 {% include "includes/common_attrs.jinja2" %}>{{ cstruct }}</textarea>
-{%- if field.widget.max_length -%}<span class="form-input__character-counter js-character-limit-counter">Up to {{ field.widget.max_length }} characters</span>{% endif %}
+{% if field.widget.max_length %}
+  <span class="form-input__character-counter" data-ref="characterLimitCounter">
+    Up to {{ field.widget.max_length }} characters
+  </span>
+{% endif %}

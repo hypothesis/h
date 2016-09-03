@@ -24,12 +24,6 @@ def in_debug_mode(request):
     return asbool(request.registry.settings.get('pyramid.debug_all'))
 
 
-def tm_activate_hook(request):
-    if request.path.startswith(('/assets/', '/_debug_toolbar/')):
-        return False
-    return True
-
-
 def create_app(global_config, **settings):
     """
     Create the h WSGI application.
@@ -84,11 +78,9 @@ def includeme(config):
     config.add_settings({
         "tm.attempts": 3,
         "tm.manager_hook": lambda request: transaction.TransactionManager(),
-        "tm.activate_hook": tm_activate_hook,
         "tm.annotate_user": False,
     })
     config.include('pyramid_tm')
-    config.add_tween('h.tweens.debug_tm_tween_factory', under='pyramid_tm.tm_tween_factory')
 
     # Enable a Content Security Policy
     # This is initially copied from:
@@ -138,3 +130,7 @@ def includeme(config):
     config.include('h.notification')
     config.include('h.followers')
     config.include('h.managers')
+    # Debugging assistance
+    if asbool(config.registry.settings.get('h.debug')):
+        config.include('pyramid_debugtoolbar')
+        config.include('h.debug')

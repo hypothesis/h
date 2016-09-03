@@ -37,7 +37,6 @@ __all__ = (
     'Activation',
     'Annotation',
     'Blocklist',
-    'DebugCounter',
     'Document',
     'DocumentMeta',
     'DocumentURI',
@@ -63,14 +62,6 @@ Subscriptions = notification_models.Subscriptions
 User = accounts_models.User
 Follower = follower_models.Follower
 Manager = manager_models.Manager
-
-
-# FIXME: Remove this. Temporary model for debugging.
-class DebugCounter(Base):
-    __tablename__ = 'counter'
-
-    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-    val = sa.Column(sa.Integer)
 
 
 def includeme(_):

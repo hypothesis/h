@@ -14,7 +14,6 @@ from pyramid import httpexceptions
 from pyramid import response
 from pyramid.view import view_config
 
-from h.models import DebugCounter
 from h.views.client import render_app
 
 log = logging.getLogger(__name__)
@@ -79,24 +78,6 @@ def stream_user_redirect(request):
     query = {'q': 'user:{}'.format(request.matchdict['user'])}
     location = request.route_url('stream', _query=query)
     raise httpexceptions.HTTPFound(location=location)
-
-
-# FIXME: Remove this. Temporary view for debugging.
-@view_config(route_name='debug.counter', renderer='string')
-def debug_counter(request):
-    setattr(request, '_debug_tm', True)
-
-    cnt = request.db.query(DebugCounter).one_or_none()
-
-    if cnt is None:
-        cnt = DebugCounter(val=0)
-        request.db.add(cnt)
-    elif 'reset' in request.params:
-        cnt.val = 0
-
-    cnt.val += 1
-
-    return 'count={}'.format(cnt.val)
 
 
 def includeme(config):

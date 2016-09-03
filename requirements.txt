@@ -40,6 +40,7 @@ kombu==3.0.35
 Mako==1.0.4               # via alembic
 MarkupSafe==0.23          # via jinja2, mako, pyramid-jinja2
 mistune==0.7.3
+newrelic==2.68.0.50
 passlib==1.6.5
 PasteDeploy==1.5.2        # via pyramid
 peppercorn==0.5           # via deform
