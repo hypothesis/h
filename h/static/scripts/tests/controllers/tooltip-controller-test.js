@@ -23,7 +23,6 @@ describe('TooltipController', function () {
     tooltipEl = testEl.querySelector('.tooltip');
   });
 
-
   it('appears when the target is hovered', function () {
     targetEl.dispatchEvent(new Event('mouseover'));
     assert.equal(tooltipEl.style.visibility, '');
