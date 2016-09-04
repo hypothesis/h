@@ -65,7 +65,6 @@ def stream(context, request):
         ]
     })
 
-
 @view_config(route_name='stream.tag_query')
 def stream_tag_redirect(request):
     query = {'q': 'tag:{}'.format(request.matchdict['tag'])}

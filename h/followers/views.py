@@ -218,7 +218,7 @@ def get_followers(request):
     me = models.User.get_by_username(request.db, uid)
     followers = models.Follower.get_followers(request.db, me)
     count = len(followers)
-    follow_status = map(lambda x: (models.User.get_by_id(x.me_id).username), followers)
+    follow_status = map(lambda x: (models.User.get_by_id(request.db, x.me_id).username), followers)
     return {'followers':follow_status}
 
 

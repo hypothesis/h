@@ -129,15 +129,19 @@ def index(context, request):
                 'url': request.route_url('api.search'),
                 'desc': 'Basic search API'
             },
-            'followers': {
-                'method': 'GET',
-                'url': request.route_url('api.followers'),
-                'desc': 'Get a list of followers'
-            },
-            'following': {
-                'method': 'GET', 
-                'url': request.route_url('api.following'),
-                'desc': 'Get a list of people you follow'
+            'user':{
+                'followers': {
+                    'method': 'GET',
+                    'url': request.route_url('api.user.followers'),
+                    'desc': 'Get a list of followers',
+                    'auth': 'required'
+                },
+                'following': {
+                    'method': 'GET', 
+                    'url': request.route_url('api.user.following'),
+                    'desc': 'Get a list of people you follow',
+                    'auth': 'required'
+                }
             }
         }
     }
@@ -282,7 +286,7 @@ def _publish_annotation_event(request,
 
 
 ################ USER ###############
-@api_config(route_name='api.followers',
+@api_config(route_name='api.user.followers',
             request_method=['GET', 'POST']
            )
 def api_followers_ids(request):
@@ -309,7 +313,7 @@ def api_followers_ids(request):
 
     return {'count': count, 'followers': followers_list}
 
-@api_config(route_name='api.following',
+@api_config(route_name='api.user.following',
             request_method=['GET', 'POST']
            )
 def api_following_ids(request):
