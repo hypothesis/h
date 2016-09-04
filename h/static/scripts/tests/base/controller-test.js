@@ -1,15 +1,13 @@
 'use strict';
 
-var inherits = require('inherits');
-
 var Controller = require('../../base/controller');
 
-function TestController(element) {
-  Controller.call(this, element);
-
-  this.update = sinon.stub();
+class TestController extends Controller {
+  constructor(element) {
+    super(element);
+    this.update = sinon.stub();
+  }
 }
-inherits(TestController, Controller);
 
 describe('Controller', function () {
   var ctrl;
