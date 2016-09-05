@@ -223,7 +223,7 @@ class User(Base):
                                  max=USERNAME_MAX_LENGTH))
 
         if not re.match(USERNAME_PATTERN, username):
-            raise ValueError('username must contain only letters, numbers, '
+            raise ValueError('username must have only letters, numbers, '
                              'periods, and underscores.')
 
         return username

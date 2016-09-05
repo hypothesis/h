@@ -85,7 +85,7 @@ class TestRegisterSchema(object):
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"password": "a"})
         assert exc.value.asdict()['password'] == (
-            "Shorter than minimum length 2")
+            "Must be 2 characters or more.")
 
     def test_it_is_invalid_when_username_too_short(self,
                                                    pyramid_request,
@@ -96,7 +96,7 @@ class TestRegisterSchema(object):
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "a"})
         assert exc.value.asdict()['username'] == (
-            "Shorter than minimum length 3")
+            "Must be 3 characters or more.")
 
     def test_it_is_invalid_when_username_too_long(self,
                                                   pyramid_request,
@@ -107,7 +107,7 @@ class TestRegisterSchema(object):
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "a" * 500})
         assert exc.value.asdict()['username'] == (
-            "Longer than maximum length 30")
+            "Must be 30 characters or less.")
 
     def test_it_is_invalid_with_invalid_characters_in_username(self,
                                                                pyramid_request,
@@ -117,9 +117,9 @@ class TestRegisterSchema(object):
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({"username": "Fred Flintstone"})
-        assert exc.value.asdict()['username'] == ("Must contain only letters, "
+        assert exc.value.asdict()['username'] == ("Must have only letters, "
                                                   "numbers, periods, and "
-                                                  "underscores")
+                                                  "underscores.")
 
 
 @pytest.mark.usefixtures('user_model')
@@ -206,7 +206,7 @@ class TestLoginSchema(object):
                 'password': 'cake',
             })
 
-        assert ("You haven't activated your account yet" in
+        assert ("Please check your email and open the link to activate your account." in
                 exc.value.asdict().get('username', ''))
 
 
@@ -224,7 +224,7 @@ class TestForgotPasswordSchema(object):
             schema.deserialize({'email': 'rapha@example.com'})
 
         assert 'email' in exc.value.asdict()
-        assert exc.value.asdict()['email'] == 'Unknown email address'
+        assert exc.value.asdict()['email'] == 'Unknown email address.'
 
     def test_it_returns_user_when_valid(self,
                                         pyramid_csrf_request,
@@ -262,7 +262,7 @@ class TestResetPasswordSchema(object):
             })
 
         assert 'user' in exc.value.asdict()
-        assert 'reset code is not valid' in exc.value.asdict()['user']
+        assert 'Wrong reset code.' in exc.value.asdict()['user']
 
     def test_it_is_invalid_with_expired_token(self, pyramid_csrf_request):
         pyramid_csrf_request.registry.password_reset_serializer = (
@@ -277,7 +277,7 @@ class TestResetPasswordSchema(object):
             })
 
         assert 'user' in exc.value.asdict()
-        assert 'reset code has expired' in exc.value.asdict()['user']
+        assert 'Reset code has expired.' in exc.value.asdict()['user']
 
     def test_it_is_invalid_if_user_has_already_reset_their_password(
             self, pyramid_csrf_request, user_model):
@@ -295,7 +295,7 @@ class TestResetPasswordSchema(object):
             })
 
         assert 'user' in exc.value.asdict()
-        assert 'already reset your password' in exc.value.asdict()['user']
+        assert 'This reset code has already been used.' in exc.value.asdict()['user']
 
     def test_it_returns_user_when_valid(self,
                                         pyramid_csrf_request,
@@ -433,8 +433,7 @@ class TestEmailChangeSchema(object):
                 'password': 'WRONG'  # Not the correct password!
             })
 
-        assert exc.value.asdict() == {
-            'password': 'Incorrect password. Please try again.'}
+        assert exc.value.asdict() == {'password': 'Wrong password.'}
 
     def test_it_returns_incorrect_password_error_if_password_too_short(
             self, schema):
@@ -453,8 +452,7 @@ class TestEmailChangeSchema(object):
                 'password': 'a'  # Too short to be a valid password.
             })
 
-        assert exc.value.asdict() == {
-            'password': 'Incorrect password. Please try again.'}
+        assert exc.value.asdict() == {'password': 'Wrong password.'}
 
     def test_it_is_invalid_if_email_too_long(self, schema):
         with pytest.raises(colander.Invalid) as exc:
@@ -464,7 +462,7 @@ class TestEmailChangeSchema(object):
             })
 
         assert exc.value.asdict() == {
-            'email': u'Longer than maximum length 100'}
+            'email': 'Must be 100 characters or less.'}
 
     def test_it_is_invalid_if_email_not_a_valid_email_address(self, schema):
         with pytest.raises(colander.Invalid) as exc:
