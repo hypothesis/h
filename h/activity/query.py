@@ -99,11 +99,20 @@ def execute(request, query, page_size):
         search.append_aggregation(agg)
 
     query = query.copy()
-    page = request.params.get('page', '')
-    if not page:
-        page = '1'
+    page = request.params.get('page', 1)
+
+    try:
+        page = int(page)
+    except ValueError:
+        page = 1
+
+    # Don't allow negative page numbers.
+    if page < 1:
+        page = 1
+
     query['limit'] = page_size
-    query['offset'] = (int(page) - 1) * page_size
+    query['offset'] = (page - 1) * page_size
+
     search_result = search.run(query)
     result = ActivityResults(total=search_result.total,
                              aggregations=search_result.aggregations,
