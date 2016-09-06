@@ -9,24 +9,23 @@ import pytest
 from h.views import panels
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_sets_null_username_when_logged_out(pyramid_request):
-    pyramid_request.authenticated_user = None
-    result = panels.navbar({}, pyramid_request)
+def test_navbar_sets_null_username_when_logged_out(req):
+    result = panels.navbar({}, req)
     assert result['username'] == None
 
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_sets_username_when_logged_in(pyramid_request, authenticated_user):
-    pyramid_request.authenticated_user = authenticated_user
-    result = panels.navbar({}, pyramid_request)
+def test_navbar_sets_username_when_logged_in(req, authenticated_user):
+    req.authenticated_user = authenticated_user
+    result = panels.navbar({}, req)
 
     assert result['username'] == 'vannevar'
 
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_lists_groups_when_logged_in(pyramid_request, authenticated_user):
-    pyramid_request.authenticated_user = authenticated_user
-    result = panels.navbar({}, pyramid_request)
+def test_navbar_lists_groups_when_logged_in(req, authenticated_user):
+    req.authenticated_user = authenticated_user
+    result = panels.navbar({}, req)
 
     titles = [group.name for group in authenticated_user.groups]
 
@@ -37,49 +36,42 @@ def test_navbar_lists_groups_when_logged_in(pyramid_request, authenticated_user)
 
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_username_link_when_logged_in(pyramid_request, authenticated_user):
-    pyramid_request.authenticated_user = authenticated_user
-    result = panels.navbar({}, pyramid_request)
+def test_navbar_username_link_when_logged_in(req, authenticated_user):
+    req.authenticated_user = authenticated_user
+    result = panels.navbar({}, req)
 
     assert result['username_link'] == 'http://example.com/search?q=user:vannevar'
 
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_includes_search_query(pyramid_request):
-    pyramid_request.authenticated_user = None
-    pyramid_request.params['q'] = 'tag:question'
-    result = panels.navbar({}, pyramid_request)
+def test_navbar_includes_search_query(req):
+    req.params['q'] = 'tag:question'
+    result = panels.navbar({}, req)
 
     assert result['q'] == 'tag:question'
 
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_includes_search_url_when_on_user_search(pyramid_request):
-    pyramid_request.authenticated_user = None
+def test_navbar_includes_search_url_when_on_user_search(req):
+    type(req.matched_route).name = PropertyMock(return_value='activity.user_search')
+    req.matchdict = {'username': 'luke'}
 
-    type(pyramid_request.matched_route).name = PropertyMock(return_value='activity.user_search')
-    pyramid_request.matchdict = {'username': 'luke'}
-
-    result = panels.navbar({}, pyramid_request)
+    result = panels.navbar({}, req)
     assert result['search_link'] == 'http://example.com/users/luke/search'
 
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_includes_search_url_when_on_group_search(pyramid_request):
-    pyramid_request.authenticated_user = None
+def test_navbar_includes_search_url_when_on_group_search(req):
+    type(req.matched_route).name = PropertyMock(return_value='activity.group_search')
+    req.matchdict = {'pubid': 'foobar'}
 
-    type(pyramid_request.matched_route).name = PropertyMock(return_value='activity.group_search')
-    pyramid_request.matchdict = {'pubid': 'foobar'}
-
-    result = panels.navbar({}, pyramid_request)
+    result = panels.navbar({}, req)
     assert result['search_link'] == 'http://example.com/groups/foobar/search'
 
 
 @pytest.mark.usefixtures('routes')
-def test_navbar_includes_default_search_url(pyramid_request):
-    pyramid_request.authenticated_user = None
-
-    result = panels.navbar({}, pyramid_request)
+def test_navbar_includes_default_search_url(req):
+    result = panels.navbar({}, req)
     assert result['search_link'] == 'http://example.com/search'
 
 
@@ -105,3 +97,9 @@ def authenticated_user():
     ]
     authenticated_user = Mock(username='vannevar', groups=groups)
     return authenticated_user
+
+
+@pytest.fixture
+def req(pyramid_request):
+    pyramid_request.authenticated_user = None
+    return pyramid_request
