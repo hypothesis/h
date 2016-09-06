@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from mock import Mock
+from mock import PropertyMock
 import pytest
 
 from h.views import panels
@@ -52,6 +53,36 @@ def test_navbar_includes_search_query(pyramid_request):
     assert result['q'] == 'tag:question'
 
 
+@pytest.mark.usefixtures('routes')
+def test_navbar_includes_search_url_when_on_user_search(pyramid_request):
+    pyramid_request.authenticated_user = None
+
+    type(pyramid_request.matched_route).name = PropertyMock(return_value='activity.user_search')
+    pyramid_request.matchdict = {'username': 'luke'}
+
+    result = panels.navbar({}, pyramid_request)
+    assert result['search_link'] == 'http://example.com/users/luke/search'
+
+
+@pytest.mark.usefixtures('routes')
+def test_navbar_includes_search_url_when_on_group_search(pyramid_request):
+    pyramid_request.authenticated_user = None
+
+    type(pyramid_request.matched_route).name = PropertyMock(return_value='activity.group_search')
+    pyramid_request.matchdict = {'pubid': 'foobar'}
+
+    result = panels.navbar({}, pyramid_request)
+    assert result['search_link'] == 'http://example.com/groups/foobar/search'
+
+
+@pytest.mark.usefixtures('routes')
+def test_navbar_includes_default_search_url(pyramid_request):
+    pyramid_request.authenticated_user = None
+
+    result = panels.navbar({}, pyramid_request)
+    assert result['search_link'] == 'http://example.com/search'
+
+
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('account', '/account')
@@ -59,6 +90,8 @@ def routes(pyramid_config):
     pyramid_config.add_route('account_notifications', '/account/notifications')
     pyramid_config.add_route('account_developer', '/account/developer')
     pyramid_config.add_route('activity.search', '/search')
+    pyramid_config.add_route('activity.user_search', '/users/{username}/search')
+    pyramid_config.add_route('activity.group_search', '/groups/{pubid}/search')
     pyramid_config.add_route('group_create', '/groups/new')
     pyramid_config.add_route('group_read', '/groups/:pubid/:slug')
     pyramid_config.add_route('logout', '/logout')

@@ -222,6 +222,7 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
     request = testing.DummyRequest(db=db_session, feature=fake_feature)
     request.auth_domain = request.domain
     request.create_form = mock.Mock()
+    request.matched_route = mock.Mock()
     request.registry.settings = pyramid_settings
     request.is_xhr = False
     return request
