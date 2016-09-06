@@ -16,3 +16,24 @@ class TestSearch(object):
 
         with pytest.raises(httpexceptions.HTTPNotFound):
             views.search(pyramid_request)
+
+    def test_it_checks_for_redirects(self, pyramid_request, query):
+        pyramid_request.feature.flags['search_page'] = True
+
+        views.search(pyramid_request)
+
+        query.check_url.assert_called_once_with(pyramid_request,
+                                                query.extract.return_value)
+
+    def test_it_executes_a_search_query(self, pyramid_request, query):
+        pyramid_request.feature.flags['search_page'] = True
+
+        views.search(pyramid_request)
+
+        query.execute.assert_called_once_with(pyramid_request,
+                                              query.extract.return_value,
+                                              page_size=views.PAGE_SIZE)
+
+    @pytest.fixture
+    def query(self, patch):
+        return patch('h.activity.views.query')
