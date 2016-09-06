@@ -57,7 +57,7 @@ pyramid-multiauth==0.8.0
 pyramid-redis-sessions==1.0.1
 pyramid-services==0.4
 pyramid-tm==0.12.1
-pyramid==1.6.1
+pyramid==1.7.3
 python-dateutil==2.5.3
 python-editor==1.0.1      # via alembic
 python-slugify==1.1.4
