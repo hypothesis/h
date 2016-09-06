@@ -51,7 +51,9 @@ def annotator_token(request):
     request.authenticated_userid of the _current_ request.
     """
     try:
-        session.check_csrf_token(request, token='assertion')
+        # The client must supply the CSRF token in the X-CSRF-Token request
+        # header.
+        session.check_csrf_token(request)
     except exceptions.BadCSRFToken:
         raise httpexceptions.HTTPUnauthorized()
 

@@ -15,8 +15,7 @@ annotator_token_fixtures = pytest.mark.usefixtures('generate_jwt', 'session')
 def test_annotator_token_calls_check_csrf_token(pyramid_request, session):
     client.annotator_token(pyramid_request)
 
-    session.check_csrf_token.assert_called_once_with(pyramid_request,
-                                                     token='assertion')
+    session.check_csrf_token.assert_called_once_with(pyramid_request)
 
 
 @annotator_token_fixtures
