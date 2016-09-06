@@ -80,7 +80,7 @@ ws4py==0.3.5
 wsaccel==0.6.2
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
 zope.interface==4.2.0     # via pyramid, pyramid-services, repoze.sendmail, transaction, zope.sqlalchemy
-git+https://github.com/nickstenning/zope.sqlalchemy.git@eb1ffe8#egg=zope.sqlalchemy
+zope.sqlalchemy==0.7.7
 
 # The following packages are commented out because they are
 # considered to be unsafe in a requirements file:
