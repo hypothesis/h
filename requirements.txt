@@ -79,7 +79,7 @@ WebOb==1.6.1              # via pyramid
 ws4py==0.3.5
 wsaccel==0.6.2
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
-zope.interface==4.2.0     # via pyramid, pyramid-services, repoze.sendmail, transaction, zope.sqlalchemy
+zope.interface==4.3.2     # via pyramid, pyramid-services, repoze.sendmail, transaction, zope.sqlalchemy
 zope.sqlalchemy==0.7.7
 
 # The following packages are commented out because they are
