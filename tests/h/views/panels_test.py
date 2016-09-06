@@ -13,7 +13,7 @@ from h.views import panels
 class TestNavbar(object):
     def test_it_sets_null_username_when_logged_out(self, req):
         result = panels.navbar({}, req)
-        assert result['username'] == None
+        assert result['username'] is None
 
     def test_it_sets_username_when_logged_in(self, req, authenticated_user):
         req.authenticated_user = authenticated_user
