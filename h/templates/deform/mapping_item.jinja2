@@ -42,7 +42,7 @@
     {%- if field.schema.hint and not feature('activity_pages') %}
       <span class="form-hint" id="hint-{{ field.oid }}">({{ field.schema.hint }})</span>
     {% endif -%}
-    {%- if field.required -%}
+    {%- if field.required and feature('activity_pages') -%}
       <span class="form-input__required">*</span>
     {% endif -%}
   </label>
