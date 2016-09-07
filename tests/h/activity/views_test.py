@@ -34,6 +34,26 @@ class TestSearch(object):
                                               query.extract.return_value,
                                               page_size=views.PAGE_SIZE)
 
+    def test_it_allows_to_specify_the_page_size(self, pyramid_request, query):
+        pyramid_request.feature.flags['search_page'] = True
+
+        pyramid_request.params['page_size'] = 100
+        views.search(pyramid_request)
+
+        query.execute.assert_called_once_with(pyramid_request,
+                                              query.extract.return_value,
+                                              page_size=100)
+
+    def test_it_uses_default_page_size_when_value_is_a_string(self, pyramid_request, query):
+        pyramid_request.feature.flags['search_page'] = True
+
+        pyramid_request.params['page_size'] = 'foobar'
+        views.search(pyramid_request)
+
+        query.execute.assert_called_once_with(pyramid_request,
+                                              query.extract.return_value,
+                                              page_size=views.PAGE_SIZE)
+
     @pytest.fixture
     def query(self, patch):
         return patch('h.activity.views.query')
