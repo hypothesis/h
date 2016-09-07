@@ -31,6 +31,11 @@ def navbar(context, request):
             "?q=user:{}".format(request.authenticated_user.username))
         username = request.authenticated_user.username
 
+    if request.matched_route.name in ['activity.group_search', 'activity.user_search']:
+        search_url = request.current_route_url()
+    else:
+        search_url = request.route_url('activity.search')
+
     return {
         'settings_menu_items': [
             {'title': _('Account details'), 'link': request.route_url('account')},
@@ -44,6 +49,7 @@ def navbar(context, request):
             {'title': _('Create new group'), 'link': request.route_url('group_create')},
         'username': username,
         'username_link': stream_url,
+        'search_link': search_url,
         'q': request.params.get('q', ''),
     }
 
