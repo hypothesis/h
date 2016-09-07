@@ -1,0 +1,19 @@
+.join-group-form__label {
+  color: $grey-5;
+  margin-bottom: 15px;
+}
+
+.join-group-form__container {
+  border: 1px solid $grey-3;
+  padding: 15px 20px;
+  color: $grey-6;
+}
+
+.join-group-form__group-name {
+  font-weight: bold;
+}
+
+.join-group-form__group-description {
+  margin-bottom: 20px;
+  word-wrap: break-word;
+}
