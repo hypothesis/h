@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import collections
 import datetime
 
+import newrelic.agent
 from pyramid import i18n
 
 from h._compat import urlparse
@@ -78,6 +79,7 @@ class Timeframe(object):
         self.cutoff_time = cutoff_time
         self.document_buckets = collections.OrderedDict()
 
+    @newrelic.agent.function_trace()
     def append(self, annotation):
         """
         Append an annotation to its document bucket in this timeframe.
@@ -127,6 +129,7 @@ class TimeframeGenerator(object):
             Timeframe(_("Last 7 days"), utcnow() - datetime.timedelta(days=7)),
         ]
 
+    @newrelic.agent.function_trace()
     def next(self, annotation):
         """
         Return the next timeframe to be used for bucketing annotations.
@@ -149,6 +152,7 @@ class TimeframeGenerator(object):
         return timeframe
 
 
+@newrelic.agent.function_trace()
 def bucket(annotations):
     """
     Return the given annotations bucketed by timeframe and document.

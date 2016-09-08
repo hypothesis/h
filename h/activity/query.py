@@ -11,6 +11,7 @@ from memex.search.query import (
     TopLevelAnnotationsFilter,
     UsersAggregation,
 )
+import newrelic.agent
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import subqueryload
 
@@ -27,6 +28,7 @@ class ActivityResults(namedtuple('ActivityResults', [
     pass
 
 
+@newrelic.agent.function_trace()
 def extract(request, parse=parser.parse):
     """
     Extract and process the query present in the passed request.
@@ -92,28 +94,10 @@ def check_url(request, query, unparse=parser.unparse):
         raise HTTPFound(location=redirect)
 
 
+@newrelic.agent.function_trace()
 def execute(request, query, page_size):
-    search = Search(request)
-    search.append_filter(TopLevelAnnotationsFilter())
-    for agg in aggregations_for(query):
-        search.append_aggregation(agg)
+    search_result = _execute_search(request, query, page_size)
 
-    query = query.copy()
-    page = request.params.get('page', 1)
-
-    try:
-        page = int(page)
-    except ValueError:
-        page = 1
-
-    # Don't allow negative page numbers.
-    if page < 1:
-        page = 1
-
-    query['limit'] = page_size
-    query['offset'] = (page - 1) * page_size
-
-    search_result = search.run(query)
     result = ActivityResults(total=search_result.total,
                              aggregations=search_result.aggregations,
                              timeframes=[])
@@ -155,6 +139,33 @@ def aggregations_for(query):
     return aggregations
 
 
+@newrelic.agent.function_trace()
+def _execute_search(request, query, page_size):
+    search = Search(request)
+    search.append_filter(TopLevelAnnotationsFilter())
+    for agg in aggregations_for(query):
+        search.append_aggregation(agg)
+
+    query = query.copy()
+    page = request.params.get('page', 1)
+
+    try:
+        page = int(page)
+    except ValueError:
+        page = 1
+
+    # Don't allow negative page numbers.
+    if page < 1:
+        page = 1
+
+    query['limit'] = page_size
+    query['offset'] = (page - 1) * page_size
+
+    search_result = search.run(query)
+    return search_result
+
+
+@newrelic.agent.function_trace()
 def _fetch_annotations(session, ids):
     return (session.query(Annotation)
             .options(subqueryload(Annotation.document)
@@ -163,6 +174,7 @@ def _fetch_annotations(session, ids):
             .order_by(Annotation.updated.desc()))
 
 
+@newrelic.agent.function_trace()
 def _fetch_groups(session, pubids):
     return session.query(Group).filter(Group.pubid.in_(pubids))
 
