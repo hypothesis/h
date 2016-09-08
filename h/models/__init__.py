@@ -31,11 +31,13 @@ from h.notification import models as notification_models
 from h.badge import models as badge_models
 
 from h.models.activation import Activation
+from h.models.auth_client import AuthClient
 from h.models.user import User
 
 __all__ = (
     'Activation',
     'Annotation',
+    'AuthClient',
     'Blocklist',
     'Document',
     'DocumentMeta',
