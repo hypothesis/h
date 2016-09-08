@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import datetime
-import hashlib
-import random
 import re
-import string
 
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
@@ -18,16 +16,6 @@ USERNAME_MAX_LENGTH = 30
 USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
 EMAIL_MAX_LENGTH = 100
 PASSWORD_MIN_LENGTH = 2
-
-
-def _generate_random_string(length=12):
-    """Generate a random ascii string of the requested length."""
-    msg = hashlib.sha256()
-    word = ''
-    for _ in range(length):
-        word += random.choice(string.ascii_letters)
-    msg.update(word.encode('ascii'))
-    return text_type(msg.hexdigest()[:length])
 
 
 class UserIDComparator(Comparator):
@@ -51,31 +39,6 @@ class UserIDComparator(Comparator):
             return False
         return sa.and_(val['username'] == self.username,
                        val['domain'] == self.authority)
-
-
-class Activation(Base):
-
-    """
-    Handles activations for users.
-
-    The code should be a random hash that is valid only once.
-    After the hash is used to access the site, it'll be removed.
-    """
-
-    __tablename__ = 'activation'
-
-    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-
-    # A random hash that is valid only once.
-    code = sa.Column(sa.UnicodeText(),
-                     nullable=False,
-                     unique=True,
-                     default=_generate_random_string)
-
-    @classmethod
-    def get_by_code(cls, session, code):
-        """Fetch an activation by code."""
-        return session.query(cls).filter(cls.code == code).first()
 
 
 class User(Base):
@@ -169,7 +132,7 @@ class User(Base):
                                 nullable=False)
 
     # Activation foreign key
-    activation_id = sa.Column(sa.Integer, sa.ForeignKey(Activation.id))
+    activation_id = sa.Column(sa.Integer, sa.ForeignKey('activation.id'))
     activation = sa.orm.relationship('Activation', backref='user')
 
     @property
