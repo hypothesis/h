@@ -2,6 +2,7 @@
 
 import pytest
 
+import mock
 from pyramid import httpexceptions
 
 from h.activity import views
@@ -54,6 +55,21 @@ class TestSearch(object):
                                               query.extract.return_value,
                                               page_size=views.PAGE_SIZE)
 
+    @pytest.mark.usefixtures('query')
+    def test_is_uses_passed_in_page_size_for_pagination(self, pyramid_request, paginate):
+        pyramid_request.feature.flags['search_page'] = True
+
+        pyramid_request.params['page_size'] = 100
+        views.search(pyramid_request)
+
+        paginate.assert_called_once_with(pyramid_request,
+                                         mock.ANY,
+                                         page_size=100)
+
     @pytest.fixture
     def query(self, patch):
         return patch('h.activity.views.query')
+
+    @pytest.fixture
+    def paginate(self, patch):
+        return patch('h.activity.views.paginate')

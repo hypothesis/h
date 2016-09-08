@@ -46,7 +46,7 @@ def search(request):
         'total': result.total,
         'aggregations': result.aggregations,
         'timeframes': result.timeframes,
-        'page': paginate(request, result.total, page_size=PAGE_SIZE),
+        'page': paginate(request, result.total, page_size=page_size),
     }
 
 
