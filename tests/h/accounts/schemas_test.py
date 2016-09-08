@@ -374,7 +374,7 @@ class TestLegacyEmailChangeSchema(object):
         assert 'password' in exc.value.asdict()
 
 
-@pytest.mark.usefixtures('user_model')
+@pytest.mark.usefixtures('models')
 class TestEmailChangeSchema(object):
 
     # The user's password.
@@ -391,7 +391,7 @@ class TestEmailChangeSchema(object):
     def test_it_is_valid_if_email_same_as_users_existing_email(self,
                                                                schema,
                                                                user,
-                                                               user_model,
+                                                               models,
                                                                pyramid_config):
         """
         It is valid if the new email is the same as the user's existing one.
@@ -400,8 +400,8 @@ class TestEmailChangeSchema(object):
         return an error.
 
         """
-        user_model.get_by_email.return_value = Mock(spec_set=['userid'],
-                                                    userid=user.userid)
+        models.User.get_by_email.return_value = Mock(spec_set=['userid'],
+                                                      userid=user.userid)
         pyramid_config.testing_securitypolicy(user.userid)
 
         schema.deserialize({'email': user.email, 'password': self.PASSWORD})
@@ -471,10 +471,10 @@ class TestEmailChangeSchema(object):
                 'password': self.PASSWORD,
             })
 
-        assert exc.value.asdict() == {'email': 'Invalid email address'}
+        assert exc.value.asdict() == {'email': 'Invalid email address.'}
 
-    def test_it_is_invalid_if_email_already_taken(self, user_model, schema):
-        user_model.get_by_email.return_value = Mock(spec_set=['userid'])
+    def test_it_is_invalid_if_email_already_taken(self, models, schema):
+        models.User.get_by_email.return_value = Mock(spec_set=['userid'])
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({
@@ -499,14 +499,14 @@ class TestEmailChangeSchema(object):
         return factories.User(password=self.PASSWORD)
 
     @pytest.fixture
-    def user_model(self, patch):
-        user_model = patch('h.accounts.schemas.models.User')
+    def models(self, patch):
+        models = patch('h.accounts.schemas.models')
 
         # By default there isn't already an account with the email address that
         # we're trying to change to.
-        user_model.get_by_email.return_value = None
+        models.User.get_by_email.return_value = None
 
-        return user_model
+        return models
 
 
 class TestPasswordChangeSchema(object):
