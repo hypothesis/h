@@ -43,16 +43,18 @@ class UserIDComparator(Comparator):
 
 class User(Base):
     __tablename__ = 'user'
+    __table_args__ = (
+        sa.UniqueConstraint('email', 'authority'),
+        sa.UniqueConstraint('uid', 'authority'),
+        sa.UniqueConstraint('username', 'authority'),
+    )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
     #: Normalised user identifier
-    uid = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
+    uid = sa.Column(sa.UnicodeText(), nullable=False)
     #: Username as chosen by the user on registration
-    _username = sa.Column('username',
-                          sa.UnicodeText(),
-                          nullable=False,
-                          unique=True)
+    _username = sa.Column('username', sa.UnicodeText(), nullable=False)
 
     #: The "authority" for this user. This represents the "namespace" in which
     #: this user lives. By default, all users are created in the namespace
@@ -120,7 +122,7 @@ class User(Base):
         # on the username and authority columns.
         return UserIDComparator(cls.username, cls.authority)
 
-    email = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
+    email = sa.Column(sa.UnicodeText(), nullable=False)
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
                                 default=datetime.datetime.utcnow,
