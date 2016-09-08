@@ -1009,12 +1009,12 @@ def subscriptions_model(patch):
 
 @pytest.fixture
 def user_model(patch):
-    return patch('h.accounts.views.User')
+    return patch('h.models.User')
 
 
 @pytest.fixture
 def activation_model(patch):
-    return patch('h.accounts.views.Activation')
+    return patch('h.models.Activation')
 
 
 @pytest.fixture

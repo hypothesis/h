@@ -8,7 +8,7 @@ from pyramid.session import check_csrf_token
 from itsdangerous import BadData, SignatureExpired
 
 from h import i18n, models
-from h.accounts.models import (
+from h.models.user import (
     EMAIL_MAX_LENGTH,
     PASSWORD_MIN_LENGTH,
     USERNAME_MAX_LENGTH,
