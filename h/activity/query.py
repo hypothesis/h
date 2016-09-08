@@ -108,7 +108,7 @@ def execute(request, query, page_size):
     # Load all referenced annotations from the database, bucket them, and add
     # the buckets to result.timeframes.
     anns = _fetch_annotations(request.db, search_result.annotation_ids)
-    result.timeframes.extend(bucketing.bucket(anns))
+    result.timeframes.extend(bucketing.bucket(anns.all()))
 
     # Fetch all groups
     group_pubids = set([a.groupid
