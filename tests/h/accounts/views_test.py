@@ -694,7 +694,7 @@ class TestActivateController(object):
         assert isinstance(result, httpexceptions.HTTPFound)
         assert success_flash
         assert success_flash[0].startswith(
-            "Your account has been activated and you're now logged in")
+            "Your account has been activated and you're logged in")
 
     def test_get_when_logged_in_already_logged_in_to_different_account(self, pyramid_request):
         pyramid_request.authenticated_user = mock.Mock(id=124, spec=['id'])

@@ -7,7 +7,7 @@ import deform
 from pyramid.session import check_csrf_token
 from itsdangerous import BadData, SignatureExpired
 
-from h import i18n, models
+from h import i18n, models, validators
 from h.models.user import (
     EMAIL_MAX_LENGTH,
     PASSWORD_MIN_LENGTH,
@@ -59,8 +59,7 @@ def unique_username(node, value):
     request = node.bindings['request']
     user = models.User.get_by_username(request.db, value)
     if user:
-        msg = _("Sorry, an account with this username already exists. "
-                "Please enter another one.")
+        msg = _("This username is already taken.")
         raise colander.Invalid(node, msg)
 
 
@@ -69,8 +68,8 @@ def email_node(**kwargs):
     return colander.SchemaNode(
         colander.String(),
         validator=colander.All(
-            colander.Length(max=EMAIL_MAX_LENGTH),
-            colander.Email(),
+            validators.Length(max=EMAIL_MAX_LENGTH),
+            validators.Email(),
             unique_email,
         ),
         widget=deform.widget.TextInputWidget(template='emailinput'),
@@ -102,7 +101,7 @@ def new_password_node(**kwargs):
     kwargs.setdefault('widget', deform.widget.PasswordWidget())
     return colander.SchemaNode(
         colander.String(),
-        validator=colander.Length(min=PASSWORD_MIN_LENGTH),
+        validator=validators.Length(min=PASSWORD_MIN_LENGTH),
         **kwargs)
 
 
@@ -154,14 +153,14 @@ class LoginSchema(CSRFSchema):
 
         if not user.check_password(password):
             err = colander.Invalid(node)
-            err['password'] = _('Incorrect password. Please try again.')
+            err['password'] = _('Wrong password.')
             raise err
 
         if not user.is_activated:
             err = colander.Invalid(node)
             err['username'] = _(
-                "You haven't activated your account yet. Please check your "
-                "email and open the link to activate your account.")
+                "Please check your email and open the link to activate your "
+                "account.")
             raise err
 
         value['user'] = user
@@ -170,7 +169,7 @@ class LoginSchema(CSRFSchema):
 class ForgotPasswordSchema(CSRFSchema):
     email = colander.SchemaNode(
         colander.String(),
-        validator=colander.All(colander.Email()),
+        validator=colander.All(validators.Email()),
         title=_('Email address'),
         widget=deform.widget.TextInputWidget(template='emailinput',
                                              autofocus=True),
@@ -185,7 +184,7 @@ class ForgotPasswordSchema(CSRFSchema):
 
         if user is None:
             err = colander.Invalid(node)
-            err['email'] = _('Unknown email address')
+            err['email'] = _('Unknown email address.')
             raise err
 
         value['user'] = user
@@ -195,17 +194,18 @@ class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
         validator=colander.All(
-            colander.Length(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
+            validators.Length(min=USERNAME_MIN_LENGTH,
+                              max=USERNAME_MAX_LENGTH),
             colander.Regex(
                 USERNAME_PATTERN,
-                msg=_("Must contain only letters, numbers, periods, and "
-                      "underscores")),
+                msg=_("Must have only letters, numbers, periods, and "
+                      "underscores.")),
             unique_username,
             unblacklisted_username,
         ),
         title=_('Username'),
-        hint=_('Between {min} and {max} characters, containing only letters, '
-               'numbers, periods, and underscores.').format(
+        hint=_('Must be between {min} and {max} characters, containing only '
+               'letters, numbers, periods, and underscores.').format(
             min=USERNAME_MIN_LENGTH,
             max=USERNAME_MAX_LENGTH
         ),
@@ -240,16 +240,16 @@ class ResetCode(colander.SchemaType):
                                                      max_age=72*3600,
                                                      return_timestamp=True)
         except SignatureExpired:
-            raise colander.Invalid(node, _('Your reset code has expired: please reset your password again'))
+            raise colander.Invalid(node, _('Reset code has expired. Please reset your password again'))
         except BadData:
-            raise colander.Invalid(node, _('Your reset code is not valid'))
+            raise colander.Invalid(node, _('Wrong reset code.'))
 
         user = models.User.get_by_username(request.db, username)
         if user is None:
             raise colander.Invalid(node, _('Your reset code is not valid'))
         if user.password_updated is not None and timestamp < user.password_updated:
             raise colander.Invalid(node,
-                                   _('You have already reset your password'))
+                                   _('This reset code has already been used.'))
         return user
 
 
@@ -286,7 +286,7 @@ class LegacyEmailChangeSchema(CSRFSchema):
             exc['email_confirm'] = _('The emails must match')
 
         if not user.check_password(value.get('password')):
-            exc['password'] = _('Incorrect password. Please try again.')
+            exc['password'] = _('Wrong password.')
 
         if exc.children:
             raise exc
@@ -304,7 +304,7 @@ class EmailChangeSchema(CSRFSchema):
         user = request.authenticated_user
 
         if not user.check_password(value.get('password')):
-            exc['password'] = _('Incorrect password. Please try again.')
+            exc['password'] = _('Wrong password.')
 
         if exc.children:
             raise exc
@@ -330,7 +330,7 @@ class PasswordChangeSchema(CSRFSchema):
             exc['new_password_confirm'] = _('The passwords must match')
 
         if not user.check_password(value.get('password')):
-            exc['password'] = _('Incorrect password. Please try again.')
+            exc['password'] = _('Wrong password.')
 
         if exc.children:
             raise exc
@@ -354,13 +354,13 @@ class EditProfileSchema(CSRFSchema):
     display_name = colander.SchemaNode(
         colander.String(),
         missing=None,
-        validator=colander.Length(max=30),
+        validator=validators.Length(max=30),
         title=_('Display name'))
 
     description = colander.SchemaNode(
         colander.String(),
         missing=None,
-        validator=colander.Length(max=250),
+        validator=validators.Length(max=250),
         widget=deform.widget.TextAreaWidget(
             max_length=250,
             rows=4,
@@ -370,14 +370,14 @@ class EditProfileSchema(CSRFSchema):
     location = colander.SchemaNode(
         colander.String(),
         missing=None,
-        validator=colander.Length(max=100),
+        validator=validators.Length(max=100),
         title=_('Location'))
 
     link = colander.SchemaNode(
         colander.String(),
         missing=None,
         validator=colander.All(
-            colander.Length(max=250),
+            validators.Length(max=250),
             validate_url),
         title=_('Link'))
 

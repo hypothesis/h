@@ -314,9 +314,9 @@ class ResetController(object):
         user.password = password
 
         self.request.session.flash(jinja2.Markup(_(
-            'Your password has been reset! '
-            'You can now <a href="{url}">login</a> using the new password you '
-            'provided.').format(url=self.request.route_url('login'))),
+            'Your password has been reset. '
+            'You can now <a href="{url}">login</a> with your new '
+            'password.').format(url=self.request.route_url('login'))),
             'success')
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
@@ -370,10 +370,8 @@ class SignupController(object):
                               password=appstruct['password'])
 
         self.request.session.flash(jinja2.Markup(_(
-            'Thank you for creating an account! '
-            "We've sent you an email with an activation link: "
-            'please check your email and open the link '
-            'to activate your account.')), 'success')
+            "Please check your email and open the link to activate your "
+            "account.")), 'success')
 
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
@@ -410,7 +408,7 @@ class ActivateController(object):
         if activation is None:
             self.request.session.flash(jinja2.Markup(_(
                 "We didn't recognize that activation link. "
-                "Perhaps you've already activated your account? "
+                "Have you already activated your account? "
                 'If so, try <a href="{url}">logging in</a> using the username '
                 'and password that you provided.').format(
                     url=self.request.route_url('login'))),
@@ -450,13 +448,13 @@ class ActivateController(object):
             # The user is already logged in to the account (so the account
             # must already be activated).
             self.request.session.flash(jinja2.Markup(_(
-                "Your account has been activated and you're now logged "
-                "in!")), 'success')
+                "Your account has been activated and you're logged in.")),
+                'success')
         else:
             self.request.session.flash(jinja2.Markup(_(
                 "You're already logged in to a different account. "
-                '<a href="{url}">Log out</a> then try opening the '
-                'activation link again.').format(
+                '<a href="{url}">Log out</a> and open the activation link '
+                'again.').format(
                     url=self.request.route_url('logout'))),
                 'error')
 
