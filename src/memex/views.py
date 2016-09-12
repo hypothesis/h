@@ -245,7 +245,7 @@ def _present_annotations(request, ids):
     """Load annotations by id from the database and present them."""
     def eager_load_documents(query):
         return query.options(
-            subqueryload(models.Annotation.document).subqueryload(models.Document.meta_titles))
+            subqueryload(models.Annotation.document))
 
     annotations = storage.fetch_ordered_annotations(request.db, ids,
                                                     query_processor=eager_load_documents)

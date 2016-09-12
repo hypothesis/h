@@ -169,8 +169,6 @@ def _execute_search(request, query, page_size):
 def _fetch_annotations(session, ids):
     return (session.query(Annotation)
             .options(subqueryload(Annotation.document)
-                     .subqueryload(Document.meta_titles),
-                     subqueryload(Annotation.document)
                      .subqueryload(Document.document_uris))
             .filter(Annotation.id.in_(ids))
             .order_by(Annotation.updated.desc()))

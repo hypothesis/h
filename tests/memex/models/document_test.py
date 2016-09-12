@@ -12,47 +12,6 @@ from memex import models
 from memex.models import document
 
 
-class TestDocumentTitle(object):
-
-    def test_it_returns_the_value_of_the_one_title_DocumentMeta(self, db_session):
-        """When there's only one DocumentMeta it should return its title."""
-        doc = document.Document()
-        document.DocumentMeta(type='title',
-                              value=['The Title'],
-                              document=doc,
-                              claimant='http://example.com')
-        db_session.add(doc)
-        db_session.flush()
-
-        assert doc.title == 'The Title'
-
-    def test_it_returns_the_value_of_the_first_title_DocumentMeta(self, db_session):
-        doc = document.Document()
-        document.DocumentMeta(type='title',
-                              value=['The US Title'],
-                              document=doc,
-                              claimant='http://example.com')
-        document.DocumentMeta(type='title',
-                              value=['The UK Title'],
-                              document=doc,
-                              claimant='http://example.co.uk')
-        db_session.add(doc)
-        db_session.flush()
-
-        assert doc.title == 'The US Title'
-
-    def test_it_returns_None_if_there_are_no_title_DocumentMetas(self, db_session):
-        doc = document.Document()
-        document.DocumentMeta(type='other',
-                              value='something',
-                              document=doc,
-                              claimant='http://example.com')
-        db_session.add(doc)
-        db_session.flush()
-
-        assert doc.title is None
-
-
 class TestDocumentFindByURIs(object):
 
     def test_with_one_matching_Document(self, db_session):
@@ -453,6 +412,72 @@ class TestCreateOrUpdateDocumentMeta(object):
             "It shouldn't update document")
         assert len(db_session.query(document.DocumentMeta).all()) == 1, (
             "It shouldn't have added any new objects to the db")
+
+    def test_it_denormalizes_title_to_document_when_none(self, db_session):
+        claimant = 'http://example.com/claimant'
+        type_ = 'title'
+        value = ['the title']
+        document_ = document.Document(title=None)
+        created = yesterday()
+        updated = now()
+        db_session.add(document_)
+
+        document.create_or_update_document_meta(
+            session=db_session,
+            claimant=claimant,
+            type=type_,
+            value=value,
+            document=document_,
+            created=created,
+            updated=updated,
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.title == value[0]
+
+    def test_it_denormalizes_title_to_document_when_empty(self, db_session):
+        claimant = 'http://example.com/claimant'
+        type_ = 'title'
+        value = ['the title']
+        document_ = document.Document(title='')
+        created = yesterday()
+        updated = now()
+        db_session.add(document_)
+
+        document.create_or_update_document_meta(
+            session=db_session,
+            claimant=claimant,
+            type=type_,
+            value=value,
+            document=document_,
+            created=created,
+            updated=updated,
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.title == value[0]
+
+    def test_it_skips_denormalizing_title_to_document_when_already_set(self, db_session):
+        claimant = 'http://example.com/claimant'
+        type_ = 'title'
+        value = ['the title']
+        document_ = document.Document(title='foobar')
+        created = yesterday()
+        updated = now()
+        db_session.add(document_)
+
+        document.create_or_update_document_meta(
+            session=db_session,
+            claimant=claimant,
+            type=type_,
+            value=value,
+            document=document_,
+            created=created,
+            updated=updated,
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.title == 'foobar'
 
     def test_it_logs_a_warning(self, log):
         """

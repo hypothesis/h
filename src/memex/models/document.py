@@ -27,6 +27,9 @@ class Document(Base, mixins.Timestamps):
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
+    #: The denormalized value of the first DocumentMeta record with type title.
+    title = sa.Column('title', sa.UnicodeText())
+
     # FIXME: This relationship should be named `uris` again after the
     #        dependency on the annotator-store is removed, as it clashes with
     #        making the Postgres and Elasticsearch interface of a Document
@@ -38,19 +41,8 @@ class Document(Base, mixins.Timestamps):
                                backref='document',
                                order_by='DocumentMeta.updated.desc()')
 
-    meta_titles = sa.orm.relationship('DocumentMeta',
-                                      primaryjoin='and_(Document.id==DocumentMeta.document_id, DocumentMeta.type==u"title")',
-                                      order_by='DocumentMeta.updated.asc()',
-                                      viewonly=True)
-
     def __repr__(self):
         return '<Document %s>' % self.id
-
-    @property
-    def title(self):
-        for meta in self.meta_titles:
-            if meta.value:
-                return meta.value[0]
 
     @classmethod
     def find_by_uris(cls, session, uris):
@@ -357,6 +349,9 @@ def create_or_update_document_meta(session,
             log.warn("Found DocumentMeta (id: %d)'s document_id (%d) doesn't "
                      "match given Document's id (%d)",
                      existing_dm.id, existing_dm.document_id, document.id)
+
+    if type == 'title' and value and not document.title:
+        document.title = value[0]
 
     try:
         session.flush()

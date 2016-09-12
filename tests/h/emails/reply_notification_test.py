@@ -53,7 +53,7 @@ class TestGenerate(object):
                                                          pyramid_request,
                                                          html_renderer,
                                                          text_renderer):
-        notification.document.meta[0].value = []
+        notification.document.title = None
 
         generate(pyramid_request, notification)
 
@@ -142,9 +142,7 @@ class TestGenerate(object):
 
     @pytest.fixture
     def document(self, db_session):
-        doc = Document()
-        doc.meta.append(DocumentMeta(
-            type='title', value=['My fascinating page'], claimant='http://example.org'))
+        doc = Document(title='My fascinating page')
         db_session.add(doc)
         db_session.flush()
         return doc
