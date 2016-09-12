@@ -413,6 +413,72 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert len(db_session.query(document.DocumentMeta).all()) == 1, (
             "It shouldn't have added any new objects to the db")
 
+    def test_it_denormalizes_title_to_document_when_none(self, db_session):
+        claimant = 'http://example.com/claimant'
+        type_ = 'title'
+        value = ['the title']
+        document_ = document.Document(title=None)
+        created = yesterday()
+        updated = now()
+        db_session.add(document_)
+
+        document.create_or_update_document_meta(
+            session=db_session,
+            claimant=claimant,
+            type=type_,
+            value=value,
+            document=document_,
+            created=created,
+            updated=updated,
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.title == value[0]
+
+    def test_it_denormalizes_title_to_document_when_empty(self, db_session):
+        claimant = 'http://example.com/claimant'
+        type_ = 'title'
+        value = ['the title']
+        document_ = document.Document(title='')
+        created = yesterday()
+        updated = now()
+        db_session.add(document_)
+
+        document.create_or_update_document_meta(
+            session=db_session,
+            claimant=claimant,
+            type=type_,
+            value=value,
+            document=document_,
+            created=created,
+            updated=updated,
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.title == value[0]
+
+    def test_it_skips_denormalizing_title_to_document_when_already_set(self, db_session):
+        claimant = 'http://example.com/claimant'
+        type_ = 'title'
+        value = ['the title']
+        document_ = document.Document(title='foobar')
+        created = yesterday()
+        updated = now()
+        db_session.add(document_)
+
+        document.create_or_update_document_meta(
+            session=db_session,
+            claimant=claimant,
+            type=type_,
+            value=value,
+            document=document_,
+            created=created,
+            updated=updated,
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.title == 'foobar'
+
     def test_it_logs_a_warning(self, log):
         """
         It should warn on document mismatches.

@@ -355,6 +355,9 @@ def create_or_update_document_meta(session,
                      "match given Document's id (%d)",
                      existing_dm.id, existing_dm.document_id, document.id)
 
+    if type == 'title' and value and not document.title:
+        document.title = value[0]
+
     try:
         session.flush()
     except sa.exc.IntegrityError:

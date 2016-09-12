@@ -38,6 +38,7 @@ class TestDocumentBucket(object):
         title_meta = factories.DocumentMeta(type="title",
                                             value=["The Document Title"],
                                             document=document)
+        document.title = 'The Document Title'
         db_session.add(title_meta)
         db_session.flush()
 
