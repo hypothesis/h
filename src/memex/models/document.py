@@ -30,6 +30,9 @@ class Document(Base, mixins.Timestamps):
     #: The denormalized value of the first DocumentMeta record with type title.
     title = sa.Column('title', sa.UnicodeText())
 
+    #: The denormalized value of the first http(s) DocumentURI
+    web_uri = sa.Column('web_uri', sa.UnicodeText())
+
     # FIXME: This relationship should be named `uris` again after the
     #        dependency on the annotator-store is removed, as it clashes with
     #        making the Postgres and Elasticsearch interface of a Document
