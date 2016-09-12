@@ -36,7 +36,6 @@ extensions = [
   'sphinx.ext.intersphinx',
   'sphinx.ext.viewcode',
   'sphinx.ext.todo',
-  'sphinxcontrib.httpdomain',
 ]
 
 # Render .. todo:: directives in the output.
