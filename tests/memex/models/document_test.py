@@ -289,6 +289,64 @@ class TestCreateOrUpdateDocumentURI(object):
         assert document_uri.created > created
         assert document_uri.updated > updated
 
+    def test_it_denormalizes_http_uri_to_document_when_none(self, db_session):
+        uri = 'http://example.com/example_uri.html'
+
+        document_ = document.Document(web_uri=None)
+        db_session.add(document_)
+
+        document.create_or_update_document_uri(
+            session=db_session,
+            claimant='http://example.com/example_claimant.html',
+            uri=uri,
+            type='self-claim',
+            content_type='',
+            document=document_,
+            created=now(),
+            updated=now(),
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.web_uri == uri
+
+    def test_it_denormalizes_https_uri_to_document_when_empty(self, db_session):
+        uri = 'https://example.com/example_uri.html'
+
+        document_ = document.Document(web_uri='')
+        db_session.add(document_)
+
+        document.create_or_update_document_uri(
+            session=db_session,
+            claimant='http://example.com/example_claimant.html',
+            uri=uri,
+            type='self-claim',
+            content_type='',
+            document=document_,
+            created=now(),
+            updated=now(),
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.web_uri == uri
+
+    def test_it_skips_denormalizing_http_s_uri_to_document(self, db_session):
+        document_ = document.Document(web_uri='http://example.com/first_uri.html')
+        db_session.add(document_)
+
+        document.create_or_update_document_uri(
+            session=db_session,
+            claimant='http://example.com/example_claimant.html',
+            uri='http://example.com/second_uri.html',
+            type='self-claim',
+            content_type='',
+            document=document_,
+            created=now(),
+            updated=now(),
+        )
+
+        document_ = db_session.query(document.Document).get(document_.id)
+        assert document_.web_uri == 'http://example.com/first_uri.html'
+
     def test_it_logs_a_warning_if_document_ids_differ(self, log):
         """
         It should log a warning on Document objects mismatch.

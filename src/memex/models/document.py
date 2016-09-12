@@ -13,6 +13,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from memex.db import Base
 from memex.db import mixins
 from memex.uri import normalize as uri_normalize
+from memex._compat import urlparse
 
 
 log = logging.getLogger(__name__)
@@ -278,6 +279,11 @@ def create_or_update_document_uri(session,
                  docuri.id, docuri.document_id, document.id)
 
     docuri.updated = updated
+
+    if not document.web_uri:
+        parsed = urlparse.urlparse(uri)
+        if parsed.scheme in ['http', 'https']:
+            document.web_uri = uri
 
     try:
         session.flush()
