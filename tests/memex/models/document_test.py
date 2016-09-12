@@ -12,47 +12,6 @@ from memex import models
 from memex.models import document
 
 
-class TestDocumentTitle(object):
-
-    def test_it_returns_the_value_of_the_one_title_DocumentMeta(self, db_session):
-        """When there's only one DocumentMeta it should return its title."""
-        doc = document.Document()
-        document.DocumentMeta(type='title',
-                              value=['The Title'],
-                              document=doc,
-                              claimant='http://example.com')
-        db_session.add(doc)
-        db_session.flush()
-
-        assert doc.title == 'The Title'
-
-    def test_it_returns_the_value_of_the_first_title_DocumentMeta(self, db_session):
-        doc = document.Document()
-        document.DocumentMeta(type='title',
-                              value=['The US Title'],
-                              document=doc,
-                              claimant='http://example.com')
-        document.DocumentMeta(type='title',
-                              value=['The UK Title'],
-                              document=doc,
-                              claimant='http://example.co.uk')
-        db_session.add(doc)
-        db_session.flush()
-
-        assert doc.title == 'The US Title'
-
-    def test_it_returns_None_if_there_are_no_title_DocumentMetas(self, db_session):
-        doc = document.Document()
-        document.DocumentMeta(type='other',
-                              value='something',
-                              document=doc,
-                              claimant='http://example.com')
-        db_session.add(doc)
-        db_session.flush()
-
-        assert doc.title is None
-
-
 class TestDocumentFindByURIs(object):
 
     def test_with_one_matching_Document(self, db_session):

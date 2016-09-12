@@ -27,6 +27,9 @@ class Document(Base, mixins.Timestamps):
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
+    #: The denormalized value of the first DocumentMeta record with type title.
+    title = sa.Column('title', sa.UnicodeText())
+
     # FIXME: This relationship should be named `uris` again after the
     #        dependency on the annotator-store is removed, as it clashes with
     #        making the Postgres and Elasticsearch interface of a Document
@@ -45,12 +48,6 @@ class Document(Base, mixins.Timestamps):
 
     def __repr__(self):
         return '<Document %s>' % self.id
-
-    @property
-    def title(self):
-        for meta in self.meta_titles:
-            if meta.value:
-                return meta.value[0]
 
     @classmethod
     def find_by_uris(cls, session, uris):
