@@ -168,8 +168,7 @@ def _execute_search(request, query, page_size):
 @newrelic.agent.function_trace()
 def _fetch_annotations(session, ids):
     return (session.query(Annotation)
-            .options(subqueryload(Annotation.document)
-                     .subqueryload(Document.document_uris))
+            .options(subqueryload(Annotation.document))
             .filter(Annotation.id.in_(ids))
             .order_by(Annotation.updated.desc()))
 

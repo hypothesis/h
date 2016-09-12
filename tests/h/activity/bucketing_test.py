@@ -45,46 +45,20 @@ class TestDocumentBucket(object):
         bucket = bucketing.DocumentBucket(document)
         assert bucket.title == 'The Document Title'
 
-    def test_init_extracts_the_first_http_uri(self, db_session, document):
-        docuri_pdf = factories.DocumentURI(uri='urn:x-pdf:fingerprint',
-                                           updated=datetime.datetime(2016, 5, 2),
-                                           document=document)
-        docuri_http = factories.DocumentURI(uri='http://example.com',
-                                            updated=datetime.datetime(2016, 5, 1),
-                                            document=document)
-        db_session.add_all([docuri_pdf, docuri_http])
-        db_session.flush()
+    def test_init_uses_the_document_web_uri(self, db_session, document):
+        document.web_uri = 'http://example.com'
 
         bucket = bucketing.DocumentBucket(document)
         assert bucket.uri == 'http://example.com'
 
-    def test_init_extracts_the_first_https_uri(self, db_session, document):
-        docuri_pdf = factories.DocumentURI(uri='urn:x-pdf:fingerprint',
-                                           updated=datetime.datetime(2016, 5, 2),
-                                           document=document)
-        docuri_https = factories.DocumentURI(uri='https://example.com',
-                                             updated=datetime.datetime(2016, 5, 1),
-                                             document=document)
-        db_session.add_all([docuri_pdf, docuri_https])
-        db_session.flush()
-
-        bucket = bucketing.DocumentBucket(document)
-        assert bucket.uri == 'https://example.com'
-
     def test_init_sets_None_uri_when_no_http_or_https_can_be_found(self, db_session, document):
-        docuri_pdf = factories.DocumentURI(uri='urn:x-pdf:fingerprint',
-                                           document=document)
-        db_session.add(docuri_pdf)
-        db_session.flush()
+        document.web_uri = None
 
         bucket = bucketing.DocumentBucket(document)
         assert bucket.uri is None
 
     def test_init_sets_the_domain_from_the_extracted_uri(self, db_session, document):
-        docuri_https = factories.DocumentURI(uri='https://www.example.com/foobar.html',
-                                             document=document)
-        db_session.add(docuri_https)
-        db_session.flush()
+        document.web_uri = 'https://www.example.com/foobar.html'
 
         bucket = bucketing.DocumentBucket(document)
         assert bucket.domain == 'www.example.com'
