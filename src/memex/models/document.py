@@ -41,11 +41,6 @@ class Document(Base, mixins.Timestamps):
                                backref='document',
                                order_by='DocumentMeta.updated.desc()')
 
-    meta_titles = sa.orm.relationship('DocumentMeta',
-                                      primaryjoin='and_(Document.id==DocumentMeta.document_id, DocumentMeta.type==u"title")',
-                                      order_by='DocumentMeta.updated.asc()',
-                                      viewonly=True)
-
     def __repr__(self):
         return '<Document %s>' % self.id
 
