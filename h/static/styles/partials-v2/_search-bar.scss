@@ -22,6 +22,7 @@
 .search-bar__input:hover,
 .search-bar__input:focus {
   border-color: $grey-4;
+  outline: none;
 }
 
 .search-bar__icon {
@@ -36,4 +37,46 @@
 .search-bar__input:hover + .search-bar__icon,
 .search-bar__input:focus + .search-bar__icon {
   color: $grey-6;
+}
+
+.search-bar__dropdown-menu-container {
+  background: white;
+  border: 1px solid $grey-2;
+  border-top: none;
+  box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.15);
+  color: $grey-4;
+  display: none;
+  padding: 20px 0 0 0;
+  position: absolute;
+  width: 100%;
+}
+
+.search-bar__dropdown-menu-header {
+  margin: 0 30px 7px 30px;
+}
+
+.search-bar__dropdown-menu-item {
+  padding: 6px 30px 6px 30px;
+  cursor: default;
+}
+
+.search-bar__dropdown-menu-item:last-child {
+  margin-bottom: 14px;
+}
+
+.js-search-bar-dropdown-menu-item--active {
+  background-color: $grey-2;
+}
+
+.search-bar__dropdown-menu-title {
+  color: $grey-6;
+  font-weight: bold;
+}
+
+.search-bar__dropdown-menu-explanation {
+  font-style: italic;
+}
+
+.search-bar__dropdown-menu-container.is-open {
+  display: block;
 }

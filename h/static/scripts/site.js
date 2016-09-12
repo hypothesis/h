@@ -12,6 +12,7 @@ var CharacterLimitController = require('./controllers/character-limit-controller
 var CreateGroupFormController = require('./controllers/create-group-form-controller');
 var DropdownMenuController = require('./controllers/dropdown-menu-controller');
 var FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
+var SearchBarController = require('./controllers/search-bar-controller');
 var SearchBucketController = require('./controllers/search-bucket-controller');
 var SignupFormController = require('./controllers/signup-form-controller');
 var TooltipController = require('./controllers/tooltip-controller');
@@ -22,6 +23,7 @@ var controllers = {
   '.js-create-group-form': CreateGroupFormController,
   '.js-dropdown-menu': DropdownMenuController,
   '.js-select-onfocus': FormSelectOnFocusController,
+  '.js-search-bar': SearchBarController,
   '.js-search-bucket': SearchBucketController,
   '.js-signup-form': SignupFormController,
   '.js-tooltip': TooltipController,
