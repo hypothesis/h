@@ -101,6 +101,8 @@ def document_metas_from_data(document_data, claimant):
                 if not isinstance(value, list):
                     value = [value]
 
+                value = [v.strip() for v in value]
+
                 document_meta_dicts.append({
                     'type': '.'.join(keypath),
                     'value': value,

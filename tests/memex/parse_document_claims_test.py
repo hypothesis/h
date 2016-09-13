@@ -196,7 +196,18 @@ class TestDocumentMetasFromData(object):
                 'type': 'foo.bar',
                 'value': ['string']
             }
-        )
+        ),
+
+        # Leading and trailing whitespace gets stripped from document titles.
+        (
+            {
+                'title': ['   My Document', 'My Document   ', ' My Document '],
+            },
+            {
+                'type': 'title',
+                'value': ['My Document', 'My Document', 'My Document']
+            }
+        ),
     ])
     def test_document_metas_from_data(self, input_, output):
         claimant = 'http://example.com/claimant/'
