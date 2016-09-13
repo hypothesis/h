@@ -160,38 +160,18 @@ class TestDocumentHTMLPresenter(object):
 
         assert presenter.filename == ""
 
-    href_fixtures = pytest.mark.usefixtures('uri')
+    def test_href_returns_web_uri_if_document_has_one(self):
+        web_uri = "http://www.example.com/example.html"
 
-    @href_fixtures
-    def test_href_returns_uri_for_http_uri(self, uri):
-        uri.return_value = "http://www.example.com/example.html"
+        assert self.presenter(web_uri=web_uri).href == web_uri
 
-        assert self.presenter().href == uri.return_value
+    def test_href_returns_empty_string_for_document_with_no_web_uri(self):
+        assert self.presenter(web_uri=None).href == ""
 
-    @href_fixtures
-    def test_href_returns_uri_for_https_uri(self, uri):
-        uri.return_value = "https://www.example.com/example.html"
+    def test_href_returns_Markup(self):
+        web_uri = "http://www.example.com/example.html"
 
-        assert self.presenter().href == uri.return_value
-
-    @href_fixtures
-    def test_href_scheme_matching_is_case_insensitive(self, uri):
-        for uri_ in ("HTTP://www.example.com/example.html",
-                     "HTTPS://www.example.com/example.html"):
-            uri.return_value = uri_
-            assert self.presenter().href == uri_
-
-    @href_fixtures
-    def test_href_returns_empty_string_for_non_http_uris(self, uri):
-        uri.return_value = "file:///MyFile.pdf"
-
-        assert self.presenter(uri=uri).href == ""
-
-    @href_fixtures
-    def test_href_returns_Markup_if_uri_returns_Markup(self, uri):
-        uri.return_value = jinja2.Markup("http://www.example.com/example.html")
-
-        assert isinstance(self.presenter().href, jinja2.Markup)
+        assert isinstance(self.presenter(web_uri=web_uri).href, jinja2.Markup)
 
     link_text_fixtures = pytest.mark.usefixtures('title')
 
