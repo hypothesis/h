@@ -15,6 +15,6 @@ Contents
 
    community
    embedding
-   api
+   The Hypothesis API <http://h.readthedocs.io/en/latest/api/>
    developing/index
    CHANGES
