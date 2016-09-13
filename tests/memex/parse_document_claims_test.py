@@ -201,11 +201,15 @@ class TestDocumentMetasFromData(object):
         # Leading and trailing whitespace gets stripped from document titles.
         (
             {
-                'title': ['   My Document', 'My Document   ', ' My Document '],
+                'title': ['   My Document',
+                          'My Document   ',
+                          ' My Document ',
+                          '\nMy Document\n\n'],
             },
             {
                 'type': 'title',
-                'value': ['My Document', 'My Document', 'My Document']
+                'value': ['My Document', 'My Document', 'My Document',
+                          'My Document']
             }
         ),
     ])
@@ -260,6 +264,36 @@ class TestDocumentMetasFromData(object):
                 'value': [value],
                 'claimant': claimant,
                 } in document_metas
+
+    def test_document_metas_from_data_ignores_null_titles(self):
+        """It should ignore null document titles."""
+        for title in (None, [None, None]):
+            document_data = {'title': title}
+
+            document_metas = parse_document_claims.document_metas_from_data(
+                document_data, 'http://example/claimant')
+
+            assert document_metas == []
+
+    def test_document_metas_from_data_ignores_empty_string_titles(self):
+        """It should ignore empty document titles."""
+        for title in ('', ['', '']):
+            document_data = {'title': title}
+
+            document_metas = parse_document_claims.document_metas_from_data(
+                document_data, 'http://example/claimant')
+
+            assert document_metas == []
+
+    def test_document_metas_from_data_ignores_whitespace_only_titles(self):
+        """It should ignore whitespace-only document titles."""
+        for title in (' ', [' ', ' '], '\n\n  \n'):
+            document_data = {'title': title}
+
+            document_metas = parse_document_claims.document_metas_from_data(
+                document_data, 'http://example/claimant')
+
+            assert document_metas == []
 
 
 class TestDocumentURIsFromHighwirePDF(object):
