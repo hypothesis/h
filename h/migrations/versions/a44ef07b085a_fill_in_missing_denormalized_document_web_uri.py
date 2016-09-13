@@ -37,13 +37,13 @@ class Document(Base):
     web_uri = sa.Column(sa.UnicodeText())
     document_uris = sa.orm.relationship('DocumentURI',
                                         backref='document',
-                                        order_by='DocumentURI.updated.desc()')
+                                        order_by='DocumentURI.created.asc()')
 
 
 class DocumentURI(Base):
     __tablename__ = 'document_uri'
     id = sa.Column(sa.Integer, primary_key=True)
-    updated = sa.Column(sa.DateTime)
+    created = sa.Column(sa.DateTime)
     uri = sa.Column(sa.UnicodeText)
     document_id = sa.Column(sa.Integer,
                             sa.ForeignKey('document.id'),
