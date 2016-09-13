@@ -24,8 +24,8 @@ class DocumentBucket(object):
 
         self.title = document.title
 
-        parsed = self._find_http_or_https_uri(document)
-        if parsed:
+        if document.web_uri:
+            parsed = urlparse.urlparse(document.web_uri)
             self.uri = parsed.geturl()
             self.domain = parsed.netloc
         else:
@@ -46,14 +46,6 @@ class DocumentBucket(object):
     def update(self, annotations):
         for annotation in annotations:
             self.append(annotation)
-
-    def _find_http_or_https_uri(self, document):
-        for docuri in document.document_uris:
-            uri = urlparse.urlparse(docuri.uri)
-            if uri.scheme in ['http', 'https']:
-                return uri
-
-        return None
 
     def __eq__(self, other):
         return (
