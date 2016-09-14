@@ -310,9 +310,8 @@ class TestExecute(object):
                                         search):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        _fetch_annotations.return_value.all.assert_called_once_with()
         bucketing.bucket.assert_called_once_with(
-            _fetch_annotations.return_value.all.return_value)
+            _fetch_annotations.return_value)
         assert result.timeframes == bucketing.bucket.return_value
 
     def test_it_fetches_the_groups_from_the_database(self,
