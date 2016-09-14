@@ -42,7 +42,7 @@ cors_policy = cors.policy(
         'X-Annotator-Auth-Token',
         'X-Client-Id',
     ),
-    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+    allow_methods=('OPTIONS', 'HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
 
 
 class APIError(Exception):
