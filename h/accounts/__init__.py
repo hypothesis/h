@@ -27,7 +27,7 @@ class JSONError(Error):
 def authenticated_user(request):
     """Return the authenticated user or None.
 
-    :rtype: h.accounts.models.User or None
+    :rtype: h.models.User or None
 
     """
     if request.authenticated_userid is None:

@@ -54,11 +54,16 @@ def get_client(settings):
 
 
 def _get_request_client(request):
-    client = get_client(request.registry.settings)
+    client = request.registry['sentry.client']
     client.http_context(http_context_data(request))
     client.user_context(user_context_data(request))
+    request.add_finished_callback(lambda _: client.context.clear())
     return client
 
 
 def includeme(config):
+    # Create a sentry client and store it in the registry
+    config.registry['sentry.client'] = get_client(config.registry.settings)
+
+    # Allow retrieval of the client within a request as `request.sentry`
     config.add_request_method(_get_request_client, 'sentry', reify=True)

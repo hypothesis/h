@@ -63,6 +63,9 @@ def init(engine, base=Base, should_create=False, should_drop=False):
         base.metadata.reflect(engine)
         base.metadata.drop_all(engine)
     if should_create:
+        # In order to be able to generate UUIDs, we load the uuid-ossp
+        # extension.
+        engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
     api_db.init(engine, should_create=should_create, should_drop=should_drop)
 

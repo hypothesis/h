@@ -1,22 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import re
-
 import pytest
 from sqlalchemy import exc
 
-from h.accounts import models
+from h import models
 from h.security import password_context
-
-
-def test_activation_has_asciinumeric_code(db_session):
-    act = models.Activation()
-
-    db_session.add(act)
-    db_session.flush()
-
-    assert re.match(r'[A-Za-z0-9]{12}', act.code)
 
 
 def test_cannot_create_dot_variant_of_user(db_session):

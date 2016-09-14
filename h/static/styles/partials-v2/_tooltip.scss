@@ -35,6 +35,7 @@
   padding-top: 4px;
   padding-bottom: 4px;
   position: absolute;
+  left: calc(100% - 12px);
   width: 220px;
   z-index: $zindex-tooltip;
 
@@ -52,7 +53,7 @@
   @include tooltip-arrow(45deg);
   content: "";
   top: calc(100% - 5px);
-  right: calc(100% - 17px);
+  right: calc(100% - 16.5px);
 }
 
 .tooltip-label {

@@ -103,3 +103,19 @@ class redirect_303_to(object):
         if not isinstance(other, httpexceptions.HTTPSeeOther):
             return False
         return other.location == self.location
+
+
+class unordered_list(object):
+    """
+    Matches a list with the same items in any order.
+
+    Matches any list that contains the same items as the given list
+    (and no more), regardless of order.
+
+    """
+
+    def __init__(self, items):
+        self.items = items
+
+    def __eq__(self, other):
+        return len(self.items) == len(other) and set(self.items) == set(other)

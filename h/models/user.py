@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import datetime
-import hashlib
-import random
 import re
-import string
 
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
@@ -18,16 +16,6 @@ USERNAME_MAX_LENGTH = 30
 USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
 EMAIL_MAX_LENGTH = 100
 PASSWORD_MIN_LENGTH = 2
-
-
-def _generate_random_string(length=12):
-    """Generate a random ascii string of the requested length."""
-    msg = hashlib.sha256()
-    word = ''
-    for _ in range(length):
-        word += random.choice(string.ascii_letters)
-    msg.update(word.encode('ascii'))
-    return text_type(msg.hexdigest()[:length])
 
 
 class UserIDComparator(Comparator):
@@ -53,43 +41,20 @@ class UserIDComparator(Comparator):
                        val['domain'] == self.authority)
 
 
-class Activation(Base):
-
-    """
-    Handles activations for users.
-
-    The code should be a random hash that is valid only once.
-    After the hash is used to access the site, it'll be removed.
-    """
-
-    __tablename__ = 'activation'
-
-    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-
-    # A random hash that is valid only once.
-    code = sa.Column(sa.UnicodeText(),
-                     nullable=False,
-                     unique=True,
-                     default=_generate_random_string)
-
-    @classmethod
-    def get_by_code(cls, session, code):
-        """Fetch an activation by code."""
-        return session.query(cls).filter(cls.code == code).first()
-
-
 class User(Base):
     __tablename__ = 'user'
+    __table_args__ = (
+        sa.UniqueConstraint('email', 'authority'),
+        sa.UniqueConstraint('uid', 'authority'),
+        sa.UniqueConstraint('username', 'authority'),
+    )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
     #: Normalised user identifier
-    uid = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
+    uid = sa.Column(sa.UnicodeText(), nullable=False)
     #: Username as chosen by the user on registration
-    _username = sa.Column('username',
-                          sa.UnicodeText(),
-                          nullable=False,
-                          unique=True)
+    _username = sa.Column('username', sa.UnicodeText(), nullable=False)
 
     #: The "authority" for this user. This represents the "namespace" in which
     #: this user lives. By default, all users are created in the namespace
@@ -157,7 +122,7 @@ class User(Base):
         # on the username and authority columns.
         return UserIDComparator(cls.username, cls.authority)
 
-    email = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
+    email = sa.Column(sa.UnicodeText(), nullable=False)
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
                                 default=datetime.datetime.utcnow,
@@ -169,7 +134,7 @@ class User(Base):
                                 nullable=False)
 
     # Activation foreign key
-    activation_id = sa.Column(sa.Integer, sa.ForeignKey(Activation.id))
+    activation_id = sa.Column(sa.Integer, sa.ForeignKey('activation.id'))
     activation = sa.orm.relationship('Activation', backref='user')
 
     @property
@@ -260,7 +225,7 @@ class User(Base):
                                  max=USERNAME_MAX_LENGTH))
 
         if not re.match(USERNAME_PATTERN, username):
-            raise ValueError('username must contain only letters, numbers, '
+            raise ValueError('username must have only letters, numbers, '
                              'periods, and underscores.')
 
         return username

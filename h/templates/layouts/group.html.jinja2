@@ -1,9 +1,15 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
+{% if not feature('activity_pages') %}
+{% set style_bundle = 'site_css' %}
+{% endif %}
+
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-  {{ panel('navbar') }}
+  {% if feature('activity_pages') %}
+    {% include "h:templates/includes/logo-header.html.jinja2" %}
+  {%- endif %}
 
   <div class="content paper">
     <div class="form-container">

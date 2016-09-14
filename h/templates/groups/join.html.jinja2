@@ -1,32 +1,67 @@
-{% extends "h:templates/layouts/base.html.jinja2" %}
+{% extends "h:templates/layouts/group.html.jinja2" %}
 
-{% set style_bundle = 'site_css' %}
+{% set page_title = group.name %}
 
-{% block page_title %}{{ group.name }}{% endblock page_title %}
+{% block page_content %}
+  {% if feature('activity_pages') %}
+    <div class="join-group-form">
+      <h1 class="form-header">Group invitation</h1>
 
-{% block content %}
-  <div class="content content--narrow">
-    <div class="group-form">
-      <img class="group-form__invite-icon" src="/assets/images/icons/group-invite.svg">
-      <div class="group-form__name-label">You have been invited to annotate with the group</div>
-      <div class="group-form__name-input">{{ group.name }}</div>
-      {% if request.authenticated_userid %}
-        <form method="POST">
+      <p class="join-group-form__label">
+        You've been invited to join the annotation group:
+      </p>
+
+      <div class="join-group-form__container">
+        <div class="join-group-form__group-name">
+          {{ group.name }}
+        </div>
+        <div class="join-group-form__group-description">
+          {{ group.description }}
+        </div>
+        {% if request.authenticated_userid %}
+          <form method="POST">
+            <button class="btn primary-action-btn group-form__submit-btn" type="submit">
+              Join {{ group.name }}
+            </button>
+          </form>
+        {% else %}
+          <form method="GET" action="{{ request.route_url('login') }}">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button class="btn primary-action-btn group-form__submit-btn" type="submit">
+              Log in to join {{ group.name }}
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="form-footer">
+      What is Hypothesis? <a class="link" href="https://hypothes.is/about">Learn more</a>
+    </footer>
+  {% else %}
+    <div class="content content--narrow">
+      <div class="group-form">
+        <img class="group-form__invite-icon" src="/assets/images/icons/group-invite.svg">
+        <div class="group-form__name-label">You have been invited to annotate with the group</div>
+        <div class="group-form__name-input">{{ group.name }}</div>
+        {% if request.authenticated_userid %}
+          <form method="POST">
+            <button class="primary-action-btn" type="submit">
+              Join {{ group.name }}
+            </button>
+          </form>
+        {% else %}
+        <form method="GET" action="{{ request.route_url('login') }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
           <button class="primary-action-btn" type="submit">
-            Join {{ group.name }}
+            Log in to join {{ group.name }}
           </button>
         </form>
-      {% else %}
-      <form method="GET" action="{{ request.route_url('login') }}">
-        <input type="hidden" name="next" value="{{ request.path }}">
-        <button class="primary-action-btn" type="submit">
-          Log in to join {{ group.name }}
-        </button>
-      </form>
-      {% endif %}
+        {% endif %}
+      </div>
+      <div class="group-form-footer-link">
+        <span>What is Hypothes.is? <a href="https://hypothes.is/about">Learn more</a>.</span>
+      </div>
     </div>
-    <div class="group-form-footer-link">
-      <span>What is Hypothes.is? <a href="https://hypothes.is/about">Learn more</a>.</span>
-    </div>
-  </div>
-{% endblock content %}
+  {%- endif %}
+{% endblock page_content %}

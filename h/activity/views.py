@@ -33,14 +33,20 @@ def search(request):
     # Check whether a redirect is required
     query.check_url(request, q)
 
+    page_size = request.params.get('page_size', PAGE_SIZE)
+    try:
+        page_size = int(page_size)
+    except ValueError:
+        page_size = PAGE_SIZE
+
     # Fetch results
-    result = query.execute(request, q, page_size=PAGE_SIZE)
+    result = query.execute(request, q, page_size=page_size)
 
     return {
         'total': result.total,
         'aggregations': result.aggregations,
         'timeframes': result.timeframes,
-        'page': paginate(request, result.total, page_size=PAGE_SIZE),
+        'page': paginate(request, result.total, page_size=page_size),
     }
 
 

@@ -11,7 +11,6 @@ import faker
 from sqlalchemy import orm
 
 from h import models
-from h.accounts import models as accounts_models
 from memex import models as api_models
 
 
@@ -184,7 +183,7 @@ class Annotation(ModelFactory):
 
 class User(factory.Factory):
 
-    """A factory class that generates h.accounts.models.User objects.
+    """A factory class that generates h.models.User objects.
 
     Note that this class doesn't add the User to the database session for you,
     if tests want the user added to a session they should do that themselves.
@@ -192,7 +191,7 @@ class User(factory.Factory):
     """
 
     class Meta(object):
-        model = accounts_models.User
+        model = models.User
 
     authority = 'example.com'
     username = factory.Faker('user_name')

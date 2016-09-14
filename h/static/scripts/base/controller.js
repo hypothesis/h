@@ -38,41 +38,46 @@ function findRefs(el) {
  * updated by calling (`this.setState(changes)`). Whenever the internal state of
  * the controller changes, `this.update()` is called to sync the DOM with this
  * state.
- *
- * @param {Element} element - The DOM Element to upgrade
  */
-function Controller(element) {
-  if (!element.controllers) {
-    element.controllers = [this];
-  } else {
-    element.controllers.push(this);
+class Controller {
+  /**
+   * Initialize the controller.
+   *
+   * @param {Element} element - The DOM Element to upgrade
+   */
+  constructor(element) {
+    if (!element.controllers) {
+      element.controllers = [this];
+    } else {
+      element.controllers.push(this);
+    }
+
+    this.state = {};
+    this.element = element;
+    this.refs = findRefs(element);
   }
 
-  this.state = {};
-  this.element = element;
-  this.refs = findRefs(element);
+  /**
+   * Set the state of the controller.
+   *
+   * This will merge `changes` into the current state and call the `update()`
+   * method provided by the subclass to update the DOM to match the current state.
+   */
+  setState(changes) {
+    var prevState = this.state;
+    this.state = Object.freeze(Object.assign({}, this.state, changes));
+    this.update(this.state, prevState);
+  }
+
+  /**
+   * Calls update() with the current state.
+   *
+   * This is useful for controllers where the state is available in the DOM
+   * itself, so doesn't need to be maintained internally.
+   */
+  forceUpdate() {
+    this.update(this.state, this.state);
+  }
 }
-
-/**
- * Set the state of the controller.
- *
- * This will merge `changes` into the current state and call the `update()`
- * method provided by the subclass to update the DOM to match the current state.
- */
-Controller.prototype.setState = function (changes) {
-  var prevState = this.state;
-  this.state = Object.freeze(Object.assign({}, this.state, changes));
-  this.update(this.state, prevState);
-};
-
-/**
- * Calls update() with the current state.
- *
- * This is useful for controllers where the state is available in the DOM
- * itself, so doesn't need to be maintained internally.
- */
-Controller.prototype.forceUpdate = function () {
-  this.update(this.state, this.state);
-};
 
 module.exports = Controller;

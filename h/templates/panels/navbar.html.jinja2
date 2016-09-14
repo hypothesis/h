@@ -8,7 +8,7 @@
       !--><img alt="Hypothesis logo" class="nav-bar__logo" src="/assets/images/logo.svg"></a>
 
     <div class="nav-bar__search">
-      <form class="search-bar" action="{{ request.route_url("activity.search") }}">
+      <form class="search-bar" action="{{ search_url }}">
         <input class="search-bar__input" name="q" value="{{ q }}" placeholder="Search…">
         {{ svg_icon('search', 'search-bar__icon') }}
       </form>

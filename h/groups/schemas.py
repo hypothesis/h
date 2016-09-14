@@ -6,6 +6,7 @@ import deform
 import slugify
 
 from h import i18n
+from h import validators
 from h.accounts.schemas import CSRFSchema
 from h.groups.models import (
     GROUP_DESCRIPTION_MAX_LENGTH,
@@ -34,7 +35,7 @@ class GroupSchema(CSRFSchema):
         colander.String(),
         title=_("Name"),
         validator=colander.All(
-            colander.Length(min=GROUP_NAME_MIN_LENGTH, max=GROUP_NAME_MAX_LENGTH),
+            validators.Length(min=GROUP_NAME_MIN_LENGTH, max=GROUP_NAME_MAX_LENGTH),
             unblacklisted_group_name_slug),
         widget=deform.widget.TextInputWidget(
             autofocus=True,
@@ -46,7 +47,7 @@ class GroupSchema(CSRFSchema):
     description = colander.SchemaNode(
         colander.String(),
         title=_("Description"),
-        validator=colander.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
+        validator=validators.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
         missing=None,
         widget=deform.widget.TextAreaWidget(
             css_class="group-form__description-input",
@@ -62,7 +63,7 @@ class LegacyGroupSchema(CSRFSchema):
     name = colander.SchemaNode(
         colander.String(),
         title=_("What do you want to call the group?"),
-        validator=colander.Length(
+        validator=validators.Length(
             min=GROUP_NAME_MIN_LENGTH,
             max=GROUP_NAME_MAX_LENGTH),
         widget=deform.widget.TextInputWidget(

@@ -87,6 +87,10 @@
     color: $grey-5;
   }
 
+  .form-input__required {
+    color: $brand;
+  }
+
   .form-input__hint-icon {
     display: none;
     margin-left: 6px;
@@ -198,14 +202,6 @@
       left: $h-padding;
       right: $h-padding;
       max-width: unset;
-    }
-  }
-
-  // Make hit target for field hint icon larger on mobile
-  @include touch-input {
-    .form-input__label > .form-input__hint-icon {
-      min-height: $touch-target-size;
-      min-width: $touch-target-size;
     }
   }
 }
