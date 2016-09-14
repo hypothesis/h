@@ -9,6 +9,7 @@ from pyramid.httpexceptions import HTTPFound
 from webob.multidict import MultiDict
 
 from h.activity.query import (
+    execute,
     extract,
     check_url,
 )
@@ -141,6 +142,361 @@ class TestCheckURL(object):
     @pytest.fixture
     def unparse(self):
         return mock.Mock(spec_set=[], return_value='UNPARSED_QUERY')
+
+
+@pytest.mark.usefixtures('_fetch_annotations',
+                         '_fetch_groups',
+                         'bucketing',
+                         'presenters',
+                         'Search',
+                         'TagsAggregation',
+                         'TopLevelAnnotationsFilter',
+                         'UsersAggregation')
+class TestExecute(object):
+
+    PAGE_SIZE = 23
+
+    def test_it_creates_a_search_query(self, pyramid_request, Search):
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        Search.assert_called_once_with(pyramid_request)
+
+    def test_it_only_returns_top_level_annotations(self,
+                                                   pyramid_request,
+                                                   search,
+                                                   TopLevelAnnotationsFilter):
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        TopLevelAnnotationsFilter.assert_called_once_with()
+        search.append_filter.assert_called_once_with(
+            TopLevelAnnotationsFilter.return_value)
+
+    def test_it_adds_a_tags_aggregation_to_the_search_query(self,
+                                                            pyramid_request,
+                                                            search,
+                                                            TagsAggregation):
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        TagsAggregation.assert_called_once_with(limit=10)
+        search.append_aggregation.assert_called_with(
+            TagsAggregation.return_value)
+
+    def test_it_does_not_add_a_users_aggregation(self,
+                                                 pyramid_request,
+                                                 search,
+                                                 UsersAggregation):
+        """On non-group pages there's no users aggregations."""
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        assert not UsersAggregation.called
+
+    def test_on_group_pages_it_adds_a_users_aggregation_to_the_search_query(
+            self, pyramid_request, search, UsersAggregation):
+        """If there's a single group facet it adds a users aggregation."""
+        query = MultiDict(group='foo')
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        UsersAggregation.assert_called_once_with(limit=10)
+        search.append_aggregation.assert_called_with(
+            UsersAggregation.return_value)
+
+    def test_it_limits_the_search_results_to_one_pages_worth(self,
+                                                             pyramid_request,
+                                                             search):
+        query = MultiDict()
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        query = search.run.call_args[0][0]
+        assert query['limit'] == self.PAGE_SIZE
+
+    def test_it_gets_the_first_page_of_results_if_no_page_arg(self,
+                                                              pyramid_request,
+                                                              search):
+        query = MultiDict()
+        assert 'page' not in pyramid_request.params
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        query = search.run.call_args[0][0]
+        assert query['offset'] == 0
+
+    def test_it_gets_the_first_page_of_results_if_page_arg_is_1(
+            self, pyramid_request, search):
+        query = MultiDict()
+        pyramid_request.params['page'] = '1'
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        query = search.run.call_args[0][0]
+        assert query['offset'] == 0
+
+    @pytest.mark.parametrize('page,offset', [
+        ('2', 23),       # These expected offsets all assume a page size of 23.
+        ('12', 253),
+        ('1000', 22977),
+    ])
+    def test_it_gets_the_nth_page_of_results_if_page_arg_is_n(self,
+                                                              pyramid_request,
+                                                              search,
+                                                              page,
+                                                              offset):
+        query = MultiDict()
+        pyramid_request.params['page'] = page
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        query = search.run.call_args[0][0]
+        assert query['offset'] == offset
+
+    @pytest.mark.parametrize('page', ('-1', '-3', '-2377'))
+    def test_it_gets_the_first_page_of_results_if_page_arg_is_negative(
+            self, pyramid_request, search, page):
+        query = MultiDict()
+        pyramid_request.params['page'] = page
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        query = search.run.call_args[0][0]
+        assert query['offset'] == 0
+
+    @pytest.mark.parametrize('page', ('-23.7', 'foo'))
+    def test_it_gets_the_first_page_of_results_if_page_arg_is_not_an_int(
+            self, pyramid_request, search, page):
+        query = MultiDict()
+        pyramid_request.params['page'] = page
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        query = search.run.call_args[0][0]
+        assert query['offset'] == 0
+
+    def test_it_passes_the_given_query_params_to_the_search(self,
+                                                            pyramid_request,
+                                                            search):
+        query = MultiDict(foo='bar')
+
+        execute(pyramid_request, query, self.PAGE_SIZE)
+
+        assert search.run.call_args[0][0]['foo'] == 'bar'
+
+    def test_it_returns_the_search_result_if_there_are_no_matches(
+            self, pyramid_request, search):
+        search.run.return_value.total = 0
+        search.run.return_value.annotation_ids = []
+
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        # This is what execute()'s result should look like if there are no
+        # annotations that match the given search query.
+        assert result.total == 0
+        assert result.aggregations == mock.sentinel.aggregations
+        assert result.timeframes == []
+
+    def test_it_fetches_the_annotations_from_the_database(self,
+                                                          _fetch_annotations,
+                                                          pyramid_request,
+                                                          search):
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        _fetch_annotations.assert_called_once_with(
+            pyramid_request.db, search.run.return_value.annotation_ids)
+
+    def test_it_buckets_the_annotations(self,
+                                        _fetch_annotations,
+                                        bucketing,
+                                        pyramid_request,
+                                        search):
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        _fetch_annotations.return_value.all.assert_called_once_with()
+        bucketing.bucket.assert_called_once_with(
+            _fetch_annotations.return_value.all.return_value)
+        assert result.timeframes == bucketing.bucket.return_value
+
+    def test_it_fetches_the_groups_from_the_database(self,
+                                                     _fetch_groups,
+                                                     group_pubids,
+                                                     matchers,
+                                                     pyramid_request):
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        _fetch_groups.assert_called_once_with(
+            pyramid_request.db, matchers.unordered_list(group_pubids))
+
+    def test_it_returns_each_annotation_presented(self,
+                                                  annotations,
+                                                  pyramid_request):
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        presented_annotations = []
+        for timeframe in result.timeframes:
+            for bucket in timeframe.document_buckets.values():
+                presented_annotations.extend(bucket.annotations)
+
+        for annotation in annotations:
+            for presented_annotation in presented_annotations:
+                if presented_annotation['annotation'].annotation == annotation:
+                    break
+            else:
+                assert False
+
+    def test_it_returns_each_annotations_group(self,
+                                               _fetch_groups,
+                                               annotations,
+                                               group_pubids,
+                                               pyramid_request):
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        presented_annotations = []
+        for timeframe in result.timeframes:
+            for bucket in timeframe.document_buckets.values():
+                presented_annotations.extend(bucket.annotations)
+
+        for group in _fetch_groups.return_value:
+            for presented_annotation in presented_annotations:
+                if presented_annotation['group'] == group:
+                    break
+            else:
+                assert False
+
+    def test_it_returns_the_total_number_of_matching_annotations(
+            self, pyramid_request):
+        assert execute(pyramid_request, MultiDict(), self.PAGE_SIZE).total == 20
+
+    def test_it_returns_the_aggregations(self, pyramid_request):
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        assert result.aggregations == mock.sentinel.aggregations
+
+    @pytest.fixture
+    def _fetch_annotations(self, patch):
+        return patch('h.activity.query._fetch_annotations')
+
+    @pytest.fixture
+    def _fetch_groups(self, group_pubids, patch):
+        _fetch_groups = patch('h.activity.query._fetch_groups')
+        _fetch_groups.return_value = [mock.Mock(pubid=pubid)
+                                      for pubid in group_pubids]
+        return _fetch_groups
+
+    @pytest.fixture
+    def annotations(self, factories, group_pubids):
+        """
+        Return the 20 annotations that bucket() will return.
+
+        Return a single flat list of all 20 annotations that will be
+        distributed among the timeframes and document buckets that our mock
+        bucketing.bucket() will return.
+
+        """
+        return [
+            factories.Annotation.build(id='annotation_' + str(i),
+                                       groupid=group_pubid)
+            for i, group_pubid in enumerate(group_pubids)]
+
+    @pytest.fixture
+    def bucketing(self, document_buckets, patch):
+        bucketing = patch('h.activity.query.bucketing')
+
+        def timeframe(document_buckets):
+            """Return a mock timeframe like the ones that bucket() returns."""
+            return mock.Mock(
+                spec_set=['document_buckets'],
+                document_buckets=document_buckets)
+
+        timeframes = [
+            timeframe({
+                'Test Document 1': document_buckets[0],
+                'Test Document 2': document_buckets[1],
+                'Test Document 3': document_buckets[2],
+            }),
+            timeframe({
+                'Test Document 1': document_buckets[3],
+            }),
+            timeframe({
+                'Test Document 4': document_buckets[4],
+                'Test Document 3': document_buckets[5],
+                'Test Document 5': document_buckets[6],
+            }),
+        ]
+
+        bucketing.bucket.return_value = timeframes
+
+        return bucketing
+
+    @pytest.fixture
+    def document_buckets(self, annotations):
+        """
+        Return the 7 document buckets that bucket() will return.
+
+        Return a single flat list of all 7 document buckets that will be
+        distributed among the timeframes that our mock bucketing.bucket() will
+        return.
+
+        """
+        def document_bucket(annotations):
+            """Return a mock document bucket like the ones bucket() returns."""
+            return mock.Mock(spec_set=['annotations'], annotations=annotations)
+
+        return [
+            document_bucket(annotations[:3]),
+            document_bucket(annotations[3:7]),
+            document_bucket(annotations[7:12]),
+            document_bucket(annotations[12:13]),
+            document_bucket(annotations[13:15]),
+            document_bucket(annotations[15:18]),
+            document_bucket(annotations[18:]),
+        ]
+
+    @pytest.fixture
+    def group_pubids(self):
+        """
+        Return a flat list of the pubids of all the annotations' groups.
+
+        Return a single flat list of all 20 pubids of the groups of the
+        annotations that our mock bucket() will return.
+
+        """
+        return ['group_' + str(i) for i in range(20)]
+
+    @pytest.fixture
+    def presenters(self, patch):
+        presenters = patch('h.activity.query.presenters')
+        presenters.AnnotationHTMLPresenter = mock.Mock(
+            spec_set=['__call__'],
+            side_effect=lambda annotation: mock.Mock(annotation=annotation)
+        )
+        return presenters
+
+    @pytest.fixture
+    def search(self, annotations):
+        search = mock.Mock(
+            spec_set=['append_filter', 'append_aggregation', 'run'])
+        search.run.return_value = mock.Mock(
+            spec_set=['total', 'aggregations', 'annotation_ids'])
+        search.run.return_value.total = 20
+        search.run.return_value.aggregations = mock.sentinel.aggregations
+        search.run.return_value.annotation_ids = [
+            annotation.id for annotation in annotations]
+        return search
+
+    @pytest.fixture
+    def Search(self, patch, search):
+        return patch('h.activity.query.Search', return_value=search)
+
+    @pytest.fixture
+    def TagsAggregation(self, patch):
+        return patch('h.activity.query.TagsAggregation')
+
+    @pytest.fixture
+    def TopLevelAnnotationsFilter(self, patch):
+        return patch('h.activity.query.TopLevelAnnotationsFilter')
+
+    @pytest.fixture
+    def UsersAggregation(self, patch):
+        return patch('h.activity.query.UsersAggregation')
 
 
 @pytest.fixture

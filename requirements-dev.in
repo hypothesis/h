@@ -5,4 +5,3 @@ honcho
 pep257
 prospector[with_pyroma]
 pyramid_debugtoolbar
-sphinxcontrib-httpdomain

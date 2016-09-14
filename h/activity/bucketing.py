@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import collections
 import datetime
 
+import newrelic.agent
 from pyramid import i18n
 
 from h._compat import urlparse
@@ -23,8 +24,8 @@ class DocumentBucket(object):
 
         self.title = document.title
 
-        parsed = self._find_http_or_https_uri(document)
-        if parsed:
+        if document.web_uri:
+            parsed = urlparse.urlparse(document.web_uri)
             self.uri = parsed.geturl()
             self.domain = parsed.netloc
         else:
@@ -45,14 +46,6 @@ class DocumentBucket(object):
     def update(self, annotations):
         for annotation in annotations:
             self.append(annotation)
-
-    def _find_http_or_https_uri(self, document):
-        for docuri in document.document_uris:
-            uri = urlparse.urlparse(docuri.uri)
-            if uri.scheme in ['http', 'https']:
-                return uri
-
-        return None
 
     def __eq__(self, other):
         return (
@@ -78,6 +71,7 @@ class Timeframe(object):
         self.cutoff_time = cutoff_time
         self.document_buckets = collections.OrderedDict()
 
+    @newrelic.agent.function_trace()
     def append(self, annotation):
         """
         Append an annotation to its document bucket in this timeframe.
@@ -127,6 +121,7 @@ class TimeframeGenerator(object):
             Timeframe(_("Last 7 days"), utcnow() - datetime.timedelta(days=7)),
         ]
 
+    @newrelic.agent.function_trace()
     def next(self, annotation):
         """
         Return the next timeframe to be used for bucketing annotations.
@@ -149,6 +144,7 @@ class TimeframeGenerator(object):
         return timeframe
 
 
+@newrelic.agent.function_trace()
 def bucket(annotations):
     """
     Return the given annotations bucketed by timeframe and document.

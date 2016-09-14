@@ -1,7 +1,5 @@
 'use strict';
 
-var inherits = require('inherits');
-
 var Controller = require('../base/controller');
 
 /**
@@ -16,51 +14,48 @@ var Controller = require('../base/controller');
  *
  * The tooltip's label is derived from the target element's 'aria-label'
  * attribute.
- *
- * @param {Element} el - The container for the tooltip.
  */
-function TooltipController(el) {
-  Controller.call(this, el);
+class TooltipController extends Controller {
+  constructor(el) {
+    super(el);
 
-  var self = this;
+    // With mouse input, show the tooltip on hover. On touch devices we rely on
+    // the browser to synthesize 'mouseover' events to make the tooltip appear
+    // when the host element is tapped and disappear when the host element loses
+    // focus.
+    // See http://www.codediesel.com/javascript/making-mouseover-event-work-on-an-ipad/
+    el.addEventListener('mouseover', () => {
+      this.setState({target: el});
+    });
 
-  // With mouse input, show the tooltip on hover. On touch devices we rely on
-  // the browser to synthesize 'mouseover' events to make the tooltip appear
-  // when the host element is tapped and disappear when the host element loses
-  // focus.
-  // See http://www.codediesel.com/javascript/making-mouseover-event-work-on-an-ipad/
-  el.addEventListener('mouseover', function () {
-    self.setState({target: el});
-  });
+    el.addEventListener('mouseout', () => {
+      this.setState({target: null});
+    });
 
-  el.addEventListener('mouseout', function () {
-    self.setState({target: null});
-  });
+    this._tooltipEl = el.ownerDocument.createElement('div');
+    this._tooltipEl.innerHTML = '<span class="tooltip-label js-tooltip-label"></span>';
+    this._tooltipEl.className = 'tooltip';
+    el.appendChild(this._tooltipEl);
+    this._labelEl = this._tooltipEl.querySelector('.js-tooltip-label');
 
-  this._el = el.ownerDocument.createElement('div');
-  this._el.innerHTML = '<span class="tooltip-label js-tooltip-label"></span>';
-  this._el.className = 'tooltip';
-  el.appendChild(this._el);
-  this._labelEl = this._el.querySelector('.js-tooltip-label');
-
-  this.setState({target: null});
-}
-inherits(TooltipController, Controller);
-
-TooltipController.prototype.update = function (state) {
-  if (!state.target) {
-    this._el.style.visibility = 'hidden';
-    return;
+    this.setState({target: null});
   }
 
-  var target = state.target;
-  var label = target.getAttribute('aria-label');
-  this._labelEl.textContent = label;
+  update(state) {
+    if (!state.target) {
+      this._tooltipEl.style.visibility = 'hidden';
+      return;
+    }
 
-  Object.assign(this._el.style, {
-    visibility: '',
-    bottom: 'calc(100% + 5px)',
-  });
-};
+    var target = state.target;
+    var label = target.getAttribute('aria-label');
+    this._labelEl.textContent = label;
+
+    Object.assign(this._tooltipEl.style, {
+      visibility: '',
+      bottom: 'calc(100% + 5px)',
+    });
+  }
+}
 
 module.exports = TooltipController;

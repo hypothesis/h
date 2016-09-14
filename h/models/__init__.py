@@ -21,7 +21,6 @@ key to. So for convenience the test module can instead just do
 import sqlalchemy as sa
 from h.db import Base
 
-from h.accounts import models as accounts_models
 from h.auth import models as auth_models
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
@@ -33,9 +32,14 @@ from h.badge import models as badge_models
 from h.followers import models as follower_models
 from h.managers import models as manager_models
 
+from h.models.activation import Activation
+from h.models.auth_client import AuthClient
+from h.models.user import User
+
 __all__ = (
     'Activation',
     'Annotation',
+    'AuthClient',
     'Blocklist',
     'Document',
     'DocumentMeta',
@@ -51,7 +55,6 @@ __all__ = (
 )
 
 
-Activation = accounts_models.Activation
 Blocklist = badge_models.Blocklist
 Feature = features_models.Feature
 FeatureCohort = features_models.FeatureCohort

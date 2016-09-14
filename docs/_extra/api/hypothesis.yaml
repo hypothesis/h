@@ -1,0 +1,249 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Hypothesis
+  description: |
+    # Hypothesis API documentation
+
+    This document details the Hypothesis public HTTP API. It is targeted at
+    developers interested in integrating functionality from Hypothesis into
+    their own applications.
+
+    ## Authorization
+    Some of the API URLs documented below require a valid API token.
+    To use these API URLs you should:
+
+    1. Generate yourself an API token on your [Hypothesis developer
+       page](https://hypothes.is/account/developer) (you must be logged in to
+       Hypothesis to get to this page).
+    2. Put the API token in the `Authorization` header in your request.
+
+    *Example request:*
+
+        GET /api
+        Host: hypothes.is
+        Accept: application/json
+        Authorization: Bearer 6879-31d62c13b0099456de5379de90f90395
+
+    (Replace `6879-31d62c13b0099456de5379de90f90395` with your own API token.)
+  termsOfService: https://hypothes.is/terms-of-service
+  license:
+    name: BSD (2-Clause)
+    url: https://github.com/hypothesis/h/blob/master/LICENSE
+host: hypothes.is
+basePath: /api
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /:
+    get:
+      summary: Service root
+      description: Provides a list of links to resources offered by the API.
+      operationId: root
+      responses:
+        '200':
+          description: Success
+  /annotations:
+    post:
+      summary: Create a new annotation
+      operationId: createAnnotation
+      parameters:
+        - name: annotation
+          in: body
+          description: Annotation to be created
+          required: true
+          schema:
+            $ref: '#/definitions/NewAnnotation'
+      responses:
+        '200':
+          description: Annotation successfully created
+          schema:
+            $ref: '#/definitions/Annotation'
+        '400':
+          description: Could not create annotation from your request
+          schema:
+            $ref: '#/definitions/Error'
+  /annotations/{id}:
+    get:
+      summary: Fetch an annotation
+      operationId: fetchAnnotation
+      parameters:
+        - name: id
+          in: path
+          description: ID of annotation to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Annotation'
+        '404':
+          description: Annotation not found or no permission to view
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Update an annotation
+      operationId: updateAnnotation
+      parameters:
+        - name: id
+          in: path
+          description: ID of annotation to return
+          required: true
+          type: string
+        - name: annotation
+          in: body
+          description: Updated annotation body
+          required: true
+          schema:
+            $ref: '#/definitions/NewAnnotation'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Annotation'
+        '400':
+          description: Could not create annotation from your request
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Annotation not found or no permission to update
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete an annotation
+      operationId: deleteAnnotation
+      parameters:
+        - name: id
+          in: path
+          description: ID of annotation to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            required:
+              - deleted
+              - id
+            properties:
+              deleted:
+                type: boolean
+                enum:
+                  - true
+              id:
+                type: string
+        '404':
+          description: Annotation not found or no permission to delete
+          schema:
+            $ref: '#/definitions/Error'
+  /search:
+    get:
+      summary: Search for annotations
+      operationId: search
+      parameters:
+        - name: limit
+          in: query
+          description: The maximum number of annotations to return.
+          required: false
+          type: integer
+          minimum: 0
+          maximum: 200
+          default: 20
+        - name: offset
+          in: query
+          description: >
+            The minimum number of initial annotations to skip. This is
+            used for pagination.
+          required: false
+          type: integer
+          default: 0
+          minimum: 0
+        - name: sort
+          in: query
+          description: The field by which annotations should be sorted.
+          required: false
+          type: string
+          default: updated
+        - name: order
+          in: query
+          description: The order in which the results should be sorted.
+          required: false
+          type: string
+          enum: [asc, desc]
+          default: desc
+        - name: uri
+          in: query
+          description: |
+            Limit the results to annotations matching the specific URI or equivalent URIs.
+
+            URI can be a URL (a web page address) or a URN representing another kind of resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
+          required: false
+          type: string
+        - name: user
+          in: query
+          description: Limit the results to annotations made by the specified user.
+          required: false
+          type: string
+        - name: group
+          in: query
+          description: Limit the results to annotations made in the specified group.
+          required: false
+          type: string
+        - name: tag
+          in: query
+          description: Limit the results to annotations tagged with the specified value.
+          required: false
+          type: string
+        - name: any
+          in: query
+          description: |
+            Limit the results to annotations in which one of a number of common fields contain the passed value.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Search results
+          schema:
+            $ref: '#/definitions/SearchResults'
+definitions:
+  NewAnnotation:
+    $ref: './schemas/annotation-schema.json'
+  Annotation:
+    allOf:
+      - $ref: '#/definitions/NewAnnotation'
+      - required:
+        - id
+        properties:
+          id:
+            type: string
+  Error:
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum:
+          - failure
+      reason:
+        type: string
+        description: A human-readable description of the reason(s) for failure.
+  SearchResults:
+    type: object
+    required:
+      - rows
+      - total
+    properties:
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/Annotation'
+      total:
+        description: Total number of results matching query.
+        type: integer
