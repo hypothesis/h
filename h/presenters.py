@@ -234,10 +234,8 @@ class DocumentHTMLPresenter(object):
         Markup object so that it doesn't get double-escaped.
 
         """
-        uri = self.uri
-        if (uri.lower().startswith('http://') or
-                uri.lower().startswith('https://')):
-            return jinja2.escape(uri)
+        if self.document.web_uri:
+            return jinja2.escape(self.document.web_uri)
         else:
             return ''
 
