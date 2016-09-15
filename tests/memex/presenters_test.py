@@ -186,10 +186,10 @@ class TestAnnotationJSONPresenter(object):
         return patch('memex.presenters.DocumentJSONPresenter.asdict')
 
 
-@pytest.mark.usefixtures('DocumentJSONPresenter')
+@pytest.mark.usefixtures('DocumentSearchIndexPresenter')
 class TestAnnotationSearchIndexPresenter(object):
 
-    def test_asdict(self, DocumentJSONPresenter):
+    def test_asdict(self, DocumentSearchIndexPresenter):
         annotation = mock.Mock(
             id='xyz123',
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
@@ -204,7 +204,7 @@ class TestAnnotationSearchIndexPresenter(object):
             target_selectors=[{'TestSelector': 'foobar'}],
             references=['referenced-id-1', 'referenced-id-2'],
             extra={'extra-1': 'foo', 'extra-2': 'bar'})
-        DocumentJSONPresenter.return_value.asdict.return_value = {'foo': 'bar'}
+        DocumentSearchIndexPresenter.return_value.asdict.return_value = {'foo': 'bar'}
 
         annotation_dict = AnnotationSearchIndexPresenter(annotation).asdict()
 
@@ -273,8 +273,8 @@ class TestAnnotationSearchIndexPresenter(object):
             'http://example.com/normalized']
 
     @pytest.fixture
-    def DocumentJSONPresenter(self, patch):
-        class_ = patch('memex.presenters.DocumentJSONPresenter')
+    def DocumentSearchIndexPresenter(self, patch):
+        class_ = patch('memex.presenters.DocumentSearchIndexPresenter')
         class_.return_value.asdict.return_value = {}
         return class_
 

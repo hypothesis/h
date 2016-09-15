@@ -93,7 +93,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         self.annotation = annotation
 
     def asdict(self):
-        docpresenter = DocumentJSONPresenter(self.annotation.document)
+        docpresenter = DocumentSearchIndexPresenter(self.annotation.document)
 
         base = {
             'id': self.annotation.id,
