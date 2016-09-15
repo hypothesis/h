@@ -150,7 +150,6 @@ class TestCheckURL(object):
                          'presenters',
                          'Search',
                          'TagsAggregation',
-                         'TopLevelAnnotationsFilter',
                          'UsersAggregation')
 class TestExecute(object):
 
@@ -159,17 +158,7 @@ class TestExecute(object):
     def test_it_creates_a_search_query(self, pyramid_request, Search):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        Search.assert_called_once_with(pyramid_request)
-
-    def test_it_only_returns_top_level_annotations(self,
-                                                   pyramid_request,
-                                                   search,
-                                                   TopLevelAnnotationsFilter):
-        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
-
-        TopLevelAnnotationsFilter.assert_called_once_with()
-        search.append_filter.assert_called_once_with(
-            TopLevelAnnotationsFilter.return_value)
+        Search.assert_called_once_with(pyramid_request, separate_replies=True)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
                                                             pyramid_request,
@@ -488,10 +477,6 @@ class TestExecute(object):
     @pytest.fixture
     def TagsAggregation(self, patch):
         return patch('h.activity.query.TagsAggregation')
-
-    @pytest.fixture
-    def TopLevelAnnotationsFilter(self, patch):
-        return patch('h.activity.query.TopLevelAnnotationsFilter')
 
     @pytest.fixture
     def UsersAggregation(self, patch):
