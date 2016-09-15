@@ -204,12 +204,34 @@ class TestDocumentMetasFromData(object):
                 'title': ['   My Document',
                           'My Document   ',
                           ' My Document ',
-                          '\nMy Document\n\n'],
+                          '\nMy Document\n\n',
+                          '\rMy Document\r\n',
+                          '\tMy Document \t \t '],
+
             },
             {
                 'type': 'title',
                 'value': ['My Document', 'My Document', 'My Document',
-                          'My Document']
+                          'My Document', 'My Document', 'My Document']
+            }
+        ),
+
+        # Leading and trailing whitespace does not get-stripped from non-titles.
+        (
+            {
+                'foo': ['   My Document',
+                          'My Document   ',
+                          ' My Document ',
+                          '\nMy Document\n\n',
+                          '\rMy Document\r\n',
+                          '\tMy Document \t \t '],
+
+            },
+            {
+                'type': 'foo',
+                'value': ['   My Document', 'My Document   ', ' My Document ',
+                          '\nMy Document\n\n', '\rMy Document\r\n',
+                          '\tMy Document \t \t ']
             }
         ),
     ])
@@ -275,6 +297,24 @@ class TestDocumentMetasFromData(object):
 
             assert document_metas == []
 
+    def test_document_metas_from_data_allows_null_non_titles(self):
+        """Null values are allowed if 'type' isn't 'title'."""
+        for value in (None, [None, None]):
+            document_data = {'foo': value}
+
+            document_metas = parse_document_claims.document_metas_from_data(
+                document_data, 'http://example/claimant')
+
+            if not isinstance(value, list):
+                # We expect it to turn non-lists into length-1 lists.
+                value = [value]
+
+            assert document_metas == [{
+                'type': 'foo',
+                'value': value,
+                'claimant': 'http://example/claimant',
+            }]
+
     def test_document_metas_from_data_ignores_empty_string_titles(self):
         """It should ignore empty document titles."""
         for title in ('', ['', '']):
@@ -285,6 +325,24 @@ class TestDocumentMetasFromData(object):
 
             assert document_metas == []
 
+    def test_document_metas_from_data_allows_empty_string_non_titles(self):
+        """Empty strings are allowed if 'type' isn't 'title'."""
+        for value in ('', ['', '']):
+            document_data = {'foo': value}
+
+            document_metas = parse_document_claims.document_metas_from_data(
+                document_data, 'http://example/claimant')
+
+            if not isinstance(value, list):
+                # We expect it to turn non-lists into length-1 lists.
+                value = [value]
+
+            assert document_metas == [{
+                'type': 'foo',
+                'value': value,
+                'claimant': 'http://example/claimant',
+            }]
+
     def test_document_metas_from_data_ignores_whitespace_only_titles(self):
         """It should ignore whitespace-only document titles."""
         for title in (' ', [' ', ' '], '\n\n  \n'):
@@ -294,6 +352,24 @@ class TestDocumentMetasFromData(object):
                 document_data, 'http://example/claimant')
 
             assert document_metas == []
+
+    def test_document_metas_from_data_allows_whitespace_only_non_titles(self):
+        """Whitespace-only strings are allowed if 'type' isn't 'title'."""
+        for value in (' ', [' ', ' '], '\n\n  \n'):
+            document_data = {'foo': value}
+
+            document_metas = parse_document_claims.document_metas_from_data(
+                document_data, 'http://example/claimant')
+
+            if not isinstance(value, list):
+                # We expect it to turn non-lists into length-1 lists.
+                value = [value]
+
+            assert document_metas == [{
+                'type': 'foo',
+                'value': value,
+                'claimant': 'http://example/claimant',
+            }]
 
 
 class TestDocumentURIsFromHighwirePDF(object):

@@ -101,13 +101,18 @@ def document_metas_from_data(document_data, claimant):
                 if not isinstance(value, list):
                     value = [value]
 
-                value = [v.strip() for v in value if v and v.strip()]
+                type_ = '.'.join(keypath)
 
-                if not value:
-                    continue
+                if type_ == 'title':
+                    # We don't allow None, empty strings, whitespace-only
+                    # strings, leading or trailing whitespaces, or empty arrays
+                    # in document title values.
+                    value = [v.strip() for v in value if v and v.strip()]
+                    if not value:
+                        continue
 
                 document_meta_dicts.append({
-                    'type': '.'.join(keypath),
+                    'type': type_,
                     'value': value,
                     'claimant': claimant,
                 })
