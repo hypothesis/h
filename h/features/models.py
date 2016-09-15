@@ -13,6 +13,8 @@ log = logging.getLogger(__name__)
 
 FEATURES = {
     'activity_pages': "Show the new activity pages?",
+    'defer_realtime_updates': ("Require a user action before applying real-time"
+                               " updates to annotations in the client?"),
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'search_page': "Show the activity pages search skeleton page?",
     'selection_tabs': "Show the tabs to select between annotations and notes?",
