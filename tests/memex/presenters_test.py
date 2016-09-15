@@ -11,6 +11,7 @@ from memex.presenters import AnnotationJSONPresenter
 from memex.presenters import AnnotationSearchIndexPresenter
 from memex.presenters import AnnotationJSONLDPresenter
 from memex.presenters import DocumentJSONPresenter
+from memex.presenters import DocumentSearchIndexPresenter
 from memex.presenters import utc_iso8601, deep_merge_dict
 
 
@@ -381,6 +382,21 @@ class TestDocumentJSONPresenter(object):
 
         presenter = DocumentJSONPresenter(document)
         assert {'title': ['Foo']} == presenter.asdict()
+
+
+class TestDocumentSearchIndexPresenter(object):
+    @pytest.mark.parametrize('document,expected', [
+        (models.Document(title='Foo'), {'title': ['Foo']}),
+        (models.Document(title=''), {}),
+        (models.Document(title=None), {}),
+        (models.Document(web_uri='http://foo.org'), {'web_uri': 'http://foo.org'}),
+        (models.Document(web_uri=''), {}),
+        (models.Document(web_uri=None), {}),
+        (models.Document(title='Foo', web_uri='http://foo.org'), {'title': ['Foo'], 'web_uri': 'http://foo.org'}),
+        (None, {})
+    ])
+    def test_asdict(self, document, expected):
+        assert expected == DocumentSearchIndexPresenter(document).asdict()
 
 
 def test_utc_iso8601():
