@@ -12,7 +12,7 @@ from pyramid.view import view_config
 from h.activity import query
 from h.paginator import paginate
 
-PAGE_SIZE = 20
+PAGE_SIZE = 200
 
 
 @view_config(route_name='activity.search',
