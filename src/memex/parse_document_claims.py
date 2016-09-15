@@ -58,6 +58,13 @@ def document_uris_from_data(document_data, claimant):
 
     document_uris.append(document_uri_self_claim(claimant))
 
+    for document_uri in document_uris:
+        uri = document_uri['uri']
+        if uri:
+            document_uri['uri'] = uri.strip()
+
+    document_uris = [d for d in document_uris if d['uri']]
+
     return document_uris
 
 
