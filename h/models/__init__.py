@@ -18,9 +18,6 @@ key to. So for convenience the test module can instead just do
 
 """
 
-import sqlalchemy as sa
-from h.db import Base
-
 from h.auth import models as auth_models
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
