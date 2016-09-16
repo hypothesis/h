@@ -8,7 +8,8 @@ import pytest
 from hypothesis import strategies as st
 from hypothesis import assume, given
 
-from h.auth import models, tokens
+from h import models
+from h.auth import tokens
 
 VALID_TOKEN_EXAMPLES = [
     # Valid
