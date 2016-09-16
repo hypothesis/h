@@ -2,6 +2,7 @@
 
 from pyramid import interfaces
 from pyramid.authentication import CallbackAuthenticationPolicy
+import sqlalchemy
 from zope import interface
 
 from h._compat import text_type
@@ -81,7 +82,9 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :rtype: unicode or None
         """
         token = getattr(request, 'auth_token', None)
-        if token is None or not token.is_valid():
+        if token is None or sqlalchemy.inspect(token).detached:
+            return None
+        if not token.is_valid():
             return None
 
         return token.userid
