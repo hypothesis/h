@@ -106,7 +106,7 @@ def execute(request, query, page_size):
 
     # Load all referenced annotations from the database, bucket them, and add
     # the buckets to result.timeframes.
-    anns = _fetch_annotations(request.db, search_result.annotation_ids)
+    anns = fetch_annotations(request.db, search_result.annotation_ids)
     result.timeframes.extend(bucketing.bucket(anns))
 
     # Fetch all groups
@@ -139,6 +139,14 @@ def aggregations_for(query):
 
 
 @newrelic.agent.function_trace()
+def fetch_annotations(session, ids):
+    return (session.query(Annotation)
+            .options(subqueryload(Annotation.document))
+            .filter(Annotation.id.in_(ids))
+            .order_by(Annotation.updated.desc()).all())
+
+
+@newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
     search = Search(request, separate_replies=True)
     for agg in aggregations_for(query):
@@ -161,14 +169,6 @@ def _execute_search(request, query, page_size):
 
     search_result = search.run(query)
     return search_result
-
-
-@newrelic.agent.function_trace()
-def _fetch_annotations(session, ids):
-    return (session.query(Annotation)
-            .options(subqueryload(Annotation.document))
-            .filter(Annotation.id.in_(ids))
-            .order_by(Annotation.updated.desc()).all())
 
 
 @newrelic.agent.function_trace()

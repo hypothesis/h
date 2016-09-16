@@ -12,6 +12,7 @@ from h.activity.query import (
     execute,
     extract,
     check_url,
+    fetch_annotations,
 )
 
 
@@ -144,7 +145,7 @@ class TestCheckURL(object):
         return mock.Mock(spec_set=[], return_value='UNPARSED_QUERY')
 
 
-@pytest.mark.usefixtures('_fetch_annotations',
+@pytest.mark.usefixtures('fetch_annotations',
                          '_fetch_groups',
                          'bucketing',
                          'presenters',
@@ -284,23 +285,23 @@ class TestExecute(object):
         assert result.timeframes == []
 
     def test_it_fetches_the_annotations_from_the_database(self,
-                                                          _fetch_annotations,
+                                                          fetch_annotations,
                                                           pyramid_request,
                                                           search):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        _fetch_annotations.assert_called_once_with(
+        fetch_annotations.assert_called_once_with(
             pyramid_request.db, search.run.return_value.annotation_ids)
 
     def test_it_buckets_the_annotations(self,
-                                        _fetch_annotations,
+                                        fetch_annotations,
                                         bucketing,
                                         pyramid_request,
                                         search):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         bucketing.bucket.assert_called_once_with(
-            _fetch_annotations.return_value)
+            fetch_annotations.return_value)
         assert result.timeframes == bucketing.bucket.return_value
 
     def test_it_fetches_the_groups_from_the_database(self,
@@ -359,8 +360,8 @@ class TestExecute(object):
         assert result.aggregations == mock.sentinel.aggregations
 
     @pytest.fixture
-    def _fetch_annotations(self, patch):
-        return patch('h.activity.query._fetch_annotations')
+    def fetch_annotations(self, patch):
+        return patch('h.activity.query.fetch_annotations')
 
     @pytest.fixture
     def _fetch_groups(self, group_pubids, patch):
@@ -481,6 +482,16 @@ class TestExecute(object):
     @pytest.fixture
     def UsersAggregation(self, patch):
         return patch('h.activity.query.UsersAggregation')
+
+
+class TestFetchAnnotations(object):
+    def test_it_returns_annotations_by_ids(self, db_session, factories):
+        annotations = [factories.Annotation() for _ in xrange(3)]
+        ids = [a.id for a in annotations]
+
+        result = fetch_annotations(db_session, ids)
+
+        assert set(annotations) == set(result)
 
 
 @pytest.fixture
