@@ -7,7 +7,9 @@ from h.auth import role
 
 def groupfinder(userid, request):
     """
-    Return the list of additional principals for a user, or None.
+    Return the list of additional principals for a userid, or None.
+
+    This loads the user and then calls ``principals_for_user``.
 
     If `userid` identifies a valid user in the system, this function will
     return the list of additional principals for that user. If `userid` is not
@@ -23,6 +25,12 @@ def groupfinder(userid, request):
     """
     user_service = request.find_service(name='user')
     user = user_service.fetch(userid)
+
+    return principals_for_user(user)
+
+
+def principals_for_user(user):
+    """Return the list of additional principals for a user, or None."""
     if user is None:
         return None
 
