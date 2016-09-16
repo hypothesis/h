@@ -18,7 +18,6 @@ key to. So for convenience the test module can instead just do
 
 """
 
-from h.auth import models as auth_models
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
 from h.features import models as features_models
@@ -29,6 +28,7 @@ from h.badge import models as badge_models
 
 from h.models.activation import Activation
 from h.models.auth_client import AuthClient
+from h.models.token import Token
 from h.models.user import User
 
 __all__ = (
@@ -53,7 +53,6 @@ Feature = features_models.Feature
 FeatureCohort = features_models.FeatureCohort
 Group = groups_models.Group
 NipsaUser = nipsa_models.NipsaUser
-Token = auth_models.Token
 Subscriptions = notification_models.Subscriptions
 
 

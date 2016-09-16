@@ -6,7 +6,7 @@ import jwt
 from zope.interface import implementer
 
 from h._compat import text_type
-from h.auth import models
+from h import models
 from h.auth.interfaces import IAuthenticationToken
 
 
@@ -80,7 +80,7 @@ def auth_token(request):
     :type request: pyramid.request.Request
 
     :returns: the auth token carried by the request, or None
-    :rtype: h.auth.models.Token or None
+    :rtype: h.models.Token or None
     """
     try:
         header = request.headers['Authorization']

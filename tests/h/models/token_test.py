@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import datetime
 
-from h.auth.models import Token
+from h.models import Token
 
 
 class TestToken(object):
