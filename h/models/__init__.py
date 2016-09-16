@@ -24,6 +24,7 @@ from h.notification import models as notification_models
 
 from h.models.activation import Activation
 from h.models.auth_client import AuthClient
+from h.models.auth_ticket import AuthTicket
 from h.models.blocklist import Blocklist
 from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort
@@ -35,6 +36,7 @@ __all__ = (
     'Activation',
     'Annotation',
     'AuthClient',
+    'AuthTicket',
     'Blocklist',
     'Document',
     'DocumentMeta',
