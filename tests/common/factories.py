@@ -4,6 +4,9 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import base64
+import os
+from datetime import (datetime, timedelta)
 import random
 
 import factory
@@ -210,3 +213,18 @@ class Group(ModelFactory):
 
     name = factory.Sequence(lambda n:'Test Group {n}'.format(n=str(n)))
     creator = factory.SubFactory(User)
+
+
+class AuthTicket(ModelFactory):
+
+    class Meta:  # pylint: disable=no-init, old-style-class
+        model = models.AuthTicket
+
+    # Simulate how pyramid_authsanity generates ticket ids
+    id = factory.LazyAttribute(lambda _: base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode('ascii'))
+    user = factory.SubFactory(User)
+    expires = factory.LazyAttribute(lambda _: (datetime.utcnow() + timedelta(minutes=10)))
+
+    @factory.lazy_attribute
+    def user_userid(self):
+        return self.user.userid
