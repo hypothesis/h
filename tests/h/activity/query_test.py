@@ -291,7 +291,9 @@ class TestExecute(object):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         fetch_annotations.assert_called_once_with(
-            pyramid_request.db, search.run.return_value.annotation_ids)
+            pyramid_request.db,
+            search.run.return_value.annotation_ids,
+            search.run.return_value.reply_ids)
 
     def test_it_buckets_the_annotations(self,
                                         fetch_annotations,
@@ -301,7 +303,7 @@ class TestExecute(object):
         result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         bucketing.bucket.assert_called_once_with(
-            fetch_annotations.return_value)
+            fetch_annotations.return_value[0])
         assert result.timeframes == bucketing.bucket.return_value
 
     def test_it_fetches_the_groups_from_the_database(self,
@@ -361,7 +363,9 @@ class TestExecute(object):
 
     @pytest.fixture
     def fetch_annotations(self, patch):
-        return patch('h.activity.query.fetch_annotations')
+        func = patch('h.activity.query.fetch_annotations')
+        func.return_value = (mock.Mock(), mock.Mock())
+        return func
 
     @pytest.fixture
     def _fetch_groups(self, group_pubids, patch):
@@ -464,7 +468,7 @@ class TestExecute(object):
         search = mock.Mock(
             spec_set=['append_filter', 'append_aggregation', 'run'])
         search.run.return_value = mock.Mock(
-            spec_set=['total', 'aggregations', 'annotation_ids'])
+            spec_set=['total', 'aggregations', 'annotation_ids', 'reply_ids'])
         search.run.return_value.total = 20
         search.run.return_value.aggregations = mock.sentinel.aggregations
         search.run.return_value.annotation_ids = [
@@ -489,9 +493,25 @@ class TestFetchAnnotations(object):
         annotations = [factories.Annotation() for _ in xrange(3)]
         ids = [a.id for a in annotations]
 
-        result = fetch_annotations(db_session, ids)
+        result, _ = fetch_annotations(db_session, ids, [])
 
         assert annotations == result
+
+    def test_it_returns_empty_list_when_no_annotation_ids_provided(self, db_session):
+        result, _ = fetch_annotations(db_session, [], [])
+        assert result == []
+
+    def test_it_returns_replies_by_ids(self, db_session, factories):
+        replies = [factories.Annotation() for _ in xrange(3)]
+        ids = [a.id for a in replies]
+
+        _, result = fetch_annotations(db_session, [], ids)
+
+        assert replies == result
+
+    def test_it_returns_empty_list_when_no_reply_ids_provided(self, db_session):
+        _, result = fetch_annotations(db_session, [], [])
+        assert result == []
 
 
 @pytest.fixture
