@@ -54,7 +54,7 @@ class TestFeature(object):
     @pytest.fixture
     def features_override(self, request):
         # Replace the primary FEATURES dictionary for the duration of testing...
-        patcher = mock.patch.dict('h.features.models.FEATURES', {
+        patcher = mock.patch.dict('h.models.feature.FEATURES', {
             'notification': "A test flag for testing with."
         }, clear=True)
         patcher.start()
@@ -63,7 +63,7 @@ class TestFeature(object):
     @pytest.fixture
     def features_pending_removal_override(self, request):
         # And configure 'abouttoberemoved' as a feature pending removal...
-        patcher = mock.patch.dict('h.features.models.FEATURES_PENDING_REMOVAL', {
+        patcher = mock.patch.dict('h.models.feature.FEATURES_PENDING_REMOVAL', {
             'abouttoberemoved': "A test flag that's about to be removed."
         }, clear=True)
         patcher.start()
