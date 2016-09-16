@@ -20,7 +20,6 @@ key to. So for convenience the test module can instead just do
 
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
-from h.nipsa import models as nipsa_models
 from h.notification import models as notification_models
 
 from h.models.activation import Activation
@@ -43,14 +42,12 @@ __all__ = (
     'Feature',
     'FeatureCohort',
     'Group',
-    'NipsaUser',
     'Subscriptions',
     'Token',
     'User',
 )
 
 
-NipsaUser = nipsa_models.NipsaUser
 Subscriptions = notification_models.Subscriptions
 
 

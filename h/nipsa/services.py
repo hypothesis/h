@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from h.nipsa import models
+from h.models import User
 from h.nipsa import worker
 
 
@@ -15,47 +15,41 @@ class NipsaService(object):
         self.session = session
 
     @property
-    def flagged_userids(self):
+    def flagged_users(self):
         """
-        A list of all the NIPSA'd user IDs.
+        A list of all the NIPSA'd users.
 
         :rtype: list of unicode strings
         """
-        return [u.userid for u in self.session.query(models.NipsaUser)]
+        return self.session.query(User).filter_by(nipsa=True)
 
     def is_flagged(self, userid):
         """Return whether the given userid is flagged as "NIPSA"."""
-        return self._user_query(userid).one_or_none() is not None
+        cnt = self.session.query(User).filter_by(userid=userid,
+                                                 nipsa=True).count()
+        return cnt != 0
 
-    def flag(self, userid):
+    def flag(self, user):
         """
-        Add a NIPSA flag for a userid.
+        Add a NIPSA flag for a user.
 
         Add the given user's ID to the list of NIPSA'd user IDs. If the user
         is already NIPSA'd then nothing will happen (but an "add_nipsa"
         message for the user will still be published to the queue).
         """
-        nipsa_user = self._user_query(userid).one_or_none()
-        if nipsa_user is None:
-            nipsa_user = models.NipsaUser(userid)
-            self.session.add(nipsa_user)
+        user.nipsa = True
+        worker.add_nipsa.delay(user.userid)
 
-        worker.add_nipsa.delay(userid)
-
-    def unflag(self, userid):
+    def unflag(self, user):
         """
-        Remove the NIPSA flag for a userid.
+        Remove the NIPSA flag for a user.
 
         If the user isn't NIPSA'd then nothing will happen (but a
         "remove_nipsa" message for the user will still be published to the
         queue).
         """
-        self._user_query(userid).delete()
-
-        worker.remove_nipsa.delay(userid)
-
-    def _user_query(self, userid):
-        return self.session.query(models.NipsaUser).filter_by(userid=userid)
+        user.nipsa = False
+        worker.remove_nipsa.delay(user.userid)
 
 
 def nipsa_factory(context, request):
