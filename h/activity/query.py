@@ -8,7 +8,6 @@ from memex.search import Search
 from memex.search import parser
 from memex.search.query import (
     TagsAggregation,
-    TopLevelAnnotationsFilter,
     UsersAggregation,
 )
 import newrelic.agent
@@ -18,6 +17,7 @@ from sqlalchemy.orm import subqueryload
 from h import presenters
 from h.activity import bucketing
 from h.models import Annotation, Document, Group
+from memex import storage
 
 
 class ActivityResults(namedtuple('ActivityResults', [
@@ -107,7 +107,10 @@ def execute(request, query, page_size):
 
     # Load all referenced annotations from the database, bucket them, and add
     # the buckets to result.timeframes.
-    anns = _fetch_annotations(request.db, search_result.annotation_ids)
+    # We also load the replies from the database, but for now just ignore them.
+    anns, _ = fetch_annotations(request.db,
+                                search_result.annotation_ids,
+                                search_result.reply_ids)
     result.timeframes.extend(bucketing.bucket(anns))
 
     # Fetch all groups
@@ -140,9 +143,21 @@ def aggregations_for(query):
 
 
 @newrelic.agent.function_trace()
+def fetch_annotations(session, ids, reply_ids):
+    def load_documents(query):
+        return query.options(subqueryload(Annotation.document))
+
+    annotations = storage.fetch_ordered_annotations(
+        session, ids, query_processor=load_documents)
+
+    replies = storage.fetch_ordered_annotations(session, reply_ids)
+
+    return (annotations, replies)
+
+
+@newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
-    search = Search(request)
-    search.append_filter(TopLevelAnnotationsFilter())
+    search = Search(request, separate_replies=True)
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 
@@ -163,14 +178,6 @@ def _execute_search(request, query, page_size):
 
     search_result = search.run(query)
     return search_result
-
-
-@newrelic.agent.function_trace()
-def _fetch_annotations(session, ids):
-    return (session.query(Annotation)
-            .options(subqueryload(Annotation.document))
-            .filter(Annotation.id.in_(ids))
-            .order_by(Annotation.updated.desc()).all())
 
 
 @newrelic.agent.function_trace()
