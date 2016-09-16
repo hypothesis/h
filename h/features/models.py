@@ -17,7 +17,6 @@ FEATURES = {
                                " updates to annotations in the client?"),
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'search_page': "Show the activity pages search skeleton page?",
-    'selection_tabs': "Show the tabs to select between annotations and notes?",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -38,7 +37,9 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {}
+FEATURES_PENDING_REMOVAL = {
+    'selection_tabs': "Show the tabs to select between annotations and notes?",
+}
 
 
 class Feature(Base):
