@@ -491,7 +491,7 @@ class TestFetchAnnotations(object):
 
         result = fetch_annotations(db_session, ids)
 
-        assert set(annotations) == set(result)
+        assert annotations == result
 
 
 @pytest.fixture

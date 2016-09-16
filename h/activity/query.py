@@ -17,6 +17,7 @@ from sqlalchemy.orm import subqueryload
 from h import presenters
 from h.activity import bucketing
 from h.models import Annotation, Document, Group
+from memex import storage
 
 
 class ActivityResults(namedtuple('ActivityResults', [
@@ -140,10 +141,13 @@ def aggregations_for(query):
 
 @newrelic.agent.function_trace()
 def fetch_annotations(session, ids):
-    return (session.query(Annotation)
-            .options(subqueryload(Annotation.document))
-            .filter(Annotation.id.in_(ids))
-            .order_by(Annotation.updated.desc()).all())
+    def load_documents(query):
+        return query.options(subqueryload(Annotation.document))
+
+    annotations = storage.fetch_ordered_annotations(
+        session, ids, query_processor=load_documents)
+
+    return annotations
 
 
 @newrelic.agent.function_trace()
