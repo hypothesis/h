@@ -1,12 +1,13 @@
 .pager {
   display: flex;
   flex-direction: row;
-  margin-top: 50px;
+  margin: 40px auto;
   font-weight: bold;
   justify-content: center;
 }
 
 .pager__item {
+  display: inline-block;
   border-radius: 2px;
   color: $grey-6;
   padding: 7px 10px 7px 10px;
