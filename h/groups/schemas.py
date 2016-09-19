@@ -8,7 +8,7 @@ import slugify
 from h import i18n
 from h import validators
 from h.accounts.schemas import CSRFSchema
-from h.groups.models import (
+from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
