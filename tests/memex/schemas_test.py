@@ -81,7 +81,8 @@ class TestCreateUpdateAnnotationSchema(object):
                     'identifier': ['foo', 'bar']
                 },
                 'highwire': {
-                    'doi': ['foo', 'bar']
+                    'doi': ['foo', 'bar'],
+                    'pdf_url': ['foo', 'bar'],
                 },
                 'link': [
                     {
@@ -135,6 +136,12 @@ class TestCreateUpdateAnnotationSchema(object):
 
         ({'document': {'highwire': {'doi': [False]}}},
          "document.highwire.doi.0: False is not of type 'string'"),
+
+        ({'document': {'highwire': {'pdf_url': False}}},
+         "document.highwire.pdf_url: False is not of type 'array'"),
+
+        ({'document': {'highwire': {'pdf_url': [False]}}},
+         "document.highwire.pdf_url.0: False is not of type 'string'"),
 
         ({'document': {'link': False}},
          "document.link: False is not of type 'array'"),

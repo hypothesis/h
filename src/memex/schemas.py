@@ -75,6 +75,12 @@ class AnnotationSchema(JSONSchema):
                                     'type': 'string',
                                 },
                             },
+                            'pdf_url': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                },
+                            },
                         },
                     },
                     'link': {
