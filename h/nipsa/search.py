@@ -36,7 +36,7 @@ def nipsa_filter(userid=None):
 
     if userid is not None:
         # Always show the logged-in user's annotations even if they have nipsa.
-        should_clauses.append({"term": {"user": userid}})
+        should_clauses.append({"term": {"user": userid.lower()}})
 
     return {"bool": {"should": should_clauses}}
 
@@ -48,7 +48,7 @@ def query_for_users_annotations(userid):
             "filtered": {
                 "filter": {
                     "bool": {
-                        "must": [{"term": {"user": userid}}]
+                        "must": [{"term": {"user": userid.lower()}}]
                     }
                 }
             }
