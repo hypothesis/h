@@ -167,15 +167,17 @@ class CreateAnnotationSchema(object):
     def validate(self, data):
         appstruct = self.structure.validate(data)
 
-        if not appstruct.get('uri', ''):
-            raise ValidationError('uri: ' + _("'uri' is a required property"))
-
         new_appstruct = {}
 
         _remove_protected_fields(appstruct)
 
         new_appstruct['userid'] = self.request.authenticated_userid
-        new_appstruct['target_uri'] = appstruct.pop('uri', u'')
+
+        uri = appstruct.pop('uri', u'').strip()
+        if not uri:
+            raise ValidationError('uri: ' + _("'uri' is a required property"))
+        new_appstruct['target_uri'] = uri
+
         new_appstruct['text'] = appstruct.pop('text', u'')
         new_appstruct['tags'] = appstruct.pop('tags', [])
         new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
@@ -229,7 +231,11 @@ class UpdateAnnotationSchema(object):
         # Fields that are allowed to be updated and that have a different name
         # internally than in the public API.
         if 'uri' in appstruct:
-            new_appstruct['target_uri'] = appstruct.pop('uri')
+            new_uri = appstruct.pop('uri').strip()
+            if not new_uri:
+                raise ValidationError(
+                    'uri: ' + _("'uri' is a required property"))
+            new_appstruct['target_uri'] = new_uri
 
         if 'permissions' in appstruct:
             new_appstruct['shared'] = _shared(appstruct.pop('permissions'),
