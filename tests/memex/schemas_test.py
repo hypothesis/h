@@ -81,7 +81,8 @@ class TestCreateUpdateAnnotationSchema(object):
                     'identifier': ['foo', 'bar']
                 },
                 'highwire': {
-                    'doi': ['foo', 'bar']
+                    'doi': ['foo', 'bar'],
+                    'pdf_url': ['foo', 'bar'],
                 },
                 'link': [
                     {
