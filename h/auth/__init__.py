@@ -37,8 +37,9 @@ TICKET_POLICY = pyramid_authsanity.AuthServicePolicy()
 TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
 
 DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
-                                      fallback_policy=SESSION_POLICY)
-WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, SESSION_POLICY])
+                                      fallback_policy=TICKET_POLICY,
+                                      migration_policy=SESSION_POLICY)
+WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, TICKET_POLICY, SESSION_POLICY])
 
 
 def auth_domain(request):
