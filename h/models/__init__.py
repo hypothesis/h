@@ -62,7 +62,6 @@ Group = groups_models.Group
 NipsaUser = nipsa_models.NipsaUser
 Token = auth_models.Token
 Subscriptions = notification_models.Subscriptions
-User = accounts_models.User
 Follower = follower_models.Follower
 Manager = manager_models.Manager
 

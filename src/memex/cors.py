@@ -18,7 +18,6 @@ def policy(allow_credentials=False,
     def cors_decorator(wrapped):
         def wrapper(context, request):
             response = wrapped(context, request)
-            response.status_int = 200
             return set_cors_headers(request, response,
                                     allow_credentials=allow_credentials,
                                     allow_headers=allow_headers,
@@ -53,14 +52,14 @@ def set_cors_headers(request, response,
     if origin is None:
         raise HTTPBadRequest('CORS preflight request lacks Origin header.')
 
-    # ...MUST have an Access-Control-Request-Method header.
-    request_method = request.headers.get('Access-Control-Request-Method')
-    if request_method is None:
-        raise HTTPBadRequest('CORS preflight request lacks '
-                             'Access-Control-Request-Method header.')
+    # # ...MUST have an Access-Control-Request-Method header.
+    # request_method = request.headers.get('Access-Control-Request-Method')
+    # if request_method is None:
+    #     raise HTTPBadRequest('CORS preflight request lacks '
+    #                          'Access-Control-Request-Method header.')
 
     # Always explicitly allow OPTIONS requests.
-    methods = set(['OPTIONS','POST'])
+    methods = set(['OPTIONS'])
     if allow_methods is not None:
         methods.update(allow_methods)
 
@@ -68,23 +67,17 @@ def set_cors_headers(request, response,
     # Access-Control-Request-Method match up with the allowed headers and
     # methods, but there's no need to do this as we can simply return what is
     # allowed and the browser will do the rest.
-    
-
     headers = response.headers
-
-    # headers['Access-Control-Allow-Origin'] = origin
+    headers['Access-Control-Allow-Origin'] = origin
     headers['Access-Control-Allow-Methods'] = ', '.join(methods)
-    # headers['Access-Control-Max-Age'] = str(max_age)
+    headers['Access-Control-Max-Age'] = str(max_age)
 
-    # if allow_credentials:
-    #     headers['Access-Control-Allow-Credentials'] = 'true'
+    if allow_credentials:
+        headers['Access-Control-Allow-Credentials'] = 'true'
 
-    # if allow_headers is not None:
-    #     headers['Access-Control-Allow-Headers'] = ', '.join(allow_headers)
+    if allow_headers is not None:
+        headers['Access-Control-Allow-Headers'] = ', '.join(allow_headers)
 
-    # if expose_headers is not None:
-    #     headers['Access-Control-Expose-Headers'] = ', '.join(expose_headers)
-
-    headers['Access-Control-Allow-Origin'] = '*'
-    headers['Access-Control-Allow-Headers'] = "Origin, X-Requested-With, Content-Type, Accept"
+    if expose_headers is not None:
+        headers['Access-Control-Expose-Headers'] = ', '.join(expose_headers)
     return response

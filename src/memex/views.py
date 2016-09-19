@@ -18,6 +18,7 @@ objects and Pyramid ACLs in :mod:`memex.resources`.
 """
 from pyramid import i18n
 from pyramid import security
+from pyramid.response import Response
 from pyramid.view import view_config
 from sqlalchemy.orm import subqueryload
 
@@ -104,9 +105,9 @@ def index(context, request):
         'links': {
             'annotation': {
                 'create': {
-                    'method': 'POST',
+                    'method': 'OPTIONS',
                     'url': request.route_url('api.annotations'),
-                    'desc': "Create a new annotation"
+                    'desc': "CORS pre-flight procedure"
                 },
                 'read': {
                     'method': 'GET',
@@ -167,6 +168,24 @@ def search(request):
     return out
 
 
+
+@api_config(route_name='api.annotations',
+            request_method='OPTIONS'
+            )
+def options(annotation, request):
+    '''returns a preflight CORS header response'''
+    print 'FUCKSHITFUCK'
+    response = Response()
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+        })
+    response.status_code = 200
+    return response
+
 @api_config(route_name='api.annotations',
             request_method='POST',
             effective_principals=security.Authenticated)
@@ -191,6 +210,8 @@ def read(annotation, request):
     links_service = request.find_service(name='links')
     presenter = AnnotationJSONPresenter(annotation, links_service)
     return presenter.asdict()
+
+
 
 
 @api_config(route_name='api.annotation.jsonld',
