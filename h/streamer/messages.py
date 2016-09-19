@@ -93,7 +93,7 @@ def handle_annotation_event(message, sockets, session):
     if annotation:
         userid = annotation.userid
     else:
-        userid = message.get('annotation_dict', {}).get('userid')
+        userid = message.get('annotation_dict', {}).get('user')
     nipsa_service = NipsaService(session)
     user_nipsad = nipsa_service.is_flagged(userid)
 
