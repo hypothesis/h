@@ -162,7 +162,7 @@ def test_cohorts_edit_with_users(factories, pyramid_request):
 
 
 @pytest.mark.usefixtures('check_csrf_token')
-@mock.patch.dict('h.features.models.FEATURES', {'feat': 'A test feature'})
+@mock.patch.dict('h.models.feature.FEATURES', {'feat': 'A test feature'})
 def test_features_save_sets_cohorts_when_checkboxes_on(pyramid_request):
     feat = models.Feature(name='feat')
     cohort = models.FeatureCohort(name='cohort')
@@ -182,7 +182,7 @@ def test_features_save_sets_cohorts_when_checkboxes_on(pyramid_request):
 
 
 @pytest.mark.usefixtures('check_csrf_token')
-@mock.patch.dict('h.features.models.FEATURES', {'feat': 'A test feature'})
+@mock.patch.dict('h.models.feature.FEATURES', {'feat': 'A test feature'})
 def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
     feat = models.Feature(name='feat')
     cohort = models.FeatureCohort(name='cohort')

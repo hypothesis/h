@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 
+from h import models
 from h.auth import role
-from h.features import models
 
 
 class UnknownFeatureError(Exception):
