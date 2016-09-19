@@ -4,9 +4,6 @@ from pyramid import interfaces
 from pyramid.authentication import CallbackAuthenticationPolicy
 from zope import interface
 
-from h._compat import text_type
-from h.auth import tokens
-
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthenticationPolicy(object):

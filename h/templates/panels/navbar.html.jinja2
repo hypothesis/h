@@ -1,5 +1,48 @@
 {% from '../includes/dropdown_menu.html.jinja2' import dropdown_menu %}
 
+{# Dropdown displaying search facet options. #}
+{% macro search_bar_dropdown() %}
+<div class="search-bar__dropdown-menu-container" data-ref="searchBarDropdown">
+  <h4 class="search-bar__dropdown-menu-header">
+    Narrow your search
+  </h4>
+  <ul class="search-bar__dropdown-menu">
+    <li class="search-bar__dropdown-menu-item" data-ref="searchBarDropdownItem">
+      <span class="search-bar__dropdown-menu-title" data-ref="searchBarDropdownItemTitle">
+        user:
+      </span>
+      <span class="search-bar__dropdown-menu-explanation">
+        search by username
+      </span>
+    </li>
+    <li class="search-bar__dropdown-menu-item" data-ref="searchBarDropdownItem">
+      <span class="search-bar__dropdown-menu-title" data-ref="searchBarDropdownItemTitle">
+        tag:
+      </span>
+      <span class="search-bar__dropdown-menu-explanation">
+        search for annotations with a tag
+      </span>
+    </li>
+    <li class="search-bar__dropdown-menu-item" data-ref="searchBarDropdownItem">
+      <span class="search-bar__dropdown-menu-title" data-ref="searchBarDropdownItemTitle">
+        url:
+      </span>
+      <span class="search-bar__dropdown-menu-explanation">
+        see all annotations on a page
+      </span>
+    </li>
+    <li class="search-bar__dropdown-menu-item" data-ref="searchBarDropdownItem">
+      <span class="search-bar__dropdown-menu-title" data-ref="searchBarDropdownItemTitle">
+        group:
+      </span>
+      <span class="search-bar__dropdown-menu-explanation">
+        show annotations created in a group you are a member of
+      </span>
+    </li>
+  </ul>
+</div>
+{% endmacro %}
+
 {% block content %}
 {% if feature('activity_pages') %}
 <header class="nav-bar">
@@ -7,10 +50,11 @@
     <a href="/" title="Hypothesis homepage"><!--
       !--><img alt="Hypothesis logo" class="nav-bar__logo" src="/assets/images/logo.svg"></a>
 
-    <div class="nav-bar__search">
+    <div class="nav-bar__search js-search-bar" data-ref="searchBar">
       <form class="search-bar" action="{{ search_url }}">
-        <input class="search-bar__input" name="q" value="{{ q }}" placeholder="Search…">
+        <input class="search-bar__input" data-ref="searchBarInput" name="q" value="{{ q }}" placeholder="Search…" autocomplete="off">
         {{ svg_icon('search', 'search-bar__icon') }}
+        {{ search_bar_dropdown() }}
       </form>
     </div>
 

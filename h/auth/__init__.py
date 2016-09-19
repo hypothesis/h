@@ -9,7 +9,6 @@ from pyramid.authentication import (RemoteUserAuthenticationPolicy,
 from pyramid_multiauth import MultiAuthenticationPolicy
 
 from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
-from h.auth.tokens import auth_token
 from h.auth.util import groupfinder
 
 __all__ = (
@@ -62,4 +61,4 @@ def includeme(config):
     config.add_request_method(auth_domain, name='auth_domain', reify=True)
 
     # Allow retrieval of the auth token (if present) from the request object.
-    config.add_request_method(auth_token, reify=True)
+    config.add_request_method('.tokens.auth_token', reify=True)
