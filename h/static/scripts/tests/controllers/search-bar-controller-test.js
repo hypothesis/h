@@ -130,4 +130,46 @@ describe('SearchBarController', function () {
     dropdown.querySelector('div').dispatchEvent(new Event('mousedown'));
     assert.isTrue(dropdown.classList.contains('is-open'));
   });
+
+  it('search options narrow as input changes', function () {
+    input.dispatchEvent(new Event('focusin'));
+    input.value = 'g';
+    input.dispatchEvent(new Event('input'));
+    assert.isTrue(dropdownItems[0].classList.contains('is-hidden'));
+    assert.isFalse(dropdownItems[1].classList.contains('is-hidden'));
+    assert.isTrue(dropdownItems[2].classList.contains('is-hidden'));
+    assert.isFalse(dropdownItems[3].classList.contains('is-hidden'));
+  });
+
+  it('highlights the correct facet from narrowed dropdown items on up and down arrow keys', function () {
+    var e = new Event('keydown');
+    input.dispatchEvent(new Event('focusin'));
+    input.value = 'g';
+    input.dispatchEvent(new Event('input'));
+    // keycode for 'up'
+    e.keyCode = 40;
+    input.dispatchEvent(new Event('focusin'));
+    input.dispatchEvent(e);
+    // down arrow to first visible item
+    assert.isTrue(dropdownItems[1].classList.contains('js-search-bar-dropdown-menu-item--active'));
+    // up arrow to last visible item
+    e.keyCode = 38;
+    input.dispatchEvent(e);
+    assert.isFalse(dropdownItems[1].classList.contains('js-search-bar-dropdown-menu-item--active'));
+    assert.isTrue(dropdownItems[3].classList.contains('js-search-bar-dropdown-menu-item--active'));
+  });
+
+  it('dropdown closes when user types ":"', function () {
+    input.dispatchEvent(new Event('focusin'));
+    input.value = ':';
+    input.dispatchEvent(new Event('input'));
+    assert.isFalse(dropdown.classList.contains('is-open'));
+  });
+
+  it('dropdown closes when there are no matches', function () {
+    input.dispatchEvent(new Event('focusin'));
+    input.value = 'x';
+    input.dispatchEvent(new Event('input'));
+    assert.isFalse(dropdown.classList.contains('is-open'));
+  });
 });
