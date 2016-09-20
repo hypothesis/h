@@ -34,16 +34,16 @@
          {% endif %}
          for="{{ field.oid }}">
            {{ _(field.title) }}
-           {%- if field.schema.hint and feature('activity_pages') -%}
-             <i class="form-input__hint-icon">
-               {{ svg_icon('info_icon') }}
-             </i>
-           {% endif %}
+    {%- if field.required and field.widget.show_required and feature('activity_pages') -%}
+      <span class="form-input__required">*</span>
+    {% endif -%}
+    {%- if field.schema.hint and feature('activity_pages') -%}
+      <i class="form-input__hint-icon">
+        {{ svg_icon('info_icon') }}
+      </i>
+    {% endif -%}
     {%- if field.schema.hint and not feature('activity_pages') %}
       <span class="form-hint" id="hint-{{ field.oid }}">({{ field.schema.hint }})</span>
-    {% endif -%}
-    {%- if field.required and feature('activity_pages') -%}
-      <span class="form-input__required">*</span>
     {% endif -%}
   </label>
 {% endif -%}
