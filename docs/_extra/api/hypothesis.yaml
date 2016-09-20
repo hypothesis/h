@@ -10,6 +10,8 @@ info:
     their own applications.
 
     ## Authorization
+
+    ### API tokens
     Some of the API URLs documented below require a valid API token.
     To use these API URLs you should:
 
@@ -26,6 +28,37 @@ info:
         Authorization: Bearer 6879-31d62c13b0099456de5379de90f90395
 
     (Replace `6879-31d62c13b0099456de5379de90f90395` with your own API token.)
+
+    ### Client credentials direct authorization
+    The user creation API is intended for use by "third-party accounts" clients.
+    These endpoints are authenticated by HTTP Basic Auth using your client ID as
+    the username and your client secret as the password.
+
+    For example, with client details as follows
+
+        Client ID: 96653f8e-80be-11e6-b32b-c7bcde86613a
+        Client Secret: E-hReVMuRyZbyr1GikieEw4JslaM6sDpb18_9V59PFw
+
+    you can compute the Authorization header [as described in
+    RFC1945](https://tools.ietf.org/html/rfc1945#section-11.1):
+
+        $ echo -n '96653f8e-80be-11e6-b32b-c7bcde86613a:E-hReVMuRyZbyr1GikieEw4JslaM6sDpb18_9V59PFw' | base64
+        OTY2NTNmOGUtODBiZS0xMWU2LWIzMmItYzdiY2RlODY2MTNhOkUtaFJlVk11UnlaYnlyMUdpa2llRXc0SnNsYU02c0RwYjE4XzlWNTlQRnc=
+
+    *Example request:*
+
+        POST /users
+        Host: hypothes.is
+        Accept: application/json
+        Content-Type: application/json
+        Authorization: Basic OTY2NTNmOGUtODBiZS0xMWU2LWIzMmItYzdiY2RlODY2MTNhOkUtaFJlVk11UnlaYnlyMUdpa2llRXc0SnNsYU02c0RwYjE4XzlWNTlQRnc=
+
+        {
+          "authority": "example.com",
+          "username": "jbloggs1",
+          "email": "jbloggs1@example.com"
+        }
+
   termsOfService: https://hypothes.is/terms-of-service
   license:
     name: BSD (2-Clause)
@@ -38,6 +71,17 @@ consumes:
   - application/json
 produces:
   - application/json
+securityDefinitions:
+  developerAPIKey:
+    type: apiKey
+    description: Authorize with a developer API key.
+    name: Authorization
+    in: header
+  authClientCredentials:
+    type: basic
+    description: Authorize using OAuth client credentials with HTTP Basic Auth.
+security:
+  - developerAPIKey: []
 paths:
   /:
     get:
@@ -47,6 +91,7 @@ paths:
       responses:
         '200':
           description: Success
+      security: []
   /annotations:
     post:
       summary: Create a new annotation
@@ -211,6 +256,31 @@ paths:
           description: Search results
           schema:
             $ref: '#/definitions/SearchResults'
+  /users:
+    post:
+      summary: Create a new user
+      description: |
+        Only for specific auth clients, this API call allows clients with a
+        designated authority to create users within their authority.
+      operationId: createUser
+      parameters:
+        - name: user
+          in: body
+          description: User to be created
+          required: true
+          schema:
+            $ref: '#/definitions/NewUser'
+      responses:
+        '200':
+          description: User successfully created
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Could not create user from your request
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - authClientCredentials: []
 definitions:
   NewAnnotation:
     $ref: './schemas/annotation-schema.json'
@@ -247,3 +317,7 @@ definitions:
       total:
         description: Total number of results matching query.
         type: integer
+  NewUser:
+    $ref: './schemas/new-user-schema.json'
+  User:
+    $ref: './schemas/user-schema.json'
