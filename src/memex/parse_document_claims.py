@@ -209,13 +209,12 @@ def document_uris_from_highwire_doi(highwire_dict, claimant):
     document_uris = []
     hwdoivalues = highwire_dict.get('doi', [])
     for doi in hwdoivalues:
-        if not doi.startswith('doi:'):
-            doi = "doi:{}".format(doi)
-
-        document_uris.append({'claimant': claimant,
-                              'uri': doi,
-                              'type': 'highwire-doi',
-                              'content_type': ''})
+        doi = doi_uri_from_string(doi)
+        if doi is not None:
+            document_uris.append({'claimant': claimant,
+                                  'uri': doi,
+                                  'type': 'highwire-doi',
+                                  'content_type': ''})
     return document_uris
 
 
@@ -231,22 +230,12 @@ def document_uris_from_dc(dc_dict, claimant):
     document_uris = []
     dcdoivalues = dc_dict.get('identifier', [])
     for doi in dcdoivalues:
-        doi = doi.strip()
-
-        if doi.startswith('doi:'):
-            doi = doi[len('doi:'):]
-
-        doi = doi.strip()
-
-        if not doi:
-            continue
-
-        doi = 'doi:{}'.format(doi)
-
-        document_uris.append({'claimant': claimant,
-                              'uri': doi,
-                              'type': 'dc-doi',
-                              'content_type': ''})
+        doi = doi_uri_from_string(doi)
+        if doi is not None:
+            document_uris.append({'claimant': claimant,
+                                  'uri': doi,
+                                  'type': 'dc-doi',
+                                  'content_type': ''})
 
     return document_uris
 
@@ -259,3 +248,32 @@ def document_uri_self_claim(claimant):
         'type': u'self-claim',
         'content_type': '',
     }
+
+
+def doi_uri_from_string(s):
+    """
+    Return the DOI URI from the given user-supplied string, or None.
+
+    Return a string of the format "doi:<id>". Leading and trailing whitespace
+    is stripped from the string as a whole and from the <id> substring.
+
+    If the given string doesn't already start with "doi:" it is prepended.
+
+    If the given string does not contain a DOI URI then None is returned.
+    Examples of strings that do not include a DOI are:
+    '', ' ', 'doi:', 'doi: ', ' doi:', ' doi: '.
+
+    """
+    s = s.strip()
+
+    if s.startswith('doi:'):
+        s = s[len('doi:'):]
+
+    s = s.strip()
+
+    if not s:
+        return None
+
+    s = 'doi:{}'.format(s)
+
+    return s

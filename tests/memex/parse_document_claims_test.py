@@ -432,6 +432,39 @@ class TestDocumentURIsFromHighwireDOI(object):
         expected_uri = 'doi:' + highwire_dict['doi'][0]
         one([d for d in document_uris if d.get('uri') == expected_uri])
 
+    def test_empty_string_dois_are_ignored(self):
+        for doi in ('', 'doi:'):
+            highwire_dict = {'doi': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+                highwire_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_only_dois_are_ignored(self):
+        for doi in (' ', 'doi: '):
+            highwire_dict = {'doi': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+                highwire_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_is_stripped_from_dois(self):
+        for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
+            highwire_dict = {'doi': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+                highwire_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert [d['uri'] for d in document_uris] == ['doi:foo']
+
 
 class TestDocumentURIsFromDC(object):
 
