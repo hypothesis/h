@@ -39,6 +39,7 @@ class GroupSchema(CSRFSchema):
             unblacklisted_group_name_slug),
         widget=deform.widget.TextInputWidget(
             autofocus=True,
+            show_required=True,
             css_class="group-form__name-input js-group-name-input",
             disable_autocomplete=True,
             label_css_class="group-form__name-label",

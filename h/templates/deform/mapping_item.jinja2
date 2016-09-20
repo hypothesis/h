@@ -34,7 +34,7 @@
          {% endif %}
          for="{{ field.oid }}">
            {{ _(field.title) }}
-    {%- if field.required and feature('activity_pages') -%}
+    {%- if field.required and field.widget.show_required and feature('activity_pages') -%}
       <span class="form-input__required">*</span>
     {% endif -%}
     {%- if field.schema.hint and feature('activity_pages') -%}
