@@ -472,6 +472,39 @@ class TestDocumentURIsFromDC(object):
         expected_uri = 'doi:' + dc_dict['identifier'][0]
         one([d for d in document_uris if d.get('uri') == expected_uri])
 
+    def test_empty_string_dois_are_ignored(self):
+        for doi in ('', 'doi:'):
+            dc_dict = {'identifier': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_dc(
+                dc_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_only_dois_are_ignored(self):
+        for doi in (' ', 'doi: '):
+            dc_dict = {'identifier': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_dc(
+                dc_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_is_stripped_from_dois(self):
+        for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
+            dc_dict = {'identifier': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_dc(
+                dc_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert [d['uri'] for d in document_uris] == ['doi:foo']
+
 
 class TestDocumentURISelfClaim(object):
 

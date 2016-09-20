@@ -231,8 +231,17 @@ def document_uris_from_dc(dc_dict, claimant):
     document_uris = []
     dcdoivalues = dc_dict.get('identifier', [])
     for doi in dcdoivalues:
-        if not doi.startswith('doi:'):
-            doi = "doi:{}".format(doi)
+        doi = doi.strip()
+
+        if doi.startswith('doi:'):
+            doi = doi[len('doi:'):]
+
+        doi = doi.strip()
+
+        if not doi:
+            continue
+
+        doi = 'doi:{}'.format(doi)
 
         document_uris.append({'claimant': claimant,
                               'uri': doi,
