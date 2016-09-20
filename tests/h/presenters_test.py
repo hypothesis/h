@@ -173,45 +173,46 @@ class TestDocumentHTMLPresenter(object):
 
         assert isinstance(self.presenter(web_uri=web_uri).href, jinja2.Markup)
 
-    link_text_fixtures = pytest.mark.usefixtures('title')
+    link_text_fixtures = pytest.mark.usefixtures('title_or_filename_or_uri')
 
     @link_text_fixtures
-    def test_link_text_with_non_http_title(self, title):
-        """If .title doesn't start with http(s) it should just use it."""
-        title.return_value = "Example Document"
+    def test_link_text_with_non_http_title(self, title_or_filename_or_uri):
+        """If .title_or_filename_or_uri doesn't start with http(s) it should just use it."""
+        title_or_filename_or_uri.return_value = "Example Document"
 
         assert self.presenter().link_text == "Example Document"
 
     @link_text_fixtures
-    def test_link_text_with_http_title(self, title):
-        """If .title is an http URI .link_test should use it.
+    def test_link_text_with_http_title(self, title_or_filename_or_uri):
+        """If .title_or_filename_or_uri is an http URI .link_test should use it.
 
-        This happens when an annotation's document has no title, so .title
-        falls back on the URI instead.
+        This happens when an annotation's document has no title, so
+        .title_or_filename_or_uri falls back on the URI instead.
 
         """
-        title.return_value = "http://www.example.com/example.html"
+        title_or_filename_or_uri.return_value = "http://www.example.com/example.html"
 
         assert self.presenter().link_text == "www.example.com/example.html"
 
     @link_text_fixtures
-    def test_link_text_with_https_title(self, title):
-        """If .title is an https URI .link_test should use it.
+    def test_link_text_with_https_title(self, title_or_filename_or_uri):
+        """If .title_or_filename_or_uri is an https URI .link_test should use it.
 
-        This happens when an annotation's document has no title, so .title
-        falls back on the URI instead.
+        This happens when an annotation's document has no title, so
+        .title_or_filename_or_uri falls back on the URI instead.
 
         """
-        title.return_value = "https://www.example.com/example.html"
+        title_or_filename_or_uri.return_value = "https://www.example.com/example.html"
 
         assert self.presenter().link_text == "www.example.com/example.html"
 
     @link_text_fixtures
-    def test_link_text_returns_Markup_if_title_returns_Markup(self, title):
+    def test_link_text_returns_Markup_if_title_returns_Markup(
+            self, title_or_filename_or_uri):
         for title_ in (jinja2.Markup("Example Document"),
                        jinja2.Markup("http://www.example.com/example.html"),
                        jinja2.Markup("https://www.example.com/example.html")):
-            title.return_value = title_
+            title_or_filename_or_uri.return_value = title_
             assert isinstance(self.presenter().link_text, jinja2.Markup)
 
     hostname_or_filename_fixtures = pytest.mark.usefixtures('uri', 'filename')
@@ -272,65 +273,70 @@ class TestDocumentHTMLPresenter(object):
 
         assert isinstance(self.presenter().hostname_or_filename, unicode)
 
-    title_fixtures = pytest.mark.usefixtures('uri', 'filename')
+    title_or_filename_or_uri_fixtures = pytest.mark.usefixtures('uri',
+                                                                'filename')
 
-    @title_fixtures
-    def test_title_with_a_document_that_has_a_title(self):
+    @title_or_filename_or_uri_fixtures
+    def test_title_or_filename_or_uri_with_a_document_that_has_a_title(self):
         """If the document has a title it should use it."""
         title = 'document title'
 
-        assert self.presenter(title=title).title == title
+        assert self.presenter(title=title).title_or_filename_or_uri == title
 
-    @title_fixtures
-    def test_title_escapes_html_in_document_titles(self):
+    @title_or_filename_or_uri_fixtures
+    def test_title_or_filename_or_uri_escapes_html_in_document_titles(self):
         spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
 
-        title = self.presenter(title=spam_link).title
+        title = self.presenter(title=spam_link).title_or_filename_or_uri
 
         assert jinja2.escape(spam_link) in title
         for char in ['<', '>', '"', "'"]:
             assert char not in title
         assert isinstance(title, jinja2.Markup)
 
-    @title_fixtures
-    def test_title_with_file_uri(self, filename):
+    @title_or_filename_or_uri_fixtures
+    def test_title_or_filename_or_uri_with_file_uri(self, filename):
         """If the document has no title and the annotation has a file:// uri
         then it should return the filename part only."""
         filename.return_value = "MyFile.pdf"
 
-        assert self.presenter(title=None).title == "MyFile.pdf"
+        assert self.presenter(title=None).title_or_filename_or_uri == "MyFile.pdf"
 
-    @title_fixtures
-    def test_title_returns_Markup_when_filename_returns_Markup(self, filename):
+    @title_or_filename_or_uri_fixtures
+    def test_title_or_filename_or_uri_returns_Markup_when_filename_returns_Markup(
+            self, filename):
         filename.return_value = jinja2.Markup("MyFile.pdf")
 
-        assert isinstance(self.presenter(title=None).title, jinja2.Markup)
+        assert isinstance(
+            self.presenter(title=None).title_or_filename_or_uri, jinja2.Markup)
 
-    @title_fixtures
-    def test_title_unquotes_uris(self, uri, filename):
+    @title_or_filename_or_uri_fixtures
+    def test_title_or_filename_or_uri_unquotes_uris(self, uri, filename):
         filename.return_value = ""  # This is not a file:// URI.
         uri.return_value = "http://example.com/example%201.html"
 
-        assert self.presenter(title=None).title == (
+        assert self.presenter(title=None).title_or_filename_or_uri == (
             "http://example.com/example 1.html")
 
-    @title_fixtures
-    def test_title_returns_Markup_when_uri_returns_Markup(self, uri, filename):
+    @title_or_filename_or_uri_fixtures
+    def test_title_or_filename_or_uri_returns_Markup_when_uri_returns_Markup(
+            self, uri, filename):
         filename.return_value = ""  # This is not a file:// URI.
         uri.return_value = jinja2.Markup("http://example.com/example.html")
 
-        assert isinstance(self.presenter(title=None).title, jinja2.Markup)
+        assert isinstance(
+            self.presenter(title=None).title_or_filename_or_uri, jinja2.Markup)
 
-    @title_fixtures
+    @title_or_filename_or_uri_fixtures
     def test_title_when_document_has_None_for_title(self, uri, filename):
         """If title is None for its title it should use the uri instead."""
         uri.return_value = "http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
 
-        assert self.presenter(title=None).title == (
+        assert self.presenter(title=None).title_or_filename_or_uri == (
             "http://example.com/example.html")
 
-    @title_fixtures
+    @title_or_filename_or_uri_fixtures
     @pytest.mark.parametrize('title', [
         23, 23.7, False, {'foo': 'bar'}, [1, 2, 3]
     ])
@@ -338,13 +344,13 @@ class TestDocumentHTMLPresenter(object):
                                                        uri,
                                                        filename,
                                                        title):
-        """If title is None it should use the uri instead."""
         uri.return_value = u"http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
 
-        assert isinstance(self.presenter(title=title).title, unicode)
+        assert isinstance(
+            self.presenter(title=title).title_or_filename_or_uri, unicode)
 
-    @title_fixtures
+    @title_or_filename_or_uri_fixtures
     def test_title_when_document_has_empty_string_for_title(self,
                                                             uri,
                                                             filename):
@@ -352,17 +358,17 @@ class TestDocumentHTMLPresenter(object):
         uri.return_value = "http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
 
-        assert self.presenter(title="").title == (
+        assert self.presenter(title="").title_or_filename_or_uri == (
             "http://example.com/example.html")
 
-    @title_fixtures
+    @title_or_filename_or_uri_fixtures
     def test_title_when_no_document_title_no_filename_and_no_uri(self,
                                                                  uri,
                                                                  filename):
         uri.return_value = ""
         filename.return_value = ""
 
-        assert self.presenter(title=None).title == ""
+        assert self.presenter(title=None).title_or_filename_or_uri == ""
 
     def presenter(self, **kwargs):
         return presenters.DocumentHTMLPresenter(mock.Mock(**kwargs))
@@ -374,10 +380,11 @@ class TestDocumentHTMLPresenter(object):
                      new_callable=mock.PropertyMock)
 
     @pytest.fixture
-    def title(self, patch):
-        return patch('h.presenters.DocumentHTMLPresenter.title',
-                     autospec=None,
-                     new_callable=mock.PropertyMock)
+    def title_or_filename_or_uri(self, patch):
+        return patch(
+            'h.presenters.DocumentHTMLPresenter.title_or_filename_or_uri',
+            autospec=None,
+            new_callable=mock.PropertyMock)
 
     @pytest.fixture
     def uri(self, patch):

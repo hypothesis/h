@@ -168,7 +168,7 @@ class AnnotationHTMLPresenter(object):
     def title(self):
         """Return a title for this annotation."""
         if self.document:
-            return self.document.title
+            return self.document.title_or_filename_or_uri
         else:
             return ''
 
@@ -304,7 +304,8 @@ class DocumentHTMLPresenter(object):
 
         """
         return _format_document_link(
-            self.href, self.title, self.link_text, self.hostname_or_filename)
+            self.href, self.title_or_filename_or_uri, self.link_text,
+            self.hostname_or_filename)
 
     @property
     def link_text(self):
@@ -323,11 +324,11 @@ class DocumentHTMLPresenter(object):
         Markup object so it doesn't get double-escaped.
 
         """
-        title = jinja2.escape(self.title)
+        title = jinja2.escape(self.title_or_filename_or_uri)
 
-        # Sometimes self.title is the annotated document's URI (if the document
-        # has no title). In those cases we want to remove the http(s):// from
-        # the front and unquote it for link text.
+        # Sometimes self.title_or_filename_or_uri is the annotated document's
+        # URI (if the document has no title). In those cases we want to remove
+        # the http(s):// from the front and unquote it for link text.
         lower = title.lower()
         if lower.startswith('http://') or lower.startswith('https://'):
             parts = urlparse.urlparse(title)
@@ -337,9 +338,9 @@ class DocumentHTMLPresenter(object):
             return title
 
     @property
-    def title(self):
+    def title_or_filename_or_uri(self):
         """
-        Return a title for this document.
+        Return a title for this document or fall back on filename or URI.
 
         Return the document's title or if the document has no title then return
         its filename (if it's a file:// URI) or its URI for non-file URIs.
