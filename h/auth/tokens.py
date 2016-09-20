@@ -11,6 +11,32 @@ from h.auth.interfaces import IAuthenticationToken
 
 
 @implementer(IAuthenticationToken)
+class Token(object):
+    """
+    A long-lived API token for a user.
+
+    This is a wrapper class that wraps an ``h.models.Token`` and provides an
+    implementation of the ``IAuthenticationToken`` interface.
+
+    Unlike ``models.Token`` this class is not a sqlalchemy ORM class so it can
+    be used after the request's db session has been committed or invalidated
+    without getting ``DetachedInstanceError``s from sqlalchemy.
+
+    """
+
+    def __init__(self, token_model):
+        self.expires = token_model.expires
+        self.userid = token_model.userid
+
+    def is_valid(self):
+        """Return ``True`` if this token is not expired, ``False`` if it is."""
+        if self.expires is None:
+            return True
+        now = datetime.datetime.utcnow()
+        return now < self.expires
+
+
+@implementer(IAuthenticationToken)
 class LegacyClientJWT(object):
 
     """
@@ -96,11 +122,11 @@ def auth_token(request):
     if not token:
         return None
 
-    api_token = (request.db.query(models.Token)
-                 .filter_by(value=token)
-                 .one_or_none())
-    if api_token is not None:
-        return api_token
+    token_model = (request.db.query(models.Token)
+                   .filter_by(value=token)
+                   .one_or_none())
+    if token_model is not None:
+        return Token(token_model)
 
     # If we've got this far it's possible the token is a legacy client JWT.
     return _maybe_jwt(token, request)

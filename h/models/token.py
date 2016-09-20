@@ -7,14 +7,12 @@ import datetime
 import os
 
 import sqlalchemy
-from zope.interface import implementer
 
 from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
 from h.db import mixins
 
 
-@implementer(IAuthenticationToken)
 class Token(Base, mixins.Timestamps):
 
     """A long-lived API token for a user."""
@@ -44,13 +42,6 @@ class Token(Base, mixins.Timestamps):
     def __init__(self, userid):
         self.userid = userid
         self.regenerate()
-
-    def is_valid(self):
-        """Check if the token is valid (unexpired). Returns a boolean."""
-        if self.expires is None:
-            return True
-        now = datetime.datetime.utcnow()
-        return now < self.expires
 
     @classmethod
     def get_by_userid(cls, session, userid):
