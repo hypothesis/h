@@ -432,6 +432,39 @@ class TestDocumentURIsFromHighwireDOI(object):
         expected_uri = 'doi:' + highwire_dict['doi'][0]
         one([d for d in document_uris if d.get('uri') == expected_uri])
 
+    def test_empty_string_dois_are_ignored(self):
+        for doi in ('', 'doi:'):
+            highwire_dict = {'doi': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+                highwire_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_only_dois_are_ignored(self):
+        for doi in (' ', 'doi: '):
+            highwire_dict = {'doi': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+                highwire_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_is_stripped_from_dois(self):
+        for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
+            highwire_dict = {'doi': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+                highwire_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert [d['uri'] for d in document_uris] == ['doi:foo']
+
 
 class TestDocumentURIsFromDC(object):
 
@@ -472,6 +505,39 @@ class TestDocumentURIsFromDC(object):
         expected_uri = 'doi:' + dc_dict['identifier'][0]
         one([d for d in document_uris if d.get('uri') == expected_uri])
 
+    def test_empty_string_dois_are_ignored(self):
+        for doi in ('', 'doi:'):
+            dc_dict = {'identifier': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_dc(
+                dc_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_only_dois_are_ignored(self):
+        for doi in (' ', 'doi: '):
+            dc_dict = {'identifier': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_dc(
+                dc_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert document_uris == []
+
+    def test_whitespace_is_stripped_from_dois(self):
+        for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
+            dc_dict = {'identifier': [doi]}
+
+            document_uris = parse_document_claims.document_uris_from_dc(
+                dc_dict,
+                claimant='http://example.com/example.html',
+            )
+
+            assert [d['uri'] for d in document_uris] == ['doi:foo']
+
 
 class TestDocumentURISelfClaim(object):
 
@@ -508,7 +574,7 @@ class TestDocumentURIsFromData(object):
         }
         claimant = 'http://localhost:5000/docs/help'
         document_uris_from_links.return_value = [
-            mock.Mock(), mock.Mock(), mock.Mock()]
+            {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
         document_uris = parse_document_claims.document_uris_from_data(
             document_data=document_data,
@@ -548,7 +614,7 @@ class TestDocumentURIsFromData(object):
         }
         claimant = 'http://localhost:5000/docs/help'
         document_uris_from_highwire_pdf.return_value = [
-            mock.Mock(), mock.Mock(), mock.Mock()]
+            {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
         document_uris = parse_document_claims.document_uris_from_data(
             document_data=document_data,
@@ -588,7 +654,7 @@ class TestDocumentURIsFromData(object):
         }
         claimant = 'http://localhost:5000/docs/help'
         document_uris_from_highwire_doi.return_value = [
-            mock.Mock(), mock.Mock(), mock.Mock()]
+            {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
         document_uris = parse_document_claims.document_uris_from_data(
             document_data=document_data,
@@ -627,7 +693,7 @@ class TestDocumentURIsFromData(object):
         }
         claimant = 'http://localhost:5000/docs/help'
         document_uris_from_dc.return_value = [
-            mock.Mock(), mock.Mock(), mock.Mock()]
+            {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
         document_uris = parse_document_claims.document_uris_from_data(
             document_data=document_data,
@@ -660,6 +726,125 @@ class TestDocumentURIsFromData(object):
 
         document_uri_self_claim.assert_called_once_with(claimant)
         assert document_uri_self_claim.return_value in document_uris
+
+    def test_it_ignores_null_uris(self,
+                                  document_uris_from_links,
+                                  document_uris_from_highwire_pdf,
+                                  document_uris_from_highwire_doi,
+                                  document_uris_from_dc,
+                                  document_uri_self_claim):
+        document_uris_from_links.return_value = [{'uri': None}]
+        document_uris_from_highwire_pdf.return_value = [{'uri': None}]
+        document_uris_from_highwire_doi.return_value = [{'uri': None}]
+        document_uris_from_dc.return_value = [{'uri': None}]
+        document_uri_self_claim.return_value = {'uri': None}
+
+        document_uris = parse_document_claims.document_uris_from_data(
+            {}, 'http://example.com/claimant')
+
+        assert document_uris == []
+
+    def test_it_ignores_empty_string_uris(self,
+                                          document_uris_from_links,
+                                          document_uris_from_highwire_pdf,
+                                          document_uris_from_highwire_doi,
+                                          document_uris_from_dc,
+                                          document_uri_self_claim):
+        document_uris_from_links.return_value = [{'uri': ''}]
+        document_uris_from_highwire_pdf.return_value = [{'uri': ''}]
+        document_uris_from_highwire_doi.return_value = [{'uri': ''}]
+        document_uris_from_dc.return_value = [{'uri': ''}]
+        document_uri_self_claim.return_value = {'uri': ''}
+
+        document_uris = parse_document_claims.document_uris_from_data(
+            {}, 'http://example.com/claimant')
+
+        assert document_uris == []
+
+    def test_it_ignores_whitespace_only_self_claim_uris(
+            self, document_uri_self_claim):
+        for uri in (' ', '\n ', '\r\n', ' \t'):
+            document_uri_self_claim.return_value = {'uri': uri}
+
+            document_uris = parse_document_claims.document_uris_from_data(
+                {}, 'http://example.com/claimant')
+
+            assert document_uris == []
+
+    def test_it_ignores_whitespace_only_uris(self,
+                                             document_uris_from_links,
+                                             document_uris_from_highwire_pdf,
+                                             document_uris_from_highwire_doi,
+                                             document_uris_from_dc,
+                                             document_uri_self_claim):
+        uris = [' ', '\n ', '\r\n', ' \t']
+        document_uris_from_links.return_value = [{'uri': u} for u in uris]
+        document_uris_from_highwire_pdf.return_value = [{'uri': u} for u in uris]
+        document_uris_from_highwire_doi.return_value = [{'uri': u} for u in uris]
+        document_uris_from_dc.return_value = [{'uri': u} for u in uris]
+
+        document_uris = parse_document_claims.document_uris_from_data(
+            {}, 'http://example.com/claimant')
+
+        assert document_uris == [document_uri_self_claim.return_value]
+
+    def test_it_strips_whitespace_from_uris(self,
+                                            document_uris_from_links,
+                                            document_uris_from_highwire_pdf,
+                                            document_uris_from_highwire_doi,
+                                            document_uris_from_dc,
+                                            document_uri_self_claim,
+                                            matchers):
+        document_uris_from_links.return_value = [
+            {'uri': ' from_link_1'},
+            {'uri': 'from_link_2 '},
+            {'uri': ' from_link_3 '}
+        ]
+        document_uris_from_highwire_pdf.return_value = [
+            {'uri': ' highwire_1'},
+            {'uri': 'highwire_2 '},
+            {'uri': ' highwire_3 '}
+        ]
+        document_uris_from_highwire_doi.return_value = [
+            {'uri': ' doi_1'},
+            {'uri': 'doi_2 '},
+            {'uri': ' doi_3 '}
+        ]
+        document_uris_from_dc.return_value = [
+            {'uri': ' dc_1'},
+            {'uri': 'dc_2 '},
+            {'uri': ' dc_3 '}
+        ]
+
+        document_uris = parse_document_claims.document_uris_from_data(
+            {}, 'http://example.com/claimant')
+
+        assert document_uris == matchers.unordered_list([
+            {'uri': 'from_link_1'},
+            {'uri': 'from_link_2'},
+            {'uri': 'from_link_3'},
+            {'uri': 'highwire_1'},
+            {'uri': 'highwire_2'},
+            {'uri': 'highwire_3'},
+            {'uri': 'doi_1'},
+            {'uri': 'doi_2'},
+            {'uri': 'doi_3'},
+            {'uri': 'dc_1'},
+            {'uri': 'dc_2'},
+            {'uri': 'dc_3'},
+            document_uri_self_claim.return_value
+        ])
+
+    def test_it_strips_whitespace_from_self_claim_uris(
+            self, document_uris_from_links, document_uri_self_claim):
+        for uri in (' self_claim', 'self_claim ', ' self_claim '):
+            document_uris_from_links.return_value = []
+            document_uri_self_claim.return_value = {'uri': uri}
+
+            document_uris = parse_document_claims.document_uris_from_data(
+                {}, 'http://example.com/claimant')
+
+            assert document_uris == [{'uri': uri.strip()}]
 
     @pytest.fixture
     def document_uris_from_dc(self, patch):
