@@ -4,8 +4,7 @@
 
 import logging
 
-from pyramid.authentication import (RemoteUserAuthenticationPolicy,
-                                    SessionAuthenticationPolicy)
+from pyramid.authentication import RemoteUserAuthenticationPolicy
 import pyramid_authsanity
 from pyramid_multiauth import MultiAuthenticationPolicy
 
@@ -22,24 +21,12 @@ log = logging.getLogger(__name__)
 
 PROXY_POLICY = RemoteUserAuthenticationPolicy(environ_key='HTTP_X_FORWARDED_USER',
                                               callback=groupfinder)
-# We currently have three ways of authenticating a user:
-# 1. session - finds the authenticated userid in the session
-# 2. ticket - finds the authenticated user in the database through auth tickets
-# 3. token - finds the authenticated user in the database through tokens (API)
-#
-# We are currently in the progress of migrating the session policy to the ticket
-# policy, for non-API requests. This is only possible by having both of them
-# running for a certain time period. When a requests comes in that does not
-# authenticate with the ticket policy, but does with the session policy, then
-# we migrate this session over to use the new auth tickets.
-SESSION_POLICY = SessionAuthenticationPolicy(callback=groupfinder)
 TICKET_POLICY = pyramid_authsanity.AuthServicePolicy()
 TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
 
 DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
-                                      fallback_policy=TICKET_POLICY,
-                                      migration_policy=SESSION_POLICY)
-WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, TICKET_POLICY, SESSION_POLICY])
+                                      fallback_policy=TICKET_POLICY)
+WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, TICKET_POLICY])
 
 
 def auth_domain(request):

@@ -28,10 +28,8 @@ class TestAuthenticationPolicy(object):
     def policy(self):
         self.api_policy = mock.Mock(spec_set=list(IAuthenticationPolicy))
         self.fallback_policy = mock.Mock(spec_set=list(IAuthenticationPolicy))
-        self.migration_policy = mock.Mock(spec_set=list(IAuthenticationPolicy))
         self.policy = AuthenticationPolicy(api_policy=self.api_policy,
-                                           fallback_policy=self.fallback_policy,
-                                           migration_policy=self.migration_policy)
+                                           fallback_policy=self.fallback_policy)
 
         self.fallback_policy.remember.return_value = [('Cookie', 'auth=foobar')]
 
@@ -54,31 +52,6 @@ class TestAuthenticationPolicy(object):
 
         self.fallback_policy.authenticated_userid.assert_called_once_with(nonapi_request)
         assert result == self.fallback_policy.authenticated_userid.return_value
-
-    def test_authenticated_userid_uses_migration_policy_when_fallback_returns_none(self, nonapi_request):
-        self.fallback_policy.authenticated_userid.return_value = None
-
-        result = self.policy.authenticated_userid(nonapi_request)
-
-        self.migration_policy.authenticated_userid.assert_called_once_with(nonapi_request)
-        assert result == self.migration_policy.authenticated_userid.return_value
-
-    def test_authenticated_userid_remembers_value_from_migration_policy_in_fallback_policy(self, nonapi_request):
-        self.fallback_policy.authenticated_userid.return_value = None
-
-        self.policy.authenticated_userid(nonapi_request)
-
-        self.fallback_policy.remember.assert_called_once_with(
-            nonapi_request,
-            self.migration_policy.authenticated_userid.return_value)
-
-    def test_authenticated_userid_sets_cookie_when_migrating(self, nonapi_request):
-        self.fallback_policy.authenticated_userid.return_value = None
-
-        self.policy.authenticated_userid(nonapi_request)
-
-        cookies = nonapi_request.response.headers.getall('Cookie')
-        assert 'auth=foobar' in cookies
 
     def test_authenticated_userid_uses_api_policy_for_api_paths(self, api_request):
         result = self.policy.authenticated_userid(api_request)
