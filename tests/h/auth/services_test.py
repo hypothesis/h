@@ -104,6 +104,13 @@ class TestAuthTicketService(object):
         assert ticket.user_userid == user.userid
         assert ticket.expires == utcnow + services.TICKET_TTL
 
+    def test_add_ticket_caches_the_userid(self, svc, db_session, user):
+        svc.usersvc.fetch.return_value = user
+
+        assert svc._userid is None
+        svc.add_ticket(user.userid, 'the-ticket-id')
+        assert svc._userid == user.userid
+
     @pytest.mark.usefixtures('ticket')
     def test_remove_ticket_skips_deleting_when_id_is_None(self, svc, db_session):
         assert db_session.query(models.AuthTicket).count() == 1

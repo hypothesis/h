@@ -94,6 +94,9 @@ class AuthTicketService(object):
                             user_userid=user.userid,
                             expires=(datetime.datetime.utcnow() + TICKET_TTL))
         self.session.add(ticket)
+        # We cache the new userid, this will allow us to migrate the old
+        # session policy to this new ticket policy.
+        self._userid = user.userid
 
     def remove_ticket(self, ticket_id):
         """Delete a ticket by id from the database."""
