@@ -36,16 +36,10 @@ node {
     rabbit = docker.image('rabbitmq').run('-P')
     brokerUrl = "amqp://guest:guest@${hostIp}:${containerPort(rabbit, 5672)}//"
 
-    redis = docker.image('redis').run('-P')
-    redisHost = hostIp
-    redisPort = containerPort(redis, 6379)
-
     try {
         // Run our Python tests inside the built container
         img.inside("-u root " +
                    "-e BROKER_URL=${brokerUrl} " +
-                   "-e REDIS_HOST=${redisHost} " +
-                   "-e REDIS_PORT=${redisPort} " +
                    "-e ELASTICSEARCH_HOST=${elasticsearchHost} " +
                    "-e TEST_DATABASE_URL=${databaseUrl}") {
             // Test dependencies
@@ -58,7 +52,6 @@ node {
             sh 'cd /var/lib/hypothesis && tox -e functional'
         }
     } finally {
-        redis.stop()
         rabbit.stop()
         elasticsearch.stop()
         postgres.stop()
