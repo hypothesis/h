@@ -36,13 +36,10 @@
   border-bottom: 1px solid $grey-3;
 
   .env-js-capable & {
-    background-color: $white;
-  }
-
-  .env-js-capable &:hover,
-  .env-js-capable &.is-expanded,
-  .env-js-timeout & {
-    background-color: $grey-2;
+    background-color: white;
+    &:hover, &.is-expanded {
+      background-color: $grey-2;
+    }
   }
 }
 
@@ -93,11 +90,9 @@
 .search-result-bucket__annotation-cards-container {
   display: flex;
   padding-left: 130px;
-  .env-js-capable & {
+
+  &.is-hidden {
     display: none;
-  }
-  .env-js-capable &.is-expanded, .env-js-timeout & {
-    display: flex;
   }
 }
 

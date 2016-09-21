@@ -3,10 +3,6 @@
 /**
  * Upgrade elements on the page with additional functionality
  *
- * `upgradeElements()` provides a hook to test a page without JS enhancements.
- * If `root` lives in a document whose URL contains the query string parameter
- * `nojs=1` then `upgradeElements()` will return immediately.
- *
  * Controllers attached to upgraded elements are accessible via the `controllers`
  * property on the element.
  *

@@ -7,6 +7,13 @@
  * It adds `env-${flag}` classes to a top-level element in the document to
  * indicate support for scripting, touch input etc. These classes can then be
  * used to modify other elements in the page via descendent selectors.
+ *
+ * EnvironmentFlags provides hooks to override the detected set of environment
+ * features via query-string or fragment parameters in the URL:
+ *
+ *  "__env__" -  A semi-colon list of environment flags to enable or disable
+ *               (if prefixed with "no-"). eg. "__env__=touch"
+ *  "nojs=1"  -  Shorthand for "__env__=no-js-capable"
  */
 class EnvironmentFlags {
   /**
