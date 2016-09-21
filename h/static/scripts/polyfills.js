@@ -15,3 +15,7 @@ try {
 } catch (err) {
   require('js-polyfills/url');
 }
+
+// Fetch API
+// https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+require('whatwg-fetch');
