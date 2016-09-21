@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import mock
 import pytest
-from pyramid import httpexceptions
 
 from h import accounts
 
@@ -20,20 +19,6 @@ class TestAuthenticatedUser(object):
 
         user_service.fetch.assert_called_once_with('userid')
 
-    def test_invalidates_session_if_user_does_not_exist(self,
-                                                        pyramid_config,
-                                                        pyramid_request):
-        """It should log the user out if they no longer exist in the db."""
-        pyramid_request.session.invalidate = mock.Mock()
-        pyramid_config.testing_securitypolicy('userid')
-
-        try:
-            accounts.authenticated_user(pyramid_request)
-        except Exception:
-            pass
-
-        pyramid_request.session.invalidate.assert_called_once_with()
-
     def test_does_not_invalidate_session_if_not_authenticated(self,
                                                               pyramid_config,
                                                               pyramid_request):
@@ -50,18 +35,6 @@ class TestAuthenticatedUser(object):
         accounts.authenticated_user(pyramid_request)
 
         assert not pyramid_request.session.invalidate.called
-
-    def test_redirects_if_user_does_not_exist(self,
-                                              pyramid_config,
-                                              pyramid_request):
-        pyramid_request.url = '/the/page/that/I/was/on'
-        pyramid_config.testing_securitypolicy('userid')
-
-        with pytest.raises(httpexceptions.HTTPFound) as exc:
-            accounts.authenticated_user(pyramid_request)
-
-        assert exc.value.location == '/the/page/that/I/was/on', (
-            'It should redirect to the same page that was requested')
 
     def test_returns_user(self,
                           factories,
