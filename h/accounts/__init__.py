@@ -36,18 +36,6 @@ def authenticated_user(request):
     user_service = request.find_service(name='user')
     user = user_service.fetch(request.authenticated_userid)
 
-    # If the authenticated user doesn't exist in the db then log them out.
-    # This happens when we delete a user account but the user still has a
-    # valid session for that account (because we don't invalidate sessions
-    # when we delete user accounts).
-    #
-    # FIXME: switch to authentication ticket based sessions so that we *can*
-    # invalidate sessions when deleting users. Throwing a 302 in the middle of
-    # an arbitrary request is NOT safe (e.g. POST requests).
-    if request.authenticated_userid and not user:
-        request.session.invalidate()
-        raise httpexceptions.HTTPFound(location=request.url)
-
     return user
 
 
