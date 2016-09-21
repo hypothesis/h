@@ -28,7 +28,11 @@ import click
               default=True,
               help="Whether or not to run the gulp watch process "
                    "(default: --assets).")
-def devserver(https, web, ws, worker, assets):
+@click.option('--beat/--no-beat',
+              default=True,
+              help="Wheter or not to run the celery beat process "
+                   "(default: --beat).")
+def devserver(https, web, ws, worker, assets, beat):
     """
     Run a development server.
 
@@ -82,6 +86,9 @@ def devserver(https, web, ws, worker, assets):
 
     if worker:
         m.add_process('worker', 'hypothesis --dev celery worker --autoreload')
+
+    if beat:
+        m.add_process('beat', 'hypothesis --dev celery beat')
 
     if assets:
         m.add_process('assets', 'gulp watch')
