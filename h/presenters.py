@@ -3,10 +3,14 @@ from __future__ import unicode_literals
 import urlparse
 import urllib2
 from dateutil import parser
+from pyramid import i18n
 
 import jinja2
 
 from h._compat import text_type
+
+
+_ = i18n.TranslationStringFactory(__package__)
 
 
 def _format_document_link(href, title, link_text, host_or_filename):
@@ -362,6 +366,11 @@ class DocumentHTMLPresenter(object):
             return jinja2.escape(urllib2.unquote(self.filename))
         else:
             return jinja2.escape(urllib2.unquote(self.uri))
+
+    @property
+    def title_or_untitled(self):
+        """Return this document's title or 'Untitled Document'."""
+        return self.document.title or  _("Untitled Document")
 
     @property
     def uri(self):

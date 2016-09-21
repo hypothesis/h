@@ -370,6 +370,20 @@ class TestDocumentHTMLPresenter(object):
 
         assert self.presenter(title=None).title_or_filename_or_uri == ""
 
+    title_or_untitled_fixtures = pytest.mark.usefixtures('_')
+
+    @title_or_untitled_fixtures
+    def test_title_or_untitled_returns_title(self):
+        assert self.presenter(title="Test Title").title_or_untitled == (
+            "Test Title")
+
+    @title_or_untitled_fixtures
+    def test_title_or_untitled_returns_untitled_if_no_title(self, _):
+        title_or_untitled = self.presenter(title=None).title_or_untitled
+
+        _.assert_called_once_with("Untitled Document")
+        assert title_or_untitled == _.return_value
+
     def presenter(self, **kwargs):
         return presenters.DocumentHTMLPresenter(mock.Mock(**kwargs))
 
@@ -378,6 +392,10 @@ class TestDocumentHTMLPresenter(object):
         return patch('h.presenters.DocumentHTMLPresenter.filename',
                      autospec=None,
                      new_callable=mock.PropertyMock)
+
+    @pytest.fixture
+    def _(self, patch):
+        return patch('h.presenters._')
 
     @pytest.fixture
     def title_or_filename_or_uri(self, patch):
