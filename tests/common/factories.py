@@ -184,6 +184,13 @@ class Annotation(ModelFactory):
         )
 
 
+class Activation(ModelFactory):
+
+    class Meta(object):
+        model = models.Activation
+        force_flush = True
+
+
 class User(factory.Factory):
 
     """A factory class that generates h.models.User objects.
@@ -195,6 +202,11 @@ class User(factory.Factory):
 
     class Meta(object):
         model = models.User
+
+    class Params(object):
+        inactive = factory.Trait(
+            activation=factory.SubFactory(Activation),
+        )
 
     authority = 'example.com'
     username = factory.Faker('user_name')

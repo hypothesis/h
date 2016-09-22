@@ -189,6 +189,7 @@ class TestAuthTicketServiceFactory(object):
 
 @pytest.fixture
 def user_service(db_session, pyramid_config):
-    service = mock.Mock(spec=UserService(db_session))
+    service = mock.Mock(spec=UserService(default_authority='example.com',
+                                         session=db_session))
     pyramid_config.register_service(service, name='user')
     return service
