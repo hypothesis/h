@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "authority": {
+      "type": "string",
+      "format": "hostname"
+    },
+    "username": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 30,
+      "pattern": "^[A-Za-z0-9._]+$"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    }
+  },
+  "required": [
+    "authority",
+    "username",
+    "email"
+  ]
+}
