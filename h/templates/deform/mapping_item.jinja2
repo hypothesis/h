@@ -19,7 +19,8 @@
 <div class="{{ field_class }}
             js-form-input
             {% if field.error %}{{ field_error_state_class }}{% endif %}
-            {% if show_char_counter %} js-character-limit {%- endif %}"
+            {% if show_char_counter %} js-character-limit {%- endif %}
+            {% if field.schema.hide_until_form_active %} is-hidden-when-loading {%- endif %}"
      {%- if field.description -%}
      title="{{ _(field.description) }}"
      {% endif %}
