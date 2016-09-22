@@ -77,6 +77,13 @@ class TestUserSignupService(object):
 
         assert isinstance(user.activation, Activation)
 
+    def test_signup_does_not_create_activation_for_user_when_activation_not_required(self, svc):
+        user = svc.signup(require_activation=False,
+                          username='foo',
+                          email='foo@bar.com')
+
+        assert user.activation is None
+
     def test_signup_sets_default_authority(self, svc):
         user = svc.signup(username='foo', email='foo@bar.com')
 
@@ -103,6 +110,13 @@ class TestUserSignupService(object):
                                                   'My subject',
                                                   'Text',
                                                   '<p>HTML</p>')
+
+    def test_signup_does_not_send_email_when_activation_not_required(self, mailer, svc):
+        svc.signup(require_activation=False,
+                   username='foo',
+                   email='foo@bar.com')
+
+        assert not mailer.send.delay.called
 
     def test_signup_creates_reply_notification_subscription(self, db_session, svc):
         svc.signup(username='foo', email='foo@bar.com')
