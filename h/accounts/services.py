@@ -16,12 +16,14 @@ class UserService(object):
 
     """A service for retrieving and performing common operations on users."""
 
-    def __init__(self, session):
+    def __init__(self, default_authority, session):
         """
         Create a new user service.
 
+        :param default_authority: the default authority for users
         :param session: the SQLAlchemy session object
         """
+        self.default_authority = default_authority
         self.session = session
 
         # Local cache of fetched users.
@@ -114,7 +116,8 @@ class UserSignupService(object):
 
 def user_service_factory(context, request):
     """Return a UserService instance for the passed context and request."""
-    return UserService(session=request.db)
+    return UserService(default_authority=text_type(request.auth_domain),
+                       session=request.db)
 
 
 def user_signup_service_factory(context, request):

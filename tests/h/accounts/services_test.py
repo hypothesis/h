@@ -45,7 +45,7 @@ class TestUserService(object):
 
     @pytest.fixture
     def svc(self, db_session):
-        return UserService(session=db_session)
+        return UserService(default_authority='example.com', session=db_session)
 
     @pytest.fixture
     def users(self, db_session, factories):
@@ -147,6 +147,11 @@ class TestUserServiceFactory(object):
         svc = user_service_factory(None, pyramid_request)
 
         assert isinstance(svc, UserService)
+
+    def test_provides_request_auth_domain_as_default_authority(self, pyramid_request):
+        svc = user_service_factory(None, pyramid_request)
+
+        assert svc.default_authority == pyramid_request.auth_domain
 
     def test_provides_request_db_as_session(self, pyramid_request):
         svc = user_service_factory(None, pyramid_request)
