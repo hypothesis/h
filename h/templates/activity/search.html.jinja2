@@ -5,12 +5,14 @@
 {# Card displaying statistics about a bucket of annotations. #}
 {% macro search_bucket_stats(bucket) %}
 <div class="search-bucket-stats">
-  <div class="search-bucket-stats__key">
-    Address
-  </div>
-  <div class="search-bucket-stats__val">
-    {{ bucket.uri }}
-  </div>
+  {% if bucket.uri %}
+    <div class="search-bucket-stats__key">
+        Address
+    </div>
+    <div class="search-bucket-stats__val">
+        {{ bucket.uri }}
+    </div>
+  {% endif %}
   {% if bucket.tags %}
     <div class="search-bucket-stats__key">
       Tags
