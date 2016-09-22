@@ -5,19 +5,23 @@ var proxyquire = require('proxyquire');
 var { noCallThru } = require('../util');
 var upgradeElements = require('../../base/upgrade-elements');
 
-// Simplified version of forms rendered by deform on the server
-var TEMPLATE = `
+// Simplified version of form fields rendered by deform on the server in
+// mapping_item.jinja2
+function fieldTemplate(field) {
+  var hideAttr = field.hide ? 'data-hide-until-active="true"' : '';
+  var typeAttr = field.type ? `type="${field.type}"`;
+
+  return `<div class="js-form-input" data-ref="${field.fieldRef}" ${hideAttr}>
+    <input id="deformField" data-ref="formInput ${field.ref}" ${typeAttr} value="${field.value}">
+  </div>`;
+}
+
+// Simplified version of forms rendered by deform on the server in form.jinja2
+function formTemplate(fields) {
+  return `
   <form class="js-form">
     <div data-ref="formBackdrop"></div>
-    <div class="js-form-input">
-      <input id="deformField" data-ref="formInput firstInput" value="original value">
-    </div>
-    <div class="js-form-input">
-      <input id="deformField2" data-ref="formInput secondInput" value="original value 2">
-    </div>
-    <div class="js-form-input">
-      <input id="deformField3" data-ref="formInput checkboxInput" type="checkbox">
-    </div>
+    ${fields.map(fieldTemplate)}
     <div data-ref="formActions">
       <button data-ref="testSaveBtn">Save</button>
       <button data-ref="cancelBtn">Cancel</button>
@@ -27,22 +31,34 @@ var TEMPLATE = `
     </div>
   </form>
 `;
+}
 
-var UPDATED_FORM = TEMPLATE.replace('js-form', 'js-form is-updated');
+var FORM_TEMPLATE = formTemplate([{
+  ref: 'firstInput',
+  value: 'original value',
+},{
+  ref: 'secondInput',
+  value: 'original value 2',
+},{
+  ref: 'checkboxInput',
+  type: 'checkbox',
+}]);
+
+var UPDATED_FORM = FORM_TEMPLATE.replace('js-form', 'js-form is-updated');
 
 describe('FormController', function () {
   var ctrl;
   var fakeSubmitForm;
   var reloadSpy;
 
-  beforeEach(function () {
+  function initForm(template) {
     fakeSubmitForm = sinon.stub();
     var FormController = proxyquire('../../controllers/form-controller', {
       '../util/submit-form': noCallThru(fakeSubmitForm),
     });
 
     var container = document.createElement('div');
-    container.innerHTML = TEMPLATE;
+    container.innerHTML = template;
     upgradeElements(container, {
       '.js-form': FormController,
     });
@@ -62,6 +78,11 @@ describe('FormController', function () {
 
     // Add element to document so that it can be focused
     document.body.appendChild(ctrl.element);
+  }
+
+  beforeEach(function () {
+    // Setup a form with the default template
+    initForm(FORM_TEMPLATE);
   });
 
   afterEach(function () {
@@ -286,6 +307,61 @@ describe('FormController', function () {
 
     it('automatically submits the form', function () {
       assert.calledWith(fakeSubmitForm, ctrl.element);
+    });
+  });
+
+  context('when the form is a "Change Email"-type form', function () {
+    beforeEach(function () {
+      // Setup a form like the 'Change Email' or 'Change Password' form which
+      // has a set of fields that are initially visible which trigger editing
+      // plus a set of hidden fields that are shown once the user starts editing
+      // the form
+      initForm(formTemplate([{
+        fieldRef: 'emailContainer',
+        ref: 'emailInput',
+        value: 'jim@smith.com',
+      },{
+        fieldRef: 'confirmPasswordContainer',
+        ref: 'confirmPasswordInput',
+        value: '',
+        hide: true, // Only show this field when the user focuses the form
+      }]));
+    });
+
+    function isConfirmFieldHidden() {
+      return ctrl.refs.confirmPasswordContainer.classList.contains('is-hidden');
+    }
+
+    it('hides initially-hidden fields', function () {
+      assert.isTrue(isConfirmFieldHidden());
+    });
+
+    it('shows initially-hidden fields when the email input is focused', function () {
+      ctrl.refs.emailInput.focus();
+      assert.isFalse(isConfirmFieldHidden());
+    });
+
+    it('hides initially-hidden fields when no input is focused', function () {
+      var externalControl = document.createElement('input');
+      document.body.appendChild(externalControl);
+
+      ctrl.refs.emailInput.focus();
+      externalControl.focus();
+
+      assert.isTrue(isConfirmFieldHidden());
+      externalControl.remove();
+    });
+
+    it('shows all fields in an editing state when any is focused', function () {
+      var containers = [ctrl.refs.emailContainer, ctrl.refs.confirmPasswordContainer];
+      var inputs = [ctrl.refs.emailInput, ctrl.refs.confirmPasswordInput];
+
+      inputs.forEach(input => {
+        input.focus();
+
+        var editing = containers.filter(el => el.classList.contains('is-editing'));
+        assert.equal(editing.length, 2);
+      });
     });
   });
 });

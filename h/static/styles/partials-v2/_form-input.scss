@@ -33,6 +33,10 @@
     z-index: $zindex-modal-content;
   }
 
+  .form-input.is-hidden {
+    display: none;
+  }
+
   .form-input.is-error {
     & > .form-input__label {
       color: $brand;
@@ -169,8 +173,11 @@
     border-width: 2px;
   }
 
+  // Show a thick border around focused input fields. When inline editing is
+  // enabled, we may also show the field as focused if its Save/Cancel buttons
+  // are focused but the <input> itself is not
   .form-input__input:focus,
-  .form-input.is-editing > .form-input__input {
+  .form-input.is-focused > .form-input__input {
     @include thick-border;
     border-color: $grey-6;
   }

@@ -11,6 +11,14 @@ function shouldAutosubmit(type) {
 }
 
 /**
+ * Return true if a form field should be hidden until the user starts
+ * editing the form.
+ */
+function isHiddenField(el) {
+  return el.getAttribute('data-hide-until-active');
+}
+
+/**
  * A controller which adds inline editing functionality to forms
  */
 class FormController extends Controller {
@@ -36,7 +44,10 @@ class FormController extends Controller {
         return;
       }
 
-      this.setState({editingField: field});
+      this.setState({
+        editingFields: this._editSet(field),
+        focusedField: field,
+      });
     }, true /* capture - focus does not bubble */);
 
     this.on('change', event => {
@@ -78,9 +89,10 @@ class FormController extends Controller {
       // True if the user has made changes to the field they are currently
       // editing
       dirty: false,
-      // The group of elements (container, input) for the form field currently
-      // being edited
-      editingField: null,
+      // The set of fields currently being edited
+      editingFields: [],
+      // The field within the `editingFields` set that was last focused
+      focusedField: null,
       // Markup for the original form. Used to revert the form to its original
       // state when the user cancels editing
       originalForm: this.element.outerHTML,
@@ -92,29 +104,39 @@ class FormController extends Controller {
   }
 
   update(state, prevState) {
-    if (prevState.editingField &&
-        state.editingField !== prevState.editingField) {
-      setElementState(prevState.editingField.container, {editing: false});
+    this._fields.forEach(field =>
+      setElementState(field.container, {
+        editing: state.editingFields.includes(field),
+        focused: field === state.focusedField,
+        hidden: isHiddenField(field.container) &&
+                !state.editingFields.includes(field),
+      })
+    );
+
+    // In forms that support editing a single field at a time, show the
+    // Save/Cancel buttons below the field that we are currently editing.
+    //
+    // In the current forms that support editing multiple fields at once,
+    // we always display the Save/Cancel buttons in their default position
+    if (state.editingFields.length === 1) {
+      state.editingFields[0].container.parentElement.insertBefore(
+        this.refs.formActions,
+        state.editingFields[0].container.nextSibling
+      );
     }
 
-    if (state.editingField) {
-      // Display Save/Cancel buttons below the field that we are currently
-      // editing
-      state.editingField.container.parentElement.insertBefore(
-        this.refs.formActions,
-        state.editingField.container.nextSibling
-      );
-      setElementState(state.editingField.container, {editing: true});
-
+    if (state.editingFields.length > 0 &&
+        state.editingFields !== prevState.editingFields) {
       this._trapFocus();
     }
 
-    var isEditing = !!state.editingField;
+    var isEditing = state.editingFields.length > 0;
     setElementState(this.element, {editing: isEditing});
     setElementState(this.refs.formActions, {
       hidden: !isEditing || shouldAutosubmit(state.editingField.input.type),
       saving: state.saving,
     });
+
     setElementState(this.refs.formSubmitError, {
       visible: state.submitError.length > 0,
     });
@@ -135,8 +157,8 @@ class FormController extends Controller {
     var originalForm = this.state.originalForm;
 
     var activeInputId;
-    if (this.state.editingField) {
-      activeInputId = this.state.editingField.input.id;
+    if (this.state.editingFields.length > 0) {
+      activeInputId = this.state.editingFields[0].input.id;
     }
 
     this.setState({saving: true});
@@ -182,11 +204,12 @@ class FormController extends Controller {
    * depending upon the field which is currently focused.
    */
   _focusGroup() {
-    if (!this.state.editingField) {
+    var fieldContainers = this.state.editingFields.map(field => field.container);
+    if (fieldContainers.length === 0) {
       return null;
     }
 
-    return [this.refs.formActions, this.state.editingField.container];
+    return [this.refs.formActions].concat(fieldContainers);
   }
 
   _trapFocus() {
@@ -195,16 +218,32 @@ class FormController extends Controller {
       // otherwise let the user focus another field in the form or move focus
       // outside the form entirely.
       if (this.state.dirty) {
-        return this.state.editingField.input;
+        return this.state.editingFields[0].input;
       }
 
       // If the user tabs out of the form, clear the editing state
       if (!this.element.contains(newFocusedElement)) {
-        this.setState({editingField: null});
+        this.setState({editingFields: []});
       }
 
       return null;
     });
+  }
+
+  /**
+   * Return the set of fields that should be displayed in the editing state
+   * when a given field is selected.
+   */
+  _editSet(field) {
+    // Currently we have two types of form:
+    // 1. Forms which only edit one field at a time
+    // 2. Forms with hidden fields (eg. the Change Email, Change Password forms)
+    //    which should enable editing all fields when any is focused
+    if (this._fields.some(field => isHiddenField(field.container))) {
+      return this._fields;
+    } else {
+      return [field];
+    }
   }
 
   /**
