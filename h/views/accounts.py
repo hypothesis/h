@@ -473,8 +473,13 @@ class AccountController(object):
     def __init__(self, request):
         self.request = request
 
+        save_email_label = _('Change email address')
+        save_password_label = _('Change password')
+
         if request.feature('activity_pages'):
             email_schema = schemas.EmailChangeSchema().bind(request=request)
+            save_email_label = _('Save')
+            save_password_label = _('Save')
         else:
             email_schema = schemas.LegacyEmailChangeSchema().bind(request=request)
 
@@ -486,13 +491,15 @@ class AccountController(object):
 
         self.forms = {
             'email': request.create_form(email_schema,
-                                         buttons=(_('Change email address'),),
+                                         buttons=(save_email_label,),
                                          formid='email',
-                                         counter=counter),
+                                         counter=counter,
+                                         use_inline_editing=True),
             'password': request.create_form(password_schema,
-                                            buttons=(_('Change password'),),
+                                            buttons=(save_password_label,),
                                             formid='password',
-                                            counter=counter),
+                                            counter=counter,
+                                            use_inline_editing=True),
         }
 
     @view_config(request_method='GET')

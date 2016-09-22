@@ -23,6 +23,9 @@
      {%- if field.description -%}
      title="{{ _(field.description) }}"
      {% endif %}
+     {%- if field.schema.hide_until_form_active -%}
+     data-hide-until-active="true"
+     {% endif %}
      id="item-{{ field.oid }}">
 {% endif -%}
 

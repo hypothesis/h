@@ -295,7 +295,8 @@ class LegacyEmailChangeSchema(CSRFSchema):
 class EmailChangeSchema(CSRFSchema):
     email = email_node(title=_('Email address'))
     # No validators: all validation is done on the email field
-    password = password_node(title=_('Confirm password'))
+    password = password_node(title=_('Confirm password'),
+                             hide_until_form_active=True)
 
     def validator(self, node, value):
         super(EmailChangeSchema, self).validator(node, value)
@@ -312,13 +313,15 @@ class EmailChangeSchema(CSRFSchema):
 
 class PasswordChangeSchema(CSRFSchema):
     password = password_node(title=_('Current password'))
-    new_password = password_node(title=_('New password'))
+    new_password = password_node(title=_('New password'),
+                                 hide_until_form_active=True)
     # No validators: all validation is done on the new_password field and we
     # merely assert that the confirmation field is the same.
     new_password_confirm = colander.SchemaNode(
         colander.String(),
         title=_('Confirm new password'),
-        widget=deform.widget.PasswordWidget())
+        widget=deform.widget.PasswordWidget(),
+        hide_until_form_active=True)
 
     def validator(self, node, value):
         super(PasswordChangeSchema, self).validator(node, value)
