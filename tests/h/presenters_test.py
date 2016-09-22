@@ -364,6 +364,56 @@ class TestDocumentHTMLPresenter(object):
 
         assert self.presenter(title=None).title == ""
 
+    def test_web_uri_returns_document_web_uri(self):
+        """
+        It just returns Document.web_uri for non-via web_uris.
+
+        If Document.web_uri is a string that doesn't start with
+        https://via.hypothes.is/ then DocumentHTMLPresenter.web_uri should
+        just return Document.web_uri.
+
+        """
+        non_via_uri = 'http://example.com/page'
+
+        assert self.presenter(web_uri=non_via_uri).web_uri == non_via_uri
+
+    def test_web_uri_returns_None_if_document_web_uri_is_None(self):
+        assert self.presenter(web_uri=None).web_uri is None
+
+    @pytest.mark.parametrize('via_url', (
+                             'https://via.hypothes.is',
+                             'https://via.hypothes.is/'))
+    def test_web_uri_returns_via_front_page(self, via_url):
+        """It doesn't strip https://via.hypothes.is if that's the entire URL."""
+        assert self.presenter(web_uri=via_url).web_uri == via_url
+
+    def test_web_uri_does_not_strip_http_via(self):
+        """
+        It doesn't strip non-SSL http://via.hypothes.is.
+
+        Since http://via.hypothes.is redirects to https://via.hypothes.is
+        anyway, and we don't currently have any http://via.hypothes.is
+        URIs in our production DB, DocumentHTMLPresenter.web_uri only strips
+        https://via.hypothes.is/ and ignores http://via.hypothes.is/.
+        """
+        uri = 'http://via.hypothes.is/http://example.com/page'
+
+        assert self.presenter(web_uri=uri).web_uri == uri
+
+    @pytest.mark.parametrize('path', ('foo', 'http://example.com'))
+    def test_web_uri_strips_via(self, path):
+        """
+        It strips any https://via.hypothes.is/ prefix from Document.web_uri.
+
+        If Document.web_uri is https://via.hypothes.is/<path>, for any <path>
+        (whether path is a URL or not), DocumentHTMLPresenter.web_uri just
+        returns <path> with the https://via.hypothes.is/ prefix removed.
+
+        """
+        uri = 'https://via.hypothes.is/' + path
+
+        assert self.presenter(web_uri=uri).web_uri == path
+
     def presenter(self, **kwargs):
         return presenters.DocumentHTMLPresenter(mock.Mock(**kwargs))
 
