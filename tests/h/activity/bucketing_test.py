@@ -32,18 +32,17 @@ class timeframe_with(object):  # noqa: N801
             n=len(self.document_buckets))
 
 
-@pytest.mark.usefixtures('factories')
+@pytest.mark.usefixtures('factories', 'presenters')
 class TestDocumentBucket(object):
-    def test_init_sets_the_document_title(self, db_session, document):
-        title_meta = factories.DocumentMeta(type="title",
-                                            value=["The Document Title"],
-                                            document=document)
-        document.title = 'The Document Title'
-        db_session.add(title_meta)
-        db_session.flush()
-
+    def test_init_sets_the_document_title(self,
+                                          db_session,
+                                          document,
+                                          presenters):
         bucket = bucketing.DocumentBucket(document)
-        assert bucket.title == 'The Document Title'
+
+        presenters.DocumentHTMLPresenter.assert_called_once_with(document)
+        assert bucket.title == (
+            presenters.DocumentHTMLPresenter.return_value.title_or_untitled)
 
     def test_init_uses_the_document_web_uri(self, db_session, document):
         document.web_uri = 'http://example.com'
@@ -185,6 +184,10 @@ class TestDocumentBucket(object):
         db_session.add(document)
         db_session.flush()
         return document
+
+    @pytest.fixture
+    def presenters(self, patch):
+        return patch('h.activity.bucketing.presenters')
 
 
 @pytest.mark.usefixtures('factories', 'utcnow')
