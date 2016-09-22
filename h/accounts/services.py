@@ -12,6 +12,18 @@ from h.emails import signup
 from h.models import Activation, Subscriptions, User
 
 
+class LoginError(Exception):
+    pass
+
+
+class UserNotActivated(LoginError):
+    """Tried to log in to an unactivated user account."""
+
+
+class UserNotKnown(LoginError):
+    """User not found while attempting to log in."""
+
+
 class UserService(object):
 
     """A service for retrieving and performing common operations on users."""
@@ -48,6 +60,37 @@ class UserService(object):
                                    .one_or_none())
 
         return self._cache[userid]
+
+    def login(self, username_or_email, password):
+        """
+        Attempt to login using *username_or_email* and *password*.
+
+        :returns: A user object if login succeeded, None otherwise.
+        :rtype: h.models.User or NoneType
+        :raises UserNotActivated: When the user is not activated.
+        :raises UserNotKnown: When the user cannot be found in the default
+            authority.
+        """
+        filters = {'authority': self.default_authority}
+        if '@' in username_or_email:
+            filters['email'] = username_or_email
+        else:
+            filters['username'] = username_or_email
+
+        user = (self.session.query(User)
+                .filter_by(**filters)
+                .one_or_none())
+
+        if user is None:
+            raise UserNotKnown()
+
+        if not user.is_activated:
+            raise UserNotActivated()
+
+        if user.check_password(password):
+            return user
+
+        return None
 
 
 class UserSignupService(object):
