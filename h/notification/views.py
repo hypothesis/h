@@ -3,7 +3,7 @@
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 
-from h.notification.models import Subscriptions
+from h.models import Subscriptions
 
 
 @view_config(route_name='unsubscribe',
