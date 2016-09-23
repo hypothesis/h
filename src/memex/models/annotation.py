@@ -103,7 +103,7 @@ class Annotation(Base):
 
     document_id = sa.Column(sa.Integer,
                             sa.ForeignKey('document.id'),
-                            nullable=True)
+                            nullable=False)
 
     document = sa.orm.relationship('Document',
                                    secondary='document_uri',
