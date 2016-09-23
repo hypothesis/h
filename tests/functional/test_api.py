@@ -23,11 +23,9 @@ class TestAPI(object):
 
 
 @pytest.fixture
-def annotation(db_session):
-    from h.models import Annotation
-    ann = Annotation(userid='acct:testuser@localhost',
-                     groupid='__world__',
-                     shared=True)
-    db_session.add(ann)
+def annotation(db_session, factories):
+    ann =  factories.Annotation(userid='acct:testuser@localhost',
+                                groupid='__world__',
+                                shared=True)
     db_session.commit()
     return ann
