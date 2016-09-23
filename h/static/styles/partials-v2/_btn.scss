@@ -16,6 +16,14 @@
   white-space: nowrap;
 }
 
+.btn.is-hidden {
+  display: none;
+}
+
+.btn--cancel {
+  background-color: $grey-4;
+}
+
 .btn:hover {
   background-color: $brand;
 }

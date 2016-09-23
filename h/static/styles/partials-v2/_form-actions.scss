@@ -6,10 +6,21 @@
 
 .form-actions {
   margin-top: 20px;
+  margin-bottom: 30px;
 
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
+  position: relative;
+  z-index: $zindex-modal-content;
+
+  &.is-hidden {
+    display: none;
+  }
+}
+
+.form-actions.is-saving {
+  opacity: .5;
 }
 
 .form-actions__message {

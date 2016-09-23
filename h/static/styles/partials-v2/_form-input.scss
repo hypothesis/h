@@ -29,6 +29,10 @@
     background-color: $white;
   }
 
+  .form-input.is-editing {
+    z-index: $zindex-modal-content;
+  }
+
   .form-input.is-error {
     & > .form-input__label {
       color: $brand;
@@ -36,6 +40,10 @@
 
     & > .form-input__input {
       color: $brand;
+    }
+
+    & > .form-input__error-list {
+      display: initial;
     }
   }
 
@@ -161,7 +169,8 @@
     border-width: 2px;
   }
 
-  .form-input__input:focus {
+  .form-input__input:focus,
+  .form-input.is-editing > .form-input__input {
     @include thick-border;
     border-color: $grey-6;
   }
@@ -178,7 +187,12 @@
     box-shadow: none;
   }
 
-  // Validation error message
+  // Validation error messages
+  .form-input__error-list {
+    // The error list is only shown when the input is in an `error` state
+    display: none;
+  }
+
   .form-input__error-item {
     max-width: $validation-message-width;
     position: absolute;
