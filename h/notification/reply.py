@@ -4,7 +4,7 @@ from collections import namedtuple
 import logging
 
 from memex import storage
-from h.notification.models import Subscriptions
+from h.models import Subscriptions
 
 log = logging.getLogger(__name__)
 

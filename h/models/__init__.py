@@ -20,7 +20,6 @@ key to. So for convenience the test module can instead just do
 
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
-from h.notification import models as notification_models
 
 from h.models.activation import Activation
 from h.models.auth_client import AuthClient
@@ -29,6 +28,7 @@ from h.models.blocklist import Blocklist
 from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort
 from h.models.group import Group
+from h.models.subscriptions import Subscriptions
 from h.models.token import Token
 from h.models.user import User
 
@@ -48,9 +48,6 @@ __all__ = (
     'Token',
     'User',
 )
-
-
-Subscriptions = notification_models.Subscriptions
 
 
 def includeme(_):
