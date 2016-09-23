@@ -63,7 +63,7 @@ def test_submit_create_group_form_with_xhr_returns_plain_text(app):
 
 @pytest.fixture
 def user(db_session, factories):
-    user = factories.User(password='pass')
+    user = factories.User(authority='localhost', password='pass')
     db_session.add(user)
     db_session.commit()
     return user

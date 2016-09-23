@@ -6,6 +6,7 @@ from pyramid.exceptions import BadCSRFToken
 from itsdangerous import BadData, SignatureExpired
 
 from h.accounts import schemas
+from h.accounts.services import UserNotActivated, UserNotKnown, UserService
 
 
 class TestUnblacklistedUsername(object):
@@ -122,13 +123,42 @@ class TestRegisterSchema(object):
                                                   "underscores.")
 
 
-@pytest.mark.usefixtures('user_model')
+@pytest.mark.usefixtures('user_service')
 class TestLoginSchema(object):
 
-    def test_it_is_invalid_with_bad_csrf(self, pyramid_request, user_model):
+    def test_passes_username_and_password_to_user_service(self,
+                                                          factories,
+                                                          pyramid_csrf_request,
+                                                          user_service):
+        user = factories.User(username='jeannie')
+        user_service.login.return_value = user
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+
+        schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
+
+        user_service.login.assert_called_once_with(username_or_email='jeannie',
+                                                   password='cake')
+
+    def test_it_returns_user_when_valid(self,
+                                        factories,
+                                        pyramid_csrf_request,
+                                        user_service):
+        user = factories.User(username='jeannie')
+        user_service.login.return_value = user
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+
+        result = schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
+
+        assert result['user'] is user
+
+    def test_invalid_with_bad_csrf(self, pyramid_request, user_service):
         schema = schemas.LoginSchema().bind(request=pyramid_request)
-        user = user_model.get_by_username.return_value
-        user.is_activated = True
 
         with pytest.raises(BadCSRFToken):
             schema.deserialize({
@@ -136,68 +166,43 @@ class TestLoginSchema(object):
                 'password': 'cake',
             })
 
-    def test_it_is_invalid_with_bad_username(self,
-                                             pyramid_csrf_request,
-                                             user_model):
-        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
-        user_model.get_by_username.return_value = None
-        user_model.get_by_email.return_value = None
-
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({
-                'username': 'jeannie',
-                'password': 'cake',
-            })
-
-        assert 'username' in exc.value.asdict()
-
-    def test_it_is_invalid_with_bad_password(self,
-                                             pyramid_csrf_request,
-                                             user_model):
-        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
-        user = user_model.get_by_username.return_value
-        user.check_password.return_value = False
-
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({
-                'username': 'jeannie',
-                'password': 'cake',
-            })
-
-        assert 'password' in exc.value.asdict()
-
-    def test_it_returns_user_when_valid(self,
+    def test_invalid_with_inactive_user(self,
                                         pyramid_csrf_request,
-                                        user_model):
-        user = user_model.get_by_username.return_value
-        user.is_activated = True
-
+                                        user_service):
         schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+        user_service.login.side_effect = UserNotActivated()
 
-        assert 'user' in schema.deserialize({
-            'username': 'jeannie',
-            'password': 'cake',
-        })
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'username': 'jeannie',
+                'password': 'cake',
+            })
+        errors = exc.value.asdict()
 
-    def test_it_is_valid_with_email_instead_of_username(self,
-                                                        pyramid_csrf_request,
-                                                        user_model):
-        """If get_by_username() returns None it should try get_by_email()."""
+        assert 'username' in errors
+        assert 'activate your account' in errors['username']
+
+    def test_invalid_with_unknown_user(self,
+                                       pyramid_csrf_request,
+                                       user_service):
         schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
-        user_model.get_by_username.return_value = None
-        user = user_model.get_by_email.return_value
-        user.is_activated = True
+        user_service.login.side_effect = UserNotKnown()
 
-        assert 'user' in schema.deserialize({
-            'username': 'jeannie',
-            'password': 'cake',
-        })
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'username': 'jeannie',
+                'password': 'cake',
+            })
+        errors = exc.value.asdict()
 
-    def test_it_is_invalid_with_inactive_user_account(self,
-                                                      pyramid_csrf_request,
-                                                      user_model):
-        user = user_model.get_by_username.return_value
-        user.is_activated = False
+        assert 'username' in errors
+        assert 'does not exist' in errors['username']
+
+
+    def test_invalid_with_bad_password(self,
+                                       pyramid_csrf_request,
+                                       user_service):
+        user_service.login.return_value = None
         schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
 
         with pytest.raises(colander.Invalid) as exc:
@@ -205,9 +210,10 @@ class TestLoginSchema(object):
                 'username': 'jeannie',
                 'password': 'cake',
             })
+        errors = exc.value.asdict()
 
-        assert ("Please check your email and open the link to activate your account." in
-                exc.value.asdict().get('username', ''))
+        assert 'password' in errors
+        assert 'Wrong password' in errors['password']
 
 
 @pytest.mark.usefixtures('user_model')
@@ -591,3 +597,12 @@ def dummy_node(pyramid_request):
 @pytest.fixture
 def user_model(patch):
     return patch('h.accounts.schemas.models.User')
+
+
+@pytest.fixture
+def user_service(db_session, pyramid_config):
+    service = Mock(spec_set=UserService(default_authority='example.com',
+                                        session=db_session))
+    service.login.return_value = None
+    pyramid_config.register_service(service, name='user')
+    return service

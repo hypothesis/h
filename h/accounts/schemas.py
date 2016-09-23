@@ -8,6 +8,8 @@ from pyramid.session import check_csrf_token
 from itsdangerous import BadData, SignatureExpired
 
 from h import i18n, models, validators
+from h.accounts import util
+from h.accounts.services import UserNotActivated, UserNotKnown
 from h.models.user import (
     EMAIL_MAX_LENGTH,
     PASSWORD_MIN_LENGTH,
@@ -15,7 +17,6 @@ from h.models.user import (
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
 )
-from h.accounts import util
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
@@ -142,25 +143,24 @@ class LoginSchema(CSRFSchema):
         username = value.get('username')
         password = value.get('password')
 
-        user = models.User.get_by_username(request.db, username)
-        if user is None:
-            user = models.User.get_by_email(request.db, username)
+        user_service = request.find_service(name='user')
 
-        if user is None:
+        try:
+            user = user_service.login(username_or_email=username,
+                                      password=password)
+        except UserNotKnown:
             err = colander.Invalid(node)
             err['username'] = _('User does not exist.')
             raise err
-
-        if not user.check_password(password):
+        except UserNotActivated:
             err = colander.Invalid(node)
-            err['password'] = _('Wrong password.')
+            err['username'] = _("Please check your email and open the link "
+                                "to activate your account.")
             raise err
 
-        if not user.is_activated:
+        if user is None:
             err = colander.Invalid(node)
-            err['username'] = _(
-                "Please check your email and open the link to activate your "
-                "account.")
+            err['password'] = _('Wrong password.')
             raise err
 
         value['user'] = user
