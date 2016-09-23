@@ -180,7 +180,8 @@ class TestCreateAnnotation(object):
 
     def test_it_updates_the_document_metadata_from_the_annotation(self,
                                                                   models,
-                                                                  pyramid_request):
+                                                                  pyramid_request,
+                                                                  datetime):
         annotation_data = self.annotation_data()
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
@@ -191,9 +192,11 @@ class TestCreateAnnotation(object):
 
         models.update_document_metadata.assert_called_once_with(
             pyramid_request.db,
-            models.Annotation.return_value,
+            models.Annotation.return_value.target_uri,
             mock.sentinel.document_meta_dicts,
-            mock.sentinel.document_uri_dicts
+            mock.sentinel.document_uri_dicts,
+            created=datetime.utcnow(),
+            updated=datetime.utcnow(),
         )
 
     def test_it_returns_the_annotation(self, models, pyramid_request):
@@ -322,7 +325,8 @@ class TestUpdateAnnotation(object):
             self,
             annotation_data,
             session,
-            models):
+            models,
+            datetime):
         annotation = session.query.return_value.get.return_value
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
@@ -335,9 +339,10 @@ class TestUpdateAnnotation(object):
 
         models.update_document_metadata.assert_called_once_with(
             session,
-            annotation,
+            annotation.target_uri,
             mock.sentinel.document_meta_dicts,
-            mock.sentinel.document_uri_dicts
+            mock.sentinel.document_uri_dicts,
+            updated=datetime.utcnow()
         )
 
     def test_it_returns_the_annotation(self, annotation_data, session):
@@ -378,10 +383,6 @@ class TestUpdateAnnotation(object):
             'extra': {},
         }
 
-    @pytest.fixture
-    def datetime(self, patch):
-        return patch('memex.storage.datetime')
-
 
 class TestDeleteAnnotation(object):
 
@@ -421,3 +422,8 @@ def session(db_session):
     session = mock.Mock(spec=db_session)
     session.query.return_value.get.return_value.extra = {}
     return session
+
+
+@pytest.fixture
+def datetime(patch):
+    return patch('memex.storage.datetime')

@@ -87,6 +87,8 @@ def create_annotation(request, data):
     :returns: the created annotation
     :rtype: dict
     """
+    created = updated = datetime.utcnow()
+
     document_uri_dicts = data['document']['document_uri_dicts']
     document_meta_dicts = data['document']['document_meta_dicts']
     del data['document']
@@ -116,14 +118,17 @@ def create_annotation(request, data):
                                             'of!'))
 
     annotation = models.Annotation(**data)
+    annotation.created = created
+    annotation.updated = updated
     request.db.add(annotation)
 
-    # We need to flush the db here so that annotation.created and
-    # annotation.updated get created.
-    request.db.flush()
-
     models.update_document_metadata(
-        request.db, annotation, document_meta_dicts, document_uri_dicts)
+        request.db,
+        annotation.target_uri,
+        document_meta_dicts,
+        document_uri_dicts,
+        created=created,
+        updated=updated)
 
     return annotation
 
@@ -149,12 +154,14 @@ def update_annotation(session, id_, data):
     :rtype: memex.models.Annotation
 
     """
+    updated = datetime.utcnow()
+
     # Remove any 'document' field first so that we don't try to save it on the
     # annotation object.
     document = data.pop('document', None)
 
     annotation = session.query(models.Annotation).get(id_)
-    annotation.updated = datetime.utcnow()
+    annotation.updated = updated
 
     annotation.extra.update(data.pop('extra', {}))
 
@@ -165,7 +172,11 @@ def update_annotation(session, id_, data):
         document_uri_dicts = document['document_uri_dicts']
         document_meta_dicts = document['document_meta_dicts']
         models.update_document_metadata(
-            session, annotation, document_meta_dicts, document_uri_dicts)
+            session,
+            annotation.target_uri,
+            document_meta_dicts,
+            document_uri_dicts,
+            updated=updated)
 
     return annotation
 

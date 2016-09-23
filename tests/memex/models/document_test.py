@@ -680,9 +680,11 @@ class TestUpdateDocumentMetadata(object):
         ]
 
         document.update_document_metadata(session,
-                                          annotation,
+                                          annotation.target_uri,
                                           [],
-                                          document_uri_dicts)
+                                          document_uri_dicts,
+                                          annotation.created,
+                                          annotation.updated)
 
         Document.find_or_create_by_uris.assert_called_once_with(
             session,
@@ -706,7 +708,12 @@ class TestUpdateDocumentMetadata(object):
         Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=3))
 
-        document.update_document_metadata(session, annotation, [], [])
+        document.update_document_metadata(session,
+                                          annotation.target_uri,
+                                          [],
+                                          [],
+                                          annotation.created,
+                                          annotation.updated)
 
         merge_documents.assert_called_once_with(
             session,
@@ -734,7 +741,12 @@ class TestUpdateDocumentMetadata(object):
         Document.find_or_create_by_uris.return_value.first.return_value = (
             document_)
 
-        document.update_document_metadata(session, annotation, [], [])
+        document.update_document_metadata(session,
+                                          annotation.target_uri,
+                                          [],
+                                          [],
+                                          annotation.created,
+                                          annotation.updated)
 
         assert document_.updated == annotation.updated
 
@@ -768,9 +780,11 @@ class TestUpdateDocumentMetadata(object):
         ]
 
         document.update_document_metadata(session,
-                                          annotation,
+                                          annotation.target_uri,
                                           [],
-                                          document_uri_dicts)
+                                          document_uri_dicts,
+                                          annotation.created,
+                                          annotation.updated)
 
         assert create_or_update_document_uri.call_count == 3
         for doc_uri_dict in document_uri_dicts:
@@ -810,9 +824,11 @@ class TestUpdateDocumentMetadata(object):
         ]
 
         document.update_document_metadata(session,
-                                          annotation,
+                                          annotation.target_uri,
                                           document_meta_dicts,
-                                          [])
+                                          [],
+                                          annotation.created,
+                                          annotation.updated)
 
         assert create_or_update_document_meta.call_count == 3
         for document_meta_dict in document_meta_dicts:
