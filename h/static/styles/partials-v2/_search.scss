@@ -46,6 +46,7 @@
 .search-result-bucket__header {
   display: flex;
   flex-direction: row;
+  align-items: center;
   padding: 10px 10px;
 
   cursor: pointer;
@@ -62,7 +63,6 @@
 .search-result-bucket__title {
   font-weight: bold;
   flex-grow: 1;
-  margin-bottom: 10px;
 }
 
 .search-result-bucket__annotations-count {
@@ -72,11 +72,17 @@
 
 .search-result-bucket__annotations-count-container {
   width: 30px;
-  padding: 5px 0px;
   background-color: $grey-2;
   text-align: center;
   border-radius: 2px;
   float: right;
+}
+
+.search-result-bucket__domain,
+.search-result-bucket__title,
+.search-result-bucket__annotations-count-container {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .search-result-bucket__content {
