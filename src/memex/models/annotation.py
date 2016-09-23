@@ -101,6 +101,10 @@ class Annotation(Base):
                       server_default=sa.func.jsonb('{}'),
                       nullable=False)
 
+    document_id = sa.Column(sa.Integer,
+                            sa.ForeignKey('document.id'),
+                            nullable=True)
+
     document = sa.orm.relationship('Document',
                                    secondary='document_uri',
                                    primaryjoin='Annotation.target_uri_normalized == DocumentURI.uri_normalized',
