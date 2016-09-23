@@ -199,6 +199,18 @@ class TestCreateAnnotation(object):
             updated=datetime.utcnow(),
         )
 
+    def test_it_sets_the_annotations_document_id(self,
+                                                 models,
+                                                 pyramid_request):
+        annotation_data = self.annotation_data()
+
+        document = mock.Mock()
+        models.update_document_metadata.return_value = document
+
+        ann = storage.create_annotation(pyramid_request, annotation_data)
+
+        assert ann.document_id == document.id
+
     def test_it_returns_the_annotation(self, models, pyramid_request):
         annotation = storage.create_annotation(pyramid_request,
                                                self.annotation_data())

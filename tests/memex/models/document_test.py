@@ -840,6 +840,22 @@ class TestUpdateDocumentMetadata(object):
                 **document_meta_dict
             )
 
+    def test_it_returns_a_document(self,
+                                   annotation,
+                                   create_or_update_document_meta,
+                                   Document,
+                                   session):
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
+
+        result = document.update_document_metadata(session,
+                                                   annotation.target_uri,
+                                                   [],
+                                                   [],
+                                                   annotation.created,
+                                                   annotation.updated)
+
+        assert result == Document.find_or_create_by_uris.return_value.first.return_value
+
     @pytest.fixture
     def annotation(self):
         return mock.Mock(spec=models.Annotation())

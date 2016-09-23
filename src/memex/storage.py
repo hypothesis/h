@@ -120,15 +120,18 @@ def create_annotation(request, data):
     annotation = models.Annotation(**data)
     annotation.created = created
     annotation.updated = updated
-    request.db.add(annotation)
 
-    models.update_document_metadata(
+    document = models.update_document_metadata(
         request.db,
         annotation.target_uri,
         document_meta_dicts,
         document_uri_dicts,
         created=created,
         updated=updated)
+    # FIXME: use `document` setter once the relationship changed to use the document_id column
+    annotation.document_id = document.id
+
+    request.db.add(annotation)
 
     return annotation
 

@@ -433,6 +433,8 @@ def update_document_metadata(session,
     :param updated: Date and time value for the new document records
     :type updated: datetime.datetime
 
+    :returns: the matched or created document
+    :rtype: memex.models.Document
     """
     if created is None:
         created = datetime.utcnow()
@@ -470,3 +472,5 @@ def update_document_metadata(session,
             created=created,
             updated=updated,
             **document_meta_dict)
+
+    return document
