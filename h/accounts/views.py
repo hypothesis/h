@@ -713,19 +713,4 @@ def dismiss_sidebar_tutorial(request):
 
 
 def includeme(config):
-    config.add_route('login', '/login')
-    config.add_route('logout', '/logout')
-    config.add_route('signup', '/signup')
-    config.add_route('activate', '/activate/{id}/{code}')
-    config.add_route('forgot_password', '/forgot-password')
-    config.add_route('account_reset', '/account/reset')
-    config.add_route('account_reset_with_code', '/account/reset/{code}')
-    config.add_route('account', '/account/settings')
-    config.add_route('account_profile', '/account/profile')
-    config.add_route(
-        'account_notifications', '/account/settings/notifications')
-    config.add_route('account_developer', '/account/developer')
-    config.add_route('claim_account_legacy', '/claim_account/{token}')
-    config.add_route('dismiss_sidebar_tutorial',
-                     '/app/dismiss_sidebar_tutorial')
     config.scan(__name__)

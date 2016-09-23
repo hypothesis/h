@@ -186,8 +186,9 @@ def create_app(global_config, **settings):
     # We have to include nipsa to provide the NIPSA service
     config.include('h.nipsa')
 
-    # And finally we add static routes which can be used for URL generation
-    # within the websocket server.
+    # And finally we add routes. Static routes are not resolvable by HTTP
+    # clients, but can be used for URL generation within the websocket server.
+    config.add_route('ws', '/ws')
     config.add_route('annotation', '/a/{id}', static=True)
     config.add_route('api.annotation', '/api/annotations/{id}', static=True)
 
