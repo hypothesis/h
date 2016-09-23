@@ -4,6 +4,11 @@ var Controller = require('../base/controller');
 var { findRefs, setElementState } = require('../util/dom');
 var submitForm = require('../util/submit-form');
 
+function shouldAutosubmit(type) {
+  var autosubmitTypes = ['checkbox', 'radio'];
+  return autosubmitTypes.indexOf(type) !== -1;
+}
+
 /**
  * A controller which adds inline editing functionality to forms
  */
@@ -42,7 +47,19 @@ class FormController extends Controller {
       this.setState({editingField: field});
     }, true /* capture - focus does not bubble */);
 
-    this.on('input', () => {
+    this.on('change', event => {
+      if (shouldAutosubmit(event.target.type)) {
+        this.submit();
+      }
+    });
+
+    this.on('input', event => {
+      // Some but not all browsers deliver an `input` event for radio/checkbox
+      // inputs. Since we auto-submit when such inputs change, don't mark the
+      // field as dirty.
+      if (shouldAutosubmit(event.target.type)) {
+        return;
+      }
       this.setState({dirty: true});
     });
 
@@ -117,7 +134,7 @@ class FormController extends Controller {
     var isEditing = !!state.editingField;
     setElementState(this.element, {editing: isEditing});
     setElementState(this.refs.formActions, {
-      hidden: !isEditing,
+      hidden: !isEditing || shouldAutosubmit(state.editingField.input.type),
       saving: state.saving,
     });
     setElementState(this.refs.formSubmitError, {
