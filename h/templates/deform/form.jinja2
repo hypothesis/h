@@ -22,10 +22,12 @@
 
   <div class="form-actions {% if field.use_inline_editing %} is-hidden-when-loading {% endif %}"
        data-ref="formActions">
+    {% if feature('activity_pages') %}
     <div class="form__submit-error" data-ref="formSubmitError">
       <span>{% trans %}Unable to save changes: {% endtrans %}</span>
       <span data-ref="formSubmitErrorMessage"></span>
     </div>
+    {% endif %}
     <div class="{{ form_message_class }}">
       {%- if field.footer %}{{ field.footer | safe }}{% endif -%}
     </div>
@@ -45,7 +47,9 @@
                 >
         {{ _(button.title) }}
         </button>
+        {% if feature('activity_pages') %}
         <button class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
+        {% endif %}
       {% endfor -%}
     </div>
   </div>
