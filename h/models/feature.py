@@ -36,9 +36,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    'selection_tabs': "Show the tabs to select between annotations and notes?",
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
