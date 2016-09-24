@@ -15,9 +15,12 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column(
-        'user',
-        sa.Column('sidebar_tutorial_dismissed', sa.Boolean(), nullable=True))
+    try:
+        op.add_column(
+            'user',
+            sa.Column('sidebar_tutorial_dismissed', sa.Boolean(), nullable=True))
+    except Exception:
+        pass
 
 def downgrade():
     op.drop_column('user', 'sidebar_tutorial_dismissed')
