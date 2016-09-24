@@ -5,20 +5,29 @@
 {% set form_buttons_class = 'form-actions-buttons' %}
 {% set form_message_class = 'form-actions-message' %}
 {% endif %}
-
 <form id="{{ field.formid }}"
       action="{{ field.action }}"
       method="{{ field.method }}"
       enctype="multipart/form-data"
       accept-charset="utf-8"
-      class="form {% if field.css_class %}{{ field.css_class }} {% endif %}">
+      class="form {{ field.css_class or '' }}
+             {%- if field.use_inline_editing %} js-form {% endif %}">
   <input type="hidden" name="__formid__" value="{{ field.formid }}" />
+
+  <div class="form__backdrop" data-ref="formBackdrop"></div>
 
   {%- for f in field.children -%}
     {{ field.renderer(field.widget.item_template, field=f, cstruct=cstruct.get(f.name, null)) }}
   {% endfor -%}
 
-  <div class="form-actions">
+  <div class="form-actions {% if field.use_inline_editing %} is-hidden-when-loading {% endif %}"
+       data-ref="formActions">
+    {% if feature('activity_pages') %}
+    <div class="form__submit-error" data-ref="formSubmitError">
+      <span>{% trans %}Unable to save changes: {% endtrans %}</span>
+      <span data-ref="formSubmitErrorMessage"></span>
+    </div>
+    {% endif %}
     <div class="{{ form_message_class }}">
       {%- if field.footer %}{{ field.footer | safe }}{% endif -%}
     </div>
@@ -30,7 +39,7 @@
         <button id="{{ field.formid + button.name }}"
                 name="{{ button.name }}"
                 type="{{ button.type }}"
-                class="btn{% if button.css_class %} {{ button.css_class }}{% endif %}"
+                class="form-actions__btn btn{% if button.css_class %} {{ button.css_class }}{% endif %}"
                 value="{{ _(button.value) }}"
                 {%- if button.disabled -%}
                 disabled="disabled"
@@ -38,6 +47,9 @@
                 >
         {{ _(button.title) }}
         </button>
+        {% if feature('activity_pages') %}
+        <button class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
+        {% endif %}
       {% endfor -%}
     </div>
   </div>

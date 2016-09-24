@@ -174,7 +174,6 @@ def search(request):
             )
 def options(annotation, request):
     '''returns a preflight CORS header response'''
-    print 'FUCKSHITFUCK'
     response = Response()
     response.headers.update({
         'Access-Control-Allow-Origin': '*',

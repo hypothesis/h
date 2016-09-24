@@ -21,6 +21,7 @@ passlib
 psycogreen
 psycopg2
 pyramid
+pyramid_authsanity
 pyramid_layout
 pyramid-jinja2
 pyramid-multiauth

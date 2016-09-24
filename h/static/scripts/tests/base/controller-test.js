@@ -3,8 +3,8 @@
 var Controller = require('../../base/controller');
 
 class TestController extends Controller {
-  constructor(element) {
-    super(element);
+  constructor(element, options) {
+    super(element, options);
     this.update = sinon.stub();
   }
 }

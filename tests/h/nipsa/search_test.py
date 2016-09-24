@@ -21,11 +21,25 @@ def test_nipsa_filter_users_own_annotations_are_not_filtered():
         filter_["bool"]["should"])
 
 
+def test_nipsa_filter_coerces_userid_to_lowercase():
+    filter_ = search.nipsa_filter(userid="DonkeyNose")
+
+    assert {'term': {'user': 'donkeynose'}} in (
+        filter_["bool"]["should"])
+
+
 def test_nipsad_annotations_filters_by_userid():
     query = search.nipsad_annotations("test_userid")
 
     must_clauses = query["query"]["filtered"]["filter"]["bool"]["must"]
     assert {"term": {"user": "test_userid"}} in must_clauses
+
+
+def test_nipsad_annotations_filters_by_lowercased_userid():
+    query = search.nipsad_annotations("SomethingWithUppercase")
+
+    must_clauses = query["query"]["filtered"]["filter"]["bool"]["must"]
+    assert {"term": {"user": "somethingwithuppercase"}} in must_clauses
 
 
 def test_not_nipsad_annotatopns_filters_by_userid():

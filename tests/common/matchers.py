@@ -118,4 +118,9 @@ class unordered_list(object):
         self.items = items
 
     def __eq__(self, other):
-        return len(self.items) == len(other) and set(self.items) == set(other)
+        if len(self.items) != len(other):
+            return False
+        for item in self.items:
+            if item not in other:
+                return False
+        return True

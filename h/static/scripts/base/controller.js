@@ -1,28 +1,13 @@
 'use strict';
 
-/**
- * Search the DOM tree starting at `el` and return a map of "data-ref" attribute
- * values to elements.
- *
- * Multiple controllers may need to refer to the same element, so `data-ref`
- * supports a space-separated list of reference names.
+var { findRefs } = require('../util/dom');
+
+/*
+ * @typedef {Object} ControllerOptions
+ * @property {Function} [reload] - A function that replaces the content of
+ *           the current element with new markup (eg. returned by an XHR request
+ *           to the server) and returns the new root Element.
  */
-function findRefs(el) {
-  var map = {};
-
-  var descendantsWithRef = el.querySelectorAll('[data-ref]');
-  for (var i=0; i < descendantsWithRef.length; i++) {
-    // Use `Element#getAttribute` rather than `Element#dataset` to support IE 10
-    // and avoid https://bugs.webkit.org/show_bug.cgi?id=161454
-    var refEl = descendantsWithRef[i];
-    var refs = (refEl.getAttribute('data-ref') || '').split(' ');
-    refs.forEach(function (ref) {
-      map[ref] = refEl;
-    });
-  }
-
-  return map;
-}
 
 /**
  * Base class for controllers that upgrade elements with additional
@@ -44,8 +29,11 @@ class Controller {
    * Initialize the controller.
    *
    * @param {Element} element - The DOM Element to upgrade
+   * @param {ControllerOptions} [options] - Configuration options for the
+   *        controller. Subclasses extend this interface to provide config
+   *        specific to that type of controller.
    */
-  constructor(element) {
+  constructor(element, options = {}) {
     if (!element.controllers) {
       element.controllers = [this];
     } else {
@@ -54,6 +42,7 @@ class Controller {
 
     this.state = {};
     this.element = element;
+    this.options = options;
     this.refs = findRefs(element);
   }
 
@@ -77,6 +66,15 @@ class Controller {
    */
   forceUpdate() {
     this.update(this.state, this.state);
+  }
+
+  /**
+   * Listen for events dispatched to the root element passed to the controller.
+   *
+   * This a convenience wrapper around `this.element.addEventListener`.
+   */
+  on(event, listener, useCapture) {
+    this.element.addEventListener(event, listener, useCapture);
   }
 }
 

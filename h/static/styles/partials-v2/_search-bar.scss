@@ -29,7 +29,7 @@
   height: 14px;
   left: 7px;
   position: absolute;
-  top: 7px;
+  top: 4px;
 
   color: $grey-5;
 }
@@ -49,6 +49,7 @@
   padding: 20px 0 0 0;
   position: absolute;
   width: 100%;
+  z-index: $zindex-dropdown-menu;
 }
 
 .search-bar__dropdown-menu-header {
@@ -79,4 +80,8 @@
 
 .search-bar__dropdown-menu-container.is-open {
   display: block;
+}
+
+.search-bar__dropdown-menu-item.is-hidden {
+  display: none;
 }

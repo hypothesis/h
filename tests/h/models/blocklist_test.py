@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h.badge import models
+from h import models
 
 
 def test_is_blocked(db_session):

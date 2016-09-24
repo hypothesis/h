@@ -14,6 +14,21 @@ FakeUser = namedtuple('FakeUser', ['admin', 'staff', 'groups'])
 FakeGroup = namedtuple('FakeGroup', ['pubid'])
 
 
+class TestGroupfinder(object):
+    def test_it_fetches_the_user(self, pyramid_request, user_service):
+        util.groupfinder('acct:bob@example.org', pyramid_request)
+        user_service.fetch.assert_called_once_with('acct:bob@example.org')
+
+    def test_it_returns_principals_for_user(self,
+                                            pyramid_request,
+                                            user_service,
+                                            principals_for_user):
+        result = util.groupfinder('acct:bob@example.org', pyramid_request)
+
+        principals_for_user.assert_called_once_with(user_service.fetch.return_value)
+        assert result == principals_for_user.return_value
+
+
 @pytest.mark.parametrize('user,principals', (
     # User isn't found in the database: they're not authenticated at all
     (None, None),
@@ -36,10 +51,8 @@ FakeGroup = namedtuple('FakeGroup', ['pubid'])
     (FakeUser(admin=True, staff=True, groups=[FakeGroup('donkeys')]),
      ['group:donkeys', role.Admin, role.Staff]),
 ))
-def test_groupfinder(user, principals, pyramid_request, user_service):
-    user_service.fetch.return_value = user
-
-    result = util.groupfinder('acct:jiji@hypothes.is', pyramid_request)
+def test_principals_for_user(user, principals):
+    result = util.principals_for_user(user)
 
     if principals is None:
         assert result is None
@@ -75,3 +88,7 @@ def user_service(pyramid_config):
     service.fetch.return_value = None
     pyramid_config.register_service(service, name='user')
     return service
+
+@pytest.fixture
+def principals_for_user(patch):
+    return patch('h.auth.util.principals_for_user')

@@ -3,6 +3,7 @@
 import datetime
 
 import jwt
+import mock
 
 import pytest
 from hypothesis import strategies as st
@@ -10,6 +11,28 @@ from hypothesis import assume, given
 
 from h import models
 from h.auth import tokens
+
+
+class TestToken(object):
+
+    def test_token_with_no_expiry_is_valid(self):
+        token = tokens.Token(mock.Mock(
+            expires=None, userid='acct:foo@example.com'))
+
+        assert token.is_valid()
+
+    def test_token_with_future_expiry_is_valid(self):
+        token = tokens.Token(mock.Mock(
+            userid='acct:foo@example.com', expires=_seconds_from_now(1800)))
+
+        assert token.is_valid()
+
+    def test_token_with_past_expiry_is_not_valid(self):
+        token = tokens.Token(mock.Mock(
+            userid='acct:foo@example.com', expires=_seconds_from_now(-1800)))
+
+        assert not token.is_valid()
+
 
 VALID_TOKEN_EXAMPLES = [
     # Valid
@@ -149,7 +172,8 @@ class TestAuthToken(object):
 
         result = tokens.auth_token(pyramid_request)
 
-        assert result == token
+        assert result.expires == token.expires
+        assert result.userid == token.userid
 
     def test_returns_none_when_no_authz_header(self, pyramid_request, token):
         result = tokens.auth_token(pyramid_request)

@@ -10,20 +10,20 @@ def includeme(config):
 
     config.add_route('group_edit',
                      '/{pubid}/edit',
-                     factory='h.groups.models:GroupFactory',
+                     factory='h.models.group:GroupFactory',
                      traverse='/{pubid}')
 
     config.add_route('group_leave',
                      '/{pubid}/leave',
-                     factory='h.groups.models:GroupFactory',
+                     factory='h.models.group:GroupFactory',
                      traverse='/{pubid}')
 
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route('group_read',
                      '/{pubid}/{slug:[^/]*}',
-                     factory='h.groups.models:GroupFactory',
+                     factory='h.models.group:GroupFactory',
                      traverse='/{pubid}')
     config.add_route('group_read_noslug',
                      '/{pubid}',
-                     factory='h.groups.models:GroupFactory',
+                     factory='h.models.group:GroupFactory',
                      traverse='/{pubid}')

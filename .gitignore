@@ -25,5 +25,7 @@ node_modules/
 *.pyo
 
 *.log
+celerybeat-schedule
+celerybeat.pid
 
 .venv/

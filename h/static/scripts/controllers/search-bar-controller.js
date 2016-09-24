@@ -32,7 +32,7 @@ class SearchBarController extends Controller {
     };
 
     var selectFacet = facet => {
-      this._input.value = this._input.value + facet;
+      this._input.value = facet;
 
       closeDropdown();
 
@@ -41,41 +41,100 @@ class SearchBarController extends Controller {
       }.bind(this), 0);
     };
 
-    var getPreviousSiblingElement = element => {
+    var isHidden = element => {
+      return element &&
+        (element.nodeType !== 1 ||
+          !element.classList ||
+          element.classList.contains('is-hidden'));
+    };
+
+    var getPreviousVisibleSiblingElement = element => {
       if (!element) {
         return null;
       }
 
       do {
         element = element.previousSibling;
-      } while (element && element.nodeType != 1);
-
+      } while (isHidden(element));
       return element;
     };
 
-    var getNextSiblingElement = element => {
+    var getNextVisibleSiblingElement = element => {
       if (!element) {
         return null;
       }
 
       do {
         element = element.nextSibling;
-      } while (element && element.nodeType != 1);
+      } while (isHidden(element));
 
       return element;
     };
 
+    var showAllDropdownItems = () => {
+      this._dropdownItems.forEach(function(dropdownItem) {
+        dropdownItem.classList.remove('is-hidden');
+      });
+    };
+
     var closeDropdown = () => {
       clearActiveDropdownItem();
+      showAllDropdownItems();
       this.setState({open: false});
       this._input.removeEventListener('keydown', setupListenerKeys,
         true /*capture*/);
     };
 
     var openDropdown = () => {
+      clearActiveDropdownItem();
+
       this.setState({open: true});
+
       this._input.addEventListener('keydown', setupListenerKeys,
         true /*capture*/);
+    };
+
+    var getVisibleDropdownItems = () => {
+      return this._dropdown.querySelectorAll('li:not(.is-hidden)');
+    };
+
+    /** Show items that match the word and hide ones that don't. */
+    var setVisibleDropdownItems = word => {
+      this._dropdownItems.forEach(function(dropdownItem) {
+        var dropdownItemTitle =
+          dropdownItem.querySelector('[data-ref="searchBarDropdownItemTitle"]').
+            innerHTML.trim();
+        if (dropdownItemTitle.indexOf(word) < 0) {
+          dropdownItem.classList.add('is-hidden');
+        } else {
+          dropdownItem.classList.remove('is-hidden');
+        }
+      });
+    };
+
+    var getTrimmedInputValue = () => {
+      return this._input.value.trim();
+    };
+
+    var maybeOpenOrCloseDropdown = () => {
+      var word = getTrimmedInputValue();
+      var shouldOpenDropdown = true;
+
+      // If there are no visible items that match the word close the dropdown
+      if (getVisibleDropdownItems().length < 1) {
+        shouldOpenDropdown = false;
+      }
+
+      // If the word has a ':' don't show dropdown
+      if (word.indexOf(':') > -1) {
+        shouldOpenDropdown = false;
+      }
+
+      if (shouldOpenDropdown) {
+        openDropdown();
+      } else {
+        closeDropdown();
+      }
     };
 
     var setupListenerKeys = event => {
@@ -85,6 +144,8 @@ class SearchBarController extends Controller {
 
       var activeItem = getActiveDropdownItem();
       var handlers = {};
+
+      var visibleDropdownItems = getVisibleDropdownItems();
 
       var handleEnterKey = event => {
         event.preventDefault();
@@ -98,14 +159,14 @@ class SearchBarController extends Controller {
         }
       };
 
-      var handleUpArrowKey = event => {
-        updateActiveDropdownItem(getPreviousSiblingElement(activeItem) ||
-          this._dropdownItems[this._dropdownItems.length - 1]);
+      var handleUpArrowKey = () => {
+        updateActiveDropdownItem(getPreviousVisibleSiblingElement(activeItem) ||
+          visibleDropdownItems[visibleDropdownItems.length - 1]);
       };
 
-      var handleDownArrowKey = event => {
-        updateActiveDropdownItem(getNextSiblingElement(activeItem) ||
-          this._dropdownItems[0]);
+      var handleDownArrowKey = () => {
+        updateActiveDropdownItem(getNextVisibleSiblingElement(activeItem) ||
+          visibleDropdownItems[0]);
       };
 
       handlers[ENTER_KEY_CODE] = handleEnterKey;
@@ -144,31 +205,32 @@ class SearchBarController extends Controller {
       closeDropdown();
     };
 
-    var handleFocusOnInput = () => {
-      if (this._input.value.trim().length > 0) {
-        closeDropdown();
-      } else {
-        openDropdown();
-      }
+    var handleFocusinOnInput = () => {
+      maybeOpenOrCloseDropdown();
     };
 
-    Object.keys(this._dropdownItems).forEach(function(key) {
-      var item = this._dropdownItems[key];
+    var handleInputOnInput = () => {
+      var word = getTrimmedInputValue();
+      setVisibleDropdownItems(word);
+      maybeOpenOrCloseDropdown();
+    };
+
+    this._dropdownItems.forEach(function(item) {
       if(item && item.addEventListener) {
         item.addEventListener('mouseover', handleHoverOnItem,
           true);
         item.addEventListener('mousedown', handleClickOnItem,
           true);
       }
-    }.bind(this));
+    });
 
     this._dropdown.addEventListener('mousedown', handleClickOnDropdown,
       true /*capture*/);
     this._input.addEventListener('focusout', handleFocusOutside,
       true /*capture*/);
-    this._input.addEventListener('input', handleFocusOnInput,
+    this._input.addEventListener('input', handleInputOnInput,
       true /*capture*/);
-    this._input.addEventListener('focusin', handleFocusOnInput,
+    this._input.addEventListener('focusin', handleFocusinOnInput,
       true /*capture*/);
   }
 

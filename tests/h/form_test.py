@@ -150,6 +150,16 @@ class TestToXHRResponse(object):
 
         assert result == form_.render.return_value
 
+    def test_does_not_show_flash_message_if_xhr(self, pyramid_request):
+        pyramid_request.is_xhr = True
+        form_ = mock.Mock(spec_set=['render'])
+
+        form.to_xhr_response(pyramid_request,
+                             mock.sentinel.non_xhr_result,
+                             form_)
+
+        assert pyramid_request.session.peek_flash('success') == []
+
 
 @pytest.mark.usefixtures('to_xhr_response')
 class TestHandleFormSubmission(object):

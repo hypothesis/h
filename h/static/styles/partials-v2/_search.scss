@@ -36,19 +36,17 @@
   border-bottom: 1px solid $grey-3;
 
   .env-js-capable & {
-    background-color: $white;
-  }
-
-  .env-js-capable &:hover,
-  .env-js-capable &.is-expanded,
-  .env-js-timeout & {
-    background-color: $grey-2;
+    background-color: white;
+    &:hover, &.is-expanded {
+      background-color: $grey-2;
+    }
   }
 }
 
 .search-result-bucket__header {
   display: flex;
   flex-direction: row;
+  align-items: center;
   padding: 10px 10px;
 
   cursor: pointer;
@@ -65,7 +63,7 @@
 .search-result-bucket__title {
   font-weight: bold;
   flex-grow: 1;
-  margin-bottom: 10px;
+  margin-right: 5px;
 }
 
 .search-result-bucket__annotations-count {
@@ -75,11 +73,17 @@
 
 .search-result-bucket__annotations-count-container {
   width: 30px;
-  padding: 5px 0px;
   background-color: $grey-2;
   text-align: center;
   border-radius: 2px;
   float: right;
+}
+
+.search-result-bucket__domain,
+.search-result-bucket__title,
+.search-result-bucket__annotations-count-container {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .search-result-bucket__content {
@@ -93,11 +97,9 @@
 .search-result-bucket__annotation-cards-container {
   display: flex;
   padding-left: 130px;
-  .env-js-capable & {
+
+  &.is-hidden {
     display: none;
-  }
-  .env-js-capable &.is-expanded, .env-js-timeout & {
-    display: flex;
   }
 }
 

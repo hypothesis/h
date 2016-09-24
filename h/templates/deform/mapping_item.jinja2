@@ -2,7 +2,7 @@
 {% set field_class = 'form-input' %}
 {% set field_error_state_class = 'is-error' %}
 {% set field_label_class = 'form-input__label' %}
-{% set field_error_list_class = '' %}
+{% set field_error_list_class = 'form-input__error-list' %}
 {% set field_error_item_class = 'form-input__error-item' %}
 {% set show_char_counter = field.widget.template in ('textinput', 'textarea') and
                            field.widget.max_length %}
@@ -17,6 +17,7 @@
 
 {%- if not field.widget.hidden -%}
 <div class="{{ field_class }}
+            js-form-input
             {% if field.error %}{{ field_error_state_class }}{% endif %}
             {% if show_char_counter %} js-character-limit {%- endif %}"
      {%- if field.description -%}
@@ -34,16 +35,16 @@
          {% endif %}
          for="{{ field.oid }}">
            {{ _(field.title) }}
-           {%- if field.schema.hint and feature('activity_pages') -%}
-             <i class="form-input__hint-icon">
-               {{ svg_icon('info_icon') }}
-             </i>
-           {% endif %}
+    {%- if field.required and field.widget.show_required and feature('activity_pages') -%}
+      <span class="form-input__required">*</span>
+    {% endif -%}
+    {%- if field.schema.hint and feature('activity_pages') -%}
+      <i class="form-input__hint-icon">
+        {{ svg_icon('info_icon') }}
+      </i>
+    {% endif -%}
     {%- if field.schema.hint and not feature('activity_pages') %}
       <span class="form-hint" id="hint-{{ field.oid }}">({{ field.schema.hint }})</span>
-    {% endif -%}
-    {%- if field.required and feature('activity_pages') -%}
-      <span class="form-input__required">*</span>
     {% endif -%}
   </label>
 {% endif -%}

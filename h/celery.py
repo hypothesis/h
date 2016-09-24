@@ -10,6 +10,7 @@ integrates it with the Pyramid application by attaching a bootstrapped fake
 
 from __future__ import absolute_import
 
+from datetime import timedelta
 import logging
 import os
 
@@ -32,6 +33,12 @@ celery.conf.update(
     # store.
     BROKER_URL=os.environ.get('CELERY_BROKER_URL',
         os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
+    CELERYBEAT_SCHEDULE={
+        'delete-expired-authtickets': {
+            'task': 'h.auth.worker.delete_expired_auth_tickets',
+            'schedule': timedelta(hours=1)
+        }
+    },
     CELERY_ACCEPT_CONTENT=['json'],
     # Enable at-least-once delivery mode. This probably isn't actually what we
     # want for all of our queues, but it makes the failure-mode behaviour of
@@ -39,7 +46,7 @@ celery.conf.update(
     CELERY_ACKS_LATE=True,
     CELERY_DISABLE_RATE_LIMITS=True,
     CELERY_IGNORE_RESULT=True,
-    CELERY_IMPORTS=('h.mailer', 'h.nipsa.worker', 'h.indexer', 'h.admin.worker'),
+    CELERY_IMPORTS=('h.mailer', 'h.nipsa.worker', 'h.indexer', 'h.admin.worker', 'h.auth.worker'),
     CELERY_ROUTES={
         'h.indexer.add_annotation': 'indexer',
         'h.indexer.delete_annotation': 'indexer',

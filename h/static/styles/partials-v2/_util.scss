@@ -5,3 +5,14 @@
 .u-stretch {
   flex-grow: 1;
 }
+
+// Utility class that hides an element during initial page load until its
+// containing element is upgraded, or JS load times out.
+//
+// This class is an exception to the rule that is-* state classes can only be
+// used with specific components.
+@include js {
+  .is-hidden-when-loading {
+    display: none !important;
+  }
+}

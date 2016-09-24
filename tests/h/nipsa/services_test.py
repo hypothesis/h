@@ -2,68 +2,59 @@
 
 from __future__ import unicode_literals
 
-import mock
 import pytest
 
-from h.nipsa.models import NipsaUser
 from h.nipsa.services import NipsaService
 from h.nipsa.services import nipsa_factory
 
 
-@pytest.mark.usefixtures('nipsa_users', 'worker')
+@pytest.mark.usefixtures('users', 'worker')
 class TestNipsaService(object):
-    def test_flagged_userids_returns_list_of_userids(self, db_session):
+    def test_flagged_user_returns_list_of_users(self, db_session, users):
         svc = NipsaService(db_session)
 
-        assert set(svc.flagged_userids) == set(['acct:renata@example.com',
-                                                'acct:cecilia@example.com',
-                                                'acct:dominic@example.com'])
+        assert set(svc.flagged_users) == set([users['renata'],
+                                              users['cecilia']])
 
-    def test_is_flagged_returns_true_for_flagged_userids(self, db_session):
+    def test_is_flagged_returns_true_for_flagged_users(self, db_session, users):
         svc = NipsaService(db_session)
 
         assert svc.is_flagged('acct:renata@example.com')
         assert svc.is_flagged('acct:cecilia@example.com')
 
-    def test_is_flagged_returns_false_for_unflagged_userids(self, db_session):
+    def test_is_flagged_returns_false_for_unflagged_users(self, db_session):
         svc = NipsaService(db_session)
 
-        assert not svc.is_flagged('acct:dochia@example.com')
+        assert not svc.is_flagged('acct:dominic@example.com')
         assert not svc.is_flagged('acct:romeo@example.com')
 
-    def test_flag_adds_record_to_database(self, db_session):
+    def test_flag_sets_nipsa_true(self, db_session, users):
         svc = NipsaService(db_session)
 
-        svc.flag('acct:ethan@example.com')
+        svc.flag(users['dominic'])
 
-        user_query = db_session.query(NipsaUser).filter_by(userid='acct:ethan@example.com')
-        assert user_query.one_or_none() is not None
+        assert users['dominic'].nipsa is True
 
-    def test_flag_is_idempotent(self, db_session):
+    def test_flag_triggers_add_nipsa_job(self, db_session, users, worker):
         svc = NipsaService(db_session)
 
-        svc.flag('acct:juno@example.com')
-        svc.flag('acct:juno@example.com')
+        svc.flag(users['dominic'])
 
-        user_query = db_session.query(NipsaUser).filter_by(userid='acct:juno@example.com')
-        assert user_query.one_or_none() is not None
+        worker.add_nipsa.delay.assert_called_once_with('acct:dominic@example.com')
 
-    def test_unflag_removes_record_from_database(self, db_session):
+    def test_unflag_sets_nipsa_false(self, db_session, users):
         svc = NipsaService(db_session)
 
-        svc.unflag('acct:renata@example.com')
+        svc.unflag(users['renata'])
 
-        user_query = db_session.query(NipsaUser).filter_by(userid='acct:renata@example.com')
-        assert user_query.one_or_none() is None
+        assert users['renata'].nipsa is False
 
-    def test_unflag_is_idempotent(self, db_session):
+    def test_unflag_triggers_remove_nipsa_job(self, db_session, users, worker):
         svc = NipsaService(db_session)
 
-        svc.unflag('acct:dominic@example.com')
-        svc.unflag('acct:dominic@example.com')
+        svc.unflag(users['renata'])
 
-        user_query = db_session.query(NipsaUser).filter_by(userid='acct:dominic@example.com')
-        assert user_query.one_or_none() is None
+        worker.remove_nipsa.delay.assert_called_once_with('acct:renata@example.com')
 
 
 def test_nipsa_factory(pyramid_request):
@@ -74,17 +65,15 @@ def test_nipsa_factory(pyramid_request):
 
 
 @pytest.fixture
-def nipsa_users(db_session):
-    flagged_userids = ['acct:renata@example.com',
-                       'acct:cecilia@example.com',
-                       'acct:dominic@example.com']
-    instances = []
-
-    for userid in flagged_userids:
-        instances.append(NipsaUser(userid=userid))
-
-    db_session.add_all(instances)
+def users(db_session, factories):
+    users = {
+        'renata': factories.User(username='renata', nipsa=True),
+        'cecilia': factories.User(username='cecilia', nipsa=True),
+        'dominic': factories.User(username='dominic', nipsa=False),
+    }
+    db_session.add_all([u for u in users.values()])
     db_session.flush()
+    return users
 
 
 @pytest.fixture

@@ -92,6 +92,14 @@ class User(Base):
                       default=False,
                       server_default=sa.sql.expression.false())
 
+    #: Is this user flagged as "Not (Suitable) In Public Site Areas" (AKA
+    #: NIPSA). This flag is used to shadow-ban a user so their annotations
+    #: don't appear to anyone but themselves.
+    nipsa = sa.Column(sa.Boolean,
+                      nullable=False,
+                      default=False,
+                      server_default=sa.sql.expression.false())
+
     sidebar_tutorial_dismissed = sa.Column(sa.Boolean,
                                            default=False,
                                            server_default=(

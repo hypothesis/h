@@ -2,6 +2,39 @@
 // -------------------------
 // Specs: https://goo.gl/pEV9E1
 
+// Backdrop which appears behind forms during inline editing
+.form__backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $zindex-modal-backdrop;
+
+  background-color: $white;
+  opacity: 0.5;
+}
+
+// Error message displayed if AJAX form submission fails for reasons other than
+// a validation error. When there is a validation error, the response is updated
+// markup for the form which replaces the original.
+.form__submit-error {
+  color: $brand;
+  display: none;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 5px;
+
+  &.is-visible {
+    display: block;
+  }
+}
+
+.form.is-editing > .form__backdrop {
+  display: block;
+}
+
 .form-header {
   margin-top: 55px;
   margin-bottom: 30px;

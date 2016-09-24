@@ -543,7 +543,8 @@ class EditProfileController(object):
         self.request = request
         self.schema = schemas.EditProfileSchema().bind(request=self.request)
         self.form = request.create_form(self.schema,
-                                        buttons=(_('Save'),))
+                                        buttons=(_('Save'),),
+                                        use_inline_editing=True)
 
     @view_config(request_method='GET')
     def get(self):
@@ -587,7 +588,8 @@ class NotificationsController(object):
         self.request = request
         self.schema = schemas.NotificationsSchema().bind(request=self.request)
         self.form = request.create_form(self.schema,
-                                        buttons=(_('Save changes'),))
+                                        buttons=(_('Save'),),
+                                        use_inline_editing=True)
 
     @view_config(request_method='GET')
     def get(self):
@@ -597,23 +599,23 @@ class NotificationsController(object):
                                  for n in self._user_notifications()
                                  if n.active)
         })
-        return {'form': self.form.render()}
+        return self._template_data()
 
     @view_config(request_method='POST')
     def post(self):
         """Process notifications POST data."""
-        try:
-            appstruct = self.form.validate(self.request.POST.items())
-        except deform.ValidationFailure:
-            return {'form': self.form.render()}
+        return form.handle_form_submission(
+            self.request,
+            self.form,
+            on_success=self._update_notifications,
+            on_failure=self._template_data)
 
+    def _update_notifications(self, appstruct):
         for n in self._user_notifications():
             n.active = n.type in appstruct['notifications']
 
-        self.request.session.flash(_("Success. We've saved your changes."),
-                                   'success')
-        return httpexceptions.HTTPFound(
-            location=self.request.route_url('account_notifications'))
+    def _template_data(self):
+        return {'form': self.form.render()}
 
     def _user_notifications(self):
         """Fetch the notifications/subscriptions for the logged-in user."""

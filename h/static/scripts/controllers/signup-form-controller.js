@@ -1,14 +1,17 @@
 'use strict';
 
-function SignupFormController(element) {
-  var self = this;
-  var form = element;
+var Controller = require('../base/controller');
 
-  this._submitBtn = element.querySelector('.js-signup-btn')
+class SignupFormController extends Controller {
+  constructor(element) {
+    super(element);
 
-  form.addEventListener('submit', event => {
-    this._submitBtn.disabled = true;
-  });
+    var submitBtn = element.querySelector('.js-signup-btn');
+
+    element.addEventListener('submit', () => {
+      submitBtn.disabled = true;
+    });
+  }
 }
 
 module.exports = SignupFormController;

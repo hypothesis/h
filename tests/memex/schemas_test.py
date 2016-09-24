@@ -81,7 +81,8 @@ class TestCreateUpdateAnnotationSchema(object):
                     'identifier': ['foo', 'bar']
                 },
                 'highwire': {
-                    'doi': ['foo', 'bar']
+                    'doi': ['foo', 'bar'],
+                    'pdf_url': ['foo', 'bar'],
                 },
                 'link': [
                     {
@@ -136,6 +137,12 @@ class TestCreateUpdateAnnotationSchema(object):
         ({'document': {'highwire': {'doi': [False]}}},
          "document.highwire.doi.0: False is not of type 'string'"),
 
+        ({'document': {'highwire': {'pdf_url': False}}},
+         "document.highwire.pdf_url: False is not of type 'array'"),
+
+        ({'document': {'highwire': {'pdf_url': [False]}}},
+         "document.highwire.pdf_url.0: False is not of type 'string'"),
+
         ({'document': {'link': False}},
          "document.link: False is not of type 'array'"),
 
@@ -188,6 +195,10 @@ class TestCreateUpdateAnnotationSchema(object):
         ({'text': False}, "text: False is not of type 'string'"),
 
         ({'uri': False}, "uri: False is not of type 'string'"),
+
+        ({'uri': ''}, "uri: 'uri' is a required property"),
+
+        ({'uri': ' '}, "uri: 'uri' is a required property"),
     ])
     def test_it_raises_for_invalid_data(self,
                                         pyramid_request,
@@ -220,6 +231,13 @@ class TestCreateUpdateAnnotationSchema(object):
 
         assert appstruct['target_uri'] == 'http://example.com/example'
         assert 'uri' not in appstruct
+
+    def test_it_strips_leading_and_trailing_whitespace_from_uri(
+            self, pyramid_request, validate):
+        appstruct = validate(pyramid_request,
+                             {'uri': ' foo '})
+
+        assert appstruct['target_uri'] == 'foo'
 
     def test_it_keeps_text(self, pyramid_request, validate):
         appstruct = validate(pyramid_request,
@@ -390,14 +408,6 @@ class TestCreateAnnotationSchema(object):
 
         with pytest.raises(schemas.ValidationError) as exc:
             schema.validate(data)
-
-        assert exc.value.message == "uri: 'uri' is a required property"
-
-    def test_it_raises_if_uri_is_empty_string(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
-
-        with pytest.raises(schemas.ValidationError) as exc:
-            schema.validate(self.valid_data(uri=''))
 
         assert exc.value.message == "uri: 'uri' is a required property"
 
