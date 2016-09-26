@@ -21,6 +21,9 @@ class RenameUserService(object):
     list of annotation ids, it is then the function's responsibility to reindex
     these annotations in the search index.
 
+    This also invalidates all authentication tickets, forcing the user to
+    login again.
+
     May raise a ValueError if the new username does not validate or
     UserRenameError if the new username is already taken by another account.
     """
@@ -43,9 +46,16 @@ class RenameUserService(object):
         user.username = new_username
         new_userid = user.userid
 
+        self._purge_auth_tickets(user)
+
         ids = self._change_annotations(old_userid, new_userid)
 
         self.reindex(ids)
+
+    def _purge_auth_tickets(self, user):
+        self.session.query(models.AuthTicket) \
+            .filter(models.AuthTicket.user_id == user.id) \
+            .delete()
 
     def _change_annotations(self, old_userid, new_userid):
         annotations = self._fetch_annotations(old_userid)

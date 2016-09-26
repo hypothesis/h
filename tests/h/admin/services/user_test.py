@@ -34,6 +34,14 @@ class TestRenameUserService(object):
 
         assert db_session.query(models.User).get(user.id).username == 'panda'
 
+    def test_rename_deletes_auth_tickets(self, service, user, db_session, factories):
+        ids = [factories.AuthTicket(user=user).id for _ in xrange(3)]
+
+        service.rename(user, 'panda')
+
+        count = db_session.query(models.AuthTicket).filter(models.AuthTicket.id.in_(ids)).count()
+        assert count == 0
+
     def test_rename_changes_the_users_annotations_userid(self, service, user, annotations, db_session):
         service.rename(user, 'panda')
 
