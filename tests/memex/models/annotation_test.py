@@ -6,30 +6,9 @@ from pyramid import security
 import pytest
 
 from memex.models.annotation import Annotation
-from memex.models.document import Document, DocumentURI
 
 
 annotation_fixture = pytest.mark.usefixtures('annotation')
-
-
-@annotation_fixture
-def test_document(annotation, db_session):
-    document = Document(document_uris=[DocumentURI(claimant=annotation.target_uri,
-                                                   uri=annotation.target_uri)])
-    db_session.add(document)
-    db_session.flush()
-
-    assert annotation.document == document
-
-
-@annotation_fixture
-def test_document_not_found(annotation, db_session):
-    document = Document(document_uris=[DocumentURI(claimant='something-else',
-                                                   uri='something-else')])
-    db_session.add(document)
-    db_session.flush()
-
-    assert annotation.document is None
 
 
 def test_parent_id_of_direct_reply():

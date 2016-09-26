@@ -209,7 +209,7 @@ class TestCreateAnnotation(object):
 
         ann = storage.create_annotation(pyramid_request, annotation_data)
 
-        assert ann.document_id == document.id
+        assert ann.document == document
 
     def test_it_returns_the_annotation(self, models, pyramid_request):
         annotation = storage.create_annotation(pyramid_request,
@@ -368,7 +368,7 @@ class TestUpdateAnnotation(object):
         storage.update_annotation(session,
                                   'test_annotation_id',
                                   annotation_data)
-        assert annotation.document_id == document.id
+        assert annotation.document == document
 
     def test_it_returns_the_annotation(self, annotation_data, session):
         annotation = storage.update_annotation(session,
