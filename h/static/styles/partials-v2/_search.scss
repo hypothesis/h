@@ -54,6 +54,8 @@
 }
 
 .search-result-bucket__domain {
+  flex-grow: 0;
+  flex-shrink: 0;
   width: 120px;
   color: $grey-4;
   margin-right: 10px;
