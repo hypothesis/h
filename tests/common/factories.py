@@ -191,6 +191,13 @@ class Activation(ModelFactory):
         force_flush = True
 
 
+class AuthClient(ModelFactory):
+
+    class Meta(object):
+        model = models.AuthClient
+        force_flush = True
+
+
 class User(factory.Factory):
 
     """A factory class that generates h.models.User objects.
