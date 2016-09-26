@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import base64
 from collections import namedtuple
+
 import pytest
 import mock
+from hypothesis import strategies as st
+from hypothesis import given
 
 from pyramid import security
 
@@ -12,6 +16,77 @@ from h.auth import util
 
 FakeUser = namedtuple('FakeUser', ['admin', 'staff', 'groups'])
 FakeGroup = namedtuple('FakeGroup', ['pubid'])
+
+# RFC 2617 defines the valid format of an HTTP Basic access authentication
+# header as follows:
+#
+#     credentials = "Basic" basic-credentials
+#     basic-credentials = base64-user-pass
+#     base64-user-pass  = <base64 encoding of user-pass, except not limited to 76 char/line>
+#     user-pass   = userid ":" password
+#     userid      = *<TEXT excluding ":">
+#     password    = *TEXT
+#
+# Where TEXT is earlier defined as follows:
+#
+#     OCTET          = <any 8-bit sequence of data>
+#     CR             = <US-ASCII CR, carriage return (13)>
+#     LF             = <US-ASCII LF, linefeed (10)>
+#     SP             = <US-ASCII SP, space (32)>
+#     HT             = <US-ASCII HT, horizontal-tab (9)>
+#     CTL            = <any US-ASCII control character (octets 0 - 31) and DEL (127)>
+#     LWS            = [CRLF] 1*( SP | HT )
+#     TEXT           = <any OCTET except CTLs, but including LWS>
+#
+# When combined with other rules about header folding, this basically means
+# that all of ISO-8859-1 is allowed except for non-LWS control characters.
+#
+# Unfortunately for us, it's not as simple as that, because while the RFCs
+# clearly imply that only 8-bit encodings are valid in these credentials, this
+# is in practice not the case, and it appears that Chrome and curl UTF-8
+# encode the text provided by the user, while Firefox UTF-8 encodes the text
+# and then discards all but the last byte (having the effect that only text in
+# the ISO-8859-1 character set survives unscathed.)
+#
+# In practice this won't matter if we never issue usernames and passwords with
+# characters outside the ISO-8859-1 character set, but here we test that we
+# can correctly handle arbitrary Unicode.
+INVALID_CONTROL_CHARS = set(chr(n)
+                            for n in range(32)
+                            if chr(n) not in ' \t')
+INVALID_CONTROL_CHARS.add('\x7f')  # DEL (127)
+INVALID_USERNAME_CHARS = INVALID_CONTROL_CHARS | set(':')
+VALID_USERNAME_CHARS = st.characters(blacklist_characters=INVALID_USERNAME_CHARS)
+VALID_PASSWORD_CHARS = st.characters(blacklist_characters=INVALID_CONTROL_CHARS)
+
+
+class TestBasicAuthCreds(object):
+
+    @given(username=st.text(alphabet=VALID_USERNAME_CHARS),
+           password=st.text(alphabet=VALID_PASSWORD_CHARS))
+    def test_valid(self, username, password, pyramid_request):
+        user_pass = username + ':' + password
+        creds = ('Basic', base64.standard_b64encode(user_pass.encode('utf-8')))
+        pyramid_request.authorization = creds
+
+        assert util.basic_auth_creds(pyramid_request) == (username, password)
+
+    def test_missing(self, pyramid_request):
+        pyramid_request.authorization = None
+
+        assert util.basic_auth_creds(pyramid_request) is None
+
+    def test_no_password(self, pyramid_request):
+        creds = ('Basic', base64.standard_b64encode('foobar'.encode('utf-8')))
+        pyramid_request.authorization = creds
+
+        assert util.basic_auth_creds(pyramid_request) is None
+
+    def test_other_authorization_type(self, pyramid_request):
+        creds = ('Digest', base64.standard_b64encode('foo:bar'.encode('utf-8')))
+        pyramid_request.authorization = creds
+
+        assert util.basic_auth_creds(pyramid_request) is None
 
 
 class TestGroupfinder(object):
