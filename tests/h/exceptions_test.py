@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h.exceptions import APIError
+from h.exceptions import APIError, ClientUnauthorized
 
 
 class TestAPIError(object):
@@ -20,3 +20,15 @@ class TestAPIError(object):
         exc = APIError('some message', status_code=418)
 
         assert exc.status_code == 418
+
+
+class TestClientUnauthorized(object):
+    def test_message(self):
+        exc = ClientUnauthorized()
+
+        assert 'credentials are invalid' in exc.message
+
+    def test_status_code(self):
+        exc = ClientUnauthorized()
+
+        assert exc.status_code == 403
