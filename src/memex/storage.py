@@ -175,12 +175,13 @@ def update_annotation(session, id_, data):
     if document:
         document_uri_dicts = document['document_uri_dicts']
         document_meta_dicts = document['document_meta_dicts']
-        models.update_document_metadata(
-            session,
-            annotation.target_uri,
-            document_meta_dicts,
-            document_uri_dicts,
-            updated=updated)
+        document = models.update_document_metadata(session,
+                                                   annotation.target_uri,
+                                                   document_meta_dicts,
+                                                   document_uri_dicts,
+                                                   updated=updated)
+        # FIXME: use `document` setter once the relationship changed to use the document_id column
+        annotation.document_id = document.id
 
     return annotation
 

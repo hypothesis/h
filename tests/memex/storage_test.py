@@ -357,6 +357,19 @@ class TestUpdateAnnotation(object):
             updated=datetime.utcnow()
         )
 
+    def test_it_updates_the_annotations_document_id(self,
+                                                    annotation_data,
+                                                    session,
+                                                    models):
+        annotation = session.query.return_value.get.return_value
+        document = mock.Mock()
+        models.update_document_metadata.return_value = document
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+        assert annotation.document_id == document.id
+
     def test_it_returns_the_annotation(self, annotation_data, session):
         annotation = storage.update_annotation(session,
                                                'test_annotation_id',
