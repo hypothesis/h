@@ -312,7 +312,8 @@ class EmailChangeSchema(CSRFSchema):
 
 
 class PasswordChangeSchema(CSRFSchema):
-    password = password_node(title=_('Current password'))
+    password = password_node(title=_('Current password'),
+                             inactive_label=_('Password'))
     new_password = password_node(title=_('New password'),
                                  hide_until_form_active=True)
     # No validators: all validation is done on the new_password field and we

@@ -9,6 +9,9 @@ require('core-js/fn/array/includes');
 require('core-js/fn/object/assign');
 require('core-js/fn/string/starts-with');
 
+// Element.prototype.dataset, required by IE 10
+require('element-dataset')();
+
 // URL constructor, required by IE 10/11,
 // early versions of Microsoft Edge.
 try {

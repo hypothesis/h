@@ -27,6 +27,10 @@
      {%- if field.schema.hide_until_form_active -%}
      data-hide-until-active="true"
      {% endif %}
+     {%- if field.schema.inactive_label -%}
+     data-active-label="{{ _(field.title) }}"
+     data-inactive-label="{{ _(field.schema.inactive_label) }}"
+     {%- endif %}
      id="item-{{ field.oid }}">
 {% endif -%}
 
@@ -38,7 +42,8 @@
          title="{{ _(field.description) }}"
          {% endif %}
          for="{{ field.oid }}">
-           {{ _(field.title) }}
+         <span class="{%- if field.schema.inactive_label %}is-hidden-when-loading{% endif %}"
+               data-ref="label">{{ _(field.title) }}</span>
     {%- if field.required and field.widget.show_required and feature('activity_pages') -%}
       <span class="form-input__required">*</span>
     {% endif -%}

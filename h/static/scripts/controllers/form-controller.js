@@ -15,7 +15,7 @@ function shouldAutosubmit(type) {
  * editing the form.
  */
 function isHiddenField(el) {
-  return el.getAttribute('data-hide-until-active');
+  return el.dataset.hideUntilActive;
 }
 
 /**
@@ -35,7 +35,11 @@ class FormController extends Controller {
     this._fields = Array.from(element.querySelectorAll('.js-form-input'))
       .map(el => {
         var parts = findRefs(el);
-        return {container: el, input: parts.formInput};
+        return {
+          container: el,
+          input: parts.formInput,
+          label: parts.label,
+        };
       });
 
     this.on('focus', event => {
@@ -133,7 +137,7 @@ class FormController extends Controller {
     var isEditing = state.editingFields.length > 0;
     setElementState(this.element, {editing: isEditing});
     setElementState(this.refs.formActions, {
-      hidden: !isEditing || shouldAutosubmit(state.editingField.input.type),
+      hidden: !isEditing || shouldAutosubmit(state.editingFields[0].input.type),
       saving: state.saving,
     });
 
@@ -141,6 +145,24 @@ class FormController extends Controller {
       visible: state.submitError.length > 0,
     });
     this.refs.formSubmitErrorMessage.textContent = state.submitError;
+
+    // Update fields depending on active/inactive state of the form
+    this._fields.forEach(field => {
+      // Fields may specify different labels for when the form is active vs
+      // inactive.
+      var activeLabel = field.container.dataset.activeLabel;
+      var inactiveLabel = field.container.dataset.inactiveLabel;
+      if (activeLabel && inactiveLabel) {
+        field.label.textContent = isEditing ? activeLabel : inactiveLabel;
+      }
+
+      // The UA may or may not autofill password fields.
+      // Set a dummy password as a placeholder when the field is not being edited
+      // so that it appears non-empty if the UA doesn't autofill it.
+      if (field.input.type === 'password') {
+        field.input.setAttribute('placeholder', !isEditing ? '••••••••' : '');
+      }
+    });
   }
 
   beforeRemove() {
