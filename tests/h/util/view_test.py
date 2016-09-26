@@ -3,8 +3,39 @@
 from __future__ import unicode_literals
 
 import pytest
+from mock import Mock
 
-from h.util.view import json_view
+from h.util.view import handle_exception, json_view
+
+
+class TestHandleException(object):
+    def test_sets_response_status_500(self, pyramid_request):
+        handle_exception(pyramid_request)
+
+        assert pyramid_request.response.status_int == 500
+
+    def test_triggers_sentry_capture(self, pyramid_request):
+        handle_exception(pyramid_request)
+
+        pyramid_request.sentry.captureException.assert_called_once_with()
+
+    def test_reraises_in_debug_mode(self, pyramid_request):
+        pyramid_request.debug = True
+        dummy_exc = ValueError('dummy')
+
+        try:
+            raise dummy_exc
+        except:
+            with pytest.raises(ValueError) as exc:
+                handle_exception(pyramid_request)
+            assert exc.value == dummy_exc
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        sentry = Mock(spec_set=['captureException'])
+        pyramid_request.sentry = sentry
+        pyramid_request.debug = False
+        return pyramid_request
 
 
 @pytest.mark.usefixtures('view_config')
