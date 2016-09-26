@@ -104,6 +104,7 @@ class Annotation(ModelFactory):
     target_uri = factory.Faker('uri')
     text = factory.Faker('paragraph')
     userid = factory.Faker('user_name')
+    document = factory.SubFactory(Document)
 
     @factory.lazy_attribute
     def target_selectors(self):  # pylint: disable=no-self-use
@@ -142,7 +143,8 @@ class Annotation(ModelFactory):
 
             This doesn't add anything to the database session yet.
             """
-            document_uri = DocumentURI.build(claimant=self.target_uri,
+            document_uri = DocumentURI.build(document=self.document,
+                                             claimant=self.target_uri,
                                              uri=self.target_uri)
             return dict(
                 claimant=document_uri.claimant,
@@ -160,6 +162,7 @@ class Annotation(ModelFactory):
 
             This doesn't add anything to the database session yet.
             """
+            kwargs.setdefault('document', self.document)
             kwargs.setdefault('claimant', self.target_uri)
             document_meta = DocumentMeta.build(**kwargs)
             return dict(
@@ -176,7 +179,7 @@ class Annotation(ModelFactory):
         if 'title' not in [m['type'] for m in document_meta_dicts]:
             document_meta_dicts.append(document_meta_dict(type='title'))
 
-        api_models.update_document_metadata(
+        self.document = api_models.update_document_metadata(
             orm.object_session(self),
             self.target_uri,
             document_meta_dicts=document_meta_dicts,

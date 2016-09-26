@@ -102,7 +102,7 @@ def test_acl_group_shared():
     assert actual == expect
 
 
-def test_setting_extras_inline_is_persisted(db_session):
+def test_setting_extras_inline_is_persisted(db_session, factories):
     """
     In-place changes to Annotation.extra should be persisted.
 
@@ -113,14 +113,7 @@ def test_setting_extras_inline_is_persisted(db_session):
     should be persisted to the database.
 
     """
-    annotation = Annotation(userid='fred')
-    db_session.add(annotation)
-
-    # We need to flush the db here so that the default value for
-    # annotation.extra gets persisted and out mutation of annotation.extra
-    # below happens when the previous value is already persisted, otherwise
-    # this test would never fail.
-    db_session.flush()
+    annotation = factories.Annotation(userid='fred')
 
     annotation.extra['foo'] = 'bar'
 
@@ -134,7 +127,7 @@ def test_setting_extras_inline_is_persisted(db_session):
     assert annotation.extra == {'foo': 'bar'}
 
 
-def test_deleting_extras_inline_is_persisted(db_session):
+def test_deleting_extras_inline_is_persisted(db_session, factories):
     """
     In-place changes to Annotation.extra should be persisted.
 
@@ -142,10 +135,7 @@ def test_deleting_extras_inline_is_persisted(db_session):
     database.
 
     """
-    annotation = Annotation(userid='fred')
-    annotation.extra = {'foo': 'bar'}
-    db_session.add(annotation)
-    db_session.flush()
+    annotation = factories.Annotation(userid='fred', extra={'foo': 'bar'})
 
     del annotation.extra['foo']
     db_session.commit()
@@ -154,7 +144,7 @@ def test_deleting_extras_inline_is_persisted(db_session):
     assert 'foo' not in annotation.extra
 
 
-def test_appending_tags_inline_is_persisted(db_session):
+def test_appending_tags_inline_is_persisted(db_session, factories):
     """
     In-place changes to Annotation.tags should be persisted.
 
@@ -162,24 +152,18 @@ def test_appending_tags_inline_is_persisted(db_session):
     database.
 
     """
-    annotation = Annotation(userid='fred')
-    annotation.tags = []  # FIXME: Annotation should have a default value here.
-    db_session.add(annotation)
-    db_session.flush()
+    annotation = factories.Annotation(userid='fred', tags=['foo'])
 
-    annotation.tags.append('foo')
+    annotation.tags.append('bar')
     db_session.commit()
     annotation = db_session.query(Annotation).get(annotation.id)
 
-    assert 'foo' in annotation.tags
+    assert 'bar' in annotation.tags
 
 
-def test_deleting_tags_inline_is_persisted(db_session):
+def test_deleting_tags_inline_is_persisted(db_session, factories):
     """In-place deletions of annotation tags should be persisted."""
-    annotation = Annotation(userid='fred')
-    annotation.tags = ['foo']
-    db_session.add(annotation)
-    db_session.flush()
+    annotation = factories.Annotation(userid='fred', tags=['foo'])
 
     del annotation.tags[0]
     db_session.commit()

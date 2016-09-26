@@ -131,16 +131,12 @@ def test_it_deletes_duplicate_document_meta_objects(req):
 
 
 @pytest.mark.usefixtures('index')
-def test_it_normalizes_annotation_target_uri(req):
-    annotation_1 = models.Annotation(userid='luke',
-                                     _target_uri='http://example.org/',
-                                     _target_uri_normalized='http://example.org')
-    annotation_2 = models.Annotation(userid='luke',
-                                     _target_uri='http://example.net/',
-                                     _target_uri_normalized='http://example.net')
-
-    req.db.add_all([annotation_1, annotation_2])
-    req.db.flush()
+def test_it_normalizes_annotation_target_uri(req, factories, db_session):
+    annotation_1 = factories.Annotation(userid='luke', target_uri='http://example.org/')
+    annotation_1._target_uri_normalized = 'http://example.org'
+    annotation_2 = factories.Annotation(userid='luke', target_uri='http://example.net/')
+    annotation_2._target_uri_normalized = 'http://example.net'
+    db_session.flush()
 
     normalize_uris.normalize_annotations(req)
 
@@ -148,16 +144,14 @@ def test_it_normalizes_annotation_target_uri(req):
     assert annotation_2.target_uri_normalized == 'httpx://example.net'
 
 
-def test_it_reindexes_changed_annotations(req, index):
-    annotation_1 = models.Annotation(userid='luke',
-                                     _target_uri='http://example.org/',
-                                     _target_uri_normalized='http://example.org')
-    annotation_2 = models.Annotation(userid='luke',
-                                     _target_uri='http://example.net/',
-                                     _target_uri_normalized='http://example.net')
-
-    req.db.add_all([annotation_1, annotation_2])
-    req.db.flush()
+def test_it_reindexes_changed_annotations(req, index, factories, db_session):
+    annotation_1 = factories.Annotation(userid='luke',
+                                        target_uri='http://example.org/')
+    annotation_1._target_uri_normalized = 'http://example.org'
+    annotation_2 = factories.Annotation(userid='luke',
+                                        target_uri='http://example.net/')
+    annotation_2._target_uri_normalized='http://example.net'
+    db_session.flush()
 
     indexer = index.BatchIndexer.return_value
     indexer.index.return_value = None
@@ -167,15 +161,13 @@ def test_it_reindexes_changed_annotations(req, index):
     indexer.index.assert_called_once_with(set([annotation_1.id, annotation_2.id]))
 
 
-def test_it_skips_reindexing_unaltered_annotations(req, index):
-    annotation_1 = models.Annotation(userid='luke',
-                                     target_uri='http://example.org/')
-    annotation_2 = models.Annotation(userid='luke',
-                                     _target_uri='http://example.net/',
-                                     _target_uri_normalized='http://example.net')
-
-    req.db.add_all([annotation_1, annotation_2])
-    req.db.flush()
+def test_it_skips_reindexing_unaltered_annotations(req, index, factories, db_session):
+    annotation_1 = factories.Annotation(userid='luke',
+                                        target_uri='http://example.org/')
+    annotation_2 = factories.Annotation(userid='luke',
+                                        target_uri='http://example.net/')
+    annotation_2._target_uri_normalized = 'http://example.net'
+    db_session.flush()
 
     indexer = index.BatchIndexer.return_value
     indexer.index.return_value = None
