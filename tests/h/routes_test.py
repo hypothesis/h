@@ -58,6 +58,7 @@ def test_includeme():
         call('assets', '/assets/*subpath'),
         call('badge', '/api/badge'),
         call('token', '/api/token'),
+        call('api.users', '/api/users'),
         call('session', '/app'),
         call('widget', '/app.html'),
         call('embed', '/embed.js'),

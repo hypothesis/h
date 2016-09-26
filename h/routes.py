@@ -61,6 +61,7 @@ def includeme(config):
     # API (other than those provided by memex)
     config.add_route('badge', '/api/badge')
     config.add_route('token', '/api/token')
+    config.add_route('api.users', '/api/users')
 
     # Client
     config.add_route('session', '/app')
