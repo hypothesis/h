@@ -62,6 +62,11 @@
   word-wrap: break-word;
 }
 
+.search-result-bucket__title-and-annotations-count {
+  display: flex;
+  flex-grow: 1;
+}
+
 .search-result-bucket__title {
   font-weight: bold;
   flex-grow: 1;
@@ -127,6 +132,23 @@
 .search-bucket-stats__val {
   color: $grey-6;
   margin-bottom: 20px;
+}
+
+// On large tablets and below, display bucket contents beneath rather than
+// alongside the domain
+@media screen and (max-width: $tablet-width + 100px) {
+    .search-result-bucket__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .search-result-bucket__domain {
+      width: 100%;
+    }
+
+    .search-result-bucket__content {
+      margin-top: 10px;
+    }
 }
 
 // On normal tablets and below, display annotation stats below annotation list

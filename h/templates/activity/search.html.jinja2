@@ -46,17 +46,19 @@
     <div class="search-result-bucket__domain">
       {{ bucket.domain }}
     </div>
-    <div class="search-result-bucket__title">
-      {% if bucket.title %}
-        {{ bucket.title }}
-      {% else %}
-        {% trans %}Untitled document{% endtrans %}
-      {% endif %}
+    <div class="search-result-bucket__title-and-annotations-count">
+        <div class="search-result-bucket__title">
+        {% if bucket.title %}
+            {{ bucket.title }}
+        {% else %}
+            {% trans %}Untitled document{% endtrans %}
+        {% endif %}
+        </div>
+        <div class="search-result-bucket__annotations-count">
+        <div class="search-result-bucket__annotations-count-container">
+            {{ bucket.annotations_count }}
+        </div>
     </div>
-    <div class="search-result-bucket__annotations-count">
-      <div class="search-result-bucket__annotations-count-container">
-        {{ bucket.annotations_count }}
-      </div>
     </div>
   </div>
 
