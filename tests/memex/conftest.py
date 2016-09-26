@@ -114,7 +114,7 @@ def db_session(db_engine):
 
 @pytest.yield_fixture
 def factories(db_session):
-    from ..common import factories
+    from . import factories
     factories.SESSION = db_session
     yield factories
     factories.SESSION = None
