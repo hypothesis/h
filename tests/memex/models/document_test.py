@@ -588,37 +588,56 @@ class TestCreateOrUpdateDocumentMeta(object):
 class TestMergeDocuments(object):
 
     def test_merge_documents_returns_master(self, db_session, merge_data):
-        master, _ = merge_data
+        master, _, _ = merge_data
 
         merged_master = document.merge_documents(db_session, merge_data)
 
         assert merged_master == master
 
     def test_merge_documents_deletes_duplicate_documents(self, db_session, merge_data):
-        _, duplicate = merge_data
+        _, duplicate_1, duplicate_2 = merge_data
 
         document.merge_documents(db_session, merge_data)
         db_session.flush()
 
-        assert db_session.query(document.Document).get(duplicate.id) is None
+        count = db_session.query(document.Document) \
+            .filter(document.Document.id.in_([duplicate_1.id, duplicate_2.id])) \
+            .count()
+
+        assert count == 0
 
     def test_merge_documents_rewires_document_uris(self, db_session, merge_data):
-        master, duplicate = merge_data
+        master, duplicate_1, duplicate_2 = merge_data
 
         document.merge_documents(db_session, merge_data)
         db_session.flush()
 
-        assert len(master.document_uris) == 2
-        assert len(duplicate.document_uris) == 0
+        assert len(master.document_uris) == 3
+        assert len(duplicate_1.document_uris) == 0
+        assert len(duplicate_2.document_uris) == 0
 
     def test_merge_documents_rewires_document_meta(self, db_session, merge_data):
-        master, duplicate = merge_data
+        master, duplicate_1, duplicate_2 = merge_data
 
         document.merge_documents(db_session, merge_data)
         db_session.flush()
 
-        assert len(master.meta) == 2
-        assert len(duplicate.meta) == 0
+        assert len(master.meta) == 3
+        assert len(duplicate_1.meta) == 0
+        assert len(duplicate_2.meta) == 0
+
+    def test_merge_documents_rewires_annotations(self, db_session, merge_data):
+        master, duplicate_1, duplicate_2 = merge_data
+
+        document.merge_documents(db_session, merge_data)
+        db_session.flush()
+
+        assert 6 == \
+            db_session.query(models.Annotation).filter_by(document_id=master.id).count()
+        assert 0 == \
+            db_session.query(models.Annotation).filter_by(document_id=duplicate_1.id).count()
+        assert 0 == \
+            db_session.query(models.Annotation).filter_by(document_id=duplicate_2.id).count()
 
     def test_raises_retryable_error_when_flush_fails(self, db_session, merge_data, monkeypatch):
         def err():
@@ -638,7 +657,7 @@ class TestMergeDocuments(object):
                     claimant='https://en.wikipedia.org/wiki/Main_Page',
                     type='title',
                     value='Wikipedia, the free encyclopedia')])
-        duplicate = document.Document(document_uris=[document.DocumentURI(
+        duplicate_1 = document.Document(document_uris=[document.DocumentURI(
                 claimant='https://m.en.wikipedia.org/wiki/Main_Page',
                 uri='https://en.wikipedia.org/wiki/Main_Page',
                 type='rel-canonical')],
@@ -646,10 +665,28 @@ class TestMergeDocuments(object):
                     claimant='https://m.en.wikipedia.org/wiki/Main_Page',
                     type='title',
                     value='Wikipedia, the free encyclopedia')])
+        duplicate_2 = document.Document(document_uris=[document.DocumentURI(
+                claimant='https://en.wikipedia.org/wiki/Home',
+                uri='https://en.wikipedia.org/wiki/Main_Page',
+                type='rel-canonical')],
+                meta=[document.DocumentMeta(
+                    claimant='https://en.wikipedia.org/wiki/Home',
+                    type='title',
+                    value='Wikipedia, the free encyclopedia')])
 
-        db_session.add_all([master, duplicate])
+        db_session.add_all([master, duplicate_1, duplicate_2])
         db_session.flush()
-        return (master, duplicate)
+
+        master_ann_1 = models.Annotation(userid='luke', document_id=master.id)
+        master_ann_2 = models.Annotation(userid='alice', document_id=master.id)
+        duplicate_1_ann_1 = models.Annotation(userid='lucy', document_id=duplicate_1.id)
+        duplicate_1_ann_2 = models.Annotation(userid='bob', document_id=duplicate_1.id)
+        duplicate_2_ann_1 = models.Annotation(userid='amy', document_id=duplicate_2.id)
+        duplicate_2_ann_2 = models.Annotation(userid='dan', document_id=duplicate_2.id)
+        db_session.add_all([master_ann_1, master_ann_2,
+                            duplicate_1_ann_1, duplicate_1_ann_2,
+                            duplicate_2_ann_1, duplicate_2_ann_2])
+        return (master, duplicate_1, duplicate_2)
 
 
 class TestUpdateDocumentMetadata(object):

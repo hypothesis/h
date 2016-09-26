@@ -12,6 +12,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from memex.db import Base
 from memex.db import mixins
+from memex.models import Annotation
 from memex.uri import normalize as uri_normalize
 from memex._compat import urlparse
 
@@ -381,6 +382,7 @@ def merge_documents(session, documents, updated=None):
 
     master = documents[0]
     duplicates = documents[1:]
+    duplicate_ids = [doc.id for doc in duplicates]
 
     for doc in duplicates:
         for _ in range(len(doc.document_uris)):
@@ -393,10 +395,14 @@ def merge_documents(session, documents, updated=None):
             m.document = master
             m.updated = updated
 
-        session.delete(doc)
-
     try:
         session.flush()
+        session.query(Annotation) \
+            .filter(Annotation.document_id.in_(duplicate_ids)) \
+            .update({Annotation.document_id: master.id}, synchronize_session='fetch')
+        session.query(Document) \
+            .filter(Document.id.in_(duplicate_ids)) \
+            .delete(synchronize_session='fetch')
     except sa.exc.IntegrityError:
         raise ConcurrentUpdateError('concurrent document merges')
 
