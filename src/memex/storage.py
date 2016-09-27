@@ -84,7 +84,7 @@ def create_annotation(request, data):
     :param data: a dictionary of annotation properties
     :type data: dict
 
-    :returns: the created annotation
+    :returns: the created and flushed annotation
     :rtype: dict
     """
     created = updated = datetime.utcnow()
@@ -132,6 +132,7 @@ def create_annotation(request, data):
     annotation.document_id = document.id
 
     request.db.add(annotation)
+    request.db.flush()
 
     return annotation
 
