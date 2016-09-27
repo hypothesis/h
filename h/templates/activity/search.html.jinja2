@@ -63,6 +63,7 @@
   {# The content is the area that appears / disappears on expand / collapse. #}
   <div class="search-result-bucket__content">
     <div class="search-result-bucket__annotation-cards-container" data-ref="content">
+      <div class="search-result-bucket__left-margin"></div>
       <ol class="search-result-bucket__annotation-cards">
         {% for result in bucket.annotations %}
           {{ annotation_card(result.annotation, request) }}

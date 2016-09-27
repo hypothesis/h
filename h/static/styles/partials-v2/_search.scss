@@ -98,11 +98,17 @@
 
 .search-result-bucket__annotation-cards-container {
   display: flex;
-  padding-left: 130px;
 
   &.is-hidden {
     display: none;
   }
+}
+
+.search-result-bucket__left-margin {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 120px;
+  margin-right: 10px;
 }
 
 .search-result-bucket__annotation-cards {
@@ -115,7 +121,6 @@
 // Card displaying stats about a group of annotations in search results
 .search-bucket-stats {
   @include font-normal;
-  width: 210px;
   margin-left: 30px;
   word-wrap: break-word;
 }
@@ -151,12 +156,17 @@
     margin-right: 10px;
   }
 
+  .search-result-bucket__left-margin {
+    display: none;
+  }
+
   .search-result-bucket__annotation-cards-container {
     flex-direction: column;
+    align-items: center;
   }
 
   .search-bucket-stats {
-    margin-left: 5px;
-    margin-top: 10px;
+    margin: 0;
+    padding: 0;
   }
 }
