@@ -202,6 +202,12 @@
     color: $brand;
   }
 
+  @include touch-input {
+    .form-input__input {
+      font-size: $touch-input-font-size;
+    }
+  }
+
   // On narrow screens, display validation error messages underneath the
   // input field.
   @media screen and (max-width: $max-phone-width) {
