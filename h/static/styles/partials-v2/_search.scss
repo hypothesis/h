@@ -129,18 +129,6 @@
   margin-bottom: 20px;
 }
 
-// On large tablets and below, display bucket contents beneath rather than
-// alongside the domain
-@media screen and (max-width: $tablet-width + 100px) {
-    .search-result-bucket {
-      flex-direction: column;
-    }
-
-    .search-result-bucket__content {
-      margin-top: 10px;
-    }
-}
-
 // On normal tablets and below, display annotation stats below annotation list
 @media screen and (max-width: $tablet-width) {
 
