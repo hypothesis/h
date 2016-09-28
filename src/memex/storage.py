@@ -128,8 +128,7 @@ def create_annotation(request, data):
         document_uri_dicts,
         created=created,
         updated=updated)
-    # FIXME: use `document` setter once the relationship changed to use the document_id column
-    annotation.document_id = document.id
+    annotation.document = document
 
     request.db.add(annotation)
     request.db.flush()
@@ -180,8 +179,7 @@ def update_annotation(session, id_, data):
                                                    document_meta_dicts,
                                                    document_uri_dicts,
                                                    updated=updated)
-        # FIXME: use `document` setter once the relationship changed to use the document_id column
-        annotation.document_id = document.id
+        annotation.document = document
 
     return annotation
 

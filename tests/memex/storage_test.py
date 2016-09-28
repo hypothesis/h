@@ -15,10 +15,8 @@ from memex.models.document import Document, DocumentURI, DocumentMeta
 
 class TestFetchAnnotation(object):
 
-    def test_it_fetches_and_returns_the_annotation(self, db_session):
-        annotation = Annotation(userid='luke')
-        db_session.add(annotation)
-        db_session.flush()
+    def test_it_fetches_and_returns_the_annotation(self, db_session, factories):
+        annotation = factories.Annotation()
 
         actual = storage.fetch_annotation(db_session, annotation.id)
         assert annotation == actual
@@ -29,29 +27,18 @@ class TestFetchAnnotation(object):
 
 class TestFetchOrderedAnnotations(object):
 
-    def test_it_returns_annotations_for_ids_in_the_same_order(self, db_session):
-        ann_1 = Annotation(userid='luke')
-        ann_2 = Annotation(userid='luke')
-        db_session.add_all([ann_1, ann_2])
-        db_session.flush()
+    def test_it_returns_annotations_for_ids_in_the_same_order(self, db_session, factories):
+        ann_1 = factories.Annotation(userid='luke')
+        ann_2 = factories.Annotation(userid='luke')
 
         assert [ann_2, ann_1] == storage.fetch_ordered_annotations(db_session,
                                                                    [ann_2.id, ann_1.id])
         assert [ann_1, ann_2] == storage.fetch_ordered_annotations(db_session,
                                                                    [ann_1.id, ann_2.id])
 
-    def test_it_allows_to_change_the_query(self, db_session):
-        ann_1 = Annotation(userid='luke', target_uri='http://example.com')
-        ann_2 = Annotation(userid='maria', target_uri='http://example.com')
-        db_session.add_all([ann_1, ann_2])
-
-        doc = Document(
-            document_uris=[DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
-                           DocumentURI(uri='http://example.com/', type='rel-canonical', claimant='http://example.com')],
-            meta=[DocumentMeta(claimant='http://example.com', type='title', value='Example')])
-        db_session.add(doc)
-
-        db_session.flush()
+    def test_it_allows_to_change_the_query(self, db_session, factories):
+        ann_1 = factories.Annotation(userid='luke')
+        ann_2 = factories.Annotation(userid='maria')
 
         def only_maria(query):
             return query.filter(Annotation.userid == 'maria')
@@ -209,7 +196,7 @@ class TestCreateAnnotation(object):
 
         ann = storage.create_annotation(pyramid_request, annotation_data)
 
-        assert ann.document_id == document.id
+        assert ann.document == document
 
     def test_it_returns_the_annotation(self, models, pyramid_request):
         annotation = storage.create_annotation(pyramid_request,
@@ -368,7 +355,7 @@ class TestUpdateAnnotation(object):
         storage.update_annotation(session,
                                   'test_annotation_id',
                                   annotation_data)
-        assert annotation.document_id == document.id
+        assert annotation.document == document
 
     def test_it_returns_the_annotation(self, annotation_data, session):
         annotation = storage.update_annotation(session,
@@ -411,11 +398,8 @@ class TestUpdateAnnotation(object):
 
 class TestDeleteAnnotation(object):
 
-    def test_it_deletes_the_annotation(self, db_session):
-        ann_1 = Annotation(userid='luke')
-        ann_2 = Annotation(userid='leia')
-        db_session.add_all([ann_1, ann_2])
-        db_session.flush()
+    def test_it_deletes_the_annotation(self, db_session, factories):
+        ann_1, ann_2 = (factories.Annotation(), factories.Annotation())
 
         storage.delete_annotation(db_session, ann_1.id)
         db_session.commit()

@@ -103,15 +103,9 @@ class Annotation(Base):
 
     document_id = sa.Column(sa.Integer,
                             sa.ForeignKey('document.id'),
-                            nullable=True)
+                            nullable=False)
 
-    document = sa.orm.relationship('Document',
-                                   secondary='document_uri',
-                                   primaryjoin='Annotation.target_uri_normalized == DocumentURI.uri_normalized',
-                                   secondaryjoin='DocumentURI.document_id == Document.id',
-                                   viewonly=True,
-                                   uselist=False,
-                                   backref='annotations')
+    document = sa.orm.relationship('Document', backref='annotations')
 
     @hybrid_property
     def target_uri(self):
