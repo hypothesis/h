@@ -178,9 +178,11 @@ class Annotation(ModelFactory):
 
         api_models.update_document_metadata(
             orm.object_session(self),
-            self,
+            self.target_uri,
             document_meta_dicts=document_meta_dicts,
             document_uri_dicts=document_uri_dicts,
+            created=self.created,
+            updated=self.updated,
         )
 
 
