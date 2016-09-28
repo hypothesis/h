@@ -48,7 +48,7 @@ def navbar(context, request):
         'create_group_item':
             {'title': _('Create new group'), 'link': request.route_url('group_create')},
         'username': username,
-        'username_link': stream_url,
+        'username_url': stream_url,
         'search_url': search_url,
         'q': request.params.get('q', ''),
     }
