@@ -49,18 +49,18 @@ class TestNavbar(object):
         req.matchdict = {'username': 'luke'}
 
         result = panels.navbar({}, req)
-        assert result['search_link'] == 'http://example.com/users/luke/search'
+        assert result['search_url'] == 'http://example.com/users/luke/search'
 
     def test_it_includes_search_url_when_on_group_search(self, req):
         type(req.matched_route).name = PropertyMock(return_value='activity.group_search')
         req.matchdict = {'pubid': 'foobar'}
 
         result = panels.navbar({}, req)
-        assert result['search_link'] == 'http://example.com/groups/foobar/search'
+        assert result['search_url'] == 'http://example.com/groups/foobar/search'
 
     def test_it_includes_default_search_url(self, req):
         result = panels.navbar({}, req)
-        assert result['search_link'] == 'http://example.com/search'
+        assert result['search_url'] == 'http://example.com/search'
 
     @pytest.fixture
     def routes(self, pyramid_config):
