@@ -32,10 +32,6 @@ SETTINGS = [
     DockerSetting('mail.host', 'mail',
                   pattern='{port_25_tcp_addr}'),
     DockerSetting('mail.port', 'mail', pattern='{port_25_tcp_port}'),
-    DockerSetting('redis.sessions.host', 'redis',
-                  pattern='{port_6379_tcp_addr}'),
-    DockerSetting('redis.sessions.port', 'redis',
-                  pattern='{port_6379_tcp_port}'),
     DockerSetting('statsd.host', 'statsd', pattern='{port_8125_udp_addr}'),
     DockerSetting('statsd.port', 'statsd', pattern='{port_8125_udp_port}'),
 
@@ -53,8 +49,6 @@ SETTINGS = [
     EnvSetting('mail.host', 'MAIL_HOST'),
     EnvSetting('mail.port', 'MAIL_PORT', type=int),
     EnvSetting('origins', 'ALLOWED_ORIGINS'),
-    EnvSetting('redis.sessions.host', 'REDIS_HOST'),
-    EnvSetting('redis.sessions.port', 'REDIS_PORT', type=int),
     EnvSetting('sqlalchemy.url', 'DATABASE_URL', type=database_url),
     EnvSetting('statsd.host', 'STATSD_HOST'),
     EnvSetting('statsd.port', 'STATSD_PORT', type=int),
@@ -106,12 +100,6 @@ def configure(environ=None, settings=None):
                  'configure the secret_key setting or the SECRET_KEY '
                  'environment variable!')
         settings['secret_key'] = os.urandom(64)
-
-    # If the redis session secret hasn't been set explicitly, derive it from
-    # the global secret key.
-    if 'redis.sessions.secret' not in settings:
-        settings['redis.sessions.secret'] = derive_key(settings['secret_key'],
-                                                       b'h.session')
 
     # Set up SQLAlchemy debug logging
     if 'debug_query' in settings:

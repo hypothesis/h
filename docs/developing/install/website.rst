@@ -75,13 +75,11 @@ h requires the following external services:
 - PostgreSQL_ 9.4+
 - Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
 - RabbitMQ_ v3.5+
-- Redis_ v2.4+
 
 .. _PostgreSQL: http://www.postgresql.org/
 .. _Elasticsearch: http://www.elasticsearch.org/
 .. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
 .. _RabbitMQ: https://rabbitmq.com/
-.. _Redis: http://redis.io/
 
 You can install these services however you want, but the easiest way is by
 using Docker. This should work on any operating system that Docker can be
@@ -92,9 +90,8 @@ installed on:
 
 2. Download and run the
    `official RabbitMQ image <https://hub.docker.com/_/rabbitmq/>`_,
-   the `official PostgreSQL image <https://hub.docker.com/_/postgres/>`_, the
-   `official Redis image <https://hub.docker.com/_/redis/>`_,
-   and our custom
+   the `official PostgreSQL image <https://hub.docker.com/_/postgres/>`_, and
+   our custom
    `Elasticsearch with ICU image <https://hub.docker.com/r/nickstenning/elasticsearch-icu/>`_:
 
    .. code-block:: bash
@@ -102,10 +99,9 @@ installed on:
       docker run -d --name postgres -p 5432:5432 postgres
       docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
       docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 --hostname rabbit rabbitmq:3-management
-      docker run -d --name redis -p 6379:6379 redis
 
-   You'll now have four Docker containers named ``postgres``, ``elasticsearch``,
-   ``rabbitmq`` and ``redis`` running and exposing their various services on the
+   You'll now have three Docker containers named ``postgres``, ``elasticsearch``,
+   and ``rabbitmq`` running and exposing their various services on the
    ports defined above. You should be able to see them by running ``docker ps``.
    You should also be able to visit your Elasticsearch service by opening
    http://localhost:9200/ in a browser, and connect to your PostgreSQL by
@@ -120,7 +116,7 @@ installed on:
 
       .. code-block:: bash
 
-         docker start postgres elasticsearch rabbitmq redis
+         docker start postgres elasticsearch rabbitmq
 
 3. Create the `htest` database in the ``postgres`` container. This is needed
    to run the h tests:
