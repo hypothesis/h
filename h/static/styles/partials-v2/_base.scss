@@ -21,6 +21,7 @@ $highlight: #58cef4;
 $sans-font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !default;
 $mono-font-family: Open Sans Mono, Menlo, DejaVu Sans Mono, monospace !default;
 
+// Standard font sizes
 $normal-font-size: 13px;
 $normal-line-height: 15px;
 
@@ -29,9 +30,15 @@ $small-line-height: 12px;
 
 $title-font-size: 19px;
 
+// Font sizes for specific categories of control
 $input-font-size: 15px;
 
+// Minimum font size for <input> fields on iOS. If the font size is smaller than
+// this, iOS will zoom into the field when focused.
+$touch-input-font-size: 16px;
+
 // Z-index scale
+// -------------
 $zindex-modal-backdrop: 5; // Backdrop of a modal dialog or form
 $zindex-modal-content: 6;  // Content of a modal dialog or form
 $zindex-dropdown-menu: 10;
