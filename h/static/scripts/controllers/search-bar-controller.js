@@ -148,9 +148,8 @@ class SearchBarController extends Controller {
       var visibleDropdownItems = getVisibleDropdownItems();
 
       var handleEnterKey = event => {
-        event.preventDefault();
-
         if (activeItem) {
+          event.preventDefault();
           var facet =
             activeItem.
               querySelector('[data-ref="searchBarDropdownItemTitle"]').
