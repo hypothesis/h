@@ -7,12 +7,16 @@ import datetime
 from pyramid_authsanity import interfaces
 import sqlalchemy as sa
 from zope import interface
-from zope.sqlalchemy import mark_changed
 
 from h.models import AuthTicket
 from h.auth.util import principals_for_user
 
 TICKET_TTL = datetime.timedelta(days=7)
+
+# We only want to update the `expires` column when the tickets `expires` is at
+# least one minute smaller than the potential new value. This prevents that we
+# update the `expires` column on every single request.
+TICKET_REFRESH_INTERVAL = datetime.timedelta(minutes=1)
 
 
 class AuthTicketNotLoadedError(Exception):
@@ -61,26 +65,24 @@ class AuthTicketService(object):
         if ticket_id is None:
             return False
 
-        # Since we load and then update the AuthTicket.expires on every request,
-        # we optimise it with a `UPDATE ... RETURNING` query, doing both of
-        # these in one. When the returned `userid` is `None` then the
-        # authentication failed, otherwise it succeeded. Doing a query like this
-        # will not mark the session as dirty, and thus the transaction will
-        # get rolled back at the end, unless we found a userid, at which point
-        # we manually mark the session as changed.
-        ticket_query = (sa.update(AuthTicket.__table__)
-                        .where(sa.and_(AuthTicket.id == ticket_id,
-                                       AuthTicket.user_userid == principal,
-                                       AuthTicket.expires > sa.func.now()))
-                        .values(expires=(sa.func.now() + TICKET_TTL))
-                        .returning(AuthTicket.user_userid))
-        self._userid = self.session.execute(ticket_query).scalar()
+        ticket = self.session.query(AuthTicket) \
+            .filter(AuthTicket.id == ticket_id,
+                    AuthTicket.user_userid == principal,
+                    AuthTicket.expires > sa.func.now()) \
+            .one_or_none()
 
-        if self._userid:
-            mark_changed(self.session)
-            return True
+        if ticket is None:
+            return False
 
-        return False
+        self._userid = ticket.user_userid
+
+        # We don't want to update the `expires` column of an auth ticket on
+        # every single request, but only when the ticket hasn't been touched
+        # within a the defined `TICKET_REFRESH_INTERVAL`.
+        if (datetime.datetime.utcnow() - ticket.updated) > TICKET_REFRESH_INTERVAL:
+            ticket.expires = datetime.datetime.utcnow() + TICKET_TTL
+
+        return True
 
     def add_ticket(self, principal, ticket_id):
         """Store a new ticket with the given id and principal in the database."""

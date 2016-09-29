@@ -73,9 +73,28 @@ class TestAuthTicketService(object):
     def test_verify_ticket_succeeds_when_ticket_is_valid(self, svc, db_session, ticket):
         assert svc.verify_ticket(ticket.user_userid, ticket.id) is True
 
-    def test_verify_ticket_extends_expiry_date_when_valid(self, svc, db_session, ticket):
+    def test_verify_ticket_skips_extending_expiration_when_within_refresh_interval(self, svc, db_session, factories):
+        ticket = factories.AuthTicket(updated=datetime.utcnow())
+        db_session.flush()
+
         expires_before = ticket.expires
+
         svc.verify_ticket(ticket.user_userid, ticket.id)
+        db_session.flush()
+
+        # Manually expire ticket, so that the data will be reloaded from the
+        # database.
+        db_session.expire(ticket)
+        assert expires_before == ticket.expires
+
+    def test_verify_ticket_extends_expiration_when_over_refresh_interval(self, svc, db_session, factories):
+        ticket = factories.AuthTicket(updated=(datetime.utcnow() - services.TICKET_REFRESH_INTERVAL))
+        db_session.flush()
+
+        expires_before = ticket.expires
+
+        svc.verify_ticket(ticket.user_userid, ticket.id)
+        db_session.flush()
 
         # Manually expire ticket, so that the data will be reloaded from the
         # database.
