@@ -17,3 +17,10 @@ def delete_expired_auth_tickets():
     celery.request.db.query(models.AuthTicket) \
         .filter(models.AuthTicket.expires < datetime.utcnow()) \
         .delete()
+
+
+@celery.task
+def delete_expired_tokens():
+    celery.request.db.query(models.Token) \
+        .filter(models.Token.expires < datetime.utcnow()) \
+        .delete()

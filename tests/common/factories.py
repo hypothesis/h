@@ -115,3 +115,12 @@ class AuthTicket(ModelFactory):
     @factory.lazy_attribute
     def user_userid(self):
         return self.user.userid
+
+
+class Token(ModelFactory):
+
+    class Meta:  # pylint: disable=no-init, old-style-class
+        model = models.Token
+        force_flush = True
+
+    userid = factory.LazyAttribute(lambda _: ('acct:' + FAKER.user_name() + '@example.com'))
