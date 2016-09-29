@@ -108,15 +108,6 @@ class FormController extends Controller {
   }
 
   update(state, prevState) {
-    this._fields.forEach(field =>
-      setElementState(field.container, {
-        editing: state.editingFields.includes(field),
-        focused: field === state.focusedField,
-        hidden: isHiddenField(field.container) &&
-                !state.editingFields.includes(field),
-      })
-    );
-
     // In forms that support editing a single field at a time, show the
     // Save/Cancel buttons below the field that we are currently editing.
     //
@@ -146,16 +137,29 @@ class FormController extends Controller {
     });
     this.refs.formSubmitErrorMessage.textContent = state.submitError;
 
-    // Update fields depending on active/inactive state of the form
+    this._updateFields(state);
+  }
+
+  _updateFields(state) {
     this._fields.forEach(field => {
-      // Fields may specify different labels for when the form is active vs
-      // inactive.
+      setElementState(field.container, {
+        editing: state.editingFields.includes(field),
+        focused: field === state.focusedField,
+        hidden: isHiddenField(field.container) &&
+                !state.editingFields.includes(field),
+      });
+
+      // Update labels
       var activeLabel = field.container.dataset.activeLabel;
       var inactiveLabel = field.container.dataset.inactiveLabel;
+      var isEditing = state.editingFields.includes(field);
+
       if (activeLabel && inactiveLabel) {
         field.label.textContent = isEditing ? activeLabel : inactiveLabel;
       }
 
+      // Update placeholder
+      //
       // The UA may or may not autofill password fields.
       // Set a dummy password as a placeholder when the field is not being edited
       // so that it appears non-empty if the UA doesn't autofill it.
