@@ -32,11 +32,11 @@ class TestNavbar(object):
             {'title': titles[1], 'link': 'http://example.com/groups/id2/second'},
         ]
 
-    def test_username_link_when_logged_in(self, req, authenticated_user):
+    def test_username_url_when_logged_in(self, req, authenticated_user):
         req.authenticated_user = authenticated_user
         result = panels.navbar({}, req)
 
-        assert result['username_link'] == 'http://example.com/search?q=user:vannevar'
+        assert result['username_url'] == 'http://example.com/search?q=user:vannevar'
 
     def test_it_includes_search_query(self, req):
         req.params['q'] = 'tag:question'
