@@ -39,8 +39,8 @@ class Token(Base, mixins.Timestamps):
     #: A NULL value in this column indicates a token that does not expire.
     expires = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
 
-    def __init__(self, userid):
-        self.userid = userid
+    def __init__(self, **kwargs):
+        super(Token, self).__init__(**kwargs)
         self.regenerate()
 
     @classmethod

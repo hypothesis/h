@@ -963,7 +963,7 @@ class TestDeveloperController(object):
 
         views.DeveloperController(pyramid_request).post()
 
-        models.Token.assert_called_once_with(pyramid_request.authenticated_userid)
+        models.Token.assert_called_once_with(userid=pyramid_request.authenticated_userid)
 
     def test_post_adds_new_token_to_db(self, models, pyramid_request):
         """If the user doesn't have a token yet it should add one to the db."""
@@ -973,7 +973,7 @@ class TestDeveloperController(object):
 
         assert models.Token.return_value in pyramid_request.db.added
 
-        models.Token.assert_called_once_with(pyramid_request.authenticated_userid)
+        models.Token.assert_called_once_with(userid=pyramid_request.authenticated_userid)
 
     def test_post_returns_token_after_regenerating(self, models, pyramid_request):
         """After regenerating a token it should return its new value."""
