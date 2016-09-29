@@ -68,5 +68,18 @@ describe('upgradeElements', function () {
       var ctrl = replacedElement.controllers[0];
       assert.instanceOf(ctrl, TestController);
     });
+
+    it('calls #beforeRemove on the original controllers', function () {
+      var root = document.createElement('div');
+      root.innerHTML = '<div class="js-test">Original content</div>';
+      upgradeElements(root, {'.js-test': TestController});
+      var ctrl = root.children[0].controllers[0];
+      ctrl.beforeRemove = sinon.stub();
+      var reloadFn = ctrl.options.reload;
+
+      reloadFn(newContent);
+
+      assert.called(ctrl.beforeRemove);
+    });
   });
 });

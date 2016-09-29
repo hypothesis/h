@@ -2,6 +2,7 @@
 
 var Controller = require('../base/controller');
 var { findRefs, setElementState } = require('../util/dom');
+var modalFocus = require('../util/modal-focus');
 var submitForm = require('../util/submit-form');
 
 function shouldAutosubmit(type) {
@@ -32,15 +33,6 @@ class FormController extends Controller {
     this.on('focus', event => {
       var field = this._fields.find(field => field.input === event.target);
       if (!field) {
-        return;
-      }
-
-      // Enforce that the current field retains focus while it has unsaved
-      // changes
-      if (this.state.dirty &&
-          this.state.editingField &&
-          this.state.editingField !== field) {
-        this.state.editingField.input.focus();
         return;
       }
 
@@ -75,22 +67,6 @@ class FormController extends Controller {
       event.preventDefault();
       event.stopPropagation();
     });
-
-    // When the user tabs outside of the form, cancel editing
-    this.on('blur', () => {
-      // Add a timeout because `document.activeElement` is not updated until
-      // after the event is processed
-      setTimeout(() => {
-        // If the user has made changes to the active element, then keep focus
-        // on the active field, otherwise allow them to move to the previous /
-        // next fields by tabbing
-        if (this.state.dirty && !this._isEditingFieldFocused()) {
-          this.state.editingField.input.focus();
-        } else if (!this.element.contains(document.activeElement)) {
-          this.setState({editingField: null});
-        }
-      }, 0);
-    }, true /* capture - 'blur' does not bubble */);
 
     // Setup AJAX handling for forms
     this.on('submit', event => {
@@ -129,6 +105,8 @@ class FormController extends Controller {
         state.editingField.container.nextSibling
       );
       setElementState(state.editingField.container, {editing: true});
+
+      this._trapFocus();
     }
 
     var isEditing = !!state.editingField;
@@ -141,6 +119,12 @@ class FormController extends Controller {
       visible: state.submitError.length > 0,
     });
     this.refs.formSubmitErrorMessage.textContent = state.submitError;
+  }
+
+  beforeRemove() {
+    if (this._releaseFocus) {
+      this._releaseFocus();
+    }
   }
 
   /**
@@ -194,19 +178,33 @@ class FormController extends Controller {
   }
 
   /**
-   * Return true if the field that the user last started editing currently has
-   * focus.
+   * Return the set of elements that the user should be able to interact with,
+   * depending upon the field which is currently focused.
    */
-  _isEditingFieldFocused() {
+  _focusGroup() {
     if (!this.state.editingField) {
-      return false;
+      return null;
     }
 
-    var focusedEl = document.activeElement;
-    if (this.refs.formActions.contains(focusedEl)) {
-      return true;
-    }
-    return this.state.editingField.container.contains(focusedEl);
+    return [this.refs.formActions, this.state.editingField.container];
+  }
+
+  _trapFocus() {
+    this._releaseFocus = modalFocus.trap(this._focusGroup(), newFocusedElement => {
+      // Keep focus in the current field when it has unsaved changes,
+      // otherwise let the user focus another field in the form or move focus
+      // outside the form entirely.
+      if (this.state.dirty) {
+        return this.state.editingField.input;
+      }
+
+      // If the user tabs out of the form, clear the editing state
+      if (!this.element.contains(newFocusedElement)) {
+        this.setState({editingField: null});
+      }
+
+      return null;
+    });
   }
 
   /**

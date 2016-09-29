@@ -76,6 +76,14 @@ class Controller {
   on(event, listener, useCapture) {
     this.element.addEventListener(event, listener, useCapture);
   }
+
+  /**
+   * Handler which is invoked when the controller's element is about to be
+   * removed.
+   *
+   * This can be used to clean up subscriptions, timeouts etc.
+   */
+  beforeRemove() {}
 }
 
 module.exports = Controller;

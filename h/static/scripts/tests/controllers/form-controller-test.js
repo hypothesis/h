@@ -65,6 +65,7 @@ describe('FormController', function () {
   });
 
   afterEach(function () {
+    ctrl.beforeRemove();
     ctrl.element.remove();
   });
 
@@ -235,31 +236,35 @@ describe('FormController', function () {
   });
 
   context('when focus moves outside of form', function () {
-    it('clears editing state if field does not have unsaved changes', function (done) {
+    var outsideEl;
+
+    beforeEach(function () {
+      outsideEl = document.createElement('input');
+      document.body.appendChild(outsideEl);
+    });
+
+    afterEach(function () {
+      outsideEl.remove();
+    });
+
+    it('clears editing state if field does not have unsaved changes', function () {
       startEditing();
 
       // Simulate user moving focus outside of form (eg. via tab key).
-      // This may be to either another part of the page or browser chrome
-      ctrl.refs.firstInput.blur();
+      outsideEl.focus();
 
-      setTimeout(function () {
-        assert.isFalse(isEditing());
-        done();
-      });
+      assert.isFalse(isEditing());
     });
 
-    it('keeps current field focused if it has unsaved changes', function (done) {
+    it('keeps current field focused if it has unsaved changes', function () {
       startEditing();
       ctrl.setState({dirty: true});
 
       // Simulate user/browser attempting to switch focus to an element outside
       // the form
-      ctrl.refs.firstInput.blur();
+      outsideEl.focus();
 
-      setTimeout(function () {
-        assert.equal(document.activeElement, ctrl.refs.firstInput);
-        done();
-      });
+      assert.equal(document.activeElement, ctrl.refs.firstInput);
     });
   });
 
