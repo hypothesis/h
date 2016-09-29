@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import itertools
 
 import colander
 import deform
@@ -479,13 +480,19 @@ class AccountController(object):
 
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
+        # Ensure deform generates unique field IDs for each field in this
+        # multiple-form page.
+        counter = itertools.count()
+
         self.forms = {
             'email': request.create_form(email_schema,
                                          buttons=(_('Change email address'),),
-                                         formid='email'),
+                                         formid='email',
+                                         counter=counter),
             'password': request.create_form(password_schema,
                                             buttons=(_('Change password'),),
-                                            formid='password'),
+                                            formid='password',
+                                            counter=counter),
         }
 
     @view_config(request_method='GET')
