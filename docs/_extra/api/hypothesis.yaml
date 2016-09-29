@@ -40,7 +40,7 @@ info:
         Client Secret: E-hReVMuRyZbyr1GikieEw4JslaM6sDpb18_9V59PFw
 
     you can compute the Authorization header [as described in
-    RFC1945](https://tools.ietf.org/html/rfc1945#section-11.1):
+    RFC7617](https://tools.ietf.org/html/rfc7617):
 
         $ echo -n '96653f8e-80be-11e6-b32b-c7bcde86613a:E-hReVMuRyZbyr1GikieEw4JslaM6sDpb18_9V59PFw' | base64
         OTY2NTNmOGUtODBiZS0xMWU2LWIzMmItYzdiY2RlODY2MTNhOkUtaFJlVk11UnlaYnlyMUdpa2llRXc0SnNsYU02c0RwYjE4XzlWNTlQRnc=

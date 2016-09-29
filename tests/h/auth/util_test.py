@@ -17,47 +17,46 @@ from h.auth import util
 FakeUser = namedtuple('FakeUser', ['admin', 'staff', 'groups'])
 FakeGroup = namedtuple('FakeGroup', ['pubid'])
 
-# RFC 2617 defines the valid format of an HTTP Basic access authentication
-# header as follows:
+# The most recent standard covering the 'Basic' HTTP Authentication scheme is
+# RFC 7617. It defines the allowable characters in usernames and passwords as
+# follows:
 #
-#     credentials = "Basic" basic-credentials
-#     basic-credentials = base64-user-pass
-#     base64-user-pass  = <base64 encoding of user-pass, except not limited to 76 char/line>
-#     user-pass   = userid ":" password
-#     userid      = *<TEXT excluding ":">
-#     password    = *TEXT
+#     The user-id and password MUST NOT contain any control characters (see
+#     "CTL" in Appendix B.1 of [RFC5234]).
 #
-# Where TEXT is earlier defined as follows:
+# RFC5234 defines CTL as:
 #
-#     OCTET          = <any 8-bit sequence of data>
-#     CR             = <US-ASCII CR, carriage return (13)>
-#     LF             = <US-ASCII LF, linefeed (10)>
-#     SP             = <US-ASCII SP, space (32)>
-#     HT             = <US-ASCII HT, horizontal-tab (9)>
-#     CTL            = <any US-ASCII control character (octets 0 - 31) and DEL (127)>
-#     LWS            = [CRLF] 1*( SP | HT )
-#     TEXT           = <any OCTET except CTLs, but including LWS>
+#     CTL            =  %x00-1F / %x7F
 #
-# When combined with other rules about header folding, this basically means
-# that all of ISO-8859-1 is allowed except for non-LWS control characters.
+CONTROL_CHARS = set(chr(n) for n in range(0x00, 0x1F+1)) | set('\x7f')
+
+# Furthermore, from RFC 7617:
 #
-# Unfortunately for us, it's not as simple as that, because while the RFCs
-# clearly imply that only 8-bit encodings are valid in these credentials, this
-# is in practice not the case, and it appears that Chrome and curl UTF-8
-# encode the text provided by the user, while Firefox UTF-8 encodes the text
-# and then discards all but the last byte (having the effect that only text in
-# the ISO-8859-1 character set survives unscathed.)
+#     a user-id containing a colon character is invalid
 #
-# In practice this won't matter if we never issue usernames and passwords with
-# characters outside the ISO-8859-1 character set, but here we test that we
-# can correctly handle arbitrary Unicode.
-INVALID_CONTROL_CHARS = set(chr(n)
-                            for n in range(32)
-                            if chr(n) not in ' \t')
-INVALID_CONTROL_CHARS.add('\x7f')  # DEL (127)
-INVALID_USERNAME_CHARS = INVALID_CONTROL_CHARS | set(':')
+INVALID_USERNAME_CHARS = CONTROL_CHARS | set(':')
+
+# The character encoding of the user-id and password is *undefined* by
+# specification for historical reasons:
+#
+#     The original definition of this authentication scheme failed to specify
+#     the character encoding scheme used to convert the user-pass into an
+#     octet sequence.  In practice, most implementations chose either a
+#     locale-specific encoding such as ISO-8859-1 ([ISO-8859-1]), or UTF-8
+#     ([RFC3629]).  For backwards compatibility reasons, this specification
+#     continues to leave the default encoding undefined, as long as it is
+#     compatible with US-ASCII (mapping any US-ASCII character to a single
+#     octet matching the US-ASCII character code).
+#
+# In particular, Firefox still does *very* special things if you provide
+# non-BMP characters in a username or password.
+#
+# There's not a lot we can do about this so we are going to assume UTF-8
+# encoding for the user-pass string, and these tests verify that we
+# successfully decode valid Unicode user-pass strings.
+#
 VALID_USERNAME_CHARS = st.characters(blacklist_characters=INVALID_USERNAME_CHARS)
-VALID_PASSWORD_CHARS = st.characters(blacklist_characters=INVALID_CONTROL_CHARS)
+VALID_PASSWORD_CHARS = st.characters(blacklist_characters=CONTROL_CHARS)
 
 
 class TestBasicAuthCreds(object):
