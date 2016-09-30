@@ -48,7 +48,3 @@ def search(request):
         'timeframes': result.timeframes,
         'page': paginate(request, result.total, page_size=page_size),
     }
-
-
-def includeme(config):
-    config.scan(__name__)
