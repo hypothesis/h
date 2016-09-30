@@ -78,6 +78,7 @@ class SearchBarController extends Controller {
     };
 
     var closeDropdown = () => {
+      if (!this.state.open) { return; }
       clearActiveDropdownItem();
       showAllDropdownItems();
       this.setState({open: false});
@@ -85,6 +86,7 @@ class SearchBarController extends Controller {
     };
 
     var openDropdown = () => {
+      if (this.state.open) { return; }
       clearActiveDropdownItem();
 
       this.setState({open: true});
