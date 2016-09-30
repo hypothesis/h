@@ -3,7 +3,7 @@
 import deform
 from pyramid import security
 from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther, HTTPNotFound)
+                                    HTTPSeeOther)
 from pyramid.view import view_config, view_defaults
 
 from h import form
@@ -175,7 +175,3 @@ def _check_slug(group, request):
         raise HTTPMovedPermanently(request.route_path('group_read',
                                                       pubid=group.pubid,
                                                       slug=group.slug))
-
-
-def includeme(config):
-    config.scan(__name__)  # pragma: no cover
