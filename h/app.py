@@ -122,7 +122,6 @@ def includeme(config):
     config.include('h.accounts')
     config.include('h.activity')
     config.include('h.admin')
-    config.include('h.feeds')
     config.include('h.groups')
     config.include('h.links')
     config.include('h.nipsa')

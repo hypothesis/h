@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from pyramid.view import view_config
 from pyramid import i18n
 
@@ -37,7 +41,3 @@ def stream_rss(request):
             "Hypothesis Stream"),
         description=request.registry.settings.get("h.feed.description") or _(
             "The Web. Annotated"))
-
-
-def includeme(config):
-    config.scan(__name__)
