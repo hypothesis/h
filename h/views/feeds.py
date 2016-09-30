@@ -6,8 +6,8 @@ from pyramid.view import view_config
 from pyramid import i18n
 
 from memex import search
-from memex import storage
-from h import feeds
+from memex.storage import fetch_ordered_annotations
+from h.feeds import render_atom, render_rss
 
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -16,13 +16,13 @@ _ = i18n.TranslationStringFactory(__package__)
 def _annotations(request):
     """Return the annotations from the search API."""
     result = search.Search(request).run(request.params)
-    return storage.fetch_ordered_annotations(request.db, result.annotation_ids)
+    return fetch_ordered_annotations(request.db, result.annotation_ids)
 
 
 @view_config(route_name='stream_atom')
 def stream_atom(request):
     """An Atom feed of the /stream page."""
-    return feeds.render_atom(
+    return render_atom(
         request=request, annotations=_annotations(request),
         atom_url=request.route_url("stream_atom"),
         html_url=request.route_url("stream"),
@@ -33,7 +33,7 @@ def stream_atom(request):
 @view_config(route_name='stream_rss')
 def stream_rss(request):
     """An RSS feed of the /stream page."""
-    return feeds.render_rss(
+    return render_rss(
         request=request, annotations=_annotations(request),
         rss_url=request.route_url("stream_rss"),
         html_url=request.route_url("stream"),
