@@ -105,7 +105,7 @@ def index(context, request):
         'links': {
             'annotation': {
                 'create': {
-                    'method': 'OPTIONS',
+                    'method': 'POST',
                     'url': request.route_url('api.annotations'),
                     'desc': "CORS pre-flight procedure"
                 },
@@ -168,11 +168,26 @@ def search(request):
     return out
 
 
+@api_config(route_name='api.annotation',
+            request_method='OPTIONS'
+            )
+def options_ann(annotation, request):
+    '''returns a preflight CORS header response'''
+    response = Response()
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+        })
+    response.status_code = 200
+    return response
 
 @api_config(route_name='api.annotations',
             request_method='OPTIONS'
             )
-def options(annotation, request):
+def options_anns(annotation, request):
     '''returns a preflight CORS header response'''
     response = Response()
     response.headers.update({

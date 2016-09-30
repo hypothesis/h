@@ -9,6 +9,7 @@ from pyramid import httpexceptions
 from pyramid import security
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
+from pyramid.response import Response
 
 from h import accounts
 from h import form
@@ -58,7 +59,7 @@ def bad_csrf_token_json(context, request):
     return {
         'status': 'failure',
         'reason': reason,
-        'model': session.model(request),
+        'model': session.model(request)
     }
 
 
@@ -146,6 +147,7 @@ class AuthController(object):
             self.request.session.invalidate()
         headers = security.forget(self.request)
         return headers
+ 
 
 
 @view_defaults(route_name='session',
@@ -189,6 +191,20 @@ class AjaxAuthController(AuthController):
         headers = self._logout()
         self.request.response.headers.extend(headers)
         return ajax_payload(self.request, {'status': 'okay'})
+
+    @view_config(request_param="__formid__=login", request_method="OPTIONS")
+    def options(request):
+        print 'fuckkkkk'
+        response = Response()
+        response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+            'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Max-Age': '1728000',
+            })
+        response.status_code = 200
+        return response
 
 
 @view_defaults(route_name='forgot_password',
