@@ -78,20 +78,20 @@ class SearchBarController extends Controller {
     };
 
     var closeDropdown = () => {
+      if (!this.state.open) { return; }
       clearActiveDropdownItem();
       showAllDropdownItems();
       this.setState({open: false});
-      this._input.removeEventListener('keydown', setupListenerKeys,
-        true /*capture*/);
+      this._input.removeEventListener('keydown', setupListenerKeys);
     };
 
     var openDropdown = () => {
+      if (this.state.open) { return; }
       clearActiveDropdownItem();
 
       this.setState({open: true});
 
-      this._input.addEventListener('keydown', setupListenerKeys,
-        true /*capture*/);
+      this._input.addEventListener('keydown', setupListenerKeys);
     };
 
     var getVisibleDropdownItems = () => {
@@ -217,21 +217,15 @@ class SearchBarController extends Controller {
 
     this._dropdownItems.forEach(function(item) {
       if(item && item.addEventListener) {
-        item.addEventListener('mouseover', handleHoverOnItem,
-          true);
-        item.addEventListener('mousedown', handleClickOnItem,
-          true);
+        item.addEventListener('mousemove', handleHoverOnItem);
+        item.addEventListener('mousedown', handleClickOnItem);
       }
     });
 
-    this._dropdown.addEventListener('mousedown', handleClickOnDropdown,
-      true /*capture*/);
-    this._input.addEventListener('focusout', handleFocusOutside,
-      true /*capture*/);
-    this._input.addEventListener('input', handleInputOnInput,
-      true /*capture*/);
-    this._input.addEventListener('focusin', handleFocusinOnInput,
-      true /*capture*/);
+    this._dropdown.addEventListener('mousedown', handleClickOnDropdown);
+    this._input.addEventListener('blur', handleFocusOutside);
+    this._input.addEventListener('input', handleInputOnInput);
+    this._input.addEventListener('focus', handleFocusinOnInput);
   }
 
   update(state) {
