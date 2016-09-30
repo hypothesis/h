@@ -32,11 +32,11 @@ class TestNavbar(object):
             {'title': titles[1], 'link': 'http://example.com/groups/id2/second'},
         ]
 
-    def test_username_link_when_logged_in(self, req, authenticated_user):
+    def test_username_url_when_logged_in(self, req, authenticated_user):
         req.authenticated_user = authenticated_user
         result = panels.navbar({}, req)
 
-        assert result['username_link'] == 'http://example.com/search?q=user:vannevar'
+        assert result['username_url'] == 'http://example.com/search?q=user:vannevar'
 
     def test_it_includes_search_query(self, req):
         req.params['q'] = 'tag:question'
@@ -49,18 +49,18 @@ class TestNavbar(object):
         req.matchdict = {'username': 'luke'}
 
         result = panels.navbar({}, req)
-        assert result['search_link'] == 'http://example.com/users/luke/search'
+        assert result['search_url'] == 'http://example.com/users/luke/search'
 
     def test_it_includes_search_url_when_on_group_search(self, req):
         type(req.matched_route).name = PropertyMock(return_value='activity.group_search')
         req.matchdict = {'pubid': 'foobar'}
 
         result = panels.navbar({}, req)
-        assert result['search_link'] == 'http://example.com/groups/foobar/search'
+        assert result['search_url'] == 'http://example.com/groups/foobar/search'
 
     def test_it_includes_default_search_url(self, req):
         result = panels.navbar({}, req)
-        assert result['search_link'] == 'http://example.com/search'
+        assert result['search_url'] == 'http://example.com/search'
 
     @pytest.fixture
     def routes(self, pyramid_config):

@@ -10,6 +10,7 @@ import newrelic.agent
 from pyramid import i18n
 
 from h._compat import urlparse
+from h import presenters
 
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -24,8 +25,10 @@ class DocumentBucket(object):
 
         self.title = document.title
 
-        if document.web_uri:
-            parsed = urlparse.urlparse(document.web_uri)
+        presented_document = presenters.DocumentHTMLPresenter(document)
+
+        if presented_document.web_uri:
+            parsed = urlparse.urlparse(presented_document.web_uri)
             self.uri = parsed.geturl()
             self.domain = parsed.netloc
         else:

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import itertools
 
 import colander
 import deform
@@ -479,13 +480,19 @@ class AccountController(object):
 
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
+        # Ensure deform generates unique field IDs for each field in this
+        # multiple-form page.
+        counter = itertools.count()
+
         self.forms = {
             'email': request.create_form(email_schema,
                                          buttons=(_('Change email address'),),
-                                         formid='email'),
+                                         formid='email',
+                                         counter=counter),
             'password': request.create_form(password_schema,
                                             buttons=(_('Change password'),),
-                                            formid='password'),
+                                            formid='password',
+                                            counter=counter),
         }
 
     @view_config(request_method='GET')
@@ -653,7 +660,7 @@ class DeveloperController(object):
             token.regenerate()
         else:
             # The user doesn't have an API token yet, generate one for them.
-            token = models.Token(self.request.authenticated_userid)
+            token = models.Token(userid=self.request.authenticated_userid)
             self.request.db.add(token)
 
         return {'token': token.value}
@@ -713,19 +720,4 @@ def dismiss_sidebar_tutorial(request):
 
 
 def includeme(config):
-    config.add_route('login', '/login')
-    config.add_route('logout', '/logout')
-    config.add_route('signup', '/signup')
-    config.add_route('activate', '/activate/{id}/{code}')
-    config.add_route('forgot_password', '/forgot-password')
-    config.add_route('account_reset', '/account/reset')
-    config.add_route('account_reset_with_code', '/account/reset/{code}')
-    config.add_route('account', '/account/settings')
-    config.add_route('account_profile', '/account/profile')
-    config.add_route(
-        'account_notifications', '/account/settings/notifications')
-    config.add_route('account_developer', '/account/developer')
-    config.add_route('claim_account_legacy', '/claim_account/{token}')
-    config.add_route('dismiss_sidebar_tutorial',
-                     '/app/dismiss_sidebar_tutorial')
     config.scan(__name__)

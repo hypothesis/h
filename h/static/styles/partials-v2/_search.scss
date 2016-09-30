@@ -54,6 +54,8 @@
 }
 
 .search-result-bucket__domain {
+  flex-grow: 0;
+  flex-shrink: 0;
   width: 120px;
   color: $grey-4;
   margin-right: 10px;
@@ -125,18 +127,6 @@
 .search-bucket-stats__val {
   color: $grey-6;
   margin-bottom: 20px;
-}
-
-// On large tablets and below, display bucket contents beneath rather than
-// alongside the domain
-@media screen and (max-width: $tablet-width + 100px) {
-    .search-result-bucket {
-      flex-direction: column;
-    }
-
-    .search-result-bucket__content {
-      margin-top: 10px;
-    }
 }
 
 // On normal tablets and below, display annotation stats below annotation list

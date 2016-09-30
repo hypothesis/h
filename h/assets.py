@@ -136,9 +136,6 @@ def includeme(config):
     config.add_view(route_name='assets', view=assets_view)
     config.add_view(route_name='assets_client', view=assets_client_view)
 
-    config.add_route('assets_client', '/assets/client/*subpath')
-    config.add_route('assets', '/assets/*subpath')
-
     assets_env = Environment('/assets',
                              'h/assets.ini',
                              'build/manifest.json')

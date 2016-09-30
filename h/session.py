@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from pyramid.session import SignedCookieSessionFactory
+
+from h.security import derive_key
+
 
 def model(request):
     session = {}
@@ -55,9 +59,14 @@ def _current_groups(request):
 
 
 def includeme(config):
-    config.add_settings({
-        "redis.sessions.cookie_httponly": True,
-        "redis.sessions.cookie_max_age": 2592000,
-        "redis.sessions.timeout": 604800,
-    })
-    config.include('pyramid_redis_sessions')
+    settings = config.registry.settings
+
+    # By default, derive_key generates a 64-byte (512 bit) secret, which is the
+    # correct length for SHA512-based HMAC as specified by the `hashalg`.
+    factory = SignedCookieSessionFactory(
+        secret=derive_key(settings['secret_key'], b'h.session.cookie_secret'),
+        hashalg='sha512',
+        httponly=True,
+        timeout=3600,
+    )
+    config.set_session_factory(factory)

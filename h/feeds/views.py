@@ -40,6 +40,4 @@ def stream_rss(request):
 
 
 def includeme(config):
-    config.add_route('stream_atom', '/stream.atom')
-    config.add_route('stream_rss', '/stream.rss')
     config.scan(__name__)

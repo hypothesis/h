@@ -12,6 +12,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from memex.db import Base
 from memex.db import mixins
+from memex.models import Annotation
 from memex.uri import normalize as uri_normalize
 from memex.uri import domainize
 from memex._compat import urlparse
@@ -393,6 +394,7 @@ def merge_documents(session, documents, updated=None):
 
     master = documents[0]
     duplicates = documents[1:]
+    duplicate_ids = [doc.id for doc in duplicates]
 
     for doc in duplicates:
         for _ in range(len(doc.document_uris)):
@@ -405,10 +407,14 @@ def merge_documents(session, documents, updated=None):
             m.document = master
             m.updated = updated
 
-        session.delete(doc)
-
     try:
         session.flush()
+        session.query(Annotation) \
+            .filter(Annotation.document_id.in_(duplicate_ids)) \
+            .update({Annotation.document_id: master.id}, synchronize_session='fetch')
+        session.query(Document) \
+            .filter(Document.id.in_(duplicate_ids)) \
+            .delete(synchronize_session='fetch')
     except sa.exc.IntegrityError:
         raise ConcurrentUpdateError('concurrent document merges')
 
@@ -416,9 +422,11 @@ def merge_documents(session, documents, updated=None):
 
 
 def update_document_metadata(session,
-                             annotation,
+                             target_uri,
                              document_meta_dicts,
-                             document_uri_dicts):
+                             document_uri_dicts,
+                             created=None,
+                             updated=None):
     """
     Create and update document metadata from the given annotation.
 
@@ -426,8 +434,8 @@ def update_document_metadata(session,
     and deleted in the database as required by the given annotation and
     document meta and uri dicts.
 
-    :param annotation: the annotation that the document metadata comes from
-    :type annotation: memex.models.Annotation
+    :param target_uri: the target_uri of the annotation from which the document metadata comes from
+    :type target_uri: unicode
 
     :param document_meta_dicts: the document metadata dicts that were derived
         by validation from the "document" dict that the client posted
@@ -437,35 +445,50 @@ def update_document_metadata(session,
         validation from the "document" dict that the client posted
     :type document_uri_dicts: list of dicts
 
+    :param created: Date and time value for the new document records
+    :type created: datetime.datetime
+
+    :param updated: Date and time value for the new document records
+    :type updated: datetime.datetime
+
+    :returns: the matched or created document
+    :rtype: memex.models.Document
     """
+    if created is None:
+        created = datetime.utcnow()
+    if updated is None:
+        updated = datetime.utcnow()
+
     documents = Document.find_or_create_by_uris(
         session,
-        annotation.target_uri,
+        target_uri,
         [u['uri'] for u in document_uri_dicts],
-        created=annotation.created,
-        updated=annotation.updated)
+        created=created,
+        updated=updated)
 
     if documents.count() > 1:
         document = merge_documents(session,
                                    documents,
-                                   updated=annotation.updated)
+                                   updated=updated)
     else:
         document = documents.first()
 
-    document.updated = annotation.updated
+    document.updated = updated
 
     for document_uri_dict in document_uri_dicts:
         create_or_update_document_uri(
             session=session,
             document=document,
-            created=annotation.created,
-            updated=annotation.updated,
+            created=created,
+            updated=updated,
             **document_uri_dict)
 
     for document_meta_dict in document_meta_dicts:
         create_or_update_document_meta(
             session=session,
             document=document,
-            created=annotation.created,
-            updated=annotation.updated,
+            created=created,
+            updated=updated,
             **document_meta_dict)
+
+    return document

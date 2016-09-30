@@ -32,4 +32,3 @@ def badge(request):
 
 def includeme(config):
     config.scan(__name__)
-    config.add_route('badge', '/api/badge')

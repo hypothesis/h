@@ -7,34 +7,15 @@ from zope import interface
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthenticationPolicy(object):
-    def __init__(self, api_policy, fallback_policy, migration_policy=None):
+    def __init__(self, api_policy, fallback_policy):
         self.api_policy = api_policy
         self.fallback_policy = fallback_policy
-        self.migration_policy = migration_policy
 
     def authenticated_userid(self, request):
         if _is_api_request(request):
             return self.api_policy.authenticated_userid(request)
 
-        userid = self.fallback_policy.authenticated_userid(request)
-        if userid is not None:
-            return userid
-
-        # In case we couldn't authenticate the user against the fallback policy
-        # and we're in the process of migrating from one policy to another,
-        # then we check if we can authenticate against the deprecated
-        # migration policy. If that succeeded, then we remember the user in the
-        # fallback policy and from then on this code path will not be called
-        # anymore.
-        if self.migration_policy is None:
-            return userid
-
-        userid = self.migration_policy.authenticated_userid(request)
-        if userid is not None:
-            headers = self.fallback_policy.remember(request, userid)
-            request.response.headers.extend(headers)
-
-        return userid
+        return self.fallback_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
         if _is_api_request(request):

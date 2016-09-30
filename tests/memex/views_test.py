@@ -5,7 +5,6 @@ import pytest
 
 from pyramid import testing
 
-from memex import models
 from memex import presenters
 from memex import views
 from memex.schemas import ValidationError
@@ -81,11 +80,9 @@ class TestSearch(object):
         storage.fetch_ordered_annotations.assert_called_once_with(
             pyramid_request.db, ['row-1', 'row-2'], query_processor=mock.ANY)
 
-    def test_it_renders_search_results(self, links_service, pyramid_request, search_run):
-        ann1 = models.Annotation(userid='luke')
-        ann2 = models.Annotation(userid='sarah')
-        pyramid_request.db.add_all([ann1, ann2])
-        pyramid_request.db.flush()
+    def test_it_renders_search_results(self, links_service, pyramid_request, search_run, factories):
+        ann1 = factories.Annotation(userid='luke')
+        ann2 = factories.Annotation(userid='sarah')
 
         search_run.return_value = SearchResult(2, [ann1.id, ann2.id], [], {})
 
@@ -108,14 +105,10 @@ class TestSearch(object):
         assert mock.call(pyramid_request.db, ['reply-1', 'reply-2'],
                          query_processor=mock.ANY) in storage.fetch_ordered_annotations.call_args_list
 
-    def test_it_renders_replies(self, links_service, pyramid_request, search_run):
-        ann = models.Annotation(userid='luke')
-        pyramid_request.db.add(ann)
-        pyramid_request.db.flush()
-        reply1 = models.Annotation(userid='sarah', references=[ann.id])
-        reply2 = models.Annotation(userid='sarah', references=[ann.id])
-        pyramid_request.db.add_all([reply1, reply2])
-        pyramid_request.db.flush()
+    def test_it_renders_replies(self, links_service, pyramid_request, search_run, factories):
+        ann = factories.Annotation(userid='luke')
+        reply1 = factories.Annotation(userid='sarah', references=[ann.id])
+        reply2 = factories.Annotation(userid='sarah', references=[ann.id])
 
         search_run.return_value = SearchResult(1, [ann.id], [reply1.id, reply2.id], {})
 
