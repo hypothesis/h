@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from pyramid import httpexceptions
 
 from h import models
@@ -28,7 +32,3 @@ def badge(request):
     result = search.Search(request).run(query)
 
     return {'total': result.total}
-
-
-def includeme(config):
-    config.scan(__name__)
