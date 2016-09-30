@@ -367,3 +367,13 @@ class DocumentHTMLPresenter(object):
         if self.document.document_uris:
             return jinja2.escape(self.document.document_uris[0].uri)
         return ''
+
+    @property
+    def web_uri(self):
+        via_prefix = 'https://via.hypothes.is/'
+        web_uri = self.document.web_uri
+
+        if web_uri and web_uri != via_prefix and web_uri.startswith(via_prefix):
+            web_uri = web_uri[len(via_prefix):]
+
+        return web_uri

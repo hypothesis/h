@@ -161,6 +161,7 @@ class TestGetNotification(object):
         reply = Annotation(**FIXTURE_DATA['reply'])
         reply.target_uri = 'http://example.net/foo'
         reply.references = [parent.id]
+        reply.document = doc
         db_session.add(reply)
         db_session.flush()
         annotations[reply.id] = reply

@@ -27,7 +27,6 @@ pyramid-jinja2
 pyramid-multiauth
 pyramid-services
 pyramid_mailer
-pyramid_redis_sessions
 pyramid_tm
 python-dateutil
 python-slugify < 1.2.0

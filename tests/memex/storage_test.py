@@ -15,10 +15,8 @@ from memex.models.document import Document, DocumentURI, DocumentMeta
 
 class TestFetchAnnotation(object):
 
-    def test_it_fetches_and_returns_the_annotation(self, db_session):
-        annotation = Annotation(userid='luke')
-        db_session.add(annotation)
-        db_session.flush()
+    def test_it_fetches_and_returns_the_annotation(self, db_session, factories):
+        annotation = factories.Annotation()
 
         actual = storage.fetch_annotation(db_session, annotation.id)
         assert annotation == actual
@@ -29,29 +27,18 @@ class TestFetchAnnotation(object):
 
 class TestFetchOrderedAnnotations(object):
 
-    def test_it_returns_annotations_for_ids_in_the_same_order(self, db_session):
-        ann_1 = Annotation(userid='luke')
-        ann_2 = Annotation(userid='luke')
-        db_session.add_all([ann_1, ann_2])
-        db_session.flush()
+    def test_it_returns_annotations_for_ids_in_the_same_order(self, db_session, factories):
+        ann_1 = factories.Annotation(userid='luke')
+        ann_2 = factories.Annotation(userid='luke')
 
         assert [ann_2, ann_1] == storage.fetch_ordered_annotations(db_session,
                                                                    [ann_2.id, ann_1.id])
         assert [ann_1, ann_2] == storage.fetch_ordered_annotations(db_session,
                                                                    [ann_1.id, ann_2.id])
 
-    def test_it_allows_to_change_the_query(self, db_session):
-        ann_1 = Annotation(userid='luke', target_uri='http://example.com')
-        ann_2 = Annotation(userid='maria', target_uri='http://example.com')
-        db_session.add_all([ann_1, ann_2])
-
-        doc = Document(
-            document_uris=[DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
-                           DocumentURI(uri='http://example.com/', type='rel-canonical', claimant='http://example.com')],
-            meta=[DocumentMeta(claimant='http://example.com', type='title', value='Example')])
-        db_session.add(doc)
-
-        db_session.flush()
+    def test_it_allows_to_change_the_query(self, db_session, factories):
+        ann_1 = factories.Annotation(userid='luke')
+        ann_2 = factories.Annotation(userid='maria')
 
         def only_maria(query):
             return query.filter(Annotation.userid == 'maria')
@@ -94,8 +81,7 @@ class TestExpandURI(object):
         ]
 
 
-@pytest.mark.usefixtures('models',
-                         'update_document_metadata')
+@pytest.mark.usefixtures('models')
 class TestCreateAnnotation(object):
 
     def test_it_fetches_parent_annotation_for_replies(self,
@@ -182,7 +168,7 @@ class TestCreateAnnotation(object):
     def test_it_updates_the_document_metadata_from_the_annotation(self,
                                                                   models,
                                                                   pyramid_request,
-                                                                  update_document_metadata):
+                                                                  datetime):
         annotation_data = self.annotation_data()
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
@@ -191,12 +177,26 @@ class TestCreateAnnotation(object):
 
         storage.create_annotation(pyramid_request, annotation_data)
 
-        update_document_metadata.assert_called_once_with(
+        models.update_document_metadata.assert_called_once_with(
             pyramid_request.db,
-            models.Annotation.return_value,
+            models.Annotation.return_value.target_uri,
             mock.sentinel.document_meta_dicts,
-            mock.sentinel.document_uri_dicts
+            mock.sentinel.document_uri_dicts,
+            created=datetime.utcnow(),
+            updated=datetime.utcnow(),
         )
+
+    def test_it_sets_the_annotations_document_id(self,
+                                                 models,
+                                                 pyramid_request):
+        annotation_data = self.annotation_data()
+
+        document = mock.Mock()
+        models.update_document_metadata.return_value = document
+
+        ann = storage.create_annotation(pyramid_request, annotation_data)
+
+        assert ann.document == document
 
     def test_it_returns_the_annotation(self, models, pyramid_request):
         annotation = storage.create_annotation(pyramid_request,
@@ -235,8 +235,7 @@ class TestCreateAnnotation(object):
         }
 
 
-@pytest.mark.usefixtures('models',
-                         'update_document_metadata')
+@pytest.mark.usefixtures('models')
 class TestUpdateAnnotation(object):
 
     def test_it_gets_the_annotation_model(self,
@@ -325,7 +324,8 @@ class TestUpdateAnnotation(object):
             self,
             annotation_data,
             session,
-            update_document_metadata):
+            models,
+            datetime):
         annotation = session.query.return_value.get.return_value
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
@@ -336,12 +336,26 @@ class TestUpdateAnnotation(object):
                                   'test_annotation_id',
                                   annotation_data)
 
-        update_document_metadata.assert_called_once_with(
+        models.update_document_metadata.assert_called_once_with(
             session,
-            annotation,
+            annotation.target_uri,
             mock.sentinel.document_meta_dicts,
-            mock.sentinel.document_uri_dicts
+            mock.sentinel.document_uri_dicts,
+            updated=datetime.utcnow()
         )
+
+    def test_it_updates_the_annotations_document_id(self,
+                                                    annotation_data,
+                                                    session,
+                                                    models):
+        annotation = session.query.return_value.get.return_value
+        document = mock.Mock()
+        models.update_document_metadata.return_value = document
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+        assert annotation.document == document
 
     def test_it_returns_the_annotation(self, annotation_data, session):
         annotation = storage.update_annotation(session,
@@ -357,11 +371,11 @@ class TestUpdateAnnotation(object):
     def test_it_does_not_call_update_document_meta_if_no_document_in_data(
             self,
             session,
-            update_document_metadata):
+            models):
 
         storage.update_annotation(session, 'test_annotation_id', {})
 
-        assert not update_document_metadata.called
+        assert not models.update_document_metadata.called
 
     @pytest.fixture
     def annotation_data(self):
@@ -381,18 +395,11 @@ class TestUpdateAnnotation(object):
             'extra': {},
         }
 
-    @pytest.fixture
-    def datetime(self, patch):
-        return patch('memex.storage.datetime')
-
 
 class TestDeleteAnnotation(object):
 
-    def test_it_deletes_the_annotation(self, db_session):
-        ann_1 = Annotation(userid='luke')
-        ann_2 = Annotation(userid='leia')
-        db_session.add_all([ann_1, ann_2])
-        db_session.flush()
+    def test_it_deletes_the_annotation(self, db_session, factories):
+        ann_1, ann_2 = (factories.Annotation(), factories.Annotation())
 
         storage.delete_annotation(db_session, ann_1.id)
         db_session.commit()
@@ -427,5 +434,5 @@ def session(db_session):
 
 
 @pytest.fixture
-def update_document_metadata(patch):
-    return patch('memex.storage.models.update_document_metadata')
+def datetime(patch):
+    return patch('memex.storage.datetime')

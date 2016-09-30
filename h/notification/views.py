@@ -26,5 +26,4 @@ def unsubscribe(request):
 
 
 def includeme(config):
-    config.add_route('unsubscribe', '/notification/unsubscribe/{token}')
     config.scan(__name__)

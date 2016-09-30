@@ -13,24 +13,14 @@ from pyramid.view import forbidden_view_config
 from pyramid.view import notfound_view_config
 from pyramid.view import view_config
 
-from h import i18n
-from h.util.view import json_view
-
-_ = i18n.TranslationString
-
-
-# Within the API, render a JSON 403/404 message.
-@forbidden_view_config(path_info='/api/', renderer='json')
-@notfound_view_config(path_info='/api/', renderer='json')
-def api_notfound(context, request):
-    request.response.status_code = 404
-    return {'status': 'failure', 'reason': 'not_found'}
+from h.util.view import handle_exception
 
 
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
 @notfound_view_config(renderer='h:templates/notfound.html.jinja2',
                       append_slash=True)
-def notfound(context, request):
+def notfound(request):
+    """Handle a request for an unknown/forbidden resource."""
     request.response.status_int = 404
     return {}
 
@@ -38,32 +28,7 @@ def notfound(context, request):
 @view_config(context=Exception,
              accept='text/html',
              renderer='h:templates/5xx.html.jinja2')
-def error(context, request):
-    """Display an error message."""
-    _handle_exc(request)
+def error(request):
+    """Handle a request for which the handler threw an exception."""
+    handle_exception(request)
     return {}
-
-
-@json_view(context=Exception)
-def json_error(context, request):
-    """"Return a JSON-formatted error message."""
-    _handle_exc(request)
-    return {"reason": _(
-        "Uh-oh, something went wrong! We're very sorry, our "
-        "application wasn't able to load this page. The team has been "
-        "notified and we'll fix it shortly. If the problem persists or you'd "
-        "like more information please email support@hypothes.is with the "
-        "subject 'Internal Server Error'.")}
-
-
-def includeme(config):
-    config.scan(__name__)
-
-
-def _handle_exc(request):
-    request.response.status_int = 500
-    request.sentry.captureException()
-    # In debug mode we should just reraise, so that the exception is caught by
-    # the debug toolbar.
-    if request.debug:
-        raise

@@ -85,3 +85,9 @@
 .search-bar__dropdown-menu-item.is-hidden {
   display: none;
 }
+
+@include touch-input {
+  .search-bar__input {
+    font-size: $touch-input-font-size;
+  }
+}

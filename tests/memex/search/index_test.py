@@ -6,7 +6,6 @@ import pytest
 
 import elasticsearch
 
-from memex import models
 from memex import presenters
 from memex.search import client
 from memex.search import index
@@ -131,10 +130,8 @@ class TestBatchIndexer(object):
             mock.call(indexer, set(['id-1'])),
         ]
 
-    def test_index_indexes_all_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk):
-        ann_1, ann_2 = self.annotation(), self.annotation()
-        db_session.add_all([ann_1, ann_2])
-        db_session.flush()
+    def test_index_indexes_all_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
+        ann_1, ann_2 = factories.Annotation(), factories.Annotation()
 
         indexer.index()
 
@@ -142,10 +139,8 @@ class TestBatchIndexer(object):
             indexer.es_client.conn, matchers.iterable_with([ann_1, ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
-    def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk):
-        ann_1, ann_2 = self.annotation(), self.annotation()
-        db_session.add_all([ann_1, ann_2])
-        db_session.flush()
+    def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
+        ann_1, ann_2 = factories.Annotation(), factories.Annotation()
 
         indexer.index([ann_2.id])
 
@@ -157,8 +152,9 @@ class TestBatchIndexer(object):
                                                    db_session,
                                                    indexer,
                                                    pyramid_request,
-                                                   streaming_bulk):
-        annotation = self.annotation()
+                                                   streaming_bulk,
+                                                   factories):
+        annotation = factories.Annotation()
         db_session.add(annotation)
         db_session.flush()
         results = []
@@ -187,11 +183,10 @@ class TestBatchIndexer(object):
                                                                                indexer,
                                                                                pyramid_request,
                                                                                streaming_bulk,
-                                                                               pyramid_config):
+                                                                               pyramid_config,
+                                                                               factories):
 
-        annotation = self.annotation()
-        db_session.add(annotation)
-        db_session.flush()
+        annotation = factories.Annotation()
         results = []
 
         def fake_streaming_bulk(*args, **kwargs):
@@ -221,12 +216,9 @@ class TestBatchIndexer(object):
             rendered
         )
 
-    def test_index_returns_failed_bulk_actions(self, db_session, indexer, streaming_bulk):
-        ann_success_1, ann_success_2 = self.annotation(), self.annotation()
-        ann_fail_1, ann_fail_2 = self.annotation(), self.annotation()
-        db_session.add_all([ann_success_1, ann_success_2,
-                            ann_fail_1, ann_fail_2])
-        db_session.flush()
+    def test_index_returns_failed_bulk_actions(self, db_session, indexer, streaming_bulk, factories):
+        ann_success_1, ann_success_2 = factories.Annotation(), factories.Annotation()
+        ann_fail_1, ann_fail_2 = factories.Annotation(), factories.Annotation()
 
         def fake_streaming_bulk(*args, **kwargs):
             for ann in args[1]:
@@ -251,9 +243,6 @@ class TestBatchIndexer(object):
     @pytest.fixture
     def streaming_bulk(self, patch):
         return patch('memex.search.index.es_helpers.streaming_bulk')
-
-    def annotation(self):
-        return models.Annotation(userid="bob", target_uri="http://example.com")
 
 
 class TestBatchDeleter(object):
@@ -394,10 +383,8 @@ class TestBatchDeleter(object):
         return patch('memex.search.index.es_helpers.streaming_bulk')
 
     @pytest.fixture
-    def annotation(self, db_session):
-        ann = models.Annotation(userid="bob", target_uri="http://example.com")
-        db_session.add(ann)
-        db_session.flush()
+    def annotation(self, db_session, factories):
+        ann = factories.Annotation(userid="bob", target_uri="http://example.com")
         return ann
 
 

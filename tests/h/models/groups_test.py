@@ -152,21 +152,6 @@ def test_documents_when_group_has_no_documents(group):
     assert group.documents() == []
 
 
-def test_documents_does_not_return_null_documents(db_session, group):
-    """
-    It shouldn't return None when an annotation has no document.
-
-    Some annotations have no document and annotation.document will be None.
-    In this case nothing should be added to the list of documents,
-    it should not return None in the list of documents that it returns.
-
-    """
-    db_session.add(memex.models.Annotation(
-        userid=u'fred', groupid=group.pubid, shared=True))
-
-    assert None not in group.documents()
-
-
 def test_acl(group, factories):
     group.pubid = 'testing-pubid'
     group.creator = factories.User(username='luke', authority='foobar.org')
@@ -182,7 +167,8 @@ def annotation(session, document_, groupid, shared):
     """Add a new annotation of the given document to the db and return it."""
     annotation_ = memex.models.Annotation(
         userid=u'fred', groupid=groupid, shared=shared,
-        target_uri=document_.document_uris[0].uri)
+        target_uri=document_.document_uris[0].uri,
+        document_id=document_.id)
     session.add(annotation_)
     return annotation_
 
