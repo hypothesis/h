@@ -78,7 +78,3 @@ def stream_user_redirect(request):
     query = {'q': 'user:{}'.format(request.matchdict['user'])}
     location = request.route_url('stream', _query=query)
     raise httpexceptions.HTTPFound(location=location)
-
-
-def includeme(config):
-    config.scan(__name__)
