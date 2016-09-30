@@ -217,7 +217,7 @@ class SearchBarController extends Controller {
 
     this._dropdownItems.forEach(function(item) {
       if(item && item.addEventListener) {
-        item.addEventListener('mouseover', handleHoverOnItem);
+        item.addEventListener('mousemove', handleHoverOnItem);
         item.addEventListener('mousedown', handleClickOnItem);
       }
     });
