@@ -221,9 +221,9 @@ class SearchBarController extends Controller {
     });
 
     this._dropdown.addEventListener('mousedown', handleClickOnDropdown);
-    this._input.addEventListener('focusout', handleFocusOutside);
+    this._input.addEventListener('blur', handleFocusOutside);
     this._input.addEventListener('input', handleInputOnInput);
-    this._input.addEventListener('focusin', handleFocusinOnInput);
+    this._input.addEventListener('focus', handleFocusinOnInput);
   }
 
   update(state) {
