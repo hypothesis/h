@@ -35,6 +35,13 @@ def ajax_payload(request, data):
     payload = {'flash': session.pop_flash(request),
                'model': session.model(request)}
     payload.update(data)
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+    })
     return payload
 
 
@@ -163,6 +170,11 @@ class AjaxAuthController(AuthController):
 
     @view_config(request_param='__formid__=login')
     def login(self):
+
+        print '----------------'
+        print self.request
+        print '----------------'
+
         try:
             json_body = self.request.json_body
         except ValueError as exc:
@@ -178,7 +190,6 @@ class AjaxAuthController(AuthController):
         # Deform crashes otherwise.
         json_body['username'] = unicode(json_body.get('username') or '')
         json_body['password'] = unicode(json_body.get('password') or '')
-
         appstruct = self.form.validate(json_body.items())
 
         user = appstruct['user']
@@ -191,10 +202,16 @@ class AjaxAuthController(AuthController):
     def logout(self):
         headers = self._logout()
         self.request.response.headers.extend(headers)
+        print '~~~~~~~~~~~~~~~~~~'
+        print ajax_payload(self.request, {'status': 'okay'})
+        print self.request.response.headers
+        print '~~~~~~~~~~~~~~~~~~'
+
         return ajax_payload(self.request, {'status': 'okay'})
 
+
     @view_config(request_param="__formid__=login", request_method="OPTIONS")
-    def options(request):
+    def options(self):
         print 'fuckkkkk'
         response = Response()
         response.headers.update({

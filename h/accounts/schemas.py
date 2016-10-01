@@ -137,7 +137,7 @@ class LoginSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
-        super(LoginSchema, self).validator(node, value)
+        # super(LoginSchema, self).validator(node, value)
 
         request = node.bindings['request']
         username = value.get('username')
