@@ -56,7 +56,6 @@ def annotator_token(request):
         session.check_csrf_token(request)
     except exceptions.BadCSRFToken:
         raise httpexceptions.HTTPUnauthorized()
-
     return generate_jwt(request, 3600)
 
 

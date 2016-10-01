@@ -171,10 +171,6 @@ class AjaxAuthController(AuthController):
     @view_config(request_param='__formid__=login')
     def login(self):
 
-        print '----------------'
-        print self.request
-        print '----------------'
-
         try:
             json_body = self.request.json_body
         except ValueError as exc:
@@ -202,17 +198,11 @@ class AjaxAuthController(AuthController):
     def logout(self):
         headers = self._logout()
         self.request.response.headers.extend(headers)
-        print '~~~~~~~~~~~~~~~~~~'
-        print ajax_payload(self.request, {'status': 'okay'})
-        print self.request.response.headers
-        print '~~~~~~~~~~~~~~~~~~'
-
         return ajax_payload(self.request, {'status': 'okay'})
 
 
     @view_config(request_param="__formid__=login", request_method="OPTIONS")
     def options(self):
-        print 'fuckkkkk'
         response = Response()
         response.headers.update({
             'Access-Control-Allow-Origin': '*',

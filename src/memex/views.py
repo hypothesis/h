@@ -189,15 +189,17 @@ def options_ann(annotation, request):
             )
 def options_anns(annotation, request):
     '''returns a preflight CORS header response'''
+    print 'nigger'
     response = Response()
     response.headers.update({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
-        'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Max-Age': '1728000',
         })
     response.status_code = 200
+    print response.headers
     return response
 
 @api_config(route_name='api.annotations',
@@ -205,6 +207,13 @@ def options_anns(annotation, request):
             effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+        })
     schema = schemas.CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
     annotation = storage.create_annotation(request, appstruct)
