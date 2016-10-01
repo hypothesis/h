@@ -59,6 +59,7 @@
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.2.1",
     "sinon": "^1.17.3",
+    "syn": "^0.2.2",
     "websocket": "^1.0.22"
   },
   "engines": {
