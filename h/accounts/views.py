@@ -107,7 +107,10 @@ class AuthController(object):
     def __init__(self, request):
         form_footer = '<a class="link" href="{href}">{text}</a>'.format(
             href=request.route_path('forgot_password'),
-            text=_('Forgot your password?'))
+            text=_('Forgot your password?')) + \
+            '<a class="link" href="{href}">Login wiht Google</a>'.format(
+                href=request.route_path('logingoogle'),
+                )
 
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
@@ -168,14 +171,14 @@ class AuthController(object):
         headers = security.forget(self.request)
         return headers
 
-@view_config(route_name='loginprovider')
+@view_config(route_name='logingoogle')
 def loginprovider(request):
     login_redirect = request.params.get('next',request.route_url('stream'))
     if request.authenticated_userid is not None:
         raise httpexceptions.HTTPFound(location=login_redirect)
 
     response = Response()
-    provider_name = request.matchdict.get('provider')
+    provider_name = 'google'
     result = authomatic.login(WebObAdapter(request, response), provider_name)
     if result:
         if result.error:
