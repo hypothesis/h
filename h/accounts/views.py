@@ -26,8 +26,20 @@ from h.accounts.events import LoginEvent
 from h.util.view import json_view
 from h._compat import urlparse
 
-_ = i18n.TranslationString
+from authomatic import Authomatic
+from authomatic.adapters import WebObAdapter
+CONFIG = {
+    'google': {
+         'class_': 'authomatic.providers.oauth2.Google',
+         'consumer_key': '371544313762-65n4g4t8jmvq1n0b0p1g8csbvmhgc5f2.apps.googleusercontent.com',
+         'consumer_secret': 'e1fRRSAo-NbpCwVjRTlN9Irm',
+         'scope': ['https://www.googleapis.com/auth/userinfo.profile',
+                   'https://www.googleapis.com/auth/userinfo.email']
+    },
+}
+authomatic = Authomatic(config=CONFIG, secret='txtpen random string')
 
+_ = i18n.TranslationString
 
 # A little helper to ensure that session data is returned in every ajax
 # response payload.
@@ -155,8 +167,46 @@ class AuthController(object):
             self.request.session.invalidate()
         headers = security.forget(self.request)
         return headers
- 
 
+@view_config(route_name='loginprovider')
+def loginprovider(request):
+    login_redirect = request.params.get('next',request.route_url('stream'))
+    if request.authenticated_userid is not None:
+        raise httpexceptions.HTTPFound(location=login_redirect)
+
+    response = Response()
+    provider_name = request.matchdict.get('provider')
+    result = authomatic.login(WebObAdapter(request, response), provider_name)
+    if result:
+        if result.error:
+            response.write(u'<h2>Damn that error: {0}</h2>'
+                .format(result.error.message))
+        elif result.user:
+            if not (result.user.name and result.user.id):
+                result.user.update()
+
+            # gid_exists = models.User.get_by_google_id(request.db, result.user.id)
+            email_exists = models.User.get_by_email(request.db, result.user.email)
+            if email_exists:
+                email_exists.last_login_date = datetime.datetime.utcnow()
+                request.registry.notify(LoginEvent(request, email_exists))
+                headers = security.remember(request, email_exists.userid)
+                return httpexceptions.HTTPFound(location=login_redirect,
+                                        headers=headers)
+            else:
+                signup_service = request.find_service(name='user_signup_google')
+                username = ''.join(map(lambda x: x.capitalize(), str(result.user.name).split(' ')))
+                while models.User.get_by_username(request.db, username):
+                    username = username + '_'
+                signup_service.signup(username=username,
+                                      email=result.user.email,
+                                      password=username*2,
+                                      google_id=result.user.id)
+                return httpexceptions.HTTPFound(location=login_redirect,
+                        headers=headers)
+            print result.user.id
+
+    return response
 
 @view_defaults(route_name='session',
                accept='application/json',
