@@ -55,6 +55,8 @@ def robots(context, request):
 
 
 @view_config(route_name='stream')
+@view_config(route_name='stream_login')
+@view_config(route_name='stream_logout')
 def stream(context, request):
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')

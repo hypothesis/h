@@ -12,6 +12,7 @@ from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 
+from h.auth.tokens import generate_jwt
 from h import accounts
 from h import form
 from h import i18n
@@ -171,9 +172,21 @@ class AuthController(object):
         headers = security.forget(self.request)
         return headers
 
+@view_config(route_name="assigntoken")
+def successcallback(request):
+    return Response('''
+        <html>
+            <script>
+                localStorage.setItem('token','%s');
+                window.location.href = "http://dev.txtpen.com:5000/stream";
+            </script>
+        </html>''' % \
+        generate_jwt(request, 3600))
+
 @view_config(route_name='logingoogle')
 def loginprovider(request):
-    login_redirect = request.params.get('next',request.route_url('stream'))
+    login_redirect = request.params.get('next',request.route_url('assigntoken'))
+    
     if request.authenticated_userid is not None:
         raise httpexceptions.HTTPFound(location=login_redirect)
 
@@ -182,7 +195,7 @@ def loginprovider(request):
     result = authomatic.login(WebObAdapter(request, response), provider_name)
     if result:
         if result.error:
-            response.write(u'<h2>Damn that error: {0}</h2>'
+            response.write(u'<h2>Error: {0}</h2>'
                 .format(result.error.message))
         elif result.user:
             if not (result.user.name and result.user.id):

@@ -10,10 +10,14 @@ def includeme(config):
     config.add_route('via_redirect', '/via')
 
     # Accounts
-    config.add_route('login', '/login')
+    config.add_route('logout', '/session/logout')
+    config.add_route('login', '/deprecated/login')
+    config.add_route('signup', '/deprecated/signup')
+    config.add_route('assigntoken', '/session/assigntoken')
+    
     config.add_route('logingoogle', '/login/google')
-    config.add_route('logout', '/logout')
-    config.add_route('signup', '/signup')
+    config.add_route('stream_login', '/login')
+    config.add_route('stream_logout', '/logout')
     config.add_route('activate', '/activate/{id}/{code}')
     config.add_route('forgot_password', '/forgot-password')
     config.add_route('account_reset', '/account/reset')

@@ -8,9 +8,8 @@
      enabled. We shouldn't really need this because a given instance of the app
      only ever displays a single route.
      #}
-    <base target="_top" href="/" />
-  {% for url in app_css_urls %}
-    <link rel="stylesheet" href="{{ url }}">
+    {% for url in app_css_urls %}
+      <link rel="stylesheet" href="{{ url }}">
     {% endfor %}
     {% for attrs in meta_attrs -%}
       <meta {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
@@ -27,16 +26,19 @@
           href="{{ base_url }}assets/images/favicons/android-chrome-192x192.png">
     <link rel="shortcut icon"
           href="{{ base_url }}assets/images/favicons/favicon.ico">
-          
+    
     {% if link_tags %}
       {% for link in link_tags %}
         <link rel="{{ link.rel }}" type="{{ link.type }}"
               href="{{ link.href }}"/>
       {% endfor %}
     {% endif %}
+
+    <link id="reactwebapp" src="{{react_client_js}}">
+
   </head>
   <body>
-    <hypothesis-app></hypothesis-app>
+    <txtpen-app id="txtpen"></txtpen-app>
 
     <!-- App Configuration !-->
     <script class="js-hypothesis-settings" type="application/json">
