@@ -20,6 +20,7 @@ newrelic
 passlib
 psycogreen
 psycopg2
+goose-extractor
 pyramid
 pyramid_authsanity
 pyramid_layout

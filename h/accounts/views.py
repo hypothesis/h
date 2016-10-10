@@ -218,6 +218,8 @@ def loginprovider(request):
                                       email=result.user.email,
                                       password=username*2,
                                       google_id=result.user.id)
+                headers = security.remember(request, 
+                    models.User.get_by_email(request.db, result.user.email).userid)
                 return httpexceptions.HTTPFound(location=login_redirect,
                         headers=headers)
             print result.user.id

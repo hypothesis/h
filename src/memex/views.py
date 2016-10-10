@@ -189,7 +189,6 @@ def options_ann(annotation, request):
             )
 def options_anns(annotation, request):
     '''returns a preflight CORS header response'''
-    print 'nigger'
     response = Response()
     response.headers.update({
         'Access-Control-Allow-Origin': '*',
@@ -199,7 +198,6 @@ def options_anns(annotation, request):
         'Access-Control-Max-Age': '1728000',
         })
     response.status_code = 200
-    print response.headers
     return response
 
 @api_config(route_name='api.annotations',

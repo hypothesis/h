@@ -10,14 +10,13 @@ assumed to be validated.
 from datetime import datetime
 
 from pyramid import i18n
-
 from memex import schemas
 from memex import models
 from memex.db import types
-
-
 _ = i18n.TranslationStringFactory(__package__)
 
+from goose import Goose
+g = Goose()
 
 def fetch_annotation(session, id_):
     """
