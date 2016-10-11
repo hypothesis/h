@@ -12,7 +12,6 @@ services:
      - postgres
      - elasticsearch
      - rabbit
-     - redis
      - websocket
   websocket:
     extends:
@@ -51,7 +50,3 @@ services:
     ports:
      - '5672:5672'
      - '15672:15672'
-  redis:
-    image: redis:3.2.3
-    ports:
-     - '6379:6379'
