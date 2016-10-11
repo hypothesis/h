@@ -4,9 +4,9 @@ import deform
 import mock
 import pytest
 from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther, HTTPNotFound)
+                                    HTTPSeeOther)
 
-from h.groups import views
+from h.views import groups as views
 from h.models import (Group, User)
 
 
@@ -116,7 +116,7 @@ class TestGroupCreateController(object):
 
     @pytest.fixture
     def handle_form_submission(self, patch):
-        return patch('h.groups.views.form.handle_form_submission')
+        return patch('h.views.groups.form.handle_form_submission')
 
 
 @pytest.mark.usefixtures('routes')
