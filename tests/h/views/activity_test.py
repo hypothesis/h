@@ -5,7 +5,8 @@ import pytest
 import mock
 from pyramid import httpexceptions
 
-from h.activity import views
+from h.views.activity import PAGE_SIZE
+from h.views.activity import search
 
 
 # The search view is just a skeleton at the moment, the only part we should
@@ -16,12 +17,12 @@ class TestSearch(object):
         pyramid_request.feature.flags['search_page'] = False
 
         with pytest.raises(httpexceptions.HTTPNotFound):
-            views.search(pyramid_request)
+            search(pyramid_request)
 
     def test_it_checks_for_redirects(self, pyramid_request, query):
         pyramid_request.feature.flags['search_page'] = True
 
-        views.search(pyramid_request)
+        search(pyramid_request)
 
         query.check_url.assert_called_once_with(pyramid_request,
                                                 query.extract.return_value)
@@ -29,17 +30,17 @@ class TestSearch(object):
     def test_it_executes_a_search_query(self, pyramid_request, query):
         pyramid_request.feature.flags['search_page'] = True
 
-        views.search(pyramid_request)
+        search(pyramid_request)
 
         query.execute.assert_called_once_with(pyramid_request,
                                               query.extract.return_value,
-                                              page_size=views.PAGE_SIZE)
+                                              page_size=PAGE_SIZE)
 
     def test_it_allows_to_specify_the_page_size(self, pyramid_request, query):
         pyramid_request.feature.flags['search_page'] = True
 
         pyramid_request.params['page_size'] = 100
-        views.search(pyramid_request)
+        search(pyramid_request)
 
         query.execute.assert_called_once_with(pyramid_request,
                                               query.extract.return_value,
@@ -49,18 +50,18 @@ class TestSearch(object):
         pyramid_request.feature.flags['search_page'] = True
 
         pyramid_request.params['page_size'] = 'foobar'
-        views.search(pyramid_request)
+        search(pyramid_request)
 
         query.execute.assert_called_once_with(pyramid_request,
                                               query.extract.return_value,
-                                              page_size=views.PAGE_SIZE)
+                                              page_size=PAGE_SIZE)
 
     @pytest.mark.usefixtures('query')
     def test_is_uses_passed_in_page_size_for_pagination(self, pyramid_request, paginate):
         pyramid_request.feature.flags['search_page'] = True
 
         pyramid_request.params['page_size'] = 100
-        views.search(pyramid_request)
+        search(pyramid_request)
 
         paginate.assert_called_once_with(pyramid_request,
                                          mock.ANY,
@@ -68,8 +69,8 @@ class TestSearch(object):
 
     @pytest.fixture
     def query(self, patch):
-        return patch('h.activity.views.query')
+        return patch('h.views.activity.query')
 
     @pytest.fixture
     def paginate(self, patch):
-        return patch('h.activity.views.paginate')
+        return patch('h.views.activity.paginate')
