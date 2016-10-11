@@ -4,7 +4,7 @@ import mock
 import pytest
 
 from h.models import Subscriptions
-from h.notification import views
+from h.views.notification import unsubscribe
 
 
 @pytest.mark.usefixtures('subscriptions', 'token_serializer')
@@ -13,7 +13,7 @@ class TestUnsubscribe(object):
     def test_deserializes_token(self, pyramid_request, token_serializer):
         pyramid_request.matchdict = {'token': 'wibble'}
 
-        views.unsubscribe(pyramid_request)
+        unsubscribe(pyramid_request)
 
         token_serializer.loads.assert_called_once_with('wibble')
 
@@ -22,7 +22,7 @@ class TestUnsubscribe(object):
         pyramid_request.matchdict = {'token': 'wibble'}
         token_serializer.loads.return_value = {'type': 'reply', 'uri': 'acct:foo@example.com'}
 
-        views.unsubscribe(pyramid_request)
+        unsubscribe(pyramid_request)
 
         assert not sub1.active
 
@@ -31,7 +31,7 @@ class TestUnsubscribe(object):
         pyramid_request.matchdict = {'token': 'wibble'}
         token_serializer.loads.return_value = {'type': 'reply', 'uri': 'acct:foo@example.com'}
 
-        views.unsubscribe(pyramid_request)
+        unsubscribe(pyramid_request)
 
         assert sub2.active
         assert sub3.active
@@ -41,8 +41,8 @@ class TestUnsubscribe(object):
         pyramid_request.matchdict = {'token': 'wibble'}
         token_serializer.loads.return_value = {'type': 'reply', 'uri': 'acct:foo@example.com'}
 
-        views.unsubscribe(pyramid_request)
-        views.unsubscribe(pyramid_request)
+        unsubscribe(pyramid_request)
+        unsubscribe(pyramid_request)
 
         assert not sub1.active
 
@@ -52,7 +52,7 @@ class TestUnsubscribe(object):
         token_serializer.loads.side_effect = ValueError('token invalid')
 
         with pytest.raises(HTTPNotFound):
-            views.unsubscribe(pyramid_request)
+            unsubscribe(pyramid_request)
 
     @pytest.fixture
     def subscriptions(self, db_session):
