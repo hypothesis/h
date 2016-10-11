@@ -52,7 +52,3 @@ def navbar(context, request):
         'search_url': search_url,
         'q': request.params.get('q', ''),
     }
-
-
-def includeme(config):
-    config.scan(__name__)

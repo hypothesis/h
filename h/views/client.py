@@ -80,7 +80,3 @@ def session_view(request):
 @view_config(route_name='widget')
 def widget(context, request):
     return render_app(request)
-
-
-def includeme(config):
-    config.scan(__name__)
