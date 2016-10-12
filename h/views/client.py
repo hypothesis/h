@@ -41,7 +41,7 @@ def render_app(request, extra=None):
 # off-origin, unlike the rest of the API. Given that this method of
 # authenticating to the API is not intended to remain, this seems like a
 # limitation we do not need to lift any time soon.
-@view_config(route_name='token', renderer='string')
+@view_config(route_name='token', renderer='string', request_method='GET')
 def annotator_token(request):
     """
     Return a JWT access token for the given request.
