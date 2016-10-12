@@ -182,10 +182,15 @@ class DocumentJSONPresenter(object):
         if not self.document:
             return {}
 
+	meta = {}
+	for m in self.document.meta:
+	    meta[m.type] = m.value
+
         d = {}
         title = self.document.title
         if title:
-            d['title'] = [title]
+            d['title'] = title
+	    d['meta'] = meta
 
         return d
 

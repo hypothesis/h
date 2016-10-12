@@ -15,9 +15,6 @@ from memex import models
 from memex.db import types
 _ = i18n.TranslationStringFactory(__package__)
 
-from goose import Goose
-g = Goose()
-
 def fetch_annotation(session, id_):
     """
     Fetch the annotation with the given id.
@@ -119,7 +116,7 @@ def create_annotation(request, data):
     annotation = models.Annotation(**data)
     annotation.created = created
     annotation.updated = updated
-
+    
     document = models.update_document_metadata(
         request.db,
         annotation.target_uri,

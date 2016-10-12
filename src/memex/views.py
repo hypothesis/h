@@ -308,7 +308,9 @@ def _present_annotations(request, ids):
 
     annotations = storage.fetch_ordered_annotations(request.db, ids,
                                                     query_processor=eager_load_documents)
+
     links_service = request.find_service(name='links')
+
     return [AnnotationJSONPresenter(ann, links_service).asdict()
             for ann in annotations]
 
