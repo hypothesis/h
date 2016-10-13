@@ -116,6 +116,7 @@
 .search-result-bucket__annotation-cards {
   flex-grow: 1;
   max-width: 500px;
+  flex-shrink: 0;
   padding-left: 0;
   padding-right: 0;
 }
