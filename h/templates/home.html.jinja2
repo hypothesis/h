@@ -11,6 +11,10 @@
   <link rel="chrome-webstore-item"
         href="{{ chrome_extension_link }}">
   <link href="{{ rss_feed_url }}" rel="alternate" type="application/rss+xml">
+  <meta property="og:url"                content="{{ base_url }}" />
+  <meta property="og:title"              content="Hypothes.is | Annotate the web" />
+  <meta property="og:description"        content="Use Hypothes.is to take personal notes or have conversations on any page online"/>
+  <meta property="og:image"              content="https://hypothes.is/assets/images/logo_new.png" />
 {% endblock %}
 
 {% block content %}
