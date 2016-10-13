@@ -160,6 +160,14 @@
     }
 }
 
+// On large tablets and below left-align annotation cards in order to make more
+// space for the stats to the right of the annotation card.
+@media screen and (max-width: $tablet-width + 150px) {
+  .search-result-bucket__annotation-cards-container {
+    padding-left: 0;
+  }
+}
+
 // On normal tablets and below, display annotation stats below annotation list
 @media screen and (max-width: $tablet-width) {
 
@@ -172,7 +180,6 @@
 
   .search-result-bucket__annotation-cards-container {
     flex-direction: column;
-    padding-left: 0;
   }
 
   .search-bucket-stats {
