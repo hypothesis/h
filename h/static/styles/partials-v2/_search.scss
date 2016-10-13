@@ -137,8 +137,8 @@
   margin-bottom: 20px;
 }
 
-// On large tablets and below, display bucket contents beneath rather than
-// alongside the domain
+// On large tablets and below, display bucket titles beneath rather than
+// alongside the domain name.
 @media screen and (max-width: $tablet-width + 100px) {
     .search-result-bucket__header {
       flex-direction: column;
