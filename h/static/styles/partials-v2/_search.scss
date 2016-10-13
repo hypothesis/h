@@ -126,9 +126,10 @@
 // Card displaying stats about a group of annotations in search results
 .search-bucket-stats {
   @include font-normal;
-  width: 210px;
   margin-left: 30px;
   word-wrap: break-word;
+  min-width: 0;  // Make sure the .search-bucket-stats element's content wraps
+                 // as its flexbox parent element is resized.
 }
 
 .search-bucket-stats__key {
