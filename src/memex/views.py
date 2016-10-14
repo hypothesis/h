@@ -33,6 +33,7 @@ from memex import storage
 from memex import models
 from h import util
 from h import models as hmodels
+from h import mailer
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -234,7 +235,6 @@ def read(annotation, request):
 
 
 
-
 @api_config(route_name='api.annotation.jsonld',
             request_method='GET',
             permission='read')
@@ -330,6 +330,44 @@ def _publish_annotation_event(request,
 
 
 ################ USER ###############
+
+@api_config(route_name='api.account.reset',
+            request_method='POST'
+           )
+def account_forgot_pw(request):
+    
+    req = _json_payload(request)
+    email = req['email']
+
+    email_exists = hmodels.User.get_by_email(request.db, email)
+    
+    if not email_exists:
+        return {"errors":[{"code":404,"message":"Account not found."}]}
+
+    serializer = request.registry.password_reset_serializer
+    code = serializer.dumps(email)
+
+    link = request.route_url('account_reset_with_code', code=code)
+    emailtext = ("Hello, {username}!\n\n"
+             "Someone has requested to reset your password. If it was "
+             "you, reset your password by using this reset code:\n\n"
+             "{code}\n\n"
+             "Alternatively, you can reset your password by "
+             "clicking on this link:\n\n"
+             "{link}\n\n"
+             "Regards,\n"
+             "TXTPEN Team\n")
+    body = emailtext.format(code=code,
+                            link=link,
+                            username=email_exists.username)
+    resetEmail =  {
+        "recipients": [email],
+        "subject": _("Reset your password"),
+        "body": body
+    }
+    mailer.send.delay(**resetEmail)
+    return {"status": "success"}
+
 @api_config(route_name='api.user.followers',
             request_method=['GET', 'POST']
            )
