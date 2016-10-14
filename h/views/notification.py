@@ -23,7 +23,3 @@ def unsubscribe(request):
             s.active = False
 
     return {}
-
-
-def includeme(config):
-    config.scan(__name__)

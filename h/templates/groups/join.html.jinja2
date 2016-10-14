@@ -16,7 +16,7 @@
           {{ group.name }}
         </div>
         <div class="join-group-form__group-description">
-          {{ group.description }}
+          {% if group.description %}{{ group.description }}{% endif %}
         </div>
         {% if request.authenticated_userid %}
           <form method="POST">

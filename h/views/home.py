@@ -37,7 +37,3 @@ def index(context, request):
         )
 
     return context
-
-
-def includeme(config):
-    config.scan(__name__)

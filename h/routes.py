@@ -15,10 +15,13 @@ def includeme(config):
     config.add_route('signup', '/deprecated/signup')
     config.add_route('assigntoken', '/session/assigntoken')
     
+    # custom
     config.add_route('logingoogle', '/login/google')
     config.add_route('stream_login', '/login')
     config.add_route('stream_logout', '/logout')
+    config.add_route('stream_forgot', '/forgot')
     config.add_route('activate', '/activate/{id}/{code}')
+    
     config.add_route('forgot_password', '/forgot-password')
     config.add_route('account_reset', '/account/reset')
     config.add_route('account_reset_with_code', '/account/reset/{code}')

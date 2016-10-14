@@ -174,14 +174,14 @@ class AuthController(object):
 
 @view_config(route_name="assigntoken")
 def successcallback(request):
+    print generate_jwt(request, 3600)
     return Response('''
         <html>
             <script>
-                localStorage.setItem('token','%s');
-                window.location.href = "http://dev.txtpen.com:5000/stream";
+                localStorage.setItem('token','{}');
+                window.location.href = "{}";
             </script>
-        </html>''' % \
-        generate_jwt(request, 3600))
+        </html>'''.format(generate_jwt(request, 3600), request.route_url('stream')))
 
 @view_config(route_name='logingoogle')
 def loginprovider(request):
@@ -808,7 +808,3 @@ def dismiss_sidebar_tutorial(request):
     else:
         request.authenticated_user.sidebar_tutorial_dismissed = True
         return ajax_payload(request, {'status': 'okay'})
-
-
-def includeme(config):
-    config.scan(__name__)

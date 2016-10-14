@@ -23,9 +23,11 @@ describe('SearchBarController', function () {
   var dropdown;
   var dropdownItems;
   var ctrl;
+  var form;
 
   before(function () {
-    template = '<input data-ref="searchBarInput">' +
+    template = '<form>' +
+      '<input data-ref="searchBarInput">' +
       '<div data-ref="searchBarDropdown">' +
       '<div>Narrow your search</div>' +
       '<ul>' +
@@ -50,7 +52,8 @@ describe('SearchBarController', function () {
       '</span>' +
       '</li>' +
       '</ul>' +
-      '</div>';
+      '</div>' +
+      '</form>';
   });
 
   beforeEach(function () {
@@ -63,6 +66,9 @@ describe('SearchBarController', function () {
     input = ctrl.refs.searchBarInput;
     dropdown = ctrl.refs.searchBarDropdown;
     dropdownItems = testEl.querySelectorAll('[data-ref="searchBarDropdownItem"]');
+    form = testEl.querySelector('form');
+
+    form.addEventListener('submit', event => { event.preventDefault() });
   });
 
   afterEach(function () {
@@ -211,6 +217,34 @@ describe('SearchBarController', function () {
       .click(input)
       .type('x', () => {
         assert.isFalse(dropdown.classList.contains('is-open'));
+        done();
+      });
+  });
+
+  it('allows submitting the form when query is empty and no dropdown element is selected', function (done) {
+    let submitted = false;
+    form.addEventListener('submit', event => {
+      submitted = true;
+    });
+
+    syn
+      .click(input)
+      .type('[enter]', () => {
+        assert.isTrue(submitted);
+        done();
+      });
+  });
+
+  it('does not submit the form when a dropdown element is selected', function (done) {
+    let submitted = false;
+    form.addEventListener('submit', event => {
+      submitted = true;
+    });
+
+    syn
+      .click(input)
+      .type('[down][enter]', () => {
+        assert.isFalse(submitted);
         done();
       });
   });

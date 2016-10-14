@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from itsdangerous import URLSafeTimedSerializer
-from pyramid import httpexceptions
 
 from h.security import derive_key
 

@@ -57,6 +57,7 @@ def robots(context, request):
 @view_config(route_name='stream')
 @view_config(route_name='stream_login')
 @view_config(route_name='stream_logout')
+@view_config(route_name='stream_forgot')
 def stream(context, request):
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
@@ -79,7 +80,3 @@ def stream_user_redirect(request):
     query = {'q': 'user:{}'.format(request.matchdict['user'])}
     location = request.route_url('stream', _query=query)
     raise httpexceptions.HTTPFound(location=location)
-
-
-def includeme(config):
-    config.scan(__name__)

@@ -64,12 +64,19 @@
 .search-result-bucket__title-and-annotations-count {
   display: flex;
   flex-grow: 1;
+  min-width: 0;  // Without this min-width document titles containing really
+                 // long words won't be wrapped (overflow-wrap: break-word
+                 // won't work), see https://github.com/hypothesis/h/pull/3932
 }
 
 .search-result-bucket__title {
   font-weight: bold;
   flex-grow: 1;
   margin-right: 5px;
+  overflow-wrap: break-word;
+  min-width: 0;  // Without this min-width document titles containing really
+                 // long words won't be wrapped (overflow-wrap: break-word
+                 // won't work), see https://github.com/hypothesis/h/pull/3932
 }
 
 .search-result-bucket__annotations-count {
@@ -165,6 +172,7 @@
 
   .search-result-bucket__annotation-cards-container {
     flex-direction: column;
+    padding-left: 0;
   }
 
   .search-bucket-stats {
