@@ -8,7 +8,7 @@ import deform
 from pyramid import httpexceptions
 
 from h import accounts
-from h.accounts import views
+from h.views import accounts as views
 
 
 class FakeForm(object):
@@ -93,7 +93,7 @@ class TestAuthController(object):
 
         assert result == {'form': 'invalid form'}
 
-    @mock.patch('h.accounts.views.LoginEvent', autospec=True)
+    @mock.patch('h.views.accounts.LoginEvent', autospec=True)
     def test_post_no_event_when_validation_fails(self,
                                                  loginevent,
                                                  invalid_form,
@@ -137,7 +137,7 @@ class TestAuthController(object):
         assert isinstance(result, httpexceptions.HTTPFound)
         assert result.location == '/foo/bar'
 
-    @mock.patch('h.accounts.views.LoginEvent', autospec=True)
+    @mock.patch('h.views.accounts.LoginEvent', autospec=True)
     def test_post_event_when_validation_succeeds(self,
                                                  loginevent,
                                                  factories,
@@ -155,7 +155,7 @@ class TestAuthController(object):
         loginevent.assert_called_with(pyramid_request, elephant)
         notify.assert_called_with(loginevent.return_value)
 
-    @mock.patch('h.accounts.views.LogoutEvent', autospec=True)
+    @mock.patch('h.views.accounts.LogoutEvent', autospec=True)
     def test_logout_event(self, logoutevent, notify, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
 
@@ -312,7 +312,7 @@ class TestForgotPasswordController(object):
 
         assert activation_model.call_count == 0
 
-    @mock.patch('h.accounts.views.account_reset_link')
+    @mock.patch('h.views.accounts.account_reset_link')
     def test_post_generates_reset_link(self,
                                        reset_link,
                                        factories,
@@ -327,8 +327,8 @@ class TestForgotPasswordController(object):
 
         reset_link.assert_called_with(pyramid_request, "faketoken")
 
-    @mock.patch('h.accounts.views.account_reset_email')
-    @mock.patch('h.accounts.views.account_reset_link')
+    @mock.patch('h.views.accounts.account_reset_email')
+    @mock.patch('h.views.accounts.account_reset_link')
     def test_post_generates_mail(self,
                                  reset_link,
                                  reset_mail,
@@ -351,7 +351,7 @@ class TestForgotPasswordController(object):
 
         reset_mail.assert_called_with(user, "faketoken", "http://example.com")
 
-    @mock.patch('h.accounts.views.account_reset_email')
+    @mock.patch('h.views.accounts.account_reset_email')
     def test_post_sends_mail(self,
                              reset_mail,
                              factories,
@@ -426,7 +426,7 @@ class TestResetController(object):
 
         assert elephant.check_password('s3cure!')
 
-    @mock.patch('h.accounts.views.PasswordResetEvent', autospec=True)
+    @mock.patch('h.views.accounts.PasswordResetEvent', autospec=True)
     def test_post_emits_event(self,
                               event,
                               factories,
@@ -999,7 +999,7 @@ class TestDeveloperController(object):
 
 @pytest.fixture
 def session(patch):
-    return patch('h.accounts.views.session')
+    return patch('h.views.accounts.session')
 
 
 @pytest.fixture
@@ -1019,17 +1019,17 @@ def activation_model(patch):
 
 @pytest.fixture
 def ActivationEvent(patch):
-    return patch('h.accounts.views.ActivationEvent')
+    return patch('h.views.accounts.ActivationEvent')
 
 
 @pytest.fixture
 def mailer(patch):
-    return patch('h.accounts.views.mailer')
+    return patch('h.views.accounts.mailer')
 
 
 @pytest.fixture
 def models(patch):
-    return patch('h.accounts.views.models')
+    return patch('h.views.accounts.models')
 
 
 @pytest.fixture

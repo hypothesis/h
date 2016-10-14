@@ -808,7 +808,3 @@ def dismiss_sidebar_tutorial(request):
     else:
         request.authenticated_user.sidebar_tutorial_dismissed = True
         return ajax_payload(request, {'status': 'okay'})
-
-
-def includeme(config):
-    config.scan(__name__)
