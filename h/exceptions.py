@@ -28,3 +28,17 @@ class ClientUnauthorized(APIError):
     def __init__(self):
         message = _('Client credentials are invalid.')
         super(ClientUnauthorized, self).__init__(message, status_code=403)
+
+
+class OAuthTokenError(APIError):
+
+    """
+    Exception raised when an OAuth token request failed.
+
+    This specifically handles OAuth errors which have a type (``message``) and
+    a description (``description``).
+    """
+
+    def __init__(self, message, type_, status_code=400):
+        self.type = type_
+        super(OAuthTokenError, self).__init__(message, status_code=status_code)
