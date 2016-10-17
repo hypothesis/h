@@ -21,6 +21,14 @@
   color: $grey-4;
 }
 
+.pager__item--begin,
+.pager__item--end {
+  padding-top: 8px;
+  padding-bottom: 6px;
+  fill: currentColor;
+}
+
+
 .pager__item--begin {
   background-color: $grey-3;
   margin-right: 10px;
