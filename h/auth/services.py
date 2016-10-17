@@ -85,8 +85,8 @@ class AuthTicketService(object):
         # We don't want to update the `expires` column of an auth ticket on
         # every single request, but only when the ticket hasn't been touched
         # within a the defined `TICKET_REFRESH_INTERVAL`.
-        if (datetime.datetime.utcnow() - ticket.updated) > TICKET_REFRESH_INTERVAL:
-            ticket.expires = datetime.datetime.utcnow() + TICKET_TTL
+        if (utcnow() - ticket.updated) > TICKET_REFRESH_INTERVAL:
+            ticket.expires = utcnow() + TICKET_TTL
 
         return True
 
@@ -100,7 +100,7 @@ class AuthTicketService(object):
         ticket = models.AuthTicket(id=ticket_id,
                                    user=user,
                                    user_userid=user.userid,
-                                   expires=(datetime.datetime.utcnow() + TICKET_TTL))
+                                   expires=(utcnow() + TICKET_TTL))
         self.session.add(ticket)
         # We cache the new userid, this will allow us to migrate the old
         # session policy to this new ticket policy.
