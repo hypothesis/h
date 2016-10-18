@@ -9,7 +9,7 @@
     <div class="search-bucket-stats__key">
         Address
     </div>
-    <div class="search-bucket-stats__val">
+    <div class="search-bucket-stats__val search-bucket-stats__address">
         {{ bucket.uri }}
     </div>
   {% endif %}
@@ -28,7 +28,9 @@
   </div>
   <ul class="search-bucket-stats__val">
     {% for user in bucket.users %}
-      <li>{{ user.split(':')[1].split('@')[0] }}</li>
+      <li class="search-bucket-stats__username">
+        {{ user.split(':')[1].split('@')[0] }}
+      </li>
     {% endfor %}
   </ul>
 </div>

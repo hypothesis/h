@@ -140,6 +140,11 @@
   margin-bottom: 20px;
 }
 
+.search-bucket-stats__address,
+.search-bucket-stats__username {
+  word-break: break-all;
+}
+
 // On large tablets and below, display bucket titles beneath rather than
 // alongside the domain name.
 @media screen and (max-width: $tablet-width + 100px) {
