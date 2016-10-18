@@ -100,9 +100,6 @@
 }
 
 .search-result-bucket__content {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
   padding-left: 10px;
   padding-right: 10px;
 }
@@ -119,6 +116,7 @@
 .search-result-bucket__annotation-cards {
   flex-grow: 1;
   max-width: 500px;
+  flex-shrink: 0;
   padding-left: 0;
   padding-right: 0;
 }
@@ -126,9 +124,11 @@
 // Card displaying stats about a group of annotations in search results
 .search-bucket-stats {
   @include font-normal;
-  width: 210px;
   margin-left: 30px;
   word-wrap: break-word;
+  min-width: 0;  // Without this min-width stats containing really
+                 // long words won't be wrapped (word-wrap: break-word won't
+                 // work).
 }
 
 .search-bucket-stats__key {
@@ -140,8 +140,13 @@
   margin-bottom: 20px;
 }
 
-// On large tablets and below, display bucket contents beneath rather than
-// alongside the domain
+.search-bucket-stats__address,
+.search-bucket-stats__username {
+  word-break: break-all;
+}
+
+// On large tablets and below, display bucket titles beneath rather than
+// alongside the domain name.
 @media screen and (max-width: $tablet-width + 100px) {
     .search-result-bucket__header {
       flex-direction: column;
@@ -160,6 +165,14 @@
     }
 }
 
+// On large tablets and below left-align annotation cards in order to make more
+// space for the stats to the right of the annotation card.
+@media screen and (max-width: $tablet-width + 150px) {
+  .search-result-bucket__annotation-cards-container {
+    padding-left: 0;
+  }
+}
+
 // On normal tablets and below, display annotation stats below annotation list
 @media screen and (max-width: $tablet-width) {
 
@@ -172,7 +185,10 @@
 
   .search-result-bucket__annotation-cards-container {
     flex-direction: column;
-    padding-left: 0;
+  }
+
+  .search-result-bucket__annotation-cards {
+    width: 100%;
   }
 
   .search-bucket-stats {
