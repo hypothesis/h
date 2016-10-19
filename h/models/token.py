@@ -7,6 +7,7 @@ import datetime
 import os
 
 import sqlalchemy
+from sqlalchemy.dialects import postgresql
 
 from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
@@ -37,6 +38,15 @@ class Token(Base, mixins.Timestamps):
     #: A timestamp after which this token will no longer be considered valid.
     #: A NULL value in this column indicates a token that does not expire.
     expires = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
+
+    _authclient_id = sqlalchemy.Column('authclient_id',
+                                       postgresql.UUID(),
+                                       sqlalchemy.ForeignKey('authclient.id', ondelete='cascade'),
+                                       nullable=True)
+
+    #: The authclient which created the token.
+    #: A NULL value means it is a developer token.
+    authclient = sqlalchemy.orm.relationship('AuthClient')
 
     def __init__(self, **kwargs):
         super(Token, self).__init__(**kwargs)
