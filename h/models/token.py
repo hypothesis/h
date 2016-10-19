@@ -53,9 +53,9 @@ class Token(Base, mixins.Timestamps):
         self.regenerate()
 
     @classmethod
-    def get_by_userid(cls, session, userid):
+    def get_dev_token_by_userid(cls, session, userid):
         return (session.query(cls)
-                .filter_by(userid=userid)
+                .filter_by(userid=userid, authclient=None)
                 .order_by(cls.created.desc())
                 .first())
 

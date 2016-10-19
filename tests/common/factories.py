@@ -65,6 +65,9 @@ class AuthClient(ModelFactory):
         model = models.AuthClient
         force_flush = True
 
+    authority = 'example.com'
+    secret = factory.LazyAttribute(lambda _: unicode(FAKER.sha256()))
+
 
 class User(factory.Factory):
 

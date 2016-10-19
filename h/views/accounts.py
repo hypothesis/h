@@ -642,8 +642,10 @@ class DeveloperController(object):
     @view_config(request_method='GET')
     def get(self):
         """Render the developer page, including the form."""
-        token = models.Token.get_by_userid(self.request.db,
-                                           self.request.authenticated_userid)
+        token = models.Token.get_dev_token_by_userid(
+            self.request.db,
+            self.request.authenticated_userid
+        )
         if token:
             return {'token': token.value}
         else:
@@ -652,8 +654,10 @@ class DeveloperController(object):
     @view_config(request_method='POST')
     def post(self):
         """(Re-)generate the user's API token."""
-        token = models.Token.get_by_userid(self.request.db,
-                                           self.request.authenticated_userid)
+        token = models.Token.get_dev_token_by_userid(
+            self.request.db,
+            self.request.authenticated_userid
+        )
 
         if token:
             # The user already has an API token, regenerate it.
