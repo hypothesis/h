@@ -28,8 +28,7 @@ class Token(Base, mixins.Timestamps):
                            primary_key=True)
 
     userid = sqlalchemy.Column(sqlalchemy.UnicodeText(),
-                               nullable=False,
-                               unique=True)
+                               nullable=False)
 
     value = sqlalchemy.Column(sqlalchemy.UnicodeText(),
                               nullable=False,
@@ -45,7 +44,10 @@ class Token(Base, mixins.Timestamps):
 
     @classmethod
     def get_by_userid(cls, session, userid):
-        return session.query(cls).filter(cls.userid == userid).first()
+        return (session.query(cls)
+                .filter_by(userid=userid)
+                .order_by(cls.created.desc())
+                .first())
 
     def regenerate(self):
         self.value = self.prefix + _token()
