@@ -926,19 +926,19 @@ class TestDeveloperController(object):
     def test_get_gets_token_for_authenticated_userid(self, models, pyramid_request):
         views.DeveloperController(pyramid_request).get()
 
-        models.Token.get_by_userid.assert_called_once_with(
+        models.Token.get_dev_token_by_userid.assert_called_once_with(
             pyramid_request.db,
             pyramid_request.authenticated_userid)
 
     def test_get_returns_token(self, models, pyramid_request):
-        models.Token.get_by_userid.return_value.value = u'abc123'
+        models.Token.get_dev_token_by_userid.return_value.value = u'abc123'
 
         data = views.DeveloperController(pyramid_request).get()
 
         assert data.get('token') == u'abc123'
 
     def test_get_with_no_token(self, models, pyramid_request):
-        models.Token.get_by_userid.return_value = None
+        models.Token.get_dev_token_by_userid.return_value = None
 
         result = views.DeveloperController(pyramid_request).get()
 
@@ -947,7 +947,7 @@ class TestDeveloperController(object):
     def test_post_gets_token_for_authenticated_userid(self, models, pyramid_request):
         views.DeveloperController(pyramid_request).post()
 
-        models.Token.get_by_userid.assert_called_once_with(
+        models.Token.get_dev_token_by_userid.assert_called_once_with(
             pyramid_request.db,
             pyramid_request.authenticated_userid)
 
@@ -955,11 +955,11 @@ class TestDeveloperController(object):
         """If the user already has a token it should regenerate it."""
         views.DeveloperController(pyramid_request).post()
 
-        models.Token.get_by_userid.return_value.regenerate.assert_called_with()
+        models.Token.get_dev_token_by_userid.return_value.regenerate.assert_called_with()
 
     def test_post_inits_new_token_for_authenticated_userid(self, models, pyramid_request):
         """If the user doesn't have a token yet it should generate one."""
-        models.Token.get_by_userid.return_value = None
+        models.Token.get_dev_token_by_userid.return_value = None
 
         views.DeveloperController(pyramid_request).post()
 
@@ -967,7 +967,7 @@ class TestDeveloperController(object):
 
     def test_post_adds_new_token_to_db(self, models, pyramid_request):
         """If the user doesn't have a token yet it should add one to the db."""
-        models.Token.get_by_userid.return_value = None
+        models.Token.get_dev_token_by_userid.return_value = None
 
         views.DeveloperController(pyramid_request).post()
 
@@ -979,11 +979,11 @@ class TestDeveloperController(object):
         """After regenerating a token it should return its new value."""
         data = views.DeveloperController(pyramid_request).post()
 
-        assert data['token'] == models.Token.get_by_userid.return_value.value
+        assert data['token'] == models.Token.get_dev_token_by_userid.return_value.value
 
     def test_post_returns_token_after_generating(self, models, pyramid_request):
         """After generating a new token it should return its value."""
-        models.Token.get_by_userid.return_value = None
+        models.Token.get_dev_token_by_userid.return_value = None
 
         data = views.DeveloperController(pyramid_request).post()
 
