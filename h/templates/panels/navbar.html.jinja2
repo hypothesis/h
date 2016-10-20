@@ -47,13 +47,15 @@
 {% if feature('activity_pages') %}
 <header class="nav-bar">
   <div class="nav-bar__content">
-    <a href="/" title="Hypothesis homepage"><!--
+    <a href="/" title="Hypothesis homepage" class="nav-bar__logo-container"><!--
       !--><img alt="Hypothesis logo" class="nav-bar__logo" src="/assets/images/logo.svg"></a>
 
     <div class="nav-bar__search js-search-bar" data-ref="searchBar">
       <form class="search-bar" action="{{ search_url }}">
-        <input class="search-bar__input" data-ref="searchBarInput" name="q" value="{{ q }}" placeholder="Search…" autocomplete="off">
         {{ svg_icon('search', 'search-bar__icon') }}
+        <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
+        <input class="search-bar__input" data-ref="searchBarInput" placeholder="Search…" autocomplete="off">
+        <input type="hidden" class="js-search-bar__input-hidden" data-ref="searchBarInputHidden" name="q" value="{{ q }}">
         {{ search_bar_dropdown() }}
       </form>
     </div>

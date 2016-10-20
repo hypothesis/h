@@ -17,6 +17,11 @@
   flex-direction: row;
 }
 
+.nav-bar__logo-container {
+  display: flex;
+  justify-content: center;
+}
+
 .nav-bar__logo {
   margin-left: 30px;
   margin-right: 30px;
@@ -87,7 +92,7 @@
 @media screen and (max-width: $max-phone-width) {
   // Display search bar full-width underneath nav links on phone-sized screens
   .nav-bar {
-    height: 90px;
+    height: 120px;
   }
 
   .nav-bar__search {

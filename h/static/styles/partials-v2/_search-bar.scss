@@ -3,19 +3,20 @@
 // Specs: https://trello.com/c/atjT8T9p
 
 .search-bar {
-  position: relative;
+  border: 1px solid $grey-3;
+  border-radius: 2px;
+  display: flex;
 }
 
 .search-bar__input {
   width: 100%;
 
-  border: 1px solid $grey-3;
-  border-radius: 2px;
+  border: none;
 
   // Add spacing to left of input field for search icon
-  padding-left: 30px;
-  padding-top: 3px;
-  padding-bottom: 3px;
+  padding-left: 7px;
+  padding-top: 18px;
+  padding-bottom: 18px;
   padding-right: 3px;
 }
 
@@ -25,12 +26,15 @@
   outline: none;
 }
 
-.search-bar__icon {
-  height: 14px;
-  left: 7px;
-  position: absolute;
-  top: 4px;
+.search-bar__lozenges {
+  display: flex;
+}
 
+.search-bar__icon {
+  flex-shrink: 0;
+  height: 14px;
+  margin-left: 7px;
+  margin-top: 18px;
   color: $grey-5;
 }
 
@@ -48,8 +52,10 @@
   display: none;
   padding: 20px 0 0 0;
   position: absolute;
+  margin-top: 52px;
   width: 100%;
   z-index: $zindex-dropdown-menu;
+  max-width: 650px;
 }
 
 .search-bar__dropdown-menu-header {

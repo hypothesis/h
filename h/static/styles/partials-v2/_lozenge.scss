@@ -1,0 +1,28 @@
+.lozenge {
+  display: flex;
+  background-color: $grey-3;
+  color: $grey-6;
+  border-radius: 2px;
+  margin-left: 10px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.lozenge__content {
+  padding: 3px 5px 3px 5px;
+  white-space: nowrap;
+}
+
+.lozenge__close {
+  font-weight: bold;
+  padding: 3px 5px 3px 5px;
+  cursor: default;
+
+  &:hover {
+    background-color: $grey-4;
+  }
+}
+
+.is-disabled {
+  pointer-events: none;
+}
