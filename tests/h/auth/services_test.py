@@ -113,11 +113,10 @@ class TestAuthTicketService(object):
 
         assert str(exc.value) == 'Cannot find user with userid bogus'
 
-    def test_add_ticket_stores_ticket(self, svc, db_session, user, patched_datetime):
+    def test_add_ticket_stores_ticket(self, svc, db_session, user, utcnow):
         svc.usersvc.fetch.return_value = user
 
-        utcnow = datetime(2016, 1, 1, 5, 23, 54)
-        patched_datetime.utcnow.return_value = utcnow
+        utcnow.return_value = datetime(2016, 1, 1, 5, 23, 54)
 
         svc.add_ticket(user.userid, 'the-ticket-id')
 
@@ -125,7 +124,7 @@ class TestAuthTicketService(object):
         assert ticket.id == 'the-ticket-id'
         assert ticket.user == user
         assert ticket.user_userid == user.userid
-        assert ticket.expires == utcnow + services.TICKET_TTL
+        assert ticket.expires == utcnow.return_value + services.TICKET_TTL
 
     def test_add_ticket_caches_the_userid(self, svc, db_session, user):
         svc.usersvc.fetch.return_value = user
@@ -176,10 +175,6 @@ class TestAuthTicketService(object):
     @pytest.fixture
     def principals_for_user(self, patch):
         return patch('h.auth.services.principals_for_user')
-
-    @pytest.fixture
-    def patched_datetime(self, patch):
-        return patch('h.auth.services.datetime.datetime')
 
     @pytest.fixture
     def ticket(self, factories, user, db_session):

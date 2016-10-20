@@ -9,7 +9,6 @@ from pyramid_authsanity import interfaces
 import sqlalchemy as sa
 from zope import interface
 
-from h.models import AuthTicket
 from h import models
 from h.exceptions import OAuthTokenError
 from h.auth.util import principals_for_user
@@ -72,10 +71,10 @@ class AuthTicketService(object):
         if ticket_id is None:
             return False
 
-        ticket = self.session.query(AuthTicket) \
-            .filter(AuthTicket.id == ticket_id,
-                    AuthTicket.user_userid == principal,
-                    AuthTicket.expires > sa.func.now()) \
+        ticket = self.session.query(models.AuthTicket) \
+            .filter(models.AuthTicket.id == ticket_id,
+                    models.AuthTicket.user_userid == principal,
+                    models.AuthTicket.expires > sa.func.now()) \
             .one_or_none()
 
         if ticket is None:
@@ -86,8 +85,8 @@ class AuthTicketService(object):
         # We don't want to update the `expires` column of an auth ticket on
         # every single request, but only when the ticket hasn't been touched
         # within a the defined `TICKET_REFRESH_INTERVAL`.
-        if (datetime.datetime.utcnow() - ticket.updated) > TICKET_REFRESH_INTERVAL:
-            ticket.expires = datetime.datetime.utcnow() + TICKET_TTL
+        if (utcnow() - ticket.updated) > TICKET_REFRESH_INTERVAL:
+            ticket.expires = utcnow() + TICKET_TTL
 
         return True
 
@@ -98,10 +97,10 @@ class AuthTicketService(object):
         if user is None:
             raise ValueError('Cannot find user with userid %s' % principal)
 
-        ticket = AuthTicket(id=ticket_id,
-                            user=user,
-                            user_userid=user.userid,
-                            expires=(datetime.datetime.utcnow() + TICKET_TTL))
+        ticket = models.AuthTicket(id=ticket_id,
+                                   user=user,
+                                   user_userid=user.userid,
+                                   expires=(utcnow() + TICKET_TTL))
         self.session.add(ticket)
         # We cache the new userid, this will allow us to migrate the old
         # session policy to this new ticket policy.
@@ -111,7 +110,7 @@ class AuthTicketService(object):
         """Delete a ticket by id from the database."""
 
         if ticket_id:
-            self.session.query(AuthTicket).filter_by(id=ticket_id).delete()
+            self.session.query(models.AuthTicket).filter_by(id=ticket_id).delete()
         self._userid = None
 
 
