@@ -44,6 +44,17 @@ def test_users_index_looks_up_users_by_email(User, pyramid_request):
 
 
 @users_index_fixtures
+def test_users_index_strips_spaces(User, pyramid_request):
+    pyramid_request.params = {"username": "    bob   "}
+    User.get_by_username.return_value = None
+    User.get_by_email.return_value = None
+
+    views.users_index(pyramid_request)
+
+    User.get_by_username.assert_called_with(pyramid_request.db, "bob")
+
+
+@users_index_fixtures
 def test_users_index_queries_annotation_count_by_userid(User, db_session, factories, pyramid_request):
     User.get_by_username.return_value = factories.User(username='bob')
     userid = "acct:bob@{}".format(pyramid_request.auth_domain)

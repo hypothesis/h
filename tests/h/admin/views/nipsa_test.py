@@ -59,6 +59,13 @@ class TestNipsaAddRemove(object):
         with pytest.raises(views.UserNotFoundError):
             views.nipsa_remove(pyramid_request)
 
+    def test_form_request_user_strips_spaces(self, nipsa_service, pyramid_request, users):
+        pyramid_request.params = {"add": "    carl   "}
+
+        views.nipsa_add(pyramid_request)
+
+        assert users['carl'] in nipsa_service.flagged
+
     def test_remove_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"remove": "kiki"}
 

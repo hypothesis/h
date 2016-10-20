@@ -11,6 +11,7 @@ from h.admin.views import admins as views
 
 @pytest.mark.usefixtures('routes')
 class TestAdminsIndex(object):
+
     def test_when_no_admins(self, pyramid_request):
         result = views.admins_index(pyramid_request)
 
@@ -39,6 +40,13 @@ class TestAdminsAddRemove(object):
         views.admins_add(pyramid_request)
 
         assert users['agnos'].admin
+
+    def test_add_strips_spaces(self, pyramid_request, users):
+        pyramid_request.params = {"add": "   david   "}
+
+        views.admins_add(pyramid_request)
+
+        assert users['david'].admin
 
     def test_add_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"add": "eva"}
