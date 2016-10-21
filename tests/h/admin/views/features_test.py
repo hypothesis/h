@@ -112,6 +112,22 @@ def test_cohorts_edit_add_user(factories, pyramid_request):
     assert cohort.members[0].username == user.username
 
 
+def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
+    user = factories.User(username='benoit')
+    cohort = models.FeatureCohort(name='FractalCohort')
+
+    pyramid_request.db.add(user)
+    pyramid_request.db.add(cohort)
+    pyramid_request.db.flush()
+
+    pyramid_request.matchdict['id'] = cohort.id
+    pyramid_request.params['add'] = '   benoit   '
+    views.cohorts_edit_add(pyramid_request)
+
+    assert len(cohort.members) == 1
+    assert cohort.members[0].username == user.username
+
+
 def test_cohorts_edit_remove_user(factories, pyramid_request):
     user = factories.User(username='benoit')
     cohort = models.FeatureCohort(name='FractalCohort')
