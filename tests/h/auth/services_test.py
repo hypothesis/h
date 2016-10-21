@@ -284,6 +284,17 @@ class TestOAuthServiceVerifyJWTBearer(object):
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is invalid' in exc.value.message
 
+    def test_non_uuid_jwt_issuer(self, svc, claims, authclient, db_session):
+        claims['iss'] = 'bogus'
+        tok = self.jwt_token(claims, authclient.secret)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_jwt_bearer(assertion=tok,
+                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+
+        assert exc.value.type == 'invalid_grant'
+        assert 'issuer is invalid' in exc.value.message
+
     def test_signed_with_different_secret(self, svc, claims):
         tok = self.jwt_token(claims, 'different-secret')
 

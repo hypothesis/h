@@ -154,7 +154,15 @@ class OAuthService(object):
         client_id = unverified_claims.get('iss', None)
         if not client_id:
             raise OAuthTokenError('grant token issuer is missing', 'invalid_grant')
-        authclient = self.session.query(models.AuthClient).get(client_id)
+
+        authclient = None
+        try:
+            authclient = self.session.query(models.AuthClient).get(client_id)
+        except sa.exc.StatementError as exc:
+            if str(exc.orig) == 'badly formed hexadecimal UUID string':
+                pass
+            else:
+                raise
         if not authclient:
             raise OAuthTokenError('given JWT issuer is invalid', 'invalid_grant')
 
