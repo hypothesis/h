@@ -79,7 +79,23 @@ function shouldLozengify(phrase) {
   return true;
 }
 
-function getLozengeValuesAndIncompleteSearchTerms(queryString) {
+/**
+ * Return an array of lozenge values from the given string.
+ *
+ * @param {String} queryString A string of query terms.
+ *
+ * @returns {Object} An object with two properties: lozengeValues is an array
+ *   of values to be turned into lozenges, and incompleteInputValue is any
+ *   remaining un-lozengifiable text from the end of the input string
+ *
+ * @example
+ * // returns {
+ *   'lozengeValues': ['foo', 'key:"foo bar"', 'gar'],
+ *   'incompleteInputValue': '"unclosed',
+ * }
+ * getLozengeValues('foo key:"foo bar" gar "unclosed')
+ */
+function getLozengeValues(queryString) {
   var inputTerms = '';
   var quoted;
   var queryTerms = [];
@@ -106,39 +122,7 @@ function getLozengeValuesAndIncompleteSearchTerms(queryString) {
   };
 }
 
-/**
- * Function which returns individual lozenge from a string.
- *
- * @param {String} queryString A string of query terms.
- *
- * @returns {Array} queryTerms An array of individual query terms.
- *
- * @example
- * // returns ['foo', 'key:"foo bar"', 'gar']
- * getLozengeValues('foo key:"foo bar" gar')
- */
-function getLozengeValues(queryString) {
-  return getLozengeValuesAndIncompleteSearchTerms(queryString).lozengeValues;
-}
-
-/**
- * Function which returns an incomplete quoted sentance from a string.
- *
- * @param {String} queryString A string of query terms.
- *
- * @returns {String} inputTerms A string which starts with a quote but
- * doesnt have an end quote.
- *
- * @example
- * // returns ['"bar gar']
- * getIncompleteInputValue('foo "bar gar')
- */
-function getIncompleteInputValue(queryString) {
-  return getLozengeValuesAndIncompleteSearchTerms(queryString).incompleteInputValue;
-}
-
 module.exports = {
   shouldLozengify: shouldLozengify,
   getLozengeValues: getLozengeValues,
-  getIncompleteInputValue: getIncompleteInputValue,
 };

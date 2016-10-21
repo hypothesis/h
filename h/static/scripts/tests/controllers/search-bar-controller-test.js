@@ -26,11 +26,10 @@ describe('SearchBarController', function () {
     var ctrl;
     var form;
     var TEMPLATE = `
-      <form>
+      <form data-ref="searchBarForm">
         <div class="search-bar__lozenges" data-ref="searchBarLozenges">
         </div>
-        <input data-ref="searchBarInput" class="search-bar__input" />
-        <input data-ref="searchBarInputHidden" class="js-search-bar__input-hidden" name="q" value="foo" />
+        <input data-ref="searchBarInput" class="search-bar__input" name="q" />
         <div data-ref="searchBarDropdown">
           <div>Narrow your search</div>
           <ul>
@@ -271,8 +270,7 @@ describe('SearchBarController', function () {
       var template = `
         <form>
           <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
-          <input data-ref="searchBarInput" class="search-bar__input">
-          <input data-ref="searchBarInputHidden" class="js-search-bar__input-hidden" name="q" value="${value}">
+          <input data-ref="searchBarInput" class="search-bar__input" name="q" value="${value}">
           <div data-ref="searchBarDropdown"></div>
         </form>
       `.trim();

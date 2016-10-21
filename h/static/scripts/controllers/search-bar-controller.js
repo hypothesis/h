@@ -16,7 +16,6 @@ class SearchBarController extends Controller {
     this._dropdownItems = Array.from(
       element.querySelectorAll('[data-ref="searchBarDropdownItem"]'));
     this._input = this.refs.searchBarInput;
-    this._inputHidden = this.refs.searchBarInputHidden;
     this._lozengeContainer = this.refs.searchBarLozenges;
     var getActiveDropdownItem = () => {
       return element.querySelector('.js-search-bar-dropdown-menu-item--active');
@@ -137,16 +136,45 @@ class SearchBarController extends Controller {
     };
 
     /**
-     * Updates the hidden input field with the consolidated
-     * search terms from the lozenges.
+     * Insert a hidden <input> into the search <form>.
+     *
+     * The value of the hidden <input> is a search string constructed from
+     * the lozenges plus any text currently in the visible <input>.
+     *
+     * The name="q" attribute is moved from the visible <input> on to the
+     * hidden <input> so that when the <form> is submitted it's the value of
+     * the _hidden_ input, not the visible one, that is submitted as the
+     * q parameter.
+     *
      */
-    var updateHiddenInputValue = () => {
-      var newValue = '';
-      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge__content'), function(loz) {
-        newValue = newValue + loz.textContent + ' ';
+    var insertHiddenInput = () => {
+      var hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+
+      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge__content')).forEach((loz) => {
+        hiddenInput.value = hiddenInput.value + loz.textContent + ' ';
       });
-      newValue = newValue + getTrimmedInputValue();
-      this._inputHidden.value = newValue;
+      hiddenInput.value = hiddenInput.value + getTrimmedInputValue();
+
+      // When JavaScript isn't enabled this._input is submitted to the server
+      // as the q param. With JavaScript we submit hiddenInput instead.
+      hiddenInput.name = this._input.name;
+      this._input.removeAttribute('name');
+
+      this.refs.searchBarForm.appendChild(hiddenInput);
+    };
+
+    /**
+     * Submit the user's search query to the server.
+     *
+     * We build a search query out of the lozenges plus any text in
+     * this._input. To avoid a potential flash of text if we were to update
+     * this._input with the search terms from the lozenge before submitting it,
+     * we update a hidden input and submit that instead.
+     */
+    var submitForm = () => {
+      insertHiddenInput();
+      this.refs.searchBarForm.submit();
     };
 
     /**
@@ -158,11 +186,10 @@ class SearchBarController extends Controller {
      */
     var addLozenge = content => {
       var deleteCallback = () => {
-        updateHiddenInputValue();
         this._lozengeContainer.querySelectorAll('.js-lozenge').forEach(function(loz) {
           loz.classList.add('is-disabled');
         });
-        this.element.querySelector('form').submit();
+        submitForm();
       };
 
       new LozengeController(
@@ -175,22 +202,16 @@ class SearchBarController extends Controller {
     };
 
     /**
-     * Add incomplete search query terms which start with a quote but are missing the end quote
-     * to the input field from the hidden input field on page load.
+     * Create lozenges for the search query terms already in the input field on
+     * page load.
      */
-    var addIncompleteSearchTermToInput = () => {
-      this._input.value = SearchTextParser.getIncompleteInputValue(this._inputHidden.value);
-    };
-
-    /**
-     * Create lozenges for the search query terms already in
-     * the hidden input field on page load.
-     */
-    var lozengifyHiddenInput = () => {
-      var queryTerms = SearchTextParser.getLozengeValues(this._inputHidden.value);
-      queryTerms.forEach(function(term) {
-        addLozenge(term);
+    var lozengifyInput = () => {
+      var {lozengeValues, incompleteInputValue} = SearchTextParser.getLozengeValues(this._input.value);
+      lozengeValues.forEach(function(value) {
+        addLozenge(value);
       });
+      this._input.value = incompleteInputValue;
+      this._input.style.visibility = 'visible';
     };
 
     /**
@@ -262,8 +283,7 @@ class SearchBarController extends Controller {
               innerHTML.trim();
           selectFacet(facet);
         } else {
-          updateHiddenInputValue();
-          this.element.querySelector('form').submit();
+          submitForm();
         }
       };
 
@@ -331,8 +351,7 @@ class SearchBarController extends Controller {
     this._input.addEventListener('input', handleInputOnInput);
     this._input.addEventListener('focus', handleFocusinOnInput);
 
-    lozengifyHiddenInput();
-    addIncompleteSearchTermToInput();
+    lozengifyInput();
   }
 
   update(state) {
