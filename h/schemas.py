@@ -23,7 +23,9 @@ class JSONSchema(object):
     schema = {}
 
     def __init__(self):
-        self.validator = jsonschema.Draft4Validator(self.schema)
+        format_checker = jsonschema.FormatChecker()
+        self.validator = jsonschema.Draft4Validator(self.schema,
+                                                    format_checker=format_checker)
 
     def validate(self, data):
         """
