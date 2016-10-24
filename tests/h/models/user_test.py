@@ -198,3 +198,33 @@ def test_User_activate_activates_user(db_session):
     db_session.commit()
 
     assert user.is_activated
+
+
+class TestUserGetByEmail(object):
+    def test_it_returns_a_user(self, db_session, users):
+        user = users['meredith']
+        actual = models.User.get_by_email(db_session, user.email)
+        assert actual == user
+
+    def test_it_filters_by_email(self, db_session, users):
+        email = 'bogus@msn.com'
+
+        actual = models.User.get_by_email(db_session, email)
+        assert actual is None
+
+    def test_it_filters_email_case_insensitive(self, db_session, users):
+        user = users['emily']
+        mixed_email = 'eMiLy@mSn.com'
+
+        actual = models.User.get_by_email(db_session, mixed_email)
+        assert actual == user
+
+    @pytest.fixture
+    def users(self, db_session, factories):
+        users = {
+            'emily': factories.User(username='emily', email='emily@msn.com', authority='example.com'),
+            'meredith': factories.User(username='meredith', email='meredith@gmail.com', authority='example.com'),
+        }
+        db_session.add_all(users.values())
+        db_session.flush()
+        return users
