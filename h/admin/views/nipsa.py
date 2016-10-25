@@ -17,7 +17,10 @@ class UserNotFoundError(Exception):
              permission='admin_nipsa')
 def nipsa_index(request):
     nipsa_service = request.find_service(name='nipsa')
-    return {"usernames": [u.username for u in nipsa_service.flagged_users]}
+    return {
+        "userids": [u.userid for u in nipsa_service.flagged_users],
+        "default_authority": request.auth_domain,
+    }
 
 
 @view_config(route_name='admin_nipsa',
@@ -25,7 +28,14 @@ def nipsa_index(request):
              request_param='add',
              permission='admin_nipsa')
 def nipsa_add(request):
-    user = _form_request_user(request, 'add')
+    username = request.params['add'].strip()
+    authority = request.params['authority'].strip()
+    user = models.User.get_by_username(request.db, username, authority)
+
+    if user is None:
+        raise UserNotFoundError(
+            _("Could not find user with username %s and authority %s" % (username, authority))
+        )
 
     nipsa_service = request.find_service(name='nipsa')
     nipsa_service.flag(user)
@@ -39,7 +49,12 @@ def nipsa_add(request):
              request_param='remove',
              permission='admin_nipsa')
 def nipsa_remove(request):
-    user = _form_request_user(request, 'remove')
+    userid = request.params['remove']
+    user = request.db.query(models.User).filter_by(userid=userid).first()
+    if user is None:
+        raise UserNotFoundError(
+            _("Could not find user with userid %s" % userid)
+        )
 
     nipsa_service = request.find_service(name='nipsa')
     nipsa_service.unflag(user)
@@ -52,18 +67,6 @@ def nipsa_remove(request):
 def user_not_found(exc, request):
     request.session.flash(exc.message, 'error')
     return httpexceptions.HTTPFound(location=request.route_path('admin_nipsa'))
-
-
-def _form_request_user(request, param):
-    username = request.params[param].strip()
-    user = models.User.get_by_username(request.db, username, request.auth_domain)
-
-    if user is None:
-        raise UserNotFoundError(
-            _("Could not find user with username %s" % username)
-        )
-
-    return user
 
 
 def includeme(config):
