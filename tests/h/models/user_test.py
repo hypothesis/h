@@ -236,3 +236,27 @@ class TestUserGetByEmail(object):
         db_session.add_all(users.values())
         db_session.flush()
         return users
+
+
+class TestUserGetByUsername(object):
+    def test_it_returns_a_user(self, db_session, users):
+        user = users['meredith']
+
+        actual = models.User.get_by_username(db_session, user.username)
+        assert actual == user
+
+    def test_it_filters_by_username(self, db_session):
+        username = 'bogus'
+
+        actual = models.User.get_by_username(db_session, username)
+        assert actual is None
+
+    @pytest.fixture
+    def users(self, db_session, factories):
+        users = {
+            'emily': factories.User(username='emily', authority='example.com'),
+            'meredith': factories.User(username='meredith', authority='example.com'),
+        }
+        db_session.add_all(users.values())
+        db_session.flush()
+        return users
