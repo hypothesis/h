@@ -309,8 +309,6 @@ describe('SearchBarController', function () {
 
     it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', function (done) {
       var {ctrl, input, hiddenInput} = component('foo');
-      input.value = '';
-      hiddenInput.value = '';
 
       syn
         .click(input)
