@@ -242,19 +242,27 @@ class TestUserGetByUsername(object):
     def test_it_returns_a_user(self, db_session, users):
         user = users['meredith']
 
-        actual = models.User.get_by_username(db_session, user.username)
+        actual = models.User.get_by_username(db_session, user.username, user.authority)
         assert actual == user
 
     def test_it_filters_by_username(self, db_session):
+        authority = 'example.com'
         username = 'bogus'
 
-        actual = models.User.get_by_username(db_session, username)
+        actual = models.User.get_by_username(db_session, username, authority)
+        assert actual is None
+
+    def test_it_filters_by_authority(self, db_session, users):
+        user = users['norma']
+
+        actual = models.User.get_by_username(db_session, user.username, 'example.com')
         assert actual is None
 
     @pytest.fixture
     def users(self, db_session, factories):
         users = {
             'emily': factories.User(username='emily', authority='example.com'),
+            'norma': factories.User(username='norma', authority='foo.org'),
             'meredith': factories.User(username='meredith', authority='example.com'),
         }
         db_session.add_all(users.values())

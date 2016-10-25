@@ -58,7 +58,7 @@ def unique_email(node, value):
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     request = node.bindings['request']
-    user = models.User.get_by_username(request.db, value)
+    user = models.User.get_by_username(request.db, value, request.auth_domain)
     if user:
         msg = _("This username is already taken.")
         raise colander.Invalid(node, msg)
@@ -244,7 +244,7 @@ class ResetCode(colander.SchemaType):
         except BadData:
             raise colander.Invalid(node, _('Wrong reset code.'))
 
-        user = models.User.get_by_username(request.db, username)
+        user = models.User.get_by_username(request.db, username, request.auth_domain)
         if user is None:
             raise colander.Invalid(node, _('Your reset code is not valid'))
         if user.password_updated is not None and timestamp < user.password_updated:

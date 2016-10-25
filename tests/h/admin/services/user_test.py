@@ -13,7 +13,7 @@ from h.admin.services.user import make_indexer
 
 class TestRenameUserService(object):
     def test_check_returns_true_when_new_username_does_not_exist(self, service):
-        assert service.check('panda') is True
+        assert service.check('panda', 'foobar.org') is True
 
     def test_check_raises_when_new_userid_is_already_taken(self, service, user, db_session, factories):
         user_taken = factories.User(username='panda')
@@ -21,13 +21,13 @@ class TestRenameUserService(object):
         db_session.flush()
 
         with pytest.raises(UserRenameError) as err:
-            service.check('panda')
+            service.check('panda', user_taken.authority)
         assert err.value.message == 'Another user already has the username "panda"'
 
     def test_rename_checks_first(self, service, check, user):
         service.rename(user, 'panda')
 
-        check.assert_called_once_with(service, 'panda')
+        check.assert_called_once_with(service, 'panda', user.authority)
 
     def test_rename_changes_the_username(self, service, user, db_session):
         service.rename(user, 'panda')

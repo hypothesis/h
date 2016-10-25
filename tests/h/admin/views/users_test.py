@@ -30,7 +30,8 @@ def test_users_index_looks_up_users_by_username(models, pyramid_request):
 
     views.users_index(pyramid_request)
 
-    models.User.get_by_username.assert_called_with(pyramid_request.db, "bob")
+    models.User.get_by_username.assert_called_with(
+        pyramid_request.db, "bob", pyramid_request.auth_domain)
 
 
 @users_index_fixtures
@@ -52,7 +53,7 @@ def test_users_index_strips_spaces(models, pyramid_request):
 
     views.users_index(pyramid_request)
 
-    models.User.get_by_username.assert_called_with(pyramid_request.db, "bob")
+    models.User.get_by_username.assert_called_with(pyramid_request.db, "bob", pyramid_request.auth_domain)
 
 
 @users_index_fixtures
@@ -102,7 +103,8 @@ def test_users_activate_gets_user(models, pyramid_request):
 
     views.users_activate(pyramid_request)
 
-    models.User.get_by_username.assert_called_once_with(pyramid_request.db, "bob")
+    models.User.get_by_username.assert_called_once_with(
+        pyramid_request.db, "bob", pyramid_request.auth_domain)
 
 
 @users_activate_fixtures

@@ -256,10 +256,13 @@ class User(Base):
         return user
 
     @classmethod
-    def get_by_username(cls, session, username):
+    def get_by_username(cls, session, username, authority):
         """Fetch a user by username."""
         uid = _username_to_uid(username)
-        return session.query(cls).filter(cls.uid == uid).first()
+        return session.query(cls).filter(
+            cls.uid == uid,
+            cls.authority == authority,
+        ).first()
 
     def __repr__(self):
         return '<User: %s>' % self.username

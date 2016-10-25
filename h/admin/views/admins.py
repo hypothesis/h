@@ -25,7 +25,7 @@ def admins_index(request):
 def admins_add(request):
     """Make a given user an admin."""
     username = request.params['add'].strip()
-    user = models.User.get_by_username(request.db, username)
+    user = models.User.get_by_username(request.db, username, request.auth_domain)
     if user is None:
         request.session.flash(
             _("User {username} doesn't exist.".format(username=username)),
@@ -46,7 +46,7 @@ def admins_remove(request):
     n_admins = request.db.query(models.User).filter(models.User.admin).count()
     if n_admins > 1:
         username = request.params['remove']
-        user = models.User.get_by_username(request.db, username)
+        user = models.User.get_by_username(request.db, username, request.auth_domain)
         if user is not None:
             user.admin = False
     index = request.route_path('admin_admins')
