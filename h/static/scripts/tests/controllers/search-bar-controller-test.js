@@ -1,6 +1,7 @@
 'use strict';
 
 var syn = require('syn');
+var util = require('./util');
 
 var SearchBarController = require('../../controllers/search-bar-controller');
 
@@ -251,78 +252,95 @@ describe('SearchBarController', function () {
   });
 
   describe('Lozenges', function () {
-    var testEl;
-    var input;
-    var inputHidden;
     var ctrl;
-    var TEMPLATE = `
-      <form>
-        <div class="search-bar__lozenges" data-ref="searchBarLozenges">
-        </div>
-        <input data-ref="searchBarInput" class="search-bar__input" />
-        <input data-ref="searchBarInputHidden" class="js-search-bar__input-hidden" name="q" value="foo 'bar" />
-        <div data-ref="searchBarDropdown">
-        </div>
-      </form>
-    `;
-
-    beforeEach(function () {
-      testEl = document.createElement('div');
-      testEl.innerHTML = TEMPLATE;
-      document.body.appendChild(testEl);
-
-      ctrl = new SearchBarController(testEl);
-
-      input = ctrl.refs.searchBarInput;
-      inputHidden = ctrl.refs.searchBarInputHidden;
-    });
 
     afterEach(function () {
-      document.body.removeChild(testEl);
+      if (ctrl) {
+        ctrl.element.remove();
+        ctrl = null;
+      }
     });
+
+    /**
+     * Make a <form> with the SearchBarController enhancement applied and
+     * return the various parts of the component.
+     *
+     */
+    function component(value) {
+      value = value || '';
+      var template = `
+        <form>
+          <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
+          <input data-ref="searchBarInput" class="search-bar__input">
+          <input data-ref="searchBarInputHidden" class="js-search-bar__input-hidden" name="q" value="${value}">
+          <div data-ref="searchBarDropdown"></div>
+        </form>
+      `.trim();
+
+      ctrl = util.setupComponent(document, template, SearchBarController);
+
+      return {
+        ctrl: ctrl,
+        input: ctrl.refs.searchBarInput,
+      };
+    }
+
+    /**
+     * Return all of the given controller's lozenge elements (if any).
+     *
+     */
+    function getLozenges(ctrl) {
+      return ctrl.refs.searchBarLozenges.querySelectorAll('.js-lozenge__content');
+    }
 
     it('should create lozenges for existing query terms in the hidden input on page load', function () {
-      assert.equal(testEl.querySelectorAll('.js-lozenge__content')[0].textContent, 'foo');
+      var {ctrl} = component('foo');
+
+      assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
     });
 
-    it('should  not create a lozenge for incomplete query strings in the hidden input on page load', function () {
-      assert.equal(testEl.querySelectorAll('.js-lozenge__content').length, 1);
-      assert.equal(testEl.querySelectorAll('.js-lozenge__content')[0].textContent, 'foo');
-      assert.equal(testEl.querySelector('[data-ref="searchBarInput"]').value, '\'bar');
+    it('should not create a lozenge for incomplete query strings in the hidden input on page load', function () {
+      var {ctrl, input} = component("'bar");
+
+      assert.equal(getLozenges(ctrl).length, 0);
+      assert.equal(input.value, "'bar");
     });
 
     it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', function (done) {
-      input.value = '';
-      inputHidden.value = '';
+      var {ctrl, input} = component('foo');
+
       syn
         .click(input)
         .type('gar')
         .type('[space]', () => {
-          assert.equal(testEl.querySelectorAll('.js-lozenge__content')[1].textContent, 'gar');
+          assert.equal(getLozenges(ctrl)[1].textContent, 'gar');
           done();
         });
     });
 
     it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', function (done) {
+      var {ctrl, input} = component("'bar gar'");
+
       syn
         .click(input)
         .type(' gar\'')
         .type('[space]', () => {
-          assert.equal(testEl.querySelectorAll('.js-lozenge__content')[1].textContent, '\'bar gar\'');
+          assert.equal(getLozenges(ctrl)[0].textContent, "'bar gar'");
           done();
         });
     });
 
     it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', function (done) {
+      var {ctrl, input} = component("'bar");
+
       syn
         .click(input)
         .type('[space]')
         .type('gar')
         .type('[space]', () => {
-          var lozenges = testEl.querySelectorAll('.js-lozenge__content');
-          assert.equal(lozenges.length, 1);
-          assert.equal(lozenges[0].textContent, 'foo');
-          assert.equal(input.value, '\'bar gar ');
+          var lozenges = getLozenges(ctrl);
+          assert.equal(lozenges.length, 0);
+          assert.equal(input.value, "'bar gar ");
           done();
         });
     });
