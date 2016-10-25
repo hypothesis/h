@@ -239,10 +239,11 @@ class User(Base):
         return username
 
     @classmethod
-    def get_by_email(cls, session, email):
+    def get_by_email(cls, session, email, authority):
         """Fetch a user by email address."""
         return session.query(cls).filter(
-            sa.func.lower(cls.email) == email.lower()
+            sa.func.lower(cls.email) == email.lower(),
+            cls.authority == authority,
         ).first()
 
     @classmethod

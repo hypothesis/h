@@ -203,26 +203,34 @@ def test_User_activate_activates_user(db_session):
 class TestUserGetByEmail(object):
     def test_it_returns_a_user(self, db_session, users):
         user = users['meredith']
-        actual = models.User.get_by_email(db_session, user.email)
+        actual = models.User.get_by_email(db_session, user.email, user.authority)
         assert actual == user
 
     def test_it_filters_by_email(self, db_session, users):
+        authority = 'example.com'
         email = 'bogus@msn.com'
 
-        actual = models.User.get_by_email(db_session, email)
+        actual = models.User.get_by_email(db_session, email, authority)
         assert actual is None
 
     def test_it_filters_email_case_insensitive(self, db_session, users):
         user = users['emily']
         mixed_email = 'eMiLy@mSn.com'
 
-        actual = models.User.get_by_email(db_session, mixed_email)
+        actual = models.User.get_by_email(db_session, mixed_email, user.authority)
         assert actual == user
+
+    def test_it_filters_by_authority(self, db_session, users):
+        user = users['norma']
+
+        actual = models.User.get_by_email(db_session, user.email, 'example.com')
+        assert actual is None
 
     @pytest.fixture
     def users(self, db_session, factories):
         users = {
             'emily': factories.User(username='emily', email='emily@msn.com', authority='example.com'),
+            'norma': factories.User(username='norma', email='norma@foo.org', authority='foo.org'),
             'meredith': factories.User(username='meredith', email='meredith@gmail.com', authority='example.com'),
         }
         db_session.add_all(users.values())

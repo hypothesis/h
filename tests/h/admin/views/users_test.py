@@ -41,7 +41,7 @@ def test_users_index_looks_up_users_by_email(models, pyramid_request):
 
     views.users_index(pyramid_request)
 
-    models.User.get_by_email.assert_called_with(pyramid_request.db, "bob@builder.com")
+    models.User.get_by_email.assert_called_with(pyramid_request.db, "bob@builder.com", pyramid_request.auth_domain)
 
 
 @users_index_fixtures

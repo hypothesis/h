@@ -34,7 +34,7 @@ def users_index(request):
         username = username.strip()
         user = models.User.get_by_username(request.db, username)
         if user is None:
-            user = models.User.get_by_email(request.db, username)
+            user = models.User.get_by_email(request.db, username, request.auth_domain)
 
     if user is not None:
         n_annots = _all_user_annotations(request, user).count()
