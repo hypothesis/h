@@ -10,8 +10,9 @@ from pyramid import httpexceptions
 import pytest
 
 from h.admin.views import users as views
+from h.models import Annotation
 
-users_index_fixtures = pytest.mark.usefixtures('User')
+users_index_fixtures = pytest.mark.usefixtures('models')
 
 
 @users_index_fixtures
@@ -22,41 +23,41 @@ def test_users_index(pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_looks_up_users_by_username(User, pyramid_request):
+def test_users_index_looks_up_users_by_username(models, pyramid_request):
     pyramid_request.params = {"username": "bob"}
-    User.get_by_username.return_value = None
-    User.get_by_email.return_value = None
+    models.User.get_by_username.return_value = None
+    models.User.get_by_email.return_value = None
 
     views.users_index(pyramid_request)
 
-    User.get_by_username.assert_called_with(pyramid_request.db, "bob")
+    models.User.get_by_username.assert_called_with(pyramid_request.db, "bob")
 
 
 @users_index_fixtures
-def test_users_index_looks_up_users_by_email(User, pyramid_request):
+def test_users_index_looks_up_users_by_email(models, pyramid_request):
     pyramid_request.params = {"username": "bob@builder.com"}
-    User.get_by_username.return_value = None
-    User.get_by_email.return_value = None
+    models.User.get_by_username.return_value = None
+    models.User.get_by_email.return_value = None
 
     views.users_index(pyramid_request)
 
-    User.get_by_email.assert_called_with(pyramid_request.db, "bob@builder.com")
+    models.User.get_by_email.assert_called_with(pyramid_request.db, "bob@builder.com")
 
 
 @users_index_fixtures
-def test_users_index_strips_spaces(User, pyramid_request):
+def test_users_index_strips_spaces(models, pyramid_request):
     pyramid_request.params = {"username": "    bob   "}
-    User.get_by_username.return_value = None
-    User.get_by_email.return_value = None
+    models.User.get_by_username.return_value = None
+    models.User.get_by_email.return_value = None
 
     views.users_index(pyramid_request)
 
-    User.get_by_username.assert_called_with(pyramid_request.db, "bob")
+    models.User.get_by_username.assert_called_with(pyramid_request.db, "bob")
 
 
 @users_index_fixtures
-def test_users_index_queries_annotation_count_by_userid(User, db_session, factories, pyramid_request):
-    User.get_by_username.return_value = factories.User(username='bob')
+def test_users_index_queries_annotation_count_by_userid(models, db_session, factories, pyramid_request):
+    models.User.get_by_username.return_value = factories.User(username='bob')
     userid = "acct:bob@{}".format(pyramid_request.auth_domain)
     for _ in xrange(8):
         db_session.add(factories.Annotation(userid=userid))
@@ -68,10 +69,10 @@ def test_users_index_queries_annotation_count_by_userid(User, db_session, factor
 
 
 @users_index_fixtures
-def test_users_index_no_user_found(User, pyramid_request):
+def test_users_index_no_user_found(models, pyramid_request):
     pyramid_request.params = {"username": "bob"}
-    User.get_by_username.return_value = None
-    User.get_by_email.return_value = None
+    models.User.get_by_username.return_value = None
+    models.User.get_by_email.return_value = None
 
     result = views.users_index(pyramid_request)
 
@@ -79,9 +80,9 @@ def test_users_index_no_user_found(User, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_user_found(User, pyramid_request, db_session, factories):
+def test_users_index_user_found(models, pyramid_request, db_session, factories):
     pyramid_request.params = {"username": "bob"}
-    user = User.get_by_username.return_value = factories.User(username='bob')
+    user = models.User.get_by_username.return_value = factories.User(username='bob')
 
     result = views.users_index(pyramid_request)
 
@@ -92,34 +93,34 @@ def test_users_index_user_found(User, pyramid_request, db_session, factories):
     }
 
 
-users_activate_fixtures = pytest.mark.usefixtures('User', 'ActivationEvent')
+users_activate_fixtures = pytest.mark.usefixtures('models', 'ActivationEvent')
 
 
 @users_activate_fixtures
-def test_users_activate_gets_user(User, pyramid_request):
+def test_users_activate_gets_user(models, pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
     views.users_activate(pyramid_request)
 
-    User.get_by_username.assert_called_once_with(pyramid_request.db, "bob")
+    models.User.get_by_username.assert_called_once_with(pyramid_request.db, "bob")
 
 
 @users_activate_fixtures
-def test_users_activate_user_not_found_error(User, pyramid_request):
+def test_users_activate_user_not_found_error(models, pyramid_request):
     pyramid_request.params = {"username": "bob"}
-    User.get_by_username.return_value = None
+    models.User.get_by_username.return_value = None
 
     with pytest.raises(views.UserNotFoundError):
         views.users_activate(pyramid_request)
 
 
 @users_activate_fixtures
-def test_users_activate_activates_user(User, pyramid_request):
+def test_users_activate_activates_user(models, pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
     views.users_activate(pyramid_request)
 
-    User.get_by_username.return_value.activate.assert_called_once_with()
+    models.User.get_by_username.return_value.activate.assert_called_once_with()
 
 
 @users_activate_fixtures
@@ -133,17 +134,17 @@ def test_users_activate_flashes_success(pyramid_request):
 
 
 @users_activate_fixtures
-def test_users_activate_inits_ActivationEvent(ActivationEvent, User, pyramid_request):
+def test_users_activate_inits_ActivationEvent(ActivationEvent, models, pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
     views.users_activate(pyramid_request)
 
     ActivationEvent.assert_called_once_with(pyramid_request,
-                                            User.get_by_username.return_value)
+                                            models.User.get_by_username.return_value)
 
 
 @users_activate_fixtures
-def test_users_activate_calls_notify(ActivationEvent, User, notify, pyramid_request):
+def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
     views.users_activate(pyramid_request)
@@ -152,7 +153,7 @@ def test_users_activate_calls_notify(ActivationEvent, User, notify, pyramid_requ
 
 
 @users_activate_fixtures
-def test_users_activate_redirects(User, pyramid_request):
+def test_users_activate_redirects(pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
     result = views.users_activate(pyramid_request)
@@ -160,25 +161,25 @@ def test_users_activate_redirects(User, pyramid_request):
     assert isinstance(result, httpexceptions.HTTPFound)
 
 
-users_delete_fixtures = pytest.mark.usefixtures('User', 'delete_user')
+users_delete_fixtures = pytest.mark.usefixtures('models', 'delete_user')
 
 
 @users_delete_fixtures
-def test_users_delete_user_not_found_error(User, pyramid_request):
+def test_users_delete_user_not_found_error(models, pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
-    User.get_by_username.return_value = None
+    models.User.get_by_username.return_value = None
 
     with pytest.raises(views.UserNotFoundError):
         views.users_delete(pyramid_request)
 
 
 @users_delete_fixtures
-def test_users_delete_deletes_user(User, delete_user, pyramid_request):
+def test_users_delete_deletes_user(models, delete_user, pyramid_request):
     pyramid_request.params = {"username": "bob"}
     user = MagicMock()
 
-    User.get_by_username.return_value = user
+    models.User.get_by_username.return_value = user
 
     views.users_delete(pyramid_request)
 
@@ -186,11 +187,11 @@ def test_users_delete_deletes_user(User, delete_user, pyramid_request):
 
 
 @users_delete_fixtures
-def test_users_delete_group_creator_error(User, delete_user, pyramid_request):
+def test_users_delete_group_creator_error(models, delete_user, pyramid_request):
     pyramid_request.params = {"username": "bob"}
     user = MagicMock()
 
-    User.get_by_username.return_value = user
+    models.User.get_by_username.return_value = user
     delete_user.side_effect = views.UserDeletionError('group creator error')
 
     views.users_delete(pyramid_request)
@@ -289,11 +290,6 @@ def ActivationEvent(patch):
 
 
 @pytest.fixture
-def User(patch):
-    return patch('h.models.User')
-
-
-@pytest.fixture
 def api_storage(patch):
     return patch('h.admin.views.users.storage')
 
@@ -310,7 +306,9 @@ def elasticsearch_helpers(patch):
 
 @pytest.fixture
 def models(patch):
-    return patch('h.admin.views.users.models')
+    module = patch('h.admin.views.users.models')
+    module.Annotation = Annotation
+    return module
 
 
 @pytest.fixture
