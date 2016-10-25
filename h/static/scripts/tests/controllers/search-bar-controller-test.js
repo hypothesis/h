@@ -266,12 +266,13 @@ describe('SearchBarController', function () {
      * return the various parts of the component.
      *
      */
-    function component() {
+    function component(value) {
+      value = value || '';
       var template = `
         <form>
           <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
           <input data-ref="searchBarInput" class="search-bar__input">
-          <input data-ref="searchBarInputHidden" class="js-search-bar__input-hidden" name="q" value="foo 'bar">
+          <input data-ref="searchBarInputHidden" class="js-search-bar__input-hidden" name="q" value="${value}">
           <div data-ref="searchBarDropdown"></div>
         </form>
       `.trim();
@@ -294,21 +295,20 @@ describe('SearchBarController', function () {
     }
 
     it('should create lozenges for existing query terms in the hidden input on page load', function () {
-      var {ctrl} = component();
+      var {ctrl} = component('foo');
 
       assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
     });
 
     it('should not create a lozenge for incomplete query strings in the hidden input on page load', function () {
-      var {ctrl, input} = component();
+      var {ctrl, input} = component("'bar");
 
-      assert.equal(getLozenges(ctrl).length, 1);
-      assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
-      assert.equal(input.value, '\'bar');
+      assert.equal(getLozenges(ctrl).length, 0);
+      assert.equal(input.value, "'bar");
     });
 
     it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', function (done) {
-      var {ctrl, input, hiddenInput} = component();
+      var {ctrl, input, hiddenInput} = component('foo');
       input.value = '';
       hiddenInput.value = '';
 
@@ -322,19 +322,19 @@ describe('SearchBarController', function () {
     });
 
     it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', function (done) {
-      var {ctrl, input} = component();
+      var {ctrl, input} = component("'bar gar'");
 
       syn
         .click(input)
         .type(' gar\'')
         .type('[space]', () => {
-          assert.equal(getLozenges(ctrl)[1].textContent, '\'bar gar\'');
+          assert.equal(getLozenges(ctrl)[0].textContent, "'bar gar'");
           done();
         });
     });
 
     it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', function (done) {
-      var {ctrl, input} = component();
+      var {ctrl, input} = component("'bar");
 
       syn
         .click(input)
@@ -342,9 +342,8 @@ describe('SearchBarController', function () {
         .type('gar')
         .type('[space]', () => {
           var lozenges = getLozenges(ctrl);
-          assert.equal(lozenges.length, 1);
-          assert.equal(lozenges[0].textContent, 'foo');
-          assert.equal(input.value, '\'bar gar ');
+          assert.equal(lozenges.length, 0);
+          assert.equal(input.value, "'bar gar ");
           done();
         });
     });
