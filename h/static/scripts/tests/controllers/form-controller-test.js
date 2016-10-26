@@ -2,22 +2,45 @@
 
 var proxyquire = require('proxyquire');
 
+var { hyphenate } = require('../../util/string');
 var { noCallThru } = require('../util');
 var upgradeElements = require('../../base/upgrade-elements');
 
-// Simplified version of forms rendered by deform on the server
-var TEMPLATE = `
+/**
+ * Converts a map of data attribute names to string values into a string
+ * containing equivalent data attributes.
+ *
+ * Note: This is not suitable for use outside tests, attribute values are not
+ * escaped.
+ *
+ * eg. dataAttrs({activeLabel: 'label'}) => 'data-active-label="label"'
+ */
+function dataAttrs(data) {
+  var dataAttrs = [];
+  Object.keys(data || {}).forEach(key => {
+    dataAttrs.push(`data-${hyphenate(key)}="${data[key]}"`);
+  });
+  return dataAttrs.join(' ');
+}
+
+// Simplified version of form fields rendered by deform on the server in
+// mapping_item.jinja2
+function fieldTemplate(field) {
+  var dataAttr = dataAttrs(field.data);
+  var typeAttr = field.type ? `type="${field.type}"` : '';
+
+  return `<div class="js-form-input" data-ref="${field.fieldRef}" ${dataAttr}>
+    <label data-ref="label ${field.labelRef}">Label</label>
+    <input id="deformField" data-ref="formInput ${field.ref}" ${typeAttr} value="${field.value}">
+  </div>`;
+}
+
+// Simplified version of forms rendered by deform on the server in form.jinja2
+function formTemplate(fields) {
+  return `
   <form class="js-form">
     <div data-ref="formBackdrop"></div>
-    <div class="js-form-input">
-      <input id="deformField" data-ref="formInput firstInput" value="original value">
-    </div>
-    <div class="js-form-input">
-      <input id="deformField2" data-ref="formInput secondInput" value="original value 2">
-    </div>
-    <div class="js-form-input">
-      <input id="deformField3" data-ref="formInput checkboxInput" type="checkbox">
-    </div>
+    ${fields.map(fieldTemplate)}
     <div data-ref="formActions">
       <button data-ref="testSaveBtn">Save</button>
       <button data-ref="cancelBtn">Cancel</button>
@@ -27,22 +50,34 @@ var TEMPLATE = `
     </div>
   </form>
 `;
+}
 
-var UPDATED_FORM = TEMPLATE.replace('js-form', 'js-form is-updated');
+var FORM_TEMPLATE = formTemplate([{
+  ref: 'firstInput',
+  value: 'original value',
+},{
+  ref: 'secondInput',
+  value: 'original value 2',
+},{
+  ref: 'checkboxInput',
+  type: 'checkbox',
+}]);
+
+var UPDATED_FORM = FORM_TEMPLATE.replace('js-form', 'js-form is-updated');
 
 describe('FormController', function () {
   var ctrl;
   var fakeSubmitForm;
   var reloadSpy;
 
-  beforeEach(function () {
+  function initForm(template) {
     fakeSubmitForm = sinon.stub();
     var FormController = proxyquire('../../controllers/form-controller', {
       '../util/submit-form': noCallThru(fakeSubmitForm),
     });
 
     var container = document.createElement('div');
-    container.innerHTML = TEMPLATE;
+    container.innerHTML = template;
     upgradeElements(container, {
       '.js-form': FormController,
     });
@@ -62,6 +97,11 @@ describe('FormController', function () {
 
     // Add element to document so that it can be focused
     document.body.appendChild(ctrl.element);
+  }
+
+  beforeEach(function () {
+    // Setup a form with the default template
+    initForm(FORM_TEMPLATE);
   });
 
   afterEach(function () {
@@ -286,6 +326,105 @@ describe('FormController', function () {
 
     it('automatically submits the form', function () {
       assert.calledWith(fakeSubmitForm, ctrl.element);
+    });
+  });
+
+  describe('forms with hidden fields', function () {
+    beforeEach(function () {
+      // Setup a form like the 'Change Email' which has a field that is initially
+      // visible plus additional fields that are shown once the form is being
+      // edited
+      initForm(formTemplate([{
+        fieldRef: 'emailContainer',
+        ref: 'emailInput',
+        value: 'jim@smith.com',
+      },{
+        fieldRef: 'passwordContainer',
+        ref: 'passwordInput',
+        value: '',
+        type: 'password',
+        data: {
+          hideUntilActive: true,
+        },
+      }]));
+    });
+
+    function isConfirmFieldHidden() {
+      return ctrl.refs.passwordContainer.classList.contains('is-hidden');
+    }
+
+    it('hides initially-hidden fields', function () {
+      assert.isTrue(isConfirmFieldHidden());
+    });
+
+    it('shows initially-hidden fields when the email input is focused', function () {
+      ctrl.refs.emailInput.focus();
+      assert.isFalse(isConfirmFieldHidden());
+    });
+
+    it('hides initially-hidden fields when no input is focused', function () {
+      var externalControl = document.createElement('input');
+      document.body.appendChild(externalControl);
+
+      ctrl.refs.emailInput.focus();
+      externalControl.focus();
+
+      assert.isTrue(isConfirmFieldHidden());
+      externalControl.remove();
+    });
+
+    it('shows all fields in an editing state when any is focused', function () {
+      var containers = [ctrl.refs.emailContainer, ctrl.refs.passwordContainer];
+      var inputs = [ctrl.refs.emailInput, ctrl.refs.passwordInput];
+
+      inputs.forEach(input => {
+        input.focus();
+
+        var editing = containers.filter(el => el.classList.contains('is-editing'));
+        assert.equal(editing.length, 2);
+      });
+    });
+  });
+
+  describe('fields with inactive and active labels', function () {
+    beforeEach(function () {
+      initForm(formTemplate([{
+        labelRef: 'passwordLabel',
+        ref: 'passwordInput',
+        type: 'password',
+        data: {
+          activeLabel: 'Current password',
+          inactiveLabel: 'Password',
+        },
+      }]));
+    });
+
+    it('uses the inactive label for fields when the form is inactive', function () {
+      assert.equal(ctrl.refs.passwordLabel.textContent, 'Password');
+    });
+
+    it('uses the active label for fields when the form is active', function () {
+      ctrl.refs.passwordInput.focus();
+      assert.equal(ctrl.refs.passwordLabel.textContent, 'Current password');
+    });
+  });
+
+  describe('password fields', function () {
+    beforeEach(function () {
+      initForm(formTemplate([{
+        ref: 'password',
+        type: 'password',
+      }]));
+    });
+
+    it('adds a placeholder to inactive password fields', function () {
+      assert.equal(ctrl.refs.password.getAttribute('placeholder'),
+        '••••••••');
+    });
+
+    it('clears the placeholder when the password field is focused', function () {
+      ctrl.refs.password.focus();
+      assert.equal(ctrl.refs.password.getAttribute('placeholder'), '');
     });
   });
 });

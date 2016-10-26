@@ -12,6 +12,7 @@
     "browserify-shim": "^3.8.12",
     "commander": "^2.9.0",
     "core-js": "^1.2.5",
+    "element-dataset": "^1.3.0",
     "end-of-stream": "^1.1.0",
     "exorcist": "^0.4.0",
     "gulp": "^3.9.1",
