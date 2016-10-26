@@ -11,15 +11,34 @@ function shouldAutosubmit(type) {
 }
 
 /**
- * Return true if a form field should be hidden until the user starts
- * editing the form.
+ * Return true if a form field should be hidden until the user starts editing
+ * the form.
+ *
+ * @param {Element} el - The container for an individual form field, which may
+ *        have a "data-hide-until-active" attribute.
  */
 function isHiddenField(el) {
   return el.dataset.hideUntilActive;
 }
 
 /**
- * A controller which adds inline editing functionality to forms
+ * @typedef {Object} Field
+ * @property {Element} container - The container element for an input field
+ * @property {HTMLInputElement} input - The <input> element for an input field
+ * @property {HTMLLabelElement} label - The <label> element for a field
+ */
+
+/**
+ * A controller which adds inline editing functionality to forms.
+ *
+ * When forms have inline editing enabled, individual fields can be edited and
+ * changes can be saved without a full page reload.
+ *
+ * Instead when the user focuses a field, Save/Cancel buttons are shown beneath
+ * the field and everything else on the page is dimmed. When the user clicks 'Save'
+ * the form is submitted to the server via a `fetch()` request and the HTML of
+ * the form is updated with the result, which may be a successfully updated form
+ * or a re-rendered version of the form with validation errors indicated.
  */
 class FormController extends Controller {
   constructor(element, options) {
@@ -140,6 +159,12 @@ class FormController extends Controller {
     this._updateFields(state);
   }
 
+  /**
+   * Update the appearance of individual form fields to match the current state
+   * of the form.
+   *
+   * @param {Object} state - The internal state of the form
+   */
   _updateFields(state) {
     this._fields.forEach(field => {
       setElementState(field.container, {
@@ -238,6 +263,9 @@ class FormController extends Controller {
     return [this.refs.formActions].concat(fieldContainers);
   }
 
+  /**
+   * Trap focus within the set of form fields currently being edited.
+   */
   _trapFocus() {
     this._releaseFocus = modalFocus.trap(this._focusGroup(), newFocusedElement => {
       // Keep focus in the current field when it has unsaved changes,
@@ -259,6 +287,9 @@ class FormController extends Controller {
   /**
    * Return the set of fields that should be displayed in the editing state
    * when a given field is selected.
+   *
+   * @param {Field} - The field that was focused
+   * @return {Field[]} - Set of fields that should be active for editing
    */
   _editSet(field) {
     // Currently we have two types of form:
