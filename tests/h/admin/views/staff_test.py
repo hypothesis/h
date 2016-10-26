@@ -40,6 +40,13 @@ class TestStaffAddRemove(object):
 
         assert users['agnos'].staff
 
+    def test_add_strips_spaces(self, pyramid_request, users):
+        pyramid_request.params = {"add": "   eva   "}
+
+        views.staff_add(pyramid_request)
+
+        assert users['eva'].staff
+
     def test_add_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"add": "eva"}
 

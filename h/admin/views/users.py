@@ -31,6 +31,7 @@ def users_index(request):
     username = request.params.get('username')
 
     if username:
+        username = username.strip()
         user = models.User.get_by_username(request.db, username)
         if user is None:
             user = models.User.get_by_email(request.db, username)
@@ -69,7 +70,7 @@ def users_rename(request):
     user = _form_request_user(request)
 
     old_username = user.username
-    new_username = request.params.get('new_username')
+    new_username = request.params.get('new_username').strip()
 
     try:
         svc = request.find_service(name='rename_user')
@@ -154,7 +155,7 @@ def _all_user_annotations(request, user):
 
 def _form_request_user(request):
     """Return the User which a user admin form action relates to."""
-    username = request.params['username']
+    username = request.params['username'].strip()
     user = models.User.get_by_username(request.db, username)
 
     if user is None:

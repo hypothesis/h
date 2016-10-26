@@ -24,7 +24,7 @@ def staff_index(request):
              permission='admin_staff')
 def staff_add(request):
     """Make a given user a staff member."""
-    username = request.params['add']
+    username = request.params['add'].strip()
     user = models.User.get_by_username(request.db, username)
     if user is None:
         request.session.flash(

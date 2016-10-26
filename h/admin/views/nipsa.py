@@ -55,7 +55,7 @@ def user_not_found(exc, request):
 
 
 def _form_request_user(request, param):
-    username = request.params[param]
+    username = request.params[param].strip()
     user = models.User.get_by_username(request.db, username)
 
     if user is None:

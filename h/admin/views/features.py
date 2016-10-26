@@ -87,7 +87,7 @@ def cohorts_edit(context, request):
              renderer='h:templates/admin/edit_cohort.html.jinja2',
              permission='admin_features')
 def cohorts_edit_add(request):
-    member_name = request.params['add']
+    member_name = request.params['add'].strip()
     cohort_id = request.matchdict['id']
 
     member = models.User.get_by_username(request.db, member_name)
