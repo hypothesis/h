@@ -207,9 +207,7 @@ class SearchBarController extends Controller {
      */
     var lozengifyInput = () => {
       var {lozengeValues, incompleteInputValue} = SearchTextParser.getLozengeValues(this._input.value);
-      lozengeValues.forEach(function(value) {
-        addLozenge(value);
-      });
+      lozengeValues.forEach(addLozenge);
       this._input.value = incompleteInputValue;
       this._input.style.visibility = 'visible';
     };
