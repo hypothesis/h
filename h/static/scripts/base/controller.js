@@ -34,7 +34,10 @@ class Controller {
    *        specific to that type of controller.
    */
   constructor(element, options = {}) {
-    if (!element.controllers) {
+
+    if (!element){
+      throw new Error('Controllers require an element passed to the constructor');
+    } else if (!element.controllers) {
       element.controllers = [this];
     } else {
       element.controllers.push(this);

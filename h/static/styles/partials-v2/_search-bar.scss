@@ -6,6 +6,9 @@
   border: 1px solid $grey-3;
   border-radius: 2px;
   display: flex;
+
+  // scope absolute positioned elements
+  position: relative;
 }
 
 .search-bar__input {
@@ -60,7 +63,8 @@
   display: none;
   padding: 20px 0 0 0;
   position: absolute;
-  margin-top: 52px;
+  top: 52px;
+  left: 0;
   width: 100%;
   z-index: $zindex-dropdown-menu;
   max-width: 650px;
@@ -72,7 +76,7 @@
 
 .search-bar__dropdown-menu-item {
   padding: 6px 30px 6px 30px;
-  cursor: default;
+  cursor: pointer;
 }
 
 .search-bar__dropdown-menu-item:last-child {
