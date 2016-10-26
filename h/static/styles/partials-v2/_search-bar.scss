@@ -18,6 +18,14 @@
   padding-top: 18px;
   padding-bottom: 18px;
   padding-right: 3px;
+
+  .env-js-capable & {
+    visibility: hidden;
+  }
+
+  .env-js-timeout & {
+    visibility: visible;
+  }
 }
 
 .search-bar__input:hover,

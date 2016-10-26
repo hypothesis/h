@@ -51,11 +51,13 @@
       !--><img alt="Hypothesis logo" class="nav-bar__logo" src="/assets/images/logo.svg"></a>
 
     <div class="nav-bar__search js-search-bar" data-ref="searchBar">
-      <form class="search-bar" action="{{ search_url }}">
+      <form class="search-bar"
+            data-ref="searchBarForm"
+            id="search-bar"
+            action="{{ search_url }}">
         {{ svg_icon('search', 'search-bar__icon') }}
         <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
-        <input class="search-bar__input" data-ref="searchBarInput" placeholder="Search…" autocomplete="off">
-        <input type="hidden" class="js-search-bar__input-hidden" data-ref="searchBarInputHidden" name="q" value="{{ q }}">
+        <input class="search-bar__input" data-ref="searchBarInput" name="q" value="{{ q }}" placeholder="Search…" autocomplete="off">
         {{ search_bar_dropdown() }}
       </form>
     </div>
