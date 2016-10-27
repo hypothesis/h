@@ -120,6 +120,46 @@ class TestCreate(object):
 
         assert "'authority' does not match authenticated client" in str(exc.value)
 
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_username_taken(self,
+                                        pyramid_request,
+                                        valid_payload,
+                                        db_session,
+                                        factories,
+                                        auth_client):
+        existing_user = factories.User(authority=auth_client.authority)
+        db_session.add(existing_user)
+        db_session.flush()
+
+        payload = valid_payload
+        payload['username'] = existing_user.username
+        pyramid_request.json_body = payload
+
+        with pytest.raises(ValidationError) as exc:
+            create(pyramid_request)
+
+        assert ('username %s already exists' % existing_user.username) in str(exc.value)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_email_taken(self,
+                                     pyramid_request,
+                                     valid_payload,
+                                     db_session,
+                                     factories,
+                                     auth_client):
+        existing_user = factories.User(authority=auth_client.authority)
+        db_session.add(existing_user)
+        db_session.flush()
+
+        payload = valid_payload
+        payload['email'] = existing_user.email
+        pyramid_request.json_body = payload
+
+        with pytest.raises(ValidationError) as exc:
+            create(pyramid_request)
+
+        assert ('email address %s already exists' % existing_user.email) in str(exc.value)
+
     @pytest.fixture
     def schemas(self, patch):
         return patch('h.views.api_users.schemas')

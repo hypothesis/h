@@ -32,6 +32,8 @@ def create(request):
     _check_authority(client, appstruct)
     appstruct['authority'] = client.authority
 
+    _check_existing_user(request.db, appstruct)
+
     user_signup_service = request.find_service(name='user_signup')
     user = user_signup_service.signup(require_activation=False, **appstruct)
     return {
@@ -46,6 +48,22 @@ def _check_authority(client, data):
     authority = data.get('authority')
     if client.authority != authority:
         msg = "'authority' does not match authenticated client"
+        raise ValidationError(msg)
+
+
+def _check_existing_user(session, data):
+    existing_user = models.User.get_by_email(session,
+                                             data['email'],
+                                             data['authority'])
+    if existing_user:
+        msg = "user with email address %s already exists" % data['email']
+        raise ValidationError(msg)
+
+    existing_user = models.User.get_by_username(session,
+                                                data['username'],
+                                                data['authority'])
+    if existing_user:
+        msg = "user with username %s already exists" % data['username']
         raise ValidationError(msg)
 
 
