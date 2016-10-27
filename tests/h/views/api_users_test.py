@@ -109,6 +109,17 @@ class TestCreate(object):
         with pytest.raises(ValidationError):
             create(pyramid_request)
 
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_authority_doesnt_match(self, pyramid_request, valid_payload, auth_client):
+        payload = valid_payload
+        payload['authority'] = 'foo-%s' % auth_client.authority
+        pyramid_request.json_body = payload
+
+        with pytest.raises(ValidationError) as exc:
+            create(pyramid_request)
+
+        assert "'authority' does not match authenticated client" in str(exc.value)
+
     @pytest.fixture
     def schemas(self, patch):
         return patch('h.views.api_users.schemas')

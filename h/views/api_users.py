@@ -10,6 +10,7 @@ from h import models
 from h.accounts import schemas
 from h.auth.util import basic_auth_creds
 from h.exceptions import ClientUnauthorized
+from h.schemas import ValidationError
 from h.util.view import json_view
 
 
@@ -27,6 +28,8 @@ def create(request):
 
     schema = schemas.CreateUserAPISchema()
     appstruct = schema.validate(request.json_body)
+
+    _check_authority(client, appstruct)
     appstruct['authority'] = client.authority
 
     user_signup_service = request.find_service(name='user_signup')
@@ -37,6 +40,13 @@ def create(request):
         'userid': user.userid,
         'username': user.username,
     }
+
+
+def _check_authority(client, data):
+    authority = data.get('authority')
+    if client.authority != authority:
+        msg = "'authority' does not match authenticated client"
+        raise ValidationError(msg)
 
 
 def _request_client(request):
