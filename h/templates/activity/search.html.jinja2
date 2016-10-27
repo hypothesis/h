@@ -95,6 +95,69 @@
         </li>
       {% endfor %}
     </ol>
+
+    {% if group %}
+    <aside class="search-result-sidebar">
+      <h1 class="search-result-sidebar__title">{{ group.name }}</h1>
+
+      {% if group.description %}
+      <section class="search-result-sidebar__section">
+        {% for paragraph in group.description.split('\n') %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+      </section>
+      {% endif %}
+
+      <section class="search-result-sidebar__section">
+        <dl>
+          <dt class="search-result-sidebar__dt">
+            {% trans %}Annotations:{% endtrans %}
+          </dt>
+          <dd class="search-result-sidebar__dd">{{ total }}</dd>
+
+          <dt class="search-result-sidebar__dt">
+            {% trans %}Created:{% endtrans %}
+          </dt>
+          <dd class="search-result-sidebar__dd">{{ group.created }}</dd>
+        </dl>
+        <div style="clear: both;"></div>
+      </section>
+
+      <section class="search-result-sidebar__section">
+        <ul>
+          {% if group_edit_url %}
+            <li>
+              <a class="search-result-sidebar__link"
+                 href="{{ group_edit_url }}">
+                {% trans %}Edit group{% endtrans %}
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </section>
+
+      <section class="search-result-sidebar__section">
+        <h3 class="search-result-sidebar__subtitle">
+          {% trans %}Members{% endtrans %}
+          <span class="search-result-sidebar-title__annotations-count">
+            {{ aggregations.users|length }}
+          <span>
+        </h3>
+        <ul>
+          {% for user in aggregations.users %}
+            <li>
+              <a class="search-result-sidebar__username">
+                {{ user.username }}
+              </a>
+              <span class="search-result-sidebar__annotations-count">
+                {{ user.count }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    </aside>
+    {% endif %}
   </div>
 
   {% if page and page.max > 1 %}

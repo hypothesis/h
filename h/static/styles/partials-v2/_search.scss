@@ -4,8 +4,9 @@
 // of activity queries.
 
 .search-result-container {
+  display: flex;
   font-size: $normal-font-size;
-  margin-top: 20px;
+  margin-top: 50px;
   color: $grey-6;
 }
 
@@ -28,6 +29,10 @@
   padding-bottom: 10px;
   border-bottom: 1px solid $grey-2;
   margin-top: 30px;
+}
+
+.search-result__timeframe:first-child {
+  margin-top: 0;
 }
 
 // A group of search results

@@ -53,6 +53,47 @@ class TestSearch(object):
                                          mock.ANY,
                                          page_size=100)
 
+    def test_it_returns_usernames(self, pyramid_request, query):
+        """
+        It should return a list of usernames to the template.
+
+        query.execute() returns userids, search() should replace these with
+        just the username parts.
+
+        """
+        query.execute.return_value = mock.Mock(
+            aggregations={
+                'users': [
+                    {'user': 'acct:test_user_1@hypothes.is'},
+                    {'user': 'acct:test_user_2@hypothes.is'},
+                    {'user': 'acct:test_user_3@hypothes.is'},
+                ]
+            }
+        )
+
+        result = activity.search(pyramid_request)
+
+        assert result['aggregations']['users'] == [
+            {'username': 'test_user_1'},
+            {'username': 'test_user_2'},
+            {'username': 'test_user_3'},
+        ]
+
+    def test_it_does_not_crash_if_there_are_no_users(self,
+                                                     pyramid_request,
+                                                     query):
+        """
+        It shouldn't crash if query.execute() returns no users.
+
+        Sometimes there is no "users" key in the aggregations.
+
+        """
+        query.execute.return_value = mock.Mock(aggregations={})
+
+        result = activity.search(pyramid_request)
+
+        assert 'users' not in result['aggregations']
+
     @pytest.fixture
     def query(self, patch):
         return patch('h.views.activity.query')
