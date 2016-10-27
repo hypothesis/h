@@ -15,14 +15,12 @@ from h.views.api_users import create
                          'user_signup_service')
 class TestCreate(object):
 
+    @pytest.mark.usefixtures('valid_auth')
     def test_returns_user_object(self,
-                                 auth_client,
-                                 basic_auth_creds,
                                  factories,
                                  pyramid_request,
                                  user_signup_service,
                                  valid_payload):
-        basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
         pyramid_request.json_body = valid_payload
         user_signup_service.signup.return_value = factories.User(**valid_payload)
 
@@ -35,14 +33,12 @@ class TestCreate(object):
             'authority': 'weylandindustries.com',
         }
 
+    @pytest.mark.usefixtures('valid_auth')
     def test_signs_up_user(self,
-                           auth_client,
-                           basic_auth_creds,
                            factories,
                            pyramid_request,
                            user_signup_service,
                            valid_payload):
-        basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
         pyramid_request.json_body = valid_payload
         user_signup_service.signup.return_value = factories.User(**valid_payload)
 
@@ -103,6 +99,11 @@ def basic_auth_creds(patch):
     basic_auth_creds = patch('h.views.api_users.basic_auth_creds')
     basic_auth_creds.return_value = None
     return basic_auth_creds
+
+
+@pytest.fixture
+def valid_auth(basic_auth_creds, auth_client):
+    basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
 
 
 @pytest.fixture
