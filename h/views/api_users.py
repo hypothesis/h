@@ -6,9 +6,10 @@ import hmac
 
 import sqlalchemy as sa
 
+from h import models
+from h.accounts import schemas
 from h.auth.util import basic_auth_creds
 from h.exceptions import ClientUnauthorized
-from h.models import AuthClient
 from h.util.view import json_view
 
 
@@ -23,17 +24,13 @@ def create(request):
     service directly.
     """
     client = _request_client(request)
-    payload = request.json_body
 
-    user_props = {
-        'authority': client.authority,
-        'username': payload['username'],
-        'email': payload['email'],
-    }
+    schema = schemas.CreateUserAPISchema()
+    appstruct = schema.validate(request.json_body)
+    appstruct['authority'] = client.authority
 
     user_signup_service = request.find_service(name='user_signup')
-    user = user_signup_service.signup(require_activation=False, **user_props)
-
+    user = user_signup_service.signup(require_activation=False, **appstruct)
     return {
         'authority': user.authority,
         'email': user.email,
@@ -54,7 +51,7 @@ def _request_client(request):
     # because the resulting code may be subject to a timing attack.
     client_id, client_secret = creds
     try:
-        client = request.db.query(AuthClient).get(client_id)
+        client = request.db.query(models.AuthClient).get(client_id)
     except sa.exc.StatementError:  # client_id is malformed
         raise ClientUnauthorized()
     if client is None:

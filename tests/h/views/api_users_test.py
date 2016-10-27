@@ -8,6 +8,7 @@ from mock import Mock
 from h.accounts.services import UserSignupService
 from h.exceptions import ClientUnauthorized
 from h.views.api_users import create
+from h.schemas import ValidationError
 
 
 @pytest.mark.usefixtures('auth_client',
@@ -87,6 +88,30 @@ class TestCreate(object):
 
         with pytest.raises(ClientUnauthorized):
             create(pyramid_request)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_it_validates_the_input(self, pyramid_request, valid_payload, schemas):
+        create_schema = schemas.CreateUserAPISchema.return_value
+        create_schema.validate.return_value = valid_payload
+        pyramid_request.json_body = valid_payload
+
+        create(pyramid_request)
+
+        create_schema.validate.assert_called_once_with(valid_payload)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_schema_validation_fails(self, pyramid_request, valid_payload, schemas):
+        create_schema = schemas.CreateUserAPISchema.return_value
+        create_schema.validate.side_effect = ValidationError('validation failed')
+
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(ValidationError):
+            create(pyramid_request)
+
+    @pytest.fixture
+    def schemas(self, patch):
+        return patch('h.views.api_users.schemas')
 
 
 @pytest.fixture
