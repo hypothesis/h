@@ -51,7 +51,9 @@
         {% include "about-groups.html.jinja2" %}
         <p class="group-form-footer__heading">Invite</p>
         Sharing the link below lets people join this group:
-        <input class="share-link-field" value="{{ group_url }}" readonly>
+        <input class="share-link-field js-select-onfocus"
+               value="{{ group_url }}"
+               readonly>
       </div>
     </div>
   </div>
