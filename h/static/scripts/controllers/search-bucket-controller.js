@@ -38,7 +38,7 @@ class SearchBucketController extends Controller {
   }
 
   update(state, prevState) {
-    setElementState(this.refs.content, {hidden: !state.expanded});
+    setElementState(this.refs.content, {expanded: state.expanded});
     setElementState(this.element, {expanded: state.expanded});
 
     // Scroll to element when expanded, except on initial load

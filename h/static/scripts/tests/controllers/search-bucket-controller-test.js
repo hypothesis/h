@@ -33,9 +33,19 @@ describe('SearchBucketController', function () {
     ctrl.element.remove();
   });
 
-  it('toggles content hidden state when clicked', function () {
+  it('does not have the is-expanded CSS class initially', function () {
+    assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
+  });
+
+  it('adds the is-expanded CSS class when clicked', function () {
     ctrl.refs.header.dispatchEvent(new Event('click'));
-    assert.isFalse(ctrl.refs.content.classList.contains('is-hidden'));
+    assert.isTrue(ctrl.refs.content.classList.contains('is-expanded'));
+  });
+
+  it('removes the is-expanded CSS class when clicked again', function () {
+    ctrl.refs.header.dispatchEvent(new Event('click'));
+    ctrl.refs.header.dispatchEvent(new Event('click'));
+    assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
   });
 
   it('scrolls element into view when expanded', function () {

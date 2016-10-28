@@ -105,11 +105,14 @@
 }
 
 .search-result-bucket__annotation-cards-container {
-  display: flex;
   padding-left: 130px;
 
-  &.is-hidden {
+  display: flex;
+  .env-js-capable & {
     display: none;
+    &.is-expanded {
+      display: flex;
+    }
   }
 }
 
