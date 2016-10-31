@@ -181,6 +181,10 @@ class OAuthService(object):
             raise OAuthTokenError('user with userid described in subject could not be found',
                                   'invalid_grant')
 
+        if user.authority != authclient.authority:
+            raise OAuthTokenError('authenticated client and JWT subject authorities do not match',
+                                  'invalid_grant')
+
         return (user, authclient)
 
     def create_token(self, user, authclient):

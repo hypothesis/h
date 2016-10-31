@@ -404,6 +404,20 @@ class TestOAuthServiceVerifyJWTBearer(object):
         assert exc.value.type == 'invalid_grant'
         assert 'user with userid described in subject could not be found' in exc.value.message
 
+    def test_it_raises_when_client_authority_does_not_match_userid(self, svc, db_session, claims, authclient, user):
+        user.authority = 'bogus-partner.org'
+        db_session.flush()
+
+        claims['sub'] = user.userid
+        tok = self.jwt_token(claims, authclient.secret)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_jwt_bearer(assertion=tok,
+                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+
+        assert exc.value.type == 'invalid_grant'
+        assert 'authenticated client and JWT subject authorities do not match' in exc.value
+
     @pytest.fixture
     def svc(self, pyramid_request, db_session, user_service):
         return services.OAuthService(db_session, user_service, pyramid_request.domain)
