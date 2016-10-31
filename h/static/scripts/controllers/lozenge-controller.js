@@ -3,6 +3,7 @@
 var escapeHtml = require('escape-html');
 
 var Controller = require('../base/controller');
+var searchTextParser = require('../util/search-text-parser');
 
 /**
  * Create a lozenge with options.content as its content and append it to containerEl.
@@ -20,9 +21,21 @@ class LozengeController extends Controller {
   constructor(containerEl, options) {
     super(containerEl, options);
     var lozengeEl = document.createElement('div');
+    var lozengeMarkup = escapeHtml(options.content);
+
+    if (searchTextParser.hasKnownNamedQueryTerm(options.content)) {
+      var queryTerm = searchTextParser.getLozengeFacetNameAndValue(options.content);
+      lozengeMarkup = '<span class="lozenge__facet-name">' +
+        escapeHtml(queryTerm.facetName) +
+        '</span>' +
+        ':' +
+        '<span class="lozenge__facet-value">' +
+        escapeHtml(queryTerm.facetValue) +
+        '</span>';
+    }
     lozengeEl.innerHTML =
       '<div class="js-lozenge__content lozenge__content">'+
-      escapeHtml(options.content)+
+      lozengeMarkup +
       '</div>' +
       '<div class="js-lozenge__close lozenge__close">' +
       '<img alt="Delete lozenge" src="/assets/images/icons/lozenge-close.svg">' +

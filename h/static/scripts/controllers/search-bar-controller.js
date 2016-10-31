@@ -182,7 +182,7 @@ class SearchBarController extends Controller {
      * content provided and executes the delete callback when
      * the lozenge is deleted.
      *
-     * @param {String} content The search term
+     * @param {string} content The search term
      */
     var addLozenge = content => {
       var deleteCallback = () => {
