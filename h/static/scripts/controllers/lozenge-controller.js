@@ -22,7 +22,9 @@ class LozengeController extends Controller {
       '<div class="js-lozenge__content lozenge__content">'+
       options.content+
       '</div>' +
-      '<div class="js-lozenge__close lozenge__close">x</div>';
+      '<div class="js-lozenge__close lozenge__close">' +
+      '<img alt="Delete lozenge" src="/assets/images/icons/lozenge-close.svg">' +
+      '</div>';
     lozengeEl.classList.add('lozenge');
     lozengeEl.classList.add('js-lozenge');
     containerEl.appendChild(lozengeEl);
