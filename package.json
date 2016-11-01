@@ -14,6 +14,7 @@
     "core-js": "^1.2.5",
     "element-dataset": "^1.3.0",
     "end-of-stream": "^1.1.0",
+    "escape-html": "^1.0.3",
     "exorcist": "^0.4.0",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
