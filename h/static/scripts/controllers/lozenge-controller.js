@@ -1,5 +1,7 @@
 'use strict';
 
+var escapeHtml = require('escape-html');
+
 var Controller = require('../base/controller');
 
 /**
@@ -20,7 +22,7 @@ class LozengeController extends Controller {
     var lozengeEl = document.createElement('div');
     lozengeEl.innerHTML =
       '<div class="js-lozenge__content lozenge__content">'+
-      options.content+
+      escapeHtml(options.content)+
       '</div>' +
       '<div class="js-lozenge__close lozenge__close">' +
       '<img alt="Delete lozenge" src="/assets/images/icons/lozenge-close.svg">' +
