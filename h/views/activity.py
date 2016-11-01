@@ -77,9 +77,44 @@ def group_search(request):
         'created': group.created.strftime('%B, %Y'),
         'description': group.description,
         'name': group.name,
+        'pubid': group.pubid,
     }
+
+    result['show_group_leave_button'] = (
+        group.creator != request.authenticated_user)
 
     if request.has_permission('admin', group):
         result['group_edit_url'] = request.route_url('group_edit', pubid=pubid)
 
     return result
+
+
+@view_config(route_name='activity.group_search',
+             request_method='POST',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='group_leave')
+def group_leave(request):
+    """
+    Leave the given group.
+
+    Remove the authenticated user from the given group and redirect the
+    browser to the search page.
+
+    """
+    if not request.feature('search_page'):
+        raise httpexceptions.HTTPNotFound()
+
+    pubid = request.params['group_leave']
+
+    try:
+        group = request.db.query(models.Group).filter_by(pubid=pubid).one()
+    except exc.NoResultFound:
+        raise httpexceptions.HTTPNotFound()
+
+    groups_service = request.find_service(name='groups')
+    groups_service.member_leave(group, request.authenticated_userid)
+
+    new_params = request.POST.copy()
+    location = request.route_url('activity.search', _query=new_params)
+
+    return httpexceptions.HTTPSeeOther(location=location)

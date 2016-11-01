@@ -15,6 +15,13 @@
         {{ svg_icon('search', 'search-bar__icon') }}
         <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
         <input class="search-bar__input" data-ref="searchBarInput" name="q" value="{{ q }}" placeholder="Search…" autocomplete="off">
+
+        {#- This seemingly pointless <input> is actually needed to make the
+            form work correctly. If you remove this input then when the user
+            presses Enter in the search bar input, the browser will act as if
+            the user had clicked one of the form's other submit elements
+            (e.g. the leave group button). #}
+        <input type="submit" style="display: none;">
       </form>
     </div>
 
