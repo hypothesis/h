@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from elasticsearch import helpers as es_helpers
 import jinja2
 from pyramid import httpexceptions
@@ -29,23 +31,31 @@ def users_index(request):
     user = None
     user_meta = {}
     username = request.params.get('username')
+    authority = request.params.get('authority')
 
     if username:
         username = username.strip()
-        user = models.User.get_by_username(request.db, username, request.auth_domain)
+        authority = authority.strip()
+        user = models.User.get_by_username(request.db, username, authority)
         if user is None:
-            user = models.User.get_by_email(request.db, username, request.auth_domain)
+            user = models.User.get_by_email(request.db, username, authority)
 
     if user is not None:
         n_annots = _all_user_annotations(request, user).count()
         user_meta['annotations_count'] = n_annots
 
-    return {'username': username, 'user': user, 'user_meta': user_meta}
+    return {
+        'default_authority': request.auth_domain,
+        'username': username,
+        'authority': authority,
+        'user': user,
+        'user_meta': user_meta
+    }
 
 
 @view_config(route_name='admin_users_activate',
              request_method='POST',
-             request_param='username',
+             request_param='userid',
              permission='admin_users')
 def users_activate(request):
     user = _form_request_user(request)
@@ -60,7 +70,8 @@ def users_activate(request):
 
     return httpexceptions.HTTPFound(
         location=request.route_path('admin_users',
-                                    _query=(('username', user.username),)))
+                                    _query=(('username', user.username),
+                                            ('authority', user.authority))))
 
 
 @view_config(route_name='admin_users_rename',
@@ -84,13 +95,15 @@ def users_rename(request):
 
         return httpexceptions.HTTPFound(
             location=request.route_path('admin_users',
-                                        _query=(('username', new_username),)))
+                                        _query=(('username', new_username),
+                                                ('authority', user.authority))))
 
     except (UserRenameError, ValueError) as e:
         request.session.flash(str(e), 'error')
         return httpexceptions.HTTPFound(
             location=request.route_path('admin_users',
-                                        _query=(('username', old_username),)))
+                                        _query=(('username', old_username),
+                                                ('authority', user.authority))))
 
 
 @view_config(route_name='admin_users_delete',
@@ -102,7 +115,7 @@ def users_delete(request):
     try:
         delete_user(request, user)
         request.session.flash(
-            'Successfully deleted user %s' % user.username, 'success')
+            'Successfully deleted user %s with authority %s' % (user.username, user.authority), 'success')
     except UserDeletionError as e:
         request.session.flash(str(e), 'error')
 
@@ -155,11 +168,12 @@ def _all_user_annotations(request, user):
 
 def _form_request_user(request):
     """Return the User which a user admin form action relates to."""
-    username = request.params['username'].strip()
-    user = models.User.get_by_username(request.db, username, request.auth_domain)
+    userid = request.params['userid'].strip()
+    user_service = request.find_service(name='user')
+    user = user_service.fetch(userid)
 
     if user is None:
-        raise UserNotFoundError("Could not find user with username %s" % username)
+        raise UserNotFoundError("Could not find user with userid %s" % userid)
 
     return user
 
