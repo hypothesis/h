@@ -50,23 +50,17 @@
       <div class="group-form-footer__explain-text">
         {% include "about-groups.html.jinja2" %}
         <p class="group-form-footer__heading">Invite</p>
-        Invite anyone to join the group using the link below:
-        <input class="share-link-field" value="{{ group_url }}">
-        <a href="//twitter.com/intent/tweet?url={{ group_url | urlencode }}"
-           target="_blank"
-           title="Tweet link"
-           class="share-link-icon h-icon-twitter"></a>
-        <a href="//www.facebook.com/sharer/sharer.php?u={{ group_url | urlencode }}"
-           target="_blank"
-           title="Share on Facebook"
-           class="share-link-icon h-icon-facebook"></a>
-        <a href="//plus.google.com/share?url={{ group_url | urlencode }}"
-           target="_blank"
-           title="Post on Google Plus"
-           class="share-link-icon h-icon-google-plus"></a>
-        <a href="mailto:?subject=Invite to join the annotation group {{group.name}}&amp;body={{ group_url }}"
-           title="Share via email"
-            class="share-link-icon h-icon-mail"></a>
+        Sharing the link below lets people join this group:
+        <div class="share-link-field__container js-copy-button">
+          <input class="share-link-field__input js-select-onfocus"
+                 data-ref="input"
+                 value="{{ group_url }}"
+                 readonly>
+          <button class="share-link-field__clipboard-button"
+                  data-ref="button"
+                  title="Copy to clipboard">
+          {{ svg_icon('copy_to_clipboard') }}
+        </div>
       </div>
     </div>
   </div>

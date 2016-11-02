@@ -16,7 +16,11 @@
   color: $gray-dark;
 }
 
-.share-link-field {
+.share-link-field__container {
+  position: relative;
+}
+
+.share-link-field__input {
   padding: 3px;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -25,6 +29,50 @@
   border: 1px solid $gray-lighter;
   border-radius: 2px;
   width: 100%;
+
+  .env-js-capable & {
+    padding-right: 22px;  /* Make space for the clipboard icon. */
+  }
+  .env-js-timeout & {
+    padding-right: 3px;
+  }
+}
+
+.share-link-field__clipboard-button {
+  background: none;
+  height: 28px;
+  width: 23px;
+  border: none;
+  position: absolute;
+  right: 0;
+  top: 12px;
+
+  display: none;
+  .env-js-capable & {
+    display: block;
+  }
+  .env-js-timeout & {
+    display: none;
+  }
+}
+
+.share-link-field__clipboard-button:focus {
+  outline: none;
+}
+
+.share-link-field__clipboard-image {
+  // Vertically center the image inside its parent <button>.
+  margin-top: 5px;
+  margin-bottom: 5px;
+
+  width: 13px;
+  height: 16px;
+
+  fill: $grey-4;
+}
+
+.share-link-field__clipboard-image:hover {
+  fill: $grey-7;
 }
 
 .share-link-icons {
