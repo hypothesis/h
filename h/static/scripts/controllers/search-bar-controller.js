@@ -1,8 +1,8 @@
 'use strict';
 
 var Controller = require('../base/controller');
-var setElementState = require('../util/dom').setElementState;
 var LozengeController = require('./lozenge-controller');
+var AutosuggestDropdownController = require('./autosuggest-dropdown-controller');
 var SearchTextParser = require('../util/search-text-parser');
 
 /**
@@ -12,128 +12,109 @@ class SearchBarController extends Controller {
   constructor(element) {
     super(element);
 
-    this._dropdown = this.refs.searchBarDropdown;
-    this._dropdownItems = Array.from(
-      element.querySelectorAll('[data-ref="searchBarDropdownItem"]'));
     this._input = this.refs.searchBarInput;
     this._lozengeContainer = this.refs.searchBarLozenges;
-    var getActiveDropdownItem = () => {
-      return element.querySelector('.js-search-bar-dropdown-menu-item--active');
-    };
 
-    var clearActiveDropdownItem = () => {
-      var activeItem = getActiveDropdownItem();
-      if (activeItem) {
-        activeItem.classList.remove('js-search-bar-dropdown-menu-item--active');
-      }
-    };
-
-    var updateActiveDropdownItem = element => {
-      clearActiveDropdownItem();
-      element.classList.add('js-search-bar-dropdown-menu-item--active');
-    };
-
-    var isHidden = element => {
-      return element &&
-        (element.nodeType !== 1 ||
-          !element.classList ||
-          element.classList.contains('is-hidden'));
-    };
-
-    var getPreviousVisibleSiblingElement = element => {
-      if (!element) {
-        return null;
-      }
-
-      do {
-        element = element.previousSibling;
-      } while (isHidden(element));
-      return element;
-    };
-
-    var getNextVisibleSiblingElement = element => {
-      if (!element) {
-        return null;
-      }
-
-      do {
-        element = element.nextSibling;
-      } while (isHidden(element));
-
-      return element;
-    };
-
-    var showAllDropdownItems = () => {
-      this._dropdownItems.forEach(function(dropdownItem) {
-        dropdownItem.classList.remove('is-hidden');
-      });
-    };
-
-    var closeDropdown = () => {
-      if (!this.state.open) { return; }
-      clearActiveDropdownItem();
-      showAllDropdownItems();
-      this.setState({open: false});
-    };
-
-    var openDropdown = () => {
-      if (this.state.open) { return; }
-      clearActiveDropdownItem();
-      this.setState({open: true});
-    };
+    let explanationList = [
+      {
+        title: 'user:',
+        explanation: 'search by username',
+      },
+      {
+        title: 'tag:',
+        explanation: 'search for annotations with a tag',
+      },
+      {
+        title: 'url:',
+        explanation: 'see all annotations on a page',
+      },
+      {
+        title: 'group:',
+        explanation: 'show annotations created in a group you are a member of',
+      },
+    ];
 
     var selectFacet = facet => {
       this._input.value = facet;
 
-      closeDropdown();
-
-      setTimeout(function() {
+      setTimeout(()=>{
         this._input.focus();
-      }.bind(this), 0);
+      }, 0);
     };
 
-    var getVisibleDropdownItems = () => {
-      return this._dropdown.querySelectorAll('li:not(.is-hidden)');
-    };
-
-    /** Show items that match the word and hide ones that don't. */
-    var setVisibleDropdownItems = word => {
-      this._dropdownItems.forEach(function(dropdownItem) {
-        var dropdownItemTitle =
-          dropdownItem.querySelector('[data-ref="searchBarDropdownItemTitle"]').
-            innerHTML.trim();
-        if (dropdownItemTitle.indexOf(word) < 0) {
-          dropdownItem.classList.add('is-hidden');
-        } else {
-          dropdownItem.classList.remove('is-hidden');
-        }
-      });
-    };
 
     var getTrimmedInputValue = () => {
       return this._input.value.trim();
     };
 
-    var maybeOpenOrCloseDropdown = () => {
-      var word = getTrimmedInputValue();
-      var shouldOpenDropdown = true;
+    new AutosuggestDropdownController( this._input, {
 
-      // If there are no visible items that match the word close the dropdown
-      if (getVisibleDropdownItems().length < 1) {
-        shouldOpenDropdown = false;
-      }
+      list: explanationList,
 
-      // If the word has a ':' don't show dropdown
-      if (word.indexOf(':') > -1) {
-        shouldOpenDropdown = false;
-      }
+      header: 'Narrow your search',
 
-      if (shouldOpenDropdown) {
-        openDropdown();
-      } else {
-        closeDropdown();
-      }
-    };
+      classNames: {
+        container: 'search-bar__dropdown-menu-container',
+        header: 'search-bar__dropdown-menu-header',
+        list: 'search-bar__dropdown-menu',
+        item: 'search-bar__dropdown-menu-item',
+        activeItem: 'js-search-bar-dropdown-menu-item--active',
+      },
+
+      renderListItem: (listItem)=>{
+
+        let itemContents = `<span class="search-bar__dropdown-menu-title"> ${listItem.title} </span>`;
+
+        if (listItem.explanation){
+          itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${listItem.explanation} </span>`;
+        }
+
+        return itemContents;
+      },
+
+      listFilter: function(list, currentInput){
+
+        currentInput = (currentInput || '').trim();
+
+        return list.filter((item)=>{
+
+          if (!currentInput){
+            return item;
+          } else if (currentInput.indexOf(':') > -1) {
+            return false;
+          }
+          return item.title.toLowerCase().indexOf(currentInput) >= 0;
+
+        }).sort((a,b)=>{
+
+          // this sort functions intention is to
+          // sort partial matches as lower index match
+          // value first. Then let natural sort of the
+          // original list take effect if they have equal
+          // index values or there is no current input value
+
+          if (!currentInput){
+            return 0;
+          }
+
+          let aIndex = a.title.indexOf(currentInput);
+          let bIndex = b.title.indexOf(currentInput);
+
+          if (aIndex > bIndex){
+            return 1;
+          } else if (aIndex < bIndex){
+            return -1;
+          }
+          return 0;
+        });
+      },
+
+      onSelect: (itemSelected)=>{
+        selectFacet(itemSelected.title);
+      },
+
+    });
+
 
     /**
      * Insert a hidden <input> into the search <form>.
@@ -186,7 +167,7 @@ class SearchBarController extends Controller {
      */
     var addLozenge = content => {
       var deleteCallback = () => {
-        this._lozengeContainer.querySelectorAll('.js-lozenge').forEach(function(loz) {
+        Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach(function(loz) {
           loz.classList.add('is-disabled');
         });
         submitForm();
@@ -235,6 +216,7 @@ class SearchBarController extends Controller {
      */
     var setupLozengeListenerKeys = event => {
       const SPACE_KEY_CODE = 32;
+      const ENTER_KEY_CODE = 13;
 
       var handleSpaceKey = () => {
         var word = getTrimmedInputValue();
@@ -247,113 +229,21 @@ class SearchBarController extends Controller {
         }
       };
 
+      var handleEnterKey = (event) => {
+        submitForm();
+        event.preventDefault();
+      };
+
       var handlers = {};
       handlers[SPACE_KEY_CODE] = handleSpaceKey;
-      setupListenerKeys(event, handlers);
-    };
-
-    /**
-     * Setup the keys to  listener for in the search dropdown.
-     *
-     * @param {Event} The event to listen for.
-     */
-    var setupDropdownListenerKeys = event => {
-      const DOWN_ARROW_KEY_CODE = 40;
-      const ENTER_KEY_CODE = 13;
-      const UP_ARROW_KEY_CODE = 38;
-
-      var activeItem = getActiveDropdownItem();
-      var handlers = {};
-
-      var visibleDropdownItems = getVisibleDropdownItems();
-
-      var handleDownArrowKey = () => {
-        updateActiveDropdownItem(getNextVisibleSiblingElement(activeItem) ||
-          visibleDropdownItems[0]);
-      };
-
-      var handleEnterKey = event => {
-        if (activeItem) {
-          event.preventDefault();
-          var facet =
-            activeItem.
-              querySelector('[data-ref="searchBarDropdownItemTitle"]').
-              innerHTML.trim();
-          selectFacet(facet);
-        } else {
-          submitForm();
-        }
-      };
-
-      var handleUpArrowKey = () => {
-        updateActiveDropdownItem(getPreviousVisibleSiblingElement(activeItem) ||
-          visibleDropdownItems[visibleDropdownItems.length - 1]);
-      };
-
-      handlers[DOWN_ARROW_KEY_CODE] = handleDownArrowKey;
       handlers[ENTER_KEY_CODE] = handleEnterKey;
-      handlers[UP_ARROW_KEY_CODE] = handleUpArrowKey;
 
       setupListenerKeys(event, handlers);
     };
 
-    var handleClickOnItem = event => {
-      var facet =
-        event.currentTarget.
-          querySelector('[data-ref="searchBarDropdownItemTitle"]').
-          innerHTML.trim();
-      selectFacet(facet);
-    };
-
-    var handleHoverOnItem = event => {
-      updateActiveDropdownItem(event.currentTarget);
-    };
-
-    var handleClickOnDropdown = event => {
-      // prevent clicking on a part of the dropdown menu itself that
-      // isn't one of the suggestions from closing the menu
-      event.preventDefault();
-    };
-
-    var handleFocusOutside = event => {
-      if (!element.contains(event.target) ||
-        !element.contains(event.relatedTarget)) {
-        this.setState({open: false});
-      }
-      closeDropdown();
-      this._input.removeEventListener('keydown', setupDropdownListenerKeys);
-      this._input.removeEventListener('keydown', setupLozengeListenerKeys);
-    };
-
-    var handleFocusinOnInput = () => {
-      this._input.addEventListener('keydown', setupDropdownListenerKeys);
-      maybeOpenOrCloseDropdown();
-    };
-
-    var handleInputOnInput = () => {
-      var word = getTrimmedInputValue();
-      setVisibleDropdownItems(word);
-      maybeOpenOrCloseDropdown();
-      this._input.addEventListener('keydown', setupLozengeListenerKeys);
-    };
-
-    this._dropdownItems.forEach(function(item) {
-      if(item && item.addEventListener) {
-        item.addEventListener('mousemove', handleHoverOnItem);
-        item.addEventListener('mousedown', handleClickOnItem);
-      }
-    });
-
-    this._dropdown.addEventListener('mousedown', handleClickOnDropdown);
-    this._input.addEventListener('blur', handleFocusOutside);
-    this._input.addEventListener('input', handleInputOnInput);
-    this._input.addEventListener('focus', handleFocusinOnInput);
+    this._input.addEventListener('keydown', setupLozengeListenerKeys);
 
     lozengifyInput();
-  }
-
-  update(state) {
-    setElementState(this._dropdown, {open: state.open});
   }
 }
 

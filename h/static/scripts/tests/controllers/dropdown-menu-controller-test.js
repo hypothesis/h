@@ -4,9 +4,9 @@ var DropdownMenuController = require('../../controllers/dropdown-menu-controller
 var util = require('./util');
 
 var TEMPLATE = ['<div class="js-dropdown-menu">',
-                '<span data-ref="dropdownMenuToggle">Toggle</span>',
-                '<span data-ref="dropdownMenuContent">Menu</span>',
-                '</div>'].join('\n');
+  '<span data-ref="dropdownMenuToggle">Toggle</span>',
+  '<span data-ref="dropdownMenuContent">Menu</span>',
+  '</div>'].join('\n');
 
 describe('DropdownMenuController', function () {
   var ctrl;
