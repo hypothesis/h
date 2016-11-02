@@ -135,14 +135,18 @@
           {% endif %}
           {% if show_group_leave_button %}
             <li>
-              <button class="search-result-sidebar__leave-button"
-                      form="search-bar"
-                      formmethod="POST"
-                      type="submit"
-                      name="group_leave"
-                      value="{{ group.pubid }}">
-                  {% trans %}Leave this group{% endtrans %}
-              </button>
+              {#- This form element is needed for Internet Explorer because it
+                  doesn't support the `form` attribute. See commit message. #}
+              <form method="POST">
+                <button class="search-result-sidebar__leave-button"
+                        form="search-bar"
+                        formmethod="POST"
+                        type="submit"
+                        name="group_leave"
+                        value="{{ group.pubid }}">
+                    {% trans %}Leave this group{% endtrans %}
+                </button>
+              </form>
             </li>
           {% endif %}
         </ul>
