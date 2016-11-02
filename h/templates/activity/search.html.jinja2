@@ -138,12 +138,13 @@
               {#- This form element is needed for Internet Explorer because it
                   doesn't support the `form` attribute. See commit message. #}
               <form method="POST">
-                <button class="search-result-sidebar__leave-button"
+                <button class="search-result-sidebar__leave-button js-confirm-submit"
                         form="search-bar"
                         formmethod="POST"
                         type="submit"
                         name="group_leave"
-                        value="{{ group.pubid }}">
+                        value="{{ group.pubid }}"
+                        data-confirm-message="Are you sure you want to leave the group &quot;{{ group.name }}&quot;?">
                     {% trans %}Leave this group{% endtrans %}
                 </button>
               </form>
