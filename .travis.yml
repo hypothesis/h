@@ -24,6 +24,13 @@ matrix:
       node_js: '6.2'
       before_install: npm install gulp-cli
       script: gulp test
+
+    # Lint frontend code
+    - env: ACTION=frontend-lint
+      language: node_js
+      node_js: '6.2'
+      script: gulp lint
+
 cache:
   directories:
     - node_modules
