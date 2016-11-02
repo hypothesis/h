@@ -14,7 +14,10 @@ from h.i18n import TranslationString as _
 def staff_index(request):
     """A list of all the staff members as an HTML page."""
     staff = request.db.query(models.User).filter(models.User.staff)
-    return {"staff": [u.username for u in staff]}
+    return {
+        "staff": [u.userid for u in staff],
+        "default_authority": request.auth_domain,
+    }
 
 
 @view_config(route_name='admin_staff',
@@ -25,7 +28,8 @@ def staff_index(request):
 def staff_add(request):
     """Make a given user a staff member."""
     username = request.params['add'].strip()
-    user = models.User.get_by_username(request.db, username, request.auth_domain)
+    authority = request.params['authority'].strip()
+    user = models.User.get_by_username(request.db, username, authority)
     if user is None:
         request.session.flash(
             _("User {username} doesn't exist.".format(username=username)),
@@ -43,8 +47,8 @@ def staff_add(request):
              permission='admin_staff')
 def staff_remove(request):
     """Remove a user from the staff."""
-    username = request.params['remove']
-    user = models.User.get_by_username(request.db, username, request.auth_domain)
+    userid = request.params['remove']
+    user = request.db.query(models.User).filter_by(userid=userid).first()
     if user is not None:
         user.staff = False
     index = request.route_path('admin_staff')
