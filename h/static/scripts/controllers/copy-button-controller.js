@@ -9,9 +9,11 @@ class CopyButtonController extends Controller {
     this.refs.button.onclick = () => {
       this.refs.input.select(); // We need to select the text before we copy.
 
-      var copySucceeded = document.execCommand('copy');
-      let notificationText = copySucceeded ? 'Link copied to clipboard!' : 'Copying link failed';
+      let notificationText = document.execCommand('copy') ?
+        'Link copied to clipboard!' :
+        'Copying link failed';
 
+      const NOTIFICATION_TEXT_TIMEOUT = 1000;
       const originalValue = this.refs.input.value;
       this.refs.input.value = notificationText;
       window.setTimeout(
@@ -22,7 +24,7 @@ class CopyButtonController extends Controller {
           // it doesn't trigger the auto select all on focus. So we unfocus it.
           this.refs.input.blur();
         },
-        1000);
+        NOTIFICATION_TEXT_TIMEOUT);
     };
   }
 }
