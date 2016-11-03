@@ -4,6 +4,7 @@ import pytest
 
 import mock
 from pyramid import httpexceptions
+from webob.multidict import NestedMultiDict
 
 from h.views import activity
 
@@ -207,17 +208,6 @@ class TestGroupSearch(object):
         assert 'group_edit_url' in result
 
     @pytest.fixture
-    def group(self, factories):
-        # Create some other groups as well, just to make sure it gets the right
-        # one from the db.
-        factories.Group()
-        factories.Group()
-
-        group = factories.Group()
-        group.members.extend([factories.User(), factories.User()])
-        return group
-
-    @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.matchdict['pubid'] = group.pubid
         pyramid_request.authenticated_user = None
@@ -233,6 +223,77 @@ class TestGroupSearch(object):
         search = patch('h.views.activity.search')
         search.return_value = {}
         return search
+
+
+@pytest.mark.usefixtures('groups_service', 'routes')
+class TestGroupLeave(object):
+
+    def test_it_returns_404_when_feature_turned_off(self,
+                                                    group,
+                                                    pyramid_request):
+        pyramid_request.feature.flags['search_page'] = False
+
+        for user in (None, group.creator, group.members[-1]):
+            pyramid_request.authenticated_user = user
+            with pytest.raises(httpexceptions.HTTPNotFound):
+                activity.group_leave(pyramid_request)
+
+    def test_it_returns_404_when_the_group_does_not_exist(self,
+                                                          pyramid_request):
+        pyramid_request.params = NestedMultiDict({
+            'group_leave': 'does_not_exist'})
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            activity.group_leave(pyramid_request)
+
+    def test_it_leaves_the_group(self,
+                                 group,
+                                 groups_service,
+                                 pyramid_config,
+                                 pyramid_request):
+        pyramid_config.testing_securitypolicy(group.members[-1].userid)
+
+        activity.group_leave(pyramid_request)
+
+        groups_service.member_leave.assert_called_once_with(
+            group, group.members[-1].userid)
+
+    def test_it_redirects_to_the_search_page(self, group, pyramid_request):
+        # This should be in the redirect URL.
+        pyramid_request.POST = NestedMultiDict({'q': 'foo bar gar'})
+        # This should *not* be in the redirect URL.
+        pyramid_request.params = NestedMultiDict({'group_leave': group.pubid})
+        result = activity.group_leave(pyramid_request)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == 'http://example.com/search?q=foo+bar+gar'
+
+    @pytest.fixture
+    def groups_service(self, patch, pyramid_config):
+        groups_service = patch('h.groups.services.GroupsService')
+        pyramid_config.register_service(groups_service, name='groups')
+        return groups_service
+
+    @pytest.fixture
+    def pyramid_request(self, group, pyramid_request):
+        pyramid_request.params = NestedMultiDict({'group_leave': group.pubid})
+        return pyramid_request
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.search', '/search')
+
+
+@pytest.fixture
+def group(factories):
+    # Create some other groups as well, just to make sure it gets the right
+    # one from the db.
+    factories.Group()
+    factories.Group()
+
+    group = factories.Group()
+    group.members.extend([factories.User(), factories.User()])
+    return group
 
 
 @pytest.fixture
