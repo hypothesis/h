@@ -54,7 +54,7 @@ class TestSearch(object):
                                               query.extract.return_value,
                                               page_size=PAGE_SIZE)
 
-    def test_is_uses_passed_in_page_size_for_pagination(self, pyramid_request, paginate):
+    def test_it_uses_passed_in_page_size_for_pagination(self, pyramid_request, paginate):
         pyramid_request.feature.flags['search_page'] = True
 
         pyramid_request.params['page_size'] = 100
