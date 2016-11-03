@@ -102,7 +102,140 @@ class TestSearch(object):
     def paginate(self, patch):
         return patch('h.views.activity.paginate')
 
+
+@pytest.mark.usefixtures('routes', 'search')
+class TestGroupSearch(object):
+
+    def test_it_returns_404_when_feature_turned_off(self,
+                                                    group,
+                                                    pyramid_request):
+        pyramid_request.feature.flags['search_page'] = False
+
+        for user in (None, group.creator, group.members[-1]):
+            pyramid_request.authenticated_user = user
+            with pytest.raises(httpexceptions.HTTPNotFound):
+                activity.group_search(pyramid_request)
+
+    def test_it_calls_search_with_the_request(self,
+                                              group,
+                                              pyramid_request,
+                                              search):
+        for user in (None, group.creator, group.members[-1]):
+            pyramid_request.authenticated_user = user
+
+            activity.group_search(pyramid_request)
+
+            search.assert_called_once_with(pyramid_request)
+
+            search.reset_mock()
+
+    def test_it_just_returns_search_result_if_group_does_not_exist(
+            self, group, pyramid_request, search):
+        for user in (None, group.creator, group.members[-1]):
+            pyramid_request.authenticated_user = user
+            pyramid_request.matchdict['pubid'] = 'does_not_exist'
+
+            assert activity.group_search(pyramid_request) == search.return_value
+
+    def test_it_just_returns_search_result_if_user_not_logged_in(
+            self, pyramid_request, search):
+        pyramid_request.authenticated_user = None
+
+        assert activity.group_search(pyramid_request) == search.return_value
+
+    def test_it_just_returns_search_result_if_user_not_a_member_of_group(
+            self, factories, pyramid_request, search):
+        pyramid_request.authenticated_user = factories.User()
+
+        assert activity.group_search(pyramid_request) == search.return_value
+
+    def test_it_returns_group_info_if_user_a_member_of_group(self,
+                                                             group,
+                                                             pyramid_request):
+        pyramid_request.authenticated_user = group.members[-1]
+
+        group_info = activity.group_search(pyramid_request)['group']
+
+        assert group_info['created'] == group.created.strftime('%B, %Y')
+        assert group_info['description'] == group.description
+        assert group_info['name'] == group.name
+        assert group_info['pubid'] == group.pubid
+
+    def test_it_shows_the_leave_button_to_group_members(self,
+                                                        group,
+                                                        pyramid_request):
+        pyramid_request.authenticated_user = group.members[-1]
+
+        result = activity.group_search(pyramid_request)
+
+        assert result['show_group_leave_button'] is True
+
+    def test_it_does_not_show_the_leave_button_to_group_creators(
+            self, group, pyramid_request):
+        pyramid_request.authenticated_user = group.creator
+
+        result = activity.group_search(pyramid_request)
+
+        assert result['show_group_leave_button'] is False
+
+    def test_it_checks_whether_the_user_has_admin_permission_on_the_group(
+            self, group, pyramid_request):
+        pyramid_request.authenticated_user = group.members[-1]
+
+        activity.group_search(pyramid_request)
+
+        pyramid_request.has_permission.assert_called_once_with('admin',
+                                                               group)
+
+    def test_it_does_not_show_the_edit_link_to_group_members(self,
+                                                             group,
+                                                             pyramid_request):
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+        pyramid_request.authenticated_user = group.members[-1]
+
+        result = activity.group_search(pyramid_request)
+
+        assert 'group_edit_url' not in result
+
+    def test_it_does_show_the_group_edit_link_to_group_creators(
+            self, group, pyramid_request):
+        pyramid_request.has_permission = mock.Mock(return_value=True)
+        pyramid_request.authenticated_user = group.creator
+
+        result = activity.group_search(pyramid_request)
+
+        assert 'group_edit_url' in result
+
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.feature.flags['search_page'] = True
+    def group(self, factories):
+        # Create some other groups as well, just to make sure it gets the right
+        # one from the db.
+        factories.Group()
+        factories.Group()
+
+        group = factories.Group()
+        group.members.extend([factories.User(), factories.User()])
+        return group
+
+    @pytest.fixture
+    def pyramid_request(self, group, pyramid_request):
+        pyramid_request.matchdict['pubid'] = group.pubid
+        pyramid_request.authenticated_user = None
+        pyramid_request.has_permission = mock.Mock(return_value=False)
         return pyramid_request
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
+
+    @pytest.fixture
+    def search(self, patch):
+        search = patch('h.views.activity.search')
+        search.return_value = {}
+        return search
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.feature.flags['search_page'] = True
+    return pyramid_request
