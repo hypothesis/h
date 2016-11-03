@@ -51,7 +51,7 @@ def admin(ctx, username, on):
     administrative privileges.
     """
     request = ctx.obj['bootstrap']()
-    user = models.User.get_by_username(request.db, username)
+    user = models.User.get_by_username(request.db, username, request.auth_domain)
     if user is None:
         raise click.ClickException('no user with username "{}"'.format(username))
 
