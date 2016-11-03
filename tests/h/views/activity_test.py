@@ -9,6 +9,7 @@ from h.views.activity import PAGE_SIZE
 from h.views.activity import search
 
 
+@pytest.mark.usefixtures('paginate', 'query')
 class TestSearch(object):
     def test_it_returns_404_when_feature_turned_off(self, pyramid_request):
         pyramid_request.feature.flags['search_page'] = False
@@ -53,7 +54,6 @@ class TestSearch(object):
                                               query.extract.return_value,
                                               page_size=PAGE_SIZE)
 
-    @pytest.mark.usefixtures('query')
     def test_is_uses_passed_in_page_size_for_pagination(self, pyramid_request, paginate):
         pyramid_request.feature.flags['search_page'] = True
 
