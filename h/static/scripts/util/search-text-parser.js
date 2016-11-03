@@ -101,13 +101,11 @@ function getLozengeValues(queryString) {
         inputTerms = '';
         quoted = false;
       }
+    } else if (shouldLozengify(term)) {
+      queryTerms.push(term);
     } else {
-      if (shouldLozengify(term)) {
-        queryTerms.push(term);
-      } else {
-        inputTerms = term;
-        quoted = true;
-      }
+      inputTerms = term;
+      quoted = true;
     }
   });
   return {
