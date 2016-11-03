@@ -18,16 +18,12 @@ class TestSearch(object):
             search(pyramid_request)
 
     def test_it_checks_for_redirects(self, pyramid_request, query):
-        pyramid_request.feature.flags['search_page'] = True
-
         search(pyramid_request)
 
         query.check_url.assert_called_once_with(pyramid_request,
                                                 query.extract.return_value)
 
     def test_it_executes_a_search_query(self, pyramid_request, query):
-        pyramid_request.feature.flags['search_page'] = True
-
         search(pyramid_request)
 
         query.execute.assert_called_once_with(pyramid_request,
@@ -35,8 +31,6 @@ class TestSearch(object):
                                               page_size=PAGE_SIZE)
 
     def test_it_allows_to_specify_the_page_size(self, pyramid_request, query):
-        pyramid_request.feature.flags['search_page'] = True
-
         pyramid_request.params['page_size'] = 100
         search(pyramid_request)
 
@@ -45,8 +39,6 @@ class TestSearch(object):
                                               page_size=100)
 
     def test_it_uses_default_page_size_when_value_is_a_string(self, pyramid_request, query):
-        pyramid_request.feature.flags['search_page'] = True
-
         pyramid_request.params['page_size'] = 'foobar'
         search(pyramid_request)
 
@@ -55,8 +47,6 @@ class TestSearch(object):
                                               page_size=PAGE_SIZE)
 
     def test_it_uses_passed_in_page_size_for_pagination(self, pyramid_request, paginate):
-        pyramid_request.feature.flags['search_page'] = True
-
         pyramid_request.params['page_size'] = 100
         search(pyramid_request)
 
@@ -71,3 +61,8 @@ class TestSearch(object):
     @pytest.fixture
     def paginate(self, patch):
         return patch('h.views.activity.paginate')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        return pyramid_request
