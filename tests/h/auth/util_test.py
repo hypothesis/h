@@ -12,6 +12,7 @@ from pyramid import security
 
 from h.auth import role
 from h.auth import util
+from h._compat import text_type
 
 
 FakeUser = namedtuple('FakeUser', ['admin', 'staff', 'groups'])
@@ -154,6 +155,19 @@ def test_translate_annotation_principals(p_in, p_out):
     result = util.translate_annotation_principals(p_in)
 
     assert set(result) == set(p_out)
+
+
+class TestAuthDomain(object):
+    def test_it_returns_the_request_domain(self, pyramid_request):
+        assert util.auth_domain(pyramid_request) == pyramid_request.domain
+
+    def test_it_allows_overriding_request_domain(self, pyramid_request):
+        pyramid_request.registry.settings['h.auth_domain'] = 'foo.org'
+        assert util.auth_domain(pyramid_request) == u'foo.org'
+
+    def test_it_returns_text_type(self, pyramid_request):
+        pyramid_request.domain = str(pyramid_request.domain)
+        assert type(util.auth_domain(pyramid_request)) == text_type
 
 
 @pytest.fixture

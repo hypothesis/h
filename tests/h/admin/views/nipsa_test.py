@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from pyramid import httpexceptions
 import pytest
 
@@ -11,20 +13,24 @@ class TestNipsaIndex(object):
     def test_lists_flagged_usernames(self, pyramid_request):
         result = views.nipsa_index(pyramid_request)
 
-        assert set(result['usernames']) == set(['kiki', 'ursula', 'osono'])
+        assert set(result['userids']) == set([
+            'acct:kiki@example.com',
+            'acct:ursula@foo.org',
+            'acct:osono@example.com',
+        ])
 
     def test_lists_flagged_usernames_no_results(self, nipsa_service, pyramid_request):
         nipsa_service.flagged = set([])
 
         result = views.nipsa_index(pyramid_request)
 
-        assert result['usernames'] == []
+        assert result['userids'] == []
 
 
 @pytest.mark.usefixtures('nipsa_service', 'routes', 'users')
 class TestNipsaAddRemove(object):
     def test_add_flags_user(self, nipsa_service, pyramid_request, users):
-        pyramid_request.params = {"add": "carl"}
+        pyramid_request.params = {"add": "carl", "authority": "foo.org"}
 
         views.nipsa_add(pyramid_request)
 
@@ -32,13 +38,13 @@ class TestNipsaAddRemove(object):
 
     @pytest.mark.parametrize('user', ['', 'donkeys', '\x00'])
     def test_add_raises_when_user_not_found(self, user, nipsa_service, pyramid_request):
-        pyramid_request.params = {"add": user}
+        pyramid_request.params = {"add": user, "authority": "example.com"}
 
         with pytest.raises(views.UserNotFoundError):
             views.nipsa_add(pyramid_request)
 
     def test_add_redirects_to_index(self, pyramid_request):
-        pyramid_request.params = {"add": "carl"}
+        pyramid_request.params = {"add": "carl", "authority": "foo.org"}
 
         result = views.nipsa_add(pyramid_request)
 
@@ -46,7 +52,7 @@ class TestNipsaAddRemove(object):
         assert result.location == '/adm/nipsa'
 
     def test_remove_unflags_user(self, nipsa_service, pyramid_request, users):
-        pyramid_request.params = {"remove": "kiki"}
+        pyramid_request.params = {"remove": "acct:kiki@example.com"}
 
         views.nipsa_remove(pyramid_request)
 
@@ -60,14 +66,14 @@ class TestNipsaAddRemove(object):
             views.nipsa_remove(pyramid_request)
 
     def test_form_request_user_strips_spaces(self, nipsa_service, pyramid_request, users):
-        pyramid_request.params = {"add": "    carl   "}
+        pyramid_request.params = {"add": "    carl   ", "authority": "   foo.org     "}
 
         views.nipsa_add(pyramid_request)
 
         assert users['carl'] in nipsa_service.flagged
 
     def test_remove_redirects_to_index(self, pyramid_request):
-        pyramid_request.params = {"remove": "kiki"}
+        pyramid_request.params = {"remove": "acct:ursula@foo.org"}
 
         result = views.nipsa_remove(pyramid_request)
 
@@ -105,10 +111,10 @@ def routes(pyramid_config):
 @pytest.fixture
 def users(db_session, factories):
     users = {
-        'carl': factories.User(username='carl'),
-        'kiki': factories.User(username='kiki', nipsa=True),
-        'ursula': factories.User(username='ursula', nipsa=True),
-        'osono': factories.User(username='osono', nipsa=True),
+        'carl': factories.User(username='carl', authority='foo.org'),
+        'kiki': factories.User(username='kiki', authority='example.com', nipsa=True),
+        'ursula': factories.User(username='ursula', authority='foo.org', nipsa=True),
+        'osono': factories.User(username='osono', authority='example.com', nipsa=True),
     }
     db_session.add_all([u for u in users.values()])
     db_session.flush()

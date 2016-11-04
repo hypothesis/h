@@ -106,6 +106,7 @@ def test_cohorts_edit_add_user(factories, pyramid_request):
 
     pyramid_request.matchdict['id'] = cohort.id
     pyramid_request.params['add'] = user.username
+    pyramid_request.params['authority'] = user.authority
     views.cohorts_edit_add(pyramid_request)
 
     assert len(cohort.members) == 1
@@ -113,7 +114,7 @@ def test_cohorts_edit_add_user(factories, pyramid_request):
 
 
 def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
-    user = factories.User(username='benoit')
+    user = factories.User(username='benoit', authority='foo.org')
     cohort = models.FeatureCohort(name='FractalCohort')
 
     pyramid_request.db.add(user)
@@ -122,6 +123,7 @@ def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
 
     pyramid_request.matchdict['id'] = cohort.id
     pyramid_request.params['add'] = '   benoit   '
+    pyramid_request.params['authority'] = '    %s   ' % user.authority
     views.cohorts_edit_add(pyramid_request)
 
     assert len(cohort.members) == 1
@@ -129,7 +131,7 @@ def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
 
 
 def test_cohorts_edit_remove_user(factories, pyramid_request):
-    user = factories.User(username='benoit')
+    user = factories.User(username='benoit', authority='foo.org')
     cohort = models.FeatureCohort(name='FractalCohort')
     cohort.members.append(user)
 
@@ -140,7 +142,7 @@ def test_cohorts_edit_remove_user(factories, pyramid_request):
     assert len(cohort.members) == 1
 
     pyramid_request.matchdict['id'] = cohort.id
-    pyramid_request.params['remove'] = user.username
+    pyramid_request.params['remove'] = user.userid
     views.cohorts_edit_remove(pyramid_request)
 
     assert len(cohort.members) == 0
@@ -161,7 +163,7 @@ def test_cohorts_edit_with_no_users(pyramid_request):
 def test_cohorts_edit_with_users(factories, pyramid_request):
     cohort = models.FeatureCohort(name='FractalCohort')
     user1 = factories.User(username='benoit')
-    user2 = factories.User(username='emily')
+    user2 = factories.User(username='emily', authority='foo.org')
     cohort.members.append(user1)
     cohort.members.append(user2)
 

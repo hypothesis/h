@@ -9,7 +9,7 @@ import pyramid_authsanity
 from pyramid_multiauth import MultiAuthenticationPolicy
 
 from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
-from h.auth.util import groupfinder
+from h.auth.util import auth_domain, groupfinder
 from h.security import derive_key
 
 __all__ = (
@@ -27,15 +27,6 @@ TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
 DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
                                       fallback_policy=TICKET_POLICY)
 WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, TICKET_POLICY])
-
-
-def auth_domain(request):
-    """Return the value of the h.auth_domain config settings.
-
-    Falls back on returning request.domain if h.auth_domain isn't set.
-
-    """
-    return request.registry.settings.get('h.auth_domain', request.domain)
 
 
 def includeme(config):

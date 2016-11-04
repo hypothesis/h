@@ -17,6 +17,7 @@ from pyramid.request import apply_request_extensions
 from sqlalchemy.orm import sessionmaker
 
 from memex import db
+from memex._compat import text_type
 
 TEST_DATABASE_URL = os.environ.get('TEST_DATABASE_URL',
                                    'postgresql://postgres@localhost/htest')
@@ -164,7 +165,7 @@ def pyramid_config(pyramid_settings, pyramid_request):
 def pyramid_request(db_session, fake_feature, pyramid_settings):
     """Dummy Pyramid request object."""
     request = testing.DummyRequest(db=db_session, feature=fake_feature)
-    request.auth_domain = request.domain
+    request.auth_domain = text_type(request.domain)
     request.create_form = mock.Mock()
     request.registry.settings = pyramid_settings
     return request
