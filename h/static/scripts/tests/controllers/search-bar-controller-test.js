@@ -68,14 +68,14 @@ describe('SearchBarController', function () {
     it('allows submitting the form dropdown is open but has no selected value', function (done) {
       let form = testEl.querySelector('form');
       let submit = sinon.stub(form, 'submit');
-      
+
       syn
         .click(input)
         .type('test[space]', () => {
           assert.isTrue(dropdown.classList.contains('is-open'));
         })
         .type('[enter]', () => {
-          assert.equal(testEl.querySelector('input[type=hidden]').value, 'test ');
+          assert.equal(testEl.querySelector('input[type=hidden]').value, 'test');
           assert.isTrue(submit.calledOnce);
           done();
         });
