@@ -1,5 +1,7 @@
 .search-result-sidebar {
-  width: 300px;
+  width: 200px;
+  flex-shrink: 0;
+  margin-bottom: 40px;
 }
 
 .search-result-sidebar__title {
@@ -14,6 +16,10 @@
 
 .search-result-sidebar__section {
   margin-bottom: 26px;
+}
+
+.search-result-sidebar__section:last-child {
+  margin-bottom: 0;
 }
 
 .search-result-sidebar__section p:first-of-type {

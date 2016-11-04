@@ -8,6 +8,10 @@
   font-size: $normal-font-size;
   margin-top: 50px;
   color: $grey-6;
+
+  // Align the left edge of the search result list with the left edge of the
+  // navbar content.
+  margin-left: 30px;
 }
 
 .search-result-list {
@@ -19,10 +23,8 @@
   padding-left: 0;
   padding-right: 0;
 
-  // These margins are set so that the left edge of the search result list
-  // aligns with the left edge of the navbar content
-  margin-left: 30px;
   margin-right: 30px;
+  margin-bottom: 40px;
 }
 
 .search-result__timeframe {
@@ -174,9 +176,17 @@
     }
 }
 
+// As the screen size gets smaller, just before it would have introduced a
+// horizontal scrollbar move the sidebar below the search results.
+@media screen and (max-width: $tablet-width + 225px) {
+  .search-result-container {
+    flex-direction: column;
+  }
+}
+
 // On large tablets and below left-align annotation cards in order to make more
 // space for the stats to the right of the annotation card.
-@media screen and (max-width: $tablet-width + 150px) {
+@media screen and (max-width: 1127px) {
   .search-result-bucket__annotation-cards-container {
     padding-left: 0;
   }
