@@ -215,6 +215,23 @@ class TestGroupSearch(object):
 
         assert 'group_edit_url' in result
 
+    def test_it_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
+            self,
+            group,
+            pyramid_request):
+        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.params['more_info'] = ''
+
+        assert activity.group_search(pyramid_request)['more_info'] is True
+
+    def test_it_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
+            self,
+            group,
+            pyramid_request):
+        pyramid_request.authenticated_user = group.members[-1]
+
+        assert activity.group_search(pyramid_request)['more_info'] is False
+
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.matchdict['pubid'] = group.pubid
@@ -225,6 +242,47 @@ class TestGroupSearch(object):
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
+
+
+@pytest.mark.usefixtures('routes')
+class TestGroupSearchMoreInfo(object):
+
+    def test_it_redirects_to_group_search(self, pyramid_request):
+        """It should redirect and preserve the search query param."""
+        pyramid_request.matchdict['pubid'] = 'test_pubid'
+        pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
+
+        result = activity.group_search_more_info(pyramid_request)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == (
+            'http://example.com/groups/test_pubid/search'
+            '?more_info=&q=foo+bar')
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.group_search',
+                                 '/groups/{pubid}/search')
+
+
+@pytest.mark.usefixtures('routes')
+class TestGroupSearchBack(object):
+
+    def test_it_redirects_to_group_search(self, pyramid_request):
+        """It should redirect and preserve the search query param."""
+        pyramid_request.matchdict['pubid'] = 'test_pubid'
+        pyramid_request.POST = {'q': 'foo bar', 'back': ''}
+
+        result = activity.group_search_back(pyramid_request)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == (
+            'http://example.com/groups/test_pubid/search?q=foo+bar')
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.group_search',
+                                 '/groups/{pubid}/search')
 
 
 @pytest.mark.usefixtures('groups_service', 'routes')

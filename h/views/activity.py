@@ -84,7 +84,36 @@ def group_search(request):
     if request.has_permission('admin', group):
         result['group_edit_url'] = request.route_url('group_edit', pubid=pubid)
 
+    result['more_info'] = 'more_info' in request.params
+
     return result
+
+
+@view_config(route_name='activity.group_search',
+             request_method='POST',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='more_info')
+def group_search_more_info(request):
+    """Respond to a click on the ``more_info`` button."""
+    new_params = request.POST.copy()
+    location = request.route_url('activity.group_search',
+                                 pubid=request.matchdict['pubid'],
+                                 _query=new_params)
+    return httpexceptions.HTTPSeeOther(location=location)
+
+
+@view_config(route_name='activity.group_search',
+             request_method='POST',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='back')
+def group_search_back(request):
+    """Respond to a click on the ``back`` button."""
+    new_params = request.POST.copy()
+    del new_params['back']
+    location = request.route_url('activity.group_search',
+                                 pubid=request.matchdict['pubid'],
+                                 _query=new_params)
+    return httpexceptions.HTTPSeeOther(location=location)
 
 
 @view_config(route_name='activity.group_search',
