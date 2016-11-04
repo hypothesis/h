@@ -230,13 +230,6 @@
 // On normal tablets and below, display annotation stats below annotation list
 @media screen and (max-width: $tablet-width) {
 
-  // Reduce margins on tablet and below to match navbar left/right margins
-  // on these screen sizes
-  .search-result-list {
-    margin-left: 10px;
-    margin-right: 10px;
-  }
-
   .search-result-bucket__annotation-cards-container {
     flex-direction: column;
   }
