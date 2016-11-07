@@ -13,11 +13,13 @@ describe('SearchBarController', function () {
     var dropdown;
     var ctrl;
     var TEMPLATE = `
-      <form data-ref="searchBarForm">
-        <div class="search-bar__lozenges" data-ref="searchBarLozenges">
-        </div>
-        <input data-ref="searchBarInput" class="search-bar__input" name="q" />
-      </form>
+      <div>
+        <form data-ref="searchBarForm">
+          <div class="search-bar__lozenges" data-ref="searchBarLozenges">
+          </div>
+          <input data-ref="searchBarInput" class="search-bar__input" name="q" />
+        </form>
+      </div>
     `;
 
     beforeEach(function () {
@@ -75,7 +77,7 @@ describe('SearchBarController', function () {
           assert.isTrue(dropdown.classList.contains('is-open'));
         })
         .type('[enter]', () => {
-          assert.equal(testEl.querySelector('input[type=hidden]').value, 'test ');
+          assert.equal(testEl.querySelector('input[type=hidden]').value, 'test');
           assert.isTrue(submit.calledOnce);
           done();
         });
@@ -101,16 +103,22 @@ describe('SearchBarController', function () {
     function component(value) {
       value = value || '';
       var template = `
-        <form>
-          <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
-          <input data-ref="searchBarInput" class="search-bar__input" name="q" value="${value}">
-        </form>
+        <div>
+          <form data-ref="searchBarForm">
+            <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
+            <input data-ref="searchBarInput" class="search-bar__input" name="q" value="${value}">
+          </form>
+        </div>
       `.trim();
 
       ctrl = util.setupComponent(document, template, SearchBarController);
 
+      // Stub the submit method so it doesn't actually do a full page reload.
+      ctrl.refs.searchBarForm.submit = sinon.stub();
+
       return {
         ctrl: ctrl,
+        hiddenInput: ctrl.element.querySelector('input[type="hidden"]'),
         input: ctrl.refs.searchBarInput,
       };
     }
@@ -120,16 +128,89 @@ describe('SearchBarController', function () {
      *
      */
     function getLozenges(ctrl) {
-      return ctrl.refs.searchBarLozenges.querySelectorAll('.js-lozenge__content');
+      return ctrl.refs.searchBarLozenges.querySelectorAll('.js-lozenge');
     }
 
-    it('should create lozenges for existing query terms in the hidden input on page load', function () {
+    it('should create lozenges for existing query terms in the input on page load', function () {
       var {ctrl} = component('foo');
 
       assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
     });
 
-    it('should not create a lozenge for incomplete query strings in the hidden input on page load', function () {
+    it('inserts a hidden input on init', function () {
+      const {hiddenInput} = component();
+
+      assert.notEqual(hiddenInput, null);
+    });
+
+    it('removes the name="q" attribute from the input on init', function () {
+      const {input} = component();
+
+      assert.isFalse(input.hasAttribute('name'));
+    });
+
+    it('adds the name="q" attribute to the hidden input on init', function () {
+      const {hiddenInput} = component();
+
+      assert.equal(hiddenInput.getAttribute('name'), 'q');
+    });
+
+    it('leaves the hidden input empty on init if the visible input is empty', function () {
+      const {hiddenInput} = component();
+
+      assert.equal(hiddenInput.value, '');
+    });
+
+    it('copies lozengifiable text from the input into the hidden input on init', function () {
+      const {hiddenInput} = component('these are my tag:lozenges');
+
+      assert.equal(hiddenInput.value, 'these are my tag:lozenges');
+    });
+
+    it('copies unlozengifiable text from the input into the hidden input on init', function () {
+      const {hiddenInput} = component("group:'unclosed quotes");
+
+      assert.equal(hiddenInput.value, "group:'unclosed quotes");
+    });
+
+    it('copies lozengifiable and unlozengifiable text from the input into the hidden input on init', function () {
+      const {hiddenInput} = component("these are my tag:lozenges group:'unclosed quotes");
+
+      assert.equal(hiddenInput.value, "these are my tag:lozenges group:'unclosed quotes");
+    });
+
+    it('updates the value of the hidden input as text is typed into the visible input', function () {
+      const {input, hiddenInput} = component('initial text');
+
+      input.value = 'new text';  // This is just "new text" and not
+                                 // "initial text new text" because the
+                                 // "initial text" will have been moved into
+                                 // lozenges.
+      input.dispatchEvent(new Event('input'));
+
+      assert.equal(hiddenInput.value, 'initial text new text');
+    });
+
+    it('updates the value of the hidden input as unlozengifiable text is typed into the visible input', function () {
+      const {input, hiddenInput} = component("group:'unclosed quotes");
+
+      input.value = "group:'unclosed quotes still unclosed";
+      input.dispatchEvent(new Event('input'));
+
+      assert.equal(hiddenInput.value, "group:'unclosed quotes still unclosed");
+    });
+
+    it('updates the value of the hidden input when a lozenge is deleted', function () {
+      const {ctrl, hiddenInput} = component('foo bar');
+
+      const lozenge = getLozenges(ctrl)[0];
+      lozenge.querySelector('.js-lozenge__close').dispatchEvent(
+        new Event('mousedown'));
+
+      assert.equal(hiddenInput.value, 'bar');
+    });
+
+    it('should not create a lozenge for incomplete query strings in the input on page load', function () {
       var {ctrl, input} = component("'bar");
 
       assert.equal(getLozenges(ctrl).length, 0);

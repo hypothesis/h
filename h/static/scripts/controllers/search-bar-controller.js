@@ -117,10 +117,7 @@ class SearchBarController extends Controller {
 
 
     /**
-     * Insert a hidden <input> into the search <form>.
-     *
-     * The value of the hidden <input> is a search string constructed from
-     * the lozenges plus any text currently in the visible <input>.
+     * Insert a hidden <input> with an empty value into the search <form>.
      *
      * The name="q" attribute is moved from the visible <input> on to the
      * hidden <input> so that when the <form> is submitted it's the value of
@@ -132,30 +129,31 @@ class SearchBarController extends Controller {
       var hiddenInput = document.createElement('input');
       hiddenInput.type = 'hidden';
 
-      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge__content')).forEach((loz) => {
-        hiddenInput.value = hiddenInput.value + loz.textContent + ' ';
-      });
-      hiddenInput.value = hiddenInput.value + getTrimmedInputValue();
-
       // When JavaScript isn't enabled this._input is submitted to the server
       // as the q param. With JavaScript we submit hiddenInput instead.
       hiddenInput.name = this._input.name;
       this._input.removeAttribute('name');
 
       this.refs.searchBarForm.appendChild(hiddenInput);
+      return hiddenInput;
     };
 
     /**
-     * Submit the user's search query to the server.
+     * Update the value of the hidden input.
      *
-     * We build a search query out of the lozenges plus any text in
-     * this._input. To avoid a potential flash of text if we were to update
-     * this._input with the search terms from the lozenge before submitting it,
-     * we update a hidden input and submit that instead.
+     * Update the value of the hidden input based on the contents of any
+     * lozenges and any remaining text in the visible input.
+     *
+     * This should be called whenever a lozenge is added to or removed from
+     * the DOM, and whenever the text in the visible input changes.
+     *
      */
-    var submitForm = () => {
-      insertHiddenInput();
-      this.refs.searchBarForm.submit();
+    var updateHiddenInput = () => {
+      let newValue = '';
+      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge__content')).forEach((loz) => {
+        newValue = newValue + loz.textContent + ' ';
+      });
+      this._hiddenInput.value = (newValue + getTrimmedInputValue()).trim();
     };
 
     /**
@@ -170,7 +168,8 @@ class SearchBarController extends Controller {
         Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach(function(loz) {
           loz.classList.add('is-disabled');
         });
-        submitForm();
+        updateHiddenInput();
+        this.refs.searchBarForm.submit();
       };
 
       new LozengeController(
@@ -191,58 +190,27 @@ class SearchBarController extends Controller {
       lozengeValues.forEach(addLozenge);
       this._input.value = incompleteInputValue;
       this._input.style.visibility = 'visible';
+      updateHiddenInput();
     };
 
-    /**
-     * Setup listener keys with the handlers provided for each
-     * of them.
-     *
-     * @param {Event} The event.
-     * @param {Object} The function to execute when
-     * the event fires for each listener key.
-     */
-    var setupListenerKeys = (event, handlers) => {
-      var handler = handlers[event.keyCode];
-      if (handler) {
-        handler(event);
+    var onInputKeyDown = event => {
+      const SPACE_KEY_CODE = 32;
+
+      if (event.keyCode === SPACE_KEY_CODE) {
+        const word = getTrimmedInputValue();
+        if (SearchTextParser.shouldLozengify(word)) {
+          event.preventDefault();
+          addLozenge(word);
+          this._input.value = '';
+          updateHiddenInput();
+        }
       }
     };
 
-    /**
-     * Setup the space key as the  listener for
-     * creating a lozenge.
-     *
-     * @param {Event} The event to listen for.
-     */
-    var setupLozengeListenerKeys = event => {
-      const SPACE_KEY_CODE = 32;
-      const ENTER_KEY_CODE = 13;
+    this._hiddenInput = insertHiddenInput(this.refs.searchBarForm);
 
-      var handleSpaceKey = () => {
-        var word = getTrimmedInputValue();
-        if (SearchTextParser.shouldLozengify(word)) {
-          addLozenge(word);
-          // Clear the input after the lozenge is created and
-          // appended to the container element.
-          event.preventDefault();
-          this._input.value = '';
-        }
-      };
-
-      var handleEnterKey = (event) => {
-        submitForm();
-        event.preventDefault();
-      };
-
-      var handlers = {};
-      handlers[SPACE_KEY_CODE] = handleSpaceKey;
-      handlers[ENTER_KEY_CODE] = handleEnterKey;
-
-      setupListenerKeys(event, handlers);
-    };
-
-    this._input.addEventListener('keydown', setupLozengeListenerKeys);
-
+    this._input.addEventListener('keydown', onInputKeyDown);
+    this._input.addEventListener('input', updateHiddenInput);
     lozengifyInput();
   }
 }
