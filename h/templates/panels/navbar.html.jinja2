@@ -4,6 +4,19 @@
 
 {% if feature('activity_pages') %}
 
+{% macro lozenge(facetName, facetValue) %}
+  <div class="lozenge">
+    <div class="lozenge__content">
+      <span class="lozenge__facet-name">
+        {{ facetName }}:
+      </span>
+      <span class="lozenge__facet-value">
+        {{ facetValue }}
+      </span>
+    </div>
+  </div>
+{% endmacro %}
+
 <header class="nav-bar">
   <div class="nav-bar__content">
     <a href="/" title="Hypothesis homepage" class="nav-bar__logo-container"><!--
@@ -15,6 +28,14 @@
             id="search-bar"
             action="{{ search_url }}">
         {{ svg_icon('search', 'search-bar__icon') }}
+        <div class="search-bar__lozenges">
+          {% if opts['search_username'] %}
+            {{ lozenge('user', opts['search_username']) }}
+          {% endif %}
+          {% if opts['search_groupname'] %}
+            {{ lozenge('group', opts['search_groupname']) }}
+          {% endif %}
+        </div>
         <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
         <input class="search-bar__input" data-ref="searchBarInput" name="q" value="{{ q }}" placeholder="Search…" autocomplete="off">
 

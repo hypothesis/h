@@ -18,7 +18,7 @@ def group_invite(context, request, group_url):
 
 
 @panel_config(name='navbar', renderer='h:templates/panels/navbar.html.jinja2')
-def navbar(context, request):
+def navbar(context, request, opts={}):
     """
     The navigation bar displayed at the top of the page.
     """
@@ -57,4 +57,5 @@ def navbar(context, request):
         'username_url': stream_url,
         'search_url': search_url,
         'q': request.params.get('q', ''),
+        'opts': opts,
     }

@@ -8,7 +8,6 @@ from webob.multidict import NestedMultiDict
 
 from h.views import activity
 
-
 @pytest.mark.usefixtures('paginate', 'query')
 class TestSearch(object):
     def test_it_returns_404_when_feature_turned_off(self, pyramid_request):
@@ -128,7 +127,6 @@ class TestSearch(object):
     def paginate(self, patch):
         return patch('h.views.activity.paginate')
 
-
 @pytest.mark.usefixtures('routes', 'search')
 class TestGroupSearch(object):
 
@@ -232,6 +230,10 @@ class TestGroupSearch(object):
 
         assert activity.group_search(pyramid_request)['more_info'] is False
 
+    def test_group_search_returns_pubid_in_opts(self, group, pyramid_request):
+      result = activity.group_search(pyramid_request)
+      assert result['opts']['search_groupname'] == group.pubid
+
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.matchdict['pubid'] = group.pubid
@@ -243,7 +245,6 @@ class TestGroupSearch(object):
     def routes(self, pyramid_config):
         pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
         pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
-
 
 @pytest.mark.usefixtures('routes')
 class TestGroupSearchMoreInfo(object):
@@ -287,7 +288,6 @@ class TestGroupSearchBack(object):
     def routes(self, pyramid_config):
         pyramid_config.add_route('activity.group_search',
                                  '/groups/{pubid}/search')
-
 
 @pytest.mark.usefixtures('groups_service', 'routes')
 class TestGroupLeave(object):
@@ -347,6 +347,34 @@ class TestGroupLeave(object):
     def routes(self, pyramid_config):
         pyramid_config.add_route('activity.search', '/search')
 
+class TestUserSearch(object):
+    def test_it_returns_404_when_feature_turned_off(self,
+                                                    pyramid_request):
+        pyramid_request.feature.flags['search_page'] = False
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            activity.user_search(pyramid_request)
+
+    @pytest.mark.usefixtures('search')
+    def test_it_calls_search_with_request(self, pyramid_request, search):
+        activity.user_search(pyramid_request)
+        search.assert_called_once_with(pyramid_request)
+
+    @pytest.mark.usefixtures('search')
+    def test_it_returns_user_search_results(self, pyramid_request, search):
+      results = activity.user_search(pyramid_request)
+      assert results['opts']['search_username'] == 'foo'
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.matchdict['username'] = 'foo'
+        return pyramid_request
+
+@pytest.fixture
+def search(patch):
+    search = patch('h.views.activity.search')
+    search.return_value = {}
+    return search
 
 @pytest.mark.usefixtures('routes', 'search')
 class TestToggleUserFacet(object):
