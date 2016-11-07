@@ -193,51 +193,23 @@ class SearchBarController extends Controller {
       updateHiddenInput();
     };
 
-    /**
-     * Setup listener keys with the handlers provided for each
-     * of them.
-     *
-     * @param {Event} The event.
-     * @param {Object} The function to execute when
-     * the event fires for each listener key.
-     */
-    var setupListenerKeys = (event, handlers) => {
-      var handler = handlers[event.keyCode];
-      if (handler) {
-        handler(event);
-      }
-    };
-
-    /**
-     * Setup the space key as the  listener for
-     * creating a lozenge.
-     *
-     * @param {Event} The event to listen for.
-     */
-    var setupLozengeListenerKeys = event => {
+    var onInputKeyDown = event => {
       const SPACE_KEY_CODE = 32;
 
-      var handleSpaceKey = () => {
-        var word = getTrimmedInputValue();
+      if (event.keyCode === SPACE_KEY_CODE) {
+        const word = getTrimmedInputValue();
         if (SearchTextParser.shouldLozengify(word)) {
-          addLozenge(word);
-          // Clear the input after the lozenge is created and
-          // appended to the container element.
           event.preventDefault();
+          addLozenge(word);
           this._input.value = '';
           updateHiddenInput();
         }
-      };
-
-      var handlers = {};
-      handlers[SPACE_KEY_CODE] = handleSpaceKey;
-
-      setupListenerKeys(event, handlers);
+      }
     };
 
     this._hiddenInput = insertHiddenInput(this.refs.searchBarForm);
 
-    this._input.addEventListener('keydown', setupLozengeListenerKeys);
+    this._input.addEventListener('keydown', onInputKeyDown);
     this._input.addEventListener('input', updateHiddenInput);
     lozengifyInput();
   }
