@@ -14,7 +14,7 @@ Contents
    :maxdepth: 1
 
    community
-   embedding
+   publishers/index
    The Hypothesis API <http://h.readthedocs.io/en/latest/api/>
    developing/index
    CHANGES
