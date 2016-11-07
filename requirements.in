@@ -2,7 +2,7 @@ PyJWT
 SQLAlchemy
 alembic
 bcrypt
-celery
+celery == 3.1.25  # Pin to latest 3.1.x to ensure forwards-compat with 4.x
 certifi
 cffi
 click

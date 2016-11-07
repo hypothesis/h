@@ -12,7 +12,7 @@ anyjson==0.3.3            # via kombu
 bcrypt==3.1.0
 billiard==3.3.0.23        # via celery
 bleach==1.4.3
-celery==3.1.23
+celery==3.1.25
 certifi==2016.2.28
 cffi==1.7.0
 Chameleon==2.24           # via deform
@@ -36,7 +36,7 @@ itsdangerous==0.24
 Jinja2==2.8               # via deform-jinja2, pyramid-jinja2
 jsonpointer==1.0
 jsonschema==2.5.1
-kombu==3.0.35
+kombu==3.0.37
 Mako==1.0.4               # via alembic
 MarkupSafe==0.23          # via jinja2, mako, pyramid-jinja2
 mistune==0.7.3
