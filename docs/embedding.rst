@@ -1,43 +1,28 @@
 How to add Hypothesis to your website
 #####################################
 
-Adding Hypothesis to any web page can be done by adding a single ``<script>``
-tag to a web page. See our `Guide for publishers`_ for details.
+.. If you update this page, please ensure you update the "For Publishers" page
+   on the Hypothesis website, or coordinate with someone who can
+   (https://hypothes.is/for-publishers/).
 
-.. _Guide for publishers: https://hypothes.is/for-publishers/
+To add Hypothesis to your website, add the following line to the HTML source of
+your page:
 
-Customizing Hypothesis
-----------------------
+.. code-block:: html
 
-To customize the application, define a function ``window.hypothesisConfig``
-which returns an options object.
+   <script src="https://hypothes.is/embed.js" async></script>
 
-The ``constructor`` property should be used to select an annotation
-application. Four are provided: ``Annotator.Guest``, ``Annotator.Host``,
-``Annotator.Sidebar`` and ``Annotator.PdfSidebar``.
+You can configure Hypothesis by including a config tag above the the script tag.
+For example, the following arrangement will ensure that our yellow highlights
+are hidden by default:
 
-``Annotator.Guest`` expects to connect to an annotator widget running in a
-different frame. Any number of instances can communicate with a single widget
-in order to provide annotation of many frames.
+.. code-block:: html
 
-``Annotator.Host`` is an extended version of ``Annotator.Guest`` that will
-instantiate an annotator widget by loading the location given by the ``app``
-option in an iframe and appending it to the document.
+   <script type="application/json" class="js-hypothesis-config">
+   {"showHighlights": false}
+   </script>
+   <script src="https://hypothes.is/embed.js" async></script>
 
-``Annotator.Sidebar`` is an extended ``Annotator.Host`` that puts the widget
-in a sidebar interface. It loads additional plugins that show a bar of bucket
-indicators, each providing the ability to select a cluster of highlights, and a
-toolbar that can be used to resize the widget and control other aspects of the
-user interface.
-
-``Annotator.PdfSidebar`` is a custom version of ``Annotator.Sidebar`` with
-defaults tailored for use in a PDF.js viewer.
-
-The following is roughly the default configuration::
-
-    window.hypothesisConfig = function () {
-      return {
-        constructor: Annotator.Sidebar,
-        app: 'https://hypothes.is/app.html'
-      };
-    };
+You can find the `full list of configuration options
+<https://github.com/hypothesis/client/blob/master/docs/config.md>`_ in our
+client documentation.
