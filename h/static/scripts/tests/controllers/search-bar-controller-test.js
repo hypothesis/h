@@ -123,13 +123,13 @@ describe('SearchBarController', function () {
       return ctrl.refs.searchBarLozenges.querySelectorAll('.js-lozenge__content');
     }
 
-    it('should create lozenges for existing query terms in the hidden input on page load', function () {
+    it('should create lozenges for existing query terms in the input on page load', function () {
       var {ctrl} = component('foo');
 
       assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
     });
 
-    it('should not create a lozenge for incomplete query strings in the hidden input on page load', function () {
+    it('should not create a lozenge for incomplete query strings in the input on page load', function () {
       var {ctrl, input} = component("'bar");
 
       assert.equal(getLozenges(ctrl).length, 0);
