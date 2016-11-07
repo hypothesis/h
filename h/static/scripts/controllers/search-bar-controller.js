@@ -132,10 +132,10 @@ class SearchBarController extends Controller {
       var hiddenInput = document.createElement('input');
       hiddenInput.type = 'hidden';
 
-      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge__content')).forEach((loz) => {
-        hiddenInput.value = hiddenInput.value + loz.textContent + ' ';
-      });
-      hiddenInput.value = hiddenInput.value + getTrimmedInputValue();
+      var lozenges = this._lozengeContainer.querySelectorAll('.js-lozenge__content');
+      hiddenInput.value = Array.from(lozenges).map((loz) => {
+        return loz.textContent;
+      }).join(' ') + getTrimmedInputValue();
 
       // When JavaScript isn't enabled this._input is submitted to the server
       // as the q param. With JavaScript we submit hiddenInput instead.
