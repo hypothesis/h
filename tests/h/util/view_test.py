@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import pytest
 from mock import Mock
 
-from h.util.view import handle_exception, json_view
+from h.util.view import handle_exception, json_view, cors_json_view
 
 
 class TestHandleException(object):
@@ -73,3 +73,28 @@ class TestJsonView(object):
         view_config = patch('h.util.view.view_config')
         view_config.side_effect = _return_kwargs
         return view_config
+
+
+@pytest.mark.usefixtures('json_view')
+class TestCorsJsonView(object):
+    def test_it_uses_json_view(self, json_view):
+        json_view.side_effect = None
+
+        settings = cors_json_view()
+        assert settings == json_view.return_value
+
+    def test_it_sets_cors_decorator(self, cors_policy):
+        settings = cors_json_view()
+        assert settings['decorator'] == cors_policy
+
+    @pytest.fixture
+    def json_view(self, patch):
+        def _return_kwargs(**kwargs):
+            return kwargs
+        json_view = patch('h.util.view.json_view')
+        json_view.side_effect = _return_kwargs
+        return json_view
+
+    @pytest.fixture
+    def cors_policy(self, patch):
+        return patch('h.util.view.cors_policy')
