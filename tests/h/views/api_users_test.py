@@ -8,6 +8,7 @@ from mock import Mock
 from h.accounts.services import UserSignupService
 from h.exceptions import ClientUnauthorized
 from h.views.api_users import create
+from h.schemas import ValidationError
 
 
 @pytest.mark.usefixtures('auth_client',
@@ -15,14 +16,12 @@ from h.views.api_users import create
                          'user_signup_service')
 class TestCreate(object):
 
+    @pytest.mark.usefixtures('valid_auth')
     def test_returns_user_object(self,
-                                 auth_client,
-                                 basic_auth_creds,
                                  factories,
                                  pyramid_request,
                                  user_signup_service,
                                  valid_payload):
-        basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
         pyramid_request.json_body = valid_payload
         user_signup_service.signup.return_value = factories.User(**valid_payload)
 
@@ -35,14 +34,12 @@ class TestCreate(object):
             'authority': 'weylandindustries.com',
         }
 
+    @pytest.mark.usefixtures('valid_auth')
     def test_signs_up_user(self,
-                           auth_client,
-                           basic_auth_creds,
                            factories,
                            pyramid_request,
                            user_signup_service,
                            valid_payload):
-        basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
         pyramid_request.json_body = valid_payload
         user_signup_service.signup.return_value = factories.User(**valid_payload)
 
@@ -92,6 +89,81 @@ class TestCreate(object):
         with pytest.raises(ClientUnauthorized):
             create(pyramid_request)
 
+    @pytest.mark.usefixtures('valid_auth')
+    def test_it_validates_the_input(self, pyramid_request, valid_payload, schemas):
+        create_schema = schemas.CreateUserAPISchema.return_value
+        create_schema.validate.return_value = valid_payload
+        pyramid_request.json_body = valid_payload
+
+        create(pyramid_request)
+
+        create_schema.validate.assert_called_once_with(valid_payload)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_schema_validation_fails(self, pyramid_request, valid_payload, schemas):
+        create_schema = schemas.CreateUserAPISchema.return_value
+        create_schema.validate.side_effect = ValidationError('validation failed')
+
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(ValidationError):
+            create(pyramid_request)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_authority_doesnt_match(self, pyramid_request, valid_payload, auth_client):
+        payload = valid_payload
+        payload['authority'] = 'foo-%s' % auth_client.authority
+        pyramid_request.json_body = payload
+
+        with pytest.raises(ValidationError) as exc:
+            create(pyramid_request)
+
+        assert "'authority' does not match authenticated client" in str(exc.value)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_username_taken(self,
+                                        pyramid_request,
+                                        valid_payload,
+                                        db_session,
+                                        factories,
+                                        auth_client):
+        existing_user = factories.User(authority=auth_client.authority)
+        db_session.add(existing_user)
+        db_session.flush()
+
+        payload = valid_payload
+        payload['username'] = existing_user.username
+        pyramid_request.json_body = payload
+
+        with pytest.raises(ValidationError) as exc:
+            create(pyramid_request)
+
+        assert ('username %s already exists' % existing_user.username) in str(exc.value)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_when_email_taken(self,
+                                     pyramid_request,
+                                     valid_payload,
+                                     db_session,
+                                     factories,
+                                     auth_client):
+        existing_user = factories.User(authority=auth_client.authority)
+        db_session.add(existing_user)
+        db_session.flush()
+
+        payload = valid_payload
+        payload['email'] = existing_user.email
+        pyramid_request.json_body = payload
+
+        with pytest.raises(ValidationError) as exc:
+            create(pyramid_request)
+
+        assert ('email address %s already exists' % existing_user.email) in str(exc.value)
+
+    @pytest.fixture
+    def schemas(self, patch):
+        return patch('h.views.api_users.schemas')
+
 
 @pytest.fixture
 def auth_client(factories):
@@ -103,6 +175,11 @@ def basic_auth_creds(patch):
     basic_auth_creds = patch('h.views.api_users.basic_auth_creds')
     basic_auth_creds.return_value = None
     return basic_auth_creds
+
+
+@pytest.fixture
+def valid_auth(basic_auth_creds, auth_client):
+    basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
 
 
 @pytest.fixture

@@ -7,6 +7,7 @@ from itsdangerous import BadData, SignatureExpired
 
 from h.accounts import schemas
 from h.accounts.services import UserNotActivated, UserNotKnown, UserService
+from h.schemas import ValidationError
 
 
 class TestUnblacklistedUsername(object):
@@ -573,6 +574,92 @@ class TestEditProfileSchema(object):
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({'link': '"invalid URL"'})
         assert exc.value.asdict()['link'] == 'Invalid URL'
+
+
+class TestCreateUserAPISchema(object):
+    def test_it_raises_when_authority_missing(self, schema, payload):
+        del payload['authority']
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_authority_not_a_string(self, schema, payload):
+        payload['authority'] = 34
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_username_missing(self, schema, payload):
+        del payload['username']
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_username_not_a_string(self, schema, payload):
+        payload['username'] = ['hello']
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_username_empty(self, schema, payload):
+        payload['username'] = ''
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_username_too_short(self, schema, payload):
+        payload['username'] = 'da'
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_username_too_long(self, schema, payload):
+        payload['username'] = 'dagrun-lets-make-this-username-really-long'
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_username_format_invalid(self, schema, payload):
+        payload['username'] = 'dagr!un'
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_email_missing(self, schema, payload):
+        del payload['email']
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_email_empty(self, schema, payload):
+        payload['email'] = ''
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_email_not_a_string(self, schema, payload):
+        payload['email'] = {'foo': 'bar'}
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_email_format_invalid(self, schema, payload):
+        payload['email'] = 'not-an-email'
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    @pytest.fixture
+    def payload(self):
+        return {
+            'authority': 'foobar.org',
+            'username': 'dagrun',
+            'email': 'dagrun@foobar.org',
+        }
+
+    @pytest.fixture
+    def schema(self):
+        return schemas.CreateUserAPISchema()
 
 
 @pytest.fixture

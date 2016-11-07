@@ -17,6 +17,7 @@ from h.models.user import (
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
 )
+from h.schemas import JSONSchema
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
@@ -402,6 +403,35 @@ class NotificationsSchema(CSRFSchema):
             omit_label=True,
             values=types),
     )
+
+
+class CreateUserAPISchema(JSONSchema):
+    """Validate a user JSON object."""
+
+    schema = {
+        'type': 'object',
+        'properties': {
+            'authority': {
+                'type': 'string',
+                'format': 'hostname',
+            },
+            'username': {
+                'type': 'string',
+                'minLength': 3,
+                'maxLength': 30,
+                'pattern': '^[A-Za-z0-9._]+$',
+            },
+            'email': {
+                'type': 'string',
+                'format': 'email',
+            },
+        },
+        'required': [
+            'authority',
+            'username',
+            'email',
+        ],
+    }
 
 
 def includeme(config):
