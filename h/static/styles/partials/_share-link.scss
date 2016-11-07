@@ -60,7 +60,7 @@
   outline: none;
 }
 
-.share-link-field__clipboard-image {
+.group-invite__clipboard-image {
   // Vertically center the image inside its parent <button>.
   margin-top: 5px;
   margin-bottom: 5px;
@@ -71,7 +71,7 @@
   fill: $grey-4;
 }
 
-.share-link-field__clipboard-image:hover {
+.group-invite__clipboard-image:hover {
   fill: $grey-7;
 }
 

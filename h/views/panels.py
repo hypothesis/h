@@ -11,6 +11,12 @@ from h import i18n
 _ = i18n.TranslationString
 
 
+@panel_config(name='group_invite',
+              renderer='h:templates/panels/group_invite.html.jinja2')
+def group_invite(context, request, group_url):
+    return {'group_url': group_url}
+
+
 @panel_config(name='navbar', renderer='h:templates/panels/navbar.html.jinja2')
 def navbar(context, request):
     """
