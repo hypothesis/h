@@ -58,7 +58,7 @@ class TestSearch(object):
         """
         It should return a list of usernames to the template.
 
-        query.execute() returns userids, search() should replace these with
+        query.execute() returns userids, search() should insert new values with
         just the username parts.
 
         """
@@ -74,10 +74,35 @@ class TestSearch(object):
 
         result = activity.search(pyramid_request)
 
-        assert result['aggregations']['users'] == [
-            {'username': 'test_user_1'},
-            {'username': 'test_user_2'},
-            {'username': 'test_user_3'},
+        usernames = [user['username']
+                     for user in result['aggregations']['users']]
+        assert usernames == ['test_user_1', 'test_user_2', 'test_user_3']
+
+    def test_it_returns_userids(self, pyramid_request, query):
+        """
+        It should return a list of userids to the template.
+
+        query.execute() returns userids as "user", search() should rename these
+        to "userid".
+
+        """
+        query.execute.return_value = mock.Mock(
+            aggregations={
+                'users': [
+                    {'user': 'acct:test_user_1@hypothes.is'},
+                    {'user': 'acct:test_user_2@hypothes.is'},
+                    {'user': 'acct:test_user_3@hypothes.is'},
+                ]
+            }
+        )
+
+        result = activity.search(pyramid_request)
+
+        userids = [user['userid'] for user in result['aggregations']['users']]
+        assert userids == [
+            'acct:test_user_1@hypothes.is',
+            'acct:test_user_2@hypothes.is',
+            'acct:test_user_3@hypothes.is',
         ]
 
     def test_it_does_not_crash_if_there_are_no_users(self,
@@ -201,12 +226,6 @@ class TestGroupSearch(object):
     def routes(self, pyramid_config):
         pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
 
-    @pytest.fixture
-    def search(self, patch):
-        search = patch('h.views.activity.search')
-        search.return_value = {}
-        return search
-
 
 @pytest.mark.usefixtures('groups_service', 'routes')
 class TestGroupLeave(object):
@@ -267,6 +286,77 @@ class TestGroupLeave(object):
         pyramid_config.add_route('activity.search', '/search')
 
 
+@pytest.mark.usefixtures('routes', 'search')
+class TestToggleUserFacet(object):
+
+    def test_it_returns_404_when_feature_turned_off(self,
+                                                    group,
+                                                    pyramid_request):
+        pyramid_request.feature.flags['search_page'] = False
+
+        for user in (None, group.creator, group.members[-1]):
+            pyramid_request.authenticated_user = user
+            with pytest.raises(httpexceptions.HTTPNotFound):
+                activity.toggle_user_facet(pyramid_request)
+
+    def test_it_returns_a_redirect(self, pyramid_request):
+        result = activity.toggle_user_facet(pyramid_request)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+
+    def test_it_adds_the_user_facet_into_the_url(self, group, pyramid_request):
+        result = activity.toggle_user_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/search'
+            '?q=user%3Afred'.format(pubid=group.pubid))
+
+    def test_it_removes_the_user_facet_from_the_url(self,
+                                                    group,
+                                                    pyramid_request):
+        pyramid_request.params['q'] = 'user:"fred"'
+
+        result = activity.toggle_user_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/search?q='.format(
+                pubid=group.pubid))
+
+    def test_it_preserves_query_when_adding_user_facet(self,
+                                                       group,
+                                                       pyramid_request):
+        pyramid_request.params['q'] = 'foo bar'
+
+        result = activity.toggle_user_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/search'
+            '?q=foo+bar+user%3Afred'.format(pubid=group.pubid))
+
+    def test_it_preserves_query_when_removing_user_facet(self,
+                                                         group,
+                                                         pyramid_request):
+        pyramid_request.params['q'] = 'user:"fred" foo bar'
+
+        result = activity.toggle_user_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/search'
+            '?q=foo+bar'.format(pubid=group.pubid))
+
+    @pytest.fixture
+    def pyramid_request(self, group, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.params['toggle_user_facet'] = 'acct:fred@hypothes.is'
+        pyramid_request.matchdict['pubid'] = group.pubid
+        return pyramid_request
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.group_search',
+                                 '/groups/{pubid}/search')
+
+
 @pytest.fixture
 def group(factories):
     # Create some other groups as well, just to make sure it gets the right
@@ -283,3 +373,10 @@ def group(factories):
 def pyramid_request(pyramid_request):
     pyramid_request.feature.flags['search_page'] = True
     return pyramid_request
+
+
+@pytest.fixture
+def search(patch):
+    search = patch('h.views.activity.search')
+    search.return_value = {}
+    return search
