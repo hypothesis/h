@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Activity pages views.
-"""
+"""Activity pages views."""
 
 from __future__ import unicode_literals
 
