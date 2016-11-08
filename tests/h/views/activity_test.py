@@ -162,23 +162,6 @@ class TestGroupSearch(object):
         assert group_info['name'] == group.name
         assert group_info['pubid'] == group.pubid
 
-    def test_it_shows_the_leave_button_to_group_members(self,
-                                                        group,
-                                                        pyramid_request):
-        pyramid_request.authenticated_user = group.members[-1]
-
-        result = activity.group_search(pyramid_request)
-
-        assert result['show_group_leave_button'] is True
-
-    def test_it_does_not_show_the_leave_button_to_group_creators(
-            self, group, pyramid_request):
-        pyramid_request.authenticated_user = group.creator
-
-        result = activity.group_search(pyramid_request)
-
-        assert result['show_group_leave_button'] is False
-
     def test_it_checks_whether_the_user_has_admin_permission_on_the_group(
             self, group, pyramid_request):
         pyramid_request.authenticated_user = group.members[-1]

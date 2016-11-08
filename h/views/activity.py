@@ -80,9 +80,6 @@ def group_search(request):
         'pubid': group.pubid,
     }
 
-    result['show_group_leave_button'] = (
-        group.creator != request.authenticated_user)
-
     if request.has_permission('admin', group):
         result['group_edit_url'] = request.route_url('group_edit', pubid=pubid)
 
