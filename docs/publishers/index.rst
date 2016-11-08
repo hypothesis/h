@@ -8,3 +8,4 @@ content, the following documents will help you get started.
    :maxdepth: 1
 
    embedding
+   authorization-grant-tokens
