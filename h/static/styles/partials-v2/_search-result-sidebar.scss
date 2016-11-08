@@ -52,6 +52,11 @@
   text-decoration: underline;
 }
 
+.search-result-sidebar__leave-button::-moz-focus-inner {
+  padding: 0;
+  border-width: 0;
+}
+
 .search-result-sidebar-title__annotations-count {
   font-size: $normal-font-size;
   font-weight: normal;
