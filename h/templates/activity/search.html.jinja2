@@ -82,6 +82,14 @@
 
   {{ panel('navbar') }}
 
+  {% for url in asset_urls("search_js") %}
+    <script src="{{ url }}"></script>
+  {% endfor %}
+
+  <script class="js-tag-suggestions">
+    {{aggregations['tags'] | to_json}}
+  </script>
+
   <div class="search-result-container">
     <ol class="search-result-list">
       {% for timeframe in timeframes %}

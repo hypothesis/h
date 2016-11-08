@@ -84,6 +84,10 @@ class AutosuggestDropdownController extends Controller {
     });
 
     this._setList(configOptions.list);
+
+
+    // Public API
+    this.setHeader = this._setHeader;
   }
 
   update(newState, prevState){
@@ -206,7 +210,7 @@ class AutosuggestDropdownController extends Controller {
 
     if (selection){
       this.options.onSelect(selection);
-      this._toggleSuggestionsVisibility(/*show*/false);
+      this._filterAndToggleVisibility();
       this.setState({
         activeId: null,
       });
