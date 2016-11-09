@@ -94,20 +94,26 @@
     {% if group %}
     <nav class="search-result-nav">
       {%- if more_info %}
-        <button form="search-bar"
-                formmethod="POST"
-                name="back"
-                class="search-result-nav__button">
-          {% trans %}Back{% endtrans %}
-        </button>
+        <form method="POST"> {# This <form> is needed for IE because it doesn't
+                                support the `form` attribute. #}
+          <button form="search-bar"
+                  formmethod="POST"
+                  name="back"
+                  class="search-result-nav__button">
+            {% trans %}Back{% endtrans %}
+          </button>
+        </form>
       {% else %}
         <h1 class="search-result-nav__title">{{ group.name }}</h1>
-        <button form="search-bar"
-                formmethod="POST"
-                name="more_info"
-                class="search-result-nav__button">
-          {% trans %}More info{% endtrans %}
-        </button>
+        <form method="POST"> {# This <form> is needed for IE because it doesn't
+                                support the `form` attribute. #}
+          <button form="search-bar"
+                  formmethod="POST"
+                  name="more_info"
+                  class="search-result-nav__button">
+            {% trans %}More info{% endtrans %}
+          </button>
+        </form>
       {% endif -%}
     </nav>
     {% endif %}
