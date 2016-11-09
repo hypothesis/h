@@ -1,0 +1,72 @@
+.search-result-sidebar {
+  width: 300px;
+}
+
+.search-result-sidebar__title {
+  margin-top: 0;
+  margin-bottom: 26px;
+}
+
+.search-result-sidebar__title,
+.search-result-sidebar__subtitle {
+  color: $brand;
+}
+
+.search-result-sidebar__section {
+  margin-bottom: 26px;
+}
+
+.search-result-sidebar__section p:first-of-type {
+  margin-top: 0; 
+}
+
+.search-result-sidebar__section p:last-of-type {
+  margin-bottom: 0;
+}
+
+.search-result-sidebar__dt {
+  font-weight: bold;
+  float: left;
+  clear: left;
+  margin-right: 3px;
+}
+
+.search-result-sidebar__dd {
+  float: left;
+  margin-left: 0;
+}
+
+.search-result-sidebar__link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.search-result-sidebar__link:hover {
+  text-decoration: underline;
+}
+
+.search-result-sidebar__leave-button {
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.search-result-sidebar__leave-button::-moz-focus-inner {
+  padding: 0;
+  border-width: 0;
+}
+
+.search-result-sidebar-title__annotations-count {
+  font-size: $normal-font-size;
+  font-weight: normal;
+}
+
+.search-result-sidebar__annotations-count {
+  color: $grey-5;
+}
+
+.search-result-sidebar__username {
+  font-weight: bold;
+  margin-right: 3px;
+}

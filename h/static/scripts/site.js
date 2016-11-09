@@ -10,6 +10,7 @@ require('./polyfills');
 
 var CharacterLimitController = require('./controllers/character-limit-controller');
 var CopyButtonController = require('./controllers/copy-button-controller');
+var ConfirmSubmitController = require('./controllers/confirm-submit-controller');
 var CreateGroupFormController = require('./controllers/create-group-form-controller');
 var DropdownMenuController = require('./controllers/dropdown-menu-controller');
 var FormController = require('./controllers/form-controller');
@@ -23,6 +24,7 @@ var upgradeElements = require('./base/upgrade-elements');
 var controllers = {
   '.js-character-limit': CharacterLimitController,
   '.js-copy-button': CopyButtonController,
+  '.js-confirm-submit': ConfirmSubmitController,
   '.js-create-group-form': CreateGroupFormController,
   '.js-dropdown-menu': DropdownMenuController,
   '.js-form': FormController,
