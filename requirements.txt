@@ -37,7 +37,7 @@ Jinja2==2.8               # via deform-jinja2, pyramid-jinja2
 jsonpointer==1.10
 jsonschema==2.5.1
 kombu==4.0.0
-Mako==1.0.5               # via alembic
+Mako==1.0.6               # via alembic
 MarkupSafe==0.23          # via jinja2, mako, pyramid-jinja2
 mistune==0.7.3
 newrelic==2.72.1.53
