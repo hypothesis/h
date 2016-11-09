@@ -22,7 +22,13 @@ describe('SearchBarController', function () {
       </div>
     `;
 
-    beforeEach(function () {
+    var getItemTitles = function(){
+      return Array.from(dropdown.querySelectorAll('.search-bar__dropdown-menu-title')).map((node)=>{
+        return node.textContent.trim();
+      });
+    };
+
+    var setup = function(){
       testEl = document.createElement('div');
       testEl.innerHTML = TEMPLATE;
       document.body.appendChild(testEl);
@@ -31,11 +37,64 @@ describe('SearchBarController', function () {
 
       input = ctrl.refs.searchBarInput;
       dropdown = input.nextSibling;
-    });
+    };
 
-    afterEach(function () {
+    var teardown = function(){
       document.body.removeChild(testEl);
-    });
+      let tagsJSON = document.querySelector('.js-tag-suggestions');
+      if(tagsJSON){
+        tagsJSON.remove();
+      }
+    };
+
+    var addTagSuggestions = function(){
+      let suggestions = [
+        {
+          tag: 'aaaa',
+          count: 1,
+        },
+        {
+          tag: 'aaab',
+          count: 1,
+        },
+        {
+          tag: 'aaac',
+          count: 4,
+        },
+        {
+          tag: 'aaad',
+          count: 3,
+        },
+        {
+          tag: 'aaae',
+          count: 1,
+        },
+        {
+          tag: 'aadf',
+          count: 3,
+        },
+        {
+          tag: 'aaag',
+          count: 2,
+        },
+        {
+          tag: 'multi word',
+          count: 1,
+        },
+        {
+          tag: 'effort',
+          count: 1,
+        },
+      ];
+
+      let tagsScript = document.createElement('script');
+      tagsScript.innerHTML = JSON.stringify(suggestions);
+      tagsScript.className = 'js-tag-suggestions';
+      document.body.appendChild(tagsScript);
+    };
+
+    beforeEach(setup);
+    afterEach(teardown);
 
     it('uses autosuggestion for initial facets', function (done) {
 
@@ -45,11 +104,7 @@ describe('SearchBarController', function () {
         .click(input, () => {
           assert.isTrue(dropdown.classList.contains('is-open'));
 
-          let titles = Array.from(document.querySelectorAll('.search-bar__dropdown-menu-title')).map((node)=>{
-            return node.textContent.trim();
-          });
-
-          assert.deepEqual(titles, ['user:', 'tag:', 'url:', 'group:']);
+          assert.deepEqual(getItemTitles(), ['user:', 'tag:', 'url:', 'group:']);
 
           done();
         });
@@ -70,7 +125,7 @@ describe('SearchBarController', function () {
     it('allows submitting the form dropdown is open but has no selected value', function (done) {
       let form = testEl.querySelector('form');
       let submit = sinon.stub(form, 'submit');
-      
+
       syn
         .click(input)
         .type('test[space]', () => {
@@ -83,6 +138,70 @@ describe('SearchBarController', function () {
         });
     });
 
+    describe('it allows tag value suggestions', function () {
+
+      beforeEach(function(){
+        // we need to setup the env vars before invoking controller
+        teardown();
+        addTagSuggestions();
+        setup();
+
+        sinon.stub(testEl.querySelector('form'), 'submit');
+      });
+
+      it('shows tag suggestions', function(done){
+        syn
+          .click(input)
+          .type('tag:', () => {
+            assert.isTrue(dropdown.classList.contains('is-open'));
+
+            let titles = getItemTitles();
+
+            assert.lengthOf(titles, 5, 'we should be enforcing the 5 item max');
+          })
+          .type('[backspace][backspace][backspace][backspace]', () => {
+            assert.deepEqual(getItemTitles(), [ 'user:', 'tag:', 'url:', 'group:' ], 'tags go away as facet is removed');
+            done();
+          });
+      });
+
+      it('orders tags by priority and indexOf score', function(done){
+        syn
+          .click(input)
+          .type('tag:', () => {
+            assert.deepEqual(getItemTitles(), [ 'aaac', 'aaad', 'aadf', 'aaag', 'aaaa' ], 'default ordering based on priority');
+          })
+          .type('aad', () => {
+            assert.deepEqual(getItemTitles(), [ 'aadf', 'aaad'], 'sorting by indexof score with equal priority');
+            done();
+          });
+      });
+
+      it('orders tags by priority and indexOf score', function(done){
+        syn
+          .click(input)
+          .type('tag:"mul', () => {
+            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a double quote initial input');
+          })
+          .type('[backspace][backspace][backspace][backspace]\'mul', () => {
+            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a single quote initial input');
+          })
+          .type('[down][enter][enter]', ()=>{
+            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'tag:"multi word"', 'selecting a multi word tag should wrap with quotes');
+            done();
+          });
+      });
+
+      it('handles filtering matches with unicode', function(done){
+        syn
+          .click(input)
+          .type('tag:éf', () => {
+            assert.deepEqual(getItemTitles(), [ 'effort' ], 'matches éffort with unicode value');
+            done();
+          });
+      });
+
+    });
   });
 
   describe('Lozenges', function () {

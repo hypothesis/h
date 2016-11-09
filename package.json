@@ -37,6 +37,7 @@
     "scroll-into-view": "^1.7.1",
     "through2": "^2.0.1",
     "uglifyify": "^3.0.1",
+    "unorm": "^1.4.1",
     "vinyl": "^1.1.1",
     "watchify": "^3.7.0",
     "whatwg-fetch": "^0.10.1"

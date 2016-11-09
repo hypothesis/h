@@ -341,8 +341,6 @@ describe('AutosuggestDropdownController', function () {
           assert.propertyVal(selectedItem, 'title', 'tag:');
           assert.propertyVal(selectedItem, 'explanation', 'search for annotations with a tag');
 
-          assert.isFalse(isSuggestionContainerVisible(), 'post select hide');
-
           assert.isFalse(form.onsubmit.called, 'should not submit the form on enter');
 
           done();
