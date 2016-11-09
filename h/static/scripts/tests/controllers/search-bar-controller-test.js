@@ -45,6 +45,11 @@ describe('SearchBarController', function () {
       if(tagsJSON){
         tagsJSON.remove();
       }
+
+      let groupsJSON = document.querySelector('.js-group-suggestions');
+      if(groupsJSON){
+        groupsJSON.remove();
+      }
     };
 
     var addTagSuggestions = function(){
@@ -93,6 +98,56 @@ describe('SearchBarController', function () {
       document.body.appendChild(tagsScript);
     };
 
+    var addGroupSuggestions = function(){
+      let suggestions = [
+        {
+          name: 'aaac',
+          pubid: 'pid1',
+        },
+        {
+          name: 'aaab',
+          pubid: 'pid2',
+        },
+        {
+          name: 'aaaa',
+          pubid: 'pid3',
+        },
+        {
+          name: 'aaae',
+          pubid: 'pid4',
+        },
+        {
+          name: 'aaad',
+          pubid: 'pid5',
+        },
+        {
+          name: 'aadf',
+          pubid: 'pid6',
+        },
+        {
+          name: 'aaag',
+          pubid: 'pid7',
+        },
+        {
+          name: 'multi word',
+          pubid: 'pid8',
+        },
+        {
+          name: 'effort',
+          pubid: 'pid9',
+        },
+        {
+          name: '<*>Haskell fans<*>',
+          pubid: 'pid10',
+        },
+      ];
+
+      let groupsScript = document.createElement('script');
+      groupsScript.innerHTML = JSON.stringify(suggestions);
+      groupsScript.className = 'js-group-suggestions';
+      document.body.appendChild(groupsScript);
+    };
+
     beforeEach(setup);
     afterEach(teardown);
 
@@ -138,6 +193,97 @@ describe('SearchBarController', function () {
         });
     });
 
+    describe('it allows group value suggestions', function () {
+
+      const getLozengeValues = function (){
+        return Array.from(testEl.querySelectorAll('.lozenge')).map((el)=>{
+          return el.querySelector('.lozenge__content').textContent;
+        });
+      };
+
+      beforeEach(function(){
+        // we need to setup the env vars before invoking controller
+        teardown();
+        addGroupSuggestions();
+        setup();
+
+        sinon.stub(testEl.querySelector('form'), 'submit');
+      });
+
+      it('shows group suggestions', function(done){
+        syn
+          .click(input)
+          .type('group:', () => {
+            assert.isTrue(dropdown.classList.contains('is-open'));
+
+            let titles = getItemTitles();
+
+            assert.lengthOf(titles, 5, 'we should be enforcing the 5 item max');
+          })
+          .type('[backspace][backspace][backspace][backspace][backspace][backspace]', () => {
+            assert.deepEqual(getItemTitles(), [ 'user:', 'tag:', 'url:', 'group:' ], 'group suggestions go away as facet is removed');
+            done();
+          });
+      });
+
+      it('orders groups by earliest value match first', function(done){
+        syn
+          .click(input)
+          .type('group:', () => {
+            assert.deepEqual(getItemTitles(), [ 'aaac', 'aaab', 'aaaa', 'aaae', 'aaad' ], 'default ordering based on original order with no input');
+          })
+          .type('aad', () => {
+            assert.deepEqual(getItemTitles(), [ 'aadf', 'aaad'], 'sorting by indexof score with some input');
+            done();
+          });
+      });
+
+      it('supports multi word matching', function(done){
+        syn
+          .click(input)
+          .type('group:"mul', () => {
+            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a double quote initial input');
+          })
+          .type('[backspace][backspace][backspace][backspace]\'mul', () => {
+            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a single quote initial input');
+            done();
+          });
+      });
+
+      it('handles filtering matches with unicode', function(done){
+        syn
+          .click(input)
+          .type('group:éf', () => {
+            assert.deepEqual(getItemTitles(), [ 'effort' ], 'matches éffort with unicode value');
+            done();
+          });
+      });
+
+      it('sets input and display friendly name value', function(done){
+        syn
+          .click(input)
+          .type('group:"mul[down][enter]', () => {
+            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid8', 'pubid should be added to the hidden input');
+            assert.deepEqual(getLozengeValues(), ['group:"multi word"'], 'adds and wraps multi word with quotes');
+          })
+          .type('group:a[down][enter]', () => {
+            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid8 group:pid1', 'pubid should be added to the hidden input');
+            assert.deepEqual(getLozengeValues(), ['group:"multi word"', 'group:aaac'], 'adds single word as is to lozenge');
+            done();
+          });
+      });
+
+      it('matches escaped values', function(done){
+        syn
+          .click(input)
+          .type('group:<[down][enter]', () => {
+            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid10', 'pubid should be added to the hidden input');
+            assert.deepEqual(getLozengeValues(), ['group:"<*>Haskell fans<*>"'], 'adds and wraps multi word with quotes');
+            done();
+          });
+      });
+    });
+
     describe('it allows tag value suggestions', function () {
 
       beforeEach(function(){
@@ -177,7 +323,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('orders tags by priority and indexOf score', function(done){
+      it('matches on multi word searches', function(done){
         syn
           .click(input)
           .type('tag:"mul', () => {
@@ -219,12 +365,13 @@ describe('SearchBarController', function () {
      * return the various parts of the component.
      *
      */
-    function component(value) {
+    function component(value, lozengeContent) {
       value = value || '';
+      lozengeContent = lozengeContent || '';
       var template = `
         <div>
           <form data-ref="searchBarForm">
-            <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
+            <div class="search-bar__lozenges" data-ref="searchBarLozenges">${lozengeContent}</div>
             <input data-ref="searchBarInput" class="search-bar__input" name="q" value="${value}">
           </form>
         </div>
@@ -249,6 +396,15 @@ describe('SearchBarController', function () {
     function getLozenges(ctrl) {
       return ctrl.refs.searchBarLozenges.querySelectorAll('.js-lozenge');
     }
+
+    /**
+     * return the array of all of lozenges values
+     */
+    const getLozengeValues = function (){
+      return Array.from(ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')).map((el)=>{
+        return el.querySelector('.lozenge__content').innerText;
+      });
+    };
 
     it('should create lozenges for existing query terms in the input on page load', function () {
       var {ctrl} = component('foo');
@@ -373,6 +529,46 @@ describe('SearchBarController', function () {
           assert.equal(input.value, "'bar gar ");
           done();
         });
+    });
+
+    describe('mapping initial input value to proper group lozenge and input values', function(){
+
+      let groupsScript;
+
+      beforeEach(()=>{
+        let suggestions = [{
+          name: 'abc 123',
+          pubid: 'pid124',
+        }];
+
+        groupsScript = document.createElement('script');
+        groupsScript.innerHTML = JSON.stringify(suggestions);
+        groupsScript.className = 'js-group-suggestions';
+        document.body.appendChild(groupsScript);
+      });
+
+      afterEach(()=>{
+        groupsScript.remove();
+      });
+
+      it('should map an initial group name to proper group pubid input value', function(){
+
+        const {input, hiddenInput} = component("group:'abc 123'");
+
+        assert.deepEqual(getLozengeValues(), ['group:"abc 123"']);
+        assert.equal(input.value, '');
+        assert.equal(hiddenInput.value, 'group:pid124');
+      });
+
+      it('should map an initial group pubid to proper group name lozenge value', function(){
+
+        const {input, hiddenInput} = component('group:pid124');
+
+        assert.deepEqual(getLozengeValues(), ['group:"abc 123"']);
+        assert.equal(input.value, '');
+        assert.equal(hiddenInput.value, 'group:pid124');
+      });
+
     });
   });
 });

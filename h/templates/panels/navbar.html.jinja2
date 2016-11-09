@@ -28,7 +28,7 @@
             id="search-bar"
             action="{{ search_url }}">
         {{ svg_icon('search', 'search-bar__icon') }}
-        <div class="search-bar__lozenges">
+        <div class="search-bar__lozenges" data-ref="searchBarLozenges">
           {% if opts['search_username'] %}
             {{ lozenge('user', opts['search_username']) }}
           {% endif %}
@@ -36,7 +36,6 @@
             {{ lozenge('group', opts['search_groupname']) }}
           {% endif %}
         </div>
-        <div class="search-bar__lozenges" data-ref="searchBarLozenges"></div>
         <input class="search-bar__input" data-ref="searchBarInput" name="q" value="{{ q }}" placeholder="Search…" autocomplete="off">
 
         {#- This seemingly pointless <input> is actually needed to make the

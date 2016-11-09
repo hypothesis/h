@@ -44,9 +44,18 @@ def search(request):
         user['faceted_by'] = _faceted_by_user(request, user['username'], q)
         del user['user']
 
+    groups_suggestions = []
+
+    if request.authenticated_user:
+        for group in request.authenticated_user.groups:
+            groups_suggestions.append({
+                'name': group.name,
+                'pubid': group.pubid
+                })
     return {
         'total': result.total,
         'aggregations': result.aggregations,
+        'groups_suggestions': groups_suggestions,
         'timeframes': result.timeframes,
         'page': paginate(request, result.total, page_size=page_size),
     }
