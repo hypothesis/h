@@ -79,6 +79,9 @@ def group_search(request):
         'description': group.description,
         'name': group.name,
         'pubid': group.pubid,
+        'url': request.route_url('group_read',
+                                 pubid=group.pubid,
+                                 slug=group.slug),
     }
 
     if request.has_permission('admin', group):

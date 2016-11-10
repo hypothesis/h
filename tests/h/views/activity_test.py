@@ -241,6 +241,7 @@ class TestGroupSearch(object):
 
     @pytest.fixture
     def routes(self, pyramid_config):
+        pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
         pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
 
 
