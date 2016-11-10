@@ -255,9 +255,12 @@ class TestGroupSearchMoreInfo(object):
         result = activity.group_search_more_info(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == (
-            'http://example.com/groups/test_pubid/search'
-            '?more_info=&q=foo+bar')
+        assert result.location.startswith(
+            'http://example.com/groups/test_pubid/search?')
+        # The order of the params vary (because they're in an unordered dict)
+        # but they should both be there.
+        assert 'more_info=' in result.location
+        assert 'q=foo+bar' in result.location
 
     @pytest.fixture
     def routes(self, pyramid_config):
