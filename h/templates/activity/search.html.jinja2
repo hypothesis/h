@@ -2,6 +2,33 @@
 
 {% from '../includes/annotation_card.html.jinja2' import annotation_card %}
 
+{% macro search_result_nav(group_name) %}
+<nav class="search-result-nav">
+  {%- if more_info %}
+    <form method="POST"> {# This <form> is needed for IE because it doesn't
+                            support the `form` attribute. #}
+      <button form="search-bar"
+              formmethod="POST"
+              name="back"
+              class="search-result-nav__button">
+        {% trans %}Back{% endtrans %}
+      </button>
+    </form>
+  {% else %}
+    <h1 class="search-result-nav__title">{{ group_name }}</h1>
+    <form method="POST"> {# This <form> is needed for IE because it doesn't
+                            support the `form` attribute. #}
+      <button form="search-bar"
+              formmethod="POST"
+              name="more_info"
+              class="search-result-nav__button">
+        {% trans %}More info{% endtrans %}
+      </button>
+    </form>
+  {% endif -%}
+</nav>
+{% endmacro %}
+
 {# Card displaying statistics about a bucket of annotations. #}
 {% macro search_bucket_stats(bucket) %}
 <div class="search-bucket-stats">
@@ -92,30 +119,7 @@
 
   <div class="search-result-container">
     {% if group %}
-    <nav class="search-result-nav">
-      {%- if more_info %}
-        <form method="POST"> {# This <form> is needed for IE because it doesn't
-                                support the `form` attribute. #}
-          <button form="search-bar"
-                  formmethod="POST"
-                  name="back"
-                  class="search-result-nav__button">
-            {% trans %}Back{% endtrans %}
-          </button>
-        </form>
-      {% else %}
-        <h1 class="search-result-nav__title">{{ group.name }}</h1>
-        <form method="POST"> {# This <form> is needed for IE because it doesn't
-                                support the `form` attribute. #}
-          <button form="search-bar"
-                  formmethod="POST"
-                  name="more_info"
-                  class="search-result-nav__button">
-            {% trans %}More info{% endtrans %}
-          </button>
-        </form>
-      {% endif -%}
-    </nav>
+      {{ search_result_nav(group.name) }}
     {% endif %}
 
     <ol class="search-result-list {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
