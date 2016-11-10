@@ -2,7 +2,7 @@
 
 <li class="annotation-card">
   <header class="annotation-card__header">
-    <a href="{{ request.route_url('stream') }}?q=user:{{ annotation.username }}"
+    <a href="{{ request.route_url('activity.user_search', username=annotation.username) }}"
       class="annotation-card__username">
       {{ annotation.username }}
     </a>

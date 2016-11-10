@@ -36,7 +36,7 @@ class TestNavbar(object):
         req.authenticated_user = authenticated_user
         result = panels.navbar({}, req)
 
-        assert result['username_url'] == 'http://example.com/search?q=user:vannevar'
+        assert result['username_url'] == 'http://example.com/users/vannevar/search'
 
     def test_it_includes_search_query(self, req):
         req.params['q'] = 'tag:question'
