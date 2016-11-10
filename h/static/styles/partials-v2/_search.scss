@@ -3,11 +3,40 @@
 // Styles for the search page which displays the results
 // of activity queries.
 
+.search-result-nav {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.search-result-nav__title {
+  color: $brand;
+  margin: 0;
+  line-height: 22px;
+}
+
+.search-result-nav__button {
+  background-color: $grey-2;
+  border: none;
+  color: inherit;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 15px;
+  padding-right: 15px;
+  text-decoration: none;
+}
+
 .search-result-container {
   display: flex;
   font-size: $normal-font-size;
   margin-top: 50px;
   color: $grey-6;
+
+  // Align the left edge of the search result list with the left edge of the
+  // navbar content.
+  margin-left: 30px;
 }
 
 .search-result-list {
@@ -19,10 +48,8 @@
   padding-left: 0;
   padding-right: 0;
 
-  // These margins are set so that the left edge of the search result list
-  // aligns with the left edge of the navbar content
-  margin-left: 30px;
   margin-right: 30px;
+  margin-bottom: 40px;
 }
 
 .search-result__timeframe {
@@ -174,9 +201,26 @@
     }
 }
 
+// As the screen size gets smaller, just before it would have introduced a
+// horizontal scrollbar move the sidebar below the search results.
+@media screen and (max-width: $tablet-width + 225px) {
+  .search-result-container {
+    flex-direction: column;
+    margin-top: 25px;
+  }
+
+  .search-result-nav {
+    display: flex;
+  }
+
+  .search-result-hide-on-small-screens {
+    display: none;
+  }
+}
+
 // On large tablets and below left-align annotation cards in order to make more
 // space for the stats to the right of the annotation card.
-@media screen and (max-width: $tablet-width + 150px) {
+@media screen and (max-width: 1127px) {
   .search-result-bucket__annotation-cards-container {
     padding-left: 0;
   }
@@ -184,13 +228,6 @@
 
 // On normal tablets and below, display annotation stats below annotation list
 @media screen and (max-width: $tablet-width) {
-
-  // Reduce margins on tablet and below to match navbar left/right margins
-  // on these screen sizes
-  .search-result-list {
-    margin-left: 10px;
-    margin-right: 10px;
-  }
 
   .search-result-bucket__annotation-cards-container {
     flex-direction: column;
@@ -203,5 +240,16 @@
   .search-bucket-stats {
     margin-left: 5px;
     margin-top: 10px;
+  }
+
+  .search-result-container {
+    // Align the left edge of the search result list with the left edge of the
+    // navbar content.
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .search-result-list {
+    margin-right: 0;
   }
 }

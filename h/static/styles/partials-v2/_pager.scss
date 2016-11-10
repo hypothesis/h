@@ -1,7 +1,10 @@
 .pager {
   display: flex;
   flex-direction: row;
-  margin: 40px auto;
+  margin-top: 0;
+  margin-bottom: 40px;
+  margin-left: auto;
+  margin-right: auto;
   font-weight: bold;
   justify-content: center;
 }

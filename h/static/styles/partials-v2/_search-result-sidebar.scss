@@ -1,5 +1,7 @@
 .search-result-sidebar {
-  width: 300px;
+  width: 200px;
+  flex-shrink: 0;
+  margin-bottom: 40px;
 }
 
 .search-result-sidebar__title {
@@ -14,6 +16,10 @@
 
 .search-result-sidebar__section {
   margin-bottom: 26px;
+}
+
+.search-result-sidebar__section:last-child {
+  margin-bottom: 0;
 }
 
 .search-result-sidebar__section p:first-of-type {
@@ -64,4 +70,14 @@
   font-weight: bold;
   margin-right: 3px;
   margin-bottom: 7px;
+}
+
+@media screen and (max-width: $tablet-width) {
+  // On tablet-sized screens and below the "sidebar" is displayed in the center
+  // of the screen instead of on the side (this is achieved by media queries
+  // on the sidebar's parent element), so make it full the whole width of the
+  // screen.
+  .search-result-sidebar {
+    width: 100%;
+  }
 }
