@@ -107,7 +107,7 @@
 
 {% block content %}
 
-  {{ panel('navbar') }}
+  {{ panel('navbar', opts or {}) }}
 
   {% for url in asset_urls("search_js") %}
     <script src="{{ url }}"></script>

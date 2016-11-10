@@ -20,9 +20,6 @@ PAGE_SIZE = 200
 @view_config(route_name='activity.search',
              request_method='GET',
              renderer='h:templates/activity/search.html.jinja2')
-@view_config(route_name='activity.user_search',
-             request_method='GET',
-             renderer='h:templates/activity/search.html.jinja2')
 def search(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
@@ -54,7 +51,6 @@ def search(request):
         'page': paginate(request, result.total, page_size=page_size),
     }
 
-
 @view_config(route_name='activity.group_search',
              request_method='GET',
              renderer='h:templates/activity/search.html.jinja2')
@@ -62,9 +58,14 @@ def group_search(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
+    opts = {}
+
     result = search(request)
 
     pubid = request.matchdict['pubid']
+
+    opts['search_groupname'] = request.matchdict['pubid']
+    result['opts'] = opts
 
     try:
         group = request.db.query(models.Group).filter_by(pubid=pubid).one()
@@ -90,7 +91,6 @@ def group_search(request):
     result['more_info'] = 'more_info' in request.params
 
     return result
-
 
 @view_config(route_name='activity.group_search',
              request_method='POST',
@@ -148,7 +148,6 @@ def group_leave(request):
     location = request.route_url('activity.search', _query=new_params)
 
     return httpexceptions.HTTPSeeOther(location=location)
-
 
 @view_config(route_name='activity.group_search',
              request_method='POST',
@@ -231,3 +230,19 @@ def _faceted_by_user(request, username, parsed_query=None):
 
     """
     return username in _username_facets(request, parsed_query)
+
+@view_config(route_name='activity.user_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2')
+def user_search(request):
+    if not request.feature('search_page'):
+        raise httpexceptions.HTTPNotFound()
+
+    opts = {}
+    result = search(request)
+    username = request.matchdict['username']
+
+    opts['search_username'] = username
+    result['opts'] = opts
+
+    return result
