@@ -59,6 +59,6 @@
   fill: $grey-4;
 }
 
-.group-invite__clipboard-image:hover {
+.group-invite__clipboard-button:hover > .group-invite__clipboard-image {
   fill: $grey-7;
 }
