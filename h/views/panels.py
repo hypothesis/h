@@ -24,7 +24,7 @@ def navbar(context, request, opts={}):
     """
 
     groups_menu_items = []
-    stream_url = None
+    user_activity_url = None
     username = None
 
     if request.authenticated_user:
@@ -33,8 +33,8 @@ def navbar(context, request, opts={}):
                 'title': group.name,
                 'link': request.route_url('group_read', pubid=group.pubid, slug=group.slug)
                 })
-        stream_url = (request.route_url('activity.search') +
-            "?q=user:{}".format(request.authenticated_user.username))
+        user_activity_url = request.route_url('activity.user_search',
+            username=request.authenticated_user.username)
         username = request.authenticated_user.username
 
     if request.matched_route.name in ['activity.group_search', 'activity.user_search']:
@@ -54,7 +54,7 @@ def navbar(context, request, opts={}):
         'create_group_item':
             {'title': _('Create new group'), 'link': request.route_url('group_create')},
         'username': username,
-        'username_url': stream_url,
+        'username_url': user_activity_url,
         'search_url': search_url,
         'q': request.params.get('q', ''),
         'opts': opts,

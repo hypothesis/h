@@ -15,6 +15,7 @@ from pyramid import response
 from pyramid.view import view_config
 
 from h.views.client import render_app
+from h.util.user import split_user
 
 log = logging.getLogger(__name__)
 
@@ -75,6 +76,20 @@ def stream_tag_redirect(request):
 
 @view_config(route_name='stream.user_query')
 def stream_user_redirect(request):
-    query = {'q': 'user:{}'.format(request.matchdict['user'])}
-    location = request.route_url('stream', _query=query)
+    """
+    Redirect to a user's activity page.
+    """
+
+    user = request.matchdict['user']
+
+    # The client generates /u/ links which include the full account ID
+    if user.startswith('acct:'):
+        user = split_user(user)['username']
+
+    if request.feature('search_page'):
+        location = request.route_url('activity.user_search', username=user)
+    else:
+        query = {'q': 'user:{}'.format(user)}
+        location = request.route_url('stream', _query=query)
+
     raise httpexceptions.HTTPFound(location=location)
