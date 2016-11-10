@@ -122,6 +122,11 @@ def read(group, request):
         request.override_renderer = 'h:templates/groups/join.html.jinja2'
         return {'group': group}
 
+    # Redirect to new group overview page if search page is enabled
+    if request.feature('search_page'):
+        url = request.route_path('activity.group_search', pubid=group.pubid)
+        return HTTPSeeOther(url)
+
     return {'group': group,
             'document_links': [presenters.DocumentHTMLPresenter(d).link
                                for d in group.documents()],

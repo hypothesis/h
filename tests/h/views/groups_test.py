@@ -170,6 +170,14 @@ class TestGroupRead(object):
 
         assert exc.value.location == '/g/abc123/some-slug'
 
+    def test_redirects_if_search_page_enabled(self, matchers, pyramid_request):
+        group = FakeGroup('abc123', 'some-slug')
+        pyramid_request.matchdict['slug'] = 'some-slug'
+        pyramid_request.feature.flags['search_page'] = True
+
+        assert views.read(group, pyramid_request) == matchers.redirect_303_to(
+            '/g/abc123/search')
+
     def test_returns_template_context(self, patch, pyramid_request):
         group = FakeGroup('abc123', 'some-slug')
         group.documents = lambda: ['d1', 'd2']
@@ -325,3 +333,10 @@ def groups_service(pyramid_config):
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('group_read', '/g/{pubid}/{slug}')
+    pyramid_config.add_route('activity.group_search', '/g/{pubid}/search')
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.feature.flags['search_page'] = False
+    return pyramid_request
