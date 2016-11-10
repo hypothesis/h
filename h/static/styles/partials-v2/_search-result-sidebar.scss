@@ -46,15 +46,8 @@
 }
 
 .search-result-sidebar__leave-button {
-  background: none;
-  border: none;
-  padding: 0;
+  @include reset-button;
   text-decoration: underline;
-}
-
-.search-result-sidebar__leave-button::-moz-focus-inner {
-  padding: 0;
-  border-width: 0;
 }
 
 .search-result-sidebar-title__annotations-count {
@@ -67,6 +60,8 @@
 }
 
 .search-result-sidebar__username {
+  @include reset-button;
   font-weight: bold;
   margin-right: 3px;
+  margin-bottom: 7px;
 }
