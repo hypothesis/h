@@ -7,9 +7,7 @@
   display: none;
   align-items: center;
   justify-content: space-between;
-
   margin-bottom: 40px;
-  margin-right: 10px;
 }
 
 .search-result-nav__title {
@@ -242,5 +240,16 @@
   .search-bucket-stats {
     margin-left: 5px;
     margin-top: 10px;
+  }
+
+  .search-result-container {
+    // Align the left edge of the search result list with the left edge of the
+    // navbar content.
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .search-result-list {
+    margin-right: 0;
   }
 }
