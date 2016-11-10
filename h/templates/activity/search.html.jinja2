@@ -2,7 +2,7 @@
 
 {% from '../includes/annotation_card.html.jinja2' import annotation_card %}
 
-{% macro search_result_nav(group_name) %}
+{% macro search_result_nav(name) %}
 <nav class="search-result-nav">
   {%- if more_info %}
     <form method="POST"> {# This <form> is needed for IE because it doesn't
@@ -15,7 +15,7 @@
       </button>
     </form>
   {% else %}
-    <h1 class="search-result-nav__title">{{ group_name }}</h1>
+    <h1 class="search-result-nav__title">{{ name }}</h1>
     <form method="POST"> {# This <form> is needed for IE because it doesn't
                             support the `form` attribute. #}
       <button form="search-bar"
@@ -105,17 +105,21 @@
 </div>
 {% endmacro %}
 
+{% macro search_result_sidebar_description(description) %}
+{% if description %}
+<section class="search-result-sidebar__section">
+  {% for paragraph in description.split('\n') %}
+    <p>{{ paragraph }}</p>
+  {% endfor %}
+</section>
+{% endif %}
+{% endmacro %}
+
 {% macro group_sidebar(group, group_edit_url, total) %}
 <aside class="search-result-sidebar {%- if not more_info %} search-result-hide-on-small-screens{% endif %}">
   <h1 class="search-result-sidebar__title">{{ group.name }}</h1>
 
-  {% if group.description %}
-  <section class="search-result-sidebar__section">
-    {% for paragraph in group.description.split('\n') %}
-      <p>{{ paragraph }}</p>
-    {% endfor %}
-  </section>
-  {% endif %}
+  {{ search_result_sidebar_description(group.description) }}
 
   <section class="search-result-sidebar__section">
     <dl>
@@ -216,6 +220,72 @@
 </aside>
 {% endmacro %}
 
+{% macro user_sidebar(user) %}
+<aside class="search-result-sidebar {%- if not more_info %} search-result-hide-on-small-screens{% endif %}">
+  <h1 class="search-result-sidebar__title">{{ user.name }}</h1>
+
+  {{ search_result_sidebar_description(user.description) }}
+
+  <section class="search-result-sidebar__section">
+    <dl>
+      <dt class="search-result-sidebar__dt">
+        {% trans %}Annotations:{% endtrans %}
+      </dt>
+      <dd class="search-result-sidebar__dd">{{ user.num_annotations }}</dd>
+
+      <dt class="search-result-sidebar__dt">
+        {% trans %}Joined:{% endtrans %}
+      </dt>
+      <dd class="search-result-sidebar__dd">{{ user.registered_date }}</dd>
+
+      {%- if user.location %}
+        <dt class="search-result-sidebar__dt">
+          {% trans %}Location:{% endtrans %}
+        </dt>
+        <dd class="search-result-sidebar__dd">{{ user.location }}</dd>
+      {% endif -%}
+
+      {%- if user.uri %}
+        <dt class="search-result-sidebar__dt">
+          {% trans %}Link:{% endtrans %}
+        </dt>
+        <dd class="search-result-sidebar__dd">
+          <a href="{{ user.uri }}" class="search-result-sidebar__user-link">
+            {{ user.domain }}
+          </a>
+        </dd>
+      {% endif -%}
+
+      {%- if user.orcid %}
+        <dt class="search-result-sidebar__dt">
+          {% trans %}ORCID:{% endtrans %}
+        </dt>
+        <dd class="search-result-sidebar__dd">
+          <a href="https://orcid.org/{{ user.orcid }}"
+             class="search-result-sidebar__orcid-link">
+            {{ user.orcid }}
+          </a>
+        </dd>
+      {% endif -%}
+    </dl>
+    <div style="clear: both;"></div>
+  </section>
+
+  <section class="search-result-sidebar__section">
+    <ul>
+      {% if user.edit_url %}
+        <li>
+          <a class="search-result-sidebar__link"
+             href="{{ user.edit_url }}">
+            {% trans %}Edit profile{% endtrans %}
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </section>
+</aside>
+{% endmacro %}
+
 {% block content %}
 
   {{ panel('navbar', opts or {}) }}
@@ -231,6 +301,8 @@
   <div class="search-result-container">
     {% if group %}
       {{ search_result_nav(group.name) }}
+    {% elif user %}
+      {{ search_result_nav(user.name) }}
     {% endif %}
 
     <ol class="search-result-list {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
@@ -248,6 +320,8 @@
 
     {% if group %}
       {{ group_sidebar(group, group_edit_url, total) }}
+    {% elif user %}
+      {{ user_sidebar(user) }}
     {% endif %}
   </div>
 

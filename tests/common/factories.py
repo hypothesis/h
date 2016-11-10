@@ -89,6 +89,7 @@ class User(factory.Factory):
     authority = 'example.com'
     username = factory.Faker('user_name')
     email = factory.Faker('email')
+    registered_date = factory.Faker('date_time_this_decade')
 
     @factory.lazy_attribute
     def uid(self):
