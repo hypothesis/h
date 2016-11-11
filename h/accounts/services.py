@@ -10,6 +10,7 @@ from h import mailer
 from h._compat import text_type
 from h.emails import signup
 from h.models import Activation, Subscriptions, User
+from h import util
 
 
 class LoginError(Exception):
@@ -54,12 +55,19 @@ class UserService(object):
         :returns: a user instance, if found
         :rtype: h.models.User or None
         """
-        if userid not in self._cache:
-            self._cache[userid] = (self.session.query(User)
-                                   .filter_by(userid=userid)
-                                   .one_or_none())
+        parts = util.user.split_user(userid)
+        username = parts['username']
+        authority = parts['domain']
 
-        return self._cache[userid]
+        # The cache is keyed by (username, authority) tuples.
+        cache_key = (username, authority)
+
+        if cache_key not in self._cache:
+            self._cache[cache_key] = (self.session.query(User)
+                                      .filter_by(userid=userid)
+                                      .one_or_none())
+
+        return self._cache[cache_key]
 
     def login(self, username_or_email, password):
         """
