@@ -257,9 +257,17 @@ class TestGroupSearch(object):
 
         assert activity.group_search(pyramid_request)['more_info'] is False
 
-    def test_group_search_returns_pubid_in_opts(self, group, pyramid_request):
+    def test_group_search_returns_name_in_opts(self, group, pyramid_request):
         result = activity.group_search(pyramid_request)
         assert result['opts']['search_groupname'] == group.name
+
+    def test_group_search_returns_pubid_in_opts_if_group_does_not_exist(
+            self, group, pyramid_request):
+        pyramid_request.matchdict['pubid'] = 'does_not_exist'
+
+        result = activity.group_search(pyramid_request)
+
+        assert result['opts']['search_groupname'] == 'does_not_exist'
 
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
@@ -414,6 +422,15 @@ class TestUserSearch(object):
                                             user):
         results = activity.user_search(pyramid_request)
         assert results['opts']['search_username'] == user.username
+
+    def test_it_returns_the_username_in_opts_if_user_does_not_exist(
+            self, pyramid_request, search, user, user_service):
+        pyramid_request.matchdict['username'] = 'does_not_exist'
+        user_service.fetch.return_value = None
+
+        results = activity.user_search(pyramid_request)
+
+        assert results['opts']['search_username'] == 'does_not_exist'
 
     def test_it_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
             self,

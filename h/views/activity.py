@@ -70,19 +70,17 @@ def group_search(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
-    opts = {}
-
     result = search(request)
 
     pubid = request.matchdict['pubid']
+    result['opts'] = {'search_groupname': pubid}
 
     try:
         group = request.db.query(models.Group).filter_by(pubid=pubid).one()
     except exc.NoResultFound:
         return result
 
-    opts['search_groupname'] = group.name
-    result['opts'] = opts
+    result['opts']['search_groupname'] = group.name
 
     if request.authenticated_user not in group.members:
         return result
@@ -115,6 +113,7 @@ def user_search(request):
     username = request.matchdict['username']
 
     result = search(request)
+    result['opts'] = {'search_username': username}
 
     result['more_info'] = 'more_info' in request.params
 
@@ -124,7 +123,7 @@ def user_search(request):
     if not user:
         return result
 
-    result['opts'] = {'search_username': user.display_name or user.username}
+    result['opts']['search_username'] = user.display_name or user.username
 
     def domain(user):
         if not user.uri:
