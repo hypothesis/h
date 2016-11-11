@@ -8,9 +8,20 @@ var AutosuggestDropdownController = require('./autosuggest-dropdown-controller')
 var SearchTextParser = require('../util/search-text-parser');
 var stringUtil = require('../util/string');
 
+
 const FACET_TYPE = 'FACET';
 const TAG_TYPE = 'TAG';
+const GROUP_TYPE = 'GROUP';
 const MAX_SUGGESTIONS = 5;
+
+
+/**
+ * Normalize a string for use in comparisons of user input with a suggestion.
+ * This causes differences in unicode composition and combining characters/accents to be ignored.
+ */
+var normalizeStr = function(str){
+  return stringUtil.fold(stringUtil.normalize(str));
+};
 
 /**
  * Controller for the search bar.
@@ -23,8 +34,150 @@ class SearchBarController extends Controller {
     this._lozengeContainer = this.refs.searchBarLozenges;
 
 
+    /**
+     * the suggestionsMap pulls in the available lists - either
+     *  static or dynamic living in the dom - into one mapping
+     *  lists of all suggestion values.
+     */
+    this._suggestionsMap = (()=>{
+
+      let explanationList = [
+        {
+          matchOn: 'user',
+          title: 'user:',
+          explanation: 'search by username',
+        },
+        {
+          matchOn: 'tag',
+          title: 'tag:',
+          explanation: 'search for annotations with a tag',
+        },
+        {
+          matchOn: 'url',
+          title: 'url:',
+          explanation: 'see all annotations on a page',
+        },
+        {
+          matchOn: 'group',
+          title: 'group:',
+          explanation: 'show annotations created in a group you are a member of',
+        },
+      ].map((item)=>{ return Object.assign(item, { type: FACET_TYPE}); });
+
+      // tagSuggestions are made available by the scoped template data.
+      // see search.html.jinja2 for definition
+      const tagSuggestionJSON = document.querySelector('.js-tag-suggestions');
+      let tagSuggestions = [];
+
+      if(tagSuggestionJSON){
+        try{
+          tagSuggestions = JSON.parse(tagSuggestionJSON.innerHTML.trim());
+        }catch(e){
+          console.error('Could not parse .js-tag-suggestions JSON content', e);
+        }
+      }
+
+      let tagsList = ((tagSuggestions) || []).map((item)=>{
+        return Object.assign(item, {
+          type: TAG_TYPE,
+          title: item.tag, // make safe
+          matchOn: normalizeStr(item.tag),
+          usageCount: item.count || 0,
+        });
+      });
+
+      // groupSuggestions are made available by the scoped template data.
+      // see search.html.jinja2 for definition
+      const groupSuggestionJSON = document.querySelector('.js-group-suggestions');
+      let groupSuggestions = [];
+
+      if(groupSuggestionJSON){
+        try{
+          groupSuggestions = JSON.parse(groupSuggestionJSON.innerHTML.trim());
+        }catch(e){
+          console.error('Could not parse .js-group-suggestions JSON content', e);
+        }
+      }
+
+      let groupsList = ((groupSuggestions) || []).map((item)=>{
+        return Object.assign(item, {
+          type: GROUP_TYPE,
+          title: item.name, // make safe
+          matchOn: normalizeStr(item.name),
+          pubid: item.pubid,
+          name: item.name,
+        });
+      });
+
+      return explanationList.concat(tagsList, groupsList);
+    })();
+
     var getTrimmedInputValue = () => {
       return this._input.value.trim();
+    };
+
+
+    /**
+     * given a lozenge set for a group, like "group:value", match the value
+     *  against our group suggestions list to find a match on either pubid
+     *  or the group name. The result will be an object to identify what
+     *  is the search input term to use and what value can be displayed
+     *  to the user. If there is no match, the input and display will be
+     *  the original input value.
+     *
+     *  @param {String} groupLoz - ex: "group:value"
+     *  @returns {Object} represents the values to display and use for inputVal
+     *    {
+     *      display: {String}, // like group:"friendly name"
+     *      input: {String}    // like group:pid1234
+     *    }
+     */
+    var getInputAndDisplayValsForGroup = (groupLoz) => {
+      let groupVal = groupLoz.substr(groupLoz.indexOf(':') + 1).trim();
+      let inputVal = groupVal.trim();
+      let displayVal = groupVal;
+      let wrapQuotesIfNeeded = function(str){
+        return str.indexOf(' ') > -1 ? `"${str}"` : str;
+      };
+
+
+      // remove quotes from value
+      if(groupVal[0] === '"' || groupVal[0] === '\''){
+        groupVal = groupVal.substr(1);
+      }
+      if(groupVal[groupVal.length - 1] === '"' || groupVal[groupVal.length - 1] === '\''){
+        groupVal = groupVal.slice(0, -1);
+      }
+
+      const matchVal = normalizeStr(groupVal).toLowerCase();
+
+      // NOTE: We are pushing a pubid to lowercase here. These ids are created by us
+      // in a random generation case-sensistive style. Theoretically, that means
+      // casting to lower could cause overlaps of values like 'Abc' and 'aBC' - making
+      // them equal to us. Since that is very unlikely to occur for one user's group
+      // set, the convenience of being defensive about bad input/urls is more valuable
+      // than the risk of overlap.
+      const matchByPubid = this._suggestionsMap.find((item)=>{
+        return item.type === GROUP_TYPE && item.pubid.toLowerCase() === matchVal;
+      });
+
+      if(matchByPubid){
+        inputVal = matchByPubid.pubid;
+        displayVal = wrapQuotesIfNeeded(matchByPubid.name);
+      }else {
+        const matchByName = this._suggestionsMap.find((item)=>{
+          return item.type === GROUP_TYPE && item.matchOn.toLowerCase() === matchVal;
+        });
+        if(matchByName){
+          inputVal = matchByName.pubid;
+          displayVal = wrapQuotesIfNeeded(matchByName.name);
+        }
+      }
+
+      return {
+        input: 'group:' + inputVal,
+        display: 'group:' + displayVal,
+      };
     };
 
     /**
@@ -61,8 +214,15 @@ class SearchBarController extends Controller {
      */
     var updateHiddenInput = () => {
       let newValue = '';
-      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge__content')).forEach((loz) => {
-        newValue = newValue + loz.textContent + ' ';
+      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach((loz) => {
+
+        let inputValue = loz.querySelector('.js-lozenge__content').textContent;
+
+        if(inputValue.indexOf('group:') === 0){
+          inputValue = getInputAndDisplayValsForGroup(inputValue).input;
+        }
+        newValue = newValue + inputValue + ' ';
+
       });
       this._hiddenInput.value = (newValue + getTrimmedInputValue()).trim();
     };
@@ -74,7 +234,8 @@ class SearchBarController extends Controller {
      *
      * @param {string} content The search term
      */
-    var addLozenge = content => {
+    var addLozenge = (content)=> {
+
       var deleteCallback = () => {
         Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach(function(loz) {
           loz.classList.add('is-disabled');
@@ -82,6 +243,13 @@ class SearchBarController extends Controller {
         updateHiddenInput();
         this.refs.searchBarForm.submit();
       };
+
+      // groups have extra logic to show one value
+      // but have their input/search value be different
+      // make sure we grab the right value to display
+      if(content.indexOf('group:') === 0){
+        content = getInputAndDisplayValsForGroup(content).display;
+      }
 
       new LozengeController(
         this._lozengeContainer,
@@ -94,15 +262,19 @@ class SearchBarController extends Controller {
 
     /**
      * Create lozenges for the search query terms already in the input field on
-     * page load.
+     * page load and update lozenges that are already in the lozenges container
+     * so they are hooked up with the proper event handling
      */
     var lozengifyInput = () => {
-      var {lozengeValues, incompleteInputValue} = SearchTextParser.getLozengeValues(this._input.value);
+
+      const {lozengeValues, incompleteInputValue} = SearchTextParser.getLozengeValues(this._input.value);
+
       lozengeValues.forEach(addLozenge);
       this._input.value = incompleteInputValue;
       this._input.style.visibility = 'visible';
       updateHiddenInput();
     };
+
 
     var onInputKeyDown = event => {
       const SPACE_KEY_CODE = 32;
@@ -121,57 +293,12 @@ class SearchBarController extends Controller {
 
     this._hiddenInput = insertHiddenInput(this.refs.searchBarForm);
 
-    let explanationList = [
-      {
-        matchOn: 'user',
-        title: 'user:',
-        explanation: 'search by username',
-      },
-      {
-        matchOn: 'tag',
-        title: 'tag:',
-        explanation: 'search for annotations with a tag',
-      },
-      {
-        matchOn: 'url',
-        title: 'url:',
-        explanation: 'see all annotations on a page',
-      },
-      {
-        matchOn: 'group',
-        title: 'group:',
-        explanation: 'show annotations created in a group you are a member of',
-      },
-    ].map((item)=>{ return Object.assign(item, { type: FACET_TYPE}); });
-
-    // tagSuggestions are made available by the scoped template data.
-    // see search.html.jinja2 for definition
-    const tagSuggestionJSON = document.querySelector('.js-tag-suggestions');
-    let tagSuggestions = [];
-
-    if(tagSuggestionJSON){
-      try{
-        tagSuggestions = JSON.parse(tagSuggestionJSON.innerHTML.trim());
-      }catch(e){
-        console.error('Could not parse .js-tag-suggestions JSON content', e);
-      }
-    }
-
-    let tagsList = ((tagSuggestions) || []).map((item)=>{
-      return Object.assign(item, {
-        type: TAG_TYPE,
-        title: escapeHtml(item.tag), // make safe
-        matchOn: stringUtil.fold(stringUtil.normalize(item.tag)),
-        usageCount: item.count || 0,
-      });
-    });
-
 
     this._suggestionsHandler = new AutosuggestDropdownController( this._input, {
 
-      list: explanationList.concat(tagsList),
+      list: this._suggestionsMap,
 
-      header: 'Narrow your search',
+      header: 'Narrow your search:',
 
       classNames: {
         container: 'search-bar__dropdown-menu-container',
@@ -183,7 +310,7 @@ class SearchBarController extends Controller {
 
       renderListItem: (listItem)=>{
 
-        let itemContents = `<span class="search-bar__dropdown-menu-title"> ${listItem.title} </span>`;
+        let itemContents = `<span class="search-bar__dropdown-menu-title"> ${escapeHtml(listItem.title)} </span>`;
 
         if (listItem.explanation){
           itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${listItem.explanation} </span>`;
@@ -196,11 +323,17 @@ class SearchBarController extends Controller {
 
         currentInput = (currentInput || '').trim();
 
-        let typeFilter = currentInput.indexOf('tag:') === 0 ? TAG_TYPE : FACET_TYPE;
-        let inputFilter = stringUtil.fold(stringUtil.normalize(currentInput));
+        let typeFilter = FACET_TYPE;
+        if(currentInput.indexOf('tag:') === 0){
+          typeFilter = TAG_TYPE;
+        }else if(currentInput.indexOf('group:') === 0){
+          typeFilter = GROUP_TYPE;
+        }
 
-        if(typeFilter === TAG_TYPE){
-          inputFilter = inputFilter.substr(/*'tag:' len*/4);
+        let inputFilter = normalizeStr(currentInput);
+
+        if(typeFilter === TAG_TYPE || typeFilter === GROUP_TYPE){
+          inputFilter = inputFilter.substr(inputFilter.indexOf(':') + 1);
 
           // remove the initial quote for comparisons if it exists
           if(inputFilter[0] === '\'' || inputFilter[0] === '"'){
@@ -254,16 +387,19 @@ class SearchBarController extends Controller {
 
       onSelect: (itemSelected)=>{
 
-        if (itemSelected.type === TAG_TYPE){
-          let tagSelection = itemSelected.title;
+        if (itemSelected.type === TAG_TYPE || itemSelected.type === GROUP_TYPE){
+          const prefix = itemSelected.type === TAG_TYPE ? 'tag:' : 'group:';
+
+          let valSelection = itemSelected.title;
 
           // wrap multi word phrases with quotes to keep
           // autosuggestions consistent with what user needs to do
-          if(tagSelection.indexOf(' ') > -1){
-            tagSelection = `"${tagSelection}"`;
+          if(valSelection.indexOf(' ') > -1){
+            valSelection = `"${valSelection}"`;
           }
 
-          addLozenge('tag:' + tagSelection);
+          addLozenge(prefix + valSelection);
+
           this._input.value = '';
         } else {
           this._input.value = itemSelected.title;
@@ -289,9 +425,11 @@ class SearchBarController extends Controller {
 
     if(newState.suggestionsType !== prevState.suggestionsType){
       if(newState.suggestionsType === TAG_TYPE){
-        this._suggestionsHandler.setHeader('Popular tags');
+        this._suggestionsHandler.setHeader('Popular tags:');
+      }else if(newState.suggestionsType === GROUP_TYPE){
+        this._suggestionsHandler.setHeader('Your groups:');
       }else {
-        this._suggestionsHandler.setHeader('Narrow your search');
+        this._suggestionsHandler.setHeader('Narrow your search:');
       }
     }
 

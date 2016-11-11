@@ -301,6 +301,10 @@
   <script class="js-tag-suggestions">
     {{aggregations['tags'] | to_json}}
   </script>
+  
+  <script class="js-group-suggestions">
+    {{groups_suggestions | to_json}}
+  </script>
 
   <div class="search-result-container">
     {% if group %}
