@@ -259,7 +259,7 @@ class TestGroupSearch(object):
 
     def test_group_search_returns_pubid_in_opts(self, group, pyramid_request):
         result = activity.group_search(pyramid_request)
-        assert result['opts']['search_groupname'] == group.pubid
+        assert result['opts']['search_groupname'] == group.name
 
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):

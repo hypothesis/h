@@ -76,13 +76,13 @@ def group_search(request):
 
     pubid = request.matchdict['pubid']
 
-    opts['search_groupname'] = request.matchdict['pubid']
-    result['opts'] = opts
-
     try:
         group = request.db.query(models.Group).filter_by(pubid=pubid).one()
     except exc.NoResultFound:
         return result
+
+    opts['search_groupname'] = group.name
+    result['opts'] = opts
 
     if request.authenticated_user not in group.members:
         return result
