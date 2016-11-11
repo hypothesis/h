@@ -258,7 +258,7 @@
 }
 
 // On normal tablets and below, display annotation stats below annotation list
-@media screen and (max-width: $tablet-width) {
+@media screen and (max-width: $tablet-width - 50px) {
 
   .search-result-bucket__annotation-cards-container {
     flex-direction: column;
