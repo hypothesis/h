@@ -633,6 +633,73 @@ class TestToggleUserFacet(object):
         return pyramid_request
 
 
+@pytest.mark.usefixtures('routes', 'search')
+class TestToggleTagFacet(object):
+
+    def test_it_returns_404_when_feature_turned_off(self,
+                                                    pyramid_request):
+        pyramid_request.feature.flags['search_page'] = False
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            activity.toggle_tag_facet(pyramid_request)
+
+    def test_it_returns_a_redirect(self, pyramid_request):
+        result = activity.toggle_tag_facet(pyramid_request)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+
+    def test_it_adds_the_tag_facet_into_the_url(self, pyramid_request):
+        result = activity.toggle_tag_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/users/foo/search'
+            '?q=tag%3Agar')
+
+    def test_it_removes_the_tag_facet_from_the_url(self,
+                                                   pyramid_request):
+        pyramid_request.params['q'] = 'tag:"gar"'
+
+        result = activity.toggle_tag_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/users/foo/search?q=')
+
+    def test_it_preserves_query_when_adding_tag_facet(self,
+                                                      pyramid_request):
+        pyramid_request.params['q'] = 'foo bar'
+
+        result = activity.toggle_tag_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/users/foo/search'
+            '?q=foo+bar+tag%3Agar')
+
+    def test_it_preserves_query_when_removing_tag_facet(self,
+                                                         pyramid_request):
+        pyramid_request.params['q'] = 'tag:"gar" foo bar'
+
+        result = activity.toggle_tag_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/users/foo/search'
+            '?q=foo+bar')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name='activity.user_search'
+
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.params['toggle_tag_facet'] = 'gar'
+        pyramid_request.matchdict['username'] = 'foo'
+        return pyramid_request
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.user_search',
+                                 '/users/{username}/search')
+
+
 @pytest.fixture
 def group(factories):
     # Create some other groups as well, just to make sure it gets the right

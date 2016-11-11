@@ -281,6 +281,54 @@ def toggle_user_facet(request):
     return httpexceptions.HTTPSeeOther(location=location)
 
 
+@view_config(route_name='activity.group_search',
+             request_method='POST',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='toggle_tag_facet')
+@view_config(route_name='activity.user_search',
+             request_method='POST',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='toggle_tag_facet')
+def toggle_tag_facet(request):
+    """
+    Toggle the given tag from the search facets.
+
+    If the search is not already faceted by the tag given in the
+    "toggle_tag_facet" request param then redirect the browser to the same
+    page but with the a facet for this  added to the search query.
+
+    If the search is already faceted by the tag then redirect the browser
+    to the same page but with this facet removed from the search query.
+
+    """
+    if not request.feature('search_page'):
+        raise httpexceptions.HTTPNotFound()
+
+    tag = request.params['toggle_tag_facet']
+
+    new_params = request.params.copy()
+
+    del new_params['toggle_tag_facet']
+
+    parsed_query = _parsed_query(request)
+    if _faceted_by_tag(request, tag, parsed_query):
+        # The search query is already faceted by the given tag,
+        # so remove that tag facet.
+        tag_facets = _tag_facets(request, parsed_query)
+        tag_facets.remove(tag)
+        if tag_facets:
+            parsed_query['tag'] = tag_facets
+        else:
+            del parsed_query['tag']
+    else:
+        # The search query is not yet faceted by the given tag, so add a facet
+        # for the tag.
+        parsed_query.add('tag', tag)
+
+    new_params['q'] = parser.unparse(parsed_query)
+    return _redirect_to_user_or_group_search(request, new_params)
+
+
 def _parsed_query(request):
     """
     Return the parsed (MultiDict) query from the given request.
@@ -303,6 +351,17 @@ def _username_facets(request, parsed_query=None):
     return (parsed_query or _parsed_query(request)).getall('user')
 
 
+def _tag_facets(request, parsed_query=None):
+    """
+    Return a list of the tags that the search is faceted by.
+
+    Returns a (possibly empty) list of all the tags that the given
+    search page request's search query is already faceted by.
+
+    """
+    return (parsed_query or _parsed_query(request)).getall('tag')
+
+
 def _faceted_by_user(request, username, parsed_query=None):
     """
     Return True if the given request is already faceted by the given username.
@@ -312,6 +371,17 @@ def _faceted_by_user(request, username, parsed_query=None):
 
     """
     return username in _username_facets(request, parsed_query)
+
+
+def _faceted_by_tag(request, tag, parsed_query=None):
+    """
+    Return True if the given request is already faceted by the given tag.
+
+    Return True if the given search page request's search query already
+    contains a facet for the given tag, False otherwise.
+
+    """
+    return tag in _tag_facets(request, parsed_query)
 
 
 def _redirect_to_user_or_group_search(request, params):
