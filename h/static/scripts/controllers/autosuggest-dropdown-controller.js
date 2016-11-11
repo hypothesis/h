@@ -126,7 +126,7 @@ class AutosuggestDropdownController extends Controller {
         currentActive.classList.remove(this.options.classNames.activeItem);
       }
 
-      if (newState.activeId && newState.list.find((item) => item.__suggestionId === newState.activeId)) {
+      if (newState.activeId && newState.list.find(item => item.__suggestionId === newState.activeId)) {
         this._listContainer
           .querySelector(`[data-suggestion-id="${newState.activeId}"]`)
           .classList.add(this.options.classNames.activeItem);

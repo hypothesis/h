@@ -23,7 +23,7 @@ var upgradedElements = [];
  * document.
  */
 function removeControllers(root) {
-  upgradedElements = upgradedElements.filter(el => {
+  upgradedElements = upgradedElements.filter((el) => {
     if (root.contains(el)) {
       el.controllers.forEach(ctrl => ctrl.beforeRemove());
       el.controllers = [];

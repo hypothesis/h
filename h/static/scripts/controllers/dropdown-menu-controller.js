@@ -12,7 +12,7 @@ class DropdownMenuController extends Controller {
 
     var toggleEl = this.refs.dropdownMenuToggle;
 
-    var handleClickOutside = event => {
+    var handleClickOutside = (event) => {
       if (!this.refs.dropdownMenuContent.contains(event.target)) {
         // When clicking outside the menu on the toggle element, stop the event
         // so that it does not re-trigger the menu
@@ -28,7 +28,7 @@ class DropdownMenuController extends Controller {
       }
     };
 
-    toggleEl.addEventListener('click', event => {
+    toggleEl.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
 

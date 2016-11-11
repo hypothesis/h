@@ -45,7 +45,7 @@ describe('submitForm', function () {
 
     var done = submitForm(form, fetchMock.fetchMock);
 
-    return done.catch(err => {
+    return done.catch((err) => {
       assert.match(err, sinon.match({status: 400, form: 'response'}));
     });
   });
@@ -56,7 +56,7 @@ describe('submitForm', function () {
 
     var done = submitForm(form, fetchMock.fetchMock);
 
-    return done.catch(err => {
+    return done.catch((err) => {
       assert.match(err, sinon.match({status: 500, reason: 'Internal Server Error'}));
     });
   });

@@ -17,7 +17,7 @@ var upgradeElements = require('../../base/upgrade-elements');
  */
 function dataAttrs(data) {
   var dataAttrs = [];
-  Object.keys(data || {}).forEach(key => {
+  Object.keys(data || {}).forEach((key) => {
     dataAttrs.push(`data-${hyphenate(key)}="${data[key]}"`);
   });
   return dataAttrs.join(' ');
@@ -88,7 +88,7 @@ describe('FormController', function () {
     // spy on calls to it and update `ctrl` to the new controller instance
     // when the form is reloaded
     var reloadFn = ctrl.options.reload;
-    reloadSpy = sinon.spy(html => {
+    reloadSpy = sinon.spy((html) => {
       var newElement = reloadFn(html);
       ctrl = newElement.controllers[0];
       return newElement;
@@ -377,7 +377,7 @@ describe('FormController', function () {
       var containers = [ctrl.refs.emailContainer, ctrl.refs.passwordContainer];
       var inputs = [ctrl.refs.emailInput, ctrl.refs.passwordInput];
 
-      inputs.forEach(input => {
+      inputs.forEach((input) => {
         input.focus();
 
         var editing = containers.filter(el => el.classList.contains('is-editing'));

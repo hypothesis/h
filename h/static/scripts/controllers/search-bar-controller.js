@@ -276,7 +276,7 @@ class SearchBarController extends Controller {
     };
 
 
-    var onInputKeyDown = event => {
+    var onInputKeyDown = (event) => {
       const SPACE_KEY_CODE = 32;
 
       if (event.keyCode === SPACE_KEY_CODE) {

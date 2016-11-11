@@ -45,14 +45,14 @@ class FormController extends Controller {
     super(element, options);
 
     setElementState(this.refs.cancelBtn, {hidden: false});
-    this.refs.cancelBtn.addEventListener('click', event => {
+    this.refs.cancelBtn.addEventListener('click', (event) => {
       event.preventDefault();
       this.cancel();
     });
 
     // List of groups of controls that constitute each form field
     this._fields = Array.from(element.querySelectorAll('.js-form-input'))
-      .map(el => {
+      .map((el) => {
         var parts = findRefs(el);
         return {
           container: el,
@@ -61,7 +61,7 @@ class FormController extends Controller {
         };
       });
 
-    this.on('focus', event => {
+    this.on('focus', (event) => {
       var field = this._fields.find(field => field.input === event.target);
       if (!field) {
         return;
@@ -73,13 +73,13 @@ class FormController extends Controller {
       });
     }, true /* capture - focus does not bubble */);
 
-    this.on('change', event => {
+    this.on('change', (event) => {
       if (shouldAutosubmit(event.target.type)) {
         this.submit();
       }
     });
 
-    this.on('input', event => {
+    this.on('input', (event) => {
       // Some but not all browsers deliver an `input` event for radio/checkbox
       // inputs. Since we auto-submit when such inputs change, don't mark the
       // field as dirty.
@@ -89,7 +89,7 @@ class FormController extends Controller {
       this.setState({dirty: true});
     });
 
-    this.on('keydown', event => {
+    this.on('keydown', (event) => {
       event.stopPropagation();
       if (event.key === 'Escape') {
         this.cancel();
@@ -97,13 +97,13 @@ class FormController extends Controller {
     });
 
     // Ignore clicks outside of the active field when editing
-    this.refs.formBackdrop.addEventListener('mousedown', event => {
+    this.refs.formBackdrop.addEventListener('mousedown', (event) => {
       event.preventDefault();
       event.stopPropagation();
     });
 
     // Setup AJAX handling for forms
-    this.on('submit', event => {
+    this.on('submit', (event) => {
       event.preventDefault();
       this.submit();
     });
@@ -166,7 +166,7 @@ class FormController extends Controller {
    * @param {Object} state - The internal state of the form
    */
   _updateFields(state) {
-    this._fields.forEach(field => {
+    this._fields.forEach((field) => {
       setElementState(field.container, {
         editing: state.editingFields.includes(field),
         focused: field === state.focusedField,
@@ -214,9 +214,9 @@ class FormController extends Controller {
 
     this.setState({saving: true});
 
-    return submitForm(this.element).then(response => {
+    return submitForm(this.element).then((response) => {
       this.options.reload(response.form);
-    }).catch(err => {
+    }).catch((err) => {
       if (err.form) {
         // The server processed the request but rejected the submission.
         // Display the returned form which will contain any validation error
@@ -267,7 +267,7 @@ class FormController extends Controller {
    * Trap focus within the set of form fields currently being edited.
    */
   _trapFocus() {
-    this._releaseFocus = modalFocus.trap(this._focusGroup(), newFocusedElement => {
+    this._releaseFocus = modalFocus.trap(this._focusGroup(), (newFocusedElement) => {
       // Keep focus in the current field when it has unsaved changes,
       // otherwise let the user focus another field in the form or move focus
       // outside the form entirely.

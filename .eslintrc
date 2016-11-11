@@ -1,6 +1,7 @@
 {
   "extends": "hypothesis",
   "rules": {
+    "arrow-parens": ["error", "as-needed", { "requireForBlockBody": true }],
     "arrow-spacing": "error",
     "keyword-spacing": "error",
     "space-before-blocks": "error"

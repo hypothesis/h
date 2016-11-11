@@ -33,7 +33,7 @@ function trap(elements, callback) {
   //
   // Instead we watch the 'focus' event on the document itself.
 
-  var onFocusChange = event => {
+  var onFocusChange = (event) => {
     if (elements.some(el => el.contains(event.target))) {
       // Focus remains within modal group
       return;

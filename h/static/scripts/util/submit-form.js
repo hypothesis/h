@@ -49,10 +49,10 @@ function submitForm(formEl, fetch = window.fetch) {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },
-  }).then(response_ => {
+  }).then((response_) => {
     response = response_;
     return response.text();
-  }).then(body => {
+  }).then((body) => {
     var { status } = response;
     switch (status) {
     case 200:
