@@ -39,7 +39,7 @@ class SearchBarController extends Controller {
      *  static or dynamic living in the dom - into one mapping
      *  lists of all suggestion values.
      */
-    this._suggestionsMap = (()=>{
+    this._suggestionsMap = (() => {
 
       let explanationList = [
         {
@@ -62,7 +62,7 @@ class SearchBarController extends Controller {
           title: 'group:',
           explanation: 'show annotations created in a group you are a member of',
         },
-      ].map((item)=>{ return Object.assign(item, { type: FACET_TYPE}); });
+      ].map((item) => { return Object.assign(item, { type: FACET_TYPE}); });
 
       // tagSuggestions are made available by the scoped template data.
       // see search.html.jinja2 for definition
@@ -77,7 +77,7 @@ class SearchBarController extends Controller {
         }
       }
 
-      let tagsList = ((tagSuggestions) || []).map((item)=>{
+      let tagsList = ((tagSuggestions) || []).map((item) => {
         return Object.assign(item, {
           type: TAG_TYPE,
           title: item.tag, // make safe
@@ -99,7 +99,7 @@ class SearchBarController extends Controller {
         }
       }
 
-      let groupsList = ((groupSuggestions) || []).map((item)=>{
+      let groupsList = ((groupSuggestions) || []).map((item) => {
         return Object.assign(item, {
           type: GROUP_TYPE,
           title: item.name, // make safe
@@ -157,7 +157,7 @@ class SearchBarController extends Controller {
       // them equal to us. Since that is very unlikely to occur for one user's group
       // set, the convenience of being defensive about bad input/urls is more valuable
       // than the risk of overlap.
-      const matchByPubid = this._suggestionsMap.find((item)=>{
+      const matchByPubid = this._suggestionsMap.find((item) => {
         return item.type === GROUP_TYPE && item.pubid.toLowerCase() === matchVal;
       });
 
@@ -165,7 +165,7 @@ class SearchBarController extends Controller {
         inputVal = matchByPubid.pubid;
         displayVal = wrapQuotesIfNeeded(matchByPubid.name);
       } else {
-        const matchByName = this._suggestionsMap.find((item)=>{
+        const matchByName = this._suggestionsMap.find((item) => {
           return item.type === GROUP_TYPE && item.matchOn.toLowerCase() === matchVal;
         });
         if (matchByName) {
@@ -234,7 +234,7 @@ class SearchBarController extends Controller {
      *
      * @param {string} content The search term
      */
-    var addLozenge = (content)=> {
+    var addLozenge = (content) => {
 
       var deleteCallback = () => {
         Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach(function(loz) {
@@ -308,7 +308,7 @@ class SearchBarController extends Controller {
         activeItem: 'js-search-bar-dropdown-menu-item--active',
       },
 
-      renderListItem: (listItem)=>{
+      renderListItem: (listItem) => {
 
         let itemContents = `<span class="search-bar__dropdown-menu-title"> ${escapeHtml(listItem.title)} </span>`;
 
@@ -319,7 +319,7 @@ class SearchBarController extends Controller {
         return itemContents;
       },
 
-      listFilter: (list, currentInput)=>{
+      listFilter: (list, currentInput) => {
 
         currentInput = (currentInput || '').trim();
 
@@ -347,9 +347,9 @@ class SearchBarController extends Controller {
           });
         }
 
-        return list.filter((item)=>{
+        return list.filter((item) => {
           return item.type === typeFilter && item.matchOn.toLowerCase().indexOf(inputFilter.toLowerCase()) >= 0;
-        }).sort((a,b)=>{
+        }).sort((a,b) => {
 
           // this sort functions intention is to
           // sort partial matches as lower index match
@@ -385,7 +385,7 @@ class SearchBarController extends Controller {
         }).slice(0, MAX_SUGGESTIONS);
       },
 
-      onSelect: (itemSelected)=>{
+      onSelect: (itemSelected) => {
 
         if (itemSelected.type === TAG_TYPE || itemSelected.type === GROUP_TYPE) {
           const prefix = itemSelected.type === TAG_TYPE ? 'tag:' : 'group:';
@@ -403,7 +403,7 @@ class SearchBarController extends Controller {
           this._input.value = '';
         } else {
           this._input.value = itemSelected.title;
-          setTimeout(()=>{
+          setTimeout(() => {
             this._input.focus();
           }, 0);
         }

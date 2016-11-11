@@ -20,7 +20,7 @@ module.exports = {
       return true;
     }
 
-    return !listA.every((item, index)=>{
+    return !listA.every((item, index) => {
       return item === listB[index];
     });
   },

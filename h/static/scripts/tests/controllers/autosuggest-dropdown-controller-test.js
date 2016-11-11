@@ -9,7 +9,7 @@ const AutosuggestDropdownController = require('../../controllers/autosuggest-dro
 
 // syn's move functionality does not fire
 // mouseenter and mouseleave events.
-const mouseMove = (()=>{
+const mouseMove = (() => {
 
   let _lastMovePos;
 
@@ -78,7 +78,7 @@ describe('AutosuggestDropdownController', function () {
         activeItem: 'an-active-item',
       },
 
-      renderListItem: (listItem)=>{
+      renderListItem: (listItem) => {
 
         let itemContents = `<span class="a-title"> ${listItem.title} </span>`;
 
@@ -94,7 +94,7 @@ describe('AutosuggestDropdownController', function () {
 
         currentInput = (currentInput || '').trim();
 
-        return list.filter((item)=>{
+        return list.filter((item) => {
 
           if (!currentInput) {
             return item;
@@ -106,17 +106,17 @@ describe('AutosuggestDropdownController', function () {
       onSelect: function() {},
     };
 
-    const isSuggestionContainerVisible = ()=>{
+    const isSuggestionContainerVisible = () => {
       const suggestionContainer = container.querySelector('.' + defaultConfig.classNames.container);
       return suggestionContainer.classList.contains('is-open');
     };
 
-    const getListItems = ()=>{
+    const getListItems = () => {
       const suggestionContainer = container.querySelector('.' + defaultConfig.classNames.container);
       return suggestionContainer.querySelectorAll('.' + defaultConfig.classNames.item);
     };
 
-    const getCurrentActiveElements = ()=>{
+    const getCurrentActiveElements = () => {
       const list = container.querySelector('.' + defaultConfig.classNames.list);
       return list.querySelectorAll('.' + defaultConfig.classNames.activeItem);
     };
@@ -254,7 +254,7 @@ describe('AutosuggestDropdownController', function () {
           assert.isTrue(isSuggestionContainerVisible(), 'pre select show');
 
           syn
-            .click(items[0], ()=>{
+            .click(items[0], () => {
 
               assert.equal(onSelectSpy.callCount, 1);
 
@@ -354,7 +354,7 @@ describe('AutosuggestDropdownController', function () {
       const list = container.querySelector('.' + defaultConfig.classNames.list);
 
       syn
-        .click(input, ()=>{
+        .click(input, () => {
 
           mouseMove(center(list.childNodes[1]));
 
@@ -383,7 +383,7 @@ describe('AutosuggestDropdownController', function () {
       const list = container.querySelector('.' + defaultConfig.classNames.list);
 
       syn
-        .click(input, ()=>{
+        .click(input, () => {
 
           mouseMove(center(list.childNodes[2]));
 
@@ -391,11 +391,11 @@ describe('AutosuggestDropdownController', function () {
           assert.isTrue(list.childNodes[2].classList.contains(defaultConfig.classNames.activeItem));
 
         })
-        .type('[down]', ()=>{
+        .type('[down]', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(list.childNodes[3].classList.contains(defaultConfig.classNames.activeItem));
         })
-        .type('[up][up][up]', ()=>{
+        .type('[up][up][up]', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(list.childNodes[0].classList.contains(defaultConfig.classNames.activeItem));
 

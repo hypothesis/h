@@ -23,7 +23,7 @@ describe('SearchBarController', function () {
     `;
 
     var getItemTitles = function() {
-      return Array.from(dropdown.querySelectorAll('.search-bar__dropdown-menu-title')).map((node)=>{
+      return Array.from(dropdown.querySelectorAll('.search-bar__dropdown-menu-title')).map((node) => {
         return node.textContent.trim();
       });
     };
@@ -167,10 +167,10 @@ describe('SearchBarController', function () {
 
     it('it filters and updates input with autosuggested facet selection', function (done) {
       syn
-        .click(input, ()=>{
+        .click(input, () => {
           assert.notOk(input.value, 'baseline no value in input');
         })
-        .type('r[down][enter]', ()=>{
+        .type('r[down][enter]', () => {
           assert.equal(input.value, 'url:');
           done();
         });
@@ -196,7 +196,7 @@ describe('SearchBarController', function () {
     describe('it allows group value suggestions', function () {
 
       const getLozengeValues = function () {
-        return Array.from(testEl.querySelectorAll('.lozenge')).map((el)=>{
+        return Array.from(testEl.querySelectorAll('.lozenge')).map((el) => {
           return el.querySelector('.lozenge__content').textContent;
         });
       };
@@ -332,7 +332,7 @@ describe('SearchBarController', function () {
           .type('[backspace][backspace][backspace][backspace]\'mul', () => {
             assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a single quote initial input');
           })
-          .type('[down][enter][enter]', ()=>{
+          .type('[down][enter][enter]', () => {
             assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'tag:"multi word"', 'selecting a multi word tag should wrap with quotes');
             done();
           });
@@ -401,7 +401,7 @@ describe('SearchBarController', function () {
      * return the array of all of lozenges values
      */
     const getLozengeValues = function () {
-      return Array.from(ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')).map((el)=>{
+      return Array.from(ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')).map((el) => {
         return el.querySelector('.lozenge__content').innerText;
       });
     };
@@ -535,7 +535,7 @@ describe('SearchBarController', function () {
 
       let groupsScript;
 
-      beforeEach(()=>{
+      beforeEach(() => {
         let suggestions = [{
           name: 'abc 123',
           pubid: 'pid124',
@@ -547,7 +547,7 @@ describe('SearchBarController', function () {
         document.body.appendChild(groupsScript);
       });
 
-      afterEach(()=>{
+      afterEach(() => {
         groupsScript.remove();
       });
 

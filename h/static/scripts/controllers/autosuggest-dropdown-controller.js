@@ -126,7 +126,7 @@ class AutosuggestDropdownController extends Controller {
         currentActive.classList.remove(this.options.classNames.activeItem);
       }
 
-      if (newState.activeId && newState.list.find((item)=>item.__suggestionId === newState.activeId)) {
+      if (newState.activeId && newState.list.find((item) => item.__suggestionId === newState.activeId)) {
         this._listContainer
           .querySelector(`[data-suggestion-id="${newState.activeId}"]`)
           .classList.add(this.options.classNames.activeItem);
@@ -159,7 +159,7 @@ class AutosuggestDropdownController extends Controller {
     }
 
     this.setState({
-      rootList: list.map((item)=>{
+      rootList: list.map((item) => {
         return Object.assign({}, item, {
           // create an id that lets us direction map
           // selection to arbitrary item in list.
@@ -206,7 +206,7 @@ class AutosuggestDropdownController extends Controller {
 
     const currentActive = this._getActiveListItemElement();
     const suggestionId = currentActive && currentActive.getAttribute('data-suggestion-id');
-    const selection = this.state.list.filter((item)=>{ return item.__suggestionId === suggestionId;})[0];
+    const selection = this.state.list.filter((item) => { return item.__suggestionId === suggestionId;})[0];
 
     if (selection) {
       this.options.onSelect(selection);
@@ -334,7 +334,7 @@ class AutosuggestDropdownController extends Controller {
 
     this._listContainer.innerHTML = '';
 
-    this.state.list.forEach((listItem)=>{
+    this.state.list.forEach((listItem) => {
       let li = document.createElement('li');
       li.classList.add(this.options.classNames.item);
       li.setAttribute('data-suggestion-id', listItem.__suggestionId);
@@ -344,7 +344,7 @@ class AutosuggestDropdownController extends Controller {
       // But for now this binding has no real affect on small list perf
       li.addEventListener('mouseenter', this._toggleItemHoverState.bind(this, /*hovering*/true));
       li.addEventListener('mouseleave', this._toggleItemHoverState.bind(this, /*hovering*/false));
-      li.addEventListener('mousedown', (event)=>{
+      li.addEventListener('mousedown', (event) => {
         // for situations like mobile, hovering might not be
         // the first event to set the active state for an element
         // so we will mimic that on mouse down and let selection happen
@@ -368,7 +368,7 @@ class AutosuggestDropdownController extends Controller {
     // we need to use mousedown instead of click
     // so we can beat the blur event which can
     // change visibility/target of the active event
-    document.addEventListener('mousedown', (event)=>{
+    document.addEventListener('mousedown', (event) => {
 
       const target = event.target;
 
@@ -394,7 +394,7 @@ class AutosuggestDropdownController extends Controller {
     // Note, keydown needed here to properly prevent the default
     // nature of navigating keystrokes - like DOWN ARROW at the end of an
     // input takes the cursor to the beginning of the input value.
-    this._input.addEventListener('keydown', (event)=>{
+    this._input.addEventListener('keydown', (event) => {
 
       const key = event.keyCode;
 
@@ -422,7 +422,7 @@ class AutosuggestDropdownController extends Controller {
       // stop propagation after inspecting input value
     }, /*useCapturePhase*/ true);
 
-    this._input.addEventListener('keyup', (event)=>{
+    this._input.addEventListener('keyup', (event) => {
 
       if ([ENTER, UP, DOWN].indexOf(event.keyCode) === -1) {
         this._filterAndToggleVisibility();
@@ -432,11 +432,11 @@ class AutosuggestDropdownController extends Controller {
       // stop propagation after inspecting input value
     }, /*useCapturePhase*/ true);
 
-    this._input.addEventListener('focus', ()=>{
+    this._input.addEventListener('focus', () => {
       this._filterAndToggleVisibility();
     });
 
-    this._input.addEventListener('blur', ()=>{
+    this._input.addEventListener('blur', () => {
       this._toggleSuggestionsVisibility(/*show*/false);
     });
 
