@@ -1,3 +1,6 @@
 {
-  "extends": "hypothesis"
+  "extends": "hypothesis",
+  "rules": {
+    "space-before-blocks": "error"
+  }
 }

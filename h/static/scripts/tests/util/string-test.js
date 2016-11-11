@@ -19,9 +19,9 @@ describe('util/string', function () {
     });
   });
 
-  describe('stringUtil helpers', function(){
+  describe('stringUtil helpers', function() {
 
-    it('removes hungarian marks', function(){
+    it('removes hungarian marks', function() {
       let text = 'Fürge rőt róka túlszökik zsíros étkű kutyán';
       let decoded = stringUtil.fold(stringUtil.normalize(text));
       let expected = 'Furge rot roka tulszokik zsiros etku kutyan';
@@ -29,7 +29,7 @@ describe('util/string', function () {
       assert.equal(decoded, expected);
     });
 
-    it('removes greek marks', function(){
+    it('removes greek marks', function() {
       let text = 'Καλημέρα κόσμε';
       let decoded = stringUtil.fold(stringUtil.normalize(text));
       let expected = 'Καλημερα κοσμε';
@@ -37,7 +37,7 @@ describe('util/string', function () {
       assert.equal(decoded, expected);
     });
 
-    it('removes japanese marks', function(){
+    it('removes japanese marks', function() {
       let text = 'カタカナコンバータ';
       let decoded = stringUtil.fold(stringUtil.normalize(text));
       let expected = 'カタカナコンハータ';
@@ -45,7 +45,7 @@ describe('util/string', function () {
       assert.equal(decoded, expected);
     });
 
-    it('removes marathi marks', function(){
+    it('removes marathi marks', function() {
       let text = 'काचं शक्नोम्यत्तुम';
       let decoded = stringUtil.fold(stringUtil.normalize(text));
       let expected = 'कच शकनमयततम';
@@ -53,7 +53,7 @@ describe('util/string', function () {
       assert.equal(decoded, expected);
     });
 
-    it('removes thai marks', function(){
+    it('removes thai marks', function() {
       let text = 'ฉันกินกระจกได้ แต่มันไม่ทำให้ฉันเจ็บ';
       let decoded = stringUtil.fold(stringUtil.normalize(text));
       let expected = 'ฉนกนกระจกได แตมนไมทาใหฉนเจบ';
@@ -61,7 +61,7 @@ describe('util/string', function () {
       assert.equal(decoded, expected);
     });
 
-    it('removes all marks', function(){
+    it('removes all marks', function() {
       let text = '̀ ́ ̂ ̃ ̄ ̅ ̆ ̇ ̈ ̉ ̊ ̋ ̌ ̍ ̎ ̏ ̐ ̑ ̒ ̓ ̔ ̕ ̖ ̗ ̘ ̙ ̚ ̛ ̜ ̝ ̞ ̟ ̠ ̡ ̢ ̣ ̤ ̥ ̦ ̧ ̨ ̩ ̪ ̫ ̬ ̭ ̮ ̯ ̰ ̱ ̲ ̳ ̴ ̵ ̶ ̷ ̸ ̹ ̺ ̻ ̼ ̽ ̾ ̿ ̀ ́ ͂ ̓ ̈́ ͅ ͠ ͡"';
       let decoded = stringUtil.fold(stringUtil.normalize(text));
       let expected = '                                                                       "';

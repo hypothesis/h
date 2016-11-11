@@ -31,7 +31,7 @@ function unhyphenate(name) {
  * @param  {String}
  * @returns {String}
  */
-function normalize(str){
+function normalize(str) {
 
   // This require is coming from a vendor bundle
   // that is loaded globally on the running webpage
@@ -39,11 +39,11 @@ function normalize(str){
   try{
     // polyfill String.prototype.normalize
     require('unorm');
-  }catch(e){
+  }catch(e) {
     console.error('unorm not available');
   }
 
-  if(!String.prototype.normalize){
+  if(!String.prototype.normalize) {
     return str;
   }
 
@@ -57,7 +57,7 @@ function normalize(str){
  * @param  {String}
  * @returns {String}
  */
-function fold(str){
+function fold(str) {
   return str.replace(COMBINING_MARKS, '');
 }
 

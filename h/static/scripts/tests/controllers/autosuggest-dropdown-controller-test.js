@@ -15,7 +15,7 @@ const mouseMove = (()=>{
 
   return (posObj) => {
 
-    if (_lastMovePos){
+    if (_lastMovePos) {
       const prevEl = document.elementFromPoint(_lastMovePos.pageX, _lastMovePos.pageY);
       const leaveEvent = document.createEvent( 'Events' );
       leaveEvent.initEvent( 'mouseleave', true, false );
@@ -43,7 +43,7 @@ function center(element) {
 
 describe('AutosuggestDropdownController', function () {
 
-  describe('provides suggestions', function(){
+  describe('provides suggestions', function() {
     let container;
     let input;
     let form;
@@ -82,28 +82,28 @@ describe('AutosuggestDropdownController', function () {
 
         let itemContents = `<span class="a-title"> ${listItem.title} </span>`;
 
-        if (listItem.explanation){
+        if (listItem.explanation) {
           itemContents += `<span class="an-explanation"> ${listItem.explanation} </span>`;
         }
 
         return itemContents;
       },
 
-      listFilter: function(list, currentInput){
+      listFilter: function(list, currentInput) {
 
 
         currentInput = (currentInput || '').trim();
 
         return list.filter((item)=>{
 
-          if (!currentInput){
+          if (!currentInput) {
             return item;
           }
           return item.title.toLowerCase().indexOf(currentInput) >= 0;
         });
       },
 
-      onSelect: function(){},
+      onSelect: function() {},
     };
 
     const isSuggestionContainerVisible = ()=>{
@@ -134,17 +134,17 @@ describe('AutosuggestDropdownController', function () {
       document.body.removeChild(container);
 
       // clear up spies
-      if ('restore' in defaultConfig.listFilter){
+      if ('restore' in defaultConfig.listFilter) {
         defaultConfig.listFilter.restore();
       }
 
-      if ('restore' in defaultConfig.onSelect){
+      if ('restore' in defaultConfig.onSelect) {
         defaultConfig.onSelect.restore();
       }
     });
 
 
-    it('should initialize the controller with correct dom', function(){
+    it('should initialize the controller with correct dom', function() {
 
       assert.isTrue(form.childNodes.length === 1, 'baseline');
 
@@ -185,7 +185,7 @@ describe('AutosuggestDropdownController', function () {
     });
 
 
-    it('changes suggestion container and item visibility on matching input', function(done){
+    it('changes suggestion container and item visibility on matching input', function(done) {
 
       const reduceSpy = sinon.spy(defaultConfig, 'listFilter');
 
@@ -236,7 +236,7 @@ describe('AutosuggestDropdownController', function () {
 
     });
 
-    it('allows click selection', function(done){
+    it('allows click selection', function(done) {
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -282,7 +282,7 @@ describe('AutosuggestDropdownController', function () {
       { travel: '[up][down][up][down][down][down][down][up]', selectedIndex: 1 },
     ];
 
-    unroll('allows keyboard navigation', function(done, fixture){
+    unroll('allows keyboard navigation', function(done, fixture) {
 
       new AutosuggestDropdownController(input, defaultConfig);
 
@@ -292,7 +292,7 @@ describe('AutosuggestDropdownController', function () {
         .click(input)
         .type(fixture.travel, () => {
           var active = getCurrentActiveElements();
-          if (fixture.selectedIndex === -1){
+          if (fixture.selectedIndex === -1) {
             assert.lengthOf(active, 0);
           } else {
             assert.isTrue(list.childNodes[fixture.selectedIndex].classList.contains(defaultConfig.classNames.activeItem));
@@ -303,7 +303,7 @@ describe('AutosuggestDropdownController', function () {
     }, navigationExpectations);
 
 
-    it('persists active navigation through list filter', function(done){
+    it('persists active navigation through list filter', function(done) {
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
@@ -323,7 +323,7 @@ describe('AutosuggestDropdownController', function () {
         });
     });
 
-    it('allows keyboard selection', function(done){
+    it('allows keyboard selection', function(done) {
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -347,7 +347,7 @@ describe('AutosuggestDropdownController', function () {
         });
     });
 
-    it('can hover items', function(done){
+    it('can hover items', function(done) {
 
       new AutosuggestDropdownController(input, defaultConfig);
 
@@ -376,7 +376,7 @@ describe('AutosuggestDropdownController', function () {
 
     });
 
-    it('correctly sets active elements when swapping between keyboard and mouse setting', function(done){
+    it('correctly sets active elements when swapping between keyboard and mouse setting', function(done) {
 
       new AutosuggestDropdownController(input, defaultConfig);
 

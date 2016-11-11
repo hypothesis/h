@@ -35,7 +35,7 @@ class Controller {
    */
   constructor(element, options = {}) {
 
-    if (!element){
+    if (!element) {
       throw new Error('Controllers require an element passed to the constructor');
     } else if (!element.controllers) {
       element.controllers = [this];

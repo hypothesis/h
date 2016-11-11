@@ -22,13 +22,13 @@ describe('SearchBarController', function () {
       </div>
     `;
 
-    var getItemTitles = function(){
+    var getItemTitles = function() {
       return Array.from(dropdown.querySelectorAll('.search-bar__dropdown-menu-title')).map((node)=>{
         return node.textContent.trim();
       });
     };
 
-    var setup = function(){
+    var setup = function() {
       testEl = document.createElement('div');
       testEl.innerHTML = TEMPLATE;
       document.body.appendChild(testEl);
@@ -39,20 +39,20 @@ describe('SearchBarController', function () {
       dropdown = input.nextSibling;
     };
 
-    var teardown = function(){
+    var teardown = function() {
       document.body.removeChild(testEl);
       let tagsJSON = document.querySelector('.js-tag-suggestions');
-      if(tagsJSON){
+      if(tagsJSON) {
         tagsJSON.remove();
       }
 
       let groupsJSON = document.querySelector('.js-group-suggestions');
-      if(groupsJSON){
+      if(groupsJSON) {
         groupsJSON.remove();
       }
     };
 
-    var addTagSuggestions = function(){
+    var addTagSuggestions = function() {
       let suggestions = [
         {
           tag: 'aaaa',
@@ -98,7 +98,7 @@ describe('SearchBarController', function () {
       document.body.appendChild(tagsScript);
     };
 
-    var addGroupSuggestions = function(){
+    var addGroupSuggestions = function() {
       let suggestions = [
         {
           name: 'aaac',
@@ -195,13 +195,13 @@ describe('SearchBarController', function () {
 
     describe('it allows group value suggestions', function () {
 
-      const getLozengeValues = function (){
+      const getLozengeValues = function () {
         return Array.from(testEl.querySelectorAll('.lozenge')).map((el)=>{
           return el.querySelector('.lozenge__content').textContent;
         });
       };
 
-      beforeEach(function(){
+      beforeEach(function() {
         // we need to setup the env vars before invoking controller
         teardown();
         addGroupSuggestions();
@@ -210,7 +210,7 @@ describe('SearchBarController', function () {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      it('shows group suggestions', function(done){
+      it('shows group suggestions', function(done) {
         syn
           .click(input)
           .type('group:', () => {
@@ -226,7 +226,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('orders groups by earliest value match first', function(done){
+      it('orders groups by earliest value match first', function(done) {
         syn
           .click(input)
           .type('group:', () => {
@@ -238,7 +238,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('supports multi word matching', function(done){
+      it('supports multi word matching', function(done) {
         syn
           .click(input)
           .type('group:"mul', () => {
@@ -250,7 +250,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('handles filtering matches with unicode', function(done){
+      it('handles filtering matches with unicode', function(done) {
         syn
           .click(input)
           .type('group:éf', () => {
@@ -259,7 +259,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('sets input and display friendly name value', function(done){
+      it('sets input and display friendly name value', function(done) {
         syn
           .click(input)
           .type('group:"mul[down][enter]', () => {
@@ -273,7 +273,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('matches escaped values', function(done){
+      it('matches escaped values', function(done) {
         syn
           .click(input)
           .type('group:<[down][enter]', () => {
@@ -286,7 +286,7 @@ describe('SearchBarController', function () {
 
     describe('it allows tag value suggestions', function () {
 
-      beforeEach(function(){
+      beforeEach(function() {
         // we need to setup the env vars before invoking controller
         teardown();
         addTagSuggestions();
@@ -295,7 +295,7 @@ describe('SearchBarController', function () {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      it('shows tag suggestions', function(done){
+      it('shows tag suggestions', function(done) {
         syn
           .click(input)
           .type('tag:', () => {
@@ -311,7 +311,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('orders tags by priority and indexOf score', function(done){
+      it('orders tags by priority and indexOf score', function(done) {
         syn
           .click(input)
           .type('tag:', () => {
@@ -323,7 +323,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('matches on multi word searches', function(done){
+      it('matches on multi word searches', function(done) {
         syn
           .click(input)
           .type('tag:"mul', () => {
@@ -338,7 +338,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('handles filtering matches with unicode', function(done){
+      it('handles filtering matches with unicode', function(done) {
         syn
           .click(input)
           .type('tag:éf', () => {
@@ -400,7 +400,7 @@ describe('SearchBarController', function () {
     /**
      * return the array of all of lozenges values
      */
-    const getLozengeValues = function (){
+    const getLozengeValues = function () {
       return Array.from(ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')).map((el)=>{
         return el.querySelector('.lozenge__content').innerText;
       });
@@ -531,7 +531,7 @@ describe('SearchBarController', function () {
         });
     });
 
-    describe('mapping initial input value to proper group lozenge and input values', function(){
+    describe('mapping initial input value to proper group lozenge and input values', function() {
 
       let groupsScript;
 
@@ -551,7 +551,7 @@ describe('SearchBarController', function () {
         groupsScript.remove();
       });
 
-      it('should map an initial group name to proper group pubid input value', function(){
+      it('should map an initial group name to proper group pubid input value', function() {
 
         const {input, hiddenInput} = component("group:'abc 123'");
 
@@ -560,7 +560,7 @@ describe('SearchBarController', function () {
         assert.equal(hiddenInput.value, 'group:pid124');
       });
 
-      it('should map an initial group pubid to proper group name lozenge value', function(){
+      it('should map an initial group pubid to proper group name lozenge value', function() {
 
         const {input, hiddenInput} = component('group:pid124');
 
