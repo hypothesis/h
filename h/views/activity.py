@@ -70,19 +70,17 @@ def group_search(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
-    opts = {}
-
     result = search(request)
 
     pubid = request.matchdict['pubid']
-
-    opts['search_groupname'] = request.matchdict['pubid']
-    result['opts'] = opts
+    result['opts'] = {'search_groupname': pubid}
 
     try:
         group = request.db.query(models.Group).filter_by(pubid=pubid).one()
     except exc.NoResultFound:
         return result
+
+    result['opts']['search_groupname'] = group.name
 
     if request.authenticated_user not in group.members:
         return result
@@ -115,8 +113,8 @@ def user_search(request):
     username = request.matchdict['username']
 
     result = search(request)
-
     result['opts'] = {'search_username': username}
+
     result['more_info'] = 'more_info' in request.params
 
     user = request.find_service(name='user').fetch(username,
@@ -124,6 +122,8 @@ def user_search(request):
 
     if not user:
         return result
+
+    result['opts']['search_username'] = user.display_name or user.username
 
     def domain(user):
         if not user.uri:
@@ -203,6 +203,31 @@ def group_leave(request):
     new_params = request.POST.copy()
     location = request.route_url('activity.search', _query=new_params)
 
+    return httpexceptions.HTTPSeeOther(location=location)
+
+
+@view_config(route_name='activity.group_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='delete_lozenge')
+@view_config(route_name='activity.user_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='delete_lozenge')
+def delete_lozenge(request):
+    """
+    Redirect to the /search page, keeping the search query intact.
+
+    When on the user or group search page a lozenge for the user or group is
+    rendered as the first lozenge in the search bar. The delete button on that
+    first lozenge calls this view. Redirect to the general /search page,
+    effectively deleting that first user or group lozenge, but maintaining any
+    other search terms that have been entered into the search box.
+
+    """
+    new_params = request.params.copy()
+    del new_params['delete_lozenge']
+    location = request.route_url('activity.search', _query=new_params)
     return httpexceptions.HTTPSeeOther(location=location)
 
 
