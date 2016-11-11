@@ -116,7 +116,6 @@ def user_search(request):
 
     result = search(request)
 
-    result['opts'] = {'search_username': username}
     result['more_info'] = 'more_info' in request.params
 
     user = request.find_service(name='user').fetch(username,
@@ -124,6 +123,8 @@ def user_search(request):
 
     if not user:
         return result
+
+    result['opts'] = {'search_username': user.display_name or user.username}
 
     def domain(user):
         if not user.uri:
