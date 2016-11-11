@@ -48,23 +48,38 @@ class UserService(object):
         def flush_cache(session):
             self._cache = {}
 
-    def fetch(self, userid):
+    def fetch(self, userid_or_username, authority=None):
         """
-        Fetch a user by userid, e.g. 'acct:foo@example.com'
+        Fetch a user by userid or by username and authority.
+
+        Takes *either* a userid *or* a username and authority as arguments.
+        For example::
+
+          user_service.fetch('acct:foo@example.com')
+
+        or::
+
+          user_service.fetch('foo', 'example.com')
 
         :returns: a user instance, if found
         :rtype: h.models.User or None
+
         """
-        parts = util.user.split_user(userid)
-        username = parts['username']
-        authority = parts['domain']
+        if authority is not None:
+            username = userid_or_username
+        else:
+            userid = userid_or_username
+            parts = util.user.split_user(userid)
+            username = parts['username']
+            authority = parts['domain']
 
         # The cache is keyed by (username, authority) tuples.
         cache_key = (username, authority)
 
         if cache_key not in self._cache:
             self._cache[cache_key] = (self.session.query(User)
-                                      .filter_by(userid=userid)
+                                      .filter_by(username=username)
+                                      .filter_by(authority=authority)
                                       .one_or_none())
 
         return self._cache[cache_key]
