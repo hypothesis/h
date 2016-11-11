@@ -37,6 +37,13 @@ def ajax_payload(request, data):
     return payload
 
 
+def _login_redirect_url(request):
+    if request.feature('search_page'):
+        return request.route_url('activity.search')
+    else:
+        return request.route_url('stream')
+
+
 @view_config(context=BadCSRFToken,
              accept='text/html',
              renderer='h:templates/accounts/session_invalid.html.jinja2')
@@ -96,8 +103,7 @@ class AuthController(object):
                                         footer=form_footer)
 
         self.login_redirect = self.request.params.get(
-            'next',
-            self.request.route_url('stream'))
+            'next', _login_redirect_url(self.request))
         self.logout_redirect = self.request.route_url('index')
 
     @view_config(request_method='GET')
@@ -381,7 +387,7 @@ class SignupController(object):
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(self.request.route_url('stream'))
+            raise httpexceptions.HTTPFound(_login_redirect_url(self.request))
 
 
 @view_defaults(route_name='activate')
@@ -397,7 +403,7 @@ class ActivateController(object):
 
         Checks if the activation code passed is valid, and (as a safety check)
         that it is an activation for the passed user id. If all is well,
-        activate the user and redirect them to the stream.
+        activate the user and redirect them.
         """
         code = self.request.matchdict.get('code')
         id_ = self.request.matchdict.get('id')
