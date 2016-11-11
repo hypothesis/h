@@ -42,12 +42,12 @@ describe('SearchBarController', function () {
     var teardown = function() {
       document.body.removeChild(testEl);
       let tagsJSON = document.querySelector('.js-tag-suggestions');
-      if(tagsJSON) {
+      if (tagsJSON) {
         tagsJSON.remove();
       }
 
       let groupsJSON = document.querySelector('.js-group-suggestions');
-      if(groupsJSON) {
+      if (groupsJSON) {
         groupsJSON.remove();
       }
     };

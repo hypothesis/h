@@ -69,10 +69,10 @@ class SearchBarController extends Controller {
       const tagSuggestionJSON = document.querySelector('.js-tag-suggestions');
       let tagSuggestions = [];
 
-      if(tagSuggestionJSON) {
-        try{
+      if (tagSuggestionJSON) {
+        try {
           tagSuggestions = JSON.parse(tagSuggestionJSON.innerHTML.trim());
-        }catch(e) {
+        } catch (e) {
           console.error('Could not parse .js-tag-suggestions JSON content', e);
         }
       }
@@ -91,10 +91,10 @@ class SearchBarController extends Controller {
       const groupSuggestionJSON = document.querySelector('.js-group-suggestions');
       let groupSuggestions = [];
 
-      if(groupSuggestionJSON) {
-        try{
+      if (groupSuggestionJSON) {
+        try {
           groupSuggestions = JSON.parse(groupSuggestionJSON.innerHTML.trim());
-        }catch(e) {
+        } catch (e) {
           console.error('Could not parse .js-group-suggestions JSON content', e);
         }
       }
@@ -142,10 +142,10 @@ class SearchBarController extends Controller {
 
 
       // remove quotes from value
-      if(groupVal[0] === '"' || groupVal[0] === '\'') {
+      if (groupVal[0] === '"' || groupVal[0] === '\'') {
         groupVal = groupVal.substr(1);
       }
-      if(groupVal[groupVal.length - 1] === '"' || groupVal[groupVal.length - 1] === '\'') {
+      if (groupVal[groupVal.length - 1] === '"' || groupVal[groupVal.length - 1] === '\'') {
         groupVal = groupVal.slice(0, -1);
       }
 
@@ -161,14 +161,14 @@ class SearchBarController extends Controller {
         return item.type === GROUP_TYPE && item.pubid.toLowerCase() === matchVal;
       });
 
-      if(matchByPubid) {
+      if (matchByPubid) {
         inputVal = matchByPubid.pubid;
         displayVal = wrapQuotesIfNeeded(matchByPubid.name);
-      }else {
+      } else {
         const matchByName = this._suggestionsMap.find((item)=>{
           return item.type === GROUP_TYPE && item.matchOn.toLowerCase() === matchVal;
         });
-        if(matchByName) {
+        if (matchByName) {
           inputVal = matchByName.pubid;
           displayVal = wrapQuotesIfNeeded(matchByName.name);
         }
@@ -218,7 +218,7 @@ class SearchBarController extends Controller {
 
         let inputValue = loz.querySelector('.js-lozenge__content').textContent;
 
-        if(inputValue.indexOf('group:') === 0) {
+        if (inputValue.indexOf('group:') === 0) {
           inputValue = getInputAndDisplayValsForGroup(inputValue).input;
         }
         newValue = newValue + inputValue + ' ';
@@ -247,7 +247,7 @@ class SearchBarController extends Controller {
       // groups have extra logic to show one value
       // but have their input/search value be different
       // make sure we grab the right value to display
-      if(content.indexOf('group:') === 0) {
+      if (content.indexOf('group:') === 0) {
         content = getInputAndDisplayValsForGroup(content).display;
       }
 
@@ -324,24 +324,24 @@ class SearchBarController extends Controller {
         currentInput = (currentInput || '').trim();
 
         let typeFilter = FACET_TYPE;
-        if(currentInput.indexOf('tag:') === 0) {
+        if (currentInput.indexOf('tag:') === 0) {
           typeFilter = TAG_TYPE;
-        }else if(currentInput.indexOf('group:') === 0) {
+        } else if (currentInput.indexOf('group:') === 0) {
           typeFilter = GROUP_TYPE;
         }
 
         let inputFilter = normalizeStr(currentInput);
 
-        if(typeFilter === TAG_TYPE || typeFilter === GROUP_TYPE) {
+        if (typeFilter === TAG_TYPE || typeFilter === GROUP_TYPE) {
           inputFilter = inputFilter.substr(inputFilter.indexOf(':') + 1);
 
           // remove the initial quote for comparisons if it exists
-          if(inputFilter[0] === '\'' || inputFilter[0] === '"') {
+          if (inputFilter[0] === '\'' || inputFilter[0] === '"') {
             inputFilter = inputFilter.substr(1);
           }
         }
 
-        if(this.state.suggestionsType !== typeFilter) {
+        if (this.state.suggestionsType !== typeFilter) {
           this.setState({
             suggestionsType: typeFilter,
           });
@@ -372,10 +372,10 @@ class SearchBarController extends Controller {
 
           // If we are filtering on tags, we need to arrange
           // by popularity
-          if(typeFilter === TAG_TYPE) {
-            if(a.usageCount > b.usageCount) {
+          if (typeFilter === TAG_TYPE) {
+            if (a.usageCount > b.usageCount) {
               return -1;
-            }else if(a.usageCount < b.usageCount) {
+            } else if (a.usageCount < b.usageCount) {
               return 1;
             }
           }
@@ -394,7 +394,7 @@ class SearchBarController extends Controller {
 
           // wrap multi word phrases with quotes to keep
           // autosuggestions consistent with what user needs to do
-          if(valSelection.indexOf(' ') > -1) {
+          if (valSelection.indexOf(' ') > -1) {
             valSelection = `"${valSelection}"`;
           }
 
@@ -419,16 +419,16 @@ class SearchBarController extends Controller {
 
   update(newState, prevState) {
 
-    if(!this._suggestionsHandler) {
+    if (!this._suggestionsHandler) {
       return;
     }
 
-    if(newState.suggestionsType !== prevState.suggestionsType) {
-      if(newState.suggestionsType === TAG_TYPE) {
+    if (newState.suggestionsType !== prevState.suggestionsType) {
+      if (newState.suggestionsType === TAG_TYPE) {
         this._suggestionsHandler.setHeader('Popular tags:');
-      }else if(newState.suggestionsType === GROUP_TYPE) {
+      } else if (newState.suggestionsType === GROUP_TYPE) {
         this._suggestionsHandler.setHeader('Your groups:');
-      }else {
+      } else {
         this._suggestionsHandler.setHeader('Narrow your search:');
       }
     }
