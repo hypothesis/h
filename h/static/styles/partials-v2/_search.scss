@@ -37,6 +37,7 @@
   // Align the left edge of the search result list with the left edge of the
   // navbar content.
   margin-left: 30px;
+  margin-right: 30px;
 }
 
 .search-result-list {
@@ -229,7 +230,7 @@
 
 // As the screen size gets smaller, just before it would have introduced a
 // horizontal scrollbar move the sidebar below the search results.
-@media screen and (max-width: $tablet-width + 225px) {
+@media screen and (max-width: $tablet-width + 250px) {
   .search-result-container {
     flex-direction: column;
     margin-top: 25px;
@@ -241,6 +242,10 @@
 
   .search-result-hide-on-small-screens {
     display: none;
+  }
+
+  .search-result-list {
+    margin-right: 0;
   }
 }
 
@@ -273,9 +278,5 @@
     // navbar content.
     margin-left: 10px;
     margin-right: 10px;
-  }
-
-  .search-result-list {
-    margin-right: 0;
   }
 }
