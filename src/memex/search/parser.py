@@ -16,7 +16,7 @@ from webob.multidict import MultiDict
 pp.ParserElement.enablePackrat()
 
 # Named fields we support when querying (e.g. `user:luke`)
-named_fields = ['user', 'tag', 'group', 'uri']
+named_fields = ['user', 'tag', 'group', 'uri', 'url']
 
 whitespace = set([
     "\u0009",  # character tabulation
