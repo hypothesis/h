@@ -81,7 +81,7 @@
   margin-bottom: 7px;
 }
 
-@media screen and (max-width: $tablet-width) {
+@media screen and (max-width: $tablet-width + 250px) {
   // On tablet-sized screens and below the "sidebar" is displayed in the center
   // of the screen instead of on the side (this is achieved by media queries
   // on the sidebar's parent element), so make it full the whole width of the
