@@ -84,7 +84,7 @@ def check_url(request, query, unparse=parser.unparse):
                                       pubid=pubid,
                                       _query={'q': unparse(query)})
 
-    if _single_entry(query, 'user'):
+    elif _single_entry(query, 'user'):
         username = query.pop('user')
         redirect = request.route_path('activity.user_search',
                                       username=username,

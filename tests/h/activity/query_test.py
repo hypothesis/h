@@ -101,7 +101,15 @@ class TestCheckURL(object):
 
         unparse.assert_called_once_with({'tag': 'foo'})
 
-    def test_redirects_to_user_search_page_if_one_group_in_query(self, pyramid_request, unparse):
+    def test_preserves_user_query_terms_for_group_search(self, pyramid_request, unparse):
+        query = MultiDict({'group': 'bar', 'user': 'foo'})
+
+        with pytest.raises(HTTPFound):
+            check_url(pyramid_request, query, unparse=unparse)
+
+        unparse.assert_called_once_with({'user': 'foo'})
+
+    def test_redirects_to_user_search_page_if_one_user_in_query(self, pyramid_request, unparse):
         query = MultiDict({'user': 'jose'})
 
         with pytest.raises(HTTPFound) as e:
