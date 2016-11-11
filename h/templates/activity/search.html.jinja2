@@ -105,6 +105,29 @@
 </div>
 {% endmacro %}
 
+{% macro tags_section() %}
+<section class="search-result-sidebar__section">
+  <h3 class="search-result-sidebar__subtitle">
+    {% trans %}Tags{% endtrans %}
+    <span class="search-result-sidebar__subtitle-count">
+      {{ aggregations['tags'] | length }}
+    </span>
+  </h3>
+  <div class="search-result-tags">
+    {% for tag in aggregations.tags %}
+      <div class="search-result-tag js-tag">
+        <div class="search-result-tag__name">
+          {{ tag.tag }}
+        </div>
+        <div class="search-result-tag__count">
+          {{ tag.count }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endmacro %}
+
 {% macro sidebar(title, description) %}
 <aside class="search-result-sidebar {%- if not more_info %} search-result-hide-on-small-screens{% endif %}">
   <h1 class="search-result-sidebar__title">{{ title }}</h1>
@@ -166,26 +189,7 @@
       </ul>
     </section>
 
-    <section class="search-result-sidebar__section">
-      <h3 class="search-result-sidebar__subtitle">
-        {% trans %}Tags{% endtrans %}
-        <span class="search-result-sidebar__subtitle-count">
-          {{ aggregations['tags'] | length }}
-        </span>
-      </h3>
-      <div class="search-result-tags">
-        {% for tag in aggregations.tags %}
-          <div class="search-result-tag js-tag">
-            <div class="search-result-tag__name">
-              {{ tag.tag }}
-            </div>
-            <div class="search-result-tag__count">
-              {{ tag.count }}
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </section>
+    {{ tags_section() }}
 
     <section class="search-result-sidebar__section">
       <h3 class="search-result-sidebar__subtitle">
@@ -281,6 +285,8 @@
         {% endif %}
       </ul>
     </section>
+
+    {{ tags_section() }}
   {% endcall %}
 {% endmacro %}
 
