@@ -132,6 +132,7 @@ function getLozengeValues(queryString) {
  */
 function hasKnownNamedQueryTerm(queryTerm) {
   const knownNamedQueryTerms = ['user',
+    'uri',
     'url',
     'group',
     'tag'];
