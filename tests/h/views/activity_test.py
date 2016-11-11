@@ -9,13 +9,8 @@ from webob.multidict import NestedMultiDict
 
 from h.views import activity
 
-class FakeGroup(object):
-    def __init__(self, pubid, name):
-        self.pubid = pubid
-        self.name = name
-        self.slug = pubid
 
-@pytest.mark.usefixtures('paginate', 'query', 'pyramid_request_mocked')
+@pytest.mark.usefixtures('paginate', 'query')
 class TestSearch(object):
     def test_it_returns_404_when_feature_turned_off(self, pyramid_request):
         pyramid_request.feature.flags['search_page'] = False
@@ -84,7 +79,6 @@ class TestSearch(object):
                      for user in result['aggregations']['users']]
         assert usernames == ['test_user_1', 'test_user_2', 'test_user_3']
 
-
     def test_it_returns_userids(self, pyramid_request, query):
         """
         It should return a list of userids to the template.
@@ -127,24 +121,23 @@ class TestSearch(object):
 
         assert 'users' not in result['aggregations']
 
-    def test_it_returns_group_suggestions(self, pyramid_request, query):
-        """
-        It should return a list of group_suggestsions to the template.
-        """
+    def test_it_returns_group_suggestions(self,
+                                          factories,
+                                          pyramid_request,
+                                          query):
+        """It should return a list of group_suggestsions to the template."""
+        fake_group_1 = factories.Group()
+        fake_group_2 = factories.Group()
+        fake_group_3 = factories.Group()
         pyramid_request.authenticated_user.groups = [
-            FakeGroup('id1', 'test_group_1'),
-            FakeGroup('id2', 'test_group_2'),
-            FakeGroup('id3', 'test_group_3'),
-        ]
+            fake_group_1, fake_group_2, fake_group_3]
 
         result = activity.search(pyramid_request)
 
-        names = [group.name for group in pyramid_request.authenticated_user.groups]
-        
         assert result['groups_suggestions'] == [
-            {'name':'test_group_1', 'pubid': 'id1'},
-            {'name':'test_group_2', 'pubid': 'id2'},
-            {'name':'test_group_3', 'pubid': 'id3'},
+            {'name': fake_group_1.name, 'pubid': fake_group_1.pubid},
+            {'name': fake_group_2.name, 'pubid': fake_group_2.pubid},
+            {'name': fake_group_3.name, 'pubid': fake_group_3.pubid},
         ]
 
     @pytest.fixture
@@ -154,6 +147,12 @@ class TestSearch(object):
     @pytest.fixture
     def paginate(self, patch):
         return patch('h.views.activity.paginate')
+
+    @pytest.fixture
+    def pyramid_request(self, factories, pyramid_request):
+        pyramid_request.authenticated_user = factories.User()
+        return pyramid_request
+
 
 @pytest.mark.usefixtures('routes', 'search')
 class TestGroupSearch(object):
@@ -259,8 +258,8 @@ class TestGroupSearch(object):
         assert activity.group_search(pyramid_request)['more_info'] is False
 
     def test_group_search_returns_pubid_in_opts(self, group, pyramid_request):
-      result = activity.group_search(pyramid_request)
-      assert result['opts']['search_groupname'] == group.pubid
+        result = activity.group_search(pyramid_request)
+        assert result['opts']['search_groupname'] == group.pubid
 
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
@@ -274,6 +273,7 @@ class TestGroupSearch(object):
         pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
         pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
 
+
 @pytest.mark.usefixtures('routes')
 class TestSearchMoreInfo(object):
 
@@ -281,7 +281,7 @@ class TestSearchMoreInfo(object):
         """It should redirect and preserve the search query param."""
         pyramid_request.matchdict['pubid'] = 'test_pubid'
         pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name='activity.group_search'
+        pyramid_request.matched_route.name = 'activity.group_search'
         pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
 
         result = activity.search_more_info(pyramid_request)
@@ -298,7 +298,7 @@ class TestSearchMoreInfo(object):
         """It should redirect and preserve the search query param."""
         pyramid_request.matchdict['username'] = 'test_username'
         pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name='activity.user_search'
+        pyramid_request.matched_route.name = 'activity.user_search'
         pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
 
         result = activity.search_more_info(pyramid_request)
@@ -326,7 +326,7 @@ class TestSearchBack(object):
         """It should redirect and preserve the search query param."""
         pyramid_request.matchdict['pubid'] = 'test_pubid'
         pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name='activity.group_search'
+        pyramid_request.matched_route.name = 'activity.group_search'
         pyramid_request.POST = {'q': 'foo bar', 'back': ''}
 
         result = activity.search_back(pyramid_request)
@@ -339,7 +339,7 @@ class TestSearchBack(object):
         """It should redirect and preserve the search query param."""
         pyramid_request.matchdict['username'] = 'test_username'
         pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name='activity.user_search'
+        pyramid_request.matched_route.name = 'activity.user_search'
         pyramid_request.POST = {'q': 'foo bar', 'back': ''}
 
         result = activity.search_back(pyramid_request)
@@ -354,6 +354,7 @@ class TestSearchBack(object):
                                  '/groups/{pubid}/search')
         pyramid_config.add_route('activity.user_search',
                                  '/users/{username}/search')
+
 
 @pytest.mark.usefixtures('groups_service', 'routes')
 class TestGroupLeave(object):
@@ -413,6 +414,7 @@ class TestGroupLeave(object):
     def routes(self, pyramid_config):
         pyramid_config.add_route('activity.search', '/search')
 
+
 @pytest.mark.usefixtures('routes', 'search', 'user_service')
 class TestUserSearch(object):
     def test_it_returns_404_when_feature_turned_off(self,
@@ -430,8 +432,8 @@ class TestUserSearch(object):
                                             pyramid_request,
                                             search,
                                             user):
-      results = activity.user_search(pyramid_request)
-      assert results['opts']['search_username'] == user.username
+        results = activity.user_search(pyramid_request)
+        assert results['opts']['search_username'] == user.username
 
     def test_it_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
             self,
@@ -545,11 +547,6 @@ class TestUserSearch(object):
         pyramid_config.register_service(user_service, name='user')
         return user_service
 
-
-@pytest.fixture
-def pyramid_request_mocked(pyramid_request):
-    pyramid_request.authenticated_user = mock.Mock(groups=[])
-    return pyramid_request
 
 @pytest.mark.usefixtures('routes', 'search')
 class TestToggleUserFacet(object):
