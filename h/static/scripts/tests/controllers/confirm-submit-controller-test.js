@@ -1,11 +1,11 @@
 'use strict';
 
-var ConfirmSubmitController = require('../../controllers/confirm-submit-controller');
-var util = require('./util');
+const ConfirmSubmitController = require('../../controllers/confirm-submit-controller');
+const util = require('./util');
 
 describe('ConfirmSubmitController', () => {
 
-  var ctrl;
+  let ctrl;
 
   afterEach(() => {
     if (ctrl) {
@@ -20,13 +20,13 @@ describe('ConfirmSubmitController', () => {
    *
    */
   function component(windowConfirmReturnValue) {
-    var confirmMessage = "Are you sure you want to leave the group 'Test Group'?";
-    var template = `<button type="submit"
+    const confirmMessage = "Are you sure you want to leave the group 'Test Group'?";
+    const template = `<button type="submit"
       class="js-confirm-submit"
       data-confirm-message="${confirmMessage}">
     `;
 
-    var fakeWindow = {
+    const fakeWindow = {
       confirm: sinon.stub().returns(windowConfirmReturnValue),
     };
 
@@ -43,7 +43,7 @@ describe('ConfirmSubmitController', () => {
   }
 
   function fakeEvent() {
-    var event = new Event('click');
+    const event = new Event('click');
     event.preventDefault = sinon.stub();
     event.stopPropagation = sinon.stub();
     event.stopImmediatePropagation = sinon.stub();
@@ -51,7 +51,7 @@ describe('ConfirmSubmitController', () => {
   }
 
   it('shows a confirm dialog using the text from the data-confirm-message attribute', () => {
-    var {ctrl, fakeWindow, confirmMessage} = component(true);
+    const {ctrl, fakeWindow, confirmMessage} = component(true);
 
     ctrl.element.dispatchEvent(new Event('click'));
 
@@ -60,8 +60,8 @@ describe('ConfirmSubmitController', () => {
   });
 
   it('prevents form submission if the user refuses the confirm dialog', () => {
-    var ctrl = component(false).ctrl;
-    var event = fakeEvent();
+    const ctrl = component(false).ctrl;
+    const event = fakeEvent();
 
     ctrl.element.dispatchEvent(event);
 
@@ -71,8 +71,8 @@ describe('ConfirmSubmitController', () => {
   });
 
   it('allows form submission if the user confirms the confirm dialog', () => {
-    var ctrl = component(true).ctrl;
-    var event = fakeEvent();
+    const ctrl = component(true).ctrl;
+    const event = fakeEvent();
 
     ctrl.element.dispatchEvent(event);
 

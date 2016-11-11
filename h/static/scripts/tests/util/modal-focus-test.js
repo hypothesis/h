@@ -1,14 +1,14 @@
 'use strict';
 
-var modalFocus = require('../../util/modal-focus');
+const modalFocus = require('../../util/modal-focus');
 
 describe('util/modal-focus', () => {
   // Elements inside the focus group
-  var insideEls;
+  let insideEls;
   // Element outside the focus group
-  var outsideEl;
-  var onFocusOut;
-  var releaseFocus;
+  let outsideEl;
+  let onFocusOut;
+  let releaseFocus;
 
   beforeEach(() => {
     insideEls = [1,2,3].map(() => document.createElement('input'));

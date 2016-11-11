@@ -10,7 +10,7 @@
 
 require('core-js/fn/object/assign');
 
-var Raven = require('raven-js');
+const Raven = require('raven-js');
 
 function init(config) {
   Raven.config(config.dsn, {
@@ -51,7 +51,7 @@ function report(error, when, context) {
     }
   }
 
-  var extra = Object.assign({ when: when }, context);
+  const extra = Object.assign({ when: when }, context);
   Raven.captureException(error, { extra: extra });
 }
 

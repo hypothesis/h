@@ -1,9 +1,9 @@
 'use strict';
 
-var escapeHtml = require('escape-html');
+const escapeHtml = require('escape-html');
 
-var Controller = require('../base/controller');
-var searchTextParser = require('../util/search-text-parser');
+const Controller = require('../base/controller');
+const searchTextParser = require('../util/search-text-parser');
 
 /**
  * Create a lozenge with options.content as its content and append it to containerEl.
@@ -20,11 +20,11 @@ var searchTextParser = require('../util/search-text-parser');
 class LozengeController extends Controller {
   constructor(containerEl, options) {
     super(containerEl, options);
-    var lozengeEl = document.createElement('div');
-    var lozengeMarkup = escapeHtml(options.content);
+    const lozengeEl = document.createElement('div');
+    let lozengeMarkup = escapeHtml(options.content);
 
     if (searchTextParser.hasKnownNamedQueryTerm(options.content)) {
-      var queryTerm = searchTextParser.getLozengeFacetNameAndValue(options.content);
+      const queryTerm = searchTextParser.getLozengeFacetNameAndValue(options.content);
       lozengeMarkup = '<span class="lozenge__facet-name">' +
         escapeHtml(queryTerm.facetName) +
         '</span>' +

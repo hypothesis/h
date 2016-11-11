@@ -1,12 +1,12 @@
 'use strict';
 
-var TooltipController = require('../../controllers/tooltip-controller');
+const TooltipController = require('../../controllers/tooltip-controller');
 
 describe('TooltipController', () => {
-  var targetEl;
-  var template;
-  var testEl;
-  var tooltipEl;
+  let targetEl;
+  let template;
+  let testEl;
+  let tooltipEl;
 
   before(() => {
     template = '<div class="form-input__hint-icon js-tooltip"' +

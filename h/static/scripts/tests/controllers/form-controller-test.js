@@ -1,10 +1,10 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire');
 
-var { hyphenate } = require('../../util/string');
-var { noCallThru } = require('../util');
-var upgradeElements = require('../../base/upgrade-elements');
+const { hyphenate } = require('../../util/string');
+const { noCallThru } = require('../util');
+const upgradeElements = require('../../base/upgrade-elements');
 
 /**
  * Converts a map of data attribute names to string values into a string
@@ -16,7 +16,7 @@ var upgradeElements = require('../../base/upgrade-elements');
  * eg. dataAttrs({activeLabel: 'label'}) => 'data-active-label="label"'
  */
 function dataAttrs(data) {
-  var dataAttrs = [];
+  const dataAttrs = [];
   Object.keys(data || {}).forEach((key) => {
     dataAttrs.push(`data-${hyphenate(key)}="${data[key]}"`);
   });
@@ -26,8 +26,8 @@ function dataAttrs(data) {
 // Simplified version of form fields rendered by deform on the server in
 // mapping_item.jinja2
 function fieldTemplate(field) {
-  var dataAttr = dataAttrs(field.data);
-  var typeAttr = field.type ? `type="${field.type}"` : '';
+  const dataAttr = dataAttrs(field.data);
+  const typeAttr = field.type ? `type="${field.type}"` : '';
 
   return `<div class="js-form-input" data-ref="${field.fieldRef}" ${dataAttr}>
     <label data-ref="label ${field.labelRef}">Label</label>
@@ -52,7 +52,7 @@ function formTemplate(fields) {
 `;
 }
 
-var FORM_TEMPLATE = formTemplate([{
+const FORM_TEMPLATE = formTemplate([{
   ref: 'firstInput',
   value: 'original value',
 },{
@@ -63,20 +63,20 @@ var FORM_TEMPLATE = formTemplate([{
   type: 'checkbox',
 }]);
 
-var UPDATED_FORM = FORM_TEMPLATE.replace('js-form', 'js-form is-updated');
+const UPDATED_FORM = FORM_TEMPLATE.replace('js-form', 'js-form is-updated');
 
 describe('FormController', () => {
-  var ctrl;
-  var fakeSubmitForm;
-  var reloadSpy;
+  let ctrl;
+  let fakeSubmitForm;
+  let reloadSpy;
 
   function initForm(template) {
     fakeSubmitForm = sinon.stub();
-    var FormController = proxyquire('../../controllers/form-controller', {
+    const FormController = proxyquire('../../controllers/form-controller', {
       '../util/submit-form': noCallThru(fakeSubmitForm),
     });
 
-    var container = document.createElement('div');
+    const container = document.createElement('div');
     container.innerHTML = template;
     upgradeElements(container, {
       '.js-form': FormController,
@@ -87,9 +87,9 @@ describe('FormController', () => {
     // Wrap the original `reload` function passed to the controller so we can
     // spy on calls to it and update `ctrl` to the new controller instance
     // when the form is reloaded
-    var reloadFn = ctrl.options.reload;
+    const reloadFn = ctrl.options.reload;
     reloadSpy = sinon.spy((html) => {
-      var newElement = reloadFn(html);
+      const newElement = reloadFn(html);
       ctrl = newElement.controllers[0];
       return newElement;
     });
@@ -147,7 +147,7 @@ describe('FormController', () => {
 
   it('reverts the form when "Escape" key is pressed', () => {
     startEditing();
-    var event = new Event('keydown', {bubbles: true});
+    const event = new Event('keydown', {bubbles: true});
     event.key = 'Escape';
     ctrl.refs.firstInput.dispatchEvent(event);
     assert.equal(ctrl.refs.firstInput.value, 'original value');
@@ -221,7 +221,7 @@ describe('FormController', () => {
 
   it('enters the "saving" state while the form is being submitted', () => {
     fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
-    var saved = submitForm();
+    const saved = submitForm();
     assert.isTrue(isSaving());
     return saved.then(() => {
       assert.isFalse(isSaving());
@@ -237,7 +237,7 @@ describe('FormController', () => {
 
   it('ignores clicks outside the field being edited', () => {
     startEditing();
-    var event = new Event('mousedown', {cancelable: true});
+    const event = new Event('mousedown', {cancelable: true});
     ctrl.refs.formBackdrop.dispatchEvent(event);
     assert.isTrue(event.defaultPrevented);
   });
@@ -253,7 +253,7 @@ describe('FormController', () => {
   context('when focus moves to another input while editing', () => {
     it('clears editing state of first input', () => {
       startEditing();
-      var inputs = ctrl.element.querySelectorAll('.js-form-input');
+      const inputs = ctrl.element.querySelectorAll('.js-form-input');
 
       // Focus second input. Although the user cannot focus the second input with
       // the mouse while the first is focused, they can navigate to it with the
@@ -276,7 +276,7 @@ describe('FormController', () => {
   });
 
   context('when focus moves outside of form', () => {
-    var outsideEl;
+    let outsideEl;
 
     beforeEach(() => {
       outsideEl = document.createElement('input');
@@ -363,7 +363,7 @@ describe('FormController', () => {
     });
 
     it('hides initially-hidden fields when no input is focused', () => {
-      var externalControl = document.createElement('input');
+      const externalControl = document.createElement('input');
       document.body.appendChild(externalControl);
 
       ctrl.refs.emailInput.focus();
@@ -374,13 +374,13 @@ describe('FormController', () => {
     });
 
     it('shows all fields in an editing state when any is focused', () => {
-      var containers = [ctrl.refs.emailContainer, ctrl.refs.passwordContainer];
-      var inputs = [ctrl.refs.emailInput, ctrl.refs.passwordInput];
+      const containers = [ctrl.refs.emailContainer, ctrl.refs.passwordContainer];
+      const inputs = [ctrl.refs.emailInput, ctrl.refs.passwordInput];
 
       inputs.forEach((input) => {
         input.focus();
 
-        var editing = containers.filter(el => el.classList.contains('is-editing'));
+        const editing = containers.filter(el => el.classList.contains('is-editing'));
         assert.equal(editing.length, 2);
       });
     });

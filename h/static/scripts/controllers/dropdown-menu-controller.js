@@ -1,7 +1,7 @@
 'use strict';
 
-var Controller = require('../base/controller');
-var setElementState = require('../util/dom').setElementState;
+const Controller = require('../base/controller');
+const setElementState = require('../util/dom').setElementState;
 
 /**
  * Controller for dropdown menus.
@@ -10,9 +10,9 @@ class DropdownMenuController extends Controller {
   constructor(element) {
     super(element);
 
-    var toggleEl = this.refs.dropdownMenuToggle;
+    const toggleEl = this.refs.dropdownMenuToggle;
 
-    var handleClickOutside = (event) => {
+    const handleClickOutside = (event) => {
       if (!this.refs.dropdownMenuContent.contains(event.target)) {
         // When clicking outside the menu on the toggle element, stop the event
         // so that it does not re-trigger the menu

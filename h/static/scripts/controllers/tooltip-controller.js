@@ -1,6 +1,6 @@
 'use strict';
 
-var Controller = require('../base/controller');
+const Controller = require('../base/controller');
 
 /**
  * A custom tooltip similar to the one used in Google Docs which appears
@@ -47,8 +47,8 @@ class TooltipController extends Controller {
       return;
     }
 
-    var target = state.target;
-    var label = target.getAttribute('aria-label');
+    const target = state.target;
+    const label = target.getAttribute('aria-label');
     this._labelEl.textContent = label;
 
     Object.assign(this._tooltipEl.style, {

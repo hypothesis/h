@@ -1,6 +1,6 @@
 'use strict';
 
-var CreateGroupFormController = require('../../controllers/create-group-form-controller');
+const CreateGroupFormController = require('../../controllers/create-group-form-controller');
 
 function isHidden(elt) {
   return elt.classList.contains('is-hidden');
@@ -10,14 +10,14 @@ function isHidden(elt) {
 function sendEvent(element, eventType) {
   // createEvent() used instead of Event constructor
   // for PhantomJS compatibility
-  var event = document.createEvent('Event');
+  const event = document.createEvent('Event');
   event.initEvent(eventType, true /* bubbles */, true /* cancelable */);
   element.dispatchEvent(event);
 }
 
 describe('CreateGroupFormController', () => {
-  var element;
-  var template;
+  let element;
+  let template;
 
   before(() => {
     template = '<input type="text" class="js-group-name-input">' +
@@ -32,7 +32,7 @@ describe('CreateGroupFormController', () => {
   });
 
   it('should enable submission if form is valid', () => {
-    var controller = new CreateGroupFormController(element);
+    const controller = new CreateGroupFormController(element);
     controller._groupNameInput.value = '';
     sendEvent(controller._groupNameInput, 'input');
     assert.equal(controller._submitBtn.disabled, true);
@@ -42,7 +42,7 @@ describe('CreateGroupFormController', () => {
   });
 
   it('should toggle info text when explain link is clicked', () => {
-    var controller = new CreateGroupFormController(element);
+    const controller = new CreateGroupFormController(element);
     assert.equal(isHidden(controller._infoText), true);
     sendEvent(controller._infoLink, 'click');
     assert.equal(isHidden(controller._infoText), false);

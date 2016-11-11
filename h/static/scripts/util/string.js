@@ -9,17 +9,17 @@ const COMBINING_MARKS = /[\u0300-\u036F\u0483-\u0489\u0591-\u05BD\u05BF\u05C1\u0
  * Convert a `camelCase` or `CapitalCase` string to `kebab-case`
  */
 function hyphenate(name) {
-  var uppercasePattern = /([A-Z])/g;
+  const uppercasePattern = /([A-Z])/g;
   return name.replace(uppercasePattern, '-$1').toLowerCase();
 }
 
 /** Convert a `kebab-case` string to `camelCase` */
 function unhyphenate(name) {
-  var idx = name.indexOf('-');
+  const idx = name.indexOf('-');
   if (idx === -1) {
     return name;
   } else {
-    var ch = (name[idx+1] || '').toUpperCase();
+    const ch = (name[idx+1] || '').toUpperCase();
     return unhyphenate(name.slice(0,idx) + ch + name.slice(idx+2));
   }
 }

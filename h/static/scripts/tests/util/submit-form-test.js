@@ -1,18 +1,18 @@
 'use strict';
 
-var fetchMock = require('fetch-mock');
+const fetchMock = require('fetch-mock');
 
-var submitForm = require('../../util/submit-form');
+const submitForm = require('../../util/submit-form');
 
 describe('submitForm', () => {
-  var FORM_URL = 'http://example.org/things';
+  const FORM_URL = 'http://example.org/things';
 
   function mockResponse(response) {
     fetchMock.post(FORM_URL, response);
   }
 
   function createForm() {
-    var form = document.createElement('form');
+    const form = document.createElement('form');
     form.action = FORM_URL;
     form.method = 'POST';
     form.innerHTML = '<input name="field" value="value">';
@@ -20,18 +20,18 @@ describe('submitForm', () => {
   }
 
   it('submits the form data', () => {
-    var form = createForm();
+    const form = createForm();
     mockResponse('<form><!-- updated form !--></form>');
 
     return submitForm(form, fetchMock.fetchMock).then(() => {
-      var [,requestInit] = fetchMock.lastCall(FORM_URL);
+      const [,requestInit] = fetchMock.lastCall(FORM_URL);
       assert.instanceOf(requestInit.body, FormData);
     });
   });
 
   it('returns the markup for the updated form if validation succeeds', () => {
-    var form = createForm();
-    var responseBody = '<form><!-- updated form !--></form>';
+    const form = createForm();
+    const responseBody = '<form><!-- updated form !--></form>';
     mockResponse(responseBody);
 
     return submitForm(form, fetchMock.fetchMock).then((response) => {
@@ -40,10 +40,10 @@ describe('submitForm', () => {
   });
 
   it('rejects with the updated form markup if validation fails', () => {
-    var form = createForm();
+    const form = createForm();
     mockResponse({status: 400, body: 'response'});
 
-    var done = submitForm(form, fetchMock.fetchMock);
+    const done = submitForm(form, fetchMock.fetchMock);
 
     return done.catch((err) => {
       assert.match(err, sinon.match({status: 400, form: 'response'}));
@@ -51,10 +51,10 @@ describe('submitForm', () => {
   });
 
   it('rejects with an error message if submission fails', () => {
-    var form = createForm();
+    const form = createForm();
     mockResponse({status: 500, statusText: 'Internal Server Error'});
 
-    var done = submitForm(form, fetchMock.fetchMock);
+    const done = submitForm(form, fetchMock.fetchMock);
 
     return done.catch((err) => {
       assert.match(err, sinon.match({status: 500, reason: 'Internal Server Error'}));

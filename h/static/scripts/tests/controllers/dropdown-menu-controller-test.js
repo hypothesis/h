@@ -1,9 +1,9 @@
 'use strict';
 
-var DropdownMenuController = require('../../controllers/dropdown-menu-controller');
-var util = require('./util');
+const DropdownMenuController = require('../../controllers/dropdown-menu-controller');
+const util = require('./util');
 
-var TEMPLATE = [
+const TEMPLATE = [
   '<div class="js-dropdown-menu">',
   '<span data-ref="dropdownMenuToggle">Toggle</span>',
   '<span data-ref="dropdownMenuContent">Menu</span>',
@@ -11,9 +11,9 @@ var TEMPLATE = [
 ].join('\n');
 
 describe('DropdownMenuController', () => {
-  var ctrl;
-  var toggleEl;
-  var menuEl;
+  let ctrl;
+  let toggleEl;
+  let menuEl;
 
   beforeEach(() => {
     ctrl = util.setupComponent(document, TEMPLATE, DropdownMenuController);

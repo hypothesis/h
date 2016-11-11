@@ -1,12 +1,12 @@
 'use strict';
 
-var domUtil = require('../../util/dom');
+const domUtil = require('../../util/dom');
 
 describe('util/dom', () => {
   function createDOM(html) {
-    var el = document.createElement('div');
+    const el = document.createElement('div');
     el.innerHTML = html;
-    var child = el.children[0];
+    const child = el.children[0];
     document.body.appendChild(child);
     el.remove();
     return child;
@@ -14,14 +14,14 @@ describe('util/dom', () => {
 
   describe('findRefs', () => {
     it('returns a map of name to DOM element', () => {
-      var root = createDOM(`
+      const root = createDOM(`
         <div>
           <label data-ref="label">Input label</label>
           <input data-ref="input">
         </div>
       `);
-      var labelEl = root.querySelector('label');
-      var inputEl = root.querySelector('input');
+      const labelEl = root.querySelector('label');
+      const inputEl = root.querySelector('input');
 
       assert.deepEqual(domUtil.findRefs(root), {
         label: labelEl,
@@ -30,7 +30,7 @@ describe('util/dom', () => {
     });
 
     it('allows elements to have more than one name', () => {
-      var root = createDOM('<div><div data-ref="one two"></div></div>');
+      const root = createDOM('<div><div data-ref="one two"></div></div>');
       assert.deepEqual(domUtil.findRefs(root), {
         one: root.firstChild,
         two: root.firstChild,
@@ -40,7 +40,7 @@ describe('util/dom', () => {
 
   describe('setElementState', () => {
     it('adds "is-$state" classes for keys with truthy values', () => {
-      var btn = createDOM('<button></button>');
+      const btn = createDOM('<button></button>');
       domUtil.setElementState(btn, {
         visible: true,
       });
@@ -48,7 +48,7 @@ describe('util/dom', () => {
     });
 
     it('removes "is-$state" classes for keys with falsey values', () => {
-      var btn = createDOM('<button class="is-hidden"></button>');
+      const btn = createDOM('<button class="is-hidden"></button>');
       domUtil.setElementState(btn, {
         hidden: false,
       });

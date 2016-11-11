@@ -1,6 +1,6 @@
 'use strict';
 
-var Controller = require('../../base/controller');
+const Controller = require('../../base/controller');
 
 class TestController extends Controller {
   constructor(element, options) {
@@ -10,10 +10,10 @@ class TestController extends Controller {
 }
 
 describe('Controller', () => {
-  var ctrl;
+  let ctrl;
 
   beforeEach(() => {
-    var root = document.createElement('div');
+    const root = document.createElement('div');
     root.innerHTML = '<div data-ref="test"></div>';
     document.body.appendChild(root);
     ctrl = new TestController(root);

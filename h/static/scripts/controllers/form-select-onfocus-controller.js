@@ -1,6 +1,6 @@
 'use strict';
 
-var Controller = require('../base/controller');
+const Controller = require('../base/controller');
 
 class FormSelectOnFocusController extends Controller {
   constructor(element) {

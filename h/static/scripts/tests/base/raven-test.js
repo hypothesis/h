@@ -1,11 +1,11 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
-var noCallThru = require('../util').noCallThru;
+const proxyquire = require('proxyquire');
+const noCallThru = require('../util').noCallThru;
 
 describe('raven', () => {
-  var fakeRavenJS;
-  var raven;
+  let fakeRavenJS;
+  let raven;
 
   beforeEach(() => {
     fakeRavenJS = {
@@ -27,7 +27,7 @@ describe('raven', () => {
         dsn: 'dsn',
         release: 'release',
       });
-      var event = document.createEvent('Event');
+      const event = document.createEvent('Event');
       event.initEvent('unhandledrejection', true /* bubbles */, true /* cancelable */);
       event.reason = new Error('Some error');
       window.dispatchEvent(event);
@@ -48,7 +48,7 @@ describe('raven', () => {
     });
 
     it('passes extra details through', () => {
-      var error = new Error('an error');
+      const error = new Error('an error');
       raven.report(error, 'some operation', { url: 'foobar.com' });
       assert.calledWith(fakeRavenJS.captureException, error, {
         extra: {

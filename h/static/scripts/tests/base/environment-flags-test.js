@@ -1,13 +1,13 @@
 'use strict';
 
-var EnvironmentFlags = require('../../base/environment-flags');
+const EnvironmentFlags = require('../../base/environment-flags');
 
-var TIMEOUT_DELAY = 10000;
+const TIMEOUT_DELAY = 10000;
 
 describe('EnvironmentFlags', () => {
-  var clock;
-  var el;
-  var flags;
+  let clock;
+  let el;
+  let flags;
 
   beforeEach(() => {
     el = document.createElement('div');

@@ -1,17 +1,17 @@
 'use strict';
 
-var SignupFormController = require('../../controllers/signup-form-controller');
+const SignupFormController = require('../../controllers/signup-form-controller');
 
-var TEMPLATE = `
+const TEMPLATE = `
   <form class="js-signup-form">
     <input type="submit" class="js-signup-btn">
   </form>
   `;
 
 describe('SignupFormController', () => {
-  var element;
-  var form;
-  var submitBtn;
+  let element;
+  let form;
+  let submitBtn;
 
   beforeEach(() => {
     element = document.createElement('div');

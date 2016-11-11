@@ -110,7 +110,7 @@ class AutosuggestDropdownController extends Controller {
       this._header.innerHTML = newState.header;
     }
 
-    let listChanged = updateHelper.listIsDifferent(newState.list, prevState.list);
+    const listChanged = updateHelper.listIsDifferent(newState.list, prevState.list);
 
     if (listChanged) {
       this._renderListItems();
@@ -120,7 +120,7 @@ class AutosuggestDropdownController extends Controller {
     // currently active elements over to the new list
     if (newState.activeId !== prevState.activeId || listChanged) {
 
-      let currentActive = this._getActiveListItemElement();
+      const currentActive = this._getActiveListItemElement();
 
       if (prevState.activeId && currentActive) {
         currentActive.classList.remove(this.options.classNames.activeItem);
@@ -226,8 +226,8 @@ class AutosuggestDropdownController extends Controller {
    */
   _toggleItemHoverState(hovering, event) {
 
-    let currentActive = this._getActiveListItemElement();
-    let target = event.currentTarget;
+    const currentActive = this._getActiveListItemElement();
+    const target = event.currentTarget;
 
     if ( hovering && currentActive && currentActive.contains(target)) {
       return;
@@ -335,7 +335,7 @@ class AutosuggestDropdownController extends Controller {
     this._listContainer.innerHTML = '';
 
     this.state.list.forEach((listItem) => {
-      let li = document.createElement('li');
+      const li = document.createElement('li');
       li.classList.add(this.options.classNames.item);
       li.setAttribute('data-suggestion-id', listItem.__suggestionId);
 

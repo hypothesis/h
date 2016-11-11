@@ -4,8 +4,8 @@ window.$ = window.jQuery = require('jquery');
 require('bootstrap');
 
 if (window.chrome !== undefined) {
-  var elements = document.getElementsByClassName('unhide-in-chrome');
-  var i;
+  let elements = document.getElementsByClassName('unhide-in-chrome');
+  let i;
   for (i = 0; i < elements.length; i++) {
     elements[i].classList.remove('hidden');
   }
@@ -15,7 +15,7 @@ if (window.chrome !== undefined) {
   }
 }
 
-var bookmarkletInstaller = document.getElementById('js-bookmarklet-install');
+const bookmarkletInstaller = document.getElementById('js-bookmarklet-install');
 if (bookmarkletInstaller) {
   bookmarkletInstaller.addEventListener('click', (event) => {
     window.alert('Drag me to the bookmarks bar');
@@ -23,7 +23,7 @@ if (bookmarkletInstaller) {
   });
 }
 
-var chromeextInstaller = document.getElementById('js-chrome-extension-install');
+const chromeextInstaller = document.getElementById('js-chrome-extension-install');
 if (chromeextInstaller) {
   chromeextInstaller.addEventListener('click', (event) => {
     window.chrome.webstore.install();

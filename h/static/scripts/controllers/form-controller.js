@@ -1,12 +1,12 @@
 'use strict';
 
-var Controller = require('../base/controller');
-var { findRefs, setElementState } = require('../util/dom');
-var modalFocus = require('../util/modal-focus');
-var submitForm = require('../util/submit-form');
+const Controller = require('../base/controller');
+const { findRefs, setElementState } = require('../util/dom');
+const modalFocus = require('../util/modal-focus');
+const submitForm = require('../util/submit-form');
 
 function shouldAutosubmit(type) {
-  var autosubmitTypes = ['checkbox', 'radio'];
+  const autosubmitTypes = ['checkbox', 'radio'];
   return autosubmitTypes.indexOf(type) !== -1;
 }
 
@@ -53,7 +53,7 @@ class FormController extends Controller {
     // List of groups of controls that constitute each form field
     this._fields = Array.from(element.querySelectorAll('.js-form-input'))
       .map((el) => {
-        var parts = findRefs(el);
+        const parts = findRefs(el);
         return {
           container: el,
           input: parts.formInput,
@@ -62,7 +62,7 @@ class FormController extends Controller {
       });
 
     this.on('focus', (event) => {
-      var field = this._fields.find(field => field.input === event.target);
+      const field = this._fields.find(field => field.input === event.target);
       if (!field) {
         return;
       }
@@ -144,7 +144,7 @@ class FormController extends Controller {
       this._trapFocus();
     }
 
-    var isEditing = state.editingFields.length > 0;
+    const isEditing = state.editingFields.length > 0;
     setElementState(this.element, {editing: isEditing});
     setElementState(this.refs.formActions, {
       hidden: !isEditing || shouldAutosubmit(state.editingFields[0].input.type),
@@ -175,9 +175,9 @@ class FormController extends Controller {
       });
 
       // Update labels
-      var activeLabel = field.container.dataset.activeLabel;
-      var inactiveLabel = field.container.dataset.inactiveLabel;
-      var isEditing = state.editingFields.includes(field);
+      const activeLabel = field.container.dataset.activeLabel;
+      const inactiveLabel = field.container.dataset.inactiveLabel;
+      const isEditing = state.editingFields.includes(field);
 
       if (activeLabel && inactiveLabel) {
         field.label.textContent = isEditing ? activeLabel : inactiveLabel;
@@ -205,9 +205,9 @@ class FormController extends Controller {
    * result.
    */
   submit() {
-    var originalForm = this.state.originalForm;
+    const originalForm = this.state.originalForm;
 
-    var activeInputId;
+    let activeInputId;
     if (this.state.editingFields.length > 0) {
       activeInputId = this.state.editingFields[0].input.id;
     }
@@ -221,12 +221,12 @@ class FormController extends Controller {
         // The server processed the request but rejected the submission.
         // Display the returned form which will contain any validation error
         // messages.
-        var newFormEl = this.options.reload(err.form);
-        var newFormCtrl = newFormEl.controllers.find(ctrl =>
+        const newFormEl = this.options.reload(err.form);
+        const newFormCtrl = newFormEl.controllers.find(ctrl =>
           ctrl instanceof FormController);
 
         // Resume editing the field where validation failed
-        var newInput = document.getElementById(activeInputId);
+        const newInput = document.getElementById(activeInputId);
         if (newInput) {
           newInput.focus();
         }
@@ -255,7 +255,7 @@ class FormController extends Controller {
    * depending upon the field which is currently focused.
    */
   _focusGroup() {
-    var fieldContainers = this.state.editingFields.map(field => field.container);
+    const fieldContainers = this.state.editingFields.map(field => field.container);
     if (fieldContainers.length === 0) {
       return null;
     }

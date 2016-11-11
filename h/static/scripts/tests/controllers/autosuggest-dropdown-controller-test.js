@@ -48,7 +48,7 @@ describe('AutosuggestDropdownController', () => {
     let input;
     let form;
 
-    let defaultConfig = {
+    const defaultConfig = {
       list: [
         {
           title: 'user:',
@@ -270,7 +270,7 @@ describe('AutosuggestDropdownController', () => {
         });
     });
 
-    var navigationExpectations = [
+    const navigationExpectations = [
       { travel: '[down]', selectedIndex: 0 },
       { travel: '[up]', selectedIndex: 3 },
       { travel: '[down][up]', selectedIndex: -1 },
@@ -291,7 +291,7 @@ describe('AutosuggestDropdownController', () => {
       syn
         .click(input)
         .type(fixture.travel, () => {
-          var active = getCurrentActiveElements();
+          const active = getCurrentActiveElements();
           if (fixture.selectedIndex === -1) {
             assert.lengthOf(active, 0);
           } else {

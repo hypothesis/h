@@ -58,7 +58,7 @@ function canLozengify(phrase) {
 function shouldLozengify(phrase) {
   // if the phrase has a facet and value
   if (phrase.indexOf(':') >= 0) {
-    var queryTerm = getLozengeFacetNameAndValue(phrase);
+    const queryTerm = getLozengeFacetNameAndValue(phrase);
 
     if (!canLozengify(queryTerm.facetName)) {
       return false;
@@ -90,9 +90,9 @@ function shouldLozengify(phrase) {
  * getLozengeValues('foo key:"foo bar" gar "unclosed')
  */
 function getLozengeValues(queryString) {
-  var inputTerms = '';
-  var quoted;
-  var queryTerms = [];
+  let inputTerms = '';
+  let quoted;
+  const queryTerms = [];
   queryString.split(' ').forEach((term) => {
     if (quoted) {
       inputTerms = inputTerms + ' ' + term;
@@ -137,9 +137,7 @@ function hasKnownNamedQueryTerm(queryTerm) {
     'group',
     'tag'];
 
-  var facetName;
-
-  facetName = getLozengeFacetNameAndValue(queryTerm).facetName;
+  const facetName = getLozengeFacetNameAndValue(queryTerm).facetName;
 
   return knownNamedQueryTerms.indexOf(facetName) >= 0;
 }
@@ -166,8 +164,8 @@ function hasKnownNamedQueryTerm(queryTerm) {
  * getLozengeFacetNameAndValue('gar')
  */
 function getLozengeFacetNameAndValue(queryTerm) {
-  var i;
-  var lozengeFacetNameAndValue = {
+  let i;
+  const lozengeFacetNameAndValue = {
     facetName: '',
     facetValue: '',
   };

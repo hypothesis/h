@@ -30,7 +30,7 @@ class EnvironmentFlags {
    * @param {string} flag
    */
   get(flag) {
-    var flagClass = 'env-' + flag;
+    const flagClass = 'env-' + flag;
     return this._element.classList.contains(flagClass);
   }
 
@@ -44,7 +44,7 @@ class EnvironmentFlags {
    * @param {boolean} on
    */
   set(flag, on) {
-    var flagClass = 'env-' + flag;
+    const flagClass = 'env-' + flag;
     if (on) {
       this._element.classList.add(flagClass);
     } else {
@@ -62,7 +62,7 @@ class EnvironmentFlags {
    * @param {string} [url] - Optional value to use as the URL for flag overrides
    */
   init(url) {
-    var JS_LOAD_TIMEOUT = 5000;
+    const JS_LOAD_TIMEOUT = 5000;
 
     // Mark browser as JS capable
     this.set('js-capable', true);
@@ -79,7 +79,7 @@ class EnvironmentFlags {
     }, JS_LOAD_TIMEOUT);
 
     // Process flag overrides specified in URL
-    var flags = envFlagsFromUrl(url || this._element.ownerDocument.location.href);
+    const flags = envFlagsFromUrl(url || this._element.ownerDocument.location.href);
     flags.forEach((flag) => {
       if (flag.indexOf('no-') === 0) {
         this.set(flag.slice(3), false);
@@ -106,8 +106,8 @@ class EnvironmentFlags {
  * @return {Array<string>} flags
  */
 function envFlagsFromUrl(url) {
-  var match = /\b__env__=([^&]+)/.exec(url);
-  var flags = [];
+  const match = /\b__env__=([^&]+)/.exec(url);
+  let flags = [];
   if (match) {
     flags = match[1].split(';');
   }

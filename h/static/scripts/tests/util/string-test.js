@@ -1,6 +1,6 @@
 'use strict';
 
-var stringUtil = require('../../util/string');
+const stringUtil = require('../../util/string');
 
 describe('util/string', () => {
   describe('hyphenate', () => {
@@ -22,49 +22,49 @@ describe('util/string', () => {
   describe('stringUtil helpers', () => {
 
     it('removes hungarian marks', () => {
-      let text = 'Fürge rőt róka túlszökik zsíros étkű kutyán';
-      let decoded = stringUtil.fold(stringUtil.normalize(text));
-      let expected = 'Furge rot roka tulszokik zsiros etku kutyan';
+      const text = 'Fürge rőt róka túlszökik zsíros étkű kutyán';
+      const decoded = stringUtil.fold(stringUtil.normalize(text));
+      const expected = 'Furge rot roka tulszokik zsiros etku kutyan';
 
       assert.equal(decoded, expected);
     });
 
     it('removes greek marks', () => {
-      let text = 'Καλημέρα κόσμε';
-      let decoded = stringUtil.fold(stringUtil.normalize(text));
-      let expected = 'Καλημερα κοσμε';
+      const text = 'Καλημέρα κόσμε';
+      const decoded = stringUtil.fold(stringUtil.normalize(text));
+      const expected = 'Καλημερα κοσμε';
 
       assert.equal(decoded, expected);
     });
 
     it('removes japanese marks', () => {
-      let text = 'カタカナコンバータ';
-      let decoded = stringUtil.fold(stringUtil.normalize(text));
-      let expected = 'カタカナコンハータ';
+      const text = 'カタカナコンバータ';
+      const decoded = stringUtil.fold(stringUtil.normalize(text));
+      const expected = 'カタカナコンハータ';
 
       assert.equal(decoded, expected);
     });
 
     it('removes marathi marks', () => {
-      let text = 'काचं शक्नोम्यत्तुम';
-      let decoded = stringUtil.fold(stringUtil.normalize(text));
-      let expected = 'कच शकनमयततम';
+      const text = 'काचं शक्नोम्यत्तुम';
+      const decoded = stringUtil.fold(stringUtil.normalize(text));
+      const expected = 'कच शकनमयततम';
 
       assert.equal(decoded, expected);
     });
 
     it('removes thai marks', () => {
-      let text = 'ฉันกินกระจกได้ แต่มันไม่ทำให้ฉันเจ็บ';
-      let decoded = stringUtil.fold(stringUtil.normalize(text));
-      let expected = 'ฉนกนกระจกได แตมนไมทาใหฉนเจบ';
+      const text = 'ฉันกินกระจกได้ แต่มันไม่ทำให้ฉันเจ็บ';
+      const decoded = stringUtil.fold(stringUtil.normalize(text));
+      const expected = 'ฉนกนกระจกได แตมนไมทาใหฉนเจบ';
 
       assert.equal(decoded, expected);
     });
 
     it('removes all marks', () => {
-      let text = '̀ ́ ̂ ̃ ̄ ̅ ̆ ̇ ̈ ̉ ̊ ̋ ̌ ̍ ̎ ̏ ̐ ̑ ̒ ̓ ̔ ̕ ̖ ̗ ̘ ̙ ̚ ̛ ̜ ̝ ̞ ̟ ̠ ̡ ̢ ̣ ̤ ̥ ̦ ̧ ̨ ̩ ̪ ̫ ̬ ̭ ̮ ̯ ̰ ̱ ̲ ̳ ̴ ̵ ̶ ̷ ̸ ̹ ̺ ̻ ̼ ̽ ̾ ̿ ̀ ́ ͂ ̓ ̈́ ͅ ͠ ͡"';
-      let decoded = stringUtil.fold(stringUtil.normalize(text));
-      let expected = '                                                                       "';
+      const text = '̀ ́ ̂ ̃ ̄ ̅ ̆ ̇ ̈ ̉ ̊ ̋ ̌ ̍ ̎ ̏ ̐ ̑ ̒ ̓ ̔ ̕ ̖ ̗ ̘ ̙ ̚ ̛ ̜ ̝ ̞ ̟ ̠ ̡ ̢ ̣ ̤ ̥ ̦ ̧ ̨ ̩ ̪ ̫ ̬ ̭ ̮ ̯ ̰ ̱ ̲ ̳ ̴ ̵ ̶ ̷ ̸ ̹ ̺ ̻ ̼ ̽ ̾ ̿ ̀ ́ ͂ ̓ ̈́ ͅ ͠ ͡"';
+      const decoded = stringUtil.fold(stringUtil.normalize(text));
+      const expected = '                                                                       "';
 
       assert.equal(decoded, expected);
     });

@@ -2,7 +2,7 @@
 
 function CreateGroupFormController(element) {
   // Create Group form handling
-  var self = this;
+  const self = this;
   this._submitBtn = element.querySelector('.js-create-group-create-btn');
   this._groupNameInput = element.querySelector('.js-group-name-input');
   this._infoLink = element.querySelector('.js-group-info-link');

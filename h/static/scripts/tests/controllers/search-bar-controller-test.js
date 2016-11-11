@@ -1,18 +1,18 @@
 'use strict';
 
-var syn = require('syn');
-var util = require('./util');
+const syn = require('syn');
+const util = require('./util');
 
-var SearchBarController = require('../../controllers/search-bar-controller');
+const SearchBarController = require('../../controllers/search-bar-controller');
 
 
 describe('SearchBarController', () => {
   describe('Autosuggest', () => {
-    var testEl;
-    var input;
-    var dropdown;
-    var ctrl;
-    var TEMPLATE = `
+    let testEl;
+    let input;
+    let dropdown;
+    let ctrl;
+    const TEMPLATE = `
       <div>
         <form data-ref="searchBarForm">
           <div class="search-bar__lozenges" data-ref="searchBarLozenges">
@@ -22,13 +22,13 @@ describe('SearchBarController', () => {
       </div>
     `;
 
-    var getItemTitles = function() {
+    const getItemTitles = function() {
       return Array.from(dropdown.querySelectorAll('.search-bar__dropdown-menu-title')).map((node) => {
         return node.textContent.trim();
       });
     };
 
-    var setup = function() {
+    const setup = function() {
       testEl = document.createElement('div');
       testEl.innerHTML = TEMPLATE;
       document.body.appendChild(testEl);
@@ -39,21 +39,21 @@ describe('SearchBarController', () => {
       dropdown = input.nextSibling;
     };
 
-    var teardown = function() {
+    const teardown = function() {
       document.body.removeChild(testEl);
-      let tagsJSON = document.querySelector('.js-tag-suggestions');
+      const tagsJSON = document.querySelector('.js-tag-suggestions');
       if (tagsJSON) {
         tagsJSON.remove();
       }
 
-      let groupsJSON = document.querySelector('.js-group-suggestions');
+      const groupsJSON = document.querySelector('.js-group-suggestions');
       if (groupsJSON) {
         groupsJSON.remove();
       }
     };
 
-    var addTagSuggestions = function() {
-      let suggestions = [
+    const addTagSuggestions = function() {
+      const suggestions = [
         {
           tag: 'aaaa',
           count: 1,
@@ -92,14 +92,14 @@ describe('SearchBarController', () => {
         },
       ];
 
-      let tagsScript = document.createElement('script');
+      const tagsScript = document.createElement('script');
       tagsScript.innerHTML = JSON.stringify(suggestions);
       tagsScript.className = 'js-tag-suggestions';
       document.body.appendChild(tagsScript);
     };
 
-    var addGroupSuggestions = function() {
-      let suggestions = [
+    const addGroupSuggestions = function() {
+      const suggestions = [
         {
           name: 'aaac',
           pubid: 'pid1',
@@ -142,7 +142,7 @@ describe('SearchBarController', () => {
         },
       ];
 
-      let groupsScript = document.createElement('script');
+      const groupsScript = document.createElement('script');
       groupsScript.innerHTML = JSON.stringify(suggestions);
       groupsScript.className = 'js-group-suggestions';
       document.body.appendChild(groupsScript);
@@ -178,8 +178,8 @@ describe('SearchBarController', () => {
 
 
     it('allows submitting the form dropdown is open but has no selected value', (done) => {
-      let form = testEl.querySelector('form');
-      let submit = sinon.stub(form, 'submit');
+      const form = testEl.querySelector('form');
+      const submit = sinon.stub(form, 'submit');
 
       syn
         .click(input)
@@ -216,7 +216,7 @@ describe('SearchBarController', () => {
           .type('group:', () => {
             assert.isTrue(dropdown.classList.contains('is-open'));
 
-            let titles = getItemTitles();
+            const titles = getItemTitles();
 
             assert.lengthOf(titles, 5, 'we should be enforcing the 5 item max');
           })
@@ -301,7 +301,7 @@ describe('SearchBarController', () => {
           .type('tag:', () => {
             assert.isTrue(dropdown.classList.contains('is-open'));
 
-            let titles = getItemTitles();
+            const titles = getItemTitles();
 
             assert.lengthOf(titles, 5, 'we should be enforcing the 5 item max');
           })
@@ -351,7 +351,7 @@ describe('SearchBarController', () => {
   });
 
   describe('Lozenges', () => {
-    var ctrl;
+    let ctrl;
 
     afterEach(() => {
       if (ctrl) {
@@ -368,7 +368,7 @@ describe('SearchBarController', () => {
     function component(value, lozengeContent) {
       value = value || '';
       lozengeContent = lozengeContent || '';
-      var template = `
+      const template = `
         <div>
           <form data-ref="searchBarForm">
             <div class="search-bar__lozenges" data-ref="searchBarLozenges">${lozengeContent}</div>
@@ -407,7 +407,7 @@ describe('SearchBarController', () => {
     };
 
     it('should create lozenges for existing query terms in the input on page load', () => {
-      var {ctrl} = component('foo');
+      const {ctrl} = component('foo');
 
       assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
     });
@@ -486,14 +486,14 @@ describe('SearchBarController', () => {
     });
 
     it('should not create a lozenge for incomplete query strings in the input on page load', () => {
-      var {ctrl, input} = component("'bar");
+      const {ctrl, input} = component("'bar");
 
       assert.equal(getLozenges(ctrl).length, 0);
       assert.equal(input.value, "'bar");
     });
 
     it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', (done) => {
-      var {ctrl, input} = component('foo');
+      const {ctrl, input} = component('foo');
 
       syn
         .click(input)
@@ -505,7 +505,7 @@ describe('SearchBarController', () => {
     });
 
     it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', (done) => {
-      var {ctrl, input} = component("'bar gar'");
+      const {ctrl, input} = component("'bar gar'");
 
       syn
         .click(input)
@@ -517,14 +517,14 @@ describe('SearchBarController', () => {
     });
 
     it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', (done) => {
-      var {ctrl, input} = component("'bar");
+      const {ctrl, input} = component("'bar");
 
       syn
         .click(input)
         .type('[space]')
         .type('gar')
         .type('[space]', () => {
-          var lozenges = getLozenges(ctrl);
+          const lozenges = getLozenges(ctrl);
           assert.equal(lozenges.length, 0);
           assert.equal(input.value, "'bar gar ");
           done();
@@ -536,7 +536,7 @@ describe('SearchBarController', () => {
       let groupsScript;
 
       beforeEach(() => {
-        let suggestions = [{
+        const suggestions = [{
           name: 'abc 123',
           pubid: 'pid124',
         }];

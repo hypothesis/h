@@ -1,9 +1,9 @@
 'use strict';
 
-var SearchBucketController = require('../../controllers/search-bucket-controller');
-var util = require('./util');
+const SearchBucketController = require('../../controllers/search-bucket-controller');
+const util = require('./util');
 
-var TEMPLATE = [
+const TEMPLATE = [
   '<div class="js-search-bucket">',
   '<div data-ref="header"></div>',
   '<div data-ref="content"></div>',
@@ -21,7 +21,7 @@ class FakeEnvFlags {
 }
 
 describe('SearchBucketController', () => {
-  var ctrl;
+  let ctrl;
 
   beforeEach(() => {
     ctrl = util.setupComponent(document, TEMPLATE, SearchBucketController, {
@@ -59,7 +59,7 @@ describe('SearchBucketController', () => {
   });
 
   context('when initial load times out', () => {
-    var scrollTo;
+    let scrollTo;
 
     beforeEach(() => {
       scrollTo = sinon.stub();

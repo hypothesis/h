@@ -1,12 +1,12 @@
 'use strict';
 
-var escapeHtml = require('escape-html');
+const escapeHtml = require('escape-html');
 
-var Controller = require('../base/controller');
-var LozengeController = require('./lozenge-controller');
-var AutosuggestDropdownController = require('./autosuggest-dropdown-controller');
-var SearchTextParser = require('../util/search-text-parser');
-var stringUtil = require('../util/string');
+const Controller = require('../base/controller');
+const LozengeController = require('./lozenge-controller');
+const AutosuggestDropdownController = require('./autosuggest-dropdown-controller');
+const SearchTextParser = require('../util/search-text-parser');
+const stringUtil = require('../util/string');
 
 
 const FACET_TYPE = 'FACET';
@@ -19,7 +19,7 @@ const MAX_SUGGESTIONS = 5;
  * Normalize a string for use in comparisons of user input with a suggestion.
  * This causes differences in unicode composition and combining characters/accents to be ignored.
  */
-var normalizeStr = function(str) {
+const normalizeStr = function(str) {
   return stringUtil.fold(stringUtil.normalize(str));
 };
 
@@ -41,7 +41,7 @@ class SearchBarController extends Controller {
      */
     this._suggestionsMap = (() => {
 
-      let explanationList = [
+      const explanationList = [
         {
           matchOn: 'user',
           title: 'user:',
@@ -77,7 +77,7 @@ class SearchBarController extends Controller {
         }
       }
 
-      let tagsList = ((tagSuggestions) || []).map((item) => {
+      const tagsList = ((tagSuggestions) || []).map((item) => {
         return Object.assign(item, {
           type: TAG_TYPE,
           title: item.tag, // make safe
@@ -99,7 +99,7 @@ class SearchBarController extends Controller {
         }
       }
 
-      let groupsList = ((groupSuggestions) || []).map((item) => {
+      const groupsList = ((groupSuggestions) || []).map((item) => {
         return Object.assign(item, {
           type: GROUP_TYPE,
           title: item.name, // make safe
@@ -112,7 +112,7 @@ class SearchBarController extends Controller {
       return explanationList.concat(tagsList, groupsList);
     })();
 
-    var getTrimmedInputValue = () => {
+    const getTrimmedInputValue = () => {
       return this._input.value.trim();
     };
 
@@ -132,11 +132,11 @@ class SearchBarController extends Controller {
      *      input: {String}    // like group:pid1234
      *    }
      */
-    var getInputAndDisplayValsForGroup = (groupLoz) => {
+    const getInputAndDisplayValsForGroup = (groupLoz) => {
       let groupVal = groupLoz.substr(groupLoz.indexOf(':') + 1).trim();
       let inputVal = groupVal.trim();
       let displayVal = groupVal;
-      let wrapQuotesIfNeeded = function(str) {
+      const wrapQuotesIfNeeded = function(str) {
         return str.indexOf(' ') > -1 ? `"${str}"` : str;
       };
 
@@ -189,8 +189,8 @@ class SearchBarController extends Controller {
      * q parameter.
      *
      */
-    var insertHiddenInput = () => {
-      var hiddenInput = document.createElement('input');
+    const insertHiddenInput = () => {
+      const hiddenInput = document.createElement('input');
       hiddenInput.type = 'hidden';
 
       // When JavaScript isn't enabled this._input is submitted to the server
@@ -212,7 +212,7 @@ class SearchBarController extends Controller {
      * the DOM, and whenever the text in the visible input changes.
      *
      */
-    var updateHiddenInput = () => {
+    const updateHiddenInput = () => {
       let newValue = '';
       Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach((loz) => {
 
@@ -234,9 +234,9 @@ class SearchBarController extends Controller {
      *
      * @param {string} content The search term
      */
-    var addLozenge = (content) => {
+    const addLozenge = (content) => {
 
-      var deleteCallback = () => {
+      const deleteCallback = () => {
         Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach((loz) => {
           loz.classList.add('is-disabled');
         });
@@ -265,7 +265,7 @@ class SearchBarController extends Controller {
      * page load and update lozenges that are already in the lozenges container
      * so they are hooked up with the proper event handling
      */
-    var lozengifyInput = () => {
+    const lozengifyInput = () => {
 
       const {lozengeValues, incompleteInputValue} = SearchTextParser.getLozengeValues(this._input.value);
 
@@ -276,7 +276,7 @@ class SearchBarController extends Controller {
     };
 
 
-    var onInputKeyDown = (event) => {
+    const onInputKeyDown = (event) => {
       const SPACE_KEY_CODE = 32;
 
       if (event.keyCode === SPACE_KEY_CODE) {
@@ -358,8 +358,8 @@ class SearchBarController extends Controller {
           // index values or there is no current input value
 
           if (inputFilter) {
-            let aIndex = a.matchOn.indexOf(inputFilter);
-            let bIndex = b.matchOn.indexOf(inputFilter);
+            const aIndex = a.matchOn.indexOf(inputFilter);
+            const bIndex = b.matchOn.indexOf(inputFilter);
 
             // match score
             if (aIndex > bIndex) {

@@ -1,13 +1,13 @@
 'use strict';
 
-var LozengeController = require('../../controllers/lozenge-controller');
+const LozengeController = require('../../controllers/lozenge-controller');
 
 describe('LozengeController', () => {
-  var el;
-  var opts;
-  var lozengeEl;
-  var lozengeContentEl;
-  var lozengeDeleteEl;
+  let el;
+  let opts;
+  let lozengeEl;
+  let lozengeContentEl;
+  let lozengeDeleteEl;
 
   beforeEach(() => {
     el = document.createElement('div');
@@ -27,9 +27,6 @@ describe('LozengeController', () => {
   });
 
   it('creates a new lozenge for a known named query term inside the container provided', () => {
-    var facetNameEl;
-    var facetValueEl;
-
     el = document.createElement('div');
     opts = {
       content: 'user:foo',
@@ -38,8 +35,8 @@ describe('LozengeController', () => {
     new LozengeController(el, opts);
     lozengeEl = el.querySelector('.js-lozenge');
     lozengeContentEl = lozengeEl.querySelector('.js-lozenge__content');
-    facetNameEl = lozengeContentEl.querySelector('.lozenge__facet-name');
-    facetValueEl = lozengeContentEl.querySelector('.lozenge__facet-value');
+    const facetNameEl = lozengeContentEl.querySelector('.lozenge__facet-name');
+    const facetValueEl = lozengeContentEl.querySelector('.lozenge__facet-value');
 
     assert.equal(facetNameEl.textContent, 'user');
     assert.equal(facetValueEl.textContent, 'foo');

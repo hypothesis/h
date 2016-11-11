@@ -10,9 +10,9 @@
  * @return {Controller} - The controller instance
  */
 function setupComponent(document, template, ControllerClass, options) {
-  var container = document.createElement('div');
+  const container = document.createElement('div');
   container.innerHTML = template;
-  var root = container.firstChild;
+  const root = container.firstChild;
   document.body.appendChild(root);
   container.remove();
   return new ControllerClass(root, options);

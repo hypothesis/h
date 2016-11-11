@@ -4,8 +4,8 @@
  * Mark an element as having been upgraded.
  */
 function markReady(element) {
-  var HIDE_CLASS = 'is-hidden-when-loading';
-  var hideOnLoad = Array.from(element.querySelectorAll('.' + HIDE_CLASS));
+  const HIDE_CLASS = 'is-hidden-when-loading';
+  const hideOnLoad = Array.from(element.querySelectorAll('.' + HIDE_CLASS));
   hideOnLoad.forEach((el) => {
     el.classList.remove(HIDE_CLASS);
   });
@@ -13,7 +13,7 @@ function markReady(element) {
 }
 
 // List of all elements which have had upgrades applied
-var upgradedElements = [];
+let upgradedElements = [];
 
 /**
  * Remove all of the controllers for elements under `root`.
@@ -56,19 +56,19 @@ function upgradeElements(root, controllers) {
     if (typeof html !== 'string') {
       throw new Error('Replacement markup must be a string');
     }
-    var container = document.createElement('div');
+    const container = document.createElement('div');
     container.innerHTML = html;
     upgradeElements(container, controllers);
 
-    var newElement = container.children[0];
+    const newElement = container.children[0];
     element.parentElement.replaceChild(newElement, element);
     return newElement;
   }
 
   Object.keys(controllers).forEach((selector) => {
-    var elements = Array.from(root.querySelectorAll(selector));
+    const elements = Array.from(root.querySelectorAll(selector));
     elements.forEach((el) => {
-      var ControllerClass = controllers[selector];
+      const ControllerClass = controllers[selector];
       try {
         new ControllerClass(el, {
           reload: reload.bind(null, el),

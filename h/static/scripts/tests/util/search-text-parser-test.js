@@ -1,7 +1,7 @@
 'use strict';
 
-var searchTextParser = require('../../util/search-text-parser');
-var unroll = require('../util').unroll;
+const searchTextParser = require('../../util/search-text-parser');
+const unroll = require('../util').unroll;
 
 describe('SearchTextParser', () => {
   unroll('should create a lozenge #input', (fixture) => {
