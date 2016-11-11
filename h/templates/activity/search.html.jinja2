@@ -224,6 +224,28 @@
       {{ panel('group_invite', group.url) }}
     </aside>
     {% endif %}
+
+    <section class="search-result-sidebar__section">
+      <h3 class="search-result-sidebar__subtitle">
+        Tags
+        <span class="search-result-sidebar__subtitle-count">
+          {{ aggregations['tags'] | length }}
+        </span>
+      </h3>
+      <div class="search-result-tags">
+        {% for tag in aggregations.tags %}
+          <div class="search-result-tag js-tag">
+            <div class="search-result-tag__name">
+              {{ tag.tag }}
+            </div>
+            <div class="search-result-tag__count">
+              {{ tag.count }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
   </div>
 
   {% if not more_info and page and page.max > 1 %}
