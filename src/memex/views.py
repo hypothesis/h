@@ -39,7 +39,8 @@ cors_policy = cors.policy(
         'X-Annotator-Auth-Token',
         'X-Client-Id',
     ),
-    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
+    allow_preflight=True)
 
 
 class APIError(Exception):
@@ -71,6 +72,14 @@ def api_config(**settings):
     settings.setdefault('accept', 'application/json')
     settings.setdefault('renderer', 'json')
     settings.setdefault('decorator', cors_policy)
+
+    request_method = settings.get('request_method', ())
+    if not isinstance(request_method, tuple):
+        request_method = (request_method,)
+    if len(request_method) == 0:
+        request_method = ('DELETE', 'GET', 'HEAD', 'POST', 'PUT',)
+    settings['request_method'] = request_method + ('OPTIONS',)
+
     return view_config(**settings)
 
 

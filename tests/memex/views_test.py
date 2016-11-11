@@ -35,6 +35,51 @@ class TestError(object):
         assert pyramid_request.response.status_code == 400
 
 
+@pytest.mark.usefixtures('view_config')
+class TestApiConfigDecorator(object):
+    def test_it_sets_accept_setting(self):
+        settings = views.api_config()
+        assert settings['accept'] == 'application/json'
+
+    def test_it_allows_accept_setting_override(self):
+        settings = views.api_config(accept='application/xml')
+        assert settings['accept'] == 'application/xml'
+
+    def test_it_sets_renderer_setting(self):
+        settings = views.api_config()
+        assert settings['renderer'] == 'json'
+
+    def test_it_allows_renderer_setting_override(self):
+        settings = views.api_config(renderer='xml')
+        assert settings['renderer'] == 'xml'
+
+    def test_it_sets_cors_decorator(self):
+        settings = views.api_config()
+        assert settings['decorator'] == views.cors_policy
+
+    def test_it_allows_decorator_override(self):
+        decorator = mock.Mock()
+        settings = views.api_config(decorator=decorator)
+        assert settings['decorator'] == decorator
+
+    def test_it_adds_OPTIONS_to_allowed_request_methods(self):
+        settings = views.api_config(request_method='DELETE')
+        assert settings['request_method'] == ('DELETE', 'OPTIONS')
+
+    def test_it_adds_all_request_methods_when_not_defined(self):
+        settings = views.api_config()
+        assert settings['request_method'] == (
+            'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS')
+
+    @pytest.fixture
+    def view_config(self, patch):
+        def _return_kwargs(**kwargs):
+            return kwargs
+        json_view = patch('memex.views.view_config')
+        json_view.side_effect = _return_kwargs
+        return json_view
+
+
 class TestIndex(object):
 
     def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):

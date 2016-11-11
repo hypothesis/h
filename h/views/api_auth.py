@@ -4,10 +4,10 @@ from __future__ import unicode_literals
 
 from h.auth.services import TOKEN_TTL
 from h.exceptions import OAuthTokenError
-from h.util.view import json_view
+from h.util.view import cors_json_view
 
 
-@json_view(route_name='token', request_method='POST')
+@cors_json_view(route_name='token', request_method='POST')
 def access_token(request):
     svc = request.find_service(name='oauth')
 
@@ -23,7 +23,7 @@ def access_token(request):
     }
 
 
-@json_view(context=OAuthTokenError)
+@cors_json_view(context=OAuthTokenError)
 def api_token_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code
