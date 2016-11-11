@@ -11,7 +11,8 @@ cors_policy = cors.policy(
         'Authorization',
         'Content-Type',
     ),
-    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
+    allow_preflight=True)
 
 
 def handle_exception(request):
@@ -38,4 +39,12 @@ def cors_json_view(**settings):
     CORS with Authorization and Content-Type headers.
     """
     settings.setdefault('decorator', cors_policy)
+
+    request_method = settings.get('request_method', ())
+    if not isinstance(request_method, tuple):
+        request_method = (request_method,)
+    if len(request_method) == 0:
+        request_method = ('DELETE', 'GET', 'HEAD', 'POST', 'PUT',)
+    settings['request_method'] = request_method + ('OPTIONS',)
+
     return json_view(**settings)

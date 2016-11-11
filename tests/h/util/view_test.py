@@ -87,6 +87,14 @@ class TestCorsJsonView(object):
         settings = cors_json_view()
         assert settings['decorator'] == cors_policy
 
+    def test_it_adds_OPTIONS_to_allowed_request_methods(self):
+        settings = cors_json_view(request_method='POST')
+        assert settings['request_method'] == ('POST', 'OPTIONS')
+
+    def test_it_adds_all_request_methods_when_not_defined(self):
+        settings = cors_json_view()
+        assert settings['request_method'] == ('DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS')
+
     @pytest.fixture
     def json_view(self, patch):
         def _return_kwargs(**kwargs):
