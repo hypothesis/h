@@ -17,7 +17,7 @@ if (window.chrome !== undefined) {
 
 var bookmarkletInstaller = document.getElementById('js-bookmarklet-install');
 if (bookmarkletInstaller) {
-  bookmarkletInstaller.addEventListener('click', function (event) {
+  bookmarkletInstaller.addEventListener('click', (event) => {
     window.alert('Drag me to the bookmarks bar');
     event.preventDefault();
   });
@@ -25,7 +25,7 @@ if (bookmarkletInstaller) {
 
 var chromeextInstaller = document.getElementById('js-chrome-extension-install');
 if (chromeextInstaller) {
-  chromeextInstaller.addEventListener('click', function (event) {
+  chromeextInstaller.addEventListener('click', (event) => {
     window.chrome.webstore.install();
     event.preventDefault();
   });

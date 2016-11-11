@@ -2,18 +2,18 @@
 
 var TooltipController = require('../../controllers/tooltip-controller');
 
-describe('TooltipController', function () {
+describe('TooltipController', () => {
   var targetEl;
   var template;
   var testEl;
   var tooltipEl;
 
-  before(function () {
+  before(() => {
     template = '<div class="form-input__hint-icon js-tooltip"' +
      'aria-label="Test"></div>';
   });
 
-  beforeEach(function () {
+  beforeEach(() => {
     testEl = document.createElement('div');
     testEl.innerHTML = template;
 
@@ -24,17 +24,17 @@ describe('TooltipController', function () {
   });
 
 
-  it('appears when the target is hovered', function () {
+  it('appears when the target is hovered', () => {
     targetEl.dispatchEvent(new Event('mouseover'));
     assert.equal(tooltipEl.style.visibility, '');
   });
 
-  it('sets the label from the target\'s "aria-label" attribute', function () {
+  it('sets the label from the target\'s "aria-label" attribute', () => {
     targetEl.dispatchEvent(new Event('mouseover'));
     assert.equal(tooltipEl.textContent, 'Test');
   });
 
-  it('disappears when the target is unhovered', function () {
+  it('disappears when the target is unhovered', () => {
     targetEl.dispatchEvent(new Event('mouseout'));
     assert.equal(tooltipEl.style.visibility, 'hidden');
   });

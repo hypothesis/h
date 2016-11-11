@@ -11,21 +11,21 @@ function sendEvent(element, eventType) {
   element.dispatchEvent(event);
 }
 
-describe('FormSelectOnFocusController', function() {
+describe('FormSelectOnFocusController', () => {
   var root;
 
-  beforeEach(function() {
+  beforeEach(() => {
     root = document.createElement('div');
     root.innerHTML = '<form id="js-users-delete-form">' +
                      '<input type="text" class="js-select-onfocus" value="some-test-value">';
     document.body.appendChild(root);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     root.parentNode.removeChild(root);
   });
 
-  it('it selects the element on focus event', function() {
+  it('it selects the element on focus event', () => {
     new FormSelectOnFocusController(root);
     var input = root.querySelector('input');
     sendEvent(input, 'focus');
@@ -33,7 +33,7 @@ describe('FormSelectOnFocusController', function() {
     assert.strictEqual(input.selectionEnd, input.value.length);
   });
 
-  it('it selects the element without focus event when it is the active element', function() {
+  it('it selects the element without focus event when it is the active element', () => {
     // Focus element before instantiating the controller
     var input = root.querySelector('input');
     input.focus();

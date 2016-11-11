@@ -2,7 +2,7 @@
 
 var domUtil = require('../../util/dom');
 
-describe('util/dom', function () {
+describe('util/dom', () => {
   function createDOM(html) {
     var el = document.createElement('div');
     el.innerHTML = html;
@@ -12,8 +12,8 @@ describe('util/dom', function () {
     return child;
   }
 
-  describe('findRefs', function () {
-    it('returns a map of name to DOM element', function () {
+  describe('findRefs', () => {
+    it('returns a map of name to DOM element', () => {
       var root = createDOM(`
         <div>
           <label data-ref="label">Input label</label>
@@ -29,7 +29,7 @@ describe('util/dom', function () {
       });
     });
 
-    it('allows elements to have more than one name', function () {
+    it('allows elements to have more than one name', () => {
       var root = createDOM('<div><div data-ref="one two"></div></div>');
       assert.deepEqual(domUtil.findRefs(root), {
         one: root.firstChild,
@@ -38,8 +38,8 @@ describe('util/dom', function () {
     });
   });
 
-  describe('setElementState', function () {
-    it('adds "is-$state" classes for keys with truthy values', function () {
+  describe('setElementState', () => {
+    it('adds "is-$state" classes for keys with truthy values', () => {
       var btn = createDOM('<button></button>');
       domUtil.setElementState(btn, {
         visible: true,
@@ -47,7 +47,7 @@ describe('util/dom', function () {
       assert.deepEqual(Array.from(btn.classList), ['is-visible']);
     });
 
-    it('removes "is-$state" classes for keys with falsey values', function () {
+    it('removes "is-$state" classes for keys with falsey values', () => {
       var btn = createDOM('<button class="is-hidden"></button>');
       domUtil.setElementState(btn, {
         hidden: false,

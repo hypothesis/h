@@ -4,6 +4,7 @@
     "arrow-parens": ["error", "as-needed", { "requireForBlockBody": true }],
     "arrow-spacing": "error",
     "keyword-spacing": "error",
+    "prefer-arrow-callback": "error",
     "space-before-blocks": "error"
   }
 }

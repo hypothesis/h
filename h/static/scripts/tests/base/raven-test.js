@@ -3,11 +3,11 @@
 var proxyquire = require('proxyquire');
 var noCallThru = require('../util').noCallThru;
 
-describe('raven', function () {
+describe('raven', () => {
   var fakeRavenJS;
   var raven;
 
-  beforeEach(function () {
+  beforeEach(() => {
     fakeRavenJS = {
       config: sinon.stub().returns({
         install: sinon.stub(),
@@ -21,8 +21,8 @@ describe('raven', function () {
     }));
   });
 
-  describe('.install()', function () {
-    it('installs a handler for uncaught promises', function () {
+  describe('.install()', () => {
+    it('installs a handler for uncaught promises', () => {
       raven.init({
         dsn: 'dsn',
         release: 'release',
@@ -37,8 +37,8 @@ describe('raven', function () {
     });
   });
 
-  describe('.report()', function () {
-    it('extracts the message property from Error-like objects', function () {
+  describe('.report()', () => {
+    it('extracts the message property from Error-like objects', () => {
       raven.report({message: 'An error'}, 'context');
       assert.calledWith(fakeRavenJS.captureException, 'An error', {
         extra: {
@@ -47,7 +47,7 @@ describe('raven', function () {
       });
     });
 
-    it('passes extra details through', function () {
+    it('passes extra details through', () => {
       var error = new Error('an error');
       raven.report(error, 'some operation', { url: 'foobar.com' });
       assert.calledWith(fakeRavenJS.captureException, error, {

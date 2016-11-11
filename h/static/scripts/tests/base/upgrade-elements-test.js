@@ -9,8 +9,8 @@ class TestController extends Controller {
   }
 }
 
-describe('upgradeElements', function () {
-  it('should upgrade elements matching selectors', function () {
+describe('upgradeElements', () => {
+  it('should upgrade elements matching selectors', () => {
     var root = document.createElement('div');
     root.innerHTML = '<div class="js-test"></div>';
 
@@ -19,7 +19,7 @@ describe('upgradeElements', function () {
     assert.instanceOf(root.children[0].controllers[0], TestController);
   });
 
-  it('should unhide elements hidden until upgrade', function () {
+  it('should unhide elements hidden until upgrade', () => {
     var root = document.createElement('div');
     root.innerHTML = '<div class="js-test is-hidden-when-loading"></div>';
 
@@ -28,7 +28,7 @@ describe('upgradeElements', function () {
     assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
   });
 
-  it('should unhide child elements hidden until upgrade', function () {
+  it('should unhide child elements hidden until upgrade', () => {
     var root = document.createElement('div');
     root.innerHTML = '<div class="js-test">' +
                      '<span class="is-hidden-when-loading"></span>' +
@@ -39,7 +39,7 @@ describe('upgradeElements', function () {
     assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
   });
 
-  describe('reload function', function () {
+  describe('reload function', () => {
     var newContent = '<div class="js-test">Reloaded element</div>';
 
     function setupAndReload() {
@@ -52,24 +52,24 @@ describe('upgradeElements', function () {
       return {root: root, reloadResult: reloadResult};
     }
 
-    it('replaces element markup', function () {
+    it('replaces element markup', () => {
       var root = setupAndReload().root;
       assert.equal(root.innerHTML, newContent);
     });
 
-    it('returns the replaced element', function () {
+    it('returns the replaced element', () => {
       var result = setupAndReload();
       assert.equal(result.root.children[0], result.reloadResult);
     });
 
-    it('re-applies element upgrades', function () {
+    it('re-applies element upgrades', () => {
       var root = setupAndReload().root;
       var replacedElement = root.children[0];
       var ctrl = replacedElement.controllers[0];
       assert.instanceOf(ctrl, TestController);
     });
 
-    it('calls #beforeRemove on the original controllers', function () {
+    it('calls #beforeRemove on the original controllers', () => {
       var root = document.createElement('div');
       root.innerHTML = '<div class="js-test">Original content</div>';
       upgradeElements(root, {'.js-test': TestController});

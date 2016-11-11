@@ -10,18 +10,18 @@ var TEMPLATE = [
   '</div>',
 ].join('\n');
 
-describe('DropdownMenuController', function () {
+describe('DropdownMenuController', () => {
   var ctrl;
   var toggleEl;
   var menuEl;
 
-  beforeEach(function () {
+  beforeEach(() => {
     ctrl = util.setupComponent(document, TEMPLATE, DropdownMenuController);
     toggleEl = ctrl.refs.dropdownMenuToggle;
     menuEl = ctrl.refs.dropdownMenuContent;
   });
 
-  afterEach(function () {
+  afterEach(() => {
     ctrl.element.remove();
   });
 
@@ -29,20 +29,20 @@ describe('DropdownMenuController', function () {
     return menuEl.classList.contains('is-open');
   }
 
-  it('should toggle menu on click', function () {
+  it('should toggle menu on click', () => {
     toggleEl.dispatchEvent(new Event('click'));
     assert.isTrue(isOpen());
     toggleEl.dispatchEvent(new Event('click'));
     assert.isFalse(isOpen());
   });
 
-  it('should close menu on click outside', function () {
+  it('should close menu on click outside', () => {
     toggleEl.dispatchEvent(new Event('click'));
     document.body.dispatchEvent(new Event('click'));
     assert.isFalse(isOpen());
   });
 
-  it('should not close menu on click inside', function () {
+  it('should not close menu on click inside', () => {
     toggleEl.dispatchEvent(new Event('click'));
     menuEl.dispatchEvent(new Event('click'));
     assert.isTrue(isOpen());

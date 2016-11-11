@@ -6,7 +6,7 @@
 function markReady(element) {
   var HIDE_CLASS = 'is-hidden-when-loading';
   var hideOnLoad = Array.from(element.querySelectorAll('.' + HIDE_CLASS));
-  hideOnLoad.forEach(function (el) {
+  hideOnLoad.forEach((el) => {
     el.classList.remove(HIDE_CLASS);
   });
   element.classList.remove(HIDE_CLASS);
@@ -65,9 +65,9 @@ function upgradeElements(root, controllers) {
     return newElement;
   }
 
-  Object.keys(controllers).forEach(function (selector) {
+  Object.keys(controllers).forEach((selector) => {
     var elements = Array.from(root.querySelectorAll(selector));
-    elements.forEach(function (el) {
+    elements.forEach((el) => {
       var ControllerClass = controllers[selector];
       try {
         new ControllerClass(el, {

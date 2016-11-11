@@ -8,9 +8,9 @@
  * as expected in tests.
  */
 function toResult(promise) {
-  return promise.then(function (result) {
+  return promise.then((result) => {
     return { result: result };
-  }).catch(function (err) {
+  }).catch((err) => {
     return { error: err };
   });
 }

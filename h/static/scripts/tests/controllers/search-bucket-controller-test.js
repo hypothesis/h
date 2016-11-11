@@ -20,48 +20,48 @@ class FakeEnvFlags {
   }
 }
 
-describe('SearchBucketController', function () {
+describe('SearchBucketController', () => {
   var ctrl;
 
-  beforeEach(function () {
+  beforeEach(() => {
     ctrl = util.setupComponent(document, TEMPLATE, SearchBucketController, {
       envFlags: new FakeEnvFlags(),
     });
   });
 
-  afterEach(function () {
+  afterEach(() => {
     ctrl.element.remove();
   });
 
-  it('does not have the is-expanded CSS class initially', function () {
+  it('does not have the is-expanded CSS class initially', () => {
     assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
   });
 
-  it('adds the is-expanded CSS class when clicked', function () {
+  it('adds the is-expanded CSS class when clicked', () => {
     ctrl.refs.header.dispatchEvent(new Event('click'));
     assert.isTrue(ctrl.refs.content.classList.contains('is-expanded'));
   });
 
-  it('removes the is-expanded CSS class when clicked again', function () {
+  it('removes the is-expanded CSS class when clicked again', () => {
     ctrl.refs.header.dispatchEvent(new Event('click'));
     ctrl.refs.header.dispatchEvent(new Event('click'));
     assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
   });
 
-  it('scrolls element into view when expanded', function () {
+  it('scrolls element into view when expanded', () => {
     ctrl.scrollTo = sinon.stub();
     ctrl.refs.header.dispatchEvent(new Event('click'));
     assert.calledWith(ctrl.scrollTo, ctrl.element);
   });
 
-  it('collapses search results on initial load', function () {
+  it('collapses search results on initial load', () => {
     assert.isFalse(ctrl.state.expanded);
   });
 
-  context('when initial load times out', function () {
+  context('when initial load times out', () => {
     var scrollTo;
 
-    beforeEach(function () {
+    beforeEach(() => {
       scrollTo = sinon.stub();
       ctrl = util.setupComponent(document, TEMPLATE, SearchBucketController, {
         scrollTo: scrollTo,
@@ -69,11 +69,11 @@ describe('SearchBucketController', function () {
       });
     });
 
-    it('does not scroll page on initial load', function () {
+    it('does not scroll page on initial load', () => {
       assert.notCalled(scrollTo);
     });
 
-    it('expands bucket on initial load', function () {
+    it('expands bucket on initial load', () => {
       assert.isTrue(ctrl.state.expanded);
     });
   });

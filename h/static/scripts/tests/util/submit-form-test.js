@@ -4,7 +4,7 @@ var fetchMock = require('fetch-mock');
 
 var submitForm = require('../../util/submit-form');
 
-describe('submitForm', function () {
+describe('submitForm', () => {
   var FORM_URL = 'http://example.org/things';
 
   function mockResponse(response) {
@@ -19,27 +19,27 @@ describe('submitForm', function () {
     return form;
   }
 
-  it('submits the form data', function () {
+  it('submits the form data', () => {
     var form = createForm();
     mockResponse('<form><!-- updated form !--></form>');
 
-    return submitForm(form, fetchMock.fetchMock).then(function () {
+    return submitForm(form, fetchMock.fetchMock).then(() => {
       var [,requestInit] = fetchMock.lastCall(FORM_URL);
       assert.instanceOf(requestInit.body, FormData);
     });
   });
 
-  it('returns the markup for the updated form if validation succeeds', function () {
+  it('returns the markup for the updated form if validation succeeds', () => {
     var form = createForm();
     var responseBody = '<form><!-- updated form !--></form>';
     mockResponse(responseBody);
 
-    return submitForm(form, fetchMock.fetchMock).then(function (response) {
+    return submitForm(form, fetchMock.fetchMock).then((response) => {
       assert.equal(response.form, responseBody);
     });
   });
 
-  it('rejects with the updated form markup if validation fails', function () {
+  it('rejects with the updated form markup if validation fails', () => {
     var form = createForm();
     mockResponse({status: 400, body: 'response'});
 
@@ -50,7 +50,7 @@ describe('submitForm', function () {
     });
   });
 
-  it('rejects with an error message if submission fails', function () {
+  it('rejects with an error message if submission fails', () => {
     var form = createForm();
     mockResponse({status: 500, statusText: 'Internal Server Error'});
 

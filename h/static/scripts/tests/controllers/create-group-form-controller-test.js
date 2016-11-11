@@ -15,23 +15,23 @@ function sendEvent(element, eventType) {
   element.dispatchEvent(event);
 }
 
-describe('CreateGroupFormController', function () {
+describe('CreateGroupFormController', () => {
   var element;
   var template;
 
-  before(function () {
+  before(() => {
     template = '<input type="text" class="js-group-name-input">' +
                '<input type="submit" class="js-create-group-create-btn">' +
                '<a href="" class="js-group-info-link">Tell me more!</a>' +
                '<div class="js-group-info-text is-hidden">More!</div>';
   });
 
-  beforeEach(function () {
+  beforeEach(() => {
     element = document.createElement('div');
     element.innerHTML = template;
   });
 
-  it('should enable submission if form is valid', function () {
+  it('should enable submission if form is valid', () => {
     var controller = new CreateGroupFormController(element);
     controller._groupNameInput.value = '';
     sendEvent(controller._groupNameInput, 'input');
@@ -41,7 +41,7 @@ describe('CreateGroupFormController', function () {
     assert.equal(controller._submitBtn.disabled, false);
   });
 
-  it('should toggle info text when explain link is clicked', function () {
+  it('should toggle info text when explain link is clicked', () => {
     var controller = new CreateGroupFormController(element);
     assert.equal(isHidden(controller._infoText), true);
     sendEvent(controller._infoLink, 'click');

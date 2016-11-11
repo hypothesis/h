@@ -3,11 +3,11 @@
 var ConfirmSubmitController = require('../../controllers/confirm-submit-controller');
 var util = require('./util');
 
-describe('ConfirmSubmitController', function () {
+describe('ConfirmSubmitController', () => {
 
   var ctrl;
 
-  afterEach(function () {
+  afterEach(() => {
     if (ctrl) {
       ctrl.element.remove();
       ctrl = null;
@@ -50,7 +50,7 @@ describe('ConfirmSubmitController', function () {
     return event;
   }
 
-  it('shows a confirm dialog using the text from the data-confirm-message attribute', function () {
+  it('shows a confirm dialog using the text from the data-confirm-message attribute', () => {
     var {ctrl, fakeWindow, confirmMessage} = component(true);
 
     ctrl.element.dispatchEvent(new Event('click'));
@@ -59,7 +59,7 @@ describe('ConfirmSubmitController', function () {
     assert.calledWithExactly(fakeWindow.confirm, confirmMessage);
   });
 
-  it('prevents form submission if the user refuses the confirm dialog', function () {
+  it('prevents form submission if the user refuses the confirm dialog', () => {
     var ctrl = component(false).ctrl;
     var event = fakeEvent();
 
@@ -70,7 +70,7 @@ describe('ConfirmSubmitController', function () {
     assert.called(event.stopImmediatePropagation);
   });
 
-  it('allows form submission if the user confirms the confirm dialog', function () {
+  it('allows form submission if the user confirms the confirm dialog', () => {
     var ctrl = component(true).ctrl;
     var event = fakeEvent();
 

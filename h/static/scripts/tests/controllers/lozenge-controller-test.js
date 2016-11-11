@@ -2,14 +2,14 @@
 
 var LozengeController = require('../../controllers/lozenge-controller');
 
-describe('LozengeController', function () {
+describe('LozengeController', () => {
   var el;
   var opts;
   var lozengeEl;
   var lozengeContentEl;
   var lozengeDeleteEl;
 
-  beforeEach(function () {
+  beforeEach(() => {
     el = document.createElement('div');
     opts = {
       content: 'foo',
@@ -22,11 +22,11 @@ describe('LozengeController', function () {
     lozengeDeleteEl = lozengeEl.querySelector('.js-lozenge__close');
   });
 
-  it('creates a new lozenge inside the container provided', function () {
+  it('creates a new lozenge inside the container provided', () => {
     assert.equal(lozengeContentEl.textContent, opts.content);
   });
 
-  it('creates a new lozenge for a known named query term inside the container provided', function () {
+  it('creates a new lozenge for a known named query term inside the container provided', () => {
     var facetNameEl;
     var facetValueEl;
 
@@ -45,7 +45,7 @@ describe('LozengeController', function () {
     assert.equal(facetValueEl.textContent, 'foo');
   });
 
-  it('does not create a new lozenge for named query term which is not known', function () {
+  it('does not create a new lozenge for named query term which is not known', () => {
     el = document.createElement('div');
     opts = {
       content: 'foo:bar',
@@ -60,7 +60,7 @@ describe('LozengeController', function () {
     assert.equal(lozengeContentEl.textContent, opts.content);
   });
 
-  it('removes the lozenge and executes the delete callback provided', function () {
+  it('removes the lozenge and executes the delete callback provided', () => {
     lozengeDeleteEl.dispatchEvent(new Event('mousedown'));
     assert(opts.deleteCallback.calledOnce);
     assert.isNull(el.querySelector('.js-lozenge'));

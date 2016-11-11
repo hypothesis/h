@@ -3,11 +3,11 @@
 var CharacterLimitController = require('../../controllers/character-limit-controller');
 var util = require('./util');
 
-describe('CharacterLimitController', function () {
+describe('CharacterLimitController', () => {
 
   var ctrl;
 
-  afterEach(function () {
+  afterEach(() => {
     if (ctrl) {
       ctrl.element.remove();
       ctrl = null;
@@ -38,25 +38,25 @@ describe('CharacterLimitController', function () {
     };
   }
 
-  it('adds the ready class', function () {
+  it('adds the ready class', () => {
     var counterEl = component().counterEl;
 
     assert.equal(counterEl.classList.contains('is-ready'), true);
   });
 
-  it('shows the counter initially even if textarea empty', function () {
+  it('shows the counter initially even if textarea empty', () => {
     var counterEl = component().counterEl;
 
     assert.equal(counterEl.innerHTML, '0/250');
   });
 
-  it('shows the counter if the element has pre-rendered text', function () {
+  it('shows the counter if the element has pre-rendered text', () => {
     var counterEl = component('pre-rendered').counterEl;
 
     assert.equal(counterEl.innerHTML, '12/250');
   });
 
-  it('continues to show the container after text deleted', function() {
+  it('continues to show the container after text deleted', () => {
     var parts = component();
     var counterEl = parts.counterEl;
     var textarea = parts.textarea;
@@ -72,13 +72,13 @@ describe('CharacterLimitController', function () {
     assert.equal(counterEl.innerHTML, '0/250');
   });
 
-  it('reads the max length from the data-maxlength attribute', function () {
+  it('reads the max length from the data-maxlength attribute', () => {
     var counterEl = component('foo', 500).counterEl;
 
     assert.equal(counterEl.innerHTML, '3/500');
   });
 
-  it('updates the counter when text is added on "input" events', function () {
+  it('updates the counter when text is added on "input" events', () => {
     var parts = component();
     var textarea = parts.textarea;
     var counterEl = parts.counterEl;
@@ -89,7 +89,7 @@ describe('CharacterLimitController', function () {
     assert.equal(counterEl.innerHTML, '7/250');
   });
 
-  it('updates the counter when text is removed on "input" events', function () {
+  it('updates the counter when text is removed on "input" events', () => {
     var parts = component('Testing testing');
     var textarea = parts.textarea;
     var counterEl = parts.counterEl;
@@ -101,28 +101,28 @@ describe('CharacterLimitController', function () {
     assert.equal(counterEl.innerHTML, '7/250');
   });
 
-  it('does not add error class when no pre-rendered text', function() {
+  it('does not add error class when no pre-rendered text', () => {
     var counterEl = component(null, 5).counterEl;
 
     assert.equal(counterEl.classList.contains('is-too-long'),
                  false);
   });
 
-  it('does not add error class when pre-rendered text short enough', function() {
+  it('does not add error class when pre-rendered text short enough', () => {
     var counterEl = component('foo', 5).counterEl;
 
     assert.equal(counterEl.classList.contains('is-too-long'),
                  false);
   });
 
-  it('adds an error class to the counter when pre-rendered value too long', function() {
+  it('adds an error class to the counter when pre-rendered value too long', () => {
     var counterEl = component('Too long', 5).counterEl;
 
     assert.equal(counterEl.classList.contains('is-too-long'),
                  true);
   });
 
-  it('adds an error class to the counter when too much text entered', function() {
+  it('adds an error class to the counter when too much text entered', () => {
     var parts = component(null, 5);
     var counterEl = parts.counterEl;
     var textarea = parts.textarea;
@@ -134,7 +134,7 @@ describe('CharacterLimitController', function () {
                  true);
   });
 
-  it('removes error class from counter when text reduced', function() {
+  it('removes error class from counter when text reduced', () => {
     var parts = component('too long', 6);
     var counterEl = parts.counterEl;
     var textarea = parts.textarea;

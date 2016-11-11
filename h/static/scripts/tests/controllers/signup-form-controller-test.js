@@ -8,19 +8,19 @@ var TEMPLATE = `
   </form>
   `;
 
-describe('SignupFormController', function () {
+describe('SignupFormController', () => {
   var element;
   var form;
   var submitBtn;
 
-  beforeEach(function () {
+  beforeEach(() => {
     element = document.createElement('div');
     element.innerHTML = TEMPLATE;
     form = element.querySelector('.js-signup-form');
     submitBtn = element.querySelector('.js-signup-btn');
   });
 
-  it('disables the submit button on form submit', function () {
+  it('disables the submit button on form submit', () => {
     new SignupFormController(form);
     assert.isFalse(submitBtn.disabled);
     form.dispatchEvent(new Event('submit'));

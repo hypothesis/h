@@ -237,7 +237,7 @@ class SearchBarController extends Controller {
     var addLozenge = (content) => {
 
       var deleteCallback = () => {
-        Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach(function(loz) {
+        Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach((loz) => {
           loz.classList.add('is-disabled');
         });
         updateHiddenInput();

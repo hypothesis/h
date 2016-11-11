@@ -3,8 +3,8 @@
 var searchTextParser = require('../../util/search-text-parser');
 var unroll = require('../util').unroll;
 
-describe('SearchTextParser', function () {
-  unroll('should create a lozenge #input', function (fixture) {
+describe('SearchTextParser', () => {
+  unroll('should create a lozenge #input', (fixture) => {
     assert.isTrue(searchTextParser.shouldLozengify(fixture.input));
   },[
     {input: 'foo'},
@@ -22,7 +22,7 @@ describe('SearchTextParser', function () {
     {input: 'foo\'bar:'},
   ]);
 
-  unroll('should not create a lozenge for', function (fixture) {
+  unroll('should not create a lozenge for', (fixture) => {
     assert.isFalse(searchTextParser.shouldLozengify(fixture.input));
   },[
     {input: 'foo\''},

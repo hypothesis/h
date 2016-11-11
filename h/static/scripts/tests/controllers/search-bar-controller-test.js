@@ -6,8 +6,8 @@ var util = require('./util');
 var SearchBarController = require('../../controllers/search-bar-controller');
 
 
-describe('SearchBarController', function () {
-  describe('Autosuggest', function () {
+describe('SearchBarController', () => {
+  describe('Autosuggest', () => {
     var testEl;
     var input;
     var dropdown;
@@ -151,7 +151,7 @@ describe('SearchBarController', function () {
     beforeEach(setup);
     afterEach(teardown);
 
-    it('uses autosuggestion for initial facets', function (done) {
+    it('uses autosuggestion for initial facets', (done) => {
 
       assert.isFalse(dropdown.classList.contains('is-open'));
 
@@ -165,7 +165,7 @@ describe('SearchBarController', function () {
         });
     });
 
-    it('it filters and updates input with autosuggested facet selection', function (done) {
+    it('it filters and updates input with autosuggested facet selection', (done) => {
       syn
         .click(input, () => {
           assert.notOk(input.value, 'baseline no value in input');
@@ -177,7 +177,7 @@ describe('SearchBarController', function () {
     });
 
 
-    it('allows submitting the form dropdown is open but has no selected value', function (done) {
+    it('allows submitting the form dropdown is open but has no selected value', (done) => {
       let form = testEl.querySelector('form');
       let submit = sinon.stub(form, 'submit');
 
@@ -193,7 +193,7 @@ describe('SearchBarController', function () {
         });
     });
 
-    describe('it allows group value suggestions', function () {
+    describe('it allows group value suggestions', () => {
 
       const getLozengeValues = function () {
         return Array.from(testEl.querySelectorAll('.lozenge')).map((el) => {
@@ -201,7 +201,7 @@ describe('SearchBarController', function () {
         });
       };
 
-      beforeEach(function() {
+      beforeEach(() => {
         // we need to setup the env vars before invoking controller
         teardown();
         addGroupSuggestions();
@@ -210,7 +210,7 @@ describe('SearchBarController', function () {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      it('shows group suggestions', function(done) {
+      it('shows group suggestions', (done) => {
         syn
           .click(input)
           .type('group:', () => {
@@ -226,7 +226,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('orders groups by earliest value match first', function(done) {
+      it('orders groups by earliest value match first', (done) => {
         syn
           .click(input)
           .type('group:', () => {
@@ -238,7 +238,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('supports multi word matching', function(done) {
+      it('supports multi word matching', (done) => {
         syn
           .click(input)
           .type('group:"mul', () => {
@@ -250,7 +250,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('handles filtering matches with unicode', function(done) {
+      it('handles filtering matches with unicode', (done) => {
         syn
           .click(input)
           .type('group:éf', () => {
@@ -259,7 +259,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('sets input and display friendly name value', function(done) {
+      it('sets input and display friendly name value', (done) => {
         syn
           .click(input)
           .type('group:"mul[down][enter]', () => {
@@ -273,7 +273,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('matches escaped values', function(done) {
+      it('matches escaped values', (done) => {
         syn
           .click(input)
           .type('group:<[down][enter]', () => {
@@ -284,9 +284,9 @@ describe('SearchBarController', function () {
       });
     });
 
-    describe('it allows tag value suggestions', function () {
+    describe('it allows tag value suggestions', () => {
 
-      beforeEach(function() {
+      beforeEach(() => {
         // we need to setup the env vars before invoking controller
         teardown();
         addTagSuggestions();
@@ -295,7 +295,7 @@ describe('SearchBarController', function () {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      it('shows tag suggestions', function(done) {
+      it('shows tag suggestions', (done) => {
         syn
           .click(input)
           .type('tag:', () => {
@@ -311,7 +311,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('orders tags by priority and indexOf score', function(done) {
+      it('orders tags by priority and indexOf score', (done) => {
         syn
           .click(input)
           .type('tag:', () => {
@@ -323,7 +323,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('matches on multi word searches', function(done) {
+      it('matches on multi word searches', (done) => {
         syn
           .click(input)
           .type('tag:"mul', () => {
@@ -338,7 +338,7 @@ describe('SearchBarController', function () {
           });
       });
 
-      it('handles filtering matches with unicode', function(done) {
+      it('handles filtering matches with unicode', (done) => {
         syn
           .click(input)
           .type('tag:éf', () => {
@@ -350,10 +350,10 @@ describe('SearchBarController', function () {
     });
   });
 
-  describe('Lozenges', function () {
+  describe('Lozenges', () => {
     var ctrl;
 
-    afterEach(function () {
+    afterEach(() => {
       if (ctrl) {
         ctrl.element.remove();
         ctrl = null;
@@ -406,55 +406,55 @@ describe('SearchBarController', function () {
       });
     };
 
-    it('should create lozenges for existing query terms in the input on page load', function () {
+    it('should create lozenges for existing query terms in the input on page load', () => {
       var {ctrl} = component('foo');
 
       assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
     });
 
-    it('inserts a hidden input on init', function () {
+    it('inserts a hidden input on init', () => {
       const {hiddenInput} = component();
 
       assert.notEqual(hiddenInput, null);
     });
 
-    it('removes the name="q" attribute from the input on init', function () {
+    it('removes the name="q" attribute from the input on init', () => {
       const {input} = component();
 
       assert.isFalse(input.hasAttribute('name'));
     });
 
-    it('adds the name="q" attribute to the hidden input on init', function () {
+    it('adds the name="q" attribute to the hidden input on init', () => {
       const {hiddenInput} = component();
 
       assert.equal(hiddenInput.getAttribute('name'), 'q');
     });
 
-    it('leaves the hidden input empty on init if the visible input is empty', function () {
+    it('leaves the hidden input empty on init if the visible input is empty', () => {
       const {hiddenInput} = component();
 
       assert.equal(hiddenInput.value, '');
     });
 
-    it('copies lozengifiable text from the input into the hidden input on init', function () {
+    it('copies lozengifiable text from the input into the hidden input on init', () => {
       const {hiddenInput} = component('these are my tag:lozenges');
 
       assert.equal(hiddenInput.value, 'these are my tag:lozenges');
     });
 
-    it('copies unlozengifiable text from the input into the hidden input on init', function () {
+    it('copies unlozengifiable text from the input into the hidden input on init', () => {
       const {hiddenInput} = component("group:'unclosed quotes");
 
       assert.equal(hiddenInput.value, "group:'unclosed quotes");
     });
 
-    it('copies lozengifiable and unlozengifiable text from the input into the hidden input on init', function () {
+    it('copies lozengifiable and unlozengifiable text from the input into the hidden input on init', () => {
       const {hiddenInput} = component("these are my tag:lozenges group:'unclosed quotes");
 
       assert.equal(hiddenInput.value, "these are my tag:lozenges group:'unclosed quotes");
     });
 
-    it('updates the value of the hidden input as text is typed into the visible input', function () {
+    it('updates the value of the hidden input as text is typed into the visible input', () => {
       const {input, hiddenInput} = component('initial text');
 
       input.value = 'new text';  // This is just "new text" and not
@@ -466,7 +466,7 @@ describe('SearchBarController', function () {
       assert.equal(hiddenInput.value, 'initial text new text');
     });
 
-    it('updates the value of the hidden input as unlozengifiable text is typed into the visible input', function () {
+    it('updates the value of the hidden input as unlozengifiable text is typed into the visible input', () => {
       const {input, hiddenInput} = component("group:'unclosed quotes");
 
       input.value = "group:'unclosed quotes still unclosed";
@@ -475,7 +475,7 @@ describe('SearchBarController', function () {
       assert.equal(hiddenInput.value, "group:'unclosed quotes still unclosed");
     });
 
-    it('updates the value of the hidden input when a lozenge is deleted', function () {
+    it('updates the value of the hidden input when a lozenge is deleted', () => {
       const {ctrl, hiddenInput} = component('foo bar');
 
       const lozenge = getLozenges(ctrl)[0];
@@ -485,14 +485,14 @@ describe('SearchBarController', function () {
       assert.equal(hiddenInput.value, 'bar');
     });
 
-    it('should not create a lozenge for incomplete query strings in the input on page load', function () {
+    it('should not create a lozenge for incomplete query strings in the input on page load', () => {
       var {ctrl, input} = component("'bar");
 
       assert.equal(getLozenges(ctrl).length, 0);
       assert.equal(input.value, "'bar");
     });
 
-    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', function (done) {
+    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', (done) => {
       var {ctrl, input} = component('foo');
 
       syn
@@ -504,7 +504,7 @@ describe('SearchBarController', function () {
         });
     });
 
-    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', function (done) {
+    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', (done) => {
       var {ctrl, input} = component("'bar gar'");
 
       syn
@@ -516,7 +516,7 @@ describe('SearchBarController', function () {
         });
     });
 
-    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', function (done) {
+    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', (done) => {
       var {ctrl, input} = component("'bar");
 
       syn
@@ -531,7 +531,7 @@ describe('SearchBarController', function () {
         });
     });
 
-    describe('mapping initial input value to proper group lozenge and input values', function() {
+    describe('mapping initial input value to proper group lozenge and input values', () => {
 
       let groupsScript;
 
@@ -551,7 +551,7 @@ describe('SearchBarController', function () {
         groupsScript.remove();
       });
 
-      it('should map an initial group name to proper group pubid input value', function() {
+      it('should map an initial group name to proper group pubid input value', () => {
 
         const {input, hiddenInput} = component("group:'abc 123'");
 
@@ -560,7 +560,7 @@ describe('SearchBarController', function () {
         assert.equal(hiddenInput.value, 'group:pid124');
       });
 
-      it('should map an initial group pubid to proper group name lozenge value', function() {
+      it('should map an initial group pubid to proper group name lozenge value', () => {
 
         const {input, hiddenInput} = component('group:pid124');
 

@@ -6,22 +6,22 @@ function submitEvent() {
   return new Event('submit', {bubbles: true, cancelable: true});
 }
 
-describe('AdminUsersController', function () {
+describe('AdminUsersController', () => {
   var root;
   var form;
 
-  beforeEach(function () {
+  beforeEach(() => {
     root = document.createElement('div');
     root.innerHTML = '<form><input type="submit"></form>';
     form = root.querySelector('form');
     document.body.appendChild(root);
   });
 
-  afterEach(function () {
+  afterEach(() => {
     root.remove();
   });
 
-  it('it submits the form when confirm returns true', function () {
+  it('it submits the form when confirm returns true', () => {
     var event = submitEvent();
     var fakeWindow = {confirm: sinon.stub().returns(true)};
     new AdminUsersController(root, {window: fakeWindow});
@@ -31,7 +31,7 @@ describe('AdminUsersController', function () {
     assert.isFalse(event.defaultPrevented);
   });
 
-  it('it cancels the form submission when confirm returns false', function () {
+  it('it cancels the form submission when confirm returns false', () => {
     var event = submitEvent();
     var fakeWindow = {confirm: sinon.stub().returns(false)};
     new AdminUsersController(root, {window: fakeWindow});
