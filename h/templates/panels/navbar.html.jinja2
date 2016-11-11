@@ -14,6 +14,12 @@
         {{ facetValue }}
       </span>
     </div>
+    <button class="lozenge__close"
+            type="submit"
+            name="delete_lozenge">
+      <img alt="Delete lozenge"
+           src="/assets/images/icons/lozenge-close.svg">
+    </button>
   </div>
 {% endmacro %}
 
@@ -27,6 +33,14 @@
             data-ref="searchBarForm"
             id="search-bar"
             action="{{ search_url }}">
+
+        {#- This seemingly pointless <input> is actually needed to make the
+            form work correctly. If you remove this input then when the user
+            presses Enter in the search bar input, the browser will act as if
+            the user had clicked one of the form's other submit elements
+            (e.g. the leave group button). #}
+        <input type="submit" class="u-hidden">
+
         {{ svg_icon('search', 'search-bar__icon') }}
         <div class="search-bar__lozenges" data-ref="searchBarLozenges">
           {% if opts['search_username'] %}
@@ -37,13 +51,6 @@
           {% endif %}
         </div>
         <input class="search-bar__input" data-ref="searchBarInput" name="q" value="{{ q }}" placeholder="Search…" autocomplete="off">
-
-        {#- This seemingly pointless <input> is actually needed to make the
-            form work correctly. If you remove this input then when the user
-            presses Enter in the search bar input, the browser will act as if
-            the user had clicked one of the form's other submit elements
-            (e.g. the leave group button). #}
-        <input type="submit" class="u-hidden">
       </form>
     </div>
 

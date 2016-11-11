@@ -268,10 +268,6 @@ class TestGroupSearch(object):
         pyramid_request.has_permission = mock.Mock(return_value=False)
         return pyramid_request
 
-    @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
-        pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
 
 
 @pytest.mark.usefixtures('routes')
@@ -311,13 +307,6 @@ class TestSearchMoreInfo(object):
         assert 'more_info=' in result.location
         assert 'q=foo+bar' in result.location
 
-    @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('activity.group_search',
-                                 '/groups/{pubid}/search')
-        pyramid_config.add_route('activity.user_search',
-                                 '/users/{username}/search')
-
 
 @pytest.mark.usefixtures('routes')
 class TestSearchBack(object):
@@ -348,12 +337,6 @@ class TestSearchBack(object):
         assert result.location == (
             'http://example.com/users/test_username/search?q=foo+bar')
 
-    @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('activity.group_search',
-                                 '/groups/{pubid}/search')
-        pyramid_config.add_route('activity.user_search',
-                                 '/users/{username}/search')
 
 
 @pytest.mark.usefixtures('groups_service', 'routes')
@@ -410,9 +393,6 @@ class TestGroupLeave(object):
         pyramid_request.params = NestedMultiDict({'group_leave': group.pubid})
         return pyramid_request
 
-    @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('activity.search', '/search')
 
 
 @pytest.mark.usefixtures('routes', 'search', 'user_service')
@@ -533,10 +513,6 @@ class TestUserSearch(object):
         return pyramid_request
 
     @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('account_profile', '/account/profile')
-
-    @pytest.fixture
     def user(self, factories):
         return factories.User()
 
@@ -546,6 +522,32 @@ class TestUserSearch(object):
         user_service.fetch.return_value = user
         pyramid_config.register_service(user_service, name='user')
         return user_service
+
+
+@pytest.mark.usefixtures('routes')
+class TestDeleteLozenge(object):
+
+    def test_it_returns_a_redirect(self, pyramid_request):
+        result = activity.delete_lozenge(pyramid_request)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+
+        # This tests that the location redirect to is correct and also that
+        # the delete_lozenge param has been removed (and is not part of the
+        # URL).
+        assert result.location == 'http://example.com/search'
+
+    def test_it_preserves_the_query_param(self, pyramid_request):
+        pyramid_request.params['q'] = 'foo bar'
+
+        location = activity.delete_lozenge(pyramid_request).location
+
+        location == 'http://example.com/search?q=foo+bar'
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.params['delete_lozenge'] = ''
+        return pyramid_request
 
 
 @pytest.mark.usefixtures('routes', 'search')
@@ -613,11 +615,6 @@ class TestToggleUserFacet(object):
         pyramid_request.matchdict['pubid'] = group.pubid
         return pyramid_request
 
-    @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('activity.group_search',
-                                 '/groups/{pubid}/search')
-
 
 @pytest.fixture
 def group(factories):
@@ -635,6 +632,16 @@ def group(factories):
 def pyramid_request(pyramid_request):
     pyramid_request.feature.flags['search_page'] = True
     return pyramid_request
+
+
+@pytest.fixture
+def routes(pyramid_config):
+    pyramid_config.add_route('activity.search', '/search')
+    pyramid_config.add_route('activity.group_search', '/groups/{pubid}/search')
+    pyramid_config.add_route('activity.user_search', '/users/{username}/search')
+    pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
+    pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
+    pyramid_config.add_route('account_profile', '/account/profile')
 
 
 @pytest.fixture

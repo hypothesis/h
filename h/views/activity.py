@@ -208,6 +208,31 @@ def group_leave(request):
 
 
 @view_config(route_name='activity.group_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='delete_lozenge')
+@view_config(route_name='activity.user_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='delete_lozenge')
+def delete_lozenge(request):
+    """
+    Redirect to the /search page, keeping the search query intact.
+
+    When on the user or group search page a lozenge for the user or group is
+    rendered as the first lozenge in the search bar. The delete button on that
+    first lozenge calls this view. Redirect to the general /search page,
+    effectively deleting that first user or group lozenge, but maintaining any
+    other search terms that have been entered into the search box.
+
+    """
+    new_params = request.params.copy()
+    del new_params['delete_lozenge']
+    location = request.route_url('activity.search', _query=new_params)
+    return httpexceptions.HTTPSeeOther(location=location)
+
+
+@view_config(route_name='activity.group_search',
              request_method='POST',
              renderer='h:templates/activity/search.html.jinja2',
              request_param='toggle_user_facet')
