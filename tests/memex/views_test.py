@@ -62,6 +62,15 @@ class TestApiConfigDecorator(object):
         settings = views.api_config(decorator=decorator)
         assert settings['decorator'] == decorator
 
+    def test_it_adds_OPTIONS_to_allowed_request_methods(self):
+        settings = views.api_config(request_method='DELETE')
+        assert settings['request_method'] == ('DELETE', 'OPTIONS')
+
+    def test_it_adds_all_request_methods_when_not_defined(self):
+        settings = views.api_config()
+        assert settings['request_method'] == (
+            'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS')
+
     @pytest.fixture
     def view_config(self, patch):
         def _return_kwargs(**kwargs):
