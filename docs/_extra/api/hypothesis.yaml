@@ -230,6 +230,12 @@ paths:
             URI can be a URL (a web page address) or a URN representing another kind of resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
           required: false
           type: string
+        - name: url
+          in: query
+          description: |
+            Alias of `uri`.
+          required: false
+          type: string
         - name: user
           in: query
           description: Limit the results to annotations made by the specified user.
