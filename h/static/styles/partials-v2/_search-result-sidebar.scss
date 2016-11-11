@@ -55,6 +55,11 @@
   text-decoration: underline;
 }
 
+.search-result-sidebar__user-link,
+.search-result-sidebar__orcid-link {
+  color: inherit;
+}
+
 .search-result-sidebar__leave-button {
   @include reset-button;
   text-decoration: underline;

@@ -4,6 +4,8 @@
 
 from __future__ import unicode_literals
 
+import urlparse
+
 from pyramid import httpexceptions
 from pyramid.view import view_config
 from sqlalchemy.orm import exc
@@ -51,6 +53,7 @@ def search(request):
         'page': paginate(request, result.total, page_size=page_size),
     }
 
+
 @view_config(route_name='activity.group_search',
              request_method='GET',
              renderer='h:templates/activity/search.html.jinja2')
@@ -92,31 +95,75 @@ def group_search(request):
 
     return result
 
+
+@view_config(route_name='activity.user_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2')
+def user_search(request):
+    if not request.feature('search_page'):
+        raise httpexceptions.HTTPNotFound()
+
+    username = request.matchdict['username']
+
+    result = search(request)
+
+    result['opts'] = {'search_username': username}
+    result['more_info'] = 'more_info' in request.params
+
+    user = request.find_service(name='user').fetch(username,
+                                                   request.auth_domain)
+
+    if not user:
+        return result
+
+    def domain(user):
+        if not user.uri:
+            return None
+        return urlparse.urlparse(user.uri).netloc
+
+    result['user'] = {
+        'name': user.display_name or user.username,
+        'num_annotations': result['total'],
+        'description': user.description,
+        'registered_date': user.registered_date.strftime('%B, %Y'),
+        'location': user.location,
+        'uri': user.uri,
+        'domain': domain(user),
+        'orcid': user.orcid,
+    }
+
+    if request.authenticated_user == user:
+        result['user']['edit_url'] = request.route_url('account_profile')
+
+    return result
+
+
 @view_config(route_name='activity.group_search',
              request_method='POST',
              renderer='h:templates/activity/search.html.jinja2',
              request_param='more_info')
-def group_search_more_info(request):
+@view_config(route_name='activity.user_search',
+             request_method='POST',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='more_info')
+def search_more_info(request):
     """Respond to a click on the ``more_info`` button."""
-    new_params = request.POST.copy()
-    location = request.route_url('activity.group_search',
-                                 pubid=request.matchdict['pubid'],
-                                 _query=new_params)
-    return httpexceptions.HTTPSeeOther(location=location)
+    return _redirect_to_user_or_group_search(request, request.POST)
 
 
 @view_config(route_name='activity.group_search',
              request_method='POST',
              renderer='h:templates/activity/search.html.jinja2',
              request_param='back')
-def group_search_back(request):
+@view_config(route_name='activity.user_search',
+             request_method='POST',
+             renderer='h:templates/activity/search.html.jinja2',
+             request_param='back')
+def search_back(request):
     """Respond to a click on the ``back`` button."""
     new_params = request.POST.copy()
     del new_params['back']
-    location = request.route_url('activity.group_search',
-                                 pubid=request.matchdict['pubid'],
-                                 _query=new_params)
-    return httpexceptions.HTTPSeeOther(location=location)
+    return _redirect_to_user_or_group_search(request, new_params)
 
 
 @view_config(route_name='activity.group_search',
@@ -148,6 +195,7 @@ def group_leave(request):
     location = request.route_url('activity.search', _query=new_params)
 
     return httpexceptions.HTTPSeeOther(location=location)
+
 
 @view_config(route_name='activity.group_search',
              request_method='POST',
@@ -231,18 +279,14 @@ def _faceted_by_user(request, username, parsed_query=None):
     """
     return username in _username_facets(request, parsed_query)
 
-@view_config(route_name='activity.user_search',
-             request_method='GET',
-             renderer='h:templates/activity/search.html.jinja2')
-def user_search(request):
-    if not request.feature('search_page'):
-        raise httpexceptions.HTTPNotFound()
 
-    opts = {}
-    result = search(request)
-    username = request.matchdict['username']
-
-    opts['search_username'] = username
-    result['opts'] = opts
-
-    return result
+def _redirect_to_user_or_group_search(request, params):
+    if request.matched_route.name == 'activity.group_search':
+        location = request.route_url('activity.group_search',
+                                     pubid=request.matchdict['pubid'],
+                                     _query=params)
+    elif request.matched_route.name == 'activity.user_search':
+        location = request.route_url('activity.user_search',
+                                     username=request.matchdict['username'],
+                                     _query=params)
+    return httpexceptions.HTTPSeeOther(location=location)
