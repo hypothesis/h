@@ -110,9 +110,8 @@ def user_search(request):
     result['opts'] = {'search_username': username}
     result['more_info'] = 'more_info' in request.params
 
-    user = request.find_service(name='user').fetch(
-        'acct:{username}@{authority}'.format(username=username,
-                                             authority=request.auth_domain))
+    user = request.find_service(name='user').fetch(username,
+                                                   request.auth_domain)
 
     if not user:
         return result

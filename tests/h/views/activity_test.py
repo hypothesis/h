@@ -421,7 +421,8 @@ class TestUserSearch(object):
     def test_it_fetches_the_user(self, pyramid_request, user, user_service):
         activity.user_search(pyramid_request)
 
-        user_service.fetch.assert_called_once_with(user.userid)
+        user_service.fetch.assert_called_once_with(user.username,
+                                                   'example.com')
 
     def test_it_does_not_pass_user_to_template_if_user_does_not_exist(
             self, pyramid_request, user_service):
