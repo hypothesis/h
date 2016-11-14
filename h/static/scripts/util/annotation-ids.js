@@ -11,7 +11,7 @@ function extractIDFromURL(url) {
   try {
     // Annotation IDs are url-safe-base64 identifiers
     // See https://tools.ietf.org/html/rfc4648#page-7
-    var annotFragmentMatch = url.match(/#annotations:([A-Za-z0-9_-]+)$/);
+    const annotFragmentMatch = url.match(/#annotations:([A-Za-z0-9_-]+)$/);
     if (annotFragmentMatch) {
       return annotFragmentMatch[1];
     } else {

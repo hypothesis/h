@@ -41,7 +41,7 @@ class FormSubmitError extends Error {
  *         request fails.
  */
 function submitForm(formEl, fetch = window.fetch) {
-  var response;
+  let response;
   return fetch(formEl.action, {
     body: new FormData(formEl),
     credentials: 'same-origin',
@@ -49,11 +49,11 @@ function submitForm(formEl, fetch = window.fetch) {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },
-  }).then(response_ => {
+  }).then((response_) => {
     response = response_;
     return response.text();
-  }).then(body => {
-    var { status } = response;
+  }).then((body) => {
+    const { status } = response;
     switch (status) {
     case 200:
       return {status, form: body};

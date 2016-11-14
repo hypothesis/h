@@ -9,17 +9,17 @@ const COMBINING_MARKS = /[\u0300-\u036F\u0483-\u0489\u0591-\u05BD\u05BF\u05C1\u0
  * Convert a `camelCase` or `CapitalCase` string to `kebab-case`
  */
 function hyphenate(name) {
-  var uppercasePattern = /([A-Z])/g;
+  const uppercasePattern = /([A-Z])/g;
   return name.replace(uppercasePattern, '-$1').toLowerCase();
 }
 
 /** Convert a `kebab-case` string to `camelCase` */
 function unhyphenate(name) {
-  var idx = name.indexOf('-');
+  const idx = name.indexOf('-');
   if (idx === -1) {
     return name;
   } else {
-    var ch = (name[idx+1] || '').toUpperCase();
+    const ch = (name[idx+1] || '').toUpperCase();
     return unhyphenate(name.slice(0,idx) + ch + name.slice(idx+2));
   }
 }
@@ -31,19 +31,19 @@ function unhyphenate(name) {
  * @param  {String}
  * @returns {String}
  */
-function normalize(str){
+function normalize(str) {
 
   // This require is coming from a vendor bundle
   // that is loaded globally on the running webpage
   // not a require in the node context
-  try{
+  try {
     // polyfill String.prototype.normalize
     require('unorm');
-  }catch(e){
+  } catch (e) {
     console.error('unorm not available');
   }
 
-  if(!String.prototype.normalize){
+  if (!String.prototype.normalize) {
     return str;
   }
 
@@ -57,7 +57,7 @@ function normalize(str){
  * @param  {String}
  * @returns {String}
  */
-function fold(str){
+function fold(str) {
   return str.replace(COMBINING_MARKS, '');
 }
 

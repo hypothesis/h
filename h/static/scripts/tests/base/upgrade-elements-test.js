@@ -1,7 +1,7 @@
 'use strict';
 
-var Controller = require('../../base/controller');
-var upgradeElements = require('../../base/upgrade-elements');
+const Controller = require('../../base/controller');
+const upgradeElements = require('../../base/upgrade-elements');
 
 class TestController extends Controller {
   constructor(element, options) {
@@ -9,9 +9,9 @@ class TestController extends Controller {
   }
 }
 
-describe('upgradeElements', function () {
-  it('should upgrade elements matching selectors', function () {
-    var root = document.createElement('div');
+describe('upgradeElements', () => {
+  it('should upgrade elements matching selectors', () => {
+    const root = document.createElement('div');
     root.innerHTML = '<div class="js-test"></div>';
 
     upgradeElements(root, {'.js-test': TestController});
@@ -19,8 +19,8 @@ describe('upgradeElements', function () {
     assert.instanceOf(root.children[0].controllers[0], TestController);
   });
 
-  it('should unhide elements hidden until upgrade', function () {
-    var root = document.createElement('div');
+  it('should unhide elements hidden until upgrade', () => {
+    const root = document.createElement('div');
     root.innerHTML = '<div class="js-test is-hidden-when-loading"></div>';
 
     upgradeElements(root, {'.js-test': TestController});
@@ -28,8 +28,8 @@ describe('upgradeElements', function () {
     assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
   });
 
-  it('should unhide child elements hidden until upgrade', function () {
-    var root = document.createElement('div');
+  it('should unhide child elements hidden until upgrade', () => {
+    const root = document.createElement('div');
     root.innerHTML = '<div class="js-test">' +
                      '<span class="is-hidden-when-loading"></span>' +
                      '</div>';
@@ -39,43 +39,43 @@ describe('upgradeElements', function () {
     assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
   });
 
-  describe('reload function', function () {
-    var newContent = '<div class="js-test">Reloaded element</div>';
+  describe('reload function', () => {
+    const newContent = '<div class="js-test">Reloaded element</div>';
 
     function setupAndReload() {
-      var root = document.createElement('div');
+      const root = document.createElement('div');
       root.innerHTML = '<div class="js-test">Original content</div>';
       upgradeElements(root, {'.js-test': TestController});
 
-      var reloadFn = root.children[0].controllers[0].options.reload;
-      var reloadResult = reloadFn(newContent);
+      const reloadFn = root.children[0].controllers[0].options.reload;
+      const reloadResult = reloadFn(newContent);
       return {root: root, reloadResult: reloadResult};
     }
 
-    it('replaces element markup', function () {
-      var root = setupAndReload().root;
+    it('replaces element markup', () => {
+      const root = setupAndReload().root;
       assert.equal(root.innerHTML, newContent);
     });
 
-    it('returns the replaced element', function () {
-      var result = setupAndReload();
+    it('returns the replaced element', () => {
+      const result = setupAndReload();
       assert.equal(result.root.children[0], result.reloadResult);
     });
 
-    it('re-applies element upgrades', function () {
-      var root = setupAndReload().root;
-      var replacedElement = root.children[0];
-      var ctrl = replacedElement.controllers[0];
+    it('re-applies element upgrades', () => {
+      const root = setupAndReload().root;
+      const replacedElement = root.children[0];
+      const ctrl = replacedElement.controllers[0];
       assert.instanceOf(ctrl, TestController);
     });
 
-    it('calls #beforeRemove on the original controllers', function () {
-      var root = document.createElement('div');
+    it('calls #beforeRemove on the original controllers', () => {
+      const root = document.createElement('div');
       root.innerHTML = '<div class="js-test">Original content</div>';
       upgradeElements(root, {'.js-test': TestController});
-      var ctrl = root.children[0].controllers[0];
+      const ctrl = root.children[0].controllers[0];
       ctrl.beforeRemove = sinon.stub();
-      var reloadFn = ctrl.options.reload;
+      const reloadFn = ctrl.options.reload;
 
       reloadFn(newContent);
 

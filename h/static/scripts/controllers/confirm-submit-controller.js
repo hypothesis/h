@@ -1,6 +1,6 @@
 'use strict';
 
-var Controller = require('../base/controller');
+const Controller = require('../base/controller');
 
 /* Turn a normal submit element into one that shows a confirm dialog.
  *
@@ -12,7 +12,7 @@ class ConfirmSubmitController extends Controller {
   constructor(element, options) {
     super(element);
 
-    var window_ = options.window || window;
+    const window_ = options.window || window;
 
     element.addEventListener('click', (event) => {
       if (!window_.confirm(element.dataset.confirmMessage)) {

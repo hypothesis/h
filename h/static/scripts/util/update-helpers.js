@@ -10,17 +10,17 @@ module.exports = {
    * @returns {bool}       the result of comparing if the two
    *   arrays seem like they have changed. True if they have changed
    */
-  listIsDifferent: function(listA, listB){
+  listIsDifferent: function(listA, listB) {
 
-    if (!(Array.isArray(listA) && Array.isArray(listB))){
+    if (!(Array.isArray(listA) && Array.isArray(listB))) {
       return true;
     }
 
-    if (listA.length !== listB.length){
+    if (listA.length !== listB.length) {
       return true;
     }
 
-    return !listA.every((item, index)=>{
+    return !listA.every((item, index) => {
       return item === listB[index];
     });
   },

@@ -42,15 +42,15 @@ class AutosuggestDropdownController extends Controller {
 
     super(inputElement, configOptions);
 
-    if (!configOptions.renderListItem){
+    if (!configOptions.renderListItem) {
       throw new Error('Missing renderListItem callback in AutosuggestDropdownController constructor');
     }
 
-    if (!configOptions.listFilter){
+    if (!configOptions.listFilter) {
       throw new Error('Missing listFilter function in AutosuggestDropdownController constructor');
     }
 
-    if (!configOptions.onSelect){
+    if (!configOptions.onSelect) {
       throw new Error('Missing onSelect callback in AutosuggestDropdownController constructor');
     }
 
@@ -58,7 +58,7 @@ class AutosuggestDropdownController extends Controller {
     // Note, we currently are not doing anything with the default
     // classes, but we have them if we wanted to give something for a default
     // styling.
-    if (configOptions.classNames){
+    if (configOptions.classNames) {
       this.options.classNames.container = configOptions.classNames.container || 'autosuggest__container';
       this.options.classNames.list = configOptions.classNames.list || 'autosuggest__list';
       this.options.classNames.item = configOptions.classNames.item || 'autosuggest__list-item';
@@ -90,43 +90,43 @@ class AutosuggestDropdownController extends Controller {
     this.setHeader = this._setHeader;
   }
 
-  update(newState, prevState){
+  update(newState, prevState) {
 
     // if our prev state is empty then
     // we assume that this is the first update/render call
-    if (!('visible' in prevState)){
+    if (!('visible' in prevState)) {
 
       // create the elements that make up the component
       this._renderContentContainers();
       this._addTopLevelEventListeners();
     }
 
-    if (newState.visible !== prevState.visible){
+    if (newState.visible !== prevState.visible) {
       // updates the dom to change the class which actually updates visibilty
       setElementState(this._suggestionContainer, { open: newState.visible});
     }
 
-    if (newState.header !== prevState.header){
+    if (newState.header !== prevState.header) {
       this._header.innerHTML = newState.header;
     }
 
-    let listChanged = updateHelper.listIsDifferent(newState.list, prevState.list);
+    const listChanged = updateHelper.listIsDifferent(newState.list, prevState.list);
 
-    if (listChanged){
+    if (listChanged) {
       this._renderListItems();
     }
 
     // list change detection is needed to persist the
     // currently active elements over to the new list
-    if (newState.activeId !== prevState.activeId || listChanged){
+    if (newState.activeId !== prevState.activeId || listChanged) {
 
-      let currentActive = this._getActiveListItemElement();
+      const currentActive = this._getActiveListItemElement();
 
-      if (prevState.activeId && currentActive){
+      if (prevState.activeId && currentActive) {
         currentActive.classList.remove(this.options.classNames.activeItem);
       }
 
-      if (newState.activeId && newState.list.find((item)=>item.__suggestionId === newState.activeId)){
+      if (newState.activeId && newState.list.find(item => item.__suggestionId === newState.activeId)) {
         this._listContainer
           .querySelector(`[data-suggestion-id="${newState.activeId}"]`)
           .classList.add(this.options.classNames.activeItem);
@@ -141,7 +141,7 @@ class AutosuggestDropdownController extends Controller {
    * @param  {string} header Html to place in header. You can pass plain text
    *  as well.
    */
-  _setHeader(header){
+  _setHeader(header) {
     this.setState({
       header,
     });
@@ -152,14 +152,14 @@ class AutosuggestDropdownController extends Controller {
    *
    * @param  {Array} list The new list.
    */
-  _setList(list){
+  _setList(list) {
 
-    if (!Array.isArray(list)){
+    if (!Array.isArray(list)) {
       throw new TypeError('setList requires an array first argument');
     }
 
     this.setState({
-      rootList: list.map((item)=>{
+      rootList: list.map((item) => {
         return Object.assign({}, item, {
           // create an id that lets us direction map
           // selection to arbitrary item in list.
@@ -181,7 +181,7 @@ class AutosuggestDropdownController extends Controller {
    *  filtered and sorted, that will be set the new working list state and
    *  be rerendered.
    */
-  _filterListFromInput(){
+  _filterListFromInput() {
     this.setState({
       list: this.options.listFilter(this.state.rootList, this._input.value) || [],
     });
@@ -191,7 +191,7 @@ class AutosuggestDropdownController extends Controller {
    * hit the consumers filter function to determine
    *   if we still have list items that need to be shown to the user.
    */
-  _filterAndToggleVisibility(){
+  _filterAndToggleVisibility() {
     this._filterListFromInput();
 
     this._toggleSuggestionsVisibility(/*show*/ this.state.list.length > 0);
@@ -202,13 +202,13 @@ class AutosuggestDropdownController extends Controller {
    *  object from list that was passed in, and invoke the onSelect callback.
    *  This is process to actually make a selection
    */
-  _selectCurrentActiveItem(){
+  _selectCurrentActiveItem() {
 
     const currentActive = this._getActiveListItemElement();
     const suggestionId = currentActive && currentActive.getAttribute('data-suggestion-id');
-    const selection = this.state.list.filter((item)=>{ return item.__suggestionId === suggestionId;})[0];
+    const selection = this.state.list.filter((item) => { return item.__suggestionId === suggestionId;})[0];
 
-    if (selection){
+    if (selection) {
       this.options.onSelect(selection);
       this._filterAndToggleVisibility();
       this.setState({
@@ -224,12 +224,12 @@ class AutosuggestDropdownController extends Controller {
    * @param  {bool} hovering are we hovering on the current element
    * @param  {Event} event    event used to pull the list item being targeted
    */
-  _toggleItemHoverState(hovering, event){
+  _toggleItemHoverState(hovering, event) {
 
-    let currentActive = this._getActiveListItemElement();
-    let target = event.currentTarget;
+    const currentActive = this._getActiveListItemElement();
+    const target = event.currentTarget;
 
-    if ( hovering && currentActive && currentActive.contains(target)){
+    if ( hovering && currentActive && currentActive.contains(target)) {
       return;
     }
 
@@ -257,7 +257,7 @@ class AutosuggestDropdownController extends Controller {
   /**
    * @returns {HTMLElement}  the active list item element
    */
-  _getActiveListItemElement(){
+  _getActiveListItemElement() {
     return this._listContainer.querySelector('.' + this.options.classNames.activeItem);
   }
 
@@ -267,15 +267,15 @@ class AutosuggestDropdownController extends Controller {
    *
    * @param  {bool} down is the user navigating down the list?
    */
-  _keyboardSelectionChange(down){
+  _keyboardSelectionChange(down) {
 
     const currentActive = this._getActiveListItemElement();
     let nextActive;
 
     // we have a starting point, navigate on siblings of current
-    if (currentActive){
+    if (currentActive) {
 
-      if (down){
+      if (down) {
         nextActive = currentActive.nextSibling;
       } else {
         nextActive = currentActive.previousSibling;
@@ -283,7 +283,7 @@ class AutosuggestDropdownController extends Controller {
 
     // we have no starting point, let's navigate based on
     // the directional expectation of what the first item would be
-    } else if (down){
+    } else if (down) {
       nextActive = this._listContainer.firstChild;
     } else {
       nextActive = this._listContainer.lastChild;
@@ -298,7 +298,7 @@ class AutosuggestDropdownController extends Controller {
    * build the DOM structure that makes up
    *  the suggestion box and content containers.
    */
-  _renderContentContainers(){
+  _renderContentContainers() {
 
     // container of all suggestion elements
     this._suggestionContainer = document.createElement('div');
@@ -317,7 +317,7 @@ class AutosuggestDropdownController extends Controller {
 
     // put the suggestions adjacent to the input element
     // firefox does not support insertAdjacentElement
-    if (HTMLElement.prototype.insertAdjacentElement){
+    if (HTMLElement.prototype.insertAdjacentElement) {
       this._input.insertAdjacentElement('afterend', this._suggestionContainer);
     } else {
       this._input.parentNode.insertBefore(this._suggestionContainer, this._input.nextSibling);
@@ -328,14 +328,14 @@ class AutosuggestDropdownController extends Controller {
    * updates the content of the list container and builds
    *  the new set of list items.
    */
-  _renderListItems(){
+  _renderListItems() {
     // Create the new list items, render their contents
     // and update the dom with the new elements.
 
     this._listContainer.innerHTML = '';
 
-    this.state.list.forEach((listItem)=>{
-      let li = document.createElement('li');
+    this.state.list.forEach((listItem) => {
+      const li = document.createElement('li');
       li.classList.add(this.options.classNames.item);
       li.setAttribute('data-suggestion-id', listItem.__suggestionId);
 
@@ -344,7 +344,7 @@ class AutosuggestDropdownController extends Controller {
       // But for now this binding has no real affect on small list perf
       li.addEventListener('mouseenter', this._toggleItemHoverState.bind(this, /*hovering*/true));
       li.addEventListener('mouseleave', this._toggleItemHoverState.bind(this, /*hovering*/false));
-      li.addEventListener('mousedown', (event)=>{
+      li.addEventListener('mousedown', (event) => {
         // for situations like mobile, hovering might not be
         // the first event to set the active state for an element
         // so we will mimic that on mouse down and let selection happen
@@ -363,24 +363,24 @@ class AutosuggestDropdownController extends Controller {
    * The events that can be set on a "global" or top
    *  level scope, we are going to set them here.
    */
-  _addTopLevelEventListeners(){
+  _addTopLevelEventListeners() {
 
     // we need to use mousedown instead of click
     // so we can beat the blur event which can
     // change visibility/target of the active event
-    document.addEventListener('mousedown', (event)=>{
+    document.addEventListener('mousedown', (event) => {
 
       const target = event.target;
 
       // when clicking the input itself or if we are
       // or a global click was made while we were not visible
       // do nothing
-      if (!this.state.visible || target === this._input){
+      if (!this.state.visible || target === this._input) {
         return;
       }
 
       // see if inside interaction areas
-      if (this._suggestionContainer.contains(target)){
+      if (this._suggestionContainer.contains(target)) {
 
         event.preventDefault();
         event.stopPropagation();
@@ -394,20 +394,20 @@ class AutosuggestDropdownController extends Controller {
     // Note, keydown needed here to properly prevent the default
     // nature of navigating keystrokes - like DOWN ARROW at the end of an
     // input takes the cursor to the beginning of the input value.
-    this._input.addEventListener('keydown', (event)=>{
+    this._input.addEventListener('keydown', (event) => {
 
       const key = event.keyCode;
 
       // only consume the ENTER event if
       // we have an active item
-      if (key === ENTER && !this._getActiveListItemElement()){
+      if (key === ENTER && !this._getActiveListItemElement()) {
         return;
       }
 
       // these keys are going to be consumed and not propagated
-      if ([ENTER, UP, DOWN].indexOf(key) > -1){
+      if ([ENTER, UP, DOWN].indexOf(key) > -1) {
 
-        if (key === ENTER){
+        if (key === ENTER) {
           this._selectCurrentActiveItem();
         } else {
           this._keyboardSelectionChange(/*down*/key === DOWN);
@@ -422,9 +422,9 @@ class AutosuggestDropdownController extends Controller {
       // stop propagation after inspecting input value
     }, /*useCapturePhase*/ true);
 
-    this._input.addEventListener('keyup', (event)=>{
+    this._input.addEventListener('keyup', (event) => {
 
-      if ([ENTER, UP, DOWN].indexOf(event.keyCode) === -1){
+      if ([ENTER, UP, DOWN].indexOf(event.keyCode) === -1) {
         this._filterAndToggleVisibility();
       }
 
@@ -432,11 +432,11 @@ class AutosuggestDropdownController extends Controller {
       // stop propagation after inspecting input value
     }, /*useCapturePhase*/ true);
 
-    this._input.addEventListener('focus', ()=>{
+    this._input.addEventListener('focus', () => {
       this._filterAndToggleVisibility();
     });
 
-    this._input.addEventListener('blur', ()=>{
+    this._input.addEventListener('blur', () => {
       this._toggleSuggestionsVisibility(/*show*/false);
     });
 

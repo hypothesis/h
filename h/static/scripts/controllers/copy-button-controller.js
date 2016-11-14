@@ -1,6 +1,6 @@
 'use strict';
 
-var Controller = require('../base/controller');
+const Controller = require('../base/controller');
 
 class CopyButtonController extends Controller {
   constructor(element) {
@@ -9,7 +9,7 @@ class CopyButtonController extends Controller {
     this.refs.button.onclick = () => {
       this.refs.input.select(); // We need to select the text before we copy.
 
-      let notificationText = document.execCommand('copy') ?
+      const notificationText = document.execCommand('copy') ?
         'Link copied to clipboard!' :
         'Copying link failed';
 

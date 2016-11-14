@@ -1,26 +1,26 @@
 'use strict';
 
-var SignupFormController = require('../../controllers/signup-form-controller');
+const SignupFormController = require('../../controllers/signup-form-controller');
 
-var TEMPLATE = `
+const TEMPLATE = `
   <form class="js-signup-form">
     <input type="submit" class="js-signup-btn">
   </form>
   `;
 
-describe('SignupFormController', function () {
-  var element;
-  var form;
-  var submitBtn;
+describe('SignupFormController', () => {
+  let element;
+  let form;
+  let submitBtn;
 
-  beforeEach(function () {
+  beforeEach(() => {
     element = document.createElement('div');
     element.innerHTML = TEMPLATE;
     form = element.querySelector('.js-signup-form');
     submitBtn = element.querySelector('.js-signup-btn');
   });
 
-  it('disables the submit button on form submit', function () {
+  it('disables the submit button on form submit', () => {
     new SignupFormController(form);
     assert.isFalse(submitBtn.disabled);
     form.dispatchEvent(new Event('submit'));

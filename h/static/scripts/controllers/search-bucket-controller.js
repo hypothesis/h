@@ -1,9 +1,9 @@
 'use strict';
 
-var scrollIntoView = require('scroll-into-view');
+const scrollIntoView = require('scroll-into-view');
 
-var Controller = require('../base/controller');
-var setElementState = require('../util/dom').setElementState;
+const Controller = require('../base/controller');
+const setElementState = require('../util/dom').setElementState;
 
 /**
  * @typedef Options
@@ -30,7 +30,7 @@ class SearchBucketController extends Controller {
       this.setState({expanded: !this.state.expanded});
     });
 
-    var envFlags = this.options.envFlags || window.envFlags;
+    const envFlags = this.options.envFlags || window.envFlags;
 
     this.setState({
       expanded: !!envFlags.get('js-timeout'),

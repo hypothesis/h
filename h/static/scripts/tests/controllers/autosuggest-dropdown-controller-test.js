@@ -9,13 +9,13 @@ const AutosuggestDropdownController = require('../../controllers/autosuggest-dro
 
 // syn's move functionality does not fire
 // mouseenter and mouseleave events.
-const mouseMove = (()=>{
+const mouseMove = (() => {
 
   let _lastMovePos;
 
   return (posObj) => {
 
-    if (_lastMovePos){
+    if (_lastMovePos) {
       const prevEl = document.elementFromPoint(_lastMovePos.pageX, _lastMovePos.pageY);
       const leaveEvent = document.createEvent( 'Events' );
       leaveEvent.initEvent( 'mouseleave', true, false );
@@ -41,14 +41,14 @@ function center(element) {
 }
 
 
-describe('AutosuggestDropdownController', function () {
+describe('AutosuggestDropdownController', () => {
 
-  describe('provides suggestions', function(){
+  describe('provides suggestions', () => {
     let container;
     let input;
     let form;
 
-    let defaultConfig = {
+    const defaultConfig = {
       list: [
         {
           title: 'user:',
@@ -78,50 +78,50 @@ describe('AutosuggestDropdownController', function () {
         activeItem: 'an-active-item',
       },
 
-      renderListItem: (listItem)=>{
+      renderListItem: (listItem) => {
 
         let itemContents = `<span class="a-title"> ${listItem.title} </span>`;
 
-        if (listItem.explanation){
+        if (listItem.explanation) {
           itemContents += `<span class="an-explanation"> ${listItem.explanation} </span>`;
         }
 
         return itemContents;
       },
 
-      listFilter: function(list, currentInput){
+      listFilter: function(list, currentInput) {
 
 
         currentInput = (currentInput || '').trim();
 
-        return list.filter((item)=>{
+        return list.filter((item) => {
 
-          if (!currentInput){
+          if (!currentInput) {
             return item;
           }
           return item.title.toLowerCase().indexOf(currentInput) >= 0;
         });
       },
 
-      onSelect: function(){},
+      onSelect: function() {},
     };
 
-    const isSuggestionContainerVisible = ()=>{
+    const isSuggestionContainerVisible = () => {
       const suggestionContainer = container.querySelector('.' + defaultConfig.classNames.container);
       return suggestionContainer.classList.contains('is-open');
     };
 
-    const getListItems = ()=>{
+    const getListItems = () => {
       const suggestionContainer = container.querySelector('.' + defaultConfig.classNames.container);
       return suggestionContainer.querySelectorAll('.' + defaultConfig.classNames.item);
     };
 
-    const getCurrentActiveElements = ()=>{
+    const getCurrentActiveElements = () => {
       const list = container.querySelector('.' + defaultConfig.classNames.list);
       return list.querySelectorAll('.' + defaultConfig.classNames.activeItem);
     };
 
-    beforeEach(function () {
+    beforeEach(() => {
       container = document.createElement('div');
       container.innerHTML = '<form><input id="input-el"/></form>';
       document.body.appendChild(container);
@@ -130,21 +130,21 @@ describe('AutosuggestDropdownController', function () {
       form.onsubmit = sinon.spy();
     });
 
-    afterEach(function () {
+    afterEach(() => {
       document.body.removeChild(container);
 
       // clear up spies
-      if ('restore' in defaultConfig.listFilter){
+      if ('restore' in defaultConfig.listFilter) {
         defaultConfig.listFilter.restore();
       }
 
-      if ('restore' in defaultConfig.onSelect){
+      if ('restore' in defaultConfig.onSelect) {
         defaultConfig.onSelect.restore();
       }
     });
 
 
-    it('should initialize the controller with correct dom', function(){
+    it('should initialize the controller with correct dom', () => {
 
       assert.isTrue(form.childNodes.length === 1, 'baseline');
 
@@ -165,7 +165,7 @@ describe('AutosuggestDropdownController', function () {
     });
 
 
-    it('opens and closes based on focus status', function (done) {
+    it('opens and closes based on focus status', (done) => {
 
       new AutosuggestDropdownController(input, defaultConfig);
 
@@ -185,7 +185,7 @@ describe('AutosuggestDropdownController', function () {
     });
 
 
-    it('changes suggestion container and item visibility on matching input', function(done){
+    it('changes suggestion container and item visibility on matching input', (done) => {
 
       const reduceSpy = sinon.spy(defaultConfig, 'listFilter');
 
@@ -236,7 +236,7 @@ describe('AutosuggestDropdownController', function () {
 
     });
 
-    it('allows click selection', function(done){
+    it('allows click selection', (done) => {
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -254,7 +254,7 @@ describe('AutosuggestDropdownController', function () {
           assert.isTrue(isSuggestionContainerVisible(), 'pre select show');
 
           syn
-            .click(items[0], ()=>{
+            .click(items[0], () => {
 
               assert.equal(onSelectSpy.callCount, 1);
 
@@ -270,7 +270,7 @@ describe('AutosuggestDropdownController', function () {
         });
     });
 
-    var navigationExpectations = [
+    const navigationExpectations = [
       { travel: '[down]', selectedIndex: 0 },
       { travel: '[up]', selectedIndex: 3 },
       { travel: '[down][up]', selectedIndex: -1 },
@@ -282,7 +282,7 @@ describe('AutosuggestDropdownController', function () {
       { travel: '[up][down][up][down][down][down][down][up]', selectedIndex: 1 },
     ];
 
-    unroll('allows keyboard navigation', function(done, fixture){
+    unroll('allows keyboard navigation', (done, fixture) => {
 
       new AutosuggestDropdownController(input, defaultConfig);
 
@@ -291,8 +291,8 @@ describe('AutosuggestDropdownController', function () {
       syn
         .click(input)
         .type(fixture.travel, () => {
-          var active = getCurrentActiveElements();
-          if (fixture.selectedIndex === -1){
+          const active = getCurrentActiveElements();
+          if (fixture.selectedIndex === -1) {
             assert.lengthOf(active, 0);
           } else {
             assert.isTrue(list.childNodes[fixture.selectedIndex].classList.contains(defaultConfig.classNames.activeItem));
@@ -303,7 +303,7 @@ describe('AutosuggestDropdownController', function () {
     }, navigationExpectations);
 
 
-    it('persists active navigation through list filter', function(done){
+    it('persists active navigation through list filter', (done) => {
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
@@ -323,7 +323,7 @@ describe('AutosuggestDropdownController', function () {
         });
     });
 
-    it('allows keyboard selection', function(done){
+    it('allows keyboard selection', (done) => {
       const onSelectSpy = sinon.spy(defaultConfig, 'onSelect');
 
       assert.equal(onSelectSpy.callCount, 0);
@@ -347,14 +347,14 @@ describe('AutosuggestDropdownController', function () {
         });
     });
 
-    it('can hover items', function(done){
+    it('can hover items', (done) => {
 
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
 
       syn
-        .click(input, ()=>{
+        .click(input, () => {
 
           mouseMove(center(list.childNodes[1]));
 
@@ -376,14 +376,14 @@ describe('AutosuggestDropdownController', function () {
 
     });
 
-    it('correctly sets active elements when swapping between keyboard and mouse setting', function(done){
+    it('correctly sets active elements when swapping between keyboard and mouse setting', (done) => {
 
       new AutosuggestDropdownController(input, defaultConfig);
 
       const list = container.querySelector('.' + defaultConfig.classNames.list);
 
       syn
-        .click(input, ()=>{
+        .click(input, () => {
 
           mouseMove(center(list.childNodes[2]));
 
@@ -391,11 +391,11 @@ describe('AutosuggestDropdownController', function () {
           assert.isTrue(list.childNodes[2].classList.contains(defaultConfig.classNames.activeItem));
 
         })
-        .type('[down]', ()=>{
+        .type('[down]', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(list.childNodes[3].classList.contains(defaultConfig.classNames.activeItem));
         })
-        .type('[up][up][up]', ()=>{
+        .type('[up][up][up]', () => {
           assert.lengthOf(getCurrentActiveElements(), 1);
           assert.isTrue(list.childNodes[0].classList.contains(defaultConfig.classNames.activeItem));
 
