@@ -113,16 +113,19 @@
       {{ aggregations['tags'] | length }}
     </span>
   </h3>
-  <div class="search-result-tags">
+  <div class="search-result-sidebar-tags">
     {% for tag in aggregations.tags %}
-      <div class="search-result-tag js-tag">
-        <div class="search-result-tag__name">
-          {{ tag.tag }}
-        </div>
-        <div class="search-result-tag__count">
+      <button type="submit"
+        form="search-bar"
+        formmethod="POST"
+        name="toggle_tag_facet"
+        value="{{ tag.tag }}"
+        class="search-result-sidebar__tag">
+        {{ tag.tag }}
+        <span class="search-result-sidebar__tag-count">
           {{ tag.count }}
-        </div>
-      </div>
+        </span>
+      </button>
     {% endfor %}
   </div>
 </section>
