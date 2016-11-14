@@ -362,7 +362,7 @@ class TestGroupLeave(object):
 
     def test_it_returns_404_when_the_group_does_not_exist(self,
                                                           pyramid_request):
-        pyramid_request.params = NestedMultiDict({
+        pyramid_request.POST = NestedMultiDict({
             'group_leave': 'does_not_exist'})
 
         with pytest.raises(httpexceptions.HTTPNotFound):
@@ -382,9 +382,9 @@ class TestGroupLeave(object):
 
     def test_it_redirects_to_the_search_page(self, group, pyramid_request):
         # This should be in the redirect URL.
-        pyramid_request.POST = NestedMultiDict({'q': 'foo bar gar'})
+        pyramid_request.POST['q'] = 'foo bar gar'
         # This should *not* be in the redirect URL.
-        pyramid_request.params = NestedMultiDict({'group_leave': group.pubid})
+        pyramid_request.POST['group_leave'] = group.pubid
         result = activity.group_leave(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
@@ -398,7 +398,7 @@ class TestGroupLeave(object):
 
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
-        pyramid_request.params = NestedMultiDict({'group_leave': group.pubid})
+        pyramid_request.POST = {'group_leave': group.pubid}
         return pyramid_request
 
 
@@ -555,7 +555,7 @@ class TestDeleteLozenge(object):
         assert result.location == 'http://example.com/search'
 
     def test_it_preserves_the_query_param(self, pyramid_request):
-        pyramid_request.params['q'] = 'foo bar'
+        pyramid_request.POST['q'] = 'foo bar'
 
         location = activity.delete_lozenge(pyramid_request).location
 
@@ -595,7 +595,7 @@ class TestToggleUserFacet(object):
     def test_it_removes_the_user_facet_from_the_url(self,
                                                     group,
                                                     pyramid_request):
-        pyramid_request.params['q'] = 'user:"fred"'
+        pyramid_request.POST['q'] = 'user:"fred"'
 
         result = activity.toggle_user_facet(pyramid_request)
 
@@ -606,7 +606,7 @@ class TestToggleUserFacet(object):
     def test_it_preserves_query_when_adding_user_facet(self,
                                                        group,
                                                        pyramid_request):
-        pyramid_request.params['q'] = 'foo bar'
+        pyramid_request.POST['q'] = 'foo bar'
 
         result = activity.toggle_user_facet(pyramid_request)
 
@@ -617,7 +617,7 @@ class TestToggleUserFacet(object):
     def test_it_preserves_query_when_removing_user_facet(self,
                                                          group,
                                                          pyramid_request):
-        pyramid_request.params['q'] = 'user:"fred" foo bar'
+        pyramid_request.POST['q'] = 'user:"fred" foo bar'
 
         result = activity.toggle_user_facet(pyramid_request)
 
@@ -628,7 +628,7 @@ class TestToggleUserFacet(object):
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.feature.flags['search_page'] = True
-        pyramid_request.params['toggle_user_facet'] = 'acct:fred@hypothes.is'
+        pyramid_request.POST['toggle_user_facet'] = 'acct:fred@hypothes.is'
         pyramid_request.matchdict['pubid'] = group.pubid
         return pyramid_request
 
@@ -657,7 +657,7 @@ class TestToggleTagFacet(object):
 
     def test_it_removes_the_tag_facet_from_the_url(self,
                                                    pyramid_request):
-        pyramid_request.params['q'] = 'tag:"gar"'
+        pyramid_request.POST['q'] = 'tag:"gar"'
 
         result = activity.toggle_tag_facet(pyramid_request)
 
@@ -666,7 +666,7 @@ class TestToggleTagFacet(object):
 
     def test_it_preserves_query_when_adding_tag_facet(self,
                                                       pyramid_request):
-        pyramid_request.params['q'] = 'foo bar'
+        pyramid_request.POST['q'] = 'foo bar'
 
         result = activity.toggle_tag_facet(pyramid_request)
 
@@ -676,7 +676,7 @@ class TestToggleTagFacet(object):
 
     def test_it_preserves_query_when_removing_tag_facet(self,
                                                          pyramid_request):
-        pyramid_request.params['q'] = 'tag:"gar" foo bar'
+        pyramid_request.POST['q'] = 'tag:"gar" foo bar'
 
         result = activity.toggle_tag_facet(pyramid_request)
 
@@ -688,9 +688,8 @@ class TestToggleTagFacet(object):
     def pyramid_request(self, pyramid_request):
         pyramid_request.matched_route = mock.Mock()
         pyramid_request.matched_route.name='activity.user_search'
-
         pyramid_request.feature.flags['search_page'] = True
-        pyramid_request.params['toggle_tag_facet'] = 'gar'
+        pyramid_request.POST['toggle_tag_facet'] = 'gar'
         pyramid_request.matchdict['username'] = 'foo'
         return pyramid_request
 
@@ -714,6 +713,13 @@ def group(factories):
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
+    # Disconnect pyramid_request.POST from pyramid_request.params.
+    # By default pyramid_request.POST and pyramid_request.params are the
+    # same object so modifying one modifies the other. We actually want to
+    # modify POST without modifying params in some of these tests so set them
+    # to different objects.
+    pyramid_request.POST = pyramid_request.params.copy()
+
     pyramid_request.feature.flags['search_page'] = True
     return pyramid_request
 
