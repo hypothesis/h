@@ -190,7 +190,7 @@ def group_leave(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
-    pubid = request.params['group_leave']
+    pubid = request.POST['group_leave']
 
     try:
         group = request.db.query(models.Group).filter_by(pubid=pubid).one()
@@ -201,6 +201,7 @@ def group_leave(request):
     groups_service.member_leave(group, request.authenticated_userid)
 
     new_params = request.POST.copy()
+    del new_params['group_leave']
     location = request.route_url('activity.search', _query=new_params)
 
     return httpexceptions.HTTPSeeOther(location=location)
@@ -250,10 +251,10 @@ def toggle_user_facet(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
-    userid = request.params['toggle_user_facet']
+    userid = request.POST['toggle_user_facet']
     username = util.user.split_user(userid)['username']
 
-    new_params = request.params.copy()
+    new_params = request.POST.copy()
 
     del new_params['toggle_user_facet']
 
@@ -304,9 +305,9 @@ def toggle_tag_facet(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
-    tag = request.params['toggle_tag_facet']
+    tag = request.POST['toggle_tag_facet']
 
-    new_params = request.params.copy()
+    new_params = request.POST.copy()
 
     del new_params['toggle_tag_facet']
 
@@ -331,13 +332,13 @@ def toggle_tag_facet(request):
 
 def _parsed_query(request):
     """
-    Return the parsed (MultiDict) query from the given request.
+    Return the parsed (MultiDict) query from the given POST request.
 
     Return a copy of the given search page request's search query, parsed from
     a string into a MultiDict.
 
     """
-    return parser.parse(request.params.get('q', ''))
+    return parser.parse(request.POST.get('q', ''))
 
 
 def _username_facets(request, parsed_query=None):
