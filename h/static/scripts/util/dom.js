@@ -19,7 +19,11 @@ const hyphenate = stringUtil.hyphenate;
 function setElementState(el, state) {
   Object.keys(state).forEach((key) => {
     const stateClass = 'is-' + hyphenate(key);
-    el.classList.toggle(stateClass, !!state[key]);
+    if (state[key]) {
+      el.classList.add(stateClass);
+    } else {
+      el.classList.remove(stateClass);
+    }
   });
 }
 
