@@ -32,17 +32,6 @@ function unhyphenate(name) {
  * @returns {String}
  */
 function normalize(str) {
-
-  // This require is coming from a vendor bundle
-  // that is loaded globally on the running webpage
-  // not a require in the node context
-  try {
-    // polyfill String.prototype.normalize
-    require('unorm');
-  } catch (e) {
-    console.error('unorm not available');
-  }
-
   if (!String.prototype.normalize) {
     return str;
   }
