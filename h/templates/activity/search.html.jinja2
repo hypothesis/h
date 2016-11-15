@@ -3,30 +3,29 @@
 {% from '../includes/annotation_card.html.jinja2' import annotation_card %}
 
 {% macro search_result_nav(name) %}
-<nav class="search-result-nav">
-  {%- if more_info %}
-    <form method="POST"> {# This <form> is needed for IE because it doesn't
-                            support the `form` attribute. #}
+{# This <form> is needed for IE because it doesn't support the `form`
+   attribute. See commit message. #}
+<form method="POST">
+  <input type="hidden" name="q" value="{{ q }}">
+  <nav class="search-result-nav">
+    {%- if more_info %}
       <button form="search-bar"
               formmethod="POST"
               name="back"
               class="search-result-nav__button">
         {% trans %}Back{% endtrans %}
       </button>
-    </form>
-  {% else %}
-    <h1 class="search-result-nav__title">{{ name }}</h1>
-    <form method="POST"> {# This <form> is needed for IE because it doesn't
-                            support the `form` attribute. #}
+    {% else %}
+      <h1 class="search-result-nav__title">{{ name }}</h1>
       <button form="search-bar"
               formmethod="POST"
               name="more_info"
               class="search-result-nav__button">
         {% trans %}More info{% endtrans %}
       </button>
-    </form>
-  {% endif -%}
-</nav>
+    {% endif -%}
+  </nav>
+</form>
 {% endmacro %}
 
 {# Card displaying statistics about a bucket of annotations. #}
@@ -133,17 +132,24 @@
 
 {% macro sidebar(title, description) %}
 <aside class="search-result-sidebar {%- if not more_info %} search-result-hide-on-small-screens{% endif %}">
-  <h1 class="search-result-sidebar__title">{{ title }}</h1>
 
-  {% if description %}
-  <section class="search-result-sidebar__section">
-    {% for paragraph in description.split('\n') %}
-      <p>{{ paragraph }}</p>
-    {% endfor %}
-  </section>
-  {% endif %}
+  {#- This form element is needed for Internet Explorer because it
+      doesn't support the `form` attribute. See commit message. #}
+  <form method="POST">
+    <input type="hidden" name="q" value="{{ q }}">
 
-  {{ caller() }}
+    <h1 class="search-result-sidebar__title">{{ title }}</h1>
+
+    {% if description %}
+    <section class="search-result-sidebar__section">
+      {% for paragraph in description.split('\n') %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    {{ caller() }}
+  </form>
 </aside>
 {% endmacro %}
 
@@ -174,20 +180,16 @@
             </a>
           </li>
         {% endif %}
-          <li>
-          {#- This form element is needed for Internet Explorer because it
-              doesn't support the `form` attribute. See commit message. #}
-          <form method="POST">
-            <button class="search-result-sidebar__leave-button js-confirm-submit"
-                    form="search-bar"
-                    formmethod="POST"
-                    type="submit"
-                    name="group_leave"
-                    value="{{ group.pubid }}"
-                    data-confirm-message="Are you sure you want to leave the group &quot;{{ group.name }}&quot;?">
-                {% trans %}Leave this group{% endtrans %}
-            </button>
-          </form>
+        <li>
+          <button class="search-result-sidebar__leave-button js-confirm-submit"
+                  type="submit"
+                  form="search-bar"
+                  formmethod="POST"
+                  name="group_leave"
+                  value="{{ group.pubid }}"
+                  data-confirm-message="Are you sure you want to leave the group &quot;{{ group.name }}&quot;?">
+              {% trans %}Leave this group{% endtrans %}
+          </button>
         </li>
       </ul>
     </section>
@@ -221,8 +223,9 @@
               </span>
             </button>
           </li>
-        {% endfor %}
-      </ul>
+          {% endfor %}
+        </ul>
+      </form>
     </section>
 
     {{ panel('group_invite', group.url) }}

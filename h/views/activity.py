@@ -60,6 +60,7 @@ def search(request):
         'groups_suggestions': groups_suggestions,
         'timeframes': result.timeframes,
         'page': paginate(request, result.total, page_size=page_size),
+        'q': request.params.get('q', ''),
     }
 
 
