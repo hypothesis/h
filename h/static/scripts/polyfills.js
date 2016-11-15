@@ -9,6 +9,10 @@ require('core-js/fn/array/includes');
 require('core-js/fn/object/assign');
 require('core-js/fn/string/starts-with');
 
+// String.prototype.normalize()
+// FIXME: This is a large polyfill which should be only loaded when necessary
+require('unorm');
+
 // Element.prototype.dataset, required by IE 10
 require('element-dataset')();
 

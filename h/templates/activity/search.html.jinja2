@@ -305,14 +305,10 @@
 
   {{ panel('navbar', opts or {}) }}
 
-  {% for url in asset_urls("search_js") %}
-    <script src="{{ url }}"></script>
-  {% endfor %}
-
   <script class="js-tag-suggestions">
     {{aggregations['tags'] | to_json}}
   </script>
-  
+
   <script class="js-group-suggestions">
     {{groups_suggestions | to_json}}
   </script>
