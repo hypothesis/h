@@ -48,4 +48,16 @@ describe('CopyButtonController', () => {
     ctrl.refs.button.click();
     assert.include(ctrl.refs.input.value, 'Copying link failed');
   });
+
+  it('makes the input field read-only', () => {
+    assert.isTrue(ctrl.refs.input.readOnly);
+  });
+
+  it('leaves the input field read-write on Mobile Safari', () => {
+    const mobileSafariUserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1';
+    ctrl = setupComponent(document, template, CopyButtonController, {
+      userAgent: mobileSafariUserAgent,
+    });
+    assert.isFalse(ctrl.refs.input.readOnly);
+  });
 });

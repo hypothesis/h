@@ -2,9 +2,22 @@
 
 const Controller = require('../base/controller');
 
+function isProbablyMobileSafari(userAgent) {
+  return /\bMobile\b/.test(userAgent) && /\bSafari\b/.test(userAgent);
+}
+
 class CopyButtonController extends Controller {
-  constructor(element) {
-    super(element);
+  constructor(element, options = {}) {
+    super(element, options);
+
+    const userAgent = options.userAgent || navigator.userAgent;
+
+    // Make the input field read-only to avoid the user accidentally modifying
+    // the link before copying it.
+    //
+    // An exception is made for Mobile Safari because selecting the contents of
+    // a read-only input field is hard in that browser.
+    this.refs.input.readOnly = !isProbablyMobileSafari(userAgent);
 
     this.refs.button.onclick = () => {
 

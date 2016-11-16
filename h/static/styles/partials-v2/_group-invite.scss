@@ -9,22 +9,16 @@
 }
 
 .group-invite__input {
-  padding: 5px;
-  padding-top: 0;
   padding-bottom: 0;
+  padding-left: 5px;
+  padding-right: 22px;  /* Make space for the clipboard icon. */
+  padding-top: 0;
   margin-top: 12px;
   margin-bottom: 8px;
   border: 1px solid $grey-3;
   border-radius: 2px;
   width: 100%;
   height: 31px;
-
-  .env-js-capable & {
-    padding-right: 22px;  /* Make space for the clipboard icon. */
-  }
-  .env-js-timeout & {
-    padding-right: 3px;
-  }
 }
 
 .group-invite__clipboard-button {
@@ -62,4 +56,20 @@
 
 .group-invite__clipboard-button:hover > .group-invite__clipboard-image {
   fill: $grey-7;
+}
+
+// On mobile, increase the size of the 'Copy to clipboard' button to make it
+// easier to tap.
+@include touch-input {
+  .group-invite__input {
+    font-size: $touch-input-font-size;
+  }
+
+  .group-invite__input {
+    padding-right: $touch-target-size;
+  }
+
+  .group-invite__clipboard-button {
+    width: $touch-target-size;
+  }
 }
