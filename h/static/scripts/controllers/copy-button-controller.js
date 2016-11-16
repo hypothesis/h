@@ -7,7 +7,12 @@ class CopyButtonController extends Controller {
     super(element);
 
     this.refs.button.onclick = () => {
-      this.refs.input.select(); // We need to select the text before we copy.
+
+      // Method for selecting <input> text taken from 'select' package.
+      // See https://github.com/zenorocha/select/issues/1 and
+      // http://stackoverflow.com/questions/3272089
+      this.refs.input.focus();
+      this.refs.input.setSelectionRange(0, this.refs.input.value.length);
 
       const notificationText = document.execCommand('copy') ?
         'Link copied to clipboard!' :
