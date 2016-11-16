@@ -2,12 +2,30 @@
 
 const Controller = require('../base/controller');
 
+function isProbablyMobileSafari(userAgent) {
+  return /\bMobile\b/.test(userAgent) && /\bSafari\b/.test(userAgent);
+}
+
 class CopyButtonController extends Controller {
-  constructor(element) {
-    super(element);
+  constructor(element, options = {}) {
+    super(element, options);
+
+    const userAgent = options.userAgent || navigator.userAgent;
+
+    // Make the input field read-only to avoid the user accidentally modifying
+    // the link before copying it.
+    //
+    // An exception is made for Mobile Safari because selecting the contents of
+    // a read-only input field is hard in that browser.
+    this.refs.input.readOnly = !isProbablyMobileSafari(userAgent);
 
     this.refs.button.onclick = () => {
-      this.refs.input.select(); // We need to select the text before we copy.
+
+      // Method for selecting <input> text taken from 'select' package.
+      // See https://github.com/zenorocha/select/issues/1 and
+      // http://stackoverflow.com/questions/3272089
+      this.refs.input.focus();
+      this.refs.input.setSelectionRange(0, this.refs.input.value.length);
 
       const notificationText = document.execCommand('copy') ?
         'Link copied to clipboard!' :
