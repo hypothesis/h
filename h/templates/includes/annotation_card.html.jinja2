@@ -1,11 +1,21 @@
-{% macro annotation_card(annotation, request) -%}
+{% macro annotation_card(annotation, request, group=none) -%}
 
 <li class="annotation-card">
   <header class="annotation-card__header">
-    <a href="{{ request.route_url('activity.user_search', username=annotation.username) }}"
-      class="annotation-card__username">
-      {{ annotation.username }}
-    </a>
+    <span>
+      <a href="{{ request.route_url('activity.user_search', username=annotation.username) }}"
+        class="annotation-card__username">
+        {{ annotation.username }}
+      </a>
+      {% if group %}
+        <a href="{{ request.route_url('activity.group_search', pubid=group.pubid) }}"
+          class="annotation-card__groupname">
+            in
+            {{ svg_icon('groups', 'annotation-card__groups-icon') }}
+            {{ group.name }}
+        </a>
+      {% endif %}
+    </span>
     <a href="{{ request.route_url('annotation', id=annotation.id) }}"
       class="annotation-card__timestamp">
       {{ annotation.updated.strftime('%d %b %Y') }}

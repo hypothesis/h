@@ -35,8 +35,22 @@
 }
 
 .annotation-card__username {
-  color: #202020;
+  color: $grey-7;
   font-weight: bold;
+}
+
+.annotation-card__groupname {
+  color: $grey-6;
+}
+
+.annotation-card__groupname:visited {
+  color: $grey-6;
+}
+
+.annotation-card__groups-icon {
+  height: 10px;
+  width: 10px;
+  color: $grey-6;
 }
 
 .annotation-card__timestamp {

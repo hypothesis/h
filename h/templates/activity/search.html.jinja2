@@ -97,7 +97,7 @@
     <div class="search-result-bucket__annotation-cards-container" data-ref="content">
       <ol class="search-result-bucket__annotation-cards">
         {% for result in bucket.annotations %}
-          {{ annotation_card(result.annotation, request) }}
+          {{ annotation_card(result.annotation, request, result.group) }}
         {% endfor %}
       </ol>
       {{ search_bucket_stats(bucket) }}
