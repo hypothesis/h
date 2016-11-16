@@ -27,18 +27,20 @@ def unblacklisted_group_name_slug(node, value, blacklist=GROUPSLUG_BLACKLIST):
                                        "Please choose another one."))
 
 
-class GroupSchema(CSRFSchema):
+def group_schema(autofocus_name=False):
 
-    """The schema for the create-a-new-group form."""
+    """Return a schema for the form for creating or editing a group."""
 
+    schema = CSRFSchema()
     name = colander.SchemaNode(
         colander.String(),
+        name='name',
         title=_("Name"),
         validator=colander.All(
             validators.Length(min=GROUP_NAME_MIN_LENGTH, max=GROUP_NAME_MAX_LENGTH),
             unblacklisted_group_name_slug),
         widget=deform.widget.TextInputWidget(
-            autofocus=True,
+            autofocus=autofocus_name,
             show_required=True,
             css_class="group-form__name-input js-group-name-input",
             disable_autocomplete=True,
@@ -47,6 +49,7 @@ class GroupSchema(CSRFSchema):
 
     description = colander.SchemaNode(
         colander.String(),
+        name='description',
         title=_("Description"),
         validator=validators.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
         missing=None,
@@ -55,6 +58,11 @@ class GroupSchema(CSRFSchema):
             label_css_class="group-form__description-label",
             min_length=0,
             max_length=GROUP_DESCRIPTION_MAX_LENGTH))
+
+    schema.add(name)
+    schema.add(description)
+
+    return schema
 
 
 class LegacyGroupSchema(CSRFSchema):

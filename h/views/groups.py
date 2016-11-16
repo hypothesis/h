@@ -22,7 +22,8 @@ class GroupCreateController(object):
         self.request = request
 
         if request.feature('activity_pages'):
-            self.schema = schemas.GroupSchema().bind(request=self.request)
+            self.schema = schemas.group_schema(autofocus_name=True).bind(
+                request=self.request)
         else:
             self.schema = schemas.LegacyGroupSchema().bind(request=self.request)
 
@@ -72,7 +73,7 @@ class GroupEditController(object):
     def __init__(self, group, request):
         self.group = group
         self.request = request
-        self.schema = schemas.GroupSchema().bind(request=self.request)
+        self.schema = schemas.group_schema().bind(request=self.request)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Save'),),
                                         use_inline_editing=True)
