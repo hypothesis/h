@@ -11,6 +11,7 @@ and how to contribute code or documentation to the project.
    install/index
    administration
    submitting-a-pr
+   how-to-review-a-pull-request
    code-style
    documentation
    ssl

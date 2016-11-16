@@ -1,5 +1,5 @@
-Submitting a Pull Request
-#########################
+How to submit a pull request
+############################
 
 To submit code or documentation to h you should submit a pull request.
 
