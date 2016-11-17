@@ -7,6 +7,7 @@ from dateutil import parser
 import jinja2
 
 from h._compat import text_type
+from h.links import incontext_link
 
 
 def _format_document_link(href, title, link_text, host_or_filename):
@@ -131,6 +132,10 @@ class AnnotationHTMLPresenter(object):
             return self.document.link
         else:
             return ''
+
+    def incontext_link(self, request):
+        """Return a link to view this annotation in context."""
+        return incontext_link(request, self.annotation)
 
     @property
     def filename(self):

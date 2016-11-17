@@ -169,7 +169,9 @@
 }
 
 .search-bucket-stats__key {
-  color: $grey-4;
+  margin-bottom: 2px;
+  color: $grey-6;
+  font-weight: bold;
 }
 
 .search-bucket-stats__val {
@@ -177,9 +179,21 @@
   margin-bottom: 20px;
 }
 
-.search-bucket-stats__address,
+.search-bucket-stats__url,
 .search-bucket-stats__username {
   word-break: break-all;
+}
+
+.search-bucket-stats__link {
+  color: $grey-6;
+  &:visited {
+    color: $grey-6;
+  }
+}
+
+.search-bucket-stats__alt-link {
+  color: $grey-5;
+  font-style: italic;
 }
 
 // On large tablets and below, display bucket titles beneath rather than

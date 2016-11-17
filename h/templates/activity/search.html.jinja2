@@ -32,13 +32,21 @@
 
 {# Card displaying statistics about a bucket of annotations. #}
 {% macro search_bucket_stats(bucket) %}
+{% set bucket_incontext_link = bucket.annotations[0].annotation.incontext_link(request) %}
 <div class="search-bucket-stats">
   {% if bucket.uri %}
     <div class="search-bucket-stats__key">
-        Address
+        URL
     </div>
-    <div class="search-bucket-stats__val search-bucket-stats__address">
-        {{ bucket.uri }}
+    <div class="search-bucket-stats__val search-bucket-stats__url">
+        <div><a class="search-bucket-stats__link"
+                href="{{ bucket.uri }}">{{ bucket.uri }}</a></div>
+        {% if bucket_incontext_link %}
+        <div>
+          <a class="search-bucket-stats__alt-link"
+             href="{{ bucket_incontext_link }}">Visit annotations in context</a>
+        </div>
+        {% endif %}
     </div>
   {% endif %}
   {% if bucket.tags %}
