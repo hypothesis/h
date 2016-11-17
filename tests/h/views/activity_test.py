@@ -10,7 +10,7 @@ from webob.multidict import NestedMultiDict
 from h.views import activity
 
 
-@pytest.mark.usefixtures('paginate', 'query')
+@pytest.mark.usefixtures('paginate', 'query', 'routes')
 class TestSearch(object):
     def test_it_returns_404_when_feature_turned_off(self, pyramid_request):
         pyramid_request.feature.flags['search_page'] = False
@@ -139,6 +139,21 @@ class TestSearch(object):
             {'name': fake_group_2.name, 'pubid': fake_group_2.pubid},
             {'name': fake_group_3.name, 'pubid': fake_group_3.pubid},
         ]
+
+    def test_it_generates_tag_links(self, pyramid_request):
+        result = activity.search(pyramid_request)
+        tag_link = result['tag_link']('foo')
+        assert tag_link == 'http://example.com/search?q=tag%3Afoo'
+
+    def test_it_generates_usernames(self, pyramid_request):
+        result = activity.search(pyramid_request)
+        username = result['username_from_id']('acct:jim.smith@hypothes.is')
+        assert username == 'jim.smith'
+
+    def test_it_generates_username_links(self, pyramid_request):
+        result = activity.search(pyramid_request)
+        user_link = result['user_link']('acct:jim.smith@hypothes.is')
+        assert user_link == 'http://example.com/users/jim.smith/search'
 
     @pytest.fixture
     def query(self, patch):
