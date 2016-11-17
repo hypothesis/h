@@ -102,8 +102,6 @@ class AuthController(object):
                                         buttons=(_('Log in'),),
                                         footer=form_footer)
 
-        self.login_redirect = self.request.params.get(
-            'next', _login_redirect_url(self.request))
         self.logout_redirect = self.request.route_url('index')
 
     @view_config(request_method='GET')
@@ -125,7 +123,7 @@ class AuthController(object):
 
         user = appstruct['user']
         headers = self._login(user)
-        return httpexceptions.HTTPFound(location=self.login_redirect,
+        return httpexceptions.HTTPFound(location=self._login_redirect(),
                                         headers=headers)
 
     @view_config(route_name='logout',
@@ -139,15 +137,24 @@ class AuthController(object):
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(location=self.login_redirect)
+            raise httpexceptions.HTTPFound(location=self._login_redirect())
+
+    def _login_redirect(self):
+        return self.request.params.get('next', _login_redirect_url(self.request))
 
     def _login(self, user):
+        # Clear any cached feature flags
+        self.request.feature.clear()
+
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
         headers = security.remember(self.request, user.userid)
         return headers
 
     def _logout(self):
+        # Clear any cached feature flags
+        self.request.feature.clear()
+
         if self.request.authenticated_userid is not None:
             self.request.registry.notify(LogoutEvent(self.request))
             self.request.session.invalidate()
