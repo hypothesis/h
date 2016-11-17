@@ -111,10 +111,14 @@ class TestIndex(object):
 class TestSearch(object):
 
     def test_it_searches(self, pyramid_request, search_lib):
+        pyramid_request.stats = mock.Mock()
+
         views.search(pyramid_request)
 
         search = search_lib.Search.return_value
-        search_lib.Search.assert_called_with(pyramid_request, separate_replies=False)
+        search_lib.Search.assert_called_with(pyramid_request,
+                                             separate_replies=False,
+                                             stats=pyramid_request.stats)
         search.run.assert_called_once_with(pyramid_request.params)
 
     def test_it_loads_annotations_from_database(self, pyramid_request, search_run, storage):

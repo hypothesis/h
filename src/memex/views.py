@@ -145,8 +145,10 @@ def search(request):
     params = request.params.copy()
 
     separate_replies = params.pop('_separate_replies', False)
-    result = search_lib.Search(request, separate_replies=separate_replies) \
-        .run(params)
+    stats = getattr(request, 'stats', None)
+    result = search_lib.Search(request,
+                               separate_replies=separate_replies,
+                               stats=stats).run(params)
 
     out = {
         'total': result.total,

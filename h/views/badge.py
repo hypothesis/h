@@ -29,6 +29,6 @@ def badge(request):
         return {'total': 0}
 
     query = {'uri': uri, 'limit': 0}
-    result = search.Search(request).run(query)
+    result = search.Search(request, stats=request.stats).run(query)
 
     return {'total': result.total}
