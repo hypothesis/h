@@ -1,13 +1,42 @@
 'use strict';
 
 const syn = require('syn');
+
+const { cloneTemplate } = require('../../util/dom');
+const lozengeTemplate = require('./lozenge-template');
 const util = require('./util');
 const unroll = require('../util').unroll;
-
+const LozengeController = require('../../controllers/lozenge-controller');
 const SearchBarController = require('../../controllers/search-bar-controller');
 
+/**
+ * Return the search terms displayed by all lozenges in a search bar.
+ *
+ * @param {SearchBarController} ctrl
+ * @return {string[]}
+ */
+const getLozengeValues = (ctrl) => {
+  return Array.from(ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')).map((el) => {
+    const facetName = el.querySelector('.lozenge__facet-name').textContent;
+    const facetValue = el.querySelector('.lozenge__facet-value').textContent;
+    return facetName + facetValue;
+  });
+};
 
 describe('SearchBarController', () => {
+  let lozengeTemplateEl;
+
+  before(() => {
+    lozengeTemplateEl = document.createElement('template');
+    lozengeTemplateEl.id = 'lozenge-template';
+    lozengeTemplateEl.innerHTML = lozengeTemplate;
+    document.body.appendChild(lozengeTemplateEl);
+  });
+
+  after(() => {
+    lozengeTemplateEl.remove();
+  });
+
   describe('Autosuggest', () => {
     let testEl;
     let input;
@@ -196,12 +225,6 @@ describe('SearchBarController', () => {
 
     describe('it allows group value suggestions', () => {
 
-      const getLozengeValues = function () {
-        return Array.from(testEl.querySelectorAll('.lozenge')).map((el) => {
-          return el.querySelector('.lozenge__content').textContent;
-        });
-      };
-
       beforeEach(() => {
         // we need to setup the env vars before invoking controller
         teardown();
@@ -269,11 +292,11 @@ describe('SearchBarController', () => {
           .click(input)
           .type('group:"mul[down][enter]', () => {
             assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid8', 'pubid should be added to the hidden input');
-            assert.deepEqual(getLozengeValues(), ['group:"multi word"'], 'adds and wraps multi word with quotes');
+            assert.deepEqual(getLozengeValues(ctrl), ['group:"multi word"'], 'adds and wraps multi word with quotes');
           })
           .type('group:a[down][enter]', () => {
             assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid8 group:pid1', 'pubid should be added to the hidden input');
-            assert.deepEqual(getLozengeValues(), ['group:"multi word"', 'group:aaac'], 'adds single word as is to lozenge');
+            assert.deepEqual(getLozengeValues(ctrl), ['group:"multi word"', 'group:aaac'], 'adds single word as is to lozenge');
             done();
           });
       });
@@ -283,7 +306,7 @@ describe('SearchBarController', () => {
           .click(input)
           .type('group:<[down][enter]', () => {
             assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid10', 'pubid should be added to the hidden input');
-            assert.deepEqual(getLozengeValues(), ['group:"<*>Haskell fans<*>"'], 'adds and wraps multi word with quotes');
+            assert.deepEqual(getLozengeValues(ctrl), ['group:"<*>Haskell fans<*>"'], 'adds and wraps multi word with quotes');
             done();
           });
       });
@@ -406,19 +429,10 @@ describe('SearchBarController', () => {
       return ctrl.refs.searchBarLozenges.querySelectorAll('.js-lozenge');
     }
 
-    /**
-     * return the array of all of lozenges values
-     */
-    const getLozengeValues = function () {
-      return Array.from(ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')).map((el) => {
-        return el.querySelector('.lozenge__content').innerText;
-      });
-    };
-
     it('should create lozenges for existing query terms in the input on page load', () => {
       const {ctrl} = component('foo');
 
-      assert.equal(getLozenges(ctrl)[0].textContent, 'foo');
+      assert.deepEqual(getLozengeValues(ctrl), ['foo']);
     });
 
     it('inserts a hidden input on init', () => {
@@ -488,8 +502,7 @@ describe('SearchBarController', () => {
       const {ctrl, hiddenInput} = component('foo bar');
 
       const lozenge = getLozenges(ctrl)[0];
-      lozenge.querySelector('.js-lozenge__close').dispatchEvent(
-        new Event('mousedown'));
+      lozenge.controllers[0].options.deleteCallback();
 
       assert.equal(hiddenInput.value, 'bar');
     });
@@ -508,7 +521,7 @@ describe('SearchBarController', () => {
         .click(input)
         .type('gar')
         .type('[space]', () => {
-          assert.equal(getLozenges(ctrl)[1].textContent, 'gar');
+          assert.deepEqual(getLozengeValues(ctrl), ['foo', 'gar']);
           done();
         });
     });
@@ -520,7 +533,7 @@ describe('SearchBarController', () => {
         .click(input)
         .type(' gar\'')
         .type('[space]', () => {
-          assert.equal(getLozenges(ctrl)[0].textContent, "'bar gar'");
+          assert.deepEqual(getLozengeValues(ctrl), ["'bar gar'"]);
           done();
         });
     });
@@ -564,7 +577,7 @@ describe('SearchBarController', () => {
 
         const {input, hiddenInput} = component("group:'abc 123'");
 
-        assert.deepEqual(getLozengeValues(), ['group:"abc 123"']);
+        assert.deepEqual(getLozengeValues(ctrl), ['group:"abc 123"']);
         assert.equal(input.value, '');
         assert.equal(hiddenInput.value, 'group:pid124');
       });
@@ -573,7 +586,7 @@ describe('SearchBarController', () => {
 
         const {input, hiddenInput} = component('group:pid124');
 
-        assert.deepEqual(getLozengeValues(), ['group:"abc 123"']);
+        assert.deepEqual(getLozengeValues(ctrl), ['group:"abc 123"']);
         assert.equal(input.value, '');
         assert.equal(hiddenInput.value, 'group:pid124');
       });
@@ -619,7 +632,6 @@ describe('SearchBarController', () => {
             <div>
               <form data-ref="searchBarForm">
                 <div class="search-bar__lozenges" data-ref="searchBarLozenges">
-                    <div class="lozenge js-lozenge"><div class="js-lozenge__content lozenge__content">seeded</div></div>
                     <input data-ref="searchBarInput" class="search-bar__input" name="q" value="">
                 </div>
               </form>
@@ -632,6 +644,12 @@ describe('SearchBarController', () => {
         ctrl.refs.searchBarForm.submit = sinon.stub();
 
         const container = ctrl.element.querySelector('.search-bar__lozenges');
+
+        const lozengeEl = cloneTemplate(lozengeTemplateEl);
+        new LozengeController(lozengeEl, {content: 'seeded'});
+
+        container.insertBefore(lozengeEl, container.firstChild);
+
         const input = ctrl.refs.searchBarInput;
 
         let currentChildrenCount = container.children.length;
@@ -647,8 +665,7 @@ describe('SearchBarController', () => {
             assert.ok(container.children[0].classList.contains('lozenge'));
             assert.ok(container.children[1].classList.contains('lozenge'));
 
-            assert.equal(container.children[0].textContent, 'seeded');
-            assert.equal(container.children[1].textContent, 'foo', 'new lozenge should be added after the initial lozenge - but before anything else');
+            assert.deepEqual(getLozengeValues(ctrl), ['seeded', 'foo']);
 
             done();
           });

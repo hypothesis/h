@@ -51,7 +51,24 @@ function findRefs(el) {
   return map;
 }
 
+/**
+ * Clone the content of a <template> element and return the first child Element.
+ *
+ * @param {HTMLTemplateElement} templateEl
+ */
+function cloneTemplate(templateEl) {
+  if (templateEl.content) {
+    // <template> supported natively.
+    const content = templateEl.content.cloneNode(true);
+    return content.firstElementChild;
+  } else {
+    // <template> not supported. Browser just treats it as an unknown Element.
+    return templateEl.firstElementChild.cloneNode(true);
+  }
+}
+
 module.exports = {
-  findRefs: findRefs,
-  setElementState: setElementState,
+  cloneTemplate,
+  findRefs,
+  setElementState,
 };

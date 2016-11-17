@@ -1,65 +1,32 @@
 'use strict';
 
 const LozengeController = require('../../controllers/lozenge-controller');
+const lozengeTemplate = require('./lozenge-template');
+const { setupComponent } = require('./util');
 
 describe('LozengeController', () => {
-  let el;
-  let opts;
-  let lozengeEl;
-  let lozengeContentEl;
-  let lozengeDeleteEl;
-
-  beforeEach(() => {
-    el = document.createElement('div');
-    opts = {
-      content: 'foo',
+  function createLozenge(content) {
+    return setupComponent(document, lozengeTemplate, LozengeController, {
+      content,
       deleteCallback: sinon.spy(),
-    };
+    });
+  }
 
-    new LozengeController(el, opts);
-    lozengeEl = el.querySelector('.js-lozenge');
-    lozengeContentEl = lozengeEl.querySelector('.js-lozenge__content');
-    lozengeDeleteEl = lozengeEl.querySelector('.js-lozenge__close');
-  });
-
-  it('creates a new lozenge inside the container provided', () => {
-    assert.equal(lozengeContentEl.textContent, opts.content);
-  });
-
-  it('creates a new lozenge for a known named query term inside the container provided', () => {
-    el = document.createElement('div');
-    opts = {
-      content: 'user:foo',
-    };
-
-    new LozengeController(el, opts);
-    lozengeEl = el.querySelector('.js-lozenge');
-    lozengeContentEl = lozengeEl.querySelector('.js-lozenge__content');
-    const facetNameEl = lozengeContentEl.querySelector('.lozenge__facet-name');
-    const facetValueEl = lozengeContentEl.querySelector('.lozenge__facet-value');
-
-    assert.equal(facetNameEl.textContent, 'user');
-    assert.equal(facetValueEl.textContent, 'foo');
+  it('displays the facet name and value for recognized facets', () => {
+    const ctrl = createLozenge('user:foo');
+    assert.equal(ctrl.refs.facetName.textContent, 'user:');
+    assert.equal(ctrl.refs.facetValue.textContent, 'foo');
   });
 
   it('does not create a new lozenge for named query term which is not known', () => {
-    el = document.createElement('div');
-    opts = {
-      content: 'foo:bar',
-    };
-
-    new LozengeController(el, opts);
-    lozengeEl = el.querySelector('.js-lozenge');
-    lozengeContentEl = lozengeEl.querySelector('.js-lozenge__content');
-
-    assert.isNull(lozengeContentEl.querySelector('.lozenge__facet-name'));
-    assert.isNull(lozengeContentEl.querySelector('.lozenge__facet-value'));
-    assert.equal(lozengeContentEl.textContent, opts.content);
+    const ctrl = createLozenge('foo:bar');
+    assert.equal(ctrl.refs.facetName.textContent, '');
+    assert.equal(ctrl.refs.facetValue.textContent, 'foo:bar');
   });
 
   it('removes the lozenge and executes the delete callback provided', () => {
-    lozengeDeleteEl.dispatchEvent(new Event('mousedown'));
-    assert(opts.deleteCallback.calledOnce);
-    assert.isNull(el.querySelector('.js-lozenge'));
+    const ctrl = createLozenge('deleteme');
+    ctrl.refs.deleteButton.dispatchEvent(new Event('click'));
+    assert.calledOnce(ctrl.options.deleteCallback);
   });
 });

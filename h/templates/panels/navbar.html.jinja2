@@ -7,14 +7,15 @@
 {% macro lozenge(facetName, facetValue) %}
   <div class="lozenge">
     <div class="lozenge__content">
-      <span class="lozenge__facet-name">
+      <span class="lozenge__facet-name" data-ref="facetName">
         {{ facetName }}:
       </span>
-      <span class="lozenge__facet-value">
+      <span class="lozenge__facet-value" data-ref="facetValue">
         {{ facetValue }}
       </span>
     </div>
-    <button class="lozenge__close"
+    <button data-ref="deleteButton"
+            class="lozenge__close"
             type="submit"
             name="delete_lozenge">
       <img alt="{% trans %}Delete lozenge{% endtrans %}"
@@ -24,6 +25,9 @@
 {% endmacro %}
 
 <header class="nav-bar">
+  <template id="lozenge-template">
+    {{ lozenge('','') }}
+  </template>
   <div class="nav-bar__content">
     <a href="/" title="Hypothesis homepage" class="nav-bar__logo-container"><!--
       !--><img alt="Hypothesis logo" class="nav-bar__logo" src="/assets/images/logo.svg"></a>
