@@ -40,7 +40,7 @@
     </div>
     <div class="search-bucket-stats__val search-bucket-stats__url">
         <div><a class="search-bucket-stats__link"
-                href="{{ bucket.uri }}">{{ bucket.uri }}</a></div>
+                href="{{ bucket.uri }}">{{ pretty_link(bucket.uri) }}</a></div>
         {% if bucket_incontext_link %}
         <div>
           <a class="search-bucket-stats__alt-link"
@@ -272,7 +272,7 @@
           </dt>
           <dd class="search-result-sidebar__dd">
             <a href="{{ user.uri }}" class="search-result-sidebar__user-link">
-              {{ user.domain }}
+              {{ pretty_link(user.uri) }}
             </a>
           </dd>
         {% endif -%}
