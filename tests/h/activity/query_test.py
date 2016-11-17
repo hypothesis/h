@@ -165,9 +165,12 @@ class TestExecute(object):
     PAGE_SIZE = 23
 
     def test_it_creates_a_search_query(self, pyramid_request, Search):
+        pyramid_request.stats = mock.Mock()
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        Search.assert_called_once_with(pyramid_request, separate_replies=True)
+        Search.assert_called_once_with(pyramid_request,
+                                       separate_replies=True,
+                                       stats=pyramid_request.stats)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
                                                             pyramid_request,
@@ -494,6 +497,11 @@ class TestExecute(object):
     @pytest.fixture
     def UsersAggregation(self, patch):
         return patch('h.activity.query.UsersAggregation')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.stats = None
+        return pyramid_request
 
 
 class TestFetchAnnotations(object):

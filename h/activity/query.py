@@ -157,7 +157,7 @@ def fetch_annotations(session, ids, reply_ids):
 
 @newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
-    search = Search(request, separate_replies=True)
+    search = Search(request, separate_replies=True, stats=request.stats)
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 
