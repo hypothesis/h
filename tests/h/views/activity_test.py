@@ -684,6 +684,16 @@ class TestToggleTagFacet(object):
             'http://example.com/users/foo/search'
             '?q=foo+bar')
 
+    def test_it_preserves_query_when_removing_one_of_multiple_tag_facets(self,
+                                                                         pyramid_request):
+        pyramid_request.POST['q'] = 'tag:"foo" tag:"gar" tag:"bar"'
+
+        result = activity.toggle_tag_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/users/foo/search'
+            '?q=tag%3Afoo+tag%3Abar')
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.matched_route = mock.Mock()
