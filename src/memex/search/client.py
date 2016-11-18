@@ -18,7 +18,6 @@ class Client(object):
     class t(object):
         """Document types"""
         annotation = 'annotation'
-        document = 'document'
 
     def __init__(self, host, index, **kwargs):
         self.index = index
