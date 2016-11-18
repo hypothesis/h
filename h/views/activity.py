@@ -318,10 +318,9 @@ def toggle_tag_facet(request):
         # so remove that tag facet.
         tag_facets = _tag_facets(request, parsed_query)
         tag_facets.remove(tag)
-        if tag_facets:
-            parsed_query['tag'] = tag_facets
-        else:
-            del parsed_query['tag']
+        del parsed_query['tag']
+        for tag_facet in tag_facets:
+            parsed_query.add('tag', tag_facet)
     else:
         # The search query is not yet faceted by the given tag, so add a facet
         # for the tag.
