@@ -68,21 +68,24 @@ class TestAuthController(object):
 
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
+        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
 
         with pytest.raises(httpexceptions.HTTPFound):
             views.AuthController(pyramid_request).post()
 
     def test_post_redirects_to_search_page_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
+        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
         pyramid_request.feature.flags['search_page'] = True
 
         with pytest.raises(httpexceptions.HTTPFound) as exc:
             views.AuthController(pyramid_request).post()
 
-        assert exc.value.location == 'http://example.com/search'
+        assert exc.value.location == 'http://example.com/users/janedoe/search'
 
     def test_post_redirects_to_next_param_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_request.params = {'next': '/foo/bar'}
+        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
 
         with pytest.raises(httpexceptions.HTTPFound) as e:
@@ -125,7 +128,9 @@ class TestAuthController(object):
                                                      pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = form_validating_to({"user": factories.User(username='cara')})
+        user = factories.User(username='cara')
+        pyramid_request.authenticated_user = user
+        controller.form = form_validating_to({"user": user})
 
         result = controller.post()
 
@@ -139,7 +144,9 @@ class TestAuthController(object):
         pyramid_request.params = {'next': '/foo/bar'}
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = form_validating_to({"user": factories.User(username='cara')})
+        user = factories.User(username='cara')
+        pyramid_request.authenticated_user = user
+        controller.form = form_validating_to({"user": user})
 
         result = controller.post()
 
@@ -157,6 +164,7 @@ class TestAuthController(object):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         elephant = factories.User(username='avocado')
         controller = views.AuthController(pyramid_request)
+        pyramid_request.authenticated_user = elephant
         controller.form = form_validating_to({"user": elephant})
 
         controller.post()
@@ -198,6 +206,7 @@ class TestAuthController(object):
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('activity.search', '/search')
+        pyramid_config.add_route('activity.user_search', '/users/{username}/search')
         pyramid_config.add_route('forgot_password', '/forgot')
         pyramid_config.add_route('index', '/index')
         pyramid_config.add_route('stream', '/stream')
