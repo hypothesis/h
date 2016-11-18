@@ -30,7 +30,7 @@ node {
     postgres = docker.image('postgres:9.4').run('-P -e POSTGRES_DB=htest')
     databaseUrl = "postgresql://postgres@${hostIp}:${containerPort(postgres, 5432)}/htest"
 
-    elasticsearch = docker.image('nickstenning/elasticsearch-icu').run('-P')
+    elasticsearch = docker.image('nickstenning/elasticsearch-icu').run('-P', "-Des.cluster.name=${buildVersion}")
     elasticsearchHost = "http://${hostIp}:${containerPort(elasticsearch, 9200)}"
 
     rabbit = docker.image('rabbitmq').run('-P')
