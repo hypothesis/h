@@ -2,10 +2,12 @@
 """Functions for updating the search index."""
 
 from __future__ import unicode_literals
-from collections import namedtuple
+
+import binascii
 import itertools
 import logging
-from memex._compat import xrange
+import os
+from collections import namedtuple
 
 import elasticsearch
 from elasticsearch import helpers as es_helpers
@@ -13,8 +15,9 @@ from sqlalchemy.orm import subqueryload
 
 from memex import models
 from memex import presenters
+from memex._compat import xrange
 from memex.events import AnnotationTransformEvent
-
+from memex.search.config import configure_index
 
 log = logging.getLogger(__name__)
 
@@ -79,11 +82,35 @@ def delete(es, annotation_id):
 
 
 def reindex(session, es, request):
-    indexing = BatchIndexer(session, es, request)
-    indexing.index_all()
+    """Reindex all annotations into a new index, and update the alias."""
 
-    deleting = BatchDeleter(session, es)
-    deleting.delete_all()
+    aliased = es.get_aliased_index() is not None
+
+    # If the index we're using is an alias, then we index into a brand new
+    # index and update the alias at the end.
+    if aliased:
+        new_index = es.index + '-' + _random_id()
+        configure_index(es, index=new_index)
+        indexer = BatchIndexer(session, es, request, target_index=new_index)
+    else:
+        indexer = BatchIndexer(session, es, request)
+
+    errored = indexer.index()
+    if errored:
+        log.debug('failed to index {} annotations, retrying...'.format(
+            len(errored)))
+        errored = indexer.index(errored)
+        if errored:
+            log.warn('failed to index {} annotations: {!r}'.format(
+                len(errored),
+                errored))
+
+    if aliased:
+        es.update_aliased_index(new_index)
+    else:
+        deleter = BatchDeleter(session, es)
+        deleter.delete_all()
+
 
 
 class BatchIndexer(object):
@@ -92,25 +119,16 @@ class BatchIndexer(object):
     the search index.
     """
 
-    def __init__(self, session, es_client, request):
+    def __init__(self, session, es_client, request, target_index=None):
         self.session = session
         self.es_client = es_client
         self.request = request
 
         # By default, index into the open index
-        self._target_index = self.es_client.index
-
-    def index_all(self):
-        """Reindex all annotations, and retry failed indexing operations once."""
-
-        errored = None
-        for _ in range(2):
-            errored = self.index(errored)
-            log.debug(
-                'Failed to index {} annotations, might retry'.format(len(errored)))
-
-            if not errored:
-                break
+        if target_index is None:
+            self._target_index = self.es_client.index
+        else:
+            self._target_index = target_index
 
     def index(self, annotation_ids=None):
         """
@@ -268,3 +286,8 @@ class BatchDeleter(object):
             if not batch:
                 return
             yield batch
+
+
+def _random_id():
+    """Generate a short random hex string."""
+    return binascii.hexlify(os.urandom(4))
