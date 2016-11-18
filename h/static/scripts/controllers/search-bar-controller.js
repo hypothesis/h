@@ -324,9 +324,10 @@ class SearchBarController extends Controller {
         currentInput = (currentInput || '').trim();
 
         let typeFilter = FACET_TYPE;
-        if (currentInput.indexOf('tag:') === 0) {
+        const inputLower = currentInput.toLowerCase();
+        if (inputLower.indexOf('tag:') === 0) {
           typeFilter = TAG_TYPE;
-        } else if (currentInput.indexOf('group:') === 0) {
+        } else if (inputLower.indexOf('group:') === 0) {
           typeFilter = GROUP_TYPE;
         }
 

@@ -2,6 +2,7 @@
 
 const syn = require('syn');
 const util = require('./util');
+const unroll = require('../util').unroll;
 
 const SearchBarController = require('../../controllers/search-bar-controller');
 
@@ -210,10 +211,10 @@ describe('SearchBarController', () => {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      it('shows group suggestions', (done) => {
+      unroll('shows group suggestions', (done, fixture) => {
         syn
           .click(input)
-          .type('group:', () => {
+          .type(fixture.text, () => {
             assert.isTrue(dropdown.classList.contains('is-open'));
 
             const titles = getItemTitles();
@@ -224,7 +225,11 @@ describe('SearchBarController', () => {
             assert.deepEqual(getItemTitles(), [ 'user:', 'tag:', 'url:', 'group:' ], 'group suggestions go away as facet is removed');
             done();
           });
-      });
+      },[
+        {text: 'group:'},
+        {text: 'Group:'},
+        {text: 'GROUP:'},
+      ]);
 
       it('orders groups by earliest value match first', (done) => {
         syn
@@ -295,10 +300,10 @@ describe('SearchBarController', () => {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      it('shows tag suggestions', (done) => {
+      unroll('shows tag suggestions', (done, fixture) => {
         syn
           .click(input)
-          .type('tag:', () => {
+          .type(fixture.text, () => {
             assert.isTrue(dropdown.classList.contains('is-open'));
 
             const titles = getItemTitles();
@@ -309,7 +314,11 @@ describe('SearchBarController', () => {
             assert.deepEqual(getItemTitles(), [ 'user:', 'tag:', 'url:', 'group:' ], 'tags go away as facet is removed');
             done();
           });
-      });
+      },[
+        {text: 'tag:'},
+        {text: 'Tag:'},
+        {text: 'TAG:'},
+      ]);
 
       it('orders tags by priority and indexOf score', (done) => {
         syn
