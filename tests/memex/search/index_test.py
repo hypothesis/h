@@ -173,7 +173,7 @@ class TestBatchIndexer(object):
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
-                       '_index': indexer.es_client.index,
+                       '_index': 'hypothesis',
                        '_id': annotation.id}},
             rendered
         )
@@ -211,7 +211,7 @@ class TestBatchIndexer(object):
 
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
-                       '_index': indexer.es_client.index,
+                       '_index': 'hypothesis',
                        '_id': annotation.id}},
             rendered
         )
@@ -233,8 +233,8 @@ class TestBatchIndexer(object):
         assert result == set([ann_fail_1.id, ann_fail_2.id])
 
     @pytest.fixture
-    def indexer(self, db_session, pyramid_request):
-        return index.BatchIndexer(db_session, mock.MagicMock(), pyramid_request)
+    def indexer(self, db_session, es, pyramid_request):
+        return index.BatchIndexer(db_session, es, pyramid_request)
 
     @pytest.fixture
     def index(self, patch):

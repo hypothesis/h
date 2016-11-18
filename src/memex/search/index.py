@@ -97,6 +97,9 @@ class BatchIndexer(object):
         self.es_client = es_client
         self.request = request
 
+        # By default, index into the open index
+        self._target_index = self.es_client.index
+
     def index_all(self):
         """Reindex all annotations, and retry failed indexing operations once."""
 
@@ -135,7 +138,7 @@ class BatchIndexer(object):
         return errored
 
     def _prepare(self, annotation):
-        action = {'index': {'_index': self.es_client.index,
+        action = {'index': {'_index': self._target_index,
                             '_type': self.es_client.t.annotation,
                             '_id': annotation.id}}
         data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
