@@ -97,7 +97,7 @@ ANNOTATION_MAPPING = {
         },
         'references': {'type': 'string'},
         'document': {
-            'enabled': False,  # indexed explicitly by the save function
+            'enabled': False,  # not indexed
         },
         'thread': {
             'type': 'string',
@@ -166,38 +166,6 @@ ANNOTATION_ANALYSIS = {
     }
 }
 
-DOCUMENT_MAPPING = {
-    '_id': {'path': 'id'},
-    '_source': {'excludes': ['id']},
-    'analyzer': 'keyword',
-    'date_detection': False,
-    'properties': {
-        'id': {'type': 'string', 'index': 'no'},
-        'annotator_schema_version': {'type': 'string'},
-        'created': {'type': 'date'},
-        'updated': {'type': 'date'},
-        'title': {'type': 'string', 'analyzer': 'standard'},
-        'link': {
-            'type': 'nested',
-            'properties': {
-                'type': {'type': 'string'},
-                'href': {'type': 'string'},
-            }
-        },
-        'dc': {
-            'type': 'nested',
-            'properties': {
-                # by default elastic search will try to parse this as
-                # a date but unfortunately the data that is in the wild
-                # may not be parsable by ES which throws an exception
-                'date': {'type': 'string'}
-            }
-        }
-    }
-}
-
-DOCUMENT_ANALYSIS = {}
-
 
 def configure_index(client, index=None):
     """Configure the elasticsearch index."""
@@ -216,11 +184,6 @@ def configure_index(client, index=None):
                    client.t.annotation,
                    ANNOTATION_MAPPING,
                    ANNOTATION_ANALYSIS)
-    _append_config(mappings,
-                   analysis,
-                   client.t.document,
-                   DOCUMENT_MAPPING,
-                   DOCUMENT_ANALYSIS)
 
     # Try to create the index with the correct settings. This will not fail if
     # the index already exists.
