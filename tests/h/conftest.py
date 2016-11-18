@@ -49,6 +49,8 @@ class DummyFeature(object):
     def load(self):
         self.loaded = True
 
+    def clear(self):
+        self.flags = {}
 
 class DummySession(object):
 
