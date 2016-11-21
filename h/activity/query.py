@@ -123,11 +123,12 @@ def execute(request, query, page_size):
     # Add group information to buckets and present annotations
     for timeframe in result.timeframes:
         for bucket in timeframe.document_buckets.values():
-            for index, annotation in enumerate(bucket.annotations):
-                bucket.annotations[index] = {
+            bucket.presented_annotations = []
+            for annotation in bucket.annotations:
+                bucket.presented_annotations.append({
                     'annotation': presenters.AnnotationHTMLPresenter(annotation),
                     'group': groups.get(annotation.groupid)
-                }
+                })
 
     return result
 

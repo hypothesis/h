@@ -10,6 +10,7 @@ import newrelic.agent
 from pyramid import i18n
 
 from h._compat import urlparse
+from h import links
 from h import presenters
 
 
@@ -40,6 +41,19 @@ class DocumentBucket(object):
     @property
     def annotations_count(self):
         return len(self.annotations)
+
+    def incontext_link(self, request):
+        """
+        Return a link to view this bucket's annotations in context.
+
+        The bouncer service and Hypothesis client do not currently provide
+        direct links to view a document's annotations without specifying a
+        specific annotation, so here we just link to the first annotation in the
+        document.
+        """
+        if len(self.annotations) == 0:
+            return None
+        return links.incontext_link(request, self.annotations[0])
 
     def append(self, annotation):
         self.annotations.append(annotation)

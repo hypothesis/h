@@ -32,7 +32,6 @@
 
 {# Card displaying statistics about a bucket of annotations. #}
 {% macro search_bucket_stats(bucket) %}
-{% set bucket_incontext_link = bucket.annotations[0].annotation.incontext_link(request) %}
 <div class="search-bucket-stats">
   {% if bucket.uri %}
     <div class="search-bucket-stats__key">
@@ -41,10 +40,10 @@
     <div class="search-bucket-stats__val search-bucket-stats__url">
         <div><a class="search-bucket-stats__link"
                 href="{{ bucket.uri }}">{{ pretty_link(bucket.uri) }}</a></div>
-        {% if bucket_incontext_link %}
+        {% if bucket.incontext_link(request) %}
         <div>
           <a class="search-bucket-stats__incontext-link"
-             href="{{ bucket_incontext_link }}"
+             href="{{ bucket.incontext_link(request) }}"
              target="_blank">
              Visit annotations in context {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__incontext-icon') }}
            </a>
@@ -107,7 +106,7 @@
   <div class="search-result-bucket__content">
     <div class="search-result-bucket__annotation-cards-container" data-ref="content">
       <ol class="search-result-bucket__annotation-cards">
-        {% for result in bucket.annotations %}
+        {% for result in bucket.presented_annotations %}
           {{ annotation_card(result.annotation, request, result.group) }}
         {% endfor %}
       </ol>

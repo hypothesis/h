@@ -335,7 +335,7 @@ class TestExecute(object):
         presented_annotations = []
         for timeframe in result.timeframes:
             for bucket in timeframe.document_buckets.values():
-                presented_annotations.extend(bucket.annotations)
+                presented_annotations.extend(bucket.presented_annotations)
 
         for annotation in annotations:
             for presented_annotation in presented_annotations:
@@ -354,7 +354,7 @@ class TestExecute(object):
         presented_annotations = []
         for timeframe in result.timeframes:
             for bucket in timeframe.document_buckets.values():
-                presented_annotations.extend(bucket.annotations)
+                presented_annotations.extend(bucket.presented_annotations)
 
         for group in _fetch_groups.return_value:
             for presented_annotation in presented_annotations:
@@ -442,7 +442,8 @@ class TestExecute(object):
         """
         def document_bucket(annotations):
             """Return a mock document bucket like the ones bucket() returns."""
-            return mock.Mock(spec_set=['annotations'], annotations=annotations)
+            return mock.Mock(spec_set=['annotations', 'presented_annotations'],
+                annotations=annotations)
 
         return [
             document_bucket(annotations[:3]),
