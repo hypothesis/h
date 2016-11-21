@@ -35,10 +35,20 @@
 <div class="search-bucket-stats">
   {% if bucket.uri %}
     <div class="search-bucket-stats__key">
-        Address
+        URL
     </div>
-    <div class="search-bucket-stats__val search-bucket-stats__address">
-        {{ bucket.uri }}
+    <div class="search-bucket-stats__val search-bucket-stats__url">
+        <div><a class="search-bucket-stats__link"
+                href="{{ bucket.uri }}">{{ pretty_link(bucket.uri) }}</a></div>
+        {% if bucket.incontext_link(request) %}
+        <div>
+          <a class="search-bucket-stats__incontext-link"
+             href="{{ bucket.incontext_link(request) }}"
+             target="_blank">
+             Visit annotations in context {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__incontext-icon') }}
+           </a>
+        </div>
+        {% endif %}
     </div>
   {% endif %}
   {% if bucket.tags %}
@@ -74,7 +84,14 @@
      clicked #}
   <div class="search-result-bucket__header" data-ref="header">
     <div class="search-result-bucket__domain">
-      {{ bucket.domain }}
+      <span class="search-result-bucket__domain-text">{{ bucket.domain }}</span>
+      <a class="search-result-bucket__domain-link"
+         href="{{ bucket.incontext_link(request) }}"
+         title="Visit annotations in context"
+         target="_blank"
+         data-ref="domainLink">
+         {{ bucket.domain }}
+         {{ svg_icon('up-right-arrow', css_class='search-result-bucket__incontext-icon') }}</a>
     </div>
     <div class="search-result-bucket__title-and-annotations-count">
         <div class="search-result-bucket__title">
@@ -96,7 +113,7 @@
   <div class="search-result-bucket__content">
     <div class="search-result-bucket__annotation-cards-container" data-ref="content">
       <ol class="search-result-bucket__annotation-cards">
-        {% for result in bucket.annotations %}
+        {% for result in bucket.presented_annotations %}
           {{ annotation_card(result.annotation, request, result.group) }}
         {% endfor %}
       </ol>
@@ -264,7 +281,7 @@
           </dt>
           <dd class="search-result-sidebar__dd">
             <a href="{{ user.uri }}" class="search-result-sidebar__user-link">
-              {{ user.domain }}
+              {{ pretty_link(user.uri) }}
             </a>
           </dd>
         {% endif -%}

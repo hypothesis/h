@@ -76,6 +76,22 @@ def test_incontext_link_skips_uri_for_pdfs_with_no_document(pyramid_request):
     assert link == 'https://hyp.is/123'
 
 
+@pytest.mark.parametrize('uri,formatted', [
+    ('http://notsecure.com', 'notsecure.com'),
+    ('https://secure.com', 'secure.com'),
+    ('ftp://not_http', 'ftp://not_http'),
+    ('http://www.google.com', 'google.com'),
+    ('http://site.com/with-a-path', 'site.com/with-a-path'),
+    ('https://site.com/with-a-path?q=and-a-query-string', 'site.com/with-a-path'),
+    ('http://site.com/path%20with%20spaces','site.com/path with spaces'),
+    ('', ''),
+    ('site.com/no-scheme', 'site.com/no-scheme'),
+    ('does not look like a URL', 'does not look like a URL'),
+])
+def test_pretty_link(uri, formatted):
+    assert links.pretty_link(uri) == formatted
+
+
 @pytest.fixture
 def pyramid_settings(pyramid_settings):
     pyramid_settings.update({

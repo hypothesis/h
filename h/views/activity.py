@@ -13,6 +13,7 @@ from memex.search import parser
 
 from h import models
 from h.activity import query
+from h.links import pretty_link
 from h.paginator import paginate
 from h import util
 
@@ -54,12 +55,14 @@ def search(request):
                 'name': group.name,
                 'pubid': group.pubid
                 })
+
     return {
         'total': result.total,
         'aggregations': result.aggregations,
         'groups_suggestions': groups_suggestions,
         'timeframes': result.timeframes,
         'page': paginate(request, result.total, page_size=page_size),
+        'pretty_link': pretty_link,
         'q': request.params.get('q', ''),
     }
 

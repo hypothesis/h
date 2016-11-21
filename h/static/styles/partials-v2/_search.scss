@@ -84,6 +84,11 @@
 
   cursor: pointer;
   user-select: none;
+
+  // The in-context arrow icon is hidden until the bucket header is hovered
+  &:hover .search-result-bucket__incontext-icon {
+    visibility: visible;
+  }
 }
 
 .search-result-bucket__domain {
@@ -93,6 +98,28 @@
   color: $grey-4;
   margin-right: 10px;
   word-wrap: break-word;
+}
+
+// The domain name in the bucket header is a clickable link on the left-hand
+// side in desktop layouts. On smaller screens it spans the full width of the
+// header and becomes plain text to avoid accidental clicks.
+.search-result-bucket__domain-text {
+  display: none;
+}
+
+.search-result-bucket__domain-link {
+  color: inherit;
+  &:visited {
+    color: inherit;
+  }
+}
+
+.search-result-bucket__incontext-icon {
+  // The in-context arrow icon is hidden until the bucket header is hovered
+  visibility: hidden;
+  width: 9px;
+  height: 9px;
+  color: $grey-4;
 }
 
 .search-result-bucket__title-and-annotations-count {
@@ -169,7 +196,9 @@
 }
 
 .search-bucket-stats__key {
-  color: $grey-4;
+  margin-bottom: 2px;
+  color: $grey-6;
+  font-weight: bold;
 }
 
 .search-bucket-stats__val {
@@ -177,9 +206,31 @@
   margin-bottom: 20px;
 }
 
-.search-bucket-stats__address,
+.search-bucket-stats__url,
 .search-bucket-stats__username {
   word-break: break-all;
+}
+
+.search-bucket-stats__link {
+  color: $grey-6;
+  &:visited {
+    color: $grey-6;
+  }
+}
+
+.search-bucket-stats__incontext-link {
+  display: block;
+  margin-top: 5px;
+
+  color: $grey-6;
+  font-weight: bold;
+}
+
+.search-bucket-stats__incontext-icon {
+  position: relative;
+  top: 1px;
+  height: 9px;
+  width: 9px;
 }
 
 // On large tablets and below, display bucket titles beneath rather than
@@ -195,6 +246,16 @@
 
     .search-result-bucket__domain {
       width: 100%;
+    }
+
+    // Make domain plain text rather than a link to avoid the user accidentally
+    // clicking it
+    .search-result-bucket__domain-text {
+      display: inline;
+    }
+
+    .search-result-bucket__domain-link {
+      display: none;
     }
 
     .search-result-bucket__content {

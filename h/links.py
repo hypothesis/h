@@ -5,7 +5,23 @@ Provides links to different representations of annotations.
 """
 
 
-from h._compat import urlparse
+from h._compat import urlparse, url_unquote
+
+
+def pretty_link(url):
+    """
+    Return a nicely formatted version of a URL.
+
+    This strips off 'visual noise' from the URL including common schemes
+    (HTTP, HTTPS), domain prefixes ('www.') and query strings.
+    """
+    parsed = urlparse.urlparse(url)
+    if parsed.scheme not in ['http', 'https']:
+        return url
+    netloc = parsed.netloc
+    if netloc.startswith('www.'):
+        netloc = netloc[4:]
+    return url_unquote(netloc + parsed.path)
 
 
 def html_link(request, annotation):
