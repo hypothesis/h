@@ -26,6 +26,9 @@ output if it fails, e.g.
     E       Actual call: set_value('a string')
 
 """
+
+import re
+
 from pyramid import httpexceptions
 
 
@@ -103,6 +106,19 @@ class redirect_303_to(object):
         if not isinstance(other, httpexceptions.HTTPSeeOther):
             return False
         return other.location == self.location
+
+
+class regex(object):
+    """Matches any string matching the passed regex."""
+
+    def __init__(self, patt):
+        self.patt = re.compile(patt)
+
+    def __eq__(self, other):
+        return bool(self.patt.match(other))
+
+    def __repr__(self):
+        return '<string matching re {!r}>'.format(self.patt.pattern)
 
 
 class unordered_list(object):
