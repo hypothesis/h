@@ -100,6 +100,13 @@
   word-wrap: break-word;
 }
 
+// The domain name in the bucket header is a clickable link on the left-hand
+// side in desktop layouts. On smaller screens it spans the full width of the
+// header and becomes plain text to avoid accidental clicks.
+.search-result-bucket__domain-text {
+  display: none;
+}
+
 .search-result-bucket__domain-link {
   color: inherit;
   &:visited {
@@ -239,6 +246,16 @@
 
     .search-result-bucket__domain {
       width: 100%;
+    }
+
+    // Make domain plain text rather than a link to avoid the user accidentally
+    // clicking it
+    .search-result-bucket__domain-text {
+      display: inline;
+    }
+
+    .search-result-bucket__domain-link {
+      display: none;
     }
 
     .search-result-bucket__content {

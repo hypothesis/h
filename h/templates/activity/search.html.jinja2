@@ -84,6 +84,7 @@
      clicked #}
   <div class="search-result-bucket__header" data-ref="header">
     <div class="search-result-bucket__domain">
+      <span class="search-result-bucket__domain-text">{{ bucket.domain }}</span>
       <a class="search-result-bucket__domain-link"
          href="{{ bucket.incontext_link(request) }}"
          title="Visit annotations in context"
