@@ -16,6 +16,7 @@ from h.activity import query
 from h.links import pretty_link
 from h.paginator import paginate
 from h import util
+from h.util.user import split_user
 
 PAGE_SIZE = 200
 
@@ -56,14 +57,29 @@ def search(request):
                 'pubid': group.pubid
                 })
 
+    def tag_link(tag):
+        q = parser.unparse({'tag': tag})
+        return request.route_url('activity.search', _query=[('q', q)])
+
+    def username_from_id(userid):
+        parts = split_user(userid)
+        return parts['username']
+
+    def user_link(userid):
+        username=username_from_id(userid)
+        return request.route_url('activity.user_search', username=username)
+
     return {
-        'total': result.total,
         'aggregations': result.aggregations,
         'groups_suggestions': groups_suggestions,
-        'timeframes': result.timeframes,
         'page': paginate(request, result.total, page_size=page_size),
         'pretty_link': pretty_link,
         'q': request.params.get('q', ''),
+        'tag_link': tag_link,
+        'timeframes': result.timeframes,
+        'total': result.total,
+        'user_link': user_link,
+        'username_from_id': username_from_id,
     }
 
 

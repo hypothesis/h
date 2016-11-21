@@ -57,7 +57,8 @@
     </div>
     <ul class="search-bucket-stats__val">
       {% for tag in bucket.tags %}
-        <li>{{ tag }}</li>
+        <li><a class="search-bucket-stats__link"
+               href="{{ tag_link(tag) }}">{{ tag }}</a></li>
       {% endfor %}
     </ul>
   {% endif %}
@@ -67,7 +68,8 @@
   <ul class="search-bucket-stats__val">
     {% for user in bucket.users %}
       <li class="search-bucket-stats__username">
-        {{ user.split(':')[1].split('@')[0] }}
+        <a class="search-bucket-stats__link"
+           href="{{ user_link(user) }}">{{ username_from_id(user) }}</a>
       </li>
     {% endfor %}
   </ul>
