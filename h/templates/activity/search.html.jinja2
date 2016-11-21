@@ -84,7 +84,12 @@
      clicked #}
   <div class="search-result-bucket__header" data-ref="header">
     <div class="search-result-bucket__domain">
-      {{ bucket.domain }}
+      <a class="search-result-bucket__domain-link"
+         href="{{ bucket.incontext_link(request) }}"
+         title="Visit annotations in context"
+         target="_blank">
+         {{ bucket.domain }}
+         {{ svg_icon('up-right-arrow', css_class='search-result-bucket__incontext-icon') }}</a>
     </div>
     <div class="search-result-bucket__title-and-annotations-count">
         <div class="search-result-bucket__title">

@@ -84,6 +84,11 @@
 
   cursor: pointer;
   user-select: none;
+
+  // The in-context arrow icon is hidden until the bucket header is hovered
+  &:hover .search-result-bucket__incontext-icon {
+    visibility: visible;
+  }
 }
 
 .search-result-bucket__domain {
@@ -93,6 +98,21 @@
   color: $grey-4;
   margin-right: 10px;
   word-wrap: break-word;
+}
+
+.search-result-bucket__domain-link {
+  color: inherit;
+  &:visited {
+    color: inherit;
+  }
+}
+
+.search-result-bucket__incontext-icon {
+  // The in-context arrow icon is hidden until the bucket header is hovered
+  visibility: hidden;
+  width: 9px;
+  height: 9px;
+  color: $grey-4;
 }
 
 .search-result-bucket__title-and-annotations-count {
