@@ -223,11 +223,11 @@
       <h3 class="search-result-sidebar__subtitle">
         {% trans %}Members{% endtrans %}
         <span class="search-result-sidebar-title__annotations-count">
-          {{ aggregations.users|length }}
+          {{ group.members|length }}
         <span>
       </h3>
       <ul>
-        {% for user in aggregations.users %}
+        {% for user in group.members %}
           <li>
             <button type="submit"
                     form="search-bar"
@@ -242,9 +242,11 @@
                     {% endif %}
                     class="search-result-sidebar__username">
               {{ user.username }}
+              {% if user.count > 0 %}
               <span class="search-result-sidebar__annotations-count">
                 {{ user.count }}
               </span>
+              {% endif %}
             </button>
           </li>
           {% endfor %}

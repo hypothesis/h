@@ -42,12 +42,6 @@ def search(request):
     # Fetch results
     result = query.execute(request, q, page_size=page_size)
 
-    for user in result.aggregations.get('users', []):
-        user['username'] = util.user.split_user(user['user'])['username']
-        user['userid'] = user['user']
-        user['faceted_by'] = _faceted_by_user(request, user['username'], q)
-        del user['user']
-
     groups_suggestions = []
 
     if request.authenticated_user:
@@ -105,6 +99,21 @@ def group_search(request):
     if request.authenticated_user not in group.members:
         return result
 
+    def user_annotation_count(aggregation, userid):
+        for user in aggregation:
+            if user['user'] == userid:
+                return user['count']
+        return 0
+
+    q = query.extract(request)
+    users_aggregation = result.get('aggregations', {}).get('users', [])
+    members = [{'username': u.username,
+                'userid': u.userid,
+                'count': user_annotation_count(users_aggregation, u.userid),
+                'faceted_by': _faceted_by_user(request, u.username, q)}
+               for u in group.members]
+    members = sorted(members, key=lambda k: k['username'].lower())
+
     result['group'] = {
         'created': group.created.strftime('%B, %Y'),
         'description': group.description,
@@ -113,6 +122,7 @@ def group_search(request):
         'url': request.route_url('group_read',
                                  pubid=group.pubid,
                                  slug=group.slug),
+        'members': members,
     }
 
     if request.has_permission('admin', group):

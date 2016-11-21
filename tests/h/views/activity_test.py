@@ -55,72 +55,6 @@ class TestSearch(object):
                                          mock.ANY,
                                          page_size=100)
 
-    def test_it_returns_usernames(self, pyramid_request, query):
-        """
-        It should return a list of usernames to the template.
-
-        query.execute() returns userids, search() should insert new values with
-        just the username parts.
-
-        """
-        query.execute.return_value = mock.Mock(
-            aggregations={
-                'users': [
-                    {'user': 'acct:test_user_1@hypothes.is'},
-                    {'user': 'acct:test_user_2@hypothes.is'},
-                    {'user': 'acct:test_user_3@hypothes.is'},
-                ]
-            }
-        )
-
-        result = activity.search(pyramid_request)
-
-        usernames = [user['username']
-                     for user in result['aggregations']['users']]
-        assert usernames == ['test_user_1', 'test_user_2', 'test_user_3']
-
-    def test_it_returns_userids(self, pyramid_request, query):
-        """
-        It should return a list of userids to the template.
-
-        query.execute() returns userids as "user", search() should rename these
-        to "userid".
-
-        """
-        query.execute.return_value = mock.Mock(
-            aggregations={
-                'users': [
-                    {'user': 'acct:test_user_1@hypothes.is'},
-                    {'user': 'acct:test_user_2@hypothes.is'},
-                    {'user': 'acct:test_user_3@hypothes.is'},
-                ]
-            }
-        )
-
-        result = activity.search(pyramid_request)
-
-        userids = [user['userid'] for user in result['aggregations']['users']]
-        assert userids == [
-            'acct:test_user_1@hypothes.is',
-            'acct:test_user_2@hypothes.is',
-            'acct:test_user_3@hypothes.is',
-        ]
-
-    def test_it_does_not_crash_if_there_are_no_users(self,
-                                                     pyramid_request,
-                                                     query):
-        """
-        It shouldn't crash if query.execute() returns no users.
-
-        Sometimes there is no "users" key in the aggregations.
-
-        """
-        query.execute.return_value = mock.Mock(aggregations={})
-
-        result = activity.search(pyramid_request)
-
-        assert 'users' not in result['aggregations']
-
     def test_it_returns_group_suggestions(self,
                                           factories,
                                           pyramid_request,
@@ -283,6 +217,59 @@ class TestGroupSearch(object):
         result = activity.group_search(pyramid_request)
 
         assert result['opts']['search_groupname'] == 'does_not_exist'
+
+    def test_it_returns_group_members_usernames(self, pyramid_request, group):
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+        pyramid_request.authenticated_user = group.members[-1]
+
+        result = activity.group_search(pyramid_request)
+
+        actual = set([m['username'] for m in result['group']['members']])
+        expected = set([m.username for m in group.members])
+        assert actual == expected
+
+    def test_it_returns_group_members_userid(self, pyramid_request, group):
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+        pyramid_request.authenticated_user = group.members[-1]
+
+        result = activity.group_search(pyramid_request)
+
+        actual = set([m['userid'] for m in result['group']['members']])
+        expected = set([m.userid for m in group.members])
+        assert actual == expected
+
+    def test_it_returns_group_members_faceted_by(self, pyramid_request, group):
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+        pyramid_request.authenticated_user = group.members[-1]
+
+        faceted_user = group.members[0]
+        pyramid_request.POST = {'q': 'user:%s' % group.members[0].username}
+
+        result = activity.group_search(pyramid_request)
+
+        for member in result['group']['members']:
+            assert member['faceted_by'] is (member['userid'] == faceted_user.userid)
+
+    def test_it_returns_annotation_count_for_group_members(self, pyramid_request, group, search, factories):
+        user_1 = factories.User()
+        user_2 = factories.User()
+        group.members = [user_1, user_2]
+
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+        pyramid_request.authenticated_user = group.members[-1]
+
+        counts = {user_1.userid: 24, user_2.userid: 6}
+        search.return_value = {
+            'aggregations': {
+                'users': [{'user': user_1.userid, 'count': counts[user_1.userid]},
+                          {'user': user_2.userid, 'count': counts[user_2.userid]}]
+            },
+        }
+
+        result = activity.group_search(pyramid_request)
+
+        for member in result['group']['members']:
+            assert member['count'] == counts[member['userid']]
 
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
