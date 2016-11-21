@@ -43,8 +43,11 @@
                 href="{{ bucket.uri }}">{{ pretty_link(bucket.uri) }}</a></div>
         {% if bucket_incontext_link %}
         <div>
-          <a class="search-bucket-stats__alt-link"
-             href="{{ bucket_incontext_link }}">Visit annotations in context</a>
+          <a class="search-bucket-stats__incontext-link"
+             href="{{ bucket_incontext_link }}"
+             target="_blank">
+             Visit annotations in context {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__incontext-icon') }}
+           </a>
         </div>
         {% endif %}
     </div>

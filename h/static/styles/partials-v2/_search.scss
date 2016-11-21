@@ -191,9 +191,19 @@
   }
 }
 
-.search-bucket-stats__alt-link {
-  color: $grey-5;
-  font-style: italic;
+.search-bucket-stats__incontext-link {
+  display: block;
+  margin-top: 5px;
+
+  color: $grey-6;
+  font-weight: bold;
+}
+
+.search-bucket-stats__incontext-icon {
+  position: relative;
+  top: 1px;
+  height: 9px;
+  width: 9px;
 }
 
 // On large tablets and below, display bucket titles beneath rather than
