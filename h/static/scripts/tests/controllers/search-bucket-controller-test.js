@@ -3,12 +3,13 @@
 const SearchBucketController = require('../../controllers/search-bucket-controller');
 const util = require('./util');
 
-const TEMPLATE = [
-  '<div class="js-search-bucket">',
-  '<div data-ref="header"></div>',
-  '<div data-ref="content"></div>',
-  '</div>',
-].join('\n');
+const TEMPLATE = `<div class="js-search-bucket">
+  <div data-ref="header">
+    <a data-ref="domainLink">foo.com</a>
+  </div>
+  <div data-ref="content"></div>
+</div>
+`;
 
 class FakeEnvFlags {
   constructor (flags = []) {
@@ -40,6 +41,11 @@ describe('SearchBucketController', () => {
   it('adds the is-expanded CSS class when clicked', () => {
     ctrl.refs.header.dispatchEvent(new Event('click'));
     assert.isTrue(ctrl.refs.content.classList.contains('is-expanded'));
+  });
+
+  it('does not expand when domain link is clicked', () => {
+    ctrl.refs.domainLink.dispatchEvent(new Event('click', {bubbles: true}));
+    assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
   });
 
   it('removes the is-expanded CSS class when clicked again', () => {
