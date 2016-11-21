@@ -15,6 +15,7 @@ const CreateGroupFormController = require('./controllers/create-group-form-contr
 const DropdownMenuController = require('./controllers/dropdown-menu-controller');
 const FormController = require('./controllers/form-controller');
 const FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
+const InputAutofocusController = require('./controllers/input-autofocus-controller');
 const SearchBarController = require('./controllers/search-bar-controller');
 const SearchBucketController = require('./controllers/search-bucket-controller');
 const SignupFormController = require('./controllers/signup-form-controller');
@@ -28,6 +29,7 @@ const controllers = {
   '.js-create-group-form': CreateGroupFormController,
   '.js-dropdown-menu': DropdownMenuController,
   '.js-form': FormController,
+  '.js-input-autofocus': InputAutofocusController,
   '.js-select-onfocus': FormSelectOnFocusController,
   '.js-search-bar': SearchBarController,
   '.js-search-bucket': SearchBucketController,
