@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import urlparse
 
+from jinja2 import Markup
 from pyramid import httpexceptions
 from pyramid.view import view_config
 from sqlalchemy.orm import exc
@@ -13,6 +14,7 @@ from memex.search import parser
 
 from h import models
 from h.activity import query
+from h.i18n import TranslationString as _
 from h.links import pretty_link
 from h.paginator import paginate
 from h import util
@@ -74,6 +76,8 @@ def search(request):
         'total': result.total,
         'user_link': user_link,
         'username_from_id': username_from_id,
+        # The message that is displayed (only) if there are no search result.
+        'zero_message': _('No annotations matched your search.'),
     }
 
 
@@ -130,6 +134,11 @@ def group_search(request):
 
     result['more_info'] = 'more_info' in request.params
 
+    if not result.get('q'):
+        result['zero_message'] = Markup(_(
+            'The group “{name}” has not made any annotations yet.').format(
+                name=Markup.escape(group.name)))
+
     return result
 
 
@@ -173,6 +182,16 @@ def user_search(request):
 
     if request.authenticated_user == user:
         result['user']['edit_url'] = request.route_url('account_profile')
+
+    if not result.get('q'):
+        if request.authenticated_user == user:
+            result['zero_message'] = _(
+                "You have not made any annotations yet.")
+
+        else:
+            result['zero_message'] = _(
+                "{name} has not made any annotations yet.".format(
+                    name=result['user']['name']))
 
     return result
 

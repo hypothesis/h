@@ -334,25 +334,31 @@
     {{groups_suggestions | to_json}}
   </script>
 
-  <div class="search-result-container">
+  <div class="search-result-container {%- if not timeframes %} search-result-container--empty{% endif %}">
     {% if group %}
       {{ search_result_nav(group.name) }}
     {% elif user %}
       {{ search_result_nav(user.name) }}
     {% endif %}
 
-    <ol class="search-result-list {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
-      {% for timeframe in timeframes %}
-        <li class="search-result__timeframe">
-          {{ timeframe.label }}
-        </li>
-        <li>
-          {% for bucket in timeframe.document_buckets.values() %}
-            {{ search_result_bucket(bucket) }}
-          {% endfor %}
-        </li>
-      {% endfor %}
-    </ol>
+    {% if timeframes %}
+      <ol class="search-result-list {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
+        {% for timeframe in timeframes %}
+          <li class="search-result__timeframe">
+            {{ timeframe.label }}
+          </li>
+          <li>
+            {% for bucket in timeframe.document_buckets.values() %}
+              {{ search_result_bucket(bucket) }}
+            {% endfor %}
+          </li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <div class="search-result-zero {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
+        {{ zero_message }}
+      </div>
+    {% endif %}
 
     {% if group %}
       {{ group_sidebar(group, group_edit_url, total) }}
