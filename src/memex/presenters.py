@@ -95,7 +95,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
     def asdict(self):
         docpresenter = DocumentSearchIndexPresenter(self.annotation.document)
 
-        base = {
+        result = {
             'id': self.annotation.id,
             'created': self.created,
             'updated': self.updated,
@@ -110,15 +110,12 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             'document': docpresenter.asdict(),
         }
 
-        base['target'][0]['scope'] = [self.annotation.target_uri_normalized]
+        result['target'][0]['scope'] = [self.annotation.target_uri_normalized]
 
         if self.annotation.references:
-            base['references'] = self.annotation.references
+            result['references'] = self.annotation.references
 
-        annotation = copy.copy(self.annotation.extra) or {}
-        annotation.update(base)
-
-        return annotation
+        return result
 
     @property
     def links(self):
