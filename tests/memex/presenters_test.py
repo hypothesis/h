@@ -227,25 +227,7 @@ class TestAnnotationSearchIndexPresenter(object):
                         'selector': [{'TestSelector': 'foobar'}]}],
             'document': {'foo': 'bar'},
             'references': ['referenced-id-1', 'referenced-id-2'],
-            'extra-1': 'foo',
-            'extra-2': 'bar',
         }
-
-    def test_asdict_extra_cannot_override_other_data(self):
-        annotation = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
-
-        annotation_dict = AnnotationSearchIndexPresenter(annotation).asdict()
-
-        assert annotation_dict['id'] == 'the-real-id'
-
-    def test_asdict_does_not_modify_extra(self):
-        extra = {'foo': 'bar'}
-        annotation = mock.Mock(id='my-id', extra=extra)
-
-        AnnotationSearchIndexPresenter(annotation).asdict()
-
-        assert extra == {'foo': 'bar'}, (
-                "Presenting the annotation shouldn't change the 'extra' dict")
 
     @pytest.mark.parametrize('annotation,action,expected', [
         (mock.Mock(userid='acct:luke', shared=False), 'read', ['acct:luke']),
