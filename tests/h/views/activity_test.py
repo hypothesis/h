@@ -627,6 +627,16 @@ class TestToggleUserFacet(object):
             'http://example.com/groups/{pubid}/search'
             '?q=foo+bar'.format(pubid=group.pubid))
 
+    def test_it_preserves_query_when_removing_one_of_multiple_username_facets(
+            self, group, pyramid_request):
+        pyramid_request.POST['q'] = 'user:"foo" user:"fred" user:"bar"'
+
+        result = activity.toggle_user_facet(pyramid_request)
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/search'
+            '?q=user%3Afoo+user%3Abar'.format(pubid=group.pubid))
+
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.feature.flags['search_page'] = True

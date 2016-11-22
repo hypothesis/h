@@ -294,10 +294,9 @@ def toggle_user_facet(request):
         # so remove that user facet.
         username_facets = _username_facets(request, parsed_query)
         username_facets.remove(username)
-        if username_facets:
-            parsed_query['user'] = username_facets
-        else:
-            del parsed_query['user']
+        del parsed_query['user']
+        for username_facet in username_facets:
+            parsed_query.add('user', username_facet)
     else:
         # The search query is not yet faceted by the given user, so add a facet
         # for the user.
