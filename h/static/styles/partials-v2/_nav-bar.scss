@@ -90,15 +90,22 @@
 }
 
 @media screen and (max-width: $max-phone-width) {
-  // Display search bar full-width underneath nav links on phone-sized screens
-  .nav-bar {
-    height: 120px;
+
+  // In order to make the search bar flow below the other
+  // two sections of the nav, we need to change the flow order
+  // and utilize the flex-wrap to allow the search to push
+  // into the next row
+  .nav-bar__content {
+    flex-wrap: wrap;
+  }
+  
+  .nav-bar__search {
+    order: 3; // swaping into links original position
+    width:100%;
+    margin: 10px;
   }
 
-  .nav-bar__search {
-    position: absolute;
-    top: 50px;
-    left: 10px;
-    right: 10px;
+  .nav-bar-links {
+    order: 2; // swaping into search's original position
   }
 }

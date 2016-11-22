@@ -49,14 +49,15 @@
           {% if opts['search_groupname'] %}
             {{ lozenge('group', opts['search_groupname']) }}
           {% endif %}
+
+          <input class="search-bar__input js-input-autofocus"
+                 autocapitalize="off"
+                 autocomplete="off"
+                 data-ref="searchBarInput"
+                 name="q"
+                 placeholder="Search…"
+                 value="{{ q }}">
         </div>
-        <input class="search-bar__input js-input-autofocus"
-               autocapitalize="off"
-               autocomplete="off"
-               data-ref="searchBarInput"
-               name="q"
-               placeholder="Search…"
-               value="{{ q }}">
       </form>
     </div>
 
