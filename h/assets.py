@@ -2,6 +2,7 @@
 import os
 
 import json
+from pyramid.httpexceptions import HTTPNotFound
 from pyramid.settings import aslist
 from pyramid.static import static_view
 
@@ -92,8 +93,48 @@ class Environment(object):
             return '{}/{}'.format(self.assets_base_url, manifest[path])
         return [asset_url(path) for path in bundles[bundle]]
 
+    def version(self, path):
+        """
+        Return the current version of the asset with a given `path`.
+
+        Returns `None` if no such asset exists.
+        """
+        try:
+            # Asset URLs in the bundle are in the form '<path>?<version>'
+            manifest = self.manifest.load()
+            [_, version] = manifest[path].split('?')
+            return version
+        except KeyError:
+            return None
+
+
+def _check_version(env, wrapped):
+    """
+    View callable decorator which checks the requested version of a static asset.
+
+    This checks the asset version specified in the query string against the
+    available version specified in the JSON manifest. If the two versions do not
+    match, the request is failed with a 404 response.
+    """
+    def wrapper(context, request):
+        requested_version = request.query_string
+
+        if requested_version:
+            asset_path = request.path[len(env.assets_base_url)+1:]
+            expected_version = env.version(asset_path)
+
+            if requested_version != expected_version:
+                return HTTPNotFound('Asset version not available.')
+
+        return wrapped(context, request)
+
+    return wrapper
+
 
 def _add_cors_header(wrapped):
+    """
+    View callable decorator which adds CORS headers to the request.
+    """
     def wrapper(context, request):
         # Add a CORS header to the response because static assets from
         # the sidebar are loaded into pages served by a different origin:
@@ -118,30 +159,31 @@ def _load_bundles(fp):
     parser.readfp(fp)
     return {k: aslist(v) for k, v in parser.items('bundles')}
 
-# Site assets
-assets_view = static_view('h:../build',
-                          cache_max_age=None,
-                          use_subpath=True)
-assets_view = _add_cors_header(assets_view)
-
-
-# Client assets
-assets_client_view = static_view('h:../node_modules/hypothesis/build',
-                                 cache_max_age=None,
-                                 use_subpath=True)
-assets_client_view = _add_cors_header(assets_client_view)
-
 
 def includeme(config):
-    config.add_view(route_name='assets', view=assets_view)
-    config.add_view(route_name='assets_client', view=assets_client_view)
-
+    # Site assets
     assets_env = Environment('/assets',
                              'h/assets.ini',
                              'build/manifest.json')
+    assets_view = static_view('h:../build',
+                              cache_max_age=None,
+                              use_subpath=True)
+    assets_view = _check_version(assets_env, assets_view)
+    assets_view = _add_cors_header(assets_view)
+
+    # Client assets
     assets_client_env = Environment('/assets/client',
                                     'h/assets_client.ini',
                                     'node_modules/hypothesis/build/manifest.json')
+    assets_client_view = static_view('h:../node_modules/hypothesis/build',
+                                     cache_max_age=None,
+                                     use_subpath=True)
+    assets_client_view = _check_version(assets_client_env, assets_client_view)
+    assets_client_view = _add_cors_header(assets_client_view)
+
+    config.add_view(route_name='assets', view=assets_view)
+    config.add_view(route_name='assets_client', view=assets_client_view)
+
 
     # We store the environment objects on the registry so that the Jinja2
     # integration can be configured in app.py

@@ -58,6 +58,22 @@ def test_environment_generates_bundle_urls(mtime):
     ]
 
 
+@patch(open_target, _fake_open)
+@patch('os.path.getmtime')
+def test_environment_version_returns_version_if_asset_exists(mtime):
+    env = Environment('/assets', 'bundles.ini', 'manifest.json')
+
+    assert env.version('app.bundle.js') == 'abcdef'
+
+
+@patch(open_target, _fake_open)
+@patch('os.path.getmtime')
+def test_environment_version_returns_none_if_asset_does_not_exist(mtime):
+    env = Environment('/assets', 'bundles.ini', 'manifest.json')
+
+    assert env.version('unknown.bundle.js') == None
+
+
 @patch(open_target)
 @patch('os.path.getmtime')
 def test_environment_reloads_manifest_on_change(mtime, open):
