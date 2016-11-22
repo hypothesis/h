@@ -160,13 +160,15 @@ def _load_bundles(fp):
     return {k: aslist(v) for k, v in parser.items('bundles')}
 
 
+ABOUT_TEN_YEARS = 60 * 60 * 24 * 365 * 10
+
 def includeme(config):
     # Site assets
     assets_env = Environment('/assets',
                              'h/assets.ini',
                              'build/manifest.json')
     assets_view = static_view('h:../build',
-                              cache_max_age=None,
+                              cache_max_age=ABOUT_TEN_YEARS,
                               use_subpath=True)
     assets_view = _check_version(assets_env, assets_view)
     assets_view = _add_cors_header(assets_view)
@@ -176,7 +178,7 @@ def includeme(config):
                                     'h/assets_client.ini',
                                     'node_modules/hypothesis/build/manifest.json')
     assets_client_view = static_view('h:../node_modules/hypothesis/build',
-                                     cache_max_age=None,
+                                     cache_max_age=ABOUT_TEN_YEARS,
                                      use_subpath=True)
     assets_client_view = _check_version(assets_client_env, assets_client_view)
     assets_client_view = _add_cors_header(assets_client_view)
