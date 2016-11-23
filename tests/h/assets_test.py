@@ -3,9 +3,12 @@
 from sys import version_info
 from StringIO import StringIO
 
-from mock import patch
+from mock import Mock, patch
+from pyramid import httpexceptions
+from pyramid.response import Response
+import pytest
 
-from h.assets import Environment
+from h.assets import Environment, create_assets_view
 
 if version_info.major == 2:
     open_target = '__builtin__.open'
@@ -34,6 +37,12 @@ def _fake_open(path):
         return StringIO(BUNDLE_INI)
     elif path == 'manifest.json':
         return StringIO(MANIFEST_JSON)
+
+
+def _fake_static_view(file_path, cache_max_age, use_subpath):
+    def fake_view(context, request):
+        return Response('Content of ' + request.path)
+    return fake_view
 
 
 @patch(open_target, _fake_open)
@@ -100,3 +109,35 @@ def test_environment_reloads_manifest_on_change(mtime, open):
     # the manifest
     mtime.return_value = 101
     assert env.urls('app_js') == ['/assets/app.bundle.js?newhash']
+
+
+@patch(open_target, _fake_open)
+@patch('os.path.getmtime', Mock())
+class TestAssetsView(object):
+    def test_returns_asset_when_version_is_correct(self, assets_view, pyramid_request):
+        pyramid_request.path = '/assets/app.bundle.js'
+        pyramid_request.query_string = 'abcdef'
+
+        result = assets_view(None, pyramid_request)
+
+        assert result.body == 'Content of /assets/app.bundle.js'
+
+    def test_returns_404_when_version_is_wrong(self, assets_view, pyramid_request):
+        pyramid_request.path = '/assets/app.bundle.js'
+        pyramid_request.query_string = 'wrong-version'
+
+        result = assets_view(None, pyramid_request)
+
+        assert isinstance(result, httpexceptions.HTTPNotFound)
+
+    def test_sets_cors_headers(self, assets_view, pyramid_request):
+        pyramid_request.path = '/assets/app.bundle.js'
+        result = assets_view(None, pyramid_request)
+
+        assert result.headers['Access-Control-Allow-Origin'] == '*'
+
+    @pytest.fixture
+    @patch('h.assets.static_view', _fake_static_view)
+    def assets_view(self):
+        env = Environment('/assets', 'bundles.ini', 'manifest.json')
+        return create_assets_view(env, file_path='')

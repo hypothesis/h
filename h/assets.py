@@ -162,30 +162,39 @@ def _load_bundles(fp):
 
 ABOUT_TEN_YEARS = 60 * 60 * 24 * 365 * 10
 
+
+def create_assets_view(assets_env, file_path):
+    """
+    Create an `Environment` and view callable for serving static assets.
+
+    :param env: The `Environment`
+    :param file_path: Package or file path of directory containing assets
+    :rtype: (Environment, callable)
+    """
+    assets_view = static_view(file_path,
+                              cache_max_age=ABOUT_TEN_YEARS,
+                              use_subpath=True)
+    assets_view = _check_version(assets_env, assets_view)
+    assets_view = _add_cors_header(assets_view)
+    return assets_view
+
+
 def includeme(config):
     # Site assets
     assets_env = Environment('/assets',
                              'h/assets.ini',
                              'build/manifest.json')
-    assets_view = static_view('h:../build',
-                              cache_max_age=ABOUT_TEN_YEARS,
-                              use_subpath=True)
-    assets_view = _check_version(assets_env, assets_view)
-    assets_view = _add_cors_header(assets_view)
+    assets_view = create_assets_view(assets_env, 'h:../build')
 
     # Client assets
     assets_client_env = Environment('/assets/client',
                                     'h/assets_client.ini',
                                     'node_modules/hypothesis/build/manifest.json')
-    assets_client_view = static_view('h:../node_modules/hypothesis/build',
-                                     cache_max_age=ABOUT_TEN_YEARS,
-                                     use_subpath=True)
-    assets_client_view = _check_version(assets_client_env, assets_client_view)
-    assets_client_view = _add_cors_header(assets_client_view)
+    assets_client_view = create_assets_view(assets_client_env,
+                                            'h:../node_modules/hypothesis/build')
 
     config.add_view(route_name='assets', view=assets_view)
     config.add_view(route_name='assets_client', view=assets_client_view)
-
 
     # We store the environment objects on the registry so that the Jinja2
     # integration can be configured in app.py
