@@ -72,7 +72,7 @@ following::
      "iss": "4a2fa3b4-c160-4436-82d3-148f602c9aa8",
      "sub": "acct:samina.mian@customwidgets.com",
      "nbf": 1478601345,
-     "exp:" 1478601945
+     "exp": 1478601945
    }
 
 You should sign this payload using the ``HS256`` JWT-signing algorithm, using
