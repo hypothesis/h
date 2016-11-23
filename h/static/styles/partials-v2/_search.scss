@@ -66,10 +66,21 @@
 
 .search-result-zero {
   background: $grey-2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
+  padding: 30px;
+}
+
+.search-result-zero__title {
+  margin-top: 0;
+}
+
+.search-result-zero__list {
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+.search-result-zero a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .search-result__timeframe {
@@ -309,6 +320,11 @@
   .search-result-list,
   .search-result-zero {
     margin-right: 0;
+  }
+
+  .search-result-zero {
+    padding-left: 10px;
+    padding-top: 20px;
   }
 }
 

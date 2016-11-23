@@ -573,14 +573,13 @@ class TestUserSearch(object):
             '{name} has not made any annotations yet.'.format(
                 name=user.username))
 
-    def test_it_returns_a_different_zero_message_when_on_your_own_page(
+    def test_it_shows_the_getting_started_box_when_on_your_own_page(
             self, pyramid_request, search, user):
         search.return_value['q'] = ''
 
         result = activity.user_search(pyramid_request)
 
-        assert result['zero_message'] == (
-            'You have not made any annotations yet.')
+        assert result['zero_message'] == '__SHOW_GETTING_STARTED__'
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
