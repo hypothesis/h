@@ -578,6 +578,82 @@ describe('SearchBarController', () => {
         assert.equal(hiddenInput.value, 'group:pid124');
       });
 
+
+      it('places lozenges as first elements in container', (done) => {
+        const template = `
+            <div>
+              <form data-ref="searchBarForm">
+                <div class="search-bar__lozenges" data-ref="searchBarLozenges">
+                    <input data-ref="searchBarInput" class="search-bar__input" name="q" value="">
+                </div>
+              </form>
+            </div>
+          `.trim();
+
+        const ctrl = util.setupComponent(document, template, SearchBarController);
+
+        // Stub the submit method so it doesn't actually do a full page reload.
+        ctrl.refs.searchBarForm.submit = sinon.stub();
+
+        const container = ctrl.element.querySelector('.search-bar__lozenges');
+        const input = ctrl.refs.searchBarInput;
+
+        let currentChildrenCount = container.children.length;
+
+        syn
+          .click(input)
+          .type('foo[space]', () => {
+
+            currentChildrenCount += 1;
+
+            assert.lengthOf(container.children, currentChildrenCount, 'lozenge add should be added as a child');
+
+            assert.ok(container.children[0].classList.contains('lozenge'), 'should be set as first child');
+
+            done();
+          });
+      });
+
+      it('places lozenges after any initial lozenges', (done) => {
+        const template = `
+            <div>
+              <form data-ref="searchBarForm">
+                <div class="search-bar__lozenges" data-ref="searchBarLozenges">
+                    <div class="lozenge js-lozenge"><div class="js-lozenge__content lozenge__content">seeded</div></div>
+                    <input data-ref="searchBarInput" class="search-bar__input" name="q" value="">
+                </div>
+              </form>
+            </div>
+          `.trim();
+
+        const ctrl = util.setupComponent(document, template, SearchBarController);
+
+        // Stub the submit method so it doesn't actually do a full page reload.
+        ctrl.refs.searchBarForm.submit = sinon.stub();
+
+        const container = ctrl.element.querySelector('.search-bar__lozenges');
+        const input = ctrl.refs.searchBarInput;
+
+        let currentChildrenCount = container.children.length;
+
+        syn
+          .click(input)
+          .type('foo[space]', () => {
+
+            currentChildrenCount += 1;
+
+            assert.lengthOf(container.children, currentChildrenCount);
+
+            assert.ok(container.children[0].classList.contains('lozenge'));
+            assert.ok(container.children[1].classList.contains('lozenge'));
+
+            assert.equal(container.children[0].textContent, 'seeded');
+            assert.equal(container.children[1].textContent, 'foo', 'new lozenge should be added after the initial lozenge - but before anything else');
+
+            done();
+          });
+      });
+
     });
   });
 });

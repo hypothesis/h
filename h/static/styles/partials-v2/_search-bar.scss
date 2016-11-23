@@ -6,13 +6,14 @@
   border: 1px solid $grey-3;
   border-radius: 2px;
   display: flex;
+  flex-wrap: wrap;
 
   // scope absolute positioned elements
   position: relative;
 }
 
 .search-bar__input {
-  width: 100%;
+  flex: 1;
 
   border: none;
 
@@ -21,6 +22,9 @@
   padding-top: 18px;
   padding-bottom: 18px;
   padding-right: 3px;
+
+  // prevent the search input from being squashed
+  min-width:30%;
 
   .env-js-capable & {
     visibility: hidden;
@@ -38,7 +42,10 @@
 }
 
 .search-bar__lozenges {
+  // offset is the width of the magnifying glass icon left of input
+  width: calc(100% - 24px);
   display: flex;
+  flex-wrap: wrap;
 }
 
 .search-bar__icon {
@@ -63,8 +70,9 @@
   display: none;
   padding: 20px 0 0 0;
   position: absolute;
-  top: 52px;
+  top: 100%;
   left: 0;
+  margin-top: 1px;
   width: 100%;
   z-index: $zindex-dropdown-menu;
   max-width: 650px;

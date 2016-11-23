@@ -5,12 +5,18 @@
   border-radius: 2px;
   margin-left: 10px;
   margin-top: 15px;
-  margin-bottom: 15px;
+  height: 22px;
+  max-width: 55%;
 }
 
 .lozenge__content {
+  // offset is for the close button
+  max-width: calc(100% - 20px);
+
   padding: 3px 5px 3px 5px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lozenge__facet-value {
