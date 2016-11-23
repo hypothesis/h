@@ -43,6 +43,7 @@ SETTINGS = [
     EnvSetting('es.client_poolsize', 'ELASTICSEARCH_CLIENT_POOLSIZE',
                type=int),
     EnvSetting('es.client_timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=float),
+    EnvSetting('es.client.retry_on_timeout', 'ELASTICSEARCH_CLIENT_RETRY_ON_TIMEOUT', type=asbool),
     EnvSetting('es.host', 'ELASTICSEARCH_HOST'),
     EnvSetting('es.index', 'ELASTICSEARCH_INDEX'),
     EnvSetting('mail.default_sender', 'MAIL_DEFAULT_SENDER'),
