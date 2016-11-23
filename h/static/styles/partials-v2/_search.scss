@@ -40,17 +40,36 @@
   margin-right: 30px;
 }
 
-.search-result-list {
+.search-result-container--empty {
+  /* The default height of the search container is calculated to so that it
+     stretches to the bottom of the viewport and no further.
+     The px value here is the height of the stuff above the
+     search-result-container. */
+  height: calc(100vh - 134px);
+  margin-bottom: 0;
+}
+
+.search-result-list,
+.search-result-zero {
   flex-basis: 950px;
   max-width: 950px;
+  margin-right: 30px;
+}
 
+.search-result-list {
   // Remove default padding from <ol>
   list-style: none;
   padding-left: 0;
   padding-right: 0;
-
-  margin-right: 30px;
   margin-bottom: 40px;
+}
+
+.search-result-zero {
+  background: $grey-2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
 }
 
 .search-result__timeframe {
@@ -271,6 +290,14 @@
     margin-top: 25px;
   }
 
+  .search-result-container--empty {
+    /* The default height of the search container is calculated to so that it
+       stretches to the bottom of the viewport and no further.
+       The px value here is the height of the stuff above the
+       search-result-container. */
+    height: calc(100vh - 155px);
+  }
+
   .search-result-nav {
     display: flex;
   }
@@ -279,7 +306,8 @@
     display: none;
   }
 
-  .search-result-list {
+  .search-result-list,
+  .search-result-zero {
     margin-right: 0;
   }
 }

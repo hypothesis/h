@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import datetime
 
@@ -88,6 +89,11 @@ class TestSearch(object):
         result = activity.search(pyramid_request)
         user_link = result['user_link']('acct:jim.smith@hypothes.is')
         assert user_link == 'http://example.com/users/jim.smith/search'
+
+    def test_it_returns_the_default_zero_message_to_the_template(
+            self, pyramid_request):
+        result = activity.search(pyramid_request)
+        assert result['zero_message'] == 'No annotations matched your search.'
 
     @pytest.fixture
     def query(self, patch):
@@ -271,13 +277,34 @@ class TestGroupSearch(object):
         for member in result['group']['members']:
             assert member['count'] == counts[member['userid']]
 
+    def test_it_returns_the_default_zero_message_to_the_template(
+            self, group, pyramid_request, search):
+        """If there's a non-empty query it uses the default zero message."""
+        pyramid_request.authenticated_user = group.members[-1]
+        search.return_value['q'] = 'foo'
+
+        result = activity.group_search(pyramid_request)
+
+        assert result['zero_message'] == 'No annotations matched your search.'
+
+    def test_it_returns_the_group_zero_message_to_the_template(
+            self, group, pyramid_request, search):
+        """If the query is empty it overrides the default zero message."""
+        pyramid_request.authenticated_user = group.members[-1]
+        search.return_value['q'] = ''
+
+        result = activity.group_search(pyramid_request)
+
+        assert result['zero_message'] == (
+            "The group “{name}” has not made any annotations yet.".format(
+                name=group.name))
+
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.matchdict['pubid'] = group.pubid
         pyramid_request.authenticated_user = None
         pyramid_request.has_permission = mock.Mock(return_value=False)
         return pyramid_request
-
 
 
 @pytest.mark.usefixtures('routes')
@@ -525,6 +552,36 @@ class TestUserSearch(object):
 
         assert 'edit_url' not in activity.user_search(pyramid_request)['user']
 
+    def test_it_returns_the_default_zero_message_to_the_template(
+            self, pyramid_request, search):
+        """If there's a non-empty query it uses the default zero message."""
+        search.return_value['q'] = 'foo'
+
+        result = activity.user_search(pyramid_request)
+
+        assert result['zero_message'] == 'No annotations matched your search.'
+
+    def test_it_returns_the_user_zero_message_to_the_template(
+            self, factories, pyramid_request, search, user):
+        """If the query is empty it overrides the default zero message."""
+        pyramid_request.authenticated_user = factories.User()
+        search.return_value['q'] = ''
+
+        result = activity.user_search(pyramid_request)
+
+        assert result['zero_message'] == (
+            '{name} has not made any annotations yet.'.format(
+                name=user.username))
+
+    def test_it_returns_a_different_zero_message_when_on_your_own_page(
+            self, pyramid_request, search, user):
+        search.return_value['q'] = ''
+
+        result = activity.user_search(pyramid_request)
+
+        assert result['zero_message'] == (
+            'You have not made any annotations yet.')
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
         pyramid_request.matchdict['username'] = user.username
@@ -761,5 +818,6 @@ def search(patch):
     search = patch('h.views.activity.search')
     search.return_value = {
         'total': 200,
+        'zero_message': 'No annotations matched your search.',
     }
     return search
