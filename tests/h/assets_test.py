@@ -46,41 +46,34 @@ def _fake_static_view(file_path, cache_max_age, use_subpath):
 
 
 @patch(open_target, _fake_open)
-@patch('os.path.getmtime')
-def test_environment_lists_bundle_files(mtime):
-    env = Environment('/assets', 'bundles.ini', 'manifest.json')
+@patch('os.path.getmtime', Mock())
+class TestEnvironment(object):
 
-    assert env.files('app_js') == [
-        'app.bundle.js',
-        'vendor.bundle.js',
-    ]
+    def test_files_lists_bundle_files(self):
+        env = Environment('/assets', 'bundles.ini', 'manifest.json')
 
+        assert env.files('app_js') == [
+            'app.bundle.js',
+            'vendor.bundle.js',
+        ]
 
-@patch(open_target, _fake_open)
-@patch('os.path.getmtime')
-def test_environment_generates_bundle_urls(mtime):
-    env = Environment('/assets', 'bundles.ini', 'manifest.json')
+    def test_urls_generates_bundle_urls(self):
+        env = Environment('/assets', 'bundles.ini', 'manifest.json')
 
-    assert env.urls('app_js') == [
-        '/assets/app.bundle.js?abcdef',
-        '/assets/vendor.bundle.js?1234',
-    ]
+        assert env.urls('app_js') == [
+            '/assets/app.bundle.js?abcdef',
+            '/assets/vendor.bundle.js?1234',
+        ]
 
+    def test_version_returns_version_if_asset_exists(self):
+        env = Environment('/assets', 'bundles.ini', 'manifest.json')
 
-@patch(open_target, _fake_open)
-@patch('os.path.getmtime')
-def test_environment_version_returns_version_if_asset_exists(mtime):
-    env = Environment('/assets', 'bundles.ini', 'manifest.json')
+        assert env.version('app.bundle.js') == 'abcdef'
 
-    assert env.version('app.bundle.js') == 'abcdef'
+    def test_version_returns_none_if_asset_does_not_exist(self):
+        env = Environment('/assets', 'bundles.ini', 'manifest.json')
 
-
-@patch(open_target, _fake_open)
-@patch('os.path.getmtime')
-def test_environment_version_returns_none_if_asset_does_not_exist(mtime):
-    env = Environment('/assets', 'bundles.ini', 'manifest.json')
-
-    assert env.version('unknown.bundle.js') == None
+        assert env.version('unknown.bundle.js') == None
 
 
 @patch(open_target)
