@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import certifi
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 
@@ -24,7 +25,12 @@ class Client(object):
 
     def __init__(self, host, index, **kwargs):
         self.index = index
-        self.conn = Elasticsearch([host], verify_certs=True, **kwargs)
+        self.conn = Elasticsearch([host],
+                                  verify_certs=True,
+                                  # N.B. this won't be necessary if we upgrade
+                                  # to elasticsearch>=5.0.0.
+                                  ca_certs=certifi.where(),
+                                  **kwargs)
 
     def get_aliased_index(self):
         """
