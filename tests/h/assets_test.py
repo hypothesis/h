@@ -130,6 +130,13 @@ class TestAssetsView(object):
 
         assert isinstance(result, httpexceptions.HTTPNotFound)
 
+    def test_returns_asset_when_version_is_unspecified(self, assets_view, pyramid_request):
+        pyramid_request.path = '/assets/app.bundle.js'
+
+        result = assets_view(None, pyramid_request)
+
+        assert result.body == 'Content of /assets/app.bundle.js'
+
     def test_sets_cors_headers(self, assets_view, pyramid_request):
         pyramid_request.path = '/assets/app.bundle.js'
         result = assets_view(None, pyramid_request)
