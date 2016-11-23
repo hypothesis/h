@@ -42,7 +42,7 @@ SETTINGS = [
     EnvSetting('broker_url', 'BROKER_URL'),
     EnvSetting('es.client_poolsize', 'ELASTICSEARCH_CLIENT_POOLSIZE',
                type=int),
-    EnvSetting('es.client_timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=int),
+    EnvSetting('es.client_timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=float),
     EnvSetting('es.host', 'ELASTICSEARCH_HOST'),
     EnvSetting('es.index', 'ELASTICSEARCH_INDEX'),
     EnvSetting('mail.default_sender', 'MAIL_DEFAULT_SENDER'),
