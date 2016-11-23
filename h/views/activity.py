@@ -185,9 +185,8 @@ def user_search(request):
 
     if not result.get('q'):
         if request.authenticated_user == user:
-            result['zero_message'] = _(
-                "You have not made any annotations yet.")
-
+            # Tell the template that it should show the "How to get started".
+            result['zero_message'] = '__SHOW_GETTING_STARTED__'
         else:
             result['zero_message'] = _(
                 "{name} has not made any annotations yet.".format(
