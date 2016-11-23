@@ -41,8 +41,9 @@ def includeme(config):
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
+    config.registry['es.client'] = _get_client(settings)
     config.add_request_method(
-        lambda r: _get_client(r.registry.settings),
+        lambda r: r.registry['es.client'],
         name='es',
         reify=True)
 
