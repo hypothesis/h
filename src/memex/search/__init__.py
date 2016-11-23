@@ -17,6 +17,7 @@ def _get_client(settings):
     index = settings['es.index']
     kwargs = {}
     kwargs['timeout'] = settings.get('es.client_timeout', 10)
+    kwargs['max_retries'] = settings.get('es.client.max_retries', 3)
     kwargs['retry_on_timeout'] = settings.get('es.client.retry_on_timeout', False)
 
     if 'es.client_poolsize' in settings:
