@@ -3,7 +3,7 @@
 from pyramid.settings import asbool
 
 from memex.search.client import Client
-from memex.search.config import configure_index
+from memex.search.config import init
 from memex.search.core import Search
 from memex.search.core import FILTERS_KEY
 from memex.search.core import MATCHERS_KEY
@@ -51,4 +51,4 @@ def includeme(config):
 
     # If requested, automatically configure the index
     if asbool(settings.get('h.search.autoconfig', False)):
-        configure_index(_get_client(settings))
+        init(config.registry['es.client'])
