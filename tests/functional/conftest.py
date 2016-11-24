@@ -62,10 +62,10 @@ def init_db(db_engine):
 
 @pytest.fixture(scope='session', autouse=True)
 def init_elasticsearch():
-    from memex.search import configure_index, _get_client
+    from memex.search import init, _get_client
     client = _get_client(TEST_SETTINGS)
     _drop_indices(TEST_SETTINGS)
-    configure_index(client)
+    init(client)
 
 
 @pytest.fixture(scope='session')
