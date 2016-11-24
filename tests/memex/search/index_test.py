@@ -93,7 +93,11 @@ class TestDeleteAnnotation:
         return patch('memex.search.index.log')
 
 
-@pytest.mark.usefixtures('BatchDeleter', 'BatchIndexer', 'configure_index')
+@pytest.mark.usefixtures('BatchDeleter',
+                         'BatchIndexer',
+                         'configure_index',
+                         'get_aliased_index',
+                         'update_aliased_index')
 class TestReindex(object):
     def test_indexes_annotations(self, es, indexer):
         """Should call .index() on the batch indexer instance."""
@@ -114,32 +118,25 @@ class TestReindex(object):
 
     def test_creates_new_index_if_aliased(self, es, configure_index, matchers):
         """If the current index isn't concrete, then create a new target index."""
-        es.get_aliased_index.return_value = 'foobar'
-
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
         configure_index.assert_called_once_with(es, matchers.regex('hypothesis-[0-9a-f]{8}'))
 
     def test_passes_new_index_to_indexer_if_aliased(self, es, matchers, BatchIndexer):
         """Pass the name of any new index as target_index to indexer."""
-        es.get_aliased_index.return_value = 'foobar'
-
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
         _, kwargs = BatchIndexer.call_args
         assert kwargs['target_index'] == matchers.regex('hypothesis-[0-9a-f]{8}')
 
-    def test_updates_alias_when_reindexed_if_aliased(self, es, matchers):
+    def test_updates_alias_when_reindexed_if_aliased(self, es, matchers, update_aliased_index):
         """Call update_aliased_index on the client with the new index name."""
-        es.get_aliased_index.return_value = 'foobar'
-
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
-        es.update_aliased_index.assert_called_once_with(matchers.regex('hypothesis-[0-9a-f]{8}'))
+        update_aliased_index.assert_called_once_with(es, matchers.regex('hypothesis-[0-9a-f]{8}'))
 
-    def test_does_not_update_alias_if_indexing_fails(self, es, indexer):
+    def test_does_not_update_alias_if_indexing_fails(self, es, indexer, update_aliased_index):
         """Don't call update_aliased_index if index() fails..."""
-        es.get_aliased_index.return_value = 'foobar'
         indexer.index.side_effect = RuntimeError('fail')
 
         try:
@@ -147,18 +144,18 @@ class TestReindex(object):
         except RuntimeError:
             pass
 
-        es.update_aliased_index.assert_not_called()
+        assert not update_aliased_index.called
 
-    def test_runs_deleter_if_not_aliased(self, es, deleter):
+    def test_runs_deleter_if_not_aliased(self, es, deleter, get_aliased_index):
         """If dealing with a concrete index, run the deleter."""
+        get_aliased_index.return_value = None
+
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
         deleter.delete_all.assert_called_once_with()
 
     def test_does_not_run_deleter_if_aliased(self, es, deleter):
         """If dealing with an alias, do not run the deleter."""
-        es.get_aliased_index.return_value = 'foobar'
-
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
         deleter.delete_all.assert_not_called()
@@ -174,6 +171,16 @@ class TestReindex(object):
     @pytest.fixture
     def configure_index(self, patch):
         return patch('memex.search.index.configure_index')
+
+    @pytest.fixture
+    def get_aliased_index(self, patch):
+        func = patch('memex.search.index.get_aliased_index')
+        func.return_value = 'foobar'
+        return func
+
+    @pytest.fixture
+    def update_aliased_index(self, patch):
+        return patch('memex.search.index.update_aliased_index')
 
     @pytest.fixture
     def deleter(self, BatchDeleter):
