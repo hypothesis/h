@@ -35,7 +35,7 @@ def test_includeme():
         call('dismiss_sidebar_tutorial', '/app/dismiss_sidebar_tutorial'),
         call('activity.search', '/search'),
         call('activity.group_search', '/groups/{pubid}/search'),
-        call('activity.user_search', '/users/{username}/search'),
+        call('activity.user_search', '/users/{username}'),
         call('admin_index', '/admin/'),
         call('admin_admins', '/admin/admins'),
         call('admin_badge', '/admin/badge'),

@@ -36,7 +36,7 @@ class TestNavbar(object):
         req.authenticated_user = authenticated_user
         result = panels.navbar({}, req)
 
-        assert result['username_url'] == 'http://example.com/users/vannevar/search'
+        assert result['username_url'] == 'http://example.com/users/vannevar'
 
     def test_it_includes_search_query(self, req):
         req.params['q'] = 'tag:question'
@@ -49,7 +49,7 @@ class TestNavbar(object):
         req.matchdict = {'username': 'luke'}
 
         result = panels.navbar({}, req)
-        assert result['search_url'] == 'http://example.com/users/luke/search'
+        assert result['search_url'] == 'http://example.com/users/luke'
 
     def test_it_includes_search_url_when_on_group_search(self, req):
         type(req.matched_route).name = PropertyMock(return_value='activity.group_search')
@@ -69,7 +69,7 @@ class TestNavbar(object):
         pyramid_config.add_route('account_notifications', '/account/notifications')
         pyramid_config.add_route('account_developer', '/account/developer')
         pyramid_config.add_route('activity.search', '/search')
-        pyramid_config.add_route('activity.user_search', '/users/{username}/search')
+        pyramid_config.add_route('activity.user_search', '/users/{username}')
         pyramid_config.add_route('activity.group_search', '/groups/{pubid}/search')
         pyramid_config.add_route('group_create', '/groups/new')
         pyramid_config.add_route('group_read', '/groups/:pubid/:slug')

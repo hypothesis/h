@@ -108,7 +108,7 @@ class TestSearchController(object):
         result = controller.search()
 
         user_link = result['user_link']('acct:jim.smith@hypothes.is')
-        assert user_link == 'http://example.com/users/jim.smith/search'
+        assert user_link == 'http://example.com/users/jim.smith'
 
     def test_search_returns_the_default_zero_message_to_the_template(self,
                                                                      controller):
@@ -513,7 +513,7 @@ class TestGroupUserSearchController(object):
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location.startswith(
-            'http://example.com/users/test_username/search?')
+            'http://example.com/users/test_username?')
         # The order of the params vary (because they're in an unordered dict)
         # but they should both be there.
         assert 'more_info=' in result.location
@@ -543,7 +543,7 @@ class TestGroupUserSearchController(object):
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == (
-            'http://example.com/users/test_username/search?q=foo+bar')
+            'http://example.com/users/test_username?q=foo+bar')
 
     @pytest.mark.usefixtures('delete_lozenge_request')
     def test_delete_lozenge_returns_a_redirect(self, controller):
@@ -576,9 +576,7 @@ class TestGroupUserSearchController(object):
                                                               controller):
         result = controller.toggle_tag_facet()
 
-        assert result.location == (
-            'http://example.com/users/foo/search'
-            '?q=tag%3Agar')
+        assert result.location == 'http://example.com/users/foo?q=tag%3Agar'
 
     def test_toggle_tag_facet_removes_the_tag_facet_from_the_url(
             self, controller, toggle_tag_facet_request):
@@ -586,7 +584,7 @@ class TestGroupUserSearchController(object):
 
         result = controller.toggle_tag_facet()
 
-        assert result.location == 'http://example.com/users/foo/search?q='
+        assert result.location == 'http://example.com/users/foo?q='
 
     def test_toggle_tag_facet_preserves_query_when_adding_tag_facet(
             self, controller, toggle_tag_facet_request):
@@ -595,8 +593,7 @@ class TestGroupUserSearchController(object):
         result = controller.toggle_tag_facet()
 
         assert result.location == (
-            'http://example.com/users/foo/search'
-            '?q=foo+bar+tag%3Agar')
+            'http://example.com/users/foo?q=foo+bar+tag%3Agar')
 
     def test_toggle_tag_facet_preserves_query_when_removing_tag_facet(
             self, controller, toggle_tag_facet_request):
@@ -604,9 +601,7 @@ class TestGroupUserSearchController(object):
 
         result = controller.toggle_tag_facet()
 
-        assert result.location == (
-            'http://example.com/users/foo/search'
-            '?q=foo+bar')
+        assert result.location == 'http://example.com/users/foo?q=foo+bar'
 
     def test_toggle_tag_facet_preserves_query_when_removing_one_of_multiple_tag_facets(
             self, controller, toggle_tag_facet_request):
@@ -615,8 +610,7 @@ class TestGroupUserSearchController(object):
         result = controller.toggle_tag_facet()
 
         assert result.location == (
-            'http://example.com/users/foo/search'
-            '?q=tag%3Afoo+tag%3Abar')
+            'http://example.com/users/foo?q=tag%3Afoo+tag%3Abar')
 
     @pytest.fixture
     def controller(self, pyramid_request):
@@ -837,7 +831,7 @@ def pyramid_request(pyramid_request):
 def routes(pyramid_config):
     pyramid_config.add_route('activity.search', '/search')
     pyramid_config.add_route('activity.group_search', '/groups/{pubid}/search')
-    pyramid_config.add_route('activity.user_search', '/users/{username}/search')
+    pyramid_config.add_route('activity.user_search', '/users/{username}')
     pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
     pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
     pyramid_config.add_route('account_profile', '/account/profile')
