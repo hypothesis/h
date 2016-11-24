@@ -120,20 +120,24 @@ class TestReindex(object):
         """If the current index isn't concrete, then create a new target index."""
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
-        configure_index.assert_called_once_with(es, matchers.regex('hypothesis-[0-9a-f]{8}'))
+        configure_index.assert_called_once_with(es)
 
-    def test_passes_new_index_to_indexer_if_aliased(self, es, matchers, BatchIndexer):
+    def test_passes_new_index_to_indexer_if_aliased(self, es, configure_index, BatchIndexer):
         """Pass the name of any new index as target_index to indexer."""
+        configure_index.return_value = 'hypothesis-abcd1234'
+
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
         _, kwargs = BatchIndexer.call_args
-        assert kwargs['target_index'] == matchers.regex('hypothesis-[0-9a-f]{8}')
+        assert kwargs['target_index'] == 'hypothesis-abcd1234'
 
-    def test_updates_alias_when_reindexed_if_aliased(self, es, matchers, update_aliased_index):
+    def test_updates_alias_when_reindexed_if_aliased(self, es, configure_index, update_aliased_index):
         """Call update_aliased_index on the client with the new index name."""
+        configure_index.return_value = 'hypothesis-abcd1234'
+
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
-        update_aliased_index.assert_called_once_with(es, matchers.regex('hypothesis-[0-9a-f]{8}'))
+        update_aliased_index.assert_called_once_with(es, 'hypothesis-abcd1234')
 
     def test_does_not_update_alias_if_indexing_fails(self, es, indexer, update_aliased_index):
         """Don't call update_aliased_index if index() fails..."""
