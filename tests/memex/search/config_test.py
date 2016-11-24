@@ -10,6 +10,7 @@ from elasticsearch.exceptions import NotFoundError
 
 from memex.search.config import (
     ANNOTATION_ANALYSIS,
+    init,
     get_aliased_index,
     update_aliased_index,
 )
@@ -57,6 +58,15 @@ def test_uri_part_tokenizer():
         'http', '', '', 'jump', 'to', '', 'u',
         'http', '', '', 'a', 'b', 'foo', 'bar', 'c', 'd', 'stuff'
     ])
+
+
+class TestInit(object):
+    def test_configures_index(self, patch):
+        configure_index = patch('memex.search.config.configure_index')
+
+        init(mock.sentinel.client)
+
+        configure_index.assert_called_once_with(mock.sentinel.client)
 
 
 class TestGetAliasedIndex(object):

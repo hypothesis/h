@@ -167,6 +167,11 @@ ANNOTATION_ANALYSIS = {
 }
 
 
+def init(client):
+    """Initialise Elasticsearch, creating necessary indices and aliases."""
+    configure_index(client)
+
+
 def configure_index(client, index=None):
     """Configure the elasticsearch index."""
 
