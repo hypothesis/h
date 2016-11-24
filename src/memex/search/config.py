@@ -9,7 +9,10 @@ these settings in an Elasticsearch instance.
 """
 
 from __future__ import unicode_literals
+
+import binascii
 import logging
+import os
 
 from elasticsearch.exceptions import NotFoundError, RequestError
 
@@ -109,7 +112,7 @@ ANNOTATION_MAPPING = {
     }
 }
 
-ANNOTATION_ANALYSIS = {
+ANALYSIS_SETTINGS = {
     'char_filter': {
         'strip_scheme': {
             'type': 'pattern_replace',
@@ -169,40 +172,33 @@ ANNOTATION_ANALYSIS = {
 
 def init(client):
     """Initialise Elasticsearch, creating necessary indices and aliases."""
-    configure_index(client)
-
-
-def configure_index(client, index=None):
-    """Configure the elasticsearch index."""
-
-    if index is None:
-        index = client.index
-
     # Ensure the ICU analysis plugin is installed
     _ensure_icu_plugin(client.conn)
 
-    # Construct desired mappings and analysis settings
-    mappings = {}
-    analysis = {}
-    _append_config(mappings,
-                   analysis,
-                   client.t.annotation,
-                   ANNOTATION_MAPPING,
-                   ANNOTATION_ANALYSIS)
+    # If the index already exists (perhaps as an alias), we're done...
+    if client.conn.indices.exists(index=client.index):
+        return
 
-    # Try to create the index with the correct settings. This will not fail if
-    # the index already exists.
-    _create_index(client.conn, index, {
-        'mappings': mappings,
-        'settings': {'analysis': analysis},
+    # Otherwise we create a new randomly-named index and alias it. This allows
+    # us to straightforwardly reindex when we need to.
+    concrete_index = configure_index(client)
+    client.conn.indices.put_alias(index=concrete_index, name=client.index)
+
+
+def configure_index(client):
+    """Create a new randomly-named index and return its name."""
+    index_name = client.index + '-' + _random_id()
+
+    client.conn.indices.create(index_name, body={
+        'mappings': {
+            client.t.annotation: ANNOTATION_MAPPING,
+        },
+        'settings': {
+            'analysis': ANALYSIS_SETTINGS,
+        },
     })
 
-    # For indices we didn't just create: try and update the analysis and
-    # mappings to their current values. May throw an exception if elasticsearch
-    # throws a MergeMappingException indicating that the index cannot be
-    # updated without reindexing.
-    _update_index_analysis(client.conn, index, analysis)
-    _update_index_mappings(client.conn, index, mappings)
+    return index_name
 
 
 def get_aliased_index(client):
@@ -241,6 +237,19 @@ def update_aliased_index(client, new_target):
     })
 
 
+def update_index_settings(client):
+    """
+    Update the index settings (analysis and mappings) to their current state.
+
+    May raise if Elasticsearch throws a MergeMappingException indicating that
+    the index cannot be updated without reindexing.
+    """
+    index = get_aliased_index(client)
+    _update_index_analysis(client.conn, index, ANALYSIS_SETTINGS)
+    _update_index_mappings(client.conn, index,
+                           {client.t.annotation: ANNOTATION_MAPPING})
+
+
 def _ensure_icu_plugin(conn):
     """Ensure that the ICU analysis plugin is installed for ES."""
     # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
@@ -255,42 +264,8 @@ def _ensure_icu_plugin(conn):
         raise RuntimeError(message)
 
 
-def _append_config(mappings, analysis, doc_type, type_mappings, type_analysis):
-    """
-    Append config for the named type to pre-existing config.
-
-    This function takes a mappings dict and an analysis dict which may contain
-    prior data, and attempts to update them with mappings and analysis settings
-    for the named type.
-    """
-    mappings.update({doc_type: type_mappings})
-    for section, items in type_analysis.items():
-        existing_items = analysis.setdefault(section, {})
-        for name in items:
-            if name in existing_items:
-                fmt = "Duplicate definition of 'index.analysis.{}.{}'."
-                msg = fmt.format(section, name)
-                raise RuntimeError(msg)
-        existing_items.update(items)
-
-
-def _create_index(conn, name, settings):
-    """
-    Create index with the specific name and settings.
-
-    This function will ignore errors caused by the index already existing.
-    """
-    # Check if the index exists (perhaps as an alias) and if so, return.
-    if conn.indices.exists(index=name):
-        return
-
-    # Otherwise, try to create the index
-    conn.indices.create(name, body=settings)
-
-
 def _update_index_analysis(conn, name, analysis):
     """Attempt to update the index analysis settings."""
-    name = _resolve_alias(conn, name)
     settings = conn.indices.get_settings(index=name)
     existing = settings[name]['settings']['index'].get('analysis', {})
     if existing != analysis:
@@ -305,7 +280,6 @@ def _update_index_analysis(conn, name, analysis):
 
 def _update_index_mappings(conn, name, mappings):
     """Attempt to update the index mappings."""
-    name = _resolve_alias(conn, name)
     try:
         for doc_type, body in mappings.items():
             conn.indices.put_mapping(index=name,
@@ -322,18 +296,6 @@ def _update_index_mappings(conn, name, mappings):
         raise RuntimeError(message)
 
 
-def _resolve_alias(conn, name):
-    """Resolve an alias into the underlying index name."""
-    result = conn.indices.get_alias(index=name)
-
-    # If there are no returned results, this isn't an alias
-    if not result:
-        return name
-
-    # If there are multiple keys, we have to raise, because this code doesn't
-    # support updating mappings for multiple indices.
-    if len(result) > 1:
-        raise RuntimeError("We don't support autocreating/updating aliases "
-                           "that point to multiple indices at the moment!")
-
-    return result.keys()[0]
+def _random_id():
+    """Generate a short random hex string."""
+    return binascii.hexlify(os.urandom(4))
