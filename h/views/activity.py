@@ -9,6 +9,7 @@ import urlparse
 from jinja2 import Markup
 from pyramid import httpexceptions
 from pyramid.view import view_config
+from pyramid.view import view_defaults
 from sqlalchemy.orm import exc
 from memex.search import parser
 
@@ -20,360 +21,355 @@ from h.paginator import paginate
 from h import util
 from h.util.user import split_user
 
+
 PAGE_SIZE = 200
 
 
-@view_config(route_name='activity.search',
-             request_method='GET',
-             renderer='h:templates/activity/search.html.jinja2')
-def search(request):
-    if not request.feature('search_page'):
-        raise httpexceptions.HTTPNotFound()
+@view_defaults(route_name='activity.search',
+               renderer='h:templates/activity/search.html.jinja2')
+class SearchController(object):
+    """View callables for the "activity.search" route."""
 
-    q = query.extract(request)
+    def __init__(self, request):
+        if not request.feature('search_page'):
+            raise httpexceptions.HTTPNotFound()
 
-    # Check whether a redirect is required
-    query.check_url(request, q)
+        self.request = request
 
-    page_size = request.params.get('page_size', PAGE_SIZE)
-    try:
-        page_size = int(page_size)
-    except ValueError:
-        page_size = PAGE_SIZE
+    @view_config(request_method='GET')
+    def search(self):
+        q = query.extract(self.request)
 
-    # Fetch results
-    result = query.execute(request, q, page_size=page_size)
+        # Check whether a redirect is required.
+        query.check_url(self.request, q)
 
-    groups_suggestions = []
+        page_size = self.request.params.get('page_size', PAGE_SIZE)
+        try:
+            page_size = int(page_size)
+        except ValueError:
+            page_size = PAGE_SIZE
 
-    if request.authenticated_user:
-        for group in request.authenticated_user.groups:
-            groups_suggestions.append({
-                'name': group.name,
-                'pubid': group.pubid
+        # Fetch results.
+        result = query.execute(self.request, q, page_size=page_size)
+
+        groups_suggestions = []
+
+        if self.request.authenticated_user:
+            for group in self.request.authenticated_user.groups:
+                groups_suggestions.append({
+                    'name': group.name,
+                    'pubid': group.pubid
                 })
 
-    def tag_link(tag):
-        q = parser.unparse({'tag': tag})
-        return request.route_url('activity.search', _query=[('q', q)])
+        def tag_link(tag):
+            q = parser.unparse({'tag': tag})
+            return self.request.route_url('activity.search', _query=[('q', q)])
 
-    def username_from_id(userid):
-        parts = split_user(userid)
-        return parts['username']
+        def username_from_id(userid):
+            parts = split_user(userid)
+            return parts['username']
 
-    def user_link(userid):
-        username=username_from_id(userid)
-        return request.route_url('activity.user_search', username=username)
+        def user_link(userid):
+            username = username_from_id(userid)
+            return self.request.route_url('activity.user_search',
+                                          username=username)
 
-    return {
-        'aggregations': result.aggregations,
-        'groups_suggestions': groups_suggestions,
-        'page': paginate(request, result.total, page_size=page_size),
-        'pretty_link': pretty_link,
-        'q': request.params.get('q', ''),
-        'tag_link': tag_link,
-        'timeframes': result.timeframes,
-        'total': result.total,
-        'user_link': user_link,
-        'username_from_id': username_from_id,
-        # The message that is displayed (only) if there are no search result.
-        'zero_message': _('No annotations matched your search.'),
-    }
+        return {
+            'aggregations': result.aggregations,
+            'groups_suggestions': groups_suggestions,
+            'page': paginate(self.request, result.total, page_size=page_size),
+            'pretty_link': pretty_link,
+            'q': self.request.params.get('q', ''),
+            'tag_link': tag_link,
+            'timeframes': result.timeframes,
+            'total': result.total,
+            'user_link': user_link,
+            'username_from_id': username_from_id,
+            # The message that is shown (only) if there's no search results.
+            'zero_message': _('No annotations matched your search.'),
+        }
 
 
-@view_config(route_name='activity.group_search',
-             request_method='GET',
-             renderer='h:templates/activity/search.html.jinja2')
-def group_search(request):
-    if not request.feature('search_page'):
-        raise httpexceptions.HTTPNotFound()
+@view_defaults(route_name='activity.group_search',
+               renderer='h:templates/activity/search.html.jinja2')
+class GroupSearchController(SearchController):
+    """View callables unique to the "activity.group_search" route."""
 
-    result = search(request)
+    @view_config(request_method='GET')
+    def search(self):
+        result = super(GroupSearchController, self).search()
 
-    pubid = request.matchdict['pubid']
-    result['opts'] = {'search_groupname': pubid}
+        pubid = self.request.matchdict['pubid']
+        result['opts'] = {'search_groupname': pubid}
 
-    try:
-        group = request.db.query(models.Group).filter_by(pubid=pubid).one()
-    except exc.NoResultFound:
+        try:
+            group = (self.request.db.query(models.Group)
+                     .filter_by(pubid=pubid).one())
+        except exc.NoResultFound:
+            return result
+
+        result['opts']['search_groupname'] = group.name
+
+        if self.request.authenticated_user not in group.members:
+            return result
+
+        def user_annotation_count(aggregation, userid):
+            for user in aggregation:
+                if user['user'] == userid:
+                    return user['count']
+            return 0
+
+        q = query.extract(self.request)
+        users_aggregation = result.get('aggregations', {}).get('users', [])
+        members = [{'username': u.username,
+                    'userid': u.userid,
+                    'count': user_annotation_count(users_aggregation,
+                                                   u.userid),
+                    'faceted_by': _faceted_by_user(self.request,
+                                                   u.username,
+                                                   q)}
+                   for u in group.members]
+        members = sorted(members, key=lambda k: k['username'].lower())
+
+        result['group'] = {
+            'created': group.created.strftime('%B, %Y'),
+            'description': group.description,
+            'name': group.name,
+            'pubid': group.pubid,
+            'url': self.request.route_url('group_read',
+                                          pubid=group.pubid,
+                                          slug=group.slug),
+            'members': members,
+        }
+
+        if self.request.has_permission('admin', group):
+            result['group_edit_url'] = self.request.route_url('group_edit',
+                                                              pubid=pubid)
+
+        result['more_info'] = 'more_info' in self.request.params
+
+        if not result.get('q'):
+            result['zero_message'] = Markup(_(
+                'The group “{name}” has not made any annotations yet.').format(
+                    name=Markup.escape(group.name)))
+
         return result
 
-    result['opts']['search_groupname'] = group.name
+    @view_config(request_method='POST',
+                 request_param='group_leave')
+    def leave(self):
+        """
+        Leave the given group.
 
-    if request.authenticated_user not in group.members:
-        return result
+        Remove the authenticated user from the given group and redirect the
+        browser to the search page.
 
-    def user_annotation_count(aggregation, userid):
-        for user in aggregation:
-            if user['user'] == userid:
-                return user['count']
-        return 0
+        """
+        pubid = self.request.POST['group_leave']
 
-    q = query.extract(request)
-    users_aggregation = result.get('aggregations', {}).get('users', [])
-    members = [{'username': u.username,
-                'userid': u.userid,
-                'count': user_annotation_count(users_aggregation, u.userid),
-                'faceted_by': _faceted_by_user(request, u.username, q)}
-               for u in group.members]
-    members = sorted(members, key=lambda k: k['username'].lower())
+        try:
+            group = (self.request.db.query(models.Group)
+                     .filter_by(pubid=pubid).one())
+        except exc.NoResultFound:
+            raise httpexceptions.HTTPNotFound()
 
-    result['group'] = {
-        'created': group.created.strftime('%B, %Y'),
-        'description': group.description,
-        'name': group.name,
-        'pubid': group.pubid,
-        'url': request.route_url('group_read',
-                                 pubid=group.pubid,
-                                 slug=group.slug),
-        'members': members,
-    }
+        groups_service = self.request.find_service(name='groups')
+        groups_service.member_leave(group, self.request.authenticated_userid)
 
-    if request.has_permission('admin', group):
-        result['group_edit_url'] = request.route_url('group_edit', pubid=pubid)
+        new_params = self.request.POST.copy()
+        del new_params['group_leave']
+        location = self.request.route_url('activity.search', _query=new_params)
 
-    result['more_info'] = 'more_info' in request.params
+        return httpexceptions.HTTPSeeOther(location=location)
 
-    if not result.get('q'):
-        result['zero_message'] = Markup(_(
-            'The group “{name}” has not made any annotations yet.').format(
-                name=Markup.escape(group.name)))
+    @view_config(request_method='POST',
+                 request_param='toggle_user_facet')
+    def toggle_user_facet(self):
+        """
+        Toggle the given user from the search facets.
 
-    return result
+        If the search is not already faceted by the userid given in the
+        "toggle_user_facet" request param then redirect the browser to the same
+        page but with the a facet for this user added to the search query.
 
+        If the search is already faceted by the userid then redirect the
+        browser to the same page but with this user facet removed from the
+        search query.
 
-@view_config(route_name='activity.user_search',
-             request_method='GET',
-             renderer='h:templates/activity/search.html.jinja2')
-def user_search(request):
-    if not request.feature('search_page'):
-        raise httpexceptions.HTTPNotFound()
+        """
+        userid = self.request.POST['toggle_user_facet']
+        username = util.user.split_user(userid)['username']
 
-    username = request.matchdict['username']
+        new_params = self.request.POST.copy()
 
-    result = search(request)
-    result['opts'] = {'search_username': username}
+        del new_params['toggle_user_facet']
 
-    result['more_info'] = 'more_info' in request.params
-
-    user = request.find_service(name='user').fetch(username,
-                                                   request.auth_domain)
-
-    if not user:
-        return result
-
-    result['opts']['search_username'] = user.display_name or user.username
-
-    def domain(user):
-        if not user.uri:
-            return None
-        return urlparse.urlparse(user.uri).netloc
-
-    result['user'] = {
-        'name': user.display_name or user.username,
-        'num_annotations': result['total'],
-        'description': user.description,
-        'registered_date': user.registered_date.strftime('%B, %Y'),
-        'location': user.location,
-        'uri': user.uri,
-        'domain': domain(user),
-        'orcid': user.orcid,
-    }
-
-    if request.authenticated_user == user:
-        result['user']['edit_url'] = request.route_url('account_profile')
-
-    if not result.get('q'):
-        if request.authenticated_user == user:
-            # Tell the template that it should show the "How to get started".
-            result['zero_message'] = '__SHOW_GETTING_STARTED__'
+        parsed_query = _parsed_query(self.request)
+        if _faceted_by_user(self.request, username, parsed_query):
+            # The search query is already faceted by the given user,
+            # so remove that user facet.
+            username_facets = _username_facets(self.request, parsed_query)
+            username_facets.remove(username)
+            del parsed_query['user']
+            for username_facet in username_facets:
+                parsed_query.add('user', username_facet)
         else:
-            result['zero_message'] = _(
-                "{name} has not made any annotations yet.".format(
-                    name=result['user']['name']))
+            # The search query is not yet faceted by the given user, so add a
+            # facet for the user.
+            parsed_query.add('user', username)
 
-    return result
+        new_params['q'] = parser.unparse(parsed_query)
 
+        location = self.request.route_url(
+            'activity.group_search', pubid=self.request.matchdict['pubid'],
+            _query=new_params)
 
-@view_config(route_name='activity.group_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='more_info')
-@view_config(route_name='activity.user_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='more_info')
-def search_more_info(request):
-    """Respond to a click on the ``more_info`` button."""
-    return _redirect_to_user_or_group_search(request, request.POST)
+        return httpexceptions.HTTPSeeOther(location=location)
 
 
-@view_config(route_name='activity.group_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='back')
-@view_config(route_name='activity.user_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='back')
-def search_back(request):
-    """Respond to a click on the ``back`` button."""
-    new_params = request.POST.copy()
-    del new_params['back']
-    return _redirect_to_user_or_group_search(request, new_params)
+@view_defaults(route_name='activity.user_search',
+               renderer='h:templates/activity/search.html.jinja2')
+class UserSearchController(SearchController):
+    """View callables unique to the "activity.user_search" route."""
+
+    @view_config(request_method='GET')
+    def search(self):
+        username = self.request.matchdict['username']
+
+        result = super(UserSearchController, self).search()
+        result['opts'] = {'search_username': username}
+
+        result['more_info'] = 'more_info' in self.request.params
+
+        user = self.request.find_service(name='user').fetch(
+            username, self.request.auth_domain)
+
+        if not user:
+            return result
+
+        result['opts']['search_username'] = user.display_name or user.username
+
+        def domain(user):
+            if not user.uri:
+                return None
+            return urlparse.urlparse(user.uri).netloc
+
+        result['user'] = {
+            'name': user.display_name or user.username,
+            'num_annotations': result['total'],
+            'description': user.description,
+            'registered_date': user.registered_date.strftime('%B, %Y'),
+            'location': user.location,
+            'uri': user.uri,
+            'domain': domain(user),
+            'orcid': user.orcid,
+        }
+
+        if self.request.authenticated_user == user:
+            result['user']['edit_url'] = self.request.route_url(
+                'account_profile')
+
+        if not result.get('q'):
+            if self.request.authenticated_user == user:
+                # Tell the template that it should show "How to get started".
+                result['zero_message'] = '__SHOW_GETTING_STARTED__'
+            else:
+                result['zero_message'] = _(
+                    "{name} has not made any annotations yet.".format(
+                        name=result['user']['name']))
+
+        return result
 
 
-@view_config(route_name='activity.group_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='group_leave')
-def group_leave(request):
-    """
-    Leave the given group.
+@view_defaults(request_method='GET',
+               renderer='h:templates/activity/search.html.jinja2')
+class GroupUserSearchController(SearchController):
+    """activity.group_search and activity.user_search shared views."""
 
-    Remove the authenticated user from the given group and redirect the
-    browser to the search page.
+    @view_config(route_name='activity.group_search',
+                 request_method='POST',
+                 request_param='more_info')
+    @view_config(route_name='activity.user_search',
+                 request_method='POST',
+                 request_param='more_info')
+    def more_info(self):
+        """Respond to a click on the ``more_info`` button."""
+        return _redirect_to_user_or_group_search(self.request,
+                                                 self.request.POST)
 
-    """
-    if not request.feature('search_page'):
-        raise httpexceptions.HTTPNotFound()
+    @view_config(route_name='activity.group_search',
+                 request_method='POST',
+                 request_param='back')
+    @view_config(route_name='activity.user_search',
+                 request_method='POST',
+                 request_param='back')
+    def back(self):
+        """Respond to a click on the ``back`` button."""
+        new_params = self.request.POST.copy()
+        del new_params['back']
+        return _redirect_to_user_or_group_search(self.request, new_params)
 
-    pubid = request.POST['group_leave']
+    @view_config(route_name='activity.group_search',
+                 request_param='delete_lozenge')
+    @view_config(route_name='activity.user_search',
+                 request_param='delete_lozenge')
+    def delete_lozenge(self):
+        """
+        Redirect to the /search page, keeping the search query intact.
 
-    try:
-        group = request.db.query(models.Group).filter_by(pubid=pubid).one()
-    except exc.NoResultFound:
-        raise httpexceptions.HTTPNotFound()
+        When on the user or group search page a lozenge for the user or group
+        is rendered as the first lozenge in the search bar. The delete button
+        on that first lozenge calls this view. Redirect to the general /search
+        page, effectively deleting that first user or group lozenge, but
+        maintaining any other search terms that have been entered into the
+        search box.
 
-    groups_service = request.find_service(name='groups')
-    groups_service.member_leave(group, request.authenticated_userid)
+        """
+        new_params = self.request.params.copy()
+        del new_params['delete_lozenge']
+        location = self.request.route_url('activity.search', _query=new_params)
+        return httpexceptions.HTTPSeeOther(location=location)
 
-    new_params = request.POST.copy()
-    del new_params['group_leave']
-    location = request.route_url('activity.search', _query=new_params)
+    @view_config(route_name='activity.group_search',
+                 request_method='POST',
+                 request_param='toggle_tag_facet')
+    @view_config(route_name='activity.user_search',
+                 request_method='POST',
+                 request_param='toggle_tag_facet')
+    def toggle_tag_facet(self):
+        """
+        Toggle the given tag from the search facets.
 
-    return httpexceptions.HTTPSeeOther(location=location)
+        If the search is not already faceted by the tag given in the
+        "toggle_tag_facet" request param then redirect the browser to the same
+        page but with the a facet for this  added to the search query.
 
+        If the search is already faceted by the tag then redirect the browser
+        to the same page but with this facet removed from the search query.
 
-@view_config(route_name='activity.group_search',
-             request_method='GET',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='delete_lozenge')
-@view_config(route_name='activity.user_search',
-             request_method='GET',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='delete_lozenge')
-def delete_lozenge(request):
-    """
-    Redirect to the /search page, keeping the search query intact.
+        """
+        tag = self.request.POST['toggle_tag_facet']
 
-    When on the user or group search page a lozenge for the user or group is
-    rendered as the first lozenge in the search bar. The delete button on that
-    first lozenge calls this view. Redirect to the general /search page,
-    effectively deleting that first user or group lozenge, but maintaining any
-    other search terms that have been entered into the search box.
+        new_params = self.request.POST.copy()
 
-    """
-    new_params = request.params.copy()
-    del new_params['delete_lozenge']
-    location = request.route_url('activity.search', _query=new_params)
-    return httpexceptions.HTTPSeeOther(location=location)
+        del new_params['toggle_tag_facet']
 
+        parsed_query = _parsed_query(self.request)
+        if _faceted_by_tag(self.request, tag, parsed_query):
+            # The search query is already faceted by the given tag,
+            # so remove that tag facet.
+            tag_facets = _tag_facets(self.request, parsed_query)
+            tag_facets.remove(tag)
+            del parsed_query['tag']
+            for tag_facet in tag_facets:
+                parsed_query.add('tag', tag_facet)
+        else:
+            # The search query is not yet faceted by the given tag, so add a facet
+            # for the tag.
+            parsed_query.add('tag', tag)
 
-@view_config(route_name='activity.group_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='toggle_user_facet')
-def toggle_user_facet(request):
-    """
-    Toggle the given user from the search facets.
-
-    If the search is not already faceted by the userid given in the
-    "toggle_user_facet" request param then redirect the browser to the same
-    page but with the a facet for this user added to the search query.
-
-    If the search is already faceted by the userid then redirect the browser
-    to the same page but with this user facet removed from the search query.
-
-    """
-    if not request.feature('search_page'):
-        raise httpexceptions.HTTPNotFound()
-
-    userid = request.POST['toggle_user_facet']
-    username = util.user.split_user(userid)['username']
-
-    new_params = request.POST.copy()
-
-    del new_params['toggle_user_facet']
-
-    parsed_query = _parsed_query(request)
-    if _faceted_by_user(request, username, parsed_query):
-        # The search query is already faceted by the given user,
-        # so remove that user facet.
-        username_facets = _username_facets(request, parsed_query)
-        username_facets.remove(username)
-        del parsed_query['user']
-        for username_facet in username_facets:
-            parsed_query.add('user', username_facet)
-    else:
-        # The search query is not yet faceted by the given user, so add a facet
-        # for the user.
-        parsed_query.add('user', username)
-
-    new_params['q'] = parser.unparse(parsed_query)
-
-    location = request.route_url('activity.group_search',
-                                 pubid=request.matchdict['pubid'],
-                                 _query=new_params)
-
-    return httpexceptions.HTTPSeeOther(location=location)
-
-
-@view_config(route_name='activity.group_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='toggle_tag_facet')
-@view_config(route_name='activity.user_search',
-             request_method='POST',
-             renderer='h:templates/activity/search.html.jinja2',
-             request_param='toggle_tag_facet')
-def toggle_tag_facet(request):
-    """
-    Toggle the given tag from the search facets.
-
-    If the search is not already faceted by the tag given in the
-    "toggle_tag_facet" request param then redirect the browser to the same
-    page but with the a facet for this  added to the search query.
-
-    If the search is already faceted by the tag then redirect the browser
-    to the same page but with this facet removed from the search query.
-
-    """
-    if not request.feature('search_page'):
-        raise httpexceptions.HTTPNotFound()
-
-    tag = request.POST['toggle_tag_facet']
-
-    new_params = request.POST.copy()
-
-    del new_params['toggle_tag_facet']
-
-    parsed_query = _parsed_query(request)
-    if _faceted_by_tag(request, tag, parsed_query):
-        # The search query is already faceted by the given tag,
-        # so remove that tag facet.
-        tag_facets = _tag_facets(request, parsed_query)
-        tag_facets.remove(tag)
-        del parsed_query['tag']
-        for tag_facet in tag_facets:
-            parsed_query.add('tag', tag_facet)
-    else:
-        # The search query is not yet faceted by the given tag, so add a facet
-        # for the tag.
-        parsed_query.add('tag', tag)
-
-    new_params['q'] = parser.unparse(parsed_query)
-    return _redirect_to_user_or_group_search(request, new_params)
+        new_params['q'] = parser.unparse(parsed_query)
+        return _redirect_to_user_or_group_search(self.request, new_params)
 
 
 def _parsed_query(request):
