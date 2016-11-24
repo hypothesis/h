@@ -457,7 +457,6 @@ def es():
     mock_es = mock.Mock(spec=client.Client('localhost', 'hypothesis'))
     mock_es.index = 'hypothesis'
     mock_es.t.annotation = 'annotation'
-    mock_es.get_aliased_index.return_value = None
     return mock_es
 
 
