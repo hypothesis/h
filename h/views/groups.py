@@ -2,6 +2,7 @@
 
 import deform
 from pyramid import security
+from pyramid.config import not_
 from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
                                     HTTPSeeOther)
 from pyramid.view import view_config, view_defaults
@@ -10,6 +11,7 @@ from h import form
 from h import i18n
 from h import presenters
 from h.groups import schemas
+from h.views import custom_predicates
 
 _ = i18n.TranslationString
 
@@ -112,7 +114,8 @@ class GroupEditController(object):
 @view_config(route_name='group_read',
              request_method='GET',
              renderer='h:templates/groups/share.html.jinja2',
-             effective_principals=security.Authenticated)
+             effective_principals=security.Authenticated,
+             custom_predicates=[not_(custom_predicates.has_read_permission)])
 def read(group, request):
     """Group view for logged-in users."""
     _check_slug(group, request)
@@ -123,11 +126,6 @@ def read(group, request):
     if not request.has_permission('read'):
         request.override_renderer = 'h:templates/groups/join.html.jinja2'
         return {'group': group}
-
-    # Redirect to new group overview page if search page is enabled
-    if request.feature('search_page'):
-        url = request.route_path('activity.group_search', pubid=group.pubid)
-        return HTTPSeeOther(url)
 
     return {'group': group,
             'document_links': [presenters.DocumentHTMLPresenter(d).link
@@ -142,7 +140,8 @@ def read(group, request):
 
 @view_config(route_name='group_read',
              request_method='GET',
-             renderer='h:templates/groups/join.html.jinja2')
+             renderer='h:templates/groups/join.html.jinja2',
+             effective_principals=not_(security.Authenticated))
 def read_unauthenticated(group, request):
     """Group view for logged-out users, allowing them to join the group."""
     _check_slug(group, request)

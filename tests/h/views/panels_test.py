@@ -52,11 +52,11 @@ class TestNavbar(object):
         assert result['search_url'] == 'http://example.com/users/luke'
 
     def test_it_includes_search_url_when_on_group_search(self, req):
-        type(req.matched_route).name = PropertyMock(return_value='activity.group_search')
-        req.matchdict = {'pubid': 'foobar'}
+        type(req.matched_route).name = PropertyMock(return_value='group_read')
+        req.matchdict = {'pubid': 'foobar', 'slug': 'slugbar'}
 
         result = panels.navbar({}, req)
-        assert result['search_url'] == 'http://example.com/groups/foobar/search'
+        assert result['search_url'] == 'http://example.com/groups/foobar/slugbar'
 
     def test_it_includes_default_search_url(self, req):
         result = panels.navbar({}, req)
@@ -70,7 +70,6 @@ class TestNavbar(object):
         pyramid_config.add_route('account_developer', '/account/developer')
         pyramid_config.add_route('activity.search', '/search')
         pyramid_config.add_route('activity.user_search', '/users/{username}')
-        pyramid_config.add_route('activity.group_search', '/groups/{pubid}/search')
         pyramid_config.add_route('group_create', '/groups/new')
         pyramid_config.add_route('group_read', '/groups/:pubid/:slug')
         pyramid_config.add_route('logout', '/logout')

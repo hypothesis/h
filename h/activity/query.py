@@ -12,6 +12,7 @@ from memex.search.query import (
 )
 import newrelic.agent
 from pyramid.httpexceptions import HTTPFound
+from sqlalchemy.orm import exc
 from sqlalchemy.orm import subqueryload
 
 from h import presenters
@@ -49,7 +50,7 @@ def extract(request, parse=parser.parse):
     #
     # (Note that a query for the *intersection* of >1 users or groups is by
     # definition empty)
-    if request.matched_route.name == 'activity.group_search':
+    if request.matched_route.name == 'group_read':
         q['group'] = request.matchdict['pubid']
     elif request.matched_route.name == 'activity.user_search':
         q['user'] = request.matchdict['username']
@@ -80,9 +81,16 @@ def check_url(request, query, unparse=parser.unparse):
 
     if _single_entry(query, 'group'):
         pubid = query.pop('group')
-        redirect = request.route_path('activity.group_search',
-                                      pubid=pubid,
-                                      _query={'q': unparse(query)})
+
+        try:
+            group = request.db.query(Group).filter_by(pubid=pubid).one()
+        except exc.NoResultFound:
+            pass
+        else:
+            redirect = request.route_path('group_read',
+                                          pubid=group.pubid,
+                                          slug=group.slug,
+                                          _query={'q': unparse(query)})
 
     elif _single_entry(query, 'user'):
         username = query.pop('user')

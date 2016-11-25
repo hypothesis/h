@@ -8,7 +8,7 @@
         {{ annotation.username }}
       </a>
       {% if group %}
-        <a href="{{ request.route_url('activity.group_search', pubid=group.pubid) }}"
+        <a href="{{ request.route_url('group_read', pubid=group.pubid, slug=group.slug) }}"
           class="annotation-card__groupname">
             in
             {{ svg_icon('groups', 'annotation-card__groups-icon') }}

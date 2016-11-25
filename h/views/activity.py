@@ -20,6 +20,7 @@ from h.links import pretty_link
 from h.paginator import paginate
 from h import util
 from h.util.user import split_user
+from h.views import custom_predicates
 
 
 PAGE_SIZE = 200
@@ -90,27 +91,23 @@ class SearchController(object):
         }
 
 
-@view_defaults(route_name='activity.group_search',
-               renderer='h:templates/activity/search.html.jinja2')
+@view_defaults(route_name='group_read',
+               renderer='h:templates/activity/search.html.jinja2',
+               custom_predicates=[custom_predicates.has_read_permission])
 class GroupSearchController(SearchController):
-    """View callables unique to the "activity.group_search" route."""
+    """View callables unique to the "group_read" route."""
+
+    def __init__(self, group, request):
+        super(GroupSearchController, self).__init__(request)
+        self.group = group
 
     @view_config(request_method='GET')
     def search(self):
         result = super(GroupSearchController, self).search()
 
-        pubid = self.request.matchdict['pubid']
-        result['opts'] = {'search_groupname': pubid}
+        result['opts'] = {'search_groupname': self.group.name}
 
-        try:
-            group = (self.request.db.query(models.Group)
-                     .filter_by(pubid=pubid).one())
-        except exc.NoResultFound:
-            return result
-
-        result['opts']['search_groupname'] = group.name
-
-        if self.request.authenticated_user not in group.members:
+        if self.request.authenticated_user not in self.group.members:
             return result
 
         def user_annotation_count(aggregation, userid):
@@ -128,30 +125,30 @@ class GroupSearchController(SearchController):
                     'faceted_by': _faceted_by_user(self.request,
                                                    u.username,
                                                    q)}
-                   for u in group.members]
+                   for u in self.group.members]
         members = sorted(members, key=lambda k: k['username'].lower())
 
         result['group'] = {
-            'created': group.created.strftime('%B, %Y'),
-            'description': group.description,
-            'name': group.name,
-            'pubid': group.pubid,
+            'created': self.group.created.strftime('%B, %Y'),
+            'description': self.group.description,
+            'name': self.group.name,
+            'pubid': self.group.pubid,
             'url': self.request.route_url('group_read',
-                                          pubid=group.pubid,
-                                          slug=group.slug),
+                                          pubid=self.group.pubid,
+                                          slug=self.group.slug),
             'members': members,
         }
 
-        if self.request.has_permission('admin', group):
-            result['group_edit_url'] = self.request.route_url('group_edit',
-                                                              pubid=pubid)
+        if self.request.has_permission('admin', self.group):
+            result['group_edit_url'] = self.request.route_url(
+                'group_edit', pubid=self.group.pubid)
 
         result['more_info'] = 'more_info' in self.request.params
 
         if not result.get('q'):
             result['zero_message'] = Markup(_(
                 'The group “{name}” has not made any annotations yet.').format(
-                    name=Markup.escape(group.name)))
+                    name=Markup.escape(self.group.name)))
 
         return result
 
@@ -221,10 +218,29 @@ class GroupSearchController(SearchController):
         new_params['q'] = parser.unparse(parsed_query)
 
         location = self.request.route_url(
-            'activity.group_search', pubid=self.request.matchdict['pubid'],
+            'group_read', pubid=self.group.pubid, slug=self.group.slug,
             _query=new_params)
 
         return httpexceptions.HTTPSeeOther(location=location)
+
+    @view_config(request_method='POST',
+                 request_param='more_info')
+    def more_info(self):
+        return _more_info(self.group, self.request)
+
+    @view_config(request_method='POST',
+                 request_param='back')
+    def back(self):
+        return _back(self.group, self.request)
+
+    @view_config(request_param='delete_lozenge')
+    def delete_lozenge(self):
+        return _delete_lozenge(self.request)
+
+    @view_config(request_method='POST',
+                 request_param='toggle_tag_facet')
+    def toggle_tag_facet(self):
+        return _toggle_tag_facet(self.group, self.request)
 
 
 @view_defaults(route_name='activity.user_search',
@@ -274,96 +290,24 @@ class UserSearchController(SearchController):
 
         return result
 
-
-@view_defaults(request_method='GET',
-               renderer='h:templates/activity/search.html.jinja2')
-class GroupUserSearchController(SearchController):
-    """activity.group_search and activity.user_search shared views."""
-
-    @view_config(route_name='activity.group_search',
-                 request_method='POST',
-                 request_param='more_info')
-    @view_config(route_name='activity.user_search',
-                 request_method='POST',
+    @view_config(request_method='POST',
                  request_param='more_info')
     def more_info(self):
-        """Respond to a click on the ``more_info`` button."""
-        return _redirect_to_user_or_group_search(self.request,
-                                                 self.request.POST)
+        return _more_info(self.user, self.request)
 
-    @view_config(route_name='activity.group_search',
-                 request_method='POST',
-                 request_param='back')
-    @view_config(route_name='activity.user_search',
-                 request_method='POST',
+    @view_config(request_method='POST',
                  request_param='back')
     def back(self):
-        """Respond to a click on the ``back`` button."""
-        new_params = self.request.POST.copy()
-        del new_params['back']
-        return _redirect_to_user_or_group_search(self.request, new_params)
+        return _back(self.user, self.request)
 
-    @view_config(route_name='activity.group_search',
-                 request_param='delete_lozenge')
-    @view_config(route_name='activity.user_search',
-                 request_param='delete_lozenge')
+    @view_config(request_param='delete_lozenge')
     def delete_lozenge(self):
-        """
-        Redirect to the /search page, keeping the search query intact.
+        return _delete_lozenge(self.request)
 
-        When on the user or group search page a lozenge for the user or group
-        is rendered as the first lozenge in the search bar. The delete button
-        on that first lozenge calls this view. Redirect to the general /search
-        page, effectively deleting that first user or group lozenge, but
-        maintaining any other search terms that have been entered into the
-        search box.
-
-        """
-        new_params = self.request.params.copy()
-        del new_params['delete_lozenge']
-        location = self.request.route_url('activity.search', _query=new_params)
-        return httpexceptions.HTTPSeeOther(location=location)
-
-    @view_config(route_name='activity.group_search',
-                 request_method='POST',
-                 request_param='toggle_tag_facet')
-    @view_config(route_name='activity.user_search',
-                 request_method='POST',
+    @view_config(request_method='POST',
                  request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
-        """
-        Toggle the given tag from the search facets.
-
-        If the search is not already faceted by the tag given in the
-        "toggle_tag_facet" request param then redirect the browser to the same
-        page but with the a facet for this  added to the search query.
-
-        If the search is already faceted by the tag then redirect the browser
-        to the same page but with this facet removed from the search query.
-
-        """
-        tag = self.request.POST['toggle_tag_facet']
-
-        new_params = self.request.POST.copy()
-
-        del new_params['toggle_tag_facet']
-
-        parsed_query = _parsed_query(self.request)
-        if _faceted_by_tag(self.request, tag, parsed_query):
-            # The search query is already faceted by the given tag,
-            # so remove that tag facet.
-            tag_facets = _tag_facets(self.request, parsed_query)
-            tag_facets.remove(tag)
-            del parsed_query['tag']
-            for tag_facet in tag_facets:
-                parsed_query.add('tag', tag_facet)
-        else:
-            # The search query is not yet faceted by the given tag, so add a facet
-            # for the tag.
-            parsed_query.add('tag', tag)
-
-        new_params['q'] = parser.unparse(parsed_query)
-        return _redirect_to_user_or_group_search(self.request, new_params)
+        return _toggle_tag_facet(self.user, self.request)
 
 
 def _parsed_query(request):
@@ -422,12 +366,79 @@ def _faceted_by_tag(request, tag, parsed_query=None):
 
 
 def _redirect_to_user_or_group_search(request, params):
-    if request.matched_route.name == 'activity.group_search':
-        location = request.route_url('activity.group_search',
+    if request.matched_route.name == 'group_read':
+        location = request.route_url('group_read',
                                      pubid=request.matchdict['pubid'],
+                                     slug=request.matchdict['slug'],
                                      _query=params)
     elif request.matched_route.name == 'activity.user_search':
         location = request.route_url('activity.user_search',
                                      username=request.matchdict['username'],
                                      _query=params)
     return httpexceptions.HTTPSeeOther(location=location)
+
+
+def _more_info(user_or_group, request):
+    """Respond to a click on the ``more_info`` button."""
+    return _redirect_to_user_or_group_search(request, request.POST)
+
+
+def _back(user_or_group, request):
+    """Respond to a click on the ``back`` button."""
+    new_params = request.POST.copy()
+    del new_params['back']
+    return _redirect_to_user_or_group_search(request, new_params)
+
+
+def _delete_lozenge(request):
+    """
+    Redirect to the /search page, keeping the search query intact.
+
+    When on the user or group search page a lozenge for the user or group
+    is rendered as the first lozenge in the search bar. The delete button
+    on that first lozenge calls this view. Redirect to the general /search
+    page, effectively deleting that first user or group lozenge, but
+    maintaining any other search terms that have been entered into the
+    search box.
+
+    """
+    new_params = request.params.copy()
+    del new_params['delete_lozenge']
+    location = request.route_url('activity.search', _query=new_params)
+    return httpexceptions.HTTPSeeOther(location=location)
+
+
+def _toggle_tag_facet(user_or_group, request):
+    """
+    Toggle the given tag from the search facets.
+
+    If the search is not already faceted by the tag given in the
+    "toggle_tag_facet" request param then redirect the browser to the same
+    page but with the a facet for this  added to the search query.
+
+    If the search is already faceted by the tag then redirect the browser
+    to the same page but with this facet removed from the search query.
+
+    """
+    tag = request.POST['toggle_tag_facet']
+
+    new_params = request.POST.copy()
+
+    del new_params['toggle_tag_facet']
+
+    parsed_query = _parsed_query(request)
+    if _faceted_by_tag(request, tag, parsed_query):
+        # The search query is already faceted by the given tag,
+        # so remove that tag facet.
+        tag_facets = _tag_facets(request, parsed_query)
+        tag_facets.remove(tag)
+        del parsed_query['tag']
+        for tag_facet in tag_facets:
+            parsed_query.add('tag', tag_facet)
+    else:
+        # The search query is not yet faceted by the given tag, so add a facet
+        # for the tag.
+        parsed_query.add('tag', tag)
+
+    new_params['q'] = parser.unparse(parsed_query)
+    return _redirect_to_user_or_group_search(request, new_params)
