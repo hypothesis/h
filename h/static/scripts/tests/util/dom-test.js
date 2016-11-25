@@ -55,4 +55,12 @@ describe('util/dom', () => {
       assert.deepEqual(Array.from(btn.classList), []);
     });
   });
+
+  describe('cloneTemplate', () => {
+    it('returns a clone of the first child Element of the template', () => {
+      const template = createDOM('<template id="test-template"><div id="child"></div></template>');
+      const clone = domUtil.cloneTemplate(template);
+      assert.deepEqual(clone.outerHTML, '<div id="child"></div>');
+    });
+  });
 });

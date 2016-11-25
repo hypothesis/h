@@ -6,6 +6,7 @@ const Controller = require('../base/controller');
 const LozengeController = require('./lozenge-controller');
 const AutosuggestDropdownController = require('./autosuggest-dropdown-controller');
 const SearchTextParser = require('../util/search-text-parser');
+const { cloneTemplate } = require('../util/dom');
 const stringUtil = require('../util/string');
 
 
@@ -27,12 +28,15 @@ const normalizeStr = function(str) {
  * Controller for the search bar.
  */
 class SearchBarController extends Controller {
-  constructor(element) {
-    super(element);
+  constructor(element, options = {}) {
+    super(element, options);
+
+    if (!options.lozengeTemplate) {
+      options.lozengeTemplate = document.querySelector('#lozenge-template');
+    }
 
     this._input = this.refs.searchBarInput;
     this._lozengeContainer = this.refs.searchBarLozenges;
-
 
     /**
      * the suggestionsMap pulls in the available lists - either
@@ -202,6 +206,12 @@ class SearchBarController extends Controller {
       return hiddenInput;
     };
 
+    /** Return the controllers for all of the displayed lozenges. */
+    const lozenges = () => {
+      const lozElements = Array.from(this.element.querySelectorAll('.js-lozenge'));
+      return lozElements.map(el => el.controllers[0]);
+    };
+
     /**
      * Update the value of the hidden input.
      *
@@ -214,15 +224,12 @@ class SearchBarController extends Controller {
      */
     const updateHiddenInput = () => {
       let newValue = '';
-      Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach((loz) => {
-
-        let inputValue = loz.querySelector('.js-lozenge__content').textContent;
-
+      lozenges().forEach((loz) => {
+        let inputValue = loz.inputValue();
         if (inputValue.indexOf('group:') === 0) {
           inputValue = getInputAndDisplayValsForGroup(inputValue).input;
         }
         newValue = newValue + inputValue + ' ';
-
       });
       this._hiddenInput.value = (newValue + getTrimmedInputValue()).trim();
     };
@@ -236,10 +243,19 @@ class SearchBarController extends Controller {
      */
     const addLozenge = (content) => {
 
+      const lozengeEl = cloneTemplate(this.options.lozengeTemplate);
+      const currentLozenges = this.element.querySelectorAll('.lozenge');
+      if (currentLozenges.length > 0) {
+        this._lozengeContainer.insertBefore(lozengeEl,
+          currentLozenges[currentLozenges.length-1].nextSibling);
+      } else {
+        this._lozengeContainer.insertBefore(lozengeEl,
+          this._lozengeContainer.firstChild);
+      }
+
       const deleteCallback = () => {
-        Array.from(this._lozengeContainer.querySelectorAll('.js-lozenge')).forEach((loz) => {
-          loz.classList.add('is-disabled');
-        });
+        lozengeEl.remove();
+        lozenges().forEach(ctrl => ctrl.setState({disabled: true}));
         updateHiddenInput();
         this.refs.searchBarForm.submit();
       };
@@ -251,13 +267,10 @@ class SearchBarController extends Controller {
         content = getInputAndDisplayValsForGroup(content).display;
       }
 
-      new LozengeController(
-        this._lozengeContainer,
-        {
-          content: content,
-          deleteCallback: deleteCallback,
-        }
-      );
+      new LozengeController(lozengeEl, {
+        content,
+        deleteCallback,
+      });
     };
 
     /**
