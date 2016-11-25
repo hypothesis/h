@@ -81,7 +81,7 @@ class TestAuthController(object):
         with pytest.raises(httpexceptions.HTTPFound) as exc:
             views.AuthController(pyramid_request).post()
 
-        assert exc.value.location == 'http://example.com/users/janedoe/search'
+        assert exc.value.location == 'http://example.com/users/janedoe'
 
     def test_post_redirects_to_next_param_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_request.params = {'next': '/foo/bar'}
@@ -206,7 +206,7 @@ class TestAuthController(object):
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('activity.search', '/search')
-        pyramid_config.add_route('activity.user_search', '/users/{username}/search')
+        pyramid_config.add_route('activity.user_search', '/users/{username}')
         pyramid_config.add_route('forgot_password', '/forgot')
         pyramid_config.add_route('index', '/index')
         pyramid_config.add_route('stream', '/stream')

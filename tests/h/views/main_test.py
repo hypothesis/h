@@ -56,7 +56,7 @@ class TestStreamUserRedirect(object):
         with pytest.raises(httpexceptions.HTTPFound) as exc:
             main.stream_user_redirect(pyramid_request)
 
-        assert exc.value.location == 'http://example.com/user/bob/search'
+        assert exc.value.location == 'http://example.com/user/bob'
 
     def test_it_extracts_username_from_account_id(self, pyramid_request):
         pyramid_request.feature.flags['search_page'] = True
@@ -65,11 +65,11 @@ class TestStreamUserRedirect(object):
         with pytest.raises(httpexceptions.HTTPFound) as exc:
             main.stream_user_redirect(pyramid_request)
 
-        assert exc.value.location == 'http://example.com/user/bob/search'
+        assert exc.value.location == 'http://example.com/user/bob'
 
     @pytest.fixture
     def routes(self, pyramid_config):
-        pyramid_config.add_route('activity.user_search', '/user/{username}/search')
+        pyramid_config.add_route('activity.user_search', '/user/{username}')
         pyramid_config.add_route('stream', '/stream')
 
 

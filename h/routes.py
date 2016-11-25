@@ -27,7 +27,7 @@ def includeme(config):
     # Activity
     config.add_route('activity.search', '/search')
     config.add_route('activity.group_search', '/groups/{pubid}/search')
-    config.add_route('activity.user_search', '/users/{username}/search')
+    config.add_route('activity.user_search', '/users/{username}')
 
     # Admin
     config.add_route('admin_index', '/admin/')
