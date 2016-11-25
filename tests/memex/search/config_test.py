@@ -4,7 +4,15 @@ import itertools
 import re
 import urllib
 
-from memex.search.config import ANNOTATION_ANALYSIS
+import mock
+import pytest
+from elasticsearch.exceptions import NotFoundError
+
+from memex.search.config import (
+    ANNOTATION_ANALYSIS,
+    get_aliased_index,
+    update_aliased_index,
+)
 
 
 def test_strip_scheme_char_filter():
@@ -51,9 +59,66 @@ def test_uri_part_tokenizer():
     ])
 
 
+class TestGetAliasedIndex(object):
+    def test_returns_underlying_index_name(self, client):
+        """If ``index`` is an alias, return the name of the concrete index."""
+        client.conn.indices.get_alias.return_value = {
+            'target-index': {'aliases': {'foo': {}}},
+        }
+
+        assert get_aliased_index(client) == 'target-index'
+
+    def test_returns_none_when_no_alias(self, client):
+        """If ``index`` is a concrete index, return None."""
+        client.conn.indices.get_alias.side_effect = NotFoundError('test', 'test desc')
+
+        assert get_aliased_index(client) is None
+
+    def test_raises_if_aliased_to_multiple_indices(self, client):
+        """Raise if ``index`` is an alias pointing to multiple indices."""
+        client.conn.indices.get_alias.return_value = {
+            'index-one': {'aliases': {'foo': {}}},
+            'index-two': {'aliases': {'foo': {}}},
+        }
+
+        with pytest.raises(RuntimeError):
+            get_aliased_index(client)
+
+
+class TestUpdateAliasedIndex(object):
+    def test_updates_index_atomically(self, client):
+        """Update the alias atomically."""
+        client.conn.indices.get_alias.return_value = {
+            'old-target': {'aliases': {'foo': {}}},
+        }
+
+        update_aliased_index(client, 'new-target')
+
+        client.conn.indices.update_aliases.assert_called_once_with(body={
+            'actions': [
+                {'add': {'index': 'new-target', 'alias': 'foo'}},
+                {'remove': {'index': 'old-target', 'alias': 'foo'}},
+            ],
+        })
+
+    def test_raises_if_called_for_concrete_index(self, client):
+        """Raise if called for a concrete index."""
+        client.conn.indices.get_alias.side_effect = NotFoundError('test', 'test desc')
+
+        with pytest.raises(RuntimeError):
+            update_aliased_index(client, 'new-target')
+
+
 def captures(patterns, text):
     return list(itertools.chain(*(groups(p, text) for p in patterns)))
 
 
 def groups(pattern, text):
     return re.search(pattern, text).groups() or []
+
+
+@pytest.fixture
+def client():
+    client = mock.Mock(spec_set=['conn', 'index'])
+    client.index = 'foo'
+    return client

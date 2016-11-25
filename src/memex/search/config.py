@@ -11,7 +11,7 @@ these settings in an Elasticsearch instance.
 from __future__ import unicode_literals
 import logging
 
-import elasticsearch
+from elasticsearch.exceptions import NotFoundError, RequestError
 
 log = logging.getLogger(__name__)
 
@@ -200,6 +200,42 @@ def configure_index(client, index=None):
     _update_index_mappings(client.conn, index, mappings)
 
 
+def get_aliased_index(client):
+    """
+    Fetch the name of the underlying index.
+
+    Returns ``None`` if the index is not aliased or does not exist.
+    """
+    try:
+        result = client.conn.indices.get_alias(name=client.index)
+    except NotFoundError:  # no alias with that name
+        return None
+    if len(result) > 1:
+        raise RuntimeError("We don't support managing aliases that "
+                           "point to multiple indices at the moment!")
+    return result.keys()[0]
+
+
+def update_aliased_index(client, new_target):
+    """
+    Update the alias to point to a new target index.
+
+    Will raise `RuntimeError` if the index is not aliased or does not
+    exist.
+    """
+    old_target = get_aliased_index(client)
+    if old_target is None:
+        raise RuntimeError("Cannot update aliased index for index that "
+                           "is not already aliased.")
+
+    client.conn.indices.update_aliases(body={
+        'actions': [
+            {'add': {'index': new_target, 'alias': client.index}},
+            {'remove': {'index': old_target, 'alias': client.index}},
+        ],
+    })
+
+
 def _ensure_icu_plugin(conn):
     """Ensure that the ICU analysis plugin is installed for ES."""
     # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
@@ -270,7 +306,7 @@ def _update_index_mappings(conn, name, mappings):
             conn.indices.put_mapping(index=name,
                                      doc_type=doc_type,
                                      body=body)
-    except elasticsearch.exceptions.RequestError as e:
+    except RequestError as e:
         if not e.error.startswith('MergeMappingException'):
             raise
 

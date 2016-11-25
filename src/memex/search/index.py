@@ -17,7 +17,11 @@ from memex import models
 from memex import presenters
 from memex._compat import xrange
 from memex.events import AnnotationTransformEvent
-from memex.search.config import configure_index
+from memex.search.config import (
+    configure_index,
+    get_aliased_index,
+    update_aliased_index,
+)
 
 log = logging.getLogger(__name__)
 
@@ -84,7 +88,7 @@ def delete(es, annotation_id):
 def reindex(session, es, request):
     """Reindex all annotations into a new index, and update the alias."""
 
-    aliased = es.get_aliased_index() is not None
+    aliased = get_aliased_index(es) is not None
 
     # If the index we're using is an alias, then we index into a brand new
     # index and update the alias at the end.
@@ -106,7 +110,7 @@ def reindex(session, es, request):
                 errored))
 
     if aliased:
-        es.update_aliased_index(new_index)
+        update_aliased_index(es, new_index)
     else:
         deleter = BatchDeleter(session, es)
         deleter.delete_all()
