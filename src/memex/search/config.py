@@ -291,7 +291,7 @@ def _update_index_mappings(conn, name, mappings):
 
         message = ("Elasticsearch index mapping cannot be automatically "
                    "updated! Please reindex it. You may find the `hypothesis "
-                   "reindex` command helpful.")
+                   "search reindex` command helpful.")
         log.critical(message)
         raise RuntimeError(message)
 
