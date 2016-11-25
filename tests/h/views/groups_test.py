@@ -53,7 +53,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert groups_service.created == [('my_new_group', 'ariadna', 'foobar')]
+        assert groups_service.created == [('my_new_group', 'example.com', 'ariadna', 'foobar')]
 
     def test_post_creates_new_group_if_legacy_form_valid(self,
                                                          controller,
@@ -70,7 +70,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert groups_service.created == [('my_new_group', 'ariadna', None)]
+        assert groups_service.created == [('my_new_group', 'example.com', 'ariadna', None)]
 
     def test_post_redirects_if_form_valid(self,
                                           controller,
@@ -127,6 +127,7 @@ class TestGroupEditController(object):
 
         creator = User(username='luke', authority='example.org')
         group = Group(name='Birdwatcher Community',
+                      authority='foobar.com',
                       description='We watch birds all day long',
                       creator=creator)
         group.pubid = 'the-test-pubid'
@@ -144,6 +145,7 @@ class TestGroupEditController(object):
     def test_post_sets_group_properties(self, form_validating_to, pyramid_request):
         creator = User(username='luke', authority='example.org')
         group = Group(name='Birdwatcher Community',
+                      authority='foobar.com',
                       description='We watch birds all day long',
                       creator=creator)
         group.pubid = 'the-test-pubid'
@@ -290,8 +292,8 @@ class FakeGroupsService(object):
         self.joined = []
         self.left = []
 
-    def create(self, name, userid, description):
-        self.created.append((name, userid, description))
+    def create(self, name, authority, userid, description):
+        self.created.append((name, authority, userid, description))
         return FakeGroup('abc123', 'fake-group')
 
     def member_join(self, group, userid):

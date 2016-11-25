@@ -103,6 +103,7 @@ class Group(ModelFactory):
         force_flush = True
 
     name = factory.Sequence(lambda n:'Test Group {n}'.format(n=str(n)))
+    authority = 'example.com'
     creator = factory.SubFactory(User)
 
 
