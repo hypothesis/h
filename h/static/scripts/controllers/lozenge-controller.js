@@ -21,6 +21,13 @@ class LozengeController extends Controller {
   constructor(element, options) {
     super(element, options);
 
+    // Work-around for HTMLFormElement#submit() failing in Firefox if a submit
+    // button removes itself during click event handler.
+    //
+    // See https://bugzilla.mozilla.org/show_bug.cgi?id=494755#c4 and
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=586329
+    this.refs.deleteButton.type = 'button';
+
     let facetName = '';
     let facetValue = options.content;
 
