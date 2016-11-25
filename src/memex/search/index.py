@@ -3,10 +3,8 @@
 
 from __future__ import unicode_literals
 
-import binascii
 import itertools
 import logging
-import os
 from collections import namedtuple
 
 import elasticsearch
@@ -93,8 +91,7 @@ def reindex(session, es, request):
     # If the index we're using is an alias, then we index into a brand new
     # index and update the alias at the end.
     if aliased:
-        new_index = es.index + '-' + _random_id()
-        configure_index(es, index=new_index)
+        new_index = configure_index(es)
         indexer = BatchIndexer(session, es, request, target_index=new_index)
     else:
         indexer = BatchIndexer(session, es, request)
@@ -290,8 +287,3 @@ class BatchDeleter(object):
             if not batch:
                 return
             yield batch
-
-
-def _random_id():
-    """Generate a short random hex string."""
-    return binascii.hexlify(os.urandom(4))

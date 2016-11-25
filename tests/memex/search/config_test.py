@@ -9,14 +9,17 @@ import pytest
 from elasticsearch.exceptions import NotFoundError
 
 from memex.search.config import (
-    ANNOTATION_ANALYSIS,
+    ANNOTATION_MAPPING,
+    ANALYSIS_SETTINGS,
+    init,
+    configure_index,
     get_aliased_index,
     update_aliased_index,
 )
 
 
 def test_strip_scheme_char_filter():
-    f = ANNOTATION_ANALYSIS['char_filter']['strip_scheme']
+    f = ANALYSIS_SETTINGS['char_filter']['strip_scheme']
     p = f['pattern']
     r = f['replacement']
     assert(re.sub(p, r, 'http://ping/pong#hash') == 'ping/pong#hash')
@@ -29,7 +32,7 @@ def test_strip_scheme_char_filter():
 
 
 def test_path_url_filter():
-    patterns = ANNOTATION_ANALYSIS['filter']['path_url']['patterns']
+    patterns = ANALYSIS_SETTINGS['filter']['path_url']['patterns']
     assert(captures(patterns, 'example.com/foo/bar?query#hash') == [
         'example.com/foo/bar'
     ])
@@ -39,15 +42,15 @@ def test_path_url_filter():
 
 
 def test_rstrip_slash_filter():
-    p = ANNOTATION_ANALYSIS['filter']['rstrip_slash']['pattern']
-    r = ANNOTATION_ANALYSIS['filter']['rstrip_slash']['replacement']
+    p = ANALYSIS_SETTINGS['filter']['rstrip_slash']['pattern']
+    r = ANALYSIS_SETTINGS['filter']['rstrip_slash']['replacement']
     assert(re.sub(p, r, 'example.com/') == 'example.com')
     assert(re.sub(p, r, 'example.com/foo/bar/') == 'example.com/foo/bar')
 
 
 def test_uri_part_tokenizer():
     text = 'http://a.b/foo/bar?c=d#stuff'
-    pattern = ANNOTATION_ANALYSIS['tokenizer']['uri_part']['pattern']
+    pattern = ANALYSIS_SETTINGS['tokenizer']['uri_part']['pattern']
     assert(re.split(pattern, text) == [
         'http', '', '', 'a', 'b', 'foo', 'bar', 'c', 'd', 'stuff'
     ])
@@ -57,6 +60,75 @@ def test_uri_part_tokenizer():
         'http', '', '', 'jump', 'to', '', 'u',
         'http', '', '', 'a', 'b', 'foo', 'bar', 'c', 'd', 'stuff'
     ])
+
+
+@pytest.mark.usefixtures('client', 'configure_index')
+class TestInit(object):
+    def test_configures_index_when_index_missing(self, client, configure_index):
+        """Calls configure_index when one doesn't exist."""
+        init(client)
+
+        configure_index.assert_called_once_with(client)
+
+    def test_configures_alias(self, client):
+        """Adds an alias to the newly-created index."""
+        init(client)
+
+        client.conn.indices.put_alias.assert_called_once_with(index='foo-abcd1234', name='foo')
+
+    def test_does_not_recreate_extant_index(self, client, configure_index):
+        """Exits early if the index (or an alias) already exists."""
+        client.conn.indices.exists.return_value = True
+
+        init(client)
+
+        assert not configure_index.called
+
+    def test_raises_if_icu_analysis_plugin_unavailable(self, client):
+        client.conn.cat.plugins.return_value = ''
+
+        with pytest.raises(RuntimeError) as e:
+            init(client)
+
+        assert 'plugin is not installed' in e.value.message
+
+    @pytest.fixture
+    def client(self, client):
+        # By default, pretend that no index exists already...
+        client.conn.indices.exists.return_value = False
+        # Simulate the ICU Analysis plugin
+        client.conn.cat.plugins.return_value = '\n'.join(['foo', 'analysis-icu'])
+        return client
+
+    @pytest.fixture
+    def configure_index(self, patch):
+        configure_index = patch('memex.search.config.configure_index')
+        configure_index.return_value = 'foo-abcd1234'
+        return configure_index
+
+
+class TestConfigureIndex(object):
+    def test_creates_randomly_named_index(self, client, matchers):
+        configure_index(client)
+
+        client.conn.indices.create.assert_called_once_with(
+            matchers.regex('foo-[0-9a-f]{8}'),
+            body=mock.ANY)
+
+    def test_returns_index_name(self, client, matchers):
+        name = configure_index(client)
+
+        assert name == matchers.regex('foo-[0-9a-f]{8}')
+
+    def test_sets_correct_mappings_and_settings(self, client):
+        configure_index(client)
+
+        client.conn.indices.create.assert_called_once_with(
+            mock.ANY,
+            body={
+                'mappings': {'annotation': ANNOTATION_MAPPING},
+                'settings': {'analysis': ANALYSIS_SETTINGS},
+            })
 
 
 class TestGetAliasedIndex(object):
@@ -119,6 +191,7 @@ def groups(pattern, text):
 
 @pytest.fixture
 def client():
-    client = mock.Mock(spec_set=['conn', 'index'])
+    client = mock.Mock(spec_set=['conn', 'index', 't'])
     client.index = 'foo'
+    client.t.annotation = 'annotation'
     return client
