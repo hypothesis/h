@@ -225,7 +225,18 @@
                  // work).
 }
 
+$stats-icon-column-width: 20px;
+
+.search-bucket-stats__icon {
+  width: 12px;
+  margin-right: $stats-icon-column-width - 12px;
+}
+
 .search-bucket-stats__key {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
   margin-bottom: 2px;
   color: $grey-6;
   font-weight: bold;
@@ -233,7 +244,8 @@
 
 .search-bucket-stats__val {
   color: $grey-6;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  margin-left: $stats-icon-column-width;
 }
 
 .search-bucket-stats__url,
@@ -249,11 +261,10 @@
 }
 
 .search-bucket-stats__incontext-link {
-  display: block;
-  margin-top: 5px;
-
   color: $grey-6;
-  font-weight: bold;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .search-bucket-stats__incontext-icon {
