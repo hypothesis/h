@@ -631,14 +631,16 @@ class TestGroupUserSearchController(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('routes', 'search', 'user_service')
+@pytest.mark.usefixtures('routes', 'search')
 class TestUserSearchController(object):
 
-    def test_init_returns_404_when_feature_turned_off(self, pyramid_request):
+    def test_init_returns_404_when_feature_turned_off(self,
+                                                      user,
+                                                      pyramid_request):
         pyramid_request.feature.flags['search_page'] = False
 
         with pytest.raises(httpexceptions.HTTPNotFound):
-            activity.UserSearchController(pyramid_request)
+            activity.UserSearchController(user, pyramid_request)
 
     def test_search_calls_search_with_request(self,
                                               controller,
@@ -653,15 +655,6 @@ class TestUserSearchController(object):
 
         assert results['opts']['search_username'] == user.username
 
-    def test_search_returns_the_username_in_opts_if_user_does_not_exist(
-            self, controller, pyramid_request, user_service):
-        pyramid_request.matchdict['username'] = 'does_not_exist'
-        user_service.fetch.return_value = None
-
-        results = controller.search()
-
-        assert results['opts']['search_username'] == 'does_not_exist'
-
     def test_search_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
             self, controller, pyramid_request):
         pyramid_request.params['more_info'] = ''
@@ -671,17 +664,6 @@ class TestUserSearchController(object):
     def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
             self, controller):
         assert controller.search()['more_info'] is False
-
-    def test_search_fetches_the_user(self, controller, user, user_service):
-        controller.search()
-
-        user_service.fetch.assert_called_once_with(user.username, 'example.com')
-
-    def test_search_does_not_pass_user_to_template_if_user_does_not_exist(
-            self, controller, user_service):
-        user_service.fetch.return_value = None
-
-        assert 'user' not in controller.search()
 
     def test_search_passes_the_username_to_the_template_if_the_user_has_no_display_name(
             self, controller, user):
@@ -709,14 +691,7 @@ class TestUserSearchController(object):
     def test_search_passes_the_other_user_details_to_the_template(self,
                                                                   controller,
                                                                   factories,
-                                                                  user_service):
-        user = factories.User(
-            registered_date=datetime.datetime(year=2016, month=8, day=1),
-            uri='http://www.example.com/me',
-            orcid='0000-0000-0000-0000',
-        )
-        user_service.fetch.return_value = user
-
+                                                                  user):
         user_details = controller.search()['user']
 
         assert user_details['description'] == user.description
@@ -728,12 +703,10 @@ class TestUserSearchController(object):
 
     def test_search_passes_the_edit_url_to_the_template(self,
                                                         controller,
-                                                        user,
-                                                        user_service):
+                                                        user):
         # The user whose page we're on is the same user as the authenticated
         # user.
         pyramid_request.authenticated_user = user
-        user_service.fetch.return_value = user
 
         user_details = controller.search()['user']
 
@@ -742,12 +715,10 @@ class TestUserSearchController(object):
     def test_search_does_not_pass_the_edit_url_to_the_template(self,
                                                                controller,
                                                                factories,
-                                                               pyramid_request,
-                                                               user_service):
+                                                               pyramid_request):
         # The user whose page we're on is *not* the same user as the
         # authenticated user.
         pyramid_request.authenticated_user = factories.User()
-        user_service.fetch.return_value = factories.User()
 
         assert 'edit_url' not in controller.search()['user']
 
@@ -781,8 +752,8 @@ class TestUserSearchController(object):
         assert result['zero_message'] == '__SHOW_GETTING_STARTED__'
 
     @pytest.fixture
-    def controller(self, pyramid_request):
-        return activity.UserSearchController(pyramid_request)
+    def controller(self, user, pyramid_request):
+        return activity.UserSearchController(user, pyramid_request)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
@@ -792,14 +763,11 @@ class TestUserSearchController(object):
 
     @pytest.fixture
     def user(self, factories):
-        return factories.User()
-
-    @pytest.fixture
-    def user_service(self, pyramid_config, user):
-        user_service = mock.Mock(spec_set=['fetch'])
-        user_service.fetch.return_value = user
-        pyramid_config.register_service(user_service, name='user')
-        return user_service
+        return factories.User(
+            registered_date=datetime.datetime(year=2016, month=8, day=1),
+            uri='http://www.example.com/me',
+            orcid='0000-0000-0000-0000',
+        )
 
 
 @pytest.fixture

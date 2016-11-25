@@ -75,7 +75,7 @@ class TestExtract(object):
         return mock.Mock(spec_set=[], return_value=MultiDict({'foo': 'bar'}))
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('routes', 'user_service')
 class TestCheckURL(object):
     def test_redirects_to_group_search_page_if_one_group_in_query(self, pyramid_request, unparse):
         query = MultiDict({'group': 'abcd1234'})
@@ -117,6 +117,15 @@ class TestCheckURL(object):
 
         assert e.value.location == '/act/users/jose?q=UNPARSED_QUERY'
 
+    def test_does_not_redirect_to_user_page_if_user_does_not_exist(self,
+                                                                   pyramid_request,
+                                                                   user_service):
+        query = MultiDict({'user': 'jose'})
+        user_service.fetch.return_value = None
+
+        assert check_url(pyramid_request, query) is None
+
+
     def test_removes_user_term_from_query(self, pyramid_request, unparse):
         query = MultiDict({'user': 'jose'})
 
@@ -147,6 +156,13 @@ class TestCheckURL(object):
         result = check_url(pyramid_request, query, unparse=unparse)
 
         assert result is None
+
+    @pytest.fixture
+    def user_service(self, factories, pyramid_config):
+        user_service = mock.Mock(spec_set=['fetch'])
+        user_service.fetch.return_value = factories.User()
+        pyramid_config.register_service(user_service, name='user')
+        return user_service
 
     @pytest.fixture
     def unparse(self):

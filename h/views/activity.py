@@ -232,20 +232,16 @@ class GroupSearchController(SearchController):
 class UserSearchController(SearchController):
     """View callables unique to the "activity.user_search" route."""
 
+    def __init__(self, user, request):
+        super(UserSearchController, self).__init__(request)
+        self.user = user
+
     @view_config(request_method='GET')
     def search(self):
-        username = self.request.matchdict['username']
-
         result = super(UserSearchController, self).search()
-        result['opts'] = {'search_username': username}
 
+        result['opts'] = {'search_username': self.user.username}
         result['more_info'] = 'more_info' in self.request.params
-
-        user = self.request.find_service(name='user').fetch(
-            username, self.request.auth_domain)
-
-        if not user:
-            return result
 
         def domain(user):
             if not user.uri:
@@ -253,22 +249,22 @@ class UserSearchController(SearchController):
             return urlparse.urlparse(user.uri).netloc
 
         result['user'] = {
-            'name': user.display_name or user.username,
+            'name': self.user.display_name or self.user.username,
             'num_annotations': result['total'],
-            'description': user.description,
-            'registered_date': user.registered_date.strftime('%B, %Y'),
-            'location': user.location,
-            'uri': user.uri,
-            'domain': domain(user),
-            'orcid': user.orcid,
+            'description': self.user.description,
+            'registered_date': self.user.registered_date.strftime('%B, %Y'),
+            'location': self.user.location,
+            'uri': self.user.uri,
+            'domain': domain(self.user),
+            'orcid': self.user.orcid,
         }
 
-        if self.request.authenticated_user == user:
+        if self.request.authenticated_user == self.user:
             result['user']['edit_url'] = self.request.route_url(
                 'account_profile')
 
         if not result.get('q'):
-            if self.request.authenticated_user == user:
+            if self.request.authenticated_user == self.user:
                 # Tell the template that it should show "How to get started".
                 result['zero_message'] = '__SHOW_GETTING_STARTED__'
             else:

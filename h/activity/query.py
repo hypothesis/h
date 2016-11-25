@@ -86,9 +86,12 @@ def check_url(request, query, unparse=parser.unparse):
 
     elif _single_entry(query, 'user'):
         username = query.pop('user')
-        redirect = request.route_path('activity.user_search',
-                                      username=username,
-                                      _query={'q': unparse(query)})
+        user = request.find_service(name='user').fetch(username,
+                                                       request.auth_domain)
+        if user:
+            redirect = request.route_path('activity.user_search',
+                                          username=username,
+                                          _query={'q': unparse(query)})
 
     if redirect is not None:
         raise HTTPFound(location=redirect)
