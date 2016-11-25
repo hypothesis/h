@@ -37,6 +37,7 @@ class Group(Base, mixins.Timestamps):
                       default=pubid.generate,
                       unique=True,
                       nullable=False)
+    authority = sa.Column(sa.UnicodeText(), nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     # We store information about who created the group -- we don't use this
@@ -53,8 +54,9 @@ class Group(Base, mixins.Timestamps):
         'User', secondary='user_group', backref=sa.orm.backref(
             'groups', order_by='Group.name'))
 
-    def __init__(self, name, creator, description=None):
+    def __init__(self, name, authority, creator, description=None):
         self.name = name
+        self.authority = authority
         self.description = description
         self.creator = creator
         self.members.append(creator)

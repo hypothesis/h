@@ -9,15 +9,17 @@ from h import models
 
 def test_init(db_session, factories):
     name = "My Hypothesis Group"
+    authority = "foobar.com"
     description = "This group is awesome"
     user = factories.User()
 
-    group = models.Group(name=name, creator=user, description=description)
+    group = models.Group(name=name, authority=authority, creator=user, description=description)
     db_session.add(group)
     db_session.flush()
 
     assert group.id
     assert group.name == name
+    assert group.authority == authority
     assert group.description == description
     assert group.created
     assert group.updated
@@ -29,13 +31,14 @@ def test_init(db_session, factories):
 def test_with_short_name(factories):
     """Should raise ValueError if name shorter than 4 characters."""
     with pytest.raises(ValueError):
-        models.Group(name="abc", creator=factories.User())
+        models.Group(name="abc", authority="foobar.com", creator=factories.User())
 
 
 def test_with_long_name(factories):
     """Should raise ValueError if name longer than 25 characters."""
     with pytest.raises(ValueError):
         models.Group(name="abcdefghijklmnopqrstuvwxyz",
+                     authority="foobar.com",
                      creator=factories.User())
 
 
@@ -43,7 +46,7 @@ def test_slug(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()
 
-    group = models.Group(name=name, creator=user)
+    group = models.Group(name=name, authority="foobar.com", creator=user)
     db_session.add(group)
     db_session.flush()
 
@@ -54,7 +57,7 @@ def test_repr(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()
 
-    group = models.Group(name=name, creator=user)
+    group = models.Group(name=name, authority='foobar.com', creator=user)
     db_session.add(group)
     db_session.flush()
 
@@ -66,8 +69,8 @@ def test_created_by(db_session, factories):
     name_2 = "My second group"
     user = factories.User()
 
-    group_1 = models.Group(name=name_1, creator=user)
-    group_2 = models.Group(name=name_2, creator=user)
+    group_1 = models.Group(name=name_1, authority='foobar.com', creator=user)
+    group_2 = models.Group(name=name_2, authority='foobar.com', creator=user)
 
     db_session.add(group_1, group_2)
     db_session.flush()
@@ -254,7 +257,9 @@ def documents(db_session):
 @pytest.fixture
 def group(db_session, factories):
     """Add a new group to the db and return it."""
-    group_ = models.Group(name='test-group', creator=factories.User())
+    group_ = models.Group(name='test-group',
+                          authority='foobar.com',
+                          creator=factories.User())
     db_session.add(group_)
     group_.pubid = 'test-group'
     return group_
