@@ -37,6 +37,7 @@ class Group(Base, mixins.Timestamps):
                       default=pubid.generate,
                       unique=True,
                       nullable=False)
+    authority = sa.Column(sa.UnicodeText(), nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     # We store information about who created the group -- we don't use this
