@@ -2,6 +2,7 @@
 
 import click
 
+from memex.search import config
 from memex.search import index
 
 
@@ -24,3 +25,22 @@ def reindex(ctx):
     request = ctx.obj['bootstrap']()
 
     index.reindex(request.db, request.es, request)
+
+
+@search.command('update-settings')
+@click.pass_context
+def update_settings(ctx):
+    """
+    Attempt to update mappings and settings.
+
+    Attempts to update mappings and index settings. This may fail if the
+    pending changes to mappings are not compatible with the current index. In
+    this case you will likely need to reindex.
+    """
+
+    request = ctx.obj['bootstrap']()
+
+    try:
+        config.update_index_settings(request.es)
+    except RuntimeError as e:
+        raise click.ClickException(e.message)
