@@ -17,9 +17,9 @@
     <button data-ref="deleteButton"
             class="lozenge__close"
             type="submit"
-            name="delete_lozenge">
-      <img alt="{% trans %}Delete lozenge{% endtrans %}"
-           src="/assets/images/icons/lozenge-close.svg">
+            name="delete_lozenge"
+            title="{% trans %}Remove search term{% endtrans %}">
+      {{ svg_icon('lozenge-close') }}
     </button>
   </div>
 {% endmacro %}
