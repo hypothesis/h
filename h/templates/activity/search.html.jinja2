@@ -39,7 +39,7 @@
       <a class="search-bucket-stats__incontext-link"
          href="{{ bucket.incontext_link(request) }}"
          target="_blank">
-         Visit annotations in context
+         {% trans %}Visit annotations in context{% endtrans %}
        </a>
     </div>
     <div class="search-bucket-stats__val"></div>
@@ -47,7 +47,7 @@
   {% if bucket.tags %}
     <div class="search-bucket-stats__key">
       {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__icon') }}
-      Tags
+      {% trans %}Tags{% endtrans %}
     </div>
     <ul class="search-bucket-stats__val">
       {% for tag in bucket.tags %}
@@ -58,7 +58,7 @@
   {% endif %}
   <div class="search-bucket-stats__key">
     {{ svg_icon('account', css_class='search-bucket-stats__icon') }}
-    Annotators
+    {% trans %}Annotators{% endtrans %}
   </div>
   <ul class="search-bucket-stats__val">
     {% for user in bucket.users %}
@@ -71,7 +71,7 @@
   {% if bucket.uri %}
     <div class="search-bucket-stats__key">
       {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__icon') }}
-      URL
+      {% trans %}URL{% endtrans %}
     </div>
     <div class="search-bucket-stats__val search-bucket-stats__url">
         <a class="search-bucket-stats__link"
