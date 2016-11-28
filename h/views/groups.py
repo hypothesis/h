@@ -118,7 +118,7 @@ class GroupEditController(object):
              custom_predicates=[not_(custom_predicates.has_read_permission)])
 def read(group, request):
     """Group view for logged-in users."""
-    _check_slug(group, request)
+    check_slug(group, request)
 
     # If the current user is not a member of the group, they will not have the
     # 'read' permission on the group. In this case, we show them the join
@@ -144,13 +144,13 @@ def read(group, request):
              effective_principals=not_(security.Authenticated))
 def read_unauthenticated(group, request):
     """Group view for logged-out users, allowing them to join the group."""
-    _check_slug(group, request)
+    check_slug(group, request)
     return {'group': group}
 
 
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read_noslug(group, request):
-    _check_slug(group, request)
+    check_slug(group, request)
 
 
 @view_config(route_name='group_read',
@@ -174,7 +174,7 @@ def leave(group, request):
     return HTTPNoContent()
 
 
-def _check_slug(group, request):
+def check_slug(group, request):
     """Redirect if the request slug does not match that of the group."""
     slug = request.matchdict.get('slug')
     if slug is None or slug != group.slug:

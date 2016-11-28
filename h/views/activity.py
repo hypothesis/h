@@ -21,6 +21,7 @@ from h.paginator import paginate
 from h import util
 from h.util.user import split_user
 from h.views import custom_predicates
+from h.views.groups import check_slug
 
 
 PAGE_SIZE = 200
@@ -100,6 +101,7 @@ class GroupSearchController(SearchController):
     def __init__(self, group, request):
         super(GroupSearchController, self).__init__(request)
         self.group = group
+        check_slug(self.group, self.request)
 
     @view_config(request_method='GET')
     def search(self):

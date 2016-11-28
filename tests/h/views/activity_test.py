@@ -145,6 +145,24 @@ class TestGroupSearchController(object):
         with pytest.raises(httpexceptions.HTTPNotFound):
             activity.GroupSearchController(group, pyramid_request)
 
+    def test_init_redirects_if_slug_wrong(self, group, pyramid_request):
+        """
+        If the slug in the URL is wrong it should redirect to the right one.
+
+        For example /groups/<pubid>/foobar redirects to /groups/<pubid>/<slug>.
+
+        The other 'group_read' views on h.views.groups do this, this tests that
+        the ones in h.views.activity do as well.
+
+        """
+        pyramid_request.matchdict['slug'] = 'wrong'
+
+        with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
+            activity.GroupSearchController(group, pyramid_request)
+
+        assert exc.value.location == '/groups/{pubid}/{slug}'.format(
+            pubid=group.pubid, slug=group.slug)
+
     def test_search_calls_search_with_the_request(self,
                                                   controller,
                                                   group,
@@ -587,6 +605,11 @@ class TestGroupAndUserSearchController(object):
 
     @pytest.fixture
     def group_search_controller(self, group, pyramid_request):
+        # Set the slug in the URL to the slug of the group.
+        # Otherwise GroupSearchController will redirect the request to the
+        # correct URL.
+        pyramid_request.matchdict['slug'] = group.slug
+
         return activity.GroupSearchController(group, pyramid_request)
 
     @pytest.fixture
