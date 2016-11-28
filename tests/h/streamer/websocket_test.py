@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
-import json
 
 import mock
 import pytest
@@ -94,15 +93,80 @@ def test_socket_send_json_skips_when_terminated(fake_environ, fake_json, fake_so
     assert not fake_socket_send.called
 
 
-def test_handle_message_sets_socket_client_id_for_client_id_messages():
+@pytest.mark.usefixtures('handlers')
+class TestHandleMessage(object):
+
+    def test_closes_connection_for_invalid_json(self):
+        """If we receive invalid JSON, we close the connection."""
+        socket = mock.Mock(spec_set=['close'])
+        message = websocket.Message(socket, payload='gibberish')
+
+        websocket.handle_message(message)
+
+        socket.close.assert_called_once_with(reason='invalid message format')
+
+    def test_uses_unknown_handler_for_missing_type(self, unknown_handler):
+        """If the type is missing, call the `None` handler."""
+        socket = mock.Mock(spec_set=['close'])
+        message = websocket.Message(socket, payload='{"foo":"bar"}')
+
+        websocket.handle_message(message)
+
+        unknown_handler.assert_called_once_with(socket,
+                                                {"foo": "bar"},
+                                                session=None)
+
+    def test_uses_unknown_handler_for_unknown_type(self, unknown_handler):
+        """If the type is unknown, call the `None` handler."""
+        socket = mock.Mock(spec_set=['close'])
+        message = websocket.Message(socket, payload='{"type":"donkeys","foo":"bar"}')
+
+        websocket.handle_message(message)
+
+        unknown_handler.assert_called_once_with(socket,
+                                                {"type": "donkeys",
+                                                 "foo": "bar"},
+                                                session=None)
+
+    def test_uses_appropriate_handler_for_known_type(self, foo_handler):
+        """If the type is recognised, call the relevant handler."""
+        socket = mock.Mock(spec_set=['close'])
+        message = websocket.Message(socket, payload='{"type":"foo","foo":"bar"}')
+
+        websocket.handle_message(message)
+
+        foo_handler.assert_called_once_with(socket,
+                                            {"type": "foo", "foo": "bar"},
+                                            session=None)
+
+    @pytest.fixture
+    def foo_handler(self):
+        return mock.Mock(spec_set=[])
+
+    @pytest.fixture
+    def unknown_handler(self):
+        return mock.Mock(spec_set=[])
+
+    @pytest.fixture
+    def handlers(self, request, foo_handler, unknown_handler):
+        patcher = mock.patch.dict('h.streamer.websocket.MESSAGE_HANDLERS', {
+            'foo': foo_handler,
+            None: unknown_handler,
+        }, clear=True)
+        handlers = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return handlers
+
+
+def test_handle_client_id_message_sets_socket_client_id_for_client_id_messages():
     socket = mock.Mock()
     socket.client_id = None
-    message = websocket.Message(socket=socket, payload=json.dumps({
+    payload = {
         'messageType': 'client_id',
         'value': 'abcd1234',
-    }))
+    }
 
-    websocket.handle_message(message)
+    websocket.handle_client_id_message(socket, payload)
 
     assert socket.client_id == 'abcd1234'
 
@@ -110,7 +174,7 @@ def test_handle_message_sets_socket_client_id_for_client_id_messages():
 def test_handle_message_sets_socket_filter_for_filter_messages():
     socket = mock.Mock()
     socket.filter = None
-    message = websocket.Message(socket=socket, payload=json.dumps({
+    payload = {
         'filter': {
             'actions': {},
             'match_policy': 'include_all',
@@ -120,22 +184,22 @@ def test_handle_message_sets_socket_filter_for_filter_messages():
                 'value': 'http://example.com',
             }],
         }
-    }))
+    }
 
-    websocket.handle_message(message)
+    websocket.handle_filter_message(socket, payload)
 
     assert socket.filter is not None
 
 
 @mock.patch('memex.storage.expand_uri')
-def test_handle_message_expands_uris_in_uri_filter_with_session(expand_uri):
+def test_handle_filter_message_expands_uris_in_uri_filter_with_session(expand_uri):
     expand_uri.return_value = ['http://example.com',
                                'http://example.com/alter',
                                'http://example.com/print']
     session = mock.sentinel.db_session
     socket = mock.Mock()
     socket.filter = None
-    message = websocket.Message(socket=socket, payload=json.dumps({
+    payload = {
         'filter': {
             'actions': {},
             'match_policy': 'include_all',
@@ -145,9 +209,9 @@ def test_handle_message_expands_uris_in_uri_filter_with_session(expand_uri):
                 'value': 'http://example.com',
             }],
         }
-    }))
+    }
 
-    websocket.handle_message(message, session=session)
+    websocket.handle_filter_message(socket, payload, session=session)
 
     uri_filter = socket.filter.filter['clauses'][0]
     uri_values = uri_filter['value']
@@ -163,7 +227,7 @@ def test_handle_message_expands_uris_using_passed_session(expand_uri):
     session = mock.sentinel.db_session
     socket = mock.Mock()
     socket.filter = None
-    message = websocket.Message(socket=socket, payload=json.dumps({
+    payload = {
         'filter': {
             'actions': {},
             'match_policy': 'include_all',
@@ -173,9 +237,9 @@ def test_handle_message_expands_uris_using_passed_session(expand_uri):
                 'value': 'http://example.com',
             }],
         }
-    }))
+    }
 
-    websocket.handle_message(message, session=session)
+    websocket.handle_filter_message(socket, payload, session=session)
 
     expand_uri.assert_called_once_with(session, 'http://example.com')
 

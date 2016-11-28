@@ -14,6 +14,10 @@ from h.streamer import filter
 
 log = logging.getLogger(__name__)
 
+# Mapping incoming message type to handler function. Handlers are added inline
+# below.
+MESSAGE_HANDLERS = {}
+
 # An incoming message from a WebSocket client.
 Message = namedtuple('Message', ['socket', 'payload'])
 
@@ -81,34 +85,63 @@ def handle_message(message, session=None):
     """
     socket = message.socket
 
-    data = json.loads(message.payload)
-
     try:
-        msg_type = data.get('messageType', 'filter')
+        data = json.loads(message.payload)
+    except ValueError:
+        socket.close(reason='invalid message format')
+        return
 
-        if msg_type == 'filter':
-            payload = data['filter']
+    type_ = data.get('type')
 
-            # Let's try to validate the schema
-            jsonschema.validate(payload, filter.SCHEMA)
+    # FIXME: This code is here to tolerate old and deprecated message formats.
+    if type_ is None:
+        if 'messageType' in data and data['messageType'] == 'client_id':
+            type_ = 'client_id'
+        if 'filter' in data:
+            type_ = 'filter'
 
-            if session is not None:
-                # Add backend expands for clauses
-                _expand_clauses(session, payload)
-
-            socket.filter = filter.FilterHandler(payload)
-        elif msg_type == 'client_id':
-            socket.client_id = data.get('value')
-    except:
-        # TODO: clean this up, catch specific errors, narrow the scope
-        log.exception("Parsing filter: %s", data)
-        socket.close()
-        raise
+    # N.B. MESSAGE_HANDLERS[None] handles both incorrect and missing message
+    # types.
+    handler = MESSAGE_HANDLERS.get(type_, MESSAGE_HANDLERS[None])
+    handler(socket, data, session=session)
 
 
-def _expand_clauses(session, payload):
-    for clause in payload['clauses']:
-        if clause['field'] == '/uri':
+def handle_client_id_message(socket, payload, session=None):
+    """A client telling us its client ID."""
+    if 'value' not in payload:
+        # FIXME: send an error message to the client
+        return
+    socket.client_id = payload['value']
+MESSAGE_HANDLERS['client_id'] = handle_client_id_message
+
+
+def handle_filter_message(socket, payload, session=None):
+    """A client updating its streamer filter."""
+    if 'filter' not in payload:
+        # FIXME: send an error message to the client
+        return
+    filter_ = payload['filter']
+    try:
+        jsonschema.validate(filter_, filter.SCHEMA)
+    except jsonschema.ValidationError:
+        # FIXME: send an error message to the client
+        return
+    if session is not None:
+        # Add backend expands for clauses
+        _expand_clauses(session, filter_)
+    socket.filter = filter.FilterHandler(filter_)
+MESSAGE_HANDLERS['filter'] = handle_filter_message
+
+
+def handle_unknown_message(socket, payload, session=None):
+    """Message type missing or not recognised."""
+    # FIXME: send an error message to the client
+MESSAGE_HANDLERS[None] = handle_unknown_message
+
+
+def _expand_clauses(session, filter_):
+    for clause in filter_['clauses']:
+        if 'field' in clause and clause['field'] == '/uri':
             _expand_uris(session, clause)
 
 
