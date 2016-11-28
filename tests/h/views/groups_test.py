@@ -186,18 +186,6 @@ class TestGroupRead(object):
         assert result['group'] == group
         assert result['document_links'] == ['link1', 'link2']
 
-    def test_renders_join_template_if_not_member(self,
-                                                 pyramid_config,
-                                                 pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_config.testing_securitypolicy('bohus', permissive=False)
-        pyramid_request.matchdict['slug'] = 'some-slug'
-
-        result = views.read(group, pyramid_request)
-
-        assert 'join.html' in pyramid_request.override_renderer
-        assert result == {'group': group}
-
 
 @pytest.mark.usefixtures('routes')
 class TestGroupReadUnauthenticated(object):
@@ -230,25 +218,48 @@ def test_read_noslug_redirects(pyramid_request):
 
 
 @pytest.mark.usefixtures('groups_service', 'routes')
-class TestGroupJoin(object):
-    def test_joins_group(self,
-                         groups_service,
-                         pyramid_config,
-                         pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
+class TestGroupJoinController(object):
+
+    def test_get_returns_the_group_to_the_template(self, controller, group):
+        assert controller.get()['group'] == group
+
+    def test_post_joins_the_group(self,
+                                  controller,
+                                  group,
+                                  groups_service,
+                                  pyramid_config,
+                                  pyramid_request):
         pyramid_config.testing_securitypolicy('gentiana')
 
-        views.join(group, pyramid_request)
+        controller.post()
 
         assert (group, 'gentiana') in groups_service.joined
 
-    def test_redirects_to_group_page(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-
-        result = views.join(group, pyramid_request)
+    def test_post_redirects_to_group_page(self,
+                                          controller,
+                                          group,
+                                          pyramid_request):
+        result = controller.post()
 
         assert isinstance(result, HTTPSeeOther)
-        assert result.location == '/groups/abc123/some-slug'
+        assert result.location == '/groups/{pubid}/{slug}'.format(
+            pubid=group.pubid, slug=group.slug)
+
+    @pytest.fixture
+    def controller(self, group, pyramid_request):
+        return views.GroupJoinController(group, pyramid_request)
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group()
+
+    @pytest.fixture
+    def pyramid_request(self, group, pyramid_request):
+        # The matchdict needs to contain the correct pubid and slug,
+        # otherwise initializing the controller will redirect.
+        pyramid_request.matchdict['pubid'] = group.pubid
+        pyramid_request.matchdict['slug'] = group.slug
+        return pyramid_request
 
 
 @pytest.mark.usefixtures('groups_service', 'routes')

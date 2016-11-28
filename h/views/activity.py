@@ -94,7 +94,8 @@ class SearchController(object):
 
 @view_defaults(route_name='group_read',
                renderer='h:templates/activity/search.html.jinja2',
-               custom_predicates=[custom_predicates.has_read_permission])
+               custom_predicates=[custom_predicates.has_read_permission,
+                                  custom_predicates.feature('search_page')])
 class GroupSearchController(SearchController):
     """View callables unique to the "group_read" route."""
 
