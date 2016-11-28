@@ -1,5 +1,5 @@
 PyJWT
-SQLAlchemy
+SQLAlchemy >= 1.1.4
 alembic
 bcrypt
 celery == 3.1.25  # Pin to latest 3.1.x to ensure forwards-compat with 4.x
@@ -15,7 +15,7 @@ gunicorn
 itsdangerous
 jsonpointer == 1.0
 jsonschema
-kombu
+kombu <3.1 # Pinned because of celery pin
 newrelic
 passlib
 psycogreen
