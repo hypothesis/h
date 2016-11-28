@@ -15,7 +15,7 @@ gunicorn
 itsdangerous
 jsonpointer == 1.0
 jsonschema
-kombu
+kombu <3.1 # Pinned because of celery pin
 newrelic
 passlib
 psycogreen
