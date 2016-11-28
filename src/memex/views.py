@@ -331,6 +331,32 @@ def _publish_annotation_event(request,
 
 ################ USER ###############
 
+@api_config(route_name='api.account.signup',
+            request_method="POST"
+            )
+def account_signup(request):
+    req = _json_payload(request)
+    email = req['email']
+    username = req['username']
+    password = req['password']
+    if not email or not username or not password:
+        return {'errors': 'malformed request'}
+    
+    email_exists = hmodels.User.get_by_email(request.db, email)
+    username_exists = hmodels.User.get_by_username(request.db, username)
+    if email_exists:
+        return {'errors': 'email'}
+    if username_exists:
+        return {'errors': 'username'}
+
+    signup_service = request.find_service(name='user_signup')
+    signup_service.signup(username=username,
+                          email=email,
+                          password=password)
+
+    return {'status':'success', "flash":'Please check your'
+    ' email and open the link to activate your account.'}
+
 @api_config(route_name='api.account.reset',
             request_method='POST'
            )
@@ -338,7 +364,8 @@ def account_forgot_pw(request):
     
     req = _json_payload(request)
     email = req['email']
-
+    if not email:
+        return {'errors':"malformed request"}
     email_exists = hmodels.User.get_by_email(request.db, email)
     
     if not email_exists:

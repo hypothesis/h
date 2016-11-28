@@ -58,6 +58,13 @@ def robots(context, request):
 @view_config(route_name='stream_login')
 @view_config(route_name='stream_logout')
 @view_config(route_name='stream_forgot')
+@view_config(route_name='stream_signup')
+@view_config(route_name='stream_notes')
+@view_config(route_name='stream_discover')
+@view_config(route_name='stream_settings')
+@view_config(route_name='stream_fav')
+@view_config(route_name='stream_search')
+@view_config(route_name='stream_ann')
 def stream(context, request):
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')

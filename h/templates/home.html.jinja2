@@ -2,8 +2,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>dev.txtpen</title>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.4/semantic.min.css">
+  <title>txtpen - highlighter for the web</title>
   <link rel="apple-touch-icon" sizes="152x152"
           href="{{ base_url }}assets/images/apple-touch-icon-152x152.png">
     <link rel="icon" type="image/png" sizes="16x16"
@@ -16,26 +15,170 @@
           href="{{ base_url }}assets/images/favicons/android-chrome-192x192.png">
     <link rel="shortcut icon"
           href="{{ base_url }}assets/images/favicons/favicon.ico">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.4/semantic.min.js"></script>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script type="text/javascript">
+      var tk = localStorage.getItem('token');
+      if (tk && tk != '') {
+        window.location.replace('/stream');
+      }
+    </script>
 
 </head>
 <body>
 
-<h1 class="ui center aligned header">The API is <a href="http://dev.txtpen.com:5000/api/">up</a>.</h1>
+<div class="container">
 
-<div class="ui text container">
-  <div class="ui segments">
-    <div class="ui segment">
-    <img src="/assets/images/favicons/android-chrome-192x192.png"></p>
-    Locksmiths get less tip for being faster. There is a clever trick from Svbtle: artificial delay increases perceived value. By allowing user spending more time waiting, it makes the user feel more invested.
+
+   <style>
+   body {
+    font-family: Roboto, sans-serif;
+   }
+   a {
+    color: black;
+   }
+   .gradient {
+     background-image: linear-gradient(rgba(255, 255, 255, 0) -38%, rgb(255, 255, 255)), linear-gradient(70deg, rgb(247, 229, 152) 32%, rgb(172, 209, 239)); 
+   }
+
+   .signupBtn {
+    text-align: center;
+    width:100%;
+    display: inline-block;
+    background: white;
+    color: rgb(68, 68, 68);
+    border-radius: 5px;
+    border: thin solid rgb(136, 136, 136);
+    box-shadow: grey 1px 1px 1px;
+    white-space: nowrap;
+    margin-bottom:10px;
+   }
+   .row {
+    margin-top: 90px;
+    margin-bottom: 100px;
+   }
+   .container-fluid {
+        margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    max-width: 1170px;
+   }
+
+   .subtitle {
+    margin-top: 140px;
+   }
+
+   .footerLinks a{
+    margin-left: 10px;  
+   }
+   </style> 
+
+  <div class="row gradient" style="border-radius: 20px; padding: 40px">
+    <div class="col-md-8">
+      <img src="/assets/images/favicons/apple-icon.png">
+      <h1>Medium for non-Medium sites</h1>
+      <p style="font-size:13pt">Have a website? txtpen offers publishers the tools to generate heatmaps, increase engagement, &amp; earn new revenue.</p>
+      <div class="btn btn-primary">Tell me how</div>
     </div>
-    <div class="ui segment">
-    I'm rewriting the front-end in React. A lot of basic funtionality is broken.
+    <div class="col-md-4">
+    <div style="margin-top:100px; margin-left:10px;">
+      <a href="/login/google" class="signupBtn"><span style="background: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AIUABAvnjgNggAAApBJREFUWMPtlk9Ik3EYxz/v+7o2ndPV/JM5RZGWlGKpaEWGWZ4i6NAhb0EmQhARhXURpUM1gg558xBCHTooYR1MpA56CLJD+YeUlSljOLHNMbf2/+0warxIc7qllz2334/v+3y/7/f3/J7fI8iyLLOLIbLLkRaQFrDrAjK2+kFwbhbf6yFCCxbCNityMIBkyEdVfRR1cyt76o9vKZ+QaB8I25dxm3sJfv4U/4+qasjp6kEqKk6dgODsFK7uO8hrjoSSqmob0Jv7UiMgvLqCs70Ned2t2JeMpWRUmJAjEULf5onYrFEHDlaSa+5D1OWkpgbc5h4FuZhfQPaNLtQnmhQ4//h7fCPD6O72Jky+qQOycwLvs0t43xohLCIa8tA/6Uc6ULwztyCy/Bx1jQNp/y88Q+Vor15PKfmmDoQ+1IJnOiomZEB1zoogSQrMg2F/XIJTJommyoxt1oBvKXb2hkMbyAHGpkNxU2SriSvgv3fCQCiZW6ApAc9M1AzvApmRMJKodMG4T1D2jDDYXbFT1WuFJIpQV4/omWE+lMM9x2E6Fsc5X96swAx0ZinWryaDPB0N/F2XGsTtP0aRwjbe+Eq4ttaELaKl78sLrOv2f+JdXpnBj8FYhQMNFdL2BWjyWhjTXiFANMmqz0nnu27GbZMbsHPOBW6+/IHNGbP/bJVEbpaQXCte8f7k8sgt3EGPYr80uwjT3nIkQWTRbeOr8ztCRIPG3oHKW4dWDf3tmRTmisk/RlOr89yeeITD70qo8gv9F7l/uo1jZVJqBpLqPBMDrQ+pKziyKbZMV8zjCycTIt/SPPAnZh0WBi2jWFxLWNeX8YcDGDR6qgwmWoyNnDE2IgpialpxeihNC0gL2In4DW319gdMRvScAAAAAElFTkSuQmCC&quot;) 5px 50% no-repeat transparent; display: inline-block; vertical-align: middle; width: 42px; height: 42px;"></span><span style="display: inline-block; vertical-align: middle; font-size: 14px; font-weight: bold;">Sign up with Google</span></a>
+
+    <a href="/signup">
+      <input type="submit" value="Sign Up" style="margin-bottom:10px;width: 100%; height: 40px; display: inline-block; padding: 6px 12px; font-size: 14px; font-weight: 600; line-height: 20px; color: rgb(0, 0, 0, 0.65); white-space: nowrap; vertical-align: middle; cursor: pointer; background-color: rgb(238, 238, 238); background-image: linear-gradient(rgba(255, 255, 255, 0) -38%, rgb(255, 255, 255)), linear-gradient(70deg, rgb(255, 218, 62) 32%, rgb(43, 160, 255)); border: thin solid rgb(92, 169, 65); border-radius: 3px; -webkit-appearance: none; box-shadow: grey 1px 1px 1px; position: relative;">
+      
+    </a>
+    <div style="width:100%;text-align:center;">Already have an account? <a href="/login">Log in</a>.</div>
+
+    </div>
     </div>
   </div>
-</div>
-  <script async src="/embed.js"></script>
 
+  <div class="row">
+    <div class="col-md-8">
+      <img style="width:100%;border-radius: 10px 0px 0px 0px" src="/assets/images/discovery.png" alt="txtpen discovers">
+    </div>
+    <div class="col-md-4">
+      <h1 class="subtitle">
+        Discover
+      </h1>
+      <p>
+        We built txtpen for you. Discover what like-minded people are reading. Only highlights, no dross, of course.
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <h1 style="float:right;" class="subtitle">
+        Comment
+      </h1>
+      <p style="float:right;text-align:right;">
+        Bring your expertise to the discussion.
+        With txtpen, you can discuss “between the lines” with other enthusiastic readers.
+      </p>
+    </div>
+    <div class="col-md-8">
+      <img style="width:100%;border-radius: 0px" src="/assets/images/elephant.png" alt="txtpen collects">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <img style="width:100%;border-radius: 0px 0px 0px 10px" src="/assets/images/annotation.png" alt="txtpen discovers">
+    </div>
+    <div class="col-md-4">
+      <h1 class="subtitle">
+        Extract
+      </h1>
+      <p>
+        Most people have the habit of selecting text when reading articles online.
+      </p>
+      <p>
+        txtpen shows you the key info, most highlighted and discussed areas based on anonymous browsing data
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h1>Add txtpen to your blog in 3 simple steps</h1>
+
+      <h4>1. In your template file, add </p><code>&lt;script src=&quot;https://txtpen.com/embed.js&quot;/&gt;</code> </p>to the bottom of the page. </h4>
+      <h4>2. Define where you want users to highlight. For example, if the text is under the #main node, you can write </p><code>window.txtpenLimits = ['#main']</code></p>To disable txtpen, use </p><code>window.txtpenLimits = ['']</code> </h4>
+      <h4>3. Register on <a style="color:orange" href="/login">Dashboard</a> and claim your site.</h4>
+    </div>
+  </div>
+  <div class="row">
+  <div class="offset-md-4 col-md-4">
+    <a href="/login/google" class="signupBtn"><span style="background: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AIUABAvnjgNggAAApBJREFUWMPtlk9Ik3EYxz/v+7o2ndPV/JM5RZGWlGKpaEWGWZ4i6NAhb0EmQhARhXURpUM1gg558xBCHTooYR1MpA56CLJD+YeUlSljOLHNMbf2/+0warxIc7qllz2334/v+3y/7/f3/J7fI8iyLLOLIbLLkRaQFrDrAjK2+kFwbhbf6yFCCxbCNityMIBkyEdVfRR1cyt76o9vKZ+QaB8I25dxm3sJfv4U/4+qasjp6kEqKk6dgODsFK7uO8hrjoSSqmob0Jv7UiMgvLqCs70Ned2t2JeMpWRUmJAjEULf5onYrFEHDlaSa+5D1OWkpgbc5h4FuZhfQPaNLtQnmhQ4//h7fCPD6O72Jky+qQOycwLvs0t43xohLCIa8tA/6Uc6ULwztyCy/Bx1jQNp/y88Q+Vor15PKfmmDoQ+1IJnOiomZEB1zoogSQrMg2F/XIJTJommyoxt1oBvKXb2hkMbyAHGpkNxU2SriSvgv3fCQCiZW6ApAc9M1AzvApmRMJKodMG4T1D2jDDYXbFT1WuFJIpQV4/omWE+lMM9x2E6Fsc5X96swAx0ZinWryaDPB0N/F2XGsTtP0aRwjbe+Eq4ttaELaKl78sLrOv2f+JdXpnBj8FYhQMNFdL2BWjyWhjTXiFANMmqz0nnu27GbZMbsHPOBW6+/IHNGbP/bJVEbpaQXCte8f7k8sgt3EGPYr80uwjT3nIkQWTRbeOr8ztCRIPG3oHKW4dWDf3tmRTmisk/RlOr89yeeITD70qo8gv9F7l/uo1jZVJqBpLqPBMDrQ+pKziyKbZMV8zjCycTIt/SPPAnZh0WBi2jWFxLWNeX8YcDGDR6qgwmWoyNnDE2IgpialpxeihNC0gL2In4DW319gdMRvScAAAAAElFTkSuQmCC&quot;) 5px 50% no-repeat transparent; display: inline-block; vertical-align: middle; width: 42px; height: 42px;"></span><span style="display: inline-block; vertical-align: middle; font-size: 14px; font-weight: bold;">Sign up with Google</span></a>
+  </div>
+  </div>
+
+</div>
+
+<hr>
+    <div style=" bottom: 0; left: 0; width: 100%; font-size: 12px; min-height: 30px; line-height: 80px; text-align: left; color: #666;
+    ">
+      <div class="container-fluid footerLinks">
+          <a href="/about">About</a>
+          <a href="/help">Help</a>
+          <a href="/developer">Developer</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/copyright">Copyright</a>
+          <a href="http://blog.txtpen.com" target="_blank">Blog</a>
+          <a href="http://twitter.com/txtpen">Twitter</a>
+          <div class="copyright">
+              © 2016 txtpen holdings, inc.
+          </div>
+      </div>
+    </div>
+
+
+
+<script>window.txtpenLimits = ['']</script>
+<script async src="/embed.js"></script>
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
 
 </body></html>

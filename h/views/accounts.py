@@ -174,14 +174,13 @@ class AuthController(object):
 
 @view_config(route_name="assigntoken")
 def successcallback(request):
-    print generate_jwt(request, 3600)
     return Response('''
         <html>
             <script>
                 localStorage.setItem('token','{}');
                 window.location.href = "{}";
             </script>
-        </html>'''.format(generate_jwt(request, 3600), request.route_url('stream')))
+        </html>'''.format(generate_jwt(request, 43200), request.route_url('stream')))
 
 @view_config(route_name='logingoogle')
 def loginprovider(request):
