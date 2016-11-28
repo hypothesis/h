@@ -56,7 +56,7 @@ pyramid-layout==1.0
 pyramid-mailer==0.14.1
 pyramid-multiauth==0.8.0
 pyramid-services==0.4
-pyramid-tm==0.12.1
+pyramid-tm==1.1.1
 pyramid==1.7.3
 python-dateutil==2.5.3
 python-editor==1.0.1      # via alembic
@@ -68,7 +68,7 @@ repoze.sendmail==4.1
 six==1.10.0               # via bcrypt, bleach, cryptography, html5lib, python-dateutil
 SQLAlchemy==1.0.14        # via alembic, zope.sqlalchemy
 statsd==3.2.1
-transaction==1.6.1        # via pyramid-tm, repoze.sendmail, zope.sqlalchemy
+transaction==2.0.3        # via pyramid-tm, repoze.sendmail, zope.sqlalchemy
 translationstring==1.3    # via colander, deform, pyramid
 unicodecsv==0.14.1
 Unidecode==0.4.19         # via python-slugify
