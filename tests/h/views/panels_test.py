@@ -88,3 +88,21 @@ class TestNavbar(object):
     def req(self, pyramid_request):
         pyramid_request.authenticated_user = None
         return pyramid_request
+
+
+class TestBackLink(object):
+
+    def test_sets_back_location_from_referrer(self, pyramid_request):
+        pyramid_request.referrer = 'https://example.com/prev-page'
+
+        result = panels.back_link({}, pyramid_request)
+
+        assert result['back_location'] == 'https://example.com/prev-page'
+
+    def test_it_sets_back_label(self, pyramid_request):
+        pyramid_request.params['back_label'] = 'Back to your profile'
+        pyramid_request.referrer = None
+
+        result = panels.back_link({}, pyramid_request)
+
+        assert result['back_label'] == 'Back to your profile'

@@ -17,6 +17,21 @@ def group_invite(context, request, group_url):
     return {'group_url': group_url}
 
 
+@panel_config(name='back_link',
+              renderer='h:templates/panels/back_link.html.jinja2')
+def back_link(context, request):
+    """
+    A link which takes the user back to the previous page on the site.
+
+    The link is only displayed if the referring page sets a label via the
+    "back_label" query param.
+    """
+    return {
+        'back_label': request.params.get('back_label'),
+        'back_location': request.referrer,
+    }
+
+
 @panel_config(name='navbar', renderer='h:templates/panels/navbar.html.jinja2')
 def navbar(context, request, opts={}):
     """
