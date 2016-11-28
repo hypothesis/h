@@ -85,12 +85,16 @@ class Environment(object):
         Returns the URLs at which all files in a bundle are served,
         read from the asset manifest.
         """
-        manifest = self.manifest.load()
         bundles = self.bundles.load()
 
-        def asset_url(path):
-            return '{}/{}'.format(self.assets_base_url, manifest[path])
-        return [asset_url(path) for path in bundles[bundle]]
+        return [self.url(path) for path in bundles[bundle]]
+
+    def url(self, path):
+        """
+        Return the cache-busted URL for an asset with a given path.
+        """
+        manifest = self.manifest.load()
+        return '{}/{}'.format(self.assets_base_url, manifest[path])
 
 
 def _add_cors_header(wrapped):

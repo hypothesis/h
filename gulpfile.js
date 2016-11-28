@@ -208,7 +208,7 @@ gulp.task('watch-images', function () {
   gulp.watch(imageFiles, ['build-images']);
 });
 
-var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
+var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/**/*.*';
 
 /**
  * Generate a JSON manifest mapping file paths to

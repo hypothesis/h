@@ -58,6 +58,14 @@ def test_environment_generates_bundle_urls(mtime):
     ]
 
 
+@patch(open_target, _fake_open)
+@patch('os.path.getmtime')
+def test_environment_url_returns_cache_busted_url(mtime):
+    env = Environment('/assets', 'bundles.ini', 'manifest.json')
+
+    assert env.url('app.bundle.js') == '/assets/app.bundle.js?abcdef'
+
+
 @patch(open_target)
 @patch('os.path.getmtime')
 def test_environment_reloads_manifest_on_change(mtime, open):

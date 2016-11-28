@@ -10,7 +10,7 @@
           font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
           font-weight: 300;
           color: #585858;
-          background: #fff url(/assets/images/noise_1.png);
+          background: #fff url({{ asset_url('images/noise_1.png') }});
         }
 
         h1 {
@@ -58,7 +58,7 @@
   </head>
   <body>
   <main class="content paper styled-text page">
-    <img id="graphic" src="/assets/images/sad-annotation.svg" />
+    <img id="graphic" src="{{ asset_url('images/sad-annotation.svg') }}" />
     <h1>Uh-oh, something went wrong!</h1>
     <p>We&rsquo;re very sorry, our application wasn&rsquo;t able to load this page. The
        team has been notified and we&rsquo;ll&nbsp;fix&nbsp;it&nbsp;shortly.</p>
