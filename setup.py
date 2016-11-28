@@ -38,10 +38,9 @@ INSTALL_REQUIRES = [
     'psycopg2>=2.6.1,<2.7',
     'pyparsing>=2.1.5,<2.2',
     'pyramid-services==0.4',
-    'pyramid>=1.6,<1.7',
+    'pyramid>=1.7,<1.8',
     'python-dateutil>=2.1',
     'transaction',
-    'zope.interface==4.2.0',
 ]
 EXTRAS_REQUIRE = {}
 ENTRY_POINTS = {}
