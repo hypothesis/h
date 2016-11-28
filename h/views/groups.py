@@ -118,7 +118,7 @@ class GroupEditController(object):
              has_permission='read')
 def read(group, request):
     """Group view for logged-in users."""
-    _check_slug(group, request)
+    check_slug(group, request)
 
     # Redirect to new group overview page if search page is enabled
     if request.feature('search_page'):
@@ -141,7 +141,7 @@ def read(group, request):
              renderer='h:templates/groups/join.html.jinja2')
 def read_unauthenticated(group, request):
     """Group view for logged-out users, allowing them to join the group."""
-    _check_slug(group, request)
+    check_slug(group, request)
     return {'group': group}
 
 
@@ -158,7 +158,7 @@ class GroupJoinController(object):
 
     @view_config(request_method='GET')
     def get(self):
-        _check_slug(self.group, self.request)
+        check_slug(self.group, self.request)
         return {'group': self.group}
 
     @view_config(request_method='POST')
@@ -175,7 +175,7 @@ class GroupJoinController(object):
 
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read_noslug(group, request):
-    _check_slug(group, request)
+    check_slug(group, request)
 
 
 @view_config(route_name='group_leave',
@@ -189,7 +189,7 @@ def leave(group, request):
     return HTTPNoContent()
 
 
-def _check_slug(group, request):
+def check_slug(group, request):
     """Redirect if the request slug does not match that of the group."""
     slug = request.matchdict.get('slug')
     if slug is None or slug != group.slug:

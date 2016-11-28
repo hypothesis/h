@@ -19,6 +19,7 @@ from h.links import pretty_link
 from h.paginator import paginate
 from h import util
 from h.util.user import split_user
+from h.views.groups import check_slug
 
 
 PAGE_SIZE = 200
@@ -103,6 +104,8 @@ class GroupSearchController(SearchController):
 
     @view_config(request_method='GET')
     def search(self):
+        check_slug(self.group, self.request)
+
         result = super(GroupSearchController, self).search()
 
         result['opts'] = {'search_groupname': self.group.name}
