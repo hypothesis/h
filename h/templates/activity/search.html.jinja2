@@ -46,7 +46,7 @@
   {% endif %}
   {% if bucket.tags %}
     <div class="search-bucket-stats__key">
-      {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__icon') }}
+      {{ svg_icon('tag', css_class='search-bucket-stats__icon') }}
       {% trans %}Tags{% endtrans %}
     </div>
     <ul class="search-bucket-stats__val">
@@ -70,7 +70,7 @@
   </ul>
   {% if bucket.uri %}
     <div class="search-bucket-stats__key">
-      {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__icon') }}
+      {{ svg_icon('link', css_class='search-bucket-stats__icon') }}
       {% trans %}URL{% endtrans %}
     </div>
     <div class="search-bucket-stats__val search-bucket-stats__url">
