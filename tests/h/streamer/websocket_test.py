@@ -150,9 +150,7 @@ class TestHandleMessage(object):
 
         websocket.handle_message(message)
 
-        unknown_handler.assert_called_once_with(socket,
-                                                {"foo": "bar"},
-                                                session=None)
+        unknown_handler.assert_called_once_with(message, session=None)
 
     def test_uses_unknown_handler_for_unknown_type(self, unknown_handler):
         """If the type is unknown, call the `None` handler."""
@@ -162,10 +160,7 @@ class TestHandleMessage(object):
 
         websocket.handle_message(message)
 
-        unknown_handler.assert_called_once_with(socket,
-                                                {"type": "donkeys",
-                                                 "foo": "bar"},
-                                                session=None)
+        unknown_handler.assert_called_once_with(message, session=None)
 
     def test_uses_appropriate_handler_for_known_type(self, foo_handler):
         """If the type is recognised, call the relevant handler."""
@@ -175,9 +170,7 @@ class TestHandleMessage(object):
 
         websocket.handle_message(message)
 
-        foo_handler.assert_called_once_with(socket,
-                                            {"type": "foo", "foo": "bar"},
-                                            session=None)
+        foo_handler.assert_called_once_with(message, session=None)
 
     @pytest.fixture
     def foo_handler(self):
@@ -201,12 +194,12 @@ class TestHandleMessage(object):
 def test_handle_client_id_message_sets_socket_client_id_for_client_id_messages():
     socket = mock.Mock()
     socket.client_id = None
-    payload = {
+    message = websocket.Message(socket=socket, payload={
         'messageType': 'client_id',
         'value': 'abcd1234',
-    }
+    })
 
-    websocket.handle_client_id_message(socket, payload)
+    websocket.handle_client_id_message(message)
 
     assert socket.client_id == 'abcd1234'
 
@@ -214,7 +207,7 @@ def test_handle_client_id_message_sets_socket_client_id_for_client_id_messages()
 def test_handle_message_sets_socket_filter_for_filter_messages():
     socket = mock.Mock()
     socket.filter = None
-    payload = {
+    message = websocket.Message(socket=socket, payload={
         'filter': {
             'actions': {},
             'match_policy': 'include_all',
@@ -224,9 +217,9 @@ def test_handle_message_sets_socket_filter_for_filter_messages():
                 'value': 'http://example.com',
             }],
         }
-    }
+    })
 
-    websocket.handle_filter_message(socket, payload)
+    websocket.handle_filter_message(message)
 
     assert socket.filter is not None
 
@@ -239,7 +232,7 @@ def test_handle_filter_message_expands_uris_in_uri_filter_with_session(expand_ur
     session = mock.sentinel.db_session
     socket = mock.Mock()
     socket.filter = None
-    payload = {
+    message = websocket.Message(socket=socket, payload={
         'filter': {
             'actions': {},
             'match_policy': 'include_all',
@@ -249,9 +242,9 @@ def test_handle_filter_message_expands_uris_in_uri_filter_with_session(expand_ur
                 'value': 'http://example.com',
             }],
         }
-    }
+    })
 
-    websocket.handle_filter_message(socket, payload, session=session)
+    websocket.handle_filter_message(message, session=session)
 
     uri_filter = socket.filter.filter['clauses'][0]
     uri_values = uri_filter['value']
@@ -267,7 +260,7 @@ def test_handle_message_expands_uris_using_passed_session(expand_uri):
     session = mock.sentinel.db_session
     socket = mock.Mock()
     socket.filter = None
-    payload = {
+    message = websocket.Message(socket=socket, payload={
         'filter': {
             'actions': {},
             'match_policy': 'include_all',
@@ -277,8 +270,8 @@ def test_handle_message_expands_uris_using_passed_session(expand_uri):
                 'value': 'http://example.com',
             }],
         }
-    }
+    })
 
-    websocket.handle_filter_message(socket, payload, session=session)
+    websocket.handle_filter_message(message, session=session)
 
     expand_uri.assert_called_once_with(session, 'http://example.com')
