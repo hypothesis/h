@@ -13,84 +13,89 @@ from h.streamer import websocket
 FakeMessage = namedtuple('FakeMessage', ['data'])
 
 
-def test_websocket_stores_instance_list(fake_environ):
-    socket = mock.Mock()
-    clients = [
-        websocket.WebSocket(socket, environ=fake_environ),
-        websocket.WebSocket(socket, environ=fake_environ)
-    ]
+class TestWebSocket(object):
+    def test_stores_instance_list(self, fake_environ):
+        clients = [
+            websocket.WebSocket(mock.sentinel.sock1, environ=fake_environ),
+            websocket.WebSocket(mock.sentinel.sock2, environ=fake_environ)
+        ]
 
-    for c in clients:
-        assert c in websocket.WebSocket.instances
+        for c in clients:
+            assert c in websocket.WebSocket.instances
 
+    def test_removes_self_from_instance_list_when_closed(self, fake_environ):
+        client1 = websocket.WebSocket(mock.sentinel.sock1, environ=fake_environ)
+        client2 = websocket.WebSocket(mock.sentinel.sock2, environ=fake_environ)
 
-def test_websocket_removes_self_from_instance_list_when_closed(fake_environ):
-    socket = mock.Mock()
-    client1 = websocket.WebSocket(socket, environ=fake_environ)
-    client2 = websocket.WebSocket(socket, environ=fake_environ)
+        assert len(websocket.WebSocket.instances) == 2
+        client1.closed(1000)
+        assert client1 not in websocket.WebSocket.instances
+        client2.closed(1000)
+        assert client2 not in websocket.WebSocket.instances
 
-    assert len(websocket.WebSocket.instances) == 2
-    client1.closed(1000)
-    assert client1 not in websocket.WebSocket.instances
-    client2.closed(1000)
-    assert client2 not in websocket.WebSocket.instances
+        # A second closure (however unusual) should not raise
+        client1.closed(1000)
 
-    # A second closure (however unusual) should not raise
-    client1.closed(1000)
+    def test_enqueues_incoming_messages(self, client, fake_environ):
+        message = FakeMessage('client data')
+        queue = fake_environ['h.ws.streamer_work_queue']
 
+        client.received_message(message)
+        result = queue.get_nowait()
 
-def test_socket_enqueues_incoming_messages(fake_environ):
-    socket = mock.Mock()
-    client = websocket.WebSocket(socket, environ=fake_environ)
-    message = FakeMessage('client data')
-    queue = fake_environ['h.ws.streamer_work_queue']
+        assert result.socket == client
+        assert result.payload == 'client data'
 
-    client.received_message(message)
-    result = queue.get_nowait()
+    def test_socket_sets_auth_data_from_environ(self, client):
+        assert client.authenticated_userid == 'janet'
+        assert client.effective_principals == [
+            security.Everyone,
+            security.Authenticated,
+            'group:__world__',
+        ]
 
-    assert result.socket == client
-    assert result.payload == 'client data'
+    def test_socket_sets_registry_from_environ(self, client):
+        assert client.registry == mock.sentinel.registry
 
+    def test_socket_send_json(self, client, fake_socket_send):
+        payload = {'foo': 'bar'}
 
-def test_socket_sets_auth_data_from_environ(fake_environ):
-    socket = mock.Mock()
-    client = websocket.WebSocket(socket, environ=fake_environ)
+        client.send_json(payload)
 
-    assert client.authenticated_userid == 'janet'
-    assert client.effective_principals == [
-        security.Everyone,
-        security.Authenticated,
-        'group:__world__',
-    ]
+        fake_socket_send.assert_called_once_with(client, '{"foo": "bar"}')
 
+    def test_socket_send_json_skips_when_terminated(self,
+                                                    client,
+                                                    fake_socket_send,
+                                                    fake_socket_terminated):
+        fake_socket_terminated.return_value = True
 
-def test_socket_sets_registry_from_environ(fake_environ):
-    socket = mock.Mock()
-    client = websocket.WebSocket(socket, environ=fake_environ)
+        client.send_json({'foo': 'bar'})
 
-    assert client.registry == mock.sentinel.registry
+        assert not fake_socket_send.called
 
+    @pytest.fixture
+    def client(self, fake_environ):
+        return websocket.WebSocket(mock.sentinel.sock, environ=fake_environ)
 
-def test_socket_send_json(fake_environ, fake_json, fake_socket_send):
-    socket = mock.Mock()
-    client = websocket.WebSocket(socket, environ=fake_environ)
+    @pytest.fixture
+    def fake_environ(self):
+        return {
+            'h.ws.authenticated_userid': 'janet',
+            'h.ws.effective_principals': [security.Everyone,
+                                          security.Authenticated,
+                                          'group:__world__'],
+            'h.ws.registry': mock.sentinel.registry,
+            'h.ws.streamer_work_queue': Queue(),
+        }
 
-    payload = {'foo': 'bar'}
-    client.send_json(payload)
+    @pytest.fixture
+    def fake_socket_send(self, patch):
+        return patch('h.streamer.websocket.WebSocket.send')
 
-    fake_json.dumps.assert_called_once_with(payload)
-    fake_socket_send.assert_called_once_with(client, fake_json.dumps.return_value)
-
-
-def test_socket_send_json_skips_when_terminated(fake_environ, fake_json, fake_socket_send, fake_socket_terminated):
-    socket = mock.Mock()
-    client = websocket.WebSocket(socket, environ=fake_environ)
-
-    fake_socket_terminated.return_value = True
-    client.send_json({'foo': 'bar'})
-
-    assert not fake_json.dumps.called
-    assert not fake_socket_send.called
+    @pytest.fixture
+    def fake_socket_terminated(self, patch):
+        return patch('h.streamer.websocket.WebSocket.terminated')
 
 
 @pytest.mark.usefixtures('handlers')
@@ -242,30 +247,3 @@ def test_handle_message_expands_uris_using_passed_session(expand_uri):
     websocket.handle_filter_message(socket, payload, session=session)
 
     expand_uri.assert_called_once_with(session, 'http://example.com')
-
-
-@pytest.fixture
-def fake_environ():
-    return {
-        'h.ws.authenticated_userid': 'janet',
-        'h.ws.effective_principals': [security.Everyone,
-                                      security.Authenticated,
-                                      'group:__world__',],
-        'h.ws.registry': mock.sentinel.registry,
-        'h.ws.streamer_work_queue': Queue(),
-    }
-
-
-@pytest.fixture
-def fake_json(patch):
-    return patch('h.streamer.websocket.json')
-
-
-@pytest.fixture
-def fake_socket_send(patch):
-    return patch('h.streamer.websocket.WebSocket.send')
-
-
-@pytest.fixture
-def fake_socket_terminated(patch):
-    return patch('h.streamer.websocket.WebSocket.terminated')
