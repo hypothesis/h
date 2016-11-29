@@ -144,8 +144,7 @@ class GroupSearchController(SearchController):
 
         if self.request.has_permission('admin', group):
             result['group_edit_url'] = self.request.route_url('group_edit',
-                pubid=pubid,
-                _query={'back_label': _('Back to group overview page')})
+                                                              pubid=pubid)
 
         result['more_info'] = 'more_info' in self.request.params
 
@@ -268,8 +267,7 @@ class UserSearchController(SearchController):
 
         if self.request.authenticated_user == user:
             result['user']['edit_url'] = self.request.route_url(
-                'account_profile',
-                _query={'back_label': _('Back to your profile')})
+                'account_profile')
 
         if not result.get('q'):
             if self.request.authenticated_user == user:
