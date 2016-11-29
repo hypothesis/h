@@ -101,24 +101,24 @@ def handle_message(message, session=None):
     # N.B. MESSAGE_HANDLERS[None] handles both incorrect and missing message
     # types.
     handler = MESSAGE_HANDLERS.get(type_, MESSAGE_HANDLERS[None])
-    handler(message.socket, payload, session=session)
+    handler(message, session=session)
 
 
-def handle_client_id_message(socket, payload, session=None):
+def handle_client_id_message(message, session=None):
     """A client telling us its client ID."""
-    if 'value' not in payload:
+    if 'value' not in message.payload:
         # FIXME: send an error message to the client
         return
-    socket.client_id = payload['value']
+    message.socket.client_id = message.payload['value']
 MESSAGE_HANDLERS['client_id'] = handle_client_id_message
 
 
-def handle_filter_message(socket, payload, session=None):
+def handle_filter_message(message, session=None):
     """A client updating its streamer filter."""
-    if 'filter' not in payload:
+    if 'filter' not in message.payload:
         # FIXME: send an error message to the client
         return
-    filter_ = payload['filter']
+    filter_ = message.payload['filter']
     try:
         jsonschema.validate(filter_, filter.SCHEMA)
     except jsonschema.ValidationError:
@@ -127,11 +127,11 @@ def handle_filter_message(socket, payload, session=None):
     if session is not None:
         # Add backend expands for clauses
         _expand_clauses(session, filter_)
-    socket.filter = filter.FilterHandler(filter_)
+    message.socket.filter = filter.FilterHandler(filter_)
 MESSAGE_HANDLERS['filter'] = handle_filter_message
 
 
-def handle_unknown_message(socket, payload, session=None):
+def handle_unknown_message(message, session=None):
     """Message type missing or not recognised."""
     # FIXME: send an error message to the client
 MESSAGE_HANDLERS[None] = handle_unknown_message
