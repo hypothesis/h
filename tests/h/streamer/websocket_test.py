@@ -36,15 +36,48 @@ class TestWebSocket(object):
         # A second closure (however unusual) should not raise
         client1.closed(1000)
 
-    def test_enqueues_incoming_messages(self, client, fake_environ):
-        message = FakeMessage('client data')
-        queue = fake_environ['h.ws.streamer_work_queue']
+    def test_enqueues_incoming_messages(self, client, queue):
+        """Valid messages are pushed onto the queue."""
+        message = FakeMessage('{"foo":"bar"}')
+
+        client.received_message(message)
+        result = queue.get_nowait()
+
+        assert result
+
+    def test_enqueued_message_has_reference_to_client(self, client, queue):
+        """Valid messages should have a backreference to the instance."""
+        message = FakeMessage('{"foo":"bar"}')
 
         client.received_message(message)
         result = queue.get_nowait()
 
         assert result.socket == client
-        assert result.payload == 'client data'
+
+    def test_enqueued_message_has_parsed_payload(self, client, queue):
+        """Valid messages should have a parsed payload."""
+        message = FakeMessage('{"foo":"bar"}')
+
+        client.received_message(message)
+        result = queue.get_nowait()
+
+        assert result.payload == {'foo': 'bar'}
+
+    def test_invalid_incoming_message_not_queued(self, client, queue):
+        """Invalid messages should not end up on the queue."""
+        message = FakeMessage('{"foo":missingquotes}')
+
+        client.received_message(message)
+
+        assert queue.empty()
+
+    def test_invalid_incoming_message_closes_connection(self, client, queue, fake_socket_close):
+        """Invalid messages should cause termination of the connection."""
+        message = FakeMessage('{"foo":missingquotes}')
+
+        client.received_message(message)
+
+        fake_socket_close.assert_called_once_with(client, reason='invalid message format')
 
     def test_socket_sets_auth_data_from_environ(self, client):
         assert client.authenticated_userid == 'janet'
@@ -76,18 +109,27 @@ class TestWebSocket(object):
 
     @pytest.fixture
     def client(self, fake_environ):
-        return websocket.WebSocket(mock.sentinel.sock, environ=fake_environ)
+        sock = mock.Mock(spec_set=['sendall'])
+        return websocket.WebSocket(sock, environ=fake_environ)
 
     @pytest.fixture
-    def fake_environ(self):
+    def queue(self):
+        return Queue()
+
+    @pytest.fixture
+    def fake_environ(self, queue):
         return {
             'h.ws.authenticated_userid': 'janet',
             'h.ws.effective_principals': [security.Everyone,
                                           security.Authenticated,
                                           'group:__world__'],
             'h.ws.registry': mock.sentinel.registry,
-            'h.ws.streamer_work_queue': Queue(),
+            'h.ws.streamer_work_queue': queue,
         }
+
+    @pytest.fixture
+    def fake_socket_close(self, patch):
+        return patch('h.streamer.websocket.WebSocket.close')
 
     @pytest.fixture
     def fake_socket_send(self, patch):
@@ -101,19 +143,10 @@ class TestWebSocket(object):
 @pytest.mark.usefixtures('handlers')
 class TestHandleMessage(object):
 
-    def test_closes_connection_for_invalid_json(self):
-        """If we receive invalid JSON, we close the connection."""
-        socket = mock.Mock(spec_set=['close'])
-        message = websocket.Message(socket, payload='gibberish')
-
-        websocket.handle_message(message)
-
-        socket.close.assert_called_once_with(reason='invalid message format')
-
     def test_uses_unknown_handler_for_missing_type(self, unknown_handler):
         """If the type is missing, call the `None` handler."""
         socket = mock.Mock(spec_set=['close'])
-        message = websocket.Message(socket, payload='{"foo":"bar"}')
+        message = websocket.Message(socket, payload={"foo": "bar"})
 
         websocket.handle_message(message)
 
@@ -124,7 +157,8 @@ class TestHandleMessage(object):
     def test_uses_unknown_handler_for_unknown_type(self, unknown_handler):
         """If the type is unknown, call the `None` handler."""
         socket = mock.Mock(spec_set=['close'])
-        message = websocket.Message(socket, payload='{"type":"donkeys","foo":"bar"}')
+        message = websocket.Message(socket, payload={"type": "donkeys",
+                                                     "foo": "bar"})
 
         websocket.handle_message(message)
 
@@ -136,7 +170,8 @@ class TestHandleMessage(object):
     def test_uses_appropriate_handler_for_known_type(self, foo_handler):
         """If the type is recognised, call the relevant handler."""
         socket = mock.Mock(spec_set=['close'])
-        message = websocket.Message(socket, payload='{"type":"foo","foo":"bar"}')
+        message = websocket.Message(socket, payload={"type": "foo",
+                                                     "foo": "bar"})
 
         websocket.handle_message(message)
 

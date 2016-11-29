@@ -52,7 +52,12 @@ class WebSocket(_WebSocket):
 
     def received_message(self, msg):
         try:
-            self._work_queue.put(Message(socket=self, payload=msg.data),
+            payload = json.loads(msg.data)
+        except ValueError:
+            self.close(reason='invalid message format')
+            return
+        try:
+            self._work_queue.put(Message(socket=self, payload=payload),
                                  timeout=0.1)
         except Full:
             log.warn('Streamer work queue full! Unable to queue message from '
@@ -83,27 +88,20 @@ def handle_message(message, session=None):
     It may also passed a database session which *must* be used for any
     communication with the database.
     """
-    socket = message.socket
-
-    try:
-        data = json.loads(message.payload)
-    except ValueError:
-        socket.close(reason='invalid message format')
-        return
-
-    type_ = data.get('type')
+    payload = message.payload
+    type_ = payload.get('type')
 
     # FIXME: This code is here to tolerate old and deprecated message formats.
     if type_ is None:
-        if 'messageType' in data and data['messageType'] == 'client_id':
+        if 'messageType' in payload and payload['messageType'] == 'client_id':
             type_ = 'client_id'
-        if 'filter' in data:
+        if 'filter' in payload:
             type_ = 'filter'
 
     # N.B. MESSAGE_HANDLERS[None] handles both incorrect and missing message
     # types.
     handler = MESSAGE_HANDLERS.get(type_, MESSAGE_HANDLERS[None])
-    handler(socket, data, session=session)
+    handler(message.socket, payload, session=session)
 
 
 def handle_client_id_message(socket, payload, session=None):
