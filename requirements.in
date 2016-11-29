@@ -10,6 +10,7 @@ cryptography
 deform < 1.0
 deform-jinja2
 elasticsearch < 2.0.0
+enum34
 gevent
 gunicorn
 itsdangerous

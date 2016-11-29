@@ -23,7 +23,7 @@ cryptography==1.4
 deform-jinja2==0.5
 deform==0.9.9
 elasticsearch==1.9.0
-enum34==1.1.6             # via cryptography
+enum34==1.1.6
 functools32==3.2.3.post2  # via jsonschema
 gevent==1.1.2
 greenlet==0.4.10          # via gevent
