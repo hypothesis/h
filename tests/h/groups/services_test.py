@@ -6,6 +6,7 @@ import mock
 import pytest
 
 from h.models import Group
+from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.groups.services import GroupsService
 from h.groups.services import groups_factory
 
@@ -52,6 +53,31 @@ class TestGroupsService(object):
         group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert group.description is None
+
+    @pytest.mark.parametrize('group_type,flag,expected_value', [
+        ('private', 'joinable_by', JoinableBy.authority),
+        ('private', 'readable_by', ReadableBy.members),
+        ('private', 'writeable_by', WriteableBy.members),
+        ('publisher', 'joinable_by', None),
+        ('publisher', 'readable_by', ReadableBy.world),
+        ('publisher', 'writeable_by', WriteableBy.authority)])
+    def test_create_sets_access_flags_for_group_types(self,
+                                                      db_session,
+                                                      users,
+                                                      group_type,
+                                                      flag,
+                                                      expected_value):
+        svc = GroupsService(db_session, users.get)
+
+        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_=group_type)
+
+        assert getattr(group, flag) == expected_value
+
+    def test_create_raises_for_invalid_group_type(self, db_session, users):
+        svc = GroupsService(db_session, users.get)
+
+        with pytest.raises(ValueError):
+            svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='foo')
 
     def test_create_adds_group_to_session(self, db_session, users):
         svc = GroupsService(db_session, users.get)
