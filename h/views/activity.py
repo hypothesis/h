@@ -247,8 +247,6 @@ class UserSearchController(SearchController):
         if not user:
             return result
 
-        result['opts']['search_username'] = user.display_name or user.username
-
         def domain(user):
             if not user.uri:
                 return None
