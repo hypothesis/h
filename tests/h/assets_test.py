@@ -4,6 +4,7 @@ from sys import version_info
 from StringIO import StringIO
 
 from mock import patch
+import pytest
 
 from h.assets import Environment
 
@@ -66,9 +67,10 @@ def test_environment_url_returns_cache_busted_url(mtime):
     assert env.url('app.bundle.js') == '/assets/app.bundle.js?abcdef'
 
 
+@pytest.mark.parametrize('auto_reload', [True, False])
 @patch(open_target)
 @patch('os.path.getmtime')
-def test_environment_reloads_manifest_on_change(mtime, open):
+def test_environment_reloads_manifest_on_change(mtime, open, auto_reload):
     manifest_content = '{"app.bundle.js":"app.bundle.js?oldhash"}'
     bundle_content = '[bundles]\napp_js = \n  app.bundle.js'
 
@@ -80,7 +82,8 @@ def test_environment_reloads_manifest_on_change(mtime, open):
 
     open.side_effect = _fake_open
     mtime.return_value = 100
-    env = Environment('/assets', 'bundles.ini', 'manifest.json')
+    env = Environment('/assets', 'bundles.ini', 'manifest.json',
+                      auto_reload=auto_reload)
 
     # An initial call to urls() should read and cache the manifest
     env.urls('app_js')
@@ -91,4 +94,8 @@ def test_environment_reloads_manifest_on_change(mtime, open):
     # Once the manifest's mtime changes, the Environment should re-read
     # the manifest
     mtime.return_value = 101
-    assert env.urls('app_js') == ['/assets/app.bundle.js?newhash']
+
+    if auto_reload:
+        assert env.urls('app_js') == ['/assets/app.bundle.js?newhash']
+    else:
+        assert env.urls('app_js') == ['/assets/app.bundle.js?oldhash']

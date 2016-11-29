@@ -2,7 +2,7 @@
 import os
 
 import json
-from pyramid.settings import aslist
+from pyramid.settings import asbool, aslist
 from pyramid.static import static_view
 
 from h._compat import configparser
@@ -11,31 +11,37 @@ from h._compat import configparser
 class _CachedFile(object):
 
     """
-    Parses content from a file and caches the result until the file changes.
+    Parses content from a file and caches the result.
 
     _CachedFile reads a file at a given path and parses the content using a
-    provided loader. The result is cached until the mtime of the file changes.
+    provided loader.
     """
 
-    def __init__(self, path, loader):
+    def __init__(self, path, loader, auto_reload=False):
         """
         :param path: The path to the file to load.
         :param loader: A callable that will be passed the file object and
                        should return the parsed content.
+        :param auto_reload: If True, the parsed content is discarded if the
+                            mtime of the file changes.
         """
         self.path = path
         self.loader = loader
         self._mtime = None
         self._cached = None
+        self._auto_reload = auto_reload
 
     def load(self):
         """
         Return the current content of the file parsed with the loader.
 
-        If the file has not been loaded or has changed since the last call
-        to load(), it will be reloaded, otherwise the cached content will
-        be returned.
+        The file is loaded using the provided loader when this is called the
+        first time or if auto-reload is enabled and the file changed since the
+        last call to ``load()``.
         """
+        if self._mtime and not self._auto_reload:
+            return self._cached
+
         current_mtime = os.path.getmtime(self.path)
         if not self._mtime or self._mtime < current_mtime:
             self._cached = self.loader(open(self.path))
@@ -59,7 +65,8 @@ class Environment(object):
     URLs for a bundle via the urls() method.
     """
 
-    def __init__(self, assets_base_url, bundle_config_path, manifest_path):
+    def __init__(self, assets_base_url, bundle_config_path, manifest_path,
+                 auto_reload=False):
         """
         Construct an Environment from the given configuration files.
 
@@ -68,10 +75,14 @@ class Environment(object):
         :param bundle_config_path: Asset bundles config file.
         :param manifest_path: JSON file mapping file paths in the bundle config
                               file to cache-busted URLs.
+        :param auto_reload: If True the config and manifest files are
+                            automatically reloaded if they change.
         """
         self.assets_base_url = assets_base_url
-        self.manifest = _CachedFile(manifest_path, json.load)
-        self.bundles = _CachedFile(bundle_config_path, _load_bundles)
+        self.manifest = _CachedFile(manifest_path, json.load,
+                                    auto_reload=auto_reload)
+        self.bundles = _CachedFile(bundle_config_path, _load_bundles,
+                                   auto_reload=auto_reload)
 
     def files(self, bundle):
         """Return the file paths for all files in a bundle."""
@@ -137,15 +148,19 @@ assets_client_view = _add_cors_header(assets_client_view)
 
 
 def includeme(config):
+    auto_reload = asbool(config.registry.settings.get('h.reload_assets', False))
+
     config.add_view(route_name='assets', view=assets_view)
     config.add_view(route_name='assets_client', view=assets_client_view)
 
     assets_env = Environment('/assets',
                              'h/assets.ini',
-                             'build/manifest.json')
+                             'build/manifest.json',
+                             auto_reload=auto_reload)
     assets_client_env = Environment('/assets/client',
                                     'h/assets_client.ini',
-                                    'node_modules/hypothesis/build/manifest.json')
+                                    'node_modules/hypothesis/build/manifest.json',
+                                    auto_reload=auto_reload)
 
     # We store the environment objects on the registry so that the Jinja2
     # integration can be configured in app.py
