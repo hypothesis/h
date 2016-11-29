@@ -18,8 +18,28 @@ log = logging.getLogger(__name__)
 # below.
 MESSAGE_HANDLERS = {}
 
+
 # An incoming message from a WebSocket client.
-Message = namedtuple('Message', ['socket', 'payload'])
+class Message(namedtuple('Message', [
+    'socket',
+    'payload',
+])):
+    def reply(self, payload, ok=True):
+        """
+        Send a response to this message.
+
+        Sends a reply message back to the client, with the passed `payload`
+        and reporting status `ok`.
+        """
+        reply_to = self.payload.get('id')
+        # Short-circuit if message is missing an ID or has a non-numeric ID.
+        if not isinstance(reply_to, (int, float)):
+            return
+        data = {}
+        data.update(payload)  # avoid modifying the payload in-place
+        data['ok'] = ok
+        data['reply_to'] = reply_to
+        self.socket.send_json(data)
 
 
 class WebSocket(_WebSocket):

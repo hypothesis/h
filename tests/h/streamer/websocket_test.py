@@ -13,6 +13,47 @@ from h.streamer import websocket
 FakeMessage = namedtuple('FakeMessage', ['data'])
 
 
+class TestMessage(object):
+    def test_reply_adds_reply_to(self, socket):
+        """Adds an appropriate `reply_to` field to the sent message."""
+        message = websocket.Message(socket=socket, payload={'id': 123})
+
+        message.reply({'foo': 'bar'})
+
+        socket.send_json.assert_called_once_with({'ok': True,
+                                                  'reply_to': 123,
+                                                  'foo': 'bar'})
+
+    @pytest.mark.parametrize('ok', [True, False])
+    def test_reply_adds_ok(self, ok, socket):
+        """Adds an appropriate `ok` field to the sent message."""
+        message = websocket.Message(socket=socket, payload={'id': 123})
+
+        message.reply({'foo': 'bar'}, ok=ok)
+
+        socket.send_json.assert_called_once_with({'ok': ok,
+                                                  'reply_to': 123,
+                                                  'foo': 'bar'})
+
+    @pytest.mark.parametrize('payload', [
+        {},
+        {'id': 'a string'},
+        {'id': [1, 2, 3]},
+        {'id': None},
+    ])
+    def test_reply_does_not_send_if_id_missing_or_invalid(self, payload, socket):
+        """Do not send a reply at all if we don't have an incoming message ID."""
+        message = websocket.Message(socket=socket, payload=payload)
+
+        message.reply({'foo': 'bar'})
+
+        assert not socket.send_json.called
+
+    @pytest.fixture
+    def socket(self):
+        return mock.Mock(spec_set=['send_json'])
+
+
 class TestWebSocket(object):
     def test_stores_instance_list(self, fake_environ):
         clients = [
