@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
+import copy
 import json
 import logging
 import weakref
@@ -35,8 +36,7 @@ class Message(namedtuple('Message', [
         # Short-circuit if message is missing an ID or has a non-numeric ID.
         if not isinstance(reply_to, (int, float)):
             return
-        data = {}
-        data.update(payload)  # avoid modifying the payload in-place
+        data = copy.deepcopy(payload)
         data['ok'] = ok
         data['reply_to'] = reply_to
         self.socket.send_json(data)
@@ -127,7 +127,10 @@ def handle_message(message, session=None):
 def handle_client_id_message(message, session=None):
     """A client telling us its client ID."""
     if 'value' not in message.payload:
-        # FIXME: send an error message to the client
+        message.reply({'type': 'error',
+                       'error': {'type': 'invalid_data',
+                                 'description': '"value" is missing'}},
+                      ok=False)
         return
     message.socket.client_id = message.payload['value']
 MESSAGE_HANDLERS['client_id'] = handle_client_id_message
@@ -136,13 +139,19 @@ MESSAGE_HANDLERS['client_id'] = handle_client_id_message
 def handle_filter_message(message, session=None):
     """A client updating its streamer filter."""
     if 'filter' not in message.payload:
-        # FIXME: send an error message to the client
+        message.reply({'type': 'error',
+                       'error': {'type': 'invalid_data',
+                                 'description': '"filter" is missing'}},
+                      ok=False)
         return
     filter_ = message.payload['filter']
     try:
         jsonschema.validate(filter_, filter.SCHEMA)
     except jsonschema.ValidationError:
-        # FIXME: send an error message to the client
+        message.reply({'type': 'error',
+                       'error': {'type': 'invalid_data',
+                                 'description': 'failed to parse filter'}},
+                      ok=False)
         return
     if session is not None:
         # Add backend expands for clauses
@@ -153,7 +162,12 @@ MESSAGE_HANDLERS['filter'] = handle_filter_message
 
 def handle_unknown_message(message, session=None):
     """Message type missing or not recognised."""
-    # FIXME: send an error message to the client
+    type_ = json.dumps(message.payload.get('type'))
+    message.reply({'type': 'error',
+                   'error': {'type': 'invalid_type',
+                             'description': 'invalid message type: '
+                                            '{:s}'.format(type_)}},
+                  ok=False)
 MESSAGE_HANDLERS[None] = handle_unknown_message
 
 

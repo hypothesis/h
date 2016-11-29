@@ -5,6 +5,7 @@ from collections import namedtuple
 import mock
 import pytest
 from gevent.queue import Queue
+from jsonschema import ValidationError
 from pyramid import security
 
 from h.streamer import websocket
@@ -32,6 +33,16 @@ class TestMessage(object):
         message.reply({'foo': 'bar'}, ok=ok)
 
         socket.send_json.assert_called_once_with({'ok': ok,
+                                                  'reply_to': 123,
+                                                  'foo': 'bar'})
+
+    def test_reply_overrides_ok_and_reply_to_fields_in_payload(self, socket):
+        """Payload `ok` and `reply_to` fields should be ignored."""
+        message = websocket.Message(socket=socket, payload={'id': 123})
+
+        message.reply({'foo': 'bar', 'ok': False, 'reply_to': 'wibble'})
+
+        socket.send_json.assert_called_once_with({'ok': True,
                                                   'reply_to': 123,
                                                   'foo': 'bar'})
 
@@ -232,87 +243,141 @@ class TestHandleMessage(object):
         return handlers
 
 
-def test_handle_client_id_message_sets_socket_client_id_for_client_id_messages():
-    socket = mock.Mock()
-    socket.client_id = None
-    message = websocket.Message(socket=socket, payload={
-        'messageType': 'client_id',
-        'value': 'abcd1234',
-    })
+class TestHandleClientIDMessage(object):
+    def test_sets_client_id(self, socket):
+        """Updates the socket client_id if valid."""
+        message = websocket.Message(socket=socket, payload={
+            'messageType': 'client_id',
+            'value': 'abcd1234',
+        })
 
-    websocket.handle_client_id_message(message)
+        websocket.handle_client_id_message(message)
 
-    assert socket.client_id == 'abcd1234'
+        assert socket.client_id == 'abcd1234'
 
+    def test_missing_value_error(self, matchers, socket):
+        message = websocket.Message(socket=socket, payload={
+            'messageType': 'client_id',
+        })
 
-def test_handle_message_sets_socket_filter_for_filter_messages():
-    socket = mock.Mock()
-    socket.filter = None
-    message = websocket.Message(socket=socket, payload={
-        'filter': {
-            'actions': {},
-            'match_policy': 'include_all',
-            'clauses': [{
-                'field': '/uri',
-                'operator': 'equals',
-                'value': 'http://example.com',
-            }],
-        }
-    })
+        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+            websocket.handle_client_id_message(message)
 
-    websocket.handle_filter_message(message)
+        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+                                           ok=False)
 
-    assert socket.filter is not None
+    @pytest.fixture
+    def socket(self):
+        socket = mock.Mock()
+        socket.client_id = None
+        return socket
 
 
-@mock.patch('memex.storage.expand_uri')
-def test_handle_filter_message_expands_uris_in_uri_filter_with_session(expand_uri):
-    expand_uri.return_value = ['http://example.com',
-                               'http://example.com/alter',
-                               'http://example.com/print']
-    session = mock.sentinel.db_session
-    socket = mock.Mock()
-    socket.filter = None
-    message = websocket.Message(socket=socket, payload={
-        'filter': {
-            'actions': {},
-            'match_policy': 'include_all',
-            'clauses': [{
-                'field': '/uri',
-                'operator': 'equals',
-                'value': 'http://example.com',
-            }],
-        }
-    })
+class TestHandleFilterMessage(object):
+    def test_sets_socket_filter(self, socket):
+        message = websocket.Message(socket=socket, payload={
+            'filter': {
+                'actions': {},
+                'match_policy': 'include_all',
+                'clauses': [{
+                    'field': '/uri',
+                    'operator': 'equals',
+                    'value': 'http://example.com',
+                }],
+            }
+        })
 
-    websocket.handle_filter_message(message, session=session)
+        websocket.handle_filter_message(message)
 
-    uri_filter = socket.filter.filter['clauses'][0]
-    uri_values = uri_filter['value']
-    assert len(uri_values) == 3
-    assert 'http://example.com' in uri_values
-    assert 'http://example.com/alter' in uri_values
-    assert 'http://example.com/print' in uri_values
+        assert socket.filter is not None
+
+    @mock.patch('memex.storage.expand_uri')
+    def test_expands_uris_in_uri_filter_with_session(self, expand_uri, socket):
+        expand_uri.return_value = ['http://example.com',
+                                   'http://example.com/alter',
+                                   'http://example.com/print']
+        session = mock.sentinel.db_session
+        message = websocket.Message(socket=socket, payload={
+            'filter': {
+                'actions': {},
+                'match_policy': 'include_all',
+                'clauses': [{
+                    'field': '/uri',
+                    'operator': 'equals',
+                    'value': 'http://example.com',
+                }],
+            }
+        })
+
+        websocket.handle_filter_message(message, session=session)
+
+        uri_filter = socket.filter.filter['clauses'][0]
+        uri_values = uri_filter['value']
+        assert len(uri_values) == 3
+        assert 'http://example.com' in uri_values
+        assert 'http://example.com/alter' in uri_values
+        assert 'http://example.com/print' in uri_values
+
+    @mock.patch('memex.storage.expand_uri')
+    def test_expands_uris_using_passed_session(self, expand_uri, socket):
+        expand_uri.return_value = ['http://example.com', 'http://example.org/']
+        session = mock.sentinel.db_session
+        message = websocket.Message(socket=socket, payload={
+            'filter': {
+                'actions': {},
+                'match_policy': 'include_all',
+                'clauses': [{
+                    'field': '/uri',
+                    'operator': 'equals',
+                    'value': 'http://example.com',
+                }],
+            }
+        })
+
+        websocket.handle_filter_message(message, session=session)
+
+        expand_uri.assert_called_once_with(session, 'http://example.com')
+
+    def test_missing_filter_error(self, matchers, socket):
+        message = websocket.Message(socket=socket, payload={
+            'type': 'filter',
+        })
+
+        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+            websocket.handle_filter_message(message)
+
+        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+                                           ok=False)
+
+    @mock.patch('h.streamer.websocket.jsonschema.validate')
+    def test_invalid_filter_error(self, validate, matchers, socket):
+        message = websocket.Message(socket=socket, payload={
+            'type': 'filter',
+            'filter': {'wibble': 'giraffe'},
+        })
+        validate.side_effect = ValidationError('kaboom!')
+
+        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+            websocket.handle_filter_message(message)
+
+        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+                                           ok=False)
+
+    @pytest.fixture
+    def socket(self):
+        socket = mock.Mock()
+        socket.filter = None
+        return socket
 
 
-@mock.patch('memex.storage.expand_uri')
-def test_handle_message_expands_uris_using_passed_session(expand_uri):
-    expand_uri.return_value = ['http://example.com', 'http://example.org/']
-    session = mock.sentinel.db_session
-    socket = mock.Mock()
-    socket.filter = None
-    message = websocket.Message(socket=socket, payload={
-        'filter': {
-            'actions': {},
-            'match_policy': 'include_all',
-            'clauses': [{
-                'field': '/uri',
-                'operator': 'equals',
-                'value': 'http://example.com',
-            }],
-        }
-    })
+class TestUnknownMessage(object):
+    def test_error(self, matchers):
+        message = websocket.Message(socket=mock.sentinel.socket, payload={
+            'type': 'wibble',
+        })
 
-    websocket.handle_filter_message(message, session=session)
+        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+            websocket.handle_unknown_message(message)
 
-    expand_uri.assert_called_once_with(session, 'http://example.com')
+        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+                                           ok=False)
