@@ -50,14 +50,26 @@
   color: $grey-5;
 }
 
-.form-footer {
+@mixin form-footer {
   @include font-normal;
+  color: $grey-5;
+}
+
+.form-footer {
+  @include form-footer;
 
   margin-top: 80px;
 
   border-top: 1px solid $grey-3;
-  color: $grey-5;
   padding-top: 15px;
+}
+
+// A form footer with no top border, useful for additional sections at the
+// bottom of a footer.
+.form-footer--no-border {
+  @include form-footer;
+
+  margin-top: 15px;
 }
 
 .form-help-text {

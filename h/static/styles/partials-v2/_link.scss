@@ -12,3 +12,8 @@
 .link:hover {
   color: $brand;
 }
+
+// A light link which appears at the footer of the page.
+.link--footer {
+  color: $grey-5;
+}
