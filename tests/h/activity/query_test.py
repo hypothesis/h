@@ -77,32 +77,49 @@ class TestExtract(object):
 
 @pytest.mark.usefixtures('routes', 'user_service')
 class TestCheckURL(object):
-    def test_redirects_to_group_search_page_if_one_group_in_query(self, pyramid_request, unparse):
-        query = MultiDict({'group': 'abcd1234'})
+    def test_redirects_to_group_search_page_if_one_group_in_query(self,
+                                                                  group,
+                                                                  pyramid_request,
+                                                                  unparse):
+        query = MultiDict({'group': group.pubid})
 
         with pytest.raises(HTTPFound) as e:
             check_url(pyramid_request, query, unparse=unparse)
 
-        assert e.value.location == '/act/groups/abcd1234?q=UNPARSED_QUERY'
+        assert e.value.location == (
+            '/act/groups/{pubid}?q=UNPARSED_QUERY'.format(pubid=group.pubid))
 
-    def test_removes_group_term_from_query(self, pyramid_request, unparse):
-        query = MultiDict({'group': 'abcd1234'})
+    def test_does_not_redirect_to_group_page_if_group_does_not_exist(self,
+                                                                     pyramid_request,
+                                                                     unparse):
+        query = MultiDict({'group': 'does_not_exist'})
+
+        assert check_url(pyramid_request, query, unparse=unparse) is None
+
+    def test_removes_group_term_from_query(self, group, pyramid_request, unparse):
+        query = MultiDict({'group': group.pubid})
 
         with pytest.raises(HTTPFound):
             check_url(pyramid_request, query, unparse=unparse)
 
         unparse.assert_called_once_with({})
 
-    def test_preserves_other_query_terms_for_group_search(self, pyramid_request, unparse):
-        query = MultiDict({'group': 'abcd1234', 'tag': 'foo'})
+    def test_preserves_other_query_terms_for_group_search(self,
+                                                          group,
+                                                          pyramid_request,
+                                                          unparse):
+        query = MultiDict({'group': group.pubid, 'tag': 'foo'})
 
         with pytest.raises(HTTPFound):
             check_url(pyramid_request, query, unparse=unparse)
 
         unparse.assert_called_once_with({'tag': 'foo'})
 
-    def test_preserves_user_query_terms_for_group_search(self, pyramid_request, unparse):
-        query = MultiDict({'group': 'bar', 'user': 'foo'})
+    def test_preserves_user_query_terms_for_group_search(self,
+                                                         group,
+                                                         pyramid_request,
+                                                         unparse):
+        query = MultiDict({'group': group.pubid, 'user': 'foo'})
 
         with pytest.raises(HTTPFound):
             check_url(pyramid_request, query, unparse=unparse)
@@ -156,6 +173,10 @@ class TestCheckURL(object):
         result = check_url(pyramid_request, query, unparse=unparse)
 
         assert result is None
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group()
 
     @pytest.fixture
     def user_service(self, factories, pyramid_config):

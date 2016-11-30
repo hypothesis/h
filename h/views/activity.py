@@ -95,22 +95,17 @@ class SearchController(object):
 class GroupSearchController(SearchController):
     """View callables unique to the "activity.group_search" route."""
 
+    def __init__(self, group, request):
+        super(GroupSearchController, self).__init__(request)
+        self.group = group
+
     @view_config(request_method='GET')
     def search(self):
         result = super(GroupSearchController, self).search()
 
-        pubid = self.request.matchdict['pubid']
-        result['opts'] = {'search_groupname': pubid}
+        result['opts'] = {'search_groupname': self.group.name}
 
-        try:
-            group = (self.request.db.query(models.Group)
-                     .filter_by(pubid=pubid).one())
-        except exc.NoResultFound:
-            return result
-
-        result['opts']['search_groupname'] = group.name
-
-        if self.request.authenticated_user not in group.members:
+        if self.request.authenticated_user not in self.group.members:
             return result
 
         def user_annotation_count(aggregation, userid):
@@ -128,30 +123,30 @@ class GroupSearchController(SearchController):
                     'faceted_by': _faceted_by_user(self.request,
                                                    u.username,
                                                    q)}
-                   for u in group.members]
+                   for u in self.group.members]
         members = sorted(members, key=lambda k: k['username'].lower())
 
         result['group'] = {
-            'created': group.created.strftime('%B, %Y'),
-            'description': group.description,
-            'name': group.name,
-            'pubid': group.pubid,
+            'created': self.group.created.strftime('%B, %Y'),
+            'description': self.group.description,
+            'name': self.group.name,
+            'pubid': self.group.pubid,
             'url': self.request.route_url('group_read',
-                                          pubid=group.pubid,
-                                          slug=group.slug),
+                                          pubid=self.group.pubid,
+                                          slug=self.group.slug),
             'members': members,
         }
 
-        if self.request.has_permission('admin', group):
-            result['group_edit_url'] = self.request.route_url('group_edit',
-                                                              pubid=pubid)
+        if self.request.has_permission('admin', self.group):
+            result['group_edit_url'] = self.request.route_url(
+                'group_edit', pubid=self.group.pubid)
 
         result['more_info'] = 'more_info' in self.request.params
 
         if not result.get('q'):
             result['zero_message'] = Markup(_(
                 'The group “{name}” has not made any annotations yet.').format(
-                    name=Markup.escape(group.name)))
+                    name=Markup.escape(self.group.name)))
 
         return result
 
@@ -165,16 +160,9 @@ class GroupSearchController(SearchController):
         browser to the search page.
 
         """
-        pubid = self.request.POST['group_leave']
-
-        try:
-            group = (self.request.db.query(models.Group)
-                     .filter_by(pubid=pubid).one())
-        except exc.NoResultFound:
-            raise httpexceptions.HTTPNotFound()
-
         groups_service = self.request.find_service(name='groups')
-        groups_service.member_leave(group, self.request.authenticated_userid)
+        groups_service.member_leave(self.group,
+                                    self.request.authenticated_userid)
 
         new_params = self.request.POST.copy()
         del new_params['group_leave']
@@ -221,7 +209,7 @@ class GroupSearchController(SearchController):
         new_params['q'] = parser.unparse(parsed_query)
 
         location = self.request.route_url(
-            'activity.group_search', pubid=self.request.matchdict['pubid'],
+            'activity.group_search', pubid=self.group.pubid,
             _query=new_params)
 
         return httpexceptions.HTTPSeeOther(location=location)

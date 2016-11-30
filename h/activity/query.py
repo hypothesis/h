@@ -80,9 +80,11 @@ def check_url(request, query, unparse=parser.unparse):
 
     if _single_entry(query, 'group'):
         pubid = query.pop('group')
-        redirect = request.route_path('activity.group_search',
-                                      pubid=pubid,
-                                      _query={'q': unparse(query)})
+        group = request.db.query(Group).filter_by(pubid=pubid).one_or_none()
+        if group:
+            redirect = request.route_path('activity.group_search',
+                                          pubid=group.pubid,
+                                          _query={'q': unparse(query)})
 
     elif _single_entry(query, 'user'):
         username = query.pop('user')
