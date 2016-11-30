@@ -41,6 +41,22 @@ class UserIDComparator(Comparator):
                        val['domain'] == self.authority)
 
 
+class UserFactory(object):
+    """Root resource for routes that look up User objects by traversal."""
+
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, username):
+        user = self.request.find_service(name='user').fetch(
+            username, self.request.auth_domain)
+
+        if not user:
+            raise KeyError()
+
+        return user
+
+
 class User(Base):
     __tablename__ = 'user'
     __table_args__ = (

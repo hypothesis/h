@@ -35,7 +35,7 @@ def test_includeme():
         call('dismiss_sidebar_tutorial', '/app/dismiss_sidebar_tutorial'),
         call('activity.search', '/search'),
         call('activity.group_search', '/groups/{pubid}/search'),
-        call('activity.user_search', '/users/{username}'),
+        call('activity.user_search', '/users/{username}', factory=u'h.models.user:UserFactory', traverse=u'/{username}'),
         call('admin_index', '/admin/'),
         call('admin_admins', '/admin/admins'),
         call('admin_badge', '/admin/badge'),
