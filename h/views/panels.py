@@ -76,7 +76,7 @@ def navbar(context, request, opts={}):
             username=request.authenticated_user.username)
         username = request.authenticated_user.username
 
-    if request.matched_route.name in ['activity.group_search', 'activity.user_search']:
+    if request.matched_route.name in ['group_read', 'activity.user_search']:
         search_url = request.current_route_url()
     else:
         search_url = request.route_url('activity.search')
