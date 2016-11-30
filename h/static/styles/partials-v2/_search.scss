@@ -28,10 +28,12 @@
   text-decoration: none;
 }
 
+// The result container holds all of the main content
+// for the page and is in charge of layout
 .search-result-container {
   display: flex;
   font-size: $normal-font-size;
-  margin-top: 50px;
+  margin-top: 40px;
   color: $grey-6;
 
   // Align the left edge of the search result list with the left edge of the
@@ -49,14 +51,23 @@
   margin-bottom: 0;
 }
 
-.search-result-list,
+// search-results and search-zero map to the internal states of the page
+// when there are actual results to be displayed or when there are none.
+// They control the inner layouts for those columns
+.search-results,
 .search-result-zero {
   flex-basis: 950px;
   max-width: 950px;
   margin-right: 30px;
 }
 
-.search-result-list {
+.search-results__total {
+  color: $brand;
+  margin-bottom: 25px;
+  word-spacing: 4px;
+}
+
+.search-results__list {
   // Remove default padding from <ol>
   list-style: none;
   padding-left: 0;
@@ -328,7 +339,7 @@ $stats-icon-column-width: 20px;
     display: none;
   }
 
-  .search-result-list,
+  .search-results,
   .search-result-zero {
     margin-right: 0;
   }
