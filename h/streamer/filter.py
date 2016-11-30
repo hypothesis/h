@@ -17,9 +17,9 @@ SCHEMA = {
                      "exclude_any", "exclude_all"]
         },
         "actions": {
-            "create": {"type": "boolean", "default":  True},
-            "update": {"type": "boolean", "default":  True},
-            "delete": {"type": "boolean", "default":  True},
+            "create": {"type": "boolean", "default": True},
+            "update": {"type": "boolean", "default": True},
+            "delete": {"type": "boolean", "default": True},
         },
         "clauses": {
             "type": "array",

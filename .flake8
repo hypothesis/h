@@ -10,8 +10,6 @@ ignore =
     E128,
     # E131 - continuation line unaligned for hanging indent
     E131,
-    # E241 - multiple spaces after ':'
-    E241,
     # E402 - module level import not at top of file
     E402,
     # N802 - function name should be lowercase

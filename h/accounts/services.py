@@ -121,7 +121,7 @@ class UserService(object):
 
         return (
             self.session.query(Annotation)
-            .filter_by(userid=userid, groupid='__world__',  shared=True)
+            .filter_by(userid=userid, groupid='__world__', shared=True)
             .count())
 
 
