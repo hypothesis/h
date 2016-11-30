@@ -137,11 +137,13 @@ class TestSearchController(object):
 @pytest.mark.usefixtures('groups_service', 'routes', 'search')
 class TestGroupSearchController(object):
 
-    def test_init_returns_404_when_feature_turned_off(self, pyramid_request):
+    def test_init_returns_404_when_feature_turned_off(self,
+                                                      group,
+                                                      pyramid_request):
         pyramid_request.feature.flags['search_page'] = False
 
         with pytest.raises(httpexceptions.HTTPNotFound):
-            activity.GroupSearchController(pyramid_request)
+            activity.GroupSearchController(group, pyramid_request)
 
     def test_search_calls_search_with_the_request(self,
                                                   controller,
@@ -247,16 +249,6 @@ class TestGroupSearchController(object):
 
         assert result['opts']['search_groupname'] == group.name
 
-    def test_search_returns_pubid_in_opts_if_group_does_not_exist(self,
-                                                                  controller,
-                                                                  group,
-                                                                  pyramid_request):
-        pyramid_request.matchdict['pubid'] = 'does_not_exist'
-
-        result = controller.search()
-
-        assert result['opts']['search_groupname'] == 'does_not_exist'
-
     def test_search_returns_group_members_usernames(self,
                                                     controller,
                                                     pyramid_request,
@@ -345,15 +337,6 @@ class TestGroupSearchController(object):
         assert result['zero_message'] == (
             "The group “{name}” has not made any annotations yet.".format(
                 name=group.name))
-
-    def test_leave_returns_404_when_the_group_does_not_exist(self,
-                                                             controller,
-                                                             group_leave_request):
-        group_leave_request.POST = NestedMultiDict({
-            'group_leave': 'does_not_exist'})
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            controller.leave()
 
     def test_leave_leaves_the_group(self,
                                     controller,
@@ -445,8 +428,8 @@ class TestGroupSearchController(object):
             '?q=user%3Afoo+user%3Abar'.format(pubid=group.pubid))
 
     @pytest.fixture
-    def controller(self, pyramid_request):
-        return activity.GroupSearchController(pyramid_request)
+    def controller(self, group, pyramid_request):
+        return activity.GroupSearchController(group, pyramid_request)
 
     @pytest.fixture
     def group_leave_request(self, group, pyramid_request):
