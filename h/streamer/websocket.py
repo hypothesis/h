@@ -160,6 +160,12 @@ def handle_filter_message(message, session=None):
 MESSAGE_HANDLERS['filter'] = handle_filter_message
 
 
+def handle_ping_message(message, session=None):
+    """A client requesting a pong."""
+    message.reply({'type': 'pong'})
+MESSAGE_HANDLERS['ping'] = handle_ping_message
+
+
 def handle_unknown_message(message, session=None):
     """Message type missing or not recognised."""
     type_ = json.dumps(message.payload.get('type'))

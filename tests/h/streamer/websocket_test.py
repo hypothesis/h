@@ -370,6 +370,18 @@ class TestHandleFilterMessage(object):
         return socket
 
 
+class TestHandlePingMessage(object):
+    def test_pong(self):
+        message = websocket.Message(socket=mock.sentinel.socket, payload={
+            'type': 'ping',
+        })
+
+        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+            websocket.handle_ping_message(message)
+
+        mock_reply.assert_called_once_with({'type': 'pong'})
+
+
 class TestUnknownMessage(object):
     def test_error(self, matchers):
         message = websocket.Message(socket=mock.sentinel.socket, payload={
