@@ -2,8 +2,6 @@
 ignore =
     # E126 - continuation line over-indented for hanging indent
     E126,
-    # E128 - continuation line under-indented for hanging indent
-    E128,
     # E402 - module level import not at top of file
     E402,
     # N813 - camelcase imported as lowercase
