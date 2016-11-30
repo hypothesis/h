@@ -43,6 +43,22 @@
   margin-top: 5px;
 }
 
+.annotation-card__footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.annotation-card__incontext-link {
+  height: 10px;
+  width: 10px;
+  color: $grey-5;
+}
+
+.annotation-card__incontext-link:visited {
+  color: $grey-5;
+}
+
 .annotation-card__username {
   color: $grey-7;
   font-weight: bold;

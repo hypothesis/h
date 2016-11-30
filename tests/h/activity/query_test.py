@@ -400,6 +400,29 @@ class TestExecute(object):
             else:
                 assert False
 
+    def test_it_returns_each_annotations_incontext_link(self,
+                                                        annotations,
+                                                        links,
+                                                        pyramid_request):
+        def incontext_link(request, annotation):
+            assert request == pyramid_request, (
+                "It should always pass the request to incontext_link")
+            # Return a predictable per-annotation value for the incontext link.
+            return 'incontext_link_for_annotation_{id}'.format(id=annotation.id)
+
+        links.incontext_link.side_effect = incontext_link
+
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        presented_annotations = []
+        for timeframe in result.timeframes:
+            for bucket in timeframe.document_buckets.values():
+                presented_annotations.extend(bucket.presented_annotations)
+
+        for presented_annotation in presented_annotations:
+            assert presented_annotation['incontext_link'] == (
+                'incontext_link_for_annotation_{id}'.format(id=presented_annotation['annotation'].annotation.id))
+
     def test_it_returns_the_total_number_of_matching_annotations(
             self, pyramid_request):
         assert execute(pyramid_request, MultiDict(), self.PAGE_SIZE).total == 20
@@ -414,6 +437,11 @@ class TestExecute(object):
         func = patch('h.activity.query.fetch_annotations')
         func.return_value = (mock.Mock(), mock.Mock())
         return func
+
+    @pytest.fixture
+    def links(self, patch):
+        links = patch('h.activity.query.links')
+        return links
 
     @pytest.fixture
     def _fetch_groups(self, group_pubids, patch):
