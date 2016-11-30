@@ -12,12 +12,6 @@ ignore =
     E131,
     # E402 - module level import not at top of file
     E402,
-    # N802 - function name should be lowercase
-    N802,
-    # N805 - first argument of a method should be named 'self'
-    N805,
-    # N806 - variable in function should be lower case
-    N806,
     # N813 - camelcase imported as lowercase
     N813,
 
