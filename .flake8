@@ -1,15 +1,9 @@
 [flake8]
 ignore =
-    # E121 - continuation line under-indented for hanging indent
-    E121,
-    # E123 - closing bracket does not match indentation of opening bracket's line
-    E123,
     # E126 - continuation line over-indented for hanging indent
     E126,
     # E128 - continuation line under-indented for hanging indent
     E128,
-    # E131 - continuation line unaligned for hanging indent
-    E131,
     # E402 - module level import not at top of file
     E402,
     # N813 - camelcase imported as lowercase
