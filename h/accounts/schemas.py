@@ -238,7 +238,7 @@ class ResetCode(colander.SchemaType):
 
         try:
             (username, timestamp) = serializer.loads(cstruct,
-                                                     max_age=72*3600,
+                                                     max_age=72 * 3600,
                                                      return_timestamp=True)
         except SignatureExpired:
             raise colander.Invalid(node, _('Reset code has expired. Please reset your password again'))

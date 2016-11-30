@@ -10,10 +10,6 @@ ignore =
     E128,
     # E131 - continuation line unaligned for hanging indent
     E131,
-    # E225 - missing whitespace around operator
-    E225,
-    # E226 - missing whitespace around arithmetic operator
-    E226,
     # E241 - multiple spaces after ':'
     E241,
     # E302 - expected 2 blank lines, found 1

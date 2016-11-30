@@ -136,7 +136,7 @@ def _fetch_windows(session, column, chunksize=100):
         order_by(column.desc()).all()
 
     count = len(updated)
-    windows = [Window(start=updated[min(x+chunksize, count)-1].updated,
+    windows = [Window(start=updated[min(x + chunksize, count) - 1].updated,
                       end=updated[x].updated)
                for x in xrange(0, count, chunksize)]
 
