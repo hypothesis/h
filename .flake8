@@ -20,8 +20,6 @@ ignore =
     E302,
     # E402 - module level import not at top of file
     E402,
-    # F401 - '<symbol>' imported but unused
-    F401,
     # N802 - function name should be lowercase
     N802,
     # N805 - first argument of a method should be named 'self'

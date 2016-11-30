@@ -33,6 +33,7 @@ __all__ = (
     'DocumentMeta',
     'DocumentURI',
     'merge_documents',
+    'update_document_metadata',
 )
 
 

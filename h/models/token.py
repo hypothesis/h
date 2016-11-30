@@ -3,13 +3,11 @@
 from __future__ import unicode_literals
 
 import binascii
-import datetime
 import os
 
 import sqlalchemy
 from sqlalchemy.dialects import postgresql
 
-from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
 from h.db import mixins
 

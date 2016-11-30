@@ -18,7 +18,7 @@ from sqlalchemy.orm import subqueryload
 from h import links
 from h import presenters
 from h.activity import bucketing
-from h.models import Annotation, Document, Group
+from h.models import Annotation, Group
 from memex import storage
 
 

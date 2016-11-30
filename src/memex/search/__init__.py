@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.settings import asbool
-
 from memex.search.client import Client
 from memex.search.config import init
 from memex.search.core import Search
