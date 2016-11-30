@@ -2,11 +2,17 @@
 
 <li class="annotation-card">
   <header class="annotation-card__header">
-    <span>
+    <div class="annotation-card__username-timestamp">
       <a href="{{ request.route_url('activity.user_search', username=annotation.username) }}"
         class="annotation-card__username">
         {{ annotation.username }}
       </a>
+      <a href="{{ request.route_url('annotation', id=annotation.id) }}"
+        class="annotation-card__timestamp">
+        {{ annotation.updated.strftime('%d %b %Y') }}
+      </a>
+    </div>
+    <div class="annotation-card__share-info">
       {% if group %}
         <a href="{{ request.route_url('activity.group_search', pubid=group.pubid) }}"
           class="annotation-card__groupname">
@@ -15,11 +21,15 @@
             {{ group.name }}
         </a>
       {% endif %}
-    </span>
-    <a href="{{ request.route_url('annotation', id=annotation.id) }}"
-      class="annotation-card__timestamp">
-      {{ annotation.updated.strftime('%d %b %Y') }}
-    </a>
+      {% if annotation.shared %}
+        <span class="annotation-card__is-private">
+          {{ svg_icon('lock', 'annotation-card__is-private-icon') }}
+          {% if not group %}
+            Only me
+          {% endif %}
+        </span>
+      {% endif %}
+    </div>
   </header>
   {% if annotation.quote %}
     <section class="annotation-card__quote">
