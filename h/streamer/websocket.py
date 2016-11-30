@@ -166,6 +166,13 @@ def handle_ping_message(message, session=None):
 MESSAGE_HANDLERS['ping'] = handle_ping_message
 
 
+def handle_whoami_message(message, session=None):
+    """A client requesting information on its auth state."""
+    message.reply({'type': 'whoyouare',
+                   'userid': message.socket.authenticated_userid})
+MESSAGE_HANDLERS['whoami'] = handle_whoami_message
+
+
 def handle_unknown_message(message, session=None):
     """Message type missing or not recognised."""
     type_ = json.dumps(message.payload.get('type'))
