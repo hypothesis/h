@@ -15,7 +15,7 @@ from h.auth import util
 from h._compat import text_type
 
 
-FakeUser = namedtuple('FakeUser', ['admin', 'staff', 'groups'])
+FakeUser = namedtuple('FakeUser', ['authority', 'admin', 'staff', 'groups'])
 FakeGroup = namedtuple('FakeGroup', ['pubid'])
 
 # The most recent standard covering the 'Basic' HTTP Authentication scheme is
@@ -108,23 +108,23 @@ class TestGroupfinder(object):
     # User isn't found in the database: they're not authenticated at all
     (None, None),
     # User found but not staff, admin, or a member of any groups: no additional principals
-    (FakeUser(admin=False, staff=False, groups=[]),
-     []),
+    (FakeUser(authority='example.com', admin=False, staff=False, groups=[]),
+     ['authority:example.com']),
     # User is admin: role.Admin should be in principals
-    (FakeUser(admin=True, staff=False, groups=[]),
-     [role.Admin]),
+    (FakeUser(authority='foobar.org', admin=True, staff=False, groups=[]),
+     ['authority:foobar.org', role.Admin]),
     # User is staff: role.Staff should be in principals
-    (FakeUser(admin=False, staff=True, groups=[]),
-     [role.Staff]),
+    (FakeUser(authority='example.com', admin=False, staff=True, groups=[]),
+     ['authority:example.com', role.Staff]),
     # User is admin and staff
-    (FakeUser(admin=True, staff=True, groups=[]),
-     [role.Admin, role.Staff]),
+    (FakeUser(authority='foobar.org', admin=True, staff=True, groups=[]),
+     ['authority:foobar.org', role.Admin, role.Staff]),
     # User is a member of some groups
-    (FakeUser(admin=False, staff=False, groups=[FakeGroup('giraffe'), FakeGroup('elephant')]),
-     ['group:giraffe', 'group:elephant']),
+    (FakeUser(authority='example.com', admin=False, staff=False, groups=[FakeGroup('giraffe'), FakeGroup('elephant')]),
+     ['authority:example.com', 'group:giraffe', 'group:elephant']),
     # User is admin, staff, and a member of some groups
-    (FakeUser(admin=True, staff=True, groups=[FakeGroup('donkeys')]),
-     ['group:donkeys', role.Admin, role.Staff]),
+    (FakeUser(authority='foobar.org', admin=True, staff=True, groups=[FakeGroup('donkeys')]),
+     ['authority:foobar.org', 'group:donkeys', role.Admin, role.Staff]),
 ))
 def test_principals_for_user(user, principals):
     result = util.principals_for_user(user)
