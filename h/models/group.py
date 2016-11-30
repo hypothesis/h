@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import enum
 import sqlalchemy as sa
 from pyramid import security
 from sqlalchemy.orm import exc
@@ -27,6 +28,21 @@ class GroupFactory(object):
             raise KeyError()
 
 
+class JoinableBy(enum.Enum):
+    authority = 'authority'
+
+
+class ReadableBy(enum.Enum):
+    authority = 'authority'
+    members = 'members'
+    world = 'world'
+
+
+class WriteableBy(enum.Enum):
+    authority = 'authority'
+    members = 'members'
+
+
 class Group(Base, mixins.Timestamps):
     __tablename__ = 'group'
 
@@ -48,6 +64,21 @@ class Group(Base, mixins.Timestamps):
     creator = sa.orm.relationship('User')
 
     description = sa.Column(sa.UnicodeText())
+
+    #: Which type of user is allowed to join this group, possible values are:
+    #: authority, None
+    joinable_by = sa.Column(sa.Enum(JoinableBy, name='group_joinable_by'),
+                            nullable=True)
+
+    #: Which type of user is allowed to read annotations in this group,
+    #: possible values are: authority, members, world
+    readable_by = sa.Column(sa.Enum(ReadableBy, name='group_readable_by'),
+                            nullable=True)
+
+    #: Which type of user is allowed to write to this group, possible values
+    #: are: authority, members
+    writeable_by = sa.Column(sa.Enum(WriteableBy, name='group_writeable_by'),
+                             nullable=True)
 
     # Group membership
     members = sa.orm.relationship(
