@@ -195,4 +195,3 @@ def create_app(global_config, **settings):
     config.include('h.streamer')
 
     return config.make_wsgi_app()
-

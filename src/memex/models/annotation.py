@@ -163,6 +163,5 @@ class Annotation(Base):
         else:
             return self.id
 
-
     def __repr__(self):
         return '<Annotation %s>' % self.id

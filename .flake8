@@ -12,8 +12,6 @@ ignore =
     E131,
     # E241 - multiple spaces after ':'
     E241,
-    # E302 - expected 2 blank lines, found 1
-    E302,
     # E402 - module level import not at top of file
     E402,
     # N802 - function name should be lowercase
@@ -24,6 +22,4 @@ ignore =
     N806,
     # N813 - camelcase imported as lowercase
     N813,
-    # W391 - blank line at end of file
-    W391,
 

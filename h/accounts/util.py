@@ -6,6 +6,7 @@ import re
 
 from h._compat import urlparse
 
+
 def validate_url(url):
     """
     Validate an HTTP(S) URL as a link for a user's profile.

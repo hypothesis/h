@@ -11,6 +11,7 @@ from h import __version__
 
 jinja_env = Environment(loader=PackageLoader(__package__, 'templates'))
 
+
 def url_with_path(url):
     if urlparse.urlparse(url).path == '':
         return '{}/'.format(url)
