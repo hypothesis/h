@@ -103,9 +103,9 @@ class TestBackLink(object):
     @pytest.mark.parametrize('referrer,label', [
         ('https://example.com/users/currentuser', 'Back to your profile page'),
         ('https://example.com/users/currentuser?q=tag:foo', 'Back to your profile page'),
-        ('https://example.com/users/otheruser', 'Back'),
+        ('https://example.com/users/otheruser', None),
         ('https://example.com/groups/abc', 'Back to group overview page'),
-        ('https://example.com/search', 'Back'),
+        ('https://example.com/search', None),
         (None, None),
     ])
     def test_it_sets_back_label(self, pyramid_request, referrer, label):

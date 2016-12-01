@@ -45,8 +45,6 @@ def back_link(context, request):
         back_label = _('Back to your profile page')
     elif _matches_route(referrer_path, request, 'activity.group_search'):
         back_label = _('Back to group overview page')
-    elif referrer_path:
-        back_label = _('Back')
     else:
         back_label = None
 
