@@ -14,6 +14,7 @@ import newrelic.agent
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import subqueryload
 
+from h import links
 from h import presenters
 from h.activity import bucketing
 from h.models import Annotation, Document, Group
@@ -132,7 +133,8 @@ def execute(request, query, page_size):
             for annotation in bucket.annotations:
                 bucket.presented_annotations.append({
                     'annotation': presenters.AnnotationHTMLPresenter(annotation),
-                    'group': groups.get(annotation.groupid)
+                    'group': groups.get(annotation.groupid),
+                    'incontext_link': links.incontext_link(request, annotation)
                 })
 
     return result

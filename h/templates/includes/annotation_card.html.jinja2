@@ -1,4 +1,4 @@
-{% macro annotation_card(annotation, request, group=none) -%}
+{% macro annotation_card(annotation, request, incontext_link, group=none) -%}
 
 <li class="annotation-card">
   <header class="annotation-card__header">
@@ -39,5 +39,12 @@
   <section class="annotation-card__text">
     {{ annotation.text_rendered|safe }}
   </section>
+  <footer class="annotation-card__footer">
+    {% if incontext_link %}
+      <a href="{{ incontext_link }}" target="_blank" title="{% trans %}Visit link in context{% endtrans %}">
+        {{ svg_icon('up-right-arrow', 'annotation-card__incontext-link') }}
+      </a>
+    {% endif %}
+  </footer>
 </li>
 {%- endmacro %}
