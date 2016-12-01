@@ -370,6 +370,43 @@ class TestHandleFilterMessage(object):
         return socket
 
 
+class TestHandlePingMessage(object):
+    def test_pong(self):
+        message = websocket.Message(socket=mock.sentinel.socket, payload={
+            'type': 'ping',
+        })
+
+        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+            websocket.handle_ping_message(message)
+
+        mock_reply.assert_called_once_with({'type': 'pong'})
+
+
+class TestHandleWhoamiMessage(object):
+    @pytest.mark.parametrize('userid', [
+        None,
+        'acct:foo@example.com',
+    ])
+    def test_replies_with_whoyouare_message(self, socket, userid):
+        """Send back a `whoyouare` message with a userid (which may be null)."""
+        socket.authenticated_userid = userid
+        message = websocket.Message(socket=socket, payload={
+            'type': 'whoami',
+        })
+
+        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+            websocket.handle_whoami_message(message)
+
+        mock_reply.assert_called_once_with({'type': 'whoyouare',
+                                            'userid': userid})
+
+    @pytest.fixture
+    def socket(self):
+        socket = mock.Mock()
+        socket.authenticated_userid = None
+        return socket
+
+
 class TestUnknownMessage(object):
     def test_error(self, matchers):
         message = websocket.Message(socket=mock.sentinel.socket, payload={
