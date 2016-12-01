@@ -137,6 +137,8 @@ class TestSearchController(object):
 @pytest.mark.usefixtures('groups_service', 'routes', 'search')
 class TestGroupSearchController(object):
 
+    """Tests unique to GroupSearchController."""
+
     def test_init_returns_404_when_feature_turned_off(self,
                                                       group,
                                                       pyramid_request):
@@ -365,6 +367,42 @@ class TestGroupSearchController(object):
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
 
+    def test_more_info_redirects_to_group_search(self,
+                                                 controller,
+                                                 group,
+                                                 pyramid_request):
+        """It should redirect and preserve the search query param."""
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
+
+        result = controller.more_info()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location.startswith(
+            'http://example.com/groups/{pubid}/search?'.format(
+                pubid=group.pubid))
+        # The order of the params vary (because they're in an unordered dict)
+        # but they should both be there.
+        assert 'more_info=' in result.location
+        assert 'q=foo+bar' in result.location
+
+    def test_back_redirects_to_group_search(self,
+                                            controller,
+                                            group,
+                                            pyramid_request):
+        """It should redirect and preserve the search query param."""
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.POST = {'q': 'foo bar', 'back': ''}
+
+        result = controller.back()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == (
+            'http://example.com/groups/{pubid}/search?q=foo+bar'.format(
+                pubid=group.pubid))
+
     @pytest.mark.usefixtures('toggle_user_facet_request')
     def test_toggle_user_facet_returns_a_redirect(self, controller):
         result = controller.toggle_user_facet()
@@ -456,166 +494,9 @@ class TestGroupSearchController(object):
 
 
 @pytest.mark.usefixtures('routes', 'search')
-class TestGroupUserSearchController(object):
-
-    def test_init_returns_404_when_feature_turned_off(self, pyramid_request):
-        pyramid_request.feature.flags['search_page'] = False
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            activity.GroupUserSearchController(pyramid_request)
-
-    def test_more_info_redirects_to_group_search(self,
-                                                 controller,
-                                                 pyramid_request):
-        """It should redirect and preserve the search query param."""
-        pyramid_request.matchdict['pubid'] = 'test_pubid'
-        pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.group_search'
-        pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
-
-        result = controller.more_info()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location.startswith(
-            'http://example.com/groups/test_pubid/search?')
-        # The order of the params vary (because they're in an unordered dict)
-        # but they should both be there.
-        assert 'more_info=' in result.location
-        assert 'q=foo+bar' in result.location
-
-    def test_more_info_redirects_to_user_search(self,
-                                                controller,
-                                                pyramid_request):
-        """It should redirect and preserve the search query param."""
-        pyramid_request.matchdict['username'] = 'test_username'
-        pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.user_search'
-        pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
-
-        result = controller.more_info()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location.startswith(
-            'http://example.com/users/test_username?')
-        # The order of the params vary (because they're in an unordered dict)
-        # but they should both be there.
-        assert 'more_info=' in result.location
-        assert 'q=foo+bar' in result.location
-
-    def test_back_redirects_to_group_search(self, controller, pyramid_request):
-        """It should redirect and preserve the search query param."""
-        pyramid_request.matchdict['pubid'] = 'test_pubid'
-        pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.group_search'
-        pyramid_request.POST = {'q': 'foo bar', 'back': ''}
-
-        result = controller.back()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == (
-            'http://example.com/groups/test_pubid/search?q=foo+bar')
-
-    def test_back_redirects_to_user_search(self, controller, pyramid_request):
-        """It should redirect and preserve the search query param."""
-        pyramid_request.matchdict['username'] = 'test_username'
-        pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.user_search'
-        pyramid_request.POST = {'q': 'foo bar', 'back': ''}
-
-        result = controller.back()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == (
-            'http://example.com/users/test_username?q=foo+bar')
-
-    @pytest.mark.usefixtures('delete_lozenge_request')
-    def test_delete_lozenge_returns_a_redirect(self, controller):
-        result = controller.delete_lozenge()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-
-        # This tests that the location redirect to is correct and also that
-        # the delete_lozenge param has been removed (and is not part of the
-        # URL).
-        assert result.location == 'http://example.com/search'
-
-    def test_delete_lozenge_preserves_the_query_param(self,
-                                                      controller,
-                                                      delete_lozenge_request):
-        delete_lozenge_request.POST['q'] = 'foo bar'
-
-        location = controller.delete_lozenge().location
-
-        location == 'http://example.com/search?q=foo+bar'
-
-    @pytest.mark.usefixtures('toggle_tag_facet_request')
-    def test_toggle_tag_facet_returns_a_redirect(self, controller):
-        result = controller.toggle_tag_facet()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-
-    @pytest.mark.usefixtures('toggle_tag_facet_request')
-    def test_toggle_tag_facet_adds_the_tag_facet_into_the_url(self,
-                                                              controller):
-        result = controller.toggle_tag_facet()
-
-        assert result.location == 'http://example.com/users/foo?q=tag%3Agar'
-
-    def test_toggle_tag_facet_removes_the_tag_facet_from_the_url(
-            self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'tag:"gar"'
-
-        result = controller.toggle_tag_facet()
-
-        assert result.location == 'http://example.com/users/foo?q='
-
-    def test_toggle_tag_facet_preserves_query_when_adding_tag_facet(
-            self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'foo bar'
-
-        result = controller.toggle_tag_facet()
-
-        assert result.location == (
-            'http://example.com/users/foo?q=foo+bar+tag%3Agar')
-
-    def test_toggle_tag_facet_preserves_query_when_removing_tag_facet(
-            self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'tag:"gar" foo bar'
-
-        result = controller.toggle_tag_facet()
-
-        assert result.location == 'http://example.com/users/foo?q=foo+bar'
-
-    def test_toggle_tag_facet_preserves_query_when_removing_one_of_multiple_tag_facets(
-            self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'tag:"foo" tag:"gar" tag:"bar"'
-
-        result = controller.toggle_tag_facet()
-
-        assert result.location == (
-            'http://example.com/users/foo?q=tag%3Afoo+tag%3Abar')
-
-    @pytest.fixture
-    def controller(self, pyramid_request):
-        return activity.GroupUserSearchController(pyramid_request)
-
-    @pytest.fixture
-    def delete_lozenge_request(self, pyramid_request):
-        pyramid_request.params['delete_lozenge'] = ''
-        return pyramid_request
-
-    @pytest.fixture
-    def toggle_tag_facet_request(self, pyramid_request):
-        pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.user_search'
-        pyramid_request.feature.flags['search_page'] = True
-        pyramid_request.POST['toggle_tag_facet'] = 'gar'
-        pyramid_request.matchdict['username'] = 'foo'
-        return pyramid_request
-
-
-@pytest.mark.usefixtures('routes', 'search')
 class TestUserSearchController(object):
+
+    """Tests unique to UserSearchController."""
 
     def test_init_returns_404_when_feature_turned_off(self,
                                                       user,
@@ -734,6 +615,42 @@ class TestUserSearchController(object):
 
         assert result['zero_message'] == '__SHOW_GETTING_STARTED__'
 
+    def test_more_info_redirects_to_user_search(self,
+                                                controller,
+                                                user,
+                                                pyramid_request):
+        """It should redirect and preserve the search query param."""
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name = 'activity.user_search'
+        pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
+
+        result = controller.more_info()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location.startswith(
+            'http://example.com/users/{username}'.format(
+                username=user.username))
+        # The order of the params vary (because they're in an unordered dict)
+        # but they should both be there.
+        assert 'more_info=' in result.location
+        assert 'q=foo+bar' in result.location
+
+    def test_back_redirects_to_user_search(self,
+                                           controller,
+                                           user,
+                                           pyramid_request):
+        """It should redirect and preserve the search query param."""
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name = 'activity.user_search'
+        pyramid_request.POST = {'q': 'foo bar', 'back': ''}
+
+        result = controller.back()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == (
+            'http://example.com/users/{username}?q=foo+bar'.format(
+                username=user.username))
+
     @pytest.fixture
     def controller(self, user, pyramid_request):
         return activity.UserSearchController(user, pyramid_request)
@@ -751,6 +668,116 @@ class TestUserSearchController(object):
             uri='http://www.example.com/me',
             orcid='0000-0000-0000-0000',
         )
+
+
+@pytest.mark.usefixtures('routes', 'search')
+class TestGroupAndUserSearchController(object):
+
+    """Tests common to both GroupSearchController and UserSearchController."""
+
+    @pytest.mark.usefixtures('delete_lozenge_request')
+    def test_delete_lozenge_returns_a_redirect(self, controller):
+        result = controller.delete_lozenge()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+
+        # This tests that the location redirect to is correct and also that
+        # the delete_lozenge param has been removed (and is not part of the
+        # URL).
+        assert result.location == 'http://example.com/search'
+
+    def test_delete_lozenge_preserves_the_query_param(self,
+                                                      controller,
+                                                      delete_lozenge_request):
+        delete_lozenge_request.POST['q'] = 'foo bar'
+
+        location = controller.delete_lozenge().location
+
+        location == 'http://example.com/search?q=foo+bar'
+
+    @pytest.mark.usefixtures('toggle_tag_facet_request')
+    def test_toggle_tag_facet_returns_a_redirect(self, controller):
+        result = controller.toggle_tag_facet()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+
+    @pytest.mark.usefixtures('toggle_tag_facet_request')
+    def test_toggle_tag_facet_adds_the_tag_facet_into_the_url(self,
+                                                              controller):
+        result = controller.toggle_tag_facet()
+
+        assert result.location == 'http://example.com/users/foo?q=tag%3Agar'
+
+    def test_toggle_tag_facet_removes_the_tag_facet_from_the_url(
+            self, controller, toggle_tag_facet_request):
+        toggle_tag_facet_request.POST['q'] = 'tag:"gar"'
+
+        result = controller.toggle_tag_facet()
+
+        assert result.location == 'http://example.com/users/foo?q='
+
+    def test_toggle_tag_facet_preserves_query_when_adding_tag_facet(
+            self, controller, toggle_tag_facet_request):
+        toggle_tag_facet_request.POST['q'] = 'foo bar'
+
+        result = controller.toggle_tag_facet()
+
+        assert result.location == (
+            'http://example.com/users/foo?q=foo+bar+tag%3Agar')
+
+    def test_toggle_tag_facet_preserves_query_when_removing_tag_facet(
+            self, controller, toggle_tag_facet_request):
+        toggle_tag_facet_request.POST['q'] = 'tag:"gar" foo bar'
+
+        result = controller.toggle_tag_facet()
+
+        assert result.location == 'http://example.com/users/foo?q=foo+bar'
+
+    def test_toggle_tag_facet_preserves_query_when_removing_one_of_multiple_tag_facets(
+            self, controller, toggle_tag_facet_request):
+        toggle_tag_facet_request.POST['q'] = 'tag:"foo" tag:"gar" tag:"bar"'
+
+        result = controller.toggle_tag_facet()
+
+        assert result.location == (
+            'http://example.com/users/foo?q=tag%3Afoo+tag%3Abar')
+
+    @pytest.fixture(params=['user_search_controller', 'group_search_controller'])
+    def controller(self, request):
+        """
+        Return a UserSearchController and a GroupSearchController.
+        Any test that uses this fixture will be called twice - once with a
+        UserSearchController instance as the controller argument, and once with
+        a GroupSearchController.
+        """
+        return request.getfuncargvalue(request.param)
+
+    @pytest.fixture
+    def group_search_controller(self, group, pyramid_request):
+        # Set the slug in the URL to the slug of the group.
+        # Otherwise GroupSearchController will redirect the request to the
+        # correct URL.
+        pyramid_request.matchdict['slug'] = group.slug
+
+        return activity.GroupSearchController(group, pyramid_request)
+
+    @pytest.fixture
+    def delete_lozenge_request(self, pyramid_request):
+        pyramid_request.params['delete_lozenge'] = ''
+        return pyramid_request
+
+    @pytest.fixture
+    def toggle_tag_facet_request(self, pyramid_request):
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name = 'activity.user_search'
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.POST['toggle_tag_facet'] = 'gar'
+        pyramid_request.matchdict['username'] = 'foo'
+        return pyramid_request
+
+    @pytest.fixture
+    def user_search_controller(self, user, pyramid_request):
+        return activity.UserSearchController(user, pyramid_request)
 
 
 @pytest.fixture
@@ -796,3 +823,8 @@ def search(patch):
         'zero_message': 'No annotations matched your search.',
     }
     return search
+
+
+@pytest.fixture
+def user(factories):
+    return factories.User()
