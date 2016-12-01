@@ -10,10 +10,8 @@ from jinja2 import Markup
 from pyramid import httpexceptions
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-from sqlalchemy.orm import exc
 from memex.search import parser
 
-from h import models
 from h.activity import query
 from h.i18n import TranslationString as _
 from h.links import pretty_link
