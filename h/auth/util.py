@@ -80,6 +80,7 @@ def principals_for_user(user):
         principals.add(role.Staff)
     for group in user.groups:
         principals.add('group:{group.pubid}'.format(group=group))
+    principals.add('authority:{authority}'.format(authority=user.authority))
 
     return list(principals)
 
