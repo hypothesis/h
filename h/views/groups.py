@@ -114,6 +114,7 @@ class GroupEditController(object):
              request_method='GET',
              renderer='h:templates/groups/share.html.jinja2',
              effective_principals=security.Authenticated,
+             has_feature_flag=not_('search_page'),
              has_permission='read')
 def read(group, request):
     """Group view for logged-in users."""
@@ -121,7 +122,7 @@ def read(group, request):
 
     # Redirect to new group overview page if search page is enabled
     if request.feature('search_page'):
-        url = request.route_path('activity.group_search', pubid=group.pubid)
+        url = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
         return HTTPSeeOther(url)
 
     return {'group': group,

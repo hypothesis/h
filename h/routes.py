@@ -26,10 +26,6 @@ def includeme(config):
 
     # Activity
     config.add_route('activity.search', '/search')
-    config.add_route('activity.group_search',
-                     '/groups/{pubid}/search',
-                     factory='h.models.group:GroupFactory',
-                     traverse='/{pubid}')
     config.add_route('activity.user_search',
                      '/users/{username}',
                      factory='h.models.user:UserFactory',

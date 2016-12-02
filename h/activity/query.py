@@ -50,7 +50,7 @@ def extract(request, parse=parser.parse):
     #
     # (Note that a query for the *intersection* of >1 users or groups is by
     # definition empty)
-    if request.matched_route.name == 'activity.group_search':
+    if request.matched_route.name == 'group_read':
         q['group'] = request.matchdict['pubid']
     elif request.matched_route.name == 'activity.user_search':
         q['user'] = request.matchdict['username']
@@ -83,8 +83,9 @@ def check_url(request, query, unparse=parser.unparse):
         pubid = query.pop('group')
         group = request.db.query(Group).filter_by(pubid=pubid).one_or_none()
         if group:
-            redirect = request.route_path('activity.group_search',
+            redirect = request.route_path('group_read',
                                           pubid=group.pubid,
+                                          slug=group.slug,
                                           _query={'q': unparse(query)})
 
     elif _single_entry(query, 'user'):

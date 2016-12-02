@@ -8,6 +8,7 @@ import urlparse
 
 from jinja2 import Markup
 from pyramid import httpexceptions
+from pyramid import security
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 from memex.search import parser
@@ -88,10 +89,13 @@ class SearchController(object):
         }
 
 
-@view_defaults(route_name='activity.group_search',
-               renderer='h:templates/activity/search.html.jinja2')
+@view_defaults(route_name='group_read',
+               renderer='h:templates/activity/search.html.jinja2',
+               effective_principals=security.Authenticated,
+               has_feature_flag='search_page',
+               has_permission='read')
 class GroupSearchController(SearchController):
-    """View callables unique to the "activity.group_search" route."""
+    """View callables unique to the "group_read" route."""
 
     def __init__(self, group, request):
         super(GroupSearchController, self).__init__(request)
@@ -207,7 +211,7 @@ class GroupSearchController(SearchController):
         new_params['q'] = parser.unparse(parsed_query)
 
         location = self.request.route_url(
-            'activity.group_search', pubid=self.group.pubid,
+            'group_read', pubid=self.group.pubid, slug=self.group.slug,
             _query=new_params)
 
         return httpexceptions.HTTPSeeOther(location=location)
@@ -349,9 +353,10 @@ def _faceted_by_tag(request, tag, parsed_query=None):
 
 
 def _redirect_to_user_or_group_search(request, params):
-    if request.matched_route.name == 'activity.group_search':
-        location = request.route_url('activity.group_search',
+    if request.matched_route.name == 'group_read':
+        location = request.route_url('group_read',
                                      pubid=request.matchdict['pubid'],
+                                     slug=request.matchdict['slug'],
                                      _query=params)
     elif request.matched_route.name == 'activity.user_search':
         location = request.route_url('activity.user_search',

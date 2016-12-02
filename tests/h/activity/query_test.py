@@ -44,7 +44,7 @@ class TestExtract(object):
         """
         parse.return_value = MultiDict({'foo': 'bar',
                                         'group': 'whattheusersent'})
-        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.matched_route.name = 'group_read'
         pyramid_request.matchdict['pubid'] = 'abcd1234'
         pyramid_request.GET['q'] = 'giraffe'
 
@@ -87,7 +87,8 @@ class TestCheckURL(object):
             check_url(pyramid_request, query, unparse=unparse)
 
         assert e.value.location == (
-            '/act/groups/{pubid}?q=UNPARSED_QUERY'.format(pubid=group.pubid))
+            '/act/groups/{pubid}/{slug}?q=UNPARSED_QUERY'.format(
+                pubid=group.pubid, slug=group.slug))
 
     def test_does_not_redirect_to_group_page_if_group_does_not_exist(self,
                                                                      pyramid_request,
@@ -167,7 +168,7 @@ class TestCheckURL(object):
         assert result is None
 
     def test_does_nothing_if_not_on_search_page(self, pyramid_request, unparse):
-        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.matched_route.name = 'group_read'
         query = MultiDict({'group': 'abcd1234'})
 
         result = check_url(pyramid_request, query, unparse=unparse)
@@ -606,5 +607,5 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('activity.group_search', '/act/groups/{pubid}')
+    pyramid_config.add_route('group_read', '/act/groups/{pubid}/{slug}')
     pyramid_config.add_route('activity.user_search', '/act/users/{username}')
