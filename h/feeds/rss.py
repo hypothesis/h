@@ -73,6 +73,6 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
     }
 
     if annotations:
-        feed['pubDate'] = annotations[0].updated.strftime('%a, %d %b %Y %H:%M:%S UTC')
+        feed['pubDate'] = _pubDate_string(annotations[0].updated)
 
     return feed
