@@ -65,8 +65,6 @@ def render_rss(request, annotations, rss_url, html_url, title, description):
     :rtype: pyramid.response.Response
 
     """
-    request.response.content_type = "application/rss+xml"
-
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
         return request.route_url('annotation', id=annotation.id)
@@ -76,5 +74,7 @@ def render_rss(request, annotations, rss_url, html_url, title, description):
         rss_url=rss_url, html_url=html_url, title=title,
         description=description)
 
-    return renderers.render_to_response(
+    response = renderers.render_to_response(
         'h:templates/rss.xml.jinja2', {"feed": feed}, request=request)
+    response.content_type = 'application/rss+xml'
+    return response
