@@ -137,7 +137,8 @@ def read(group, request):
 
 @view_config(route_name='group_read',
              request_method='GET',
-             renderer='h:templates/groups/join.html.jinja2')
+             renderer='h:templates/groups/join.html.jinja2',
+             effective_principals=not_(security.Authenticated))
 def read_unauthenticated(group, request):
     """Group view for logged-out users, allowing them to join the group."""
     _check_slug(group, request)
