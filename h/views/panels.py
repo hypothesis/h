@@ -43,7 +43,7 @@ def back_link(context, request):
     if referrer_path == request.route_path('activity.user_search',
                                            username=current_username):
         back_label = _('Back to your profile page')
-    elif _matches_route(referrer_path, request, 'activity.group_search'):
+    elif _matches_route(referrer_path, request, 'group_read'):
         back_label = _('Back to group overview page')
     else:
         back_label = None
@@ -74,7 +74,7 @@ def navbar(context, request, opts={}):
             username=request.authenticated_user.username)
         username = request.authenticated_user.username
 
-    if request.matched_route.name in ['activity.group_search', 'activity.user_search']:
+    if request.matched_route.name in ['group_read', 'activity.user_search']:
         search_url = request.current_route_url()
     else:
         search_url = request.route_url('activity.search')

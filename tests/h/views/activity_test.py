@@ -147,6 +147,27 @@ class TestGroupSearchController(object):
         with pytest.raises(httpexceptions.HTTPNotFound):
             activity.GroupSearchController(group, pyramid_request)
 
+    def test_search_redirects_if_slug_wrong(self,
+                                            controller,
+                                            group,
+                                            pyramid_request):
+        """
+        If the slug in the URL is wrong it should redirect to the right one.
+
+        For example /groups/<pubid>/foobar redirects to /groups/<pubid>/<slug>.
+
+        The other 'group_read' views on h.views.groups do this, this tests that
+        the ones in h.views.activity do as well.
+
+        """
+        pyramid_request.matchdict['slug'] = 'wrong'
+
+        with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
+            controller.search()
+
+        assert exc.value.location == '/groups/{pubid}/{slug}'.format(
+            pubid=group.pubid, slug=group.slug)
+
     def test_search_calls_search_with_the_request(self,
                                                   controller,
                                                   group,
@@ -373,15 +394,15 @@ class TestGroupSearchController(object):
                                                  pyramid_request):
         """It should redirect and preserve the search query param."""
         pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.matched_route.name = 'group_read'
         pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
 
         result = controller.more_info()
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location.startswith(
-            'http://example.com/groups/{pubid}/search?'.format(
-                pubid=group.pubid))
+            'http://example.com/groups/{pubid}/{slug}?'.format(
+                pubid=group.pubid, slug=group.slug))
         # The order of the params vary (because they're in an unordered dict)
         # but they should both be there.
         assert 'more_info=' in result.location
@@ -393,15 +414,15 @@ class TestGroupSearchController(object):
                                             pyramid_request):
         """It should redirect and preserve the search query param."""
         pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.matched_route.name = 'group_read'
         pyramid_request.POST = {'q': 'foo bar', 'back': ''}
 
         result = controller.back()
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == (
-            'http://example.com/groups/{pubid}/search?q=foo+bar'.format(
-                pubid=group.pubid))
+            'http://example.com/groups/{pubid}/{slug}?q=foo+bar'.format(
+                pubid=group.pubid, slug=group.slug))
 
     @pytest.mark.usefixtures('toggle_user_facet_request')
     def test_toggle_user_facet_returns_a_redirect(self, controller):
@@ -416,8 +437,8 @@ class TestGroupSearchController(object):
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            'http://example.com/groups/{pubid}/search'
-            '?q=user%3Afred'.format(pubid=group.pubid))
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=user%3Afred'.format(pubid=group.pubid, slug=group.slug))
 
     def test_toggle_user_facet_removes_the_user_facet_from_the_url(self,
                                                                    controller,
@@ -428,8 +449,8 @@ class TestGroupSearchController(object):
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            'http://example.com/groups/{pubid}/search?q='.format(
-                pubid=group.pubid))
+            'http://example.com/groups/{pubid}/{slug}?q='.format(
+                pubid=group.pubid, slug=group.slug))
 
     def test_toggle_user_facet_preserves_query_when_adding_user_facet(self,
                                                                       controller,
@@ -440,8 +461,8 @@ class TestGroupSearchController(object):
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            'http://example.com/groups/{pubid}/search'
-            '?q=foo+bar+user%3Afred'.format(pubid=group.pubid))
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=foo+bar+user%3Afred'.format(pubid=group.pubid, slug=group.slug))
 
     def test_toggle_user_facet_preserves_query_when_removing_user_facet(self,
                                                                         controller,
@@ -452,8 +473,8 @@ class TestGroupSearchController(object):
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            'http://example.com/groups/{pubid}/search'
-            '?q=foo+bar'.format(pubid=group.pubid))
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=foo+bar'.format(pubid=group.pubid, slug=group.slug))
 
     def test_toggle_user_facet_preserves_query_when_removing_one_of_multiple_username_facets(
             self, controller, group, toggle_user_facet_request):
@@ -462,8 +483,8 @@ class TestGroupSearchController(object):
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            'http://example.com/groups/{pubid}/search'
-            '?q=user%3Afoo+user%3Abar'.format(pubid=group.pubid))
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=user%3Afoo+user%3Abar'.format(pubid=group.pubid, slug=group.slug))
 
     @pytest.fixture
     def controller(self, group, pyramid_request):
@@ -483,6 +504,7 @@ class TestGroupSearchController(object):
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.matchdict['pubid'] = group.pubid
+        pyramid_request.matchdict['slug'] = group.slug
         pyramid_request.authenticated_user = None
         pyramid_request.has_permission = mock.Mock(return_value=False)
         return pyramid_request
@@ -808,7 +830,6 @@ def pyramid_request(pyramid_request):
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('activity.search', '/search')
-    pyramid_config.add_route('activity.group_search', '/groups/{pubid}/search')
     pyramid_config.add_route('activity.user_search', '/users/{username}')
     pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
     pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
