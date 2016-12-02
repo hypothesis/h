@@ -45,7 +45,7 @@ def test_feed_annotations_pubDate():
     feed = rss.feed_from_annotations(
         [ann], _annotation_url(), mock.Mock(), '', '', '')
 
-    assert feed['entries'][0]['pubDate'] == 'Wed, 11 Mar 2015 10:43:54 +0000'
+    assert feed['entries'][0]['pubDate'] == 'Wed, 11 Mar 2015 10:43:54 -0000'
 
 
 def test_feed_from_annotations_html_links(factories):
