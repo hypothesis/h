@@ -681,7 +681,7 @@ class TestGroupAndUserSearchController(object):
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
 
-        # This tests that the location redirect to is correct and also that
+        # This tests that the location redirected to is correct and also that
         # the delete_lozenge param has been removed (and is not part of the
         # URL).
         assert result.location == 'http://example.com/search'
