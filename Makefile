@@ -40,6 +40,18 @@ test: node_modules/.uptodate
 	tox
 	$(GULP) test
 
+## Linting
+.PHONY: lint
+lint: lint-js lint-python
+
+.PHONY: lint-js
+lint-js:
+	$(GULP) lint
+
+.PHONY: lint-python
+lint-python:
+	flake8 h src --exclude h/migrations/versions
+
 ################################################################################
 
 # Fake targets to aid with deps installation
@@ -60,4 +72,5 @@ help:
 	@echo " clean      Clean up runtime artifacts (needed after a version update)"
 	@echo " dev        Run the development H server locally"
 	@echo " docker     Build hypothesis/hypothesis docker image"
+	@echo " lint       Run code quality and style checks"
 	@echo " test       Run the test suite (default)"
