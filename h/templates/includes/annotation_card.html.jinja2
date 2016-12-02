@@ -21,7 +21,7 @@
             {{ group.name }}
         </a>
       {% endif %}
-      {% if annotation.shared %}
+      {% if not annotation.shared %}
         <span class="annotation-card__is-private">
           {{ svg_icon('lock', 'annotation-card__is-private-icon') }}
           {% if not group %}
