@@ -217,6 +217,7 @@ class TestAnnotationSearchIndexPresenter(object):
             'uri': 'http://example.com',
             'text': 'It is magical!',
             'tags': ['magic'],
+            'tags_raw': ['magic'],
             'group': '__world__',
             'permissions': {'read': ['group:__world__'],
                             'admin': ['acct:luke@hypothes.is'],

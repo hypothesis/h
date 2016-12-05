@@ -28,6 +28,7 @@ ANNOTATION_MAPPING = {
         'updated': {'type': 'date'},
         'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
         'tags': {'type': 'string', 'analyzer': 'uni_normalizer'},
+        'tags_raw': {'type': 'string', 'index': 'not_analyzed'},
         'text': {'type': 'string', 'analyzer': 'uni_normalizer'},
         'deleted': {'type': 'boolean'},
         'uri': {
