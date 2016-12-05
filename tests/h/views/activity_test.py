@@ -388,6 +388,26 @@ class TestGroupSearchController(object):
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
 
+    @pytest.mark.parametrize('q', ['', '   '])
+    def test_leave_removes_empty_query_from_url(self,
+                                                controller,
+                                                group,
+                                                group_leave_request,
+                                                q):
+        """
+        It should remove an empty q from the URL it redirects to.
+
+        We don't want to redirect to a URL with a pointless trailing empty ?q=.
+
+        """
+        group_leave_request.POST['q'] = q
+        group_leave_request.POST['group_leave'] = group.pubid
+
+        result = controller.leave()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == 'http://example.com/search'
+
     def test_back_redirects_to_group_search(self,
                                             controller,
                                             group,
@@ -429,7 +449,7 @@ class TestGroupSearchController(object):
         result = controller.toggle_user_facet()
 
         assert result.location == (
-            'http://example.com/groups/{pubid}/{slug}?q='.format(
+            'http://example.com/groups/{pubid}/{slug}'.format(
                 pubid=group.pubid, slug=group.slug))
 
     def test_toggle_user_facet_preserves_query_when_adding_user_facet(self,
@@ -465,6 +485,26 @@ class TestGroupSearchController(object):
         assert result.location == (
             'http://example.com/groups/{pubid}/{slug}'
             '?q=user%3Afoo+user%3Abar'.format(pubid=group.pubid, slug=group.slug))
+
+    @pytest.mark.parametrize('q', ['user:fred', '  user:fred   '])
+    def test_toggle_user_facet_removes_empty_query(self,
+                                                   controller,
+                                                   group,
+                                                   toggle_user_facet_request,
+                                                   q):
+        """
+        It should remove an empty query from the URL.
+
+        We don't want to redirect to a URL with a pointless trailing empty ?q=.
+
+        """
+        toggle_user_facet_request.params['q'] = q
+
+        result = controller.toggle_user_facet()
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}'.format(
+                pubid=group.pubid, slug=group.slug))
 
     @pytest.fixture
     def controller(self, group, pyramid_request):
@@ -633,6 +673,29 @@ class TestUserSearchController(object):
             'http://example.com/users/{username}?q=foo+bar'.format(
                 username=user.username))
 
+    @pytest.mark.parametrize('q', ['', '   '])
+    def test_back_removes_empty_query(self,
+                                      controller,
+                                      user,
+                                      pyramid_request,
+                                      q):
+        """
+        It should remove an empty q param from the URL.
+
+        We don't want to redirect to a URL with a pointless trailing empty ?q=.
+
+        """
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name = 'activity.user_search'
+        pyramid_request.params = {'q': q, 'back': ''}
+
+        result = controller.back()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == (
+            'http://example.com/users/{username}'.format(
+                username=user.username))
+
     @pytest.fixture
     def controller(self, user, pyramid_request):
         return activity.UserSearchController(user, pyramid_request)
@@ -677,6 +740,23 @@ class TestGroupAndUserSearchController(object):
 
         location == 'http://example.com/search?q=foo+bar'
 
+    @pytest.mark.parametrize('q', ['', '   '])
+    def test_delete_lozenge_removes_empty_queries(self,
+                                                  controller,
+                                                  delete_lozenge_request,
+                                                  q):
+        """
+        It should remove an empty q from the URL.
+
+        We don't want to redirect to a URL with a pointless trailing empty ?q=.
+
+        """
+        delete_lozenge_request.params['q'] = q
+
+        location = controller.delete_lozenge().location
+
+        location == 'http://example.com/search'
+
     @pytest.mark.usefixtures('toggle_tag_facet_request')
     def test_toggle_tag_facet_returns_a_redirect(self, controller):
         result = controller.toggle_tag_facet()
@@ -696,7 +776,7 @@ class TestGroupAndUserSearchController(object):
 
         result = controller.toggle_tag_facet()
 
-        assert result.location == 'http://example.com/users/foo?q='
+        assert result.location == 'http://example.com/users/foo'
 
     def test_toggle_tag_facet_preserves_query_when_adding_tag_facet(
             self, controller, toggle_tag_facet_request):
@@ -723,6 +803,24 @@ class TestGroupAndUserSearchController(object):
 
         assert result.location == (
             'http://example.com/users/foo?q=tag%3Afoo+tag%3Abar')
+
+    @pytest.mark.parametrize('q', ['tag:gar', ' tag:gar   '])
+    def test_toggle_tag_facet_removes_empty_query(self,
+                                                  controller,
+                                                  toggle_tag_facet_request,
+                                                  q):
+        """
+        It should remove an empty q from the URL.
+
+
+        We don't want to redirect to a URL with a pointless trailing empty ?q=.
+
+        """
+        toggle_tag_facet_request.params['q'] = q
+
+        result = controller.toggle_tag_facet()
+
+        assert result.location == 'http://example.com/users/foo'
 
     @pytest.fixture(params=['user_search_controller', 'group_search_controller'])
     def controller(self, request):
