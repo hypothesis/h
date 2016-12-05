@@ -33,13 +33,14 @@
 }
 
 .nav-bar__search-hidden-input {
-  /* Don't display this input to the user.
-     We use visibility: hidden; instead of display: none; because
-     display: none; causes iOS Safari to ignore the <input> and not use it for
-     form submission. */
+  // Don't display this input to the user.
+  // We use visibility: hidden; instead of display: none; because
+  // display: none; causes iOS Safari to ignore the <input> and not use it for
+  // form submission.
+  // See https://bugs.webkit.org/show_bug.cgi?id=64733
   visibility: hidden;
 
-  /* Prevent the hidden input from affecting the layout of the visible parts. */
+  // Prevent the hidden input from affecting the layout of the visible parts.
   position: absolute;
 }
 
