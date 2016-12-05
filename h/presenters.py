@@ -197,6 +197,10 @@ class AnnotationHTMLPresenter(object):
     def shared(self):
         return self.annotation.shared
 
+    @property
+    def tags(self):
+        return self.annotation.tags
+
 class DocumentHTMLPresenter(object):
     """Wraps Document model objects and adds some HTML properties."""
 

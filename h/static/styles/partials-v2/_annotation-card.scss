@@ -43,6 +43,27 @@
   margin-top: 5px;
 }
 
+.annotation-card__tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.annotation-card__tag {
+  text-decoration: none;
+  border: 1px solid $grey-3;
+  border-radius: 2px;
+  padding: 0 5px 2px;
+  color: $grey-5;
+  background: $grey-1;
+  margin: 0 5px 5px 0;
+  font-size: $small-font-size;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .annotation-card__footer {
   display: flex;
   flex-direction: row;
