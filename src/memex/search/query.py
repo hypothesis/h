@@ -257,7 +257,7 @@ class TagsAggregation(object):
     def __call__(self, _):
         return {
             "terms": {
-                "field": "tags",
+                "field": "tags_raw",
                 "size": self.limit
             }
         }
