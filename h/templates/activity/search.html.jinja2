@@ -10,7 +10,6 @@
   <nav class="search-result-nav">
     {%- if more_info %}
       <button form="search-bar"
-              formaction="{{ request.path_url }}"
               name="back"
               class="search-result-nav__button">
         {% trans %}Back{% endtrans %}
@@ -18,7 +17,6 @@
     {% else %}
       <h1 class="search-result-nav__title">{{ name }}</h1>
       <button form="search-bar"
-              formaction="{{ request.path_url }}"
               name="more_info"
               class="search-result-nav__button">
         {% trans %}More info{% endtrans %}
@@ -141,7 +139,6 @@
     {% for tag in aggregations.tags %}
       <button type="submit"
               form="search-bar"
-              formaction="{{ request.path_url }}"
               name="toggle_tag_facet"
               value="{{ tag.tag }}"
               class="search-result-sidebar__tag">
@@ -210,7 +207,6 @@
                   type="submit"
                   form="search-bar"
                   formmethod="POST"
-                  formaction="{{ request.path_url }}"
                   name="group_leave"
                   value="{{ group.pubid }}"
                   data-confirm-message="Are you sure you want to leave the group &quot;{{ group.name }}&quot;?">
@@ -234,7 +230,6 @@
           <li>
             <button type="submit"
                     form="search-bar"
-                    formaction="{{ request.path_url }}"
                     name="toggle_user_facet"
                     value="{{ user.userid }}"
                     {% if user.faceted_by %}
