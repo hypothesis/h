@@ -94,7 +94,8 @@ class SearchController(object):
                renderer='h:templates/activity/search.html.jinja2',
                effective_principals=security.Authenticated,
                has_feature_flag='search_page',
-               has_permission='read')
+               has_permission='read',
+               request_method='GET')
 class GroupSearchController(SearchController):
     """View callables unique to the "group_read" route."""
 
@@ -175,8 +176,7 @@ class GroupSearchController(SearchController):
 
         return httpexceptions.HTTPSeeOther(location=location)
 
-    @view_config(request_method='POST',
-                 request_param='toggle_user_facet')
+    @view_config(request_param='toggle_user_facet')
     def toggle_user_facet(self):
         """
         Toggle the given user from the search facets.
@@ -190,10 +190,10 @@ class GroupSearchController(SearchController):
         search query.
 
         """
-        userid = self.request.POST['toggle_user_facet']
+        userid = self.request.params['toggle_user_facet']
         username = util.user.split_user(userid)['username']
 
-        new_params = self.request.POST.copy()
+        new_params = self.request.params.copy()
 
         del new_params['toggle_user_facet']
 
@@ -219,11 +219,7 @@ class GroupSearchController(SearchController):
 
         return httpexceptions.HTTPSeeOther(location=location)
 
-    @view_config(request_method='POST', request_param='more_info')
-    def more_info(self):
-        return _more_info(self.request)
-
-    @view_config(request_method='POST', request_param='back')
+    @view_config(request_param='back')
     def back(self):
         return _back(self.request)
 
@@ -231,7 +227,7 @@ class GroupSearchController(SearchController):
     def delete_lozenge(self):
         return _delete_lozenge(self.request)
 
-    @view_config(request_method='POST', request_param='toggle_tag_facet')
+    @view_config(request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
 
@@ -283,11 +279,7 @@ class UserSearchController(SearchController):
 
         return result
 
-    @view_config(request_method='POST', request_param='more_info')
-    def more_info(self):
-        return _more_info(self.request)
-
-    @view_config(request_method='POST', request_param='back')
+    @view_config(request_param='back')
     def back(self):
         return _back(self.request)
 
@@ -295,20 +287,20 @@ class UserSearchController(SearchController):
     def delete_lozenge(self):
         return _delete_lozenge(self.request)
 
-    @view_config(request_method='POST', request_param='toggle_tag_facet')
+    @view_config(request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
 
 
 def _parsed_query(request):
     """
-    Return the parsed (MultiDict) query from the given POST request.
+    Return the parsed (MultiDict) query from the given request.
 
     Return a copy of the given search page request's search query, parsed from
     a string into a MultiDict.
 
     """
-    return parser.parse(request.POST.get('q', ''))
+    return parser.parse(request.params.get('q', ''))
 
 
 def _username_facets(request, parsed_query=None):
@@ -368,14 +360,9 @@ def _redirect_to_user_or_group_search(request, params):
     return httpexceptions.HTTPSeeOther(location=location)
 
 
-def _more_info(request):
-    """Respond to a click on the ``more_info`` button."""
-    return _redirect_to_user_or_group_search(request, request.POST)
-
-
 def _back(request):
     """Respond to a click on the ``back`` button."""
-    new_params = request.POST.copy()
+    new_params = request.params.copy()
     del new_params['back']
     return _redirect_to_user_or_group_search(request, new_params)
 
@@ -410,9 +397,9 @@ def _toggle_tag_facet(request):
     to the same page but with this facet removed from the search query.
 
     """
-    tag = request.POST['toggle_tag_facet']
+    tag = request.params['toggle_tag_facet']
 
-    new_params = request.POST.copy()
+    new_params = request.params.copy()
 
     del new_params['toggle_tag_facet']
 
