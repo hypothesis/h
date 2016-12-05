@@ -306,7 +306,7 @@ class TestGroupSearchController(object):
         pyramid_request.authenticated_user = group.members[-1]
 
         faceted_user = group.members[0]
-        pyramid_request.POST = {'q': 'user:%s' % group.members[0].username}
+        pyramid_request.params = {'q': 'user:%s' % group.members[0].username}
 
         result = controller.search()
 
@@ -388,26 +388,6 @@ class TestGroupSearchController(object):
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
 
-    def test_more_info_redirects_to_group_search(self,
-                                                 controller,
-                                                 group,
-                                                 pyramid_request):
-        """It should redirect and preserve the search query param."""
-        pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'group_read'
-        pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
-
-        result = controller.more_info()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location.startswith(
-            'http://example.com/groups/{pubid}/{slug}?'.format(
-                pubid=group.pubid, slug=group.slug))
-        # The order of the params vary (because they're in an unordered dict)
-        # but they should both be there.
-        assert 'more_info=' in result.location
-        assert 'q=foo+bar' in result.location
-
     def test_back_redirects_to_group_search(self,
                                             controller,
                                             group,
@@ -415,7 +395,7 @@ class TestGroupSearchController(object):
         """It should redirect and preserve the search query param."""
         pyramid_request.matched_route = mock.Mock()
         pyramid_request.matched_route.name = 'group_read'
-        pyramid_request.POST = {'q': 'foo bar', 'back': ''}
+        pyramid_request.params = {'q': 'foo bar', 'back': ''}
 
         result = controller.back()
 
@@ -444,7 +424,7 @@ class TestGroupSearchController(object):
                                                                    controller,
                                                                    group,
                                                                    toggle_user_facet_request):
-        toggle_user_facet_request.POST['q'] = 'user:"fred"'
+        toggle_user_facet_request.params['q'] = 'user:"fred"'
 
         result = controller.toggle_user_facet()
 
@@ -456,7 +436,7 @@ class TestGroupSearchController(object):
                                                                       controller,
                                                                       group,
                                                                       toggle_user_facet_request):
-        toggle_user_facet_request.POST['q'] = 'foo bar'
+        toggle_user_facet_request.params['q'] = 'foo bar'
 
         result = controller.toggle_user_facet()
 
@@ -468,7 +448,7 @@ class TestGroupSearchController(object):
                                                                         controller,
                                                                         group,
                                                                         toggle_user_facet_request):
-        toggle_user_facet_request.POST['q'] = 'user:"fred" foo bar'
+        toggle_user_facet_request.params['q'] = 'user:"fred" foo bar'
 
         result = controller.toggle_user_facet()
 
@@ -478,7 +458,7 @@ class TestGroupSearchController(object):
 
     def test_toggle_user_facet_preserves_query_when_removing_one_of_multiple_username_facets(
             self, controller, group, toggle_user_facet_request):
-        toggle_user_facet_request.POST['q'] = 'user:"foo" user:"fred" user:"bar"'
+        toggle_user_facet_request.params['q'] = 'user:"foo" user:"fred" user:"bar"'
 
         result = controller.toggle_user_facet()
 
@@ -511,7 +491,7 @@ class TestGroupSearchController(object):
 
     @pytest.fixture
     def toggle_user_facet_request(self, group, pyramid_request):
-        pyramid_request.POST['toggle_user_facet'] = 'acct:fred@hypothes.is'
+        pyramid_request.params['toggle_user_facet'] = 'acct:fred@hypothes.is'
         return pyramid_request
 
 
@@ -637,26 +617,6 @@ class TestUserSearchController(object):
 
         assert result['zero_message'] == '__SHOW_GETTING_STARTED__'
 
-    def test_more_info_redirects_to_user_search(self,
-                                                controller,
-                                                user,
-                                                pyramid_request):
-        """It should redirect and preserve the search query param."""
-        pyramid_request.matched_route = mock.Mock()
-        pyramid_request.matched_route.name = 'activity.user_search'
-        pyramid_request.POST = {'q': 'foo bar', 'more_info': ''}
-
-        result = controller.more_info()
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location.startswith(
-            'http://example.com/users/{username}'.format(
-                username=user.username))
-        # The order of the params vary (because they're in an unordered dict)
-        # but they should both be there.
-        assert 'more_info=' in result.location
-        assert 'q=foo+bar' in result.location
-
     def test_back_redirects_to_user_search(self,
                                            controller,
                                            user,
@@ -664,7 +624,7 @@ class TestUserSearchController(object):
         """It should redirect and preserve the search query param."""
         pyramid_request.matched_route = mock.Mock()
         pyramid_request.matched_route.name = 'activity.user_search'
-        pyramid_request.POST = {'q': 'foo bar', 'back': ''}
+        pyramid_request.params = {'q': 'foo bar', 'back': ''}
 
         result = controller.back()
 
@@ -711,7 +671,7 @@ class TestGroupAndUserSearchController(object):
     def test_delete_lozenge_preserves_the_query_param(self,
                                                       controller,
                                                       delete_lozenge_request):
-        delete_lozenge_request.POST['q'] = 'foo bar'
+        delete_lozenge_request.params['q'] = 'foo bar'
 
         location = controller.delete_lozenge().location
 
@@ -732,7 +692,7 @@ class TestGroupAndUserSearchController(object):
 
     def test_toggle_tag_facet_removes_the_tag_facet_from_the_url(
             self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'tag:"gar"'
+        toggle_tag_facet_request.params['q'] = 'tag:"gar"'
 
         result = controller.toggle_tag_facet()
 
@@ -740,7 +700,7 @@ class TestGroupAndUserSearchController(object):
 
     def test_toggle_tag_facet_preserves_query_when_adding_tag_facet(
             self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'foo bar'
+        toggle_tag_facet_request.params['q'] = 'foo bar'
 
         result = controller.toggle_tag_facet()
 
@@ -749,7 +709,7 @@ class TestGroupAndUserSearchController(object):
 
     def test_toggle_tag_facet_preserves_query_when_removing_tag_facet(
             self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'tag:"gar" foo bar'
+        toggle_tag_facet_request.params['q'] = 'tag:"gar" foo bar'
 
         result = controller.toggle_tag_facet()
 
@@ -757,7 +717,7 @@ class TestGroupAndUserSearchController(object):
 
     def test_toggle_tag_facet_preserves_query_when_removing_one_of_multiple_tag_facets(
             self, controller, toggle_tag_facet_request):
-        toggle_tag_facet_request.POST['q'] = 'tag:"foo" tag:"gar" tag:"bar"'
+        toggle_tag_facet_request.params['q'] = 'tag:"foo" tag:"gar" tag:"bar"'
 
         result = controller.toggle_tag_facet()
 
@@ -793,7 +753,7 @@ class TestGroupAndUserSearchController(object):
         pyramid_request.matched_route = mock.Mock()
         pyramid_request.matched_route.name = 'activity.user_search'
         pyramid_request.feature.flags['search_page'] = True
-        pyramid_request.POST['toggle_tag_facet'] = 'gar'
+        pyramid_request.params['toggle_tag_facet'] = 'gar'
         pyramid_request.matchdict['username'] = 'foo'
         return pyramid_request
 
