@@ -340,13 +340,13 @@
 
     {% if timeframes %}
 
-      <div class="search-results">
+      <div class="search-results {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
 
         {% if q or user or group %}
         <div class="search-results__total"><b>{% trans %}Annotations{% endtrans %}</b> {{total}}</div>
         {% endif %}
 
-        <ol class="search-results__list {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
+        <ol class="search-results__list">
           {% for timeframe in timeframes %}
           <li class="search-result__timeframe">
             {{ timeframe.label }}
