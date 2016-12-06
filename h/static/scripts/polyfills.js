@@ -9,6 +9,9 @@ require('core-js/fn/array/includes');
 require('core-js/fn/object/assign');
 require('core-js/fn/string/starts-with');
 
+// Sets Element.prototype.closest and Element.prototype.matches
+require('element-closest');
+
 // String.prototype.normalize()
 // FIXME: This is a large polyfill which should be only loaded when necessary
 require('unorm');

@@ -1,6 +1,7 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
 {% from '../includes/annotation_card.html.jinja2' import annotation_card %}
+{% from '../includes/share_widget.html.jinja2' import share_widget %}
 
 {% macro search_result_nav(name) %}
 {# This <form> is needed for IE because it doesn't support the `form`
@@ -413,5 +414,9 @@
     {% elif user %}
       {{ user_sidebar(user) }}
     {% endif %}
+
+    <div class="js-share-widget is-hidden-when-loading">
+      {{ share_widget() }}
+    </div>
   </div>
 {% endblock %}

@@ -19,6 +19,7 @@ const FormSelectOnFocusController = require('./controllers/form-select-onfocus-c
 const InputAutofocusController = require('./controllers/input-autofocus-controller');
 const SearchBarController = require('./controllers/search-bar-controller');
 const SearchBucketController = require('./controllers/search-bucket-controller');
+const ShareWidgetController = require('./controllers/share-widget-controller');
 const SignupFormController = require('./controllers/signup-form-controller');
 const TooltipController = require('./controllers/tooltip-controller');
 const upgradeElements = require('./base/upgrade-elements');
@@ -34,6 +35,7 @@ const controllers = {
   '.js-select-onfocus': FormSelectOnFocusController,
   '.js-search-bar': SearchBarController,
   '.js-search-bucket': SearchBucketController,
+  '.js-share-widget': ShareWidgetController,
   '.js-signup-form': SignupFormController,
   '.js-tooltip': TooltipController,
 };

@@ -68,12 +68,22 @@
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  align-items: baseline;
+}
+
+.annotation-card__footer-link {
+  margin-left: 15px;
+  color: $grey-4;
+  height: 16px;
+  width: 16px;
 }
 
 .annotation-card__incontext-link {
-  height: 10px;
-  width: 10px;
-  color: $grey-5;
+  /* the arrow for context links is vsually larger
+      we need to adjust that here to make it look uniform */
+  height: 14px;
+  width: 14px;
+  padding-top: 1px;
 }
 
 .annotation-card__incontext-link:visited {
