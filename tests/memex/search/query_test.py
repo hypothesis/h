@@ -490,13 +490,13 @@ class TestTagsAggregations(object):
     def test_elasticsearch_aggregation(self):
         agg = query.TagsAggregation()
         assert agg({}) == {
-            'terms': {'field': 'tags', 'size': 0}
+            'terms': {'field': 'tags_raw', 'size': 0}
         }
 
     def test_it_allows_to_set_a_limit(self):
         agg = query.TagsAggregation(limit=14)
         assert agg({}) == {
-            'terms': {'field': 'tags', 'size': 14}
+            'terms': {'field': 'tags_raw', 'size': 14}
         }
 
     def parse_result(self):

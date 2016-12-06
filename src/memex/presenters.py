@@ -104,6 +104,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             'uri': self.annotation.target_uri,
             'text': self.text,
             'tags': self.tags,
+            'tags_raw': self.tags,
             'group': self.annotation.groupid,
             'permissions': self.permissions,
             'target': self.target,
