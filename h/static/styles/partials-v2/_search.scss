@@ -218,10 +218,15 @@
   }
 }
 
+// Preferred width of annotation cards on large screens.
+$annotation-card-width: 500px;
+
+// The list of annotation cards in a bucket.
 .search-result-bucket__annotation-cards {
+  flex-basis: $annotation-card-width;
   flex-grow: 1;
-  max-width: 500px;
   flex-shrink: 0;
+  max-width: $annotation-card-width;
   padding-left: 0;
   padding-right: 0;
 }
@@ -367,6 +372,10 @@ $stats-icon-column-width: 20px;
 
   .search-result-bucket__annotation-cards {
     width: 100%;
+
+    // Set the preferred height of the annotation card list based on its
+    // contents.
+    flex-basis: auto;
   }
 
   .search-bucket-stats {
