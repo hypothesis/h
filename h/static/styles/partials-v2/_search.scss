@@ -201,11 +201,14 @@
   padding-bottom: 5px;
 }
 
+// The container for the contents of a search result bucket.
 .search-result-bucket__content {
   padding-left: 10px;
   padding-right: 10px;
 }
 
+// The contents of a search result bucket which is shown when the bucket is
+// expanded.
 .search-result-bucket__annotation-cards-container {
   padding-left: 130px;
 
@@ -321,7 +324,7 @@ $stats-icon-column-width: 20px;
 }
 
 // As the screen size gets smaller, just before it would have introduced a
-// horizontal scrollbar move the sidebar below the search results.
+// horizontal scrollbar move the user/group sidebar below the search results.
 @media screen and (max-width: $tablet-width + 250px) {
   .search-result-container {
     flex-direction: column;
