@@ -64,6 +64,7 @@ Install the following packages:
         libevent \
         libffi \
         node \
+        postgresql \
         python
 
 
