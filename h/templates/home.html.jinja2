@@ -15,7 +15,8 @@
           href="{{ base_url }}assets/images/favicons/android-chrome-192x192.png">
     <link rel="shortcut icon"
           href="{{ base_url }}assets/images/favicons/favicon.ico">
-
+	
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script type="text/javascript">
       var tk = localStorage.getItem('token');
@@ -24,12 +25,6 @@
       }
     </script>
 
-</head>
-<body>
-
-<div class="container">
-
-
    <style>
    body {
     font-family: Roboto, sans-serif;
@@ -37,8 +32,16 @@
    a {
     color: black;
    }
+
    .gradient {
      background-image: linear-gradient(rgba(255, 255, 255, 0) -38%, rgb(255, 255, 255)), linear-gradient(70deg, rgb(247, 229, 152) 32%, rgb(172, 209, 239)); 
+
+    max-height: 800px;
+    position: absolute;
+    height: 800px;
+    left: 0;
+    top: 0;
+    width: 100%;
    }
 
    .signupBtn {
@@ -54,8 +57,8 @@
     margin-bottom:10px;
    }
    .row {
-    margin-top: 90px;
     margin-bottom: 100px;
+    padding: 40px;
    }
    .container-fluid {
         margin-right: auto;
@@ -72,14 +75,69 @@
    .footerLinks a{
     margin-left: 10px;  
    }
-   </style> 
 
-  <div class="row gradient" style="border-radius: 20px; padding: 40px">
-    <div class="col-md-8">
-      <img src="/assets/images/favicons/apple-icon.png">
-      <h1>Medium for non-Medium sites</h1>
+   .logo-header {
+   	left: 50px;
+   }
+   .installer__browser-logo--chrome{
+	    width: 19px;
+	    margin-right: .3em;
+	    float: left;
+   }
+
+   .hidden-xs {
+   	background-color: #9c83ff;
+   }
+
+   .readme {
+   	background-color: aliceblue;
+   }
+   </style> 
+   <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/cgmgoplajbhiglefllnjknlcjnabimhk">
+</head>
+
+<!-- Start of Async Drift Code -->
+<script>
+!function() {
+  var t;
+  if (t = window.driftt = window.drift = window.driftt || [], !t.init) return t.invoked ? void (window.console && console.error && console.error("Drift snippet included twice.")) : (t.invoked = !0, 
+  t.methods = [ "identify", "config", "track", "reset", "debug", "show", "ping", "page", "hide", "off", "on" ], 
+  t.factory = function(e) {
+    return function() {
+      var n;
+      return n = Array.prototype.slice.call(arguments), n.unshift(e), t.push(n), t;
+    };
+  }, t.methods.forEach(function(e) {
+    t[e] = t.factory(e);
+  }), t.load = function(t) {
+    var e, n, o, i;
+    e = 3e5, i = Math.ceil(new Date() / e) * e, o = document.createElement("script"), 
+    o.type = "text/javascript", o.async = !0, o.crossorigin = "anonymous", o.src = "https://js.driftt.com/include/" + i + "/" + t + ".js", 
+    n = document.getElementsByTagName("script")[0], n.parentNode.insertBefore(o, n);
+  });
+}();
+drift.SNIPPET_VERSION = '0.3.1';
+drift.load('p9icr264px5v');
+</script>
+<!-- End of Async Drift Code -->
+
+
+<body>
+<div class="gradient"></div>
+<div class="container-fluid">
+	<div class="row ">
+    <div class="col-md-8 logo-header">
+      <img id="title-logo" src="/assets/images/favicons/apple-icon.png">
+      <h1>learns the way you highlight the web</h1>
       <p style="font-size:13pt">Have a website? txtpen offers publishers the tools to generate heatmaps, increase engagement, &amp; earn new revenue.</p>
-      <div class="btn btn-primary">Tell me how</div>
+
+      
+      <a class="btn btn-primary hidden-xs" id="install-link" onclick="chrome.webstore.install()" href="#">
+	    <img alt="Install Chrome Extension" class="installer__browser-logo--chrome" src="https://txtpen.com/assets/images/browser-chrome-64x64.png">
+	    Add to Chrome
+	  </a>
+
+
     </div>
     <div class="col-md-4">
     <div style="margin-top:100px; margin-left:10px;">
@@ -89,11 +147,16 @@
       <input type="submit" value="Sign Up" style="margin-bottom:10px;width: 100%; height: 40px; display: inline-block; padding: 6px 12px; font-size: 14px; font-weight: 600; line-height: 20px; color: rgb(0, 0, 0, 0.65); white-space: nowrap; vertical-align: middle; cursor: pointer; background-color: rgb(238, 238, 238); background-image: linear-gradient(rgba(255, 255, 255, 0) -38%, rgb(255, 255, 255)), linear-gradient(70deg, rgb(255, 218, 62) 32%, rgb(43, 160, 255)); border: thin solid rgb(92, 169, 65); border-radius: 3px; -webkit-appearance: none; box-shadow: grey 1px 1px 1px; position: relative;">
       
     </a>
-    <div style="width:100%;text-align:center;">Already have an account? <a href="/login">Log in</a>.</div>
+    <div style="width:100%;text-align:center;">Already have an account? <a href="/login"><b>Log in</b></a>.</div>
 
     </div>
     </div>
   </div>
+
+</div>
+<div class="container">
+
+
 
   <div class="row">
     <div class="col-md-8">
@@ -140,7 +203,7 @@
       </p>
     </div>
   </div>
-  <div class="row">
+  <div class="row readme">
     <div class="col-md-6">
       <h1>Add txtpen to your blog in 3 simple steps</h1>
 
@@ -176,9 +239,48 @@
     </div>
 
 
-
-<script>window.txtpenLimits = ['']</script>
+<script>
+  window.txtpenConfig={
+    limits: ['']
+  };
+</script>
 <script async src="/embed.js"></script>
 <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
+<script async src="https://code.jquery.com/jquery-2.2.4.min.js"/>
+<script>
+//TODO: this shit
+    var theLogo = $("#title-logo");
+    var newImage = new Image();
+    newImage.src = theLogo.attr("src");
+    var imgWidth = newImage.width;
+    
+    // distance over which zoom effect takes place
+    var maxScrollDistance = 100;
+    
+    // set to window height if larger
+    maxScrollDistance = Math.min(maxScrollDistance, $(window).height());
+    
+    // width at maximum zoom out (i.e. when window has scrolled maxScrollDistance)
+    var widthAtMax = 50;
+    
+    // calculate diff and how many pixels to zoom per pixel scrolled
+    var widthDiff = imgWidth - widthAtMax;
+    var pixelsPerScroll =(widthDiff / maxScrollDistance);
+
+    $(window).scroll(function () {
+        // the currently scrolled-to position - max-out at maxScrollDistance
+        var scrollTopPos = Math.min($(document).scrollTop(), maxScrollDistance);
+        
+        // how many pixels to adjust by
+        var scrollChangePx =  Math.floor(scrollTopPos * pixelsPerScroll);
+        
+        // calculate the new width
+        var zoomedWidth = imgWidth - scrollChangePx;
+        
+        // set the width
+        $('#title-logo').css('width', zoomedWidth);
+    });
+
+</script>
 
 </body></html>
