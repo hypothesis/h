@@ -170,7 +170,7 @@ class GroupSearchController(SearchController):
         groups_service.member_leave(self.group,
                                     self.request.authenticated_userid)
 
-        new_params = self.request.POST.copy()
+        new_params = _copy_params(self.request, self.request.POST.copy())
         del new_params['group_leave']
         location = self.request.route_url('activity.search', _query=new_params)
 
@@ -193,7 +193,7 @@ class GroupSearchController(SearchController):
         userid = self.request.params['toggle_user_facet']
         username = util.user.split_user(userid)['username']
 
-        new_params = self.request.params.copy()
+        new_params = _copy_params(self.request)
 
         del new_params['toggle_user_facet']
 
@@ -211,7 +211,7 @@ class GroupSearchController(SearchController):
             # facet for the user.
             parsed_query.add('user', username)
 
-        new_params['q'] = parser.unparse(parsed_query)
+        _update_q(new_params, parsed_query)
 
         location = self.request.route_url(
             'group_read', pubid=self.group.pubid, slug=self.group.slug,
@@ -362,7 +362,7 @@ def _redirect_to_user_or_group_search(request, params):
 
 def _back(request):
     """Respond to a click on the ``back`` button."""
-    new_params = request.params.copy()
+    new_params = _copy_params(request)
     del new_params['back']
     return _redirect_to_user_or_group_search(request, new_params)
 
@@ -379,7 +379,7 @@ def _delete_lozenge(request):
     search box.
 
     """
-    new_params = request.params.copy()
+    new_params = _copy_params(request)
     del new_params['delete_lozenge']
     location = request.route_url('activity.search', _query=new_params)
     return httpexceptions.HTTPSeeOther(location=location)
@@ -399,7 +399,7 @@ def _toggle_tag_facet(request):
     """
     tag = request.params['toggle_tag_facet']
 
-    new_params = request.params.copy()
+    new_params = _copy_params(request)
 
     del new_params['toggle_tag_facet']
 
@@ -417,5 +417,43 @@ def _toggle_tag_facet(request):
         # for the tag.
         parsed_query.add('tag', tag)
 
-    new_params['q'] = parser.unparse(parsed_query)
+    _update_q(new_params, parsed_query)
+
     return _redirect_to_user_or_group_search(request, new_params)
+
+
+def _update_q(params, parsed_query):
+    """
+    Update the given request params based on the given parsed_query.
+
+    Update the value of the 'q' string in the given request params based on the
+    given parsed_query.
+
+    If the query parses to an empty string then ensure that there is no 'q' in
+    the given request params, to avoid redirecting the browser to a URL with an
+    empty trailing ?q=
+
+    """
+    q = parser.unparse(parsed_query)
+    if q.strip():
+        params['q'] = q
+    else:
+        params.pop('q', None)
+
+
+def _copy_params(request, params=None):
+    """
+    Return a copy of the given request's params.
+
+    If the request contains an empty 'q' param then it is omitted from the
+    returned copy of the params, to avoid redirecting the browser to a URL with
+    an empty trailing ?q=
+
+    """
+    if params is None:
+        params = request.params.copy()
+
+    if 'q' in params and not params['q'].strip():
+        del params['q']
+
+    return params
