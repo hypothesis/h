@@ -142,11 +142,11 @@ def execute(request, query, page_size):
 
 
 def aggregations_for(query):
-    aggregations = [TagsAggregation(limit=10)]
+    aggregations = [TagsAggregation(limit=50)]
 
     # Should we aggregate by user?
     if _single_entry(query, 'group'):
-        aggregations.append(UsersAggregation(limit=10))
+        aggregations.append(UsersAggregation(limit=50))
 
     return aggregations
 
