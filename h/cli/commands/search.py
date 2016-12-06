@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 import click
 
 from memex.search import config
@@ -21,6 +23,8 @@ def reindex(ctx):
     updates the index alias. This requires that the index is aliased already,
     and will raise an error if it is not.
     """
+
+    os.environ['ELASTICSEARCH_CLIENT_TIMEOUT'] = '30'
 
     request = ctx.obj['bootstrap']()
 

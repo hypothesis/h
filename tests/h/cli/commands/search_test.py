@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import mock
+import os
 import pytest
 
 from h.cli.commands import search
 
 
 class TestReindexCommand(object):
+    @pytest.mark.usefixtures('reindex')
+    def test_it_raises_timeout(self, cli, cliconfig):
+        cli.invoke(search.reindex, [], obj=cliconfig)
+        assert os.getenv('ELASTICSEARCH_CLIENT_TIMEOUT') == '30'
+
     def test_calls_reindex(self, cli, cliconfig, pyramid_request, reindex):
         result = cli.invoke(search.reindex, [], obj=cliconfig)
 
