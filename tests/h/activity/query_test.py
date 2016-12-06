@@ -216,7 +216,7 @@ class TestExecute(object):
                                                             TagsAggregation):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        TagsAggregation.assert_called_once_with(limit=10)
+        TagsAggregation.assert_called_once_with(limit=50)
         search.append_aggregation.assert_called_with(
             TagsAggregation.return_value)
 
@@ -236,7 +236,7 @@ class TestExecute(object):
 
         execute(pyramid_request, query, self.PAGE_SIZE)
 
-        UsersAggregation.assert_called_once_with(limit=10)
+        UsersAggregation.assert_called_once_with(limit=50)
         search.append_aggregation.assert_called_with(
             UsersAggregation.return_value)
 
