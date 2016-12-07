@@ -38,8 +38,8 @@
 
   // Align the left edge of the search result list with the left edge of the
   // navbar content.
-  margin-left: 30px;
-  margin-right: 60px;
+  margin-left: $search-result-container-margin-left;
+  margin-right: $search-result-container-margin-right;
 }
 
 .search-result-container--empty {

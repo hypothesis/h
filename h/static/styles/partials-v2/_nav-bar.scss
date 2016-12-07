@@ -15,8 +15,8 @@
 .nav-bar__content {
   display: flex;
   flex-direction: row;
-  margin-left: 30px;
-  margin-right: 60px;
+  margin-left: $search-result-container-margin-left;
+  margin-right: $search-result-container-margin-right;
 }
 
 .nav-bar__logo-container {
