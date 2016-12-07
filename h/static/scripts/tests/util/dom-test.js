@@ -57,8 +57,18 @@ describe('util/dom', () => {
   });
 
   describe('cloneTemplate', () => {
-    it('returns a clone of the first child Element of the template', () => {
-      const template = createDOM('<template id="test-template"><div id="child"></div></template>');
+    it('clones the first child of the template when <template> is supported', () => {
+      const frag = document.createDocumentFragment();
+      frag.appendChild(createDOM('<div id="child"></div>'));
+      frag.appendChild(createDOM('<div id="child-b"></div>'));
+      const template = document.createElement('template');
+      template.content = frag;
+      const clone = domUtil.cloneTemplate(template);
+      assert.deepEqual(clone.outerHTML, '<div id="child"></div>');
+    });
+
+    it('clones the first child of the template when <template> is not supported', () => {
+      const template = createDOM('<fake-template><div id="child"></div></fake-template>');
       const clone = domUtil.cloneTemplate(template);
       assert.deepEqual(clone.outerHTML, '<div id="child"></div>');
     });

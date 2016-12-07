@@ -52,6 +52,23 @@ function findRefs(el) {
 }
 
 /**
+ * Return the first child of `node` which is an `Element`.
+ *
+ * Work around certain browsers (IE, Edge) not supporting firstElementChild on
+ * Document, DocumentFragment.
+ *
+ * @param {Node} node
+ */
+function firstElementChild(node) {
+  for (let i=0; i < node.childNodes.length; i++) {
+    if (node.childNodes[i].nodeType === Node.ELEMENT_NODE) {
+      return node.childNodes[i];
+    }
+  }
+  return null;
+}
+
+/**
  * Clone the content of a <template> element and return the first child Element.
  *
  * @param {HTMLTemplateElement} templateEl
@@ -60,7 +77,7 @@ function cloneTemplate(templateEl) {
   if (templateEl.content) {
     // <template> supported natively.
     const content = templateEl.content.cloneNode(true);
-    return content.firstElementChild;
+    return firstElementChild(content);
   } else {
     // <template> not supported. Browser just treats it as an unknown Element.
     return templateEl.firstElementChild.cloneNode(true);
