@@ -373,11 +373,13 @@ $stats-icon-column-width: 20px;
     margin-left: 5px;
     margin-top: 10px;
   }
+}
 
+@media screen and (max-width: $tablet-width) {
+  // Align the left and right edges of the search result list with the left and
+  // right edges of the navbar content.
   .search-result-container {
-    // Align the left edge of the search result list with the left edge of the
-    // navbar content.
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: $search-result-container-margin-left-on-small-screens;
+    margin-right: $search-result-container-margin-right-on-small-screens;
   }
 }

@@ -56,6 +56,8 @@ $touch-target-size: 44px;
 // ----
 $search-result-container-margin-left: 30px;
 $search-result-container-margin-right: 60px;
+$search-result-container-margin-left-on-small-screens: 10px;
+$search-result-container-margin-right-on-small-screens: 10px;
 
 // Include all mixins, making them available to the stylesheet. N.B. Mixins
 // should *never* output CSS, so this is safe.
