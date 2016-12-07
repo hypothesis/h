@@ -15,8 +15,8 @@
 .nav-bar__content {
   display: flex;
   flex-direction: row;
-  margin-left: $search-result-container-margin-left;
-  margin-right: $search-result-container-margin-right;
+  margin-left: $content-margin-left;
+  margin-right: $content-margin-right;
 }
 
 .nav-bar__logo-container {
@@ -93,8 +93,8 @@
   // Reduce horizontal margins on smaller screens to provide more space for
   // search bar
   .nav-bar__content {
-    margin-left: $search-result-container-margin-left-on-small-screens;
-    margin-right: $search-result-container-margin-right-on-small-screens;
+    margin-left: $content-margin-left-on-small-screens;
+    margin-right: $content-margin-right-on-small-screens;
   }
 }
 

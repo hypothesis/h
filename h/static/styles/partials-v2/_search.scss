@@ -38,8 +38,8 @@
 
   // Align the left and right edges of the search result list with the left and
   // right edges of the navbar content.
-  margin-left: $search-result-container-margin-left;
-  margin-right: $search-result-container-margin-right;
+  margin-left: $content-margin-left;
+  margin-right: $content-margin-right;
 }
 
 .search-result-container--empty {
@@ -379,7 +379,7 @@ $stats-icon-column-width: 20px;
   // Align the left and right edges of the search result list with the left and
   // right edges of the navbar content.
   .search-result-container {
-    margin-left: $search-result-container-margin-left-on-small-screens;
-    margin-right: $search-result-container-margin-right-on-small-screens;
+    margin-left: $content-margin-left-on-small-screens;
+    margin-right: $content-margin-right-on-small-screens;
   }
 }
