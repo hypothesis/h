@@ -358,6 +358,10 @@
           </li>
           {% endfor %}
         </ol>
+
+        {% if page.max > 1 %}
+          {% include "h:templates/includes/paginator.html.jinja2" %}
+        {% endif %}
       </div>
     {% else %}
       <div class="search-result-zero {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
@@ -410,8 +414,4 @@
       {{ user_sidebar(user) }}
     {% endif %}
   </div>
-
-  {% if not more_info and page and page.max > 1 %}
-    {% include "h:templates/includes/paginator.html.jinja2" %}
-  {% endif %}
 {% endblock %}
