@@ -65,6 +65,11 @@ def svg_icon(loader, name, css_class=''):
     that can be customized via CSS.
     See https://github.com/blog/2112-delivering-octicons-with-svg
 
+    To color an icon dynamically (eg. on hover), apply a CSS class to the SVG
+    via the `css_class` property, style the `color` property for the relevant
+    pseudo-class (eg. `:hover`) and use `fill="currentColor"` or
+    `stroke="currentColor"` in the SVG markup.
+
     :param loader: Callable accepting an icon name and returning XML markup for
                    the SVG.
     :param name: The name of the SVG file to render
