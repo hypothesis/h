@@ -3,7 +3,9 @@
 // Configure error reporting
 const settings = require('./base/settings')(document);
 if (settings.raven) {
-  require('./base/raven').init(settings.raven);
+  const raven = require('./base/raven');
+  raven.init(settings.raven);
+  raven.setUserInfo({userid: settings.raven.userid});
 }
 
 require('./polyfills');

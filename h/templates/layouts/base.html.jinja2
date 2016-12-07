@@ -66,7 +66,8 @@
         {
           "raven": {
             "dsn": "{{ request.sentry.get_public_dsn('https') }}",
-            "release": "{{ h_version }}"
+            "release": "{{ h_version }}",
+            "userid": {{ request.authenticated_userid | to_json }}
           }
         }
       </script>
