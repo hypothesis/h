@@ -3,7 +3,8 @@
 const Controller = require('../base/controller');
 
 function isWordChar(event) {
-  return event.key.match(/^\w$/) && !event.ctrlKey && !event.altKey;
+  return event.key.match(/^\w$/) && !event.ctrlKey && !event.altKey &&
+                                    !event.metaKey;
 }
 
 /**
