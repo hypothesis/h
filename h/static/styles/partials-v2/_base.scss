@@ -54,6 +54,12 @@ $touch-target-size: 44px;
 
 // Misc
 // ----
+$search-results-max-width: 950px;
+$search-results-margin-right: 30px;
+$search-result-sidebar-width: 285px;
+
+$content-max-width: $search-results-max-width + $search-results-margin-right + $search-result-sidebar-width;
+
 $content-padding-left: 30px;
 $content-padding-right: 60px;
 $content-padding-left-on-small-screens: 10px;
