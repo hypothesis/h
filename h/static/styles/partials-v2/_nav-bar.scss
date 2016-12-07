@@ -15,6 +15,8 @@
 .nav-bar__content {
   display: flex;
   flex-direction: row;
+  margin-left: 30px;
+  margin-right: 60px;
 }
 
 .nav-bar__logo-container {
@@ -23,7 +25,6 @@
 }
 
 .nav-bar__logo {
-  margin-left: 30px;
   margin-right: 30px;
 }
 
@@ -46,7 +47,6 @@
 
 .nav-bar-links {
   margin-left: 10px;
-  margin-right: 60px;
 
   display: flex;
   flex-direction: row;
