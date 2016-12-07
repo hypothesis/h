@@ -8,6 +8,7 @@ from memex.search import Search
 from memex.search import parser
 from memex.search.query import (
     TagsAggregation,
+    TopLevelAnnotationsFilter,
     UsersAggregation,
 )
 import newrelic.agent
@@ -166,7 +167,8 @@ def fetch_annotations(session, ids, reply_ids):
 
 @newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
-    search = Search(request, separate_replies=True, stats=request.stats)
+    search = Search(request, stats=request.stats)
+    search.append_filter(TopLevelAnnotationsFilter())
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 
