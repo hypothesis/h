@@ -15,8 +15,13 @@
 .nav-bar__content {
   display: flex;
   flex-direction: row;
-  margin-left: $content-margin-left;
-  margin-right: $content-margin-right;
+
+  padding-left: $content-padding-left;
+  padding-right: $content-padding-right;
+
+  max-width: 1265px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .nav-bar__logo-container {
@@ -93,8 +98,8 @@
   // Reduce horizontal margins on smaller screens to provide more space for
   // search bar
   .nav-bar__content {
-    margin-left: $content-margin-left-on-small-screens;
-    margin-right: $content-margin-right-on-small-screens;
+    padding-left: $content-padding-left-on-small-screens;
+    padding-right: $content-padding-right-on-small-screens;
   }
 }
 
