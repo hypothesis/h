@@ -50,7 +50,9 @@
     </section>
   {% endif %}
   <section class="annotation-card__text">
-    {{ presented_annotation.annotation.text_rendered|safe }}
+    {% if presented_annotation.annotation.text_rendered %}
+      {{ presented_annotation.annotation.text_rendered|safe }}
+    {% endif %}
   </section>
   <section class="annotation-card__tags">
     {% for tag in presented_annotation.annotation.tags%}
