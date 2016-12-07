@@ -16,6 +16,15 @@ require('unorm');
 // Element.prototype.dataset, required by IE 10
 require('element-dataset')();
 
+// Element.prototype.remove. Required by IE 10/11
+if (!Element.prototype.remove) {
+  Element.prototype.remove = function () {
+    if (this.parentNode) {
+      this.parentNode.removeChild(this);
+    }
+  };
+}
+
 // URL constructor, required by IE 10/11,
 // early versions of Microsoft Edge.
 try {
