@@ -201,11 +201,14 @@
   padding-bottom: 5px;
 }
 
+// The container for the contents of a search result bucket.
 .search-result-bucket__content {
   padding-left: 10px;
   padding-right: 10px;
 }
 
+// The contents of a search result bucket which is shown when the bucket is
+// expanded.
 .search-result-bucket__annotation-cards-container {
   padding-left: 130px;
 
@@ -218,10 +221,15 @@
   }
 }
 
+// Preferred width of annotation cards on large screens.
+$annotation-card-width: 500px;
+
+// The list of annotation cards in a bucket.
 .search-result-bucket__annotation-cards {
+  flex-basis: $annotation-card-width;
   flex-grow: 1;
-  max-width: 500px;
   flex-shrink: 0;
+  max-width: $annotation-card-width;
   padding-left: 0;
   padding-right: 0;
 }
@@ -316,7 +324,7 @@ $stats-icon-column-width: 20px;
 }
 
 // As the screen size gets smaller, just before it would have introduced a
-// horizontal scrollbar move the sidebar below the search results.
+// horizontal scrollbar move the user/group sidebar below the search results.
 @media screen and (max-width: $tablet-width + 250px) {
   .search-result-container {
     flex-direction: column;
@@ -367,6 +375,10 @@ $stats-icon-column-width: 20px;
 
   .search-result-bucket__annotation-cards {
     width: 100%;
+
+    // Set the preferred height of the annotation card list based on its
+    // contents.
+    flex-basis: auto;
   }
 
   .search-bucket-stats {
