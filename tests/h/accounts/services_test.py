@@ -24,6 +24,11 @@ class TestUserService(object):
 
         assert isinstance(result, User)
 
+    def test_fetch_retrieves_user_by_username_and_authority(self, svc):
+        result = svc.fetch('jacqui', 'foo.com')
+
+        assert isinstance(result, User)
+
     def test_fetch_caches_fetched_users(self, db_session, svc, users):
         jacqui, _, _ = users
 

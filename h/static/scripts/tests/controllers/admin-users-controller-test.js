@@ -1,29 +1,29 @@
 'use strict';
 
-var AdminUsersController = require('../../controllers/admin-users-controller');
+const AdminUsersController = require('../../controllers/admin-users-controller');
 
 function submitEvent() {
   return new Event('submit', {bubbles: true, cancelable: true});
 }
 
-describe('AdminUsersController', function () {
-  var root;
-  var form;
+describe('AdminUsersController', () => {
+  let root;
+  let form;
 
-  beforeEach(function () {
+  beforeEach(() => {
     root = document.createElement('div');
     root.innerHTML = '<form><input type="submit"></form>';
     form = root.querySelector('form');
     document.body.appendChild(root);
   });
 
-  afterEach(function () {
+  afterEach(() => {
     root.remove();
   });
 
-  it('it submits the form when confirm returns true', function () {
-    var event = submitEvent();
-    var fakeWindow = {confirm: sinon.stub().returns(true)};
+  it('it submits the form when confirm returns true', () => {
+    const event = submitEvent();
+    const fakeWindow = {confirm: sinon.stub().returns(true)};
     new AdminUsersController(root, {window: fakeWindow});
 
     form.dispatchEvent(event);
@@ -31,9 +31,9 @@ describe('AdminUsersController', function () {
     assert.isFalse(event.defaultPrevented);
   });
 
-  it('it cancels the form submission when confirm returns false', function () {
-    var event = submitEvent();
-    var fakeWindow = {confirm: sinon.stub().returns(false)};
+  it('it cancels the form submission when confirm returns false', () => {
+    const event = submitEvent();
+    const fakeWindow = {confirm: sinon.stub().returns(false)};
     new AdminUsersController(root, {window: fakeWindow});
 
     form.dispatchEvent(event);

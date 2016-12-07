@@ -31,16 +31,16 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = [
     'SQLAlchemy>=1.0.13',
     'bleach>=1.4.3,<1.5',
+    'certifi',
     'elasticsearch>=1.1.0,<2.0.0',
     'jsonschema>=2.5.1,<2.6',
     'mistune>=0.7.3,<0.8',
     'psycopg2>=2.6.1,<2.7',
     'pyparsing>=2.1.5,<2.2',
     'pyramid-services==0.4',
-    'pyramid>=1.6,<1.7',
+    'pyramid>=1.7,<1.8',
     'python-dateutil>=2.1',
     'transaction',
-    'zope.interface==4.2.0',
 ]
 EXTRAS_REQUIRE = {}
 ENTRY_POINTS = {}

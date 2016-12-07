@@ -351,6 +351,27 @@ class TestUriFilter(object):
                                              "httpx://elephants.com",
                                              "httpx://tigers.com"])
 
+    def test_accepts_url_aliases(self, storage):
+        request = mock.Mock()
+        params = multidict.MultiDict()
+        params.add("uri", "http://example.com")
+        params.add("url", "http://example.net")
+        storage.expand_uri.side_effect = [
+            ["http://giraffes.com/", "https://elephants.com/"],
+            ["http://tigers.com/", "https://elephants.com/"],
+        ]
+
+        urifilter = query.UriFilter(request)
+
+        result = urifilter(params)
+        query_uris = result["terms"]["target.scope"]
+
+        storage.expand_uri.assert_any_call(request.db, "http://example.com")
+        storage.expand_uri.assert_any_call(request.db, "http://example.net")
+        assert sorted(query_uris) == sorted(["httpx://giraffes.com",
+                                             "httpx://elephants.com",
+                                             "httpx://tigers.com"])
+
     @pytest.fixture
     def storage(self, patch):
         storage = patch('memex.search.query.storage')
@@ -469,13 +490,13 @@ class TestTagsAggregations(object):
     def test_elasticsearch_aggregation(self):
         agg = query.TagsAggregation()
         assert agg({}) == {
-            'terms': {'field': 'tags', 'size': 0}
+            'terms': {'field': 'tags_raw', 'size': 0}
         }
 
     def test_it_allows_to_set_a_limit(self):
         agg = query.TagsAggregation(limit=14)
         assert agg({}) == {
-            'terms': {'field': 'tags', 'size': 14}
+            'terms': {'field': 'tags_raw', 'size': 14}
         }
 
     def parse_result(self):

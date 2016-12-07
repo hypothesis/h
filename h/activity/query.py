@@ -14,6 +14,7 @@ import newrelic.agent
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import subqueryload
 
+from h import links
 from h import presenters
 from h.activity import bucketing
 from h.models import Annotation, Document, Group
@@ -49,7 +50,7 @@ def extract(request, parse=parser.parse):
     #
     # (Note that a query for the *intersection* of >1 users or groups is by
     # definition empty)
-    if request.matched_route.name == 'activity.group_search':
+    if request.matched_route.name == 'group_read':
         q['group'] = request.matchdict['pubid']
     elif request.matched_route.name == 'activity.user_search':
         q['user'] = request.matchdict['username']
@@ -80,15 +81,21 @@ def check_url(request, query, unparse=parser.unparse):
 
     if _single_entry(query, 'group'):
         pubid = query.pop('group')
-        redirect = request.route_path('activity.group_search',
-                                      pubid=pubid,
-                                      _query={'q': unparse(query)})
+        group = request.db.query(Group).filter_by(pubid=pubid).one_or_none()
+        if group:
+            redirect = request.route_path('group_read',
+                                          pubid=group.pubid,
+                                          slug=group.slug,
+                                          _query={'q': unparse(query)})
 
-    if _single_entry(query, 'user'):
+    elif _single_entry(query, 'user'):
         username = query.pop('user')
-        redirect = request.route_path('activity.user_search',
-                                      username=username,
-                                      _query={'q': unparse(query)})
+        user = request.find_service(name='user').fetch(username,
+                                                       request.auth_domain)
+        if user:
+            redirect = request.route_path('activity.user_search',
+                                          username=username,
+                                          _query={'q': unparse(query)})
 
     if redirect is not None:
         raise HTTPFound(location=redirect)
@@ -123,21 +130,23 @@ def execute(request, query, page_size):
     # Add group information to buckets and present annotations
     for timeframe in result.timeframes:
         for bucket in timeframe.document_buckets.values():
-            for index, annotation in enumerate(bucket.annotations):
-                bucket.annotations[index] = {
+            bucket.presented_annotations = []
+            for annotation in bucket.annotations:
+                bucket.presented_annotations.append({
                     'annotation': presenters.AnnotationHTMLPresenter(annotation),
-                    'group': groups.get(annotation.groupid)
-                }
+                    'group': groups.get(annotation.groupid),
+                    'incontext_link': links.incontext_link(request, annotation)
+                })
 
     return result
 
 
 def aggregations_for(query):
-    aggregations = [TagsAggregation(limit=10)]
+    aggregations = [TagsAggregation(limit=50)]
 
     # Should we aggregate by user?
     if _single_entry(query, 'group'):
-        aggregations.append(UsersAggregation(limit=10))
+        aggregations.append(UsersAggregation(limit=50))
 
     return aggregations
 
@@ -157,7 +166,7 @@ def fetch_annotations(session, ids, reply_ids):
 
 @newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
-    search = Search(request, separate_replies=True)
+    search = Search(request, separate_replies=True, stats=request.stats)
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 

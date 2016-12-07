@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import elasticsearch
+import certifi
+from elasticsearch import Elasticsearch
+
+__all__ = ('Client',)
 
 
 class Client(object):
@@ -15,13 +18,15 @@ class Client(object):
     :param index: index name
     """
 
-    class t(object):
+    class t(object):  # noqa
         """Document types"""
         annotation = 'annotation'
-        document = 'document'
 
     def __init__(self, host, index, **kwargs):
         self.index = index
-        self.conn = elasticsearch.Elasticsearch([host],
-                                                verify_certs=True,
-                                                **kwargs)
+        self.conn = Elasticsearch([host],
+                                  verify_certs=True,
+                                  # N.B. this won't be necessary if we upgrade
+                                  # to elasticsearch>=5.0.0.
+                                  ca_certs=certifi.where(),
+                                  **kwargs)

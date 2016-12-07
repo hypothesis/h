@@ -12,6 +12,10 @@
     <div class="form-group">
       <label for="username">Username or email</label>
       <input type="text" class="form-control" name="username">
+    </div>
+    <div class="form-group">
+      <label for="authority">Authority</label>
+      <input type="text" class="form-control" name="authority" value="{{ authority or default_authority }}">
       <input type="submit" class="btn btn-default" value="Find">
     </div>
   </form>
@@ -21,6 +25,7 @@
       <table class="table table-auto table-striped">
         <tbody>
           <tr><th>Username</th><td>{{ user.username }}</td></tr>
+          <tr><th>Authority</th><td>{{ user.authority }}</td></tr>
           <tr><th>UID</th><td>{{ user.uid }}</td></tr>
           <tr><th>Email</th><td>{{ user.email }}</td></tr>
           <tr><th>Registered</th><td>{{ user.registered_date }}</td></tr>
@@ -36,8 +41,8 @@
                       class="users-activate-form"
                       method="POST">
                   <input type="hidden"
-                         name="username"
-                         value="{{user.username}}">
+                         name="userid"
+                         value="{{user.userid}}">
                   <button class="btn btn-primary btn-xs" type="submit">
                     Activate
                   </button>
@@ -63,7 +68,7 @@
       <h3>Please-be-careful Zone</h3>
 
       <form method="POST" action="{{request.route_path('admin_users_rename')}}" class="form-inline">
-        <input type="hidden" name="username" value="{{user.username}}">
+        <input type="hidden" name="userid" value="{{user.userid}}">
         <input type="text" name="new_username" placeholder="New Username">
         <button class="btn" type="submit">Change username</button>
       </form>
@@ -73,7 +78,7 @@
       <form method="POST"
             action="{{request.route_path('admin_users_delete')}}"
             class="form-inline js-users-delete-form">
-        <input type="hidden" name="username" value="{{user.username}}">
+        <input type="hidden" name="userid" value="{{user.userid}}">
 
         {% if user_meta['annotations_count'] > 100 %}
           <div class="alert alert-warning" role="alert">
@@ -111,7 +116,7 @@
         </table>
       {% endif %}
     {% else %}
-      <p>No user found with username or email <em>{{ username }}</em>!</p>
+      <p>No user found with username or email <em>{{ username }}</em> and authority <em>{{ authority }}</em>!</p>
     {% endif %}
   {% endif %}
 {% endblock %}

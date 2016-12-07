@@ -20,28 +20,51 @@ class TestStaffIndex(object):
     def test_context_contains_staff_usernames(self, pyramid_request):
         result = views.staff_index(pyramid_request)
 
-        assert set(result["staff"]) == set(["agnos", "bojan", "cristof"])
+        assert set(result["staff"]) == set([
+            "acct:agnos@example.com",
+            "acct:bojan@example.com",
+            "acct:cristof@foo.org"
+        ])
 
 
 @pytest.mark.usefixtures('users', 'routes')
 class TestStaffAddRemove(object):
 
     def test_add_makes_users_staff(self, pyramid_request, users):
-        pyramid_request.params = {"add": "eva"}
+        pyramid_request.params = {
+            "add": "eva",
+            "authority": "foo.org"
+        }
 
         views.staff_add(pyramid_request)
 
         assert users['eva'].staff
 
     def test_add_is_idempotent(self, pyramid_request, users):
-        pyramid_request.params = {"add": "agnos"}
+        pyramid_request.params = {
+            "add": "agnos",
+            "authority": pyramid_request.auth_domain
+        }
 
         views.staff_add(pyramid_request)
 
         assert users['agnos'].staff
 
+    def test_add_strips_spaces(self, pyramid_request, users):
+        pyramid_request.params = {
+            "add": "   eva   ",
+            "authority": "     foo.org   "
+        }
+
+        views.staff_add(pyramid_request)
+
+        assert users['eva'].staff
+
     def test_add_redirects_to_index(self, pyramid_request):
-        pyramid_request.params = {"add": "eva"}
+        pyramid_request.params = {
+            "add": "eva",
+            "authority": pyramid_request.auth_domain
+        }
 
         result = views.staff_add(pyramid_request)
 
@@ -49,7 +72,10 @@ class TestStaffAddRemove(object):
         assert result.location == '/adm/staff'
 
     def test_add_redirects_to_index_when_user_not_found(self, pyramid_request):
-        pyramid_request.params = {"add": "florp"}
+        pyramid_request.params = {
+            "add": "florp",
+            "authority": pyramid_request.auth_domain
+        }
 
         result = views.staff_add(pyramid_request)
 
@@ -57,7 +83,10 @@ class TestStaffAddRemove(object):
         assert result.location == '/adm/staff'
 
     def test_add_flashes_when_user_not_found(self, pyramid_request):
-        pyramid_request.params = {"add": "florp"}
+        pyramid_request.params = {
+            "add": "florp",
+            "authority": pyramid_request.auth_domain
+        }
         pyramid_request.session.flash = mock.Mock()
 
         views.staff_add(pyramid_request)
@@ -65,21 +94,21 @@ class TestStaffAddRemove(object):
         assert pyramid_request.session.flash.call_count == 1
 
     def test_remove_makes_users_not_staff(self, pyramid_request, users):
-        pyramid_request.params = {"remove": "cristof"}
+        pyramid_request.params = {"remove": "acct:cristof@foo.org"}
 
         views.staff_remove(pyramid_request)
 
         assert not users['cristof'].staff
 
     def test_remove_is_idempotent(self, pyramid_request, users):
-        pyramid_request.params = {"remove": "eva"}
+        pyramid_request.params = {"remove": "acct:eva@example.com"}
 
         views.staff_remove(pyramid_request)
 
         assert not users['eva'].staff
 
     def test_remove_redirects_to_index(self, pyramid_request):
-        pyramid_request.params = {"remove": "agnos"}
+        pyramid_request.params = {"remove": "acct:agnos@example.com"}
 
         result = views.staff_remove(pyramid_request)
 
@@ -87,7 +116,7 @@ class TestStaffAddRemove(object):
         assert result.location == '/adm/staff'
 
     def test_remove_redirects_to_index_when_user_not_found(self, pyramid_request):
-        pyramid_request.params = {"remove": "florp"}
+        pyramid_request.params = {"remove": "acct:florp@example.com"}
 
         result = views.staff_remove(pyramid_request)
 
@@ -102,17 +131,15 @@ def routes(pyramid_config):
 
 @pytest.fixture
 def users(db_session, factories):
-    staff = ['agnos', 'bojan', 'cristof']
-    nonstaff = ['david', 'eva', 'flora']
-
-    users = {}
-
-    for staff in staff:
-        users[staff] = factories.User(username=staff, staff=True)
-    for nonstaff in nonstaff:
-        users[nonstaff] = factories.User(username=nonstaff)
-
-    db_session.add_all(list(users.values()))
+    users = {
+        'agnos': factories.User(username='agnos', authority='example.com', staff=True),
+        'bojan': factories.User(username='bojan', authority='example.com', staff=True),
+        'cristof': factories.User(username='cristof', authority='foo.org', staff=True),
+        'david': factories.User(username='david', authority='example.com', staff=False),
+        'eva': factories.User(username='eva', authority='foo.org', staff=False),
+        'flora': factories.User(username='flora', authority='foo.org', staff=False),
+    }
+    db_session.add_all(users.values())
     db_session.flush()
 
     return users

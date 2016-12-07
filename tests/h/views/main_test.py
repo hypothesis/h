@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import mock
+from pyramid import httpexceptions
 import pytest
 
 from memex.models.annotation import Annotation
@@ -38,6 +39,40 @@ def test_og_no_document(render_app_html, pyramid_request):
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])
 
 
+@pytest.mark.usefixtures('routes')
+class TestStreamUserRedirect(object):
+
+    def test_it_redirects_to_stream(self, pyramid_request):
+        pyramid_request.matchdict['user'] = 'bob'
+        with pytest.raises(httpexceptions.HTTPFound) as exc:
+            main.stream_user_redirect(pyramid_request)
+
+        assert exc.value.location == 'http://example.com/stream?q=user%3Abob'
+
+    def test_it_redirects_to_user_activity_page(self, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.matchdict['user'] = 'bob'
+
+        with pytest.raises(httpexceptions.HTTPFound) as exc:
+            main.stream_user_redirect(pyramid_request)
+
+        assert exc.value.location == 'http://example.com/user/bob'
+
+    def test_it_extracts_username_from_account_id(self, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.matchdict['user'] = 'acct:bob@hypothes.is'
+
+        with pytest.raises(httpexceptions.HTTPFound) as exc:
+            main.stream_user_redirect(pyramid_request)
+
+        assert exc.value.location == 'http://example.com/user/bob'
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.user_search', '/user/{username}')
+        pyramid_config.add_route('stream', '/stream')
+
+
 @pytest.fixture
 def annotation_document(patch):
     return patch('memex.models.annotation.Annotation.document',
@@ -57,6 +92,12 @@ def pyramid_config(pyramid_config):
     # Pretend the client assets environment has been configured
     pyramid_config.registry['assets_client_env'] = mock.Mock()
     return pyramid_config
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.feature.flags['search_page'] = False
+    return pyramid_request
 
 
 @pytest.fixture

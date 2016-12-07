@@ -44,7 +44,7 @@ class TestExtract(object):
         """
         parse.return_value = MultiDict({'foo': 'bar',
                                         'group': 'whattheusersent'})
-        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.matched_route.name = 'group_read'
         pyramid_request.matchdict['pubid'] = 'abcd1234'
         pyramid_request.GET['q'] = 'giraffe'
 
@@ -75,39 +75,74 @@ class TestExtract(object):
         return mock.Mock(spec_set=[], return_value=MultiDict({'foo': 'bar'}))
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('routes', 'user_service')
 class TestCheckURL(object):
-    def test_redirects_to_group_search_page_if_one_group_in_query(self, pyramid_request, unparse):
-        query = MultiDict({'group': 'abcd1234'})
+    def test_redirects_to_group_search_page_if_one_group_in_query(self,
+                                                                  group,
+                                                                  pyramid_request,
+                                                                  unparse):
+        query = MultiDict({'group': group.pubid})
 
         with pytest.raises(HTTPFound) as e:
             check_url(pyramid_request, query, unparse=unparse)
 
-        assert e.value.location == '/act/groups/abcd1234?q=UNPARSED_QUERY'
+        assert e.value.location == (
+            '/act/groups/{pubid}/{slug}?q=UNPARSED_QUERY'.format(
+                pubid=group.pubid, slug=group.slug))
 
-    def test_removes_group_term_from_query(self, pyramid_request, unparse):
-        query = MultiDict({'group': 'abcd1234'})
+    def test_does_not_redirect_to_group_page_if_group_does_not_exist(self,
+                                                                     pyramid_request,
+                                                                     unparse):
+        query = MultiDict({'group': 'does_not_exist'})
+
+        assert check_url(pyramid_request, query, unparse=unparse) is None
+
+    def test_removes_group_term_from_query(self, group, pyramid_request, unparse):
+        query = MultiDict({'group': group.pubid})
 
         with pytest.raises(HTTPFound):
             check_url(pyramid_request, query, unparse=unparse)
 
         unparse.assert_called_once_with({})
 
-    def test_preserves_other_query_terms_for_group_search(self, pyramid_request, unparse):
-        query = MultiDict({'group': 'abcd1234', 'tag': 'foo'})
+    def test_preserves_other_query_terms_for_group_search(self,
+                                                          group,
+                                                          pyramid_request,
+                                                          unparse):
+        query = MultiDict({'group': group.pubid, 'tag': 'foo'})
 
         with pytest.raises(HTTPFound):
             check_url(pyramid_request, query, unparse=unparse)
 
         unparse.assert_called_once_with({'tag': 'foo'})
 
-    def test_redirects_to_user_search_page_if_one_group_in_query(self, pyramid_request, unparse):
+    def test_preserves_user_query_terms_for_group_search(self,
+                                                         group,
+                                                         pyramid_request,
+                                                         unparse):
+        query = MultiDict({'group': group.pubid, 'user': 'foo'})
+
+        with pytest.raises(HTTPFound):
+            check_url(pyramid_request, query, unparse=unparse)
+
+        unparse.assert_called_once_with({'user': 'foo'})
+
+    def test_redirects_to_user_search_page_if_one_user_in_query(self, pyramid_request, unparse):
         query = MultiDict({'user': 'jose'})
 
         with pytest.raises(HTTPFound) as e:
             check_url(pyramid_request, query, unparse=unparse)
 
         assert e.value.location == '/act/users/jose?q=UNPARSED_QUERY'
+
+    def test_does_not_redirect_to_user_page_if_user_does_not_exist(self,
+                                                                   pyramid_request,
+                                                                   user_service):
+        query = MultiDict({'user': 'jose'})
+        user_service.fetch.return_value = None
+
+        assert check_url(pyramid_request, query) is None
+
 
     def test_removes_user_term_from_query(self, pyramid_request, unparse):
         query = MultiDict({'user': 'jose'})
@@ -133,12 +168,23 @@ class TestCheckURL(object):
         assert result is None
 
     def test_does_nothing_if_not_on_search_page(self, pyramid_request, unparse):
-        pyramid_request.matched_route.name = 'activity.group_search'
+        pyramid_request.matched_route.name = 'group_read'
         query = MultiDict({'group': 'abcd1234'})
 
         result = check_url(pyramid_request, query, unparse=unparse)
 
         assert result is None
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group()
+
+    @pytest.fixture
+    def user_service(self, factories, pyramid_config):
+        user_service = mock.Mock(spec_set=['fetch'])
+        user_service.fetch.return_value = factories.User()
+        pyramid_config.register_service(user_service, name='user')
+        return user_service
 
     @pytest.fixture
     def unparse(self):
@@ -157,9 +203,12 @@ class TestExecute(object):
     PAGE_SIZE = 23
 
     def test_it_creates_a_search_query(self, pyramid_request, Search):
+        pyramid_request.stats = mock.Mock()
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        Search.assert_called_once_with(pyramid_request, separate_replies=True)
+        Search.assert_called_once_with(pyramid_request,
+                                       separate_replies=True,
+                                       stats=pyramid_request.stats)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
                                                             pyramid_request,
@@ -167,7 +216,7 @@ class TestExecute(object):
                                                             TagsAggregation):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        TagsAggregation.assert_called_once_with(limit=10)
+        TagsAggregation.assert_called_once_with(limit=50)
         search.append_aggregation.assert_called_with(
             TagsAggregation.return_value)
 
@@ -187,7 +236,7 @@ class TestExecute(object):
 
         execute(pyramid_request, query, self.PAGE_SIZE)
 
-        UsersAggregation.assert_called_once_with(limit=10)
+        UsersAggregation.assert_called_once_with(limit=50)
         search.append_aggregation.assert_called_with(
             UsersAggregation.return_value)
 
@@ -324,7 +373,7 @@ class TestExecute(object):
         presented_annotations = []
         for timeframe in result.timeframes:
             for bucket in timeframe.document_buckets.values():
-                presented_annotations.extend(bucket.annotations)
+                presented_annotations.extend(bucket.presented_annotations)
 
         for annotation in annotations:
             for presented_annotation in presented_annotations:
@@ -343,7 +392,7 @@ class TestExecute(object):
         presented_annotations = []
         for timeframe in result.timeframes:
             for bucket in timeframe.document_buckets.values():
-                presented_annotations.extend(bucket.annotations)
+                presented_annotations.extend(bucket.presented_annotations)
 
         for group in _fetch_groups.return_value:
             for presented_annotation in presented_annotations:
@@ -351,6 +400,29 @@ class TestExecute(object):
                     break
             else:
                 assert False
+
+    def test_it_returns_each_annotations_incontext_link(self,
+                                                        annotations,
+                                                        links,
+                                                        pyramid_request):
+        def incontext_link(request, annotation):
+            assert request == pyramid_request, (
+                "It should always pass the request to incontext_link")
+            # Return a predictable per-annotation value for the incontext link.
+            return 'incontext_link_for_annotation_{id}'.format(id=annotation.id)
+
+        links.incontext_link.side_effect = incontext_link
+
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        presented_annotations = []
+        for timeframe in result.timeframes:
+            for bucket in timeframe.document_buckets.values():
+                presented_annotations.extend(bucket.presented_annotations)
+
+        for presented_annotation in presented_annotations:
+            assert presented_annotation['incontext_link'] == (
+                'incontext_link_for_annotation_{id}'.format(id=presented_annotation['annotation'].annotation.id))
 
     def test_it_returns_the_total_number_of_matching_annotations(
             self, pyramid_request):
@@ -366,6 +438,11 @@ class TestExecute(object):
         func = patch('h.activity.query.fetch_annotations')
         func.return_value = (mock.Mock(), mock.Mock())
         return func
+
+    @pytest.fixture
+    def links(self, patch):
+        links = patch('h.activity.query.links')
+        return links
 
     @pytest.fixture
     def _fetch_groups(self, group_pubids, patch):
@@ -431,7 +508,8 @@ class TestExecute(object):
         """
         def document_bucket(annotations):
             """Return a mock document bucket like the ones bucket() returns."""
-            return mock.Mock(spec_set=['annotations'], annotations=annotations)
+            return mock.Mock(spec_set=['annotations', 'presented_annotations'],
+                annotations=annotations)
 
         return [
             document_bucket(annotations[:3]),
@@ -487,6 +565,11 @@ class TestExecute(object):
     def UsersAggregation(self, patch):
         return patch('h.activity.query.UsersAggregation')
 
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.stats = None
+        return pyramid_request
+
 
 class TestFetchAnnotations(object):
     def test_it_returns_annotations_by_ids(self, db_session, factories):
@@ -524,5 +607,5 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('activity.group_search', '/act/groups/{pubid}')
+    pyramid_config.add_route('group_read', '/act/groups/{pubid}/{slug}')
     pyramid_config.add_route('activity.user_search', '/act/users/{username}')

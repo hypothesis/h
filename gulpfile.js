@@ -58,9 +58,10 @@ var vendorBundles = {
   jquery: ['jquery'],
   bootstrap: ['bootstrap'],
   raven: ['raven-js'],
+  unorm: ['unorm'],
 };
-var vendorModules = ['jquery', 'bootstrap', 'raven-js'];
-var vendorNoParseModules = ['jquery'];
+var vendorModules = ['jquery', 'bootstrap', 'raven-js', 'unorm'];
+var vendorNoParseModules = ['jquery', 'unorm'];
 
 // Builds the bundles containing vendor JS code
 gulp.task('build-vendor-js', function () {
@@ -207,7 +208,7 @@ gulp.task('watch-images', function () {
   gulp.watch(imageFiles, ['build-images']);
 });
 
-var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
+var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/**/*.*';
 
 /**
  * Generate a JSON manifest mapping file paths to
@@ -252,7 +253,7 @@ function runKarma(baseConfig, opts, done) {
     client: {
       mocha: {
         grep: taskArgs.grep,
-      }
+      },
     },
   };
 

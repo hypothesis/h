@@ -58,6 +58,14 @@ def ajax_payload(request, data):
     return payload
 
 
+def _login_redirect_url(request):
+    if request.feature('search_page'):
+        return request.route_url('activity.user_search',
+            username=request.authenticated_user.username)
+    else:
+        return request.route_url('stream')
+
+
 @view_config(context=BadCSRFToken,
              accept='text/html',
              renderer='h:templates/accounts/session_invalid.html.jinja2')
@@ -119,9 +127,6 @@ class AuthController(object):
                                         buttons=(_('Log in'),),
                                         footer=form_footer)
 
-        self.login_redirect = self.request.params.get(
-            'next',
-            self.request.route_url('stream'))
         self.logout_redirect = self.request.route_url('index')
 
     @view_config(request_method='GET')
@@ -143,7 +148,7 @@ class AuthController(object):
 
         user = appstruct['user']
         headers = self._login(user)
-        return httpexceptions.HTTPFound(location=self.login_redirect,
+        return httpexceptions.HTTPFound(location=self._login_redirect(),
                                         headers=headers)
 
     @view_config(route_name='logout',
@@ -157,15 +162,24 @@ class AuthController(object):
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(location=self.login_redirect)
+            raise httpexceptions.HTTPFound(location=self._login_redirect())
+
+    def _login_redirect(self):
+        return self.request.params.get('next', _login_redirect_url(self.request))
 
     def _login(self, user):
+        # Clear any cached feature flags
+        self.request.feature.clear()
+
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
         headers = security.remember(self.request, user.userid)
         return headers
 
     def _logout(self):
+        # Clear any cached feature flags
+        self.request.feature.clear()
+
         if self.request.authenticated_userid is not None:
             self.request.registry.notify(LogoutEvent(self.request))
             self.request.session.invalidate()
@@ -471,7 +485,7 @@ class SignupController(object):
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(self.request.route_url('stream'))
+            raise httpexceptions.HTTPFound(_login_redirect_url(self.request))
 
 
 @view_defaults(route_name='activate')
@@ -487,7 +501,7 @@ class ActivateController(object):
 
         Checks if the activation code passed is valid, and (as a safety check)
         that it is an activation for the passed user id. If all is well,
-        activate the user and redirect them to the stream.
+        activate the user and redirect them.
         """
         code = self.request.matchdict.get('code')
         id_ = self.request.matchdict.get('id')
@@ -563,8 +577,13 @@ class AccountController(object):
     def __init__(self, request):
         self.request = request
 
+        save_email_label = _('Change email address')
+        save_password_label = _('Change password')
+
         if request.feature('activity_pages'):
             email_schema = schemas.EmailChangeSchema().bind(request=request)
+            save_email_label = _('Save')
+            save_password_label = _('Save')
         else:
             email_schema = schemas.LegacyEmailChangeSchema().bind(request=request)
 
@@ -576,13 +595,15 @@ class AccountController(object):
 
         self.forms = {
             'email': request.create_form(email_schema,
-                                         buttons=(_('Change email address'),),
+                                         buttons=(save_email_label,),
                                          formid='email',
-                                         counter=counter),
+                                         counter=counter,
+                                         use_inline_editing=True),
             'password': request.create_form(password_schema,
-                                            buttons=(_('Change password'),),
+                                            buttons=(save_password_label,),
                                             formid='password',
-                                            counter=counter),
+                                            counter=counter,
+                                            use_inline_editing=True),
         }
 
     @view_config(request_method='GET')
@@ -732,8 +753,10 @@ class DeveloperController(object):
     @view_config(request_method='GET')
     def get(self):
         """Render the developer page, including the form."""
-        token = models.Token.get_by_userid(self.request.db,
-                                           self.request.authenticated_userid)
+        token = models.Token.get_dev_token_by_userid(
+            self.request.db,
+            self.request.authenticated_userid
+        )
         if token:
             return {'token': token.value}
         else:
@@ -742,8 +765,10 @@ class DeveloperController(object):
     @view_config(request_method='POST')
     def post(self):
         """(Re-)generate the user's API token."""
-        token = models.Token.get_by_userid(self.request.db,
-                                           self.request.authenticated_userid)
+        token = models.Token.get_dev_token_by_userid(
+            self.request.db,
+            self.request.authenticated_userid
+        )
 
         if token:
             # The user already has an API token, regenerate it.

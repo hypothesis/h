@@ -1,0 +1,116 @@
+.search-result-sidebar {
+  width: 285px;
+  flex-shrink: 0;
+  margin-bottom: 40px;
+}
+
+.search-result-sidebar__title {
+  margin-top: 0;
+  margin-bottom: 26px;
+}
+
+.search-result-sidebar__title,
+.search-result-sidebar__subtitle {
+  color: $brand;
+}
+
+.search-result-sidebar__subtitle-count {
+  font-weight: normal;
+}
+
+.search-result-sidebar__section {
+  margin-bottom: 26px;
+}
+
+.search-result-sidebar__section:last-child {
+  margin-bottom: 0;
+}
+
+.search-result-sidebar__section p:first-of-type {
+  margin-top: 0; 
+}
+
+.search-result-sidebar__section p:last-of-type {
+  margin-bottom: 0;
+}
+
+.search-result-sidebar__dt {
+  font-weight: bold;
+  float: left;
+  clear: left;
+  margin-right: 3px;
+}
+
+.search-result-sidebar__dd {
+  float: left;
+  margin-left: 0;
+}
+
+.search-result-sidebar__link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.search-result-sidebar__link:hover {
+  text-decoration: underline;
+}
+
+.search-result-sidebar__user-link,
+.search-result-sidebar__orcid-link {
+  color: inherit;
+}
+
+.search-result-sidebar__leave-button {
+  @include reset-button;
+  text-decoration: underline;
+}
+
+.search-result-sidebar-title__annotations-count {
+  font-size: $normal-font-size;
+  font-weight: normal;
+}
+
+.search-result-sidebar__annotations-count {
+  color: $grey-5;
+}
+
+.search-result-sidebar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 350px;
+  margin-top: 30px;
+}
+
+.search-result-sidebar__tag {
+  @include reset-button;
+  background-color: $grey-2;
+  border-radius: 2px;
+  display: flex;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  padding: 5px;
+  font-weight: bold;
+}
+
+.search-result-sidebar__tag-count {
+  color: $grey-4;
+  margin-left: 10px;
+  font-weight: normal;
+}
+
+.search-result-sidebar__username {
+  @include reset-button;
+  font-weight: bold;
+  margin-right: 3px;
+  margin-bottom: 7px;
+}
+
+@media screen and (max-width: $tablet-width + 250px) {
+  // On tablet-sized screens and below the "sidebar" is displayed in the center
+  // of the screen instead of on the side (this is achieved by media queries
+  // on the sidebar's parent element), so make it full the whole width of the
+  // screen.
+  .search-result-sidebar {
+    width: 100%;
+  }
+}

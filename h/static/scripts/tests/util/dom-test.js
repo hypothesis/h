@@ -1,27 +1,27 @@
 'use strict';
 
-var domUtil = require('../../util/dom');
+const domUtil = require('../../util/dom');
 
-describe('util/dom', function () {
+describe('util/dom', () => {
   function createDOM(html) {
-    var el = document.createElement('div');
+    const el = document.createElement('div');
     el.innerHTML = html;
-    var child = el.children[0];
+    const child = el.children[0];
     document.body.appendChild(child);
     el.remove();
     return child;
   }
 
-  describe('findRefs', function () {
-    it('returns a map of name to DOM element', function () {
-      var root = createDOM(`
+  describe('findRefs', () => {
+    it('returns a map of name to DOM element', () => {
+      const root = createDOM(`
         <div>
           <label data-ref="label">Input label</label>
           <input data-ref="input">
         </div>
       `);
-      var labelEl = root.querySelector('label');
-      var inputEl = root.querySelector('input');
+      const labelEl = root.querySelector('label');
+      const inputEl = root.querySelector('input');
 
       assert.deepEqual(domUtil.findRefs(root), {
         label: labelEl,
@@ -29,8 +29,8 @@ describe('util/dom', function () {
       });
     });
 
-    it('allows elements to have more than one name', function () {
-      var root = createDOM('<div><div data-ref="one two"></div></div>');
+    it('allows elements to have more than one name', () => {
+      const root = createDOM('<div><div data-ref="one two"></div></div>');
       assert.deepEqual(domUtil.findRefs(root), {
         one: root.firstChild,
         two: root.firstChild,
@@ -38,21 +38,29 @@ describe('util/dom', function () {
     });
   });
 
-  describe('setElementState', function () {
-    it('adds "is-$state" classes for keys with truthy values', function () {
-      var btn = createDOM('<button></button>');
+  describe('setElementState', () => {
+    it('adds "is-$state" classes for keys with truthy values', () => {
+      const btn = createDOM('<button></button>');
       domUtil.setElementState(btn, {
         visible: true,
       });
       assert.deepEqual(Array.from(btn.classList), ['is-visible']);
     });
 
-    it('removes "is-$state" classes for keys with falsey values', function () {
-      var btn = createDOM('<button class="is-hidden"></button>');
+    it('removes "is-$state" classes for keys with falsey values', () => {
+      const btn = createDOM('<button class="is-hidden"></button>');
       domUtil.setElementState(btn, {
         hidden: false,
       });
       assert.deepEqual(Array.from(btn.classList), []);
+    });
+  });
+
+  describe('cloneTemplate', () => {
+    it('returns a clone of the first child Element of the template', () => {
+      const template = createDOM('<template id="test-template"><div id="child"></div></template>');
+      const clone = domUtil.cloneTemplate(template);
+      assert.deepEqual(clone.outerHTML, '<div id="child"></div>');
     });
   });
 });

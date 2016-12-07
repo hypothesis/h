@@ -7,6 +7,7 @@ import datetime
 import os
 
 import sqlalchemy
+from sqlalchemy.dialects import postgresql
 
 from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
@@ -28,8 +29,7 @@ class Token(Base, mixins.Timestamps):
                            primary_key=True)
 
     userid = sqlalchemy.Column(sqlalchemy.UnicodeText(),
-                               nullable=False,
-                               unique=True)
+                               nullable=False)
 
     value = sqlalchemy.Column(sqlalchemy.UnicodeText(),
                               nullable=False,
@@ -39,13 +39,25 @@ class Token(Base, mixins.Timestamps):
     #: A NULL value in this column indicates a token that does not expire.
     expires = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
 
+    _authclient_id = sqlalchemy.Column('authclient_id',
+                                       postgresql.UUID(),
+                                       sqlalchemy.ForeignKey('authclient.id', ondelete='cascade'),
+                                       nullable=True)
+
+    #: The authclient which created the token.
+    #: A NULL value means it is a developer token.
+    authclient = sqlalchemy.orm.relationship('AuthClient')
+
     def __init__(self, **kwargs):
         super(Token, self).__init__(**kwargs)
         self.regenerate()
 
     @classmethod
-    def get_by_userid(cls, session, userid):
-        return session.query(cls).filter(cls.userid == userid).first()
+    def get_dev_token_by_userid(cls, session, userid):
+        return (session.query(cls)
+                .filter_by(userid=userid, authclient=None)
+                .order_by(cls.created.desc())
+                .first())
 
     def regenerate(self):
         self.value = self.prefix + _token()

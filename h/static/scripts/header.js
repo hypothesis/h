@@ -5,7 +5,7 @@
 // This should be a small script which does things like setting up flags to
 // indicate that scripting is active, send analytics events etc.
 
-var EnvironmentFlags = require('./base/environment-flags');
+const EnvironmentFlags = require('./base/environment-flags');
 
 window.envFlags = new EnvironmentFlags(document.documentElement);
 window.envFlags.init();

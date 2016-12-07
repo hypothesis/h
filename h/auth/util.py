@@ -5,6 +5,7 @@ import base64
 from pyramid import security
 
 from h.auth import role
+from h._compat import text_type
 
 
 def basic_auth_creds(request):
@@ -79,6 +80,7 @@ def principals_for_user(user):
         principals.add(role.Staff)
     for group in user.groups:
         principals.add('group:{group.pubid}'.format(group=group))
+    principals.add('authority:{authority}'.format(authority=user.authority))
 
     return list(principals)
 
@@ -98,3 +100,11 @@ def translate_annotation_principals(principals):
             result.add(principal)
     return list(result)
 
+
+def auth_domain(request):
+    """
+    Return the value of the h.auth_domain config settings.
+
+    Falls back on returning request.domain if h.auth_domain isn't set.
+    """
+    return text_type(request.registry.settings.get('h.auth_domain', request.domain))

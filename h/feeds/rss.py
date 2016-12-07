@@ -1,4 +1,8 @@
 """Functions for generating RSS feeds."""
+
+from calendar import timegm
+from email.utils import formatdate
+
 from pyramid import i18n
 
 from h import presenters
@@ -9,18 +13,16 @@ import h.feeds.util
 _ = i18n.TranslationStringFactory(__package__)
 
 
-def _pubDate_string_from_annotation(annotation):
-    """Return a correctly-formatted pubDate string for the given annotation.
+def _pubDate_string(timestamp):
+    """Return a RFC2822-formatted pubDate string for the given timestamp.
 
-    Return a pubDate string like 'Tue, 03 Jun 2003 09:39:21 GMT' from a
-    Hypothesis API 'created' datetime string like
-    '2015-03-11T10:43:54.537626+00:00'.
+    Return a pubDate string like 'Tue, 03 Jun 2003 09:39:21 -0000'.
 
     Suitable for use as the contents of a <pubDate> element in an <item>
     element of an RSS feed.
 
     """
-    return annotation.created.strftime('%a, %d %b %Y %H:%M:%S +0000')
+    return formatdate(timegm(timestamp.utctimetuple()))
 
 
 def _feed_item_from_annotation(annotation, annotation_url):
@@ -40,7 +42,7 @@ def _feed_item_from_annotation(annotation, annotation_url):
         "author": {"name": name},
         "title": annotation.title,
         "description": annotation.description,
-        "pubDate": _pubDate_string_from_annotation(annotation),
+        "pubDate": _pubDate_string(annotation.created),
         "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
         "link": annotation_url(annotation)
     }
@@ -71,6 +73,6 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
     }
 
     if annotations:
-        feed['pubDate'] = annotations[0].updated.strftime('%a, %d %b %Y %H:%M:%S UTC')
+        feed['pubDate'] = _pubDate_string(annotations[0].updated)
 
     return feed

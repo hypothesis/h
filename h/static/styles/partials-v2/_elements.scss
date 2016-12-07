@@ -23,3 +23,9 @@ input[type=text],
 textarea {
   appearance: none;
 }
+
+// Hide contents of <template> elements in browsers that do not support
+// this element natively (eg. IE).
+template {
+  display: none;
+}

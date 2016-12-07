@@ -1,6 +1,6 @@
 'use strict';
 
-var { findRefs } = require('../util/dom');
+const { findRefs } = require('../util/dom');
 
 /*
  * @typedef {Object} ControllerOptions
@@ -34,7 +34,10 @@ class Controller {
    *        specific to that type of controller.
    */
   constructor(element, options = {}) {
-    if (!element.controllers) {
+
+    if (!element) {
+      throw new Error('Controllers require an element passed to the constructor');
+    } else if (!element.controllers) {
       element.controllers = [this];
     } else {
       element.controllers.push(this);
@@ -53,7 +56,7 @@ class Controller {
    * method provided by the subclass to update the DOM to match the current state.
    */
   setState(changes) {
-    var prevState = this.state;
+    const prevState = this.state;
     this.state = Object.freeze(Object.assign({}, this.state, changes));
     this.update(this.state, prevState);
   }

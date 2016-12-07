@@ -1,13 +1,13 @@
 'use strict';
 
-var CharacterLimitController = require('../../controllers/character-limit-controller');
-var util = require('./util');
+const CharacterLimitController = require('../../controllers/character-limit-controller');
+const util = require('./util');
 
-describe('CharacterLimitController', function () {
+describe('CharacterLimitController', () => {
 
-  var ctrl;
+  let ctrl;
 
-  afterEach(function () {
+  afterEach(() => {
     if (ctrl) {
       ctrl.element.remove();
       ctrl = null;
@@ -21,7 +21,7 @@ describe('CharacterLimitController', function () {
   function component(value, maxlength) {
     maxlength = maxlength || 250;
 
-    var template = '<div class="js-character-limit">';
+    let template = '<div class="js-character-limit">';
     template += '<textarea data-ref="characterLimitInput" data-maxlength="' + maxlength + '">';
     if (value) {
       template += value;
@@ -38,28 +38,28 @@ describe('CharacterLimitController', function () {
     };
   }
 
-  it('adds the ready class', function () {
-    var counterEl = component().counterEl;
+  it('adds the ready class', () => {
+    const counterEl = component().counterEl;
 
     assert.equal(counterEl.classList.contains('is-ready'), true);
   });
 
-  it('shows the counter initially even if textarea empty', function () {
-    var counterEl = component().counterEl;
+  it('shows the counter initially even if textarea empty', () => {
+    const counterEl = component().counterEl;
 
     assert.equal(counterEl.innerHTML, '0/250');
   });
 
-  it('shows the counter if the element has pre-rendered text', function () {
-    var counterEl = component('pre-rendered').counterEl;
+  it('shows the counter if the element has pre-rendered text', () => {
+    const counterEl = component('pre-rendered').counterEl;
 
     assert.equal(counterEl.innerHTML, '12/250');
   });
 
-  it('continues to show the container after text deleted', function() {
-    var parts = component();
-    var counterEl = parts.counterEl;
-    var textarea = parts.textarea;
+  it('continues to show the container after text deleted', () => {
+    const parts = component();
+    const counterEl = parts.counterEl;
+    const textarea = parts.textarea;
 
     // Trigger the counter to be shown.
     textarea.value = 'Some text';
@@ -72,16 +72,16 @@ describe('CharacterLimitController', function () {
     assert.equal(counterEl.innerHTML, '0/250');
   });
 
-  it('reads the max length from the data-maxlength attribute', function () {
-    var counterEl = component('foo', 500).counterEl;
+  it('reads the max length from the data-maxlength attribute', () => {
+    const counterEl = component('foo', 500).counterEl;
 
     assert.equal(counterEl.innerHTML, '3/500');
   });
 
-  it('updates the counter when text is added on "input" events', function () {
-    var parts = component();
-    var textarea = parts.textarea;
-    var counterEl = parts.counterEl;
+  it('updates the counter when text is added on "input" events', () => {
+    const parts = component();
+    const textarea = parts.textarea;
+    const counterEl = parts.counterEl;
 
     textarea.value = 'testing';
     textarea.dispatchEvent(new Event('input'));
@@ -89,10 +89,10 @@ describe('CharacterLimitController', function () {
     assert.equal(counterEl.innerHTML, '7/250');
   });
 
-  it('updates the counter when text is removed on "input" events', function () {
-    var parts = component('Testing testing');
-    var textarea = parts.textarea;
-    var counterEl = parts.counterEl;
+  it('updates the counter when text is removed on "input" events', () => {
+    const parts = component('Testing testing');
+    const textarea = parts.textarea;
+    const counterEl = parts.counterEl;
 
     // Make the text shorter.
     textarea.value = 'Testing';
@@ -101,31 +101,31 @@ describe('CharacterLimitController', function () {
     assert.equal(counterEl.innerHTML, '7/250');
   });
 
-  it('does not add error class when no pre-rendered text', function() {
-    var counterEl = component(null, 5).counterEl;
+  it('does not add error class when no pre-rendered text', () => {
+    const counterEl = component(null, 5).counterEl;
 
     assert.equal(counterEl.classList.contains('is-too-long'),
                  false);
   });
 
-  it('does not add error class when pre-rendered text short enough', function() {
-    var counterEl = component('foo', 5).counterEl;
+  it('does not add error class when pre-rendered text short enough', () => {
+    const counterEl = component('foo', 5).counterEl;
 
     assert.equal(counterEl.classList.contains('is-too-long'),
                  false);
   });
 
-  it('adds an error class to the counter when pre-rendered value too long', function() {
-    var counterEl = component('Too long', 5).counterEl;
+  it('adds an error class to the counter when pre-rendered value too long', () => {
+    const counterEl = component('Too long', 5).counterEl;
 
     assert.equal(counterEl.classList.contains('is-too-long'),
                  true);
   });
 
-  it('adds an error class to the counter when too much text entered', function() {
-    var parts = component(null, 5);
-    var counterEl = parts.counterEl;
-    var textarea = parts.textarea;
+  it('adds an error class to the counter when too much text entered', () => {
+    const parts = component(null, 5);
+    const counterEl = parts.counterEl;
+    const textarea = parts.textarea;
 
     textarea.value = 'too long';
     textarea.dispatchEvent(new Event('input'));
@@ -134,10 +134,10 @@ describe('CharacterLimitController', function () {
                  true);
   });
 
-  it('removes error class from counter when text reduced', function() {
-    var parts = component('too long', 6);
-    var counterEl = parts.counterEl;
-    var textarea = parts.textarea;
+  it('removes error class from counter when text reduced', () => {
+    const parts = component('too long', 6);
+    const counterEl = parts.counterEl;
+    const textarea = parts.textarea;
 
     textarea.value = 'short';
     textarea.dispatchEvent(new Event('input'));

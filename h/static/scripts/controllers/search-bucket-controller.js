@@ -1,9 +1,9 @@
 'use strict';
 
-var scrollIntoView = require('scroll-into-view');
+const scrollIntoView = require('scroll-into-view');
 
-var Controller = require('../base/controller');
-var setElementState = require('../util/dom').setElementState;
+const Controller = require('../base/controller');
+const setElementState = require('../util/dom').setElementState;
 
 /**
  * @typedef Options
@@ -26,11 +26,14 @@ class SearchBucketController extends Controller {
 
     this.scrollTo = this.options.scrollTo || scrollIntoView;
 
-    this.refs.header.addEventListener('click', () => {
+    this.refs.header.addEventListener('click', (event) => {
+      if (this.refs.domainLink.contains(event.target)) {
+        return;
+      }
       this.setState({expanded: !this.state.expanded});
     });
 
-    var envFlags = this.options.envFlags || window.envFlags;
+    const envFlags = this.options.envFlags || window.envFlags;
 
     this.setState({
       expanded: !!envFlags.get('js-timeout'),
@@ -38,7 +41,7 @@ class SearchBucketController extends Controller {
   }
 
   update(state, prevState) {
-    setElementState(this.refs.content, {hidden: !state.expanded});
+    setElementState(this.refs.content, {expanded: state.expanded});
     setElementState(this.element, {expanded: state.expanded});
 
     // Scroll to element when expanded, except on initial load

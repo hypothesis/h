@@ -2,6 +2,7 @@
 
 import deform
 from pyramid import security
+from pyramid.config import not_
 from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
                                     HTTPSeeOther)
 from pyramid.view import view_config, view_defaults
@@ -22,7 +23,8 @@ class GroupCreateController(object):
         self.request = request
 
         if request.feature('activity_pages'):
-            self.schema = schemas.GroupSchema().bind(request=self.request)
+            self.schema = schemas.group_schema(autofocus_name=True).bind(
+                request=self.request)
         else:
             self.schema = schemas.LegacyGroupSchema().bind(request=self.request)
 
@@ -46,6 +48,7 @@ class GroupCreateController(object):
             groups_service = self.request.find_service(name='groups')
             group = groups_service.create(
                 name=appstruct['name'],
+                authority=self.request.auth_domain,
                 description=appstruct.get('description'),
                 userid=self.request.authenticated_userid)
 
@@ -72,7 +75,7 @@ class GroupEditController(object):
     def __init__(self, group, request):
         self.group = group
         self.request = request
-        self.schema = schemas.GroupSchema().bind(request=self.request)
+        self.schema = schemas.group_schema().bind(request=self.request)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Save'),),
                                         use_inline_editing=True)
@@ -110,17 +113,17 @@ class GroupEditController(object):
 @view_config(route_name='group_read',
              request_method='GET',
              renderer='h:templates/groups/share.html.jinja2',
-             effective_principals=security.Authenticated)
+             effective_principals=security.Authenticated,
+             has_feature_flag=not_('search_page'),
+             has_permission='read')
 def read(group, request):
     """Group view for logged-in users."""
-    _check_slug(group, request)
+    check_slug(group, request)
 
-    # If the current user is not a member of the group, they will not have the
-    # 'read' permission on the group. In this case, we show them the join
-    # page.
-    if not request.has_permission('read'):
-        request.override_renderer = 'h:templates/groups/join.html.jinja2'
-        return {'group': group}
+    # Redirect to new group overview page if search page is enabled
+    if request.feature('search_page'):
+        url = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
+        return HTTPSeeOther(url)
 
     return {'group': group,
             'document_links': [presenters.DocumentHTMLPresenter(d).link
@@ -135,32 +138,51 @@ def read(group, request):
 
 @view_config(route_name='group_read',
              request_method='GET',
-             renderer='h:templates/groups/join.html.jinja2')
+             renderer='h:templates/groups/join.html.jinja2',
+             effective_principals=not_(security.Authenticated))
 def read_unauthenticated(group, request):
     """Group view for logged-out users, allowing them to join the group."""
-    _check_slug(group, request)
+    check_slug(group, request)
     return {'group': group}
+
+
+@view_defaults(route_name='group_read',
+               renderer='h:templates/groups/join.html.jinja2',
+               effective_principals=security.Authenticated,
+               has_permission=not_('read'))
+class GroupJoinController(object):
+    """Views for "group_read" when logged in but not a member of the group."""
+
+    def __init__(self, group, request):
+        self.group = group
+        self.request = request
+
+    @view_config(request_method='GET')
+    def get(self):
+        check_slug(self.group, self.request)
+        return {'group': self.group}
+
+    @view_config(request_method='POST')
+    def post(self):
+        groups_service = self.request.find_service(name='groups')
+        groups_service.member_join(self.group,
+                                   self.request.authenticated_userid)
+
+        url = self.request.route_path('group_read',
+                                      pubid=self.group.pubid,
+                                      slug=self.group.slug)
+        return HTTPSeeOther(url)
 
 
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read_noslug(group, request):
-    _check_slug(group, request)
-
-
-@view_config(route_name='group_read',
-             request_method='POST',
-             effective_principals=security.Authenticated)
-def join(group, request):
-    groups_service = request.find_service(name='groups')
-    groups_service.member_join(group, request.authenticated_userid)
-
-    url = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
-    return HTTPSeeOther(url)
+    check_slug(group, request)
 
 
 @view_config(route_name='group_leave',
              request_method='POST',
-             effective_principals=security.Authenticated)
+             effective_principals=security.Authenticated,
+             has_permission='read')
 def leave(group, request):
     groups_service = request.find_service(name='groups')
     groups_service.member_leave(group, request.authenticated_userid)
@@ -168,7 +190,7 @@ def leave(group, request):
     return HTTPNoContent()
 
 
-def _check_slug(group, request):
+def check_slug(group, request):
     """Redirect if the request slug does not match that of the group."""
     slug = request.matchdict.get('slug')
     if slug is None or slug != group.slug:

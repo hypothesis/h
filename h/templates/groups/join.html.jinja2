@@ -41,7 +41,7 @@
   {% else %}
     <div class="content content--narrow">
       <div class="group-form">
-        <img class="group-form__invite-icon" src="/assets/images/icons/group-invite.svg">
+        <img class="group-form__invite-icon" src="{{ asset_url('images/icons/group-invite.svg') }}">
         <div class="group-form__name-label">You have been invited to annotate with the group</div>
         <div class="group-form__name-input">{{ group.name }}</div>
         {% if request.authenticated_userid %}

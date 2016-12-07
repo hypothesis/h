@@ -41,9 +41,10 @@ def add(ctx, username, email, password):
 
 @user.command()
 @click.argument('username')
+@click.option('--authority')
 @click.option('--on/--off', default=True)
 @click.pass_context
-def admin(ctx, username, on):
+def admin(ctx, username, authority, on):
     """
     Make a user an admin.
 
@@ -51,9 +52,14 @@ def admin(ctx, username, on):
     administrative privileges.
     """
     request = ctx.obj['bootstrap']()
-    user = models.User.get_by_username(request.db, username)
+
+    if not authority:
+        authority = request.auth_domain
+
+    user = models.User.get_by_username(request.db, username, authority)
     if user is None:
-        raise click.ClickException('no user with username "{}"'.format(username))
+        msg = 'no user with username "{}" and authority "{}"'.format(username, authority)
+        raise click.ClickException(msg)
 
     user.admin = on
     request.tm.commit()

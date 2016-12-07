@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import enum
 import sqlalchemy as sa
 from pyramid import security
 from sqlalchemy.orm import exc
@@ -27,6 +28,21 @@ class GroupFactory(object):
             raise KeyError()
 
 
+class JoinableBy(enum.Enum):
+    authority = 'authority'
+
+
+class ReadableBy(enum.Enum):
+    authority = 'authority'
+    members = 'members'
+    world = 'world'
+
+
+class WriteableBy(enum.Enum):
+    authority = 'authority'
+    members = 'members'
+
+
 class Group(Base, mixins.Timestamps):
     __tablename__ = 'group'
 
@@ -37,6 +53,7 @@ class Group(Base, mixins.Timestamps):
                       default=pubid.generate,
                       unique=True,
                       nullable=False)
+    authority = sa.Column(sa.UnicodeText(), nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     # We store information about who created the group -- we don't use this
@@ -48,13 +65,29 @@ class Group(Base, mixins.Timestamps):
 
     description = sa.Column(sa.UnicodeText())
 
+    #: Which type of user is allowed to join this group, possible values are:
+    #: authority, None
+    joinable_by = sa.Column(sa.Enum(JoinableBy, name='group_joinable_by'),
+                            nullable=True)
+
+    #: Which type of user is allowed to read annotations in this group,
+    #: possible values are: authority, members, world
+    readable_by = sa.Column(sa.Enum(ReadableBy, name='group_readable_by'),
+                            nullable=True)
+
+    #: Which type of user is allowed to write to this group, possible values
+    #: are: authority, members
+    writeable_by = sa.Column(sa.Enum(WriteableBy, name='group_writeable_by'),
+                             nullable=True)
+
     # Group membership
     members = sa.orm.relationship(
         'User', secondary='user_group', backref=sa.orm.backref(
             'groups', order_by='Group.name'))
 
-    def __init__(self, name, creator, description=None):
+    def __init__(self, name, authority, creator, description=None):
         self.name = name
+        self.authority = authority
         self.description = description
         self.creator = creator
         self.members.append(creator)

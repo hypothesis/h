@@ -78,7 +78,11 @@ def cohorts_add(request):
 def cohorts_edit(context, request):
     id = request.matchdict['id']
     cohort = request.db.query(models.FeatureCohort).get(id)
-    return {'cohort': cohort, 'members': cohort.members}
+    return {
+        'cohort': cohort,
+        'members': cohort.members,
+        'default_authority': request.auth_domain
+    }
 
 
 @view_config(route_name='admin_cohorts_edit',
@@ -87,13 +91,15 @@ def cohorts_edit(context, request):
              renderer='h:templates/admin/edit_cohort.html.jinja2',
              permission='admin_features')
 def cohorts_edit_add(request):
-    member_name = request.params['add']
+    member_name = request.params['add'].strip()
+    member_authority = request.params['authority'].strip()
     cohort_id = request.matchdict['id']
 
-    member = models.User.get_by_username(request.db, member_name)
+    member = models.User.get_by_username(request.db, member_name, member_authority)
     if member is None:
         request.session.flash(
-            _("User {member_name} doesn't exist.".format(member_name=member_name)),
+            _("User {member_name} with authority {authority} doesn't exist.".format(
+                member_name=member_name, authority=member_authority)),
             "error")
     else:
         cohort = request.db.query(models.FeatureCohort).get(cohort_id)
@@ -109,16 +115,16 @@ def cohorts_edit_add(request):
              renderer='h:templates/admin/edit_cohort.html.jinja2',
              permission='admin_features')
 def cohorts_edit_remove(request):
-    member_name = request.params['remove']
+    member_userid = request.params['remove']
     cohort_id = request.matchdict['id']
 
     cohort = request.db.query(models.FeatureCohort).get(cohort_id)
-    member = request.db.query(models.User).filter_by(username=member_name).first()
+    member = request.db.query(models.User).filter_by(userid=member_userid).first()
     try:
         cohort.members.remove(member)
     except ValueError:
         request.session.flash(
-            _("User {member_name} doesn't exist.".format(member_name=member_name)),
+            _("User {member_userid} doesn't exist.".format(member_userid=member_userid)),
             "error")
 
     url = request.route_url('admin_cohorts_edit', id=cohort_id)

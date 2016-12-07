@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 from collections import namedtuple
+from contextlib import contextmanager
+
+from elasticsearch.exceptions import ConnectionTimeout
 
 from memex.search import query
 
@@ -27,11 +30,16 @@ class Search(object):
         annotations returned by this search. If this is True then the
         resulting annotations will only include top-leve annotations, not replies.
     :type separate_replies: bool
+
+    :param stats: An optional statsd client to which some metrics will be
+        published.
+    :type stats: statsd.client.StatsClient
     """
-    def __init__(self, request, separate_replies=False):
+    def __init__(self, request, separate_replies=False, stats=None):
         self.request = request
         self.es = request.es
         self.separate_replies = separate_replies
+        self.stats = stats
 
         self.builder = default_querybuilder(request)
         self.reply_builder = default_querybuilder(request)
@@ -68,10 +76,12 @@ class Search(object):
         if self.separate_replies:
             self.builder.append_filter(query.TopLevelAnnotationsFilter())
 
-        response = self.es.conn.search(index=self.es.index,
-                                       doc_type=self.es.t.annotation,
-                                       _source=False,
-                                       body=self.builder.build(params))
+        response = None
+        with self._instrument():
+            response = self.es.conn.search(index=self.es.index,
+                                           doc_type=self.es.t.annotation,
+                                           _source=False,
+                                           body=self.builder.build(params))
         total = response['hits']['total']
         annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
         aggregations = self._parse_aggregation_results(response.get('aggregations', None))
@@ -82,10 +92,13 @@ class Search(object):
             return []
 
         self.reply_builder.append_matcher(query.RepliesMatcher(annotation_ids))
-        response = self.es.conn.search(index=self.es.index,
-                                       doc_type=self.es.t.annotation,
-                                       _source=False,
-                                       body=self.reply_builder.build({'limit': 200}))
+
+        response = None
+        with self._instrument():
+            response = self.es.conn.search(index=self.es.index,
+                                           doc_type=self.es.t.annotation,
+                                           _source=False,
+                                           body=self.reply_builder.build({'limit': 200}))
 
         if len(response['hits']['hits']) < response['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "
@@ -109,6 +122,27 @@ class Search(object):
                 break
 
         return results
+
+    @contextmanager
+    def _instrument(self):
+        if not self.stats:
+            yield
+            return
+
+        s = self.stats.pipeline()
+        timer = s.timer('memex.search.query').start()
+        try:
+            yield
+            s.incr('memex.search.query.success')
+        except ConnectionTimeout:
+            s.incr('memex.search.query.timeout')
+            raise
+        except:
+            s.incr('memex.search.query.error')
+            raise
+        finally:
+            timer.stop()
+            s.send()
 
 
 def default_querybuilder(request):

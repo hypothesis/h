@@ -1,11 +1,42 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import mock
 import pytest
 from sqlalchemy import exc
 
 from h import models
+from h.accounts.services import user_service_factory
+from h.models.user import UserFactory
 from h.security import password_context
+
+
+@pytest.mark.usefixtures('user_service')
+class TestUserFactory(object):
+
+    def test_it_raises_KeyError_if_the_user_does_not_exist(self,
+                                                           user_factory,
+                                                           user_service):
+        user_service.fetch.return_value = None
+
+        with pytest.raises(KeyError):
+            user_factory["does_not_exist"]
+
+    def test_it_returns_users(self, factories, user_factory, user_service):
+        user_service.fetch.return_value = user = factories.User()
+
+        assert user_factory[user.username] == user
+
+    @pytest.fixture
+    def user_factory(self, pyramid_request):
+        return UserFactory(pyramid_request)
+
+    @pytest.fixture
+    def user_service(self, pyramid_config, pyramid_request):
+        user_service = mock.Mock(spec_set=user_service_factory(
+            None, pyramid_request))
+        pyramid_config.register_service(user_service, name='user')
+        return user_service
 
 
 def test_cannot_create_dot_variant_of_user(db_session):
@@ -198,3 +229,73 @@ def test_User_activate_activates_user(db_session):
     db_session.commit()
 
     assert user.is_activated
+
+
+class TestUserGetByEmail(object):
+    def test_it_returns_a_user(self, db_session, users):
+        user = users['meredith']
+        actual = models.User.get_by_email(db_session, user.email, user.authority)
+        assert actual == user
+
+    def test_it_filters_by_email(self, db_session, users):
+        authority = 'example.com'
+        email = 'bogus@msn.com'
+
+        actual = models.User.get_by_email(db_session, email, authority)
+        assert actual is None
+
+    def test_it_filters_email_case_insensitive(self, db_session, users):
+        user = users['emily']
+        mixed_email = 'eMiLy@mSn.com'
+
+        actual = models.User.get_by_email(db_session, mixed_email, user.authority)
+        assert actual == user
+
+    def test_it_filters_by_authority(self, db_session, users):
+        user = users['norma']
+
+        actual = models.User.get_by_email(db_session, user.email, 'example.com')
+        assert actual is None
+
+    @pytest.fixture
+    def users(self, db_session, factories):
+        users = {
+            'emily': factories.User(username='emily', email='emily@msn.com', authority='example.com'),
+            'norma': factories.User(username='norma', email='norma@foo.org', authority='foo.org'),
+            'meredith': factories.User(username='meredith', email='meredith@gmail.com', authority='example.com'),
+        }
+        db_session.add_all(users.values())
+        db_session.flush()
+        return users
+
+
+class TestUserGetByUsername(object):
+    def test_it_returns_a_user(self, db_session, users):
+        user = users['meredith']
+
+        actual = models.User.get_by_username(db_session, user.username, user.authority)
+        assert actual == user
+
+    def test_it_filters_by_username(self, db_session):
+        authority = 'example.com'
+        username = 'bogus'
+
+        actual = models.User.get_by_username(db_session, username, authority)
+        assert actual is None
+
+    def test_it_filters_by_authority(self, db_session, users):
+        user = users['norma']
+
+        actual = models.User.get_by_username(db_session, user.username, 'example.com')
+        assert actual is None
+
+    @pytest.fixture
+    def users(self, db_session, factories):
+        users = {
+            'emily': factories.User(username='emily', authority='example.com'),
+            'norma': factories.User(username='norma', authority='foo.org'),
+            'meredith': factories.User(username='meredith', authority='example.com'),
+        }
+        db_session.add_all(users.values())
+        db_session.flush()
+        return users

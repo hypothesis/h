@@ -1,17 +1,17 @@
 'use strict';
 
-var Controller = require('../base/controller');
+const Controller = require('../base/controller');
 
 class AdminUsersController extends Controller {
   constructor(element, options) {
     super(element, options);
 
-    var window_ = options.window || window;
+    const window_ = options.window || window;
     function confirmFormSubmit() {
       return window_.confirm('This will permanently delete all the user\'s data. Are you sure?');
     }
 
-    this.on('submit', event => {
+    this.on('submit', (event) => {
       if (!confirmFormSubmit()) {
         event.preventDefault();
       }

@@ -44,7 +44,8 @@ cors_policy = cors.policy(
         'X-Annotator-Auth-Token',
         'X-Client-Id',
     ),
-    allow_methods=('OPTIONS', 'HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+    allow_methods=('OPTION', 'HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
+    allow_preflight=True)
 
 
 class APIError(Exception):
@@ -76,6 +77,14 @@ def api_config(**settings):
     settings.setdefault('accept', 'application/json')
     settings.setdefault('renderer', 'json')
     settings.setdefault('decorator', cors_policy)
+
+    request_method = settings.get('request_method', ())
+    if not isinstance(request_method, tuple):
+        request_method = (request_method,)
+    if len(request_method) == 0:
+        request_method = ('DELETE', 'GET', 'HEAD', 'POST', 'PUT',)
+    settings['request_method'] = request_method + ('OPTIONS',)
+
     return view_config(**settings)
 
 
@@ -155,8 +164,10 @@ def search(request):
     params = request.params.copy()
 
     separate_replies = params.pop('_separate_replies', False)
-    result = search_lib.Search(request, separate_replies=separate_replies) \
-        .run(params)
+    stats = getattr(request, 'stats', None)
+    result = search_lib.Search(request,
+                               separate_replies=separate_replies,
+                               stats=stats).run(params)
 
     out = {
         'total': result.total,
@@ -396,7 +407,7 @@ def account_forgot_pw(request):
     return {"status": "success"}
 
 @api_config(route_name='api.user.followers',
-            request_method=['GET', 'POST']
+            request_method=('GET', 'POST')
            )
 def api_followers_ids(request):
     if request.authenticated_userid is None:
@@ -423,7 +434,7 @@ def api_followers_ids(request):
     return {'count': count, 'followers': followers_list}
 
 @api_config(route_name='api.user.following',
-            request_method=['GET', 'POST']
+            request_method=('GET', 'POST')
            )
 def api_following_ids(request):
     if request.authenticated_userid is None:

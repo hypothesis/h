@@ -1,8 +1,8 @@
 'use strict';
 
-var stringUtil = require('./string');
+const stringUtil = require('./string');
 
-var hyphenate = stringUtil.hyphenate;
+const hyphenate = stringUtil.hyphenate;
 
 /**
  * Utility functions for DOM manipulation.
@@ -17,9 +17,13 @@ var hyphenate = stringUtil.hyphenate;
  *                 is true or removed otherwise.
  */
 function setElementState(el, state) {
-  Object.keys(state).forEach(function (key) {
-    var stateClass = 'is-' + hyphenate(key);
-    el.classList.toggle(stateClass, !!state[key]);
+  Object.keys(state).forEach((key) => {
+    const stateClass = 'is-' + hyphenate(key);
+    if (state[key]) {
+      el.classList.add(stateClass);
+    } else {
+      el.classList.remove(stateClass);
+    }
   });
 }
 
@@ -31,15 +35,15 @@ function setElementState(el, state) {
  * reference to them subsequently in code.
  */
 function findRefs(el) {
-  var map = {};
+  const map = {};
 
-  var descendantsWithRef = el.querySelectorAll('[data-ref]');
-  for (var i=0; i < descendantsWithRef.length; i++) {
+  const descendantsWithRef = el.querySelectorAll('[data-ref]');
+  for (let i=0; i < descendantsWithRef.length; i++) {
     // Use `Element#getAttribute` rather than `Element#dataset` to support IE 10
     // and avoid https://bugs.webkit.org/show_bug.cgi?id=161454
-    var refEl = descendantsWithRef[i];
-    var refs = (refEl.getAttribute('data-ref') || '').split(' ');
-    refs.forEach(function (ref) {
+    const refEl = descendantsWithRef[i];
+    const refs = (refEl.getAttribute('data-ref') || '').split(' ');
+    refs.forEach((ref) => {
       map[ref] = refEl;
     });
   }
@@ -47,7 +51,24 @@ function findRefs(el) {
   return map;
 }
 
+/**
+ * Clone the content of a <template> element and return the first child Element.
+ *
+ * @param {HTMLTemplateElement} templateEl
+ */
+function cloneTemplate(templateEl) {
+  if (templateEl.content) {
+    // <template> supported natively.
+    const content = templateEl.content.cloneNode(true);
+    return content.firstElementChild;
+  } else {
+    // <template> not supported. Browser just treats it as an unknown Element.
+    return templateEl.firstElementChild.cloneNode(true);
+  }
+}
+
 module.exports = {
-  findRefs: findRefs,
-  setElementState: setElementState,
+  cloneTemplate,
+  findRefs,
+  setElementState,
 };

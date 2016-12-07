@@ -93,43 +93,94 @@ class TestDeleteAnnotation:
         return patch('memex.search.index.log')
 
 
-@pytest.mark.usefixtures('BatchIndexer', 'BatchDeleter')
+@pytest.mark.usefixtures('BatchIndexer',
+                         'configure_index',
+                         'get_aliased_index',
+                         'update_aliased_index')
 class TestReindex(object):
-    def test_it_indexes_all_annotations(self, BatchIndexer):
-        index.reindex(mock.sentinel.session, mock.sentinel.es, mock.sentinel.request)
+    def test_indexes_annotations(self, es, indexer):
+        """Should call .index() on the batch indexer instance."""
+        index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
-        BatchIndexer.assert_called_once_with(
-            mock.sentinel.session, mock.sentinel.es, mock.sentinel.request)
-        assert BatchIndexer.return_value.index_all.called
+        indexer.index.assert_called_once_with()
 
-    def test_it_removes_all_deleted_annotations(self, BatchDeleter):
-        index.reindex(mock.sentinel.session, mock.sentinel.es, mock.sentinel.request)
+    def test_retries_failed_annotations(self, es, indexer):
+        """Should call .index() a second time with any failed annotation IDs."""
+        indexer.index.return_value = ['abc123', 'def456']
 
-        BatchDeleter.assert_called_once_with(mock.sentinel.session, mock.sentinel.es)
-        assert BatchDeleter.return_value.delete_all.called
+        index.reindex(mock.sentinel.session, es, mock.sentinel.request)
+
+        assert indexer.index.mock_calls == [
+            mock.call(),
+            mock.call(['abc123', 'def456']),
+        ]
+
+    def test_creates_new_index(self, es, configure_index, matchers):
+        """Creates a new target index."""
+        index.reindex(mock.sentinel.session, es, mock.sentinel.request)
+
+        configure_index.assert_called_once_with(es)
+
+    def test_passes_new_index_to_indexer(self, es, configure_index, BatchIndexer):
+        """Pass the name of the new index as target_index to indexer."""
+        configure_index.return_value = 'hypothesis-abcd1234'
+
+        index.reindex(mock.sentinel.session, es, mock.sentinel.request)
+
+        _, kwargs = BatchIndexer.call_args
+        assert kwargs['target_index'] == 'hypothesis-abcd1234'
+
+    def test_updates_alias_when_reindexed(self, es, configure_index, update_aliased_index):
+        """Call update_aliased_index on the client with the new index name."""
+        configure_index.return_value = 'hypothesis-abcd1234'
+
+        index.reindex(mock.sentinel.session, es, mock.sentinel.request)
+
+        update_aliased_index.assert_called_once_with(es, 'hypothesis-abcd1234')
+
+    def test_does_not_update_alias_if_indexing_fails(self, es, indexer, update_aliased_index):
+        """Don't call update_aliased_index if index() fails..."""
+        indexer.index.side_effect = RuntimeError('fail')
+
+        try:
+            index.reindex(mock.sentinel.session, es, mock.sentinel.request)
+        except RuntimeError:
+            pass
+
+        assert not update_aliased_index.called
+
+    def test_raises_if_index_not_aliased(self, es, get_aliased_index):
+        get_aliased_index.return_value = None
+
+        with pytest.raises(RuntimeError):
+            index.reindex(mock.sentinel.session, es, mock.sentinel.request)
 
     @pytest.fixture
     def BatchIndexer(self, patch):
         return patch('memex.search.index.BatchIndexer')
 
     @pytest.fixture
-    def BatchDeleter(self, patch):
-        return patch('memex.search.index.BatchDeleter')
+    def configure_index(self, patch):
+        return patch('memex.search.index.configure_index')
+
+    @pytest.fixture
+    def get_aliased_index(self, patch):
+        func = patch('memex.search.index.get_aliased_index')
+        func.return_value = 'foobar'
+        return func
+
+    @pytest.fixture
+    def update_aliased_index(self, patch):
+        return patch('memex.search.index.update_aliased_index')
+
+    @pytest.fixture
+    def indexer(self, BatchIndexer):
+        indexer = BatchIndexer.return_value
+        indexer.index.return_value = []
+        return indexer
 
 
 class TestBatchIndexer(object):
-    def test_index_all(self, indexer, index):
-        indexer.index_all()
-        assert index.called
-
-    def test_index_all_retries_failed_index_attempts_once(self, indexer, index):
-        index.return_value = set(['id-1'])
-        indexer.index_all()
-        assert index.call_args_list == [
-            mock.call(indexer, None),
-            mock.call(indexer, set(['id-1'])),
-        ]
-
     def test_index_indexes_all_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
         ann_1, ann_2 = factories.Annotation(), factories.Annotation()
 
@@ -173,7 +224,7 @@ class TestBatchIndexer(object):
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
-                       '_index': indexer.es_client.index,
+                       '_index': 'hypothesis',
                        '_id': annotation.id}},
             rendered
         )
@@ -211,7 +262,7 @@ class TestBatchIndexer(object):
 
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
-                       '_index': indexer.es_client.index,
+                       '_index': 'hypothesis',
                        '_id': annotation.id}},
             rendered
         )
@@ -233,8 +284,8 @@ class TestBatchIndexer(object):
         assert result == set([ann_fail_1.id, ann_fail_2.id])
 
     @pytest.fixture
-    def indexer(self, db_session, pyramid_request):
-        return index.BatchIndexer(db_session, mock.MagicMock(), pyramid_request)
+    def indexer(self, db_session, es, pyramid_request):
+        return index.BatchIndexer(db_session, es, pyramid_request)
 
     @pytest.fixture
     def index(self, patch):
@@ -243,149 +294,6 @@ class TestBatchIndexer(object):
     @pytest.fixture
     def streaming_bulk(self, patch):
         return patch('memex.search.index.es_helpers.streaming_bulk')
-
-
-class TestBatchDeleter(object):
-    def test_delete_all_fetches_deleted_annotation_ids(self, deleter, deleted_annotation_ids):
-        deleter.delete_all()
-        assert deleted_annotation_ids.call_count == 1
-
-    def test_delete_all_deletes_annotation_ids(self, deleter, deleted_annotation_ids, delete):
-        deleted_annotation_ids.return_value = set([mock.Mock()])
-        delete.return_value = set()
-
-        deleter.delete_all()
-        delete.assert_called_once_with(deleter, deleted_annotation_ids.return_value)
-
-    def test_delete_all_skips_deleting_when_no_deleted_annotation_ids(self,
-                                                                      deleter,
-                                                                      deleted_annotation_ids,
-                                                                      delete):
-        deleted_annotation_ids.return_value = set()
-
-        deleter.delete_all()
-        assert not delete.called
-
-    def test_delete_all_retries_failed_deletion_attempts_once(self,
-                                                              deleter,
-                                                              deleted_annotation_ids,
-                                                              delete):
-        deleted_annotation_ids.return_value = set(['id-1', 'id-2'])
-        delete.return_value = set(['id-1'])
-
-        deleter.delete_all()
-        assert delete.call_args_list == [
-            mock.call(deleter, set(['id-1', 'id-2'])),
-            mock.call(deleter, set(['id-1']))
-        ]
-
-    def test_deleted_annotation_ids(self, db_session, es_scan, annotation):
-        deleter = self.deleter(session=db_session)
-
-        es_scan.return_value = [
-            {'_id': 'deleted-from-postgres-id',
-             '_source': {'uri': 'http://example.org'}}]
-
-        deleted_ids = deleter.deleted_annotation_ids()
-        assert deleted_ids == set(['deleted-from-postgres-id'])
-
-    def test_deleted_annotation_ids_no_changes(self,
-                                               annotation,
-                                               db_session,
-                                               es_scan,
-                                               pyramid_request):
-        deleter = self.deleter(session=db_session)
-
-        es_scan.return_value = [
-            {'_id': annotation.id,
-             '_source': presenters.AnnotationSearchIndexPresenter(annotation)}]
-
-        deleted_ids = deleter.deleted_annotation_ids()
-        assert len(deleted_ids) == 0
-
-    def test_delete_deletes_from_es(self, deleter, streaming_bulk):
-        ids = set(['test-annotation-id'])
-
-        deleter.delete(ids)
-        streaming_bulk.assert_called_once_with(
-            deleter.es_client.conn, ids, chunk_size=mock.ANY,
-            raise_on_error=False, expand_action_callback=mock.ANY)
-
-    def test_delete_correctly_presents_bulk_actions(self, deleter, streaming_bulk):
-        results = []
-
-        def fake_streaming_bulk(*args, **kwargs):
-            id_ = args[1][0]
-            callback = kwargs.get('expand_action_callback')
-            results.append(callback(id_))
-            return set()
-
-        streaming_bulk.side_effect = fake_streaming_bulk
-
-        deleter.delete(['test-annotation-id'])
-        assert results[0] == (
-            {'delete': {'_type': deleter.es_client.t.annotation,
-                        '_index': deleter.es_client.index,
-                        '_id': 'test-annotation-id'}},
-            None,
-        )
-
-    def test_delete_returns_failed_bulk_actions(self, deleter, streaming_bulk):
-        def fake_streaming_bulk(*args, **kwargs):
-            ids = args[1]
-            for id_ in ids:
-                if id_.startswith('fail'):
-                    yield (False, {'delete': {'_id': id_, 'status': 504}})
-                else:
-                    yield (True, {'delete': {'_id': id_, 'status': 200}})
-
-        streaming_bulk.side_effect = fake_streaming_bulk
-
-        result = deleter.delete(['succeed-1', 'fail-1', 'fail-2', 'succeed-2'])
-        assert result == set(['fail-1', 'fail-2'])
-
-    def test_delete_does_not_return_failed_404_bulk_actions(self, deleter, streaming_bulk):
-        def fake_streaming_bulk(*args, **kwargs):
-            ids = args[1]
-            for id_ in ids:
-                if id_ == 'fail-404':
-                    yield (False, {'delete': {'_id': id_, 'status': 404}})
-                elif id_.startswith('fail-504'):
-                    yield (False, {'delete': {'_id': id_, 'status': 504}})
-                else:
-                    yield (True, {'delete': {'_id': id_, 'status': 200}})
-
-        streaming_bulk.side_effect = fake_streaming_bulk
-
-        result = deleter.delete(['succeed-1', 'fail-404', 'fail-504'])
-        assert result == set(['fail-504'])
-
-    @pytest.fixture
-    def deleter(self, session=None):
-        if session is None:
-            session = mock.MagicMock()
-        return index.BatchDeleter(session, mock.MagicMock())
-
-    @pytest.fixture
-    def deleted_annotation_ids(self, patch):
-        return patch('memex.search.index.BatchDeleter.deleted_annotation_ids')
-
-    @pytest.fixture
-    def delete(self, patch):
-        return patch('memex.search.index.BatchDeleter.delete')
-
-    @pytest.fixture
-    def es_scan(self, patch):
-        return patch('memex.search.index.es_helpers.scan')
-
-    @pytest.fixture
-    def streaming_bulk(self, patch):
-        return patch('memex.search.index.es_helpers.streaming_bulk')
-
-    @pytest.fixture
-    def annotation(self, db_session, factories):
-        ann = factories.Annotation(userid="bob", target_uri="http://example.com")
-        return ann
 
 
 @pytest.fixture

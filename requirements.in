@@ -1,8 +1,8 @@
 PyJWT
-SQLAlchemy
+SQLAlchemy >= 1.1.4
 alembic
 bcrypt
-celery
+celery == 3.1.25  # Pin to latest 3.1.x to ensure forwards-compat with 4.x
 certifi
 cffi
 click
@@ -10,12 +10,13 @@ cryptography
 deform < 1.0
 deform-jinja2
 elasticsearch < 2.0.0
+enum34
 gevent
 gunicorn
 itsdangerous
 jsonpointer == 1.0
 jsonschema
-kombu
+kombu <3.1 # Pinned because of celery pin
 newrelic
 passlib
 psycogreen

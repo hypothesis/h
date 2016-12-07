@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import datetime
 import pytest
+from mock import Mock
 
 from h.activity import bucketing
 from tests.common import factories
@@ -178,6 +179,22 @@ class TestDocumentBucket(object):
         bucket_2.title = 'Second Title'
 
         assert not bucket_1 == bucket_2
+
+    def test_incontext_link_returns_link_to_first_annotation(self, document, patch):
+        incontext_link = patch('h.links.incontext_link')
+        bucket = bucketing.DocumentBucket(document)
+        ann = factories.Annotation()
+        bucket.append(ann)
+        request = Mock()
+
+        assert bucket.incontext_link(request) == incontext_link.return_value
+
+    def test_incontext_link_returns_none_if_bucket_empty(self, document, patch):
+        incontext_link = patch('h.links.incontext_link')
+        bucket = bucketing.DocumentBucket(document)
+        request = Mock()
+
+        assert bucket.incontext_link(request) == None
 
     @pytest.fixture
     def document(self, db_session):

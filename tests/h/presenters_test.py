@@ -51,6 +51,20 @@ class TestAnnotationHTMLPresenter(object):
 
         assert annotation.username == ("jdoe")
 
+    def test_shared(self):
+        annotation = self._annotation(
+            annotation=mock.Mock()
+        )
+
+        assert annotation.shared == annotation.annotation.shared
+
+    def test_tags(self):
+        annotation = self._annotation(
+            annotation=mock.Mock()
+        )
+
+        assert annotation.tags == annotation.annotation.tags
+
     def test_text_rendered(self):
         annotation = self._annotation(
             annotation=mock.Mock()

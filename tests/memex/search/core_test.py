@@ -4,6 +4,30 @@ import pytest
 from memex.search import core
 
 
+class FakeStatsdClient(object):
+    def pipeline(self):
+        return FakeStatsdPipeline()
+
+
+class FakeStatsdPipeline(object):
+    def timer(self, name):
+        return FakeStatsdTimer()
+
+    def incr(self, name):
+        pass
+
+    def send(self):
+        pass
+
+
+class FakeStatsdTimer(object):
+    def start(self):
+        return self
+
+    def stop(self):
+        pass
+
+
 class TestSearch(object):
     def test_run_searches_annotations(self, pyramid_request, search_annotations):
         params = mock.Mock()
@@ -85,6 +109,11 @@ class TestSearch(object):
         _, _, aggregations = search.search_annotations({})
         assert aggregations == {'foobar': foobaragg.parse_result.return_value}
 
+    def test_search_annotations_works_with_stats_client(self, pyramid_request):
+        search = core.Search(pyramid_request, stats=FakeStatsdClient())
+        # This should not raise
+        search.search_annotations({})
+
     def test_search_replies_skips_search_by_default(self, pyramid_request):
         search = core.Search(pyramid_request)
         search.search_replies(['id-1', 'id-2'])
@@ -131,6 +160,13 @@ class TestSearch(object):
 
         search.search_replies(['id-1'])
         assert log.warn.call_count == 1
+
+    def test_search_replies_works_with_stats_client(self, pyramid_request):
+        search = core.Search(pyramid_request,
+                             stats=FakeStatsdClient(),
+                             separate_replies=True)
+        # This should not raise
+        search.search_replies(['id-1'])
 
     def test_append_filter_appends_to_annotation_builder(self, pyramid_request):
         filter_ = mock.Mock()

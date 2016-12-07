@@ -1,6 +1,6 @@
 'use strict';
 
-var Controller = require('../base/controller');
+const Controller = require('../base/controller');
 
 class FormSelectOnFocusController extends Controller {
   constructor(element) {
@@ -11,7 +11,7 @@ class FormSelectOnFocusController extends Controller {
       element.select();
     }
 
-    element.addEventListener('focus', event => {
+    element.addEventListener('focus', (event) => {
       event.target.select();
     });
   }

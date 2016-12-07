@@ -65,6 +65,9 @@ class AuthClient(ModelFactory):
         model = models.AuthClient
         force_flush = True
 
+    authority = 'example.com'
+    secret = factory.LazyAttribute(lambda _: unicode(FAKER.sha256()))
+
 
 class User(factory.Factory):
 
@@ -86,6 +89,7 @@ class User(factory.Factory):
     authority = 'example.com'
     username = factory.Faker('user_name')
     email = factory.Faker('email')
+    registered_date = factory.Faker('date_time_this_decade')
 
     @factory.lazy_attribute
     def uid(self):
@@ -99,6 +103,7 @@ class Group(ModelFactory):
         force_flush = True
 
     name = factory.Sequence(lambda n:'Test Group {n}'.format(n=str(n)))
+    authority = 'example.com'
     creator = factory.SubFactory(User)
 
 

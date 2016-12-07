@@ -17,6 +17,7 @@ from h.models.user import (
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
 )
+from h.schemas import JSONSchema
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def get_blacklist():
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
     request = node.bindings['request']
-    user = models.User.get_by_email(request.db, value)
+    user = models.User.get_by_email(request.db, value, request.auth_domain)
     if user and user.userid != request.authenticated_userid:
         msg = _("Sorry, an account with this email address already exists.")
         raise colander.Invalid(node, msg)
@@ -58,7 +59,7 @@ def unique_email(node, value):
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     request = node.bindings['request']
-    user = models.User.get_by_username(request.db, value)
+    user = models.User.get_by_username(request.db, value, request.auth_domain)
     if user:
         msg = _("This username is already taken.")
         raise colander.Invalid(node, msg)
@@ -180,7 +181,7 @@ class ForgotPasswordSchema(CSRFSchema):
 
         request = node.bindings['request']
         email = value.get('email')
-        user = models.User.get_by_email(request.db, email)
+        user = models.User.get_by_email(request.db, email, request.auth_domain)
 
         if user is None:
             err = colander.Invalid(node)
@@ -244,7 +245,7 @@ class ResetCode(colander.SchemaType):
         except BadData:
             raise colander.Invalid(node, _('Wrong reset code.'))
 
-        user = models.User.get_by_username(request.db, username)
+        user = models.User.get_by_username(request.db, username, request.auth_domain)
         if user is None:
             raise colander.Invalid(node, _('Your reset code is not valid'))
         if user.password_updated is not None and timestamp < user.password_updated:
@@ -295,7 +296,8 @@ class LegacyEmailChangeSchema(CSRFSchema):
 class EmailChangeSchema(CSRFSchema):
     email = email_node(title=_('Email address'))
     # No validators: all validation is done on the email field
-    password = password_node(title=_('Confirm password'))
+    password = password_node(title=_('Confirm password'),
+                             hide_until_form_active=True)
 
     def validator(self, node, value):
         super(EmailChangeSchema, self).validator(node, value)
@@ -311,14 +313,17 @@ class EmailChangeSchema(CSRFSchema):
 
 
 class PasswordChangeSchema(CSRFSchema):
-    password = password_node(title=_('Current password'))
-    new_password = password_node(title=_('New password'))
+    password = password_node(title=_('Current password'),
+                             inactive_label=_('Password'))
+    new_password = password_node(title=_('New password'),
+                                 hide_until_form_active=True)
     # No validators: all validation is done on the new_password field and we
     # merely assert that the confirmation field is the same.
     new_password_confirm = colander.SchemaNode(
         colander.String(),
         title=_('Confirm new password'),
-        widget=deform.widget.PasswordWidget())
+        widget=deform.widget.PasswordWidget(),
+        hide_until_form_active=True)
 
     def validator(self, node, value):
         super(PasswordChangeSchema, self).validator(node, value)
@@ -398,6 +403,35 @@ class NotificationsSchema(CSRFSchema):
             omit_label=True,
             values=types),
     )
+
+
+class CreateUserAPISchema(JSONSchema):
+    """Validate a user JSON object."""
+
+    schema = {
+        'type': 'object',
+        'properties': {
+            'authority': {
+                'type': 'string',
+                'format': 'hostname',
+            },
+            'username': {
+                'type': 'string',
+                'minLength': 3,
+                'maxLength': 30,
+                'pattern': '^[A-Za-z0-9._]+$',
+            },
+            'email': {
+                'type': 'string',
+                'format': 'email',
+            },
+        },
+        'required': [
+            'authority',
+            'username',
+            'email',
+        ],
+    }
 
 
 def includeme(config):

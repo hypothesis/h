@@ -41,6 +41,22 @@ class UserIDComparator(Comparator):
                        val['domain'] == self.authority)
 
 
+class UserFactory(object):
+    """Root resource for routes that look up User objects by traversal."""
+
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, username):
+        user = self.request.find_service(name='user').fetch(
+            username, self.request.auth_domain)
+
+        if not user:
+            raise KeyError()
+
+        return user
+
+
 class User(Base):
     __tablename__ = 'user'
     __table_args__ = (
@@ -260,11 +276,11 @@ class User(Base):
             cls.google_id == google_id
         ).first()
 
-    @classmethod
-    def get_by_email(cls, session, email):
+    def get_by_email(cls, session, email, authority):
         """Fetch a user by email address."""
         return session.query(cls).filter(
-            sa.func.lower(cls.email) == email.lower()
+            sa.func.lower(cls.email) == email.lower(),
+            cls.authority == authority,
         ).first()
 
     @classmethod
@@ -277,10 +293,13 @@ class User(Base):
         return user
 
     @classmethod
-    def get_by_username(cls, session, username):
+    def get_by_username(cls, session, username, authority):
         """Fetch a user by username."""
         uid = _username_to_uid(username)
-        return session.query(cls).filter(cls.uid == uid).first()
+        return session.query(cls).filter(
+            cls.uid == uid,
+            cls.authority == authority,
+        ).first()
 
     @classmethod
     def get_by_id(cls, session, id):

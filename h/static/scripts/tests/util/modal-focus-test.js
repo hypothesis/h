@@ -1,16 +1,16 @@
 'use strict';
 
-var modalFocus = require('../../util/modal-focus');
+const modalFocus = require('../../util/modal-focus');
 
-describe('util/modal-focus', function () {
+describe('util/modal-focus', () => {
   // Elements inside the focus group
-  var insideEls;
+  let insideEls;
   // Element outside the focus group
-  var outsideEl;
-  var onFocusOut;
-  var releaseFocus;
+  let outsideEl;
+  let onFocusOut;
+  let releaseFocus;
 
-  beforeEach(function () {
+  beforeEach(() => {
     insideEls = [1,2,3].map(() => document.createElement('input'));
     insideEls.forEach(el => document.body.appendChild(el));
 
@@ -21,36 +21,36 @@ describe('util/modal-focus', function () {
     releaseFocus = modalFocus.trap(insideEls, onFocusOut);
   });
 
-  afterEach(function () {
+  afterEach(() => {
     insideEls.forEach(el => el.remove());
     releaseFocus();
   });
 
-  describe('#trap', function () {
-    it('does not invoke the callback when an element in the group is focused', function () {
+  describe('#trap', () => {
+    it('does not invoke the callback when an element in the group is focused', () => {
       insideEls[0].focus();
       insideEls[1].focus();
       assert.notCalled(onFocusOut);
     });
 
-    it('invokes the callback when an element outside the group is focused', function () {
+    it('invokes the callback when an element outside the group is focused', () => {
       outsideEl.focus();
       assert.calledWith(onFocusOut, outsideEl);
     });
 
-    it('does not prevent the focus change if the callback returns null', function () {
+    it('does not prevent the focus change if the callback returns null', () => {
       onFocusOut.returns(null);
       outsideEl.focus();
       assert.equal(document.activeElement, outsideEl);
     });
 
-    it('prevents a focus change if the callback returns an element', function () {
+    it('prevents a focus change if the callback returns an element', () => {
       onFocusOut.returns(insideEls[0]);
       outsideEl.focus();
       assert.equal(document.activeElement, insideEls[0]);
     });
 
-    it('releases focus when returned function is called', function () {
+    it('releases focus when returned function is called', () => {
       onFocusOut.returns(insideEls[0]);
 
       releaseFocus();

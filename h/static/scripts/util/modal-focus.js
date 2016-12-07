@@ -1,7 +1,7 @@
 'use strict';
 
 // Focus release function returned by most recent call to trap()
-var currentReleaseFn;
+let currentReleaseFn;
 
 /**
  * Trap focus within a group of elements.
@@ -33,7 +33,7 @@ function trap(elements, callback) {
   //
   // Instead we watch the 'focus' event on the document itself.
 
-  var onFocusChange = event => {
+  const onFocusChange = (event) => {
     if (elements.some(el => el.contains(event.target))) {
       // Focus remains within modal group
       return;
@@ -41,7 +41,7 @@ function trap(elements, callback) {
 
     // Focus is trying to move outside of the modal group, test whether to
     // allow this
-    var newTarget = callback(event.target);
+    const newTarget = callback(event.target);
     if (newTarget) {
       event.preventDefault();
       event.stopPropagation();
@@ -52,7 +52,7 @@ function trap(elements, callback) {
   };
   document.addEventListener('focus', onFocusChange, true /* useCapture */);
 
-  var releaseFn = () => {
+  const releaseFn = () => {
     if (currentReleaseFn === releaseFn) {
       currentReleaseFn = null;
       document.removeEventListener('focus', onFocusChange, true /* useCapture */);

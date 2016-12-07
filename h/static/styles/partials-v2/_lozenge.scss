@@ -1,0 +1,41 @@
+.lozenge {
+  display: flex;
+  background-color: $grey-3;
+  color: $grey-6;
+  border-radius: 2px;
+  margin-left: 10px;
+  margin-top: 15px;
+  height: 22px;
+  max-width: 55%;
+}
+
+.lozenge__content {
+  // offset is for the close button
+  max-width: calc(100% - 20px);
+
+  padding: 3px 5px 3px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lozenge__facet-value {
+  font-weight: bold;
+}
+
+.lozenge__close {
+  @include reset-button;
+
+  font-weight: bold;
+  padding: 0px 5px 0px 5px;
+  cursor: default;
+  border-radius: 0 2px 2px 0;
+
+  &:hover {
+    background-color: $grey-4;
+  }
+}
+
+.is-disabled {
+  pointer-events: none;
+}

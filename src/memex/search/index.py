@@ -2,10 +2,10 @@
 """Functions for updating the search index."""
 
 from __future__ import unicode_literals
-from collections import namedtuple
+
 import itertools
 import logging
-from memex._compat import xrange
+from collections import namedtuple
 
 import elasticsearch
 from elasticsearch import helpers as es_helpers
@@ -13,8 +13,13 @@ from sqlalchemy.orm import subqueryload
 
 from memex import models
 from memex import presenters
+from memex._compat import xrange
 from memex.events import AnnotationTransformEvent
-
+from memex.search.config import (
+    configure_index,
+    get_aliased_index,
+    update_aliased_index,
+)
 
 log = logging.getLogger(__name__)
 
@@ -79,11 +84,25 @@ def delete(es, annotation_id):
 
 
 def reindex(session, es, request):
-    indexing = BatchIndexer(session, es, request)
-    indexing.index_all()
+    """Reindex all annotations into a new index, and update the alias."""
 
-    deleting = BatchDeleter(session, es)
-    deleting.delete_all()
+    if get_aliased_index(es) is None:
+        raise RuntimeError('cannot reindex if current index is not aliased')
+
+    new_index = configure_index(es)
+    indexer = BatchIndexer(session, es, request, target_index=new_index)
+
+    errored = indexer.index()
+    if errored:
+        log.debug('failed to index {} annotations, retrying...'.format(
+            len(errored)))
+        errored = indexer.index(errored)
+        if errored:
+            log.warn('failed to index {} annotations: {!r}'.format(
+                len(errored),
+                errored))
+
+    update_aliased_index(es, new_index)
 
 
 class BatchIndexer(object):
@@ -92,22 +111,16 @@ class BatchIndexer(object):
     the search index.
     """
 
-    def __init__(self, session, es_client, request):
+    def __init__(self, session, es_client, request, target_index=None):
         self.session = session
         self.es_client = es_client
         self.request = request
 
-    def index_all(self):
-        """Reindex all annotations, and retry failed indexing operations once."""
-
-        errored = None
-        for _ in range(2):
-            errored = self.index(errored)
-            log.debug(
-                'Failed to index {} annotations, might retry'.format(len(errored)))
-
-            if not errored:
-                break
+        # By default, index into the open index
+        if target_index is None:
+            self._target_index = self.es_client.index
+        else:
+            self._target_index = target_index
 
     def index(self, annotation_ids=None):
         """
@@ -135,7 +148,7 @@ class BatchIndexer(object):
         return errored
 
     def _prepare(self, annotation):
-        action = {'index': {'_index': self.es_client.index,
+        action = {'index': {'_index': self._target_index,
                             '_type': self.es_client.t.annotation,
                             '_id': annotation.id}}
         data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
@@ -179,89 +192,3 @@ class BatchIndexer(object):
             subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
             subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
         )
-
-
-class BatchDeleter(object):
-    """
-    A convenience class for removing all annotations that are deleted from the
-    database from the search index.
-    """
-
-    def __init__(self, session, es_client):
-        self.session = session
-        self.es_client = es_client
-
-    def delete_all(self):
-        """Remove all deleted annotations, and retry failed delete operations once."""
-        ids = self.deleted_annotation_ids()
-        for _ in range(2):
-            if not ids:
-                break
-
-            ids = self.delete(ids)
-            log.debug(
-                'Failed to delete {} annotations, might retry'.format(len(ids)))
-
-    def deleted_annotation_ids(self):
-        """
-        Get a list of deleted annotation ids by comparing all ids in the search
-        index and comparing them to all ids in the database.
-
-        :returns: a set of deleted annotation ids
-        :rtype: set
-        """
-        ids = set()
-        for batch in self._batch_iter(2000, self._es_scan()):
-            ids.update({a['_id'] for a in batch})
-
-        for batch in self._batch_iter(2000, self._pg_ids()):
-            ids.difference_update({a.id for a in batch})
-        return ids
-
-    def delete(self, annotation_ids):
-        """
-        Delete annotations from the search index.
-
-        :param annotation_ids: a list of ids to delete.
-        :type annotation_ids: collection
-
-        :returns: a set of errored ids
-        :rtype: set
-        """
-        if not annotation_ids:
-            return set()
-
-        deleting = es_helpers.streaming_bulk(self.es_client.conn, annotation_ids,
-                                             chunk_size=100,
-                                             expand_action_callback=self._prepare,
-                                             raise_on_error=False)
-        errored = set()
-        for ok, item in deleting:
-            if not ok and item['delete']['status'] != 404:
-                errored.add(item['delete']['_id'])
-        return errored
-
-    def _prepare(self, id_):
-        action = {'delete': {'_index': self.es_client.index,
-                             '_type': self.es_client.t.annotation,
-                             '_id': id_}}
-        return (action, None)
-
-    def _pg_ids(self):
-        # This is using a Postgres cursor for better query performance.
-        return self.session.query(models.Annotation.id).execution_options(stream_results=True)
-
-    def _es_scan(self):
-        query = {'_source': False, 'query': {'match_all': {}}}
-        return es_helpers.scan(self.es_client.conn,
-                               index=self.es_client.index,
-                               doc_type=self.es_client.t.annotation,
-                               query=query)
-
-    def _batch_iter(self, n, iterable):
-        it = iter(iterable)
-        while True:
-            batch = list(itertools.islice(it, n))
-            if not batch:
-                return
-            yield batch

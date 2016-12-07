@@ -1,234 +1,452 @@
 'use strict';
 
-var Controller = require('../base/controller');
-var setElementState = require('../util/dom').setElementState;
+const escapeHtml = require('escape-html');
+
+const Controller = require('../base/controller');
+const LozengeController = require('./lozenge-controller');
+const AutosuggestDropdownController = require('./autosuggest-dropdown-controller');
+const SearchTextParser = require('../util/search-text-parser');
+const { cloneTemplate } = require('../util/dom');
+const stringUtil = require('../util/string');
+
+
+const FACET_TYPE = 'FACET';
+const TAG_TYPE = 'TAG';
+const GROUP_TYPE = 'GROUP';
+const MAX_SUGGESTIONS = 5;
+
+
+/**
+ * Normalize a string for use in comparisons of user input with a suggestion.
+ * This causes differences in unicode composition and combining characters/accents to be ignored.
+ */
+const normalizeStr = function(str) {
+  return stringUtil.fold(stringUtil.normalize(str));
+};
 
 /**
  * Controller for the search bar.
  */
 class SearchBarController extends Controller {
-  constructor(element) {
-    super(element);
+  constructor(element, options = {}) {
+    super(element, options);
+
+    if (!options.lozengeTemplate) {
+      options.lozengeTemplate = document.querySelector('#lozenge-template');
+    }
 
     this._input = this.refs.searchBarInput;
-    this._dropdown = this.refs.searchBarDropdown;
-    this._dropdownItems = Array.from(
-      element.querySelectorAll('[data-ref="searchBarDropdownItem"]'));
+    this._lozengeContainer = this.refs.searchBarLozenges;
 
-    var getActiveDropdownItem = () => {
-      return element.querySelector('.js-search-bar-dropdown-menu-item--active');
-    };
+    /**
+     * the suggestionsMap pulls in the available lists - either
+     *  static or dynamic living in the dom - into one mapping
+     *  lists of all suggestion values.
+     */
+    this._suggestionsMap = (() => {
 
-    var clearActiveDropdownItem = () => {
-      var activeItem = getActiveDropdownItem();
-      if (activeItem) {
-        activeItem.classList.remove('js-search-bar-dropdown-menu-item--active');
-      }
-    };
+      const explanationList = [
+        {
+          matchOn: 'user',
+          title: 'user:',
+          explanation: 'search by username',
+        },
+        {
+          matchOn: 'tag',
+          title: 'tag:',
+          explanation: 'search for annotations with a tag',
+        },
+        {
+          matchOn: 'url',
+          title: 'url:',
+          explanation: 'see all annotations on a page',
+        },
+        {
+          matchOn: 'group',
+          title: 'group:',
+          explanation: 'show annotations created in a group you are a member of',
+        },
+      ].map((item) => { return Object.assign(item, { type: FACET_TYPE}); });
 
-    var updateActiveDropdownItem = element => {
-      clearActiveDropdownItem();
-      element.classList.add('js-search-bar-dropdown-menu-item--active');
-    };
+      // tagSuggestions are made available by the scoped template data.
+      // see search.html.jinja2 for definition
+      const tagSuggestionJSON = document.querySelector('.js-tag-suggestions');
+      let tagSuggestions = [];
 
-    var selectFacet = facet => {
-      this._input.value = facet;
-
-      closeDropdown();
-
-      setTimeout(function() {
-        this._input.focus();
-      }.bind(this), 0);
-    };
-
-    var isHidden = element => {
-      return element &&
-        (element.nodeType !== 1 ||
-          !element.classList ||
-          element.classList.contains('is-hidden'));
-    };
-
-    var getPreviousVisibleSiblingElement = element => {
-      if (!element) {
-        return null;
-      }
-
-      do {
-        element = element.previousSibling;
-      } while (isHidden(element));
-      return element;
-    };
-
-    var getNextVisibleSiblingElement = element => {
-      if (!element) {
-        return null;
-      }
-
-      do {
-        element = element.nextSibling;
-      } while (isHidden(element));
-
-      return element;
-    };
-
-    var showAllDropdownItems = () => {
-      this._dropdownItems.forEach(function(dropdownItem) {
-        dropdownItem.classList.remove('is-hidden');
-      });
-    };
-
-    var closeDropdown = () => {
-      if (!this.state.open) { return; }
-      clearActiveDropdownItem();
-      showAllDropdownItems();
-      this.setState({open: false});
-      this._input.removeEventListener('keydown', setupListenerKeys);
-    };
-
-    var openDropdown = () => {
-      if (this.state.open) { return; }
-      clearActiveDropdownItem();
-
-      this.setState({open: true});
-
-      this._input.addEventListener('keydown', setupListenerKeys);
-    };
-
-    var getVisibleDropdownItems = () => {
-      return this._dropdown.querySelectorAll('li:not(.is-hidden)');
-    };
-
-    /** Show items that match the word and hide ones that don't. */
-    var setVisibleDropdownItems = word => {
-      this._dropdownItems.forEach(function(dropdownItem) {
-        var dropdownItemTitle =
-          dropdownItem.querySelector('[data-ref="searchBarDropdownItemTitle"]').
-            innerHTML.trim();
-        if (dropdownItemTitle.indexOf(word) < 0) {
-          dropdownItem.classList.add('is-hidden');
-        } else {
-          dropdownItem.classList.remove('is-hidden');
+      if (tagSuggestionJSON) {
+        try {
+          tagSuggestions = JSON.parse(tagSuggestionJSON.innerHTML.trim());
+        } catch (e) {
+          console.error('Could not parse .js-tag-suggestions JSON content', e);
         }
-      });
-    };
+      }
 
-    var getTrimmedInputValue = () => {
+      const tagsList = ((tagSuggestions) || []).map((item) => {
+        return Object.assign(item, {
+          type: TAG_TYPE,
+          title: item.tag, // make safe
+          matchOn: normalizeStr(item.tag),
+          usageCount: item.count || 0,
+        });
+      });
+
+      // groupSuggestions are made available by the scoped template data.
+      // see search.html.jinja2 for definition
+      const groupSuggestionJSON = document.querySelector('.js-group-suggestions');
+      let groupSuggestions = [];
+
+      if (groupSuggestionJSON) {
+        try {
+          groupSuggestions = JSON.parse(groupSuggestionJSON.innerHTML.trim());
+        } catch (e) {
+          console.error('Could not parse .js-group-suggestions JSON content', e);
+        }
+      }
+
+      const groupsList = ((groupSuggestions) || []).map((item) => {
+        return Object.assign(item, {
+          type: GROUP_TYPE,
+          title: item.name, // make safe
+          matchOn: normalizeStr(item.name),
+          pubid: item.pubid,
+          name: item.name,
+        });
+      });
+
+      return explanationList.concat(tagsList, groupsList);
+    })();
+
+    const getTrimmedInputValue = () => {
       return this._input.value.trim();
     };
 
-    var maybeOpenOrCloseDropdown = () => {
-      var word = getTrimmedInputValue();
-      var shouldOpenDropdown = true;
 
-      // If there are no visible items that match the word close the dropdown
-      if (getVisibleDropdownItems().length < 1) {
-        shouldOpenDropdown = false;
+    /**
+     * given a lozenge set for a group, like "group:value", match the value
+     *  against our group suggestions list to find a match on either pubid
+     *  or the group name. The result will be an object to identify what
+     *  is the search input term to use and what value can be displayed
+     *  to the user. If there is no match, the input and display will be
+     *  the original input value.
+     *
+     *  @param {String} groupLoz - ex: "group:value"
+     *  @returns {Object} represents the values to display and use for inputVal
+     *    {
+     *      display: {String}, // like group:"friendly name"
+     *      input: {String}    // like group:pid1234
+     *    }
+     */
+    const getInputAndDisplayValsForGroup = (groupLoz) => {
+      let groupVal = groupLoz.substr(groupLoz.indexOf(':') + 1).trim();
+      let inputVal = groupVal.trim();
+      let displayVal = groupVal;
+      const wrapQuotesIfNeeded = function(str) {
+        return str.indexOf(' ') > -1 ? `"${str}"` : str;
+      };
+
+
+      // remove quotes from value
+      if (groupVal[0] === '"' || groupVal[0] === '\'') {
+        groupVal = groupVal.substr(1);
+      }
+      if (groupVal[groupVal.length - 1] === '"' || groupVal[groupVal.length - 1] === '\'') {
+        groupVal = groupVal.slice(0, -1);
       }
 
-      // If the word has a ':' don't show dropdown
-      if (word.indexOf(':') > -1) {
-        shouldOpenDropdown = false;
-      }
+      const matchVal = normalizeStr(groupVal).toLowerCase();
 
-      if (shouldOpenDropdown) {
-        openDropdown();
+      // NOTE: We are pushing a pubid to lowercase here. These ids are created by us
+      // in a random generation case-sensistive style. Theoretically, that means
+      // casting to lower could cause overlaps of values like 'Abc' and 'aBC' - making
+      // them equal to us. Since that is very unlikely to occur for one user's group
+      // set, the convenience of being defensive about bad input/urls is more valuable
+      // than the risk of overlap.
+      const matchByPubid = this._suggestionsMap.find((item) => {
+        return item.type === GROUP_TYPE && item.pubid.toLowerCase() === matchVal;
+      });
+
+      if (matchByPubid) {
+        inputVal = matchByPubid.pubid;
+        displayVal = wrapQuotesIfNeeded(matchByPubid.name);
       } else {
-        closeDropdown();
-      }
-    };
-
-    var setupListenerKeys = event => {
-      const ENTER_KEY_CODE = 13;
-      const UP_ARROW_KEY_CODE = 38;
-      const DOWN_ARROW_KEY_CODE = 40;
-
-      var activeItem = getActiveDropdownItem();
-      var handlers = {};
-
-      var visibleDropdownItems = getVisibleDropdownItems();
-
-      var handleEnterKey = event => {
-        if (activeItem) {
-          event.preventDefault();
-          var facet =
-            activeItem.
-              querySelector('[data-ref="searchBarDropdownItemTitle"]').
-              innerHTML.trim();
-          selectFacet(facet);
+        const matchByName = this._suggestionsMap.find((item) => {
+          return item.type === GROUP_TYPE && item.matchOn.toLowerCase() === matchVal;
+        });
+        if (matchByName) {
+          inputVal = matchByName.pubid;
+          displayVal = wrapQuotesIfNeeded(matchByName.name);
         }
+      }
+
+      return {
+        input: 'group:' + inputVal,
+        display: 'group:' + displayVal,
+      };
+    };
+
+    /**
+     * Insert a hidden <input> with an empty value into the search <form>.
+     *
+     * The name="q" attribute is moved from the visible <input> on to the
+     * hidden <input> so that when the <form> is submitted it's the value of
+     * the _hidden_ input, not the visible one, that is submitted as the
+     * q parameter.
+     *
+     */
+    const insertHiddenInput = () => {
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+
+      // When JavaScript isn't enabled this._input is submitted to the server
+      // as the q param. With JavaScript we submit hiddenInput instead.
+      hiddenInput.name = this._input.name;
+      this._input.removeAttribute('name');
+
+      this.refs.searchBarForm.appendChild(hiddenInput);
+      return hiddenInput;
+    };
+
+    /** Return the controllers for all of the displayed lozenges. */
+    const lozenges = () => {
+      const lozElements = Array.from(this.element.querySelectorAll('.js-lozenge'));
+      return lozElements.map(el => el.controllers[0]);
+    };
+
+    /**
+     * Update the value of the hidden input.
+     *
+     * Update the value of the hidden input based on the contents of any
+     * lozenges and any remaining text in the visible input.
+     *
+     * This should be called whenever a lozenge is added to or removed from
+     * the DOM, and whenever the text in the visible input changes.
+     *
+     */
+    const updateHiddenInput = () => {
+      let newValue = '';
+      lozenges().forEach((loz) => {
+        let inputValue = loz.inputValue();
+        if (inputValue.indexOf('group:') === 0) {
+          inputValue = getInputAndDisplayValsForGroup(inputValue).input;
+        }
+        newValue = newValue + inputValue + ' ';
+      });
+      this._hiddenInput.value = (newValue + getTrimmedInputValue()).trim();
+    };
+
+    /**
+     * Creates a lozenge and sets the content string to the
+     * content provided and executes the delete callback when
+     * the lozenge is deleted.
+     *
+     * @param {string} content The search term
+     */
+    const addLozenge = (content) => {
+
+      const lozengeEl = cloneTemplate(this.options.lozengeTemplate);
+      const currentLozenges = this.element.querySelectorAll('.lozenge');
+      if (currentLozenges.length > 0) {
+        this._lozengeContainer.insertBefore(lozengeEl,
+          currentLozenges[currentLozenges.length-1].nextSibling);
+      } else {
+        this._lozengeContainer.insertBefore(lozengeEl,
+          this._lozengeContainer.firstChild);
+      }
+
+      const deleteCallback = () => {
+        lozengeEl.remove();
+        lozenges().forEach(ctrl => ctrl.setState({disabled: true}));
+        updateHiddenInput();
+        this.refs.searchBarForm.submit();
       };
 
-      var handleUpArrowKey = () => {
-        updateActiveDropdownItem(getPreviousVisibleSiblingElement(activeItem) ||
-          visibleDropdownItems[visibleDropdownItems.length - 1]);
-      };
+      // groups have extra logic to show one value
+      // but have their input/search value be different
+      // make sure we grab the right value to display
+      if (content.indexOf('group:') === 0) {
+        content = getInputAndDisplayValsForGroup(content).display;
+      }
 
-      var handleDownArrowKey = () => {
-        updateActiveDropdownItem(getNextVisibleSiblingElement(activeItem) ||
-          visibleDropdownItems[0]);
-      };
+      new LozengeController(lozengeEl, {
+        content,
+        deleteCallback,
+      });
+    };
 
-      handlers[ENTER_KEY_CODE] = handleEnterKey;
-      handlers[UP_ARROW_KEY_CODE] = handleUpArrowKey;
-      handlers[DOWN_ARROW_KEY_CODE] = handleDownArrowKey;
+    /**
+     * Create lozenges for the search query terms already in the input field on
+     * page load and update lozenges that are already in the lozenges container
+     * so they are hooked up with the proper event handling
+     */
+    const lozengifyInput = () => {
 
-      var handler = handlers[event.keyCode];
-      if (handler) {
-        handler(event);
+      const {lozengeValues, incompleteInputValue} = SearchTextParser.getLozengeValues(this._input.value);
+
+      lozengeValues.forEach(addLozenge);
+      this._input.value = incompleteInputValue;
+      this._input.style.visibility = 'visible';
+      updateHiddenInput();
+    };
+
+
+    const onInputKeyDown = (event) => {
+      const SPACE_KEY_CODE = 32;
+
+      if (event.keyCode === SPACE_KEY_CODE) {
+        const word = getTrimmedInputValue();
+        if (SearchTextParser.shouldLozengify(word)) {
+          event.preventDefault();
+          addLozenge(word);
+          this._input.value = '';
+          updateHiddenInput();
+        }
       }
     };
 
-    var handleClickOnItem = event => {
-      var facet =
-        event.currentTarget.
-          querySelector('[data-ref="searchBarDropdownItemTitle"]').
-          innerHTML.trim();
-      selectFacet(facet);
-    };
 
-    var handleHoverOnItem = event => {
-      updateActiveDropdownItem(event.currentTarget);
-    };
+    this._hiddenInput = insertHiddenInput(this.refs.searchBarForm);
 
-    var handleClickOnDropdown = event => {
-      // prevent clicking on a part of the dropdown menu itself that
-      // isn't one of the suggestions from closing the menu
-      event.preventDefault();
-    };
 
-    var handleFocusOutside = event => {
-      if (!element.contains(event.target) ||
-        !element.contains(event.relatedTarget)) {
-        this.setState({open: false});
-      }
-      closeDropdown();
-    };
+    this._suggestionsHandler = new AutosuggestDropdownController( this._input, {
 
-    var handleFocusinOnInput = () => {
-      maybeOpenOrCloseDropdown();
-    };
+      list: this._suggestionsMap,
 
-    var handleInputOnInput = () => {
-      var word = getTrimmedInputValue();
-      setVisibleDropdownItems(word);
-      maybeOpenOrCloseDropdown();
-    };
+      header: 'Narrow your search:',
 
-    this._dropdownItems.forEach(function(item) {
-      if(item && item.addEventListener) {
-        item.addEventListener('mousemove', handleHoverOnItem);
-        item.addEventListener('mousedown', handleClickOnItem);
-      }
+      classNames: {
+        container: 'search-bar__dropdown-menu-container',
+        header: 'search-bar__dropdown-menu-header',
+        list: 'search-bar__dropdown-menu',
+        item: 'search-bar__dropdown-menu-item',
+        activeItem: 'js-search-bar-dropdown-menu-item--active',
+      },
+
+      renderListItem: (listItem) => {
+
+        let itemContents = `<span class="search-bar__dropdown-menu-title"> ${escapeHtml(listItem.title)} </span>`;
+
+        if (listItem.explanation) {
+          itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${listItem.explanation} </span>`;
+        }
+
+        return itemContents;
+      },
+
+      listFilter: (list, currentInput) => {
+
+        currentInput = (currentInput || '').trim();
+
+        let typeFilter = FACET_TYPE;
+        const inputLower = currentInput.toLowerCase();
+        if (inputLower.indexOf('tag:') === 0) {
+          typeFilter = TAG_TYPE;
+        } else if (inputLower.indexOf('group:') === 0) {
+          typeFilter = GROUP_TYPE;
+        }
+
+        let inputFilter = normalizeStr(currentInput);
+
+        if (typeFilter === TAG_TYPE || typeFilter === GROUP_TYPE) {
+          inputFilter = inputFilter.substr(inputFilter.indexOf(':') + 1);
+
+          // remove the initial quote for comparisons if it exists
+          if (inputFilter[0] === '\'' || inputFilter[0] === '"') {
+            inputFilter = inputFilter.substr(1);
+          }
+        }
+
+        if (this.state.suggestionsType !== typeFilter) {
+          this.setState({
+            suggestionsType: typeFilter,
+          });
+        }
+
+        return list.filter((item) => {
+          return item.type === typeFilter && item.matchOn.toLowerCase().indexOf(inputFilter.toLowerCase()) >= 0;
+        }).sort((a,b) => {
+
+          // this sort functions intention is to
+          // sort partial matches as lower index match
+          // value first. Then let natural sort of the
+          // original list take effect if they have equal
+          // index values or there is no current input value
+
+          if (inputFilter) {
+            const aIndex = a.matchOn.indexOf(inputFilter);
+            const bIndex = b.matchOn.indexOf(inputFilter);
+
+            // match score
+            if (aIndex > bIndex) {
+              return 1;
+            } else if (aIndex < bIndex) {
+              return -1;
+            }
+          }
+
+
+          // If we are filtering on tags, we need to arrange
+          // by popularity
+          if (typeFilter === TAG_TYPE) {
+            if (a.usageCount > b.usageCount) {
+              return -1;
+            } else if (a.usageCount < b.usageCount) {
+              return 1;
+            }
+          }
+
+          return 0;
+
+        }).slice(0, MAX_SUGGESTIONS);
+      },
+
+      onSelect: (itemSelected) => {
+
+        if (itemSelected.type === TAG_TYPE || itemSelected.type === GROUP_TYPE) {
+          const prefix = itemSelected.type === TAG_TYPE ? 'tag:' : 'group:';
+
+          let valSelection = itemSelected.title;
+
+          // wrap multi word phrases with quotes to keep
+          // autosuggestions consistent with what user needs to do
+          if (valSelection.indexOf(' ') > -1) {
+            valSelection = `"${valSelection}"`;
+          }
+
+          addLozenge(prefix + valSelection);
+
+          this._input.value = '';
+        } else {
+          this._input.value = itemSelected.title;
+          setTimeout(() => {
+            this._input.focus();
+          }, 0);
+        }
+        updateHiddenInput();
+      },
+
     });
 
-    this._dropdown.addEventListener('mousedown', handleClickOnDropdown);
-    this._input.addEventListener('blur', handleFocusOutside);
-    this._input.addEventListener('input', handleInputOnInput);
-    this._input.addEventListener('focus', handleFocusinOnInput);
+    this._input.addEventListener('keydown', onInputKeyDown);
+    this._input.addEventListener('input', updateHiddenInput);
+    lozengifyInput();
   }
 
-  update(state) {
-    setElementState(this._dropdown, {open: state.open});
+  update(newState, prevState) {
+
+    if (!this._suggestionsHandler) {
+      return;
+    }
+
+    if (newState.suggestionsType !== prevState.suggestionsType) {
+      if (newState.suggestionsType === TAG_TYPE) {
+        this._suggestionsHandler.setHeader('Popular tags:');
+      } else if (newState.suggestionsType === GROUP_TYPE) {
+        this._suggestionsHandler.setHeader('Your groups:');
+      } else {
+        this._suggestionsHandler.setHeader('Narrow your search:');
+      }
+    }
+
   }
 }
 

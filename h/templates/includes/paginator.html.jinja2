@@ -2,9 +2,8 @@
   <ul class="pager">
     {% if page.prev is none %}
       <li>
-        <span class="pager__item pager__item--begin is-disabled"
-          aria-hidden="true">
-          &#x3c;
+        <span class="pager__item pager__item--begin is-disabled" aria-hidden="true">
+          {{ svg_icon('pagination-left') }}
         </span>
       </li>
     {% else %}
@@ -12,7 +11,7 @@
         <a class="pager__item pager__item--begin pager__item--link"
           href="{{ page.url_for(page.prev) }}"
           aria-label="{% trans %}Go to previous page{% endtrans %}">
-          <span aria-hidden="true">&#x3c;</span>
+          {{ svg_icon('pagination-left') }}
         </a>
       </li>
     {% endif %}
@@ -42,15 +41,16 @@
     {% endfor %}
     {% if page.next is none %}
       <li>
-        <span class="pager__item pager__item--end is-disabled"
-          aria-hidden="true">&#x3e;</span>
+        <span class="pager__item pager__item--end is-disabled" aria-hidden="true">
+          {{ svg_icon('pagination-right') }}
+        </span>
       </li>
     {% else %}
       <li>
         <a class="pager__item pager__item--end pager__item--link"
           href="{{ page.url_for(page.next) }}"
           aria-label="{% trans %}Go to next page{% endtrans %}">
-          <span aria-hidden="true">&#x3e;</span>
+          {{ svg_icon('pagination-right') }}
         </a>
       </li>
     {% endif %}

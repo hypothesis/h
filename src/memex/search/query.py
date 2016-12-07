@@ -166,10 +166,13 @@ class UriFilter(object):
         self.request = request
 
     def __call__(self, params):
-        if 'uri' not in params:
+        if 'uri' not in params and 'url' not in params:
             return None
-        query_uris = [v for k, v in params.items() if k == 'uri']
-        del params['uri']
+        query_uris = [v for k, v in params.items() if k in ['uri', 'url']]
+        if 'uri' in params:
+            del params['uri']
+        if 'url' in params:
+            del params['url']
 
         uris = set()
         for query_uri in query_uris:
@@ -254,7 +257,7 @@ class TagsAggregation(object):
     def __call__(self, _):
         return {
             "terms": {
-                "field": "tags",
+                "field": "tags_raw",
                 "size": self.limit
             }
         }

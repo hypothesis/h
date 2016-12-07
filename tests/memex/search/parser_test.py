@@ -41,6 +41,13 @@ from memex.search import parser
     ('uri:https://example.com?foo=bar&baz=qux#hello', MultiDict([('uri', 'https://example.com?foo=bar&baz=qux#hello')])),
     ('URI:https://example.com', MultiDict([('uri', 'https://example.com')])),
 
+    # url field
+    ('url:https://example.com', MultiDict([('url', 'https://example.com')])),
+    ('url:urn:x-pdf:hthe-fingerprint', MultiDict([('url', 'urn:x-pdf:hthe-fingerprint')])),
+    ('url:https://foo.com url:http://bar.com', MultiDict([('url', 'https://foo.com'), ('url', 'http://bar.com')])),
+    ('url:https://example.com?foo=bar&baz=qux#hello', MultiDict([('url', 'https://example.com?foo=bar&baz=qux#hello')])),
+    ('URL:https://example.com', MultiDict([('url', 'https://example.com')])),
+
     # any field
     ('foo', MultiDict([('any', 'foo')])),
     ('foo bar', MultiDict([('any', 'foo'), ('any', 'bar')])),

@@ -3,7 +3,7 @@
 from pyramid.settings import asbool
 
 from memex.search.client import Client
-from memex.search.config import configure_index
+from memex.search.config import init
 from memex.search.core import Search
 from memex.search.core import FILTERS_KEY
 from memex.search.core import MATCHERS_KEY
@@ -16,7 +16,9 @@ def _get_client(settings):
     host = settings['es.host']
     index = settings['es.index']
     kwargs = {}
-    kwargs['timeout'] = settings.get('es.client_timeout', 10)
+    kwargs['max_retries'] = settings.get('es.client.max_retries', 3)
+    kwargs['retry_on_timeout'] = settings.get('es.client.retry_on_timeout', False)
+    kwargs['timeout'] = settings.get('es.client.timeout', 10)
 
     if 'es.client_poolsize' in settings:
         kwargs['maxsize'] = settings['es.client_poolsize']
@@ -41,11 +43,12 @@ def includeme(config):
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
+    config.registry['es.client'] = _get_client(settings)
     config.add_request_method(
-        lambda r: _get_client(r.registry.settings),
+        lambda r: r.registry['es.client'],
         name='es',
         reify=True)
 
     # If requested, automatically configure the index
     if asbool(settings.get('h.search.autoconfig', False)):
-        configure_index(_get_client(settings))
+        init(config.registry['es.client'])

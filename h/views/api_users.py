@@ -6,9 +6,11 @@ import hmac
 
 import sqlalchemy as sa
 
+from h import models
+from h.accounts import schemas
 from h.auth.util import basic_auth_creds
 from h.exceptions import ClientUnauthorized
-from h.models import AuthClient
+from h.schemas import ValidationError
 from h.util.view import json_view
 
 
@@ -23,23 +25,46 @@ def create(request):
     service directly.
     """
     client = _request_client(request)
-    payload = request.json_body
 
-    user_props = {
-        'authority': client.authority,
-        'username': payload['username'],
-        'email': payload['email'],
-    }
+    schema = schemas.CreateUserAPISchema()
+    appstruct = schema.validate(request.json_body)
+
+    _check_authority(client, appstruct)
+    appstruct['authority'] = client.authority
+
+    _check_existing_user(request.db, appstruct)
 
     user_signup_service = request.find_service(name='user_signup')
-    user = user_signup_service.signup(require_activation=False, **user_props)
-
+    user = user_signup_service.signup(require_activation=False, **appstruct)
     return {
         'authority': user.authority,
         'email': user.email,
         'userid': user.userid,
         'username': user.username,
     }
+
+
+def _check_authority(client, data):
+    authority = data.get('authority')
+    if client.authority != authority:
+        msg = "'authority' does not match authenticated client"
+        raise ValidationError(msg)
+
+
+def _check_existing_user(session, data):
+    existing_user = models.User.get_by_email(session,
+                                             data['email'],
+                                             data['authority'])
+    if existing_user:
+        msg = "user with email address %s already exists" % data['email']
+        raise ValidationError(msg)
+
+    existing_user = models.User.get_by_username(session,
+                                                data['username'],
+                                                data['authority'])
+    if existing_user:
+        msg = "user with username %s already exists" % data['username']
+        raise ValidationError(msg)
 
 
 def _request_client(request):
@@ -54,7 +79,7 @@ def _request_client(request):
     # because the resulting code may be subject to a timing attack.
     client_id, client_secret = creds
     try:
-        client = request.db.query(AuthClient).get(client_id)
+        client = request.db.query(models.AuthClient).get(client_id)
     except sa.exc.StatementError:  # client_id is malformed
         raise ClientUnauthorized()
     if client is None:

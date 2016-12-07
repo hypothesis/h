@@ -1,29 +1,35 @@
 'use strict';
 
 // Configure error reporting
-var settings = require('./base/settings')(document);
+const settings = require('./base/settings')(document);
 if (settings.raven) {
   require('./base/raven').init(settings.raven);
 }
 
 require('./polyfills');
 
-var CharacterLimitController = require('./controllers/character-limit-controller');
-var CreateGroupFormController = require('./controllers/create-group-form-controller');
-var DropdownMenuController = require('./controllers/dropdown-menu-controller');
-var FormController = require('./controllers/form-controller');
-var FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
-var SearchBarController = require('./controllers/search-bar-controller');
-var SearchBucketController = require('./controllers/search-bucket-controller');
-var SignupFormController = require('./controllers/signup-form-controller');
-var TooltipController = require('./controllers/tooltip-controller');
-var upgradeElements = require('./base/upgrade-elements');
+const CharacterLimitController = require('./controllers/character-limit-controller');
+const CopyButtonController = require('./controllers/copy-button-controller');
+const ConfirmSubmitController = require('./controllers/confirm-submit-controller');
+const CreateGroupFormController = require('./controllers/create-group-form-controller');
+const DropdownMenuController = require('./controllers/dropdown-menu-controller');
+const FormController = require('./controllers/form-controller');
+const FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
+const InputAutofocusController = require('./controllers/input-autofocus-controller');
+const SearchBarController = require('./controllers/search-bar-controller');
+const SearchBucketController = require('./controllers/search-bucket-controller');
+const SignupFormController = require('./controllers/signup-form-controller');
+const TooltipController = require('./controllers/tooltip-controller');
+const upgradeElements = require('./base/upgrade-elements');
 
-var controllers = {
+const controllers = {
   '.js-character-limit': CharacterLimitController,
+  '.js-copy-button': CopyButtonController,
+  '.js-confirm-submit': ConfirmSubmitController,
   '.js-create-group-form': CreateGroupFormController,
   '.js-dropdown-menu': DropdownMenuController,
   '.js-form': FormController,
+  '.js-input-autofocus': InputAutofocusController,
   '.js-select-onfocus': FormSelectOnFocusController,
   '.js-search-bar': SearchBarController,
   '.js-search-bucket': SearchBucketController,

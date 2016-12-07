@@ -48,6 +48,10 @@
           </div>
         {%- endif %}
         {{ self.page_content() }}
+
+        <footer class="form-footer--no-border">
+          {{ panel('back_link') }}
+        </footer>
       </div>
     {% else %}
       {% include "h:templates/includes/logo-header.html.jinja2" %}
