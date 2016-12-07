@@ -85,11 +85,15 @@ class Group(Base, mixins.Timestamps):
         'User', secondary='user_group', backref=sa.orm.backref(
             'groups', order_by='Group.name'))
 
-    def __init__(self, name, authority, creator, description=None):
+    def __init__(self, name, authority, creator, description=None,
+                 joinable_by=None, readable_by=None, writeable_by=None):
         self.name = name
         self.authority = authority
         self.description = description
         self.creator = creator
+        self.joinable_by = joinable_by
+        self.readable_by = readable_by
+        self.writeable_by = writeable_by
         self.members.append(creator)
 
     @sa.orm.validates('name')
