@@ -2,7 +2,12 @@
   display: flex;
   flex-direction: row;
   margin-top: 0;
-  margin-bottom: 40px;
+
+  /* margin-bottom here doesn't seem to work on some mobile devices
+     (e.g. mobile Safari on an iPhone 5S) so use padding-bottom instead. */
+  margin-bottom: 0;
+  padding-bottom: 40px;
+
   margin-left: auto;
   margin-right: auto;
   font-weight: bold;
