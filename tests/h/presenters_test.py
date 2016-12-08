@@ -65,12 +65,17 @@ class TestAnnotationHTMLPresenter(object):
 
         assert annotation.tags == annotation.annotation.tags
 
-    def test_text_rendered(self):
+    @pytest.mark.parametrize('value,expected', [
+        (None, jinja2.Markup('')),
+        ('', jinja2.Markup('')),
+        ('donkeys with umbrellas', jinja2.Markup('donkeys with umbrellas')),
+    ])
+    def test_text_rendered(self, value, expected):
         annotation = self._annotation(
-            annotation=mock.Mock()
+            annotation=mock.Mock(text_rendered=value)
         )
 
-        assert annotation.text_rendered == annotation.annotation.text_rendered
+        assert annotation.text_rendered == expected
 
     def test_description(self):
         annotation = self._annotation(

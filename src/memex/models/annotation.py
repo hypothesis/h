@@ -127,6 +127,11 @@ class Annotation(Base):
     @text.setter
     def text(self, value):
         self._text = value
+        # N.B. We MUST take care here of appropriately escaping the user
+        # input. Code elsewhere will assume that the content of the
+        # `text_rendered` field is safe for printing without further escaping.
+        #
+        # `markdown.render` does the hard work for now.
         self._text_rendered = markdown.render(value)
 
     @hybrid_property

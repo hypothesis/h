@@ -46,13 +46,11 @@
   </header>
   {% if presented_annotation.annotation.quote %}
     <section class="annotation-card__quote">
-      {{ presented_annotation.annotation.quote|safe }}
+      {{ presented_annotation.annotation.quote }}
     </section>
   {% endif %}
   <section class="annotation-card__text">
-    {% if presented_annotation.annotation.text_rendered %}
-      {{ presented_annotation.annotation.text_rendered|safe }}
-    {% endif %}
+    {{ presented_annotation.annotation.text_rendered }}
   </section>
   <section class="annotation-card__tags">
     {% for tag in presented_annotation.annotation.tags%}
