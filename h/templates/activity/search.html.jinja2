@@ -323,11 +323,11 @@
 
   {{ panel('navbar', opts or {}) }}
 
-  <script class="js-tag-suggestions">
+  <script type="application/json" class="js-tag-suggestions">
     {{aggregations['tags'] | to_json}}
   </script>
 
-  <script class="js-group-suggestions">
+  <script type="application/json" class="js-group-suggestions">
     {{groups_suggestions | to_json}}
   </script>
 
