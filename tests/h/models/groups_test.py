@@ -2,9 +2,11 @@
 import pytest
 
 from pyramid import security
+from pyramid.authorization import ACLAuthorizationPolicy
 
 import memex
 from h import models
+from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 
 def test_init_sets_given_attributes():
@@ -146,15 +148,61 @@ def test_documents_when_group_has_no_documents(group):
     assert group.documents() == []
 
 
-def test_acl(group, factories):
-    group.pubid = 'testing-pubid'
-    group.creator = factories.User(username='luke', authority='foobar.org')
+class TestGroupACL(object):
+    def test_authority_joinable(self, group, authz_policy):
+        group.joinable_by = JoinableBy.authority
 
-    assert group.__acl__() == [
-        (security.Allow, 'group:testing-pubid', 'read'),
-        (security.Allow, 'acct:luke@foobar.org', 'admin'),
-        security.DENY_ALL,
-    ]
+        assert authz_policy.permits(group, ['userid', 'authority:example.com'], 'join')
+
+    def test_not_joinable(self, group, authz_policy):
+        group.joinable_by = None
+        assert not authz_policy.permits(group, ['userid', 'authority:example.com'], 'join')
+
+    def test_world_readable(self, group, authz_policy):
+        group.readable_by = ReadableBy.world
+        assert authz_policy.permits(group, [security.Everyone], 'read')
+
+    def test_members_readable(self, group, authz_policy):
+        group.readable_by = ReadableBy.members
+        assert authz_policy.permits(group, ['group:test-group'], 'read')
+
+    def test_not_readable(self, group, authz_policy):
+        group.readable_by = None
+        assert not authz_policy.permits(group, [security.Everyone, 'group:test-group'], 'read')
+
+    def test_authority_writeable(self, group, authz_policy):
+        group.writeable_by = WriteableBy.authority
+        assert authz_policy.permits(group, ['authority:example.com'], 'write')
+
+    def test_members_writeable(self, group, authz_policy):
+        group.writeable_by = WriteableBy.members
+        assert authz_policy.permits(group, ['group:test-group'], 'write')
+
+    def test_not_writeable(self, group, authz_policy):
+        group.writeable_by = None,
+        assert not authz_policy.permits(group, ['authority:example.com', 'group:test-group'], 'write')
+
+    def test_creator_has_admin_permissions(self, group, authz_policy):
+        assert authz_policy.permits(group, 'acct:luke@example.com', 'admin')
+
+    def test_fallback_is_deny_all(self, group, authz_policy):
+        assert not authz_policy.permits(group, [security.Everyone], 'foobar')
+
+    @pytest.fixture
+    def authz_policy(self):
+        return ACLAuthorizationPolicy()
+
+    @pytest.fixture
+    def group(self):
+        creator = models.User(username='luke', authority='example.com')
+        group = models.Group(name='test-group',
+                             authority='example.com',
+                             creator=creator)
+        group.pubid = 'test-group'
+        return group
+
+    def permissions(self, acl):
+        return [term[-1] for term in acl]
 
 
 def annotation(session, document_, groupid, shared):

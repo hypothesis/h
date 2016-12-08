@@ -127,11 +127,24 @@ class Group(Base, mixins.Timestamps):
         return documents
 
     def __acl__(self):
-        return [
-            (security.Allow, 'group:{}'.format(self.pubid), 'read'),
-            (security.Allow, self.creator.userid, 'admin'),
-            security.DENY_ALL,
-        ]
+        terms = []
+
+        join_principal = _join_principal(self)
+        if join_principal is not None:
+            terms.append((security.Allow, join_principal, 'join'))
+
+        read_principal = _read_principal(self)
+        if read_principal is not None:
+            terms.append((security.Allow, read_principal, 'read'))
+
+        write_principal = _write_principal(self)
+        if write_principal is not None:
+            terms.append((security.Allow, write_principal, 'write'))
+
+        terms.append((security.Allow, self.creator.userid, 'admin'))
+        terms.append(security.DENY_ALL)
+
+        return terms
 
     def __repr__(self):
         return '<Group: %s>' % self.slug
@@ -140,6 +153,26 @@ class Group(Base, mixins.Timestamps):
     def created_by(cls, session, user):
         """Return a query object filtering groups by creator."""
         return session.query(cls).filter(Group.creator == user)
+
+
+def _join_principal(group):
+    return {
+        JoinableBy.authority: 'authority:{}'.format(group.authority),
+    }.get(group.joinable_by)
+
+
+def _read_principal(group):
+    return {
+        ReadableBy.members: 'group:{}'.format(group.pubid),
+        ReadableBy.world: security.Everyone,
+    }.get(group.readable_by)
+
+
+def _write_principal(group):
+    return {
+        WriteableBy.authority: 'authority:{}'.format(group.authority),
+        WriteableBy.members: 'group:{}'.format(group.pubid),
+    }.get(group.writeable_by)
 
 
 USER_GROUP_TABLE = sa.Table(
