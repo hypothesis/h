@@ -7,8 +7,8 @@ const submitForm = require('../../util/submit-form');
 describe('submitForm', () => {
   const FORM_URL = 'http://example.org/things';
 
-  function mockResponse(response) {
-    fetchMock.post(FORM_URL, response);
+  function mockResponse(response, url = FORM_URL) {
+    fetchMock.post(url, response);
   }
 
   function createForm() {
@@ -25,6 +25,17 @@ describe('submitForm', () => {
 
     return submitForm(form, fetchMock.fetchMock).then(() => {
       const [,requestInit] = fetchMock.lastCall(FORM_URL);
+      assert.instanceOf(requestInit.body, FormData);
+    });
+  });
+
+  it('submits the form data to the current URL if the action attr is empty', () => {
+    const form = createForm();
+    form.setAttribute('action', '');
+    mockResponse('<form><!-- updated form !--></form>', document.location.href);
+
+    return submitForm(form, fetchMock.fetchMock).then(() => {
+      const [,requestInit] = fetchMock.lastCall(document.location.href);
       assert.instanceOf(requestInit.body, FormData);
     });
   });
