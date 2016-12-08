@@ -33,7 +33,6 @@ class JoinableBy(enum.Enum):
 
 
 class ReadableBy(enum.Enum):
-    authority = 'authority'
     members = 'members'
     world = 'world'
 
