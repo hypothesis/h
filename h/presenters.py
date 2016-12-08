@@ -75,9 +75,16 @@ class AnnotationHTMLPresenter(object):
 
     @property
     def text_rendered(self):
-        """The body text of this annotation."""
+        """
+        The body text of this annotation.
 
-        return self.annotation.text_rendered
+        This return value of this field is marked safe because it is rendered
+        to HTML on write by :py:func:`memex.markdown.render`, which must take
+        care of all necessary escaping.
+        """
+        if self.annotation.text_rendered:
+            return jinja2.Markup(self.annotation.text_rendered)
+        return jinja2.Markup('')
 
     @property
     def quote(self):
