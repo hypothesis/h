@@ -7,10 +7,18 @@ import copy
 import pytest
 import mock
 
+from pyramid import security
+
+from memex import GROUPFINDER_KEY
 from memex import storage
 from memex import schemas
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentURI, DocumentMeta
+
+
+class FakeGroup(object):
+    def __acl__(self):
+        return []
 
 
 class TestFetchAnnotation(object):
@@ -143,7 +151,42 @@ class TestCreateAnnotation(object):
 
         assert str(exc.value).startswith('references.0: ')
 
-    def test_it_raises_if_user_does_not_have_permissions_for_group(self, pyramid_request):
+    def test_it_allows_when_no_groupfinder_is_configured(self, pyramid_request, models):
+        data = self.annotation_data()
+        data['groupid'] = 'foo-group'
+
+        # this should not raise
+        result = storage.create_annotation(pyramid_request, data)
+
+        assert result == models.Annotation.return_value
+
+    def test_it_finds_the_group(self, pyramid_request, pyramid_config):
+        groupfinder = mock.Mock()
+        pyramid_config.registry[GROUPFINDER_KEY] = groupfinder
+
+        data = self.annotation_data()
+        data['groupid'] = 'foo-group'
+
+        storage.create_annotation(pyramid_request, data)
+
+        groupfinder.assert_called_once_with(pyramid_request, 'foo-group')
+
+    def test_it_allows_when_user_has_write_permission(self, pyramid_request, pyramid_config, models):
+        pyramid_config.testing_securitypolicy('userid', permissive=True)
+        pyramid_config.registry[GROUPFINDER_KEY] = mock.Mock(return_value=FakeGroup())
+
+        data = self.annotation_data()
+        data['groupid'] = 'foo-group'
+
+        # this should not raise
+        result = storage.create_annotation(pyramid_request, data)
+
+        assert result == models.Annotation.return_value
+
+    def test_it_raises_when_user_is_missing_write_permission(self, pyramid_request, pyramid_config):
+        pyramid_config.testing_securitypolicy('userid', permissive=False)
+        pyramid_config.registry[GROUPFINDER_KEY] = mock.Mock(return_value=FakeGroup())
+
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
