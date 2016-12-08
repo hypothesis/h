@@ -65,6 +65,7 @@ describe('InputAutofocusController', () => {
     it('should not focus the input if a letter key is pressed with a modifier', () => {
       sendKey('a', {ctrlKey: true});
       sendKey('b', {altKey: true});
+      sendKey('c', {metaKey: true});
       assert.notEqual(document.activeElement, ctrl.element);
     });
   });

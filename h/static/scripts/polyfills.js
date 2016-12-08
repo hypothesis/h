@@ -35,7 +35,7 @@ try {
 
 // KeyboardEvent.prototype.key
 // (Native in Chrome >= 51, Firefox >= 23, IE >= 9)
-require('keyboardevent-key-polyfill');
+require('keyboardevent-key-polyfill').polyfill();
 
 // Fetch API
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
