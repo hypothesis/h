@@ -8,6 +8,7 @@ import mock
 from pyramid import httpexceptions
 from webob.multidict import NestedMultiDict
 
+from h.activity.query import ActivityResults
 from h.views import activity
 
 
@@ -327,11 +328,14 @@ class TestGroupSearchController(object):
         pyramid_request.authenticated_user = group.members[-1]
 
         counts = {user_1.userid: 24, user_2.userid: 6}
+        users_aggregation = [
+            {'user': user_1.userid, 'count': counts[user_1.userid]},
+            {'user': user_2.userid, 'count': counts[user_2.userid]},
+        ]
         search.return_value = {
-            'aggregations': {
-                'users': [{'user': user_1.userid, 'count': counts[user_1.userid]},
-                          {'user': user_2.userid, 'count': counts[user_2.userid]}]
-            },
+            'search_results': ActivityResults(total=200,
+                                              aggregations={'users': users_aggregation},
+                                              timeframes=[]),
         }
 
         result = controller.search()
@@ -592,7 +596,7 @@ class TestUserSearchController(object):
                                                                search):
         user_details = controller.search()['user']
 
-        assert user_details['num_annotations'] == search.return_value['total']
+        assert user_details['num_annotations'] == search.return_value['search_results'].total
 
     def test_search_passes_the_other_user_details_to_the_template(self,
                                                                   controller,
@@ -898,7 +902,9 @@ def routes(pyramid_config):
 def search(patch):
     search = patch('h.views.activity.SearchController.search')
     search.return_value = {
-        'total': 200,
+        'search_results': ActivityResults(total=200,
+                                          aggregations={},
+                                          timeframes=[]),
         'zero_message': 'No annotations matched your search.',
     }
     return search
