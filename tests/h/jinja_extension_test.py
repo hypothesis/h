@@ -8,7 +8,14 @@ import pytest
 from h import jinja_extensions as ext
 
 @pytest.mark.parametrize("value_in,json_out", [
-    ({"foo": 42}, "{\"foo\": 42}")
+    ({"foo": 42}, "{\"foo\": 42}"),
+
+    # to_json should escape HTML tags so that the result can be safely included
+    # in HTML, eg. for encoding data payloads that are used by JavaScript code
+    # on the page.
+    ('<html-tag>&\'', '"\\u003chtml-tag\\u003e\\u0026\\u0027"'),
+    ('</script><script>alert("foo")</script>',
+     '"\\u003c/script\\u003e\\u003cscript\\u003ealert(\\"foo\\")\\u003c/script\\u003e"'),
 ])
 def test_to_json(value_in, json_out):
     result = str(ext.to_json(value_in))
