@@ -5,7 +5,6 @@ const settings = require('./base/settings')(document);
 if (settings.raven) {
   const raven = require('./base/raven');
   raven.init(settings.raven);
-  raven.setUserInfo({userid: settings.raven.userid});
 }
 
 require('./polyfills');

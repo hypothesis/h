@@ -16,15 +16,12 @@ function init(config) {
   Raven.config(config.dsn, {
     release: config.release,
   }).install();
-  installUnhandledPromiseErrorHandler();
-}
 
-function setUserInfo(info) {
-  if (info) {
-    Raven.setUserContext(info);
-  } else {
-    Raven.setUserContext();
+  if (config.userid) {
+    Raven.setUserContext({id: config.userid});
   }
+
+  installUnhandledPromiseErrorHandler();
 }
 
 /**
@@ -79,6 +76,5 @@ function installUnhandledPromiseErrorHandler() {
 
 module.exports = {
   init: init,
-  setUserInfo: setUserInfo,
   report: report,
 };

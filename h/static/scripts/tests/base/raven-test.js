@@ -14,6 +14,7 @@ describe('raven', () => {
       }),
 
       captureException: sinon.stub(),
+      setUserContext: sinon.stub(),
     };
 
     raven = proxyquire('../../base/raven', noCallThru({
@@ -21,7 +22,38 @@ describe('raven', () => {
     }));
   });
 
-  describe('.install()', () => {
+  describe('.init()', () => {
+    it('configures the Sentry client', () => {
+      raven.init({
+        dsn: 'dsn',
+        release: 'release',
+        userid: 'acct:foobar@hypothes.is',
+      });
+      assert.calledWith(fakeRavenJS.config, 'dsn', sinon.match({
+        release: 'release',
+      }));
+    });
+
+    it('sets the user context when a userid is specified', () => {
+      raven.init({
+        dsn: 'dsn',
+        release: 'release',
+        userid: 'acct:foobar@hypothes.is',
+      });
+      assert.calledWith(fakeRavenJS.setUserContext, sinon.match({
+        id: 'acct:foobar@hypothes.is',
+      }));
+    });
+
+    it('does not set the user context when a userid is not specified', () => {
+      raven.init({
+        dsn: 'dsn',
+        release: 'release',
+        userid: null,
+      });
+      assert.notCalled(fakeRavenJS.setUserContext);
+    });
+
     it('installs a handler for uncaught promises', () => {
       raven.init({
         dsn: 'dsn',
