@@ -30,7 +30,7 @@ class FormSubmitError extends Error {
  * @param {HTMLFormElement} form
  */
 function formUrl(form) {
-  if (form.getAttribute('action').length > 0) {
+  if (form.getAttribute('action')) {
     return form.action;
   } else {
     // `form.action` returns an absolute URL created by resolving the URL
