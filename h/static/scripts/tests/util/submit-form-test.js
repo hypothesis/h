@@ -3,12 +3,13 @@
 const fetchMock = require('fetch-mock');
 
 const submitForm = require('../../util/submit-form');
+const { unroll } = require('../util');
 
 describe('submitForm', () => {
   const FORM_URL = 'http://example.org/things';
 
-  function mockResponse(response) {
-    fetchMock.post(FORM_URL, response);
+  function mockResponse(response, url = FORM_URL) {
+    fetchMock.post(url, response);
   }
 
   function createForm() {
@@ -19,15 +20,35 @@ describe('submitForm', () => {
     return form;
   }
 
-  it('submits the form data', () => {
-    const form = createForm();
-    mockResponse('<form><!-- updated form !--></form>');
+  unroll('submits the form data', (testCase) => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = '<input name="field" value="value">';
+
+    if (typeof testCase.action === 'string') {
+      form.setAttribute('action', testCase.action);
+    }
+    mockResponse('<form><!-- updated form !--></form>', testCase.expectedSubmitUrl);
 
     return submitForm(form, fetchMock.fetchMock).then(() => {
-      const [,requestInit] = fetchMock.lastCall(FORM_URL);
+      const [,requestInit] = fetchMock.lastCall(testCase.expectedSubmitUrl);
       assert.instanceOf(requestInit.body, FormData);
     });
-  });
+  }, [{
+    action: FORM_URL,
+    expectedSubmitUrl: FORM_URL,
+  },{
+    // Setting "action" to an empty string is technically disallowed according
+    // to https://w3c.github.io/html/sec-forms.html#element-attrdef-form-action
+    // but in practice browsers treat it mostly the same way as a missing
+    // "action" attr.
+    action: '',
+    expectedSubmitUrl: document.location.href,
+  },{
+    // Omit "action" attr.
+    action: null,
+    expectedSubmitUrl: document.location.href,
+  }]);
 
   it('returns the markup for the updated form if validation succeeds', () => {
     const form = createForm();

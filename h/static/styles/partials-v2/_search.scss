@@ -38,8 +38,12 @@
 
   // Align the left and right edges of the search result list with the left and
   // right edges of the navbar content.
-  margin-left: $content-margin-left;
-  margin-right: $content-margin-right;
+  padding-left: $content-padding-left;
+  padding-right: $content-padding-right;
+
+  max-width: $content-max-width;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .search-result-container--empty {
@@ -56,9 +60,9 @@
 // They control the inner layouts for those columns
 .search-results,
 .search-result-zero {
-  flex-basis: 950px;
-  max-width: 950px;
-  margin-right: 30px;
+  flex-basis: $search-results-max-width;
+  max-width: $search-results-max-width;
+  margin-right: $search-results-margin-right;
 }
 
 .search-results__total {
@@ -391,7 +395,7 @@ $stats-icon-column-width: 20px;
   // Align the left and right edges of the search result list with the left and
   // right edges of the navbar content.
   .search-result-container {
-    margin-left: $content-margin-left-on-small-screens;
-    margin-right: $content-margin-right-on-small-screens;
+    padding-left: $content-padding-left-on-small-screens;
+    padding-right: $content-padding-right-on-small-screens;
   }
 }

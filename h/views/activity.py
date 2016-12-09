@@ -50,7 +50,7 @@ class SearchController(object):
             page_size = PAGE_SIZE
 
         # Fetch results.
-        result = query.execute(self.request, q, page_size=page_size)
+        results = query.execute(self.request, q, page_size=page_size)
 
         groups_suggestions = []
 
@@ -75,14 +75,12 @@ class SearchController(object):
                                           username=username)
 
         return {
-            'aggregations': result.aggregations,
+            'search_results': results,
             'groups_suggestions': groups_suggestions,
-            'page': paginate(self.request, result.total, page_size=page_size),
+            'page': paginate(self.request, results.total, page_size=page_size),
             'pretty_link': pretty_link,
             'q': self.request.params.get('q', ''),
             'tag_link': tag_link,
-            'timeframes': result.timeframes,
-            'total': result.total,
             'user_link': user_link,
             'username_from_id': username_from_id,
             # The message that is shown (only) if there's no search results.
@@ -121,7 +119,7 @@ class GroupSearchController(SearchController):
             return 0
 
         q = query.extract(self.request)
-        users_aggregation = result.get('aggregations', {}).get('users', [])
+        users_aggregation = result['search_results'].aggregations.get('users', [])
         members = [{'username': u.username,
                     'userid': u.userid,
                     'count': user_annotation_count(users_aggregation,
@@ -255,7 +253,7 @@ class UserSearchController(SearchController):
 
         result['user'] = {
             'name': self.user.display_name or self.user.username,
-            'num_annotations': result['total'],
+            'num_annotations': result['search_results'].total,
             'description': self.user.description,
             'registered_date': self.user.registered_date.strftime('%B, %Y'),
             'location': self.user.location,
