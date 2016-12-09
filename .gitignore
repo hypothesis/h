@@ -26,5 +26,7 @@ node_modules/
 
 *.log
 
+.venv/
+
 celerybeat-schedule
 celerybeat.pid

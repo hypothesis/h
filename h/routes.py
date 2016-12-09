@@ -10,9 +10,24 @@ def includeme(config):
     config.add_route('via_redirect', '/via')
 
     # Accounts
-    config.add_route('login', '/login')
-    config.add_route('logout', '/logout')
-    config.add_route('signup', '/signup')
+    config.add_route('logout', '/session/logout')
+    config.add_route('login', '/deprecated/login')
+    config.add_route('signup', '/deprecated/signup')
+    config.add_route('assigntoken', '/session/assigntoken')
+    
+    # custom
+    config.add_route('logingoogle', '/login/google')
+    config.add_route('stream_login', '/login')
+    config.add_route('stream_logout', '/logout')
+    config.add_route('stream_forgot', '/forgot')
+    config.add_route('stream_signup', '/signup')
+    config.add_route('stream_notes', '/notes')
+    config.add_route('stream_discover', '/discover')
+    config.add_route('stream_fav', '/fav')
+    config.add_route('stream_search', '/search')
+    config.add_route('stream_settings', '/settings')
+    config.add_route('stream_ann', '/note/{id}')
+    
     config.add_route('activate', '/activate/{id}/{code}')
     config.add_route('forgot_password', '/forgot-password')
     config.add_route('account_reset', '/account/reset')

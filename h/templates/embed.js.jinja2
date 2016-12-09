@@ -1,5 +1,4 @@
 (function () {
-// Detect presence of Hypothesis in the page
 var appLinkEl = document.querySelector('link[type="application/annotator+html"]');
 if (appLinkEl) {
   return {
@@ -19,14 +18,10 @@ function injectScript(src) {
   var script = document.createElement('script');
   script.type = 'text/javascript';
   script.src = src;
-
-  // Set 'async' to false to maintain execution order of scripts.
-  // See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
   script.async = false;
   document.head.appendChild(script);
 };
 
-/** Fetch the resources for the Hypothesis client. */
 function install() {
   var resources = [];
   if (typeof window.Annotator === 'undefined') {
@@ -42,11 +37,9 @@ function install() {
       injectScript(url);
     }
   });
+
 }
 
-// Register the URL of the sidebar app which the Hypothesis client should load.
-// The <link> tag is also used by browser extensions etc. to detect the
-// presence of the Hypothesis client on the page.
 var baseUrl = document.createElement('link');
 baseUrl.rel = 'sidebar';
 baseUrl.href = '{{ app_html_url }}';
@@ -57,3 +50,4 @@ install();
 
 return {installedURL: baseUrl.href};
 })();
+

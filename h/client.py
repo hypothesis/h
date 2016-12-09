@@ -52,12 +52,15 @@ def _app_html_context(assets_env, api_url, service_url, ga_tracking_id,
             }
         })
 
+    react_link = urlparse.urljoin(service_url,
+     assets_env.urls('react_client_js')[0])
     return {
         'app_config': json.dumps(app_config),
         'app_css_urls': assets_env.urls('app_css'),
         'app_js_urls': assets_env.urls('app_js'),
         'ga_tracking_id': ga_tracking_id,
         'ga_cookie_domain': ga_cookie_domain,
+        'react_client_js': react_link
     }
 
 
@@ -90,7 +93,8 @@ def render_app_html(assets_env,
                                 ga_tracking_id=ga_tracking_id,
                                 sentry_public_dsn=sentry_public_dsn,
                                 assets_env=assets_env,
-                                websocket_url=websocket_url).copy()
+                                websocket_url=websocket_url
+                                ).copy()
     if extra is not None:
         context.update(extra)
     return template.render(context)

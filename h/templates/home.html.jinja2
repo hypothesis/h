@@ -1,303 +1,285 @@
-{% set rss_feed_url = base_url + "feed/" %}
-{% set style_bundle = "front_page_css" %}
+<html><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>txtpen - highlighter for the web</title>
+  <link rel="apple-touch-icon" sizes="152x152"
+          href="{{ base_url }}assets/images/apple-touch-icon-152x152.png">
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="{{ base_url }}assets/images/favicons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="{{ base_url }}assets/images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96"
+          href="{{ base_url }}assets/images/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="192x192"
+          href="{{ base_url }}assets/images/favicons/android-chrome-192x192.png">
+    <link rel="shortcut icon"
+          href="{{ base_url }}assets/images/favicons/favicon.ico">
+	
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script type="text/javascript">
+      var tk = localStorage.getItem('token');
+      if (tk && tk != '') {
+        window.location.replace('/stream');
+      }
+    </script>
 
-{% extends "h:templates/layouts/base.html.jinja2" %}
+   <style>
+   body {
+    font-family: Roboto, sans-serif;
+   }
+   a {
+    color: black;
+   }
 
-{% block page_title %}Hypothesis | The Internet, peer reviewed.{% endblock %}
+   .gradient {
+     background-image: linear-gradient(rgba(255, 255, 255, 0) -38%, rgb(255, 255, 255)), linear-gradient(70deg, rgb(247, 229, 152) 32%, rgb(172, 209, 239)); 
+    max-height: 800px;
+    position: absolute;
+    height: 800px;
+    left: 0;
+    top: 0;
+    width: 100%;
+   }
 
-{% block meta %}
-  {{ super() }}
-  <link rel='canonical' href='{{ base_url }}'>
-  <link rel="chrome-webstore-item"
-        href="{{ chrome_extension_link }}">
-  <link href="{{ rss_feed_url }}" rel="alternate" type="application/rss+xml">
-  <meta property="og:url" content="{{ base_url }}" />
-  <meta property="og:title" content="Hypothesis | Annotate the web" />
-  <meta property="og:description" content="Use Hypothes.is to take personal notes or have conversations on any page online"/>
-  <meta property="og:image" content="{{ base_url }}assets/images/logo_new.png" />
-{% endblock %}
+   .signupBtn {
+    text-align: center;
+    width:100%;
+    display: inline-block;
+    background: white;
+    color: rgb(68, 68, 68);
+    border-radius: 5px;
+    border: thin solid rgb(136, 136, 136);
+    box-shadow: grey 1px 1px 1px;
+    white-space: nowrap;
+    margin-bottom:10px;
+   }
+   .row {
+    margin-bottom: 100px;
+    padding: 40px;
+   }
+   .container-fluid {
+        margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    max-width: 1170px;
+   }
 
-{% block content %}
+   .subtitle {
+    margin-top: 140px;
+   }
 
-  <header class="banner hiring">
-    <div class="container">
-      <span>
-         We&rsquo;re
-        <a href="{{ base_url }}jobs/">hiring!</a>
-      </span>
+   .footerLinks a{
+    margin-left: 10px;  
+   }
+
+   .logo-header {
+   	left: 50px;
+   }
+   .installer__browser-logo--chrome{
+	    width: 19px;
+	    margin-right: .3em;
+	    float: left;
+   }
+
+   .hidden-xs {
+   	background-color: #9c83ff;
+   }
+
+   .readme {
+   	background-color: aliceblue;
+   }
+   </style> 
+   <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/cgmgoplajbhiglefllnjknlcjnabimhk">
+</head>
+
+<!-- Start of Async Drift Code -->
+<script>
+!function() {
+  var t;
+  if (t = window.driftt = window.drift = window.driftt || [], !t.init) return t.invoked ? void (window.console && console.error && console.error("Drift snippet included twice.")) : (t.invoked = !0, 
+  t.methods = [ "identify", "config", "track", "reset", "debug", "show", "ping", "page", "hide", "off", "on" ], 
+  t.factory = function(e) {
+    return function() {
+      var n;
+      return n = Array.prototype.slice.call(arguments), n.unshift(e), t.push(n), t;
+    };
+  }, t.methods.forEach(function(e) {
+    t[e] = t.factory(e);
+  }), t.load = function(t) {
+    var e, n, o, i;
+    e = 3e5, i = Math.ceil(new Date() / e) * e, o = document.createElement("script"), 
+    o.type = "text/javascript", o.async = !0, o.crossorigin = "anonymous", o.src = "https://js.driftt.com/include/" + i + "/" + t + ".js", 
+    n = document.getElementsByTagName("script")[0], n.parentNode.insertBefore(o, n);
+  });
+}();
+drift.SNIPPET_VERSION = '0.3.1';
+drift.load('p9icr264px5v');
+</script>
+<!-- End of Async Drift Code -->
+
+
+<body>
+<div class="gradient"></div>
+<div class="container-fluid">
+	<div class="row ">
+    <div class="col-md-8 logo-header">
+      <img id="title-logo" src="/assets/images/favicons/apple-icon.png">
+      <h1>learns the way you highlight the web</h1>
+      <p style="font-size:13pt">Have a website? txtpen offers publishers the tools to generate heatmaps, increase engagement, &amp; earn new revenue.</p>
+
+      
+      <a class="btn btn-primary hidden-xs" id="install-link" onclick="chrome.webstore.install()" href="#">
+	    <img alt="Install Chrome Extension" class="installer__browser-logo--chrome" src="https://txtpen.com/assets/images/browser-chrome-64x64.png">
+	    Add to Chrome
+	  </a>
+
+
     </div>
-  </header>
+    <div class="col-md-4">
+    <div style="margin-top:100px; margin-left:10px;">
+      <a href="/login/google" class="signupBtn"><span style="background: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AIUABAvnjgNggAAApBJREFUWMPtlk9Ik3EYxz/v+7o2ndPV/JM5RZGWlGKpaEWGWZ4i6NAhb0EmQhARhXURpUM1gg558xBCHTooYR1MpA56CLJD+YeUlSljOLHNMbf2/+0warxIc7qllz2334/v+3y/7/f3/J7fI8iyLLOLIbLLkRaQFrDrAjK2+kFwbhbf6yFCCxbCNityMIBkyEdVfRR1cyt76o9vKZ+QaB8I25dxm3sJfv4U/4+qasjp6kEqKk6dgODsFK7uO8hrjoSSqmob0Jv7UiMgvLqCs70Ned2t2JeMpWRUmJAjEULf5onYrFEHDlaSa+5D1OWkpgbc5h4FuZhfQPaNLtQnmhQ4//h7fCPD6O72Jky+qQOycwLvs0t43xohLCIa8tA/6Uc6ULwztyCy/Bx1jQNp/y88Q+Vor15PKfmmDoQ+1IJnOiomZEB1zoogSQrMg2F/XIJTJommyoxt1oBvKXb2hkMbyAHGpkNxU2SriSvgv3fCQCiZW6ApAc9M1AzvApmRMJKodMG4T1D2jDDYXbFT1WuFJIpQV4/omWE+lMM9x2E6Fsc5X96swAx0ZinWryaDPB0N/F2XGsTtP0aRwjbe+Eq4ttaELaKl78sLrOv2f+JdXpnBj8FYhQMNFdL2BWjyWhjTXiFANMmqz0nnu27GbZMbsHPOBW6+/IHNGbP/bJVEbpaQXCte8f7k8sgt3EGPYr80uwjT3nIkQWTRbeOr8ztCRIPG3oHKW4dWDf3tmRTmisk/RlOr89yeeITD70qo8gv9F7l/uo1jZVJqBpLqPBMDrQ+pKziyKbZMV8zjCycTIt/SPPAnZh0WBi2jWFxLWNeX8YcDGDR6qgwmWoyNnDE2IgpialpxeihNC0gL2In4DW319gdMRvScAAAAAElFTkSuQmCC&quot;) 5px 50% no-repeat transparent; display: inline-block; vertical-align: middle; width: 42px; height: 42px;"></span><span style="display: inline-block; vertical-align: middle; font-size: 14px; font-weight: bold;">Sign up with Google</span></a>
 
-  <header class="navbar navbar-default navbar-static-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed"
-                data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="{{ base_url }}">
-          Hypothes<span class="red">.</span>is
-        </a>
-      </div>
-      <nav class="collapse navbar-collapse">
-        <div class="menu-main-menu-container">
-          <ul id="menu-main-menu" class="nav navbar-nav">
-            <li id="menu-item-3607"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3607">
-              <a href="{{ base_url }}about/">About</a>
-            </li>
-            <li id="menu-item-3609"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3609">
-              <a href="{{ base_url }}blog/">Blog</a>
-            </li>
-            <li id="menu-item-3608"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3608">
-              <a href="{{ base_url }}contribute/">Contribute</a>
-            </li>
-            <li id="menu-item-5894"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-5894">
-              <a href="{{ base_url }}bioscience/">Bioscience</a>
-            </li>
-            <li id="menu-item-4372"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4372">
-              <a href="{{ base_url }}education/">Education</a>
-            </li>
-            <li id="menu-item-3615"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3615">
-              <a href="{{ base_url }}jobs/">Jobs</a>
-            </li>
-             <li id="menu-item-3615"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3615">
-              <a href="https://hypothesis.zendesk.com/hc/en-us" target='_blank'>Help</a>
-            </li>
-          </ul>
-        </div>
-        <ul class="nav navbar-nav pull-right login">
-          {% if username %}
-            <li><a href="{{ user_account_link }}">{{ username }}</a></li>
-            <li><a href="{{ request.route_url("logout") }}">Log out</a></li>
-          {% else %}
-            <li><a href="{{ base_url }}login">Log in</a></li>
-            <li><a href="{{ base_url }}signup">Create an account</a></li>
-          {% endif %}
-        </ul>
-      </nav>
-      {% include "h:templates/includes/flashbar.html.jinja2" %}
+    <a href="/signup">
+      <input type="submit" value="Sign Up" style="margin-bottom:10px;width: 100%; height: 40px; display: inline-block; padding: 6px 12px; font-size: 14px; font-weight: 600; line-height: 20px; color: rgb(0, 0, 0, 0.65); white-space: nowrap; vertical-align: middle; cursor: pointer; background-color: rgb(238, 238, 238); background-image: linear-gradient(rgba(255, 255, 255, 0) -38%, rgb(255, 255, 255)), linear-gradient(70deg, rgb(255, 218, 62) 32%, rgb(43, 160, 255)); border: thin solid rgb(92, 169, 65); border-radius: 3px; -webkit-appearance: none; box-shadow: grey 1px 1px 1px; position: relative;">
+      
+    </a>
+    <div style="width:100%;text-align:center;">Already have an account? <a href="/login"><b>Log in</b></a>.</div>
+
     </div>
-  </header>
-
-  <div class="wrap container" role="document">
-    <div class="content row">
-      <main class="main">
-        <div class="jumbotron">
-          <div class="row">
-            <div class="col-sm-6">
-              <div id="video"
-                    class="embed-responsive embed-responsive-16by9">
-                <iframe allowfullscreen class="embed-responsive-item"
-                        src="https://www.youtube.com/embed/QCkm0lL-6lc?showinfo=0&autohide=1">
-                </iframe>
-              </div>
-            </div>
-            <div class="col-sm-6 call-to-action">
-
-              <h2>Annotate with anyone, anywhere</h2>
-              <p>
-                <a href="{{ base_url }}about/">Our mission</a> is to
-                bring a new layer to the web. Use Hypothesis to discuss,
-                collaborate, organize your research, or take personal notes.
-              </p>
-
-              <section class="installer">
-
-                <span class="hidden unhide-in-chrome">
-                  <a class="btn btn-primary hidden-xs"
-                      id="js-chrome-extension-install"
-                      href="{{ chrome_extension_link }}"
-                      data-chromeext-button="">
-                    <img alt="" class="installer__browser-logo--chrome"
-                          src="{{ base_url }}assets/images/browser-chrome-64x64.png">
-                    Install
-                  </a>
-                </span>
-                <span class="hide-in-chrome">
-                  <a class="btn btn-primary hidden-xs" href="#"
-                      data-toggle="modal" data-target="#bookmarklet">
-                    Get Bookmarklet
-                  </a>
-                </span>
-
-                <em class="or hidden-xs">Or...</em>
-                <form class="via" onsubmit="url = document.getElementById('search').value; if (url != '') { window.location.href = 'https://via.hypothes.is/h/' + url; } return false;">
-                  <span class="input-group"
-                        title="Insert a URL to annotate that page.">
-                    <input id="search" class="form-control" type="text"
-                            name="search" placeholder="Paste a link...">
-                    <span class="input-group-btn" data-via-button="">
-                      <button class="btn btn-primary" type="submit">
-                        Annotate!
-                      </button>
-                    </span>
-                  </span>
-                </form>
-              </section>
-
-              <p class="hide-in-chrome installer__section--bookmarklet">
-                There's also a
-                <a href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek">
-                  Chrome extension
-                </a>
-                or you can
-                <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
-                  add it to your website</a>.
-              </p>
-              <p class="hidden unhide-in-chrome installer__section--bookmarklet">
-                There's also a
-                <a href="#" class="" data-toggle="modal" data-target="#bookmarklet">
-                  bookmarklet
-                </a>
-                or you can
-                <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
-                  add it to your website</a>.
-              </p>
-
-              <div class="modal fade" id="bookmarklet" tabindex="-1"
-                    role="dialog" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close"
-                              data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                      <h4 class="modal-title">Bookmarklet</h4>
-                    </div>
-                    <div class="modal-body">
-                      <div>
-                        <a title="Drag me to the bookmarks bar"
-                            data-bookmarklet-button=""
-                            id="js-bookmarklet-install"
-                            class="btn btn-primary btn-lg installer__button--draggable"
-                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();">
-                            Launch Hypothesis
-                        </a>
-                        <p><i class="h-icon-move"></i> Drag the button into
-                        your bookmarks bar then click it to launch the
-                        Hypothesis application.</p>
-                        <p>Alternatively, right click and select
-                        "bookmark this link." To load Hypothesis on a webpage
-                        or PDF, simply click on the bookmarklet in your
-                        bookmarks.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="modal fade" id="addtoyoursite" tabindex="-1"
-                  role="dialog" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"
-                            aria-label="Close">
-                      <span aria-hidden="true">×</span>
-                    </button>
-                    <h4 class="modal-title">Add Hypothesis to a web site</h4>
-                  </div>
-                  <div class="modal-body">
-                    <div class="installer__section--addtosite">
-                      <p>
-                        <input class="form-control" type="text"
-                               value="<script async defer src=&quot;{{request.route_url('embed')}}&quot;></script>">
-                      </p>
-                      <p>Add the above script tag to your web site's HTML to load
-                      the Hypothesis sidebar on your site.</p>
-
-                      <p>Alternatively, if you use WordPress, checkout the
-                      <a href="https://wordpress.org/plugins/hypothesis/">
-                          Hypothesis WordPress plugin</a>.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <div class="press-release-banner">
-            <p><a href="https://hypothes.is/blog/elife-partners-with-hypothes-is-to-advance-open-scholarly-annotation/">eLife Partners with Hypothesis to Advance Open Scholarly Annotation.</a></p>
-        </div>
-      </main>
     </div>
   </div>
 
-  <footer class="content-info">
-    <div class="container">
-      <nav class="navbar navbar-default">
-        <div class="nav navbar-nav social-media pull-right">
-          <a class="social-media-link" href="https://github.com/hypothesis">
-            <i class="h-icon-github"></i>
-          </a>
-          <a class="social-media-link" href="https://twitter.com/hypothes_is">
-            <i class="h-icon-twitter"></i>
-          </a>
-          <a class="social-media-link" href="{{ rss_feed_url }}"><i class="h-icon-feed"></i></a>
-        </div>
-        <div class="menu-footer-container">
-          <ul id="menu-footer" class="nav navbar-nav">
-            <li id="menu-item-3613"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3613">
-              <a href="{{ base_url }}contact/">Contact</a>
-            </li>
-            <li id="menu-item-3623"
-                class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3623">
-              <a href="{{ base_url }}fund/">Grant opportunities</a>
-            </li>
-            <li id="menu-item-3611"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3611">
-              <a href="{{ base_url }}roadmap/">Roadmap</a>
-            </li>
-            <li id="menu-item-3614"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3614">
-              <a href="{{ base_url }}press/">Press</a>
-            </li>
-            <li id="menu-item-3610"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3610">
-              <a href="{{ base_url }}team/">Our team</a>
-            </li>
-            <li id="menu-item-3612"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3612">
-              <a href="{{ base_url }}terms-of-service/">
-                Terms of Service
-              </a>
-            </li>
-             <li id="menu-item-3612"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3612">
-              <a href="{{ base_url }}privacy/">
-                Privacy Policy
-              </a>
-            </li>
-            <li id="menu-item-4123"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4123">
-              <a href="{{ base_url }}for-publishers/">
-                For Publishers
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </div>
-  </footer>
-{% endblock %}
+</div>
+<div class="container">
 
-{% block scripts %}
-  {% for url in asset_urls("front_page_js") %}
-  <script src="{{ url }}"></script>
-  {% endfor %}
-{% endblock %}
+
+
+  <div class="row">
+    <div class="col-md-8">
+      <img style="width:100%;border-radius: 10px 0px 0px 0px" src="/assets/images/discovery.png" alt="txtpen discovers">
+    </div>
+    <div class="col-md-4">
+      <h1 class="subtitle">
+        Discover
+      </h1>
+      <p>
+        We built txtpen for you. Discover what like-minded people are reading. Only highlights, no dross, of course.
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <h1 style="float:right;" class="subtitle">
+        Comment
+      </h1>
+      <p style="float:right;text-align:right;">
+        Bring your expertise to the discussion.
+        With txtpen, you can discuss “between the lines” with other enthusiastic readers.
+      </p>
+    </div>
+    <div class="col-md-8">
+      <img style="width:100%;border-radius: 0px" src="/assets/images/elephant.png" alt="txtpen collects">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <img style="width:100%;border-radius: 0px 0px 0px 10px" src="/assets/images/annotation.png" alt="txtpen discovers">
+    </div>
+    <div class="col-md-4">
+      <h1 class="subtitle">
+        Extract
+      </h1>
+      <p>
+        Most people have the habit of selecting text when reading articles online.
+      </p>
+      <p>
+        txtpen shows you the key info, most highlighted and discussed areas based on anonymous browsing data
+      </p>
+    </div>
+  </div>
+  <div class="row readme">
+    <div class="col-md-6">
+      <h1>Add txtpen to your blog in 3 simple steps</h1>
+
+      <h4>1. In your template file, add </p><code>&lt;script src=&quot;https://txtpen.com/embed.js&quot;/&gt;</code> </p>to the bottom of the page. </h4>
+      <h4>2. Define where you want users to highlight. For example, if the text is under the #main node, you can write </p><code>window.txtpenLimits = ['#main']</code></p>To disable txtpen, use </p><code>window.txtpenLimits = ['']</code> </h4>
+      <h4>3. Register on <a style="color:orange" href="/login">Dashboard</a> and claim your site.</h4>
+    </div>
+  </div>
+  <div class="row">
+  <div class="offset-md-4 col-md-4">
+    <a href="/login/google" class="signupBtn"><span style="background: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AIUABAvnjgNggAAApBJREFUWMPtlk9Ik3EYxz/v+7o2ndPV/JM5RZGWlGKpaEWGWZ4i6NAhb0EmQhARhXURpUM1gg558xBCHTooYR1MpA56CLJD+YeUlSljOLHNMbf2/+0warxIc7qllz2334/v+3y/7/f3/J7fI8iyLLOLIbLLkRaQFrDrAjK2+kFwbhbf6yFCCxbCNityMIBkyEdVfRR1cyt76o9vKZ+QaB8I25dxm3sJfv4U/4+qasjp6kEqKk6dgODsFK7uO8hrjoSSqmob0Jv7UiMgvLqCs70Ned2t2JeMpWRUmJAjEULf5onYrFEHDlaSa+5D1OWkpgbc5h4FuZhfQPaNLtQnmhQ4//h7fCPD6O72Jky+qQOycwLvs0t43xohLCIa8tA/6Uc6ULwztyCy/Bx1jQNp/y88Q+Vor15PKfmmDoQ+1IJnOiomZEB1zoogSQrMg2F/XIJTJommyoxt1oBvKXb2hkMbyAHGpkNxU2SriSvgv3fCQCiZW6ApAc9M1AzvApmRMJKodMG4T1D2jDDYXbFT1WuFJIpQV4/omWE+lMM9x2E6Fsc5X96swAx0ZinWryaDPB0N/F2XGsTtP0aRwjbe+Eq4ttaELaKl78sLrOv2f+JdXpnBj8FYhQMNFdL2BWjyWhjTXiFANMmqz0nnu27GbZMbsHPOBW6+/IHNGbP/bJVEbpaQXCte8f7k8sgt3EGPYr80uwjT3nIkQWTRbeOr8ztCRIPG3oHKW4dWDf3tmRTmisk/RlOr89yeeITD70qo8gv9F7l/uo1jZVJqBpLqPBMDrQ+pKziyKbZMV8zjCycTIt/SPPAnZh0WBi2jWFxLWNeX8YcDGDR6qgwmWoyNnDE2IgpialpxeihNC0gL2In4DW319gdMRvScAAAAAElFTkSuQmCC&quot;) 5px 50% no-repeat transparent; display: inline-block; vertical-align: middle; width: 42px; height: 42px;"></span><span style="display: inline-block; vertical-align: middle; font-size: 14px; font-weight: bold;">Sign up with Google</span></a>
+  </div>
+  </div>
+
+</div>
+
+<hr>
+    <div style=" bottom: 0; left: 0; width: 100%; font-size: 12px; min-height: 30px; line-height: 80px; text-align: left; color: #666;
+    ">
+      <div class="container-fluid footerLinks">
+          <a href="/about">About</a>
+          <a href="/help">Help</a>
+          <a href="/developer">Developer</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/copyright">Copyright</a>
+          <a href="http://blog.txtpen.com" target="_blank">Blog</a>
+          <a href="http://twitter.com/txtpen">Twitter</a>
+          <div class="copyright">
+              © 2016 txtpen holdings, inc.
+          </div>
+      </div>
+    </div>
+
+
+<script>
+  window.txtpenConfig={
+    limits: ['']
+  };
+</script>
+<script async src="/embed.js"></script>
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
+<script async src="https://code.jquery.com/jquery-2.2.4.min.js"/>
+<script>
+//TODO: this shit
+    var theLogo = $("#title-logo");
+    var newImage = new Image();
+    newImage.src = theLogo.attr("src");
+    var imgWidth = newImage.width;
+    
+    // distance over which zoom effect takes place
+    var maxScrollDistance = 100;
+    
+    // set to window height if larger
+    maxScrollDistance = Math.min(maxScrollDistance, $(window).height());
+    
+    // width at maximum zoom out (i.e. when window has scrolled maxScrollDistance)
+    var widthAtMax = 50;
+    
+    // calculate diff and how many pixels to zoom per pixel scrolled
+    var widthDiff = imgWidth - widthAtMax;
+    var pixelsPerScroll =(widthDiff / maxScrollDistance);
+
+    $(window).scroll(function () {
+        // the currently scrolled-to position - max-out at maxScrollDistance
+        var scrollTopPos = Math.min($(document).scrollTop(), maxScrollDistance);
+        
+        // how many pixels to adjust by
+        var scrollChangePx =  Math.floor(scrollTopPos * pixelsPerScroll);
+        
+        // calculate the new width
+        var zoomedWidth = imgWidth - scrollChangePx;
+        
+        // set the width
+        $('#title-logo').css('width', zoomedWidth);
+    });
+
+</script>
+
+</body></html>

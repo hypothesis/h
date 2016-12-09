@@ -65,14 +65,14 @@ def devserver(https, web, ws, worker, assets, beat):
     os.environ['PYTHONUNBUFFERED'] = 'true'
     if https:
         gunicorn_args = '--certfile=.tlscert.pem --keyfile=.tlskey.pem'
-        os.environ['APP_URL'] = 'https://localhost:5000'
-        os.environ['WEBSOCKET_URL'] = 'wss://localhost:5001/ws'
+        os.environ['APP_URL'] = 'https://0.0.0.0:5000'
+        os.environ['WEBSOCKET_URL'] = 'wss://0.0.0.0:5001/ws'
         os.environ['ALLOWED_ORIGINS'] = ' '.join(
             ['https://localhost:5000', os.environ.get('ALLOWED_ORIGINS', '')])
     else:
         gunicorn_args = ''
-        os.environ['APP_URL'] = 'http://localhost:5000'
-        os.environ['WEBSOCKET_URL'] = 'ws://localhost:5001/ws'
+        os.environ['APP_URL'] = 'http://0.0.0.0:5000'
+        os.environ['WEBSOCKET_URL'] = 'ws://dev.txtpen.com:5001/ws'
 
     m = Manager()
     if web:

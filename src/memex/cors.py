@@ -57,11 +57,11 @@ def set_cors_headers(request, response,
     if origin is None:
         raise HTTPBadRequest('CORS preflight request lacks Origin header.')
 
-    # ...MUST have an Access-Control-Request-Method header.
-    request_method = request.headers.get('Access-Control-Request-Method')
-    if request_method is None:
-        raise HTTPBadRequest('CORS preflight request lacks '
-                             'Access-Control-Request-Method header.')
+    # # ...MUST have an Access-Control-Request-Method header.
+    # request_method = request.headers.get('Access-Control-Request-Method')
+    # if request_method is None:
+    #     raise HTTPBadRequest('CORS preflight request lacks '
+    #                          'Access-Control-Request-Method header.')
 
     # Always explicitly allow OPTIONS requests.
     methods = set(['OPTIONS'])
@@ -85,5 +85,4 @@ def set_cors_headers(request, response,
 
     if expose_headers is not None:
         headers['Access-Control-Expose-Headers'] = ', '.join(expose_headers)
-
     return response

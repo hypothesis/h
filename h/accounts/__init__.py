@@ -56,7 +56,8 @@ def includeme(config):
                                     name='user')
     config.register_service_factory('.services.user_signup_service_factory',
                                     name='user_signup')
-
+    config.register_service_factory('.services.user_signup_google_service_factory',
+                                    name='user_signup_google')
     config.include('.schemas')
     config.include('.subscribers')
 

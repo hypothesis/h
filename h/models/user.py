@@ -63,6 +63,7 @@ class User(Base):
         sa.UniqueConstraint('email', 'authority'),
         sa.UniqueConstraint('uid', 'authority'),
         sa.UniqueConstraint('username', 'authority'),
+        sa.UniqueConstraint('google_id', 'authority'),
     )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
@@ -71,6 +72,11 @@ class User(Base):
     uid = sa.Column(sa.UnicodeText(), nullable=False)
     #: Username as chosen by the user on registration
     _username = sa.Column('username', sa.UnicodeText(), nullable=False)
+
+    #: This user's Google ID
+    _google_id = sa.Column("google_id", sa.UnicodeText(),
+                        nullable=True
+                      )
 
     #: The "authority" for this user. This represents the "namespace" in which
     #: this user lives. By default, all users are created in the namespace
@@ -120,6 +126,15 @@ class User(Base):
                                            default=False,
                                            server_default=(
                                                 sa.sql.expression.false()))
+
+    @hybrid_property
+    def google_id(self):
+        return self._google_id
+
+    @google_id.setter
+    def google_id(self, value):
+        self._google_id = value
+
 
     @hybrid_property
     def username(self):
@@ -255,6 +270,12 @@ class User(Base):
         return username
 
     @classmethod
+    def get_by_google_id(cls, session, google_id):
+        """Fetch a user by google_id."""
+        return session.query(cls).filter(
+            cls.google_id == google_id
+        ).first()
+
     def get_by_email(cls, session, email, authority):
         """Fetch a user by email address."""
         return session.query(cls).filter(
@@ -280,6 +301,17 @@ class User(Base):
             cls.authority == authority,
         ).first()
 
+    @classmethod
+    def get_by_id(cls, session, id):
+        """Fetch a user by id."""
+        return session.query(cls).filter(cls.id == id).first()
+
+    @classmethod
+    def get_a_list_of_all_users(cls, session):
+        """Fetch a user by id."""
+        return session.query(cls).all()
+
+    @classmethod
     def __repr__(self):
         return '<User: %s>' % self.username
 

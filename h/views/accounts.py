@@ -10,7 +10,9 @@ from pyramid import httpexceptions
 from pyramid import security
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
+from pyramid.response import Response
 
+from h.auth.tokens import generate_jwt
 from h import accounts
 from h import form
 from h import i18n
@@ -25,8 +27,20 @@ from h.accounts.events import LoginEvent
 from h.util.view import json_view
 from h._compat import urlparse
 
-_ = i18n.TranslationString
+from authomatic import Authomatic
+from authomatic.adapters import WebObAdapter
+CONFIG = {
+    'google': {
+         'class_': 'authomatic.providers.oauth2.Google',
+         'consumer_key': '371544313762-65n4g4t8jmvq1n0b0p1g8csbvmhgc5f2.apps.googleusercontent.com',
+         'consumer_secret': 'e1fRRSAo-NbpCwVjRTlN9Irm',
+         'scope': ['https://www.googleapis.com/auth/userinfo.profile',
+                   'https://www.googleapis.com/auth/userinfo.email']
+    },
+}
+authomatic = Authomatic(config=CONFIG, secret='txtpen random string')
 
+_ = i18n.TranslationString
 
 # A little helper to ensure that session data is returned in every ajax
 # response payload.
@@ -34,6 +48,13 @@ def ajax_payload(request, data):
     payload = {'flash': session.pop_flash(request),
                'model': session.model(request)}
     payload.update(data)
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+    })
     return payload
 
 
@@ -67,7 +88,7 @@ def bad_csrf_token_json(context, request):
     return {
         'status': 'failure',
         'reason': reason,
-        'model': session.model(request),
+        'model': session.model(request)
     }
 
 
@@ -95,7 +116,10 @@ class AuthController(object):
     def __init__(self, request):
         form_footer = '<a class="link" href="{href}">{text}</a>'.format(
             href=request.route_path('forgot_password'),
-            text=_('Forgot your password?'))
+            text=_('Forgot your password?')) + \
+            '<a class="link" href="{href}">Login wiht Google</a>'.format(
+                href=request.route_path('logingoogle'),
+                )
 
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
@@ -162,6 +186,58 @@ class AuthController(object):
         headers = security.forget(self.request)
         return headers
 
+@view_config(route_name="assigntoken")
+def successcallback(request):
+    return Response('''
+        <html>
+            <script>
+                localStorage.setItem('token','{}');
+                window.location.href = "{}";
+            </script>
+        </html>'''.format(generate_jwt(request, 43200), request.route_url('stream')))
+
+@view_config(route_name='logingoogle')
+def loginprovider(request):
+    login_redirect = request.params.get('next',request.route_url('assigntoken'))
+    
+    if request.authenticated_userid is not None:
+        raise httpexceptions.HTTPFound(location=login_redirect)
+
+    response = Response()
+    provider_name = 'google'
+    result = authomatic.login(WebObAdapter(request, response), provider_name)
+    if result:
+        if result.error:
+            response.write(u'<h2>Error: {0}</h2>'
+                .format(result.error.message))
+        elif result.user:
+            if not (result.user.name and result.user.id):
+                result.user.update()
+
+            # gid_exists = models.User.get_by_google_id(request.db, result.user.id)
+            email_exists = models.User.get_by_email(request.db, result.user.email)
+            if email_exists:
+                email_exists.last_login_date = datetime.datetime.utcnow()
+                request.registry.notify(LoginEvent(request, email_exists))
+                headers = security.remember(request, email_exists.userid)
+                return httpexceptions.HTTPFound(location=login_redirect,
+                                        headers=headers)
+            else:
+                signup_service = request.find_service(name='user_signup_google')
+                username = ''.join(map(lambda x: x.capitalize(), str(result.user.name).split(' ')))
+                while models.User.get_by_username(request.db, username):
+                    username = username + '_'
+                signup_service.signup(username=username,
+                                      email=result.user.email,
+                                      password=username*2,
+                                      google_id=result.user.id)
+                headers = security.remember(request, 
+                    models.User.get_by_email(request.db, result.user.email).userid)
+                return httpexceptions.HTTPFound(location=login_redirect,
+                        headers=headers)
+            print result.user.id
+
+    return response
 
 @view_defaults(route_name='session',
                accept='application/json',
@@ -175,6 +251,7 @@ class AjaxAuthController(AuthController):
 
     @view_config(request_param='__formid__=login')
     def login(self):
+
         try:
             json_body = self.request.json_body
         except ValueError as exc:
@@ -190,7 +267,6 @@ class AjaxAuthController(AuthController):
         # Deform crashes otherwise.
         json_body['username'] = unicode(json_body.get('username') or '')
         json_body['password'] = unicode(json_body.get('password') or '')
-
         appstruct = self.form.validate(json_body.items())
 
         user = appstruct['user']
@@ -204,6 +280,20 @@ class AjaxAuthController(AuthController):
         headers = self._logout()
         self.request.response.headers.extend(headers)
         return ajax_payload(self.request, {'status': 'okay'})
+
+
+    @view_config(request_param="__formid__=login", request_method="OPTIONS")
+    def options(self):
+        response = Response()
+        response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+            'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Max-Age': '1728000',
+            })
+        response.status_code = 200
+        return response
 
 
 @view_defaults(route_name='forgot_password',

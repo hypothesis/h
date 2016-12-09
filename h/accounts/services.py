@@ -193,6 +193,65 @@ class UserSignupService(object):
         self.mailer.send.delay(*mail_params)
 
 
+
+class UserSignupGoogleService(object):
+
+    """A service for registering users."""
+
+    def __init__(self,
+                 default_authority,
+                 mailer,
+                 session,
+                 signup_email,
+                 stats=None):
+        """
+        Create a new user signup service.
+
+        :param default_authority: the default authority for new users
+        :param mailer: a mailer (such as :py:mod:`h.mailer`)
+        :param session: the SQLAlchemy session object
+        :param signup_email: a function for generating a signup email
+        :param stats: the stats service
+        """
+        self.default_authority = default_authority
+        self.mailer = mailer
+        self.session = session
+        self.signup_email = signup_email
+        self.stats = stats
+
+    def signup(self, require_activation=False, **kwargs):
+        """
+        Create a new user.
+
+        If *require_activation* is ``True``, the user will be flagged as
+        requiring activation and an activation email will be sent.
+
+        :param require_activation: The name to use.
+        :type require_activation: bool.
+
+        Remaining keyword arguments are passed to the
+        :py:class:`h.models.User` constructor.
+
+        :returns: the newly-created user object.
+        :rtype: h.models.User
+        """
+        kwargs.setdefault('authority', self.default_authority)
+        user = User(**kwargs)
+        self.session.add(user)
+
+        # FIXME: this is horrible, but is needed until the
+        # notification/subscription system is made opt-out rather than opt-in
+        # (at least from the perspective of the database).
+        sub = Subscriptions(uri=user.userid, type='reply', active=True)
+        self.session.add(sub)
+
+        # Record a registration with the stats service
+        if self.stats is not None:
+            self.stats.incr('auth.local.register')
+
+        return user
+
+
 def user_service_factory(context, request):
     """Return a UserService instance for the passed context and request."""
     return UserService(default_authority=request.auth_domain,
@@ -202,6 +261,14 @@ def user_service_factory(context, request):
 def user_signup_service_factory(context, request):
     """Return a UserSignupService instance for the passed context and request."""
     return UserSignupService(default_authority=request.auth_domain,
+                             mailer=mailer,
+                             session=request.db,
+                             signup_email=partial(signup.generate, request),
+                             stats=request.stats)
+
+def user_signup_google_service_factory(context, request):
+    """Return a UserSignupGoogleService instance for the passed context and request."""
+    return UserSignupGoogleService(default_authority=text_type(request.auth_domain),
                              mailer=mailer,
                              session=request.db,
                              signup_email=partial(signup.generate, request),

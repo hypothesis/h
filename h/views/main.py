@@ -38,7 +38,7 @@ def annotation_page(annotation, request):
             {'property': 'og:title', 'content': title},
             {'property': 'og:description', 'content': ''},
             {'property': 'og:image', 'content': '/assets/images/logo.png'},
-            {'property': 'og:site_name', 'content': 'Hypothes.is'},
+            {'property': 'og:site_name', 'content': 'txtpen.com'},
             {'property': 'og:url', 'content': request.url},
         ),
         'link_attrs': (
@@ -56,6 +56,16 @@ def robots(context, request):
 
 
 @view_config(route_name='stream')
+@view_config(route_name='stream_login')
+@view_config(route_name='stream_logout')
+@view_config(route_name='stream_forgot')
+@view_config(route_name='stream_signup')
+@view_config(route_name='stream_notes')
+@view_config(route_name='stream_discover')
+@view_config(route_name='stream_settings')
+@view_config(route_name='stream_fav')
+@view_config(route_name='stream_search')
+@view_config(route_name='stream_ann')
 def stream(context, request):
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
@@ -65,7 +75,6 @@ def stream(context, request):
             {'rel': 'alternate', 'href': rss, 'type': 'application/rss+xml'},
         ]
     })
-
 
 @view_config(route_name='stream.tag_query')
 def stream_tag_redirect(request):

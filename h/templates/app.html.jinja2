@@ -3,27 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Hypothesis</title>
+    <title>txtpen</title>
     {# the <base> tag is required by Angular JS when HTML 5 history is
      enabled. We shouldn't really need this because a given instance of the app
      only ever displays a single route.
      #}
-    <base target="_top" href="/" />
-  {% for url in app_css_urls %}
-    <link rel="stylesheet" href="{{ url }}">
+    {% for url in app_css_urls %}
+      <link rel="stylesheet" href="{{ url }}">
     {% endfor %}
     {% for attrs in meta_attrs -%}
       <meta {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
+    <link rel="apple-touch-icon" sizes="152x152"
+          href="{{ base_url }}assets/images/apple-touch-icon-152x152.png">
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="{{ base_url }}assets/images/favicons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="{{ base_url }}assets/images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96"
+          href="{{ base_url }}assets/images/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="192x192"
+          href="{{ base_url }}assets/images/favicons/android-chrome-192x192.png">
+    <link rel="shortcut icon"
+          href="{{ base_url }}assets/images/favicons/favicon.ico">
+    
     {% if link_tags %}
       {% for link in link_tags %}
         <link rel="{{ link.rel }}" type="{{ link.type }}"
               href="{{ link.href }}"/>
       {% endfor %}
     {% endif %}
+
+    <link id="reactwebapp" src="{{react_client_js}}">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    
   </head>
   <body>
-    <hypothesis-app></hypothesis-app>
+    <txtpen-app id="txtpen"></txtpen-app>
 
     <!-- App Configuration !-->
     <script class="js-hypothesis-settings" type="application/json">

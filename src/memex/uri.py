@@ -69,7 +69,6 @@ from memex._compat import urlparse
 from memex._compat import url_quote, url_quote_plus
 from memex._compat import url_unquote, url_unquote_plus
 
-
 URL_SCHEMES = set(['http', 'https'])
 
 # List of regular expressions matching the names of query parameters that we
@@ -125,6 +124,10 @@ UNRESERVED_QUERY_VALUE = "-._~:@!$'()*,="
 # form. For example pasting https://example.com would
 # redirect your browser to https://via.hypothes.is/https://example.com.
 VIA_PREFIX = "https://via.hypothes.is/"
+
+
+def domainize(uristr):
+    return urlparse.urlparse(uristr).netloc
 
 
 def normalize(uristr):

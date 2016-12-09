@@ -15,9 +15,12 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.alter_column('user', 'sidebar_tutorial_dismissed', nullable=False)
-    op.alter_column('user', 'sidebar_tutorial_dismissed',
-                    server_default=sa.sql.expression.false())
+    try:
+        op.alter_column('user', 'sidebar_tutorial_dismissed', nullable=False)
+        op.alter_column('user', 'sidebar_tutorial_dismissed',
+                        server_default=sa.sql.expression.false())
+    except Exception:
+        pass
 
 
 def downgrade():

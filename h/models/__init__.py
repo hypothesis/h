@@ -20,6 +20,10 @@ key to. So for convenience the test module can instead just do
 
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
+from h.followers import models as follower_models
+from h.managers import models as manager_models
+Follower = follower_models.Follower
+Manager = manager_models.Manager
 
 from h.models.activation import Activation
 from h.models.auth_client import AuthClient
@@ -47,8 +51,9 @@ __all__ = (
     'Subscriptions',
     'Token',
     'User',
+    'Follower',
+    'Manager'
 )
-
 
 def includeme(_):
     # This module is included for side-effects only. SQLAlchemy models register

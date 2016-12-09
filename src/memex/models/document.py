@@ -14,6 +14,7 @@ from memex.db import Base
 from memex.db import mixins
 from memex.models import Annotation
 from memex.uri import normalize as uri_normalize
+from memex.uri import domainize
 from memex._compat import urlparse
 
 
@@ -101,6 +102,7 @@ class DocumentURI(Base, mixins.Timestamps):
     __table_args__ = (
         sa.UniqueConstraint('claimant_normalized',
                             'uri_normalized',
+                            'domain',
                             'type',
                             'content_type'),
         sa.Index('ix__document_uri_document_id', 'document_id'),
@@ -123,6 +125,11 @@ class DocumentURI(Base, mixins.Timestamps):
                                 sa.UnicodeText,
                                 nullable=False,
                                 index=True)
+
+    _domain = sa.Column('domain',
+                        sa.UnicodeText,
+                        nullable=False,
+                       )
 
     type = sa.Column(sa.UnicodeText,
                      nullable=False,
@@ -158,10 +165,15 @@ class DocumentURI(Base, mixins.Timestamps):
     def uri(self, value):
         self._uri = value
         self._uri_normalized = uri_normalize(value)
+        self._domain = domainize(value)
 
     @hybrid_property
     def uri_normalized(self):
         return self._uri_normalized
+
+    @hybrid_property
+    def domain(self):
+        return self._domain
 
     def __repr__(self):
         return '<DocumentURI %s>' % self.id

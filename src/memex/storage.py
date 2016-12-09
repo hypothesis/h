@@ -10,14 +10,10 @@ assumed to be validated.
 from datetime import datetime
 
 from pyramid import i18n
-
 from memex import schemas
 from memex import models
 from memex.db import types
-
-
 _ = i18n.TranslationStringFactory(__package__)
-
 
 def fetch_annotation(session, id_):
     """
@@ -120,7 +116,7 @@ def create_annotation(request, data):
     annotation = models.Annotation(**data)
     annotation.created = created
     annotation.updated = updated
-
+    
     document = models.update_document_metadata(
         request.db,
         annotation.target_uri,

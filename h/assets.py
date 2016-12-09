@@ -141,7 +141,7 @@ assets_view = _add_cors_header(assets_view)
 
 
 # Client assets
-assets_client_view = static_view('h:../node_modules/hypothesis/build',
+assets_client_view = static_view('h:../node_modules/txtpen-embed-js',
                                  cache_max_age=None,
                                  use_subpath=True)
 assets_client_view = _add_cors_header(assets_client_view)
@@ -159,7 +159,7 @@ def includeme(config):
                              auto_reload=auto_reload)
     assets_client_env = Environment('/assets/client',
                                     'h/assets_client.ini',
-                                    'node_modules/hypothesis/build/manifest.json',
+                                    'node_modules/txtpen-embed-js/manifest.json',
                                     auto_reload=auto_reload)
 
     # We store the environment objects on the registry so that the Jinja2

@@ -126,6 +126,8 @@ def includeme(config):
     config.include('h.links')
     config.include('h.nipsa')
     config.include('h.notification')
+    config.include('h.followers')
+    config.include('h.managers')
 
     # Debugging assistance
     if asbool(config.registry.settings.get('h.debug')):

@@ -15,31 +15,9 @@ matrix:
         tox -e coverage
         tox -e codecov
 
-    # Test web application frontend
-    - env: ACTION=gulp
-      language: node_js
-      # We currently build production against Alpine v3.4:
-      #
-      #   https://pkgs.alpinelinux.org/packages?name=nodejs&branch=v3.4
-      node_js: '6.2'
-      before_install: npm install gulp-cli
-      script: gulp test
-
-    # Lint frontend code
-    - env: ACTION=frontend-lint
-      language: node_js
-      node_js: '6.2'
-      script: gulp lint
-
 cache:
   directories:
     - node_modules
     - $HOME/.cache/pip
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
-notifications:
-  slack:
-    rooms:
-      - secure: SKPwtfoH32aDop6hLhQdgrUhl58gM6CMBUATMdq0KMmEwCxskPbIArqxGUKxeeiO3c3jBQ+Yuq3b4m8GbR2AJxxelO0DRLNyV1lAjfeJ/QzCc3Taxqo0yel4uAFNg/oCYWH50dv2oAgDP3CHk/tKXmsgDWOjcm6A6k35xst16xI=
-    on_success: change
-    on_failure: always

@@ -18,6 +18,7 @@ objects and Pyramid ACLs in :mod:`memex.resources`.
 """
 from pyramid import i18n
 from pyramid import security
+from pyramid.response import Response
 from pyramid.view import view_config
 from sqlalchemy.orm import subqueryload
 
@@ -29,6 +30,10 @@ from memex.presenters import AnnotationJSONLDPresenter
 from memex import search as search_lib
 from memex import schemas
 from memex import storage
+from memex import models
+from h import util
+from h import models as hmodels
+from h import mailer
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -39,7 +44,7 @@ cors_policy = cors.policy(
         'X-Annotator-Auth-Token',
         'X-Client-Id',
     ),
-    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
+    allow_methods=('OPTION', 'HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
     allow_preflight=True)
 
 
@@ -112,7 +117,7 @@ def index(context, request):
                 'create': {
                     'method': 'POST',
                     'url': request.route_url('api.annotations'),
-                    'desc': "Create a new annotation"
+                    'desc': "CORS pre-flight procedure"
                 },
                 'read': {
                     'method': 'GET',
@@ -135,6 +140,20 @@ def index(context, request):
                 'url': request.route_url('api.search'),
                 'desc': 'Basic search API'
             },
+            'user':{
+                'followers': {
+                    'method': 'GET',
+                    'url': request.route_url('api.user.followers'),
+                    'desc': 'Get a list of followers',
+                    'auth': 'required'
+                },
+                'following': {
+                    'method': 'GET', 
+                    'url': request.route_url('api.user.following'),
+                    'desc': 'Get a list of people you follow',
+                    'auth': 'required'
+                }
+            }
         }
     }
 
@@ -161,11 +180,50 @@ def search(request):
     return out
 
 
+@api_config(route_name='api.annotation',
+            request_method='OPTIONS'
+            )
+def options_ann(annotation, request):
+    '''returns a preflight CORS header response'''
+    response = Response()
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+        })
+    response.status_code = 200
+    return response
+
+@api_config(route_name='api.annotations',
+            request_method='OPTIONS'
+            )
+def options_anns(annotation, request):
+    '''returns a preflight CORS header response'''
+    response = Response()
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+        })
+    response.status_code = 200
+    return response
+
 @api_config(route_name='api.annotations',
             request_method='POST',
             effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+        })
     schema = schemas.CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
     annotation = storage.create_annotation(request, appstruct)
@@ -185,6 +243,7 @@ def read(annotation, request):
     links_service = request.find_service(name='links')
     presenter = AnnotationJSONPresenter(annotation, links_service)
     return presenter.asdict()
+
 
 
 @api_config(route_name='api.annotation.jsonld',
@@ -260,7 +319,9 @@ def _present_annotations(request, ids):
 
     annotations = storage.fetch_ordered_annotations(request.db, ids,
                                                     query_processor=eager_load_documents)
+
     links_service = request.find_service(name='links')
+
     return [AnnotationJSONPresenter(ann, links_service).asdict()
             for ann in annotations]
 
@@ -278,6 +339,128 @@ def _publish_annotation_event(request,
     event = AnnotationEvent(request, annotation.id, action, annotation_dict)
     request.notify_after_commit(event)
 
+
+################ USER ###############
+
+@api_config(route_name='api.account.signup',
+            request_method="POST"
+            )
+def account_signup(request):
+    req = _json_payload(request)
+    email = req['email']
+    username = req['username']
+    password = req['password']
+    if not email or not username or not password:
+        return {'errors': 'malformed request'}
+    
+    email_exists = hmodels.User.get_by_email(request.db, email)
+    username_exists = hmodels.User.get_by_username(request.db, username)
+    if email_exists:
+        return {'errors': 'email'}
+    if username_exists:
+        return {'errors': 'username'}
+
+    signup_service = request.find_service(name='user_signup')
+    signup_service.signup(username=username,
+                          email=email,
+                          password=password)
+
+    return {'status':'success', "flash":'Please check your'
+    ' email and open the link to activate your account.'}
+
+@api_config(route_name='api.account.reset',
+            request_method='POST'
+           )
+def account_forgot_pw(request):
+    
+    req = _json_payload(request)
+    email = req['email']
+    if not email:
+        return {'errors':"malformed request"}
+    email_exists = hmodels.User.get_by_email(request.db, email)
+    
+    if not email_exists:
+        return {"errors":[{"code":404,"message":"Account not found."}]}
+
+    serializer = request.registry.password_reset_serializer
+    code = serializer.dumps(email)
+
+    link = request.route_url('account_reset_with_code', code=code)
+    emailtext = ("Hello, {username}!\n\n"
+             "Someone has requested to reset your password. If it was "
+             "you, reset your password by using this reset code:\n\n"
+             "{code}\n\n"
+             "Alternatively, you can reset your password by "
+             "clicking on this link:\n\n"
+             "{link}\n\n"
+             "Regards,\n"
+             "TXTPEN Team\n")
+    body = emailtext.format(code=code,
+                            link=link,
+                            username=email_exists.username)
+    resetEmail =  {
+        "recipients": [email],
+        "subject": _("Reset your password"),
+        "body": body
+    }
+    mailer.send.delay(**resetEmail)
+    return {"status": "success"}
+
+@api_config(route_name='api.user.followers',
+            request_method=('GET', 'POST')
+           )
+def api_followers_ids(request):
+    if request.authenticated_userid is None:
+        return {"errors":[{"code":215,"message":"Bad Authentication data."}]}
+
+    uid = util.user.split_user(request.authenticated_userid)['username']
+    me = hmodels.User.get_by_username(request.db, uid)
+    followers = hmodels.Follower.get_followers(request.db, me)
+    
+    count = len(followers)
+
+    followers_list = []
+    for follower in followers:
+        follower_props = {}
+        user = hmodels.User.get_by_id(request.db, follower.me_id)
+        screen_name = user.username
+        user_id = user.id
+
+        follower_props['screen_name'] = screen_name
+        follower_props['user_id'] = user_id
+
+        followers_list.append(follower_props)
+
+    return {'count': count, 'followers': followers_list}
+
+@api_config(route_name='api.user.following',
+            request_method=('GET', 'POST')
+           )
+def api_following_ids(request):
+    if request.authenticated_userid is None:
+        return {"errors":[{"code":215,"message":"Bad Authentication data."}]}
+
+    uid = util.user.split_user(request.authenticated_userid)['username']
+    me = hmodels.User.get_by_username(request.db, uid)
+    following = hmodels.Follower.get_following(request.db, me)
+    
+    count = len(following)
+
+    following_list = []
+    for follow in following:
+        follow_props = {}
+        user = hmodels.User.get_by_id(request.db, follow.follow_id)
+        screen_name = user.username
+        user_id = user.id
+
+        follow_props['screen_name'] = screen_name
+        follow_props['user_id'] = user_id
+
+        following_list.append(follow_props)
+
+    return {'count': count, 'following': following_list}
+
+######################################
 
 def includeme(config):
     config.scan(__name__)
