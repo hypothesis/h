@@ -132,11 +132,11 @@
   <h3 class="search-result-sidebar__subtitle">
     {% trans %}Top tags{% endtrans %}
     <span class="search-result-sidebar__subtitle-count">
-      {{ aggregations['tags'] | length }}
+      {{ search_results.aggregations['tags'] | length }}
     </span>
   </h3>
   <div class="search-result-sidebar-tags">
-    {% for tag in aggregations.tags %}
+    {% for tag in search_results.aggregations.tags %}
       <button type="submit"
               form="search-bar"
               name="toggle_tag_facet"
@@ -324,30 +324,30 @@
   {{ panel('navbar', opts or {}) }}
 
   <script type="application/json" class="js-tag-suggestions">
-    {{aggregations['tags'] | to_json}}
+    {{search_results.aggregations['tags'] | to_json}}
   </script>
 
   <script type="application/json" class="js-group-suggestions">
     {{groups_suggestions | to_json}}
   </script>
 
-  <div class="search-result-container {%- if not timeframes %} search-result-container--empty{% endif %}">
+  <div class="search-result-container {%- if not search_results.timeframes %} search-result-container--empty{% endif %}">
     {% if group %}
       {{ search_result_nav(group.name) }}
     {% elif user %}
       {{ search_result_nav(user.name) }}
     {% endif %}
 
-    {% if timeframes %}
+    {% if search_results.timeframes %}
 
       <div class="search-results {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
 
         {% if q or user or group %}
-        <div class="search-results__total"><b>{% trans %}Annotations{% endtrans %}</b> {{total}}</div>
+        <div class="search-results__total"><b>{% trans %}Annotations{% endtrans %}</b> {{search_results.total}}</div>
         {% endif %}
 
         <ol class="search-results__list">
-          {% for timeframe in timeframes %}
+          {% for timeframe in search_results.timeframes %}
           <li class="search-result__timeframe">
             {{ timeframe.label }}
           </li>
@@ -409,7 +409,7 @@
     {% endif %}
 
     {% if group %}
-      {{ group_sidebar(group, group_edit_url, total) }}
+      {{ group_sidebar(group, group_edit_url, search_results.total) }}
     {% elif user %}
       {{ user_sidebar(user) }}
     {% endif %}
