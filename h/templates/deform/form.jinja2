@@ -6,7 +6,9 @@
 {% set form_message_class = 'form-actions-message' %}
 {% endif %}
 <form id="{{ field.formid }}"
+      {%- if field.action %}
       action="{{ field.action }}"
+      {%- endif %}
       method="{{ field.method }}"
       enctype="multipart/form-data"
       accept-charset="utf-8"

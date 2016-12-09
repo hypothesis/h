@@ -25,6 +25,24 @@ class FormSubmitError extends Error {
 }
 
 /**
+ * Return the URL which a form should be submitted to.
+ *
+ * @param {HTMLFormElement} form
+ */
+function formUrl(form) {
+  if (form.getAttribute('action')) {
+    return form.action;
+  } else {
+    // `form.action` returns an absolute URL created by resolving the URL
+    // in the "action" attribute against the document's location.
+    //
+    // Browsers except IE implement a special case where the document's URL
+    // is returned if the "action" attribute is missing or an empty string.
+    return document.location.href;
+  }
+}
+
+/**
  * @typedef {Object} SubmitResult
  * @property {number} status - Always 200
  * @property {string} form - The HTML markup for the re-rendered form
@@ -42,7 +60,7 @@ class FormSubmitError extends Error {
  */
 function submitForm(formEl, fetch = window.fetch) {
   let response;
-  return fetch(formEl.action, {
+  return fetch(formUrl(formEl), {
     body: new FormData(formEl),
     credentials: 'same-origin',
     method: 'POST',
