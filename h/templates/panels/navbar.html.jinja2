@@ -102,5 +102,15 @@
     </div>
   </div>
 </header>
+
+{% if search %}
+<script type="application/json" class="js-tag-suggestions">
+  {{search.aggregations['tags'] | to_json}}
+</script>
+{% endif %}
+
+<script type="application/json" class="js-group-suggestions">
+  {{groups_suggestions | to_json}}
+</script>
 {% endif %}
 {% endblock %}

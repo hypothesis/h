@@ -73,26 +73,6 @@ class TestSearchController(object):
                                          mock.ANY,
                                          page_size=100)
 
-    def test_search_returns_group_suggestions(self,
-                                              controller,
-                                              factories,
-                                              pyramid_request,
-                                              query):
-        """It should return a list of group_suggestions to the template."""
-        fake_group_1 = factories.Group()
-        fake_group_2 = factories.Group()
-        fake_group_3 = factories.Group()
-        pyramid_request.authenticated_user.groups = [
-            fake_group_1, fake_group_2, fake_group_3]
-
-        result = controller.search()
-
-        assert result['groups_suggestions'] == [
-            {'name': fake_group_1.name, 'pubid': fake_group_1.pubid},
-            {'name': fake_group_2.name, 'pubid': fake_group_2.pubid},
-            {'name': fake_group_3.name, 'pubid': fake_group_3.pubid},
-        ]
-
     def test_search_generates_tag_links(self, controller):
         result = controller.search()
 
