@@ -112,6 +112,7 @@ def includeme(config):
     config.include('h.form')
     config.include('h.indexer')
     config.include('h.models')
+    config.include('h.panels')
     config.include('h.realtime')
     config.include('h.routes')
     config.include('h.sentry')
