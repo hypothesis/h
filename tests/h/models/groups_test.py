@@ -7,39 +7,30 @@ import memex
 from h import models
 
 
-def test_init(db_session, factories):
-    name = "My Hypothesis Group"
-    authority = "foobar.com"
-    description = "This group is awesome"
-    user = factories.User()
+def test_init_sets_given_attributes():
+    group = models.Group(name='My group', authority='example.com')
 
-    group = models.Group(name=name, authority=authority, creator=user, description=description)
-    db_session.add(group)
-    db_session.flush()
-
-    assert group.id
-    assert group.name == name
-    assert group.authority == authority
-    assert group.description == description
-    assert group.created
-    assert group.updated
-    assert group.creator == user
-    assert group.creator_id == user.id
-    assert group.members == [user]
+    assert group.name == 'My group'
+    assert group.authority == 'example.com'
 
 
-def test_with_short_name(factories):
+def test_init_adds_creator_as_member():
+    creator = models.User()
+    group = models.Group(creator=creator)
+
+    assert creator in group.members
+
+
+def test_with_short_name():
     """Should raise ValueError if name shorter than 4 characters."""
     with pytest.raises(ValueError):
-        models.Group(name="abc", authority="foobar.com", creator=factories.User())
+        models.Group(name="abc")
 
 
-def test_with_long_name(factories):
+def test_with_long_name():
     """Should raise ValueError if name longer than 25 characters."""
     with pytest.raises(ValueError):
-        models.Group(name="abcdefghijklmnopqrstuvwxyz",
-                     authority="foobar.com",
-                     creator=factories.User())
+        models.Group(name="abcdefghijklmnopqrstuvwxyz")
 
 
 def test_slug(db_session, factories):

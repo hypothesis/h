@@ -84,12 +84,12 @@ class Group(Base, mixins.Timestamps):
         'User', secondary='user_group', backref=sa.orm.backref(
             'groups', order_by='Group.name'))
 
-    def __init__(self, name, authority, creator, description=None):
-        self.name = name
-        self.authority = authority
-        self.description = description
-        self.creator = creator
-        self.members.append(creator)
+    def __init__(self, **kwargs):
+        super(Group, self).__init__(**kwargs)
+
+        creator = kwargs.get('creator')
+        if creator:
+            self.members.append(creator)
 
     @sa.orm.validates('name')
     def validate_name(self, key, name):
