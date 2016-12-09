@@ -333,15 +333,7 @@
 
 {% block content %}
 
-  {{ panel('navbar', opts or {}) }}
-
-  <script type="application/json" class="js-tag-suggestions">
-    {{search_results.aggregations['tags'] | to_json}}
-  </script>
-
-  <script type="application/json" class="js-group-suggestions">
-    {{groups_suggestions | to_json}}
-  </script>
+  {{ panel('navbar', search_results, opts) }}
 
   <div class="search-result-container {%- if not search_results.timeframes %} search-result-container--empty{% endif %}">
     {% if group %}

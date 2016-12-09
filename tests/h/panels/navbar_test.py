@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
 from mock import PropertyMock
 import pytest
 
@@ -25,12 +24,17 @@ class TestNavbar(object):
         req.authenticated_user = authenticated_user
         result = navbar({}, req)
 
-        titles = [group.name for group in authenticated_user.groups]
-
         assert result['groups_menu_items'] == [
-            {'title': titles[0], 'link': 'http://example.com/groups/id1/first'},
-            {'title': titles[1], 'link': 'http://example.com/groups/id2/second'},
+            {'title': g.name, 'link': 'http://example.com/groups/' + g.pubid + '/' + g.slug}
+            for g in authenticated_user.groups
         ]
+
+    def test_includes_groups_suggestions_when_logged_in(self, req, authenticated_user):
+        req.authenticated_user = authenticated_user
+        result = navbar({}, req)
+
+        assert result['groups_suggestions'] == [{'name': g.name, 'pubid': g.pubid}
+                                                for g in authenticated_user.groups]
 
     def test_username_url_when_logged_in(self, req, authenticated_user):
         req.authenticated_user = authenticated_user
@@ -75,12 +79,9 @@ class TestNavbar(object):
         pyramid_config.add_route('logout', '/logout')
 
     @pytest.fixture
-    def authenticated_user(self):
-        groups = [
-            Mock(pubid='id1', slug='first'),
-            Mock(pubid='id2', slug='second'),
-        ]
-        authenticated_user = Mock(username='vannevar', groups=groups)
+    def authenticated_user(self, factories):
+        authenticated_user = factories.User(username='vannevar')
+        authenticated_user.groups = [factories.Group(), factories.Group()]
         return authenticated_user
 
     @pytest.fixture
