@@ -72,7 +72,7 @@
 
     // Show fallback "counter" if loading js times out.
     .env-js-timeout & {
-      display: initial;
+      display: block;
     }
 
     // Immediately hide counter if js capable - prevents momentary flash of
@@ -84,7 +84,7 @@
     // The js controller adds this class when it's ready - show the now
     // enhanced counter.
     &.is-ready {
-      display: initial;
+      display: block;
     }
 
     &.is-too-long {
