@@ -62,7 +62,17 @@
   <footer class="annotation-card__footer">
     {% if presented_annotation.incontext_link %}
       <a href="{{ presented_annotation.incontext_link }}" target="_blank" title="{% trans %}Visit annotation in context{% endtrans %}">
-        {{ svg_icon('up-right-arrow', 'annotation-card__incontext-link') }}
+        {{ svg_icon('up-right-arrow', 'annotation-card__footer-link annotation-card__incontext-link') }}
+      </a>
+      <a href="#"
+        title="{% trans %}Share this annotation{% endtrans %}"
+        aria-haspopup="true"
+        share-widget-config='{
+          "url": "{{presented_annotation.incontext_link}}",
+          "private": {%if not presented_annotation.annotation.shared %}true{%else%}false{%endif%},
+          "group": {%if presented_annotation.group %}true{%else%}false{%endif%}
+        }'>
+        {{ svg_icon('share', 'annotation-card__footer-link') }}
       </a>
     {% endif %}
   </footer>

@@ -1,0 +1,55 @@
+{% macro share_widget() -%}
+
+<div class="share-widget js-share-widget-owner">
+  <div class="share-widget-target">
+    <span class="share-widget-target__label">Share:</span>
+    <a share-target-href="https://twitter.com/intent/tweet?url={href}&hashtags=annotated"
+      target="_blank"
+      title="Tweet link"
+      class="share-widget-target__icon">
+      {{ svg_icon('twitter', 'share-widget-action') }}
+    </a>
+    <a share-target-href="https://www.facebook.com/sharer/sharer.php?u={href}"
+      target="_blank"
+      title="Share on Facebook"
+      class="share-widget-target__icon">
+      {{ svg_icon('facebook', 'share-widget-action') }}
+    </a>
+    <a share-target-href="https://plus.google.com/share?url={href}"
+      target="_blank"
+      title="Post on Google Plus"
+      class="share-widget-target__icon">
+      {{ svg_icon('google-plus', 'share-widget-action') }}
+    </a>
+    <a share-target-href="mailto:?subject=Let's%20Annotate&amp;body={href}"
+      title="Share via email"
+      class="share-widget-target__icon">
+      {{ svg_icon('mail', 'share-widget-action') }}
+    </a>
+  </div>
+  <div class="share-widget-link js-copy-button" type="text">
+      <input class="share-widget-link__text js-select-onfocus js-share-widget-clipboard"
+             data-ref="input"
+             value=""
+             readonly>
+      <button class="share-widget-link__btn"
+              data-ref="button"
+              title="Copy to clipboard">
+        {{ svg_icon('copy_to_clipboard', 'share-widget-link__btn--copy share-widget-action') }}
+      </button>
+  </div>
+
+  <div class="share-widget-msg share-widget-msg-group js-share-widget-msg-group">
+    <span class="share-widget-msg__audience">
+      Group.
+    </span>
+    Only group members will be able to view this annotation.
+  </div>
+  <div class="share-widget-msg share-widget-msg-private js-share-widget-msg-private">
+    <span class="share-widget-msg__audience">
+      Only me.
+    </span>
+    No one else will be able to view this annotation.
+  </div>
+</div>
+{%- endmacro %}
