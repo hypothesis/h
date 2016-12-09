@@ -3,15 +3,10 @@
 __all__ = ('__version__',)
 __version__ = '0.39.0+dev'
 
-GROUPFINDER_KEY = 'memex.groupfinder'
-
-
-def set_groupfinder(config, func):
-    config.registry[GROUPFINDER_KEY] = config.maybe_dotted(func)
-
 
 def includeme(config):
     config.include('memex.eventqueue')
+    config.include('memex.groups')
     config.include('memex.links')
     config.include('memex.presenters')
     config.include('memex.search')
@@ -28,5 +23,3 @@ def includeme(config):
                      factory='memex.resources:AnnotationFactory',
                      traverse='/{id}')
     config.add_route('api.search', '/search')
-
-    config.add_directive('memex_set_groupfinder', set_groupfinder)

@@ -9,7 +9,7 @@ import mock
 
 from pyramid import security
 
-from memex import GROUPFINDER_KEY
+from memex import groups
 from memex import storage
 from memex import schemas
 from memex.models.annotation import Annotation
@@ -89,7 +89,7 @@ class TestExpandURI(object):
         ]
 
 
-@pytest.mark.usefixtures('models')
+@pytest.mark.usefixtures('models', 'default_groupfinder')
 class TestCreateAnnotation(object):
 
     def test_it_fetches_parent_annotation_for_replies(self,
@@ -160,20 +160,17 @@ class TestCreateAnnotation(object):
 
         assert result == models.Annotation.return_value
 
-    def test_it_finds_the_group(self, pyramid_request, pyramid_config):
-        groupfinder = mock.Mock()
-        pyramid_config.registry[GROUPFINDER_KEY] = groupfinder
-
+    def test_it_finds_the_group(self, pyramid_request, pyramid_config, groups_find):
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
         storage.create_annotation(pyramid_request, data)
 
-        groupfinder.assert_called_once_with(pyramid_request, 'foo-group')
+        groups_find.assert_called_once_with(pyramid_request, 'foo-group')
 
-    def test_it_allows_when_user_has_write_permission(self, pyramid_request, pyramid_config, models):
+    def test_it_allows_when_user_has_write_permission(self, pyramid_request, pyramid_config, models, groups_find):
         pyramid_config.testing_securitypolicy('userid', permissive=True)
-        pyramid_config.registry[GROUPFINDER_KEY] = mock.Mock(return_value=FakeGroup())
+        groups_find.return_value = FakeGroup()
 
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
@@ -183,12 +180,24 @@ class TestCreateAnnotation(object):
 
         assert result == models.Annotation.return_value
 
-    def test_it_raises_when_user_is_missing_write_permission(self, pyramid_request, pyramid_config):
+    def test_it_raises_when_user_is_missing_write_permission(self, pyramid_request, pyramid_config, groups_find):
         pyramid_config.testing_securitypolicy('userid', permissive=False)
-        pyramid_config.registry[GROUPFINDER_KEY] = mock.Mock(return_value=FakeGroup())
+        groups_find.return_value = FakeGroup()
 
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
+
+        with pytest.raises(schemas.ValidationError) as exc:
+            storage.create_annotation(pyramid_request, data)
+
+        assert str(exc.value).startswith('group: ')
+
+    def test_it_raises_when_group_could_not_be_found(self, pyramid_request, pyramid_config, groups_find):
+        pyramid_config.testing_securitypolicy('userid', permissive=True)
+        groups_find.return_value = None
+
+        data = self.annotation_data()
+        data['groupid'] = 'missing-group'
 
         with pytest.raises(schemas.ValidationError) as exc:
             storage.create_annotation(pyramid_request, data)
@@ -260,6 +269,14 @@ class TestCreateAnnotation(object):
         data['text'] = data['tags'] = ''
 
         storage.create_annotation(pyramid_request, data)
+
+    @pytest.fixture
+    def default_groupfinder(self, pyramid_config):
+        pyramid_config.registry[groups.GROUPFINDER_KEY] = groups.default_groupfinder
+
+    @pytest.fixture
+    def groups_find(self, patch):
+        return patch('memex.storage.groups.find')
 
     def annotation_data(self):
         return {

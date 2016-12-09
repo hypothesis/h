@@ -11,8 +11,8 @@ from datetime import datetime
 
 from pyramid import i18n
 
-from memex import GROUPFINDER_KEY
 from memex import schemas
+from memex import groups
 from memex import models
 from memex.db import types
 
@@ -112,13 +112,11 @@ def create_annotation(request, data):
     # they've asked to create one in. If the application didn't configure
     # a groupfinder we will allow writing this annotation without any
     # further checks.
-    groupfinder = request.registry.get(GROUPFINDER_KEY)
-    if groupfinder is not None:
-        group = groupfinder(request, data['groupid'])
-        if not request.has_permission('write', context=group):
-            raise schemas.ValidationError('group: ' +
-                                          _('You may not create annotations '
-                                            'in the specified group!'))
+    group = groups.find(request, data['groupid'])
+    if group is None or not request.has_permission('write', context=group):
+        raise schemas.ValidationError('group: ' +
+                                      _('You may not create annotations '
+                                        'in the specified group!'))
 
     annotation = models.Annotation(**data)
     annotation.created = created
