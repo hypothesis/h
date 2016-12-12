@@ -7,6 +7,7 @@ import copy
 import pytest
 import mock
 
+from memex import auth
 from memex import storage
 from memex import schemas
 from memex.models.annotation import Annotation
@@ -144,11 +145,12 @@ class TestCreateAnnotation(object):
         assert str(exc.value).startswith('references.0: ')
 
     def test_it_raises_if_user_does_not_have_permissions_for_group(self, pyramid_request):
-        data = self.annotation_data()
-        data['groupid'] = 'foo-group'
+        def permit(request, groupid):
+            return False
+        pyramid_request.registry[auth.GROUP_WRITE_PERMITTED_KEY] = permit
 
         with pytest.raises(schemas.ValidationError) as exc:
-            storage.create_annotation(pyramid_request, data)
+            storage.create_annotation(pyramid_request, self.annotation_data())
 
         assert str(exc.value).startswith('group: ')
 
@@ -233,6 +235,13 @@ class TestCreateAnnotation(object):
                 'document_meta_dicts': [],
             }
         }
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        def permit(request, groupid):
+            return True
+        pyramid_request.registry[auth.GROUP_WRITE_PERMITTED_KEY] = permit
+        return pyramid_request
 
 
 @pytest.mark.usefixtures('models')

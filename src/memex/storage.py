@@ -11,6 +11,7 @@ from datetime import datetime
 
 from pyramid import i18n
 
+from memex import auth
 from memex import schemas
 from memex import models
 from memex.db import types
@@ -109,13 +110,11 @@ def create_annotation(request, data):
 
     # The user must have permission to create an annotation in the group
     # they've asked to create one in.
-    if data['groupid'] != '__world__':
-        group_principal = 'group:{}'.format(data['groupid'])
-        if group_principal not in request.effective_principals:
-            raise schemas.ValidationError('group: ' +
-                                          _('You may not create annotations '
-                                            'in groups you are not a member '
-                                            'of!'))
+    permitted = request.registry.get(auth.GROUP_WRITE_PERMITTED_KEY, auth.group_write_permitted)
+    if not permitted(request, data['groupid']):
+        raise schemas.ValidationError('group: ' +
+                                      _('You may not create annotations'
+                                        'in the specified group!'))
 
     annotation = models.Annotation(**data)
     annotation.created = created

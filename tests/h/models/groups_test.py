@@ -5,6 +5,7 @@ from pyramid import security
 
 import memex
 from h import models
+from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 
 def test_init(db_session, factories):
@@ -13,7 +14,13 @@ def test_init(db_session, factories):
     description = "This group is awesome"
     user = factories.User()
 
-    group = models.Group(name=name, authority=authority, creator=user, description=description)
+    group = models.Group(name=name,
+                         authority=authority,
+                         creator=user,
+                         description=description,
+                         joinable_by=JoinableBy.authority,
+                         readable_by=ReadableBy.members,
+                         writeable_by=WriteableBy.members)
     db_session.add(group)
     db_session.flush()
 
@@ -25,6 +32,9 @@ def test_init(db_session, factories):
     assert group.updated
     assert group.creator == user
     assert group.creator_id == user.id
+    assert group.joinable_by == JoinableBy.authority
+    assert group.readable_by == ReadableBy.members
+    assert group.writeable_by == WriteableBy.members
     assert group.members == [user]
 
 
