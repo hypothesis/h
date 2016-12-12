@@ -35,10 +35,11 @@
         </a>
       {% endif %}
       {% if not presented_annotation.annotation.shared %}
-        <span class="annotation-card__is-private">
+        <span class="annotation-card__is-private"
+              title="{% trans %}This annotation is visible only to you.{% endtrans %}">
           {{ svg_icon('lock', 'annotation-card__is-private-icon') }}
           {% if not presented_annotation.group %}
-            Only me
+            {% trans %}Only me{% endtrans %}
           {% endif %}
         </span>
       {% endif %}
