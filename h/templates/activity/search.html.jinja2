@@ -48,7 +48,7 @@
     </div>
     <ul class="search-bucket-stats__val">
       {% for tag in bucket.tags %}
-        <li><a class="search-bucket-stats__link"
+        <li><a class="link--plain"
                href="{{ tag_link(tag) }}">{{ tag }}</a></li>
       {% endfor %}
     </ul>
@@ -60,7 +60,7 @@
   <ul class="search-bucket-stats__val">
     {% for user in bucket.users %}
       <li class="search-bucket-stats__username">
-        <a class="search-bucket-stats__link"
+        <a class="link--plain"
            href="{{ user_link(user) }}">{{ username_from_id(user) }}</a>
       </li>
     {% endfor %}
@@ -71,7 +71,7 @@
       {% trans %}URL{% endtrans %}
     </div>
     <div class="search-bucket-stats__val search-bucket-stats__url">
-        <a class="search-bucket-stats__link"
+        <a class="link--plain"
            href="{{ bucket.uri }}"
            target="_blank">{{ pretty_link(bucket.uri) }}</a>
     </div>
@@ -90,7 +90,7 @@
   <div class="search-result-bucket__header" data-ref="header">
     <div class="search-result-bucket__domain">
       <span class="search-result-bucket__domain-text">{{ bucket.domain }}</span>
-      <a class="search-result-bucket__domain-link"
+      <a class="link--plain search-result-bucket__domain-link"
          href="{{ bucket.incontext_link(request) }}"
          title="Visit annotations in context"
          target="_blank"
@@ -197,14 +197,14 @@
       <ul>
         {% if group_edit_url %}
           <li>
-            <a class="search-result-sidebar__link"
+            <a class="link"
                href="{{ group_edit_url }}">
               {% trans %}Edit group{% endtrans %}
             </a>
           </li>
         {% endif %}
         <li>
-          <button class="search-result-sidebar__leave-button js-confirm-submit"
+          <button class="link--btn js-confirm-submit"
                   type="submit"
                   form="search-bar"
                   formmethod="POST"
@@ -295,7 +295,7 @@
             {% trans %}Link:{% endtrans %}
           </dt>
           <dd class="search-result-sidebar__dd">
-            <a href="{{ user.uri }}" class="search-result-sidebar__user-link">
+            <a href="{{ user.uri }}" class="link--plain">
               {{ pretty_link(user.uri) }}
             </a>
           </dd>
@@ -307,7 +307,7 @@
           </dt>
           <dd class="search-result-sidebar__dd">
             <a href="https://orcid.org/{{ user.orcid }}"
-               class="search-result-sidebar__orcid-link">
+               class="link--plain">
               {{ user.orcid }}
             </a>
           </dd>
@@ -320,7 +320,7 @@
       <ul>
         {% if user.edit_url %}
           <li>
-            <a class="search-result-sidebar__link"
+            <a class="link"
                href="{{ user.edit_url }}">
               {% trans %}Edit profile{% endtrans %}
             </a>
@@ -378,14 +378,15 @@
             </h2>
             <ol class="search-result-zero__list">
               <li class="search-result-zero__list-item"><!--
-                !--><a href="https://chrome.google.com/webstore/detail/hypothesis-web-pdf-annota/bjfhmglciegochdpefhhlphglcehbmek">
+                !--><a class="link"
+                       href="https://chrome.google.com/webstore/detail/hypothesis-web-pdf-annota/bjfhmglciegochdpefhhlphglcehbmek">
                   {%- trans %}Install our Chrome extension{% endtrans -%}
                 </a>
               </li>
               <li class="search-result-zero__list-item">
                 {%- trans url=request.route_url('activity.search') -%}
                   Check out some of the
-                  <a href="{{ url }}">
+                  <a class="link" href="{{ url }}">
                     recently annotated documents
                   </a>
                 {%- endtrans -%}
@@ -393,7 +394,7 @@
               <li class="search-result-zero__list-item">
                 {%- trans url=user.edit_url -%}
                   Let other users know more about you by
-                  <a href="{{ url }}">
+                  <a class="link" href="{{ url }}">
                     adding more information to your profile
                   </a>
                 {%- endtrans -%}
@@ -401,7 +402,7 @@
               <li class="search-result-zero__list-item">
                 {%- trans -%}
                   Read more about
-                  <a href="https://hypothes.is/annotating-with-groups/">
+                  <a class="link" href="https://hypothes.is/annotating-with-groups/">
                     how to annotate with groups
                   </a>
                 {%- endtrans -%}

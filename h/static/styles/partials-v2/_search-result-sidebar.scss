@@ -27,7 +27,7 @@
 }
 
 .search-result-sidebar__section p:first-of-type {
-  margin-top: 0; 
+  margin-top: 0;
 }
 
 .search-result-sidebar__section p:last-of-type {
@@ -44,25 +44,6 @@
 .search-result-sidebar__dd {
   float: left;
   margin-left: 0;
-}
-
-.search-result-sidebar__link {
-  color: inherit;
-  text-decoration: underline;
-}
-
-.search-result-sidebar__link:hover {
-  text-decoration: underline;
-}
-
-.search-result-sidebar__user-link,
-.search-result-sidebar__orcid-link {
-  color: inherit;
-}
-
-.search-result-sidebar__leave-button {
-  @include reset-button;
-  text-decoration: underline;
 }
 
 .search-result-sidebar-title__annotations-count {

@@ -103,11 +103,6 @@
   }
 }
 
-.search-result-zero a {
-  color: inherit;
-  text-decoration: underline;
-}
-
 .search-result__timeframe {
   font-weight: bold;
   padding-bottom: 10px;
@@ -160,13 +155,6 @@
 // header and becomes plain text to avoid accidental clicks.
 .search-result-bucket__domain-text {
   display: none;
-}
-
-.search-result-bucket__domain-link {
-  color: inherit;
-  &:visited {
-    color: inherit;
-  }
 }
 
 .search-result-bucket__incontext-icon {
@@ -284,13 +272,6 @@ $stats-icon-column-width: 20px;
 .search-bucket-stats__url,
 .search-bucket-stats__username {
   word-break: break-all;
-}
-
-.search-bucket-stats__link {
-  color: $grey-6;
-  &:visited {
-    color: $grey-6;
-  }
 }
 
 .search-bucket-stats__incontext-link {
