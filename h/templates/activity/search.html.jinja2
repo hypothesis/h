@@ -374,38 +374,38 @@
         {% if zero_message == '__SHOW_GETTING_STARTED__' %}
           <div>
             <h2 class="search-result-zero__title">
-              {% trans %}How to get started{% endtrans %}
+              {%- trans %}How to get started{% endtrans -%}
             </h2>
             <ol class="search-result-zero__list">
-              <li><p>
-                <a href="https://chrome.google.com/webstore/detail/hypothesis-web-pdf-annota/bjfhmglciegochdpefhhlphglcehbmek">
-                  {% trans %}Install our Chrome extension{% endtrans %}
+              <li class="search-result-zero__list-item"><!--
+                !--><a href="https://chrome.google.com/webstore/detail/hypothesis-web-pdf-annota/bjfhmglciegochdpefhhlphglcehbmek">
+                  {%- trans %}Install our Chrome extension{% endtrans -%}
                 </a>
-              </p></li>
-              <li><p>
-                {% trans url=request.route_url('activity.search') %}
+              </li>
+              <li class="search-result-zero__list-item">
+                {%- trans url=request.route_url('activity.search') -%}
                   Check out some of the
                   <a href="{{ url }}">
                     recently annotated documents
                   </a>
-                {% endtrans %}
-              </p></li>
-              <li><p>
-                {% trans url=user.edit_url %}
+                {%- endtrans -%}
+              </li>
+              <li class="search-result-zero__list-item">
+                {%- trans url=user.edit_url -%}
                   Let other users know more about you by
                   <a href="{{ url }}">
                     adding more information to your profile
                   </a>
-                {% endtrans %}
-              </p></li>
-              <li><p>
-                {% trans %}
+                {%- endtrans -%}
+              </li>
+              <li class="search-result-zero__list-item">
+                {%- trans -%}
                   Read more about
                   <a href="https://hypothes.is/annotating-with-groups/">
                     how to annotate with groups
                   </a>
-                {% endtrans %}
-              </p></li>
+                {%- endtrans -%}
+              </li>
             </ol>
           </div>
         {% else %}
