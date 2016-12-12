@@ -93,6 +93,16 @@
   padding-left: 0;
 }
 
+.search-result-zero__list-item {
+  line-height: 35px;
+
+  // Add additional padding between marker and item content.
+  &:before {
+    content: "";
+    padding-left: 5px;
+  }
+}
+
 .search-result-zero a {
   color: inherit;
   text-decoration: underline;
