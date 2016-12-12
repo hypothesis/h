@@ -39,7 +39,7 @@ def test_og_no_document(render_app_html, pyramid_request):
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('render_app', 'routes')
 class TestStreamUserRedirect(object):
 
     def test_it_redirects_to_stream(self, pyramid_request):
@@ -48,6 +48,66 @@ class TestStreamUserRedirect(object):
             main.stream_user_redirect(pyramid_request)
 
         assert exc.value.location == 'http://example.com/stream?q=user%3Abob'
+
+    def test_it_redirects_to_activity_page_with_tags(self, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.params['q'] = 'tag:foo'
+        pyramid_request.matchdict['tag'] = 'foo'
+        with pytest.raises(httpexceptions.HTTPFound) as exc:
+            main.stream(None, pyramid_request)
+
+        assert exc.value.location == 'http://example.com/search?q=tag%3Afoo'
+
+    def test_it_redirects_to_activity_page_with_tags(self, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.params['q'] = 'tag:foo bar'
+        pyramid_request.matchdict['tag'] = 'foo bar'
+        with pytest.raises(httpexceptions.HTTPFound) as exc:
+            main.stream(None, pyramid_request)
+
+        assert exc.value.location == 'http://example.com/search?q=tag%3A%22foo+bar%22'
+
+    def test_it_redirects_to_activity_page_if_q_length_great_than_2(self, render_app, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.params['q'] = 'tag:foo:bar'
+        pyramid_request.matchdict['tag'] = 'foo:bar'
+        with pytest.raises(httpexceptions.HTTPFound) as exc:
+            main.stream(None, pyramid_request)
+
+        assert exc.value.location == 'http://example.com/search?q=tag%3Afoo%3Abar'
+
+    def test_it_does_not_redirect_to_activity_page_if_no_q_param(self, render_app, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.matchdict['tag'] = 'foo'
+
+        main.stream(None, pyramid_request)
+
+        assert render_app.called
+
+    def test_it_does_not_redirect_to_activity_page_if_no_tag_key(self, render_app, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.params['q'] = 'foo'
+
+        main.stream(None, pyramid_request)
+
+        assert render_app.called
+
+    def test_it_does_not_redirect_to_activity_page_if_no_tag_key_value(self, render_app, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = True
+        pyramid_request.params['q'] = 'tag-foo'
+
+        main.stream(None, pyramid_request)
+
+        assert render_app.called
+
+    def test_it_does_not_redirect_to_activity_page_feature_flag_is_not_enabled(self, render_app, pyramid_request):
+        pyramid_request.feature.flags['search_page'] = False
+        pyramid_request.params['q'] = 'tag:foo'
+        pyramid_request.matchdict['tag'] = 'foo'
+
+        main.stream(None, pyramid_request)
+
+        assert render_app.called
 
     def test_it_redirects_to_user_activity_page(self, pyramid_request):
         pyramid_request.feature.flags['search_page'] = True
@@ -69,8 +129,15 @@ class TestStreamUserRedirect(object):
 
     @pytest.fixture
     def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.search', '/search')
         pyramid_config.add_route('activity.user_search', '/user/{username}')
         pyramid_config.add_route('stream', '/stream')
+        pyramid_config.add_route('stream_atom', '/stream.atom')
+        pyramid_config.add_route('stream_rss', '/stream.rss')
+
+    @pytest.fixture
+    def render_app(self, patch):
+        return patch('h.views.main.render_app')
 
 
 @pytest.fixture

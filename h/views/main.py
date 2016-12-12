@@ -57,6 +57,15 @@ def robots(context, request):
 
 @view_config(route_name='stream')
 def stream(context, request):
+    if request.feature('search_page'):
+        q = request.params.get('q', '').split(':', 1)
+        if len(q) >= 2 and q[0] == 'tag':
+            tag = q[1]
+            if ' ' in tag:
+                tag = '"' + tag + '"'
+            query = {'q': 'tag:{}'.format(tag)}
+            location = request.route_url('activity.search', _query=query)
+            raise httpexceptions.HTTPFound(location=location)
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
     return render_app(request, {
