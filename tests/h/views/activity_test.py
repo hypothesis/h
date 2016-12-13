@@ -372,6 +372,29 @@ class TestGroupSearchController(object):
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
 
+    def test_search_passes_the_annotation_count_to_the_template(self,
+                                                                controller,
+                                                                search,
+                                                                group,
+                                                                groups_service,
+                                                                pyramid_request):
+        pyramid_request.authenticated_user = group.members[-1]
+        controller.search()
+
+        groups_service.annotation_count.assert_called_once_with(group.pubid)
+
+    def test_search_does_not_pass_annotation_count_to_the_template_when_flag_is_disabled(self,
+                                                                                         controller,
+                                                                                         search,
+                                                                                         group,
+                                                                                         groups_service,
+                                                                                         pyramid_request):
+        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.feature.flags['total_shared_annotations'] = False
+        controller.search()
+
+        assert groups_service.annotation_count.called == False
+
     @pytest.mark.parametrize('q', ['', '   '])
     def test_leave_removes_empty_query_from_url(self,
                                                 controller,
@@ -519,7 +542,7 @@ class TestGroupSearchController(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('routes', 'search')
+@pytest.mark.usefixtures('user_service', 'routes', 'search')
 class TestUserSearchController(object):
 
     """Tests unique to UserSearchController."""
@@ -571,12 +594,25 @@ class TestUserSearchController(object):
 
         assert username == user.display_name
 
-    def test_search_passes_the_num_annotations_to_the_template(self,
-                                                               controller,
-                                                               search):
-        user_details = controller.search()['user']
+    def test_search_passes_the_annotation_count_to_the_template(self,
+                                                                controller,
+                                                                search,
+                                                                user,
+                                                                user_service):
+        controller.search()
 
-        assert user_details['num_annotations'] == search.return_value['search_results'].total
+        user_service.annotation_count.assert_called_once_with(user.userid)
+
+    def test_search_does_not_pass_the_annotation_count_to_the_template_when_flag_is_disabled(self,
+                                                                                             controller,
+                                                                                             search,
+                                                                                             user,
+                                                                                             user_service,
+                                                                                             pyramid_request):
+        pyramid_request.feature.flags['total_shared_annotations'] = False
+        controller.search()
+
+        assert user_service.annotation_count.called == False
 
     def test_search_passes_the_other_user_details_to_the_template(self,
                                                                   controller,
@@ -697,6 +733,12 @@ class TestUserSearchController(object):
             uri='http://www.example.com/me',
             orcid='0000-0000-0000-0000',
         )
+
+    @pytest.fixture
+    def user_service(self, patch, pyramid_config):
+        user_service = patch('h.accounts.services.UserService')
+        pyramid_config.register_service(user_service, name='user')
+        return user_service
 
 
 @pytest.mark.usefixtures('routes', 'search')

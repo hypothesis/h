@@ -9,7 +9,7 @@ import sqlalchemy
 from h import mailer
 from h._compat import text_type
 from h.emails import signup
-from h.models import Activation, Subscriptions, User
+from h.models import Activation, Annotation, Subscriptions, User
 from h import util
 
 
@@ -114,6 +114,16 @@ class UserService(object):
             return user
 
         return None
+
+    def annotation_count(self, userid):
+        """
+        Return the count of shared annotations for this user.
+        """
+
+        return (
+            self.session.query(Annotation)
+            .filter_by(userid=userid, groupid='__world__',  shared=True)
+            .count())
 
 
 class UserSignupService(object):

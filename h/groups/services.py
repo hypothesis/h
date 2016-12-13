@@ -3,7 +3,7 @@
 from functools import partial
 
 from h import session
-from h.models import Group
+from h.models import Annotation, Group
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 GROUP_ACCESS_FLAGS = {
@@ -91,6 +91,16 @@ class GroupsService(object):
 
         if self.publish:
             self.publish('group-leave', group.pubid, userid)
+
+    def annotation_count(self, pubid):
+        """
+        Return the count of shared annotations for this group.
+        """
+
+        return (
+            self.session.query(Annotation)
+            .filter_by(groupid=pubid, shared=True)
+            .count())
 
 
 def groups_factory(context, request):
