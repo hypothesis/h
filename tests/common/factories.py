@@ -12,6 +12,7 @@ import factory
 import faker
 
 from h import models
+from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 from ..memex import factories as memex_factories
 
@@ -105,6 +106,9 @@ class Group(ModelFactory):
     name = factory.Sequence(lambda n:'Test Group {n}'.format(n=str(n)))
     authority = 'example.com'
     creator = factory.SubFactory(User)
+    joinable_by = JoinableBy.authority
+    readable_by = ReadableBy.members
+    writeable_by = WriteableBy.members
 
 
 class AuthTicket(ModelFactory):

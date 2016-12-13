@@ -6,6 +6,7 @@ __version__ = '0.39.0+dev'
 
 def includeme(config):
     config.include('memex.eventqueue')
+    config.include('memex.groups')
     config.include('memex.links')
     config.include('memex.presenters')
     config.include('memex.search')
