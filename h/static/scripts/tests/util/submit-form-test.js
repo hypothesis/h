@@ -8,6 +8,10 @@ const { unroll } = require('../util');
 describe('submitForm', () => {
   const FORM_URL = 'http://example.org/things';
 
+  afterEach(() => {
+    fetchMock.restore();
+  });
+
   function mockResponse(response, url = FORM_URL) {
     fetchMock.post(url, response);
   }
@@ -81,4 +85,5 @@ describe('submitForm', () => {
       assert.match(err, sinon.match({status: 500, reason: 'Internal Server Error'}));
     });
   });
+
 });

@@ -243,7 +243,7 @@ class FormController extends Controller {
         // If there was an error processing the request or the server could
         // not be reached, display a helpful error
         this.setState({
-          submitError: err.reason,
+          submitError: err.reason || 'There was a problem saving changes.',
           saving: false,
         });
       }
