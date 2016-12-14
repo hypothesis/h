@@ -5,6 +5,10 @@
 
 
 .js-share-widget {
+  // for when js can't hide it, we need
+  // to have the default state be hidden
+  visibility: hidden;
+
   // we want template to have no effect
   // on the page layout, but keep it in it's
   // current flow
