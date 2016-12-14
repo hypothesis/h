@@ -19,6 +19,7 @@ from pyramid.request import apply_request_extensions
 from sqlalchemy.orm import sessionmaker
 
 from h import db
+from h import models  # noqa: ensure base class set for memex
 from h import form
 from h.settings import database_url
 from h._compat import text_type

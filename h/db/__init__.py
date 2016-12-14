@@ -20,11 +20,8 @@ import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
 from pyramid.settings import asbool
-from sqlalchemy import event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
-from memex import db as api_db
 
 __all__ = (
     'Base',
@@ -67,7 +64,6 @@ def init(engine, base=Base, should_create=False, should_drop=False):
         # extension.
         engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
-    api_db.init(engine, should_create=should_create, should_drop=should_drop)
 
 
 def make_engine(settings):

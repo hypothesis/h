@@ -14,6 +14,7 @@ import pytest
 import sqlalchemy
 from pyramid import testing
 from pyramid.request import apply_request_extensions
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from memex import db
@@ -21,6 +22,8 @@ from memex._compat import text_type
 
 TEST_DATABASE_URL = os.environ.get('TEST_DATABASE_URL',
                                    'postgresql://postgres@localhost/htest')
+
+db.set_base(declarative_base())
 
 Session = sessionmaker()
 
