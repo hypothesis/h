@@ -223,6 +223,7 @@ class TestAnnotationSearchIndexPresenter(object):
                             'admin': ['acct:luke@hypothes.is'],
                             'update': ['acct:luke@hypothes.is'],
                             'delete': ['acct:luke@hypothes.is']},
+            'shared': True,
             'target': [{'scope': ['http://example.com/normalized'],
                         'source': 'http://example.com',
                         'selector': [{'TestSelector': 'foobar'}]}],

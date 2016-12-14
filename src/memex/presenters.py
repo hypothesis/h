@@ -107,6 +107,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             'tags_raw': self.tags,
             'group': self.annotation.groupid,
             'permissions': self.permissions,
+            'shared': self.annotation.shared,
             'target': self.target,
             'document': docpresenter.asdict(),
         }

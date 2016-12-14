@@ -99,6 +99,7 @@ ANNOTATION_MAPPING = {
                 'admin': {'type': 'string'}
             }
         },
+        'shared': {'type': 'boolean'},
         'references': {'type': 'string'},
         'document': {
             'enabled': False,  # not indexed
