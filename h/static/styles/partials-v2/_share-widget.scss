@@ -15,7 +15,8 @@
 // The actual container that maintains the positioning of the widget
 .share-widget {
   position: absolute;
-  top:0;
+  top: 0;
+  left: 0;
   z-index: 1;
   background: $white;
   border: 1px solid $grey-3;
