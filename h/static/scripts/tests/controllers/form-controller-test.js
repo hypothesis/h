@@ -229,9 +229,16 @@ describe('FormController', () => {
   });
 
   it('displays an error if form submission fails without returning a new form', () => {
-    fakeSubmitForm.returns(Promise.reject({status: 500, reason: 'Internal Server Error'}));
+    fakeSubmitForm.returns(Promise.reject({status: 501, reason: 'Internal Server Error'}));
     return submitForm().then(() => {
       assert.equal(submitError(), 'Internal Server Error');
+    });
+  });
+
+  it('Displays a generic error message when an internal error occurs inside of submit form', () => {
+    fakeSubmitForm.returns(Promise.reject(new Error('An internal issue')));
+    return submitForm().then(() => {
+      assert.equal(submitError(), 'There was a problem saving changes.');
     });
   });
 
