@@ -4,6 +4,12 @@
   display: none;
 }
 
+// Push any children after this child in a row-direction flex container all
+// the way along to the right side.
+.u-push-right {
+  margin-right: auto;
+}
+
 // Stretch an element to fill available space in its container.
 // Also useful for creating spacers
 .u-stretch {

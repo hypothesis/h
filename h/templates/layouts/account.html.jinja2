@@ -76,3 +76,9 @@
     {% endif %}
   </div>
 {% endblock content %}
+
+{% block footer %}
+  {% if feature('activity_pages') %}
+    {% include "h:templates/includes/footer.html.jinja2" %}
+  {% endif %}
+{% endblock %}

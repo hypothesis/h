@@ -1,0 +1,20 @@
+/* The "brand" component is our name for the "h" logo plus the name
+   "Hypothesis" together as a single component. */
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand__icon {
+  color: $brand;
+
+  /* The arrow at the bottom of the speech bubble icon is 4px tall.
+     Push the icon 4px down so that the square of the speech bubble, not
+     counting the arrow, is vertically centered. */
+  margin-top: 4px;
+}
+
+.brand__name {
+  margin-left: 15px;
+  font-weight: bold;
+}
