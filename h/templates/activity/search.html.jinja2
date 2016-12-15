@@ -333,10 +333,11 @@
   {% endcall %}
 {% endmacro %}
 
-{% block content %}
-
+{% block header %}
   {{ panel('navbar', search_results, opts) }}
+{% endblock %}
 
+{% block content %}
   <div class="search-result-container {%- if not search_results.timeframes %} search-result-container--empty{% endif %}">
     {% if group %}
       {{ search_result_nav(group.name) }}

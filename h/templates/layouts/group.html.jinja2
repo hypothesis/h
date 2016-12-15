@@ -6,11 +6,13 @@
 
 {% block page_title %}{{ page_title }}{% endblock %}
 
-{% block content %}
+{% block header %}
   {% if feature('activity_pages') %}
     {% include "h:templates/includes/logo-header.html.jinja2" %}
   {%- endif %}
+{% endblock %}
 
+{% block content %}
   <div class="content paper">
     <div class="form-container">
       {% if request.session.peek_flash('success') -%}
