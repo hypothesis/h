@@ -10,4 +10,4 @@ def includeme(config):
                           'memex.events.AnnotationTransformEvent')
 
     # Register an additional filter with the API search module
-    config.add_search_filter(search.Filter)
+    config.memex_add_search_filter(search.Filter)

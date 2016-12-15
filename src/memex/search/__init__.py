@@ -35,9 +35,9 @@ def includeme(config):
     # search matcher factories.
     config.registry[FILTERS_KEY] = []
     config.registry[MATCHERS_KEY] = []
-    config.add_directive('add_search_filter',
+    config.add_directive('memex_add_search_filter',
                          lambda c, f: c.registry[FILTERS_KEY].append(f))
-    config.add_directive('add_search_matcher',
+    config.add_directive('memex_add_search_matcher',
                          lambda c, m: c.registry[MATCHERS_KEY].append(m))
 
     # Add a property to all requests for easy access to the elasticsearch
