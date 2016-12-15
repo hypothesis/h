@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import datetime
 
-from pyramid import security
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -164,25 +163,6 @@ class Annotation(Base):
         else:
             return self.id
 
-    def __acl__(self):
-        """Return a Pyramid ACL for this annotation."""
-        acl = []
-        if self.shared:
-            group = 'group:{}'.format(self.groupid)
-            if self.groupid == '__world__':
-                group = security.Everyone
-
-            acl.append((security.Allow, group, 'read'))
-        else:
-            acl.append((security.Allow, self.userid, 'read'))
-
-        for action in ['admin', 'update', 'delete']:
-            acl.append((security.Allow, self.userid, action))
-
-        # If we haven't explicitly authorized it, it's not allowed.
-        acl.append(security.DENY_ALL)
-
-        return acl
 
     def __repr__(self):
         return '<Annotation %s>' % self.id

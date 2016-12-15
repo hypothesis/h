@@ -50,7 +50,7 @@ def includeme(config):
     # Annotations & stream
     config.add_route('annotation',
                      '/a/{id}',
-                     factory='memex.resources:AnnotationFactory',
+                     factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
     config.add_route('stream', '/stream')
     config.add_route('stream.user_query', '/u/{user}')

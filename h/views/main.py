@@ -21,7 +21,8 @@ log = logging.getLogger(__name__)
 
 
 @view_config(route_name='annotation', permission='read')
-def annotation_page(annotation, request):
+def annotation_page(context, request):
+    annotation = context.annotation
     document = annotation.document
     if document and document.title:
         title = 'Annotation by {user} on {title}'.format(

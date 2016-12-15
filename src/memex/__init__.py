@@ -16,10 +16,10 @@ def includeme(config):
     config.add_route('api.annotations', '/annotations')
     config.add_route('api.annotation',
                      '/annotations/{id:[A-Za-z0-9_-]{20,22}}',
-                     factory='memex.resources:AnnotationFactory',
+                     factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
     config.add_route('api.annotation.jsonld',
                      '/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
-                     factory='memex.resources:AnnotationFactory',
+                     factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
     config.add_route('api.search', '/search')

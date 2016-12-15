@@ -8,6 +8,7 @@ import pytest
 
 from memex.models.annotation import Annotation
 from memex.models.document import Document
+from memex.resources import AnnotationResource
 from h.views import main
 
 
@@ -16,12 +17,13 @@ from h.views import main
 @pytest.mark.usefixtures('routes')
 def test_og_document(render_app_html, annotation_document, document_title, pyramid_request):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
+    context = AnnotationResource(pyramid_request, annotation)
     document = Document()
     annotation_document.return_value = document
     document_title.return_value = 'WikiHow — How to Make a ☆Starmap☆'
 
     render_app_html.return_value = '<html></html>'
-    main.annotation_page(annotation, pyramid_request)
+    main.annotation_page(context, pyramid_request)
     args, kwargs = render_app_html.call_args
     test = lambda d: 'foo' in d['content'] and 'Starmap' in d['content']
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])
@@ -31,9 +33,10 @@ def test_og_document(render_app_html, annotation_document, document_title, pyram
 @pytest.mark.usefixtures('routes')
 def test_og_no_document(render_app_html, pyramid_request):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
+    context = AnnotationResource(pyramid_request, annotation)
 
     render_app_html.return_value = '<html></html>'
-    main.annotation_page(annotation, pyramid_request)
+    main.annotation_page(context, pyramid_request)
     args, kwargs = render_app_html.call_args
     test = lambda d: 'foo' in d['content']
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])

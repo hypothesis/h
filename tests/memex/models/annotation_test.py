@@ -69,39 +69,6 @@ def test_text_setter_renders_markdown(markdown):
     annotation.text_rendered == markdown.render.return_value
 
 
-def test_acl_private():
-    ann = Annotation(shared=False, userid='saoirse')
-    actual = ann.__acl__()
-    expect = [(security.Allow, 'saoirse', 'read'),
-              (security.Allow, 'saoirse', 'admin'),
-              (security.Allow, 'saoirse', 'update'),
-              (security.Allow, 'saoirse', 'delete'),
-              security.DENY_ALL]
-    assert actual == expect
-
-
-def test_acl_world_shared():
-    ann = Annotation(shared=True, userid='saoirse', groupid='__world__')
-    actual = ann.__acl__()
-    expect = [(security.Allow, security.Everyone, 'read'),
-              (security.Allow, 'saoirse', 'admin'),
-              (security.Allow, 'saoirse', 'update'),
-              (security.Allow, 'saoirse', 'delete'),
-              security.DENY_ALL]
-    assert actual == expect
-
-
-def test_acl_group_shared():
-    ann = Annotation(shared=True, userid='saoirse', groupid='lulapalooza')
-    actual = ann.__acl__()
-    expect = [(security.Allow, 'group:lulapalooza', 'read'),
-              (security.Allow, 'saoirse', 'admin'),
-              (security.Allow, 'saoirse', 'update'),
-              (security.Allow, 'saoirse', 'delete'),
-              security.DENY_ALL]
-    assert actual == expect
-
-
 def test_setting_extras_inline_is_persisted(db_session, factories):
     """
     In-place changes to Annotation.extra should be persisted.

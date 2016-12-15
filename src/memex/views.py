@@ -180,37 +180,37 @@ def create(request):
 @api_config(route_name='api.annotation',
             request_method='GET',
             permission='read')
-def read(annotation, request):
+def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     links_service = request.find_service(name='links')
-    presenter = AnnotationJSONPresenter(annotation, links_service)
+    presenter = AnnotationJSONPresenter(context.annotation, links_service)
     return presenter.asdict()
 
 
 @api_config(route_name='api.annotation.jsonld',
             request_method='GET',
             permission='read')
-def read_jsonld(annotation, request):
+def read_jsonld(context, request):
     request.response.content_type = 'application/ld+json'
     request.response.content_type_params = {
         'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
     links_service = request.find_service(name='links')
-    presenter = AnnotationJSONLDPresenter(annotation, links_service)
+    presenter = AnnotationJSONLDPresenter(context.annotation, links_service)
     return presenter.asdict()
 
 
 @api_config(route_name='api.annotation',
             request_method='PUT',
             permission='update')
-def update(annotation, request):
+def update(context, request):
     """Update the specified annotation with data from the PUT payload."""
     schema = schemas.UpdateAnnotationSchema(request,
-                                            annotation.target_uri,
-                                            annotation.groupid)
+                                            context.annotation.target_uri,
+                                            context.annotation.groupid)
     appstruct = schema.validate(_json_payload(request))
 
     annotation = storage.update_annotation(request.db,
-                                           annotation.id,
+                                           context.annotation.id,
                                            appstruct)
 
     _publish_annotation_event(request, annotation, 'update')
@@ -223,9 +223,9 @@ def update(annotation, request):
 @api_config(route_name='api.annotation',
             request_method='DELETE',
             permission='delete')
-def delete(annotation, request):
+def delete(context, request):
     """Delete the specified annotation."""
-    storage.delete_annotation(request.db, annotation.id)
+    storage.delete_annotation(request.db, context.annotation.id)
 
     # N.B. We publish the original model (including all the original annotation
     # fields) so that queue subscribers have context needed to decide how to
@@ -234,10 +234,10 @@ def delete(annotation, request):
     # forward the delete event to.
     _publish_annotation_event(
         request,
-        annotation,
+        context.annotation,
         'delete')
 
-    return {'id': annotation.id, 'deleted': True}
+    return {'id': context.annotation.id, 'deleted': True}
 
 
 def _json_payload(request):
