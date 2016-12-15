@@ -18,6 +18,20 @@ key to. So for convenience the test module can instead just do
 
 """
 
+import h.db
+import memex.db
+
+# We want memex models and h models to share a base class (and hence a
+# metadata instance). This allows us to add relationships on
+# Annotation/Document from "outside" -- i.e. from the `h` package.
+#
+# Because metadata is filled at import time, we have to provide the Base class
+# for memex at import time too.
+#
+# Importing a memex model without having imported `h.models` will cause an
+# exception to be raised, and should be avoided.
+memex.db.set_base(h.db.Base)  # noqa
+
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
 

@@ -4,29 +4,17 @@ import logging
 import os
 
 from alembic import context
-from sqlalchemy import MetaData
 from sqlalchemy import engine_from_config, pool
 
+from h import db
 from h.settings import database_url
+
+# Import all model modules here in order to populate the metadata
+from h import models  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
-from h import db
-from memex import db as api_db
-
-# Import all model modules here in order to populate the metadata
-from h import models  # noqa
-from memex.models import annotation  # noqa
-
-# Since we have multiple MetaData objects (one from the app and one from the
-# API), we need to merge them all for alembic autogenerate to work correctly.
-target_metadata = MetaData(naming_convention=db.Base.metadata.naming_convention)
-
-for metadata in [db.Base.metadata, api_db.Base.metadata]:
-    for t in metadata.tables.values():
-        t.tometadata(target_metadata)
 
 
 def configure_logging():
@@ -85,7 +73,7 @@ def run_migrations_online():
     connection = engine.connect()
     context.configure(
         connection=connection,
-        target_metadata=target_metadata,
+        target_metadata=db.Base.metadata,
         transaction_per_migration=True,
     )
 
