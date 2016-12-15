@@ -4,11 +4,14 @@
 {% set style_bundle = 'legacy_site_css' %}
 {% endif %}
 
+{% block header %}
+  {% include "h:templates/includes/logo-header.html.jinja2" %}
+{% endblock %}
+
 {% block page_title %}Log in{% endblock %}
 
 {% block content %}
   {%if feature('activity_pages') %}
-    {% include "h:templates/includes/logo-header.html.jinja2" %}
     <div class="form-container content">
       <h1 class="form-header">Log in</h1>
       {{ form }}
@@ -19,7 +22,6 @@
     </div>
   {% else %}
     <div class="content paper">
-      {% include "h:templates/includes/logo-header.html.jinja2" %}
       <div class="form-vertical">
         <ul class="nav nav-tabs">
           <li class="active"><a href="{{ request.route_path('login') }}">Log in</a></li>{#

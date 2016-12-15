@@ -17,8 +17,8 @@
   <meta property="og:image" content="{{ base_url }}assets/images/logo_new.png" />
 {% endblock %}
 
-{% block content %}
 
+{% block header %}
   <header class="banner hiring">
     <div class="container">
       <span>
@@ -88,7 +88,9 @@
       {% include "h:templates/includes/flashbar.html.jinja2" %}
     </div>
   </header>
+{% endblock %}
 
+{% block content %}
   <div class="wrap container" role="document">
     <div class="content row">
       <main class="main">

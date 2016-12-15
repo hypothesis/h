@@ -21,10 +21,13 @@
 
 {% block page_title %}{{ page_title }}{% endblock %}
 
-{% block content %}
+{% block header %}
   {% if feature('activity_pages') %}
-  {{ panel('navbar') }}
+    {{ panel('navbar') }}
   {% endif %}
+{% endblock %}
+
+{% block content %}
   <div class="content paper">
     {% if feature('activity_pages') %}
       <div class="form-container">
