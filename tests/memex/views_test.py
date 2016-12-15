@@ -295,13 +295,13 @@ class TestRead(object):
                                              AnnotationJSONPresenter,
                                              links_service,
                                              pyramid_request):
-        annotation = mock.Mock()
+        context = mock.Mock()
         presenter = mock.Mock()
         AnnotationJSONPresenter.return_value = presenter
 
-        result = views.read(annotation, pyramid_request)
+        result = views.read(context, pyramid_request)
 
-        AnnotationJSONPresenter.assert_called_once_with(annotation,
+        AnnotationJSONPresenter.assert_called_once_with(context.annotation,
                                                         links_service)
         assert result == presenter.asdict()
 
@@ -312,9 +312,9 @@ class TestReadJSONLD(object):
     def test_it_sets_correct_content_type(self, AnnotationJSONLDPresenter, pyramid_request):
         AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
 
-        annotation = mock.Mock()
+        context = mock.Mock()
 
-        views.read_jsonld(annotation, pyramid_request)
+        views.read_jsonld(context, pyramid_request)
 
         assert pyramid_request.response.content_type == 'application/ld+json'
         assert pyramid_request.response.content_type_params == {
@@ -325,14 +325,14 @@ class TestReadJSONLD(object):
                                              AnnotationJSONLDPresenter,
                                              links_service,
                                              pyramid_request):
-        annotation = mock.Mock()
+        context = mock.Mock()
         presenter = mock.Mock()
         AnnotationJSONLDPresenter.return_value = presenter
         AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
 
-        result = views.read_jsonld(annotation, pyramid_request)
+        result = views.read_jsonld(context, pyramid_request)
 
-        AnnotationJSONLDPresenter.assert_called_once_with(annotation,
+        AnnotationJSONLDPresenter.assert_called_once_with(context.annotation,
                                                           links_service)
         assert result == presenter.asdict()
 
@@ -349,14 +349,14 @@ class TestReadJSONLD(object):
 class TestUpdate(object):
 
     def test_it_inits_the_schema(self, pyramid_request, schemas):
-        annotation = mock.Mock()
+        context = mock.Mock()
 
-        views.update(annotation, pyramid_request)
+        views.update(context, pyramid_request)
 
         schemas.UpdateAnnotationSchema.assert_called_once_with(
             pyramid_request,
-            annotation.target_uri,
-            annotation.groupid)
+            context.annotation.target_uri,
+            context.annotation.groupid)
 
     def test_it_raises_if_json_parsing_fails(self, pyramid_request):
         """It raises PayloadError if parsing of the request body fails."""
@@ -370,10 +370,10 @@ class TestUpdate(object):
                 views.update(mock.Mock(), pyramid_request)
 
     def test_it_validates_the_posted_data(self, pyramid_request, schemas):
-        annotation = mock.Mock()
+        context = mock.Mock()
         schema = schemas.UpdateAnnotationSchema.return_value
 
-        views.update(annotation, pyramid_request)
+        views.update(context, pyramid_request)
 
         schema.validate.assert_called_once_with(pyramid_request.json_body)
 
@@ -388,15 +388,15 @@ class TestUpdate(object):
                                                   pyramid_request,
                                                   storage,
                                                   schemas):
-        annotation = mock.Mock()
+        context = mock.Mock()
         schema = schemas.UpdateAnnotationSchema.return_value
         schema.validate.return_value = mock.sentinel.validated_data
 
-        views.update(annotation, pyramid_request)
+        views.update(context, pyramid_request)
 
         storage.update_annotation.assert_called_once_with(
             pyramid_request.db,
-            annotation.id,
+            context.annotation.id,
             mock.sentinel.validated_data
         )
 
@@ -410,9 +410,9 @@ class TestUpdate(object):
                                          AnnotationEvent,
                                          storage,
                                          pyramid_request):
-        annotation = mock.Mock()
+        context = mock.Mock()
 
-        views.update(annotation, pyramid_request)
+        views.update(context, pyramid_request)
 
         AnnotationEvent.assert_called_once_with(
             pyramid_request, storage.update_annotation.return_value.id, 'update',
@@ -464,45 +464,46 @@ class TestUpdate(object):
 class TestDelete(object):
 
     def test_it_deletes_then_annotation_from_storage(self, pyramid_request, storage):
-        annotation = mock.Mock()
+        context = mock.Mock()
 
-        views.delete(annotation, pyramid_request)
+        views.delete(context, pyramid_request)
 
         storage.delete_annotation.assert_called_once_with(pyramid_request.db,
-                                                          annotation.id)
+                                                          context.annotation.id)
 
     def test_it_serializes_the_annotation(self,
                                           AnnotationJSONPresenter,
                                           links_service,
                                           pyramid_request):
-        annotation = mock.Mock()
+        context = mock.Mock()
 
-        views.delete(annotation, pyramid_request)
+        views.delete(context, pyramid_request)
 
-        AnnotationJSONPresenter.assert_called_once_with(annotation, links_service)
+        AnnotationJSONPresenter.assert_called_once_with(context.annotation,
+                                                        links_service)
 
     def test_it_inits_and_fires_an_AnnotationEvent(self,
                                                    AnnotationEvent,
                                                    AnnotationJSONPresenter,
                                                    pyramid_request):
-        annotation = mock.Mock()
+        context = mock.Mock()
         event = AnnotationEvent.return_value
         annotation_dict = AnnotationJSONPresenter.return_value.asdict.return_value
 
-        views.delete(annotation, pyramid_request)
+        views.delete(context, pyramid_request)
 
         AnnotationEvent.assert_called_once_with(pyramid_request,
-                                                annotation.id,
+                                                context.annotation.id,
                                                 'delete',
                                                 annotation_dict=annotation_dict)
         pyramid_request.notify_after_commit.assert_called_once_with(event)
 
     def test_it_returns_object(self, pyramid_request):
-        annotation = mock.Mock()
+        context = mock.Mock()
 
-        result = views.delete(annotation, pyramid_request)
+        result = views.delete(context, pyramid_request)
 
-        assert result == {'id': annotation.id, 'deleted': True}
+        assert result == {'id': context.annotation.id, 'deleted': True}
 
 
 @pytest.fixture

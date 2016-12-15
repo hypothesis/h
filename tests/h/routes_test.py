@@ -49,7 +49,7 @@ def test_includeme():
         call('admin_users_activate', '/admin/users/activate'),
         call('admin_users_delete', '/admin/users/delete'),
         call('admin_users_rename', '/admin/users/rename'),
-        call('annotation', '/a/{id}', factory='memex.resources:AnnotationFactory', traverse='/{id}'),
+        call('annotation', '/a/{id}', factory='memex.resources:AnnotationResourceFactory', traverse='/{id}'),
         call('stream', '/stream'),
         call('stream.user_query', '/u/{user}'),
         call('stream.tag_query', '/t/{tag}'),
