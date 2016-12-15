@@ -70,3 +70,21 @@ def test_svg_icon_sets_css_class():
     result = ext.svg_icon(read_icon, 'icon', css_class='fancy-icon')
 
     assert result == Markup('<svg class="fancy-icon" />')
+
+
+def test_svg_icon_does_not_set_transform_by_default():
+    def read_icon(name):
+        return '<svg></svg>'
+
+    result = ext.svg_icon(read_icon, 'icon')
+
+    assert result == Markup('<svg />')
+
+
+def test_svg_icon_sets_transform_when_asked_to():
+    def read_icon(name):
+        return '<svg></svg>'
+
+    result = ext.svg_icon(read_icon, 'icon', translate_z=True)
+
+    assert result == Markup('<svg style="transform: translateZ(0px)" />')

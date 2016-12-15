@@ -74,7 +74,7 @@ class SvgIcon(Extension):
         environment.globals['svg_icon'] = partial(svg_icon, read_icon)
 
 
-def svg_icon(loader, name, css_class=''):
+def svg_icon(loader, name, css_class='', translate_z=False):
     """
     Return inline SVG markup for an icon.
 
@@ -91,6 +91,9 @@ def svg_icon(loader, name, css_class=''):
                    the SVG.
     :param name: The name of the SVG file to render
     :param css_class: CSS class attribute for the returned `<svg>` element
+    :param translate_z: Whether or not to apply a hack that fixes blurry SVG
+                        rendering in Firefox
+
     """
 
     # Register SVG as the default namespace. This avoids a problem where
@@ -102,6 +105,13 @@ def svg_icon(loader, name, css_class=''):
 
     if css_class:
         root.set('class', css_class)
+
+    if translate_z:
+        # Trigger snapping of the <svg>'s left and top edges to pixel
+        # boundaries in Firefox.
+        # See also https://bugzilla.mozilla.org/show_bug.cgi?id=608812 and
+        # https://github.com/hypothesis/h/pull/4215#issuecomment-267012849
+        root.set('style', 'transform: translateZ(0px)')
 
     # If the SVG has its own title, ignore it in favor of the title attribute
     # of the <svg> or its containing element, which is usually a link.
