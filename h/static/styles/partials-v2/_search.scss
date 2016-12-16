@@ -46,15 +46,6 @@
   margin-right: auto;
 }
 
-.search-result-container--empty {
-  /* The default height of the search container is calculated to so that it
-     stretches to the bottom of the viewport and no further.
-     The px value here is the height of the stuff above the
-     search-result-container. */
-  height: calc(100vh - 134px);
-  margin-bottom: 0;
-}
-
 // search-results and search-zero map to the internal states of the page
 // when there are actual results to be displayed or when there are none.
 // They control the inner layouts for those columns
@@ -324,14 +315,6 @@ $stats-icon-column-width: 20px;
   .search-result-container {
     flex-direction: column;
     margin-top: 25px;
-  }
-
-  .search-result-container--empty {
-    /* The default height of the search container is calculated to so that it
-       stretches to the bottom of the viewport and no further.
-       The px value here is the height of the stuff above the
-       search-result-container. */
-    height: calc(100vh - 155px);
   }
 
   .search-result-nav {

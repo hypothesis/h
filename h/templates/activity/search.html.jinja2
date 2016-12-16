@@ -341,7 +341,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="search-result-container {%- if not search_results.timeframes %} search-result-container--empty{% endif %}">
+  <div class="search-result-container">
     {% if group %}
       {{ search_result_nav(group.name) }}
     {% elif user %}
