@@ -101,3 +101,32 @@ def includeme(config):
 
     # Notification
     config.add_route('unsubscribe', '/notification/unsubscribe/{token}')
+
+    # Static
+    config.add_route('about', '/about/', static=True)
+    config.add_route('bioscience', '/bioscience/', static=True)
+    config.add_route('blog', '/blog/', static=True)
+    config.add_route(
+        'chrome-extension',
+        'https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek',
+        static=True)
+    config.add_route('contact', '/contact/', static=True)
+    config.add_route('contribute', '/contribute/', static=True)
+    config.add_route('education', '/education/', static=True)
+    config.add_route('for-publishers', '/for-publishers/', static=True)
+    config.add_route('fund', '/fund/', static=True)
+    config.add_route(
+        'help-center', 'https://hypothesis.zendesk.com/hc/en-us', static=True)
+    config.add_route(
+        'hypothesis-github', 'https://github.com/hypothesis', static=True)
+    config.add_route(
+        'hypothesis-twitter', 'https://twitter.com/hypothes_is', static=True)
+    config.add_route('jobs', '/jobs/', static=True)
+    config.add_route('press', '/press/', static=True)
+    config.add_route('privacy', '/privacy/', static=True)
+    config.add_route('roadmap', '/roadmap/', static=True)
+    config.add_route('team', '/team/', static=True)
+    config.add_route('terms-of-service', '/terms-of-service/', static=True)
+    config.add_route(
+        'wordpress-plugin', 'https://wordpress.org/plugins/hypothesis/',
+        static=True)

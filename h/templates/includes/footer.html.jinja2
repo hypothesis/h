@@ -7,37 +7,37 @@
     <div class="footer__rows">
       <ul class="footer__row">
         <li class="footer__item">
-          <a href="{{ base_url }}about/">{% trans %}About{% endtrans %}</a>
+          <a href="{{ request.route_url('about') }}">{% trans %}About{% endtrans %}</a>
         </li>
         <li class="footer__item">
-          <a href="{{ base_url }}blog/">{% trans %}Blog{% endtrans %}</a>
+          <a href="{{ request.route_url('blog') }}">{% trans %}Blog{% endtrans %}</a>
         </li>
         <li class="footer__item">
-          <a href="{{ base_url }}bioscience/">{% trans %}Bioscience{% endtrans %}</a>
+          <a href="{{ request.route_url('bioscience') }}">{% trans %}Bioscience{% endtrans %}</a>
         </li>
       </ul>
 
       <ul class="footer__row u-push-right">
         <li class="footer__item">
-          <a href="{{ base_url }}education/">{% trans %}Education{% endtrans %}</a>
+          <a href="{{ request.route_url('education') }}">{% trans %}Education{% endtrans %}</a>
         </li>
         <li class="footer__item">
-          <a href="{{ base_url }}jobs/">{% trans %}Jobs{% endtrans %}</a>
+          <a href="{{ request.route_url('jobs') }}">{% trans %}Jobs{% endtrans %}</a>
         </li>
         <li class="footer__item">
-          <a href="https://hypothesis.zendesk.com/hc/en-us" target='_blank'>{% trans %}Help{% endtrans %}</a>
+          <a href="{{ request.route_url('help-center') }}" target='_blank'>{% trans %}Help{% endtrans %}</a>
         </li>
       </ul>
 
       <ul class="footer__row">
         <li class="footer__item">
-          <a href="{{ base_url }}contact/">{% trans %}Contact{% endtrans %}</a>
+          <a href="{{ request.route_url('contact') }}">{% trans %}Contact{% endtrans %}</a>
         </li>
         <li class="footer__item">
-          <a href="{{ base_url }}terms-of-service/">{% trans %}Terms of Service{% endtrans %}</a>
+          <a href="{{ request.route_url('terms-of-service') }}">{% trans %}Terms of Service{% endtrans %}</a>
         </li>
         <li class="footer__item footer__item--last">
-          <a href="{{ base_url }}privacy/">{% trans %}Privacy Policy{% endtrans %}</a>
+          <a href="{{ request.route_url('privacy') }}">{% trans %}Privacy Policy{% endtrans %}</a>
         </li>
       </ul>
     </div>

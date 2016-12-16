@@ -23,10 +23,7 @@ def via_redirect(context, request):
              request_method='GET',
              renderer='h:templates/home.html.jinja2')
 def index(context, request):
-    context = {
-        "chrome_extension_link": ("https://chrome.google.com/webstore/detail/"
-                                  "bjfhmglciegochdpefhhlphglcehbmek")
-    }
+    context = {}
 
     if request.authenticated_user:
         username = request.authenticated_user.username
