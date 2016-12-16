@@ -1,0 +1,65 @@
+// The amount of horizontal space between items in the footer.
+$spacing: 30px;
+
+.footer {
+  margin-top: auto;
+  width: 100%;
+
+  padding-top: 8px;
+  padding-bottom: 10px;
+
+  background-color: $grey-7;
+}
+
+.footer,
+.footer a {
+  color: $white;
+}
+
+.footer__content {
+  // Make the contents of the footer line up horizontally with the contents
+  // of the header at the top, and with the main contents of the page.
+  max-width: $content-max-width;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $content-padding-left;
+  padding-right: $content-padding-right;
+
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.footer__item {
+  // Vertical space between "lines" when the footer items wrap onto multiple
+  // lines on smaller screens.
+  margin-top: 5px;
+  margin-bottom: 5px;
+
+  margin-right: $spacing;
+  white-space: nowrap;
+}
+
+// The very last list item in the last list in the footer.
+.footer__item--last {
+  margin-right: 0;
+}
+
+.footer__rows {
+  display: flex;
+  flex-wrap: wrap;
+  flex-grow: 1;
+}
+
+.footer__row {
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (max-width: $tablet-width) {
+  // Reduce horizontal margins on smaller screens to provide more space for
+  // search bar
+  .footer__content {
+    padding-left: $content-padding-left-on-small-screens;
+    padding-right: $content-padding-right-on-small-screens;
+  }
+}

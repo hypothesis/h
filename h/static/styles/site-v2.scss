@@ -6,8 +6,10 @@
 // Components
 @import 'partials-v2/api-token';
 @import 'partials-v2/annotation-card';
+@import 'partials-v2/brand';
 @import 'partials-v2/btn';
 @import 'partials-v2/dropdown-menu';
+@import 'partials-v2/footer';
 @import 'partials-v2/form-actions';
 @import 'partials-v2/form-checkbox';
 @import 'partials-v2/form-container';
@@ -31,4 +33,8 @@ body {
   @include font-normal;
 
   font-family: $sans-font-family;
+}
+
+.content {
+  margin-bottom: 40px;
 }

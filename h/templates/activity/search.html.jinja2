@@ -341,7 +341,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="search-result-container {%- if not search_results.timeframes %} search-result-container--empty{% endif %}">
+  <div class="search-result-container">
     {% if group %}
       {{ search_result_nav(group.name) }}
     {% elif user %}
@@ -383,7 +383,7 @@
             <ol class="search-result-zero__list">
               <li class="search-result-zero__list-item"><!--
                 !--><a class="link"
-                       href="https://chrome.google.com/webstore/detail/hypothesis-web-pdf-annota/bjfhmglciegochdpefhhlphglcehbmek">
+                       href="{{ request.route_url('chrome-extension') }}">
                   {%- trans %}Install our Chrome extension{% endtrans -%}
                 </a>
               </li>
@@ -429,4 +429,8 @@
       {{ share_widget() }}
     </div>
   </div>
+{% endblock %}
+
+{% block footer %}
+  {% include "h:templates/includes/footer.html.jinja2" %}
 {% endblock %}

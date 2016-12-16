@@ -84,6 +84,8 @@
       {% block content %}{% endblock %}
     </main>
 
+    {% block footer %}{% endblock %}
+
     {% block scripts %}
     {% for url in asset_urls("site_js") %}
     <script src="{{ url }}"></script>
