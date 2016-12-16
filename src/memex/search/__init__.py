@@ -43,12 +43,10 @@ def includeme(config):
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
-    config.registry['es.client'] = _get_client(settings)
+    config.registry['es.client'] = client = _get_client(settings)
     config.add_request_method(
         lambda r: r.registry['es.client'],
         name='es',
         reify=True)
 
-    # If requested, automatically configure the index
-    if asbool(settings.get('h.search.autoconfig', False)):
-        init(config.registry['es.client'])
+    config.action('memex.search.init', init, args=(client,), order=10)

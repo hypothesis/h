@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
+from sqlalchemy.ext.declarative import declarative_base
+
+log = logging.getLogger(__name__)
+
 #: The base class used by memex's models.
 #:
 #: This must be configured by the including application using
@@ -20,7 +26,14 @@ def init(engine, base=None, should_create=False, should_drop=False):
         base.metadata.create_all(engine)
 
 
-def set_base(basecls):
+def set_base(basecls=None):
     """Provide a base class for memex models."""
     global Base
+
+    if basecls is None:
+        if Base is None:
+            log.info('model base class not already set, using defaults')
+            Base = declarative_base()
+        return
+
     Base = basecls

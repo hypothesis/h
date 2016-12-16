@@ -11,6 +11,10 @@ direct to the submodules of this package, but rather through the helper
 functions in `memex.storage`.
 """
 
+from memex.db import set_base
+
+set_base()  # noqa
+
 from memex.models.annotation import Annotation
 from memex.models.document import create_or_update_document_meta
 from memex.models.document import create_or_update_document_uri
@@ -30,3 +34,9 @@ __all__ = (
     'DocumentURI',
     'merge_documents',
 )
+
+
+def includeme(_):
+    # This module is included for side-effects only. SQLAlchemy models
+    # register with the global metadata object when imported.
+    pass
