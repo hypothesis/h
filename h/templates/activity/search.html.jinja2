@@ -180,11 +180,12 @@
   {% call sidebar(group.name, group.description) %}
     <section class="search-result-sidebar__section">
       <dl>
-        <dt class="search-result-sidebar__dt">
-          {% trans %}Annotations:{% endtrans %}
-        </dt>
-        <dd class="search-result-sidebar__dd">{{ total }}</dd>
-
+        {% if group.annotation_count  %}
+          <dt class="search-result-sidebar__dt">
+            {% trans %}Shared annotations:{% endtrans %}
+          </dt>
+          <dd class="search-result-sidebar__dd">{{ group.annotation_count }}</dd>
+        {% endif %}
         <dt class="search-result-sidebar__dt">
           {% trans %}Created:{% endtrans %}
         </dt>
@@ -273,10 +274,12 @@
   {% call sidebar(user.name, user.description) %}
     <section class="search-result-sidebar__section">
       <dl>
-        <dt class="search-result-sidebar__dt">
-          {% trans %}Annotations:{% endtrans %}
-        </dt>
-        <dd class="search-result-sidebar__dd">{{ user.num_annotations }}</dd>
+        {% if user.annotation_count %}
+          <dt class="search-result-sidebar__dt">
+            {% trans %}Shared annotations:{% endtrans %}
+          </dt>
+          <dd class="search-result-sidebar__dd">{{ user.annotation_count }}</dd>
+        {% endif %}
 
         <dt class="search-result-sidebar__dt">
           {% trans %}Joined:{% endtrans %}
@@ -350,7 +353,7 @@
       <div class="search-results {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
 
         {% if q or user or group %}
-        <div class="search-results__total"><b>{% trans %}Annotations{% endtrans %}</b> {{search_results.total}}</div>
+        <div class="search-results__total"> {{search_results.total}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
         {% endif %}
 
         <ol class="search-results__list">

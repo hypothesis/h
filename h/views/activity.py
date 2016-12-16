@@ -130,11 +130,16 @@ class GroupSearchController(SearchController):
                    for u in self.group.members]
         members = sorted(members, key=lambda k: k['username'].lower())
 
+        annotation_count = None
+        if self.request.feature('total_shared_annotations'):
+            annotation_count = self.request.find_service(name='groups').annotation_count(self.group.pubid)
+
         result['group'] = {
             'created': self.group.created.strftime('%B, %Y'),
             'description': self.group.description,
             'name': self.group.name,
             'pubid': self.group.pubid,
+            'annotation_count': annotation_count,
             'url': self.request.route_url('group_read',
                                           pubid=self.group.pubid,
                                           slug=self.group.slug),
@@ -251,9 +256,13 @@ class UserSearchController(SearchController):
                 return None
             return urlparse.urlparse(user.uri).netloc
 
+        annotation_count = None
+        if self.request.feature('total_shared_annotations'):
+            annotation_count = self.request.find_service(name='user').annotation_count(self.user.userid)
+
         result['user'] = {
             'name': self.user.display_name or self.user.username,
-            'num_annotations': result['search_results'].total,
+            'annotation_count': annotation_count,
             'description': self.user.description,
             'registered_date': self.user.registered_date.strftime('%B, %Y'),
             'location': self.user.location,

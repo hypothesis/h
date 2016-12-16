@@ -16,6 +16,7 @@ FEATURES = {
                                " updates to annotations in the client?"),
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'search_page': "Show the activity pages search skeleton page?",
+    'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
