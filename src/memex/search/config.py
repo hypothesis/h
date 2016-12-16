@@ -85,7 +85,7 @@ ANNOTATION_MAPPING = {
 
                         # Open Annotation (Data|Text)PositionSelector
                         'start': {'type': 'long'},
-                        'end':   {'type': 'long'},
+                        'end': {'type': 'long'},
                     }
                 }
             }

@@ -40,7 +40,7 @@ def ajax_payload(request, data):
 def _login_redirect_url(request):
     if request.feature('search_page'):
         return request.route_url('activity.user_search',
-            username=request.authenticated_user.username)
+                                 username=request.authenticated_user.username)
     else:
         return request.route_url('stream')
 

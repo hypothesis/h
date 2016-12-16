@@ -13,7 +13,7 @@ import h.feeds.util
 _ = i18n.TranslationStringFactory(__package__)
 
 
-def _pubDate_string(timestamp):
+def _pubDate_string(timestamp):  # noqa: N802
     """Return a RFC2822-formatted pubDate string for the given timestamp.
 
     Return a pubDate string like 'Tue, 03 Jun 2003 09:39:21 -0000'.

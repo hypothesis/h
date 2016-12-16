@@ -10,7 +10,6 @@ import os
 from pyramid.config import Configurator
 from pyramid.settings import asbool
 
-from h.security import derive_key
 from h.settings import DockerSetting
 from h.settings import EnvSetting
 from h.settings import SettingError

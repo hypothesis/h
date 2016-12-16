@@ -2,7 +2,6 @@
 
 import collections
 import logging
-import sys
 from pyramid import httpexceptions
 from pyramid.util import DottedNameResolver
 

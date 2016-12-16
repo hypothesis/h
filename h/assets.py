@@ -133,6 +133,7 @@ def _load_bundles(fp):
     parser.readfp(fp)
     return {k: aslist(v) for k, v in parser.items('bundles')}
 
+
 # Site assets
 assets_view = static_view('h:../build',
                           cache_max_age=None,

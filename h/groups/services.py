@@ -11,7 +11,7 @@ GROUP_ACCESS_FLAGS = {
         'joinable_by': JoinableBy.authority,
         'readable_by': ReadableBy.members,
         'writeable_by': WriteableBy.members,
-     },
+    },
     'publisher': {
         'joinable_by': None,
         'readable_by': ReadableBy.world,

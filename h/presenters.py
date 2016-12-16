@@ -208,6 +208,7 @@ class AnnotationHTMLPresenter(object):
     def tags(self):
         return self.annotation.tags
 
+
 class DocumentHTMLPresenter(object):
     """Wraps Document model objects and adds some HTML properties."""
 

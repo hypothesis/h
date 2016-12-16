@@ -7,7 +7,6 @@ from functools import partial
 import sqlalchemy
 
 from h import mailer
-from h._compat import text_type
 from h.emails import signup
 from h.models import Activation, Annotation, Subscriptions, User
 from h import util
@@ -122,7 +121,7 @@ class UserService(object):
 
         return (
             self.session.query(Annotation)
-            .filter_by(userid=userid, groupid='__world__',  shared=True)
+            .filter_by(userid=userid, groupid='__world__', shared=True)
             .count())
 
 
