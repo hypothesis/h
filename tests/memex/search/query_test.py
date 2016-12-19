@@ -423,6 +423,15 @@ class TestUserFilter(object):
         assert userfilter({}) is None
 
 
+class TestDeletedFilter(object):
+    def test_filter(self):
+        deletedfilter = query.DeletedFilter()
+
+        assert deletedfilter({}) == {
+            "bool": {"must_not": {"exists": {"field": "deleted"}}}
+        }
+
+
 class TestAnyMatcher():
     def test_any_query(self):
         anymatcher = query.AnyMatcher()

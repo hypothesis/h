@@ -147,6 +147,7 @@ class Search(object):
 
 def default_querybuilder(request):
     builder = query.Builder()
+    builder.append_filter(query.DeletedFilter())
     builder.append_filter(query.AuthFilter(request))
     builder.append_filter(query.UriFilter(request))
     builder.append_filter(query.GroupFilter())
