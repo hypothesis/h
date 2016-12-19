@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from h.models import User
-from h.nipsa import worker
+from h.tasks.nipsa import add_nipsa, remove_nipsa
 
 
 class NipsaService(object):
@@ -38,7 +38,7 @@ class NipsaService(object):
         message for the user will still be published to the queue).
         """
         user.nipsa = True
-        worker.add_nipsa.delay(user.userid)
+        add_nipsa.delay(user.userid)
 
     def unflag(self, user):
         """
@@ -49,7 +49,7 @@ class NipsaService(object):
         queue).
         """
         user.nipsa = False
-        worker.remove_nipsa.delay(user.userid)
+        remove_nipsa.delay(user.userid)
 
 
 def nipsa_factory(context, request):

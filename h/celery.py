@@ -54,8 +54,8 @@ celery.conf.update(
         'h.admin.worker',
         'h.auth.worker',
         'h.indexer',
-        'h.nipsa.worker',
         'h.tasks.mailer',
+        'h.tasks.nipsa',
     ),
     CELERY_ROUTES={
         'h.indexer.add_annotation': 'indexer',
