@@ -108,10 +108,11 @@ class BatchIndexer(object):
     the search index.
     """
 
-    def __init__(self, session, es_client, request, target_index=None):
+    def __init__(self, session, es_client, request, target_index=None, op_type='index'):
         self.session = session
         self.es_client = es_client
         self.request = request
+        self.op_type = op_type
 
         # By default, index into the open index
         if target_index is None:
@@ -141,13 +142,13 @@ class BatchIndexer(object):
         errored = set()
         for ok, item in indexing:
             if not ok:
-                errored.add(item['index']['_id'])
+                errored.add(item[self.op_type]['_id'])
         return errored
 
     def _prepare(self, annotation):
-        action = {'index': {'_index': self._target_index,
-                            '_type': self.es_client.t.annotation,
-                            '_id': annotation.id}}
+        action = {self.op_type: {'_index': self._target_index,
+                                 '_type': self.es_client.t.annotation,
+                                 '_id': annotation.id}}
         data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
 
         event = AnnotationTransformEvent(self.request, data)

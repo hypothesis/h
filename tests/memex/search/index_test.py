@@ -217,6 +217,32 @@ class TestBatchIndexer(object):
             rendered
         )
 
+    def test_index_allows_to_set_op_type(self, db_session, es, pyramid_request, streaming_bulk, factories):
+        indexer = index.BatchIndexer(db_session, es, pyramid_request,
+                                     op_type='create')
+        annotation = factories.Annotation()
+        db_session.add(annotation)
+        db_session.flush()
+        results = []
+
+        def fake_streaming_bulk(*args, **kwargs):
+            ann = list(args[1])[0]
+            callback = kwargs.get('expand_action_callback')
+            results.append(callback(ann))
+            return set()
+
+        streaming_bulk.side_effect = fake_streaming_bulk
+
+        indexer.index()
+
+        rendered = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
+        rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
+        assert results[0] == (
+            {'create': {'_type': indexer.es_client.t.annotation,
+                        '_index': 'hypothesis',
+                        '_id': annotation.id}},
+            rendered
+        )
     def test_index_emits_AnnotationTransformEvent_when_presenting_bulk_actions(self,
                                                                                db_session,
                                                                                indexer,
