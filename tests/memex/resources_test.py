@@ -71,6 +71,19 @@ class TestAnnotationResource(object):
             assert policy.permits(res, ['saoirse'], perm)
             assert not policy.permits(res, ['someoneelse'], perm)
 
+    def test_acl_deleted(self, factories, pyramid_request):
+        """
+        Nobody -- not even the owner -- should have any permissions on a
+        deleted annotation.
+        """
+        policy = ACLAuthorizationPolicy()
+
+        ann = factories.Annotation(userid='saoirse', deleted=True)
+        res = AnnotationResource(pyramid_request, ann)
+
+        for perm in ['read', 'admin', 'update', 'delete']:
+            assert not policy.permits(res, ['saiorse'], perm)
+
     @pytest.mark.parametrize('groupid,userid,permitted', [
         ('freeforall', 'jim', True),
         ('freeforall', 'saoirse', True),

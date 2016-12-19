@@ -30,6 +30,11 @@ class AnnotationResource(object):
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
+        # If the annotation has been deleted, nobody has any privileges on it
+        # any more.
+        if self.annotation.deleted:
+            return [security.DENY_ALL]
+
         acl = []
         if self.annotation.shared:
             for principal in _group_principals(self.group):
