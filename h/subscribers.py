@@ -3,9 +3,9 @@
 
 from h import __version__
 from h import emails
-from h import mailer
 from memex import storage
 from h.notification import reply
+from h.tasks import mailer
 
 
 def add_renderer_globals(event):

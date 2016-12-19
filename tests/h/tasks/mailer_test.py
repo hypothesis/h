@@ -4,11 +4,11 @@ from smtplib import SMTPServerDisconnected
 
 import mock
 
-from h import mailer
+from h.tasks import mailer
 
 
-@mock.patch('h.mailer.celery', autospec=True)
-@mock.patch('h.mailer.pyramid_mailer', autospec=True)
+@mock.patch('h.tasks.mailer.celery', autospec=True)
+@mock.patch('h.tasks.mailer.pyramid_mailer', autospec=True)
 def test_send_creates_email_message(pyramid_mailer, celery):
     celery.request = mock.sentinel.request
 
@@ -23,8 +23,8 @@ def test_send_creates_email_message(pyramid_mailer, celery):
         html=None)
 
 
-@mock.patch('h.mailer.celery', autospec=True)
-@mock.patch('h.mailer.pyramid_mailer', autospec=True)
+@mock.patch('h.tasks.mailer.celery', autospec=True)
+@mock.patch('h.tasks.mailer.pyramid_mailer', autospec=True)
 def test_send_creates_email_message_with_html_body(pyramid_mailer, celery):
     celery.request = mock.sentinel.request
 
@@ -40,8 +40,8 @@ def test_send_creates_email_message_with_html_body(pyramid_mailer, celery):
         html='<p>An HTML body</p>')
 
 
-@mock.patch('h.mailer.celery', autospec=True)
-@mock.patch('h.mailer.pyramid_mailer', autospec=True)
+@mock.patch('h.tasks.mailer.celery', autospec=True)
+@mock.patch('h.tasks.mailer.pyramid_mailer', autospec=True)
 def test_send_dispatches_email_using_request_mailer(pyramid_mailer, celery):
     celery.request = mock.sentinel.request
     request_mailer = pyramid_mailer.get_mailer.return_value
@@ -55,8 +55,8 @@ def test_send_dispatches_email_using_request_mailer(pyramid_mailer, celery):
     request_mailer.send_immediately.assert_called_once_with(message)
 
 
-@mock.patch('h.mailer.celery', autospec=True)
-@mock.patch('h.mailer.pyramid_mailer', autospec=True)
+@mock.patch('h.tasks.mailer.celery', autospec=True)
+@mock.patch('h.tasks.mailer.pyramid_mailer', autospec=True)
 def test_send_retries_if_mailing_fails(pyramid_mailer, celery):
     celery.request = mock.sentinel.request
     request_mailer = pyramid_mailer.get_mailer.return_value

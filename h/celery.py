@@ -50,7 +50,13 @@ celery.conf.update(
     CELERY_ACKS_LATE=True,
     CELERY_DISABLE_RATE_LIMITS=True,
     CELERY_IGNORE_RESULT=True,
-    CELERY_IMPORTS=('h.mailer', 'h.nipsa.worker', 'h.indexer', 'h.admin.worker', 'h.auth.worker'),
+    CELERY_IMPORTS=(
+        'h.admin.worker',
+        'h.auth.worker',
+        'h.indexer',
+        'h.nipsa.worker',
+        'h.tasks.mailer',
+    ),
     CELERY_ROUTES={
         'h.indexer.add_annotation': 'indexer',
         'h.indexer.delete_annotation': 'indexer',

@@ -14,7 +14,6 @@ from pyramid.view import view_config, view_defaults
 from h import accounts
 from h import form
 from h import i18n
-from h import mailer
 from h import models
 from h import session
 from h.accounts import schemas
@@ -22,6 +21,7 @@ from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
+from h.tasks import mailer
 from h.util.view import json_view
 from h._compat import urlparse
 
