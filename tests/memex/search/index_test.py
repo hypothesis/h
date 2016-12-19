@@ -288,7 +288,7 @@ class TestBatchIndexer(object):
         def fake_streaming_bulk(*args, **kwargs):
             for ann in args[1]:
                 if ann.id in [ann_fail_1.id, ann_fail_2.id]:
-                    yield (False, {'index': {'_id': ann.id}})
+                    yield (False, {'index': {'_id': ann.id, 'error': 'unknown error'}})
                 elif ann.id in [ann_success_1.id, ann_success_2.id]:
                     yield (True, {'index': {'_id': ann.id}})
 
@@ -296,6 +296,27 @@ class TestBatchIndexer(object):
 
         result = indexer.index()
         assert result == set([ann_fail_1.id, ann_fail_2.id])
+
+    def test_index_ignores_document_exists_errors_for_op_type_create(self, db_session, es, pyramid_request, streaming_bulk, factories):
+        indexer = index.BatchIndexer(db_session, es, pyramid_request,
+                                     op_type='create')
+
+        ann_success_1, ann_success_2 = factories.Annotation(), factories.Annotation()
+        ann_fail_1, ann_fail_2 = factories.Annotation(), factories.Annotation()
+
+        def fake_streaming_bulk(*args, **kwargs):
+            for ann in args[1]:
+                if ann.id in [ann_fail_1.id, ann_fail_2.id]:
+                    error = 'DocumentAlreadyExistsException[[index-name][1] [annotation][gibberish]: ' \
+                            'document already exist]'
+                    yield (False, {'create': {'_id': ann.id, 'error': error}})
+                elif ann.id in [ann_success_1.id, ann_success_2.id]:
+                    yield (True, {'create': {'_id': ann.id}})
+
+        streaming_bulk.side_effect = fake_streaming_bulk
+
+        result = indexer.index()
+        assert len(result) == 0
 
     @pytest.fixture
     def indexer(self, db_session, es, pyramid_request):

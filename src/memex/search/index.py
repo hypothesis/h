@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import itertools
 import logging
+import re
 from collections import namedtuple
 
 import elasticsearch
@@ -142,7 +143,10 @@ class BatchIndexer(object):
         errored = set()
         for ok, item in indexing:
             if not ok:
-                errored.add(item[self.op_type]['_id'])
+                status = item[self.op_type]
+                if self.op_type != 'create' and \
+                        not re.match('^.*document already exists', status['error']):
+                    errored.add(status['_id'])
         return errored
 
     def _prepare(self, annotation):
