@@ -62,7 +62,8 @@ def delete(es, annotation_id):
     Mark an annotation as deleted in the search index.
 
     This will write a new body that only contains the ``deleted`` boolean field
-    with the value ``true``.
+    with the value ``true``. It allows us to rely on Elasticsearch to complain
+    about dubious operations while re-indexing when we use `op_type=create`.
 
     :param es: the Elasticsearch client object to use
     :type es: memex.search.Client
