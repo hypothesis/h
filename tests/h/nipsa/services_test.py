@@ -8,7 +8,7 @@ from h.nipsa.services import NipsaService
 from h.nipsa.services import nipsa_factory
 
 
-@pytest.mark.usefixtures('users', 'worker')
+@pytest.mark.usefixtures('users', 'add_nipsa', 'remove_nipsa')
 class TestNipsaService(object):
     def test_flagged_user_returns_list_of_users(self, db_session, users):
         svc = NipsaService(db_session)
@@ -35,12 +35,12 @@ class TestNipsaService(object):
 
         assert users['dominic'].nipsa is True
 
-    def test_flag_triggers_add_nipsa_job(self, db_session, users, worker):
+    def test_flag_triggers_add_nipsa_job(self, db_session, users, add_nipsa):
         svc = NipsaService(db_session)
 
         svc.flag(users['dominic'])
 
-        worker.add_nipsa.delay.assert_called_once_with('acct:dominic@example.com')
+        add_nipsa.delay.assert_called_once_with('acct:dominic@example.com')
 
     def test_unflag_sets_nipsa_false(self, db_session, users):
         svc = NipsaService(db_session)
@@ -49,12 +49,12 @@ class TestNipsaService(object):
 
         assert users['renata'].nipsa is False
 
-    def test_unflag_triggers_remove_nipsa_job(self, db_session, users, worker):
+    def test_unflag_triggers_remove_nipsa_job(self, db_session, users, remove_nipsa):
         svc = NipsaService(db_session)
 
         svc.unflag(users['renata'])
 
-        worker.remove_nipsa.delay.assert_called_once_with('acct:renata@example.com')
+        remove_nipsa.delay.assert_called_once_with('acct:renata@example.com')
 
 
 def test_nipsa_factory(pyramid_request):
@@ -62,6 +62,16 @@ def test_nipsa_factory(pyramid_request):
 
     assert isinstance(svc, NipsaService)
     assert svc.session == pyramid_request.db
+
+
+@pytest.fixture
+def add_nipsa(patch):
+    return patch('h.nipsa.services.add_nipsa')
+
+
+@pytest.fixture
+def remove_nipsa(patch):
+    return patch('h.nipsa.services.remove_nipsa')
 
 
 @pytest.fixture
@@ -74,8 +84,3 @@ def users(db_session, factories):
     db_session.add_all([u for u in users.values()])
     db_session.flush()
     return users
-
-
-@pytest.fixture
-def worker(patch):
-    return patch('h.nipsa.services.worker')

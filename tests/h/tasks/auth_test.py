@@ -6,7 +6,7 @@ from datetime import (datetime, timedelta)
 
 import pytest
 
-from h.auth import worker
+from h.tasks.auth import delete_expired_auth_tickets, delete_expired_tokens
 from h.models import (AuthTicket, Token)
 
 
@@ -20,7 +20,7 @@ class TestDeleteExpiredAuthTickets(object):
         db_session.add_all(tickets)
 
         assert db_session.query(AuthTicket).count() == 2
-        worker.delete_expired_auth_tickets()
+        delete_expired_auth_tickets()
         assert db_session.query(AuthTicket).count() == 0
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
@@ -31,7 +31,7 @@ class TestDeleteExpiredAuthTickets(object):
         db_session.add_all(tickets)
 
         assert db_session.query(AuthTicket).count() == 2
-        worker.delete_expired_auth_tickets()
+        delete_expired_auth_tickets()
         assert db_session.query(AuthTicket).count() == 1
 
 
@@ -42,7 +42,7 @@ class TestDeleteExpiredTokens(object):
         factories.Token(expires=(datetime.utcnow() - timedelta(seconds=1)))
 
         assert db_session.query(Token).count() == 2
-        worker.delete_expired_tokens()
+        delete_expired_tokens()
         assert db_session.query(Token).count() == 0
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
@@ -50,7 +50,7 @@ class TestDeleteExpiredTokens(object):
         factories.Token(expires=(datetime.utcnow() + timedelta(hours=1)))
 
         assert db_session.query(Token).count() == 2
-        worker.delete_expired_tokens()
+        delete_expired_tokens()
         assert db_session.query(Token).count() == 1
 
     def test_it_leaves_tickets_without_an_expiration_date(self, db_session, factories):
@@ -58,12 +58,12 @@ class TestDeleteExpiredTokens(object):
         factories.Token(expires=None)
 
         assert db_session.query(Token).count() == 2
-        worker.delete_expired_tokens()
+        delete_expired_tokens()
         assert db_session.query(Token).count() == 2
 
 
 @pytest.fixture
 def celery(patch, db_session):
-    cel = patch('h.auth.worker.celery', autospec=False)
+    cel = patch('h.tasks.auth.celery', autospec=False)
     cel.request.db = db_session
     return cel

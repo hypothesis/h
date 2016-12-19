@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from h.nipsa import services
 from h.nipsa import search
 
 
@@ -11,7 +10,7 @@ def includeme(config):
                           'memex.events.AnnotationTransformEvent')
 
     # Register the NIPSA service
-    config.register_service_factory(services.nipsa_factory, name='nipsa')
+    config.register_service_factory('.services.nipsa_factory', name='nipsa')
 
     # Register an additional filter with the API search module
     config.add_search_filter(search.Filter)

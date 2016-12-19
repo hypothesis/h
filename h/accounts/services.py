@@ -6,10 +6,10 @@ from functools import partial
 
 import sqlalchemy
 
-from h import mailer
 from h._compat import text_type
 from h.emails import signup
 from h.models import Activation, Annotation, Subscriptions, User
+from h.tasks import mailer
 from h import util
 
 
@@ -140,7 +140,7 @@ class UserSignupService(object):
         Create a new user signup service.
 
         :param default_authority: the default authority for new users
-        :param mailer: a mailer (such as :py:mod:`h.mailer`)
+        :param mailer: a mailer (such as :py:mod:`h.tasks.mailer`)
         :param session: the SQLAlchemy session object
         :param signup_email: a function for generating a signup email
         :param stats: the stats service
