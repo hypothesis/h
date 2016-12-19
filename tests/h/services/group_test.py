@@ -162,18 +162,6 @@ class TestGroupService(object):
 
         publish.assert_called_once_with('group-leave', 'abc123', 'cazimir')
 
-    def test_annotation_count_returns_count_of_shared_annotations_for_group(self, db_session, users, factories):
-        svc = GroupService(db_session, users.get)
-        group = Group(name='Donkey Trust',
-                      authority='foobari.com',
-                      creator=users['theresa'])
-        group.pubid = 'abc123'
-        for i in range(3):
-            factories.Annotation(groupid=group.pubid, shared=True)
-        for i in range(2):
-            factories.Annotation(groupid=group.pubid, shared=False)
-
-        assert svc.annotation_count(group.pubid) == 3
 
     @pytest.mark.parametrize('with_user', [True, False])
     def test_groupids_readable_by_includes_world(self, with_user, service, db_session, factories):

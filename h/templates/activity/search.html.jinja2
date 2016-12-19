@@ -176,15 +176,15 @@
 </aside>
 {% endmacro %}
 
-{% macro group_sidebar(group, group_edit_url, total) %}
+{% macro group_sidebar(group, group_edit_url, total, stats) %}
   {% call sidebar(group.name, group.description) %}
     <section class="search-result-sidebar__section">
       <dl>
-        {% if group.annotation_count  %}
+        {% if stats.annotation_count  %}
           <dt class="search-result-sidebar__dt">
             {% trans %}Shared annotations:{% endtrans %}
           </dt>
-          <dd class="search-result-sidebar__dd">{{ group.annotation_count }}</dd>
+          <dd class="search-result-sidebar__dd">{{ stats.annotation_count }}</dd>
         {% endif %}
         <dt class="search-result-sidebar__dt">
           {% trans %}Created:{% endtrans %}
@@ -270,15 +270,15 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro user_sidebar(user) %}
+{% macro user_sidebar(user, stats) %}
   {% call sidebar(user.name, user.description) %}
     <section class="search-result-sidebar__section">
       <dl>
-        {% if user.annotation_count %}
+        {% if stats.annotation_count %}
           <dt class="search-result-sidebar__dt">
-            {% trans %}Public annotations:{% endtrans %}
+            {% trans %}Annotations:{% endtrans %}
           </dt>
-          <dd class="search-result-sidebar__dd">{{ user.annotation_count }}</dd>
+          <dd class="search-result-sidebar__dd">{{ stats.annotation_count }}</dd>
         {% endif %}
 
         <dt class="search-result-sidebar__dt">
@@ -420,9 +420,9 @@
     {% endif %}
 
     {% if group %}
-      {{ group_sidebar(group, group_edit_url, search_results.total) }}
+      {{ group_sidebar(group, group_edit_url, search_results.total, stats) }}
     {% elif user %}
-      {{ user_sidebar(user) }}
+      {{ user_sidebar(user, stats) }}
     {% endif %}
 
     <div class="js-share-widget is-hidden-when-loading">

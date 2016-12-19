@@ -94,16 +94,6 @@ class GroupService(object):
         if self.publish:
             self.publish('group-leave', group.pubid, userid)
 
-    def annotation_count(self, pubid):
-        """
-        Return the count of shared annotations for this group.
-        """
-
-        return (
-            self.session.query(Annotation)
-            .filter_by(groupid=pubid, shared=True)
-            .count())
-
     def groupids_readable_by(self, user):
         """
         Return a list of pubids for which the user has read access.

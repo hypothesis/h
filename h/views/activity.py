@@ -130,16 +130,19 @@ class GroupSearchController(SearchController):
                    for u in self.group.members]
         members = sorted(members, key=lambda k: k['username'].lower())
 
-        annotation_count = None
+        group_annotation_count = None
         if self.request.feature('total_shared_annotations'):
-            annotation_count = self.request.find_service(name='group').annotation_count(self.group.pubid)
+            group_annotation_count = self.request.find_service(name='annotation_stats').group_annotation_count(self.group.pubid)
+
+        result['stats'] = {
+            'annotation_count': group_annotation_count,
+        }
 
         result['group'] = {
             'created': self.group.created.strftime('%B, %Y'),
             'description': self.group.description,
             'name': self.group.name,
             'pubid': self.group.pubid,
-            'annotation_count': annotation_count,
             'url': self.request.route_url('group_read',
                                           pubid=self.group.pubid,
                                           slug=self.group.slug),
@@ -258,11 +261,17 @@ class UserSearchController(SearchController):
 
         annotation_count = None
         if self.request.feature('total_shared_annotations'):
-            annotation_count = self.request.find_service(name='user').annotation_count(self.user.userid)
+            user_annotation_counts = self.request.find_service(name='annotation_stats').user_annotation_counts(self.user.userid)
+            annotation_count = user_annotation_counts['public']
+            if self.request.authenticated_userid == self.user.userid:
+                annotation_count = annotation_count + user_annotation_counts['private'] + user_annotation_counts['group']
+
+        result['stats'] = {
+            'annotation_count': annotation_count,
+        }
 
         result['user'] = {
             'name': self.user.display_name or self.user.username,
-            'annotation_count': annotation_count,
             'description': self.user.description,
             'registered_date': self.user.registered_date.strftime('%B, %Y'),
             'location': self.user.location,

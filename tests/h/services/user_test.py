@@ -47,17 +47,6 @@ class TestUserService(object):
 
         assert user is None
 
-    def test_annotation_count_returns_count_of_shared_annotations_for_user(self, svc, users, factories, db_session):
-        _, steve, _ = users
-        for i in range(3):
-            factories.Annotation(userid=steve.userid, shared=True)
-        for i in range(2):
-            factories.Annotation(userid=steve.userid, shared=False)
-        for i in range(4):
-            factories.Annotation(userid=steve.userid, groupid='abc', shared=True)
-
-        assert svc.annotation_count(steve.userid) == 3
-
     def test_login_by_username(self, svc, users):
         _, steve, _ = users
         assert svc.login('steve', 'stevespassword') is steve
