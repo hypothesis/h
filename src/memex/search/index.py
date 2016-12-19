@@ -23,7 +23,7 @@ class Window(namedtuple('Window', ['start', 'end'])):
     pass
 
 
-def index(es, annotation, request):
+def index(es, annotation, request, target_index=None):
     """
     Index an annotation into the search index.
 
@@ -37,6 +37,8 @@ def index(es, annotation, request):
     :param annotation: the annotation to index
     :type annotation: memex.models.Annotation
 
+    :param target_index: the index name, uses default index if not given
+    :type target_index: unicode
     """
     presenter = presenters.AnnotationSearchIndexPresenter(annotation)
     annotation_dict = presenter.asdict()
@@ -44,8 +46,11 @@ def index(es, annotation, request):
     event = AnnotationTransformEvent(request, annotation_dict)
     request.registry.notify(event)
 
+    if target_index is None:
+        target_index = es.index
+
     es.conn.index(
-        index=es.index,
+        index=target_index,
         doc_type=es.t.annotation,
         body=annotation_dict,
         id=annotation_dict["id"],
