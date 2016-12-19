@@ -59,10 +59,10 @@ def index(es, annotation, request):
 
 def delete(es, annotation_id):
     """
-    Delete an annotation from the search index.
+    Mark an annotation as deleted in the search index.
 
-    If no annotation with the given annotation's ID exists in the search index,
-    just log the resulting elasticsearch exception (don't crash).
+    This will write a new body that only contains the ``deleted`` boolean field
+    with the value ``true``.
 
     :param es: the Elasticsearch client object to use
     :type es: memex.search.Client
@@ -72,15 +72,11 @@ def delete(es, annotation_id):
     :type annotation_id: str
 
     """
-    try:
-        es.conn.delete(
-            index=es.index,
-            doc_type=es.t.annotation,
-            id=annotation_id,
-        )
-    except elasticsearch.NotFoundError:
-        log.exception('Tried to delete a nonexistent annotation from the '
-                      'search index, annotation id: %s', annotation_id)
+    es.conn.index(
+        index=es.index,
+        doc_type=es.t.annotation,
+        body={'deleted': True},
+        id=annotation_id)
 
 
 def reindex(session, es, request):
