@@ -34,6 +34,10 @@ celery.conf.update(
     BROKER_URL=os.environ.get('CELERY_BROKER_URL',
         os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
     CELERYBEAT_SCHEDULE={
+        'purge-deleted-annotations': {
+            'task': 'h.tasks.cleanup.purge_deleted_annotations',
+            'schedule': timedelta(hours=1)
+        },
         'purge-expired-authtickets': {
             'task': 'h.tasks.cleanup.purge_expired_auth_tickets',
             'schedule': timedelta(hours=1)
