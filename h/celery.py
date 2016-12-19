@@ -34,12 +34,12 @@ celery.conf.update(
     BROKER_URL=os.environ.get('CELERY_BROKER_URL',
         os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
     CELERYBEAT_SCHEDULE={
-        'delete-expired-authtickets': {
-            'task': 'h.tasks.auth.delete_expired_auth_tickets',
+        'purge-expired-authtickets': {
+            'task': 'h.tasks.cleanup.purge_expired_auth_tickets',
             'schedule': timedelta(hours=1)
         },
-        'delete-expired-tokens': {
-            'task': 'h.tasks.auth.delete_expired_tokens',
+        'purge-expired-tokens': {
+            'task': 'h.tasks.cleanup.purge_expired_tokens',
             'schedule': timedelta(hours=1)
         },
     },
@@ -52,7 +52,7 @@ celery.conf.update(
     CELERY_IGNORE_RESULT=True,
     CELERY_IMPORTS=(
         'h.tasks.admin',
-        'h.tasks.auth',
+        'h.tasks.cleanup',
         'h.tasks.indexer',
         'h.tasks.mailer',
         'h.tasks.nipsa',
