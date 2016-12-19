@@ -86,6 +86,12 @@ class TestDeleteAnnotation:
                          'get_aliased_index',
                          'update_aliased_index')
 class TestReindex(object):
+    def test_sets_op_type_to_create(self, es, BatchIndexer):
+        index.reindex(mock.sentinel.session, es, mock.sentinel.request)
+
+        _, kwargs = BatchIndexer.call_args
+        assert kwargs['op_type'] == 'create'
+
     def test_indexes_annotations(self, es, indexer):
         """Should call .index() on the batch indexer instance."""
         index.reindex(mock.sentinel.session, es, mock.sentinel.request)
@@ -281,7 +287,7 @@ class TestBatchIndexer(object):
             rendered
         )
 
-    def test_index_returns_failed_bulk_actions(self, db_session, indexer, streaming_bulk, factories):
+    def test_index_returns_failed_bulk_actions_for_default_op_type(self, db_session, indexer, streaming_bulk, factories):
         ann_success_1, ann_success_2 = factories.Annotation(), factories.Annotation()
         ann_fail_1, ann_fail_2 = factories.Annotation(), factories.Annotation()
 
@@ -291,6 +297,25 @@ class TestBatchIndexer(object):
                     yield (False, {'index': {'_id': ann.id, 'error': 'unknown error'}})
                 elif ann.id in [ann_success_1.id, ann_success_2.id]:
                     yield (True, {'index': {'_id': ann.id}})
+
+        streaming_bulk.side_effect = fake_streaming_bulk
+
+        result = indexer.index()
+        assert result == set([ann_fail_1.id, ann_fail_2.id])
+
+    def test_index_returns_failed_bulk_actions_for_create_op_type(self, pyramid_request, es, db_session, streaming_bulk, factories):
+        indexer = index.BatchIndexer(db_session, es, pyramid_request,
+                                     op_type='create')
+
+        ann_success_1, ann_success_2 = factories.Annotation(), factories.Annotation()
+        ann_fail_1, ann_fail_2 = factories.Annotation(), factories.Annotation()
+
+        def fake_streaming_bulk(*args, **kwargs):
+            for ann in args[1]:
+                if ann.id in [ann_fail_1.id, ann_fail_2.id]:
+                    yield (False, {'create': {'_id': ann.id, 'error': 'unknown error'}})
+                elif ann.id in [ann_success_1.id, ann_success_2.id]:
+                    yield (True, {'create': {'_id': ann.id}})
 
         streaming_bulk.side_effect = fake_streaming_bulk
 
@@ -308,7 +333,7 @@ class TestBatchIndexer(object):
             for ann in args[1]:
                 if ann.id in [ann_fail_1.id, ann_fail_2.id]:
                     error = 'DocumentAlreadyExistsException[[index-name][1] [annotation][gibberish]: ' \
-                            'document already exist]'
+                            'document already exists]'
                     yield (False, {'create': {'_id': ann.id, 'error': error}})
                 elif ann.id in [ann_success_1.id, ann_success_2.id]:
                     yield (True, {'create': {'_id': ann.id}})

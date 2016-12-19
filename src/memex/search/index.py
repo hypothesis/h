@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import itertools
 import logging
-import re
 from collections import namedtuple
 
 import elasticsearch
@@ -88,7 +87,7 @@ def reindex(session, es, request):
         raise RuntimeError('cannot reindex if current index is not aliased')
 
     new_index = configure_index(es)
-    indexer = BatchIndexer(session, es, request, target_index=new_index)
+    indexer = BatchIndexer(session, es, request, target_index=new_index, op_type='create')
 
     errored = indexer.index()
     if errored:
@@ -144,9 +143,12 @@ class BatchIndexer(object):
         for ok, item in indexing:
             if not ok:
                 status = item[self.op_type]
-                if self.op_type != 'create' and \
-                        not re.match('^.*document already exists', status['error']):
-                    errored.add(status['_id'])
+
+                was_doc_exists_err = 'document already exists' in status['error']
+                if self.op_type == 'create' and was_doc_exists_err:
+                    continue
+
+                errored.add(status['_id'])
         return errored
 
     def _prepare(self, annotation):
