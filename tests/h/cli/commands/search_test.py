@@ -23,7 +23,7 @@ class TestReindexCommand(object):
 
     @pytest.fixture
     def reindex(self, patch):
-        index = patch('h.cli.commands.search.index')
+        index = patch('h.cli.commands.search.indexer')
         return index.reindex
 
 
