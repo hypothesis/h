@@ -86,6 +86,12 @@ class TestDeleteAnnotation:
             id='test_annotation_id'
         )
 
+    def test_it_allows_to_override_target_index(self, es):
+        index.delete(es, 'test_annotation_id', target_index='custom-index')
+
+        _, kwargs = es.conn.index.call_args
+        assert kwargs['index'] == 'custom-index'
+
 
 class TestBatchIndexer(object):
     def test_index_indexes_all_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):

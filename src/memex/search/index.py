@@ -57,7 +57,7 @@ def index(es, annotation, request, target_index=None):
     )
 
 
-def delete(es, annotation_id):
+def delete(es, annotation_id, target_index=None):
     """
     Mark an annotation as deleted in the search index.
 
@@ -72,9 +72,15 @@ def delete(es, annotation_id):
         delete from the search index
     :type annotation_id: str
 
+    :param target_index: the index name, uses default index if not given
+    :type target_index: unicode
     """
+
+    if target_index is None:
+        target_index = es.index
+
     es.conn.index(
-        index=es.index,
+        index=target_index,
         doc_type=es.t.annotation,
         body={'deleted': True},
         id=annotation_id)
