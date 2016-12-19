@@ -51,8 +51,8 @@ celery.conf.update(
     CELERY_DISABLE_RATE_LIMITS=True,
     CELERY_IGNORE_RESULT=True,
     CELERY_IMPORTS=(
-        'h.admin.worker',
         'h.auth.worker',
+        'h.tasks.admin',
         'h.tasks.indexer',
         'h.tasks.mailer',
         'h.tasks.nipsa',
