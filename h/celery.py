@@ -53,14 +53,13 @@ celery.conf.update(
     CELERY_IMPORTS=(
         'h.admin.worker',
         'h.auth.worker',
-        'h.indexer',
+        'h.tasks.indexer',
         'h.tasks.mailer',
         'h.tasks.nipsa',
     ),
     CELERY_ROUTES={
-        'h.indexer.add_annotation': 'indexer',
-        'h.indexer.delete_annotation': 'indexer',
-        'h.indexer.reindex_annotations': 'indexer',
+        'h.tasks.indexer.add_annotation': 'indexer',
+        'h.tasks.indexer.delete_annotation': 'indexer',
     },
     CELERY_TASK_SERIALIZER='json',
     CELERY_QUEUES=[
