@@ -29,7 +29,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2.7',
 ]
 INSTALL_REQUIRES = [
-    'SQLAlchemy>=1.0.13',
+    'SQLAlchemy>=1.1.0',
     'bleach>=1.4.3,<1.5',
     'certifi',
     'elasticsearch>=1.1.0,<2.0.0',
