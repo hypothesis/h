@@ -200,6 +200,19 @@ class UserFilter(object):
         return {'terms': {'user': users}}
 
 
+class DeletedFilter(object):
+
+    """
+    A filter that only returns non-deleted documents.
+
+    Documents are not getting deleted from the index, they only get marked as
+    deleted.
+    """
+
+    def __call__(self, _):
+        return {"bool": {"must_not": {"exists": {"field": "deleted"}}}}
+
+
 class AnyMatcher(object):
 
     """

@@ -259,6 +259,7 @@ class TestSearch(object):
 
 
 @pytest.mark.parametrize('filter_type', [
+    'DeletedFilter',
     'AuthFilter',
     'UriFilter',
     'UserFilter',
