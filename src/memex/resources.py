@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from pyramid import security
 
+from memex import groups
 from memex import storage
 
 
@@ -21,15 +24,16 @@ class AnnotationResource(object):
         self.request = request
         self.annotation = annotation
 
+    @property
+    def group(self):
+        return groups.find(self.request, self.annotation.groupid)
+
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
         acl = []
         if self.annotation.shared:
-            group = 'group:{}'.format(self.annotation.groupid)
-            if self.annotation.groupid == '__world__':
-                group = security.Everyone
-
-            acl.append((security.Allow, group, 'read'))
+            for principal in _group_principals(self.group):
+                acl.append((security.Allow, principal, 'read'))
         else:
             acl.append((security.Allow, self.annotation.userid, 'read'))
 
@@ -40,3 +44,9 @@ class AnnotationResource(object):
         acl.append(security.DENY_ALL)
 
         return acl
+
+
+def _group_principals(group):
+    if group is None:
+        return []
+    return security.principals_allowed_by_permission(group, 'read')
