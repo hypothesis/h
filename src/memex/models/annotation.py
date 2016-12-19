@@ -7,7 +7,7 @@ import datetime
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from memex import markdown
 from memex import uri
@@ -67,10 +67,10 @@ class Annotation(Base):
     _text = sa.Column('text', sa.UnicodeText)
     #: The Markdown-rendered and HTML-sanitized textual body of the annotation.
     _text_rendered = sa.Column('text_rendered', sa.UnicodeText)
+
     #: The tags associated with the annotation.
-    tags = sa.Column(
-        types.MutableList.as_mutable(
-            pg.ARRAY(sa.UnicodeText, zero_indexes=True)))
+    tags = sa.Column(MutableList.as_mutable(pg.ARRAY(sa.UnicodeText,
+                                                     zero_indexes=True)))
 
     #: A boolean indicating whether this annotation is shared with members of
     #: the group it is published in. "Private"/"Only me" annotations have
