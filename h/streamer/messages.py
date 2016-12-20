@@ -11,7 +11,7 @@ from memex import presenters
 from memex import storage
 from memex.links import LinksService
 from h.auth.util import translate_annotation_principals
-from h.nipsa.services import NipsaService
+from h.services.nipsa import NipsaService
 from h.streamer import websocket
 import h.sentry
 import h.stats
