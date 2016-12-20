@@ -7,6 +7,7 @@ import pytest
 
 from h import jinja_extensions as ext
 
+
 @pytest.mark.parametrize("value_in,json_out", [
     ({"foo": 42}, "{\"foo\": 42}"),
 
@@ -44,7 +45,7 @@ def test_svg_icon_loads_icon():
 
     result = ext.svg_icon(read_icon, 'settings')
 
-    assert result == Markup('<svg id="settings" />')
+    assert result == Markup('<svg class="svg-icon" id="settings" />')
 
 
 def test_svg_icon_removes_title():
@@ -52,7 +53,7 @@ def test_svg_icon_removes_title():
         return '<svg xmlns="http://www.w3.org/2000/svg"><title>foo</title></svg>'
 
     assert (ext.svg_icon(read_icon, 'icon') ==
-        Markup('<svg xmlns="http://www.w3.org/2000/svg" />'))
+            Markup('<svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" />'))
 
 
 def test_svg_icon_strips_default_xml_namespace():
@@ -60,7 +61,7 @@ def test_svg_icon_strips_default_xml_namespace():
         return '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
 
     assert (ext.svg_icon(read_icon, 'icon') ==
-        Markup('<svg xmlns="http://www.w3.org/2000/svg" />'))
+            Markup('<svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" />'))
 
 
 def test_svg_icon_sets_css_class():
@@ -69,22 +70,4 @@ def test_svg_icon_sets_css_class():
 
     result = ext.svg_icon(read_icon, 'icon', css_class='fancy-icon')
 
-    assert result == Markup('<svg class="fancy-icon" />')
-
-
-def test_svg_icon_does_not_set_transform_by_default():
-    def read_icon(name):
-        return '<svg></svg>'
-
-    result = ext.svg_icon(read_icon, 'icon')
-
-    assert result == Markup('<svg />')
-
-
-def test_svg_icon_sets_transform_when_asked_to():
-    def read_icon(name):
-        return '<svg></svg>'
-
-    result = ext.svg_icon(read_icon, 'icon', translate_z=True)
-
-    assert result == Markup('<svg style="transform: translateZ(0px)" />')
+    assert result == Markup('<svg class="svg-icon fancy-icon" />')
