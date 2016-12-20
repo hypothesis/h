@@ -3,9 +3,9 @@
 import mock
 import pytest
 
-from memex import events
 from memex.search import client
-from h import indexer
+
+from h.indexer.reindexer import reindex, SETTING_NEW_INDEX
 
 
 @pytest.mark.usefixtures('BatchIndexer',
@@ -15,14 +15,14 @@ from h import indexer
                          'settings_service')
 class TestReindex(object):
     def test_sets_op_type_to_create(self, pyramid_request, es, BatchIndexer):
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
         _, kwargs = BatchIndexer.call_args
         assert kwargs['op_type'] == 'create'
 
     def test_indexes_annotations(self, pyramid_request, es, batchindexer):
         """Should call .index() on the batch indexer instance."""
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
         batchindexer.index.assert_called_once_with()
 
@@ -30,7 +30,7 @@ class TestReindex(object):
         """Should call .index() a second time with any failed annotation IDs."""
         batchindexer.index.return_value = ['abc123', 'def456']
 
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
         assert batchindexer.index.mock_calls == [
             mock.call(),
@@ -39,7 +39,7 @@ class TestReindex(object):
 
     def test_creates_new_index(self, pyramid_request, es, configure_index, matchers):
         """Creates a new target index."""
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
         configure_index.assert_called_once_with(es)
 
@@ -47,7 +47,7 @@ class TestReindex(object):
         """Pass the name of the new index as target_index to indexer."""
         configure_index.return_value = 'hypothesis-abcd1234'
 
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
         _, kwargs = BatchIndexer.call_args
         assert kwargs['target_index'] == 'hypothesis-abcd1234'
@@ -56,7 +56,7 @@ class TestReindex(object):
         """Call update_aliased_index on the client with the new index name."""
         configure_index.return_value = 'hypothesis-abcd1234'
 
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
         update_aliased_index.assert_called_once_with(es, 'hypothesis-abcd1234')
 
@@ -65,7 +65,7 @@ class TestReindex(object):
         batchindexer.index.side_effect = RuntimeError('fail')
 
         try:
-            indexer.reindex(mock.sentinel.session, es, pyramid_request)
+            reindex(mock.sentinel.session, es, pyramid_request)
         except RuntimeError:
             pass
 
@@ -75,45 +75,45 @@ class TestReindex(object):
         get_aliased_index.return_value = None
 
         with pytest.raises(RuntimeError):
-            indexer.reindex(mock.sentinel.session, es, mock.sentinel.request)
+            reindex(mock.sentinel.session, es, mock.sentinel.request)
 
     def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service, configure_index):
         configure_index.return_value = 'hypothesis-abcd1234'
 
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.put.assert_called_once_with(indexer.SETTING_NEW_INDEX, 'hypothesis-abcd1234')
+        settings_service.put.assert_called_once_with(SETTING_NEW_INDEX, 'hypothesis-abcd1234')
 
     def test_deletes_index_name_setting(self, pyramid_request, es, settings_service):
-        indexer.reindex(mock.sentinel.session, es, pyramid_request)
+        reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(indexer.SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
 
     def test_deletes_index_name_setting_when_exception_raised(self, pyramid_request, es, settings_service, batchindexer):
         batchindexer.index.side_effect = RuntimeError('boom!')
 
         with pytest.raises(RuntimeError):
-            indexer.reindex(mock.sentinel.session, es, pyramid_request)
+            reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(indexer.SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
 
     @pytest.fixture
     def BatchIndexer(self, patch):
-        return patch('h.indexer.BatchIndexer')
+        return patch('h.indexer.reindexer.BatchIndexer')
 
     @pytest.fixture
     def configure_index(self, patch):
-        return patch('h.indexer.configure_index')
+        return patch('h.indexer.reindexer.configure_index')
 
     @pytest.fixture
     def get_aliased_index(self, patch):
-        func = patch('h.indexer.get_aliased_index')
+        func = patch('h.indexer.reindexer.get_aliased_index')
         func.return_value = 'foobar'
         return func
 
     @pytest.fixture
     def update_aliased_index(self, patch):
-        return patch('h.indexer.update_aliased_index')
+        return patch('h.indexer.reindexer.update_aliased_index')
 
     @pytest.fixture
     def batchindexer(self, BatchIndexer):
@@ -138,43 +138,3 @@ class TestReindex(object):
     def pyramid_request(self, pyramid_request):
         pyramid_request.tm = mock.Mock()
         return pyramid_request
-
-
-@pytest.mark.usefixtures('add_annotation', 'delete_annotation')
-class TestSubscribeAnnotationEvent(object):
-
-    @pytest.mark.parametrize('action', ['create', 'update'])
-    def test_it_enqueues_add_annotation_celery_task(self,
-                                                    action,
-                                                    add_annotation,
-                                                    delete_annotation,
-                                                    pyramid_request):
-        event = events.AnnotationEvent(pyramid_request,
-                                       {'id': 'test_annotation_id'},
-                                       action)
-
-        indexer.subscribe_annotation_event(event)
-
-        add_annotation.delay.assert_called_once_with(event.annotation_id)
-        assert not delete_annotation.delay.called
-
-    def test_it_enqueues_delete_annotation_celery_task_for_delete(self,
-                                                                  add_annotation,
-                                                                  delete_annotation,
-                                                                  pyramid_request):
-        event = events.AnnotationEvent(pyramid_request,
-                                       {'id': 'test_annotation_id'},
-                                       'delete')
-
-        indexer.subscribe_annotation_event(event)
-
-        delete_annotation.delay.assert_called_once_with(event.annotation_id)
-        assert not add_annotation.delay.called
-
-    @pytest.fixture
-    def add_annotation(self, patch):
-        return patch('h.indexer.add_annotation')
-
-    @pytest.fixture
-    def delete_annotation(self, patch):
-        return patch('h.indexer.delete_annotation')

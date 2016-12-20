@@ -2,8 +2,6 @@
 
 import logging
 
-from h.tasks.indexer import add_annotation, delete_annotation
-
 from memex.search.config import (
     configure_index,
     get_aliased_index,
@@ -47,15 +45,3 @@ def reindex(session, es, request):
     finally:
         settings.delete(SETTING_NEW_INDEX)
         request.tm.commit()
-
-
-def subscribe_annotation_event(event):
-    if event.action in ['create', 'update']:
-        add_annotation.delay(event.annotation_id)
-    elif event.action == 'delete':
-        delete_annotation.delay(event.annotation_id)
-
-
-def includeme(config):
-    config.add_subscriber('h.indexer.subscribe_annotation_event',
-                          'memex.events.AnnotationEvent')
