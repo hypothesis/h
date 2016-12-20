@@ -26,6 +26,7 @@
 .lozenge__close {
   @include reset-button;
 
+  color: $grey-6;
   font-weight: bold;
   padding: 0px 5px 0px 5px;
   cursor: default;
@@ -33,6 +34,11 @@
 
   &:hover {
     background-color: $grey-4;
+  }
+
+  &:focus {
+    background-color: $grey-6;
+    color: white;
   }
 }
 
