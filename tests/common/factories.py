@@ -133,3 +133,13 @@ class Token(ModelFactory):
         force_flush = True
 
     userid = factory.LazyAttribute(lambda _: ('acct:' + FAKER.user_name() + '@example.com'))
+
+
+class Setting(ModelFactory):
+
+    class Meta:  # pylint: disable=no-init, old-style-class
+        model = models.Setting
+        force_flush = True
+
+    key = factory.LazyAttribute(lambda _: FAKER.domain_word())
+    value = factory.LazyAttribute(lambda _: FAKER.catch_phrase())

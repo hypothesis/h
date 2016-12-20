@@ -4,8 +4,8 @@ import os
 
 import click
 
+from h import indexer
 from memex.search import config
-from memex.search import index
 
 
 @click.group()
@@ -28,7 +28,7 @@ def reindex(ctx):
 
     request = ctx.obj['bootstrap']()
 
-    index.reindex(request.db, request.es, request)
+    indexer.reindex(request.db, request.es, request)
 
 
 @search.command('update-settings')

@@ -129,6 +129,7 @@ def includeme(config):
     config.include('h.realtime')
     config.include('h.routes')
     config.include('h.sentry')
+    config.include('h.services')
     config.include('h.session')
     config.include('h.stats')
     config.include('h.views')
