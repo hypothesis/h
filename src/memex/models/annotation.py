@@ -100,6 +100,12 @@ class Annotation(Base):
                       server_default=sa.func.jsonb('{}'),
                       nullable=False)
 
+    #: Has the annotation been deleted?
+    deleted = sa.Column(sa.Boolean,
+                        nullable=False,
+                        default=False,
+                        server_default=sa.sql.expression.false())
+
     document_id = sa.Column(sa.Integer,
                             sa.ForeignKey('document.id'),
                             nullable=False)

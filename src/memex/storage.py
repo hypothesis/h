@@ -195,7 +195,9 @@ def delete_annotation(session, id_):
     :param id_: the annotation ID
     :type id_: str
     """
-    session.query(models.Annotation).filter_by(id=id_).delete()
+    annotation = session.query(models.Annotation).get(id_)
+    annotation.updated = datetime.utcnow()
+    annotation.deleted = True
 
 
 def expand_uri(session, uri):

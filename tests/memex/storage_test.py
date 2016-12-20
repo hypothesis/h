@@ -458,14 +458,19 @@ class TestUpdateAnnotation(object):
 
 class TestDeleteAnnotation(object):
 
-    def test_it_deletes_the_annotation(self, db_session, factories):
-        ann_1, ann_2 = (factories.Annotation(), factories.Annotation())
+    def test_it_marks_the_annotation_as_deleted(self, db_session, factories):
+        ann = factories.Annotation()
 
-        storage.delete_annotation(db_session, ann_1.id)
-        db_session.commit()
+        storage.delete_annotation(db_session, ann.id)
 
-        assert db_session.query(Annotation).get(ann_1.id) is None
-        assert db_session.query(Annotation).get(ann_2.id) == ann_2
+        assert ann.deleted
+
+    def test_it_touches_the_updated_field(self, db_session, factories, datetime):
+        ann = factories.Annotation()
+
+        storage.delete_annotation(db_session, ann.id)
+
+        assert ann.updated == datetime.utcnow()
 
 
 @pytest.fixture
