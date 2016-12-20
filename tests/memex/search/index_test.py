@@ -103,8 +103,33 @@ class TestBatchIndexer(object):
             indexer.es_client.conn, matchers.iterable_with([ann_1, ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
+    def test_index_skips_deleted_annotations_when_indexing_all(self, db_session, indexer, matchers, streaming_bulk, factories):
+        ann_1, ann_2 = factories.Annotation(), factories.Annotation()
+        # create deleted annotations
+        factories.Annotation(deleted=True)
+        factories.Annotation(deleted=True)
+
+        indexer.index()
+
+        streaming_bulk.assert_called_once_with(
+            indexer.es_client.conn, matchers.iterable_with([ann_1, ann_2]),
+            chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
+
     def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
         ann_1, ann_2 = factories.Annotation(), factories.Annotation()
+
+        indexer.index([ann_2.id])
+
+        streaming_bulk.assert_called_once_with(
+            indexer.es_client.conn, matchers.iterable_with([ann_2]),
+            chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
+
+    def test_index_skips_deleted_annotations_when_indexing_filtered(self, db_session, indexer, matchers, streaming_bulk, factories):
+        factories.Annotation()
+        ann_2 = factories.Annotation()
+        # create deleted annotations
+        factories.Annotation(deleted=True)
+        factories.Annotation(deleted=True)
 
         indexer.index([ann_2.id])
 

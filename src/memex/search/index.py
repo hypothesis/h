@@ -9,7 +9,7 @@ from collections import namedtuple
 
 import elasticsearch
 from elasticsearch import helpers as es_helpers
-from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm import load_only, subqueryload
 
 from memex import models
 from memex import presenters
@@ -152,15 +152,18 @@ class BatchIndexer(object):
         # the database while still supporting eagerloading of associated
         # document data.
 
-        updated = self.session.query(models.Annotation.updated). \
+        updated = self._base_query(). \
+                options(load_only('updated')). \
                 execution_options(stream_results=True). \
+                filter_by(deleted=False). \
                 order_by(models.Annotation.updated.desc()).all()
 
         count = len(updated)
         windows = [Window(start=updated[min(x+chunksize, count)-1].updated,
                           end=updated[x].updated)
                    for x in xrange(0, count, chunksize)]
-        basequery = self._eager_loaded_query().order_by(models.Annotation.updated.asc())
+        basequery = self._eager_loaded_query(). \
+            order_by(models.Annotation.updated.asc())
 
         for window in windows:
             in_window = models.Annotation.updated.between(window.start, window.end)
@@ -175,8 +178,11 @@ class BatchIndexer(object):
         for a in annotations:
             yield a
 
+    def _base_query(self):
+        return self.session.query(models.Annotation).filter_by(deleted=False)
+
     def _eager_loaded_query(self):
-        return self.session.query(models.Annotation).options(
+        return self._base_query().options(
             subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
             subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
         )
