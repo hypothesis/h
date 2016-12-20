@@ -10,7 +10,7 @@ import mock
 import pytest
 
 from h import models
-from h.accounts.services import UserService
+from h.services.user import UserService
 from h.auth import services
 from h.exceptions import OAuthTokenError
 from h._compat import text_type

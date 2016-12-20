@@ -9,7 +9,7 @@ from itsdangerous import BadData, SignatureExpired
 
 from h import i18n, models, validators
 from h.accounts import util
-from h.accounts.services import UserNotActivated, UserNotKnown
+from h.services.user import UserNotActivated, UserNotKnown
 from h.models.user import (
     EMAIL_MAX_LENGTH,
     PASSWORD_MIN_LENGTH,
