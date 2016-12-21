@@ -1,21 +1,8 @@
 {% extends "h:templates/layouts/account.html.jinja2" %}
 
-{% if not feature('activity_pages') %}
-{% set style_bundle = 'legacy_site_css' %}
-{% endif %}
-
 {% set page_route = 'account_notifications' %}
 {% set page_title = 'Notifications' %}
 
 {% block page_content %}
-  {% if feature('activity_pages') %}
-    {{ form }}
-  {% else %}
-    <div class="form-vertical">
-      <h2 class="form-heading">
-        <span>{% trans %}Update your notification settings{% endtrans %}</span>
-      </h2>
-      {{ form }}
-    </div>
-  {% endif %}
+  {{ form }}
 {% endblock page_content %}
