@@ -1,84 +1,49 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% if not feature('activity_pages') %}
-{% set style_bundle = 'legacy_site_css' %}
-{% endif %}
-
-{% if feature('activity_pages') %}
 {%- set nav_pages = [
     ('account', 'Account'),
     ('account_profile', 'Edit profile'),
     ('account_notifications', 'Notifications'),
     ('account_developer', 'Developer'),
 ] -%}
-{% else %}
-{%- set nav_pages = [
-    ('account', 'Account'),
-    ('account_notifications', 'Notifications'),
-    ('account_developer', 'Developer'),
-] -%}
-{% endif %}
 
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block header %}
-  {% if feature('activity_pages') %}
-    {{ panel('navbar') }}
-  {% endif %}
+  {{ panel('navbar') }}
 {% endblock %}
 
 {% block content %}
   <div class="content paper">
-    {% if feature('activity_pages') %}
-      <div class="form-container">
-        <nav class="tabs">
-          <ul>
-            {% for route, title in nav_pages %}
-              <li class="tabs__item">
-                  <a href="{{ request.route_url(route) }}"
-                     class="tabs__link{% if route == page_route %} is-active{% endif %}">
-                    {{ title }}
-                  </a>
-              </li>
-            {% endfor %}
-          </ul>
-        </nav>
-        {% if request.session.peek_flash('success') -%}
-          <div class="form-flash">
-            {% for message in request.session.pop_flash('success') %}
-              <p>{{ message }}</p>
-            {%- endfor %}
-          </div>
-        {%- endif %}
-        {{ self.page_content() }}
-
-        <footer class="form-footer--no-border">
-          {{ panel('back_link') }}
-        </footer>
-      </div>
-    {% else %}
-      {% include "h:templates/includes/logo-header.html.jinja2" %}
-      <ul class="nav nav-tabs">
-        {% for route, title in nav_pages %}
-          <li{% if route == page_route %} class="active"{% endif %}>
-              <a href="{{ request.route_url(route) }}">{{ title }}</a>
-          </li>
-        {% endfor %}
-      </ul>
+    <div class="form-container">
+      <nav class="tabs">
+        <ul>
+          {% for route, title in nav_pages %}
+            <li class="tabs__item">
+                <a href="{{ request.route_url(route) }}"
+                   class="tabs__link{% if route == page_route %} is-active{% endif %}">
+                  {{ title }}
+                </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
       {% if request.session.peek_flash('success') -%}
-      <div class="form-flash">
-        {% for message in request.session.pop_flash('success') %}
-          <p>{{ message }}</p>
-        {%- endfor %}
-      </div>
+        <div class="form-flash">
+          {% for message in request.session.pop_flash('success') %}
+            <p>{{ message }}</p>
+          {%- endfor %}
+        </div>
       {%- endif %}
       {{ self.page_content() }}
-    {% endif %}
+
+      <footer class="form-footer--no-border">
+        {{ panel('back_link') }}
+      </footer>
+    </div>
   </div>
 {% endblock content %}
 
 {% block footer %}
-  {% if feature('activity_pages') %}
-    {% include "h:templates/includes/footer.html.jinja2" %}
-  {% endif %}
+  {% include "h:templates/includes/footer.html.jinja2" %}
 {% endblock %}
