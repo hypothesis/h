@@ -13,21 +13,23 @@ class NipsaService(object):
 
     def __init__(self, session):
         self.session = session
+        self._flagged_userids = None
 
     @property
-    def flagged_users(self):
+    def flagged_userids(self):
         """
-        A list of all the NIPSA'd users.
+        A list of all the NIPSA'd userids.
 
-        :rtype: list of unicode strings
+        :rtype: set of unicode strings
         """
-        return self.session.query(User).filter_by(nipsa=True)
+        if self._flagged_userids is None:
+            query = self.session.query(User).filter_by(nipsa=True)
+            self._flagged_userids = set([u.userid for u in query])
+        return self._flagged_userids
 
     def is_flagged(self, userid):
         """Return whether the given userid is flagged as "NIPSA"."""
-        cnt = self.session.query(User).filter_by(userid=userid,
-                                                 nipsa=True).count()
-        return cnt != 0
+        return userid in self.flagged_userids
 
     def flag(self, user):
         """
