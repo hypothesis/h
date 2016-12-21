@@ -10,7 +10,7 @@ from h.views import groups as views
 from h.models import (Group, User)
 
 
-@pytest.mark.usefixtures('groups_service', 'handle_form_submission', 'routes')
+@pytest.mark.usefixtures('group_service', 'handle_form_submission', 'routes')
 class TestGroupCreateController(object):
 
     def test_get_renders_form(self, controller):
@@ -40,7 +40,7 @@ class TestGroupCreateController(object):
 
     def test_post_creates_new_group_if_form_valid(self,
                                                   controller,
-                                                  groups_service,
+                                                  group_service,
                                                   handle_form_submission,
                                                   pyramid_config):
         pyramid_config.testing_securitypolicy('ariadna')
@@ -53,11 +53,11 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert groups_service.created == [('my_new_group', 'example.com', 'ariadna', 'foobar')]
+        assert group_service.created == [('my_new_group', 'example.com', 'ariadna', 'foobar')]
 
     def test_post_creates_new_group_if_legacy_form_valid(self,
                                                          controller,
-                                                         groups_service,
+                                                         group_service,
                                                          handle_form_submission,
                                                          pyramid_config):
         pyramid_config.testing_securitypolicy('ariadna')
@@ -70,7 +70,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert groups_service.created == [('my_new_group', 'example.com', 'ariadna', None)]
+        assert group_service.created == [('my_new_group', 'example.com', 'ariadna', None)]
 
     def test_post_redirects_if_form_valid(self,
                                           controller,
@@ -87,7 +87,7 @@ class TestGroupCreateController(object):
 
     def test_post_does_not_create_group_if_form_invalid(self,
                                                         controller,
-                                                        groups_service,
+                                                        group_service,
                                                         handle_form_submission):
         # If the form submission is invalid then handle_form_submission() should
         # call on_failure().
@@ -97,7 +97,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert groups_service.created == []
+        assert group_service.created == []
 
     def test_post_returns_template_data_if_form_invalid(self,
                                                         controller,
@@ -161,7 +161,7 @@ class TestGroupEditController(object):
         assert group.description == 'We are all about the alligators now'
 
 
-@pytest.mark.usefixtures('groups_service', 'routes')
+@pytest.mark.usefixtures('group_service', 'routes')
 class TestGroupRead(object):
     def test_redirects_if_slug_incorrect(self, pyramid_request):
         group = FakeGroup('abc123', 'some-slug')
@@ -225,10 +225,10 @@ def test_read_noslug_redirects(pyramid_request):
     assert exc.value.location == '/g/abc123/some-slug'
 
 
-@pytest.mark.usefixtures('groups_service', 'routes')
+@pytest.mark.usefixtures('group_service', 'routes')
 class TestGroupLeave(object):
     def test_leaves_group(self,
-                          groups_service,
+                          group_service,
                           pyramid_config,
                           pyramid_request):
         group = FakeGroup('abc123', 'some-slug')
@@ -236,7 +236,7 @@ class TestGroupLeave(object):
 
         views.leave(group, pyramid_request)
 
-        assert (group, 'marcela') in groups_service.left
+        assert (group, 'marcela') in group_service.left
 
     def test_returns_nocontent(self, pyramid_request):
         group = FakeGroup('abc123', 'some-slug')
@@ -246,7 +246,7 @@ class TestGroupLeave(object):
         assert isinstance(result, HTTPNoContent)
 
 
-@pytest.mark.usefixtures('groups_service', 'routes')
+@pytest.mark.usefixtures('group_service', 'routes')
 class TestGroupJoinController(object):
 
     def test_get_returns_the_group_to_the_template(self, controller, group):
@@ -255,13 +255,13 @@ class TestGroupJoinController(object):
     def test_post_joins_the_group(self,
                                   controller,
                                   group,
-                                  groups_service,
+                                  group_service,
                                   pyramid_config):
         pyramid_config.testing_securitypolicy('gentiana')
 
         controller.post()
 
-        assert (group, 'gentiana') in groups_service.joined
+        assert (group, 'gentiana') in group_service.joined
 
     def test_post_redirects_to_group_page(self,
                                           controller,
@@ -295,7 +295,7 @@ class FakeGroup(object):
         self.slug = slug
 
 
-class FakeGroupsService(object):
+class FakeGroupService(object):
     def __init__(self):
         self.created = []
         self.joined = []
@@ -335,9 +335,9 @@ def invalid_form():
 
 
 @pytest.fixture
-def groups_service(pyramid_config):
-    service = FakeGroupsService()
-    pyramid_config.register_service(service, name='groups')
+def group_service(pyramid_config):
+    service = FakeGroupService()
+    pyramid_config.register_service(service, name='group')
     return service
 
 

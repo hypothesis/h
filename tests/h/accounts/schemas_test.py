@@ -6,7 +6,7 @@ from pyramid.exceptions import BadCSRFToken
 from itsdangerous import BadData, SignatureExpired
 
 from h.accounts import schemas
-from h.accounts.services import UserNotActivated, UserNotKnown, UserService
+from h.services.user import UserNotActivated, UserNotKnown, UserService
 from h.schemas import ValidationError
 
 

@@ -6,9 +6,11 @@ import mock
 import pytest
 
 from h import models
-from h.admin.services.user import RenameUserService
-from h.admin.services.user import UserRenameError
-from h.admin.services.user import make_indexer
+from h.services.rename_user import (
+    make_indexer,
+    RenameUserService,
+    UserRenameError,
+)
 
 
 class TestRenameUserService(object):
@@ -63,7 +65,7 @@ class TestRenameUserService(object):
 
     @pytest.fixture
     def check(self, patch):
-        return patch('h.admin.services.user.RenameUserService.check')
+        return patch('h.services.rename_user.RenameUserService.check')
 
     @pytest.fixture
     def user(self, factories, db_session):
@@ -106,4 +108,4 @@ class TestMakeIndexer(object):
 
     @pytest.fixture
     def index(self, patch):
-        return patch('h.admin.services.user.index')
+        return patch('h.services.rename_user.index')

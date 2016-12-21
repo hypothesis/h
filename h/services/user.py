@@ -2,14 +2,9 @@
 
 from __future__ import unicode_literals
 
-from functools import partial
-
 import sqlalchemy
 
-from h._compat import text_type
-from h.emails import signup
-from h.models import Activation, Annotation, Subscriptions, User
-from h.tasks import mailer
+from h.models import Annotation, User
 from h import util
 
 
@@ -126,93 +121,7 @@ class UserService(object):
             .count())
 
 
-class UserSignupService(object):
-
-    """A service for registering users."""
-
-    def __init__(self,
-                 default_authority,
-                 mailer,
-                 session,
-                 signup_email,
-                 stats=None):
-        """
-        Create a new user signup service.
-
-        :param default_authority: the default authority for new users
-        :param mailer: a mailer (such as :py:mod:`h.tasks.mailer`)
-        :param session: the SQLAlchemy session object
-        :param signup_email: a function for generating a signup email
-        :param stats: the stats service
-        """
-        self.default_authority = default_authority
-        self.mailer = mailer
-        self.session = session
-        self.signup_email = signup_email
-        self.stats = stats
-
-    def signup(self, require_activation=True, **kwargs):
-        """
-        Create a new user.
-
-        If *require_activation* is ``True``, the user will be flagged as
-        requiring activation and an activation email will be sent.
-
-        :param require_activation: The name to use.
-        :type require_activation: bool.
-
-        Remaining keyword arguments are passed to the
-        :py:class:`h.models.User` constructor.
-
-        :returns: the newly-created user object.
-        :rtype: h.models.User
-        """
-        kwargs.setdefault('authority', self.default_authority)
-        user = User(**kwargs)
-        self.session.add(user)
-
-        # Create a new activation for the user
-        if require_activation:
-            self._require_activation(user)
-
-        # FIXME: this is horrible, but is needed until the
-        # notification/subscription system is made opt-out rather than opt-in
-        # (at least from the perspective of the database).
-        sub = Subscriptions(uri=user.userid, type='reply', active=True)
-        self.session.add(sub)
-
-        # Record a registration with the stats service
-        if self.stats is not None:
-            self.stats.incr('auth.local.register')
-
-        return user
-
-    def _require_activation(self, user):
-        activation = Activation()
-        self.session.add(activation)
-        user.activation = activation
-
-        # Flush the session to ensure that the user can be created and the
-        # activation is successfully wired up.
-        self.session.flush()
-
-        # Send the activation email
-        mail_params = self.signup_email(id=user.id,
-                                        email=user.email,
-                                        activation_code=user.activation.code)
-        self.mailer.send.delay(*mail_params)
-
-
 def user_service_factory(context, request):
     """Return a UserService instance for the passed context and request."""
     return UserService(default_authority=request.auth_domain,
                        session=request.db)
-
-
-def user_signup_service_factory(context, request):
-    """Return a UserSignupService instance for the passed context and request."""
-    return UserSignupService(default_authority=request.auth_domain,
-                             mailer=mailer,
-                             session=request.db,
-                             signup_email=partial(signup.generate, request),
-                             stats=request.stats)

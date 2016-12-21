@@ -9,8 +9,5 @@ def includeme(config):
     config.add_subscriber('h.nipsa.subscribers.transform_annotation',
                           'memex.events.AnnotationTransformEvent')
 
-    # Register the NIPSA service
-    config.register_service_factory('.services.nipsa_factory', name='nipsa')
-
     # Register an additional filter with the API search module
     config.add_search_filter(search.Filter)

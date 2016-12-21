@@ -176,15 +176,12 @@ def create_app(global_config, **settings):
     config.include('memex.presenters')
     config.include('memex.search')
 
-    # accounts provides the UserService
-    config.include('h.accounts')
-
     # We include links in order to set up the alternative link registrations
     # for annotations.
     config.include('h.links')
 
-    # We have to include nipsa to provide the NIPSA service
-    config.include('h.nipsa')
+    # Access to services
+    config.include('h.services')
 
     # And finally we add routes. Static routes are not resolvable by HTTP
     # clients, but can be used for URL generation within the websocket server.

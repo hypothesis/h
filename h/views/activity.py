@@ -132,7 +132,7 @@ class GroupSearchController(SearchController):
 
         annotation_count = None
         if self.request.feature('total_shared_annotations'):
-            annotation_count = self.request.find_service(name='groups').annotation_count(self.group.pubid)
+            annotation_count = self.request.find_service(name='group').annotation_count(self.group.pubid)
 
         result['group'] = {
             'created': self.group.created.strftime('%B, %Y'),
@@ -169,7 +169,7 @@ class GroupSearchController(SearchController):
         browser to the search page.
 
         """
-        groups_service = self.request.find_service(name='groups')
+        groups_service = self.request.find_service(name='group')
         groups_service.member_leave(self.group,
                                     self.request.authenticated_userid)
 

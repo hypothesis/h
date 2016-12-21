@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import exc
 
 from h import models
-from h.accounts.services import user_service_factory
+from h.services.user import user_service_factory
 from h.models.user import UserFactory
 from h.security import password_context
 

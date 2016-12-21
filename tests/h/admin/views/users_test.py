@@ -9,7 +9,7 @@ from mock import call
 from pyramid import httpexceptions
 import pytest
 
-from h.accounts.services import UserService
+from h.services.user import UserService
 from h.admin.views import users as views
 from h.models import Annotation
 

@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import pytest
 
-from h.nipsa.services import NipsaService
-from h.nipsa.services import nipsa_factory
+from h.services.nipsa import NipsaService
+from h.services.nipsa import nipsa_factory
 
 
 @pytest.mark.usefixtures('users', 'add_nipsa', 'remove_nipsa')
@@ -66,12 +66,12 @@ def test_nipsa_factory(pyramid_request):
 
 @pytest.fixture
 def add_nipsa(patch):
-    return patch('h.nipsa.services.add_nipsa')
+    return patch('h.services.nipsa.add_nipsa')
 
 
 @pytest.fixture
 def remove_nipsa(patch):
-    return patch('h.nipsa.services.remove_nipsa')
+    return patch('h.services.nipsa.remove_nipsa')
 
 
 @pytest.fixture
