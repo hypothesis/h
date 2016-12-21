@@ -3,20 +3,22 @@
 
 from __future__ import unicode_literals
 
-import itertools
 import logging
 from collections import namedtuple
 
-import elasticsearch
+import sqlalchemy as sa
 from elasticsearch import helpers as es_helpers
-from sqlalchemy.orm import load_only, subqueryload
+from sqlalchemy.orm import subqueryload
 
 from memex import models
 from memex import presenters
-from memex._compat import xrange
 from memex.events import AnnotationTransformEvent
+from memex.util.query import column_windows
 
 log = logging.getLogger(__name__)
+
+ES_CHUNK_SIZE = 100
+PG_WINDOW_SIZE = 2000
 
 
 class Window(namedtuple('Window', ['start', 'end'])):
@@ -115,12 +117,14 @@ class BatchIndexer(object):
         :rtype: set
         """
         if not annotation_ids:
-            annotations = self._stream_all_annotations()
+            annotations = _all_annotations(session=self.session,
+                                           windowsize=PG_WINDOW_SIZE)
         else:
-            annotations = self._stream_filtered_annotations(annotation_ids)
+            annotations = _filtered_annotations(session=self.session,
+                                                ids=annotation_ids)
 
         indexing = es_helpers.streaming_bulk(self.es_client.conn, annotations,
-                                             chunk_size=100,
+                                             chunk_size=ES_CHUNK_SIZE,
                                              raise_on_error=False,
                                              expand_action_callback=self._prepare)
         errored = set()
@@ -146,43 +150,40 @@ class BatchIndexer(object):
 
         return (action, data)
 
-    def _stream_all_annotations(self, chunksize=2000):
-        # This is using a windowed query for loading all annotations in batches.
-        # It is the most performant way of loading a big set of records from
-        # the database while still supporting eagerloading of associated
-        # document data.
 
-        updated = self._base_query(). \
-                options(load_only('updated')). \
-                execution_options(stream_results=True). \
-                filter_by(deleted=False). \
-                order_by(models.Annotation.updated.desc()).all()
+def _all_annotations(session, windowsize=2000):
+    # This is using a windowed query for loading all annotations in batches.
+    # It is the most performant way of loading a big set of records from
+    # the database while still supporting eagerloading of associated
+    # document data.
+    windows = column_windows(session=session,
+                             column=models.Annotation.updated,  # implicit ASC
+                             windowsize=windowsize,
+                             where=_annotation_filter())
+    query = _eager_loaded_annotations(session).filter(_annotation_filter())
 
-        count = len(updated)
-        windows = [Window(start=updated[min(x+chunksize, count)-1].updated,
-                          end=updated[x].updated)
-                   for x in xrange(0, count, chunksize)]
-        basequery = self._eager_loaded_query(). \
-            order_by(models.Annotation.updated.asc())
-
-        for window in windows:
-            in_window = models.Annotation.updated.between(window.start, window.end)
-            for a in basequery.filter(in_window):
-                yield a
-
-    def _stream_filtered_annotations(self, annotation_ids):
-        annotations = self._eager_loaded_query(). \
-            execution_options(stream_results=True). \
-            filter(models.Annotation.id.in_(annotation_ids))
-
-        for a in annotations:
+    for window in windows:
+        for a in query.filter(window):
             yield a
 
-    def _base_query(self):
-        return self.session.query(models.Annotation).filter_by(deleted=False)
 
-    def _eager_loaded_query(self):
-        return self._base_query().options(
-            subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
-            subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
-        )
+def _filtered_annotations(session, ids):
+    annotations = (_eager_loaded_annotations(session)
+                   .execution_options(stream_results=True)
+                   .filter(_annotation_filter())
+                   .filter(models.Annotation.id.in_(ids)))
+
+    for a in annotations:
+        yield a
+
+
+def _annotation_filter():
+    """Default filter for all search indexing operations."""
+    return sa.not_(models.Annotation.deleted)
+
+
+def _eager_loaded_annotations(session):
+    return session.query(models.Annotation).options(
+        subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
+        subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
+    )
