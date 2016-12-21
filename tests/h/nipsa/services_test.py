@@ -10,11 +10,11 @@ from h.nipsa.services import nipsa_factory
 
 @pytest.mark.usefixtures('users', 'add_nipsa', 'remove_nipsa')
 class TestNipsaService(object):
-    def test_flagged_user_returns_list_of_users(self, db_session, users):
+    def test_flagged_userids_returns_set_of_userids(self, db_session):
         svc = NipsaService(db_session)
 
-        assert set(svc.flagged_users) == set([users['renata'],
-                                              users['cecilia']])
+        assert svc.flagged_userids == set(['acct:renata@example.com',
+                                           'acct:cecilia@example.com'])
 
     def test_is_flagged_returns_true_for_flagged_users(self, db_session, users):
         svc = NipsaService(db_session)

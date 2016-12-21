@@ -18,7 +18,7 @@ class UserNotFoundError(Exception):
 def nipsa_index(request):
     nipsa_service = request.find_service(name='nipsa')
     return {
-        "userids": [u.userid for u in nipsa_service.flagged_users],
+        "userids": sorted(nipsa_service.flagged_userids),
         "default_authority": request.auth_domain,
     }
 
