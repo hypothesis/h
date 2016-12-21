@@ -213,6 +213,26 @@ class TestHandleAnnotationEvent(object):
             'options': {'action': 'update'},
         }
 
+    def test_notification_format_delete(self, fetch_annotation, presenter_asdict):
+        """Check the format of the returned notification for deletes."""
+        message = {
+            'annotation_id': '_',
+            'action': 'delete',
+            'src_client_id': 'pigeon'
+        }
+        annotation = fetch_annotation.return_value
+        socket = FakeSocket('giraffe')
+        session = mock.sentinel.db_session
+        presenter_asdict.return_value = self.serialized_annotation()
+
+        messages.handle_annotation_event(message, [socket], session)
+
+        assert socket.send_json_payloads[0] == {
+            'payload': [{'id': annotation.id}],
+            'type': 'annotation-notification',
+            'options': {'action': 'delete'},
+        }
+
     def test_no_send_for_sender_socket(self, presenter_asdict):
         """Should return None if the socket's client_id matches the message's."""
         message = {'src_client_id': 'pigeon', 'annotation_id': '_', 'action': '_'}
