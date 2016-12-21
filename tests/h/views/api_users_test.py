@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import pytest
 from mock import Mock
 
-from h.accounts.services import UserSignupService
+from h.services.user_signup import UserSignupService
 from h.exceptions import ClientUnauthorized
 from h.views.api_users import create
 from h.schemas import ValidationError

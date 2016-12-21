@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.accounts.services import (
+from h.services.user_signup import (
     UserSignupService,
     user_signup_service_factory,
 )
