@@ -34,8 +34,6 @@ def includeme(config):
     global WEBSOCKET_POLICY
 
     # Set up authsanity
-    config.register_service_factory('.services.auth_ticket_service_factory',
-                                    iface='pyramid_authsanity.interfaces.IAuthService')
     settings = config.registry.settings
     settings['authsanity.source'] = 'cookie'
     settings['authsanity.cookie.max_age'] = 2592000

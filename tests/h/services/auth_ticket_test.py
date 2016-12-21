@@ -9,12 +9,18 @@ import pytest
 
 from h import models
 from h.services.user import UserService
-from h.auth import services
+from h.services.auth_ticket import (
+    auth_ticket_service_factory,
+    AuthTicketNotLoadedError,
+    AuthTicketService,
+    TICKET_REFRESH_INTERVAL,
+    TICKET_TTL,
+)
 
 
 class TestAuthTicketService(object):
     def test_userid_raises_when_ticket_has_not_been_loaded_yet(self, svc):
-        with pytest.raises(services.AuthTicketNotLoadedError) as exc:
+        with pytest.raises(AuthTicketNotLoadedError) as exc:
             svc.userid()
         assert str(exc.value) == 'auth ticket is not loaded yet'
 
@@ -46,7 +52,7 @@ class TestAuthTicketService(object):
         assert ['foo', 'bar', 'baz'] == result
 
     def test_groups_raises_when_ticket_is_not_loaded(self, svc, ticket):
-        with pytest.raises(services.AuthTicketNotLoadedError) as exc:
+        with pytest.raises(AuthTicketNotLoadedError) as exc:
             svc.groups()
         assert str(exc.value) == 'auth ticket is not loaded yet'
 
@@ -88,7 +94,7 @@ class TestAuthTicketService(object):
         assert expires_before == ticket.expires
 
     def test_verify_ticket_extends_expiration_when_over_refresh_interval(self, svc, db_session, factories):
-        ticket = factories.AuthTicket(updated=(datetime.utcnow() - services.TICKET_REFRESH_INTERVAL))
+        ticket = factories.AuthTicket(updated=(datetime.utcnow() - TICKET_REFRESH_INTERVAL))
         db_session.flush()
 
         expires_before = ticket.expires
@@ -120,7 +126,7 @@ class TestAuthTicketService(object):
         assert ticket.id == 'the-ticket-id'
         assert ticket.user == user
         assert ticket.user_userid == user.userid
-        assert ticket.expires == utcnow.return_value + services.TICKET_TTL
+        assert ticket.expires == utcnow.return_value + TICKET_TTL
 
     def test_add_ticket_caches_the_userid(self, svc, db_session, user):
         svc.usersvc.fetch.return_value = user
@@ -166,11 +172,11 @@ class TestAuthTicketService(object):
 
     @pytest.fixture
     def svc(self, db_session, user_service):
-        return services.AuthTicketService(db_session, user_service)
+        return AuthTicketService(db_session, user_service)
 
     @pytest.fixture
     def principals_for_user(self, patch):
-        return patch('h.auth.services.principals_for_user')
+        return patch('h.services.auth_ticket.principals_for_user')
 
     @pytest.fixture
     def ticket(self, factories, user, db_session):
@@ -189,15 +195,15 @@ class TestAuthTicketService(object):
 @pytest.mark.usefixtures('user_service')
 class TestAuthTicketServiceFactory(object):
     def test_it_returns_auth_ticket_service(self, pyramid_request):
-        svc = services.auth_ticket_service_factory(None, pyramid_request)
-        assert isinstance(svc, services.AuthTicketService)
+        svc = auth_ticket_service_factory(None, pyramid_request)
+        assert isinstance(svc, AuthTicketService)
 
     def test_it_provides_request_db_as_session(self, pyramid_request):
-        svc = services.auth_ticket_service_factory(None, pyramid_request)
+        svc = auth_ticket_service_factory(None, pyramid_request)
         assert svc.session == pyramid_request.db
 
     def test_it_provides_user_service(self, pyramid_request, user_service):
-        svc = services.auth_ticket_service_factory(None, pyramid_request)
+        svc = auth_ticket_service_factory(None, pyramid_request)
         assert svc.usersvc == user_service
 
 
@@ -211,4 +217,4 @@ def user_service(db_session, pyramid_config):
 
 @pytest.fixture
 def utcnow(patch):
-    return patch('h.auth.services.utcnow')
+    return patch('h.services.auth_ticket.utcnow')
