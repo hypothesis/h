@@ -83,19 +83,12 @@ def handle_annotation_event(message, sockets, session):
     id_ = message['annotation_id']
     annotation = storage.fetch_annotation(session, id_)
 
-    # FIXME: It isn't really nice to try and get the userid from the fetched
-    # annotation or otherwise get it from the maybe-already serialized
-    # annotation dict, to then only access the database for the nipsa flag once.
-    # We do this because the event action is `delete` at which point we can't
-    # load the annotation from the database. Handling annotation deletions is
-    # a known problem and will be fixed in the future.
-    userid = None
-    if annotation:
-        userid = annotation.userid
-    else:
-        userid = message.get('annotation_dict', {}).get('user')
+    if annotation is None:
+        log.warn('received annotation event for missing annotation: %s', id_)
+        return
+
     nipsa_service = NipsaService(session)
-    user_nipsad = nipsa_service.is_flagged(userid)
+    user_nipsad = nipsa_service.is_flagged(annotation.userid)
 
     for socket in sockets:
         reply = _generate_annotation_event(message, socket, annotation, user_nipsad)
@@ -134,29 +127,21 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad):
     if socket.filter is None:
         return None
 
+    # Don't sent annotations from NIPSA'd users to anyone other than that
+    # user.
+    if user_nipsad and socket.authenticated_userid != annotation.userid:
+        return None
+
     notification = {
         'type': 'annotation-notification',
         'options': {'action': action},
     }
-    id_ = message['annotation_id']
 
-    # Return early when action is delete
-    serialized = None
-    if action == 'delete':
-        serialized = message['annotation_dict']
-    else:
-        if annotation is None:
-            return None
-
-        base_url = socket.registry.settings.get('h.app_url',
-                                                'http://localhost:5000')
-        links_service = LinksService(base_url, socket.registry)
-        serialized = presenters.AnnotationJSONPresenter(annotation,
-                                                        links_service).asdict()
-
-    userid = serialized.get('user')
-    if user_nipsad and socket.authenticated_userid != userid:
-        return None
+    base_url = socket.registry.settings.get('h.app_url',
+                                            'http://localhost:5000')
+    links_service = LinksService(base_url, socket.registry)
+    serialized = presenters.AnnotationJSONPresenter(annotation,
+                                                    links_service).asdict()
 
     permissions = serialized.get('permissions')
     if not _authorized_to_read(socket.effective_principals, permissions):
@@ -167,7 +152,7 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad):
 
     notification['payload'] = [serialized]
     if action == 'delete':
-        notification['payload'] = [{'id': id_}]
+        notification['payload'] = [{'id': annotation.id}]
     return notification
 
 

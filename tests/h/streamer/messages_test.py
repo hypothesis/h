@@ -271,56 +271,15 @@ class TestHandleAnnotationEvent(object):
 
         assert socket.send_json_payloads == []
 
-    def test_no_send_if_annotation_delete_nipsad(self, fetch_annotation, nipsa_service):
-        """
-        Should return None if the annotation is a deletion from a NIPSA'd
-        user.
-        """
-        message = {
-            'action': 'delete',
-            'src_client_id': '_',
-            'annotation_id': '_',
-            'annotation_dict': self.serialized_annotation({'user': 'geraldine'}),
-        }
-        fetch_annotation.return_value = None
-        socket = FakeSocket('giraffe')
-        session = mock.sentinel.db_session
-        def is_flagged(userid):
-            return userid == 'geraldine'
-        nipsa_service.return_value.is_flagged.side_effect = is_flagged
-
-        messages.handle_annotation_event(message, [socket], session)
-
-        assert socket.send_json_payloads == []
-
-    def test_sends_nipsad_annotations_to_owners(self, nipsa_service, presenter_asdict):
+    def test_sends_nipsad_annotations_to_owners(self, fetch_annotation, nipsa_service, presenter_asdict):
         """NIPSA'd users should see their own annotations."""
         message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
+        fetch_annotation.return_value.userid = 'fred'
         socket = FakeSocket('giraffe')
         socket.authenticated_userid = 'fred'
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
         nipsa_service.return_value.is_flagged.return_value = True
-
-        messages.handle_annotation_event(message, [socket], session)
-
-        assert len(socket.send_json_payloads) == 1
-
-    def test_sends_nipsad_deletes_to_owners(self, fetch_annotation, nipsa_service):
-        """NIPSA'd users should see their own deletions."""
-        message = {
-            'action': 'delete',
-            'src_client_id': '_',
-            'annotation_id': '_',
-            'annotation_dict': self.serialized_annotation({'user': 'geraldine'}),
-        }
-        fetch_annotation.return_value = None
-        socket = FakeSocket('giraffe')
-        socket.authenticated_userid = 'geraldine'
-        session = mock.sentinel.db_session
-        def is_flagged(userid):
-            return userid == 'geraldine'
-        nipsa_service.return_value.is_flagged.side_effect = is_flagged
 
         messages.handle_annotation_event(message, [socket], session)
 
@@ -377,7 +336,6 @@ class TestHandleAnnotationEvent(object):
             data = {}
 
         serialized = {
-            'user': 'fred',
             'permissions': {'read': ['group:__world__']}
         }
         serialized.update(data)
@@ -385,8 +343,10 @@ class TestHandleAnnotationEvent(object):
         return serialized
 
     @pytest.fixture
-    def fetch_annotation(self, patch):
-        return patch('h.streamer.messages.storage.fetch_annotation')
+    def fetch_annotation(self, factories, patch):
+        fetch = patch('h.streamer.messages.storage.fetch_annotation')
+        fetch.return_value = factories.Annotation()
+        return fetch
 
     @pytest.fixture
     def presenters(self, patch):
