@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h.auth.services import TOKEN_TTL
+from h.services.oauth import TOKEN_TTL
 from h.exceptions import OAuthTokenError
 from h.util.view import cors_json_view
 

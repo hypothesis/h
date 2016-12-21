@@ -56,9 +56,6 @@ def includeme(config):
         WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY,
                                                       PROXY_POLICY])
 
-    config.register_service_factory('.services.oauth_service_factory',
-                                    name='oauth')
-
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
     config.set_authentication_policy(DEFAULT_POLICY)

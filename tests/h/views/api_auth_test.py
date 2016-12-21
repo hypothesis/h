@@ -6,8 +6,8 @@ import mock
 import pytest
 
 from h import models
+from h.services.oauth import oauth_service_factory, TOKEN_TTL
 from h.services.user import user_service_factory
-from h.auth.services import oauth_service_factory, TOKEN_TTL
 from h.exceptions import OAuthTokenError
 from h.views import api_auth as views
 
