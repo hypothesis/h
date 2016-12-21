@@ -267,8 +267,9 @@ class TestCreate(object):
 
         annotation = storage.create_annotation.return_value
 
-        AnnotationEvent.assert_called_once_with(
-            pyramid_request, annotation.id, 'create', annotation_dict=None)
+        AnnotationEvent.assert_called_once_with(pyramid_request,
+                                                annotation.id,
+                                                'create')
         pyramid_request.notify_after_commit.assert_called_once_with(
             AnnotationEvent.return_value)
 
@@ -414,9 +415,9 @@ class TestUpdate(object):
 
         views.update(context, pyramid_request)
 
-        AnnotationEvent.assert_called_once_with(
-            pyramid_request, storage.update_annotation.return_value.id, 'update',
-            annotation_dict=None)
+        AnnotationEvent.assert_called_once_with(pyramid_request,
+                                                storage.update_annotation.return_value.id,
+                                                'update')
 
     def test_it_fires_the_AnnotationEvent(self, AnnotationEvent, pyramid_request):
         views.update(mock.Mock(), pyramid_request)
@@ -471,31 +472,18 @@ class TestDelete(object):
         storage.delete_annotation.assert_called_once_with(pyramid_request.db,
                                                           context.annotation.id)
 
-    def test_it_serializes_the_annotation(self,
-                                          AnnotationJSONPresenter,
-                                          links_service,
-                                          pyramid_request):
-        context = mock.Mock()
-
-        views.delete(context, pyramid_request)
-
-        AnnotationJSONPresenter.assert_called_once_with(context.annotation,
-                                                        links_service)
-
     def test_it_inits_and_fires_an_AnnotationEvent(self,
                                                    AnnotationEvent,
                                                    AnnotationJSONPresenter,
                                                    pyramid_request):
         context = mock.Mock()
         event = AnnotationEvent.return_value
-        annotation_dict = AnnotationJSONPresenter.return_value.asdict.return_value
 
         views.delete(context, pyramid_request)
 
         AnnotationEvent.assert_called_once_with(pyramid_request,
                                                 context.annotation.id,
-                                                'delete',
-                                                annotation_dict=annotation_dict)
+                                                'delete')
         pyramid_request.notify_after_commit.assert_called_once_with(event)
 
     def test_it_returns_object(self, pyramid_request):
