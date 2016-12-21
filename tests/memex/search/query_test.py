@@ -508,7 +508,7 @@ class TestTagsAggregations(object):
             'terms': {'field': 'tags_raw', 'size': 14}
         }
 
-    def parse_result(self):
+    def test_parse_result(self):
         agg = query.TagsAggregation()
         elasticsearch_result = {
             'buckets': [
@@ -517,16 +517,16 @@ class TestTagsAggregations(object):
             ]
         }
 
-        assert agg(elasticsearch_result) == [
+        assert agg.parse_result(elasticsearch_result) == [
             {'tag': 'tag-4', 'count': 42},
             {'tag': 'tag-2', 'count': 28},
         ]
 
-    def parse_result_with_none(self):
+    def test_parse_result_with_none(self):
         agg = query.TagsAggregation()
         assert agg.parse_result(None) == {}
 
-    def parse_result_with_empty(self):
+    def test_parse_result_with_empty(self):
         agg = query.TagsAggregation()
         assert agg.parse_result({}) == {}
 
@@ -547,7 +547,7 @@ class TestUsersAggregation(object):
             'terms': {'field': 'user_raw', 'size': 14}
         }
 
-    def parse_result(self):
+    def test_parse_result(self):
         agg = query.UsersAggregation()
         elasticsearch_result = {
             'buckets': [
@@ -556,15 +556,15 @@ class TestUsersAggregation(object):
             ]
         }
 
-        assert agg(elasticsearch_result) == [
+        assert agg.parse_result(elasticsearch_result) == [
             {'user': 'alice', 'count': 42},
             {'user': 'luke', 'count': 28},
         ]
 
-    def parse_result_with_none(self):
+    def test_parse_result_with_none(self):
         agg = query.UsersAggregation()
         assert agg.parse_result(None) == {}
 
-    def parse_result_with_empty(self):
+    def test_parse_result_with_empty(self):
         agg = query.UsersAggregation()
         assert agg.parse_result({}) == {}
