@@ -5,30 +5,9 @@
 
 {% block page_content %}
   <div class="form-vertical">
-    {% if not feature('activity_pages') -%}
-    <h2 class="form-heading">
-      <span>{% trans %}Change your email address{% endtrans %}</span>
-    </h2>
-    <legend>
-      {% trans %}Your current email address is:{% endtrans %}
-      <strong>{{ email }}</strong>.
-    </legend>
-    {%- endif %}
     {{ email_form }}
-
-    <h2 class="form-heading">
-    {% if not feature('activity_pages') -%}
-      <span>{% trans %}Change your password{% endtrans %}</span>
-    {%- endif %}
-    </h2>
     {{ password_form }}
 
-    {% if not feature('activity_pages') -%}
-    <h2 class="form-heading">
-      <span>{% trans %}Delete account{% endtrans %}</span>
-    </h2>
-    {%- endif %}
-    {% if feature('activity_pages') -%}
     <footer class="form-footer">
       {% trans %}
         If you would like to delete your account, please email us at
@@ -36,14 +15,5 @@
         registered email address, and we'll take it from there.
       {% endtrans %}
     </footer>
-    {% else %}
-    <legend>
-      {% trans %}
-        If you would like to delete your account, please email us at
-        <a href="mailto:support@hypothes.is">support@hypothes.is</a> from your
-        registered email address, and we'll take it from there.
-      {% endtrans %}
-    </legend>
-    {%- endif %}
   </div>
 {% endblock page_content %}
