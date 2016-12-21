@@ -5,85 +5,35 @@
 
 {% block page_content %}
   <div class="form-vertical">
-    {% if not feature('activity_pages') -%}
-    <h2 class="form-heading">
-      <span>{% trans %}Generate your API token{% endtrans %}</span>
-    </h2>
-    {% endif %}
-
     {% if token %}
-      {% if feature('activity_pages') %}
-        <p class="form-help-text">
-        <label for="token">{% trans %}Your API token is:{% endtrans %}</label>
-        </p>
-        <input id="token"
-               type="text"
-               value="{{ token }}"
-               readonly="readonly"
-               class="api-token">
-        <p class="form-help-text">
-          Please keep your API token safe as it can be used to access your account.
-        </p>
-      {% else %}
+      <p class="form-help-text">
       <label for="token">{% trans %}Your API token is:{% endtrans %}</label>
-      <input id="token" type="text" value="{{ token }}" readonly="readonly"
-             class="api-token-input">
-      <span class="help-block">
-        Please keep your API token safe as it can be used to access your
-        account.
-      </span>
-      {% endif %}
-    {% else %}
-      {% if not feature('activity_pages') -%}
-      <legend>
-        {% trans %}You haven't generated an API token yet.{% endtrans %}
-      </legend>
-      {%- endif %}
+      </p>
+      <input id="token"
+             type="text"
+             value="{{ token }}"
+             readonly="readonly"
+             class="api-token">
+      <p class="form-help-text">
+        Please keep your API token safe as it can be used to access your account.
+      </p>
     {% endif %}
 
       <form method="POST">
-        {% if feature('activity_pages') %}
-          {% if token %}
-            <button type="submit" class="btn"
-                    title="{% trans %}Delete your API token and generate a new one{% endtrans%}">
-              Regenerate your API token
-            </button>
-          {% else %}
-            <button type="submit" class="btn btn-primary">
-              {% trans %}Generate your API token{% endtrans %}
-            </button>
-          {% endif %}
+        {% if token %}
+          <button type="submit" class="btn"
+                  title="{% trans %}Delete your API token and generate a new one{% endtrans%}">
+            Regenerate your API token
+          </button>
         {% else %}
-        <div class="form-actions">
-          <div class="form-actions-buttons">
-
-    {% if token %}
-            <button type="submit" class="btn btn-danger"
-                    title="{% trans %}Delete your API token and generate a new one{% endtrans%}">
-              Regenerate your API token
-            </button>
-    {% else %}
-            <button type="submit" class="btn btn-primary">
-              {% trans %}Generate your API token{% endtrans %}
-            </button>
-    {% endif %}
-          </div>
-        </div>
+          <button type="submit" class="btn btn-primary">
+            {% trans %}Generate your API token{% endtrans %}
+          </button>
         {% endif %}
       </form>
-      {% if feature('activity_pages') -%}
       <footer class="form-footer">
         You can learn more about the Hypothesis API at
         <a class="link--footer" href="https://h.readthedocs.io/en/latest/api.html">h.readthedocs.io/en/latest/api.html</a>
       </footer>
-      {% else %}
-      <h2 class="form-heading">
-        <span>{% trans %}API documentation{% endtrans %}</span>
-      </h2>
-      <legend>
-        You can learn more about the Hypothesis API at
-        <a href="https://h.readthedocs.io/en/latest/api.html">h.readthedocs.io/en/latest/api.html</a>.
-      </legend>
-      {%- endif %}
   </div>
 {% endblock page_content %}
