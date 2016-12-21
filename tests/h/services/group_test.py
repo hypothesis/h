@@ -7,8 +7,8 @@ import pytest
 
 from h.models import Group
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
-from h.groups.services import GroupsService
-from h.groups.services import groups_factory
+from h.services.group import GroupsService
+from h.services.group import groups_factory
 
 
 class TestGroupsService(object):
@@ -203,7 +203,7 @@ class TestGroupsFactory(object):
 
     def test_provides_realtime_publisher_as_publish(self, patch, pyramid_request):
         pyramid_request.realtime = mock.Mock(spec_set=['publish_user'])
-        session = patch('h.groups.services.session')
+        session = patch('h.services.group.session')
         svc = groups_factory(None, pyramid_request)
 
         svc.publish('group-join', 'abc123', 'theresa')

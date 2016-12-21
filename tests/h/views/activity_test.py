@@ -524,7 +524,7 @@ class TestGroupSearchController(object):
 
     @pytest.fixture
     def groups_service(self, patch, pyramid_config):
-        groups_service = patch('h.groups.services.GroupsService')
+        groups_service = patch('h.services.group.GroupsService')
         pyramid_config.register_service(groups_service, name='groups')
         return groups_service
 
