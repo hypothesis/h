@@ -267,32 +267,6 @@ class ResetPasswordSchema(CSRFSchema):
         widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
 
-class LegacyEmailChangeSchema(CSRFSchema):
-    email = email_node(title=_('New email address'))
-    # No validators: all validation is done on the email field and we merely
-    # assert that the confirmation field is the same.
-    email_confirm = colander.SchemaNode(
-        colander.String(),
-        title=_('Confirm new email address'),
-        widget=deform.widget.TextInputWidget(template='emailinput'))
-    password = new_password_node(title=_('Current password'))
-
-    def validator(self, node, value):
-        super(LegacyEmailChangeSchema, self).validator(node, value)
-        exc = colander.Invalid(node)
-        request = node.bindings['request']
-        user = request.authenticated_user
-
-        if value.get('email') != value.get('email_confirm'):
-            exc['email_confirm'] = _('The emails must match')
-
-        if not user.check_password(value.get('password')):
-            exc['password'] = _('Wrong password.')
-
-        if exc.children:
-            raise exc
-
-
 class EmailChangeSchema(CSRFSchema):
     email = email_node(title=_('Email address'))
     # No validators: all validation is done on the email field

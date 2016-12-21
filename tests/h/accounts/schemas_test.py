@@ -341,47 +341,6 @@ class TestResetPasswordSchema(object):
             raise BadData("Invalid token")
 
 
-@pytest.mark.usefixtures('user_model')
-class TestLegacyEmailChangeSchema(object):
-
-    def test_it_is_invalid_if_emails_dont_match(self,
-                                                pyramid_csrf_request,
-                                                user_model):
-        user = Mock()
-        pyramid_csrf_request.authenticated_user = user
-        schema = schemas.LegacyEmailChangeSchema().bind(
-            request=pyramid_csrf_request)
-        # The email isn't taken
-        user_model.get_by_email.return_value = None
-
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({'email': 'foo@bar.com',
-                                'email_confirm': 'foo@baz.com',
-                                'password': 'flibble'})
-
-        assert 'email_confirm' in exc.value.asdict()
-
-    def test_it_is_invalid_if_password_wrong(self,
-                                             pyramid_csrf_request,
-                                             user_model):
-        user = Mock()
-        pyramid_csrf_request.authenticated_user = user
-        schema = schemas.LegacyEmailChangeSchema().bind(
-            request=pyramid_csrf_request)
-        # The email isn't taken
-        user_model.get_by_email.return_value = None
-        # The password does not check out
-        user.check_password.return_value = False
-
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({'email': 'foo@bar.com',
-                                'email_confirm': 'foo@bar.com',
-                                'password': 'flibble'})
-
-        user.check_password.assert_called_once_with('flibble')
-        assert 'password' in exc.value.asdict()
-
-
 @pytest.mark.usefixtures('models')
 class TestEmailChangeSchema(object):
 

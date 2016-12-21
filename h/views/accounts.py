@@ -487,15 +487,9 @@ class AccountController(object):
     def __init__(self, request):
         self.request = request
 
-        save_email_label = _('Change email address')
-        save_password_label = _('Change password')
-
-        if request.feature('activity_pages'):
-            email_schema = schemas.EmailChangeSchema().bind(request=request)
-            save_email_label = _('Save')
-            save_password_label = _('Save')
-        else:
-            email_schema = schemas.LegacyEmailChangeSchema().bind(request=request)
+        email_schema = schemas.EmailChangeSchema().bind(request=request)
+        save_email_label = _('Save')
+        save_password_label = _('Save')
 
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
@@ -551,11 +545,7 @@ class AccountController(object):
         """Return the data needed to render accounts.html.jinja2."""
         email = self.request.authenticated_user.email
         password_form = self.forms['password'].render()
-
-        if self.request.feature('activity_pages'):
-            email_form = self.forms['email'].render({'email': email})
-        else:
-            email_form = self.forms['email'].render()
+        email_form = self.forms['email'].render({'email': email})
 
         return {'email': email,
                 'email_form': email_form,
