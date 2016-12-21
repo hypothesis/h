@@ -17,6 +17,7 @@ from pyramid.request import apply_request_extensions
 from sqlalchemy.orm import sessionmaker
 
 from memex import db
+from memex import models  # noqa: ensure that model base class is set
 from memex._compat import text_type
 
 TEST_DATABASE_URL = os.environ.get('TEST_DATABASE_URL',
