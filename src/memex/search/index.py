@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Functions for updating the search index."""
 
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
 
 import logging
+import time
 from collections import namedtuple
 
 import sqlalchemy as sa
@@ -123,6 +124,9 @@ class BatchIndexer(object):
             annotations = _filtered_annotations(session=self.session,
                                                 ids=annotation_ids)
 
+        # Report indexing status as we go
+        annotations = _log_status(annotations)
+
         indexing = es_helpers.streaming_bulk(self.es_client.conn, annotations,
                                              chunk_size=ES_CHUNK_SIZE,
                                              raise_on_error=False,
@@ -187,3 +191,18 @@ def _eager_loaded_annotations(session):
         subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
         subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
     )
+
+
+def _log_status(stream, log_every=1000):
+    i = 0
+    then = time.time()
+    for item in stream:
+        yield item
+        i += 1
+        if i % log_every == 0:
+            now = time.time()
+            delta = now - then
+            then = now
+            rate = log_every / delta
+            log.info('indexed {:d}k annotations, rate={:.0f}/s'
+                     .format(i // 1000, rate))
