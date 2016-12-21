@@ -115,7 +115,7 @@ class TestSearchController(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('groups_service', 'routes', 'search')
+@pytest.mark.usefixtures('group_service', 'routes', 'search')
 class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
@@ -349,13 +349,13 @@ class TestGroupSearchController(object):
                                     controller,
                                     group,
                                     group_leave_request,
-                                    groups_service,
+                                    group_service,
                                     pyramid_config):
         pyramid_config.testing_securitypolicy(group.members[-1].userid)
 
         controller.leave()
 
-        groups_service.member_leave.assert_called_once_with(
+        group_service.member_leave.assert_called_once_with(
             group, group.members[-1].userid)
 
     def test_leave_redirects_to_the_search_page(self,
@@ -376,24 +376,24 @@ class TestGroupSearchController(object):
                                                                 controller,
                                                                 search,
                                                                 group,
-                                                                groups_service,
+                                                                group_service,
                                                                 pyramid_request):
         pyramid_request.authenticated_user = group.members[-1]
         controller.search()
 
-        groups_service.annotation_count.assert_called_once_with(group.pubid)
+        group_service.annotation_count.assert_called_once_with(group.pubid)
 
     def test_search_does_not_pass_annotation_count_to_the_template_when_flag_is_disabled(self,
                                                                                          controller,
                                                                                          search,
                                                                                          group,
-                                                                                         groups_service,
+                                                                                         group_service,
                                                                                          pyramid_request):
         pyramid_request.authenticated_user = group.members[-1]
         pyramid_request.feature.flags['total_shared_annotations'] = False
         controller.search()
 
-        assert groups_service.annotation_count.called == False
+        assert group_service.annotation_count.called is False
 
     @pytest.mark.parametrize('q', ['', '   '])
     def test_leave_removes_empty_query_from_url(self,
@@ -523,10 +523,10 @@ class TestGroupSearchController(object):
         return pyramid_request
 
     @pytest.fixture
-    def groups_service(self, patch, pyramid_config):
-        groups_service = patch('h.services.group.GroupsService')
-        pyramid_config.register_service(groups_service, name='groups')
-        return groups_service
+    def group_service(self, patch, pyramid_config):
+        group_service = patch('h.services.group.GroupService')
+        pyramid_config.register_service(group_service, name='group')
+        return group_service
 
     @pytest.fixture
     def pyramid_request(self, group, pyramid_request):

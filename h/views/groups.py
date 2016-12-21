@@ -45,7 +45,7 @@ class GroupCreateController(object):
     def post(self):
         """Respond to a submission of the create group form."""
         def on_success(appstruct):
-            groups_service = self.request.find_service(name='groups')
+            groups_service = self.request.find_service(name='group')
             group = groups_service.create(
                 name=appstruct['name'],
                 authority=self.request.auth_domain,
@@ -164,7 +164,7 @@ class GroupJoinController(object):
 
     @view_config(request_method='POST')
     def post(self):
-        groups_service = self.request.find_service(name='groups')
+        groups_service = self.request.find_service(name='group')
         groups_service.member_join(self.group,
                                    self.request.authenticated_userid)
 
@@ -184,7 +184,7 @@ def read_noslug(group, request):
              effective_principals=security.Authenticated,
              has_permission='read')
 def leave(group, request):
-    groups_service = request.find_service(name='groups')
+    groups_service = request.find_service(name='group')
     groups_service.member_leave(group, request.authenticated_userid)
 
     return HTTPNoContent()

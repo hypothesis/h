@@ -20,7 +20,7 @@ GROUP_ACCESS_FLAGS = {
 }
 
 
-class GroupsService(object):
+class GroupService(object):
 
     """A service for manipulating groups and group membership."""
 
@@ -104,11 +104,11 @@ class GroupsService(object):
 
 
 def groups_factory(context, request):
-    """Return a GroupsService instance for the passed context and request."""
+    """Return a GroupService instance for the passed context and request."""
     user_service = request.find_service(name='user')
-    return GroupsService(session=request.db,
-                         user_fetcher=user_service.fetch,
-                         publish=partial(_publish, request))
+    return GroupService(session=request.db,
+                        user_fetcher=user_service.fetch,
+                        publish=partial(_publish, request))
 
 
 def _publish(request, event_type, groupid, userid):
