@@ -1,6 +1,6 @@
 <input type="text"
 {% include "includes/common_attrs.jinja2" %}>
-{%- if field.widget.max_length and feature('activity_pages') -%}
+{%- if field.widget.max_length -%}
 <span class="form-input__character-counter" data-ref="characterLimitCounter">
   Up to {{ field.widget.max_length }} characters
 </span>

@@ -1,10 +1,3 @@
-{% if feature('activity_pages') %}
-{% set form_buttons_class = 'form-actions__buttons' %}
-{% set form_message_class = 'form-actions__message' %}
-{% else %}
-{% set form_buttons_class = 'form-actions-buttons' %}
-{% set form_message_class = 'form-actions-message' %}
-{% endif %}
 <form id="{{ field.formid }}"
       {%- if field.action %}
       action="{{ field.action }}"
@@ -24,19 +17,15 @@
 
   <div class="form-actions {% if field.use_inline_editing %} is-hidden-when-loading {% endif %}"
        data-ref="formActions">
-    {% if feature('activity_pages') %}
     <div class="form__submit-error" data-ref="formSubmitError">
       <span>{% trans %}Unable to save changes: {% endtrans %}</span>
       <span data-ref="formSubmitErrorMessage"></span>
     </div>
-    {% endif %}
-    <div class="{{ form_message_class }}">
+    <div class="form-actions__message">
       {%- if field.footer %}{{ field.footer | safe }}{% endif -%}
     </div>
-    {% if feature('activity_pages') %}
     <div class="u-stretch"></div>
-    {% endif %}
-    <div class="{{ form_buttons_class }}">
+    <div class="form-actions__buttons">
       {%- for button in field.buttons -%}
         <button id="{{ field.formid + button.name }}"
                 name="{{ button.name }}"
@@ -49,9 +38,7 @@
                 >
         {{ _(button.title) }}
         </button>
-        {% if feature('activity_pages') %}
         <button class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
-        {% endif %}
       {% endfor -%}
     </div>
   </div>
