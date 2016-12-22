@@ -44,19 +44,8 @@ def send_reply_notifications(event,
     with request.tm:
         annotation = storage.fetch_annotation(event.request.db,
                                               event.annotation_id)
-        action = event.action
-        try:
-            notification = get_notification(request, annotation, action)
-            if notification is None:
-                return
-            send_params = generate_mail(request, notification)
-            send(*send_params)
-        # We don't want any exceptions thrown by this code to cause the
-        # annotation CRUD action to fail, but we do want to collect the error
-        # in Sentry, so we explicitly wrap this here.
-        #
-        # FIXME: Fix the underlying bugs and remove this try/except.
-        except Exception:
-            event.request.sentry.captureException()
-            if event.request.debug:
-                raise
+        notification = get_notification(request, annotation, event.action)
+        if notification is None:
+            return
+        send_params = generate_mail(request, notification)
+        send(*send_params)

@@ -76,35 +76,6 @@ class TestSendReplyNotifications(object):
                                               mock.sentinel.notification)
         assert send.lastcall == (['foo@example.com'], 'Your email', 'Text body', 'HTML body')
 
-    def test_catches_exceptions_and_reports_to_sentry(self, pyramid_request):
-        send = FakeMailer()
-        get_notification = mock.Mock(spec_set=[], side_effect=RuntimeError('asplode!'))
-        generate_mail = mock.Mock(spec_set=[], return_value=[])
-        pyramid_request.debug = False
-        pyramid_request.sentry = mock.Mock()
-        event = AnnotationEvent(pyramid_request, None, None)
-
-        subscribers.send_reply_notifications(event,
-                                             get_notification=get_notification,
-                                             generate_mail=generate_mail,
-                                             send=send)
-
-        event.request.sentry.captureException.assert_called_once_with()
-
-    def test_reraises_exceptions_in_debug_mode(self, pyramid_request):
-        send = FakeMailer()
-        get_notification = mock.Mock(spec_set=[], side_effect=RuntimeError('asplode!'))
-        generate_mail = mock.Mock(spec_set=[], return_value=[])
-        pyramid_request.debug = True
-        pyramid_request.sentry = mock.Mock()
-        event = AnnotationEvent(pyramid_request, None, None)
-
-        with pytest.raises(RuntimeError):
-            subscribers.send_reply_notifications(event,
-                                                 get_notification=get_notification,
-                                                 generate_mail=generate_mail,
-                                                 send=send)
-
     @pytest.fixture
     def fetch_annotation(self, patch):
         return patch('h.subscribers.storage.fetch_annotation')
