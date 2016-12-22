@@ -6,7 +6,6 @@ import datetime
 import pytest
 import mock
 from pyramid import httpexceptions
-from webob.multidict import NestedMultiDict
 
 from h.activity.query import ActivityResults
 from h.views import activity
@@ -14,12 +13,6 @@ from h.views import activity
 
 @pytest.mark.usefixtures('paginate', 'query', 'routes')
 class TestSearchController(object):
-
-    def test_init_returns_404_when_feature_turned_off(self, pyramid_request):
-        pyramid_request.feature.flags['search_page'] = False
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            activity.SearchController(pyramid_request)
 
     def test_search_checks_for_redirects(self, controller, pyramid_request, query):
         controller.search()
@@ -119,14 +112,6 @@ class TestSearchController(object):
 class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
-
-    def test_init_returns_404_when_feature_turned_off(self,
-                                                      group,
-                                                      pyramid_request):
-        pyramid_request.feature.flags['search_page'] = False
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            activity.GroupSearchController(group, pyramid_request)
 
     def test_search_redirects_if_slug_wrong(self,
                                             controller,
@@ -547,14 +532,6 @@ class TestUserSearchController(object):
 
     """Tests unique to UserSearchController."""
 
-    def test_init_returns_404_when_feature_turned_off(self,
-                                                      user,
-                                                      pyramid_request):
-        pyramid_request.feature.flags['search_page'] = False
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            activity.UserSearchController(user, pyramid_request)
-
     def test_search_calls_search_with_request(self,
                                               controller,
                                               pyramid_request,
@@ -876,7 +853,6 @@ class TestGroupAndUserSearchController(object):
     def toggle_tag_facet_request(self, pyramid_request):
         pyramid_request.matched_route = mock.Mock()
         pyramid_request.matched_route.name = 'activity.user_search'
-        pyramid_request.feature.flags['search_page'] = True
         pyramid_request.params['toggle_tag_facet'] = 'gar'
         pyramid_request.matchdict['username'] = 'foo'
         return pyramid_request
@@ -906,8 +882,6 @@ def pyramid_request(pyramid_request):
     # modify POST without modifying params in some of these tests so set them
     # to different objects.
     pyramid_request.POST = pyramid_request.params.copy()
-
-    pyramid_request.feature.flags['search_page'] = True
     return pyramid_request
 
 

@@ -58,15 +58,14 @@ def robots(context, request):
 
 @view_config(route_name='stream')
 def stream(context, request):
-    if request.feature('search_page'):
-        q = request.params.get('q', '').split(':', 1)
-        if len(q) >= 2 and q[0] == 'tag':
-            tag = q[1]
-            if ' ' in tag:
-                tag = '"' + tag + '"'
-            query = {'q': 'tag:{}'.format(tag)}
-            location = request.route_url('activity.search', _query=query)
-            raise httpexceptions.HTTPFound(location=location)
+    q = request.params.get('q', '').split(':', 1)
+    if len(q) >= 2 and q[0] == 'tag':
+        tag = q[1]
+        if ' ' in tag:
+            tag = '"' + tag + '"'
+        query = {'q': 'tag:{}'.format(tag)}
+        location = request.route_url('activity.search', _query=query)
+        raise httpexceptions.HTTPFound(location=location)
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
     return render_app(request, {
@@ -96,10 +95,6 @@ def stream_user_redirect(request):
     if user.startswith('acct:'):
         user = split_user(user)['username']
 
-    if request.feature('search_page'):
-        location = request.route_url('activity.user_search', username=user)
-    else:
-        query = {'q': 'user:{}'.format(user)}
-        location = request.route_url('stream', _query=query)
+    location = request.route_url('activity.user_search', username=user)
 
     raise httpexceptions.HTTPFound(location=location)
