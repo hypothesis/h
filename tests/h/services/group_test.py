@@ -175,11 +175,51 @@ class TestGroupService(object):
 
         assert svc.annotation_count(group.pubid) == 3
 
+    @pytest.mark.parametrize('with_user', [True, False])
+    def test_groupids_readable_by_includes_world(self, with_user, service, db_session, factories):
+        user = None
+        if with_user:
+            user = factories.User()
+            db_session.add(user)
+            db_session.flush()
+
+        assert '__world__' in service.groupids_readable_by(user)
+
+    @pytest.mark.parametrize('with_user', [True, False])
+    def test_groupids_readable_by_includes_world_readable_groups(self, with_user, service, db_session, factories):
+        # group readable by members
+        factories.Group(readable_by=ReadableBy.members)
+        # group readable by everyone
+        group = factories.Group(readable_by=ReadableBy.world)
+
+        user = None
+        if with_user:
+            user = factories.User()
+            db_session.add(user)
+            db_session.flush()
+
+        assert group.pubid in service.groupids_readable_by(user)
+
+    def test_groupids_readable_by_includes_memberships(self, service, db_session, factories):
+        user = factories.User()
+        db_session.add(user)
+
+        group = factories.Group(readable_by=ReadableBy.members)
+        group.members.append(user)
+
+        db_session.flush()
+
+        assert group.pubid in service.groupids_readable_by(user)
+
     @pytest.fixture
     def group(self, users):
         return Group(name='Donkey Trust',
                      authority='foobar.com',
                      creator=users['cazimir'])
+
+    @pytest.fixture
+    def service(self, db_session, users):
+        return GroupService(db_session, users.get)
 
 
 @pytest.mark.usefixtures('user_service')
