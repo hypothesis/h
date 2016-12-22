@@ -18,7 +18,7 @@ class TestAccountSettings(object):
 
         res = email_form.submit().follow()
 
-        assert res.body.startswith('<!DOCTYPE html>')
+        assert res.text.startswith('<!DOCTYPE html>')
 
     def test_submit_email_form_with_xhr_returns_partial_html_snippet(self,
                                                                      app):
@@ -30,7 +30,7 @@ class TestAccountSettings(object):
 
         res = email_form.submit(xhr=True, status=200)
 
-        assert res.body.strip('\n').startswith('<form')
+        assert res.text.strip('\n').startswith('<form')
 
     def test_submit_email_form_with_xhr_returns_plain_text(self, app):
         res = app.get('/account/settings')
@@ -54,7 +54,7 @@ class TestAccountSettings(object):
 
         res = password_form.submit().follow()
 
-        assert res.body.startswith('<!DOCTYPE html>')
+        assert res.text.startswith('<!DOCTYPE html>')
 
     def test_submit_password_form_with_xhr_returns_partial_html_snippet(self,
                                                                         app):
@@ -67,7 +67,7 @@ class TestAccountSettings(object):
 
         res = password_form.submit(xhr=True)
 
-        assert res.body.strip('\n').startswith('<form')
+        assert res.text.strip('\n').startswith('<form')
 
     def test_submit_password_form_with_xhr_returns_plain_text(self, app):
         res = app.get('/account/settings')
