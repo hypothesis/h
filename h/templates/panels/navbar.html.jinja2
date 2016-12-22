@@ -2,8 +2,6 @@
 
 {% block content %}
 
-{% if feature('activity_pages') %}
-
 {% macro lozenge(facetName, facetValue) %}
   <div class="lozenge">
     <div class="lozenge__content">
@@ -111,5 +109,4 @@
 <script type="application/json" class="js-group-suggestions">
   {{groups_suggestions | to_json}}
 </script>
-{% endif %}
 {% endblock %}
