@@ -153,7 +153,7 @@ gulp.task('build-vendor-css', function () {
 var styleBundleEntryFiles = [
   './h/static/styles/admin.scss',
   './h/static/styles/help-page.scss',
-  './h/static/styles/site-v2.scss',
+  './h/static/styles/site.scss',
   './h/static/styles/old-home.scss',
 ];
 
