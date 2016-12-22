@@ -1,15 +1,9 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% if not feature('activity_pages') %}
-{% set style_bundle = 'site_css' %}
-{% endif %}
-
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block header %}
-  {% if feature('activity_pages') %}
-    {% include "h:templates/includes/logo-header.html.jinja2" %}
-  {%- endif %}
+  {% include "h:templates/includes/logo-header.html.jinja2" %}
 {% endblock %}
 
 {% block content %}
