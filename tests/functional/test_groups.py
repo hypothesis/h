@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 
+@pytest.mark.xfail  # See https://github.com/hypothesis/product-backlog/issues/109
 @pytest.mark.functional
 def test_group_page_includes_referrer_tag(app, db_session, factories, user):
     """
