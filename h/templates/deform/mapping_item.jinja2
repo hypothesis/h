@@ -1,24 +1,9 @@
-{% if feature('activity_pages') %}
-{% set field_class = 'form-input' %}
-{% set field_error_state_class = 'is-error' %}
-{% set field_label_class = 'form-input__label' %}
-{% set field_error_list_class = 'form-input__error-list' %}
-{% set field_error_item_class = 'form-input__error-item' %}
 {% set show_char_counter = field.widget.template in ('textinput', 'textarea') and
                            field.widget.max_length %}
-{% else %}
-{% set field_class = 'form-group form-field' %}
-{% set field_error_state_class = 'form-field-error' %}
-{% set field_label_class = 'form-label' %}
-{% set field_error_list_class = 'form-error-list' %}
-{% set field_error_item_class = 'form-error' %}
-{% set show_char_counter = False %}
-{% endif %}
-
 {%- if not field.widget.hidden -%}
-<div class="{{ field_class }}
+<div class="form-input
             js-form-input
-            {% if field.error %}{{ field_error_state_class }}{% endif %}
+            {% if field.error %}is-error{% endif %}
             {% if show_char_counter %} js-character-limit {%- endif %}
             {% if field.schema.hide_until_form_active %} is-hidden-when-loading {%- endif %}"
      {%- if field.description -%}
@@ -35,8 +20,8 @@
 {% endif -%}
 
 {%- if not (field.widget.hidden or field.widget.omit_label or field.widget.category == 'structural') -%}
-  <label class="{{ field_label_class }} {% if field.widget.label_css_class %} {{ field.widget.label_css_class }}{% endif %}
-                {%- if field.schema.hint and feature('activity_pages') -%}js-tooltip{% endif %}"
+  <label class="form-input__label {% if field.widget.label_css_class %} {{ field.widget.label_css_class }}{% endif %}
+                {%- if field.schema.hint -%}js-tooltip{% endif %}"
          {%- if field.schema.hint %}aria-label="{{ field.schema.hint }}"{% endif %}
          {%- if field.description -%}
          title="{{ _(field.description) }}"
@@ -44,16 +29,13 @@
          for="{{ field.oid }}">
          <span class="{%- if field.schema.inactive_label %}is-hidden-when-loading{% endif %}"
                data-ref="label">{{ _(field.title) }}</span>
-    {%- if field.required and field.widget.show_required and feature('activity_pages') -%}
+    {%- if field.required and field.widget.show_required -%}
       <span class="form-input__required">*</span>
     {% endif -%}
-    {%- if field.schema.hint and feature('activity_pages') -%}
+    {%- if field.schema.hint -%}
       <i class="form-input__hint-icon">
         {{ svg_icon('info_icon') }}
       </i>
-    {% endif -%}
-    {%- if field.schema.hint and not feature('activity_pages') %}
-      <span class="form-hint" id="hint-{{ field.oid }}">({{ field.schema.hint }})</span>
     {% endif -%}
   </label>
 {% endif -%}
@@ -61,11 +43,11 @@
 {{ field.serialize(cstruct) }}
 
 {%- if field.error and not field.widget.hidden -%}
-  <ul class="{{ field_error_list_class }}">
+  <ul class="form-input__error-list">
   {% for msg in field.error.messages() -%}
     {%- set errstr = 'error-%s' % field.oid -%}
     {%- set pid = (loop.index0==0 and errstr) or ('%s-%s' % (errstr, loop.index0)) -%}
-    <li class="{{ field_error_item_class }}" id="{{ pid }}">{{ _(msg) }}</li>
+    <li class="form-input__error-item" id="{{ pid }}">{{ _(msg) }}</li>
   {% endfor -%}
   </ul>
 {% endif -%}
@@ -73,7 +55,7 @@
 {%- if not field.widget.hidden -%}
 </div>
 
-{% if field.schema.hint and feature('activity_pages') %}
+{% if field.schema.hint %}
 <div class="form-input__hint" id="hint-{{ field.oid }}">{{ field.schema.hint }}</div>
 {% endif %}
 

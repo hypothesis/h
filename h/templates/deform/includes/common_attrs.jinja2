@@ -1,9 +1,3 @@
-{% if feature('activity_pages') %}
-{% set field_css_class = 'form-input__input' %}
-{% else %}
-{% set field_css_class = 'form-input' %}
-{% endif %}
-
 {% if field.widget.template in ('textinput', 'textarea') and field.widget.max_length %}
 {% set ref = 'characterLimitInput' %}
 {% endif %}
@@ -12,7 +6,7 @@ name="{{ field.name }}"
 value="{{ cstruct }}"
 id="{{ field.oid }}"
 data-ref="{{ ref }} formInput"
-class="{{field_css_class}}
+class="form-input__input
       {% if field.widget.css_class %} {{ field.widget.css_class }} {% endif %}
       {% if field.widget.autofocus %} js-select-onfocus{% endif %}
       {% if field.schema.hint %} has-hint {% endif %}"
