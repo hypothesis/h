@@ -14,7 +14,6 @@ class TestAccountSettings(object):
 
         email_form = res.forms['email']
         email_form['email'] = 'new_email@example.com'
-        email_form['email_confirm'] = 'new_email@example.com'
         email_form['password'] = 'pass'
 
         res = email_form.submit().follow()
@@ -27,7 +26,6 @@ class TestAccountSettings(object):
 
         email_form = res.forms['email']
         email_form['email'] = 'new_email@example.com'
-        email_form['email_confirm'] = 'new_email@example.com'
         email_form['password'] = 'pass'
 
         res = email_form.submit(xhr=True, status=200)
@@ -39,22 +37,11 @@ class TestAccountSettings(object):
 
         email_form = res.forms['email']
         email_form['email'] = 'new_email@example.com'
-        email_form['email_confirm'] = 'new_email@example.com'
         email_form['password'] = 'pass'
 
         res = email_form.submit(xhr=True)
 
         assert res.content_type == 'text/plain'
-
-    def test_submit_invalid_email_form_with_xhr_returns_400(self, app):
-        res = app.get('/account/settings')
-
-        email_form = res.forms['email']
-        email_form['email'] = 'new_email@example.com'
-        email_form['email_confirm'] = 'WRONG'
-        email_form['password'] = 'pass'
-
-        email_form.submit(xhr=True, status=400)
 
     def test_submit_password_form_without_xhr_returns_full_html_page(self,
                                                                      app):

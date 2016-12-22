@@ -487,16 +487,7 @@ class AccountController(object):
     def __init__(self, request):
         self.request = request
 
-        save_email_label = _('Change email address')
-        save_password_label = _('Change password')
-
-        if request.feature('activity_pages'):
-            email_schema = schemas.EmailChangeSchema().bind(request=request)
-            save_email_label = _('Save')
-            save_password_label = _('Save')
-        else:
-            email_schema = schemas.LegacyEmailChangeSchema().bind(request=request)
-
+        email_schema = schemas.EmailChangeSchema().bind(request=request)
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
         # Ensure deform generates unique field IDs for each field in this
@@ -505,12 +496,12 @@ class AccountController(object):
 
         self.forms = {
             'email': request.create_form(email_schema,
-                                         buttons=(save_email_label,),
+                                         buttons=(_('Save'),),
                                          formid='email',
                                          counter=counter,
                                          use_inline_editing=True),
             'password': request.create_form(password_schema,
-                                            buttons=(save_password_label,),
+                                            buttons=(_('Save'),),
                                             formid='password',
                                             counter=counter,
                                             use_inline_editing=True),
@@ -551,11 +542,7 @@ class AccountController(object):
         """Return the data needed to render accounts.html.jinja2."""
         email = self.request.authenticated_user.email
         password_form = self.forms['password'].render()
-
-        if self.request.feature('activity_pages'):
-            email_form = self.forms['email'].render({'email': email})
-        else:
-            email_form = self.forms['email'].render()
+        email_form = self.forms['email'].render({'email': email})
 
         return {'email': email,
                 'email_form': email_form,
