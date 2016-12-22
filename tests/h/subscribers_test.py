@@ -40,73 +40,47 @@ class TestPublishAnnotationEvent:
 
 @pytest.mark.usefixtures('fetch_annotation')
 class TestSendReplyNotifications(object):
-    def test_calls_get_notification_with_request_annotation_and_action(self, fetch_annotation):
+    def test_calls_get_notification_with_request_annotation_and_action(self, fetch_annotation, pyramid_request):
         send = FakeMailer()
         get_notification = mock.Mock(spec_set=[], return_value=None)
         generate_mail = mock.Mock(spec_set=[], return_value=[])
-        event = AnnotationEvent(mock.sentinel.request,
+        event = AnnotationEvent(pyramid_request,
                                 mock.sentinel.annotation_id,
                                 mock.sentinel.action)
-        mock.sentinel.request.db = mock.Mock()
 
         subscribers.send_reply_notifications(event,
                                              get_notification=get_notification,
                                              generate_mail=generate_mail,
                                              send=send)
 
-        fetch_annotation.assert_called_once_with(mock.sentinel.request.db,
+        fetch_annotation.assert_called_once_with(pyramid_request.db,
                                                  mock.sentinel.annotation_id)
 
-        get_notification.assert_called_once_with(mock.sentinel.request,
+        get_notification.assert_called_once_with(pyramid_request,
                                                  fetch_annotation.return_value,
                                                  mock.sentinel.action)
 
-    def test_generates_and_sends_mail_for_any_notification(self):
-        s = mock.sentinel
+    def test_generates_and_sends_mail_for_any_notification(self, pyramid_request):
         send = FakeMailer()
-        get_notification = mock.Mock(spec_set=[], return_value=s.notification)
+        get_notification = mock.Mock(spec_set=[], return_value=mock.sentinel.notification)
         generate_mail = mock.Mock(spec_set=[])
         generate_mail.return_value = (['foo@example.com'], 'Your email', 'Text body', 'HTML body')
-        event = AnnotationEvent(s.request, None, None)
-        s.request.db = mock.Mock()
+        event = AnnotationEvent(pyramid_request, None, None)
 
         subscribers.send_reply_notifications(event,
                                              get_notification=get_notification,
                                              generate_mail=generate_mail,
                                              send=send)
 
-        generate_mail.assert_called_once_with(s.request, s.notification)
+        generate_mail.assert_called_once_with(pyramid_request,
+                                              mock.sentinel.notification)
         assert send.lastcall == (['foo@example.com'], 'Your email', 'Text body', 'HTML body')
-
-    def test_catches_exceptions_and_reports_to_sentry(self, pyramid_request):
-        send = FakeMailer()
-        get_notification = mock.Mock(spec_set=[], side_effect=RuntimeError('asplode!'))
-        generate_mail = mock.Mock(spec_set=[], return_value=[])
-        pyramid_request.debug = False
-        pyramid_request.sentry = mock.Mock()
-        event = AnnotationEvent(pyramid_request, None, None)
-
-        subscribers.send_reply_notifications(event,
-                                             get_notification=get_notification,
-                                             generate_mail=generate_mail,
-                                             send=send)
-
-        event.request.sentry.captureException.assert_called_once_with()
-
-    def test_reraises_exceptions_in_debug_mode(self, pyramid_request):
-        send = FakeMailer()
-        get_notification = mock.Mock(spec_set=[], side_effect=RuntimeError('asplode!'))
-        generate_mail = mock.Mock(spec_set=[], return_value=[])
-        pyramid_request.debug = True
-        pyramid_request.sentry = mock.Mock()
-        event = AnnotationEvent(pyramid_request, None, None)
-
-        with pytest.raises(RuntimeError):
-            subscribers.send_reply_notifications(event,
-                                                 get_notification=get_notification,
-                                                 generate_mail=generate_mail,
-                                                 send=send)
 
     @pytest.fixture
     def fetch_annotation(self, patch):
         return patch('h.subscribers.storage.fetch_annotation')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.tm = mock.MagicMock()
+        return pyramid_request
