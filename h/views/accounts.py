@@ -21,6 +21,7 @@ from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
+from h.emails import reset_password
 from h.tasks import mailer
 from h.util.view import json_view
 from h._compat import urlparse
@@ -252,12 +253,8 @@ class ForgotPasswordController(object):
             raise httpexceptions.HTTPFound(self.request.route_path('index'))
 
     def _send_forgot_password_email(self, user):
-        serializer = self.request.registry.password_reset_serializer
-        code = serializer.dumps(user.username)
-
-        link = account_reset_link(self.request, code)
-        message = account_reset_email(user, code, link)
-        mailer.send.delay(**message)
+        send_params = reset_password.generate(self.request, user)
+        mailer.send.delay(*send_params)
 
 
 @view_defaults(route_name='account_reset',
@@ -676,36 +673,6 @@ class DeveloperController(object):
             self.request.db.add(token)
 
         return {'token': token.value}
-
-
-def account_reset_email(user, reset_code, reset_link):
-    """Return the data for a 'reset your password' email for the given user.
-
-    :rtype: dict
-
-    """
-    emailtext = ("Hello, {username}!\n\n"
-                 "Someone has requested to reset your password. If it was "
-                 "you, reset your password by using this reset code:\n\n"
-                 "{code}\n\n"
-                 "Alternatively, you can reset your password by "
-                 "clicking on this link:\n\n"
-                 "{link}\n\n"
-                 "Regards,\n"
-                 "The Hypothesis Team\n")
-    body = emailtext.format(code=reset_code,
-                            link=reset_link,
-                            username=user.username)
-    return {
-        "recipients": [user.email],
-        "subject": _("Reset your password"),
-        "body": body
-    }
-
-
-def account_reset_link(request, reset_code):
-    """Transform an activation code into an account reset link."""
-    return request.route_url('account_reset_with_code', code=reset_code)
 
 
 # TODO: This can be removed after October 2016, which will be >1 year from the

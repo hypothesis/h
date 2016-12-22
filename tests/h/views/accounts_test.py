@@ -307,6 +307,7 @@ class TestAjaxAuthController(object):
 
 @pytest.mark.usefixtures('activation_model',
                          'mailer',
+                         'reset_password_email',
                          'routes')
 class TestForgotPasswordController(object):
 
@@ -331,26 +332,8 @@ class TestForgotPasswordController(object):
 
         assert activation_model.call_count == 0
 
-    @mock.patch('h.views.accounts.account_reset_link')
-    def test_post_generates_reset_link(self,
-                                       reset_link,
-                                       factories,
-                                       form_validating_to,
-                                       pyramid_request):
-        pyramid_request.registry.password_reset_serializer = FakeSerializer()
-        user = factories.User(username='giraffe', email='giraffe@thezoo.org')
-        controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = form_validating_to({"user": user})
-
-        controller.post()
-
-        reset_link.assert_called_with(pyramid_request, "faketoken")
-
-    @mock.patch('h.views.accounts.account_reset_email')
-    @mock.patch('h.views.accounts.account_reset_link')
     def test_post_generates_mail(self,
-                                 reset_link,
-                                 reset_mail,
+                                 reset_password_email,
                                  activation_model,
                                  factories,
                                  form_validating_to,
@@ -359,20 +342,14 @@ class TestForgotPasswordController(object):
         user = factories.User(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = form_validating_to({"user": user})
-        reset_link.return_value = "http://example.com"
-        reset_mail.return_value = {
-            'recipients': [],
-            'subject': '',
-            'body': ''
-        }
 
         controller.post()
 
-        reset_mail.assert_called_with(user, "faketoken", "http://example.com")
+        reset_password_email.generate.assert_called_once_with(pyramid_request,
+                                                              user)
 
-    @mock.patch('h.views.accounts.account_reset_email')
     def test_post_sends_mail(self,
-                             reset_mail,
+                             reset_password_email,
                              factories,
                              form_validating_to,
                              mailer,
@@ -381,17 +358,13 @@ class TestForgotPasswordController(object):
         user = factories.User(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = form_validating_to({"user": user})
-        reset_mail.return_value = {
-            'recipients': ['giraffe@thezoo.org'],
-            'subject': 'subject',
-            'body': 'body'
-        }
 
         controller.post()
 
-        mailer.send.delay.assert_called_once_with(recipients=['giraffe@thezoo.org'],
-                                                  subject='subject',
-                                                  body='body')
+        mailer.send.delay.assert_called_once_with(['giraffe@thezoo.org'],
+                                                  'Reset yer passwor!',
+                                                  'HTML output',
+                                                  'Text output')
 
     def test_post_redirects_on_success(self,
                                        factories,
@@ -413,10 +386,20 @@ class TestForgotPasswordController(object):
             views.ForgotPasswordController(pyramid_request).get()
 
     @pytest.fixture
+    def reset_password_email(self, patch):
+        reset_password_email = patch('h.views.accounts.reset_password')
+        reset_password_email.generate.return_value = (
+            ['giraffe@thezoo.org'],
+            'Reset yer passwor!',
+            'HTML output',
+            'Text output',
+        )
+        return reset_password_email
+
+    @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('index', '/index')
         pyramid_config.add_route('account_reset', '/account/reset')
-        pyramid_config.add_route('account_reset_with_code', '/account/reset-with-code')
 
 
 @pytest.mark.usefixtures('routes')
