@@ -488,9 +488,6 @@ class AccountController(object):
         self.request = request
 
         email_schema = schemas.EmailChangeSchema().bind(request=request)
-        save_email_label = _('Save')
-        save_password_label = _('Save')
-
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
         # Ensure deform generates unique field IDs for each field in this
@@ -499,12 +496,12 @@ class AccountController(object):
 
         self.forms = {
             'email': request.create_form(email_schema,
-                                         buttons=(save_email_label,),
+                                         buttons=(_('Save'),),
                                          formid='email',
                                          counter=counter,
                                          use_inline_editing=True),
             'password': request.create_form(password_schema,
-                                            buttons=(save_password_label,),
+                                            buttons=(_('Save'),),
                                             formid='password',
                                             counter=counter,
                                             use_inline_editing=True),
