@@ -36,7 +36,7 @@ def test_submit_create_group_form_without_xhr_returns_full_html_page(app):
 
     res = group_form.submit().follow()
 
-    assert res.body.startswith('<!DOCTYPE html>')
+    assert res.text.startswith('<!DOCTYPE html>')
 
 
 @pytest.mark.functional
