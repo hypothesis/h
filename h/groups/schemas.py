@@ -63,22 +63,3 @@ def group_schema(autofocus_name=False):
     schema.add(description)
 
     return schema
-
-
-class LegacyGroupSchema(CSRFSchema):
-
-    """The legacy schema for the create-a-new-group form."""
-
-    name = colander.SchemaNode(
-        colander.String(),
-        title=_("What do you want to call the group?"),
-        validator=validators.Length(
-            min=GROUP_NAME_MIN_LENGTH,
-            max=GROUP_NAME_MAX_LENGTH),
-        widget=deform.widget.TextInputWidget(
-            autofocus=True,
-            css_class="group-form__name-input js-group-name-input",
-            disable_autocomplete=True,
-            label_css_class="group-form__name-label",
-            max_length=GROUP_NAME_MAX_LENGTH,
-            placeholder=_("Group Name")))

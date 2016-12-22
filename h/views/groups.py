@@ -22,11 +22,8 @@ class GroupCreateController(object):
     def __init__(self, request):
         self.request = request
 
-        if request.feature('activity_pages'):
-            self.schema = schemas.group_schema(autofocus_name=True).bind(
-                request=self.request)
-        else:
-            self.schema = schemas.LegacyGroupSchema().bind(request=self.request)
+        self.schema = schemas.group_schema(autofocus_name=True).bind(
+            request=self.request)
 
         submit = deform.Button(title=_('Create a new group'),
                                css_class='primary-action-btn '
