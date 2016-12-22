@@ -72,7 +72,7 @@ class Group(Base, mixins.Timestamps):
     #: Which type of user is allowed to read annotations in this group,
     #: possible values are: authority, members, world
     readable_by = sa.Column(sa.Enum(ReadableBy, name='group_readable_by'),
-                            nullable=True)
+                            nullable=True, index=True)
 
     #: Which type of user is allowed to write to this group, possible values
     #: are: authority, members
