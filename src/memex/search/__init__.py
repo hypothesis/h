@@ -37,8 +37,12 @@ def includeme(config):
     config.registry[MATCHERS_KEY] = []
     config.add_directive('memex_add_search_filter',
                          lambda c, f: c.registry[FILTERS_KEY].append(f))
+    config.add_directive('memex_get_search_filters',
+                         lambda c: c.registry[FILTERS_KEY])
     config.add_directive('memex_add_search_matcher',
                          lambda c, m: c.registry[MATCHERS_KEY].append(m))
+    config.add_directive('memex_get_search_matchers',
+                         lambda c: c.registry[MATCHERS_KEY])
 
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to
