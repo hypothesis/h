@@ -76,7 +76,6 @@ class TestEventQueue(object):
         assert not publish_all.called
 
     def test_response_callback_publishes_events(self, publish_all, pyramid_request):
-        pyramid_request.tm = mock.MagicMock()
         queue = eventqueue.EventQueue(pyramid_request)
         queue(mock.Mock())
         queue.response_callback(pyramid_request, None)

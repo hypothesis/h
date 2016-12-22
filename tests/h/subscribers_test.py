@@ -108,3 +108,8 @@ class TestSendReplyNotifications(object):
     @pytest.fixture
     def fetch_annotation(self, patch):
         return patch('h.subscribers.storage.fetch_annotation')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.tm = mock.MagicMock()
+        return pyramid_request

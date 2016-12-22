@@ -40,8 +40,7 @@ class EventQueue(object):
         if request.exception is not None:
             return
 
-        with request.tm:
-            self.publish_all()
+        self.publish_all()
 
 
 def includeme(config):
