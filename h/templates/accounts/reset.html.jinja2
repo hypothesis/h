@@ -1,58 +1,28 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% if not feature('activity_pages') %}
-{% set style_bundle = 'legacy_site_css' %}
-{% endif %}
-
 {% block header %}
   {% include "h:templates/includes/logo-header.html.jinja2" %}
 {% endblock %}
 
 {% block page_title %}
-{% if feature('activity_pages') %}
 Reset your password
-{% else %}
-Password reset
-{% endif %}
 {% endblock %}
 
 {% block content %}
-  {% if feature('activity_pages') %}
-  <div class="form-container content">
-    <h1 class="form-header">New password</h1>
-    {% if not has_code %}
-    <div class="form-description">
-    {% trans %}
-    Please check your email. We've sent you a reset code that you must enter
-    below in order to set your new password.
-    {% endtrans %}
-    </div>
-    {% endif %}
-    {{ form }}
-    <footer class="form-footer">
-      Already know your password?
-      <a class="link--footer" href="{{ request.route_path('login') }}">Log in</a>
-    </footer>
-  </div>
-  {% else %}
-  <div class="content paper">
-    <div class="form-vertical">
-      <ul class="nav nav-tabs">
-        <li><a href="{{ request.route_path('login') }}">Log in</a></li>{#
-        #}<li><a href="{{ request.route_path('signup') }}">Create an account</a></li>{#
-        #}<li class="active"><a href="">New password</a></li>
-      </ul>
-      {% if not has_code %}
-      <legend>
-        {% trans %}
-        When you reset your password, we will send you an email containing a
-        code you can use to complete the process. Please check your email and
-        retrieve the code in order to set your new password.
-        {% endtrans %}
-      </legend>
-      {% endif %}
-      {{ form }}
-    </div>
+<div class="form-container content">
+  <h1 class="form-header">New password</h1>
+  {% if not has_code %}
+  <div class="form-description">
+  {% trans %}
+  Please check your email. We've sent you a reset code that you must enter
+  below in order to set your new password.
+  {% endtrans %}
   </div>
   {% endif %}
+  {{ form }}
+  <footer class="form-footer">
+    Already know your password?
+    <a class="link--footer" href="{{ request.route_path('login') }}">Log in</a>
+  </footer>
+</div>
 {% endblock content %}
