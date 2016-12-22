@@ -55,23 +55,6 @@ class TestGroupCreateController(object):
 
         assert group_service.created == [('my_new_group', 'example.com', 'ariadna', 'foobar')]
 
-    def test_post_creates_new_group_if_legacy_form_valid(self,
-                                                         controller,
-                                                         group_service,
-                                                         handle_form_submission,
-                                                         pyramid_config):
-        pyramid_config.testing_securitypolicy('ariadna')
-
-        # If the form submission is valid then handle_form_submission() should
-        # call on_success() with the appstruct.
-        def call_on_success(request, form, on_success, on_failure):
-            on_success({'name': 'my_new_group'})
-        handle_form_submission.side_effect = call_on_success
-
-        controller.post()
-
-        assert group_service.created == [('my_new_group', 'example.com', 'ariadna', None)]
-
     def test_post_redirects_if_form_valid(self,
                                           controller,
                                           handle_form_submission,
