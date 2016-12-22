@@ -144,39 +144,6 @@ class TestGroupEditController(object):
         assert group.description == 'We are all about the alligators now'
 
 
-@pytest.mark.usefixtures('group_service', 'routes')
-class TestGroupRead(object):
-    def test_redirects_if_slug_incorrect(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_request.matchdict['slug'] = 'another-slug'
-
-        with pytest.raises(HTTPMovedPermanently) as exc:
-            views.read(group, pyramid_request)
-
-        assert exc.value.location == '/g/abc123/some-slug'
-
-    def test_redirects(self, matchers, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_request.matchdict['slug'] = 'some-slug'
-
-        assert views.read(group, pyramid_request) == matchers.redirect_303_to(
-            '/g/abc123/some-slug')
-
-    def test_returns_template_context(self, patch, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        group.documents = lambda: ['d1', 'd2']
-        link = patch('h.presenters.DocumentHTMLPresenter.link',
-                     autospec=None,
-                     new_callable=mock.PropertyMock)
-        link.side_effect = ['link1', 'link2']
-        pyramid_request.matchdict['slug'] = 'some-slug'
-
-        result = views.read(group, pyramid_request)
-
-        assert result['group'] == group
-        assert result['document_links'] == ['link1', 'link2']
-
-
 @pytest.mark.usefixtures('routes')
 class TestGroupReadUnauthenticated(object):
     def test_redirects_if_slug_incorrect(self, pyramid_request):
