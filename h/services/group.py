@@ -2,8 +2,10 @@
 
 from functools import partial
 
+import sqlalchemy as sa
+
 from h import session
-from h.models import Annotation, Group
+from h.models import Annotation, Group, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 GROUP_ACCESS_FLAGS = {
@@ -101,6 +103,24 @@ class GroupService(object):
             self.session.query(Annotation)
             .filter_by(groupid=pubid, shared=True)
             .count())
+
+    def groupids_readable_by(self, user):
+        """
+        Return a list of pubids for which the user has read access.
+
+        If the passed-in user is ``None``, this returns the list of
+        world-readable groups.
+        """
+        readable = (Group.readable_by == ReadableBy.world)
+
+        if user is not None:
+            readable_member = sa.and_(Group.readable_by == ReadableBy.members, Group.members.any(User.id == user.id))
+            readable = sa.or_(readable, readable_member)
+
+        ids = [record.pubid for record in self.session.query(Group.pubid).filter(readable)]
+        ids.insert(0, '__world__')
+
+        return ids
 
 
 def groups_factory(context, request):

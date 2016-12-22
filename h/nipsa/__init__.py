@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from h.nipsa import search
-
 
 def includeme(config):
     # Register the transform_annotation subscriber so that nipsa fields are
@@ -10,4 +8,4 @@ def includeme(config):
                           'memex.events.AnnotationTransformEvent')
 
     # Register an additional filter with the API search module
-    config.add_search_filter(search.Filter)
+    config.memex_add_search_filter('h.nipsa.search.Filter')
