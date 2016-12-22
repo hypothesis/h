@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.settings import asbool
-
 from memex.search.client import Client
 from memex.search.config import init
 from memex.search.core import Search
@@ -36,11 +34,11 @@ def includeme(config):
     config.registry[FILTERS_KEY] = []
     config.registry[MATCHERS_KEY] = []
     config.add_directive('memex_add_search_filter',
-                         lambda c, f: c.registry[FILTERS_KEY].append(f))
+                         lambda c, f: c.registry[FILTERS_KEY].append(config.maybe_dotted(f)))
     config.add_directive('memex_get_search_filters',
                          lambda c: c.registry[FILTERS_KEY])
     config.add_directive('memex_add_search_matcher',
-                         lambda c, m: c.registry[MATCHERS_KEY].append(m))
+                         lambda c, m: c.registry[MATCHERS_KEY].append(config.maybe_dotted(m)))
     config.add_directive('memex_get_search_matchers',
                          lambda c: c.registry[MATCHERS_KEY])
 

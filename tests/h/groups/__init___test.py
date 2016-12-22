@@ -17,7 +17,7 @@ def pyramid_config(pyramid_config):
 
     filters = []
     pyramid_config.add_directive('memex_add_search_filter',
-                                 lambda c, f: filters.append(f))
+                                 lambda c, f: filters.append(pyramid_config.maybe_dotted(f)))
     pyramid_config.add_directive('memex_get_search_filters',
                                  lambda c: filters)
     return pyramid_config
