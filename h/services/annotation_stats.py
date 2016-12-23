@@ -14,7 +14,9 @@ class AnnotationStatsService(object):
     def user_annotation_counts(self, userid):
         """Return the count of annotations for this user."""
 
-        annotations = self.session.query(Annotation).filter_by(userid=userid).options(sa.orm.load_only('groupid', 'shared')).subquery()
+        annotations = self.session.query(Annotation). \
+            filter_by(userid=userid, deleted=False). \
+            options(sa.orm.load_only('groupid', 'shared')).subquery()
         grouping = sa.case([
             (sa.not_(annotations.c.shared), 'private'),
             (annotations.c.groupid == '__world__', 'public'),
@@ -37,7 +39,7 @@ class AnnotationStatsService(object):
 
         return (
             self.session.query(Annotation)
-            .filter_by(groupid=pubid, shared=True)
+            .filter_by(groupid=pubid, shared=True, deleted=False)
             .count())
 
 
