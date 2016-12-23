@@ -11,7 +11,7 @@ from h.activity.query import ActivityResults
 from h.views import activity
 
 
-@pytest.mark.usefixtures('paginate', 'query', 'routes')
+@pytest.mark.usefixtures('annotation_stats_service', 'paginate', 'query', 'routes')
 class TestSearchController(object):
 
     def test_search_checks_for_redirects(self, controller, pyramid_request, query):
@@ -108,7 +108,7 @@ class TestSearchController(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('group_service', 'routes', 'search')
+@pytest.mark.usefixtures('annotation_stats_service', 'group_service', 'routes', 'search')
 class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
@@ -357,28 +357,26 @@ class TestGroupSearchController(object):
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
 
-    def test_search_passes_the_annotation_count_to_the_template(self,
-                                                                controller,
-                                                                search,
-                                                                group,
-                                                                group_service,
-                                                                pyramid_request):
+    def test_search_passes_the_group_annotation_count_to_the_template(self,
+                                                                      controller,
+                                                                      group,
+                                                                      pyramid_request):
         pyramid_request.authenticated_user = group.members[-1]
-        controller.search()
+        result = controller.search()['stats']
 
-        group_service.annotation_count.assert_called_once_with(group.pubid)
+        assert result['annotation_count'] == 5
 
-    def test_search_does_not_pass_annotation_count_to_the_template_when_flag_is_disabled(self,
-                                                                                         controller,
-                                                                                         search,
-                                                                                         group,
-                                                                                         group_service,
-                                                                                         pyramid_request):
+    def test_search_does_not_pass_annotation_count_to_the_template(self,
+                                                                   controller,
+                                                                   group,
+                                                                   pyramid_request):
+        """ It should not pass the annotation count to the view when the feature flag is turned off."""
+
         pyramid_request.authenticated_user = group.members[-1]
         pyramid_request.feature.flags['total_shared_annotations'] = False
-        controller.search()
+        result = controller.search()['stats']
 
-        assert group_service.annotation_count.called is False
+        assert result['annotation_count'] is None
 
     @pytest.mark.parametrize('q', ['', '   '])
     def test_leave_removes_empty_query_from_url(self,
@@ -527,7 +525,7 @@ class TestGroupSearchController(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('user_service', 'routes', 'search')
+@pytest.mark.usefixtures('annotation_stats_service', 'user_service', 'routes', 'search')
 class TestUserSearchController(object):
 
     """Tests unique to UserSearchController."""
@@ -571,25 +569,42 @@ class TestUserSearchController(object):
 
         assert username == user.display_name
 
-    def test_search_passes_the_annotation_count_to_the_template(self,
-                                                                controller,
-                                                                search,
-                                                                user,
-                                                                user_service):
-        controller.search()
+    def test_search_passes_the_user_annotation_counts_to_the_template(self,
+                                                                      controller,
+                                                                      pyramid_config,
+                                                                      user):
+        pyramid_config.testing_securitypolicy(user.userid)
 
-        user_service.annotation_count.assert_called_once_with(user.userid)
+        stats = controller.search()['stats']
 
-    def test_search_does_not_pass_the_annotation_count_to_the_template_when_flag_is_disabled(self,
-                                                                                             controller,
-                                                                                             search,
-                                                                                             user,
-                                                                                             user_service,
-                                                                                             pyramid_request):
+        assert stats['annotation_count'] == 6
+
+    def test_search_does_not_pass_the_user_annotation_counts_to_the_template(self,
+                                                                             controller,
+                                                                             pyramid_request):
+        """ It should not pass the annotation counts to the view when the feature flag is turned off."""
+
         pyramid_request.feature.flags['total_shared_annotations'] = False
-        controller.search()
+        result = controller.search()['stats']
 
-        assert user_service.annotation_count.called == False
+        assert result['annotation_count'] is None
+
+    def test_search_passes_public_annotation_counts_to_the_template(self,
+                                                                    controller,
+                                                                    factories,
+                                                                    pyramid_config,
+                                                                    pyramid_request):
+        """
+        The annotation count passed to the view should not include private and group annotation counts
+        if the user whose page we are on is different from the authenticated user.
+
+        """
+        pyramid_request.feature.flags['total_shared_annotations'] = True
+        pyramid_config.testing_securitypolicy(factories.User().userid)
+
+        stats = controller.search()['stats']
+
+        assert stats['annotation_count'] == 1
 
     def test_search_passes_the_other_user_details_to_the_template(self,
                                                                   controller,
@@ -862,6 +877,14 @@ class TestGroupAndUserSearchController(object):
         return activity.UserSearchController(user, pyramid_request)
 
 
+class FakeAnnotationStatsService(object):
+    def user_annotation_counts(self, userid):
+        return {'public': 1, 'private': 3, 'group': 2}
+
+    def group_annotation_count(self, pubid):
+        return 5
+
+
 @pytest.fixture
 def group(factories):
     # Create some other groups as well, just to make sure it gets the right
@@ -892,6 +915,11 @@ def routes(pyramid_config):
     pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
     pyramid_config.add_route('group_edit', '/groups/{pubid}/edit')
     pyramid_config.add_route('account_profile', '/account/profile')
+
+
+@pytest.fixture
+def annotation_stats_service(pyramid_config):
+    pyramid_config.register_service(FakeAnnotationStatsService(), name='annotation_stats')
 
 
 @pytest.fixture

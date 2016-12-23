@@ -110,16 +110,6 @@ class UserService(object):
 
         return None
 
-    def annotation_count(self, userid):
-        """
-        Return the count of shared annotations for this user.
-        """
-
-        return (
-            self.session.query(Annotation)
-            .filter_by(userid=userid, groupid='__world__',  shared=True)
-            .count())
-
 
 def user_service_factory(context, request):
     """Return a UserService instance for the passed context and request."""
