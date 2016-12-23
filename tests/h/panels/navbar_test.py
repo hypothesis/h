@@ -66,6 +66,11 @@ class TestNavbar(object):
         result = navbar({}, req)
         assert result['search_url'] == 'http://example.com/search'
 
+    def test_it_includes_default_search_url_if_no_matched_route(self, req):
+        req.matched_route = None
+        result = navbar({}, req)
+        assert result['search_url'] == 'http://example.com/search'
+
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('account', '/account')
