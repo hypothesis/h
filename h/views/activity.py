@@ -260,7 +260,7 @@ class UserSearchController(SearchController):
             user_annotation_counts = self.request.find_service(name='annotation_stats').user_annotation_counts(self.user.userid)
             annotation_count = user_annotation_counts['public']
             if self.request.authenticated_userid == self.user.userid:
-                annotation_count = annotation_count + user_annotation_counts['private'] + user_annotation_counts['group']
+                annotation_count = user_annotation_counts['total']
 
         result['stats'] = {
             'annotation_count': annotation_count,
