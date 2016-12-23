@@ -25,6 +25,26 @@ class TestAnnotationStatsService(object):
         assert results['private'] == 2
         assert results['group'] == 4
 
+    @pytest.mark.parametrize('public,group,private,expected_total', [
+        (3, 2, 4, 9),
+        (3, 2, 0, 5),
+        (3, 0, 4, 7),
+        (0, 2, 4, 6),
+     ])
+    def test_user_annotation_counts_includes_total_count_of_annotations_for_user(
+            self, svc, factories, public, group, private, expected_total):
+        userid = '123'
+        for i in range(public):
+            factories.Annotation(userid=userid, shared=True)
+        for i in range(private):
+            factories.Annotation(userid=userid, shared=False)
+        for i in range(group):
+            factories.Annotation(userid=userid, groupid='abc', shared=True)
+
+        results = svc.user_annotation_counts(userid)
+
+        assert results['total'] == expected_total
+
     def test_annotation_count_returns_count_of_shared_annotations_for_group(self, svc, factories):
         pubid = 'abc123'
         for i in range(3):

@@ -19,7 +19,13 @@ class AnnotationStatsService(object):
             (sa.not_(annotations.c.shared), 'private'),
             (annotations.c.groupid == '__world__', 'public'),
         ], else_='group')
-        return dict(self.session.query(grouping, sa.func.count(annotations.c.id)).group_by(grouping).all())
+
+        result = dict(self.session.query(grouping, sa.func.count(annotations.c.id)).group_by(grouping).all())
+        result['total'] = result.get('public', 0) + \
+            result.get('group', 0) + \
+            result.get('private', 0)
+
+        return result
 
     def group_annotation_count(self, pubid):
         """
