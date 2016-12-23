@@ -1,12 +1,11 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% set style_bundle = 'legacy_site_css' %}
-
 {% block page_title %}Claim account{% endblock page_title %}
 
 {% block content %}
-  <div id="claim" class="content paper">
-    {% include "h:templates/includes/logo-header.html.jinja2" %}
+  {% include "h:templates/includes/logo-header.html.jinja2" %}
+  <div class="form-container">
+    <h1 class="form-header">Claim account</h1>
     <p>
       Sorry, your claim link has expired. If you still wish to claim a username
       you reserved, please contact us at
