@@ -21,9 +21,12 @@ class AnnotationStatsService(object):
         ], else_='group')
 
         result = dict(self.session.query(grouping, sa.func.count(annotations.c.id)).group_by(grouping).all())
-        result['total'] = result.get('public', 0) + \
-            result.get('group', 0) + \
-            result.get('private', 0)
+        for key in ['public', 'group', 'private']:
+            result.setdefault(key, 0)
+
+        result['total'] = result['public'] + \
+            result['group'] + \
+            result['private']
 
         return result
 

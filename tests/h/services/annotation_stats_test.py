@@ -45,6 +45,14 @@ class TestAnnotationStatsService(object):
 
         assert results['total'] == expected_total
 
+    def test_user_annotation_counts_returns_default_values(self, svc, factories):
+        results = svc.user_annotation_counts('123')
+
+        assert results['public'] == 0
+        assert results['private'] == 0
+        assert results['group'] == 0
+        assert results['total'] == 0
+
     def test_annotation_count_returns_count_of_shared_annotations_for_group(self, svc, factories):
         pubid = 'abc123'
         for i in range(3):
