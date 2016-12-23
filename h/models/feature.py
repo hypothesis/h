@@ -11,11 +11,9 @@ from h.db import Base
 log = logging.getLogger(__name__)
 
 FEATURES = {
-    'activity_pages': "Show the new activity pages?",
     'defer_realtime_updates': ("Require a user action before applying real-time"
                                " updates to annotations in the client?"),
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
-    'search_page': "Show the activity pages search skeleton page?",
     'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
 }
 
@@ -37,7 +35,10 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {}
+FEATURES_PENDING_REMOVAL = {
+    'activity_pages': "Show the new activity pages?",
+    'search_page': "Show the activity pages search skeleton page?",
+}
 
 
 class Feature(Base):

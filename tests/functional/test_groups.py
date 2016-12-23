@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 
+@pytest.mark.xfail  # See https://github.com/hypothesis/product-backlog/issues/109
 @pytest.mark.functional
 def test_group_page_includes_referrer_tag(app, db_session, factories, user):
     """
@@ -36,7 +37,7 @@ def test_submit_create_group_form_without_xhr_returns_full_html_page(app):
 
     res = group_form.submit().follow()
 
-    assert res.body.startswith('<!DOCTYPE html>')
+    assert res.text.startswith('<!DOCTYPE html>')
 
 
 @pytest.mark.functional

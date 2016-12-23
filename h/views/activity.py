@@ -31,9 +31,6 @@ class SearchController(object):
     """View callables for the "activity.search" route."""
 
     def __init__(self, request):
-        if not request.feature('search_page'):
-            raise httpexceptions.HTTPNotFound()
-
         self.request = request
 
     @view_config(request_method='GET')
@@ -91,7 +88,6 @@ class SearchController(object):
 @view_defaults(route_name='group_read',
                renderer='h:templates/activity/search.html.jinja2',
                effective_principals=security.Authenticated,
-               has_feature_flag='search_page',
                has_permission='read',
                request_method='GET')
 class GroupSearchController(SearchController):

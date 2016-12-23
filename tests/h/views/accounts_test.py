@@ -76,7 +76,6 @@ class TestAuthController(object):
     def test_post_redirects_to_search_page_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
         pyramid_request.authenticated_user = mock.Mock(username='janedoe')
-        pyramid_request.feature.flags['search_page'] = True
 
         with pytest.raises(httpexceptions.HTTPFound) as exc:
             views.AuthController(pyramid_request).post()
@@ -526,6 +525,7 @@ class TestSignupController(object):
 
     def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
+        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
         controller = views.SignupController(pyramid_request)
 
         with pytest.raises(httpexceptions.HTTPRedirection):
@@ -533,6 +533,7 @@ class TestSignupController(object):
 
     @pytest.fixture
     def routes(self, pyramid_config):
+        pyramid_config.add_route('activity.user_search', '/users/{username}')
         pyramid_config.add_route('index', '/index')
         pyramid_config.add_route('stream', '/stream')
 
@@ -1032,12 +1033,6 @@ def mailer(patch):
 @pytest.fixture
 def models(patch):
     return patch('h.views.accounts.models')
-
-
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.feature.flags['search_page'] = False
-    return pyramid_request
 
 
 @pytest.fixture

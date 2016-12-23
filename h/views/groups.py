@@ -9,7 +9,6 @@ from pyramid.view import view_config, view_defaults
 
 from h import form
 from h import i18n
-from h import presenters
 from h.groups import schemas
 
 _ = i18n.TranslationString
@@ -105,32 +104,6 @@ class GroupEditController(object):
     def _update_group(self, appstruct):
         self.group.name = appstruct['name']
         self.group.description = appstruct['description']
-
-
-@view_config(route_name='group_read',
-             request_method='GET',
-             renderer='h:templates/groups/share.html.jinja2',
-             effective_principals=security.Authenticated,
-             has_feature_flag=not_('search_page'),
-             has_permission='read')
-def read(group, request):
-    """Group view for logged-in users."""
-    check_slug(group, request)
-
-    # Redirect to new group overview page if search page is enabled
-    if request.feature('search_page'):
-        url = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
-        return HTTPSeeOther(url)
-
-    return {'group': group,
-            'document_links': [presenters.DocumentHTMLPresenter(d).link
-                               for d in group.documents()],
-            'meta_attrs': [
-                # Ask browsers not to send the page's URL (which can be used to
-                # join the group) to other websites in the Referer header.
-                {'name': 'referrer', 'content': 'origin'},
-                          ],
-            }
 
 
 @view_config(route_name='group_read',
