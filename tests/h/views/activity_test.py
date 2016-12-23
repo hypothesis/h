@@ -879,7 +879,7 @@ class TestGroupAndUserSearchController(object):
 
 class FakeAnnotationStatsService(object):
     def user_annotation_counts(self, userid):
-        return {'public': 1, 'private': 3, 'group': 2}
+        return {'public': 1, 'private': 3, 'group': 2, 'total': 6}
 
     def group_annotation_count(self, pubid):
         return 5
