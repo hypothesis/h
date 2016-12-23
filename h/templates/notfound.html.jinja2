@@ -1,23 +1,15 @@
 {% extends "layouts/base.html.jinja2" %}
 
-{% set style_bundle = 'legacy_site_css' %}
-
 {% block title %}Page Not Found{% endblock %}
 
 {% block content %}
-  <main class="content paper styled-text page">
-    <h1>There&rsquo;s nothing here!</h1>
-    <p>Either this page doesn&rsquo;t exist, or you don&rsquo;t have the permissions required for viewing it.</p>
-    <form class="form" action="/stream" method="get">
-      <div class="form-field">
-        <label class="form-label" for="search">Search annotations:</label>
-        <input class="form-input" name="q" type="text" />
-        <div class="form-actions">
-          <div class="form-actions-buttons">
-            <button class="btn btn-primary" type="submit">Search</button>
-          </div>
-        </div>
-      </div>
-    </form>
-  </main>
+  {{ panel('navbar') }}
+  <div class="form-container">
+    <h1 class="form-header">Page not found</h1>
+    <p>Either this page does not exist, or you do not have the permissions required for viewing it.</p>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {% include "h:templates/includes/footer.html.jinja2" %}
 {% endblock %}
