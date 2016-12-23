@@ -3,7 +3,7 @@
 {% block title %}Page Not Found{% endblock %}
 
 {% block content %}
-  {{ panel('navbar') }}
+  {% include 'h:templates/includes/logo-header.html.jinja2' %}
   <div class="form-container">
     <h1 class="form-header">Page not found</h1>
     <p>Either this page does not exist, or you do not have the permissions required for viewing it.</p>
