@@ -10,7 +10,7 @@ from h.services.annotation_stats import annotation_stats_factory
 
 
 class TestAnnotationStatsService(object):
-    def test_user_annotation_counts_returns_count_of_annotations_for_user(self, svc, factories, db_session):
+    def test_user_annotation_counts_returns_count_of_annotations_for_user(self, svc, factories):
         userid = '123'
         for i in range(3):
             factories.Annotation(userid=userid, shared=True)
@@ -25,7 +25,7 @@ class TestAnnotationStatsService(object):
         assert results['private'] == 2
         assert results['group'] == 4
 
-    def test_annotation_count_returns_count_of_shared_annotations_for_group(self, svc, db_session, factories):
+    def test_annotation_count_returns_count_of_shared_annotations_for_group(self, svc, factories):
         pubid = 'abc123'
         for i in range(3):
             factories.Annotation(groupid=pubid, shared=True)
