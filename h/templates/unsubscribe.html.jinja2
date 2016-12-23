@@ -1,17 +1,16 @@
 {% extends "layouts/base.html.jinja2" %}
 
-{% set style_bundle = 'legacy_site_css' %}
-
 {% block title %}Unsubscribed{% endblock %}
 
 {% block content %}
-  <main class="content paper styled-text page">
-    <h1>Your unsubscribe request has been processed.</h1>
+  {% include 'h:templates/includes/logo-header.html.jinja2' %}
+  <div class="form-container">
+    <h1 class="form-header">Your unsubscribe request has been processed.</h1>
     <p>You should no longer receive further notifications of this type.</p>
     <p>
       If you have made a mistake and wish to resubscribe, please see your
       <a href="{{request.route_path('login', _query={'next': request.route_path('account_notifications')})}}"
         >notification settings</a>.
     </p>
-  </main>
+  </div>
 {% endblock %}
