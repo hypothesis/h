@@ -79,7 +79,7 @@ h requires the following external services:
 
 .. _PostgreSQL: http://www.postgresql.org/
 .. _Elasticsearch: http://www.elasticsearch.org/
-.. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
+.. _Elasticsearch ICU Analysis: https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-icu.html
 .. _RabbitMQ: https://rabbitmq.com/
 
 You can install these services however you want, but the easiest way is by
