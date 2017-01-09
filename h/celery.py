@@ -99,6 +99,13 @@ def reset_feature_flags(sender, **kwargs):
     sender.app.request.feature.clear()
 
 
+@signals.task_prerun.connect
+def reset_nipsa_cache(sender, **kwargs):
+    """Reset nipsa service cache before running each task."""
+    svc = sender.app.request.find_service(name='nipsa')
+    svc.clear()
+
+
 @signals.task_success.connect
 def transaction_commit(sender, **kwargs):
     """Commit the request transaction after each successful task execution."""
