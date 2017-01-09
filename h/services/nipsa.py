@@ -53,6 +53,9 @@ class NipsaService(object):
         user.nipsa = False
         remove_nipsa.delay(user.userid)
 
+    def clear(self):
+        self._flagged_userids = None
+
 
 def nipsa_factory(context, request):
     """Return a NipsaService instance for the passed context and request."""

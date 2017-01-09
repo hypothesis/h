@@ -56,6 +56,19 @@ class TestNipsaService(object):
 
         remove_nipsa.delay.assert_called_once_with('acct:renata@example.com')
 
+    def test_clear_resets_cache(self, db_session, users):
+        svc = NipsaService(db_session)
+
+        assert svc.flagged_userids == set(['acct:renata@example.com',
+                                           'acct:cecilia@example.com'])
+
+        users['dominic'].nipsa = True
+        svc.clear()
+
+        assert svc.flagged_userids == set(['acct:renata@example.com',
+                                           'acct:cecilia@example.com',
+                                           'acct:dominic@example.com'])
+
 
 def test_nipsa_factory(pyramid_request):
     svc = nipsa_factory(None, pyramid_request)
