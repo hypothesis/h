@@ -251,20 +251,21 @@ class TestBuilder(object):
 
 
 class TestAuthFilter(object):
-    def test_world_not_in_principals(self):
-        request = mock.Mock(effective_principals=['foo'])
+    def test_unauthenticated(self):
+        request = mock.Mock(authenticated_userid=None)
+        authfilter = query.AuthFilter(request)
+
+        assert authfilter({}) == {'term': {'shared': True}}
+
+    def test_authenticated(self):
+        request = mock.Mock(authenticated_userid='acct:doe@example.org')
         authfilter = query.AuthFilter(request)
 
         assert authfilter({}) == {
-            'terms': {'permissions.read': ['group:__world__', 'foo']}
-        }
-
-    def test_world_in_principals(self):
-        request = mock.Mock(effective_principals=['group:__world__', 'foo'])
-        authfilter = query.AuthFilter(request)
-
-        assert authfilter({}) == {
-            'terms': {'permissions.read': ['group:__world__', 'foo']}
+            'or': [
+                {'term': {'shared': True}},
+                {'term': {'user': 'acct:doe@example.org'}},
+            ]
         }
 
 

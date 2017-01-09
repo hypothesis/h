@@ -111,30 +111,29 @@ class AuthFilter(object):
     """
     A filter that selects only annotations the user is authorised to see.
 
-    Only annotations where the 'read' permission contains one or more of the
-    user's effective principals will pass through this filter.
+    Only annotations that are shared, or private annotations made
+    by the logged-in user will pass through this filter.
     """
 
     def __init__(self, request):
-        """Initialize a new AuthFilter.
+        """
+        Initialize a new AuthFilter.
 
         :param request: the pyramid.request object
         """
         self.request = request
 
     def __call__(self, params):
-        principals = list(self.request.effective_principals)
+        public_filter = {'term': {'shared': True}}
 
-        # We always want annotations with 'group:__world__' in their read
-        # permissions to show up in the search results, but 'group:__world__'
-        # is not in effective_principals for unauthenticated requests.
-        #
-        # FIXME: If public annotations used 'system.Everyone'
-        # instead of 'group:__world__' we wouldn't have to do this.
-        if 'group:__world__' not in principals:
-            principals.insert(0, 'group:__world__')
+        userid = self.request.authenticated_userid
+        if userid is None:
+            return public_filter
 
-        return {'terms': {'permissions.read': principals}}
+        return {'or': [
+            public_filter,
+            {'term': {'user': userid}},
+        ]}
 
 
 class GroupFilter(object):
