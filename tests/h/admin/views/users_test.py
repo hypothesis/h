@@ -9,11 +9,12 @@ from mock import call
 from pyramid import httpexceptions
 import pytest
 
+from h.services.annotation_stats import AnnotationStatsService
 from h.services.user import UserService
 from h.admin.views import users as views
 from h.models import Annotation
 
-users_index_fixtures = pytest.mark.usefixtures('models')
+users_index_fixtures = pytest.mark.usefixtures('models', 'annotation_stats_service')
 
 
 @users_index_fixtures
@@ -64,13 +65,10 @@ def test_users_index_strips_spaces(models, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_queries_annotation_count_by_userid(models, db_session, factories, pyramid_request):
+def test_users_index_queries_annotation_count_by_userid(models, factories, pyramid_request, annotation_stats_service):
     user = factories.User(username='bob')
     models.User.get_by_username.return_value = user
-    userid = "acct:bob@{}".format(pyramid_request.auth_domain)
-    for _ in xrange(8):
-        db_session.add(factories.Annotation(userid=userid))
-    db_session.flush()
+    annotation_stats_service.user_annotation_counts.return_value = {'total': 8}
 
     pyramid_request.params = {"username": "bob", "authority": user.authority}
     result = views.users_index(pyramid_request)
@@ -335,6 +333,14 @@ def user_service(pyramid_config, db_session):
                                         session=db_session))
     service.login.return_value = None
     pyramid_config.register_service(service, name='user')
+    return service
+
+
+@pytest.fixture
+def annotation_stats_service(pyramid_config, db_session):
+    service = Mock(spec_set=AnnotationStatsService(session=db_session))
+    service.user_annotation_counts.return_value = {'total': 0}
+    pyramid_config.register_service(service, name='annotation_stats')
     return service
 
 
