@@ -62,7 +62,9 @@
   </section>
   <footer class="annotation-card__footer">
     {% if presented_annotation.incontext_link %}
-      <a href="{{ presented_annotation.incontext_link }}" target="_blank" title="{% trans %}Visit annotation in context{% endtrans %}">
+      <a href="{{ presented_annotation.incontext_link }}"
+         rel="nofollow"
+         target="_blank" title="{% trans %}Visit annotation in context{% endtrans %}">
         {{ svg_icon('up-right-arrow', 'annotation-card__footer-link annotation-card__incontext-link') }}
       </a>
       <a href="#"
