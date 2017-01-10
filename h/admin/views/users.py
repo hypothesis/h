@@ -41,8 +41,9 @@ def users_index(request):
             user = models.User.get_by_email(request.db, username, authority)
 
     if user is not None:
-        n_annots = _all_user_annotations(request, user).count()
-        user_meta['annotations_count'] = n_annots
+        svc = request.find_service(name='annotation_stats')
+        counts = svc.user_annotation_counts(user.userid)
+        user_meta['annotations_count'] = counts['total']
 
     return {
         'default_authority': request.auth_domain,
@@ -158,12 +159,6 @@ def _all_user_annotations_query(request, user):
             'query': {'match_all': {}}
         }
     }
-
-
-def _all_user_annotations(request, user):
-    return (request.db.query(models.Annotation)
-            .filter(models.Annotation.userid == user.userid)
-            .yield_per(100))
 
 
 def _form_request_user(request):
