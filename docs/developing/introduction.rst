@@ -46,7 +46,7 @@ Application components
 The important parts of the ``h`` application can be broken down into:
 
 Models
-    SQLAlchemy models representing the data objects that live in our database.
+    SQLAlchemy_ models representing the data objects that live in our database.
 
     With a few important exceptions (see :ref:`memex`, below), these live in
     :py:mod:`h.models`.
@@ -85,6 +85,7 @@ into a service in the future.
 There is one important part of the ``h`` repository codebase that we haven't yet
 talked about, and that's :ref:`memex`.
 
+.. _SQLAlchemy: http://www.sqlalchemy.org/
 .. _Celery: http://www.celeryproject.org/
 .. _services pattern: https://h.readthedocs.io/en/latest/arch/adr-002/
 
