@@ -8,6 +8,7 @@ const TEMPLATE = `<div class="js-search-bucket">
     <a data-ref="domainLink">foo.com</a>
   </div>
   <div data-ref="content"></div>
+  <button data-ref="collapseView"></button>
 </div>
 `;
 
@@ -51,6 +52,12 @@ describe('SearchBucketController', () => {
   it('removes the is-expanded CSS class when clicked again', () => {
     ctrl.refs.header.dispatchEvent(new Event('click'));
     ctrl.refs.header.dispatchEvent(new Event('click'));
+    assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
+  });
+
+  it('removes the is-expanded CSS class when collapse view is clicked', () => {
+    ctrl.refs.header.dispatchEvent(new Event('click'));
+    ctrl.refs.collapseView.dispatchEvent(new Event('click'));
     assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
   });
 

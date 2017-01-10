@@ -230,6 +230,8 @@ $annotation-card-width: 500px;
 // Card displaying stats about a group of annotations in search results
 .search-bucket-stats {
   @include font-normal;
+  display: flex;
+  flex-direction: column;
   margin-left: 30px;
   word-wrap: break-word;
   min-width: 0;  // Without this min-width stats containing really
@@ -277,6 +279,22 @@ $stats-icon-column-width: 20px;
   top: 1px;
   height: 9px;
   width: 9px;
+}
+
+.search-bucket-stats__collapse-view {
+  @include reset-button;
+  color: $grey-6;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.search-bucket-stats__collapse-view-icon {
+  margin-right: 4px;
+  width: 12px;
+}
+
+.search-bucket-stats__collapse-view:focus {
+  outline:0;
 }
 
 // On large tablets and below, display bucket titles beneath rather than

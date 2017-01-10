@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="11px" height="13px" viewBox="0 0 11 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41 (35326) - http://www.bohemiancoding.com/sketch -->
+    <title>Collapse Icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Collapse-Icon" transform="translate(-1.000000, 0.000000)">
+            <g id="Group-Copy-2" transform="translate(6.500000, 6.500000) rotate(-45.000000) translate(-6.500000, -6.500000) translate(2.000000, 2.000000)">
+                <rect id="Rectangle-5" fill="#3F3F3F" x="2" y="0" width="7" height="2"></rect>
+                <rect id="Rectangle-5-Copy" fill="#3F3F3F" x="7" y="0" width="2" height="7"></rect>
+                <path d="M8,1 L0,9" id="Path-2" stroke="#3F3F3F" stroke-width="2"></path>
+            </g>
+        </g>
+    </g>
+</svg>

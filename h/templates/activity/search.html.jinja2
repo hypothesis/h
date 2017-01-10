@@ -76,6 +76,14 @@
            target="_blank">{{ pretty_link(bucket.uri) }}</a>
     </div>
   {% endif %}
+  <div class="u-stretch">
+  </div>
+  <button class="search-bucket-stats__collapse-view"
+          data-ref="collapseView"
+          title="Collapse view">
+    {{ svg_icon('collapse-view', 'search-bucket-stats__collapse-view-icon') }}
+    Collapse view
+  </button>
 </div>
 {% endmacro %}
 

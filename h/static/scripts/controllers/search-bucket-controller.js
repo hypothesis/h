@@ -33,6 +33,10 @@ class SearchBucketController extends Controller {
       this.setState({expanded: !this.state.expanded});
     });
 
+    this.refs.collapseView.addEventListener('click', () => {
+      this.setState({expanded: !this.state.expanded});
+    });
+
     const envFlags = this.options.envFlags || window.envFlags;
 
     this.setState({
