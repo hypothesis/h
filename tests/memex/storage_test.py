@@ -89,13 +89,14 @@ class TestExpandURI(object):
         ]
 
 
-@pytest.mark.usefixtures('models', 'default_groupfinder')
+@pytest.mark.usefixtures('models', 'group_service')
 class TestCreateAnnotation(object):
 
     def test_it_fetches_parent_annotation_for_replies(self,
                                                       fetch_annotation,
                                                       pyramid_config,
-                                                      pyramid_request):
+                                                      pyramid_request,
+                                                      group_service):
 
         # Make the annotation's parent belong to 'test-group'.
         fetch_annotation.return_value.groupid = 'test-group'
@@ -109,7 +110,7 @@ class TestCreateAnnotation(object):
         # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
-        storage.create_annotation(pyramid_request, data)
+        storage.create_annotation(pyramid_request, data, group_service)
 
         fetch_annotation.assert_called_once_with(pyramid_request.db,
                                                  'parent_annotation_id')
@@ -118,7 +119,8 @@ class TestCreateAnnotation(object):
                                        fetch_annotation,
                                        models,
                                        pyramid_config,
-                                       pyramid_request):
+                                       pyramid_request,
+                                       group_service):
         # Make the annotation's parent belong to 'test-group'.
         fetch_annotation.return_value.groupid = 'test-group'
 
@@ -132,13 +134,14 @@ class TestCreateAnnotation(object):
         # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
-        storage.create_annotation(pyramid_request, data)
+        storage.create_annotation(pyramid_request, data, group_service)
 
         assert models.Annotation.call_args[1]['groupid'] == 'test-group'
 
     def test_it_raises_if_parent_annotation_does_not_exist(self,
                                                            fetch_annotation,
-                                                           pyramid_request):
+                                                           pyramid_request,
+                                                           group_service):
         fetch_annotation.return_value = None
 
         data = self.annotation_data()
@@ -147,87 +150,79 @@ class TestCreateAnnotation(object):
         data['references'] = ['parent_annotation_id']
 
         with pytest.raises(schemas.ValidationError) as exc:
-            storage.create_annotation(pyramid_request, data)
+            storage.create_annotation(pyramid_request, data, group_service)
 
         assert str(exc.value).startswith('references.0: ')
 
-    def test_it_allows_when_no_groupfinder_is_configured(self, pyramid_request, models):
+    def test_it_finds_the_group(self, pyramid_request, pyramid_config, group_service):
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
-        # this should not raise
-        result = storage.create_annotation(pyramid_request, data)
+        storage.create_annotation(pyramid_request, data, group_service)
 
-        assert result == models.Annotation.return_value
+        group_service.find.assert_called_once_with('foo-group')
 
-    def test_it_finds_the_group(self, pyramid_request, pyramid_config, groups_find):
-        data = self.annotation_data()
-        data['groupid'] = 'foo-group'
-
-        storage.create_annotation(pyramid_request, data)
-
-        groups_find.assert_called_once_with(pyramid_request, 'foo-group')
-
-    def test_it_allows_when_user_has_write_permission(self, pyramid_request, pyramid_config, models, groups_find):
+    def test_it_allows_when_user_has_write_permission(self, pyramid_request, pyramid_config, models, group_service):
         pyramid_config.testing_securitypolicy('userid', permissive=True)
-        groups_find.return_value = FakeGroup()
+        group_service.find.return_value = FakeGroup()
 
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
         # this should not raise
-        result = storage.create_annotation(pyramid_request, data)
+        result = storage.create_annotation(pyramid_request, data, group_service)
 
         assert result == models.Annotation.return_value
 
-    def test_it_raises_when_user_is_missing_write_permission(self, pyramid_request, pyramid_config, groups_find):
+    def test_it_raises_when_user_is_missing_write_permission(self, pyramid_request, pyramid_config, group_service):
         pyramid_config.testing_securitypolicy('userid', permissive=False)
-        groups_find.return_value = FakeGroup()
+        group_service.find.return_value = FakeGroup()
 
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
         with pytest.raises(schemas.ValidationError) as exc:
-            storage.create_annotation(pyramid_request, data)
+            storage.create_annotation(pyramid_request, data, group_service)
 
         assert str(exc.value).startswith('group: ')
 
-    def test_it_raises_when_group_could_not_be_found(self, pyramid_request, pyramid_config, groups_find):
+    def test_it_raises_when_group_could_not_be_found(self, pyramid_request, pyramid_config, group_service):
         pyramid_config.testing_securitypolicy('userid', permissive=True)
-        groups_find.return_value = None
+        group_service.find.return_value = None
 
         data = self.annotation_data()
         data['groupid'] = 'missing-group'
 
         with pytest.raises(schemas.ValidationError) as exc:
-            storage.create_annotation(pyramid_request, data)
+            storage.create_annotation(pyramid_request, data, group_service)
 
         assert str(exc.value).startswith('group: ')
 
-    def test_it_inits_an_Annotation_model(self, models, pyramid_request):
+    def test_it_inits_an_Annotation_model(self, models, pyramid_request, group_service):
         data = self.annotation_data()
 
-        storage.create_annotation(pyramid_request, copy.deepcopy(data))
+        storage.create_annotation(pyramid_request, copy.deepcopy(data), group_service)
 
         del data['document']
         models.Annotation.assert_called_once_with(**data)
 
-    def test_it_adds_the_annotation_to_the_database(self, models, pyramid_request):
-        storage.create_annotation(pyramid_request, self.annotation_data())
+    def test_it_adds_the_annotation_to_the_database(self, models, pyramid_request, group_service):
+        storage.create_annotation(pyramid_request, self.annotation_data(), group_service)
 
         assert models.Annotation.return_value in pyramid_request.db.added
 
     def test_it_updates_the_document_metadata_from_the_annotation(self,
                                                                   models,
                                                                   pyramid_request,
-                                                                  datetime):
+                                                                  datetime,
+                                                                  group_service):
         annotation_data = self.annotation_data()
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
         annotation_data['document']['document_uri_dicts'] = (
             mock.sentinel.document_uri_dicts)
 
-        storage.create_annotation(pyramid_request, annotation_data)
+        storage.create_annotation(pyramid_request, annotation_data, group_service)
 
         models.update_document_metadata.assert_called_once_with(
             pyramid_request.db,
@@ -240,43 +235,43 @@ class TestCreateAnnotation(object):
 
     def test_it_sets_the_annotations_document_id(self,
                                                  models,
-                                                 pyramid_request):
+                                                 pyramid_request,
+                                                 group_service):
         annotation_data = self.annotation_data()
 
         document = mock.Mock()
         models.update_document_metadata.return_value = document
 
-        ann = storage.create_annotation(pyramid_request, annotation_data)
+        ann = storage.create_annotation(pyramid_request, annotation_data, group_service)
 
         assert ann.document == document
 
-    def test_it_returns_the_annotation(self, models, pyramid_request):
+    def test_it_returns_the_annotation(self, models, pyramid_request, group_service):
         annotation = storage.create_annotation(pyramid_request,
-                                               self.annotation_data())
+                                               self.annotation_data(),
+                                               group_service)
 
         assert annotation == models.Annotation.return_value
 
-    def test_it_does_not_crash_if_target_selectors_is_empty(self, pyramid_request):
+    def test_it_does_not_crash_if_target_selectors_is_empty(self, pyramid_request, group_service):
         # Page notes have [] for target_selectors.
         data = self.annotation_data()
         data['target_selectors'] = []
 
-        storage.create_annotation(pyramid_request, data)
+        storage.create_annotation(pyramid_request, data, group_service)
 
-    def test_it_does_not_crash_if_no_text_or_tags(self, pyramid_request):
+    def test_it_does_not_crash_if_no_text_or_tags(self, pyramid_request, group_service):
         # Highlights have no text or tags.
         data = self.annotation_data()
         data['text'] = data['tags'] = ''
 
-        storage.create_annotation(pyramid_request, data)
+        storage.create_annotation(pyramid_request, data, group_service)
 
     @pytest.fixture
-    def default_groupfinder(self, pyramid_config):
-        pyramid_config.registry[groups.GROUPFINDER_KEY] = groups.default_groupfinder
-
-    @pytest.fixture
-    def groups_find(self, patch):
-        return patch('memex.storage.groups.find')
+    def group_service(self, pyramid_config):
+        group_service = mock.Mock(spec_set=['find'])
+        pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+        return group_service
 
     def annotation_data(self):
         return {

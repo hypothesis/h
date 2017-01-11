@@ -24,6 +24,7 @@ from sqlalchemy.orm import subqueryload
 from memex import cors
 from memex import models
 from memex.events import AnnotationEvent
+from memex.interfaces import IGroupService
 from memex.presenters import AnnotationJSONPresenter
 from memex.presenters import AnnotationJSONLDPresenter
 from memex import search as search_lib
@@ -168,7 +169,8 @@ def create(request):
     """Create an annotation from the POST payload."""
     schema = schemas.CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
-    annotation = storage.create_annotation(request, appstruct)
+    group_service = request.find_service(IGroupService)
+    annotation = storage.create_annotation(request, appstruct, group_service)
 
     _publish_annotation_event(request, annotation, 'create')
 
