@@ -4,6 +4,7 @@ import mock
 import pytest
 
 from pyramid.interfaces import IAuthenticationPolicy
+from sqlalchemy.orm.exc import DetachedInstanceError
 
 from h.auth.policy import AuthenticationPolicy
 from h.auth.policy import TokenAuthenticationPolicy
@@ -108,6 +109,7 @@ class TestAuthenticationPolicy(object):
         assert result == self.api_policy.forget.return_value
 
 
+@pytest.mark.usefixtures('sqlalchemy')
 class TestTokenAuthenticationPolicy(object):
     def test_remember_does_nothing(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
@@ -141,6 +143,25 @@ class TestTokenAuthenticationPolicy(object):
 
         assert result is None
 
+    def test_unauthenticated_userid_does_not_crash_on_detached_tokens(
+            self, pyramid_request, sqlalchemy):
+        policy = TokenAuthenticationPolicy()
+
+        # request.auth_token is a detached instance.
+        sqlalchemy.inspect.return_value.detached = True
+
+        # If it tried to call token.is_valid() when token was detached it would
+        # get a DetachedInstanceError from sqlalchemy.
+        token = pyramid_request.auth_token = mock.Mock()
+        token.is_valid.side_effect = DetachedInstanceError()
+
+        # This would raise if the code wasn't aware of the potential for token
+        # to be detached.
+        policy.unauthenticated_userid(pyramid_request)
+
+        # For good measure check that inspect() was called correctly.
+        sqlalchemy.inspect.assert_called_once_with(token)
+
     def test_authenticated_userid_uses_callback(self, fake_token, pyramid_request):
         def callback(userid, request):
             return None
@@ -166,6 +187,12 @@ class TestTokenAuthenticationPolicy(object):
     @pytest.fixture
     def fake_token(self):
         return DummyToken()
+
+    @pytest.fixture
+    def sqlalchemy(self, patch):
+        sqlalchemy = patch('h.auth.policy.sqlalchemy')
+        sqlalchemy.inspect.return_value.detached = False
+        return sqlalchemy
 
 
 class DummyToken(object):
