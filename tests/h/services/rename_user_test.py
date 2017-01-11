@@ -14,8 +14,8 @@ from h.services.rename_user import (
 
 
 class TestRenameUserService(object):
-    def test_check_returns_true_when_new_username_does_not_exist(self, service):
-        assert service.check('panda', 'foobar.org') is True
+    def test_check_returns_true_when_new_username_does_not_exist(self, service, user):
+        assert service.check(user, 'panda', 'foobar.org') is True
 
     def test_check_raises_when_new_userid_is_already_taken(self, service, user, db_session, factories):
         user_taken = factories.User(username='panda')
@@ -23,13 +23,34 @@ class TestRenameUserService(object):
         db_session.flush()
 
         with pytest.raises(UserRenameError) as err:
-            service.check('panda', user_taken.authority)
+            service.check(user, 'panda', user_taken.authority)
         assert err.value.message == 'Another user already has the username "panda"'
+
+    @mock.patch('h.models.user.User.get_by_username')
+    def test_check_returns_True_if_new_username_equivalent_to_old(self, get_by_username, service, user):
+        """
+        check() should return True if the new username is equivalent to the old.
+
+        It's possible to have two different usernames, for example "bob.smith"
+        and "Bob.Smith", that are "equivalent" in that they both reduce to the
+        same uid "bobsmith". While we can't allow two different users to have
+        the usernames "bob.smith" and "Bob.Smith", we _should_ allow renaming
+        a single "bob.smith" user to "Bob.Smith".
+
+        get_by_username() returns a User whose username is the same as or
+        equivalent to the given username. If the returned User is the same user
+        who we're trying to rename, we should allow the rename operation to go
+        ahead.
+
+        """
+        get_by_username.return_value = user
+
+        assert service.check(user, 'panda', user.authority) is True
 
     def test_rename_checks_first(self, service, check, user):
         service.rename(user, 'panda')
 
-        check.assert_called_once_with(service, 'panda', user.authority)
+        check.assert_called_once_with(service, user, 'panda', user.authority)
 
     def test_rename_changes_the_username(self, service, user, db_session):
         service.rename(user, 'panda')

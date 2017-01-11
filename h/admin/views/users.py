@@ -86,7 +86,7 @@ def users_rename(request):
 
     try:
         svc = request.find_service(name='rename_user')
-        svc.check(new_username, request.auth_domain)
+        svc.check(user, new_username, request.auth_domain)
 
         rename_user.delay(user.id, new_username)
 

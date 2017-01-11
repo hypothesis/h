@@ -31,15 +31,15 @@ class RenameUserService(object):
         self.session = session
         self.reindex = reindex
 
-    def check(self, new_username, authority):
+    def check(self, user, new_username, authority):
         existing_user = models.User.get_by_username(self.session, new_username, authority)
-        if existing_user:
+        if existing_user and existing_user != user:
             raise UserRenameError('Another user already has the username "%s"' % new_username)
 
         return True
 
     def rename(self, user, new_username):
-        self.check(new_username, user.authority)
+        self.check(user, new_username, user.authority)
 
         old_userid = user.userid
 
