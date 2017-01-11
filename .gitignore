@@ -27,4 +27,5 @@ node_modules/
 *.log
 
 celerybeat-schedule
+celerybeat-schedule.*
 celerybeat.pid
