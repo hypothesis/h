@@ -30,6 +30,29 @@ class TestGroupfinderService(object):
 
         assert svc.find('bogus') is None
 
+    def test_caches_groups(self, svc, factories, db_session):
+        group = factories.Group()
+        pubid = group.pubid
+
+        svc.find(group.pubid)
+        db_session.delete(group)
+        db_session.flush()
+        group = svc.find(pubid)
+
+        assert group is not None
+        assert group.pubid == pubid
+
+    def test_flushes_cache_on_session_commit(self, svc, factories, db_session):
+        group = factories.Group()
+        pubid = group.pubid
+
+        svc.find(pubid)
+        db_session.delete(group)
+        db_session.commit()
+        group = svc.find(pubid)
+
+        assert group is None
+
     @pytest.fixture
     def svc(self, db_session):
         return GroupfinderService(db_session, 'example.com')
