@@ -15,7 +15,7 @@ from h.services.rename_user import (
 
 class TestRenameUserService(object):
     def test_check_returns_true_when_new_username_does_not_exist(self, service, user):
-        assert service.check(user, 'panda', 'foobar.org') is True
+        assert service.check(user, 'panda') is True
 
     def test_check_raises_when_new_userid_is_already_taken(self, service, user, db_session, factories):
         user_taken = factories.User(username='panda')
@@ -23,7 +23,7 @@ class TestRenameUserService(object):
         db_session.flush()
 
         with pytest.raises(UserRenameError) as err:
-            service.check(user, 'panda', user_taken.authority)
+            service.check(user, 'panda')
         assert err.value.message == 'Another user already has the username "panda"'
 
     @mock.patch('h.models.user.User.get_by_username')
@@ -45,12 +45,12 @@ class TestRenameUserService(object):
         """
         get_by_username.return_value = user
 
-        assert service.check(user, 'panda', user.authority) is True
+        assert service.check(user, 'panda') is True
 
     def test_rename_checks_first(self, service, check, user):
         service.rename(user, 'panda')
 
-        check.assert_called_once_with(service, user, 'panda', user.authority)
+        check.assert_called_once_with(service, user, 'panda')
 
     def test_rename_changes_the_username(self, service, user, db_session):
         service.rename(user, 'panda')
