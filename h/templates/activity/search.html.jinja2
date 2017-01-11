@@ -35,7 +35,7 @@
       {{ svg_icon('up-right-arrow', css_class='search-bucket-stats__icon') }}
       <a class="search-bucket-stats__incontext-link"
          href="{{ bucket.incontext_link(request) }}"
-         rel="nofollow"
+         rel="nofollow noopener"
          target="_blank">
          {% trans %}Visit annotations in context{% endtrans %}
        </a>
@@ -73,7 +73,7 @@
     </div>
     <div class="search-bucket-stats__val search-bucket-stats__url">
         <a class="link--plain"
-           rel="nofollow"
+           rel="nofollow noopener"
            href="{{ bucket.uri }}"
            target="_blank">{{ pretty_link(bucket.uri) }}</a>
     </div>
@@ -102,7 +102,7 @@
       <span class="search-result-bucket__domain-text">{{ bucket.domain }}</span>
       <a class="link--plain search-result-bucket__domain-link"
          href="{{ bucket.incontext_link(request) }}"
-         rel="nofollow"
+         rel="nofollow noopener"
          title="Visit annotations in context"
          target="_blank"
          data-ref="domainLink">
@@ -309,7 +309,7 @@
             {% trans %}Link:{% endtrans %}
           </dt>
           <dd class="search-result-sidebar__dd">
-            <a href="{{ user.uri }}" rel="nofollow" class="link--plain">
+            <a href="{{ user.uri }}" rel="nofollow noopener" class="link--plain">
               {{ pretty_link(user.uri) }}
             </a>
           </dd>
