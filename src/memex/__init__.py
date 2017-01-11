@@ -12,7 +12,6 @@ def includeme(config):
     config.include('memex.models')
 
     config.include('memex.eventqueue')
-    config.include('memex.groups')
     config.include('memex.links')
     config.include('memex.presenters')
     config.include('memex.search')

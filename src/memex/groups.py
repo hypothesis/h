@@ -7,8 +7,6 @@ from zope.interface import implementer
 
 from memex.interfaces import IGroupService
 
-GROUPFINDER_KEY = 'memex.groupfinder'
-
 
 class DefaultGroupContext(object):
     def __init__(self, id_):
@@ -30,21 +28,3 @@ class DefaultGroupService(object):
 
 def default_group_service_factory(context, request):
     return DefaultGroupService()
-
-
-def find(request, id_):
-    groupfinder = request.registry.get(GROUPFINDER_KEY)
-    return groupfinder(request, id_)
-
-
-def default_groupfinder(request, id_):
-    return DefaultGroupContext(id_)
-
-
-def set_groupfinder(config, func):
-    config.registry[GROUPFINDER_KEY] = config.maybe_dotted(func)
-
-
-def includeme(config):
-    config.add_directive('memex_set_groupfinder', set_groupfinder)
-    config.memex_set_groupfinder(default_groupfinder)
