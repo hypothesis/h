@@ -29,3 +29,6 @@ def includeme(config):
                      factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
     config.add_route('api.search', '/search')
+
+    config.register_service_factory('memex.groups.default_group_service_factory',
+                                    iface='memex.interfaces.IGroupService')

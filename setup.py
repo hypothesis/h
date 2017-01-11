@@ -41,6 +41,7 @@ INSTALL_REQUIRES = [
     'pyramid>=1.7,<1.8',
     'python-dateutil>=2.1',
     'transaction',
+    'zope.interface',
 ]
 EXTRAS_REQUIRE = {}
 ENTRY_POINTS = {}

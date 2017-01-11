@@ -3,6 +3,9 @@
 from __future__ import unicode_literals
 
 from pyramid import security
+from zope.interface import implementer
+
+from memex.interfaces import IGroupService
 
 GROUPFINDER_KEY = 'memex.groupfinder'
 
@@ -17,6 +20,16 @@ class DefaultGroupContext(object):
                     (security.Allow, security.Everyone, 'read'),
                     security.DENY_ALL]
         return [security.DENY_ALL]
+
+
+@implementer(IGroupService)
+class DefaultGroupService(object):
+    def find(self, id_):
+        return DefaultGroupContext(id_)
+
+
+def default_group_service_factory(context, request):
+    return DefaultGroupService()
 
 
 def find(request, id_):
