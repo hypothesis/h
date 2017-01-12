@@ -132,7 +132,7 @@ class AuthFilter(object):
 
         return {'or': [
             public_filter,
-            {'term': {'user': userid}},
+            {'term': {'user_raw': userid}},
         ]}
 
 

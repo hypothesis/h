@@ -264,7 +264,7 @@ class TestAuthFilter(object):
         assert authfilter({}) == {
             'or': [
                 {'term': {'shared': True}},
-                {'term': {'user': 'acct:doe@example.org'}},
+                {'term': {'user_raw': 'acct:doe@example.org'}},
             ]
         }
 
