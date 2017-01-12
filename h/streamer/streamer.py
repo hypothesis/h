@@ -90,7 +90,7 @@ def process_work_queue(settings, queue, session_factory=None):
 
             if isinstance(msg, messages.Message):
                 with s.timer('streamer.msg.handler_message'):
-                    messages.handle_message(msg, session, topic_handlers)
+                    messages.handle_message(msg, settings, session, topic_handlers)
             elif isinstance(msg, websocket.Message):
                 with s.timer('streamer.msg.handler_websocket'):
                     websocket.handle_message(msg, session)

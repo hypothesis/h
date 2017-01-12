@@ -6,10 +6,13 @@ Presenters for API data.
 import collections
 import copy
 
+from pyramid import security
+
 
 class AnnotationBasePresenter(object):
-    def __init__(self, annotation, links_service):
-        self.annotation = annotation
+    def __init__(self, annotation_resource, links_service):
+        self.annotation_resource = annotation_resource
+        self.annotation = annotation_resource.annotation
 
         self._links_service = links_service
 
@@ -93,6 +96,11 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         read = self.annotation.userid
         if self.annotation.shared:
             read = 'group:{}'.format(self.annotation.groupid)
+
+            principals = security.principals_allowed_by_permission(
+                    self.annotation_resource, 'read')
+            if security.Everyone in principals:
+                read = 'group:__world__'
 
         return {'read': [read],
                 'admin': [self.annotation.userid],

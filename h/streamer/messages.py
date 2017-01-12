@@ -10,11 +10,15 @@ from h.realtime import Consumer
 from memex import presenters
 from memex import storage
 from memex.links import LinksService
+from memex.resources import AnnotationResource
 from h.auth.util import translate_annotation_principals
 from h.services.nipsa import NipsaService
+from h.services.groupfinder import GroupfinderService
 from h.streamer import websocket
 import h.sentry
 import h.stats
+
+from h._compat import text_type
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +59,7 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
         raise RuntimeError('Realtime consumer quit unexpectedly!')
 
 
-def handle_message(message, session, topic_handlers):
+def handle_message(message, settings, session, topic_handlers):
     """
     Deserialize and process a message from the reader.
 
@@ -76,10 +80,10 @@ def handle_message(message, session, topic_handlers):
     # to stop connections being added or dropped during iteration, and if that
     # happens Python will throw a "Set changed size during iteration" error.
     sockets = list(websocket.WebSocket.instances)
-    handler(message.payload, sockets, session)
+    handler(message.payload, sockets, settings, session)
 
 
-def handle_annotation_event(message, sockets, session):
+def handle_annotation_event(message, sockets, settings, session):
     id_ = message['annotation_id']
     annotation = storage.fetch_annotation(session, id_)
 
@@ -90,14 +94,17 @@ def handle_annotation_event(message, sockets, session):
     nipsa_service = NipsaService(session)
     user_nipsad = nipsa_service.is_flagged(annotation.userid)
 
+    auth_domain = text_type(settings.get('h.auth_domain', 'localhost'))
+    group_service = GroupfinderService(session, auth_domain)
+
     for socket in sockets:
-        reply = _generate_annotation_event(message, socket, annotation, user_nipsad)
+        reply = _generate_annotation_event(message, socket, annotation, user_nipsad, group_service)
         if reply is None:
             continue
         socket.send_json(reply)
 
 
-def handle_user_event(message, sockets, _):
+def handle_user_event(message, sockets, settings, session):
     for socket in sockets:
         reply = _generate_user_event(message, socket)
         if reply is None:
@@ -105,7 +112,7 @@ def handle_user_event(message, sockets, _):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(message, socket, annotation, user_nipsad):
+def _generate_annotation_event(message, socket, annotation, user_nipsad, group_service):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -140,8 +147,8 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad):
     base_url = socket.registry.settings.get('h.app_url',
                                             'http://localhost:5000')
     links_service = LinksService(base_url, socket.registry)
-    serialized = presenters.AnnotationJSONPresenter(annotation,
-                                                    links_service).asdict()
+    resource = AnnotationResource(annotation, group_service)
+    serialized = presenters.AnnotationJSONPresenter(resource, links_service).asdict()
 
     permissions = serialized.get('permissions')
     if not _authorized_to_read(socket.effective_principals, permissions):
