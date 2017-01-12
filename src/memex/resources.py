@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 from pyramid import security
 
-from memex import groups
 from memex import storage
+from memex.interfaces import IGroupService
 
 
 class AnnotationResourceFactory(object):
@@ -16,17 +16,19 @@ class AnnotationResourceFactory(object):
         annotation = storage.fetch_annotation(self.request.db, id)
         if annotation is None:
             raise KeyError()
-        return AnnotationResource(self.request, annotation)
+
+        group_service = self.request.find_service(IGroupService)
+        return AnnotationResource(annotation, group_service)
 
 
 class AnnotationResource(object):
-    def __init__(self, request, annotation):
-        self.request = request
+    def __init__(self, annotation, group_service):
+        self.group_service = group_service
         self.annotation = annotation
 
     @property
     def group(self):
-        return groups.find(self.request, self.annotation.groupid)
+        return self.group_service.find(self.annotation.groupid)
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""

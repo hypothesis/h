@@ -190,6 +190,7 @@ class TestSearch(object):
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
                          'links_service',
+                         'group_service',
                          'schemas',
                          'storage')
 class TestCreate(object):
@@ -229,13 +230,14 @@ class TestCreate(object):
     def test_it_creates_the_annotation_in_storage(self,
                                                   pyramid_request,
                                                   storage,
-                                                  schemas):
+                                                  schemas,
+                                                  group_service):
         schema = schemas.CreateAnnotationSchema.return_value
 
         views.create(pyramid_request)
 
         storage.create_annotation.assert_called_once_with(
-            pyramid_request, schema.validate.return_value)
+            pyramid_request, schema.validate.return_value, group_service)
 
     def test_it_raises_if_create_annotation_raises(self,
                                                    pyramid_request,
@@ -287,6 +289,12 @@ class TestCreate(object):
         pyramid_request.json_body = {}
         pyramid_request.notify_after_commit = mock.Mock()
         return pyramid_request
+
+    @pytest.fixture
+    def group_service(self, pyramid_config):
+        group_service = mock.Mock(spec_set=['find'])
+        pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+        return group_service
 
 
 @pytest.mark.usefixtures('AnnotationJSONPresenter', 'links_service')

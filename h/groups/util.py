@@ -23,11 +23,3 @@ class WorldGroup(object):
             (security.Allow, 'authority:{}'.format(self.auth_domain), 'write'),
             security.DENY_ALL,
         ]
-
-
-def fetch_group(request, id_):
-    if id_ == '__world__':
-        return WorldGroup(request.auth_domain)
-
-    # This should probably use the GroupService with a built-in caching layer.
-    return request.db.query(models.Group).filter_by(pubid=id_).one_or_none()

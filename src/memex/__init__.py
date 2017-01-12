@@ -12,7 +12,6 @@ def includeme(config):
     config.include('memex.models')
 
     config.include('memex.eventqueue')
-    config.include('memex.groups')
     config.include('memex.links')
     config.include('memex.presenters')
     config.include('memex.search')
@@ -29,3 +28,6 @@ def includeme(config):
                      factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
     config.add_route('api.search', '/search')
+
+    config.register_service_factory('memex.groups.default_group_service_factory',
+                                    iface='memex.interfaces.IGroupService')

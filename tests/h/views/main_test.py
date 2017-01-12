@@ -14,9 +14,9 @@ from h.views import main
 
 @mock.patch('h.client.render_app_html')
 @pytest.mark.usefixtures('routes')
-def test_og_document(render_app_html, annotation_document, document_title, pyramid_request):
+def test_og_document(render_app_html, annotation_document, document_title, pyramid_request, group_service):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
-    context = AnnotationResource(pyramid_request, annotation)
+    context = AnnotationResource(annotation, group_service)
     document = Document()
     annotation_document.return_value = document
     document_title.return_value = 'WikiHow — How to Make a ☆Starmap☆'
@@ -30,9 +30,9 @@ def test_og_document(render_app_html, annotation_document, document_title, pyram
 
 @mock.patch('h.client.render_app_html')
 @pytest.mark.usefixtures('routes')
-def test_og_no_document(render_app_html, pyramid_request):
+def test_og_no_document(render_app_html, pyramid_request, group_service):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
-    context = AnnotationResource(pyramid_request, annotation)
+    context = AnnotationResource(annotation, group_service)
 
     render_app_html.return_value = '<html></html>'
     main.annotation_page(context, pyramid_request)
@@ -144,3 +144,10 @@ def routes(pyramid_config):
     pyramid_config.add_route('api.annotation', '/api/ann/{id}')
     pyramid_config.add_route('api.index', '/api/index')
     pyramid_config.add_route('index', '/index')
+
+
+@pytest.fixture
+def group_service(pyramid_config):
+    group_service = mock.Mock(spec_set=['find'])
+    pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+    return group_service

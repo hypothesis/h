@@ -3,8 +3,9 @@
 from __future__ import unicode_literals
 
 from pyramid import security
+from zope.interface import implementer
 
-GROUPFINDER_KEY = 'memex.groupfinder'
+from memex.interfaces import IGroupService
 
 
 class DefaultGroupContext(object):
@@ -19,19 +20,11 @@ class DefaultGroupContext(object):
         return [security.DENY_ALL]
 
 
-def find(request, id_):
-    groupfinder = request.registry.get(GROUPFINDER_KEY)
-    return groupfinder(request, id_)
+@implementer(IGroupService)
+class DefaultGroupService(object):
+    def find(self, id_):
+        return DefaultGroupContext(id_)
 
 
-def default_groupfinder(request, id_):
-    return DefaultGroupContext(id_)
-
-
-def set_groupfinder(config, func):
-    config.registry[GROUPFINDER_KEY] = config.maybe_dotted(func)
-
-
-def includeme(config):
-    config.add_directive('memex_set_groupfinder', set_groupfinder)
-    config.memex_set_groupfinder(default_groupfinder)
+def default_group_service_factory(context, request):
+    return DefaultGroupService()

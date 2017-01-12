@@ -11,6 +11,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from memex.resources import AnnotationResourceFactory, AnnotationResource
 
 
+@pytest.mark.usefixtures('group_service')
 class TestAnnotationResourceFactory(object):
     def test_get_item_fetches_annotation(self, pyramid_request, storage):
         factory = AnnotationResourceFactory(pyramid_request)
@@ -39,16 +40,29 @@ class TestAnnotationResourceFactory(object):
         with pytest.raises(KeyError):
             factory['123']
 
+    def test_get_item_has_right_group_service(self, pyramid_request, storage, group_service):
+        factory = AnnotationResourceFactory(pyramid_request)
+        storage.fetch_annotation.return_value = Mock()
+
+        resource = factory['123']
+        assert resource.group_service == group_service
+
     @pytest.fixture
     def storage(self, patch):
         return patch('memex.resources.storage')
 
+    @pytest.fixture
+    def group_service(self, pyramid_config):
+        group_service = Mock(spec_set=['find'])
+        pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+        return group_service
 
-@pytest.mark.usefixtures('groupfinder')
+
+@pytest.mark.usefixtures('group_service')
 class TestAnnotationResource(object):
-    def test_acl_private(self, factories, pyramid_request):
+    def test_acl_private(self, factories, group_service):
         ann = factories.Annotation(shared=False, userid='saoirse')
-        res = AnnotationResource(pyramid_request, ann)
+        res = AnnotationResource(ann, group_service)
         actual = res.__acl__()
         expect = [(security.Allow, 'saoirse', 'read'),
                   (security.Allow, 'saoirse', 'admin'),
@@ -57,7 +71,7 @@ class TestAnnotationResource(object):
                   security.DENY_ALL]
         assert actual == expect
 
-    def test_acl_shared_admin_perms(self, factories, pyramid_request):
+    def test_acl_shared_admin_perms(self, factories, group_service):
         """
         Shared annotation resources should still only give admin/update/delete
         permissions to the owner.
@@ -65,13 +79,13 @@ class TestAnnotationResource(object):
         policy = ACLAuthorizationPolicy()
 
         ann = factories.Annotation(shared=False, userid='saoirse')
-        res = AnnotationResource(pyramid_request, ann)
+        res = AnnotationResource(ann, group_service)
 
         for perm in ['admin', 'update', 'delete']:
             assert policy.permits(res, ['saoirse'], perm)
             assert not policy.permits(res, ['someoneelse'], perm)
 
-    def test_acl_deleted(self, factories, pyramid_request):
+    def test_acl_deleted(self, factories, group_service):
         """
         Nobody -- not even the owner -- should have any permissions on a
         deleted annotation.
@@ -79,7 +93,7 @@ class TestAnnotationResource(object):
         policy = ACLAuthorizationPolicy()
 
         ann = factories.Annotation(userid='saoirse', deleted=True)
-        res = AnnotationResource(pyramid_request, ann)
+        res = AnnotationResource(ann, group_service)
 
         for perm in ['read', 'admin', 'update', 'delete']:
             assert not policy.permits(res, ['saiorse'], perm)
@@ -106,7 +120,8 @@ class TestAnnotationResource(object):
                         pyramid_request,
                         groupid,
                         userid,
-                        permitted):
+                        permitted,
+                        group_service):
         """
         Shared annotation resources should delegate their 'read' permission to
         their containing group.
@@ -120,7 +135,7 @@ class TestAnnotationResource(object):
         ann = factories.Annotation(shared=True,
                                    userid='mioara',
                                    groupid=groupid)
-        res = AnnotationResource(pyramid_request, ann)
+        res = AnnotationResource(ann, group_service)
 
         if permitted:
             assert pyramid_request.has_permission('read', res)
@@ -136,10 +151,11 @@ class TestAnnotationResource(object):
         }
 
     @pytest.fixture
-    def groupfinder(self, groups, patch):
-        groupfinder = patch('memex.resources.groups.find')
-        groupfinder.side_effect = lambda r, groupid: groups.get(groupid)
-        return groupfinder
+    def group_service(self, pyramid_config, groups):
+        group_service = Mock(spec_set=['find'])
+        group_service.find.side_effect = lambda groupid: groups.get(groupid)
+        pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+        return group_service
 
 
 class FakeGroup(object):

@@ -12,7 +12,6 @@ from datetime import datetime
 from pyramid import i18n
 
 from memex import schemas
-from memex import groups
 from memex import models
 from memex.db import types
 
@@ -75,7 +74,7 @@ def fetch_ordered_annotations(session, ids, query_processor=None):
     return anns
 
 
-def create_annotation(request, data):
+def create_annotation(request, data, group_service):
     """
     Create an annotation from passed data.
 
@@ -112,7 +111,7 @@ def create_annotation(request, data):
     # they've asked to create one in. If the application didn't configure
     # a groupfinder we will allow writing this annotation without any
     # further checks.
-    group = groups.find(request, data['groupid'])
+    group = group_service.find(data['groupid'])
     if group is None or not request.has_permission('write', context=group):
         raise schemas.ValidationError('group: ' +
                                       _('You may not create annotations '
