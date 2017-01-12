@@ -90,6 +90,7 @@ ANNOTATION_MAPPING = {
                 }
             }
         },
+        # FIXME: Remove once we've stopped indexing this field.
         'permissions': {
             'index_name': 'permission',
             'properties': {

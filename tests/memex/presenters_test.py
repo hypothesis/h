@@ -219,10 +219,6 @@ class TestAnnotationSearchIndexPresenter(object):
             'tags': ['magic'],
             'tags_raw': ['magic'],
             'group': '__world__',
-            'permissions': {'read': ['group:__world__'],
-                            'admin': ['acct:luke@hypothes.is'],
-                            'update': ['acct:luke@hypothes.is'],
-                            'delete': ['acct:luke@hypothes.is']},
             'shared': True,
             'target': [{'scope': ['http://example.com/normalized'],
                         'source': 'http://example.com',
@@ -230,21 +226,6 @@ class TestAnnotationSearchIndexPresenter(object):
             'document': {'foo': 'bar'},
             'references': ['referenced-id-1', 'referenced-id-2'],
         }
-
-    @pytest.mark.parametrize('annotation,action,expected', [
-        (mock.Mock(userid='acct:luke', shared=False), 'read', ['acct:luke']),
-        (mock.Mock(groupid='__world__', shared=True), 'read',
-            ['group:__world__']),
-        (mock.Mock(groupid='lulapalooza', shared=True), 'read',
-            ['group:lulapalooza']),
-        (mock.Mock(userid='acct:luke'), 'admin', ['acct:luke']),
-        (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
-        (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
-        ])
-    def test_permissions(self, annotation, action, expected):
-        presenter = AnnotationSearchIndexPresenter(annotation)
-
-        assert expected == presenter.permissions[action]
 
     def test_it_copies_target_uri_normalized_to_target_scope(self):
         annotation = mock.Mock(

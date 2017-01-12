@@ -83,7 +83,21 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
 
     @property
     def permissions(self):
-        return _permissions(self.annotation)
+        """
+        Return a permissions dict for the given annotation.
+
+        Converts our simple internal annotation storage format into the legacy
+        complex permissions dict format that is still used in some places.
+
+        """
+        read = self.annotation.userid
+        if self.annotation.shared:
+            read = 'group:{}'.format(self.annotation.groupid)
+
+        return {'read': [read],
+                'admin': [self.annotation.userid],
+                'update': [self.annotation.userid],
+                'delete': [self.annotation.userid]}
 
 
 class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
@@ -106,7 +120,6 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             'tags': self.tags,
             'tags_raw': self.tags,
             'group': self.annotation.groupid,
-            'permissions': self.permissions,
             'shared': self.annotation.shared,
             'target': self.target,
             'document': docpresenter.asdict(),
@@ -124,10 +137,6 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         # The search index presenter has no need to generate links, and so the
         # `links_service` parameter has been removed from the constructor.
         raise NotImplementedError("search index presenter doesn't have links")
-
-    @property
-    def permissions(self):
-        return _permissions(self.annotation)
 
 
 class AnnotationJSONLDPresenter(AnnotationBasePresenter):
