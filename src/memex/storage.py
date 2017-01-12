@@ -84,6 +84,9 @@ def create_annotation(request, data, group_service):
     :param data: a dictionary of annotation properties
     :type data: dict
 
+    :param group_service: a service object that adheres to ``memex.interfaces.IGroupService``
+    :type group_service: memex.interfaces.IGroupService
+
     :returns: the created and flushed annotation
     :rtype: dict
     """
