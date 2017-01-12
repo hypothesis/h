@@ -11,6 +11,8 @@ from h import models
 from h.groups.util import WorldGroup
 
 
+# Ideally this would be called the GroupService to match nomenclature in memex.
+# FIXME: rename / split existing GroupService and rename this.
 @implementer(IGroupService)
 class GroupfinderService(object):
     def __init__(self, session, auth_domain):
