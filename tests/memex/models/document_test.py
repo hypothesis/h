@@ -127,6 +127,82 @@ class TestDocumentFindOrCreateByURIs(object):
                     ['https://m.en.wikipedia.org/wiki/Pluto'])
 
 
+class TestDocumentWebURI(object):
+    """Unit tests for Document.web_uri and Document.update_web_uri()."""
+
+    def test_web_uri_is_initially_None(self, factories):
+        assert factories.Document().web_uri is None
+
+    @pytest.mark.parametrize('document_uris,expected_web_uri', [
+        # Given a single http or https URL it just uses it.
+        ([('http://example.com',   'self-claim')],    'http://example.com'),
+        ([('https://example.com',  'self-claim')],    'https://example.com'),
+        ([('http://example.com',   'rel-canonical')], 'http://example.com'),
+        ([('https://example.com',  'rel-canonical')], 'https://example.com'),
+        ([('http://example.com',   'rel-shortlink')], 'http://example.com'),
+        ([('https://example.com',  'rel-shortlink')], 'https://example.com'),
+
+        # Given no http or https URLs it sets web_uri to None.
+        ([], None),
+        ([
+            ('ftp://example.com',              'self-claim'),
+            ('android-app://example.com',      'rel-canonical'),
+            ('urn:x-pdf:example',              'rel-alternate'),
+            ('doi:http://example.com',         'rel-shortlink'),
+         ], None),
+
+        # It prefers self-claim URLs over all other URLs.
+        ([
+            ('https://example.com/shortlink',  'rel-shortlink'),
+            ('https://example.com/canonical',  'rel-canonical'),
+            ('https://example.com/self-claim', 'self-claim'),
+         ], 'https://example.com/self-claim'),
+
+        # It prefers canonical URLs over all other non-self-claim URLs.
+        ([
+            ('https://example.com/shortlink',  'rel-shortlink'),
+            ('https://example.com/canonical',  'rel-canonical'),
+         ], 'https://example.com/canonical'),
+
+
+        # If there's no self-claim or canonical URL it will return an https
+        # URL of a different type.
+        ([
+            ('ftp://example.com',              'self-claim'),
+            ('urn:x-pdf:example',              'rel-alternate'),
+
+            # This is the one that should be returned.
+            ('https://example.com/alternate',  'rel-alternate'),
+
+            ('android-app://example.com',      'rel-canonical'),
+            ('doi:http://example.com',         'rel-shortlink'),
+         ], 'https://example.com/alternate'),
+
+        # If there's no self-claim or canonical URL it will return an http
+        # URL of a different type.
+        ([
+            ('ftp://example.com',              'self-claim'),
+            ('urn:x-pdf:example',              'rel-alternate'),
+
+            # This is the one that should be returned.
+            ('http://example.com/alternate',   'rel-alternate'),
+
+            ('android-app://example.com',      'rel-canonical'),
+            ('doi:http://example.com',         'rel-shortlink'),
+         ], 'http://example.com/alternate'),
+    ])
+    def test_update_web_uri(self, document_uris, factories, expected_web_uri):
+        document = factories.Document()
+
+        for docuri_tuple in document_uris:
+            factories.DocumentURI(uri=docuri_tuple[0], type=docuri_tuple[1],
+                                  document=document)
+
+        document.update_web_uri()
+
+        assert document.web_uri == expected_web_uri
+
+
 class TestDocumentURI(object):
 
     def test_type_defaults_to_empty_string(self, db_session):
@@ -288,46 +364,6 @@ class TestCreateOrUpdateDocumentURI(object):
         assert document_uri.document == document_
         assert document_uri.created > created
         assert document_uri.updated > updated
-
-    def test_it_denormalizes_http_uri_to_document_when_none(self, db_session):
-        uri = 'http://example.com/example_uri.html'
-
-        document_ = document.Document(web_uri=None)
-        db_session.add(document_)
-
-        document.create_or_update_document_uri(
-            session=db_session,
-            claimant='http://example.com/example_claimant.html',
-            uri=uri,
-            type='self-claim',
-            content_type='',
-            document=document_,
-            created=now(),
-            updated=now(),
-        )
-
-        document_ = db_session.query(document.Document).get(document_.id)
-        assert document_.web_uri == uri
-
-    def test_it_denormalizes_https_uri_to_document_when_empty(self, db_session):
-        uri = 'https://example.com/example_uri.html'
-
-        document_ = document.Document(web_uri='')
-        db_session.add(document_)
-
-        document.create_or_update_document_uri(
-            session=db_session,
-            claimant='http://example.com/example_claimant.html',
-            uri=uri,
-            type='self-claim',
-            content_type='',
-            document=document_,
-            created=now(),
-            updated=now(),
-        )
-
-        document_ = db_session.query(document.Document).get(document_.id)
-        assert document_.web_uri == uri
 
     def test_it_skips_denormalizing_http_s_uri_to_document(self, db_session):
         document_ = document.Document(web_uri='http://example.com/first_uri.html')
@@ -832,6 +868,24 @@ class TestUpdateDocumentMetadata(object):
                 updated=annotation.updated,
                 **doc_uri_dict
             )
+
+    def test_it_updates_document_web_uri(self,
+                                         annotation,
+                                         Document,
+                                         factories,
+                                         session):
+        document_ = mock.Mock(web_uri=None)
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
+        Document.find_or_create_by_uris.return_value.first.return_value = document_
+
+        document.update_document_metadata(session,
+                                          annotation.target_uri,
+                                          [],
+                                          [],
+                                          annotation.created,
+                                          annotation.updated)
+
+        document_.update_web_uri.assert_called_once_with()
 
     def test_it_saves_all_the_document_metas(self,
                                              annotation,
