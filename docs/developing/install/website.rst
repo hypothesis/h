@@ -97,9 +97,9 @@ installed on:
 
    .. code-block:: bash
 
-      docker run -d --name postgres -p 5432:5432 postgres
-      docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
-      docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 --hostname rabbit rabbitmq:3-management
+      docker run -d --name postgres -p 127.0.0.1:5432:5432 postgres
+      docker run -d --name elasticsearch -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 nickstenning/elasticsearch-icu
+      docker run -d --name rabbitmq -p 127.0.0.1:5672:5672 -p 127.0.0.1:15672:15672 --hostname rabbit rabbitmq:3-management
 
    You'll now have three Docker containers named ``postgres``, ``elasticsearch``,
    and ``rabbitmq`` running and exposing their various services on the
