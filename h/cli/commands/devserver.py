@@ -79,7 +79,7 @@ def devserver(https, web, ws, worker, assets, beat):
         m.add_process('web',
                       'MODEL_CREATE_ALL=true '
                       'SEARCH_AUTOCONFIG=true '
-                      'gunicorn --reload --paste conf/development-app.ini %s' % gunicorn_args)
+                      'gunicorn --reload --paste conf/development-app.ini --workers 7 %s' % gunicorn_args)
 
     if ws:
         m.add_process('ws', 'gunicorn --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
