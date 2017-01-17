@@ -32,7 +32,7 @@ class Document(Base, mixins.Timestamps):
     #: The denormalized value of the first DocumentMeta record with type title.
     title = sa.Column('title', sa.UnicodeText())
 
-    #: The denormalized value of the first http(s) DocumentURI
+    #: The denormalized value of the "best" http(s) DocumentURI for this Document.
     web_uri = sa.Column('web_uri', sa.UnicodeText())
 
     # FIXME: This relationship should be named `uris` again after the
@@ -48,6 +48,38 @@ class Document(Base, mixins.Timestamps):
 
     def __repr__(self):
         return '<Document %s>' % self.id
+
+    def update_web_uri(self):
+        """
+        Update the value of the self.web_uri field.
+
+        Set self.web_uri to the "best" http(s) URL from self.document_uris.
+
+        Set self.web_uri to None if there's no http(s) DocumentURIs.
+
+        """
+        def first_http_url(type_=None):
+            """
+            Return this document's first http(s) URL of the given type.
+
+            Return None if this document doesn't have any http(s) URLs of the
+            given type.
+
+            If no type is given just return this document's first http(s)
+            URL, or None.
+
+            """
+            for document_uri in self.document_uris:
+                uri = document_uri.uri
+                if type_ is not None and document_uri.type != type_:
+                    continue
+                if urlparse.urlparse(uri).scheme not in ['http', 'https']:
+                    continue
+                return document_uri.uri
+
+        self.web_uri = (first_http_url(type_='self-claim') or
+                        first_http_url(type_='rel-canonical') or
+                        first_http_url())
 
     @classmethod
     def find_by_uris(cls, session, uris):
@@ -281,11 +313,6 @@ def create_or_update_document_uri(session,
 
     docuri.updated = updated
 
-    if not document.web_uri:
-        parsed = urlparse.urlparse(uri)
-        if parsed.scheme in ['http', 'https']:
-            document.web_uri = uri
-
     try:
         session.flush()
     except sa.exc.IntegrityError:
@@ -470,6 +497,8 @@ def update_document_metadata(session,
             created=created,
             updated=updated,
             **document_uri_dict)
+
+    document.update_web_uri()
 
     for document_meta_dict in document_meta_dicts:
         create_or_update_document_meta(
