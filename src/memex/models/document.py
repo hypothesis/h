@@ -58,9 +58,6 @@ class Document(Base, mixins.Timestamps):
         Set self.web_uri to None if there's no http(s) DocumentURIs.
 
         """
-        if self.web_uri is not None:
-            return
-
         def first_http_url(type_=None):
             """
             Return this document's first http(s) URL of the given type.
