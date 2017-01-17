@@ -27,6 +27,7 @@ from memex.events import AnnotationEvent
 from memex.interfaces import IGroupService
 from memex.presenters import AnnotationJSONPresenter
 from memex.presenters import AnnotationJSONLDPresenter
+from memex.resources import AnnotationResource
 from memex import search as search_lib
 from memex import schemas
 from memex import storage
@@ -175,7 +176,9 @@ def create(request):
     _publish_annotation_event(request, annotation, 'create')
 
     links_service = request.find_service(name='links')
-    presenter = AnnotationJSONPresenter(annotation, links_service)
+    group_service = request.find_service(IGroupService)
+    resource = AnnotationResource(annotation, group_service)
+    presenter = AnnotationJSONPresenter(resource, links_service)
     return presenter.asdict()
 
 
@@ -185,7 +188,7 @@ def create(request):
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     links_service = request.find_service(name='links')
-    presenter = AnnotationJSONPresenter(context.annotation, links_service)
+    presenter = AnnotationJSONPresenter(context, links_service)
     return presenter.asdict()
 
 
@@ -197,7 +200,7 @@ def read_jsonld(context, request):
     request.response.content_type_params = {
         'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
     links_service = request.find_service(name='links')
-    presenter = AnnotationJSONLDPresenter(context.annotation, links_service)
+    presenter = AnnotationJSONLDPresenter(context, links_service)
     return presenter.asdict()
 
 
@@ -218,7 +221,9 @@ def update(context, request):
     _publish_annotation_event(request, annotation, 'update')
 
     links_service = request.find_service(name='links')
-    presenter = AnnotationJSONPresenter(annotation, links_service)
+    group_service = request.find_service(IGroupService)
+    resource = AnnotationResource(annotation, group_service)
+    presenter = AnnotationJSONPresenter(resource, links_service)
     return presenter.asdict()
 
 
@@ -262,8 +267,10 @@ def _present_annotations(request, ids):
 
     annotations = storage.fetch_ordered_annotations(request.db, ids,
                                                     query_processor=eager_load_documents)
+    group_service = request.find_service(IGroupService)
     links_service = request.find_service(name='links')
-    return [AnnotationJSONPresenter(ann, links_service).asdict()
+    return [AnnotationJSONPresenter(AnnotationResource(ann, group_service),
+                                    links_service).asdict()
             for ann in annotations]
 
 

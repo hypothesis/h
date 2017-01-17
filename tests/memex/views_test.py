@@ -7,6 +7,7 @@ from pyramid import testing
 
 from memex import presenters
 from memex import views
+from memex.resources import AnnotationResource
 from memex.schemas import ValidationError
 from memex.search.core import SearchResult
 
@@ -107,7 +108,7 @@ class TestIndex(object):
         assert links['search']['url'] == host + '/dummy/search'
 
 
-@pytest.mark.usefixtures('links_service', 'search_lib')
+@pytest.mark.usefixtures('group_service', 'links_service', 'search_lib')
 class TestSearch(object):
 
     def test_it_searches(self, pyramid_request, search_lib):
@@ -129,11 +130,11 @@ class TestSearch(object):
         storage.fetch_ordered_annotations.assert_called_once_with(
             pyramid_request.db, ['row-1', 'row-2'], query_processor=mock.ANY)
 
-    def test_it_renders_search_results(self, links_service, pyramid_request, search_run, factories):
-        ann1 = factories.Annotation(userid='luke')
-        ann2 = factories.Annotation(userid='sarah')
+    def test_it_renders_search_results(self, links_service, pyramid_request, search_run, factories, group_service):
+        ann1 = AnnotationResource(factories.Annotation(userid='luke'), group_service)
+        ann2 = AnnotationResource(factories.Annotation(userid='sarah'), group_service)
 
-        search_run.return_value = SearchResult(2, [ann1.id, ann2.id], [], {})
+        search_run.return_value = SearchResult(2, [ann1.annotation.id, ann2.annotation.id], [], {})
 
         expected = {
             'total': 2,
@@ -154,12 +155,14 @@ class TestSearch(object):
         assert mock.call(pyramid_request.db, ['reply-1', 'reply-2'],
                          query_processor=mock.ANY) in storage.fetch_ordered_annotations.call_args_list
 
-    def test_it_renders_replies(self, links_service, pyramid_request, search_run, factories):
-        ann = factories.Annotation(userid='luke')
-        reply1 = factories.Annotation(userid='sarah', references=[ann.id])
-        reply2 = factories.Annotation(userid='sarah', references=[ann.id])
+    def test_it_renders_replies(self, links_service, pyramid_request, search_run, factories, group_service):
+        ann = AnnotationResource(factories.Annotation(userid='luke'), group_service)
+        reply1 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service)
+        reply2 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service)
 
-        search_run.return_value = SearchResult(1, [ann.id], [reply1.id, reply2.id], {})
+        search_run.return_value = SearchResult(1,
+                                               [ann.annotation.id],
+                                               [reply1.annotation.id, reply2.annotation.id], {})
 
         pyramid_request.params = {'_separate_replies': '1'}
 
@@ -251,13 +254,18 @@ class TestCreate(object):
 
     def test_it_inits_AnnotationJSONPresenter(self,
                                               AnnotationJSONPresenter,
+                                              annotation_resource,
                                               links_service,
+                                              group_service,
                                               pyramid_request,
                                               storage):
         views.create(pyramid_request)
 
+        annotation_resource.assert_called_once_with(
+                storage.create_annotation.return_value, group_service)
+
         AnnotationJSONPresenter.assert_called_once_with(
-            storage.create_annotation.return_value,
+            annotation_resource.return_value,
             links_service)
 
     def test_it_publishes_annotation_event(self,
@@ -290,12 +298,6 @@ class TestCreate(object):
         pyramid_request.notify_after_commit = mock.Mock()
         return pyramid_request
 
-    @pytest.fixture
-    def group_service(self, pyramid_config):
-        group_service = mock.Mock(spec_set=['find'])
-        pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
-        return group_service
-
 
 @pytest.mark.usefixtures('AnnotationJSONPresenter', 'links_service')
 class TestRead(object):
@@ -310,7 +312,7 @@ class TestRead(object):
 
         result = views.read(context, pyramid_request)
 
-        AnnotationJSONPresenter.assert_called_once_with(context.annotation,
+        AnnotationJSONPresenter.assert_called_once_with(context,
                                                         links_service)
         assert result == presenter.asdict()
 
@@ -341,7 +343,7 @@ class TestReadJSONLD(object):
 
         result = views.read_jsonld(context, pyramid_request)
 
-        AnnotationJSONLDPresenter.assert_called_once_with(context.annotation,
+        AnnotationJSONLDPresenter.assert_called_once_with(context,
                                                           links_service)
         assert result == presenter.asdict()
 
@@ -353,6 +355,7 @@ class TestReadJSONLD(object):
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
                          'links_service',
+                         'group_service',
                          'schemas',
                          'storage')
 class TestUpdate(object):
@@ -435,13 +438,18 @@ class TestUpdate(object):
 
     def test_it_inits_a_presenter(self,
                                   AnnotationJSONPresenter,
+                                  annotation_resource,
+                                  group_service,
                                   links_service,
                                   pyramid_request,
                                   storage):
         views.update(mock.Mock(), pyramid_request)
 
+        annotation_resource.assert_called_once_with(
+                storage.update_annotation.return_value, group_service)
+
         AnnotationJSONPresenter.assert_any_call(
-            storage.update_annotation.return_value,
+            annotation_resource.return_value,
             links_service)
 
     def test_it_dictizes_the_presenter(self,
@@ -513,10 +521,22 @@ def AnnotationJSONPresenter(patch):
 
 
 @pytest.fixture
+def annotation_resource(patch):
+    return patch('memex.views.AnnotationResource')
+
+
+@pytest.fixture
 def links_service(pyramid_config):
     service = mock.Mock(spec_set=['get', 'get_all'])
     pyramid_config.register_service(service, name='links')
     return service
+
+
+@pytest.fixture
+def group_service(pyramid_config):
+    group_service = mock.Mock(spec_set=['find'])
+    pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+    return group_service
 
 
 @pytest.fixture

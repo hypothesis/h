@@ -5,6 +5,9 @@ import datetime
 import mock
 import pytest
 
+from pyramid import security
+from pyramid.authorization import ACLAuthorizationPolicy
+
 from memex import models
 from memex.presenters import AnnotationBasePresenter
 from memex.presenters import AnnotationJSONPresenter
@@ -13,105 +16,120 @@ from memex.presenters import AnnotationJSONLDPresenter
 from memex.presenters import DocumentJSONPresenter
 from memex.presenters import DocumentSearchIndexPresenter
 from memex.presenters import utc_iso8601, deep_merge_dict
+from memex.resources import AnnotationResource
 
 
 class TestAnnotationBasePresenter(object):
 
     def test_constructor_args(self, fake_links_service):
         annotation = mock.Mock()
+        resource = mock.Mock(annotation=annotation)
 
-        presenter = AnnotationBasePresenter(annotation, fake_links_service)
+        presenter = AnnotationBasePresenter(resource, fake_links_service)
 
+        assert presenter.annotation_resource == resource
         assert presenter.annotation == annotation
 
     def test_created_returns_none_if_missing(self, fake_links_service):
         annotation = mock.Mock(created=None)
+        resource = mock.Mock(annotation=annotation)
 
-        created = AnnotationBasePresenter(annotation, fake_links_service).created
+        created = AnnotationBasePresenter(resource, fake_links_service).created
 
         assert created is None
 
     def test_created_uses_iso_format(self, fake_links_service):
         when = datetime.datetime(2012, 3, 14, 23, 34, 47, 12)
         annotation = mock.Mock(created=when)
+        resource = mock.Mock(annotation=annotation)
 
-        created = AnnotationBasePresenter(annotation, fake_links_service).created
+        created = AnnotationBasePresenter(resource, fake_links_service).created
 
         assert created == '2012-03-14T23:34:47.000012+00:00'
 
     def test_updated_returns_none_if_missing(self, fake_links_service):
         annotation = mock.Mock(updated=None)
+        resource = mock.Mock(annotation=annotation)
 
-        updated = AnnotationBasePresenter(annotation, fake_links_service).updated
+        updated = AnnotationBasePresenter(resource, fake_links_service).updated
 
         assert updated is None
 
-    def test_updated_uses_iso_format(self, fake_links_service):
+    def test_updated_uses_iso_format(self, group_service, fake_links_service):
         when = datetime.datetime(1983, 8, 31, 7, 18, 20, 98763)
         annotation = mock.Mock(updated=when)
+        resource = mock.Mock(annotation=annotation)
 
-        updated = AnnotationBasePresenter(annotation, fake_links_service).updated
+        updated = AnnotationBasePresenter(resource, fake_links_service).updated
 
         assert updated == '1983-08-31T07:18:20.098763+00:00'
 
-    def test_links(self, fake_links_service):
+    def test_links(self, group_service, fake_links_service):
         annotation = mock.Mock()
+        resource = mock.Mock(annotation=annotation)
 
-        links = AnnotationBasePresenter(annotation, fake_links_service).links
+        links = AnnotationBasePresenter(resource, fake_links_service).links
 
         assert links == {'giraffe': 'http://giraffe.com',
                          'toad': 'http://toad.net'}
 
-    def test_links_passes_annotation(self, fake_links_service):
+    def test_links_passes_annotation(self, group_service, fake_links_service):
         annotation = mock.Mock()
+        resource = mock.Mock(annotation=annotation)
 
-        links = AnnotationBasePresenter(annotation, fake_links_service).links
+        AnnotationBasePresenter(resource, fake_links_service).links
 
         assert fake_links_service.last_annotation == annotation
 
-    def test_text(self, fake_links_service):
-        ann = mock.Mock(text='It is magical!')
-        presenter = AnnotationBasePresenter(ann, fake_links_service)
+    def test_text(self, group_service, fake_links_service):
+        annotation = mock.Mock(text='It is magical!')
+        resource = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert 'It is magical!' == presenter.text
 
-    def test_text_missing(self, fake_links_service):
-        ann = mock.Mock(text=None)
-        presenter = AnnotationBasePresenter(ann, fake_links_service)
+    def test_text_missing(self, group_service, fake_links_service):
+        annotation = mock.Mock(text=None)
+        resource = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert '' == presenter.text
 
-    def test_tags(self, fake_links_service):
-        ann = mock.Mock(tags=['interesting', 'magic'])
-        presenter = AnnotationBasePresenter(ann, fake_links_service)
+    def test_tags(self, group_service, fake_links_service):
+        annotation = mock.Mock(tags=['interesting', 'magic'])
+        resource = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert ['interesting', 'magic'] == presenter.tags
 
-    def test_tags_missing(self, fake_links_service):
-        ann = mock.Mock(tags=None)
-        presenter = AnnotationBasePresenter(ann, fake_links_service)
+    def test_tags_missing(self, group_service, fake_links_service):
+        annotation = mock.Mock(tags=None)
+        resource = mock.Mock(annotation=annotation)
+        presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert [] == presenter.tags
 
-    def test_target(self, fake_links_service):
-        ann = mock.Mock(target_uri='http://example.com',
-                        target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
+    def test_target(self, group_service, fake_links_service):
+        annotation = mock.Mock(target_uri='http://example.com',
+                               target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
+        resource = mock.Mock(annotation=annotation)
 
         expected = [{'source': 'http://example.com', 'selector': {'PositionSelector': {'start': 0, 'end': 12}}}]
-        actual = AnnotationBasePresenter(ann, fake_links_service).target
+        actual = AnnotationBasePresenter(resource, fake_links_service).target
         assert expected == actual
 
-    def test_target_missing_selectors(self, fake_links_service):
-        ann = mock.Mock(target_uri='http://example.com',
-                        target_selectors=None)
+    def test_target_missing_selectors(self, group_service, fake_links_service):
+        annotation = mock.Mock(target_uri='http://example.com',
+                               target_selectors=None)
+        resource = mock.Mock(annotation=annotation)
 
         expected = [{'source': 'http://example.com'}]
-        actual = AnnotationBasePresenter(ann, fake_links_service).target
+        actual = AnnotationBasePresenter(resource, fake_links_service).target
         assert expected == actual
 
 
 class TestAnnotationJSONPresenter(object):
-    def test_asdict(self, document_asdict, fake_links_service):
+    def test_asdict(self, document_asdict, group_service, fake_links_service):
         ann = mock.Mock(id='the-id',
                         created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
                         updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
@@ -124,6 +142,7 @@ class TestAnnotationJSONPresenter(object):
                         target_selectors=[{'TestSelector': 'foobar'}],
                         references=['referenced-id-1', 'referenced-id-2'],
                         extra={'extra-1': 'foo', 'extra-2': 'bar'})
+        resource = AnnotationResource(ann, group_service)
 
         document_asdict.return_value = {'foo': 'bar'}
 
@@ -148,42 +167,66 @@ class TestAnnotationJSONPresenter(object):
                     'extra-1': 'foo',
                     'extra-2': 'bar'}
 
-        result = AnnotationJSONPresenter(ann, fake_links_service).asdict()
+        result = AnnotationJSONPresenter(resource, fake_links_service).asdict()
 
         assert result == expected
 
-    def test_asdict_extra_cannot_override_other_data(self, document_asdict, fake_links_service):
+    def test_asdict_extra_cannot_override_other_data(self, document_asdict, group_service, fake_links_service):
         ann = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
+        resource = AnnotationResource(ann, group_service)
         document_asdict.return_value = {}
 
-        presented = AnnotationJSONPresenter(ann, fake_links_service).asdict()
+        presented = AnnotationJSONPresenter(resource, fake_links_service).asdict()
         assert presented['id'] == 'the-real-id'
 
-    def test_asdict_extra_uses_copy_of_extra(self, document_asdict, fake_links_service):
+    def test_asdict_extra_uses_copy_of_extra(self, document_asdict, group_service, fake_links_service):
         extra = {'foo': 'bar'}
         ann = mock.Mock(id='my-id', extra=extra)
+        resource = AnnotationResource(ann, group_service)
         document_asdict.return_value = {}
 
-        presented = AnnotationJSONPresenter(ann, fake_links_service).asdict()
+        AnnotationJSONPresenter(resource, fake_links_service).asdict()
 
         # Presenting the annotation shouldn't change the "extra" dict.
         assert extra == {'foo': 'bar'}
 
-    @pytest.mark.parametrize('annotation,action,expected', [
-        (mock.Mock(userid='acct:luke', shared=False), 'read', ['acct:luke']),
-        (mock.Mock(groupid='__world__', shared=True), 'read', ['group:__world__']),
-        (mock.Mock(groupid='lulapalooza', shared=True), 'read', ['group:lulapalooza']),
-        (mock.Mock(userid='acct:luke'), 'admin', ['acct:luke']),
-        (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
-        (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
+    @pytest.mark.usefixtures('policy')
+    @pytest.mark.parametrize('annotation,group_readable,action,expected', [
+        (mock.Mock(userid='acct:luke', shared=False), 'world', 'read', ['acct:luke']),
+        (mock.Mock(userid='acct:luke', groupid='abcde', shared=False), 'members', 'read', ['acct:luke']),
+        (mock.Mock(groupid='__world__', shared=True), 'world', 'read', ['group:__world__']),
+        (mock.Mock(groupid='lulapalooza', shared=True), 'members', 'read', ['group:lulapalooza']),
+        (mock.Mock(groupid='publisher', shared=True), 'world', 'read', ['group:__world__']),
+        (mock.Mock(userid='acct:luke'), None, 'admin', ['acct:luke']),
+        (mock.Mock(userid='acct:luke'), None, 'update', ['acct:luke']),
+        (mock.Mock(userid='acct:luke'), None, 'delete', ['acct:luke']),
         ])
-    def test_permissions(self, annotation, action, expected, fake_links_service):
-        presenter = AnnotationJSONPresenter(annotation, fake_links_service)
+    def test_permissions(self, annotation, group_readable, action, expected, group_service, fake_links_service):
+        annotation.deleted = False
+
+        group_principals = {
+            'members': (security.Allow, 'group:{}'.format(annotation.groupid), 'read'),
+            'world': (security.Allow, security.Everyone, 'read'),
+            None: security.DENY_ALL,
+        }
+        group = mock.Mock(spec_set=['__acl__'])
+        group.__acl__.return_value = [group_principals[group_readable]]
+        group_service.find.return_value = group
+
+        resource = AnnotationResource(annotation, group_service)
+        presenter = AnnotationJSONPresenter(resource, fake_links_service)
         assert expected == presenter.permissions[action]
 
     @pytest.fixture
     def document_asdict(self, patch):
         return patch('memex.presenters.DocumentJSONPresenter.asdict')
+
+    @pytest.fixture
+    def policy(self, pyramid_config):
+        """Set up a fake authentication policy with a real ACL authorization policy."""
+        policy = ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy(None)
+        pyramid_config.set_authorization_policy(policy)
 
 
 @pytest.mark.usefixtures('DocumentSearchIndexPresenter')
@@ -219,10 +262,6 @@ class TestAnnotationSearchIndexPresenter(object):
             'tags': ['magic'],
             'tags_raw': ['magic'],
             'group': '__world__',
-            'permissions': {'read': ['group:__world__'],
-                            'admin': ['acct:luke@hypothes.is'],
-                            'update': ['acct:luke@hypothes.is'],
-                            'delete': ['acct:luke@hypothes.is']},
             'shared': True,
             'target': [{'scope': ['http://example.com/normalized'],
                         'source': 'http://example.com',
@@ -230,21 +269,6 @@ class TestAnnotationSearchIndexPresenter(object):
             'document': {'foo': 'bar'},
             'references': ['referenced-id-1', 'referenced-id-2'],
         }
-
-    @pytest.mark.parametrize('annotation,action,expected', [
-        (mock.Mock(userid='acct:luke', shared=False), 'read', ['acct:luke']),
-        (mock.Mock(groupid='__world__', shared=True), 'read',
-            ['group:__world__']),
-        (mock.Mock(groupid='lulapalooza', shared=True), 'read',
-            ['group:lulapalooza']),
-        (mock.Mock(userid='acct:luke'), 'admin', ['acct:luke']),
-        (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
-        (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
-        ])
-    def test_permissions(self, annotation, action, expected):
-        presenter = AnnotationSearchIndexPresenter(annotation)
-
-        assert expected == presenter.permissions[action]
 
     def test_it_copies_target_uri_normalized_to_target_scope(self):
         annotation = mock.Mock(
@@ -265,7 +289,7 @@ class TestAnnotationSearchIndexPresenter(object):
 
 class TestAnnotationJSONLDPresenter(object):
 
-    def test_asdict(self, fake_links_service):
+    def test_asdict(self, group_service, fake_links_service):
         annotation = mock.Mock(
             id='foobar',
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
@@ -292,29 +316,33 @@ class TestAnnotationJSONLDPresenter(object):
                         'selector': [{'TestSelector': 'foobar'}]}]
         }
 
-        result = AnnotationJSONLDPresenter(annotation, fake_links_service).asdict()
+        resource = AnnotationResource(annotation, group_service)
+        result = AnnotationJSONLDPresenter(resource, fake_links_service).asdict()
 
         assert result == expected
 
-    def test_id_returns_jsonld_id_link(self, fake_links_service):
+    def test_id_returns_jsonld_id_link(self, group_service, fake_links_service):
         annotation = mock.Mock(id='foobar')
+        resource = AnnotationResource(annotation, group_service)
 
-        presenter = AnnotationJSONLDPresenter(annotation, fake_links_service)
+        presenter = AnnotationJSONLDPresenter(resource, fake_links_service)
 
         assert presenter.id == 'http://fake-link/jsonld_id'
 
-    def test_id_passes_annotation_to_link_service(self, fake_links_service):
+    def test_id_passes_annotation_to_link_service(self, group_service, fake_links_service):
         annotation = mock.Mock(id='foobar')
+        resource = AnnotationResource(annotation, group_service)
 
-        presenter = AnnotationJSONLDPresenter(annotation, fake_links_service)
+        presenter = AnnotationJSONLDPresenter(resource, fake_links_service)
         _ = presenter.id
 
         assert fake_links_service.last_annotation == annotation
 
-    def test_bodies_returns_textual_body(self, fake_links_service):
+    def test_bodies_returns_textual_body(self, group_service, fake_links_service):
         annotation = mock.Mock(text='Flib flob flab', tags=None)
+        resource = AnnotationResource(annotation, group_service)
 
-        bodies = AnnotationJSONLDPresenter(annotation, fake_links_service).bodies
+        bodies = AnnotationJSONLDPresenter(resource, fake_links_service).bodies
 
         assert bodies == [{
             'type': 'TextualBody',
@@ -322,10 +350,11 @@ class TestAnnotationJSONLDPresenter(object):
             'format': 'text/markdown',
         }]
 
-    def test_bodies_appends_tag_bodies(self, fake_links_service):
+    def test_bodies_appends_tag_bodies(self, group_service, fake_links_service):
         annotation = mock.Mock(text='Flib flob flab', tags=['giraffe', 'lion'])
+        resource = AnnotationResource(annotation, group_service)
 
-        bodies = AnnotationJSONLDPresenter(annotation, fake_links_service).bodies
+        bodies = AnnotationJSONLDPresenter(resource, fake_links_service).bodies
 
         assert {
             'type': 'TextualBody',
@@ -437,3 +466,8 @@ class FakeLinksService(object):
 @pytest.fixture
 def fake_links_service():
     return FakeLinksService()
+
+
+@pytest.fixture
+def group_service():
+    return mock.Mock(spec_set=['find'])

@@ -12,10 +12,12 @@ from h.streamer import websocket
 def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(session):
     message = messages.Message(topic='foo', payload='bar')
     queue = [message]
+    settings = {'foo': 'bar'}
 
-    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
+    streamer.process_work_queue(settings, queue, session_factory=lambda _: session)
 
     messages.handle_message.assert_called_once_with(message,
+                                                    settings,
                                                     session,
                                                     topic_handlers=mock.ANY)
 
@@ -23,8 +25,9 @@ def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(s
 def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_messages(session):
     message = messages.Message(topic='user', payload='bar')
     queue = [message]
+    settings = {'foo': 'bar'}
 
-    streamer.process_work_queue({},
+    streamer.process_work_queue(settings,
                                 queue,
                                 session_factory=lambda _: session)
 
@@ -34,6 +37,7 @@ def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_message
     }
 
     messages.handle_message.assert_called_once_with(mock.ANY,
+                                                    settings,
                                                     session,
                                                     topic_handlers=topic_handlers)
 
