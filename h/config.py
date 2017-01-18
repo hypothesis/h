@@ -63,6 +63,7 @@ SETTINGS = [
     EnvSetting('csp.report_uri', 'CSP_REPORT_URI'),
     EnvSetting('csp.report_only', 'CSP_REPORT_ONLY'),
     EnvSetting('ga_tracking_id', 'GOOGLE_ANALYTICS_TRACKING_ID'),
+    EnvSetting('ga_client_tracking_id', 'GOOGLE_ANALYTICS_CLIENT_TRACKING_ID'),
     EnvSetting('h.app_url', 'APP_URL'),
     EnvSetting('h.auth_domain', 'AUTH_DOMAIN'),
     EnvSetting('h.bouncer_url', 'BOUNCER_URL'),

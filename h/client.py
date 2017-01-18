@@ -18,17 +18,12 @@ def url_with_path(url):
         return url
 
 
-def _app_html_context(assets_env, api_url, service_url, ga_tracking_id,
-                      sentry_public_dsn, websocket_url):
+def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
+                      websocket_url, ga_client_tracking_id):
     """
     Returns a dict of asset URLs and contents used by the sidebar app
     HTML tempate.
     """
-
-    if urlparse.urlparse(service_url).hostname == 'localhost':
-        ga_cookie_domain = 'none'
-    else:
-        ga_cookie_domain = 'auto'
 
     # the serviceUrl parameter must contain a path element
     service_url = url_with_path(service_url)
@@ -52,12 +47,15 @@ def _app_html_context(assets_env, api_url, service_url, ga_tracking_id,
             }
         })
 
+    if ga_client_tracking_id:
+        app_config.update({
+            'googleAnalytics': ga_client_tracking_id
+        })
+
     return {
         'app_config': json.dumps(app_config),
         'app_css_urls': assets_env.urls('app_css'),
         'app_js_urls': assets_env.urls('app_js'),
-        'ga_tracking_id': ga_tracking_id,
-        'ga_cookie_domain': ga_cookie_domain,
     }
 
 
@@ -65,8 +63,8 @@ def render_app_html(assets_env,
                     service_url,
                     api_url,
                     sentry_public_dsn,
-                    ga_tracking_id=None,
                     websocket_url=None,
+                    ga_client_tracking_id=None,
                     extra=None):
     """
     Return the HTML for the Hypothesis app page,
@@ -79,7 +77,8 @@ def render_app_html(assets_env,
     :param websocket_url: The WebSocket URL which the client should connect to
     :param sentry_public_dsn: The _public_ Sentry DSN for client-side
                               crash reporting
-    :param ga_tracking_id: The Google Analytics tracking ID
+    :param ga_client_tracking_id: The Google Analytics tracking ID for the client
+                  property.
     :param extra: A dict of optional properties specifying link tags and
                   meta attributes to be included on the page, passed through to
                   app.html.jinja2
@@ -87,10 +86,10 @@ def render_app_html(assets_env,
     template = jinja_env.get_template('app.html.jinja2')
     context = _app_html_context(api_url=api_url,
                                 service_url=service_url,
-                                ga_tracking_id=ga_tracking_id,
                                 sentry_public_dsn=sentry_public_dsn,
                                 assets_env=assets_env,
-                                websocket_url=websocket_url).copy()
+                                websocket_url=websocket_url,
+                                ga_client_tracking_id=ga_client_tracking_id).copy()
     if extra is not None:
         context.update(extra)
     return template.render(context)
