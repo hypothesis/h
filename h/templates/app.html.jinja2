@@ -34,20 +34,6 @@
     {% for url in app_js_urls %}
     <script src="{{ url }}"></script>
     {% endfor %}
-
-    <!-- Analytics !-->
-    {% if ga_tracking_id %}
-      <!-- Google Analytics -->
-      <script async src='//www.google-analytics.com/analytics.js'></script>
-      <script>
-       window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-       ga('create', 'UA-{{ga_tracking_id}}', '{{ga_cookie_domain}}');
-
-       {# No pageview event is sent here because that is handled by the
-          Angular GA integration in the client app after it boots.
-        #}
-      </script>
-      <!-- End Google Analytics -->
-    {% endif %}
+    
   </body>
 </html>

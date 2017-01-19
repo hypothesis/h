@@ -29,9 +29,9 @@ def render_app(request, extra=None):
         # URLs.
         api_url=request.route_url('api.index'),
         service_url=request.route_url('index'),
-        ga_tracking_id=request.registry.settings.get('ga_tracking_id'),
         sentry_public_dsn=client_sentry_dsn,
         websocket_url=request.registry.settings.get('h.websocket_url'),
+        ga_client_tracking_id=request.registry.settings.get('ga_client_tracking_id'),
         extra=extra)
     request.response.text = html
     return request.response
