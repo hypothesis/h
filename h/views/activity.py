@@ -88,7 +88,6 @@ class SearchController(object):
 @view_defaults(route_name='group_read',
                renderer='h:templates/activity/search.html.jinja2',
                effective_principals=security.Authenticated,
-               has_permission='read',
                request_method='GET')
 class GroupSearchController(SearchController):
     """View callables unique to the "group_read" route."""
@@ -99,6 +98,10 @@ class GroupSearchController(SearchController):
 
     @view_config(request_method='GET')
     def search(self):
+        result = self._check_access_permissions()
+        if result is not None:
+            return result
+
         check_slug(self.group, self.request)
 
         result = super(GroupSearchController, self).search()
@@ -232,6 +235,13 @@ class GroupSearchController(SearchController):
     @view_config(request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
+
+    def _check_access_permissions(self):
+        if not self.request.has_permission('read', self.group):
+            if self.request.has_permission('join', self.group):
+                self.request.override_renderer = 'h:templates/groups/join.html.jinja2'
+                return {'group': self.group}
+            raise httpexceptions.HTTPNotFound()
 
 
 @view_defaults(route_name='activity.user_search',
