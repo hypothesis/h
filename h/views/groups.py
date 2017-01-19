@@ -116,34 +116,6 @@ def read_unauthenticated(group, request):
     return {'group': group}
 
 
-@view_defaults(route_name='group_read',
-               renderer='h:templates/groups/join.html.jinja2',
-               effective_principals=security.Authenticated,
-               has_permission=not_('read'))
-class GroupJoinController(object):
-    """Views for "group_read" when logged in but not a member of the group."""
-
-    def __init__(self, group, request):
-        self.group = group
-        self.request = request
-
-    @view_config(request_method='GET')
-    def get(self):
-        check_slug(self.group, self.request)
-        return {'group': self.group}
-
-    @view_config(request_method='POST')
-    def post(self):
-        groups_service = self.request.find_service(name='group')
-        groups_service.member_join(self.group,
-                                   self.request.authenticated_userid)
-
-        url = self.request.route_path('group_read',
-                                      pubid=self.group.pubid,
-                                      slug=self.group.slug)
-        return HTTPSeeOther(url)
-
-
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read_noslug(group, request):
     check_slug(group, request)

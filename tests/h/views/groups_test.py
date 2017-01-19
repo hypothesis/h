@@ -3,8 +3,7 @@
 import deform
 import mock
 import pytest
-from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther)
+from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent)
 
 from h.views import groups as views
 from h.models import (Group, User)
@@ -193,49 +192,6 @@ class TestGroupLeave(object):
         result = views.leave(group, pyramid_request)
 
         assert isinstance(result, HTTPNoContent)
-
-
-@pytest.mark.usefixtures('group_service', 'routes')
-class TestGroupJoinController(object):
-
-    def test_get_returns_the_group_to_the_template(self, controller, group):
-        assert controller.get()['group'] == group
-
-    def test_post_joins_the_group(self,
-                                  controller,
-                                  group,
-                                  group_service,
-                                  pyramid_config):
-        pyramid_config.testing_securitypolicy('gentiana')
-
-        controller.post()
-
-        assert (group, 'gentiana') in group_service.joined
-
-    def test_post_redirects_to_group_page(self,
-                                          controller,
-                                          group):
-        result = controller.post()
-
-        assert isinstance(result, HTTPSeeOther)
-        assert result.location == '/g/{pubid}/{slug}'.format(
-            pubid=group.pubid, slug=group.slug)
-
-    @pytest.fixture
-    def controller(self, group, pyramid_request):
-        return views.GroupJoinController(group, pyramid_request)
-
-    @pytest.fixture
-    def group(self, factories):
-        return factories.Group()
-
-    @pytest.fixture
-    def pyramid_request(self, group, pyramid_request):
-        # The matchdict needs to contain the correct pubid and slug,
-        # otherwise initializing the controller will redirect.
-        pyramid_request.matchdict['pubid'] = group.pubid
-        pyramid_request.matchdict['slug'] = group.slug
-        return pyramid_request
 
 
 class FakeGroup(object):
