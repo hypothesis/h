@@ -3,8 +3,7 @@
 import deform
 from pyramid import security
 from pyramid.config import not_
-from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther)
+from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPSeeOther)
 from pyramid.view import view_config, view_defaults
 
 from h import form
@@ -119,17 +118,6 @@ def read_unauthenticated(group, request):
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read_noslug(group, request):
     check_slug(group, request)
-
-
-@view_config(route_name='group_leave',
-             request_method='POST',
-             effective_principals=security.Authenticated,
-             has_permission='read')
-def leave(group, request):
-    groups_service = request.find_service(name='group')
-    groups_service.member_leave(group, request.authenticated_userid)
-
-    return HTTPNoContent()
 
 
 def check_slug(group, request):
