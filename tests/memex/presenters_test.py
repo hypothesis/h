@@ -55,7 +55,7 @@ class TestAnnotationBasePresenter(object):
 
         assert updated is None
 
-    def test_updated_uses_iso_format(self, group_service, fake_links_service):
+    def test_updated_uses_iso_format(self, fake_links_service):
         when = datetime.datetime(1983, 8, 31, 7, 18, 20, 98763)
         annotation = mock.Mock(updated=when)
         resource = mock.Mock(annotation=annotation)
@@ -64,7 +64,7 @@ class TestAnnotationBasePresenter(object):
 
         assert updated == '1983-08-31T07:18:20.098763+00:00'
 
-    def test_links(self, group_service, fake_links_service):
+    def test_links(self, fake_links_service):
         annotation = mock.Mock()
         resource = mock.Mock(annotation=annotation)
 
@@ -73,7 +73,7 @@ class TestAnnotationBasePresenter(object):
         assert links == {'giraffe': 'http://giraffe.com',
                          'toad': 'http://toad.net'}
 
-    def test_links_passes_annotation(self, group_service, fake_links_service):
+    def test_links_passes_annotation(self, fake_links_service):
         annotation = mock.Mock()
         resource = mock.Mock(annotation=annotation)
 
@@ -81,35 +81,35 @@ class TestAnnotationBasePresenter(object):
 
         assert fake_links_service.last_annotation == annotation
 
-    def test_text(self, group_service, fake_links_service):
+    def test_text(self, fake_links_service):
         annotation = mock.Mock(text='It is magical!')
         resource = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert 'It is magical!' == presenter.text
 
-    def test_text_missing(self, group_service, fake_links_service):
+    def test_text_missing(self, fake_links_service):
         annotation = mock.Mock(text=None)
         resource = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert '' == presenter.text
 
-    def test_tags(self, group_service, fake_links_service):
+    def test_tags(self, fake_links_service):
         annotation = mock.Mock(tags=['interesting', 'magic'])
         resource = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert ['interesting', 'magic'] == presenter.tags
 
-    def test_tags_missing(self, group_service, fake_links_service):
+    def test_tags_missing(self, fake_links_service):
         annotation = mock.Mock(tags=None)
         resource = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(resource, fake_links_service)
 
         assert [] == presenter.tags
 
-    def test_target(self, group_service, fake_links_service):
+    def test_target(self, fake_links_service):
         annotation = mock.Mock(target_uri='http://example.com',
                                target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
         resource = mock.Mock(annotation=annotation)
@@ -118,7 +118,7 @@ class TestAnnotationBasePresenter(object):
         actual = AnnotationBasePresenter(resource, fake_links_service).target
         assert expected == actual
 
-    def test_target_missing_selectors(self, group_service, fake_links_service):
+    def test_target_missing_selectors(self, fake_links_service):
         annotation = mock.Mock(target_uri='http://example.com',
                                target_selectors=None)
         resource = mock.Mock(annotation=annotation)
