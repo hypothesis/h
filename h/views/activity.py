@@ -162,6 +162,27 @@ class GroupSearchController(SearchController):
         return result
 
     @view_config(request_method='POST',
+                 request_param='group_join')
+    def join(self):
+        """
+        Join the given group.
+
+        This adds the authenticated user to the given group and redirect the
+        browser to the search page.
+        """
+        if not self.request.has_permission('join', self.group):
+            raise httpexceptions.HTTPNotFound()
+
+        groups_service = self.request.find_service(name='group')
+        groups_service.member_join(self.group,
+                                   self.request.authenticated_userid)
+
+        url = self.request.route_url('group_read',
+                                     pubid=self.group.pubid,
+                                     slug=self.group.slug)
+        return httpexceptions.HTTPSeeOther(location=url)
+
+    @view_config(request_method='POST',
                  request_param='group_leave')
     def leave(self):
         """

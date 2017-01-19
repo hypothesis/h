@@ -372,6 +372,26 @@ class TestGroupSearchController(object):
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
 
+    def test_join_raises_not_found_when_not_joinable(self, controller, pyramid_request):
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            controller.join()
+
+    def test_join_adds_group_member(self, controller, group, pyramid_request, pyramid_config, group_service):
+        pyramid_config.testing_securitypolicy('acct:doe@example.org')
+
+        controller.join()
+
+        group_service.member_join.assert_called_once_with(group, 'acct:doe@example.org')
+
+    def test_join_redirects_to_search_page(self, controller, group, pyramid_request):
+        result = controller.join()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        expected = pyramid_request.route_url('group_read', pubid=group.pubid, slug=group.slug)
+        assert result.location == expected
+
     def test_search_passes_the_group_annotation_count_to_the_template(self,
                                                                       controller,
                                                                       group,
