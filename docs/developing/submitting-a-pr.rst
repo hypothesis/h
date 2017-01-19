@@ -30,12 +30,6 @@ Some things to remember when submitting or reviewing a pull request:
   Please minimize issue gardening by using the GitHub syntax for closing
   issues with commit messages.
 
-- Name your branch in a way that makes it easier to follow the history back
-  to issues. The recommended template is ``<issue name>-<slug>``.
-
-  For instance, ``43-browser-extensions`` would be a branch to address issue
-  ``#43``, which is to create browser extensions.
-
 - Don't merge on feature branches. Feature branches should merge into upstream
   branches, but never contain merge commits in the other direction.
   Consider using ``--rebase`` when pulling if you must keep a long-running
