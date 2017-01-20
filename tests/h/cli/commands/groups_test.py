@@ -3,25 +3,13 @@
 import mock
 import pytest
 
-from h import models
-from h.cli.commands import publisher as publisher_cli
+from h.cli.commands import groups as groups_cli
 
 
 class TestAddCommand(object):
 
-    def test_it_creates_an_authclient(self, cli, cliconfig, db_session):
-        result = cli.invoke(publisher_cli.add,
-                            [u'--name', 'Publisher', u'--authority', 'publisher.org'],
-                            obj=cliconfig)
-
-        assert result.exit_code == 0
-
-        authclient = db_session.query(models.AuthClient).filter(
-                   models.AuthClient.authority == 'publisher.org').first()
-        assert authclient
-
     def test_it_creates_a_publisher_group(self, cli, cliconfig, group_service, signup_service):
-        result = cli.invoke(publisher_cli.add,
+        result = cli.invoke(groups_cli.add_publisher_group,
                             [u'--name', 'Publisher', u'--authority', 'publisher.org'],
                             obj=cliconfig)
 
@@ -32,22 +20,6 @@ class TestAddCommand(object):
                                                 authority=u'publisher.org',
                                                 userid=creator_id,
                                                 type_='publisher')
-
-
-class TestSecretCommand(object):
-    def test_it_prints_the_client_id_and_secret(self, authclient, cli, cliconfig, echo):
-        result = cli.invoke(publisher_cli.secret, [u'partner.org'], obj=cliconfig)
-
-        assert result.exit_code == 0
-
-        echo.assert_called_with('ID: {}\nSecret: {}'.format(authclient.id, authclient.secret))
-
-    @pytest.fixture
-    def authclient(self, db_session, factories):
-        authclient = models.AuthClient(name='Partner', authority='partner.org')
-        db_session.add(authclient)
-        db_session.flush()
-        return authclient
 
 
 @pytest.fixture
@@ -72,5 +44,5 @@ def cliconfig(pyramid_config, pyramid_request, group_service, signup_service):
 
 @pytest.fixture
 def echo(patch):
-    echo = patch('h.cli.commands.publisher.click.echo')
+    echo = patch('h.cli.commands.groups.click.echo')
     return echo
