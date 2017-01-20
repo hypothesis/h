@@ -6,10 +6,14 @@ from memex.search.core import Search
 from memex.search.core import FILTERS_KEY
 from memex.search.core import MATCHERS_KEY
 
-__all__ = ('Search',)
+__all__ = (
+    'Search',
+    'get_client',
+    'init',
+)
 
 
-def _get_client(settings):
+def get_client(settings):
     """Return a client for the Elasticsearch index."""
     host = settings['es.host']
     index = settings['es.index']
@@ -45,7 +49,7 @@ def includeme(config):
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
-    config.registry['es.client'] = client = _get_client(settings)
+    config.registry['es.client'] = client = get_client(settings)
     config.add_request_method(
         lambda r: r.registry['es.client'],
         name='es',
