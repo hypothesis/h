@@ -12,4 +12,4 @@ from h.util.view import json_view
            request_method='GET',
            effective_principals=security.Authenticated)
 def profile(request):
-    return h_session.model(request)
+    return h_session.profile(request)

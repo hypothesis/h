@@ -69,8 +69,28 @@ def test_model_show_sidebar_tutorial(
         assert 'show_sidebar_tutorial' not in preferences
 
 
+def test_profile_userid_unauthenticated(unauthenticated_request):
+    assert session.profile(unauthenticated_request)['userid'] is None
+
+
+def test_profile_userid_authenticated(authenticated_request):
+    profile = session.profile(authenticated_request)
+    assert profile['userid'] == u'acct:user@example.com'
+
+
 @pytest.fixture
 def fake_user():
     fake_user = mock.Mock()
     fake_user.groups = []
     return fake_user
+
+
+@pytest.fixture
+def unauthenticated_request():
+    return mock.Mock(authenticated_userid=None, authenticated_user=None)
+
+
+@pytest.fixture
+def authenticated_request(fake_user):
+    return mock.Mock(authenticated_userid=u'acct:user@example.com',
+                     authenticated_user=fake_user)

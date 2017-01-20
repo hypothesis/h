@@ -11,11 +11,20 @@ def model(request):
     session['userid'] = request.authenticated_userid
     session['groups'] = _current_groups(request)
     session['features'] = request.feature.all()
-    session['preferences'] = {}
-    user = request.authenticated_user
-    if user and not user.sidebar_tutorial_dismissed:
-        session['preferences']['show_sidebar_tutorial'] = True
+    session['preferences'] = _user_preferences(request.authenticated_user)
     return session
+
+
+def profile(request):
+    """
+    Return a representation of the current user's information and settings.
+    """
+    profile = {}
+    profile['userid'] = request.authenticated_userid
+    profile['groups'] = _current_groups(request)
+    profile['features'] = request.feature.all()
+    profile['preferences'] = _user_preferences(request.authenticated_user)
+    return profile
 
 
 def pop_flash(request):
@@ -56,6 +65,13 @@ def _current_groups(request):
                                      slug=group.slug),
         })
     return groups
+
+
+def _user_preferences(user):
+    preferences = {}
+    if user and not user.sidebar_tutorial_dismissed:
+        preferences['show_sidebar_tutorial'] = True
+    return preferences
 
 
 def includeme(config):
