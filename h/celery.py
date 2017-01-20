@@ -46,6 +46,10 @@ celery.conf.update(
             'task': 'h.tasks.cleanup.purge_expired_tokens',
             'schedule': timedelta(hours=1)
         },
+        'purge-removed-features': {
+            'task': 'h.tasks.cleanup.purge_removed_features',
+            'schedule': timedelta(hours=6)
+        },
     },
     CELERY_ACCEPT_CONTENT=['json'],
     # Enable at-least-once delivery mode. This probably isn't actually what we

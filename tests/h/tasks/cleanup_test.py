@@ -11,6 +11,7 @@ from h.tasks.cleanup import (
     purge_deleted_annotations,
     purge_expired_auth_tickets,
     purge_expired_tokens,
+    purge_removed_features,
 )
 
 
@@ -96,6 +97,16 @@ class TestPurgeExpiredTokens(object):
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
         assert db_session.query(Token).count() == 2
+
+
+@pytest.mark.usefixtures('celery')
+class TestPurgeRemovedFeatures(object):
+    def test_calls_remove_old_flags(self, db_session, patch):
+        Feature = patch('h.tasks.cleanup.models.Feature')
+
+        purge_removed_features()
+
+        Feature.remove_old_flags.assert_called_once_with(db_session)
 
 
 @pytest.fixture

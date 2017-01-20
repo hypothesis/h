@@ -41,3 +41,9 @@ def purge_expired_tokens():
     celery.request.db.query(models.Token) \
         .filter(models.Token.expires < datetime.utcnow()) \
         .delete()
+
+
+@celery.task
+def purge_removed_features():
+    """Remove old feature flags from the database."""
+    models.Feature.remove_old_flags(celery.request.db)
