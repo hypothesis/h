@@ -177,8 +177,8 @@ def create(request):
 
     links_service = request.find_service(name='links')
     group_service = request.find_service(IGroupService)
-    resource = AnnotationResource(annotation, group_service)
-    presenter = AnnotationJSONPresenter(resource, links_service)
+    resource = AnnotationResource(annotation, group_service, links_service)
+    presenter = AnnotationJSONPresenter(resource)
     return presenter.asdict()
 
 
@@ -187,8 +187,7 @@ def create(request):
             permission='read')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
-    links_service = request.find_service(name='links')
-    presenter = AnnotationJSONPresenter(context, links_service)
+    presenter = AnnotationJSONPresenter(context)
     return presenter.asdict()
 
 
@@ -199,8 +198,7 @@ def read_jsonld(context, request):
     request.response.content_type = 'application/ld+json'
     request.response.content_type_params = {
         'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
-    links_service = request.find_service(name='links')
-    presenter = AnnotationJSONLDPresenter(context, links_service)
+    presenter = AnnotationJSONLDPresenter(context)
     return presenter.asdict()
 
 
@@ -222,8 +220,8 @@ def update(context, request):
 
     links_service = request.find_service(name='links')
     group_service = request.find_service(IGroupService)
-    resource = AnnotationResource(annotation, group_service)
-    presenter = AnnotationJSONPresenter(resource, links_service)
+    resource = AnnotationResource(annotation, group_service, links_service)
+    presenter = AnnotationJSONPresenter(resource)
     return presenter.asdict()
 
 
@@ -269,8 +267,8 @@ def _present_annotations(request, ids):
                                                     query_processor=eager_load_documents)
     group_service = request.find_service(IGroupService)
     links_service = request.find_service(name='links')
-    return [AnnotationJSONPresenter(AnnotationResource(ann, group_service),
-                                    links_service).asdict()
+    return [AnnotationJSONPresenter(
+                AnnotationResource(ann, group_service, links_service)).asdict()
             for ann in annotations]
 
 

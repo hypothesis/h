@@ -207,11 +207,11 @@ class TestHandleAnnotationEvent(object):
 
         annotation_resource.assert_called_once_with(
             fetch_annotation.return_value,
-            groupfinder_service.return_value)
+            groupfinder_service.return_value,
+            links_service.return_value)
 
         presenters.AnnotationJSONPresenter.assert_called_once_with(
-            annotation_resource.return_value,
-            links_service.return_value)
+            annotation_resource.return_value)
         assert presenters.AnnotationJSONPresenter.return_value.asdict.called
 
     def test_notification_format(self, presenter_asdict):

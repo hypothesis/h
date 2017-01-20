@@ -131,16 +131,16 @@ class TestSearch(object):
             pyramid_request.db, ['row-1', 'row-2'], query_processor=mock.ANY)
 
     def test_it_renders_search_results(self, links_service, pyramid_request, search_run, factories, group_service):
-        ann1 = AnnotationResource(factories.Annotation(userid='luke'), group_service)
-        ann2 = AnnotationResource(factories.Annotation(userid='sarah'), group_service)
+        ann1 = AnnotationResource(factories.Annotation(userid='luke'), group_service, links_service)
+        ann2 = AnnotationResource(factories.Annotation(userid='sarah'), group_service, links_service)
 
         search_run.return_value = SearchResult(2, [ann1.annotation.id, ann2.annotation.id], [], {})
 
         expected = {
             'total': 2,
             'rows': [
-                presenters.AnnotationJSONPresenter(ann1, links_service).asdict(),
-                presenters.AnnotationJSONPresenter(ann2, links_service).asdict(),
+                presenters.AnnotationJSONPresenter(ann1).asdict(),
+                presenters.AnnotationJSONPresenter(ann2).asdict(),
             ]
         }
 
@@ -156,9 +156,9 @@ class TestSearch(object):
                          query_processor=mock.ANY) in storage.fetch_ordered_annotations.call_args_list
 
     def test_it_renders_replies(self, links_service, pyramid_request, search_run, factories, group_service):
-        ann = AnnotationResource(factories.Annotation(userid='luke'), group_service)
-        reply1 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service)
-        reply2 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service)
+        ann = AnnotationResource(factories.Annotation(userid='luke'), group_service, links_service)
+        reply1 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service, links_service)
+        reply2 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service, links_service)
 
         search_run.return_value = SearchResult(1,
                                                [ann.annotation.id],
@@ -168,10 +168,10 @@ class TestSearch(object):
 
         expected = {
             'total': 1,
-            'rows': [presenters.AnnotationJSONPresenter(ann, links_service).asdict()],
+            'rows': [presenters.AnnotationJSONPresenter(ann).asdict()],
             'replies': [
-                presenters.AnnotationJSONPresenter(reply1, links_service).asdict(),
-                presenters.AnnotationJSONPresenter(reply2, links_service).asdict(),
+                presenters.AnnotationJSONPresenter(reply1).asdict(),
+                presenters.AnnotationJSONPresenter(reply2).asdict(),
             ]
         }
 
@@ -262,11 +262,9 @@ class TestCreate(object):
         views.create(pyramid_request)
 
         annotation_resource.assert_called_once_with(
-                storage.create_annotation.return_value, group_service)
+                storage.create_annotation.return_value, group_service, links_service)
 
-        AnnotationJSONPresenter.assert_called_once_with(
-            annotation_resource.return_value,
-            links_service)
+        AnnotationJSONPresenter.assert_called_once_with(annotation_resource.return_value)
 
     def test_it_publishes_annotation_event(self,
                                            AnnotationEvent,
@@ -304,7 +302,6 @@ class TestRead(object):
 
     def test_it_returns_presented_annotation(self,
                                              AnnotationJSONPresenter,
-                                             links_service,
                                              pyramid_request):
         context = mock.Mock()
         presenter = mock.Mock()
@@ -312,8 +309,8 @@ class TestRead(object):
 
         result = views.read(context, pyramid_request)
 
-        AnnotationJSONPresenter.assert_called_once_with(context,
-                                                        links_service)
+        AnnotationJSONPresenter.assert_called_once_with(context)
+
         assert result == presenter.asdict()
 
 
@@ -334,7 +331,6 @@ class TestReadJSONLD(object):
 
     def test_it_returns_presented_annotation(self,
                                              AnnotationJSONLDPresenter,
-                                             links_service,
                                              pyramid_request):
         context = mock.Mock()
         presenter = mock.Mock()
@@ -343,8 +339,7 @@ class TestReadJSONLD(object):
 
         result = views.read_jsonld(context, pyramid_request)
 
-        AnnotationJSONLDPresenter.assert_called_once_with(context,
-                                                          links_service)
+        AnnotationJSONLDPresenter.assert_called_once_with(context)
         assert result == presenter.asdict()
 
     @pytest.fixture
@@ -446,11 +441,9 @@ class TestUpdate(object):
         views.update(mock.Mock(), pyramid_request)
 
         annotation_resource.assert_called_once_with(
-                storage.update_annotation.return_value, group_service)
+                storage.update_annotation.return_value, group_service, links_service)
 
-        AnnotationJSONPresenter.assert_any_call(
-            annotation_resource.return_value,
-            links_service)
+        AnnotationJSONPresenter.assert_any_call(annotation_resource.return_value)
 
     def test_it_dictizes_the_presenter(self,
                                        AnnotationJSONPresenter,

@@ -147,8 +147,8 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad, group_s
     base_url = socket.registry.settings.get('h.app_url',
                                             'http://localhost:5000')
     links_service = LinksService(base_url, socket.registry)
-    resource = AnnotationResource(annotation, group_service)
-    serialized = presenters.AnnotationJSONPresenter(resource, links_service).asdict()
+    resource = AnnotationResource(annotation, group_service, links_service)
+    serialized = presenters.AnnotationJSONPresenter(resource).asdict()
 
     permissions = serialized.get('permissions')
     if not _authorized_to_read(socket.effective_principals, permissions):
