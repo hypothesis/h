@@ -112,11 +112,6 @@ def includeme(config):
     # - we can override behaviour from `memex` if necessary.
     config.include('memex', route_prefix='/api')
 
-    # If search autoconfig is false, then override memex.search.init with a
-    # no-op.
-    if not asbool(config.registry.settings.get('h.search.autoconfig')):
-        config.action('memex.search.init', lambda: None)
-
     # Override memex group service
     config.register_service_factory('h.services.groupfinder.groupfinder_service_factory',
                                     iface='memex.interfaces.IGroupService')

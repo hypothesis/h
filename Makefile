@@ -26,6 +26,7 @@ clean:
 ## Run the development H server locally
 .PHONY: dev
 dev: build/manifest.json .pydeps
+	@bin/hypothesis --dev init
 	@bin/hypothesis devserver
 
 ## Build hypothesis/hypothesis docker image
