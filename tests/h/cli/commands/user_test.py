@@ -7,6 +7,35 @@ from h import models
 from h.cli.commands import user as user_cli
 
 
+class TestAddCommand(object):
+    def test_it_adds_user_with_default_authority(self, cli, cliconfig, signup_service):
+        result = cli.invoke(user_cli.add,
+                            [u'--username', u'admin', u'--email', u'admin@localhost',
+                             u'--password', u'admin'],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        signup_service.signup.assert_called_with(username=u'admin',
+                                                 email=u'admin@localhost',
+                                                 password=u'admin',
+                                                 require_activation=False)
+
+    def test_it_adds_user_with_specific_authority(self, cli, cliconfig, signup_service):
+        result = cli.invoke(user_cli.add,
+                            [u'--username', u'admin', u'--email', u'admin@localhost',
+                             u'--password', u'admin', u'--authority', u'publisher.org'],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        signup_service.signup.assert_called_with(username=u'admin',
+                                                 email=u'admin@localhost',
+                                                 password=u'admin',
+                                                 authority=u'publisher.org',
+                                                 require_activation=False)
+
+
 class TestAdminCommand(object):
     def test_it_adds_admin(self, cli, cliconfig, non_admin_user, db_session):
         result = cli.invoke(user_cli.admin,
@@ -84,11 +113,6 @@ class TestAdminCommand(object):
         assert not user.admin
 
     @pytest.fixture
-    def cliconfig(self, pyramid_request):
-        pyramid_request.tm = mock.Mock()
-        return {'bootstrap': mock.Mock(return_value=pyramid_request)}
-
-    @pytest.fixture
     def admin_user(self, db_session, factories):
         return self._user(db_session, factories, True)
 
@@ -101,3 +125,21 @@ class TestAdminCommand(object):
         db_session.add(user)
         db_session.flush()
         return user
+
+
+@pytest.fixture
+def signup_service():
+    signup_service = mock.Mock(spec_set=['signup'])
+    return signup_service
+
+
+@pytest.fixture
+def pyramid_config(pyramid_config, signup_service):
+    pyramid_config.register_service(signup_service, name='user_signup')
+    return pyramid_config
+
+
+@pytest.fixture
+def cliconfig(pyramid_config, pyramid_request):
+    pyramid_request.tm = mock.Mock()
+    return {'bootstrap': mock.Mock(return_value=pyramid_request)}
