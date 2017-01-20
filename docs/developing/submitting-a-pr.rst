@@ -30,6 +30,10 @@ Some things to remember when submitting or reviewing a pull request:
   Please minimize issue gardening by using the GitHub syntax for closing
   issues with commit messages.
 
+- We recommend giving your branch a relatively short, descriptive,
+  hyphen-delimited name. ``fix-editor-lists`` and ``tabbed-sidebar`` are good
+  examples of this convention.
+
 - Don't merge on feature branches. Feature branches should merge into upstream
   branches, but never contain merge commits in the other direction.
   Consider using ``--rebase`` when pulling if you must keep a long-running
