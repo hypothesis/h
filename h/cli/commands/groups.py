@@ -11,8 +11,9 @@ def groups():
 @groups.command()
 @click.option('--name', prompt=True, help="The name of the group")
 @click.option('--authority', prompt=True, help="The authority which the group is associated with")
+@click.option('--creator', prompt=True, help="The username of the group's creator")
 @click.pass_context
-def add_publisher_group(ctx, name, authority):
+def add_publisher_group(ctx, name, authority, creator):
     """
     Create a new "publisher" group.
 
@@ -23,17 +24,10 @@ def add_publisher_group(ctx, name, authority):
     """
     request = ctx.obj['bootstrap']()
 
-    # Add an admin user for the group. This is needed because groups must
-    # currently be associated with a creator.
-    signup_service = request.find_service(name='user_signup')
-    creator = signup_service.signup(username=u'admin',
-                                    email=u'admin@localhost',
-                                    authority=authority,
-                                    require_activation=False)
-
-    # Add a main group for the publisher's annotations.
+    creator_userid = u'acct:{username}@{authority}'.format(username=creator,
+                                                           authority=authority)
     group_svc = request.find_service(name='group')
-    group_svc.create(name=name, authority=authority, userid=creator.userid,
+    group_svc.create(name=name, authority=authority, userid=creator_userid,
                      type_='publisher')
 
     request.tm.commit()
