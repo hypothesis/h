@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import deform
+from pyramid import httpexceptions
 from pyramid import security
 from pyramid.config import not_
-from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPSeeOther)
 from pyramid.view import view_config, view_defaults
 
 from h import form
@@ -50,7 +50,7 @@ class GroupCreateController(object):
             url = self.request.route_path('group_read',
                                           pubid=group.pubid,
                                           slug=group.slug)
-            return HTTPSeeOther(url)
+            return httpexceptions.HTTPSeeOther(url)
 
         return form.handle_form_submission(
             self.request,
@@ -112,6 +112,10 @@ class GroupEditController(object):
 def read_unauthenticated(group, request):
     """Group view for logged-out users, allowing them to join the group."""
     check_slug(group, request)
+
+    if group.joinable_by is None:
+        raise httpexceptions.HTTPNotFound()
+
     return {'group': group}
 
 
@@ -124,6 +128,5 @@ def check_slug(group, request):
     """Redirect if the request slug does not match that of the group."""
     slug = request.matchdict.get('slug')
     if slug is None or slug != group.slug:
-        raise HTTPMovedPermanently(request.route_path('group_read',
-                                                      pubid=group.pubid,
-                                                      slug=group.slug))
+        path = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
+        raise httpexceptions.HTTPMovedPermanently(path)

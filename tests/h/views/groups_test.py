@@ -7,6 +7,7 @@ from pyramid import httpexceptions
 
 from h.views import groups as views
 from h.models import (Group, User)
+from h.models.group import JoinableBy
 
 
 @pytest.mark.usefixtures('group_service', 'handle_form_submission', 'routes')
@@ -162,6 +163,13 @@ class TestGroupReadUnauthenticated(object):
 
         assert result == {'group': group}
 
+    def test_raises_not_found_when_not_joinable(self, pyramid_request):
+        group = FakeGroup('abc123', 'some-slug', joinable_by=None)
+        pyramid_request.matchdict['slug'] = 'some-slug'
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.read_unauthenticated(group, pyramid_request)
+
 
 @pytest.mark.usefixtures('routes')
 def test_read_noslug_redirects(pyramid_request):
@@ -174,9 +182,10 @@ def test_read_noslug_redirects(pyramid_request):
 
 
 class FakeGroup(object):
-    def __init__(self, pubid, slug):
+    def __init__(self, pubid, slug, joinable_by=JoinableBy.authority):
         self.pubid = pubid
         self.slug = slug
+        self.joinable_by = joinable_by
 
 
 class FakeGroupService(object):
