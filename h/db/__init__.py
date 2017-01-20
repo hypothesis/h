@@ -7,8 +7,7 @@ This module is responsible for setting up the database session and engine, and
 making that accessible to other parts of the application.
 
 Models should inherit from `h.db.Base` in order to have their metadata bound at
-application startup (and if `h.db.should_create_all` is set, their tables will
-be automatically created).
+application startup.
 
 Most application code should access the database session using the request
 property `request.db` which is provided by this module.
@@ -19,7 +18,6 @@ import logging
 import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
-from pyramid.settings import asbool
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -107,23 +105,11 @@ def _session(request):
 
 
 def includeme(config):
-    settings = config.registry.settings
-    should_create = asbool(settings.get('h.db.should_create_all', False))
-    should_drop = asbool(settings.get('h.db.should_drop_all', False))
-
     # Create the SQLAlchemy engine and save a reference in the app registry.
-    engine = make_engine(settings)
+    engine = make_engine(config.registry.settings)
     config.registry['sqlalchemy.engine'] = engine
 
     # Add a property to all requests for easy access to the session. This means
     # that view functions need only refer to `request.db` in order to retrieve
     # the current database session.
     config.add_request_method(_session, name='db', reify=True)
-
-    # Register a deferred action to bind the engine when the configuration is
-    # committed. Deferring the action means that this module can be included
-    # before model modules without ill effect.
-    config.action(None, init, (engine,), {
-        'should_create': should_create,
-        'should_drop': should_drop
-    }, order=10)

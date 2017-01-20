@@ -12,9 +12,6 @@ TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
     'es.index': 'hypothesis-test',
     'h.app_url': 'http://localhost',
-    'h.db.should_create_all': False,
-    'h.db.should_drop_all': False,
-    'h.search.autoconfig': False,
     'pyramid.debug_all': True,
     'sqlalchemy.url': os.environ.get('TEST_DATABASE_URL',
                                      'postgresql://postgres@localhost/htest')

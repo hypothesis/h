@@ -17,6 +17,7 @@ log = logging.getLogger('h')
 SUBCOMMANDS = (
     'h.cli.commands.celery.celery',
     'h.cli.commands.devserver.devserver',
+    'h.cli.commands.init.init',
     'h.cli.commands.initdb.initdb',
     'h.cli.commands.migrate.migrate',
     'h.cli.commands.move_uri.move_uri',
