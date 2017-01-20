@@ -23,7 +23,6 @@ def add(ctx, name, authority):
     """
     request = ctx.obj['bootstrap']()
 
-    # Create a new auth client.
     authclient = models.AuthClient(name=name, authority=authority)
     request.db.add(authclient)
     request.db.flush()
@@ -46,8 +45,8 @@ def secret(ctx, authority):
     """
     Display client ID and secret.
 
-    Display the client ID and secret for making API requests to manage the
-    users associated with a publisher.
+    Display the ID and secret for an OAuth client associated with a given
+    authority.
     """
     request = ctx.obj['bootstrap']()
 
@@ -55,7 +54,7 @@ def secret(ctx, authority):
                      models.AuthClient.authority == authority).first()
 
     if authclient is None:
-        msg = 'no publisher with authority "{}" exists'.format(authority)
+        msg = 'no authclient exists for the authority "{}"'.format(authority)
         raise click.ClickException(msg)
 
     click.echo('ID: {id}\nSecret: {secret}'

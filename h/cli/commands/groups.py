@@ -17,10 +17,8 @@ def add_publisher_group(ctx, name, authority, creator):
     """
     Create a new "publisher" group.
 
-    ** This command is intended for dev environments only. **
-
-    This consists of an authority, an admin user and the main group for the
-    publisher's annotations.
+    Create a new group which everyone can read but which only users belonging
+    to a given authority can write to.
     """
     request = ctx.obj['bootstrap']()
 
