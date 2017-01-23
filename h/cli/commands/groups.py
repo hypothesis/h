@@ -8,7 +8,7 @@ def groups():
     """Manage groups."""
 
 
-@groups.command()
+@groups.command('add-publisher-group')
 @click.option('--name', prompt=True, help="The name of the group")
 @click.option('--authority', prompt=True, help="The authority which the group is associated with")
 @click.option('--creator', prompt=True, help="The username of the group's creator")

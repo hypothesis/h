@@ -33,9 +33,3 @@ def cliconfig(pyramid_config, pyramid_request, group_service):
     pyramid_config.register_service(group_service, name='group')
     pyramid_request.tm = mock.Mock()
     return {'bootstrap': mock.Mock(return_value=pyramid_request)}
-
-
-@pytest.fixture
-def echo(patch):
-    echo = patch('h.cli.commands.groups.click.echo')
-    return echo

@@ -23,15 +23,16 @@ def add(ctx, username, email, password, authority):
 
     signup_service = request.find_service(name='user_signup')
 
-    signup_args = {}
+    signup_kwargs = {
+        'username': username,
+        'email': email,
+        'password': password,
+        'require_activation': False,
+    }
     if authority:
-        signup_args['authority'] = authority
+        signup_kwargs['authority'] = authority
 
-    signup_service.signup(username=username,
-                          email=email,
-                          password=password,
-                          require_activation=False,
-                          **signup_args)
+    signup_service.signup(**signup_kwargs)
 
     try:
         request.tm.commit()
