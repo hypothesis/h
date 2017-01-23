@@ -6,6 +6,7 @@ RUN apk-install \
     ca-certificates \
     libffi \
     libpq \
+    nginx \
     python \
     py-pip \
     nodejs \
@@ -14,6 +15,9 @@ RUN apk-install \
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
 WORKDIR /var/lib/hypothesis
+
+# Ensure nginx state and log directories writeable by unprivileged user.
+RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx
 
 # Copy minimal data to allow installation of dependencies.
 COPY src/memex/__init__.py ./src/memex/
@@ -25,9 +29,14 @@ RUN apk-install --virtual build-deps \
     libffi-dev \
     postgresql-dev \
     python-dev \
-  && pip install --no-cache-dir -U pip \
+  && pip install --no-cache-dir -U pip supervisor \
   && pip install --no-cache-dir -r requirements.txt \
   && apk del build-deps
+
+# Copy default nginx config and template
+COPY conf/nginx.conf.tpl /etc/nginx/nginx.conf.tpl
+COPY conf/nginx.conf.tpl /etc/nginx/nginx.conf
+RUN chown hypothesis:hypothesis /etc/nginx/nginx.conf
 
 # Copy the rest of the application files.
 COPY . .
@@ -48,4 +57,4 @@ ENV PYTHONPATH /var/lib/hypothesis:$PYTHONPATH
 
 # Start the web server by default
 USER hypothesis
-CMD ["newrelic-admin", "run-program", "gunicorn", "--paste", "conf/app.ini"]
+CMD ["supervisord", "-c" , "conf/supervisord.conf"]
