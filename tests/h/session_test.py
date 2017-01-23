@@ -11,8 +11,7 @@ class FakeGroup(object):
         self.slug = pubid
 
 
-@mock.patch('h.models.User', autospec=True)
-def test_model_sorts_groups(User):
+def test_model_sorts_groups():
     fake_user = mock.Mock()
     fake_user.groups = [
         FakeGroup('c', 'Group A'),
