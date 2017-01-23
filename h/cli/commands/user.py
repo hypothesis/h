@@ -14,18 +14,25 @@ def user():
 @user.command()
 @click.option('--username', prompt=True)
 @click.option('--email', prompt=True)
+@click.option('--authority')
 @click.password_option()
 @click.pass_context
-def add(ctx, username, email, password):
+def add(ctx, username, email, password, authority):
     """Create a new user."""
     request = ctx.obj['bootstrap']()
 
     signup_service = request.find_service(name='user_signup')
 
-    user = signup_service.signup(username=username,
-                                 email=email,
-                                 password=password)
-    user.activate()
+    signup_kwargs = {
+        'username': username,
+        'email': email,
+        'password': password,
+        'require_activation': False,
+    }
+    if authority:
+        signup_kwargs['authority'] = authority
+
+    signup_service.signup(**signup_kwargs)
 
     try:
         request.tm.commit()
