@@ -33,23 +33,6 @@ class TestAddCommand(object):
         return (authclient, result.output)
 
 
-class TestSecretCommand(object):
-    def test_it_prints_the_client_id_and_secret(self, authclient, cli, cliconfig):
-        result = cli.invoke(authclient_cli.secret, [u'partner.org'], obj=cliconfig)
-
-        assert result.exit_code == 0
-
-        id_and_secret = 'ID: {}\nSecret: {}'.format(authclient.id, authclient.secret)
-        assert id_and_secret in result.output
-
-    @pytest.fixture
-    def authclient(self, db_session, factories):
-        authclient = models.AuthClient(name='Partner', authority='partner.org')
-        db_session.add(authclient)
-        db_session.flush()
-        return authclient
-
-
 @pytest.fixture
 def cliconfig(pyramid_config, pyramid_request):
     pyramid_request.tm = mock.Mock()

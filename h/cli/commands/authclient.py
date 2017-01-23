@@ -33,26 +33,3 @@ def add(ctx, name, authority):
                'Client ID: {id}\n'
                'Client Secret: {secret}'.format(authority=authority, id=id_,
                                                 secret=secret))
-
-
-@authclient.command()
-@click.argument('authority')
-@click.pass_context
-def secret(ctx, authority):
-    """
-    Display client ID and secret.
-
-    Display the ID and secret for an OAuth client associated with a given
-    authority.
-    """
-    request = ctx.obj['bootstrap']()
-
-    authclient = request.db.query(models.AuthClient).filter(
-                     models.AuthClient.authority == authority).first()
-
-    if authclient is None:
-        msg = 'no authclient exists for the authority "{}"'.format(authority)
-        raise click.ClickException(msg)
-
-    click.echo('ID: {id}\nSecret: {secret}'
-               .format(id=authclient.id, secret=authclient.secret))
