@@ -12,14 +12,11 @@ def authclient():
 
 @authclient.command()
 @click.option('--name', prompt=True, help="The name of the client")
-@click.option('--authority', prompt=True, help="The authority (domain name) for the client")
+@click.option('--authority', prompt=True, help="The authority (domain name) of the resources managed by the client")
 @click.pass_context
 def add(ctx, name, authority):
     """
     Create a new OAuth client.
-
-    Create a new OAuth client for a "publisher" account, which can be used to
-    create and manage resources within a given namespace ("authority").
     """
     request = ctx.obj['bootstrap']()
 
