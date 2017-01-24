@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
+from __future__ import unicode_literals
 import argparse
 import dateutil.parser
 import re
 import requests
 import subprocess
 import textwrap
-from __future__ import unicode_literals
 from subprocess import PIPE
 
 GITHUB_API_URL = 'https://api.github.com'
