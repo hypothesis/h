@@ -101,7 +101,7 @@ class OAuthService(object):
 
         :rtype: h.models.Token
         """
-        token = models.Token(userid=user.userid,
+        token = models.Token(user.userid,
                              expires=(utcnow() + TOKEN_TTL),
                              authclient=authclient)
         self.session.add(token)

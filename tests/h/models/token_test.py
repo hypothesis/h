@@ -11,7 +11,7 @@ class TestToken(object):
     def test_init_dev_token(self):
         userid = 'acct:test@hypothes.is'
 
-        dev_token = Token(userid=userid)
+        dev_token = Token(userid)
 
         assert dev_token.userid == userid
         assert dev_token.value
@@ -25,7 +25,7 @@ class TestToken(object):
         expires = one_hour_from_now()
         authclient = 'example.com'
 
-        access_token = Token(userid=userid,
+        access_token = Token(userid,
                              expires=expires,
                              authclient=authclient)
 
