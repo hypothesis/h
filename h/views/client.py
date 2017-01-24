@@ -48,15 +48,8 @@ def annotator_token(request):
 
     The token can be used in the Authorization header in subsequent requests to
     the API to authenticate the user identified by the
-    request.authenticated_userid of the _current_ request.
+    request.authenticated_userid of the _current_ request, which may be None.
     """
-    try:
-        # The client must supply the CSRF token in the X-CSRF-Token request
-        # header.
-        session.check_csrf_token(request)
-    except exceptions.BadCSRFToken:
-        raise httpexceptions.HTTPUnauthorized()
-
     return generate_jwt(request, 3600)
 
 
