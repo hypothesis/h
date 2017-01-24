@@ -183,7 +183,7 @@
                             data-bookmarklet-button=""
                             id="js-bookmarklet-install"
                             class="btn btn-primary btn-lg installer__button--draggable"
-                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();">
+                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true,appType:'bookmarklet'};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();">
                             Launch Hypothesis
                         </a>
                         <p><i class="h-icon-move"></i> Drag the button into
