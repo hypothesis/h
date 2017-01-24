@@ -3,11 +3,11 @@
 import deform
 import mock
 import pytest
-from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther)
+from pyramid import httpexceptions
 
 from h.views import groups as views
 from h.models import (Group, User)
+from h.models.group import JoinableBy
 
 
 @pytest.mark.usefixtures('group_service', 'handle_form_submission', 'routes')
@@ -150,7 +150,7 @@ class TestGroupReadUnauthenticated(object):
         group = FakeGroup('abc123', 'some-slug')
         pyramid_request.matchdict['slug'] = 'another-slug'
 
-        with pytest.raises(HTTPMovedPermanently) as exc:
+        with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
             views.read_unauthenticated(group, pyramid_request)
 
         assert exc.value.location == '/g/abc123/some-slug'
@@ -163,85 +163,29 @@ class TestGroupReadUnauthenticated(object):
 
         assert result == {'group': group}
 
+    def test_raises_not_found_when_not_joinable(self, pyramid_request):
+        group = FakeGroup('abc123', 'some-slug', joinable_by=None)
+        pyramid_request.matchdict['slug'] = 'some-slug'
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.read_unauthenticated(group, pyramid_request)
+
 
 @pytest.mark.usefixtures('routes')
 def test_read_noslug_redirects(pyramid_request):
     group = FakeGroup('abc123', 'some-slug')
 
-    with pytest.raises(HTTPMovedPermanently) as exc:
+    with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
         views.read_noslug(group, pyramid_request)
 
     assert exc.value.location == '/g/abc123/some-slug'
 
 
-@pytest.mark.usefixtures('group_service', 'routes')
-class TestGroupLeave(object):
-    def test_leaves_group(self,
-                          group_service,
-                          pyramid_config,
-                          pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_config.testing_securitypolicy('marcela')
-
-        views.leave(group, pyramid_request)
-
-        assert (group, 'marcela') in group_service.left
-
-    def test_returns_nocontent(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-
-        result = views.leave(group, pyramid_request)
-
-        assert isinstance(result, HTTPNoContent)
-
-
-@pytest.mark.usefixtures('group_service', 'routes')
-class TestGroupJoinController(object):
-
-    def test_get_returns_the_group_to_the_template(self, controller, group):
-        assert controller.get()['group'] == group
-
-    def test_post_joins_the_group(self,
-                                  controller,
-                                  group,
-                                  group_service,
-                                  pyramid_config):
-        pyramid_config.testing_securitypolicy('gentiana')
-
-        controller.post()
-
-        assert (group, 'gentiana') in group_service.joined
-
-    def test_post_redirects_to_group_page(self,
-                                          controller,
-                                          group):
-        result = controller.post()
-
-        assert isinstance(result, HTTPSeeOther)
-        assert result.location == '/g/{pubid}/{slug}'.format(
-            pubid=group.pubid, slug=group.slug)
-
-    @pytest.fixture
-    def controller(self, group, pyramid_request):
-        return views.GroupJoinController(group, pyramid_request)
-
-    @pytest.fixture
-    def group(self, factories):
-        return factories.Group()
-
-    @pytest.fixture
-    def pyramid_request(self, group, pyramid_request):
-        # The matchdict needs to contain the correct pubid and slug,
-        # otherwise initializing the controller will redirect.
-        pyramid_request.matchdict['pubid'] = group.pubid
-        pyramid_request.matchdict['slug'] = group.slug
-        return pyramid_request
-
-
 class FakeGroup(object):
-    def __init__(self, pubid, slug):
+    def __init__(self, pubid, slug, joinable_by=JoinableBy.authority):
         self.pubid = pubid
         self.slug = slug
+        self.joinable_by = joinable_by
 
 
 class FakeGroupService(object):

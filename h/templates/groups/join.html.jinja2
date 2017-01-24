@@ -19,7 +19,7 @@
       </div>
       {% if request.authenticated_userid %}
         <form method="POST">
-          <button class="btn primary-action-btn group-form__submit-btn" type="submit">
+          <button class="btn primary-action-btn group-form__submit-btn" name="group_join" type="submit">
             Join {{ group.name }}
           </button>
         </form>

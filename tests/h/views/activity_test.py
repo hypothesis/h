@@ -113,6 +113,31 @@ class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
 
+    def test_search_renders_join_template(self, controller, pyramid_request, group):
+        """When the request has no read permission but join, it should render the join template."""
+
+        def fake_has_permission(permission, context=None):
+            if permission == 'read':
+                return False
+            if permission == 'join':
+                return True
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.override_renderer = mock.PropertyMock()
+
+        result = controller.search()
+
+        assert 'join.html' in pyramid_request.override_renderer
+        assert result == {'group': group}
+
+    def test_raises_not_found_when_no_read_or_join_permissions(self, controller, pyramid_request):
+        def fake_has_permission(permission, context=None):
+            if permission in ('read', 'join'):
+                return False
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            controller.search()
+
     def test_search_redirects_if_slug_wrong(self,
                                             controller,
                                             group,
@@ -181,19 +206,13 @@ class TestGroupSearchController(object):
         assert group_info['name'] == group.name
         assert group_info['pubid'] == group.pubid
 
-    def test_search_checks_whether_the_user_has_admin_permission_on_the_group(
-            self, controller, group, pyramid_request):
-        pyramid_request.authenticated_user = group.members[-1]
-
-        controller.search()
-
-        pyramid_request.has_permission.assert_called_once_with('admin', group)
-
     def test_search_does_not_show_the_edit_link_to_group_members(self,
                                                                  controller,
                                                                  group,
                                                                  pyramid_request):
-        pyramid_request.has_permission = mock.Mock(return_value=False)
+        def fake_has_permission(permission, context=None):
+            return permission != 'admin'
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
         pyramid_request.authenticated_user = group.members[-1]
 
         result = controller.search()
@@ -242,7 +261,6 @@ class TestGroupSearchController(object):
                                                     controller,
                                                     pyramid_request,
                                                     group):
-        pyramid_request.has_permission = mock.Mock(return_value=False)
         pyramid_request.authenticated_user = group.members[-1]
 
         result = controller.search()
@@ -255,7 +273,6 @@ class TestGroupSearchController(object):
                                                  controller,
                                                  pyramid_request,
                                                  group):
-        pyramid_request.has_permission = mock.Mock(return_value=False)
         pyramid_request.authenticated_user = group.members[-1]
 
         result = controller.search()
@@ -268,7 +285,6 @@ class TestGroupSearchController(object):
                                                      controller,
                                                      pyramid_request,
                                                      group):
-        pyramid_request.has_permission = mock.Mock(return_value=False)
         pyramid_request.authenticated_user = group.members[-1]
 
         faceted_user = group.members[0]
@@ -289,7 +305,6 @@ class TestGroupSearchController(object):
         user_2 = factories.User()
         group.members = [user_1, user_2]
 
-        pyramid_request.has_permission = mock.Mock(return_value=False)
         pyramid_request.authenticated_user = group.members[-1]
 
         counts = {user_1.userid: 24, user_2.userid: 6}
@@ -356,6 +371,26 @@ class TestGroupSearchController(object):
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
+
+    def test_join_raises_not_found_when_not_joinable(self, controller, pyramid_request):
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            controller.join()
+
+    def test_join_adds_group_member(self, controller, group, pyramid_request, pyramid_config, group_service):
+        pyramid_config.testing_securitypolicy('acct:doe@example.org')
+
+        controller.join()
+
+        group_service.member_join.assert_called_once_with(group, 'acct:doe@example.org')
+
+    def test_join_redirects_to_search_page(self, controller, group, pyramid_request):
+        result = controller.join()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        expected = pyramid_request.route_url('group_read', pubid=group.pubid, slug=group.slug)
+        assert result.location == expected
 
     def test_search_passes_the_group_annotation_count_to_the_template(self,
                                                                       controller,
@@ -516,7 +551,6 @@ class TestGroupSearchController(object):
         pyramid_request.matchdict['pubid'] = group.pubid
         pyramid_request.matchdict['slug'] = group.slug
         pyramid_request.authenticated_user = None
-        pyramid_request.has_permission = mock.Mock(return_value=False)
         return pyramid_request
 
     @pytest.fixture

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import deform
+from pyramid import httpexceptions
 from pyramid import security
 from pyramid.config import not_
-from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther)
 from pyramid.view import view_config, view_defaults
 
 from h import form
@@ -51,7 +50,7 @@ class GroupCreateController(object):
             url = self.request.route_path('group_read',
                                           pubid=group.pubid,
                                           slug=group.slug)
-            return HTTPSeeOther(url)
+            return httpexceptions.HTTPSeeOther(url)
 
         return form.handle_form_submission(
             self.request,
@@ -113,35 +112,11 @@ class GroupEditController(object):
 def read_unauthenticated(group, request):
     """Group view for logged-out users, allowing them to join the group."""
     check_slug(group, request)
+
+    if group.joinable_by is None:
+        raise httpexceptions.HTTPNotFound()
+
     return {'group': group}
-
-
-@view_defaults(route_name='group_read',
-               renderer='h:templates/groups/join.html.jinja2',
-               effective_principals=security.Authenticated,
-               has_permission=not_('read'))
-class GroupJoinController(object):
-    """Views for "group_read" when logged in but not a member of the group."""
-
-    def __init__(self, group, request):
-        self.group = group
-        self.request = request
-
-    @view_config(request_method='GET')
-    def get(self):
-        check_slug(self.group, self.request)
-        return {'group': self.group}
-
-    @view_config(request_method='POST')
-    def post(self):
-        groups_service = self.request.find_service(name='group')
-        groups_service.member_join(self.group,
-                                   self.request.authenticated_userid)
-
-        url = self.request.route_path('group_read',
-                                      pubid=self.group.pubid,
-                                      slug=self.group.slug)
-        return HTTPSeeOther(url)
 
 
 @view_config(route_name='group_read_noslug', request_method='GET')
@@ -149,21 +124,9 @@ def read_noslug(group, request):
     check_slug(group, request)
 
 
-@view_config(route_name='group_leave',
-             request_method='POST',
-             effective_principals=security.Authenticated,
-             has_permission='read')
-def leave(group, request):
-    groups_service = request.find_service(name='group')
-    groups_service.member_leave(group, request.authenticated_userid)
-
-    return HTTPNoContent()
-
-
 def check_slug(group, request):
     """Redirect if the request slug does not match that of the group."""
     slug = request.matchdict.get('slug')
     if slug is None or slug != group.slug:
-        raise HTTPMovedPermanently(request.route_path('group_read',
-                                                      pubid=group.pubid,
-                                                      slug=group.slug))
+        path = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
+        raise httpexceptions.HTTPMovedPermanently(path)
