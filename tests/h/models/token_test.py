@@ -18,6 +18,7 @@ class TestToken(object):
         assert dev_token.value.startswith("6879-")
         assert not dev_token.expires
         assert not dev_token.authclient
+        assert not dev_token.refresh_token
 
     def test_init_access_token(self):
         userid = 'acct:test@hypothes.is'
@@ -33,6 +34,8 @@ class TestToken(object):
         assert access_token.value.startswith("6879-")
         assert access_token.expires == expires
         assert access_token.authclient == authclient
+        assert access_token.refresh_token
+        assert access_token.refresh_token.startswith("7980-")
 
     def test_get_dev_token_by_userid_filters_by_userid(self, db_session, factories):
         token_1 = factories.Token(userid='acct:vanessa@example.org', authclient=None)
