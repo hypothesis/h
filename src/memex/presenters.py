@@ -10,11 +10,9 @@ from pyramid import security
 
 
 class AnnotationBasePresenter(object):
-    def __init__(self, annotation_resource, links_service):
+    def __init__(self, annotation_resource):
         self.annotation_resource = annotation_resource
         self.annotation = annotation_resource.annotation
-
-        self._links_service = links_service
 
     @property
     def created(self):
@@ -29,7 +27,7 @@ class AnnotationBasePresenter(object):
     @property
     def links(self):
         """A dictionary of named hypermedia links for this annotation."""
-        return self._links_service.get_all(self.annotation)
+        return self.annotation_resource.links
 
     @property
     def text(self):
@@ -172,7 +170,7 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
 
     @property
     def id(self):
-        return self._links_service.get(self.annotation, 'jsonld_id')
+        return self.annotation_resource.link('jsonld_id')
 
     @property
     def bodies(self):

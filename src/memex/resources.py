@@ -18,17 +18,26 @@ class AnnotationResourceFactory(object):
             raise KeyError()
 
         group_service = self.request.find_service(IGroupService)
-        return AnnotationResource(annotation, group_service)
+        links_service = self.request.find_service(name='links')
+        return AnnotationResource(annotation, group_service, links_service)
 
 
 class AnnotationResource(object):
-    def __init__(self, annotation, group_service):
+    def __init__(self, annotation, group_service, links_service):
         self.group_service = group_service
+        self.links_service = links_service
         self.annotation = annotation
 
     @property
     def group(self):
         return self.group_service.find(self.annotation.groupid)
+
+    @property
+    def links(self):
+        return self.links_service.get_all(self.annotation)
+
+    def link(self, name):
+        return self.links_service.get(self.annotation, name)
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
