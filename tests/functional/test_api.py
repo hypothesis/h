@@ -49,6 +49,18 @@ class TestAPI(object):
         assert res.status_code == 400
         assert res.json['reason'].startswith('group:')
 
+    def test_profile_api(self, app, user_with_token):
+        """Fetch a profile through the API for an authenticated user."""
+
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+
+        res = app.get('/api/profile', headers=headers)
+
+        assert res.json['userid'] == user.userid
+        assert [group['id'] for group in res.json['groups']] == ['__world__']
+
 
 @pytest.fixture
 def annotation(db_session, factories):
