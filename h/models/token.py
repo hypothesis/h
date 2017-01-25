@@ -56,11 +56,11 @@ class Token(Base, mixins.Timestamps):
     #: A NULL value means it is a developer token.
     authclient = sqlalchemy.orm.relationship('AuthClient')
 
-    def __init__(self, expires=None, **kwargs):
-        super(Token, self).__init__(expires=expires, **kwargs)
+    def __init__(self, **kwargs):
+        super(Token, self).__init__(**kwargs)
         self.regenerate()
 
-        if expires:
+        if self.expires:
             self.refresh_token = security.token_urlsafe()
 
     @classmethod
