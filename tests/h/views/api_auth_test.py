@@ -39,6 +39,19 @@ class TestAccessToken(object):
             'expires_in': TOKEN_TTL.total_seconds(),
         }
 
+    def test_it_returns_the_refresh_token_if_the_token_has_one(self, pyramid_request, oauth_service):
+        token = models.Token()
+        refresh_token = token.refresh_token = 'test_refresh_token'
+        oauth_service.create_token.return_value = token
+
+        assert views.access_token(pyramid_request)['refresh_token'] == refresh_token
+
+    def test_it_does_not_returns_the_refresh_token_if_the_token_does_not_have_one(self, pyramid_request, oauth_service):
+        token = models.Token()
+        oauth_service.create_token.return_value = token
+
+        assert 'refresh_token' not in views.access_token(pyramid_request)
+
     @pytest.fixture
     def oauth_service(self, pyramid_config, pyramid_request):
         svc = mock.Mock(spec_set=oauth_service_factory(None, pyramid_request))

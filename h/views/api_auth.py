@@ -16,11 +16,16 @@ def access_token(request):
         grant_type=request.POST.get('grant_type'))
     token = svc.create_token(user, authclient)
 
-    return {
+    response = {
         'access_token': token.value,
         'token_type': 'bearer',
         'expires_in': TOKEN_TTL.total_seconds(),
     }
+
+    if token.refresh_token:
+        response['refresh_token'] = token.refresh_token
+
+    return response
 
 
 @cors_json_view(context=OAuthTokenError)
