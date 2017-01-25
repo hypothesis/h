@@ -71,9 +71,4 @@ class Token(Base, mixins.Timestamps):
                 .first())
 
     def regenerate(self):
-        self.value = self.prefix + _token()
-
-
-def _token():
-    """Return a random string suitable for use in an API token."""
-    return binascii.hexlify(os.urandom(16))
+        self.value = self.prefix + security.token_urlsafe()
