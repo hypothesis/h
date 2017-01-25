@@ -9,6 +9,7 @@ import os
 import sqlalchemy
 from sqlalchemy.dialects import postgresql
 
+from h import security
 from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
 from h.db import mixins
@@ -39,6 +40,13 @@ class Token(Base, mixins.Timestamps):
     #: A NULL value in this column indicates a token that does not expire.
     expires = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
 
+    #: A refresh token that can be exchanged for a new token (with a new value
+    #: and expiry time). A NULL value in this column indicates a token that
+    #: cannot be refreshed.
+    refresh_token = sqlalchemy.Column(sqlalchemy.UnicodeText(),
+                                      unique=True,
+                                      nullable=True)
+
     _authclient_id = sqlalchemy.Column('authclient_id',
                                        postgresql.UUID(),
                                        sqlalchemy.ForeignKey('authclient.id', ondelete='cascade'),
@@ -51,6 +59,9 @@ class Token(Base, mixins.Timestamps):
     def __init__(self, **kwargs):
         super(Token, self).__init__(**kwargs)
         self.regenerate()
+
+        if self.expires:
+            self.refresh_token = security.token_urlsafe()
 
     @classmethod
     def get_dev_token_by_userid(cls, session, userid):

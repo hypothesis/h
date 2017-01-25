@@ -2,12 +2,39 @@
 
 from __future__ import unicode_literals
 
+import datetime
+
 from h.models import Token
 
 
 class TestToken(object):
-    def test_init_generates_value(self):
-        assert Token().value
+    def test_init_dev_token(self):
+        userid = 'acct:test@hypothes.is'
+
+        dev_token = Token(userid=userid)
+
+        assert dev_token.userid == userid
+        assert dev_token.value
+        assert dev_token.value.startswith("6879-")
+        assert not dev_token.expires
+        assert not dev_token.authclient
+        assert not dev_token.refresh_token
+
+    def test_init_access_token(self):
+        userid = 'acct:test@hypothes.is'
+        expires = one_hour_from_now()
+        authclient = 'example.com'
+
+        access_token = Token(userid=userid,
+                             expires=expires,
+                             authclient=authclient)
+
+        assert access_token.userid == userid
+        assert access_token.value
+        assert access_token.value.startswith("6879-")
+        assert access_token.expires == expires
+        assert access_token.authclient == authclient
+        assert access_token.refresh_token
 
     def test_get_dev_token_by_userid_filters_by_userid(self, db_session, factories):
         token_1 = factories.Token(userid='acct:vanessa@example.org', authclient=None)
@@ -25,3 +52,7 @@ class TestToken(object):
         token = factories.Token(authclient=factories.AuthClient())
 
         assert Token.get_dev_token_by_userid(db_session, token.userid) is None
+
+
+def one_hour_from_now():
+    return datetime.datetime.now() + datetime.timedelta(hours=1)
