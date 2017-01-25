@@ -35,7 +35,6 @@ class TestToken(object):
         assert access_token.expires == expires
         assert access_token.authclient == authclient
         assert access_token.refresh_token
-        assert access_token.refresh_token.startswith("7980-")
 
     def test_get_dev_token_by_userid_filters_by_userid(self, db_session, factories):
         token_1 = factories.Token(userid='acct:vanessa@example.org', authclient=None)

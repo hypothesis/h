@@ -24,9 +24,6 @@ class Token(Base, mixins.Timestamps):
     #: to, for example, one of the short-lived JWTs that the client uses).
     prefix = u'6879-'
 
-    #: A prefix that identifies a token as a refresh token.
-    refresh_token_prefix = u'7980-'
-
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            autoincrement=True,
                            primary_key=True)
@@ -63,7 +60,7 @@ class Token(Base, mixins.Timestamps):
         self.regenerate()
 
         if expires:
-            self.refresh_token = self.refresh_token_prefix + _token()
+            self.refresh_token = _token()
 
     @classmethod
     def get_dev_token_by_userid(cls, session, userid):
