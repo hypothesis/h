@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 import pytest
 
+from elasticsearch import RequestsHttpConnection
+
 from memex.search.client import get_client
 
 
@@ -35,6 +37,41 @@ class TestGetClient(object):
         _, kwargs = patched_client.call_args
         assert kwargs[key] == value
 
+    def test_initialises_aws_auth(self, settings, patched_aws_auth):
+        settings.update({'es.aws.access_key_id': 'foo', 'es.aws.secret_access_key': 'bar', 'es.aws.region': 'baz'})
+        get_client(settings)
+
+        patched_aws_auth.assert_called_once_with('foo', 'bar', 'baz', 'es')
+
+    def test_sets_aws_auth(self, settings, patched_client, patched_aws_auth):
+        settings.update({'es.aws.access_key_id': 'foo', 'es.aws.secret_access_key': 'bar', 'es.aws.region': 'baz'})
+        get_client(settings)
+
+        _, kwargs = patched_client.call_args
+        assert kwargs['http_auth'] == patched_aws_auth.return_value
+
+    def test_sets_connection_class_for_aws_auth(self, settings, patched_client):
+        settings.update({'es.aws.access_key_id': 'foo', 'es.aws.secret_access_key': 'bar', 'es.aws.region': 'baz'})
+        get_client(settings)
+
+        _, kwargs = patched_client.call_args
+        assert kwargs['connection_class'] == RequestsHttpConnection
+
+    @pytest.mark.parametrize('aws_settings', [
+        {'es.aws.access_key_id': 'foo'},
+        {'es.aws.secret_access_key': 'foo'},
+        {'es.aws.region': 'foo'},
+        {'es.aws.access_key_id': 'foo', 'es.aws.secret_access_key': 'bar'},
+        {'es.aws.access_key_id': 'foo', 'es.aws.region': 'bar'},
+        {'es.aws.secret_access_key': 'foo', 'es.aws.region': 'bar'},
+    ])
+    def test_ignores_aws_auth_when_settings_missing(self, settings, patched_client, aws_settings):
+        settings.update(aws_settings)
+        get_client(settings)
+
+        _, kwargs = patched_client.call_args
+        assert 'auth' not in kwargs
+
     @pytest.fixture
     def settings(self):
         return {
@@ -45,3 +82,7 @@ class TestGetClient(object):
     @pytest.fixture
     def patched_client(self, patch):
         return patch('memex.search.client.Client')
+
+    @pytest.fixture
+    def patched_aws_auth(self, patch):
+        return patch('memex.search.client.AWS4Auth')

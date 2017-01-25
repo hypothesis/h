@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import certifi
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+from requests_aws4auth import AWS4Auth
 
 __all__ = ('Client',)
 
@@ -43,5 +44,17 @@ def get_client(settings):
 
     if 'es.client_poolsize' in settings:
         kwargs['maxsize'] = settings['es.client_poolsize']
+
+    have_aws_creds = ('es.aws.access_key_id' in settings and
+                      'es.aws.region' in settings and
+                      'es.aws.secret_access_key' in settings)
+
+    if have_aws_creds:
+        auth = AWS4Auth(settings['es.aws.access_key_id'],
+                        settings['es.aws.secret_access_key'],
+                        settings['es.aws.region'],
+                        'es')
+        kwargs['http_auth'] = auth
+        kwargs['connection_class'] = RequestsHttpConnection
 
     return Client(host, index, **kwargs)

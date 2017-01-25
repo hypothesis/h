@@ -40,6 +40,7 @@ INSTALL_REQUIRES = [
     'pyramid-services==0.4',
     'pyramid>=1.7,<1.8',
     'python-dateutil>=2.1',
+    'requests-aws4auth>=0.9',
     'transaction',
     'zope.interface',
 ]
