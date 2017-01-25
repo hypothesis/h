@@ -8,9 +8,6 @@ Views which exist either to serve or support the JavaScript annotation client.
 
 from __future__ import unicode_literals
 
-from pyramid import exceptions
-from pyramid import httpexceptions
-from pyramid import session
 from pyramid.view import view_config
 
 from h import client
