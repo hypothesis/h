@@ -8,9 +8,6 @@ Views which exist either to serve or support the JavaScript annotation client.
 
 from __future__ import unicode_literals
 
-from pyramid import exceptions
-from pyramid import httpexceptions
-from pyramid import session
 from pyramid.view import view_config
 
 from h import client
@@ -48,15 +45,8 @@ def annotator_token(request):
 
     The token can be used in the Authorization header in subsequent requests to
     the API to authenticate the user identified by the
-    request.authenticated_userid of the _current_ request.
+    request.authenticated_userid of the _current_ request, which may be None.
     """
-    try:
-        # The client must supply the CSRF token in the X-CSRF-Token request
-        # header.
-        session.check_csrf_token(request)
-    except exceptions.BadCSRFToken:
-        raise httpexceptions.HTTPUnauthorized()
-
     return generate_jwt(request, 3600)
 
 
