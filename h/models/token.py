@@ -24,6 +24,9 @@ class Token(Base, mixins.Timestamps):
     #: to, for example, one of the short-lived JWTs that the client uses).
     prefix = u'6879-'
 
+    #: A prefix that identifies a token as a refresh token.
+    refresh_token_prefix = u'7980-'
+
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            autoincrement=True,
                            primary_key=True)
@@ -39,6 +42,13 @@ class Token(Base, mixins.Timestamps):
     #: A NULL value in this column indicates a token that does not expire.
     expires = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
 
+    #: A refresh token that can be exchanged for a new token (with a new value
+    #: and expiry time). A NULL value in this column indicates a token that
+    #: cannot be refreshed.
+    refresh_token = sqlalchemy.Column(sqlalchemy.UnicodeText(),
+                                      unique=True,
+                                      nullable=True)
+
     _authclient_id = sqlalchemy.Column('authclient_id',
                                        postgresql.UUID(),
                                        sqlalchemy.ForeignKey('authclient.id', ondelete='cascade'),
@@ -48,9 +58,12 @@ class Token(Base, mixins.Timestamps):
     #: A NULL value means it is a developer token.
     authclient = sqlalchemy.orm.relationship('AuthClient')
 
-    def __init__(self, **kwargs):
-        super(Token, self).__init__(**kwargs)
+    def __init__(self, userid, expires=None, **kwargs):
+        super(Token, self).__init__(userid=userid, expires=expires, **kwargs)
         self.regenerate()
+
+        if expires:
+            self.refresh_token = self.refresh_token_prefix + _token()
 
     @classmethod
     def get_dev_token_by_userid(cls, session, userid):

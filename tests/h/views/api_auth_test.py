@@ -30,7 +30,7 @@ class TestAccessToken(object):
             mock.sentinel.user, mock.sentinel.authclient)
 
     def test_it_returns_an_oauth_compliant_response(self, pyramid_request, oauth_service):
-        token = models.Token()
+        token = models.Token('acct:test@hypothes.is')
         oauth_service.create_token.return_value = token
 
         assert views.access_token(pyramid_request) == {
