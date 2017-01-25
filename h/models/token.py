@@ -9,6 +9,7 @@ import os
 import sqlalchemy
 from sqlalchemy.dialects import postgresql
 
+from h import security
 from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
 from h.db import mixins
@@ -60,7 +61,7 @@ class Token(Base, mixins.Timestamps):
         self.regenerate()
 
         if expires:
-            self.refresh_token = _token()
+            self.refresh_token = security.token_urlsafe()
 
     @classmethod
     def get_dev_token_by_userid(cls, session, userid):
