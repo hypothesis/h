@@ -50,9 +50,6 @@ def _current_groups(request):
     groups = [
         {'name': 'Public', 'id': '__world__', 'public': True},
     ]
-    userid = request.authenticated_userid
-    if userid is None:
-        return groups
     user = request.authenticated_user
     if user is None:
         return groups
