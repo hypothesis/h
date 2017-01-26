@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import base64
 import datetime
 
 import jwt
@@ -167,8 +168,18 @@ def test_generate_jwt_returns_token(jwt_, pyramid_request):
 
 @pytest.mark.usefixtures('token')
 class TestAuthToken(object):
-    def test_retrieves_token_for_request(self, pyramid_request, token):
+    def test_retrieves_bearer_token_for_request(self, pyramid_request, token):
         pyramid_request.headers['Authorization'] = 'Bearer ' + token.value
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result.expires == token.expires
+        assert result.userid == token.userid
+
+    def test_retrieves_basic_auth_token_for_request(self, pyramid_request, token):
+        user_pass = 'X:' + token.value
+        creds = ('Basic', base64.standard_b64encode(user_pass.encode('utf-8')))
+        pyramid_request.authorization = creds
 
         result = tokens.auth_token(pyramid_request)
 
@@ -187,8 +198,24 @@ class TestAuthToken(object):
 
         assert result is None
 
+    def test_returns_none_for_empty_basic_auth_password(self, pyramid_request):
+        user_pass = 'X:'
+        creds = ('Basic', base64.standard_b64encode(user_pass.encode('utf-8')))
+        pyramid_request.authorization = creds
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result is None
+
     def test_returns_none_for_malformed_header(self, pyramid_request, token):
         pyramid_request.headers['Authorization'] = token.value
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result is None
+
+    def test_returns_none_for_malformed_basic_auth_header(self, pyramid_request):
+        pyramid_request.headers['Authorization'] = 'Basic foobar'
 
         result = tokens.auth_token(pyramid_request)
 
@@ -231,6 +258,11 @@ class TestAuthToken(object):
         db_session.add(token)
         db_session.flush()
         return token
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.authorization = None
+        return pyramid_request
 
 
 @pytest.fixture

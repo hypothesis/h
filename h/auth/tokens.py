@@ -8,6 +8,7 @@ from zope.interface import implementer
 from h._compat import text_type
 from h import models
 from h.auth.interfaces import IAuthenticationToken
+from h.auth.util import basic_auth_creds
 
 
 @implementer(IAuthenticationToken)
@@ -102,21 +103,21 @@ def auth_token(request):
     """
     Fetch the token (if any) associated with a request.
 
+    We support two ways of passing the bearer token to the server.
+    1) A bearer authorization header: ``Authorization: Bearer {token}``.
+    2) As the HTTP Basic auth password, the username has to be set, but we ignore it.
+
     :param request: the request object
     :type request: pyramid.request.Request
 
     :returns: the auth token carried by the request, or None
     :rtype: h.models.Token or None
     """
-    try:
-        header = request.headers['Authorization']
-    except KeyError:
-        return None
+    token = _bearer_token(request)
 
-    if not header.startswith('Bearer '):
-        return None
+    if token is None:
+        token = _basic_auth_token(request)
 
-    token = text_type(header[len('Bearer '):]).strip()
     # If the token is empty at this point, it is clearly invalid and we
     # should reject it.
     if not token:
@@ -139,3 +140,25 @@ def _maybe_jwt(token, request):
                                audience=request.host_url)
     except jwt.InvalidTokenError:
         return None
+
+
+def _bearer_token(request):
+    try:
+        header = request.headers['Authorization']
+    except KeyError:
+        return None
+
+    if not header.startswith('Bearer '):
+        return None
+
+    token = text_type(header[len('Bearer '):]).strip()
+    return token
+
+
+def _basic_auth_token(request):
+    creds = basic_auth_creds(request)
+    if creds is None:
+        return None
+
+    _, token = creds
+    return token
