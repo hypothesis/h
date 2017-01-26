@@ -46,10 +46,9 @@ class LegacyClientJWT(object):
     Exposes the standard "auth token" interface on top of legacy tokens.
     """
 
-    def __init__(self, body, key, audience=None, leeway=240):
+    def __init__(self, body, key, leeway=240):
         self.payload = jwt.decode(body,
                                   key=key,
-                                  audience=audience,
                                   leeway=leeway,
                                   algorithms=['HS256'])
 
@@ -88,7 +87,6 @@ def generate_jwt(request, expires_in):
 
     claims = {
         'iss': request.registry.settings['h.client_id'],
-        'aud': request.host_url,
         'sub': request.authenticated_userid,
         'exp': now + datetime.timedelta(seconds=expires_in),
         'iat': now,
@@ -136,8 +134,7 @@ def auth_token(request):
 def _maybe_jwt(token, request):
     try:
         return LegacyClientJWT(token,
-                               key=request.registry.settings['h.client_secret'],
-                               audience=request.host_url)
+                               key=request.registry.settings['h.client_secret'])
     except jwt.InvalidTokenError:
         return None
 
