@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import datetime
 
 import jwt
@@ -230,6 +232,21 @@ class TestAuthTokenFetcher(object):
 
         assert isinstance(result, tokens.LegacyClientJWT)
 
+    def test_retrieves_token_from_query_params(self, pyramid_request, token):
+        pyramid_request.GET['access_token'] = token.value
+
+        result = tokens.AuthTokenFetcher(pyramid_request)(get_param='access_token')
+
+        assert result.expires == token.expires
+        assert result.userid == token.userid
+
+    def test_returns_none_when_wrong_param_key(self, pyramid_request, token):
+        pyramid_request.GET['access_token'] = token.value
+
+        result = tokens.AuthTokenFetcher(pyramid_request)(get_param='bogus')
+
+        assert result is None
+
     def test_it_caches_token(self, pyramid_request, token, db_session):
         pyramid_request.headers['Authorization'] = 'Bearer ' + token.value
 
@@ -242,6 +259,29 @@ class TestAuthTokenFetcher(object):
         result = fetch()
         assert result.expires == token.expires
         assert result.userid == token.userid
+
+    def test_it_caches_tokens_separately(self, pyramid_request, token, factories, db_session):
+        header_token = factories.Token(userid='acct:alice@example.org')
+        token_param_token = factories.Token(userid='acct:bob@example.org')
+        ticket_param_token = factories.Token(userid='acct:laura@example.org')
+        pyramid_request.headers['Authorization'] = 'Bearer ' + header_token.value
+        pyramid_request.GET = {'token': token_param_token.value,
+                               'ticket': ticket_param_token.value}
+
+        fetch = tokens.AuthTokenFetcher(pyramid_request)
+
+        fetch()
+        fetch(get_param='token')
+        fetch(get_param='ticket')
+
+        db_session.delete(header_token)
+        db_session.delete(token_param_token)
+        db_session.delete(ticket_param_token)
+        db_session.flush()
+
+        assert fetch().userid == header_token.userid
+        assert fetch(get_param='token').userid == token_param_token.userid
+        assert fetch(get_param='ticket').userid == ticket_param_token.userid
 
     @pytest.fixture
     def token(self, db_session):

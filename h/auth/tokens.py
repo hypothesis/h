@@ -102,6 +102,10 @@ class AuthTokenFetcher(object):
     """
     Fetch the token (if any) associated with a request.
 
+    This looks for the a bearer token in the "Authorization" header. This method
+    can optionally look for the token in the GET URL parameters by providing a
+    key as the ``get_param`` argument.
+
     :returns: the auth token carried by the request, or None
     :rtype: h.models.Token or None
     """
@@ -109,33 +113,33 @@ class AuthTokenFetcher(object):
         self.request = request
         self._cache = {}
 
-    def __call__(self):
+    def __call__(self, get_param=None):
         """
         Returns the token.
 
+        :param get_param: the GET URI parameter key
+        :type unicode
 
         :returns: the auth token carried by the request, or None
         :rtype: h.auth.tokens.Token or None
         """
         cache_key = 'default'
+        if get_param is not None:
+            cache_key = 'param-%s' % get_param
 
         if cache_key not in self._cache:
-            self._cache[cache_key] = self._fetch()
+            self._cache[cache_key] = self._fetch(get_param)
 
         return self._cache[cache_key]
 
-    def _fetch(self):
-        try:
-            header = self.request.headers['Authorization']
-        except KeyError:
-            return None
+    def _fetch(self, get_param):
+        token = None
 
-        if not header.startswith('Bearer '):
-            return None
+        if get_param is None:
+            token = _header_token(self.request)
+        else:
+            token = self.request.GET.get(get_param, None)
 
-        token = text_type(header[len('Bearer '):]).strip()
-        # If the token is empty at this point, it is clearly invalid and we
-        # should reject it.
         if not token:
             return None
 
@@ -156,3 +160,21 @@ def _maybe_jwt(token, request):
                                audience=request.host_url)
     except jwt.InvalidTokenError:
         return None
+
+
+def _header_token(request):
+    try:
+        header = request.headers['Authorization']
+    except KeyError:
+        return None
+
+    if not header.startswith('Bearer '):
+        return None
+
+    token = text_type(header[len('Bearer '):]).strip()
+    # If the token is empty at this point, it is clearly invalid and we
+    # should reject it.
+    if not token:
+        return None
+
+    return token

@@ -86,6 +86,26 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         return token.userid
 
 
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class TokenParameterAuthenticationPolicy(TokenAuthenticationPolicy):
+    def unauthenticated_userid(self, request):
+        """
+        Return the userid implied by the token in the passed request, if any.
+
+        :param request: a request object
+        :type request: pyramid.request.Request
+
+        :returns: the userid authenticated for the passed request or None
+        :rtype: unicode or None
+        """
+        auth_token = getattr(request, 'auth_token', lambda get_param: None)
+        token = auth_token(get_param='access_token')
+        if token is None or not token.is_valid():
+            return None
+
+        return token.userid
+
+
 def _is_api_request(request):
     return (request.path.startswith('/api') and
             request.path not in ['/api/token', '/api/badge'])
