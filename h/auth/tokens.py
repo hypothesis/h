@@ -98,38 +98,55 @@ def generate_jwt(request, expires_in):
                       algorithm='HS256')
 
 
-def auth_token(request):
+class AuthTokenFetcher(object):
     """
     Fetch the token (if any) associated with a request.
-
-    :param request: the request object
-    :type request: pyramid.request.Request
 
     :returns: the auth token carried by the request, or None
     :rtype: h.models.Token or None
     """
-    try:
-        header = request.headers['Authorization']
-    except KeyError:
-        return None
+    def __init__(self, request):
+        self.request = request
+        self._cache = {}
 
-    if not header.startswith('Bearer '):
-        return None
+    def __call__(self):
+        """
+        Returns the token.
 
-    token = text_type(header[len('Bearer '):]).strip()
-    # If the token is empty at this point, it is clearly invalid and we
-    # should reject it.
-    if not token:
-        return None
 
-    token_model = (request.db.query(models.Token)
-                   .filter_by(value=token)
-                   .one_or_none())
-    if token_model is not None:
-        return Token(token_model)
+        :returns: the auth token carried by the request, or None
+        :rtype: h.auth.tokens.Token or None
+        """
+        cache_key = 'default'
 
-    # If we've got this far it's possible the token is a legacy client JWT.
-    return _maybe_jwt(token, request)
+        if cache_key not in self._cache:
+            self._cache[cache_key] = self._fetch()
+
+        return self._cache[cache_key]
+
+    def _fetch(self):
+        try:
+            header = self.request.headers['Authorization']
+        except KeyError:
+            return None
+
+        if not header.startswith('Bearer '):
+            return None
+
+        token = text_type(header[len('Bearer '):]).strip()
+        # If the token is empty at this point, it is clearly invalid and we
+        # should reject it.
+        if not token:
+            return None
+
+        token_model = (self.request.db.query(models.Token)
+                       .filter_by(value=token)
+                       .one_or_none())
+        if token_model is not None:
+            return Token(token_model)
+
+        # If we've got this far it's possible the token is a legacy client JWT.
+        return _maybe_jwt(token, self.request)
 
 
 def _maybe_jwt(token, request):

@@ -166,31 +166,36 @@ def test_generate_jwt_returns_token(jwt_, pyramid_request):
 
 
 @pytest.mark.usefixtures('token')
-class TestAuthToken(object):
+class TestAuthTokenFetcher(object):
+    def test_init_stores_request(self):
+        request = mock.Mock()
+        fetcher = tokens.AuthTokenFetcher(request)
+        assert fetcher.request == request
+
     def test_retrieves_token_for_request(self, pyramid_request, token):
         pyramid_request.headers['Authorization'] = 'Bearer ' + token.value
 
-        result = tokens.auth_token(pyramid_request)
+        result = tokens.AuthTokenFetcher(pyramid_request)()
 
         assert result.expires == token.expires
         assert result.userid == token.userid
 
     def test_returns_none_when_no_authz_header(self, pyramid_request, token):
-        result = tokens.auth_token(pyramid_request)
+        result = tokens.AuthTokenFetcher(pyramid_request)()
 
         assert result is None
 
     def test_returns_none_for_empty_token(self, pyramid_request, token):
         pyramid_request.headers['Authorization'] = 'Bearer '
 
-        result = tokens.auth_token(pyramid_request)
+        result = tokens.AuthTokenFetcher(pyramid_request)()
 
         assert result is None
 
     def test_returns_none_for_malformed_header(self, pyramid_request, token):
         pyramid_request.headers['Authorization'] = token.value
 
-        result = tokens.auth_token(pyramid_request)
+        result = tokens.AuthTokenFetcher(pyramid_request)()
 
         assert result is None
 
@@ -203,14 +208,14 @@ class TestAuthToken(object):
         assume(header != 'Bearer ' + token.value)
         pyramid_request.headers['Authorization'] = header
 
-        result = tokens.auth_token(pyramid_request)
+        result = tokens.AuthTokenFetcher(pyramid_request)()
 
         assert result is None
 
     def test_returns_none_for_invalid_token(self, pyramid_request):
         pyramid_request.headers['Authorization'] = 'Bearer abcd1234'
 
-        result = tokens.auth_token(pyramid_request)
+        result = tokens.AuthTokenFetcher(pyramid_request)()
 
         assert result is None
 
@@ -221,9 +226,22 @@ class TestAuthToken(object):
                            key='secret')
         pyramid_request.headers['Authorization'] = 'Bearer ' + token
 
-        result = tokens.auth_token(pyramid_request)
+        result = tokens.AuthTokenFetcher(pyramid_request)()
 
         assert isinstance(result, tokens.LegacyClientJWT)
+
+    def test_it_caches_token(self, pyramid_request, token, db_session):
+        pyramid_request.headers['Authorization'] = 'Bearer ' + token.value
+
+        fetch = tokens.AuthTokenFetcher(pyramid_request)
+
+        fetch()
+        db_session.delete(token)
+        db_session.flush()
+
+        result = fetch()
+        assert result.expires == token.expires
+        assert result.userid == token.userid
 
     @pytest.fixture
     def token(self, db_session):

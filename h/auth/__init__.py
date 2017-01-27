@@ -62,4 +62,4 @@ def includeme(config):
     config.add_request_method(auth_domain, name='auth_domain', reify=True)
 
     # Allow retrieval of the auth token (if present) from the request object.
-    config.add_request_method('.tokens.auth_token', reify=True)
+    config.add_request_method('.tokens.AuthTokenFetcher', name='auth_token', reify=True)

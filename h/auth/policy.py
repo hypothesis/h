@@ -47,7 +47,7 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
     This is a Pyramid authentication policy in which the user's identity is
     provided by and authenticated by the presence of a valid authentication
     token associated with the request. The token is retrieved from the
-    ``request.auth_token`` property, which is provided by the
+    ``request.auth_token`` method, which is provided by the
     :py:func:`h.auth.token.auth_token` function.
 
     It uses Pyramid's CallbackAuthenticationPolicy to divide responsibility
@@ -78,7 +78,8 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :returns: the userid authenticated for the passed request or None
         :rtype: unicode or None
         """
-        token = getattr(request, 'auth_token', None)
+        auth_token = getattr(request, 'auth_token', lambda: None)
+        token = auth_token()
         if token is None or not token.is_valid():
             return None
 

@@ -126,7 +126,7 @@ class TestTokenAuthenticationPolicy(object):
 
     def test_unauthenticated_userid_returns_userid_from_token(self, fake_token, pyramid_request):
         policy = TokenAuthenticationPolicy()
-        pyramid_request.auth_token = fake_token
+        pyramid_request.auth_token = mock.Mock(return_value=fake_token)
 
         result = policy.unauthenticated_userid(pyramid_request)
 
@@ -136,6 +136,7 @@ class TestTokenAuthenticationPolicy(object):
         policy = TokenAuthenticationPolicy()
         token = DummyToken(valid=False)
         pyramid_request.auth_token = token
+        pyramid_request.auth_token = mock.Mock(return_value=token)
 
         result = policy.unauthenticated_userid(pyramid_request)
 
@@ -145,7 +146,7 @@ class TestTokenAuthenticationPolicy(object):
         def callback(userid, request):
             return None
         policy = TokenAuthenticationPolicy(callback=callback)
-        pyramid_request.auth_token = fake_token
+        pyramid_request.auth_token = mock.Mock(return_value=fake_token)
 
         result = policy.authenticated_userid(pyramid_request)
 
@@ -155,7 +156,7 @@ class TestTokenAuthenticationPolicy(object):
         def callback(userid, request):
             return [userid + '.foo', 'group:donkeys']
         policy = TokenAuthenticationPolicy(callback=callback)
-        pyramid_request.auth_token = fake_token
+        pyramid_request.auth_token = mock.Mock(return_value=fake_token)
 
         result = policy.effective_principals(pyramid_request)
 
