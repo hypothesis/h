@@ -7,7 +7,7 @@ from pyramid import security
 
 class WorldGroup(object):
     """
-    A Group object for the __world__ group, it only implements __acl__.
+    A Group object for the __world__ group.
 
     This is so we don't have to store a __world__ group in the database.
     """
@@ -21,3 +21,15 @@ class WorldGroup(object):
             (security.Allow, 'authority:{}'.format(self.auth_domain), 'write'),
             security.DENY_ALL,
         ]
+
+    @property
+    def name(self):
+        return 'Public'
+
+    @property
+    def pubid(self):
+        return '__world__'
+
+    @property
+    def is_public(self):
+        return True
