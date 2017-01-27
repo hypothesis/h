@@ -60,6 +60,7 @@ def _current_groups(request):
             'url': request.route_url('group_read',
                                      pubid=group.pubid,
                                      slug=group.slug),
+            'public': False,
         })
     return groups
 

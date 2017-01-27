@@ -24,6 +24,22 @@ def test_model_sorts_groups(authenticated_request):
     assert ids == ['__world__', 'c', 'a', 'b']
 
 
+def test_world_group_is_public_in_model(authenticated_request):
+    model = session.model(authenticated_request)
+    world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
+
+    assert world_group['public'] is True
+
+
+def test_private_group_is_not_public_in_model(authenticated_request):
+    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+
+    model = session.model(authenticated_request)
+    private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
+
+    assert private_group['public'] is False
+
+
 def test_model_includes_features(authenticated_request):
     feature_dict = {
         'feature_one': True,
@@ -90,6 +106,22 @@ def test_world_group_not_in_third_party_profile(third_party_request):
     result = session.profile(third_party_request)
 
     assert '__world__' not in [g['id'] for g in result['groups']]
+
+
+def test_world_group_is_public_in_profile(authenticated_request):
+    profile = session.profile(authenticated_request)
+    world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
+
+    assert world_group['public'] is True
+
+
+def test_private_group_is_not_public_in_profile(authenticated_request):
+    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+
+    profile = session.profile(authenticated_request)
+    private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
+
+    assert private_group['public'] is False
 
 
 def test_profile_includes_features(authenticated_request):
