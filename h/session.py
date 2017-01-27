@@ -53,15 +53,8 @@ def _current_groups(request):
 
     groups = _authority_groups(request.auth_domain, authority)
 
-    for group in _user_groups(user):
-        groups.append({
-            'name': group.name,
-            'id': group.pubid,
-            'url': request.route_url('group_read',
-                                     pubid=group.pubid,
-                                     slug=group.slug),
-            'public': group.is_public,
-        })
+    groups.extend(_group_model(request.route_url, group)
+                  for group in _user_groups(user))
     return groups
 
 
@@ -78,6 +71,20 @@ def _user_groups(user):
         return []
     else:
         return sorted(user.groups, key=_group_sort_key)
+
+
+def _group_model(route_url, group):
+    model = {'name': group.name, 'id': group.pubid, 'public': group.is_public}
+
+    # We currently want to show URLs for secret groups, but not for publisher
+    # groups, and not for the `__world__` group (where it doesn't make sense).
+    # This is currently all non-public groups, which saves us needing to do a
+    # check in here on the group's authority.
+    if not group.is_public:
+        model['url'] = route_url('group_read',
+                                 pubid=group.pubid,
+                                 slug=group.slug)
+    return model
 
 
 def _user_preferences(user):

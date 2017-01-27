@@ -41,6 +41,31 @@ def test_private_group_is_not_public_in_model(authenticated_request):
     assert private_group['public'] is False
 
 
+def test_world_group_has_no_url_in_model(authenticated_request):
+    model = session.model(authenticated_request)
+    world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
+
+    assert 'url' not in world_group
+
+
+def test_private_group_has_url_in_model(authenticated_request):
+    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+
+    model = session.model(authenticated_request)
+    private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
+
+    assert private_group['url']
+
+
+def test_publisher_group_has_no_url_in_model(third_party_request):
+    third_party_request.set_groups([FakeGroup('a', 'Group A', is_public=True)])
+
+    model = session.model(third_party_request)
+    publisher_group = [g for g in model['groups'] if g['id'] == 'a'][0]
+
+    assert 'url' not in publisher_group
+
+
 def test_model_includes_features(authenticated_request):
     feature_dict = {
         'feature_one': True,
@@ -132,6 +157,31 @@ def test_publisher_group_is_public_in_profile(third_party_request):
     publisher_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
 
     assert publisher_group['public'] is True
+
+
+def test_world_group_has_no_url_in_profile(authenticated_request):
+    profile = session.profile(authenticated_request)
+    world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
+
+    assert 'url' not in world_group
+
+
+def test_private_group_has_url_in_profile(authenticated_request):
+    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+
+    profile = session.profile(authenticated_request)
+    private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
+
+    assert private_group['url']
+
+
+def test_publisher_group_has_no_url_in_profile(third_party_request):
+    third_party_request.set_groups([FakeGroup('a', 'Group A', is_public=True)])
+
+    profile = session.profile(third_party_request)
+    publisher_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
+
+    assert 'url' not in publisher_group
 
 
 def test_profile_includes_features(authenticated_request):
