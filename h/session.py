@@ -53,9 +53,7 @@ def _current_groups(request):
 
     groups = _authority_groups(request.auth_domain, authority)
 
-    if user is None:
-        return groups
-    for group in sorted(user.groups, key=_group_sort_key):
+    for group in _user_groups(user):
         groups.append({
             'name': group.name,
             'id': group.pubid,
@@ -72,6 +70,13 @@ def _authority_groups(auth_domain, authority):
         return [{'name': 'Public', 'id': '__world__', 'public': True}]
     else:
         return []
+
+
+def _user_groups(user):
+    if user is None:
+        return []
+    else:
+        return sorted(user.groups, key=_group_sort_key)
 
 
 def _user_preferences(user):
