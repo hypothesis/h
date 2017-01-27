@@ -5,10 +5,11 @@ from h import session
 
 
 class FakeGroup(object):
-    def __init__(self, pubid, name):
+    def __init__(self, pubid, name, is_public=False):
         self.pubid = pubid
         self.name = name
         self.slug = pubid
+        self.is_public = is_public
 
 
 def test_model_sorts_groups(authenticated_request):
@@ -122,6 +123,15 @@ def test_private_group_is_not_public_in_profile(authenticated_request):
     private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
 
     assert private_group['public'] is False
+
+
+def test_publisher_group_is_public_in_profile(third_party_request):
+    third_party_request.set_groups([FakeGroup('a', 'Group A', is_public=True)])
+
+    profile = session.profile(third_party_request)
+    publisher_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
+
+    assert publisher_group['public'] is True
 
 
 def test_profile_includes_features(authenticated_request):

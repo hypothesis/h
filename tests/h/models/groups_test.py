@@ -71,6 +71,18 @@ def test_created_by(db_session, factories):
     assert models.Group.created_by(db_session, user).all() == [group_1, group_2]
 
 
+def test_public_group():
+    group = models.Group(readable_by=ReadableBy.world)
+
+    assert group.is_public
+
+
+def test_non_public_group():
+    group = models.Group(readable_by=ReadableBy.members)
+
+    assert not group.is_public
+
+
 @pytest.mark.usefixtures('documents')
 def test_documents_returns_groups_annotated_documents(db_session, group):
     # Three different documents each with a shared annotation in the group.

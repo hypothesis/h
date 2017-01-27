@@ -104,6 +104,10 @@ class Group(Base, mixins.Timestamps):
         """A version of this group's name suitable for use in a URL."""
         return slugify.slugify(self.name)
 
+    @property
+    def is_public(self):
+        return self.readable_by == ReadableBy.world
+
     def documents(self, limit=25):
         """
         Return this group's most recently annotated documents.
