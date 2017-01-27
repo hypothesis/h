@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 
 from pyramid import security
 
-from h import models
-
 
 class WorldGroup(object):
     """
