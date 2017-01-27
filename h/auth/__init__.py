@@ -8,7 +8,7 @@ from pyramid.authentication import RemoteUserAuthenticationPolicy
 import pyramid_authsanity
 from pyramid_multiauth import MultiAuthenticationPolicy
 
-from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
+from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy, TokenParameterAuthenticationPolicy
 from h.auth.util import auth_domain, groupfinder
 from h.security import derive_key
 
@@ -23,10 +23,11 @@ PROXY_POLICY = RemoteUserAuthenticationPolicy(environ_key='HTTP_X_FORWARDED_USER
                                               callback=groupfinder)
 TICKET_POLICY = pyramid_authsanity.AuthServicePolicy()
 TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
+TOKEN_PARAM_POLICY = TokenParameterAuthenticationPolicy(callback=groupfinder, debug=True)
 
 DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
                                       fallback_policy=TICKET_POLICY)
-WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, TICKET_POLICY])
+WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_PARAM_POLICY, TOKEN_POLICY, TICKET_POLICY])
 
 
 def includeme(config):
@@ -51,7 +52,8 @@ def includeme(config):
 
         DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
                                               fallback_policy=PROXY_POLICY)
-        WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY,
+        WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_PARAM_POLICY,
+                                                      TOKEN_POLICY,
                                                       PROXY_POLICY])
 
     # Set the default authentication policy. This can be overridden by modules
