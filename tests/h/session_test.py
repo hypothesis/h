@@ -74,6 +74,24 @@ def test_profile_sorts_groups(authenticated_request):
     assert ids == ['__world__', 'c', 'a', 'b']
 
 
+def test_world_group_in_authenticated_profile(authenticated_request):
+    result = session.profile(authenticated_request)
+
+    assert '__world__' in [g['id'] for g in result['groups']]
+
+
+def test_world_group_in_anonymous_profile(unauthenticated_request):
+    result = session.profile(unauthenticated_request)
+
+    assert '__world__' in [g['id'] for g in result['groups']]
+
+
+def test_world_group_not_in_third_party_profile(third_party_request):
+    result = session.profile(third_party_request)
+
+    assert '__world__' not in [g['id'] for g in result['groups']]
+
+
 def test_profile_includes_features(authenticated_request):
     feature_dict = {
         'feature_one': True,
@@ -133,6 +151,11 @@ def auth_domain():
 
 
 @pytest.fixture
+def third_party_domain():
+    return u'thirdparty.example.org'
+
+
+@pytest.fixture
 def unauthenticated_request(auth_domain):
     return FakeRequest(auth_domain, None, None)
 
@@ -142,3 +165,10 @@ def authenticated_request(auth_domain):
     return FakeRequest(auth_domain,
                        u'acct:user@{}'.format(auth_domain),
                        auth_domain)
+
+
+@pytest.fixture
+def third_party_request(auth_domain, third_party_domain):
+    return FakeRequest(auth_domain,
+                       u'acct:user@{}'.format(third_party_domain),
+                       third_party_domain)

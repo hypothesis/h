@@ -47,10 +47,12 @@ def _current_groups(request):
     This list is meant to be returned to the client in the "session" model.
 
     """
-    groups = [
-        {'name': 'Public', 'id': '__world__', 'public': True},
-    ]
+
     user = request.authenticated_user
+    authority = user.authority if user else request.auth_domain
+
+    groups = _authority_groups(request.auth_domain, authority)
+
     if user is None:
         return groups
     for group in sorted(user.groups, key=_group_sort_key):
@@ -62,6 +64,14 @@ def _current_groups(request):
                                      slug=group.slug),
         })
     return groups
+
+
+def _authority_groups(auth_domain, authority):
+    """Return the default groups associated with an authority."""
+    if authority == auth_domain:
+        return [{'name': 'Public', 'id': '__world__', 'public': True}]
+    else:
+        return []
 
 
 def _user_preferences(user):
