@@ -66,6 +66,8 @@ raven==5.24.3
 repoze.lru==0.6           # via pyramid
 repoze.sendmail==4.1
 six==1.10.0               # via bcrypt, bleach, cryptography, html5lib, python-dateutil
+requests-aws4auth==0.9
+requests==2.13.0          # via requests-aws4auth
 SQLAlchemy==1.1.4         # via alembic, zope.sqlalchemy
 statsd==3.2.1
 transaction==2.0.3        # via pyramid-tm, repoze.sendmail, zope.sqlalchemy
