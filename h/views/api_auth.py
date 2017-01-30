@@ -11,9 +11,7 @@ from h.util.view import cors_json_view
 def access_token(request):
     svc = request.find_service(name='oauth')
 
-    user, authclient = svc.verify_jwt_bearer(
-        assertion=request.POST.get('assertion'),
-        grant_type=request.POST.get('grant_type'))
+    user, authclient = svc.verify_token_request(request.POST)
     token = svc.create_token(user, authclient)
 
     response = {

@@ -15,13 +15,13 @@ from h.views import api_auth as views
 
 @pytest.mark.usefixtures('user_service', 'oauth_service')
 class TestAccessToken(object):
-    def test_it_verifies_the_jwt_bearer(self, pyramid_request, oauth_service):
+    def test_it_verifies_the_token(self, pyramid_request, oauth_service):
         pyramid_request.POST = {'assertion': 'the-assertion', 'grant_type': 'the-grant-type'}
 
         views.access_token(pyramid_request)
 
-        oauth_service.verify_jwt_bearer.assert_called_once_with(
-            assertion='the-assertion', grant_type='the-grant-type'
+        oauth_service.verify_token_request.assert_called_once_with(
+            pyramid_request.POST
         )
 
     def test_it_creates_a_token(self, pyramid_request, oauth_service):
@@ -57,7 +57,7 @@ class TestAccessToken(object):
     @pytest.fixture
     def oauth_service(self, pyramid_config, pyramid_request, token):
         svc = mock.Mock(spec_set=oauth_service_factory(None, pyramid_request))
-        svc.verify_jwt_bearer.return_value = (mock.sentinel.user, mock.sentinel.authclient)
+        svc.verify_token_request.return_value = (mock.sentinel.user, mock.sentinel.authclient)
         svc.create_token.return_value = token
         pyramid_config.register_service(svc, name='oauth')
         return svc

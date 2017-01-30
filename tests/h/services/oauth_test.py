@@ -16,46 +16,46 @@ from h.services.user import UserService
 from h._compat import text_type
 
 
-class TestOAuthServiceVerifyJWTBearer(object):
-    """ Tests for ``OAuthService.verify_jwt_bearer`` """
+class TestOAuthServiceVerifyJWTBearerRequest(object):
+    """Test for verifying jwt-bearer requests with OAuthService."""
 
     def test_it_returns_the_user_and_authclient_from_the_jwt_token(self, svc, claims, authclient, user):
         expected_user = user
         tok = self.jwt_token(claims, authclient.secret)
 
-        result = svc.verify_jwt_bearer(assertion=tok,
-                                       grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+        result = svc.verify_token_request(dict(assertion=tok,
+                                               grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert (expected_user, authclient) == result
 
     def test_missing_grant_type(self, svc):
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion='jwt-token',
-                                  grant_type=None)
+            svc.verify_token_request(dict(assertion='jwt-token',
+                                          grant_type=None))
 
         assert exc.value.type == 'unsupported_grant_type'
         assert 'grant type is not supported' in exc.value.message
 
     def test_unsupported_grant_type(self, svc):
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion='jwt-token',
-                                  grant_type='authorization_code')
+            svc.verify_token_request(dict(assertion='jwt-token',
+                                          grant_type='authorization_code'))
 
         assert exc.value.type == 'unsupported_grant_type'
         assert 'grant type is not supported' in exc.value.message
 
     def test_missing_assertion(self, svc):
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=None,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=None,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_request'
         assert 'assertion parameter is missing' in exc.value.message
 
     def test_non_jwt_assertion(self, svc):
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion='bogus',
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion='bogus',
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT signature' in exc.value.message
@@ -65,8 +65,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is missing' in exc.value.message
@@ -76,8 +76,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is missing' in exc.value.message
@@ -89,8 +89,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is invalid' in exc.value.message
@@ -100,8 +100,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is invalid' in exc.value.message
@@ -110,8 +110,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, 'different-secret')
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT signature' in exc.value.message
@@ -120,8 +120,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret, algorithm='HS512')
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT signature algorithm' in exc.value.message
@@ -131,8 +131,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'missing claim aud' in exc.value.message
@@ -142,8 +142,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT audience' in exc.value.message
@@ -153,8 +153,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'not before is in the future' in exc.value.message
@@ -164,8 +164,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'token is expired' in exc.value.message
@@ -175,8 +175,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'issued at is in the future' in exc.value.message
@@ -186,8 +186,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'subject is missing' in exc.value.message
@@ -197,8 +197,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'subject is missing' in exc.value.message
@@ -209,8 +209,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'user with userid described in subject could not be found' in exc.value.message
@@ -223,8 +223,8 @@ class TestOAuthServiceVerifyJWTBearer(object):
         tok = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(dict(assertion=tok,
+                                          grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer'))
 
         assert exc.value.type == 'invalid_grant'
         assert 'authenticated client and JWT subject authorities do not match' in exc.value
