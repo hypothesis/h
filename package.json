@@ -31,7 +31,7 @@
     "js-polyfills": "^0.1.16",
     "keyboardevent-key-polyfill": "^1.0.2",
     "mkdirp": "^0.5.1",
-    "node-sass": "^3.8.0",
+    "node-sass": "^4.4.0",
     "postcss": "^5.0.6",
     "postcss-url": "^5.1.1",
     "query-string": "^3.0.1",
