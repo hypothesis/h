@@ -64,6 +64,19 @@ class Token(Base, mixins.Timestamps):
             self.refresh_token = security.token_urlsafe()
 
     @classmethod
+    def get_by_refresh_token(cls, session, refresh_token):
+        """
+        Return the token with the given refresh token (there can be only one).
+
+        Return None if there's no token with the given refresh_token.
+
+        """
+        return (session.query(cls)
+                .filter_by(refresh_token=refresh_token)
+                .order_by(cls.created.desc())
+                .first())
+
+    @classmethod
     def get_dev_token_by_userid(cls, session, userid):
         return (session.query(cls)
                 .filter_by(userid=userid, authclient=None)

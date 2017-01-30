@@ -39,6 +39,28 @@ class TestToken(object):
         assert access_token.authclient == authclient
         assert access_token.refresh_token in security.token_urlsafe.side_effect.generated_tokens
 
+    def test_get_by_refresh_token_returns_the_token(self, db_session, factories):
+        refresh_token = 'xyz123'
+        # A token that should *not* be returned.
+        factories.Token(refresh_token='something_else')
+        # The token that should be returned.
+        expected_token = factories.Token(refresh_token=refresh_token)
+        # Another token that should not be returned.
+        factories.Token()
+
+        returned_token = Token.get_by_refresh_token(db_session, refresh_token)
+
+        assert returned_token == expected_token
+
+    def test_get_by_refresh_token_returns_None_if_theres_no_token(self, db_session, factories):
+        refresh_token = 'xyz123'
+        # A token that should *not* be returned.
+        factories.Token(refresh_token='something_else')
+        # Another token that should not be returned.
+        factories.Token()
+
+        assert Token.get_by_refresh_token(db_session, refresh_token) is None
+
     def test_get_dev_token_by_userid_filters_by_userid(self, db_session, factories):
         token_1 = factories.Token(userid='acct:vanessa@example.org', authclient=None)
         token_2 = factories.Token(userid='acct:david@example.org', authclient=None)
