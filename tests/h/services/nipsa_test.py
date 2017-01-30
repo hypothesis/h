@@ -94,6 +94,5 @@ def users(db_session, factories):
         'cecilia': factories.User(username='cecilia', nipsa=True),
         'dominic': factories.User(username='dominic', nipsa=False),
     }
-    db_session.add_all([u for u in users.values()])
     db_session.flush()
     return users

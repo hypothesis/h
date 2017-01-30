@@ -132,7 +132,7 @@ class TestLoginSchema(object):
                                                           factories,
                                                           pyramid_csrf_request,
                                                           user_service):
-        user = factories.User(username='jeannie')
+        user = factories.User.build(username='jeannie')
         user_service.login.return_value = user
         schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
 
@@ -148,7 +148,7 @@ class TestLoginSchema(object):
                                         factories,
                                         pyramid_csrf_request,
                                         user_service):
-        user = factories.User(username='jeannie')
+        user = factories.User.build(username='jeannie')
         user_service.login.return_value = user
         schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
 
@@ -463,7 +463,7 @@ class TestEmailChangeSchema(object):
 
     @pytest.fixture
     def user(self, factories):
-        return factories.User(password=self.PASSWORD)
+        return factories.User.build(password=self.PASSWORD)
 
     @pytest.fixture
     def models(self, patch):

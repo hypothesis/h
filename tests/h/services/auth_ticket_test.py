@@ -187,7 +187,6 @@ class TestAuthTicketService(object):
     @pytest.fixture
     def user(self, factories, db_session):
         user = factories.User()
-        db_session.add(user)
         db_session.flush()
         return user
 

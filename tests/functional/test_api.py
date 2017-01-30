@@ -74,7 +74,6 @@ def annotation(db_session, factories):
 @pytest.fixture
 def user(db_session, factories):
     user = factories.User()
-    db_session.add(user)
     db_session.commit()
     return user
 

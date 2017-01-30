@@ -70,14 +70,9 @@ class AuthClient(ModelFactory):
     secret = factory.LazyAttribute(lambda _: unicode(FAKER.sha256()))
 
 
-class User(factory.Factory):
+class User(ModelFactory):
 
-    """A factory class that generates h.models.User objects.
-
-    Note that this class doesn't add the User to the database session for you,
-    if tests want the user added to a session they should do that themselves.
-
-    """
+    """A factory class that generates h.models.User objects."""
 
     class Meta(object):
         model = models.User

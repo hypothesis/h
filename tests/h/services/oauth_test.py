@@ -253,7 +253,7 @@ class TestOAuthServiceVerifyJWTBearer(object):
 
     @pytest.fixture
     def user(self, factories, authclient, user_service):
-        user = factories.User(authority=authclient.authority)
+        user = factories.User.build(authority=authclient.authority)
         user_service.fetch.return_value = user
         return user
 

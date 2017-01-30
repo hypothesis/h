@@ -139,7 +139,6 @@ def users(db_session, factories):
         'eva': factories.User(username='eva', authority='foo.org', staff=False),
         'flora': factories.User(username='flora', authority='foo.org', staff=False),
     }
-    db_session.add_all(users.values())
     db_session.flush()
 
     return users

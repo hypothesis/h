@@ -182,7 +182,7 @@ class TestCheckURL(object):
     @pytest.fixture
     def user_service(self, factories, pyramid_config):
         user_service = mock.Mock(spec_set=['fetch'])
-        user_service.fetch.return_value = factories.User()
+        user_service.fetch.return_value = factories.User.build()
         pyramid_config.register_service(user_service, name='user')
         return user_service
 
