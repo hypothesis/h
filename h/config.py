@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import logging
 import os
+import socket
 
 from pyramid.config import Configurator
 from pyramid.settings import asbool
@@ -57,6 +58,7 @@ SETTINGS = [
     EnvSetting('sqlalchemy.url', 'DATABASE_URL', type=database_url),
     EnvSetting('statsd.host', 'STATSD_HOST'),
     EnvSetting('statsd.port', 'STATSD_PORT', type=int),
+    EnvSetting('statsd.prefix', 'STATSD_PREFIX'),
 
     # Configuration for Pyramid
     EnvSetting('secret_key', 'SECRET_KEY', type=bytes),
@@ -110,5 +112,11 @@ def configure(environ=None, settings=None):
         if settings['debug_query'] == 'trace':
             level = logging.DEBUG
         logging.getLogger('sqlalchemy.engine').setLevel(level)
+
+    hostname = socket.gethostname()
+    if 'STATSD_PREFIX' in os.environ:
+        settings['statsd.prefix'] = '.'.join([os.environ['STATSD_PREFIX'], hostname])
+    else:
+        settings['statsd.prefix'] = hostname
 
     return Configurator(settings=settings)

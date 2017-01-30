@@ -6,7 +6,8 @@ __all__ = ('get_client',)
 
 def get_client(settings):
     return statsd.StatsClient(host=settings.get('statsd.host', 'localhost'),
-                              port=settings.get('statsd.port', 8125))
+                              port=settings.get('statsd.port', 8125),
+                              prefix=settings.get('statsd.prefix', ''))
 
 
 def includeme(config):
