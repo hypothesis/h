@@ -23,7 +23,7 @@ class TestCreate(object):
                                  user_signup_service,
                                  valid_payload):
         pyramid_request.json_body = valid_payload
-        user_signup_service.signup.return_value = factories.User(**valid_payload)
+        user_signup_service.signup.return_value = factories.User.build(**valid_payload)
 
         result = create(pyramid_request)
 
@@ -41,7 +41,7 @@ class TestCreate(object):
                            user_signup_service,
                            valid_payload):
         pyramid_request.json_body = valid_payload
-        user_signup_service.signup.return_value = factories.User(**valid_payload)
+        user_signup_service.signup.return_value = factories.User.build(**valid_payload)
 
         create(pyramid_request)
 
@@ -128,7 +128,6 @@ class TestCreate(object):
                                         factories,
                                         auth_client):
         existing_user = factories.User(authority=auth_client.authority)
-        db_session.add(existing_user)
         db_session.flush()
 
         payload = valid_payload
@@ -148,7 +147,6 @@ class TestCreate(object):
                                      factories,
                                      auth_client):
         existing_user = factories.User(authority=auth_client.authority)
-        db_session.add(existing_user)
         db_session.flush()
 
         payload = valid_payload

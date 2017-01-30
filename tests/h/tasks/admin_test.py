@@ -28,7 +28,6 @@ class TestRenameUser(object):
     @pytest.fixture
     def user(self, factories, db_session):
         user = factories.User(username='giraffe')
-        db_session.add(user)
         db_session.flush()
         return user
 

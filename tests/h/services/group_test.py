@@ -168,7 +168,6 @@ class TestGroupService(object):
         user = None
         if with_user:
             user = factories.User()
-            db_session.add(user)
             db_session.flush()
 
         assert '__world__' in service.groupids_readable_by(user)
@@ -183,14 +182,12 @@ class TestGroupService(object):
         user = None
         if with_user:
             user = factories.User()
-            db_session.add(user)
             db_session.flush()
 
         assert group.pubid in service.groupids_readable_by(user)
 
     def test_groupids_readable_by_includes_memberships(self, service, db_session, factories):
         user = factories.User()
-        db_session.add(user)
 
         group = factories.Group(readable_by=ReadableBy.members)
         group.members.append(user)

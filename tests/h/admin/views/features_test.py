@@ -100,7 +100,6 @@ def test_cohorts_edit_add_user(factories, pyramid_request):
     user = factories.User(username='benoit')
     cohort = models.FeatureCohort(name='FractalCohort')
 
-    pyramid_request.db.add(user)
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
@@ -117,7 +116,6 @@ def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
     user = factories.User(username='benoit', authority='foo.org')
     cohort = models.FeatureCohort(name='FractalCohort')
 
-    pyramid_request.db.add(user)
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
@@ -135,7 +133,6 @@ def test_cohorts_edit_remove_user(factories, pyramid_request):
     cohort = models.FeatureCohort(name='FractalCohort')
     cohort.members.append(user)
 
-    pyramid_request.db.add(user)
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
@@ -167,8 +164,6 @@ def test_cohorts_edit_with_users(factories, pyramid_request):
     cohort.members.append(user1)
     cohort.members.append(user2)
 
-    pyramid_request.db.add(user1)
-    pyramid_request.db.add(user2)
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 

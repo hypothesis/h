@@ -66,7 +66,7 @@ def test_users_index_strips_spaces(models, pyramid_request):
 
 @users_index_fixtures
 def test_users_index_queries_annotation_count_by_userid(models, factories, pyramid_request, annotation_stats_service):
-    user = factories.User(username='bob')
+    user = factories.User.build(username='bob')
     models.User.get_by_username.return_value = user
     annotation_stats_service.user_annotation_counts.return_value = {'total': 8}
 
@@ -95,8 +95,8 @@ def test_users_index_no_user_found(models, pyramid_request):
 @users_index_fixtures
 def test_users_index_user_found(models, pyramid_request, db_session, factories):
     pyramid_request.params = {"username": "bob", "authority": "foo.org"}
-    user = models.User.get_by_username.return_value = factories.User(username='bob',
-                                                                     authority='foo.org')
+    user = factories.User.build(username='bob', authority='foo.org')
+    models.User.get_by_username.return_value = user
 
     result = views.users_index(pyramid_request)
 

@@ -94,7 +94,6 @@ class TestUserService(object):
                                 authority='example.com',
                                 password='mirthespassword',
                                 inactive=True)]
-        db_session.add_all(users)
         db_session.flush()
         return users
 

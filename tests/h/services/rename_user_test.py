@@ -19,7 +19,6 @@ class TestRenameUserService(object):
 
     def test_check_raises_when_new_userid_is_already_taken(self, service, user, db_session, factories):
         user_taken = factories.User(username='panda')
-        db_session.add(user_taken)
         db_session.flush()
 
         with pytest.raises(UserRenameError) as err:
@@ -91,7 +90,6 @@ class TestRenameUserService(object):
     @pytest.fixture
     def user(self, factories, db_session):
         user = factories.User(username='giraffe')
-        db_session.add(user)
         db_session.flush()
         return user
 

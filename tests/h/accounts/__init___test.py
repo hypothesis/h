@@ -13,7 +13,7 @@ class TestAuthenticatedUser(object):
                                         pyramid_request,
                                         user_service):
         pyramid_config.testing_securitypolicy('userid')
-        user_service.fetch.return_value = factories.User()
+        user_service.fetch.return_value = factories.User.build()
 
         accounts.authenticated_user(pyramid_request)
 
@@ -42,7 +42,7 @@ class TestAuthenticatedUser(object):
                           pyramid_request,
                           user_service):
         pyramid_config.testing_securitypolicy('userid')
-        user = user_service.fetch.return_value = factories.User()
+        user = user_service.fetch.return_value = factories.User.build()
 
         result = accounts.authenticated_user(pyramid_request)
 

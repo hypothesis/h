@@ -23,7 +23,7 @@ class TestUserFactory(object):
             user_factory["does_not_exist"]
 
     def test_it_returns_users(self, factories, user_factory, user_service):
-        user_service.fetch.return_value = user = factories.User()
+        user_service.fetch.return_value = user = factories.User.build()
 
         assert user_factory[user.username] == user
 
@@ -264,7 +264,6 @@ class TestUserGetByEmail(object):
             'norma': factories.User(username='norma', email='norma@foo.org', authority='foo.org'),
             'meredith': factories.User(username='meredith', email='meredith@gmail.com', authority='example.com'),
         }
-        db_session.add_all(users.values())
         db_session.flush()
         return users
 
@@ -296,6 +295,5 @@ class TestUserGetByUsername(object):
             'norma': factories.User(username='norma', authority='foo.org'),
             'meredith': factories.User(username='meredith', authority='example.com'),
         }
-        db_session.add_all(users.values())
         db_session.flush()
         return users

@@ -122,7 +122,6 @@ class TestAdminCommand(object):
 
     def _user(self, db_session, factories, admin):
         user = factories.User(admin=admin)
-        db_session.add(user)
         db_session.flush()
         return user
 
