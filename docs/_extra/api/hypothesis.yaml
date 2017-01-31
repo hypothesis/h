@@ -25,9 +25,9 @@ info:
         GET /api
         Host: hypothes.is
         Accept: application/json
-        Authorization: Bearer 6879-31d62c13b0099456de5379de90f90395
+        Authorization: Bearer 6879-nUYZBzc15MsjDDicz-0xEaKBrVGGruwCHW9-p8BMqq4
 
-    (Replace `6879-31d62c13b0099456de5379de90f90395` with your own API token.)
+    (Replace `6879-nUYZBzc15MsjDDicz-0xEaKBrVGGruwCHW9-p8BMqq4` with your own API token.)
 
     ### Client credentials direct authorization
     The user creation API is intended for use by "third-party accounts" clients.
