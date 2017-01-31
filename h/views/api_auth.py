@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-from h.services.oauth import TOKEN_TTL
 from h.exceptions import OAuthTokenError
 from h.util.view import cors_json_view
 
@@ -22,7 +21,7 @@ def access_token(request):
     }
 
     if token.expires:
-        response['expires_in'] = TOKEN_TTL.total_seconds()
+        response['expires_in'] = token.ttl
 
     if token.refresh_token:
         response['refresh_token'] = token.refresh_token

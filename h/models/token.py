@@ -68,6 +68,20 @@ class Token(Base, mixins.Timestamps):
         """True if this token has expired, False otherwise."""
         return self.expires and datetime.datetime.utcnow() > self.expires
 
+    @property
+    def ttl(self):
+        """The amount of time from now until this token expires, in seconds."""
+        if not self.expires:
+            return None
+
+        now = datetime.datetime.utcnow()
+        ttl = self.expires - now
+        ttl_in_seconds = ttl.total_seconds()
+        # We truncate (rather than round) ttl_in_seconds to get an int.
+        # For example 2.3 beccomes 2, but 2.9 also becomes 2.
+        ttl_in_seconds_truncated = int(ttl_in_seconds)
+        return ttl_in_seconds_truncated
+
     @classmethod
     def get_dev_token_by_userid(cls, session, userid):
         return (session.query(cls)
