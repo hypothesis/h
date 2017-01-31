@@ -40,18 +40,14 @@ class TestAuthTokenService(object):
         assert result is None
 
     def test_validate_returns_legacy_client_token(self, svc):
-        token = text_type(jwt.encode({'aud': 'http://example.com',
-                                      'exp': self.time(1)},
-                                     key='secret'))
+        token = text_type(jwt.encode({'exp': self.time(1)}, key='secret'))
 
         result = svc.validate(token)
 
         assert isinstance(result, LegacyClientJWT)
 
     def test_validate_returns_none_for_invalid_legacy_client_token(self, svc):
-        token = text_type(jwt.encode({'aud': 'http://example.com',
-                                      'exp': self.time(-1)},
-                                     key='secret'))
+        token = text_type(jwt.encode({'exp': self.time(-1)}, key='secret'))
 
         result = svc.validate(token)
 
@@ -64,7 +60,7 @@ class TestAuthTokenService(object):
 
     @pytest.fixture
     def svc(self, db_session):
-        return AuthTokenService(db_session, 'secret', 'http://example.com')
+        return AuthTokenService(db_session, 'secret')
 
     def time(self, days_delta=0):
         return datetime.datetime.utcnow() + datetime.timedelta(days=days_delta)
@@ -80,23 +76,12 @@ class TestAuthTokenServiceFactory(object):
     def test_it_passes_session(self, pyramid_request, mocked_service):
         auth_token_service_factory(None, pyramid_request)
 
-        mocked_service.assert_called_once_with(pyramid_request.db,
-                                               mock.ANY,
-                                               mock.ANY)
+        mocked_service.assert_called_once_with(pyramid_request.db, mock.ANY)
 
     def test_it_passes_client_secret(self, pyramid_request, mocked_service):
         auth_token_service_factory(None, pyramid_request)
 
-        mocked_service.assert_called_once_with(mock.ANY,
-                                               'the-secret',
-                                               mock.ANY)
-
-    def test_it_passes_host_url(self, pyramid_request, mocked_service):
-        auth_token_service_factory(None, pyramid_request)
-
-        mocked_service.assert_called_once_with(mock.ANY,
-                                               mock.ANY,
-                                               pyramid_request.host_url)
+        mocked_service.assert_called_once_with(mock.ANY, 'the-secret')
 
     @pytest.fixture
     def pyramid_settings(self, pyramid_settings):

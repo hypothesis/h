@@ -9,10 +9,9 @@ from h.auth.tokens import LegacyClientJWT, Token
 
 
 class AuthTokenService(object):
-    def __init__(self, session, client_secret, host_url):
+    def __init__(self, session, client_secret):
         self._session = session
         self._client_secret = client_secret
-        self._host_url = host_url
 
         self._validate_cache = {}
 
@@ -48,16 +47,16 @@ class AuthTokenService(object):
             return token
 
         # If we've got this far it's possible the token is a legacy client JWT.
-        return _maybe_jwt(token_str, self._client_secret, self._host_url)
+        return _maybe_jwt(token_str, self._client_secret)
 
 
 def auth_token_service_factory(context, request):
     client_secret = request.registry.settings['h.client_secret']
-    return AuthTokenService(request.db, client_secret, request.host_url)
+    return AuthTokenService(request.db, client_secret)
 
 
-def _maybe_jwt(token, client_secret, audience):
+def _maybe_jwt(token, client_secret):
     try:
-        return LegacyClientJWT(token, key=client_secret, audience=audience)
+        return LegacyClientJWT(token, key=client_secret)
     except jwt.InvalidTokenError:
         return None
