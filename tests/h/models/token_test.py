@@ -40,7 +40,7 @@ class TestToken(object):
         assert access_token.refresh_token in security.token_urlsafe.side_effect.generated_tokens
 
     def test_expired_is_false_if_expires_is_in_the_future(self):
-        expires = datetime.datetime.now() + datetime.timedelta(hours=1)
+        expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         token = Token(expires=expires)
 
         assert not token.expired
@@ -51,7 +51,7 @@ class TestToken(object):
         assert not token.expired
 
     def test_expired_is_true_if_expires_is_in_the_past(self):
-        expires = datetime.datetime.now() - datetime.timedelta(hours=1)
+        expires = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
         token = Token(expires=expires)
 
         assert token.expired
