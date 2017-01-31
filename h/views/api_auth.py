@@ -19,8 +19,10 @@ def access_token(request):
     response = {
         'access_token': token.value,
         'token_type': 'bearer',
-        'expires_in': TOKEN_TTL.total_seconds(),
     }
+
+    if token.expires:
+        response['expires_in'] = TOKEN_TTL.total_seconds()
 
     if token.refresh_token:
         response['refresh_token'] = token.refresh_token
