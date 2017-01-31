@@ -142,6 +142,42 @@ class TestTokenAuthenticationPolicy(object):
 
         assert result is None
 
+    def test_unauthenticated_userid_returns_userid_from_query_params_token(self, pyramid_request):
+        """When the path is `/ws` then we look into the query string parameters as well."""
+
+        policy = TokenAuthenticationPolicy()
+        pyramid_request.GET['access_token'] = 'valid123'
+        pyramid_request.path = '/ws'
+
+        result = policy.unauthenticated_userid(pyramid_request)
+
+        assert result == 'acct:foo@example.com'
+
+    def test_unauthenticated_userid_returns_none_for_invalid_query_param_token(self, pyramid_request):
+        """When the path is `/ws` but the token is invalid, it should still return None."""
+
+        policy = TokenAuthenticationPolicy()
+        pyramid_request.GET['access_token'] = 'expired'
+        pyramid_request.path = '/ws'
+
+        result = policy.unauthenticated_userid(pyramid_request)
+
+        assert result is None
+
+    def test_unauthenticated_userid_skips_query_param_for_non_ws_requests(self, pyramid_request):
+        """
+        When we have a valid token in the `access_token` query param, but it's
+        not a request to /ws, then we should ignore this access token.
+        """
+
+        policy = TokenAuthenticationPolicy()
+        pyramid_request.GET['access_token'] = 'valid123'
+        pyramid_request.path = '/api'
+
+        result = policy.unauthenticated_userid(pyramid_request)
+
+        assert result is None
+
     def test_authenticated_userid_uses_callback(self, pyramid_request):
         def callback(userid, request):
             return None
