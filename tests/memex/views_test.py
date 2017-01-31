@@ -11,7 +11,6 @@ from memex import views
 from memex.resources import AnnotationResource
 from memex.schemas import ValidationError
 from memex.search.core import SearchResult
-from memex.views import api_config
 
 
 class TestError(object):
