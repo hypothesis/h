@@ -19,7 +19,7 @@ class TestAPI(object):
         res = app.get('/api/annotations/' + annotation.id + '.jsonld')
         data = res.json
         assert data['@context'] == 'http://www.w3.org/ns/anno.jsonld'
-        assert data['id'] == 'http://localhost/a/' + annotation.id
+        assert data['id'] == 'http://example.com/a/' + annotation.id
 
     def test_annotation_write_unauthorized_group(self, app, user_with_token, non_writeable_group):
         """
@@ -64,7 +64,7 @@ class TestAPI(object):
 
 @pytest.fixture
 def annotation(db_session, factories):
-    ann =  factories.Annotation(userid='acct:testuser@localhost',
+    ann =  factories.Annotation(userid='acct:testuser@example.com',
                                 groupid='__world__',
                                 shared=True)
     db_session.commit()
