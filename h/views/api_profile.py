@@ -5,11 +5,13 @@ from __future__ import unicode_literals
 from pyramid import security
 
 from h import session as h_session
-from h.util.view import json_view
+from memex.views import api_config
 
 
-@json_view(route_name='api.profile',
-           request_method='GET',
-           effective_principals=security.Authenticated)
+@api_config(route_name='api.profile',
+            request_method='GET',
+            effective_principals=security.Authenticated,
+            link_name='profile',
+            description="Fetch the user's profile")
 def profile(request):
     return h_session.profile(request)
