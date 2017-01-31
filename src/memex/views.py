@@ -66,35 +66,27 @@ class PayloadError(APIError):
         )
 
 
-def api_config(link_name=None, description=None, **settings):
+def add_api_view(config, view, link_name=None, description=None, **settings):
+
     """
-    A view configuration decorator with defaults.
+    Add a view configuration for an API view.
 
-    JSON in and out. CORS with tokens and client id but no cookie.
+    This adds a new view using `config.add_view` with appropriate defaults for
+    API methods (JSON in & out, CORS support). Additionally if `link_name` is
+    specified it adds the view to the list of views returned by the `api.index`
+    route.
 
-    :param link_name: The dotted path to the metadata for this view in the
-                      `api.index` route output.
-    :param description: Description of the view included in the `api.index`
-                        route output.
+    :param config: The Pyramid `Configurator`
+    :param view: The view callable
+    :param link_name: Dotted path of the metadata for this route in the output
+                      of the `api.index` view
+    :param description: Description of the view to use in the `api.index` view
+    :param settings: Arguments to pass on to `config.add_view`
     """
 
     # Save the initial request method here before we add others (eg. OPTIONS)
     # later for CORS support.
     initial_request_method = settings.get('request_method', 'GET')
-
-    # Callback which adds the view's metadata to the list of API links returned
-    # by the /api index root
-    def register_api_link(context, name, ob):
-        link = {'name': link_name,
-                'method': initial_request_method,
-                'route_name': settings.get('route_name'),
-                'description': description,
-                }
-
-        registry = context.config.registry
-        if not hasattr(registry, 'api_links'):
-            registry.api_links = []
-        registry.api_links.append(link)
 
     settings.setdefault('accept', 'application/json')
     settings.setdefault('renderer', 'json')
@@ -107,12 +99,41 @@ def api_config(link_name=None, description=None, **settings):
         request_method = ('DELETE', 'GET', 'HEAD', 'POST', 'PUT',)
     settings['request_method'] = request_method + ('OPTIONS',)
 
-    def config(wrapped):
-        if link_name:
-            venusian.attach(wrapped, register_api_link, category='pyramid')
-        return view_config(**settings)(wrapped)
+    if link_name:
+        link = {'name': link_name,
+                'method': initial_request_method,
+                'route_name': settings.get('route_name'),
+                'description': description,
+                }
 
-    return config
+        registry = config.registry
+        if not hasattr(registry, 'api_links'):
+            registry.api_links = []
+        registry.api_links.append(link)
+
+    config.add_view(view=view, **settings)
+
+
+def api_config(link_name=None, description=None, **settings):
+    """
+    A view configuration decorator for API views.
+
+    This is similar to Pyramid's `view_config` except that it uses
+    `add_api_view` to register the view instead of `context.add_view`.
+    """
+
+    def callback(context, name, ob):
+        add_api_view(context.config,
+                     view=ob,
+                     link_name=link_name,
+                     description=description,
+                     **settings)
+
+    def wrapper(wrapped):
+        venusian.attach(wrapped, callback, category='pyramid')
+        return wrapped
+
+    return wrapper
 
 
 @api_config(context=APIError)

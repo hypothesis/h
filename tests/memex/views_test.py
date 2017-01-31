@@ -38,85 +38,71 @@ class TestError(object):
         assert pyramid_request.response.status_code == 400
 
 
-@pytest.mark.usefixtures('view_config')
-class TestApiConfigDecorator(object):
-    def test_it_sets_accept_setting(self, view):
-        settings = views.api_config()(view)
-        assert settings['accept'] == 'application/json'
+class TestAddApiView(object):
+    def test_it_sets_accept_setting(self, pyramid_config, view):
+        views.add_api_view(pyramid_config, view)
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['accept'] == 'application/json'
 
-    def test_it_allows_accept_setting_override(self, view):
-        settings = views.api_config(accept='application/xml')(view)
-        assert settings['accept'] == 'application/xml'
+    def test_it_allows_accept_setting_override(self, pyramid_config, view):
+        views.add_api_view(pyramid_config, view, accept='application/xml')
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['accept'] == 'application/xml'
 
-    def test_it_sets_renderer_setting(self, view):
-        settings = views.api_config()(view)
-        assert settings['renderer'] == 'json'
+    def test_it_sets_renderer_setting(self, pyramid_config, view):
+        views.add_api_view(pyramid_config, view)
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['renderer'] == 'json'
 
-    def test_it_allows_renderer_setting_override(self, view):
-        settings = views.api_config(renderer='xml')(view)
-        assert settings['renderer'] == 'xml'
+    def test_it_allows_renderer_setting_override(self, pyramid_config, view):
+        views.add_api_view(pyramid_config, view, renderer='xml')
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['renderer'] == 'xml'
 
-    def test_it_sets_cors_decorator(self, view):
-        settings = views.api_config()(view)
-        assert settings['decorator'] == views.cors_policy
+    def test_it_sets_cors_decorator(self, pyramid_config, view):
+        views.add_api_view(pyramid_config, view)
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['decorator'] == views.cors_policy
 
-    def test_it_allows_decorator_override(self, view):
+    def test_it_allows_decorator_override(self, pyramid_config, view):
         decorator = mock.Mock()
-        settings = views.api_config(decorator=decorator)(view)
-        assert settings['decorator'] == decorator
+        views.add_api_view(pyramid_config, view, decorator=decorator)
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['decorator'] == decorator
 
-    def test_it_adds_OPTIONS_to_allowed_request_methods(self, view):
-        settings = views.api_config(request_method='DELETE')(view)
-        assert settings['request_method'] == ('DELETE', 'OPTIONS')
+    def test_it_adds_OPTIONS_to_allowed_request_methods(self, pyramid_config, view):
+        views.add_api_view(pyramid_config, view, request_method='DELETE')
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['request_method'] == ('DELETE', 'OPTIONS')
 
-    def test_it_adds_all_request_methods_when_not_defined(self, view):
-        settings = views.api_config()(view)
-        assert settings['request_method'] == (
+    def test_it_adds_all_request_methods_when_not_defined(self, pyramid_config, view):
+        views.add_api_view(pyramid_config, view)
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['request_method'] == (
             'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS')
 
-    def test_it_adds_api_links_to_registry(self):
-        config = Configurator()
-        config.scan('tests.memex.views_test')
+    def test_it_adds_api_links_to_registry(self, pyramid_config, view):
 
-        assert config.registry.api_links == [{
+        views.add_api_view(pyramid_config, view=view,
+                           link_name='thing.read',
+                           route_name='thing.read',
+                           description='Fetch a thing')
+
+        assert pyramid_config.registry.api_links == [{
             'name': 'thing.read',
             'description': 'Fetch a thing',
             'method': 'GET',
             'route_name': 'thing.read',
-        }, {
-            'name': 'thing.create',
-            'description': 'Create a thing',
-            'method': 'POST',
-            'route_name': 'thing.create',
         }]
 
     @pytest.fixture
-    def view_config(self, patch):
-        class DummyViewConfig(object):
-            def __init__(self, **settings):
-                self.settings = settings
-
-            def __call__(self, wrapped):
-                return self.settings
-        json_view = patch('memex.views.view_config', new=DummyViewConfig, autospec=None)
-        return json_view
+    def pyramid_config(self, pyramid_config):
+        pyramid_config.add_view = mock.Mock()
+        return pyramid_config
 
     @pytest.fixture
     def view(self):
         return mock.Mock()
-
-    @api_config(route_name='thing.read',
-                link_name='thing.read',
-                description='Fetch a thing')
-    def read_thing():
-        return {}
-
-    @api_config(route_name='thing.create',
-                link_name='thing.create',
-                description='Create a thing',
-                request_method='POST')
-    def create_thing():
-        return {}
 
 
 class TestIndex(object):
