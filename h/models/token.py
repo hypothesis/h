@@ -66,7 +66,7 @@ class Token(Base, mixins.Timestamps):
     @property
     def expired(self):
         """True if this token has expired, False otherwise."""
-        return self.expires and datetime.datetime.now() > self.expires
+        return self.expires and datetime.datetime.utcnow() > self.expires
 
     @classmethod
     def get_dev_token_by_userid(cls, session, userid):
