@@ -3,6 +3,7 @@
 import mock
 import pytest
 
+from pyramid.config import Configurator
 from pyramid import testing
 
 from memex import presenters
@@ -10,6 +11,7 @@ from memex import views
 from memex.resources import AnnotationResource
 from memex.schemas import ValidationError
 from memex.search.core import SearchResult
+from memex.views import api_config
 
 
 class TestError(object):
@@ -38,52 +40,95 @@ class TestError(object):
 
 @pytest.mark.usefixtures('view_config')
 class TestApiConfigDecorator(object):
-    def test_it_sets_accept_setting(self):
-        settings = views.api_config()
+    def test_it_sets_accept_setting(self, view):
+        settings = views.api_config()(view)
         assert settings['accept'] == 'application/json'
 
-    def test_it_allows_accept_setting_override(self):
-        settings = views.api_config(accept='application/xml')
+    def test_it_allows_accept_setting_override(self, view):
+        settings = views.api_config(accept='application/xml')(view)
         assert settings['accept'] == 'application/xml'
 
-    def test_it_sets_renderer_setting(self):
-        settings = views.api_config()
+    def test_it_sets_renderer_setting(self, view):
+        settings = views.api_config()(view)
         assert settings['renderer'] == 'json'
 
-    def test_it_allows_renderer_setting_override(self):
-        settings = views.api_config(renderer='xml')
+    def test_it_allows_renderer_setting_override(self, view):
+        settings = views.api_config(renderer='xml')(view)
         assert settings['renderer'] == 'xml'
 
-    def test_it_sets_cors_decorator(self):
-        settings = views.api_config()
+    def test_it_sets_cors_decorator(self, view):
+        settings = views.api_config()(view)
         assert settings['decorator'] == views.cors_policy
 
-    def test_it_allows_decorator_override(self):
+    def test_it_allows_decorator_override(self, view):
         decorator = mock.Mock()
-        settings = views.api_config(decorator=decorator)
+        settings = views.api_config(decorator=decorator)(view)
         assert settings['decorator'] == decorator
 
-    def test_it_adds_OPTIONS_to_allowed_request_methods(self):
-        settings = views.api_config(request_method='DELETE')
+    def test_it_adds_OPTIONS_to_allowed_request_methods(self, view):
+        settings = views.api_config(request_method='DELETE')(view)
         assert settings['request_method'] == ('DELETE', 'OPTIONS')
 
-    def test_it_adds_all_request_methods_when_not_defined(self):
-        settings = views.api_config()
+    def test_it_adds_all_request_methods_when_not_defined(self, view):
+        settings = views.api_config()(view)
         assert settings['request_method'] == (
             'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS')
 
+    def test_it_adds_api_links_to_registry(self):
+        config = Configurator()
+        config.scan('tests.memex.views_test')
+
+        assert config.registry.api_links == [{
+            'name': 'thing.read',
+            'description': 'Fetch a thing',
+            'method': 'GET',
+            'route_name': 'thing.read',
+        }, {
+            'name': 'thing.create',
+            'description': 'Create a thing',
+            'method': 'POST',
+            'route_name': 'thing.create',
+        }]
+
     @pytest.fixture
     def view_config(self, patch):
-        def _return_kwargs(**kwargs):
-            return kwargs
-        json_view = patch('memex.views.view_config')
-        json_view.side_effect = _return_kwargs
+        class DummyViewConfig(object):
+            def __init__(self, **settings):
+                self.settings = settings
+
+            def __call__(self, wrapped):
+                return self.settings
+        json_view = patch('memex.views.view_config', new=DummyViewConfig, autospec=None)
         return json_view
+
+    @pytest.fixture
+    def view(self):
+        return mock.Mock()
+
+    @api_config(route_name='thing.read',
+                link_name='thing.read',
+                description='Fetch a thing')
+    def read_thing():
+        return {}
+
+    @api_config(route_name='thing.create',
+                link_name='thing.create',
+                description='Create a thing',
+                request_method='POST')
+    def create_thing():
+        return {}
 
 
 class TestIndex(object):
 
     def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):
+
+        # Scan `memex.views` for API link metadata specified in @api_config
+        # declarations.
+        config = Configurator()
+        config.scan('memex.views')
+        pyramid_request.registry.api_links = config.registry.api_links
+
         pyramid_config.add_route('api.search', '/dummy/search')
         pyramid_config.add_route('api.annotations', '/dummy/annotations')
         pyramid_config.add_route('api.annotation', '/dummy/annotations/:id')

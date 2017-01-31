@@ -20,6 +20,7 @@ from pyramid import i18n
 from pyramid import security
 from pyramid.view import view_config
 from sqlalchemy.orm import subqueryload
+import venusian
 
 from memex import cors
 from memex import models
@@ -65,12 +66,36 @@ class PayloadError(APIError):
         )
 
 
-def api_config(**settings):
+def api_config(link_name=None, description=None, **settings):
     """
     A view configuration decorator with defaults.
 
     JSON in and out. CORS with tokens and client id but no cookie.
+
+    :param link_name: The dotted path to the metadata for this view in the
+                      `api.index` route output.
+    :param description: Description of the view included in the `api.index`
+                        route output.
     """
+
+    # Save the initial request method here before we add others (eg. OPTIONS)
+    # later for CORS support.
+    initial_request_method = settings.get('request_method', 'GET')
+
+    # Callback which adds the view's metadata to the list of API links returned
+    # by the /api index root
+    def register_api_link(context, name, ob):
+        link = {'name': link_name,
+                'method': initial_request_method,
+                'route_name': settings.get('route_name'),
+                'description': description,
+                }
+
+        registry = context.config.registry
+        if not hasattr(registry, 'api_links'):
+            registry.api_links = []
+        registry.api_links.append(link)
+
     settings.setdefault('accept', 'application/json')
     settings.setdefault('renderer', 'json')
     settings.setdefault('decorator', cors_policy)
@@ -82,7 +107,12 @@ def api_config(**settings):
         request_method = ('DELETE', 'GET', 'HEAD', 'POST', 'PUT',)
     settings['request_method'] = request_method + ('OPTIONS',)
 
-    return view_config(**settings)
+    def config(wrapped):
+        if link_name:
+            venusian.attach(wrapped, register_api_link, category='pyramid')
+        return view_config(**settings)(wrapped)
+
+    return config
 
 
 @api_config(context=APIError)
@@ -103,45 +133,32 @@ def index(context, request):
 
     Clients may use this to discover endpoints for the API.
     """
-    # Because request.route_url urlencodes parameters, we can't just pass in
-    # ":id" as the id here.
-    annotation_url = request.route_url('api.annotation', id='123')\
-                            .replace('123', ':id')
+
+    api_links = request.registry.api_links
+
+    links = {}
+    for link in api_links:
+        method_info = {
+            'method': link['method'],
+
+            # For routes that include an id, generate a route URL with `:id` in
+            # the output. We can't just use `:id` as the `id` param value because
+            # `route_url` URL-encodes parameters.
+            'url': request.route_url(link['route_name'],
+                                     id='_id_').replace('_id_', ':id'),
+            'desc': link['description'],
+        }
+        _set_at_path(links, link['name'].split('.'), method_info)
+
     return {
         'message': "Annotator Store API",
-        'links': {
-            'annotation': {
-                'create': {
-                    'method': 'POST',
-                    'url': request.route_url('api.annotations'),
-                    'desc': "Create a new annotation"
-                },
-                'read': {
-                    'method': 'GET',
-                    'url': annotation_url,
-                    'desc': "Get an existing annotation"
-                },
-                'update': {
-                    'method': 'PUT',
-                    'url': annotation_url,
-                    'desc': "Update an existing annotation"
-                },
-                'delete': {
-                    'method': 'DELETE',
-                    'url': annotation_url,
-                    'desc': "Delete an annotation"
-                }
-            },
-            'search': {
-                'method': 'GET',
-                'url': request.route_url('api.search'),
-                'desc': 'Basic search API'
-            },
-        }
+        'links': links,
     }
 
 
-@api_config(route_name='api.search')
+@api_config(route_name='api.search',
+            link_name='search',
+            description='Search for annotations')
 def search(request):
     """Search the database for annotations matching with the given query."""
     params = request.params.copy()
@@ -165,7 +182,9 @@ def search(request):
 
 @api_config(route_name='api.annotations',
             request_method='POST',
-            effective_principals=security.Authenticated)
+            effective_principals=security.Authenticated,
+            link_name='annotation.create',
+            description='Create an annotation')
 def create(request):
     """Create an annotation from the POST payload."""
     schema = schemas.CreateAnnotationSchema(request)
@@ -184,7 +203,9 @@ def create(request):
 
 @api_config(route_name='api.annotation',
             request_method='GET',
-            permission='read')
+            permission='read',
+            link_name='annotation.read',
+            description='Fetch an annotation')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     presenter = AnnotationJSONPresenter(context)
@@ -204,7 +225,9 @@ def read_jsonld(context, request):
 
 @api_config(route_name='api.annotation',
             request_method='PUT',
-            permission='update')
+            permission='update',
+            link_name='annotation.update',
+            description='Update an annotation')
 def update(context, request):
     """Update the specified annotation with data from the PUT payload."""
     schema = schemas.UpdateAnnotationSchema(request,
@@ -227,7 +250,9 @@ def update(context, request):
 
 @api_config(route_name='api.annotation',
             request_method='DELETE',
-            permission='delete')
+            permission='delete',
+            link_name='annotation.delete',
+            description='Delete an annotation')
 def delete(context, request):
     """Delete the specified annotation."""
     storage.delete_annotation(request.db, context.annotation.id)
@@ -278,6 +303,24 @@ def _publish_annotation_event(request,
     """Publish an event to the annotations queue for this annotation action."""
     event = AnnotationEvent(request, annotation.id, action)
     request.notify_after_commit(event)
+
+
+def _set_at_path(dict_, path, value):
+    """
+    Set the value at a given `path` within a nested `dict`.
+
+    :param dict_: The root `dict` to update
+    :param path: List of path components
+    :param value: Value to assign
+    """
+    key = path[0]
+    if key not in dict_:
+        dict_[key] = {}
+
+    if len(path) == 1:
+        dict_[key] = value
+    else:
+        _set_at_path(dict_[key], path[1:], value)
 
 
 def includeme(config):
