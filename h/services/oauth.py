@@ -41,6 +41,7 @@ class OAuthService(object):
 
         verifiers = {
             'urn:ietf:params:oauth:grant-type:jwt-bearer': self._verify_jwt_bearer,
+            'refresh_token': self._verify_refresh_token,
         }
 
         try:
@@ -112,6 +113,33 @@ class OAuthService(object):
                                   'invalid_grant')
 
         return (user, authclient)
+
+    def _verify_refresh_token(self, body):
+        refresh_token = body.get('refresh_token')
+
+        if not refresh_token:
+            raise OAuthTokenError('required refresh_token parameter is missing',
+                                  'invalid_request')
+
+        if type(refresh_token) != text_type:
+            raise OAuthTokenError('refresh_token is invalid', 'invalid_refresh')
+
+        token = (self.session.query(models.Token)
+                 .filter_by(refresh_token=refresh_token)
+                 .order_by(models.Token.created.desc())
+                 .first())
+
+        if not token:
+            raise OAuthTokenError('refresh_token is invalid', 'invalid_refresh')
+
+        if token.expired:
+            raise OAuthTokenError('refresh_token has expired', 'invalid_refresh')
+
+        user = self.usersvc.fetch(token.userid)
+        if not user:
+            raise OAuthTokenError('user no longer exists', 'invalid_refresh')
+
+        return (user, token.authclient)
 
     def create_token(self, user, authclient):
         """

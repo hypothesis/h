@@ -269,6 +269,119 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
         return timegm(timestamp.utctimetuple())
 
 
+@pytest.mark.usefixtures('token')
+class TestOAuthServiceVerifyRefreshTokenRequest(object):
+    """Tests for verifying refresh token requests with OAuthService."""
+
+    def test_it_raises_it_refresh_token_is_missing(self, refresh_token_body, svc):
+        del refresh_token_body['refresh_token']
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_request'
+        assert 'refresh_token parameter is missing' in exc.value.message
+
+    def test_it_raises_it_refresh_token_not_a_string(self, refresh_token_body, svc):
+        refresh_token_body['refresh_token'] = 123
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'refresh_token is invalid' in exc.value.message
+
+    def test_it_raises_if_the_refresh_token_is_wrong(self, refresh_token_body, svc):
+        """It raises if refresh_token doesn't match a token in the db."""
+        refresh_token_body['refresh_token'] = 'wrong'
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'refresh_token is invalid' in exc.value.message
+
+    def test_it_raises_if_the_refresh_token_has_expired(self, refresh_token_body, svc, token):
+        token.expires = datetime.utcnow() - timedelta(hours=1)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'refresh_token has expired' in exc.value.message
+
+    def test_it_raises_if_the_refresh_tokens_user_does_not_exist(self, refresh_token_body, svc, user_service):
+        user_service.fetch.side_effect = lambda userid: None
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'user no longer exists' in exc.value.message
+
+    def test_it_fetches_the_user(self, refresh_token_body, svc, token, user_service):
+        svc.verify_token_request(refresh_token_body)
+
+        user_service.fetch.assert_called_once_with(token.userid)
+
+    def test_it_returns_the_user(self, refresh_token_body, svc, user_service):
+        user, _ = svc.verify_token_request(refresh_token_body)
+
+        assert user == user_service.fetch.return_value
+
+    def test_it_returns_the_authclient(self, refresh_token_body, svc, token):
+        _, authclient = svc.verify_token_request(refresh_token_body)
+
+        assert authclient == token.authclient
+
+    @pytest.fixture
+    def refresh_token(self):
+        """The string value of the refresh_token used by these tests."""
+        return 'foo'
+
+    @pytest.fixture
+    def refresh_token_body(self, refresh_token):
+        """
+        Return the body of an OAuth refresh_token request.
+
+        The refresh_token in this request body is the same as that of the
+        refresh_token fixture.
+
+        The request body also contains the correct grant_type for a
+        refresh_token request.
+
+        """
+        return {
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+        }
+
+    @pytest.fixture
+    def svc(self, pyramid_request, db_session, user_service):
+        return oauth.OAuthService(db_session, user_service, pyramid_request.domain)
+
+    @pytest.fixture
+    def token(self, factories, refresh_token):
+        """
+        Add a Token model to the database and return it.
+
+        The token's refresh_token value is the same as the refresh_token
+        fixture.
+
+        """
+        return factories.Token(refresh_token=refresh_token)
+
+    @pytest.fixture
+    def user(self, token):
+        """A mock user whose userid is the same as the token fixture's userid."""
+        return mock.Mock(spec_set=['userid'], userid=token.userid)
+
+    @pytest.fixture
+    def user_service(self, user, user_service):
+        user_service.fetch.return_value = user
+        return user_service
+
+
 class TestOAuthServiceCreateToken(object):
     """ Tests for ``OAuthService.create_token`` """
 
