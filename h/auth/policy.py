@@ -78,8 +78,13 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :returns: the userid authenticated for the passed request or None
         :rtype: unicode or None
         """
-        token = getattr(request, 'auth_token', None)
-        if token is None or not token.is_valid():
+        token_str = getattr(request, 'auth_token', None)
+        if token_str is None:
+            return None
+
+        svc = request.find_service(name='auth_token')
+        token = svc.validate(token_str)
+        if token is None:
             return None
 
         return token.userid

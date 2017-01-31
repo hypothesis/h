@@ -108,6 +108,7 @@ class TestAuthenticationPolicy(object):
         assert result == self.api_policy.forget.return_value
 
 
+@pytest.mark.usefixtures('token_service')
 class TestTokenAuthenticationPolicy(object):
     def test_remember_does_nothing(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
@@ -124,38 +125,38 @@ class TestTokenAuthenticationPolicy(object):
 
         assert policy.unauthenticated_userid(pyramid_request) is None
 
-    def test_unauthenticated_userid_returns_userid_from_token(self, fake_token, pyramid_request):
+    def test_unauthenticated_userid_returns_userid_from_token(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
-        pyramid_request.auth_token = fake_token
+        pyramid_request.auth_token = 'valid123'
 
         result = policy.unauthenticated_userid(pyramid_request)
 
         assert result == 'acct:foo@example.com'
 
-    def test_unauthenticated_userid_returns_none_if_token_invalid(self, pyramid_request):
+    def test_unauthenticated_userid_returns_none_if_token_invalid(self, pyramid_request, token_service):
         policy = TokenAuthenticationPolicy()
-        token = DummyToken(valid=False)
-        pyramid_request.auth_token = token
+        token_service.validate.return_value = None
+        pyramid_request.auth_token = 'abcd123'
 
         result = policy.unauthenticated_userid(pyramid_request)
 
         assert result is None
 
-    def test_authenticated_userid_uses_callback(self, fake_token, pyramid_request):
+    def test_authenticated_userid_uses_callback(self, pyramid_request):
         def callback(userid, request):
             return None
         policy = TokenAuthenticationPolicy(callback=callback)
-        pyramid_request.auth_token = fake_token
+        pyramid_request.auth_token = 'valid123'
 
         result = policy.authenticated_userid(pyramid_request)
 
         assert result is None
 
-    def test_effective_principals_uses_callback(self, fake_token, pyramid_request):
+    def test_effective_principals_uses_callback(self, pyramid_request):
         def callback(userid, request):
             return [userid + '.foo', 'group:donkeys']
         policy = TokenAuthenticationPolicy(callback=callback)
-        pyramid_request.auth_token = fake_token
+        pyramid_request.auth_token = 'valid123'
 
         result = policy.effective_principals(pyramid_request)
 
@@ -166,6 +167,16 @@ class TestTokenAuthenticationPolicy(object):
     @pytest.fixture
     def fake_token(self):
         return DummyToken()
+
+    @pytest.fixture
+    def token_service(self, pyramid_config, fake_token):
+        def validate(token_str):
+            if token_str == 'valid123':
+                return fake_token
+            return None
+        svc = mock.Mock(validate=mock.Mock(side_effect=validate))
+        pyramid_config.register_service(svc, name='auth_token')
+        return svc
 
 
 class DummyToken(object):
