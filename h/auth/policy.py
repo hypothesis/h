@@ -78,8 +78,18 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :returns: the userid authenticated for the passed request or None
         :rtype: unicode or None
         """
-        token = getattr(request, 'auth_token', None)
-        if token is None or not token.is_valid():
+        token_str = None
+        if _is_ws_request(request):
+            token_str = request.GET.get('access_token', None)
+        if token_str is None:
+            token_str = getattr(request, 'auth_token', None)
+
+        if token_str is None:
+            return None
+
+        svc = request.find_service(name='auth_token')
+        token = svc.validate(token_str)
+        if token is None:
             return None
 
         return token.userid
@@ -88,3 +98,7 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
 def _is_api_request(request):
     return (request.path.startswith('/api') and
             request.path not in ['/api/token', '/api/badge'])
+
+
+def _is_ws_request(request):
+    return request.path == '/ws'
