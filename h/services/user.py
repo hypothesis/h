@@ -7,6 +7,8 @@ import sqlalchemy
 from h.models import Annotation, User
 from h import util
 
+UPDATE_PREFS_ALLOWED_KEYS = set(['show_sidebar_tutorial'])
+
 
 class LoginError(Exception):
     pass
@@ -109,6 +111,15 @@ class UserService(object):
             return user
 
         return None
+
+    def update_preferences(self, user, **kwargs):
+        invalid_keys = set(kwargs.keys()) - UPDATE_PREFS_ALLOWED_KEYS
+        if invalid_keys:
+            keys = ', '.join(sorted(invalid_keys))
+            raise TypeError("settings with keys %s are not allowed" % keys)
+
+        if 'show_sidebar_tutorial' in kwargs:
+            user.sidebar_tutorial_dismissed = not kwargs['show_sidebar_tutorial']
 
 
 def user_service_factory(context, request):
