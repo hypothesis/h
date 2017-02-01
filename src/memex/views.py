@@ -84,9 +84,12 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
     :param settings: Arguments to pass on to `config.add_view`
     """
 
-    # Save the initial request method here before we add others (eg. OPTIONS)
-    # later for CORS support.
-    initial_request_method = settings.get('request_method', 'GET')
+    # Get the HTTP method for use in the API links metadata
+    primary_method = settings.get('request_method', 'GET')
+    if isinstance(primary_method, tuple):
+        # If the view matches multiple methods, assume the first one is
+        # preferred
+        primary_method = primary_method[0]
 
     settings.setdefault('accept', 'application/json')
     settings.setdefault('renderer', 'json')
@@ -101,7 +104,7 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
 
     if link_name:
         link = {'name': link_name,
-                'method': initial_request_method,
+                'method': primary_method,
                 'route_name': settings.get('route_name'),
                 'description': description,
                 }
