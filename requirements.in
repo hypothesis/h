@@ -34,7 +34,6 @@ python-slugify < 1.2.0
 raven
 statsd
 unicodecsv
-venusian
 wsaccel
 ws4py
 zope.sqlalchemy
