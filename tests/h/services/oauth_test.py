@@ -16,215 +16,195 @@ from h.services.user import UserService
 from h._compat import text_type
 
 
-class TestOAuthServiceVerifyJWTBearer(object):
-    """ Tests for ``OAuthService.verify_jwt_bearer`` """
+class TestOAuthServiceVerifyJWTBearerRequest(object):
+    """Test for verifying jwt-bearer requests with OAuthService."""
 
-    def test_it_returns_the_user_and_authclient_from_the_jwt_token(self, svc, claims, authclient, user):
+    def test_it_returns_the_user_and_authclient_from_the_jwt_token(self, svc, authclient, jwt_bearer_body, user):
         expected_user = user
-        tok = self.jwt_token(claims, authclient.secret)
 
-        result = svc.verify_jwt_bearer(assertion=tok,
-                                       grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+        result = svc.verify_token_request(jwt_bearer_body)
 
         assert (expected_user, authclient) == result
 
-    def test_missing_grant_type(self, svc):
+    def test_missing_grant_type(self, svc, jwt_bearer_body):
+        del jwt_bearer_body['grant_type']
+
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion='jwt-token',
-                                  grant_type=None)
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'unsupported_grant_type'
         assert 'grant type is not supported' in exc.value.message
 
-    def test_unsupported_grant_type(self, svc):
+    def test_unsupported_grant_type(self, svc, jwt_bearer_body):
+        jwt_bearer_body['grant_type'] = 'authorization_code'
+
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion='jwt-token',
-                                  grant_type='authorization_code')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'unsupported_grant_type'
         assert 'grant type is not supported' in exc.value.message
 
-    def test_missing_assertion(self, svc):
+    def test_missing_assertion(self, svc, jwt_bearer_body):
+        del jwt_bearer_body['assertion']
+
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=None,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_request'
         assert 'assertion parameter is missing' in exc.value.message
 
-    def test_non_jwt_assertion(self, svc):
+    def test_non_jwt_assertion(self, svc, jwt_bearer_body):
+        jwt_bearer_body['assertion'] = 'bogus'
+
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion='bogus',
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT signature' in exc.value.message
 
-    def test_missing_jwt_issuer(self, svc, claims, authclient):
+    def test_missing_jwt_issuer(self, svc, claims, authclient, jwt_bearer_body):
         del claims['iss']
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is missing' in exc.value.message
 
-    def test_empty_jwt_issuer(self, svc, claims, authclient):
+    def test_empty_jwt_issuer(self, svc, claims, authclient, jwt_bearer_body):
         claims['iss'] = ''
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is missing' in exc.value.message
 
-    def test_missing_authclient_with_given_jwt_issuer(self, svc, claims, authclient, db_session):
+    def test_missing_authclient_with_given_jwt_issuer(self, svc, authclient, db_session, jwt_bearer_body):
         db_session.delete(authclient)
         db_session.flush()
 
-        tok = self.jwt_token(claims, authclient.secret)
-
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is invalid' in exc.value.message
 
-    def test_non_uuid_jwt_issuer(self, svc, claims, authclient, db_session):
+    def test_non_uuid_jwt_issuer(self, svc, claims, authclient, jwt_bearer_body):
         claims['iss'] = 'bogus'
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'issuer is invalid' in exc.value.message
 
-    def test_signed_with_different_secret(self, svc, claims):
-        tok = self.jwt_token(claims, 'different-secret')
+    def test_signed_with_different_secret(self, svc, claims, jwt_bearer_body):
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, 'different-secret')
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT signature' in exc.value.message
 
-    def test_signed_with_unsupported_algorithm(self, svc, claims, authclient):
-        tok = self.jwt_token(claims, authclient.secret, algorithm='HS512')
+    def test_signed_with_unsupported_algorithm(self, svc, claims, authclient, jwt_bearer_body):
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret, algorithm='HS512')
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT signature algorithm' in exc.value.message
 
-    def test_missing_jwt_audience(self, svc, claims, authclient):
+    def test_missing_jwt_audience(self, svc, claims, authclient, jwt_bearer_body):
         del claims['aud']
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'missing claim aud' in exc.value.message
 
-    def test_invalid_jwt_audience(self, svc, claims, authclient):
+    def test_invalid_jwt_audience(self, svc, claims, authclient, jwt_bearer_body):
         claims['aud'] = 'foobar.org'
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'invalid JWT audience' in exc.value.message
 
-    def test_jwt_not_before_in_future(self, svc, claims, authclient):
+    def test_jwt_not_before_in_future(self, svc, claims, authclient, jwt_bearer_body):
         claims['nbf'] = self.epoch(delta=timedelta(minutes=5))
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'not before is in the future' in exc.value.message
 
-    def test_jwt_expires_with_leeway_in_the_past(self, svc, claims, authclient):
+    def test_jwt_expires_with_leeway_in_the_past(self, svc, claims, authclient, jwt_bearer_body):
         claims['exp'] = self.epoch(delta=timedelta(minutes=-2))
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'token is expired' in exc.value.message
 
-    def test_jwt_issued_at_in_the_future(self, svc, claims, authclient):
+    def test_jwt_issued_at_in_the_future(self, svc, claims, authclient, jwt_bearer_body):
         claims['iat'] = self.epoch(delta=timedelta(minutes=2))
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'issued at is in the future' in exc.value.message
 
-    def test_missing_jwt_subject(self, svc, claims, authclient):
+    def test_missing_jwt_subject(self, svc, claims, authclient, jwt_bearer_body):
         del claims['sub']
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'subject is missing' in exc.value.message
 
-    def test_empty_jwt_subject(self, svc, claims, authclient):
+    def test_empty_jwt_subject(self, svc, claims, authclient, jwt_bearer_body):
         claims['sub'] = ''
-        tok = self.jwt_token(claims, authclient.secret)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'subject is missing' in exc.value.message
 
-    def test_user_not_found(self, svc, claims, authclient, user_service):
+    def test_user_not_found(self, svc, user_service, jwt_bearer_body):
         user_service.fetch.return_value = None
 
-        tok = self.jwt_token(claims, authclient.secret)
-
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'user with userid described in subject could not be found' in exc.value.message
 
-    def test_it_raises_when_client_authority_does_not_match_userid(self, svc, db_session, claims, authclient, user):
+    def test_it_raises_when_client_authority_does_not_match_userid(self, svc, db_session, user, jwt_bearer_body):
         user.authority = 'bogus-partner.org'
         db_session.flush()
 
-        claims['sub'] = user.userid
-        tok = self.jwt_token(claims, authclient.secret)
-
         with pytest.raises(OAuthTokenError) as exc:
-            svc.verify_jwt_bearer(assertion=tok,
-                                  grant_type='urn:ietf:params:oauth:grant-type:jwt-bearer')
+            svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
         assert 'authenticated client and JWT subject authorities do not match' in exc.value
@@ -257,6 +237,25 @@ class TestOAuthServiceVerifyJWTBearer(object):
         user_service.fetch.return_value = user
         return user
 
+    @pytest.fixture
+    def jwt_bearer_body(self, claims, authclient):
+        """
+        Return the body of an OAuth jwt-bearer request.
+
+        The JWT assertion in this request body contains the claims from
+        the claims fixture (including the userid from the user fixture
+        and the authclient from the authclient fixture) signed using the
+        authclient secret from the authclient fixture.
+
+        The request body also contains the correct grant_type for a
+        jwt-bearer request.
+
+        """
+        return {
+         'assertion': self.jwt_token(claims, authclient.secret),
+         'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        }
+
     def jwt_token(self, claims, secret, algorithm='HS256'):
         return text_type(jwt.encode(claims, secret, algorithm=algorithm))
 
@@ -268,6 +267,119 @@ class TestOAuthServiceVerifyJWTBearer(object):
             timestamp = timestamp + delta
 
         return timegm(timestamp.utctimetuple())
+
+
+@pytest.mark.usefixtures('token')
+class TestOAuthServiceVerifyRefreshTokenRequest(object):
+    """Tests for verifying refresh token requests with OAuthService."""
+
+    def test_it_raises_it_refresh_token_is_missing(self, refresh_token_body, svc):
+        del refresh_token_body['refresh_token']
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_request'
+        assert 'refresh_token parameter is missing' in exc.value.message
+
+    def test_it_raises_it_refresh_token_not_a_string(self, refresh_token_body, svc):
+        refresh_token_body['refresh_token'] = 123
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'refresh_token is invalid' in exc.value.message
+
+    def test_it_raises_if_the_refresh_token_is_wrong(self, refresh_token_body, svc):
+        """It raises if refresh_token doesn't match a token in the db."""
+        refresh_token_body['refresh_token'] = 'wrong'
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'refresh_token is invalid' in exc.value.message
+
+    def test_it_raises_if_the_refresh_token_has_expired(self, refresh_token_body, svc, token):
+        token.expires = datetime.utcnow() - timedelta(hours=1)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'refresh_token has expired' in exc.value.message
+
+    def test_it_raises_if_the_refresh_tokens_user_does_not_exist(self, refresh_token_body, svc, user_service):
+        user_service.fetch.side_effect = lambda userid: None
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(refresh_token_body)
+
+        assert exc.value.type == 'invalid_refresh'
+        assert 'user no longer exists' in exc.value.message
+
+    def test_it_fetches_the_user(self, refresh_token_body, svc, token, user_service):
+        svc.verify_token_request(refresh_token_body)
+
+        user_service.fetch.assert_called_once_with(token.userid)
+
+    def test_it_returns_the_user(self, refresh_token_body, svc, user_service):
+        user, _ = svc.verify_token_request(refresh_token_body)
+
+        assert user == user_service.fetch.return_value
+
+    def test_it_returns_the_authclient(self, refresh_token_body, svc, token):
+        _, authclient = svc.verify_token_request(refresh_token_body)
+
+        assert authclient == token.authclient
+
+    @pytest.fixture
+    def refresh_token(self):
+        """The string value of the refresh_token used by these tests."""
+        return 'foo'
+
+    @pytest.fixture
+    def refresh_token_body(self, refresh_token):
+        """
+        Return the body of an OAuth refresh_token request.
+
+        The refresh_token in this request body is the same as that of the
+        refresh_token fixture.
+
+        The request body also contains the correct grant_type for a
+        refresh_token request.
+
+        """
+        return {
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+        }
+
+    @pytest.fixture
+    def svc(self, pyramid_request, db_session, user_service):
+        return oauth.OAuthService(db_session, user_service, pyramid_request.domain)
+
+    @pytest.fixture
+    def token(self, factories, refresh_token):
+        """
+        Add a Token model to the database and return it.
+
+        The token's refresh_token value is the same as the refresh_token
+        fixture.
+
+        """
+        return factories.Token(refresh_token=refresh_token)
+
+    @pytest.fixture
+    def user(self, token):
+        """A mock user whose userid is the same as the token fixture's userid."""
+        return mock.Mock(spec_set=['userid'], userid=token.userid)
+
+    @pytest.fixture
+    def user_service(self, user, user_service):
+        user_service.fetch.return_value = user
+        return user_service
 
 
 class TestOAuthServiceCreateToken(object):
