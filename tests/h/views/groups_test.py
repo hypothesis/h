@@ -3,7 +3,8 @@
 import deform
 import mock
 import pytest
-from pyramid import httpexceptions
+from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
+                                    HTTPNotFound)
 
 from h.views import groups as views
 from h.models import (Group, User)
@@ -150,7 +151,7 @@ class TestGroupReadUnauthenticated(object):
         group = FakeGroup('abc123', 'some-slug')
         pyramid_request.matchdict['slug'] = 'another-slug'
 
-        with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
+        with pytest.raises(HTTPMovedPermanently) as exc:
             views.read_unauthenticated(group, pyramid_request)
 
         assert exc.value.location == '/g/abc123/some-slug'
@@ -167,7 +168,7 @@ class TestGroupReadUnauthenticated(object):
         group = FakeGroup('abc123', 'some-slug', joinable_by=None)
         pyramid_request.matchdict['slug'] = 'some-slug'
 
-        with pytest.raises(httpexceptions.HTTPNotFound):
+        with pytest.raises(HTTPNotFound):
             views.read_unauthenticated(group, pyramid_request)
 
 
@@ -175,10 +176,31 @@ class TestGroupReadUnauthenticated(object):
 def test_read_noslug_redirects(pyramid_request):
     group = FakeGroup('abc123', 'some-slug')
 
-    with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
+    with pytest.raises(HTTPMovedPermanently) as exc:
         views.read_noslug(group, pyramid_request)
 
     assert exc.value.location == '/g/abc123/some-slug'
+
+
+@pytest.mark.usefixtures('group_service', 'routes')
+class TestGroupLeave(object):
+    def test_leaves_group(self,
+                          group_service,
+                          pyramid_config,
+                          pyramid_request):
+        group = FakeGroup('abc123', 'some-slug')
+        pyramid_config.testing_securitypolicy('marcela')
+
+        views.leave(group, pyramid_request)
+
+        assert (group, 'marcela') in group_service.left
+
+    def test_returns_nocontent(self, pyramid_request):
+        group = FakeGroup('abc123', 'some-slug')
+
+        result = views.leave(group, pyramid_request)
+
+        assert isinstance(result, HTTPNoContent)
 
 
 class FakeGroup(object):
