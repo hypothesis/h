@@ -7,7 +7,7 @@ import datetime
 import mock
 import pytest
 
-from h.services.oauth import oauth_service_factory, TOKEN_TTL
+from h.services.oauth import oauth_service_factory
 from h.services.user import user_service_factory
 from h.exceptions import OAuthTokenError
 from h.views import api_auth as views
@@ -41,7 +41,7 @@ class TestAccessToken(object):
             expires=datetime.datetime.utcnow() + datetime.timedelta(hours=1))
         oauth_service.create_token.return_value = token
 
-        assert views.access_token(pyramid_request)['expires_in'] == 3600
+        assert 'expires_in' in views.access_token(pyramid_request)
 
     def test_it_does_not_return_expires_in_if_the_token_does_not_expire(self, pyramid_request):
         assert 'expires_in' not in views.access_token(pyramid_request)

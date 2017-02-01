@@ -39,6 +39,15 @@ class TestToken(object):
         assert access_token.authclient == authclient
         assert access_token.refresh_token in security.token_urlsafe.side_effect.generated_tokens
 
+    def test_ttl_is_none_if_token_has_no_expires(self):
+        assert Token().ttl is None
+
+    def test_ttl_when_token_does_expire(self):
+        expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        token = Token(expires=expires)
+
+        assert 0 < token.ttl < 3601
+
     def test_expired_is_false_if_expires_is_in_the_future(self):
         expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         token = Token(expires=expires)
