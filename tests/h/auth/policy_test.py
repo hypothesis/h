@@ -7,6 +7,7 @@ from pyramid.interfaces import IAuthenticationPolicy
 
 from h.auth.policy import AuthenticationPolicy
 from h.auth.policy import TokenAuthenticationPolicy
+from h.auth.policy import TokenParameterAuthenticationPolicy
 
 API_PATHS = (
     '/api',
@@ -108,17 +109,43 @@ class TestAuthenticationPolicy(object):
         assert result == self.api_policy.forget.return_value
 
 
-class TestTokenAuthenticationPolicy(object):
-    def test_remember_does_nothing(self, pyramid_request):
-        policy = TokenAuthenticationPolicy()
+@pytest.mark.parametrize('policy_class', [TokenAuthenticationPolicy,
+                                          TokenParameterAuthenticationPolicy])
+class TestCommonTokenAuthenticationPolicy(object):
+    def test_remember_does_nothing(self, policy_class, pyramid_request):
+        policy = policy_class()
 
         assert policy.remember(pyramid_request, 'foo') == []
 
-    def test_forget_does_nothing(self, pyramid_request):
-        policy = TokenAuthenticationPolicy()
+    def test_forget_does_nothing(self, policy_class, pyramid_request):
+        policy = policy_class()
 
         assert policy.forget(pyramid_request) == []
 
+    def test_authenticated_userid_uses_callback(self, policy_class, fake_token, pyramid_request):
+        def callback(userid, request):
+            return None
+        policy = policy_class(callback=callback)
+        pyramid_request.auth_token = mock.Mock(return_value=fake_token)
+
+        result = policy.authenticated_userid(pyramid_request)
+
+        assert result is None
+
+    def test_effective_principals_uses_callback(self, policy_class, fake_token, pyramid_request):
+        def callback(userid, request):
+            return [userid + '.foo', 'group:donkeys']
+        policy = policy_class(callback=callback)
+        pyramid_request.auth_token = mock.Mock(return_value=fake_token)
+
+        result = policy.effective_principals(pyramid_request)
+
+        assert set(result) > set(['acct:foo@example.com',
+                                  'acct:foo@example.com.foo',
+                                  'group:donkeys'])
+
+
+class TestTokenAuthenticationPolicy(object):
     def test_unauthenticated_userid_is_none_if_no_token(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
 
@@ -126,7 +153,7 @@ class TestTokenAuthenticationPolicy(object):
 
     def test_unauthenticated_userid_returns_userid_from_token(self, fake_token, pyramid_request):
         policy = TokenAuthenticationPolicy()
-        pyramid_request.auth_token = fake_token
+        pyramid_request.auth_token = mock.Mock(return_value=fake_token)
 
         result = policy.unauthenticated_userid(pyramid_request)
 
@@ -136,36 +163,43 @@ class TestTokenAuthenticationPolicy(object):
         policy = TokenAuthenticationPolicy()
         token = DummyToken(valid=False)
         pyramid_request.auth_token = token
+        pyramid_request.auth_token = mock.Mock(return_value=token)
 
         result = policy.unauthenticated_userid(pyramid_request)
 
         assert result is None
 
-    def test_authenticated_userid_uses_callback(self, fake_token, pyramid_request):
-        def callback(userid, request):
-            return None
-        policy = TokenAuthenticationPolicy(callback=callback)
-        pyramid_request.auth_token = fake_token
 
-        result = policy.authenticated_userid(pyramid_request)
+class TestTokenParameterAuthenticationPolicy(object):
+    def test_unauthenticated_userid_is_none_if_no_token(self, pyramid_request):
+        policy = TokenParameterAuthenticationPolicy()
+
+        assert policy.unauthenticated_userid(pyramid_request) is None
+
+    def test_unauthenticated_userid_returns_userid_from_token(self, fake_token, pyramid_request):
+        policy = TokenParameterAuthenticationPolicy()
+
+        def fake_auth_token(get_param):
+            if get_param == 'access_token':
+                return fake_token
+        pyramid_request.auth_token = mock.Mock(side_effect=fake_auth_token)
+
+        result = policy.unauthenticated_userid(pyramid_request)
+
+        assert result == 'acct:foo@example.com'
+
+    def test_unauthenticated_userid_returns_none_if_token_invalid(self, pyramid_request):
+        policy = TokenParameterAuthenticationPolicy()
+        token = DummyToken(valid=False)
+
+        def fake_auth_token(get_param):
+            if get_param == 'access_token':
+                return token
+        pyramid_request.auth_token = mock.Mock(side_effect=fake_auth_token)
+
+        result = policy.unauthenticated_userid(pyramid_request)
 
         assert result is None
-
-    def test_effective_principals_uses_callback(self, fake_token, pyramid_request):
-        def callback(userid, request):
-            return [userid + '.foo', 'group:donkeys']
-        policy = TokenAuthenticationPolicy(callback=callback)
-        pyramid_request.auth_token = fake_token
-
-        result = policy.effective_principals(pyramid_request)
-
-        assert set(result) > set(['acct:foo@example.com',
-                                  'acct:foo@example.com.foo',
-                                  'group:donkeys'])
-
-    @pytest.fixture
-    def fake_token(self):
-        return DummyToken()
 
 
 class DummyToken(object):
@@ -175,3 +209,8 @@ class DummyToken(object):
 
     def is_valid(self):
         return self._valid
+
+
+@pytest.fixture
+def fake_token():
+    return DummyToken()

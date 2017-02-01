@@ -45,10 +45,9 @@ class LegacyClientJWT(object):
     Exposes the standard "auth token" interface on top of legacy tokens.
     """
 
-    def __init__(self, body, key, audience=None, leeway=240):
+    def __init__(self, body, key, leeway=240):
         self.payload = jwt.decode(body,
                                   key=key,
-                                  audience=audience,
                                   leeway=leeway,
                                   algorithms=['HS256'])
 
@@ -87,7 +86,6 @@ def generate_jwt(request, expires_in):
 
     claims = {
         'iss': request.registry.settings['h.client_id'],
-        'aud': request.host_url,
         'sub': request.authenticated_userid,
         'exp': now + datetime.timedelta(seconds=expires_in),
         'iat': now,
@@ -98,16 +96,70 @@ def generate_jwt(request, expires_in):
                       algorithm='HS256')
 
 
-def auth_token(request):
+class AuthTokenFetcher(object):
     """
     Fetch the token (if any) associated with a request.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    This looks for the a bearer token in the "Authorization" header. This method
+    can optionally look for the token in the GET URL parameters by providing a
+    key as the ``get_param`` argument.
 
     :returns: the auth token carried by the request, or None
     :rtype: h.models.Token or None
     """
+    def __init__(self, request):
+        self.request = request
+        self._cache = {}
+
+    def __call__(self, get_param=None):
+        """
+        Returns the token.
+
+        :param get_param: the GET URI parameter key
+        :type unicode
+
+        :returns: the auth token carried by the request, or None
+        :rtype: h.auth.tokens.Token or None
+        """
+        cache_key = 'default'
+        if get_param is not None:
+            cache_key = 'param-%s' % get_param
+
+        if cache_key not in self._cache:
+            self._cache[cache_key] = self._fetch(get_param)
+
+        return self._cache[cache_key]
+
+    def _fetch(self, get_param):
+        token = None
+
+        if get_param is None:
+            token = _header_token(self.request)
+        else:
+            token = self.request.GET.get(get_param, None)
+
+        if not token:
+            return None
+
+        token_model = (self.request.db.query(models.Token)
+                       .filter_by(value=token)
+                       .one_or_none())
+        if token_model is not None:
+            return Token(token_model)
+
+        # If we've got this far it's possible the token is a legacy client JWT.
+        return _maybe_jwt(token, self.request)
+
+
+def _maybe_jwt(token, request):
+    try:
+        return LegacyClientJWT(token,
+                               key=request.registry.settings['h.client_secret'])
+    except jwt.InvalidTokenError:
+        return None
+
+
+def _header_token(request):
     try:
         header = request.headers['Authorization']
     except KeyError:
@@ -122,20 +174,4 @@ def auth_token(request):
     if not token:
         return None
 
-    token_model = (request.db.query(models.Token)
-                   .filter_by(value=token)
-                   .one_or_none())
-    if token_model is not None:
-        return Token(token_model)
-
-    # If we've got this far it's possible the token is a legacy client JWT.
-    return _maybe_jwt(token, request)
-
-
-def _maybe_jwt(token, request):
-    try:
-        return LegacyClientJWT(token,
-                               key=request.registry.settings['h.client_secret'],
-                               audience=request.host_url)
-    except jwt.InvalidTokenError:
-        return None
+    return token
