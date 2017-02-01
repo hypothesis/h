@@ -61,7 +61,7 @@ class TestAPI(object):
         assert res.json['userid'] == user.userid
         assert [group['id'] for group in res.json['groups']] == ['__world__']
 
-    def test_third_party_profile_api(self, app, third_party_user_with_token):
+    def test_third_party_profile_api(self, app, publisher_group, third_party_user_with_token):
         """Fetch a profile for a third-party account."""
 
         user, token = third_party_user_with_token
@@ -71,7 +71,9 @@ class TestAPI(object):
         res = app.get('/api/profile', headers=headers)
 
         assert res.json['userid'] == user.userid
-        assert [group['id'] for group in res.json['groups']] == []
+
+        group_ids = [group['id'] for group in res.json['groups']]
+        assert group_ids == [publisher_group.pubid]
 
 
 @pytest.fixture
@@ -110,6 +112,13 @@ def third_party_user(auth_client, db_session, factories):
     user = factories.User(authority=auth_client.authority)
     db_session.commit()
     return user
+
+
+@pytest.fixture
+def publisher_group(auth_client, db_session, factories):
+    group = factories.PublisherGroup(authority=auth_client.authority)
+    db_session.commit()
+    return group
 
 
 @pytest.fixture
