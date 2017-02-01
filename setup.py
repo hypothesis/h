@@ -43,6 +43,7 @@ INSTALL_REQUIRES = [
     'requests-aws4auth>=0.9',
     'transaction',
     'zope.interface',
+    'venusian',
 ]
 EXTRAS_REQUIRE = {}
 ENTRY_POINTS = {}
