@@ -124,10 +124,13 @@ def read_noslug(group, request):
     check_slug(group, request)
 
 
+# FIXME: This view is only used by the client, it needs to be refactored
+#        into a proper API endpoint under the /api namespace.
 @view_config(route_name='group_leave',
              request_method='POST',
              effective_principals=security.Authenticated)
 def leave(group, request):
+    """Route for leaving a group. Used by the Hypothesis client."""
     groups_service = request.find_service(name='group')
     groups_service.member_leave(group, request.authenticated_userid)
 
