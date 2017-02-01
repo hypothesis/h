@@ -11,11 +11,11 @@ from memex.views import api_config
 
 @api_config(route_name='api.profile',
             request_method='GET',
-            effective_principals=security.Authenticated,
             link_name='profile.read',
             description="Fetch the user's profile")
 def profile(request):
-    return h_session.profile(request)
+    authority = request.params.get('authority')
+    return h_session.profile(request, authority)
 
 
 @api_config(route_name='api.profile',

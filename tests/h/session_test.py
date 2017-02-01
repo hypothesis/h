@@ -199,6 +199,38 @@ def test_authenticated_profile_sidebar_tutorial(authenticated_request, dismissed
         assert preferences['show_sidebar_tutorial'] is True
 
 
+def test_authority_in_anonymous_profile(unauthenticated_request, auth_domain):
+    assert session.profile(unauthenticated_request)['authority'] == auth_domain
+
+
+def test_authority_override(unauthenticated_request):
+    unauthenticated_request.set_public_groups({'foo.com': []})
+
+    profile = session.profile(unauthenticated_request, 'foo.com')
+
+    assert profile['authority'] == 'foo.com'
+
+
+def test_authority_in_authenticated_profile(authenticated_request, auth_domain):
+    assert session.profile(authenticated_request)['authority'] == auth_domain
+
+
+def test_authority_ignored_for_authenticated_profile(authenticated_request, auth_domain):
+    profile = session.profile(authenticated_request, 'foo.com')
+
+    assert profile['authority'] == auth_domain
+
+
+def test_authority_in_third_party_profile(third_party_request, third_party_domain):
+    assert session.profile(third_party_request)['authority'] == third_party_domain
+
+
+def test_authority_ignored_for_third_party_profile(third_party_request, third_party_domain):
+    profile = session.profile(third_party_request, 'foo.com')
+
+    assert profile['authority'] == third_party_domain
+
+
 class FakeAuthorityGroupService(object):
 
     def __init__(self, public_groups):
@@ -233,6 +265,9 @@ class FakeRequest(object):
 
     def set_sidebar_tutorial_dismissed(self, dismissed):
         self.authenticated_user.sidebar_tutorial_dismissed = dismissed
+
+    def set_public_groups(self, public_groups):
+        self._authority_group_service = FakeAuthorityGroupService(public_groups)
 
     def find_service(self, **kwargs):
         if kwargs == {'name': 'authority_group'}:

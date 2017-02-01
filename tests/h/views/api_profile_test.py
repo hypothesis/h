@@ -11,9 +11,18 @@ from h.views import api_profile
 
 class TestProfile(object):
     def test_profile_view_proxies_to_session(self, session_profile, pyramid_request):
-        session_profile.return_value = {'foo': 'bar'}
         result = api_profile.profile(pyramid_request)
-        assert result == {'foo': 'bar'}
+
+        session_profile.assert_called_once_with(pyramid_request, None)
+        assert result == session_profile.return_value
+
+    def test_profile_passes_authority_parameter(self, session_profile, pyramid_request):
+        pyramid_request.params = {'authority': 'foo.com'}
+
+        result = api_profile.profile(pyramid_request)
+
+        session_profile.assert_called_once_with(pyramid_request, 'foo.com')
+        assert result == session_profile.return_value
 
 
 @pytest.mark.usefixtures('user_service', 'session_profile')
