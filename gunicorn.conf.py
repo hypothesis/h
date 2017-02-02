@@ -39,3 +39,11 @@ def post_fork(server, worker):
         import psycogreen.gevent
         psycogreen.gevent.patch_psycopg()
         worker.log.info("Made psycopg green")
+
+
+def when_ready(server):
+    name = server.proc_name
+    if name.endswith('app.ini') and 'H_WEB_CONCURRENCY' in os.environ:
+        server.num_workers = int(os.environ['H_WEB_CONCURRENCY'])
+    elif name.endswith('websocket.ini') and 'H_WEBSOCKET_CONCURRENCY' in os.environ:
+        server.num_workers = int(os.environ['H_WEBSOCKET_CONCURRENCY'])
