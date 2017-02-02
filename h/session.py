@@ -2,7 +2,6 @@
 
 from pyramid.session import SignedCookieSessionFactory
 
-from h.groups import util
 from h.security import derive_key
 
 
@@ -51,19 +50,12 @@ def _current_groups(request):
 
     user = request.authenticated_user
     authority = user.authority if user else request.auth_domain
+    authority_groups = (request.find_service(name='authority_group')
+                        .public_groups(authority=authority))
 
-    groups = (_authority_groups(request.auth_domain, authority) +
-              _user_groups(user))
+    groups = authority_groups + _user_groups(user)
 
     return [_group_model(request.route_url, group) for group in groups]
-
-
-def _authority_groups(auth_domain, authority):
-    """Return the default groups associated with an authority."""
-    if authority == auth_domain:
-        return [util.WorldGroup(auth_domain)]
-    else:
-        return []
 
 
 def _user_groups(user):
