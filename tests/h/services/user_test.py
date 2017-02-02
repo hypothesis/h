@@ -75,6 +75,28 @@ class TestUserService(object):
         with pytest.raises(UserNotActivated):
             svc.login('mirthe@deboer.com', 'mirthespassword')
 
+    def test_update_preferences_tutorial_enable(self, svc, factories):
+        user = factories.User.build(sidebar_tutorial_dismissed=True)
+
+        svc.update_preferences(user, show_sidebar_tutorial=True)
+
+        assert user.sidebar_tutorial_dismissed is False
+
+    def test_update_preferences_tutorial_disable(self, svc, factories):
+        user = factories.User.build(sidebar_tutorial_dismissed=False)
+
+        svc.update_preferences(user, show_sidebar_tutorial=False)
+
+        assert user.sidebar_tutorial_dismissed is True
+
+    def test_update_preferences_raises_for_unsupported_keys(self, svc, factories):
+        user = factories.User.build()
+
+        with pytest.raises(TypeError) as exc:
+            svc.update_preferences(user, foo='bar', baz='qux')
+
+        assert 'keys baz, foo are not allowed' in exc.value.message
+
     @pytest.fixture
     def svc(self, db_session):
         return UserService(default_authority='example.com', session=db_session)
