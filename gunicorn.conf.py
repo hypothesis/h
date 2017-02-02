@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import socket
 
 if 'GUNICORN_TIMEOUT' in os.environ:
     timeout = int(os.environ['GUNICORN_TIMEOUT'])
@@ -20,6 +21,10 @@ if not os.environ.get('GUNICORN_STATS_DISABLE', None):
         _host = os.environ['STATSD_HOST']
         _port = os.environ.get('STATSD_PORT', '8125')
         statsd_host = '{}:{}'.format(_host, _port)
+
+    if 'STATSD_PREFIX' in os.environ:
+        _hostname = socket.gethostname()
+        statsd_prefix = '.'.join([os.environ['STATSD_PREFIX'], _hostname])
 
 
 def post_fork(server, worker):
