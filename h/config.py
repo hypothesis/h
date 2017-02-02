@@ -113,10 +113,8 @@ def configure(environ=None, settings=None):
             level = logging.DEBUG
         logging.getLogger('sqlalchemy.engine').setLevel(level)
 
-    hostname = socket.gethostname()
     if 'STATSD_PREFIX' in os.environ:
+        hostname = socket.gethostname()
         settings['statsd.prefix'] = '.'.join([os.environ['STATSD_PREFIX'], hostname])
-    else:
-        settings['statsd.prefix'] = hostname
 
     return Configurator(settings=settings)
