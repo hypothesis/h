@@ -106,6 +106,15 @@ class Group(ModelFactory):
     writeable_by = WriteableBy.members
 
 
+class PublisherGroup(Group):
+
+    name = factory.Sequence(lambda n: 'Test Publisher Group {n}'.format(n=str(n)))
+
+    joinable_by = None
+    readable_by = ReadableBy.world
+    writeable_by = WriteableBy.authority
+
+
 class AuthTicket(ModelFactory):
 
     class Meta:  # pylint: disable=no-init, old-style-class
