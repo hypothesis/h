@@ -1,31 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import mock
 import pytest
 
 from h.streamer import views
 from h.streamer import streamer
-
-
-def test_websocket_view_bad_origin(pyramid_request):
-    pyramid_request.registry.settings.update({'origins': ['http://good']})
-    pyramid_request.headers = {'Origin': 'http://bad'}
-    res = views.websocket_view(pyramid_request)
-    assert res.code == 403
-
-
-def test_websocket_view_good_origin(pyramid_request):
-    pyramid_request.registry.settings.update({'origins': ['http://good']})
-    pyramid_request.headers = {'Origin': 'http://good'}
-    pyramid_request.get_response = lambda _: mock.sentinel.good_response
-    res = views.websocket_view(pyramid_request)
-    assert res == mock.sentinel.good_response
-
-
-def test_websocket_view_same_origin(pyramid_request):
-    pyramid_request.get_response = lambda _: mock.sentinel.good_response
-    res = views.websocket_view(pyramid_request)
-    assert res == mock.sentinel.good_response
 
 
 def test_websocket_view_adds_auth_state_to_environ(pyramid_config, pyramid_request):
@@ -59,7 +37,4 @@ def test_websocket_view_adds_work_queue_to_environ(pyramid_request):
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
-    pyramid_request.registry.settings.update({'origins': []})
-    # example.com is the dummy request default host URL
-    pyramid_request.headers = {'Origin': 'http://example.com'}
     return pyramid_request
