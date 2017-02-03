@@ -76,10 +76,10 @@ def devserver(https, web, ws, worker, assets, beat):
 
     m = Manager()
     if web:
-        m.add_process('web', 'gunicorn --reload --paste conf/development-app.ini %s' % gunicorn_args)
+        m.add_process('web', 'gunicorn --name web --reload --paste conf/development-app.ini %s' % gunicorn_args)
 
     if ws:
-        m.add_process('ws', 'gunicorn --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
+        m.add_process('ws', 'gunicorn --name websocket --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
 
     if worker:
         m.add_process('worker', 'hypothesis --dev celery worker --autoreload')

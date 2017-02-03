@@ -39,3 +39,11 @@ def post_fork(server, worker):
         import psycogreen.gevent
         psycogreen.gevent.patch_psycopg()
         worker.log.info("Made psycopg green")
+
+
+def when_ready(server):
+    name = server.proc_name
+    if name == 'web' and 'WEB_NUM_WORKERS' in os.environ:
+        server.num_workers = int(os.environ['WEB_NUM_WORKERS'])
+    elif name == 'websocket' and 'WEBSOCKET_NUM_WORKERS' in os.environ:
+        server.num_workers = int(os.environ['WEBSOCKET_NUM_WORKERS'])
