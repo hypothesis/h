@@ -14,13 +14,15 @@ from pyramid import httpexceptions
 from pyramid import response
 from pyramid.view import view_config
 
-from h.views.client import render_app
+from h.views.client import sidebar_app
 from h.util.user import split_user
 
 log = logging.getLogger(__name__)
 
 
-@view_config(route_name='annotation', permission='read')
+@view_config(route_name='annotation',
+             permission='read',
+             renderer='h:templates/app.html.jinja2')
 def annotation_page(context, request):
     annotation = context.annotation
     document = annotation.document
@@ -34,7 +36,7 @@ def annotation_page(context, request):
 
     alternate = request.route_url('api.annotation', id=annotation.id)
 
-    return render_app(request, {
+    return sidebar_app(request, {
         'meta_attrs': (
             {'property': 'og:title', 'content': title},
             {'property': 'og:description', 'content': ''},
@@ -56,7 +58,8 @@ def robots(context, request):
                                  content_type=b'text/plain')
 
 
-@view_config(route_name='stream')
+@view_config(route_name='stream',
+             renderer='h:templates/app.html.jinja2')
 def stream(context, request):
     q = request.params.get('q', '').split(':', 1)
     if len(q) >= 2 and q[0] == 'tag':
@@ -68,7 +71,7 @@ def stream(context, request):
         raise httpexceptions.HTTPFound(location=location)
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
-    return render_app(request, {
+    return sidebar_app(request, {
         'link_tags': [
             {'rel': 'alternate', 'href': atom, 'type': 'application/atom+xml'},
             {'rel': 'alternate', 'href': rss, 'type': 'application/rss+xml'},

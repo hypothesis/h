@@ -12,36 +12,34 @@ from memex.resources import AnnotationResource
 from h.views import main
 
 
-@mock.patch('h.client.render_app_html')
 @pytest.mark.usefixtures('routes')
-def test_og_document(render_app_html, annotation_document, document_title, pyramid_request, group_service, links_service):
+def test_og_document(annotation_document, document_title, pyramid_request, group_service, links_service):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
     context = AnnotationResource(annotation, group_service, links_service)
     document = Document()
     annotation_document.return_value = document
     document_title.return_value = 'WikiHow — How to Make a ☆Starmap☆'
 
-    render_app_html.return_value = '<html></html>'
-    main.annotation_page(context, pyramid_request)
-    args, kwargs = render_app_html.call_args
-    test = lambda d: 'foo' in d['content'] and 'Starmap' in d['content']
-    assert any(test(d) for d in kwargs['extra']['meta_attrs'])
+    ctx = main.annotation_page(context, pyramid_request)
+
+    def test(d):
+        return 'foo' in d['content'] and 'Starmap' in d['content']
+    assert any(test(d) for d in ctx['meta_attrs'])
 
 
-@mock.patch('h.client.render_app_html')
 @pytest.mark.usefixtures('routes')
-def test_og_no_document(render_app_html, pyramid_request, group_service, links_service):
+def test_og_no_document(pyramid_request, group_service, links_service):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
     context = AnnotationResource(annotation, group_service, links_service)
 
-    render_app_html.return_value = '<html></html>'
-    main.annotation_page(context, pyramid_request)
-    args, kwargs = render_app_html.call_args
-    test = lambda d: 'foo' in d['content']
-    assert any(test(d) for d in kwargs['extra']['meta_attrs'])
+    ctx = main.annotation_page(context, pyramid_request)
+
+    def test(d):
+        return 'foo' in d['content']
+    assert any(test(d) for d in ctx['meta_attrs'])
 
 
-@pytest.mark.usefixtures('render_app', 'routes')
+@pytest.mark.usefixtures('sidebar_app', 'routes')
 class TestStreamUserRedirect(object):
 
     def test_it_redirects_to_activity_page_with_tags(self, pyramid_request):
@@ -60,7 +58,7 @@ class TestStreamUserRedirect(object):
 
         assert exc.value.location == 'http://example.com/search?q=tag%3A%22foo+bar%22'
 
-    def test_it_redirects_to_activity_page_if_q_length_great_than_2(self, render_app, pyramid_request):
+    def test_it_redirects_to_activity_page_if_q_length_great_than_2(self, sidebar_app, pyramid_request):
         pyramid_request.params['q'] = 'tag:foo:bar'
         pyramid_request.matchdict['tag'] = 'foo:bar'
         with pytest.raises(httpexceptions.HTTPFound) as exc:
@@ -68,26 +66,26 @@ class TestStreamUserRedirect(object):
 
         assert exc.value.location == 'http://example.com/search?q=tag%3Afoo%3Abar'
 
-    def test_it_does_not_redirect_to_activity_page_if_no_q_param(self, render_app, pyramid_request):
+    def test_it_does_not_redirect_to_activity_page_if_no_q_param(self, sidebar_app, pyramid_request):
         pyramid_request.matchdict['tag'] = 'foo'
 
         main.stream(None, pyramid_request)
 
-        assert render_app.called
+        assert sidebar_app.called
 
-    def test_it_does_not_redirect_to_activity_page_if_no_tag_key(self, render_app, pyramid_request):
+    def test_it_does_not_redirect_to_activity_page_if_no_tag_key(self, sidebar_app, pyramid_request):
         pyramid_request.params['q'] = 'foo'
 
         main.stream(None, pyramid_request)
 
-        assert render_app.called
+        assert sidebar_app.called
 
-    def test_it_does_not_redirect_to_activity_page_if_no_tag_key_value(self, render_app, pyramid_request):
+    def test_it_does_not_redirect_to_activity_page_if_no_tag_key_value(self, sidebar_app, pyramid_request):
         pyramid_request.params['q'] = 'tag-foo'
 
         main.stream(None, pyramid_request)
 
-        assert render_app.called
+        assert sidebar_app.called
 
     def test_it_redirects_to_user_activity_page(self, pyramid_request):
         pyramid_request.matchdict['user'] = 'bob'
@@ -114,8 +112,8 @@ class TestStreamUserRedirect(object):
         pyramid_config.add_route('stream_rss', '/stream.rss')
 
     @pytest.fixture
-    def render_app(self, patch):
-        return patch('h.views.main.render_app')
+    def sidebar_app(self, patch):
+        return patch('h.views.main.sidebar_app')
 
 
 @pytest.fixture
@@ -143,6 +141,7 @@ def pyramid_config(pyramid_config):
 def routes(pyramid_config):
     pyramid_config.add_route('api.annotation', '/api/ann/{id}')
     pyramid_config.add_route('api.index', '/api/index')
+    pyramid_config.add_route('assets_client', '/assets/client')
     pyramid_config.add_route('index', '/index')
 
 
