@@ -40,7 +40,7 @@ http {
       return 499;
     }
 
-    location ~ ^/(|a|u|t|account|admin|api|app|app.html|assets|docs/help|embed\.js.*|forgot-password|login|logout|activate|groups|notification|robots\.txt|search|signup|stream|stream\.atom|stream\.rss|users|viewer|welcome)(/|$) {
+    location ~ ^/(|_status|a|u|t|account|admin|api|app|app.html|assets|docs/help|embed\.js.*|forgot-password|login|logout|activate|groups|notification|robots\.txt|search|signup|stream|stream\.atom|stream\.rss|users|viewer|welcome)(/|$) {
       proxy_pass http://web;
       proxy_http_version 1.1;
       proxy_connect_timeout 10s;

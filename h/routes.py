@@ -103,6 +103,9 @@ def includeme(config):
     # Notification
     config.add_route('unsubscribe', '/notification/unsubscribe/{token}')
 
+    # Health check
+    config.add_route('status', '/_status')
+
     # Static
     config.add_route('about', '/about/', static=True)
     config.add_route('bioscience', '/bioscience/', static=True)

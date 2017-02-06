@@ -73,6 +73,7 @@ def test_includeme():
         call('onboarding', '/welcome/'),
         call('custom_onboarding', '/welcome/{slug}'),
         call('unsubscribe', '/notification/unsubscribe/{token}'),
+        call('status', '/_status'),
         call('about', '/about/', static=True),
         call('bioscience', '/bioscience/', static=True),
         call('blog', '/blog/', static=True),
