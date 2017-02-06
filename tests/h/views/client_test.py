@@ -43,9 +43,15 @@ class TestSidebarApp(object):
         assert actual_config == expected_config
 
     def test_it_sets_asset_urls(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.sidebar_app(pyramid_request)
         assert ctx['app_css_urls'] == ['/assets/client/app.css']
         assert ctx['app_js_urls'] == ['/assets/client/app.js']
+
+    def test_uses_client_boot_script_when_enabled(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = True
+        ctx = client.sidebar_app(pyramid_request)
+        assert ctx['app_js_urls'] == ['http://example.com/assets/client/boot.js']
 
 
 @pytest.mark.usefixtures('client_assets_env', 'routes', 'pyramid_settings')
@@ -61,6 +67,20 @@ class TestEmbed(object):
             'http://example.com/assets/client/inject.js',
             'http://example.com/assets/client/inject.css',
             ]
+
+    def test_sets_client_boot_url(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = True
+        ctx = client.embed(pyramid_request)
+        assert ctx['client_boot_url'] == 'http://example.com/assets/client/boot.js'
+
+    def test_sets_client_asset_root(self, pyramid_request):
+        ctx = client.embed(pyramid_request)
+        assert ctx['client_asset_root'] == 'http://example.com/assets/client/'
+
+    def test_does_not_set_client_boot_url_when_disabled(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = False
+        ctx = client.embed(pyramid_request)
+        assert ctx['client_boot_url'] is None
 
     def test_it_sets_content_type(self, pyramid_request):
         client.embed(pyramid_request)

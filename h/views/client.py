@@ -26,8 +26,19 @@ def url_with_path(url):
         return url
 
 
+def _client_boot_url(request):
+    """
+    Return the URL of the script which bootstraps the client.
+    """
+    client_boot_url = None
+    if request.feature('use_client_boot_script'):
+        client_boot_url = request.route_url('assets_client', subpath='boot.js')
+    return client_boot_url
+
+
 def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
-                      websocket_url, auth_domain, ga_client_tracking_id):
+                      websocket_url, auth_domain, ga_client_tracking_id,
+                      client_boot_url):
     """
     Returns a dict of asset URLs and contents used by the sidebar app
     HTML tempate.
@@ -62,7 +73,11 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
         })
 
     app_css_urls = assets_env.urls('app_css')
-    app_js_urls = assets_env.urls('app_js')
+
+    if client_boot_url:
+        app_js_urls = [client_boot_url]
+    else:
+        app_js_urls = assets_env.urls('app_js')
 
     return {
         'app_config': json.dumps(app_config),
@@ -85,6 +100,7 @@ def sidebar_app(request, extra=None):
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
 
     ctx = _app_html_context(api_url=request.route_url('api.index'),
+                            client_boot_url=_client_boot_url(request),
                             service_url=request.route_url('index'),
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
                             assets_env=request.registry['assets_client_env'],
@@ -127,6 +143,8 @@ def embed(request):
 
     return {
         'app_html_url': request.route_url('sidebar_app'),
+        'client_asset_root': request.route_url('assets_client', subpath=''),
+        'client_boot_url': _client_boot_url(request),
         'inject_resource_urls': (absolute_asset_urls('inject_js') +
                                  absolute_asset_urls('inject_css'))
     }

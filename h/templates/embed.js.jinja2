@@ -1,3 +1,19 @@
+{% if client_boot_url %}
+(function () {
+  var configEl = document.createElement('script');
+  configEl.className = 'js-hypothesis-settings';
+  configEl.type = 'application/json';
+  configEl.textContent = JSON.stringify({
+    assetRoot: '{{ client_asset_root }}',
+    sidebarAppUrl: '{{ app_html_url }}',
+  });
+  document.head.appendChild(configEl);
+
+  var bootScriptEl = document.createElement('script');
+  bootScriptEl.src = '{{ client_boot_url }}';
+  document.head.appendChild(bootScriptEl);
+})();
+{% else %}
 (function () {
 // Detect presence of Hypothesis in the page
 var appLinkEl = document.querySelector('link[type="application/annotator+html"]');
@@ -57,3 +73,4 @@ install();
 
 return {installedURL: baseUrl.href};
 })();
+{% endif %}
