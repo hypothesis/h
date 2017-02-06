@@ -1,3 +1,13 @@
+{% if client_boot_url %}
+(function () {
+  window.__HYP_APP_HTML_URL__ = '{{ app_html_url }}';
+  window.__HYP_CLIENT_ASSET_ROOT__ = '{{ client_asset_root }}';
+
+  var bootScriptEl = document.createElement('script');
+  bootScriptEl.src = '{{ client_boot_url }}';
+  document.head.appendChild(bootScriptEl);
+})();
+{% else %}
 (function () {
 // Detect presence of Hypothesis in the page
 var appLinkEl = document.querySelector('link[type="application/annotator+html"]');
@@ -57,3 +67,4 @@ install();
 
 return {installedURL: baseUrl.href};
 })();
+{% endif %}

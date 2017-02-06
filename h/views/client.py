@@ -18,6 +18,11 @@ from h.util.view import json_view
 
 def render_app(request, extra=None):
     """Render a page that serves a preconfigured annotation client."""
+
+    client_boot_url = None
+    if request.feature('use_client_boot_script'):
+        client_boot_url = request.route_url('assets_client', subpath='boot.js')
+
     client_sentry_dsn = request.registry.settings.get('h.client.sentry_dsn')
     html = client.render_app_html(
         assets_env=request.registry['assets_client_env'],
@@ -29,7 +34,8 @@ def render_app(request, extra=None):
         sentry_public_dsn=client_sentry_dsn,
         websocket_url=request.registry.settings.get('h.websocket_url'),
         ga_client_tracking_id=request.registry.settings.get('ga_client_tracking_id'),
-        extra=extra)
+        extra=extra,
+        client_boot_url=client_boot_url)
     request.response.text = html
     return request.response
 
@@ -52,11 +58,17 @@ def annotator_token(request):
 
 @view_config(route_name='embed')
 def embed(context, request):
+    client_boot_url = None
+    if request.feature('use_client_boot_script'):
+        client_boot_url = request.route_url('assets_client', subpath='boot.js')
+
     request.response.content_type = b'text/javascript'
     request.response.text = client.render_embed_js(
         assets_env=request.registry['assets_client_env'],
         app_html_url=request.route_url('widget'),
-        base_url=request.route_url('index'))
+        base_url=request.route_url('index'),
+        client_asset_root=request.route_url('assets_client', subpath=''),
+        client_boot_url=client_boot_url)
     return request.response
 
 
