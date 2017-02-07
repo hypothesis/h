@@ -4,6 +4,7 @@ MAINTAINER Hypothes.is Project and contributors
 # Install system build and runtime dependencies.
 RUN apk-install \
     ca-certificates \
+    collectd \
     libffi \
     libpq \
     nginx \
@@ -37,6 +38,11 @@ RUN apk-install --virtual build-deps \
 COPY conf/nginx.conf.tpl /etc/nginx/nginx.conf.tpl
 COPY conf/nginx.conf.tpl /etc/nginx/nginx.conf
 RUN chown hypothesis:hypothesis /etc/nginx/nginx.conf
+
+# Copy collectd config
+COPY conf/collectd.conf /etc/collectd/collectd.conf
+RUN mkdir /etc/collectd/collectd.conf.d \
+ && chown hypothesis:hypothesis /etc/collectd/collectd.conf.d
 
 # Copy the rest of the application files.
 COPY . .
