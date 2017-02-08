@@ -16,13 +16,17 @@ from h.auth.tokens import generate_jwt
 from h.util.view import json_view
 
 
-def render_app(request, extra=None):
-    """Render a page that serves a preconfigured annotation client."""
-
+def _client_boot_url(request):
     client_boot_url = None
     if request.feature('use_client_boot_script'):
         client_boot_url = request.route_url('assets_client', subpath='boot.js')
+    return client_boot_url
 
+
+def render_app(request, extra=None):
+    """Render a page that serves a preconfigured annotation client."""
+
+    client_boot_url = _client_boot_url(request)
     client_sentry_dsn = request.registry.settings.get('h.client.sentry_dsn')
     html = client.render_app_html(
         assets_env=request.registry['assets_client_env'],
@@ -56,20 +60,17 @@ def annotator_token(request):
     return generate_jwt(request, 3600)
 
 
-@view_config(route_name='embed')
-def embed(context, request):
-    client_boot_url = None
-    if request.feature('use_client_boot_script'):
-        client_boot_url = request.route_url('assets_client', subpath='boot.js')
+@view_config(route_name='embed',
+             renderer='h:templates/embed.js.jinja2')
+def embed(request):
+    request.response.content_type = 'text/javascript'
 
-    request.response.content_type = b'text/javascript'
-    request.response.text = client.render_embed_js(
+    return client.embed_context(
         assets_env=request.registry['assets_client_env'],
         app_html_url=request.route_url('widget'),
         base_url=request.route_url('index'),
         client_asset_root=request.route_url('assets_client', subpath=''),
-        client_boot_url=client_boot_url)
-    return request.response
+        client_boot_url=_client_boot_url(request))
 
 
 @json_view(route_name='session', http_cache=0)
@@ -81,4 +82,7 @@ def session_view(request):
 
 @view_config(route_name='widget')
 def widget(context, request):
+    """
+    Return the HTML for the Hypothesis client's sidebar application.
+    """
     return render_app(request)

@@ -106,11 +106,10 @@ def render_app_html(assets_env,
     return template.render(context)
 
 
-def render_embed_js(assets_env, app_html_url, base_url=None,
-                    client_asset_root=None, client_boot_url=None):
+def embed_context(assets_env, app_html_url, base_url=None,
+                  client_asset_root=None, client_boot_url=None):
     """
-    Return the code for the script which is injected into a page in order
-    to load the Hypothesis annotation client into it.
+    Return the context for the `embed.js` template.
 
     :param assets_env: The assets environment
     :param app_html_url: The URL of the app.html page for the sidebar
@@ -123,12 +122,10 @@ def render_embed_js(assets_env, app_html_url, base_url=None,
         return [urlparse.urljoin(base_url, url)
                 for url in assets_env.urls(bundle_name)]
 
-    template = jinja_env.get_template('embed.js.jinja2')
-    template_args = {
+    return {
         'app_html_url': app_html_url,
         'client_asset_root': client_asset_root,
         'client_boot_url': client_boot_url,
         'inject_resource_urls': (absolute_asset_urls('inject_js') +
                                  absolute_asset_urls('inject_css'))
     }
-    return template.render(template_args)
