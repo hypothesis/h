@@ -30,7 +30,10 @@ class AuthTokenService(object):
         """
 
         if token_str in self._validate_cache:
-            return self._validate_cache[token_str]
+            token = self._validate_cache[token_str]
+            if token is not None and token.is_valid():
+                return token
+            return None
 
         token = self._fetch_auth_token(token_str)
         self._validate_cache[token_str] = token
