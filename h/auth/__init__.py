@@ -6,7 +6,6 @@ import logging
 
 from pyramid.authentication import RemoteUserAuthenticationPolicy
 import pyramid_authsanity
-from pyramid_multiauth import MultiAuthenticationPolicy
 
 from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
 from h.auth.util import auth_domain, groupfinder
@@ -26,7 +25,7 @@ TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
 
 DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
                                       fallback_policy=TICKET_POLICY)
-WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, TICKET_POLICY])
+WEBSOCKET_POLICY = TOKEN_POLICY
 
 
 def includeme(config):
@@ -51,8 +50,7 @@ def includeme(config):
 
         DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
                                               fallback_policy=PROXY_POLICY)
-        WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY,
-                                                      PROXY_POLICY])
+        WEBSOCKET_POLICY = TOKEN_POLICY
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.

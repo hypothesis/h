@@ -25,7 +25,6 @@ pyramid
 pyramid_authsanity
 pyramid_layout
 pyramid-jinja2
-pyramid-multiauth
 pyramid-services
 pyramid_mailer
 pyramid_tm

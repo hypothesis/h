@@ -14,13 +14,6 @@ real-time notifications of annotation events.
 Overview
 --------
 
-.. note::
-
-   At the moment, use of the Real Time API is limited to server-side clients.
-   JavaScript applications running in the browser **will not be able to use this
-   API** due to security restrictions. We hope to lift this restriction in the
-   future.
-
 To use the Real Time API, you should open a WebSocket connection to the
 following endpoint::
 
@@ -28,6 +21,25 @@ following endpoint::
 
 Communication with this endpoint consists of JSON-encoded messages sent from
 client to server and vice versa.
+
+Authorization
+-------------
+
+Clients that are only interested in receiving notifications about public
+annotations on a page do not need to authenticate. Clients that want to receive
+notifications about all updates relevant to a particular user must
+authenticate.
+
+Server-side clients can authenticate to the Real Time API by providing an access
+token in an Authorization header::
+
+    Authorization: Bearer <token>
+
+Browser-based clients are not able to set this header due to limitations of the
+the browser's ``WebSocket`` API. Instead they can authenticate by setting an
+``access_token`` query parameter in the URL when connecting::
+
+    var socket = new WebSocket(`wss://hypothes.is/ws?access_token=${token}`)
 
 Server messages
 ---------------

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyramid import httpexceptions
-from pyramid.config import aslist
 from pyramid.view import forbidden_view_config
 from pyramid.view import notfound_view_config
 from pyramid.view import view_config
@@ -13,15 +11,6 @@ from h.streamer import streamer, websocket
 
 @view_config(route_name='ws')
 def websocket_view(request):
-    # WebSockets can be opened across origins and send cookies. To prevent
-    # scripts on other sites from using this socket, ensure that the Origin
-    # header (if present) matches the request host URL or is whitelisted.
-    origin = request.headers.get('Origin')
-    allowed = request.registry.settings['origins']
-    if origin is not None:
-        if origin != request.host_url and origin not in allowed:
-            return httpexceptions.HTTPForbidden()
-
     # Provide environment which the WebSocket handler can use...
     request.environ.update({
         'h.ws.authenticated_userid': request.authenticated_userid,
@@ -87,7 +76,4 @@ def error(context, request):
 
 
 def includeme(config):
-    settings = config.registry.settings
-    settings['origins'] = aslist(settings.get('origins', ''))
-
     config.scan(__name__)

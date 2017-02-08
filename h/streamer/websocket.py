@@ -45,7 +45,6 @@ class Message(namedtuple('Message', [
 class WebSocket(_WebSocket):
     # All instances of WebSocket, allowing us to iterate over open websockets
     instances = weakref.WeakSet()
-    origins = []
 
     # Instance attributes
     client_id = None
