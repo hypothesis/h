@@ -30,9 +30,6 @@ def render_app(request, extra=None):
     client_sentry_dsn = request.registry.settings.get('h.client.sentry_dsn')
     html = client.render_app_html(
         assets_env=request.registry['assets_client_env'],
-        # FIXME: The '' here is to ensure this has a trailing slash. This seems
-        # rather messy, and is inconsistent with the rest of the application's
-        # URLs.
         api_url=request.route_url('api.index'),
         service_url=request.route_url('index'),
         sentry_public_dsn=client_sentry_dsn,
