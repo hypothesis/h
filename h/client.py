@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Provides functions for building the assets for the Hypothesis client
-application.
+Provides functions for rendering the `app.html` entry point for the Hypothesis
+client's sidebar application.
 """
 import json
 from h._compat import urlparse
@@ -104,28 +104,3 @@ def render_app_html(assets_env,
     if extra is not None:
         context.update(extra)
     return template.render(context)
-
-
-def embed_context(assets_env, app_html_url, base_url=None,
-                  client_asset_root=None, client_boot_url=None):
-    """
-    Return the context for the `embed.js` template.
-
-    :param assets_env: The assets environment
-    :param app_html_url: The URL of the app.html page for the sidebar
-    :param base_url: The absolute base URL of the web service
-    :param client_asset_root: The absolute URL where client assets are hosted
-    :param client_boot_url: The URL of the client's boot script
-    """
-
-    def absolute_asset_urls(bundle_name):
-        return [urlparse.urljoin(base_url, url)
-                for url in assets_env.urls(bundle_name)]
-
-    return {
-        'app_html_url': app_html_url,
-        'client_asset_root': client_asset_root,
-        'client_boot_url': client_boot_url,
-        'inject_resource_urls': (absolute_asset_urls('inject_js') +
-                                 absolute_asset_urls('inject_css'))
-    }

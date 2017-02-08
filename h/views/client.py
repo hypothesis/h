@@ -8,6 +8,8 @@ Views which exist either to serve or support the JavaScript annotation client.
 
 from __future__ import unicode_literals
 
+from h._compat import urlparse
+
 from pyramid.view import view_config
 
 from h import client
@@ -62,12 +64,20 @@ def annotator_token(request):
 def embed(request):
     request.response.content_type = 'text/javascript'
 
-    return client.embed_context(
-        assets_env=request.registry['assets_client_env'],
-        app_html_url=request.route_url('widget'),
-        base_url=request.route_url('index'),
-        client_asset_root=request.route_url('assets_client', subpath=''),
-        client_boot_url=_client_boot_url(request))
+    assets_env = request.registry['assets_client_env']
+    base_url = request.route_url('index')
+
+    def absolute_asset_urls(bundle_name):
+        return [urlparse.urljoin(base_url, url)
+                for url in assets_env.urls(bundle_name)]
+
+    return {
+        'app_html_url': request.route_url('widget'),
+        'client_asset_root': request.route_url('assets_client', subpath=''),
+        'client_boot_url': _client_boot_url(request),
+        'inject_resource_urls': (absolute_asset_urls('inject_js') +
+                                 absolute_asset_urls('inject_css'))
+    }
 
 
 @json_view(route_name='session', http_cache=0)
