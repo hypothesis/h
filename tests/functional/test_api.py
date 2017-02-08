@@ -49,6 +49,20 @@ class TestAPI(object):
         assert res.status_code == 400
         assert res.json['reason'].startswith('group:')
 
+    def test_anonymous_profile_api(self, app):
+        """
+        Fetch an anonymous "profile".
+
+        With no authentication and no authority parameter, this should default
+        to the site's `auth_domain` and show only the global group.
+        """
+
+        res = app.get('/api/profile')
+
+        assert res.json['userid'] is None
+        assert res.json['authority'] == 'example.com'
+        assert [group['id'] for group in res.json['groups']] == ['__world__']
+
     def test_profile_api(self, app, user_with_token):
         """Fetch a profile through the API for an authenticated user."""
 

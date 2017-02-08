@@ -9,21 +9,35 @@ def model(request):
     session = {}
     session['csrf'] = request.session.get_csrf_token()
     session['userid'] = request.authenticated_userid
-    session['groups'] = _current_groups(request)
+    session['groups'] = _current_groups(request, request.auth_domain)
     session['features'] = request.feature.all()
     session['preferences'] = _user_preferences(request.authenticated_user)
     return session
 
 
-def profile(request):
+def profile(request, authority=None):
     """
     Return a representation of the current user's information and settings.
+
+    If the request is unauthenticated (and so not tied to a particular
+    authority), the authority parameter can be used to override the authority
+    used to find public groups (by default, this is the `auth_domain` of the
+    request). This parameter is ignored for authenticated requests.
+
     """
+    user = request.authenticated_user
+
+    if user is not None:
+        authority = user.authority
+    else:
+        authority = authority or request.auth_domain
+
     profile = {}
     profile['userid'] = request.authenticated_userid
-    profile['groups'] = _current_groups(request)
+    profile['authority'] = authority
+    profile['groups'] = _current_groups(request, authority)
     profile['features'] = request.feature.all()
-    profile['preferences'] = _user_preferences(request.authenticated_user)
+    profile['preferences'] = _user_preferences(user)
     return profile
 
 
@@ -41,7 +55,7 @@ def _group_sort_key(group):
     return (group.name.lower(), group.pubid)
 
 
-def _current_groups(request):
+def _current_groups(request, authority):
     """Return a list of the groups the current user is a member of.
 
     This list is meant to be returned to the client in the "session" model.
@@ -49,7 +63,6 @@ def _current_groups(request):
     """
 
     user = request.authenticated_user
-    authority = user.authority if user else request.auth_domain
     authority_groups = (request.find_service(name='authority_group')
                         .public_groups(authority=authority))
 
