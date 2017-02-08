@@ -57,13 +57,6 @@ def test_private_group_has_url_in_model(authenticated_request):
     assert private_group['url']
 
 
-def test_publisher_group_has_no_url_in_model(third_party_request, publisher_group):
-    model = session.model(third_party_request)
-    group = [g for g in model['groups'] if g['id'] == publisher_group.pubid][0]
-
-    assert 'url' not in group
-
-
 def test_model_includes_features(authenticated_request):
     feature_dict = {
         'feature_one': True,
