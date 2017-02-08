@@ -7,10 +7,12 @@ import datetime
 import mock
 import pytest
 
+from h.services.auth_token import auth_token_service_factory
 from h.services.oauth import oauth_service_factory
 from h.services.user import user_service_factory
 from h.exceptions import OAuthTokenError
 from h.views import api_auth as views
+from memex.presenters import utc_iso8601
 
 
 @pytest.mark.usefixtures('user_service', 'oauth_service')
@@ -71,6 +73,84 @@ class TestAccessToken(object):
         svc = mock.Mock(spec_set=user_service_factory(None, pyramid_request))
         pyramid_config.register_service(svc, name='user')
         return svc
+
+
+class TestDebugToken(object):
+    def test_it_raises_error_when_token_is_missing(self, pyramid_request):
+        pyramid_request.auth_token = None
+
+        with pytest.raises(OAuthTokenError) as exc:
+            views.debug_token(pyramid_request)
+
+        assert exc.value.type == 'missing_token'
+        assert 'Bearer token is missing' in exc.value.message
+
+    def test_it_raises_error_when_token_is_empty(self, pyramid_request):
+        pyramid_request.auth_token = ''
+
+        with pytest.raises(OAuthTokenError) as exc:
+            views.debug_token(pyramid_request)
+
+        assert exc.value.type == 'missing_token'
+        assert 'Bearer token is missing' in exc.value.message
+
+    def test_it_validates_token(self, pyramid_request, token_service):
+        pyramid_request.auth_token = 'the-access-token'
+
+        views.debug_token(pyramid_request)
+
+        token_service.validate.assert_called_once_with('the-access-token')
+
+    def test_it_raises_error_when_token_is_invalid(self, pyramid_request, token_service):
+        pyramid_request.auth_token = 'the-token'
+        token_service.validate.return_value = None
+
+        with pytest.raises(OAuthTokenError) as exc:
+            views.debug_token(pyramid_request)
+
+        assert exc.value.type == 'missing_token'
+        assert 'Bearer token does not exist or is expired' in exc.value.message
+
+    def test_returns_debug_data_for_oauth_token(self, pyramid_request, token_service, oauth_token):
+        pyramid_request.auth_token = oauth_token.value
+        token_service.fetch.return_value = oauth_token
+
+        result = views.debug_token(pyramid_request)
+
+        assert result == {'userid': oauth_token.userid,
+                          'client': {'id': oauth_token.authclient.id,
+                                     'name': oauth_token.authclient.name},
+                          'issued_at': utc_iso8601(oauth_token.created),
+                          'expires_at': utc_iso8601(oauth_token.expires),
+                          'expired': oauth_token.expired}
+
+    def test_returns_debug_data_for_developer_token(self, pyramid_request, token_service, developer_token):
+        pyramid_request.auth_token = developer_token.value
+        token_service.fetch.return_value = developer_token
+
+        result = views.debug_token(pyramid_request)
+
+        assert result == {'userid': developer_token.userid,
+                          'issued_at': utc_iso8601(developer_token.created),
+                          'expires_at': None,
+                          'expired': False}
+
+    @pytest.fixture
+    def token_service(self, pyramid_config, pyramid_request):
+        pyramid_config.registry.settings['h.client_secret'] = 'notsosecretafterall'
+        svc = mock.Mock(spec_set=auth_token_service_factory(None, pyramid_request))
+        pyramid_config.register_service(svc, name='auth_token')
+        return svc
+
+    @pytest.fixture
+    def oauth_token(self, factories):
+        authclient = factories.AuthClient(name='Example Client')
+        expires = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+        return factories.Token(authclient=authclient, expires=expires)
+
+    @pytest.fixture
+    def developer_token(self, factories):
+        return factories.Token()
 
 
 class TestAPITokenError(object):
