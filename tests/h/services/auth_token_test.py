@@ -58,9 +58,20 @@ class TestAuthTokenService(object):
 
         assert result is None
 
+    def test_fetch_returns_database_model(self, svc, token):
+        assert svc.fetch(token.value) == token
+
+    @pytest.mark.usefixtures('token')
+    def test_fetch_returns_none_when_not_found(self, svc):
+        assert svc.fetch('bogus') is None
+
     @pytest.fixture
     def svc(self, db_session):
         return AuthTokenService(db_session, 'secret')
+
+    @pytest.fixture
+    def token(self, factories):
+        return factories.Token()
 
     def time(self, days_delta=0):
         return datetime.datetime.utcnow() + datetime.timedelta(days=days_delta)
