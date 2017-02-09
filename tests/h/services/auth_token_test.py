@@ -32,6 +32,15 @@ class TestAuthTokenService(object):
 
         assert result is not None
 
+    def test_validate_returns_none_for_cached_invalid_token(self, svc, factories, db_session):
+        token_model = factories.Token(expires=self.time(-1))
+
+        svc.validate(token_model.value)
+        db_session.delete(token_model)
+        result = svc.validate(token_model.value)
+
+        assert result is None
+
     def test_validate_returns_none_for_invalid_database_token(self, svc, factories):
         token_model = factories.Token(expires=self.time(-1))
 
@@ -58,9 +67,20 @@ class TestAuthTokenService(object):
 
         assert result is None
 
+    def test_fetch_returns_database_model(self, svc, token):
+        assert svc.fetch(token.value) == token
+
+    @pytest.mark.usefixtures('token')
+    def test_fetch_returns_none_when_not_found(self, svc):
+        assert svc.fetch('bogus') is None
+
     @pytest.fixture
     def svc(self, db_session):
         return AuthTokenService(db_session, 'secret')
+
+    @pytest.fixture
+    def token(self, factories):
+        return factories.Token()
 
     def time(self, days_delta=0):
         return datetime.datetime.utcnow() + datetime.timedelta(days=days_delta)

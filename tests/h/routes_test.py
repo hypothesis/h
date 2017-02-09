@@ -57,6 +57,7 @@ def test_includeme():
         call('assets', '/assets/*subpath'),
         call('badge', '/api/badge'),
         call('api.profile', '/api/profile'),
+        call('api.debug_token', '/api/debug-token'),
         call('token', '/api/token'),
         call('api.users', '/api/users'),
         call('session', '/app'),

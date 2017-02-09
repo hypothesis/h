@@ -52,18 +52,18 @@ class TestToken(object):
         expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         token = Token(expires=expires)
 
-        assert not token.expired
+        assert token.expired is False
 
     def test_expired_is_false_if_expires_is_none(self):
         token = Token(expires=None)
 
-        assert not token.expired
+        assert token.expired is False
 
     def test_expired_is_true_if_expires_is_in_the_past(self):
         expires = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
         token = Token(expires=expires)
 
-        assert token.expired
+        assert token.expired is True
 
     def test_get_dev_token_by_userid_filters_by_userid(self, db_session, factories):
         token_1 = factories.Token(userid='acct:vanessa@example.org', authclient=None)

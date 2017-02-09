@@ -18,19 +18,18 @@ class TestOAuth(object):
         access_token = response['access_token']
 
         # Test that you can use the access token to authorize with the API.
-        profile = app.get(
-            '/api/profile',
+        app.get(
+            '/api/debug-token',
             headers={'Authorization': str('Bearer {}'.format(access_token))},
         )
-        assert profile.json_body['userid']
 
     def test_request_fails_if_access_token_wrong(self, app, authclient,
                                                  userid):
-        profile = app.get(
-            '/api/profile',
+        app.get(
+            '/api/debug-token',
             headers={'Authorization': str('Bearer wrong')},
+            status=401,
         )
-        assert profile.json_body['userid'] is None
 
     def test_request_fails_if_access_token_expired(self, app, authclient,
                                                    db_session, factories,
@@ -40,11 +39,11 @@ class TestOAuth(object):
         token = token.value
         db_session.commit()
 
-        profile = app.get(
-            '/api/profile',
+        app.get(
+            '/api/debug-token',
             headers={'Authorization': str('Bearer {}'.format(token))},
+            status=401,
         )
-        assert profile.json_body['userid'] is None
 
     def test_using_a_refresh_token(self, app, authclient, userid):
         """Get a new access token by POSTing a refresh token to /api/token."""
@@ -64,22 +63,20 @@ class TestOAuth(object):
         new_access_token = response.json_body['access_token']
 
         # Test that the new access token works.
-        new_token_profile = app.get(
-            '/api/profile',
+        app.get(
+            '/api/debug-token',
             headers={
                 'Authorization': str('Bearer {}'.format(new_access_token)),
             },
         )
-        assert new_token_profile.json_body['userid']
 
         # Test that the old access token still works, too.
-        old_token_profile = app.get(
-            '/api/profile',
+        app.get(
+            '/api/debug-token',
             headers={
                 'Authorization': str('Bearer {}'.format(old_access_token)),
             },
         )
-        assert old_token_profile.json_body['userid']
 
     def test_refresh_token_request_fails_if_refresh_token_wrong(self, app,
                                                                 authclient,
@@ -117,11 +114,11 @@ class TestOAuth(object):
         response = self.get_access_token(app, authclient, userid)
         refresh_token = response['refresh_token']
 
-        profile = app.get(
-            '/api/profile',
+        app.get(
+            '/api/debug-token',
             headers={'Authorization': str('Bearer {}'.format(refresh_token))},
+            status=401,
         )
-        assert profile.json_body['userid'] is None
 
     def get_access_token(self, app, authclient, userid):
         """Get an access token by POSTing a grant token to /api/token."""
