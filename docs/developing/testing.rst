@@ -12,6 +12,14 @@ some of the testing techniques they provide (factories and parametrization).
 
 .. _guide to getting started: https://www.seanh.cc/posts/running-the-h-tests
 
+Unit and functional tests
+-------------------------
+
+We keep our functional tests separate from our unit tests, in the
+``tests/functional`` directory. Because these are slow to run, we will usually
+write one or two functional tests to check a new feature works in the common
+case, and unit tests for all the other cases.
+
 Using mock objects
 ------------------
 
