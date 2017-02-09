@@ -8,6 +8,8 @@ Views which exist either to serve or support the JavaScript annotation client.
 
 from __future__ import unicode_literals
 
+from h._compat import urlparse
+
 from pyramid.view import view_config
 
 from h import client
@@ -16,20 +18,27 @@ from h.auth.tokens import generate_jwt
 from h.util.view import json_view
 
 
+def _client_boot_url(request):
+    client_boot_url = None
+    if request.feature('use_client_boot_script'):
+        client_boot_url = request.route_url('assets_client', subpath='boot.js')
+    return client_boot_url
+
+
 def render_app(request, extra=None):
     """Render a page that serves a preconfigured annotation client."""
+
+    client_boot_url = _client_boot_url(request)
     client_sentry_dsn = request.registry.settings.get('h.client.sentry_dsn')
     html = client.render_app_html(
         assets_env=request.registry['assets_client_env'],
-        # FIXME: The '' here is to ensure this has a trailing slash. This seems
-        # rather messy, and is inconsistent with the rest of the application's
-        # URLs.
         api_url=request.route_url('api.index'),
         service_url=request.route_url('index'),
         sentry_public_dsn=client_sentry_dsn,
         websocket_url=request.registry.settings.get('h.websocket_url'),
         ga_client_tracking_id=request.registry.settings.get('ga_client_tracking_id'),
-        extra=extra)
+        extra=extra,
+        client_boot_url=client_boot_url)
     request.response.text = html
     return request.response
 
@@ -50,14 +59,25 @@ def annotator_token(request):
     return generate_jwt(request, 3600)
 
 
-@view_config(route_name='embed')
-def embed(context, request):
-    request.response.content_type = b'text/javascript'
-    request.response.text = client.render_embed_js(
-        assets_env=request.registry['assets_client_env'],
-        app_html_url=request.route_url('widget'),
-        base_url=request.route_url('index'))
-    return request.response
+@view_config(route_name='embed',
+             renderer='h:templates/embed.js.jinja2')
+def embed(request):
+    request.response.content_type = 'text/javascript'
+
+    assets_env = request.registry['assets_client_env']
+    base_url = request.route_url('index')
+
+    def absolute_asset_urls(bundle_name):
+        return [urlparse.urljoin(base_url, url)
+                for url in assets_env.urls(bundle_name)]
+
+    return {
+        'app_html_url': request.route_url('widget'),
+        'client_asset_root': request.route_url('assets_client', subpath=''),
+        'client_boot_url': _client_boot_url(request),
+        'inject_resource_urls': (absolute_asset_urls('inject_js') +
+                                 absolute_asset_urls('inject_css'))
+    }
 
 
 @json_view(route_name='session', http_cache=0)
@@ -69,4 +89,7 @@ def session_view(request):
 
 @view_config(route_name='widget')
 def widget(context, request):
+    """
+    Return the HTML for the Hypothesis client's sidebar application.
+    """
     return render_app(request)
