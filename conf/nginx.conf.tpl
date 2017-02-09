@@ -84,4 +84,16 @@ http {
       # FALLBACK-END
     }
   }
+
+  server {
+    listen 127.0.0.234:5000;
+    server_name _;
+
+    location /status {
+      stub_status on;
+      access_log off;
+      allow 127.0.0.0/24;
+      deny all;
+    }
+  }
 }
