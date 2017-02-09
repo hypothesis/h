@@ -5,8 +5,7 @@
 
 set -eu
 
-CONF_TEMPLATE=/etc/collectd/collectd.conf.tpl
-CONF_DEST=/etc/collectd/collectd.conf
+CONF_FILE=/etc/collectd/collectd.conf
 EXTRA_CONF_DIR=/etc/collectd/collectd.conf.d
 
 if [ -n "$GRAPHITE_HOST" ]; then
@@ -29,7 +28,7 @@ LoadPlugin write_graphite
 </Plugin>
 EOM
 
-    exec collectd -f -C $CONF_DEST
+    exec collectd -f -C $CONF_FILE
 else
   echo "INFO: GRAPHITE_HOST not provided so collectd will not be started"
   exit 0
