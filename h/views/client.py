@@ -80,19 +80,14 @@ def sidebar_app(request, extra=None):
                   attributes to be included on the page.
     """
 
-    client_sentry_dsn = request.registry.settings.get('h.client.sentry_dsn')
-    assets_env = request.registry['assets_client_env']
-    api_url = request.route_url('api.index')
-    service_url = request.route_url('index')
-    sentry_public_dsn = client_sentry_dsn
-    websocket_url = request.registry.settings.get('h.websocket_url')
-    ga_client_tracking_id = request.registry.settings.get('ga_client_tracking_id')
+    settings = request.registry.settings
+    ga_client_tracking_id = settings.get('ga_client_tracking_id')
 
-    ctx = _app_html_context(api_url=api_url,
-                            service_url=service_url,
-                            sentry_public_dsn=sentry_public_dsn,
-                            assets_env=assets_env,
-                            websocket_url=websocket_url,
+    ctx = _app_html_context(api_url=request.route_url('api.index'),
+                            service_url=request.route_url('index'),
+                            sentry_public_dsn=settings.get('h.client.sentry_dsn'),
+                            assets_env=request.registry['assets_client_env'],
+                            websocket_url=settings.get('h.websocket_url'),
                             ga_client_tracking_id=ga_client_tracking_id).copy()
     if extra is not None:
         ctx.update(extra)
