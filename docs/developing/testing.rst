@@ -27,15 +27,23 @@ The ``mock`` library lets us construct fake versions of our objects to help with
 testing. While this can make it easier to write fast, isolated tests, it also
 makes it easier to write tests that don't reflect reality.
 
-Where practical, we prefer to write tests using (in order of preference):
+In an ideal world, we would always be able to use real objects instead of stubs
+or mocks, but sometimes this can result in:
 
-1. Real objects
-2. Fake objects
-3. Mock objects constructed with ``spec_set`` or ``autospec`` – these objects
-   will only respond to the same methods as the real objects they replace,
-   which reduces the risk of mocks that do not behave like their real
-   counterparts
-4. Generic mock objects
+- complicated test setup code
+- slow tests
+- coupling of test assertions to non-interface implementation details
 
-This is a deliberate decision that, when we have to choose between test
-isolation and test fidelity, we usually want to choose test fidelity.
+For new code, it's usually a good idea to design the code so that it's easy to
+test with "real" objects, rather than stubs or mocks. It can help to make
+extensive use of `value objects`_ in tested interfaces (using
+``collections.namedtuple`` from the standard library, for example) and apply
+the `functional core, imperative shell`_ pattern.
+
+For older code which doesn't make testing so easy, or for code that is part of
+the "imperative shell" (see link in previous paragraph) it can sometimes be
+hard to test what you need without resorting to stubs or mock objects, and
+that's fine.
+
+.. _value objects: https://martinfowler.com/bliki/ValueObject.html
+.. _functional core, imperative shell: https://www.destroyallsoftware.com/talks/boundaries
