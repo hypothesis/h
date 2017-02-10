@@ -22,7 +22,7 @@ def test_annotator_token_returns_token(generate_jwt, pyramid_request):
     assert result == generate_jwt.return_value
 
 
-@pytest.mark.usefixtures('client_registry_settings', 'routes')
+@pytest.mark.usefixtures('client_assets_env', 'routes', 'pyramid_settings')
 class TestSidebarApp(object):
 
     def test_it_includes_client_config(self, pyramid_request):
@@ -47,7 +47,7 @@ class TestSidebarApp(object):
         assert ctx['app_js_urls'] == ['/assets/client/app.js']
 
 
-@pytest.mark.usefixtures('client_registry_settings', 'routes')
+@pytest.mark.usefixtures('client_assets_env', 'routes', 'pyramid_settings')
 class TestEmbed(object):
     def test_it_sets_sidebar_app_url(self, pyramid_request):
         ctx = client.embed(pyramid_request)
@@ -67,14 +67,7 @@ class TestEmbed(object):
 
 
 @pytest.fixture
-def client_registry_settings(pyramid_config, pyramid_request):
-    """
-    Add settings required by client views to the application registry.
-
-    This fixture depends on `pyramid_config`, which initializes the registry,
-    so that it runs before this one.
-    """
-
+def client_assets_env(pyramid_config):
     assets_client_env = Mock(spec_set=['urls'])
 
     bundles = {
@@ -87,11 +80,19 @@ def client_registry_settings(pyramid_config, pyramid_request):
     def urls(bundle_name):
         return bundles[bundle_name]
     assets_client_env.urls = urls
-    pyramid_request.registry['assets_client_env'] = assets_client_env
+    pyramid_config.registry['assets_client_env'] = assets_client_env
 
-    pyramid_request.registry.settings['ga_client_tracking_id'] = 'UA-4567'
-    pyramid_request.registry.settings['h.client.sentry_dsn'] = 'test-sentry-dsn'
-    pyramid_request.registry.settings['h.websocket_url'] = 'wss://example.com/ws'
+
+@pytest.fixture
+def pyramid_settings(pyramid_settings):
+
+    pyramid_settings.update({
+        'ga_client_tracking_id': 'UA-4567',
+        'h.client.sentry_dsn': 'test-sentry-dsn',
+        'h.websocket_url': 'wss://example.com/ws',
+        })
+
+    return pyramid_settings
 
 
 @pytest.fixture
