@@ -23,8 +23,7 @@ if not os.environ.get('GUNICORN_STATS_DISABLE', None):
         statsd_host = '{}:{}'.format(_host, _port)
 
     if 'STATSD_PREFIX' in os.environ:
-        _hostname = socket.gethostname()
-        statsd_prefix = '.'.join([os.environ['STATSD_PREFIX'], _hostname])
+        statsd_prefix = os.environ['STATSD_PREFIX']
 
 
 def post_fork(server, worker):
