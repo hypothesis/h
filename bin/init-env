@@ -1,0 +1,27 @@
+#!/bin/sh
+
+: ${STATSD_PREFIX:=}
+
+set -eu
+
+extend_statsd_prefix () {
+  local statsd_prefix=${1}
+  local instance_id=${2}
+
+  local hostname
+  if [ -z "${instance_id}" ]; then
+    hostname=$(hostname)
+  else
+    hostname=${instance_id}
+  fi
+
+  if [ -n "${statsd_prefix}" ]; then
+    statsd_prefix="${statsd_prefix}."
+  fi
+  echo "${statsd_prefix}${hostname}"
+}
+
+export INSTANCE_ID=$(wget -O - -T 1 http://169.254.169.254/1.0/meta-data/instance-id 2>/dev/null || echo '')
+export STATSD_PREFIX=$(extend_statsd_prefix "$STATSD_PREFIX" "$INSTANCE_ID")
+
+exec "$@"

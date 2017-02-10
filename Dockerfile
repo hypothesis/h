@@ -64,4 +64,4 @@ ENV PYTHONPATH /var/lib/hypothesis:$PYTHONPATH
 
 # Start the web server by default
 USER hypothesis
-CMD ["supervisord", "-c" , "conf/supervisord.conf"]
+CMD ["init-env", "supervisord", "-c" , "conf/supervisord.conf"]
