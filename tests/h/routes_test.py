@@ -61,7 +61,7 @@ def test_includeme():
         call('token', '/api/token'),
         call('api.users', '/api/users'),
         call('session', '/app'),
-        call('widget', '/app.html'),
+        call('sidebar_app', '/app.html'),
         call('embed', '/embed.js'),
         call('stream_atom', '/stream.atom'),
         call('stream_rss', '/stream.rss'),
