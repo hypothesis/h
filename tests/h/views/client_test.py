@@ -22,11 +22,11 @@ def test_annotator_token_returns_token(generate_jwt, pyramid_request):
     assert result == generate_jwt.return_value
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('client_registry_settings', 'routes')
 class TestSidebarApp(object):
 
-    def test_it_includes_client_config(self, pyramid_request_):
-        ctx = client.sidebar_app(pyramid_request_)
+    def test_it_includes_client_config(self, pyramid_request):
+        ctx = client.sidebar_app(pyramid_request)
         expected_config = {
                 'apiUrl': 'http://example.com/api',
                 'websocketUrl': 'wss://example.com/ws',
@@ -41,33 +41,40 @@ class TestSidebarApp(object):
         actual_config = json.loads(ctx['app_config'])
         assert actual_config == expected_config
 
-    def test_it_sets_asset_urls(self, pyramid_request_):
-        ctx = client.sidebar_app(pyramid_request_)
+    def test_it_sets_asset_urls(self, pyramid_request):
+        ctx = client.sidebar_app(pyramid_request)
         assert ctx['app_css_urls'] == ['/assets/client/app.css']
         assert ctx['app_js_urls'] == ['/assets/client/app.js']
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('client_registry_settings', 'routes')
 class TestEmbed(object):
-    def test_it_sets_sidebar_app_url(self, pyramid_request_):
-        ctx = client.embed(pyramid_request_)
+    def test_it_sets_sidebar_app_url(self, pyramid_request):
+        ctx = client.embed(pyramid_request)
         assert ctx['app_html_url'] == 'http://example.com/app.html'
 
-    def test_it_sets_asset_urls(self, pyramid_request_):
-        ctx = client.embed(pyramid_request_)
+    def test_it_sets_asset_urls(self, pyramid_request):
+        ctx = client.embed(pyramid_request)
         assert ctx['inject_resource_urls'] == [
             'http://example.com/assets/client/polyfills.js',
             'http://example.com/assets/client/inject.js',
             'http://example.com/assets/client/inject.css',
             ]
 
-    def test_it_sets_content_type(self, pyramid_request_):
-        client.embed(pyramid_request_)
-        assert pyramid_request_.response.content_type == 'text/javascript'
+    def test_it_sets_content_type(self, pyramid_request):
+        client.embed(pyramid_request)
+        assert pyramid_request.response.content_type == 'text/javascript'
 
 
 @pytest.fixture
-def pyramid_request_(pyramid_request):
+def client_registry_settings(pyramid_config, pyramid_request):
+    """
+    Add settings required by client views to the application registry.
+
+    This fixture depends on `pyramid_config`, which initializes the registry,
+    so that it runs before this one.
+    """
+
     assets_client_env = Mock(spec_set=['urls'])
 
     bundles = {
@@ -85,7 +92,6 @@ def pyramid_request_(pyramid_request):
     pyramid_request.registry.settings['ga_client_tracking_id'] = 'UA-4567'
     pyramid_request.registry.settings['h.client.sentry_dsn'] = 'test-sentry-dsn'
     pyramid_request.registry.settings['h.websocket_url'] = 'wss://example.com/ws'
-    return pyramid_request
 
 
 @pytest.fixture
