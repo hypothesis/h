@@ -40,7 +40,7 @@ def _check_search(request):
 
 def _check_celery():
     try:
-        result = celery.control.ping(timeout=0.25)
+        result = celery.control.ping(timeout=0.25, limit=1)
         if not result:
             raise APIError('Celery ping failed')
 
