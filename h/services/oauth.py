@@ -108,6 +108,10 @@ class OAuthService(object):
             raise OAuthTokenError('user with userid described in subject could not be found',
                                   'invalid_grant')
 
+        if claims['exp'] - claims['nbf'] > 10 * 60:
+            raise OAuthTokenError('token lifetime is greater than 600 seconds',
+                                  'invalid_grant')
+
         if user.authority != authclient.authority:
             raise OAuthTokenError('authenticated client and JWT subject authorities do not match',
                                   'invalid_grant')

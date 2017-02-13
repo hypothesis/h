@@ -209,6 +209,21 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
         assert exc.value.type == 'invalid_grant'
         assert 'authenticated client and JWT subject authorities do not match' in exc.value
 
+
+    @pytest.mark.parametrize('grant_start,grant_expiry',
+                             [[None, timedelta(minutes=15)],
+                              [timedelta(minutes=-15), None],
+                              [timedelta(minutes=-9), timedelta(minutes=9)]])
+    def test_overlong_expiry(self, svc, claims, authclient, jwt_bearer_body, grant_start, grant_expiry):
+        claims['nbf'] = self.epoch(delta=grant_start)
+        claims['exp'] = self.epoch(delta=grant_expiry)
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(jwt_bearer_body)
+
+        assert exc.value.type == 'invalid_grant'
+
     @pytest.fixture
     def svc(self, pyramid_request, db_session, user_service):
         return oauth.OAuthService(db_session, user_service, pyramid_request.domain)
