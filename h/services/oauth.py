@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import numbers
 
 import jwt
 import sqlalchemy as sa
@@ -101,6 +102,14 @@ class OAuthService(object):
                               key=authclient.secret,
                               leeway=10,
                               options=token_options)
+
+        timestamp_claims = set(['iat', 'nbf', 'exp'])
+
+        # Check that any timestamp claims are numeric
+        for claim_name in timestamp_claims & set(claims.keys()):
+            if not isinstance(claims[claim_name], numbers.Real):
+                raise OAuthTokenError('invalid claim {}'.format(claim_name),
+                                      'invalid_grant')
 
         userid = claims.get('sub')
         if not userid:

@@ -244,6 +244,31 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
         assert exc.value.type == 'invalid_grant'
         assert 'JWT is missing claim nbf' in exc.value
 
+    @pytest.mark.parametrize('claim_name', ['nbf', 'exp'])
+    def test_null_timestamp(self, svc, claims, authclient, jwt_bearer_body, claim_name):
+        claims[claim_name] = None
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(jwt_bearer_body)
+
+        assert exc.value.type == 'invalid_grant'
+        assert 'JWT is missing claim {}'.format(claim_name) in exc.value
+
+    @pytest.mark.parametrize('claim_name,delta',
+                             [['iat', timedelta(minutes=-5)],
+                              ['nbf', timedelta(minutes=-5)],
+                              ['exp', timedelta(minutes=5)]])
+    def test_string_timestamp(self, svc, claims, authclient, jwt_bearer_body, claim_name, delta):
+        claims[claim_name] = unicode(self.epoch(delta=delta))
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(jwt_bearer_body)
+
+        assert exc.value.type == 'invalid_grant'
+        assert 'invalid claim {}'.format(claim_name) in exc.value
+
     @pytest.fixture
     def svc(self, pyramid_request, db_session, user_service):
         return oauth.OAuthService(db_session, user_service, pyramid_request.domain)
