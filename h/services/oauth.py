@@ -93,11 +93,14 @@ class OAuthService(object):
         if not authclient:
             raise OAuthTokenError('given JWT issuer is invalid', 'invalid_grant')
 
+        token_options = {'require_exp': True, 'require_nbf': True}
+
         claims = self._decode(token,
                               algorithms=['HS256'],
                               audience=self.domain,
                               key=authclient.secret,
-                              leeway=10)
+                              leeway=10,
+                              options=token_options)
 
         userid = claims.get('sub')
         if not userid:

@@ -224,6 +224,26 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
 
         assert exc.value.type == 'invalid_grant'
 
+    def test_missing_expiry(self, svc, claims, authclient, jwt_bearer_body):
+        del claims['exp']
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(jwt_bearer_body)
+
+        assert exc.value.type == 'invalid_grant'
+        assert 'JWT is missing claim exp' in exc.value
+
+    def test_missing_nbf(self, svc, claims, authclient, jwt_bearer_body):
+        del claims['nbf']
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
+
+        with pytest.raises(OAuthTokenError) as exc:
+            svc.verify_token_request(jwt_bearer_body)
+
+        assert exc.value.type == 'invalid_grant'
+        assert 'JWT is missing claim nbf' in exc.value
+
     @pytest.fixture
     def svc(self, pyramid_request, db_session, user_service):
         return oauth.OAuthService(db_session, user_service, pyramid_request.domain)
