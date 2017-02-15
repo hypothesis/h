@@ -260,7 +260,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
                               ['nbf', timedelta(minutes=-5)],
                               ['exp', timedelta(minutes=5)]])
     def test_string_timestamp(self, svc, claims, authclient, jwt_bearer_body, claim_name, delta):
-        claims[claim_name] = unicode(self.epoch(delta=delta))
+        claims[claim_name] = text_type(self.epoch(delta=delta))
         jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
