@@ -209,7 +209,6 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
         assert exc.value.type == 'invalid_grant'
         assert 'authenticated client and JWT subject authorities do not match' in exc.value
 
-
     @pytest.mark.parametrize('grant_start,grant_expiry',
                              [[None, timedelta(minutes=15)],
                               [timedelta(minutes=-15), None],
