@@ -78,7 +78,7 @@ class TestAddApiView(object):
         views.add_api_view(pyramid_config, view)
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['request_method'] == (
-            'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS')
+            'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'OPTIONS')
 
     @pytest.mark.parametrize('link_name,description,request_method,expected_method', [
         ('thing.read', 'Fetch a thing', None, 'GET'),
