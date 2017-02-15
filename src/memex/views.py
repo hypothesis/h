@@ -248,12 +248,12 @@ def read_jsonld(context, request):
 
 
 @api_config(route_name='api.annotation',
-            request_method='PUT',
+            request_method=('PATCH', 'PUT'),
             permission='update',
             link_name='annotation.update',
             description='Update an annotation')
 def update(context, request):
-    """Update the specified annotation with data from the PUT payload."""
+    """Update the specified annotation with data from the PATCH payload."""
     schema = schemas.UpdateAnnotationSchema(request,
                                             context.annotation.target_uri,
                                             context.annotation.groupid)

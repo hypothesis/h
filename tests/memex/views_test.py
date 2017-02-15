@@ -142,7 +142,7 @@ class TestIndex(object):
         assert links['annotation']['read']['method'] == 'GET'
         assert links['annotation']['read']['url'] == (
             host + '/dummy/annotations/:id')
-        assert links['annotation']['update']['method'] == 'PUT'
+        assert links['annotation']['update']['method'] == 'PATCH'
         assert links['annotation']['update']['url'] == (
             host + '/dummy/annotations/:id')
         assert links['search']['method'] == 'GET'
