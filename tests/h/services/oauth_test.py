@@ -318,9 +318,8 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
     def jwt_token(self, claims, secret, algorithm='HS256'):
         return text_type(jwt.encode(claims, secret, algorithm=algorithm))
 
-    def epoch(self, timestamp=None, delta=None):
-        if timestamp is None:
-            timestamp = datetime.utcnow()
+    def epoch(self, delta=None):
+        timestamp = datetime.utcnow()
 
         if delta is not None:
             timestamp = timestamp + delta
