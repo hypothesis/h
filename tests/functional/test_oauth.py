@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import calendar
 import datetime
 
 import jwt
@@ -122,16 +123,30 @@ class TestOAuth(object):
 
     def get_access_token(self, app, authclient, userid):
         """Get an access token by POSTing a grant token to /api/token."""
+        claims = {
+            'iss': authclient.id,
+            'aud': 'localhost',
+            'sub': userid,
+            'nbf': self.epoch(),
+            'exp': self.epoch(delta=datetime.timedelta(minutes=5)),
+        }
         response = app.post(
             '/api/token',
             {
                 'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                'assertion': jwt.encode({'iss': authclient.id,
-                                         'aud': 'localhost',
-                                         'sub': userid,
-                                         }, authclient.secret)},
+                'assertion': jwt.encode(claims, authclient.secret)
+            },
         )
         return response.json_body
+
+    def epoch(self, delta=None):
+        """Get a Unix timestamp for the current time, with optional offset."""
+        timestamp = datetime.datetime.utcnow()
+
+        if delta is not None:
+            timestamp = timestamp + delta
+
+        return calendar.timegm(timestamp.utctimetuple())
 
     @pytest.fixture
     def authclient(self, db_session, factories):
