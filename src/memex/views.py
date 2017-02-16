@@ -42,7 +42,7 @@ cors_policy = cors.policy(
         'X-Annotator-Auth-Token',
         'X-Client-Id',
     ),
-    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
+    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'),
     allow_preflight=True)
 
 
@@ -99,7 +99,7 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
     if not isinstance(request_method, tuple):
         request_method = (request_method,)
     if len(request_method) == 0:
-        request_method = ('DELETE', 'GET', 'HEAD', 'POST', 'PUT',)
+        request_method = ('DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT',)
     settings['request_method'] = request_method + ('OPTIONS',)
 
     if link_name:
@@ -248,12 +248,15 @@ def read_jsonld(context, request):
 
 
 @api_config(route_name='api.annotation',
-            request_method='PUT',
+            request_method=('PATCH', 'PUT'),
             permission='update',
             link_name='annotation.update',
             description='Update an annotation')
 def update(context, request):
-    """Update the specified annotation with data from the PUT payload."""
+    """Update the specified annotation with data from the PATCH payload."""
+    if request.method == 'PUT' and hasattr(request, 'stats'):
+        request.stats.incr('memex.api.deprecated.put_update_annotation')
+
     schema = schemas.UpdateAnnotationSchema(request,
                                             context.annotation.target_uri,
                                             context.annotation.groupid)

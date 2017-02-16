@@ -78,7 +78,7 @@ class TestAddApiView(object):
         views.add_api_view(pyramid_config, view)
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['request_method'] == (
-            'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS')
+            'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'OPTIONS')
 
     @pytest.mark.parametrize('link_name,description,request_method,expected_method', [
         ('thing.read', 'Fetch a thing', None, 'GET'),
@@ -142,7 +142,7 @@ class TestIndex(object):
         assert links['annotation']['read']['method'] == 'GET'
         assert links['annotation']['read']['url'] == (
             host + '/dummy/annotations/:id')
-        assert links['annotation']['update']['method'] == 'PUT'
+        assert links['annotation']['update']['method'] == 'PATCH'
         assert links['annotation']['update']['url'] == (
             host + '/dummy/annotations/:id')
         assert links['search']['method'] == 'GET'
@@ -500,6 +500,14 @@ class TestUpdate(object):
 
         assert returned == (
             AnnotationJSONPresenter.return_value.asdict.return_value)
+
+    def test_it_tracks_deprecated_put_requests(self, pyramid_request):
+        pyramid_request.method = 'PUT'
+        pyramid_request.stats = mock.Mock(spec_set=['incr'])
+
+        views.update(mock.Mock(), pyramid_request)
+
+        pyramid_request.stats.incr.assert_called_once_with('memex.api.deprecated.put_update_annotation')
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
