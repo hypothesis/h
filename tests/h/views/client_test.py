@@ -2,9 +2,12 @@
 
 from __future__ import unicode_literals
 
+from h._compat import StringIO
 import json
-from mock import Mock
+
+from mock import Mock, patch
 import pytest
+import requests
 
 from h.views import client
 from h import __version__
@@ -51,10 +54,11 @@ class TestSidebarApp(object):
     def test_uses_client_boot_script_when_enabled(self, pyramid_request):
         pyramid_request.feature.flags['use_client_boot_script'] = True
         ctx = client.sidebar_app(pyramid_request)
-        assert ctx['app_js_urls'] == ['http://example.com/assets/client/boot.js']
+        assert ctx['app_js_urls'] == ['http://example.com/embed.js']
 
 
-@pytest.mark.usefixtures('client_assets_env', 'routes', 'pyramid_settings')
+@pytest.mark.usefixtures('client_assets_env', 'requests_get',
+                         'routes', 'pyramid_settings')
 class TestEmbed(object):
     def test_it_sets_sidebar_app_url(self, pyramid_request):
         ctx = client.embed(pyramid_request)
@@ -68,23 +72,54 @@ class TestEmbed(object):
             'http://example.com/assets/client/inject.css',
             ]
 
-    def test_sets_client_boot_url(self, pyramid_request):
+    def test_fetches_client_boot_script(self, pyramid_request, requests_get):
         pyramid_request.feature.flags['use_client_boot_script'] = True
-        ctx = client.embed(pyramid_request)
-        assert ctx['client_boot_url'] == 'http://example.com/assets/client/boot.js'
 
-    def test_sets_client_asset_root(self, pyramid_request):
-        ctx = client.embed(pyramid_request)
-        assert ctx['client_asset_root'] == 'http://example.com/assets/client/'
+        client.embed(pyramid_request)
 
-    def test_does_not_set_client_boot_url_when_disabled(self, pyramid_request):
+        requests_get.assert_called_with('https://unpkg.com/hypothesis')
+
+    def test_injects_client_boot_script(self, pyramid_request, fake_client_boot_response):
+        pyramid_request.feature.flags['use_client_boot_script'] = True
+
+        ctx = client.embed(pyramid_request)
+
+        assert ctx['client_boot_script'] == fake_client_boot_response.text
+
+    @pytest.mark.parametrize('boot_url,asset_root', [
+        # Client boot script URL without trailing slash
+        ('https://unpkg.com/hypothes.is@0.100', 'https://unpkg.com/hypothes.is@0.100/'),
+        # Client boot script URL with trailing slash
+        ('http://localhost:3001/', 'http://localhost:3001/'),
+    ])
+    def test_sets_client_asset_root(self, fake_client_boot_response, pyramid_request,
+                                    boot_url, asset_root):
+        fake_client_boot_response.url = boot_url
+        ctx = client.embed(pyramid_request)
+        assert ctx['client_asset_root'] == asset_root
+
+    def test_does_not_inject_client_boot_script_when_disabled(self, pyramid_request):
         pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.embed(pyramid_request)
-        assert ctx['client_boot_url'] is None
+        assert ctx['client_boot_script'] is None
 
     def test_it_sets_content_type(self, pyramid_request):
         client.embed(pyramid_request)
         assert pyramid_request.response.content_type == 'text/javascript'
+
+    @pytest.yield_fixture
+    def requests_get(self, fake_client_boot_response):
+        with patch('h.views.client.requests.get') as requests_get:
+            requests_get.return_value = fake_client_boot_response
+            yield requests_get
+
+    @pytest.fixture
+    def fake_client_boot_response(self):
+        rsp = requests.models.Response()
+        rsp.url = 'https://unpkg.com/hypothesis@0.100'
+        rsp.raw = StringIO(b'/* client boot script */')
+        rsp.status_code = 200
+        return rsp
 
 
 @pytest.fixture
@@ -110,6 +145,7 @@ def pyramid_settings(pyramid_settings):
     pyramid_settings.update({
         'ga_client_tracking_id': 'UA-4567',
         'h.client.sentry_dsn': 'test-sentry-dsn',
+        'h.client_url': 'https://unpkg.com/hypothesis',
         'h.websocket_url': 'wss://example.com/ws',
         'auth_domain': 'example.com'
         })
@@ -121,6 +157,7 @@ def pyramid_settings(pyramid_settings):
 def routes(pyramid_config):
     pyramid_config.add_route('api.index', '/api')
     pyramid_config.add_route('assets_client', '/assets/client/{subpath}')
+    pyramid_config.add_route('embed', '/embed.js')
     pyramid_config.add_route('index', '/')
     pyramid_config.add_route('sidebar_app', '/app.html')
 

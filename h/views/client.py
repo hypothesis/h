@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Application client views.
+Hypothesis client views.
 
-Views which exist either to serve or support the JavaScript annotation client.
+Views which exist either to serve or support the Hypothesis client.
 """
 
 from __future__ import unicode_literals
@@ -11,6 +11,7 @@ from __future__ import unicode_literals
 import json
 
 from pyramid.view import view_config
+import requests
 
 from h._compat import urlparse
 from h import session as h_session
@@ -24,16 +25,6 @@ def url_with_path(url):
         return '{}/'.format(url)
     else:
         return url
-
-
-def _client_boot_url(request):
-    """
-    Return the URL of the script which bootstraps the client.
-    """
-    client_boot_url = None
-    if request.feature('use_client_boot_script'):
-        client_boot_url = request.route_url('assets_client', subpath='boot.js')
-    return client_boot_url
 
 
 def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
@@ -76,6 +67,7 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
 
     if client_boot_url:
         app_js_urls = [client_boot_url]
+        app_css_urls = []
     else:
         app_js_urls = assets_env.urls('app_js')
 
@@ -99,8 +91,16 @@ def sidebar_app(request, extra=None):
     settings = request.registry.settings
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
 
+    if request.feature('use_client_boot_script'):
+        # The /embed.js script returns the client boot script which functions
+        # as the entry point for the client in the host page and the sidebar
+        # application.
+        client_boot_url = request.route_url('embed')
+    else:
+        client_boot_url = None
+
     ctx = _app_html_context(api_url=request.route_url('api.index'),
-                            client_boot_url=_client_boot_url(request),
+                            client_boot_url=client_boot_url,
                             service_url=request.route_url('index'),
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
                             assets_env=request.registry['assets_client_env'],
@@ -132,6 +132,15 @@ def annotator_token(request):
 @view_config(route_name='embed',
              renderer='h:templates/embed.js.jinja2')
 def embed(request):
+    """
+    The script which loads the Hypothesis client on a page.
+
+    This view renders the client's boot script which loads the rest of the
+    assets required by the client.
+
+    The boot script also serves as the main script for the client's sidebar
+    viewer ('app.html') application.
+    """
     request.response.content_type = 'text/javascript'
 
     assets_env = request.registry['assets_client_env']
@@ -141,10 +150,34 @@ def embed(request):
         return [urlparse.urljoin(base_url, url)
                 for url in assets_env.urls(bundle_name)]
 
+    if request.feature('use_client_boot_script'):
+        client_boot_url = request.registry.settings['h.client_url']
+        client_script_rsp = requests.get(client_boot_url)
+        client_script_rsp.raise_for_status()
+
+        # The request for the boot script may have redirected (eg, from
+        # 'https://unpkg.com/hypothesis' to
+        # 'https://unpkg.com/hypothesis@X.Y.Z'), in that case use the final URL
+        # to determine the asset path
+        client_boot_url = client_script_rsp.url
+        client_boot_script = client_script_rsp.text
+
+        # The client's boot script includes the paths of assets relative to the
+        # root of the package. eg. If the boot script is
+        # 'https://unpkg.com/hypothesis@0.1.0' then assets are loaded from
+        # 'https://unpkg.com/hypothesis@0.1.0/'.
+        client_asset_root = client_boot_url
+        if not client_asset_root.endswith('/'):
+            client_asset_root += '/'
+
+    else:
+        client_asset_root = None
+        client_boot_script = None
+
     return {
         'app_html_url': request.route_url('sidebar_app'),
-        'client_asset_root': request.route_url('assets_client', subpath=''),
-        'client_boot_url': _client_boot_url(request),
+        'client_asset_root': client_asset_root,
+        'client_boot_script': client_boot_script,
         'inject_resource_urls': (absolute_asset_urls('inject_js') +
                                  absolute_asset_urls('inject_css'))
     }

@@ -142,6 +142,7 @@ def routes(pyramid_config):
     pyramid_config.add_route('api.annotation', '/api/ann/{id}')
     pyramid_config.add_route('api.index', '/api/index')
     pyramid_config.add_route('assets_client', '/assets/client')
+    pyramid_config.add_route('embed', '/embed.js')
     pyramid_config.add_route('index', '/index')
 
 

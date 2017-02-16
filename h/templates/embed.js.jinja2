@@ -1,4 +1,4 @@
-{% if client_boot_url %}
+{% if client_boot_script %}
 (function () {
   var configEl = document.createElement('script');
   configEl.className = 'js-hypothesis-settings';
@@ -9,9 +9,7 @@
   });
   document.head.appendChild(configEl);
 
-  var bootScriptEl = document.createElement('script');
-  bootScriptEl.src = '{{ client_boot_url }}';
-  document.head.appendChild(bootScriptEl);
+  {{ client_boot_script | safe }}
 })();
 {% else %}
 (function () {
