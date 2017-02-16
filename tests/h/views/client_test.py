@@ -36,6 +36,7 @@ class TestSidebarApp(object):
                     'dsn': 'test-sentry-dsn',
                     'release': __version__
                 },
+                'authDomain': 'example.com',
                 'googleAnalytics': 'UA-4567'
                 }
         actual_config = json.loads(ctx['app_config'])
@@ -90,6 +91,7 @@ def pyramid_settings(pyramid_settings):
         'ga_client_tracking_id': 'UA-4567',
         'h.client.sentry_dsn': 'test-sentry-dsn',
         'h.websocket_url': 'wss://example.com/ws',
+        'auth_domain': 'example.com'
         })
 
     return pyramid_settings

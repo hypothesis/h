@@ -27,7 +27,7 @@ def url_with_path(url):
 
 
 def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
-                      websocket_url, ga_client_tracking_id):
+                      websocket_url, auth_domain, ga_client_tracking_id):
     """
     Returns a dict of asset URLs and contents used by the sidebar app
     HTML tempate.
@@ -38,6 +38,7 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
 
     app_config = {
         'apiUrl': api_url,
+        'authDomain': auth_domain,
         'serviceUrl': service_url,
         'release': __version__
     }
@@ -88,6 +89,7 @@ def sidebar_app(request, extra=None):
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
                             assets_env=request.registry['assets_client_env'],
                             websocket_url=settings.get('h.websocket_url'),
+                            auth_domain=request.auth_domain,
                             ga_client_tracking_id=ga_client_tracking_id).copy()
     if extra is not None:
         ctx.update(extra)
