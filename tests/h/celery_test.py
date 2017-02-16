@@ -5,6 +5,8 @@ import logging
 import mock
 import pytest
 
+from billiard.einfo import ExceptionInfo
+
 from h import celery
 
 
@@ -75,6 +77,38 @@ class TestCelery(object):
         celery.transaction_abort(sender)
 
         sender.app.request.tm.abort.assert_called_once_with()
+
+    def test_report_failure_reports_failure_in_debug_mode(self, patch):
+        log = patch('h.celery.log')
+        sender = mock.Mock(spec=['app'])
+        sender.name = 'wibble'
+        sender.app.request.debug = True
+
+        # Make a fake ExceptionInfo object
+        try:
+            raise RuntimeError('asplode!')
+        except:
+            einfo = ExceptionInfo()
+
+        celery.report_failure(sender, 'abc123', (), {}, einfo)
+
+        assert log.error.called
+
+    def test_report_failure_skipped_when_not_in_debug_mode(self, patch):
+        log = patch('h.celery.log')
+        sender = mock.Mock(spec=['app'])
+        sender.name = 'wibble'
+        sender.app.request.debug = False
+
+        # Make a fake ExceptionInfo object
+        try:
+            raise RuntimeError('asplode!')
+        except:
+            einfo = ExceptionInfo()
+
+        celery.report_failure(sender, 'abc123', (), {}, einfo)
+
+        assert not log.error.called
 
 
 def _patch(modulepath, request):
