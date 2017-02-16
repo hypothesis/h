@@ -13,6 +13,7 @@ and how to contribute code or documentation to the project.
    introduction
    submitting-a-pr
    code-style
+   testing
    documentation
    ssl
    making-changes-to-model-code
