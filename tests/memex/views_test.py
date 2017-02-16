@@ -501,6 +501,14 @@ class TestUpdate(object):
         assert returned == (
             AnnotationJSONPresenter.return_value.asdict.return_value)
 
+    def test_it_tracks_deprecated_put_requests(self, pyramid_request):
+        pyramid_request.method = 'PUT'
+        pyramid_request.stats = mock.Mock(spec_set=['incr'])
+
+        views.update(mock.Mock(), pyramid_request)
+
+        pyramid_request.stats.incr.assert_called_once_with('memex.api.deprecated.put_update_annotation')
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.json_body = {}

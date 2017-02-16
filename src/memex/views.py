@@ -254,6 +254,9 @@ def read_jsonld(context, request):
             description='Update an annotation')
 def update(context, request):
     """Update the specified annotation with data from the PATCH payload."""
+    if request.method == 'PUT' and hasattr(request, 'stats'):
+        request.stats.incr('memex.api.deprecated.put_update_annotation')
+
     schema = schemas.UpdateAnnotationSchema(request,
                                             context.annotation.target_uri,
                                             context.annotation.groupid)
