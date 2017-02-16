@@ -131,8 +131,18 @@ paths:
           description: Annotation not found or no permission to view
           schema:
             $ref: '#/definitions/Error'
-    put:
+    patch:
       summary: Update an annotation
+      description: |
+        This endpoint is available under both the `PATCH` and `PUT`
+        request methods. Both endpoints have PATCH-characteristics
+        as defined in [RFC5789](https://tools.ietf.org/html/rfc5789#section-1),
+        meaning the request body does not have to include the whole annotation
+        object.
+
+        New implementations should use the `PATCH` request method, and existing
+        implementations continue to work under `PUT` but should switch to `PATCH`.
+
       operationId: updateAnnotation
       parameters:
         - name: id
