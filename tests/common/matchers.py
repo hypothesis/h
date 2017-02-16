@@ -32,7 +32,16 @@ import re
 from pyramid import httpexceptions
 
 
-class any_callable(object):  # noqa: N801
+class Matcher(object):
+
+    def __eq__(self, other):
+        raise NotImplementedError('subclasses should provide an __eq__ method')
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+
+class any_callable(Matcher):  # noqa: N801
     """An object __eq__ to any callable object."""
 
     def __eq__(self, other):
@@ -40,7 +49,7 @@ class any_callable(object):  # noqa: N801
         return callable(other)
 
 
-class instance_of(object):  # noqa: N801
+class instance_of(Matcher):  # noqa: N801
     """An object __eq__ to any object which is an instance of `type_`."""
 
     def __init__(self, type_):
@@ -53,7 +62,7 @@ class instance_of(object):  # noqa: N801
         return '<instance of {!r}>'.format(self.type)
 
 
-class iterable_with(object):  # noqa: N801
+class iterable_with(Matcher):  # noqa: N801
     """An object __eq__ to any iterable which yields `items`."""
 
     def __init__(self, items):
@@ -66,7 +75,7 @@ class iterable_with(object):  # noqa: N801
         return '<iterable with {!r}>'.format(self.items)
 
 
-class mapping_containing(object):  # noqa: N801
+class mapping_containing(Matcher):  # noqa: N801
     """An object __eq__ to any mapping with the passed `key`."""
 
     def __init__(self, key):
@@ -84,7 +93,7 @@ class mapping_containing(object):  # noqa: N801
         return '<mapping containing {!r}>'.format(self.key)
 
 
-class redirect_302_to(object):
+class redirect_302_to(Matcher):
     """Matches any HTTPFound redirect to the given URL."""
 
     def __init__(self, location):
@@ -96,7 +105,7 @@ class redirect_302_to(object):
         return other.location == self.location
 
 
-class redirect_303_to(object):
+class redirect_303_to(Matcher):
     """Matches any HTTPSeeOther redirect to the given URL."""
 
     def __init__(self, location):
@@ -108,7 +117,7 @@ class redirect_303_to(object):
         return other.location == self.location
 
 
-class regex(object):
+class regex(Matcher):
     """Matches any string matching the passed regex."""
 
     def __init__(self, patt):
@@ -121,7 +130,7 @@ class regex(object):
         return '<string matching re {!r}>'.format(self.patt.pattern)
 
 
-class unordered_list(object):
+class unordered_list(Matcher):
     """
     Matches a list with the same items in any order.
 
