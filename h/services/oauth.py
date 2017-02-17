@@ -69,22 +69,11 @@ class OAuthService(object):
         :returns: a tuple with the user and authclient
         :rtype: tuple
         """
-        assertion = body.get('assertion')
-
-        if not assertion or type(assertion) != text_type:
-            raise OAuthTokenError('required assertion parameter is missing',
-                                  'invalid_request')
-        token = assertion
-
-        unverified_claims = self._decode(token, verify=False)
-
-        client_id = unverified_claims.get('iss', None)
-        if not client_id:
-            raise OAuthTokenError('grant token issuer is missing', 'invalid_grant')
+        token = GrantToken(body.get('assertion'))
 
         authclient = None
         try:
-            authclient = self.session.query(models.AuthClient).get(client_id)
+            authclient = self.session.query(models.AuthClient).get(token.issuer)
         except sa.exc.StatementError as exc:
             if str(exc.orig) == 'badly formed hexadecimal UUID string':
                 pass
@@ -93,17 +82,9 @@ class OAuthService(object):
         if not authclient:
             raise OAuthTokenError('given JWT issuer is invalid', 'invalid_grant')
 
-        claims = self._decode(token,
-                              algorithms=['HS256'],
-                              audience=self.domain,
-                              key=authclient.secret,
-                              leeway=10)
+        token.verify(key=authclient.secret, audience=self.domain)
 
-        userid = claims.get('sub')
-        if not userid:
-            raise OAuthTokenError('JWT subject is missing', 'invalid_grant')
-
-        user = self.usersvc.fetch(userid)
+        user = self.usersvc.fetch(token.subject)
         if user is None:
             raise OAuthTokenError('user with userid described in subject could not be found',
                                   'invalid_grant')
@@ -161,10 +142,51 @@ class OAuthService(object):
 
         return token
 
-    def _decode(self, token, **kwargs):
+
+class GrantToken(object):
+    """
+    Represents a JWT bearer grant token.
+
+    This class is responsible for a couple of things: firstly, verifying that
+    the token is a correctly-formatted JSON Web Token, and that it contains all
+    the required claims in the right formats. Some of this processing is
+    deferred to the `jwt` module, but that doesn't handle all the fields we
+    want to validate.
+
+    """
+
+    def __init__(self, token):
+        if not token or type(token) != text_type:
+            raise OAuthTokenError('required assertion parameter is missing',
+                                  'invalid_request')
+        self._token = token
+
         try:
-            claims = jwt.decode(token, **kwargs)
-            return claims
+            self._claims = jwt.decode(token, verify=False)
+        except jwt.DecodeError:
+            raise OAuthTokenError('invalid JWT signature', 'invalid_grant')
+
+    @property
+    def issuer(self):
+        iss = self._claims.get('iss', None)
+        if not iss:
+            raise OAuthTokenError('grant token issuer is missing', 'invalid_grant')
+        return iss
+
+    @property
+    def subject(self):
+        sub = self._claims.get('sub', None)
+        if not sub:
+            raise OAuthTokenError('JWT subject is missing', 'invalid_grant')
+        return sub
+
+    def verify(self, key, audience):
+        try:
+            jwt.decode(self._token,
+                       algorithms=['HS256'],
+                       audience=audience,
+                       key=key,
+                       leeway=10)
         except jwt.DecodeError:
             raise OAuthTokenError('invalid JWT signature', 'invalid_grant')
         except jwt.exceptions.InvalidAlgorithmError:
