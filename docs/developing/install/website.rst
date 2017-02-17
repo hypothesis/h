@@ -84,80 +84,62 @@ h requires the following external services:
 .. _Elasticsearch ICU Analysis: https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-icu.html
 .. _RabbitMQ: https://rabbitmq.com/
 
-You can install these services however you want, but the easiest way is by
-using Docker. This should work on any operating system that Docker can be
-installed on:
+You can install these services however you want, but the easiest way is by using
+Docker and Docker Compose. This should work on any operating system that Docker
+can be installed on:
 
-1. Install Docker by following the instructions on the
+1. Install Docker and Docker Compose by following the instructions on the
    `Docker website`_.
 
-2. Download and run the
-   `official RabbitMQ image <https://hub.docker.com/_/rabbitmq/>`_,
-   the `official PostgreSQL image <https://hub.docker.com/_/postgres/>`_, and
-   our custom
-   `Elasticsearch with ICU image <https://hub.docker.com/r/nickstenning/elasticsearch-icu/>`_:
+2. Run Docker Compose:
 
    .. code-block:: bash
 
-      docker run -d --name postgres -p 127.0.0.1:5432:5432 postgres
-      docker run -d --name elasticsearch -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 nickstenning/elasticsearch-icu
-      docker run -d --name rabbitmq -p 127.0.0.1:5672:5672 -p 127.0.0.1:15672:15672 --hostname rabbit rabbitmq:3-management
+      docker-compose up
 
-   You'll now have three Docker containers named ``postgres``, ``elasticsearch``,
-   and ``rabbitmq`` running and exposing their various services on the
-   ports defined above. You should be able to see them by running ``docker ps``.
-   You should also be able to visit your Elasticsearch service by opening
+   You'll now have three Docker containers running the PostgreSQL, RabbitMQ, and
+   Elasticsearch services. You should be able to see them by running ``docker
+   ps``. You should also be able to visit your Elasticsearch service by opening
    http://localhost:9200/ in a browser, and connect to your PostgreSQL by
    running ``psql postgresql://postgres@localhost/postgres`` (if you have psql
    installed).
 
    .. note::
 
-      You only need to run the above ``docker run`` commands once. If you need
-      to start the containers again (for example after restarting your
-      computer), you can just run:
-
-      .. code-block:: bash
-
-         docker start postgres elasticsearch rabbitmq
+      If at any point you want to shut the containers down, you can simply
+      interrupt the ``docker-compose`` command. If you want to run the
+      containers in the background, you can run ``docker-compose up -d``.
 
 3. Create the `htest` database in the ``postgres`` container. This is needed
    to run the h tests:
 
    .. code-block:: bash
 
-      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres -c "CREATE DATABASE htest;"'
+      docker-compose exec postgres psql -U postgres -c "CREATE DATABASE htest;"
 
 
 .. tip::
 
-   You can use the PostgreSQL Docker image to open a psql shell to your
-   Dockerized database without having to install psql on your host machine.
-   Do:
+   You can use Docker Compose image to open a psql shell in your Dockerized
+   database container without having to install psql on your host machine. Do:
 
    .. code-block:: bash
 
-      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
-
-   This runs psql in a fourth Docker container (from the same official
-   PostgreSQL image, which also contains psql) and links it to your named
-   ``postgres`` container using Docker's container linking system.
-   The psql container is automatically removed (``--rm``) when you exit the
-   psql shell.
+      docker-compose exec postgres psql -U postgres
 
 .. tip::
 
-   Use the ``docker logs`` command to see what's going on inside your
+   Use the ``docker-compose logs`` command to see what's going on inside your
    Docker containers, for example:
 
    .. code-block:: bash
 
-      docker logs rabbitmq
+      docker-compose logs rabbitmq
 
-   For more on how to use Docker see the `Docker website`_.
+   For more on how to use Docker and Docker Compose see the `Docker website`_.
 
 
-.. _Docker website: https://www.docker.com/
+.. _Docker website: https://docs.docker.com/compose/install/
 
 
 Installing the gulp command
