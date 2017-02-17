@@ -79,9 +79,10 @@ class OAuthService(object):
         if not authclient:
             raise OAuthTokenError('given JWT issuer is invalid', 'invalid_grant')
 
-        token.verify(key=authclient.secret, audience=self.domain)
+        verified_token = token.verified(key=authclient.secret,
+                                        audience=self.domain)
 
-        user = self.usersvc.fetch(token.subject)
+        user = self.usersvc.fetch(verified_token.subject)
         if user is None:
             raise OAuthTokenError('user with userid described in subject could not be found',
                                   'invalid_grant')
@@ -177,14 +178,24 @@ class GrantToken(object):
             raise OAuthTokenError('grant token issuer is missing', 'invalid_grant')
         return iss
 
-    @property
-    def subject(self):
-        sub = self._claims.get('sub', None)
-        if not sub:
-            raise OAuthTokenError('JWT subject is missing', 'invalid_grant')
-        return sub
+    def verified(self, key, audience):
+        return VerifiedGrantToken(self._token, key, audience)
 
-    def verify(self, key, audience):
+
+class VerifiedGrantToken(GrantToken):
+    """
+    Represents a JWT bearer grant token verified with a secret key.
+
+    This exposes more claims than the `GrantToken` superclass, so that it's not
+    possible to access the subject ID without first verifying the token.
+
+    """
+
+    def __init__(self, token, key, audience):
+        super(VerifiedGrantToken, self).__init__(token)
+        self._verify(key, audience)
+
+    def _verify(self, key, audience):
         try:
             jwt.decode(self._token,
                        algorithms=['HS256'],
@@ -205,6 +216,13 @@ class GrantToken(object):
             raise OAuthTokenError('JWT token is expired', 'invalid_grant')
         except jwt.InvalidIssuedAtError:
             raise OAuthTokenError('JWT issued at is in the future', 'invalid_grant')
+
+    @property
+    def subject(self):
+        sub = self._claims.get('sub', None)
+        if not sub:
+            raise OAuthTokenError('JWT subject is missing', 'invalid_grant')
+        return sub
 
 
 def oauth_service_factory(context, request):
