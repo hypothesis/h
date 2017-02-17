@@ -1,0 +1,10 @@
+version: '2'
+services:
+  common:
+    build: .
+    # NB: you have to export UID for it to be visable here
+    user: $UID
+    restart: always
+    env_file: docker-compose-common.env
+    volumes:
+     - .:/var/lib/hypothesis
