@@ -6,6 +6,7 @@ from h._compat import StringIO
 import json
 
 from mock import Mock, patch
+from pyramid.httpexceptions import HTTPFound
 import pytest
 import requests
 
@@ -25,10 +26,12 @@ def test_annotator_token_returns_token(generate_jwt, pyramid_request):
     assert result == generate_jwt.return_value
 
 
-@pytest.mark.usefixtures('client_assets_env', 'routes', 'pyramid_settings')
+@pytest.mark.usefixtures('client_assets_env', 'requests_get',
+                         'routes', 'pyramid_settings')
 class TestSidebarApp(object):
 
     def test_it_includes_client_config(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.sidebar_app(pyramid_request)
         expected_config = {
                 'apiUrl': 'http://example.com/api',
@@ -42,29 +45,53 @@ class TestSidebarApp(object):
                 'authDomain': 'example.com',
                 'googleAnalytics': 'UA-4567'
                 }
+
         actual_config = json.loads(ctx['app_config'])
+
         assert actual_config == expected_config
 
     def test_it_sets_asset_urls(self, pyramid_request):
         pyramid_request.feature.flags['use_client_boot_script'] = False
+
         ctx = client.sidebar_app(pyramid_request)
+
         assert ctx['app_css_urls'] == ['/assets/client/app.css']
         assert ctx['app_js_urls'] == ['/assets/client/app.js']
 
+    def test_does_not_set_asset_root(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = False
+
+        ctx = client.sidebar_app(pyramid_request)
+
+        assert ctx.get('assetRoot') is None
+
     def test_uses_client_boot_script_when_enabled(self, pyramid_request):
         pyramid_request.feature.flags['use_client_boot_script'] = True
+
         ctx = client.sidebar_app(pyramid_request)
-        assert ctx['app_js_urls'] == ['http://example.com/embed.js']
+
+        assert ctx['app_js_urls'] == ['https://unpkg.com/hypothesis@0.100']
+        assert ctx['app_css_urls'] == []
+
+    def test_sets_asset_root_when_using_client_boot_script(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = True
+
+        ctx = client.sidebar_app(pyramid_request)
+        app_config = json.loads(ctx['app_config'])
+
+        assert app_config['assetRoot'] == 'https://unpkg.com/hypothesis@0.100/'
 
 
 @pytest.mark.usefixtures('client_assets_env', 'requests_get',
                          'routes', 'pyramid_settings')
 class TestEmbed(object):
     def test_it_sets_sidebar_app_url(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.embed(pyramid_request)
         assert ctx['app_html_url'] == 'http://example.com/app.html'
 
     def test_it_sets_asset_urls(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.embed(pyramid_request)
         assert ctx['inject_resource_urls'] == [
             'http://example.com/assets/client/polyfills.js',
@@ -74,52 +101,42 @@ class TestEmbed(object):
 
     def test_fetches_client_boot_script(self, pyramid_request, requests_get):
         pyramid_request.feature.flags['use_client_boot_script'] = True
-
         client.embed(pyramid_request)
-
         requests_get.assert_called_with('https://unpkg.com/hypothesis')
 
     def test_injects_client_boot_script(self, pyramid_request, fake_client_boot_response):
         pyramid_request.feature.flags['use_client_boot_script'] = True
 
-        ctx = client.embed(pyramid_request)
+        rsp = client.embed(pyramid_request)
 
-        assert ctx['client_boot_script'] == fake_client_boot_response.text
+        assert isinstance(rsp, HTTPFound)
+        assert rsp.location == 'https://unpkg.com/hypothesis@0.100'
 
-    @pytest.mark.parametrize('boot_url,asset_root', [
-        # Client boot script URL without trailing slash
-        ('https://unpkg.com/hypothes.is@0.100', 'https://unpkg.com/hypothes.is@0.100/'),
-        # Client boot script URL with trailing slash
-        ('http://localhost:3001/', 'http://localhost:3001/'),
-    ])
-    def test_sets_client_asset_root(self, fake_client_boot_response, pyramid_request,
-                                    boot_url, asset_root):
-        fake_client_boot_response.url = boot_url
-        ctx = client.embed(pyramid_request)
-        assert ctx['client_asset_root'] == asset_root
-
-    def test_does_not_inject_client_boot_script_when_disabled(self, pyramid_request):
+    def test_does_not_redirect_when_client_boot_script_disabled(self, pyramid_request):
         pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.embed(pyramid_request)
-        assert ctx['client_boot_script'] is None
+        assert not isinstance(ctx, HTTPFound)
 
     def test_it_sets_content_type(self, pyramid_request):
+        pyramid_request.feature.flags['use_client_boot_script'] = False
         client.embed(pyramid_request)
         assert pyramid_request.response.content_type == 'text/javascript'
 
-    @pytest.yield_fixture
-    def requests_get(self, fake_client_boot_response):
-        with patch('h.views.client.requests.get') as requests_get:
-            requests_get.return_value = fake_client_boot_response
-            yield requests_get
 
-    @pytest.fixture
-    def fake_client_boot_response(self):
-        rsp = requests.models.Response()
-        rsp.url = 'https://unpkg.com/hypothesis@0.100'
-        rsp.raw = StringIO(b'/* client boot script */')
-        rsp.status_code = 200
-        return rsp
+@pytest.yield_fixture
+def requests_get(fake_client_boot_response):
+    with patch('h.views.client.requests.get') as requests_get:
+        requests_get.return_value = fake_client_boot_response
+        yield requests_get
+
+
+@pytest.fixture
+def fake_client_boot_response():
+    rsp = requests.models.Response()
+    rsp.url = 'https://unpkg.com/hypothesis@0.100'
+    rsp.raw = StringIO(b'/* client boot script */')
+    rsp.status_code = 200
+    return rsp
 
 
 @pytest.fixture

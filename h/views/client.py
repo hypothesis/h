@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 
 import json
 
+from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 import requests
 
@@ -25,6 +26,24 @@ def url_with_path(url):
         return '{}/'.format(url)
     else:
         return url
+
+
+def _resolve_client_boot_url(request):
+    """
+    Return the URL of the client's boot script if enabled.
+    """
+    if not request.feature('use_client_boot_script'):
+        return None
+
+    client_boot_url = request.registry.settings['h.client_url']
+    client_script_rsp = requests.get(client_boot_url)
+    client_script_rsp.raise_for_status()
+
+    # The request for the boot script may have redirected (eg, from
+    # 'https://unpkg.com/hypothesis' to
+    # 'https://unpkg.com/hypothesis@X.Y.Z'), in that case use the final URL
+    # to determine the asset path
+    return client_script_rsp.url
 
 
 def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
@@ -68,6 +87,7 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
     if client_boot_url:
         app_js_urls = [client_boot_url]
         app_css_urls = []
+        app_config['assetRoot'] = '{}/'.format(client_boot_url)
     else:
         app_js_urls = assets_env.urls('app_js')
 
@@ -91,16 +111,8 @@ def sidebar_app(request, extra=None):
     settings = request.registry.settings
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
 
-    if request.feature('use_client_boot_script'):
-        # The /embed.js script returns the client boot script which functions
-        # as the entry point for the client in the host page and the sidebar
-        # application.
-        client_boot_url = request.route_url('embed')
-    else:
-        client_boot_url = None
-
     ctx = _app_html_context(api_url=request.route_url('api.index'),
-                            client_boot_url=client_boot_url,
+                            client_boot_url=_resolve_client_boot_url(request),
                             service_url=request.route_url('index'),
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
                             assets_env=request.registry['assets_client_env'],
@@ -150,37 +162,18 @@ def embed(request):
         return [urlparse.urljoin(base_url, url)
                 for url in assets_env.urls(bundle_name)]
 
-    if request.feature('use_client_boot_script'):
-        client_boot_url = request.registry.settings['h.client_url']
-        client_script_rsp = requests.get(client_boot_url)
-        client_script_rsp.raise_for_status()
+    client_boot_url = _resolve_client_boot_url(request)
 
-        # The request for the boot script may have redirected (eg, from
-        # 'https://unpkg.com/hypothesis' to
-        # 'https://unpkg.com/hypothesis@X.Y.Z'), in that case use the final URL
-        # to determine the asset path
-        client_boot_url = client_script_rsp.url
-        client_boot_script = client_script_rsp.text
-
-        # The client's boot script includes the paths of assets relative to the
-        # root of the package. eg. If the boot script is
-        # 'https://unpkg.com/hypothesis@0.1.0' then assets are loaded from
-        # 'https://unpkg.com/hypothesis@0.1.0/'.
-        client_asset_root = client_boot_url
-        if not client_asset_root.endswith('/'):
-            client_asset_root += '/'
-
+    if client_boot_url:
+        rsp = HTTPFound(location=client_boot_url)
+        rsp.cache_control.max_age = 60 * 5  # 5 minutes
+        return rsp
     else:
-        client_asset_root = None
-        client_boot_script = None
-
-    return {
-        'app_html_url': request.route_url('sidebar_app'),
-        'client_asset_root': client_asset_root,
-        'client_boot_script': client_boot_script,
-        'inject_resource_urls': (absolute_asset_urls('inject_js') +
-                                 absolute_asset_urls('inject_css'))
-    }
+        return {
+            'app_html_url': request.route_url('sidebar_app'),
+            'inject_resource_urls': (absolute_asset_urls('inject_js') +
+                                     absolute_asset_urls('inject_css'))
+        }
 
 
 @json_view(route_name='session', http_cache=0)
