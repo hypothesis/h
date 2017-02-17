@@ -11,6 +11,7 @@ class Root(object):
     __acl__ = [
         (Allow, role.Staff, 'admin_index'),
         (Allow, role.Staff, 'admin_groups'),
+        (Allow, role.Staff, 'admin_mailer'),
         (Allow, role.Staff, 'admin_users'),
         (Allow, role.Admin, ALL_PERMISSIONS),
         DENY_ALL
