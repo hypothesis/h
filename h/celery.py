@@ -122,6 +122,19 @@ def transaction_abort(sender, **kwargs):
     sender.app.request.tm.abort()
 
 
+@signals.task_failure.connect
+def report_failure(sender, task_id, args, kwargs, einfo, **kw):
+    """Report a task failure to the console in development."""
+    if not sender.app.request.debug:
+        return
+    log.error('task failure: %s (%s) called with args=%s, kwargs=%s',
+              sender.name,
+              task_id,
+              args,
+              kwargs,
+              exc_info=einfo.exc_info)
+
+
 def start(argv, bootstrap):
     """Run the Celery CLI."""
     # We attach the bootstrap function directly to the Celery application
