@@ -67,6 +67,8 @@ Install the following packages:
         postgresql \
         python
 
+.. note:: Unfortunately you need to install the ``postgresql`` package, because
+          Homebrew does not currently provide a standalone ``libpq`` package.
 
 Installing the services
 -----------------------
