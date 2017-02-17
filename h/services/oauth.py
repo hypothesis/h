@@ -191,11 +191,16 @@ class VerifiedGrantToken(GrantToken):
 
     """
 
+    MAX_LIFETIME = datetime.timedelta(minutes=10)
+
     def __init__(self, token, key, audience):
         super(VerifiedGrantToken, self).__init__(token)
         self._verify(key, audience)
 
     def _verify(self, key, audience):
+        if self.expiry - self.not_before > self.MAX_LIFETIME:
+            raise OAuthTokenError('grant token lifetime is too long',
+                                  'invalid_grant')
         try:
             jwt.decode(self._token,
                        algorithms=['HS256'],
@@ -216,6 +221,25 @@ class VerifiedGrantToken(GrantToken):
             raise OAuthTokenError('JWT token is expired', 'invalid_grant')
         except jwt.InvalidIssuedAtError:
             raise OAuthTokenError('JWT issued at is in the future', 'invalid_grant')
+
+    @property
+    def expiry(self):
+        return self._timestamp_claim('exp')
+
+    @property
+    def not_before(self):
+        return self._timestamp_claim('nbf')
+
+    def _timestamp_claim(self, key):
+        claim = self._claims.get(key, None)
+        if claim is None:
+            raise OAuthTokenError('JWT is missing claim {}'.format(key),
+                                  'invalid_grant')
+        try:
+            return datetime.datetime.utcfromtimestamp(claim)
+        except (TypeError, ValueError):
+            raise OAuthTokenError('invalid claim {}'.format(key),
+                                  'invalid_grant')
 
     @property
     def subject(self):
