@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import numbers
 
 import jwt
 import sqlalchemy as sa
@@ -93,11 +94,22 @@ class OAuthService(object):
         if not authclient:
             raise OAuthTokenError('given JWT issuer is invalid', 'invalid_grant')
 
+        token_options = {'require_exp': True, 'require_nbf': True}
+
         claims = self._decode(token,
                               algorithms=['HS256'],
                               audience=self.domain,
                               key=authclient.secret,
-                              leeway=10)
+                              leeway=10,
+                              options=token_options)
+
+        timestamp_claims = set(['iat', 'nbf', 'exp'])
+
+        # Check that any timestamp claims are numeric
+        for claim_name in timestamp_claims & set(claims.keys()):
+            if not isinstance(claims[claim_name], numbers.Real):
+                raise OAuthTokenError('invalid claim {}'.format(claim_name),
+                                      'invalid_grant')
 
         userid = claims.get('sub')
         if not userid:
@@ -106,6 +118,10 @@ class OAuthService(object):
         user = self.usersvc.fetch(userid)
         if user is None:
             raise OAuthTokenError('user with userid described in subject could not be found',
+                                  'invalid_grant')
+
+        if claims['exp'] - claims['nbf'] > 10 * 60:
+            raise OAuthTokenError('token lifetime is greater than 600 seconds',
                                   'invalid_grant')
 
         if user.authority != authclient.authority:
