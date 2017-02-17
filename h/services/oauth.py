@@ -69,7 +69,11 @@ class OAuthService(object):
         :returns: a tuple with the user and authclient
         :rtype: tuple
         """
-        token = GrantToken(body.get('assertion'))
+        if 'assertion' not in body:
+            raise OAuthTokenError('required assertion parameter is missing',
+                                  'invalid_request')
+
+        token = GrantToken(body['assertion'])
 
         authclient = self._get_authclient_by_id(token.issuer)
         if not authclient:
@@ -158,15 +162,13 @@ class GrantToken(object):
     """
 
     def __init__(self, token):
-        if not token or type(token) != text_type:
-            raise OAuthTokenError('required assertion parameter is missing',
-                                  'invalid_request')
         self._token = token
 
         try:
             self._claims = jwt.decode(token, verify=False)
-        except jwt.DecodeError:
-            raise OAuthTokenError('invalid JWT signature', 'invalid_grant')
+        except jwt.DecodeError as e:
+            raise OAuthTokenError('grant token format is invalid',
+                                  'invalid_request')
 
     @property
     def issuer(self):

@@ -53,14 +53,15 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
         assert exc.value.type == 'invalid_request'
         assert 'assertion parameter is missing' in exc.value.message
 
-    def test_non_jwt_assertion(self, svc, jwt_bearer_body):
+    @pytest.mark.parametrize('assertion', [None, 57, '', 'bogus'])
+    def test_non_jwt_assertion(self, svc, jwt_bearer_body, assertion):
         jwt_bearer_body['assertion'] = 'bogus'
 
         with pytest.raises(OAuthTokenError) as exc:
             svc.verify_token_request(jwt_bearer_body)
 
-        assert exc.value.type == 'invalid_grant'
-        assert 'invalid JWT signature' in exc.value.message
+        assert exc.value.type == 'invalid_request'
+        assert 'grant token format is invalid' in exc.value.message
 
     def test_missing_jwt_issuer(self, svc, claims, authclient, jwt_bearer_body):
         del claims['iss']
