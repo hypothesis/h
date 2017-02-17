@@ -71,14 +71,7 @@ class OAuthService(object):
         """
         token = GrantToken(body.get('assertion'))
 
-        authclient = None
-        try:
-            authclient = self.session.query(models.AuthClient).get(token.issuer)
-        except sa.exc.StatementError as exc:
-            if str(exc.orig) == 'badly formed hexadecimal UUID string':
-                pass
-            else:
-                raise
+        authclient = self._get_authclient_by_id(token.issuer)
         if not authclient:
             raise OAuthTokenError('given JWT issuer is invalid', 'invalid_grant')
 
@@ -94,6 +87,15 @@ class OAuthService(object):
                                   'invalid_grant')
 
         return (user, authclient)
+
+    def _get_authclient_by_id(self, client_id):
+        try:
+            return self.session.query(models.AuthClient).get(client_id)
+        except sa.exc.StatementError as exc:
+            if str(exc.orig) == 'badly formed hexadecimal UUID string':
+                return None
+            else:
+                raise
 
     def _verify_refresh_token(self, body):
         refresh_token = body.get('refresh_token')
