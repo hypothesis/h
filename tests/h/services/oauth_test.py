@@ -151,6 +151,12 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
         assert exc.value.type == 'invalid_grant'
         assert 'not before is in the future' in exc.value.message
 
+    def test_jwt_expires_within_leeway(self, svc, claims, authclient, jwt_bearer_body):
+        claims['exp'] = self.epoch(delta=timedelta(seconds=-8))
+        jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
+
+        svc.verify_token_request(jwt_bearer_body)
+
     def test_jwt_expires_with_leeway_in_the_past(self, svc, claims, authclient, jwt_bearer_body):
         claims['exp'] = self.epoch(delta=timedelta(minutes=-2))
         jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)

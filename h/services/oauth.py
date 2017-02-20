@@ -192,6 +192,7 @@ class VerifiedGrantToken(GrantToken):
     """
 
     MAX_LIFETIME = datetime.timedelta(minutes=10)
+    LEEWAY = datetime.timedelta(seconds=10)
 
     def __init__(self, token, key, audience):
         super(VerifiedGrantToken, self).__init__(token)
@@ -206,7 +207,7 @@ class VerifiedGrantToken(GrantToken):
                        algorithms=['HS256'],
                        audience=audience,
                        key=key,
-                       leeway=10)
+                       leeway=self.LEEWAY)
         except jwt.DecodeError:
             raise OAuthTokenError('invalid JWT signature', 'invalid_grant')
         except jwt.exceptions.InvalidAlgorithmError:
