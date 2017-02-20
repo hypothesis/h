@@ -59,8 +59,9 @@ assume that:
 - The user has a username of ``samina.mian``.
 - The current time is ``2016-11-08T11:35:45Z``, which corresponds to a UTC Unix
   timestamp of ``1478601345``.
-- The token should be valid for about 10 minutes, i.e. until ``1478601945``,
-  expressed as a UTC Unix timestamp.
+- The token should be valid for a few minutes, e.g. until ``1478601645``,
+  expressed as a UTC Unix timestamp. The server limits the lifetime of a token
+  (the difference between the ``nbf`` and ``exp`` timestamps) to 10 minutes.
 - The token should be valid for the annotation service running at
   ``hypothes.is``.
 
@@ -72,7 +73,7 @@ following::
      "iss": "4a2fa3b4-c160-4436-82d3-148f602c9aa8",
      "sub": "acct:samina.mian@customwidgets.com",
      "nbf": 1478601345,
-     "exp": 1478601945
+     "exp": 1478601645
    }
 
 You should sign this payload using the ``HS256`` JWT-signing algorithm, using
