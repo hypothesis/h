@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 
 import json
 
+from pyramid.config import not_
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 import requests
@@ -142,7 +143,8 @@ def annotator_token(request):
 
 
 @view_config(route_name='embed',
-             renderer='h:templates/embed.js.jinja2')
+             renderer='h:templates/embed.js.jinja2',
+             has_feature_flag=not_('use_client_boot_script'))
 def embed(request):
     """
     The script which loads the Hypothesis client on a page.
@@ -162,18 +164,30 @@ def embed(request):
         return [urlparse.urljoin(base_url, url)
                 for url in assets_env.urls(bundle_name)]
 
-    client_boot_url = _resolve_client_boot_url(request)
+    return {
+        'app_html_url': request.route_url('sidebar_app'),
+        'inject_resource_urls': (absolute_asset_urls('inject_js') +
+                                 absolute_asset_urls('inject_css'))
+    }
 
-    if client_boot_url:
-        rsp = HTTPFound(location=client_boot_url)
-        rsp.cache_control.max_age = 60 * 5  # 5 minutes
-        return rsp
-    else:
-        return {
-            'app_html_url': request.route_url('sidebar_app'),
-            'inject_resource_urls': (absolute_asset_urls('inject_js') +
-                                     absolute_asset_urls('inject_css'))
-        }
+
+@view_config(route_name='embed',
+             has_feature_flag='use_client_boot_script',
+             http_cache=60 * 5)
+def embed_redirect(request):
+    """
+    The script which loads the Hypothesis client on a page.
+
+    This view redirects to the client's boot script which loads the rest of the
+    assets required by the client.
+
+    The boot script also serves as the main script for the client's sidebar
+    viewer ('app.html') application.
+    """
+    client_boot_url = _resolve_client_boot_url(request)
+    rsp = HTTPFound(location=client_boot_url)
+    rsp.cache_control.max_age = 60 * 5  # 5 minutes
+    return rsp
 
 
 @json_view(route_name='session', http_cache=0)

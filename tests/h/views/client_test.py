@@ -82,16 +82,9 @@ class TestSidebarApp(object):
         assert app_config['assetRoot'] == 'https://unpkg.com/hypothesis@0.100/'
 
 
-@pytest.mark.usefixtures('client_assets_env', 'requests_get',
-                         'routes', 'pyramid_settings')
+@pytest.mark.usefixtures('client_assets_env', 'routes')
 class TestEmbed(object):
-    def test_it_sets_sidebar_app_url(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = False
-        ctx = client.embed(pyramid_request)
-        assert ctx['app_html_url'] == 'http://example.com/app.html'
-
     def test_it_sets_asset_urls(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.embed(pyramid_request)
         assert ctx['inject_resource_urls'] == [
             'http://example.com/assets/client/polyfills.js',
@@ -99,28 +92,22 @@ class TestEmbed(object):
             'http://example.com/assets/client/inject.css',
             ]
 
-    def test_fetches_client_boot_script(self, pyramid_request, requests_get):
-        pyramid_request.feature.flags['use_client_boot_script'] = True
+    def test_it_sets_content_type(self, pyramid_request):
         client.embed(pyramid_request)
+        assert pyramid_request.response.content_type == 'text/javascript'
+
+
+@pytest.mark.usefixtures('requests_get', 'routes', 'pyramid_settings')
+class TestEmbedRedirect(object):
+    def test_fetches_client_boot_script(self, pyramid_request, requests_get):
+        client.embed_redirect(pyramid_request)
         requests_get.assert_called_with('https://unpkg.com/hypothesis')
 
-    def test_injects_client_boot_script(self, pyramid_request, fake_client_boot_response):
-        pyramid_request.feature.flags['use_client_boot_script'] = True
-
-        rsp = client.embed(pyramid_request)
+    def test_redirects_to_client_boot_script(self, pyramid_request, fake_client_boot_response):
+        rsp = client.embed_redirect(pyramid_request)
 
         assert isinstance(rsp, HTTPFound)
         assert rsp.location == 'https://unpkg.com/hypothesis@0.100'
-
-    def test_does_not_redirect_when_client_boot_script_disabled(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = False
-        ctx = client.embed(pyramid_request)
-        assert not isinstance(ctx, HTTPFound)
-
-    def test_it_sets_content_type(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = False
-        client.embed(pyramid_request)
-        assert pyramid_request.response.content_type == 'text/javascript'
 
 
 @pytest.yield_fixture
