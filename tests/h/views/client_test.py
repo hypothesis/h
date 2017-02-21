@@ -26,8 +26,7 @@ def test_annotator_token_returns_token(generate_jwt, pyramid_request):
     assert result == generate_jwt.return_value
 
 
-@pytest.mark.usefixtures('client_assets_env', 'requests_get',
-                         'routes', 'pyramid_settings')
+@pytest.mark.usefixtures('client_assets_env', 'routes', 'pyramid_settings')
 class TestSidebarApp(object):
 
     def test_it_includes_client_config(self, pyramid_request):
@@ -58,28 +57,13 @@ class TestSidebarApp(object):
         assert ctx['app_css_urls'] == ['/assets/client/app.css']
         assert ctx['app_js_urls'] == ['/assets/client/app.js']
 
-    def test_does_not_set_asset_root(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = False
-
-        ctx = client.sidebar_app(pyramid_request)
-
-        assert ctx.get('assetRoot') is None
-
     def test_uses_client_boot_script_when_enabled(self, pyramid_request):
         pyramid_request.feature.flags['use_client_boot_script'] = True
 
         ctx = client.sidebar_app(pyramid_request)
 
-        assert ctx['app_js_urls'] == ['https://unpkg.com/hypothesis@0.100']
+        assert ctx['app_js_urls'] == ['https://unpkg.com/hypothesis']
         assert ctx['app_css_urls'] == []
-
-    def test_sets_asset_root_when_using_client_boot_script(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = True
-
-        ctx = client.sidebar_app(pyramid_request)
-        app_config = json.loads(ctx['app_config'])
-
-        assert app_config['assetRoot'] == 'https://unpkg.com/hypothesis@0.100/'
 
 
 @pytest.mark.usefixtures('client_assets_env', 'routes')
@@ -103,7 +87,12 @@ class TestEmbedRedirect(object):
         client.embed_redirect(pyramid_request)
         requests_get.assert_called_with('https://unpkg.com/hypothesis')
 
-    def test_redirects_to_client_boot_script(self, pyramid_request, fake_client_boot_response):
+    def test_fetches_custom_client_boot_script(self, pyramid_request, requests_get):
+        pyramid_request.registry.settings['h.client_url'] = 'https://client.hypothes.is'
+        client.embed_redirect(pyramid_request)
+        requests_get.assert_called_with('https://client.hypothes.is')
+
+    def test_redirects_to_client_boot_script(self, pyramid_request):
         rsp = client.embed_redirect(pyramid_request)
 
         assert isinstance(rsp, HTTPFound)
@@ -149,7 +138,6 @@ def pyramid_settings(pyramid_settings):
     pyramid_settings.update({
         'ga_client_tracking_id': 'UA-4567',
         'h.client.sentry_dsn': 'test-sentry-dsn',
-        'h.client_url': 'https://unpkg.com/hypothesis',
         'h.websocket_url': 'wss://example.com/ws',
         'auth_domain': 'example.com'
         })

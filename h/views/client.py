@@ -21,6 +21,10 @@ from h.auth.tokens import generate_jwt
 from h.util.view import json_view
 from h import __version__
 
+# Default URL for the client, which points to the latest version of the client
+# that was published to npm.
+DEFAULT_CLIENT_URL = 'https://unpkg.com/hypothesis'
+
 
 def url_with_path(url):
     if urlparse.urlparse(url).path == '':
@@ -29,27 +33,34 @@ def url_with_path(url):
         return url
 
 
-def _resolve_client_boot_url(request):
+def _client_url(request):
     """
-    Return the URL of the client's boot script if enabled.
+    Return the configured URL for the client.
     """
     if not request.feature('use_client_boot_script'):
         return None
+    return request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
 
-    client_boot_url = request.registry.settings['h.client_url']
-    client_script_rsp = requests.get(client_boot_url)
+
+def _resolve_client_url(request):
+    """
+    Return the URL for the client after following any redirects.
+    """
+    client_url = _client_url(request)
+    if not client_url:
+        return None
+
+    # `requests.get` fetches the URL and follows any redirects along the way.
+    # The response URL will be the final URL that returned the content of the
+    # boot script.
+    client_script_rsp = requests.get(client_url)
     client_script_rsp.raise_for_status()
-
-    # The request for the boot script may have redirected (eg, from
-    # 'https://unpkg.com/hypothesis' to
-    # 'https://unpkg.com/hypothesis@X.Y.Z'), in that case use the final URL
-    # to determine the asset path
     return client_script_rsp.url
 
 
 def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
                       websocket_url, auth_domain, ga_client_tracking_id,
-                      client_boot_url):
+                      client_url):
     """
     Returns a dict of asset URLs and contents used by the sidebar app
     HTML tempate.
@@ -85,10 +96,9 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
 
     app_css_urls = assets_env.urls('app_css')
 
-    if client_boot_url:
-        app_js_urls = [client_boot_url]
+    if client_url:
+        app_js_urls = [client_url]
         app_css_urls = []
-        app_config['assetRoot'] = '{}/'.format(client_boot_url)
     else:
         app_js_urls = assets_env.urls('app_js')
 
@@ -112,8 +122,12 @@ def sidebar_app(request, extra=None):
     settings = request.registry.settings
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
 
+    client_url = None
+    if request.feature('use_client_boot_script'):
+        client_url = _client_url(request)
+
     ctx = _app_html_context(api_url=request.route_url('api.index'),
-                            client_boot_url=_resolve_client_boot_url(request),
+                            client_url=client_url,
                             service_url=request.route_url('index'),
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
                             assets_env=request.registry['assets_client_env'],
@@ -147,13 +161,9 @@ def annotator_token(request):
              has_feature_flag=not_('use_client_boot_script'))
 def embed(request):
     """
-    The script which loads the Hypothesis client on a page.
+    Render the script which loads the Hypothesis client on a page.
 
-    This view renders the client's boot script which loads the rest of the
-    assets required by the client.
-
-    The boot script also serves as the main script for the client's sidebar
-    viewer ('app.html') application.
+    This view renders a script which loads the assets required by the client.
     """
     request.response.content_type = 'text/javascript'
 
@@ -176,18 +186,13 @@ def embed(request):
              http_cache=60 * 5)
 def embed_redirect(request):
     """
-    The script which loads the Hypothesis client on a page.
+    Redirect to the script which loads the Hypothesis client on a page.
 
-    This view redirects to the client's boot script which loads the rest of the
-    assets required by the client.
-
-    The boot script also serves as the main script for the client's sidebar
-    viewer ('app.html') application.
+    This view provides a fixed URL which redirects to the latest version of the
+    client, typically hosted on a CDN.
     """
-    client_boot_url = _resolve_client_boot_url(request)
-    rsp = HTTPFound(location=client_boot_url)
-    rsp.cache_control.max_age = 60 * 5  # 5 minutes
-    return rsp
+    client_url = _resolve_client_url(request)
+    return HTTPFound(location=client_url)
 
 
 @json_view(route_name='session', http_cache=0)
