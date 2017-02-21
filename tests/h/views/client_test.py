@@ -30,7 +30,6 @@ def test_annotator_token_returns_token(generate_jwt, pyramid_request):
 class TestSidebarApp(object):
 
     def test_it_includes_client_config(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = False
         ctx = client.sidebar_app(pyramid_request)
         expected_config = {
                 'apiUrl': 'http://example.com/api',
@@ -149,7 +148,6 @@ def pyramid_settings(pyramid_settings):
 def routes(pyramid_config):
     pyramid_config.add_route('api.index', '/api')
     pyramid_config.add_route('assets_client', '/assets/client/{subpath}')
-    pyramid_config.add_route('embed', '/embed.js')
     pyramid_config.add_route('index', '/')
     pyramid_config.add_route('sidebar_app', '/app.html')
 
