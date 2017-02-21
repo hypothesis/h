@@ -122,12 +122,8 @@ def sidebar_app(request, extra=None):
     settings = request.registry.settings
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
 
-    client_url = None
-    if request.feature('use_client_boot_script'):
-        client_url = _client_url(request)
-
     ctx = _app_html_context(api_url=request.route_url('api.index'),
-                            client_url=client_url,
+                            client_url=_client_url(request),
                             service_url=request.route_url('index'),
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
                             assets_env=request.registry['assets_client_env'],
