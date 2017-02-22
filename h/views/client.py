@@ -94,13 +94,12 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
             'googleAnalytics': ga_client_tracking_id
         })
 
-    app_css_urls = assets_env.urls('app_css')
-
     if client_url:
         app_js_urls = [client_url]
         app_css_urls = []
     else:
         app_js_urls = assets_env.urls('app_js')
+        app_css_urls = assets_env.urls('app_css')
 
     return {
         'app_config': json.dumps(app_config),
