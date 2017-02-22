@@ -61,7 +61,7 @@ class TestSidebarApp(object):
 
         ctx = client.sidebar_app(pyramid_request)
 
-        assert ctx['app_js_urls'] == ['https://unpkg.com/hypothesis']
+        assert ctx['app_js_urls'] == ['/embed.js']
         assert ctx['app_css_urls'] == []
 
 
@@ -148,6 +148,7 @@ def pyramid_settings(pyramid_settings):
 def routes(pyramid_config):
     pyramid_config.add_route('api.index', '/api')
     pyramid_config.add_route('assets_client', '/assets/client/{subpath}')
+    pyramid_config.add_route('embed', '/embed.js')
     pyramid_config.add_route('index', '/')
     pyramid_config.add_route('sidebar_app', '/app.html')
 
