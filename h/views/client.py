@@ -183,7 +183,7 @@ def embed(request):
 
 @view_config(route_name='embed',
              has_feature_flag='use_client_boot_script',
-             http_cache=60 * 5)
+             http_cache=(60 * 5, {'public': True}))
 def embed_redirect(request):
     """
     Redirect to the script which loads the Hypothesis client on a page.
