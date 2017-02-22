@@ -66,11 +66,14 @@
   @include reset-button;
   background-color: $grey-2;
   border-radius: 2px;
-  display: flex;
   margin-bottom: 5px;
   margin-right: 5px;
   padding: 5px;
   font-weight: bold;
+}
+
+.search-result-sidebar__tag-container {
+  display: flex;
 }
 
 .search-result-sidebar__tag-count {

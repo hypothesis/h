@@ -154,9 +154,17 @@
               name="toggle_tag_facet"
               value="{{ tag.tag }}"
               class="search-result-sidebar__tag">
-        {{ tag.tag }}
-        <span class="search-result-sidebar__tag-count">
-          {{ tag.count }}
+        {#
+          Add an extra container element to work around the fact that <button>s
+          can't be flex containers in FF51 and earlier:
+
+            https://bugzilla.mozilla.org/show_bug.cgi?id=984869
+        #}
+        <span class="search-result-sidebar__tag-container">
+          {{ tag.tag }}
+          <span class="search-result-sidebar__tag-count">
+            {{ tag.count }}
+          </span>
         </span>
       </button>
     {% endfor %}
