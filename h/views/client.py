@@ -37,8 +37,6 @@ def _client_url(request):
     """
     Return the configured URL for the client.
     """
-    if not request.feature('use_client_boot_script'):
-        return None
     return request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
 
 
@@ -47,8 +45,6 @@ def _resolve_client_url(request):
     Return the URL for the client after following any redirects.
     """
     client_url = _client_url(request)
-    if not client_url:
-        return None
 
     # `requests.get` fetches the URL and follows any redirects along the way.
     # The response URL will be the final URL that returned the content of the
