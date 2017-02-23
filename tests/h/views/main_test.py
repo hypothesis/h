@@ -12,13 +12,19 @@ from memex.resources import AnnotationResource
 from h.views import main
 
 
+def _fake_sidebar_app(request, extra):
+    return extra
+
+
 @pytest.mark.usefixtures('routes')
-def test_og_document(annotation_document, document_title, pyramid_request, group_service, links_service):
+def test_og_document(annotation_document, document_title, pyramid_request,
+                     group_service, links_service, sidebar_app):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
     context = AnnotationResource(annotation, group_service, links_service)
     document = Document()
     annotation_document.return_value = document
     document_title.return_value = 'WikiHow — How to Make a ☆Starmap☆'
+    sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)
 
@@ -28,9 +34,10 @@ def test_og_document(annotation_document, document_title, pyramid_request, group
 
 
 @pytest.mark.usefixtures('routes')
-def test_og_no_document(pyramid_request, group_service, links_service):
+def test_og_no_document(pyramid_request, group_service, links_service, sidebar_app):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
     context = AnnotationResource(annotation, group_service, links_service)
+    sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)
 
@@ -111,9 +118,10 @@ class TestStreamUserRedirect(object):
         pyramid_config.add_route('stream_atom', '/stream.atom')
         pyramid_config.add_route('stream_rss', '/stream.rss')
 
-    @pytest.fixture
-    def sidebar_app(self, patch):
-        return patch('h.views.main.sidebar_app')
+
+@pytest.fixture
+def sidebar_app(patch):
+    return patch('h.views.main.sidebar_app')
 
 
 @pytest.fixture

@@ -73,6 +73,7 @@ SETTINGS = [
     EnvSetting('h.bouncer_url', 'BOUNCER_URL'),
     EnvSetting('h.client_id', 'CLIENT_ID'),
     EnvSetting('h.client_secret', 'CLIENT_SECRET'),
+    EnvSetting('h.client_url', 'CLIENT_URL'),
     EnvSetting('h.proxy_auth', 'PROXY_AUTH', type=asbool),
     EnvSetting('h.websocket_url', 'WEBSOCKET_URL'),
     # The client Sentry DSN should be of the public kind, lacking the password

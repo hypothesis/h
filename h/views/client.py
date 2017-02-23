@@ -1,22 +1,29 @@
 # -*- coding: utf-8 -*-
 
 """
-Application client views.
+Hypothesis client views.
 
-Views which exist either to serve or support the JavaScript annotation client.
+Views which exist either to serve or support the Hypothesis client.
 """
 
 from __future__ import unicode_literals
 
 import json
 
+from pyramid.config import not_
+from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
+import requests
 
 from h._compat import urlparse
 from h import session as h_session
 from h.auth.tokens import generate_jwt
 from h.util.view import json_view
 from h import __version__
+
+# Default URL for the client, which points to the latest version of the client
+# that was published to npm.
+DEFAULT_CLIENT_URL = 'https://unpkg.com/hypothesis'
 
 
 def url_with_path(url):
@@ -26,8 +33,30 @@ def url_with_path(url):
         return url
 
 
+def _client_url(request):
+    """
+    Return the configured URL for the client.
+    """
+    return request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
+
+
+def _resolve_client_url(request):
+    """
+    Return the URL for the client after following any redirects.
+    """
+    client_url = _client_url(request)
+
+    # `requests.get` fetches the URL and follows any redirects along the way.
+    # The response URL will be the final URL that returned the content of the
+    # boot script.
+    client_script_rsp = requests.get(client_url)
+    client_script_rsp.raise_for_status()
+    return client_script_rsp.url
+
+
 def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
-                      websocket_url, auth_domain, ga_client_tracking_id):
+                      websocket_url, auth_domain, ga_client_tracking_id,
+                      client_url):
     """
     Returns a dict of asset URLs and contents used by the sidebar app
     HTML tempate.
@@ -61,8 +90,12 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
             'googleAnalytics': ga_client_tracking_id
         })
 
-    app_css_urls = assets_env.urls('app_css')
-    app_js_urls = assets_env.urls('app_js')
+    if client_url:
+        app_js_urls = [client_url]
+        app_css_urls = []
+    else:
+        app_js_urls = assets_env.urls('app_js')
+        app_css_urls = assets_env.urls('app_css')
 
     return {
         'app_config': json.dumps(app_config),
@@ -84,7 +117,13 @@ def sidebar_app(request, extra=None):
     settings = request.registry.settings
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
 
+    if request.feature('use_client_boot_script'):
+        client_url = request.route_path('embed')
+    else:
+        client_url = None
+
     ctx = _app_html_context(api_url=request.route_url('api.index'),
+                            client_url=client_url,
                             service_url=request.route_url('index'),
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
                             assets_env=request.registry['assets_client_env'],
@@ -114,8 +153,14 @@ def annotator_token(request):
 
 
 @view_config(route_name='embed',
-             renderer='h:templates/embed.js.jinja2')
+             renderer='h:templates/embed.js.jinja2',
+             has_feature_flag=not_('use_client_boot_script'))
 def embed(request):
+    """
+    Render the script which loads the Hypothesis client on a page.
+
+    This view renders a script which loads the assets required by the client.
+    """
     request.response.content_type = 'text/javascript'
 
     assets_env = request.registry['assets_client_env']
@@ -130,6 +175,20 @@ def embed(request):
         'inject_resource_urls': (absolute_asset_urls('inject_js') +
                                  absolute_asset_urls('inject_css'))
     }
+
+
+@view_config(route_name='embed',
+             has_feature_flag='use_client_boot_script',
+             http_cache=(60 * 5, {'public': True}))
+def embed_redirect(request):
+    """
+    Redirect to the script which loads the Hypothesis client on a page.
+
+    This view provides a fixed URL which redirects to the latest version of the
+    client, typically hosted on a CDN.
+    """
+    client_url = _resolve_client_url(request)
+    return HTTPFound(location=client_url)
 
 
 @json_view(route_name='session', http_cache=0)
