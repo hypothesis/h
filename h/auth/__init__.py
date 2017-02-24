@@ -38,6 +38,7 @@ def includeme(config):
     settings['authsanity.cookie.max_age'] = 2592000
     settings['authsanity.cookie.httponly'] = True
     settings['authsanity.secret'] = derive_key(settings['secret_key'],
+                                               settings['secret_salt'],
                                                b'h.auth.cookie_secret')
     config.include('pyramid_authsanity')
 

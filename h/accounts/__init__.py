@@ -56,6 +56,7 @@ def includeme(config):
     config.include('.subscribers')
 
     secret = config.registry.settings['secret_key']
-    derived = derive_key(secret, b'h.accounts')
+    salt = config.registry.settings['secret_salt']
+    derived = derive_key(secret, salt, b'h.accounts')
     serializer = URLSafeTimedSerializer(derived)
     config.registry.password_reset_serializer = serializer

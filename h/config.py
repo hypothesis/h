@@ -11,7 +11,6 @@ import socket
 from pyramid.config import Configurator
 from pyramid.settings import asbool
 
-from h.security import derive_key
 from h.settings import DockerSetting
 from h.settings import EnvSetting
 from h.settings import SettingError
@@ -21,6 +20,13 @@ from h.settings import mandrill_settings
 __all__ = ('configure',)
 
 log = logging.getLogger(__name__)
+
+# The default salt used for secret derivation. This is a public value, and can
+# be overridden using the SECRET_SALT environment variable.
+DEFAULT_SALT = (b"\xbc\x9ck!k\x81(\xb6I\xaa\x90\x0f'}\x07\xa1P\xd9\xb7\xcb"
+                b"\xcb\xe8\x8b\t\xcf\xeb *\xa7\xa6\xe1i\xc7\x81\xe8\xd8\x18"
+                b"\x9f\x1b\x96\xc1\xfa\x8b\x19\x82\xa3[\x19\xcb\xa4\x1a\x0f"
+                b"\xe4\xcb\r\x17\x7f\xfbh\xd5^W\xdb\xe6")
 
 # The list of all settings read from the system environment. These are in
 # reverse-priority order, meaning that later settings trump earlier settings.
@@ -61,6 +67,7 @@ SETTINGS = [
 
     # Configuration for Pyramid
     EnvSetting('secret_key', 'SECRET_KEY', type=bytes),
+    EnvSetting('secret_salt', 'SECRET_SALT', type=bytes),
 
     # Configuration for h
     EnvSetting('csp.enabled', 'CSP_ENABLED', type=asbool),
@@ -105,6 +112,10 @@ def configure(environ=None, settings=None):
                  'configure the secret_key setting or the SECRET_KEY '
                  'environment variable!')
         settings['secret_key'] = os.urandom(64)
+
+    # Use a fixed default salt if none provided
+    if 'secret_salt' not in settings:
+        settings['secret_salt'] = DEFAULT_SALT
 
     # Set up SQLAlchemy debug logging
     if 'debug_query' in settings:

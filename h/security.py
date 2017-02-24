@@ -30,12 +30,10 @@ password_context = CryptContext(schemes=['bcrypt'],
                                 bcrypt__min_rounds=12)
 
 
-def derive_key(key_material, info, algorithm=None, length=None):
-    if algorithm is None:
-        algorithm = hashes.SHA512()
-    if length is None:
-        length = algorithm.digest_size
-    hkdf = HKDF(algorithm, length, b'h.security', info, backend)
+def derive_key(key_material, salt, info):
+    algorithm = hashes.SHA512()
+    length = algorithm.digest_size
+    hkdf = HKDF(algorithm, length, salt, info, backend)
     return hkdf.derive(key_material)
 
 

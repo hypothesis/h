@@ -105,7 +105,9 @@ def includeme(config):
     # By default, derive_key generates a 64-byte (512 bit) secret, which is the
     # correct length for SHA512-based HMAC as specified by the `hashalg`.
     factory = SignedCookieSessionFactory(
-        secret=derive_key(settings['secret_key'], b'h.session.cookie_secret'),
+        secret=derive_key(settings['secret_key'],
+                          settings['secret_salt'],
+                          b'h.session.cookie_secret'),
         hashalg='sha512',
         httponly=True,
         timeout=3600,
