@@ -197,6 +197,27 @@ paths:
           description: Annotation not found or no permission to delete
           schema:
             $ref: '#/definitions/Error'
+  /profile:
+    get:
+      summary: Get the user's profile
+      description: >
+        This can either be accessed with an API key, in which case it will show
+        the authenticated user's profile, or without, in which case it will show
+        information for a logged-out profile, including only public groups for
+        the current authority.
+      parameters:
+        - name: authority
+          in: query
+          description: >
+            The current authority if the user is not logged in.
+          required: false
+          type: string
+          default: "hypothes.is"
+      responses:
+        '200':
+          description: Profile information
+          schema:
+            $ref: '#/definitions/Profile'
   /search:
     get:
       summary: Search for annotations
@@ -337,3 +358,5 @@ definitions:
     $ref: './schemas/new-user-schema.json'
   User:
     $ref: './schemas/user-schema.json'
+  Profile:
+    $ref: './schemas/profile-schema.json'
