@@ -77,18 +77,18 @@ class OAuthService(object):
 
         authclient = self._get_authclient_by_id(token.issuer)
         if not authclient:
-            raise OAuthTokenError('given JWT issuer is invalid', 'invalid_grant')
+            raise OAuthTokenError('grant token issuer (iss) is invalid', 'invalid_grant')
 
         verified_token = token.verified(key=authclient.secret,
                                         audience=self.domain)
 
         user = self.usersvc.fetch(verified_token.subject)
         if user is None:
-            raise OAuthTokenError('user with userid described in subject could not be found',
+            raise OAuthTokenError('grant token subject (sub) could not be found',
                                   'invalid_grant')
 
         if user.authority != authclient.authority:
-            raise OAuthTokenError('authenticated client and JWT subject authorities do not match',
+            raise OAuthTokenError('grant token subject (sub) does not match issuer (iss)',
                                   'invalid_grant')
 
         return (user, authclient)
@@ -175,7 +175,7 @@ class GrantToken(object):
     def issuer(self):
         iss = self._claims.get('iss', None)
         if not iss:
-            raise OAuthTokenError('grant token issuer is missing', 'invalid_grant')
+            raise OAuthTokenError('grant token issuer (iss) is missing', 'invalid_grant')
         return iss
 
     def verified(self, key, audience):
@@ -209,44 +209,48 @@ class VerifiedGrantToken(GrantToken):
                        key=key,
                        leeway=self.LEEWAY)
         except jwt.DecodeError:
-            raise OAuthTokenError('invalid JWT signature', 'invalid_grant')
+            raise OAuthTokenError('grant token signature is invalid', 'invalid_grant')
         except jwt.exceptions.InvalidAlgorithmError:
-            raise OAuthTokenError('invalid JWT signature algorithm', 'invalid_grant')
+            raise OAuthTokenError('grant token signature algorithm is invalid', 'invalid_grant')
         except jwt.MissingRequiredClaimError as exc:
-            raise OAuthTokenError('JWT is missing claim %s' % exc.claim, 'invalid_grant')
+            if exc.claim == 'aud':
+                raise OAuthTokenError('grant token audience (aud) is missing', 'invalid_grant')
+            else:
+                raise OAuthTokenError('grant token claim {} is missing'.format(exc.claim),
+                                      'invalid_grant')
         except jwt.InvalidAudienceError:
-            raise OAuthTokenError('invalid JWT audience', 'invalid_grant')
+            raise OAuthTokenError('grant token audience (aud) is invalid', 'invalid_grant')
         except jwt.ImmatureSignatureError:
-            raise OAuthTokenError('JWT not before is in the future', 'invalid_grant')
+            raise OAuthTokenError('grant token is not yet valid', 'invalid_grant')
         except jwt.ExpiredSignatureError:
-            raise OAuthTokenError('JWT token is expired', 'invalid_grant')
+            raise OAuthTokenError('grant token is expired', 'invalid_grant')
         except jwt.InvalidIssuedAtError:
-            raise OAuthTokenError('JWT issued at is in the future', 'invalid_grant')
+            raise OAuthTokenError('grant token issue time (iat) is in the future', 'invalid_grant')
 
     @property
     def expiry(self):
-        return self._timestamp_claim('exp')
+        return self._timestamp_claim('exp', 'expiry')
 
     @property
     def not_before(self):
-        return self._timestamp_claim('nbf')
+        return self._timestamp_claim('nbf', 'start time')
 
-    def _timestamp_claim(self, key):
+    def _timestamp_claim(self, key, description):
         claim = self._claims.get(key, None)
         if claim is None:
-            raise OAuthTokenError('JWT is missing claim {}'.format(key),
-                                  'invalid_grant')
+            message = 'grant token {} ({}) is missing'.format(description, key)
+            raise OAuthTokenError(message, 'invalid_grant')
         try:
             return datetime.datetime.utcfromtimestamp(claim)
         except (TypeError, ValueError):
-            raise OAuthTokenError('invalid claim {}'.format(key),
-                                  'invalid_grant')
+            message = 'grant token {} ({}) is invalid'.format(description, key)
+            raise OAuthTokenError(message, 'invalid_grant')
 
     @property
     def subject(self):
         sub = self._claims.get('sub', None)
         if not sub:
-            raise OAuthTokenError('JWT subject is missing', 'invalid_grant')
+            raise OAuthTokenError('grant token subject (sub) is missing', 'invalid_grant')
         return sub
 
 
