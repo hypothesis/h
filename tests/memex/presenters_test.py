@@ -288,7 +288,7 @@ class TestAnnotationJSONLDPresenter(object):
             target_uri='http://example.com',
             text='It is magical!',
             tags=['magic'],
-            target_selectors=[{'TestSelector': 'foobar'}])
+            target_selectors=[{'type': 'TestSelector', 'test': 'foobar'}])
         expected = {
             '@context': 'http://www.w3.org/ns/anno.jsonld',
             'type': 'Annotation',
@@ -298,12 +298,13 @@ class TestAnnotationJSONLDPresenter(object):
             'creator': 'acct:luke',
             'body': [{'type': 'TextualBody',
                       'format': 'text/markdown',
-                      'text': 'It is magical!'},
+                      'value': 'It is magical!'},
                      {'type': 'TextualBody',
                       'purpose': 'tagging',
-                      'text': 'magic'}],
+                      'value': 'magic'}],
             'target': [{'source': 'http://example.com',
-                        'selector': [{'TestSelector': 'foobar'}]}]
+                        'selector': [{'type': 'TestSelector',
+                                      'test': 'foobar'}]}]
         }
 
         resource = AnnotationResource(annotation, group_service, fake_links_service)
@@ -336,7 +337,7 @@ class TestAnnotationJSONLDPresenter(object):
 
         assert bodies == [{
             'type': 'TextualBody',
-            'text': 'Flib flob flab',
+            'value': 'Flib flob flab',
             'format': 'text/markdown',
         }]
 
@@ -348,14 +349,118 @@ class TestAnnotationJSONLDPresenter(object):
 
         assert {
             'type': 'TextualBody',
-            'text': 'giraffe',
+            'value': 'giraffe',
             'purpose': 'tagging',
         } in bodies
         assert {
             'type': 'TextualBody',
-            'text': 'lion',
+            'value': 'lion',
             'purpose': 'tagging',
         } in bodies
+
+    def test_ignores_selectors_lacking_types(self, group_service, fake_links_service):
+        annotation = mock.Mock(target_uri='http://example.com')
+        annotation.target_selectors = [
+            {'type': 'TestSelector', 'test': 'foobar'},
+            {'something': 'else'},
+        ]
+        resource = AnnotationResource(annotation, group_service, fake_links_service)
+
+        selectors = AnnotationJSONLDPresenter(resource).target[0]['selector']
+
+        assert selectors == [{
+            'type': 'TestSelector',
+            'test': 'foobar',
+        }]
+
+    def test_rewrites_rangeselectors_same_element(self, group_service, fake_links_service):
+        """
+        A RangeSelector that starts and ends in the same element should be
+        rewritten to an XPathSelector refinedBy a TextPositionSelector, for
+        the sake of simplicity.
+        """
+        annotation = mock.Mock(target_uri='http://example.com')
+        annotation.target_selectors = [
+            {
+                'type': 'RangeSelector',
+                'startContainer': '/div[1]/main[1]/article[1]/div[2]/p[339]',
+                'startOffset': 12,
+                'endContainer': '/div[1]/main[1]/article[1]/div[2]/p[339]',
+                'endOffset': 43,
+            }
+        ]
+        resource = AnnotationResource(annotation, group_service, fake_links_service)
+
+        selectors = AnnotationJSONLDPresenter(resource).target[0]['selector']
+
+        assert selectors == [{
+            'type': 'XPathSelector',
+            'value': '/div[1]/main[1]/article[1]/div[2]/p[339]',
+            'refinedBy': {
+                'type': 'TextPositionSelector',
+                'start': 12,
+                'end': 43,
+            }
+        }]
+
+    def test_rewrites_rangeselectors_different_element(self, group_service, fake_links_service):
+        """
+        A RangeSelector that starts and ends in the different elements should
+        be rewritten to a RangeSelector bounded by two XPathSelectors, each of
+        which is refinedBy a "point"-like TextPositionSelector.
+        """
+        annotation = mock.Mock(target_uri='http://example.com')
+        annotation.target_selectors = [
+            {
+                'type': 'RangeSelector',
+                'startContainer': '/div[1]/main[1]/article[1]/div[2]/h1[1]',
+                'startOffset': 4,
+                'endContainer': '/div[1]/main[1]/article[1]/div[2]/p[339]',
+                'endOffset': 72,
+            }
+        ]
+        resource = AnnotationResource(annotation, group_service, fake_links_service)
+
+        selectors = AnnotationJSONLDPresenter(resource).target[0]['selector']
+
+        assert selectors == [{
+            'type': 'RangeSelector',
+            'startSelector': {
+                'type': 'XPathSelector',
+                'value': '/div[1]/main[1]/article[1]/div[2]/h1[1]',
+                'refinedBy': {
+                    'type': 'TextPositionSelector',
+                    'start': 4,
+                    'end': 4,
+                }
+            },
+            'endSelector': {
+                'type': 'XPathSelector',
+                'value': '/div[1]/main[1]/article[1]/div[2]/p[339]',
+                'refinedBy': {
+                    'type': 'TextPositionSelector',
+                    'start': 72,
+                    'end': 72,
+                }
+            },
+        }]
+
+    def test_ignores_malformed_rangeselectors(self, group_service, fake_links_service):
+        annotation = mock.Mock(target_uri='http://example.com')
+        annotation.target_selectors = [
+            {
+                'type': 'RangeSelector',
+                'startContainer': '/div[1]/main[1]/article[1]/div[2]/h1[1]',
+                'startOffset': 4,
+                'endContainer': '/div[1]/main[1]/article[1]/div[2]/p[339]',
+            }
+        ]
+        resource = AnnotationResource(annotation, group_service, fake_links_service)
+
+        target = AnnotationJSONLDPresenter(resource).target[0]
+
+        assert 'selector' not in target
+
 
 
 class TestDocumentJSONPresenter(object):
