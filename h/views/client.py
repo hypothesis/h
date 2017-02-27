@@ -13,7 +13,6 @@ import json
 from pyramid.config import not_
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-import requests
 
 from h._compat import urlparse
 from h import session as h_session
@@ -23,7 +22,7 @@ from h import __version__
 
 # Default URL for the client, which points to the latest version of the client
 # that was published to npm.
-DEFAULT_CLIENT_URL = 'https://unpkg.com/hypothesis'
+DEFAULT_CLIENT_URL = 'https://cdn.hypothes.is/hypothesis'
 
 
 def url_with_path(url):
@@ -38,20 +37,6 @@ def _client_url(request):
     Return the configured URL for the client.
     """
     return request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
-
-
-def _resolve_client_url(request):
-    """
-    Return the URL for the client after following any redirects.
-    """
-    client_url = _client_url(request)
-
-    # `requests.get` fetches the URL and follows any redirects along the way.
-    # The response URL will be the final URL that returned the content of the
-    # boot script.
-    client_script_rsp = requests.get(client_url)
-    client_script_rsp.raise_for_status()
-    return client_script_rsp.url
 
 
 def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
@@ -187,8 +172,7 @@ def embed_redirect(request):
     This view provides a fixed URL which redirects to the latest version of the
     client, typically hosted on a CDN.
     """
-    client_url = _resolve_client_url(request)
-    return HTTPFound(location=client_url)
+    return HTTPFound(_client_url(request))
 
 
 @json_view(route_name='session', http_cache=0)
