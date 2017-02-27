@@ -71,7 +71,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'issuer is missing' in exc.value.message
+        assert 'grant token issuer (iss) is missing' in exc.value.message
 
     def test_empty_jwt_issuer(self, svc, claims, authclient, jwt_bearer_body):
         claims['iss'] = ''
@@ -81,7 +81,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'issuer is missing' in exc.value.message
+        assert 'grant token issuer (iss) is missing' in exc.value.message
 
     def test_missing_authclient_with_given_jwt_issuer(self, svc, authclient, db_session, jwt_bearer_body):
         db_session.delete(authclient)
@@ -91,7 +91,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'issuer is invalid' in exc.value.message
+        assert 'grant token issuer (iss) is invalid' in exc.value.message
 
     def test_non_uuid_jwt_issuer(self, svc, claims, authclient, jwt_bearer_body):
         claims['iss'] = 'bogus'
@@ -101,7 +101,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'issuer is invalid' in exc.value.message
+        assert 'grant token issuer (iss) is invalid' in exc.value.message
 
     def test_signed_with_different_secret(self, svc, claims, jwt_bearer_body):
         jwt_bearer_body['assertion'] = self.jwt_token(claims, 'different-secret')
@@ -110,7 +110,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'invalid JWT signature' in exc.value.message
+        assert 'grant token signature is invalid' in exc.value.message
 
     def test_signed_with_unsupported_algorithm(self, svc, claims, authclient, jwt_bearer_body):
         jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret, algorithm='HS512')
@@ -119,7 +119,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'invalid JWT signature algorithm' in exc.value.message
+        assert 'grant token signature algorithm is invalid' in exc.value.message
 
     def test_missing_jwt_audience(self, svc, claims, authclient, jwt_bearer_body):
         del claims['aud']
@@ -129,7 +129,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'missing claim aud' in exc.value.message
+        assert 'grant token audience (aud) is missing' in exc.value.message
 
     def test_invalid_jwt_audience(self, svc, claims, authclient, jwt_bearer_body):
         claims['aud'] = 'foobar.org'
@@ -139,7 +139,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'invalid JWT audience' in exc.value.message
+        assert 'grant token audience (aud) is invalid' in exc.value.message
 
     def test_jwt_not_before_in_future(self, svc, claims, authclient, jwt_bearer_body):
         claims['nbf'] = self.epoch(delta=timedelta(minutes=5))
@@ -149,7 +149,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'not before is in the future' in exc.value.message
+        assert 'grant token is not yet valid' in exc.value.message
 
     def test_jwt_expires_within_leeway(self, svc, claims, authclient, jwt_bearer_body):
         claims['exp'] = self.epoch(delta=timedelta(seconds=-8))
@@ -165,7 +165,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'token is expired' in exc.value.message
+        assert 'grant token is expired' in exc.value.message
 
     def test_jwt_issued_at_in_the_future(self, svc, claims, authclient, jwt_bearer_body):
         claims['iat'] = self.epoch(delta=timedelta(minutes=2))
@@ -175,7 +175,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'issued at is in the future' in exc.value.message
+        assert 'grant token issue time (iat) is in the future' in exc.value.message
 
     def test_missing_jwt_subject(self, svc, claims, authclient, jwt_bearer_body):
         del claims['sub']
@@ -185,7 +185,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'subject is missing' in exc.value.message
+        assert 'grant token subject (sub) is missing' in exc.value.message
 
     def test_empty_jwt_subject(self, svc, claims, authclient, jwt_bearer_body):
         claims['sub'] = ''
@@ -195,7 +195,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'subject is missing' in exc.value.message
+        assert 'grant token subject (sub) is missing' in exc.value.message
 
     def test_user_not_found(self, svc, user_service, jwt_bearer_body):
         user_service.fetch.return_value = None
@@ -204,7 +204,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'user with userid described in subject could not be found' in exc.value.message
+        assert 'grant token subject (sub) could not be found' in exc.value.message
 
     def test_it_raises_when_client_authority_does_not_match_userid(self, svc, db_session, user, jwt_bearer_body):
         user.authority = 'bogus-partner.org'
@@ -214,7 +214,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'authenticated client and JWT subject authorities do not match' in exc.value
+        assert 'grant token subject (sub) does not match issuer (iss)' in exc.value
 
     def test_missing_expiry(self, svc, claims, authclient, jwt_bearer_body):
         del claims['exp']
@@ -224,7 +224,7 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'JWT is missing claim exp' in exc.value
+        assert 'grant token expiry (exp) is missing' in exc.value
 
     def test_missing_nbf(self, svc, claims, authclient, jwt_bearer_body):
         del claims['nbf']
@@ -234,31 +234,31 @@ class TestOAuthServiceVerifyJWTBearerRequest(object):
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'JWT is missing claim nbf' in exc.value
+        assert 'grant token start time (nbf) is missing' in exc.value
 
-    @pytest.mark.parametrize('claim_name', ['nbf', 'exp'])
-    def test_null_timestamp(self, svc, claims, authclient, jwt_bearer_body, claim_name):
-        claims[claim_name] = None
+    @pytest.mark.parametrize('claim,description', [['nbf', 'start time'], ['exp', 'expiry']])
+    def test_null_timestamp(self, svc, claims, authclient, jwt_bearer_body, claim, description):
+        claims[claim] = None
         jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'JWT is missing claim {}'.format(claim_name) in exc.value
+        assert 'grant token {} ({}) is missing'.format(description, claim) in exc.value
 
-    @pytest.mark.parametrize('claim_name,delta',
-                             [['nbf', timedelta(minutes=-5)],
-                              ['exp', timedelta(minutes=5)]])
-    def test_string_timestamp(self, svc, claims, authclient, jwt_bearer_body, claim_name, delta):
-        claims[claim_name] = text_type(self.epoch(delta=delta))
+    @pytest.mark.parametrize('claim,description,delta',
+                             [['nbf', 'start time', timedelta(minutes=-5)],
+                              ['exp', 'expiry', timedelta(minutes=5)]])
+    def test_string_timestamp(self, svc, claims, authclient, jwt_bearer_body, claim, description, delta):
+        claims[claim] = text_type(self.epoch(delta=delta))
         jwt_bearer_body['assertion'] = self.jwt_token(claims, authclient.secret)
 
         with pytest.raises(OAuthTokenError) as exc:
             svc.verify_token_request(jwt_bearer_body)
 
         assert exc.value.type == 'invalid_grant'
-        assert 'invalid claim {}'.format(claim_name) in exc.value
+        assert 'grant token {} ({}) is invalid'.format(description, claim) in exc.value
 
     @pytest.mark.parametrize('grant_start,grant_expiry',
                              [[None, timedelta(minutes=15)],
