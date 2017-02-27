@@ -176,13 +176,13 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
     def bodies(self):
         bodies = [{
             'type': 'TextualBody',
-            'text': self.text,
+            'value': self.text,
             'format': 'text/markdown',
         }]
         for t in self.tags:
             bodies.append({
                 'type': 'TextualBody',
-                'text': t,
+                'value': t,
                 'purpose': 'tagging',
             })
         return bodies

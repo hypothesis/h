@@ -298,10 +298,10 @@ class TestAnnotationJSONLDPresenter(object):
             'creator': 'acct:luke',
             'body': [{'type': 'TextualBody',
                       'format': 'text/markdown',
-                      'text': 'It is magical!'},
+                      'value': 'It is magical!'},
                      {'type': 'TextualBody',
                       'purpose': 'tagging',
-                      'text': 'magic'}],
+                      'value': 'magic'}],
             'target': [{'source': 'http://example.com',
                         'selector': [{'TestSelector': 'foobar'}]}]
         }
@@ -336,7 +336,7 @@ class TestAnnotationJSONLDPresenter(object):
 
         assert bodies == [{
             'type': 'TextualBody',
-            'text': 'Flib flob flab',
+            'value': 'Flib flob flab',
             'format': 'text/markdown',
         }]
 
@@ -348,12 +348,12 @@ class TestAnnotationJSONLDPresenter(object):
 
         assert {
             'type': 'TextualBody',
-            'text': 'giraffe',
+            'value': 'giraffe',
             'purpose': 'tagging',
         } in bodies
         assert {
             'type': 'TextualBody',
-            'text': 'lion',
+            'value': 'lion',
             'purpose': 'tagging',
         } in bodies
 
