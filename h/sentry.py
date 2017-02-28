@@ -48,7 +48,11 @@ def get_client(settings):
     transport_name = settings.get('raven.transport')
     transport = GeventedHTTPTransport if transport_name == 'gevent' else None
 
-    return raven.Client(release=__version__,
+    # Application environment name
+    environment = settings.get('h.env', 'dev')
+
+    return raven.Client(environment=environment,
+                        release=__version__,
                         transport=transport,
                         processors=PROCESSORS)
 
