@@ -2,13 +2,11 @@
 
 from __future__ import unicode_literals
 
-from h._compat import StringIO
 import json
 
-from mock import Mock, patch
+from mock import Mock
 from pyramid.httpexceptions import HTTPFound
 import pytest
-import requests
 
 from h.views import client
 from h import __version__
@@ -80,38 +78,13 @@ class TestEmbed(object):
         assert pyramid_request.response.content_type == 'text/javascript'
 
 
-@pytest.mark.usefixtures('requests_get', 'routes', 'pyramid_settings')
+@pytest.mark.usefixtures('routes', 'pyramid_settings')
 class TestEmbedRedirect(object):
-    def test_fetches_client_boot_script(self, pyramid_request, requests_get):
-        client.embed_redirect(pyramid_request)
-        requests_get.assert_called_with('https://unpkg.com/hypothesis')
-
-    def test_fetches_custom_client_boot_script(self, pyramid_request, requests_get):
-        pyramid_request.registry.settings['h.client_url'] = 'https://client.hypothes.is'
-        client.embed_redirect(pyramid_request)
-        requests_get.assert_called_with('https://client.hypothes.is')
-
     def test_redirects_to_client_boot_script(self, pyramid_request):
         rsp = client.embed_redirect(pyramid_request)
 
         assert isinstance(rsp, HTTPFound)
-        assert rsp.location == 'https://unpkg.com/hypothesis@0.100'
-
-
-@pytest.yield_fixture
-def requests_get(fake_client_boot_response):
-    with patch('h.views.client.requests.get') as requests_get:
-        requests_get.return_value = fake_client_boot_response
-        yield requests_get
-
-
-@pytest.fixture
-def fake_client_boot_response():
-    rsp = requests.models.Response()
-    rsp.url = 'https://unpkg.com/hypothesis@0.100'
-    rsp.raw = StringIO(b'/* client boot script */')
-    rsp.status_code = 200
-    return rsp
+        assert rsp.location == 'https://cdn.hypothes.is/hypothesis'
 
 
 @pytest.fixture
