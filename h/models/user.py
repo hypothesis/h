@@ -41,6 +41,19 @@ class UserIDComparator(Comparator):
                        val['domain'] == self.authority)
 
 
+class UIDComparator(Comparator):
+    """
+    Custom comparator for the User.username property.
+
+    This ensures that lookups by username are actually always done against the
+    :py:attr:`~h.models.user.User.uid` property. This ensures that username
+    normalisation is consistently applied when retrieving users by username
+    throughout the application.
+    """
+    def __eq__(self, other):
+        return self.__clause_element__() == _username_to_uid(other)
+
+
 class UserFactory(object):
     """Root resource for routes that look up User objects by traversal."""
 
@@ -129,6 +142,13 @@ class User(Base):
     def username(self, value):
         self._username = value
         self.uid = _username_to_uid(value)
+
+    @username.comparator
+    def username(cls):
+        # Whenever a query filters by username, filter by uid instead behind
+        # the scenes. This ensures, for example, that login by case- or
+        # dot-variant of a username works as expected.
+        return UIDComparator(cls.uid)
 
     @hybrid_property
     def userid(self):
