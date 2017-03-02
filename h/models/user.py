@@ -5,8 +5,9 @@ import re
 
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
+from sqlalchemy.ext.declarative import declared_attr
 
-from h._compat import text_type
+from h._compat import string_types, text_type
 from h.db import Base
 from h.security import password_context
 from h.util.user import split_user
@@ -18,27 +19,91 @@ EMAIL_MAX_LENGTH = 100
 PASSWORD_MIN_LENGTH = 2
 
 
+def _normalise_username(username):
+    # We normalize usernames by dots and case in order to discourage attempts
+    # at impersonation.
+    return sa.func.lower(sa.func.replace(username,
+                                         sa.text("'.'"),
+                                         sa.text("''")))
+
+
+class UsernameComparator(Comparator):
+    """
+    Custom comparator for :py:attr:`~h.models.user.User.username`.
+
+    This ensures that all lookups against the username property, such as
+
+        session.query(User).filter_by(username='juanwood')
+
+    use the normalised username for the lookup and appropriately normalise the
+    RHS of the query. This means that a query like the one above will
+    correctly find a user with a username of "Juan.Wood", for example.
+    """
+    def operate(self, op, other, **kwargs):
+        return op(_normalise_username(self.__clause_element__()),
+                  _normalise_username(other),
+                  **kwargs)
+
+
 class UserIDComparator(Comparator):
     """
-    Custom comparator for the User.userid property.
+    Custom comparator for :py:attr:`~h.models.user.User.userid`.
 
-    This is a comparator conforming to the
-    :py:class:`sqlalchemy.orm.interfaces.PropComparator` interface, which
-    makes it possible to find users by userid without doing ugly SQL
-    concatenation that prevents the use of indices.
+    A user's userid is a compound property which depends on their username
+    and their authority. A naive comparator for this property would generate
+    SQL like the following:
+
+        ... WHERE 'acct:' || username || '@' || authority = ...
+
+    This would be slow, due to the lack of an index on the LHS expression.
+    While we could add a functional index on this expression, we can also take
+    advantage of the existing index on (normalised_username, authority), which
+    is what this comparator does.
+
+    A query such as
+
+        session.query(User).filter_by(userid='acct:luis.silva@example.com')
+
+    will instead generate
+
+        WHERE
+            (lower(replace(username,     '.', '')), authority    ) =
+            (lower(replace('luis.silva', '.', '')), 'example.com')
     """
     def __init__(self, username, authority):
         self.username = username
         self.authority = authority
 
+    def __clause_element__(self):
+        return sa.tuple_(_normalise_username(self.username), self.authority)
+
     def __eq__(self, other):
-        try:
-            val = split_user(other)
-        except ValueError:
-            # The value being compared isn't a valid userid
-            return False
-        return sa.and_(val['username'] == self.username,
-                       val['domain'] == self.authority)
+        """
+        Compare the userid for equality with `other`.
+
+        `other` can be anything plausibly on the RHS of a comparison, which
+        can include other SQL clause elements or expressions, as in
+
+            User.userid == sa.tuple_(User.username, Group.authority)
+
+        or literals, as in
+
+            User.userid == 'acct:miruna@example.com'
+
+        We treat the literal case specially, and split the string into
+        username and authority ourselves. If the string is not a well-formed
+        userid, the comparison will always return False.
+        """
+        if isinstance(other, string_types):
+            try:
+                val = split_user(other)
+            except ValueError:
+                # The value being compared isn't a valid userid
+                return False
+            else:
+                other = sa.tuple_(_normalise_username(val['username']),
+                                  val['domain'])
+        return self.__clause_element__() == other
 
 
 class UserFactory(object):
@@ -59,16 +124,22 @@ class UserFactory(object):
 
 class User(Base):
     __tablename__ = 'user'
-    __table_args__ = (
-        sa.UniqueConstraint('email', 'authority'),
-        sa.UniqueConstraint('uid', 'authority'),
-        sa.UniqueConstraint('username', 'authority'),
-    )
+
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            # (email, authority) must be unique
+            sa.UniqueConstraint('email', 'authority'),
+            # (normalised username, authority) must be unique. This index is
+            # also critical for making user lookups fast.
+            sa.Index('ix__user__userid',
+                     _normalise_username(cls.username),
+                     cls.authority,
+                     unique=True),
+        )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    #: Normalised user identifier
-    uid = sa.Column(sa.UnicodeText(), nullable=False)
     #: Username as chosen by the user on registration
     _username = sa.Column('username', sa.UnicodeText(), nullable=False)
 
@@ -76,10 +147,7 @@ class User(Base):
     #: this user lives. By default, all users are created in the namespace
     #: corresponding to `request.domain`, but this can be overridden with the
     #: `AUTH_DOMAIN` environment variable.
-    authority = sa.Column('authority',
-                          sa.UnicodeText(),
-                          index=True,
-                          nullable=False)
+    authority = sa.Column('authority', sa.UnicodeText(), nullable=False)
 
     #: The display name which will be used when rendering an annotation.
     display_name = sa.Column(sa.UnicodeText())
@@ -128,7 +196,10 @@ class User(Base):
     @username.setter
     def username(self, value):
         self._username = value
-        self.uid = _username_to_uid(value)
+
+    @username.comparator
+    def username(cls):
+        return UsernameComparator(cls._username)
 
     @hybrid_property
     def userid(self):
@@ -137,13 +208,6 @@ class User(Base):
 
     @userid.comparator
     def userid(cls):
-        # Rather than using the default generated by hybrid_property, which
-        # would generate SQL like the following:
-        #
-        #     ... WHERE 'acct:' || username || '@' || authority = ...
-        #
-        # we use a custom comparator so that we can take advantage of indices
-        # on the username and authority columns.
         return UserIDComparator(cls.username, cls.authority)
 
     email = sa.Column(sa.UnicodeText(), nullable=False)
@@ -274,17 +338,11 @@ class User(Base):
     @classmethod
     def get_by_username(cls, session, username, authority):
         """Fetch a user by username."""
-        uid = _username_to_uid(username)
         return session.query(cls).filter(
-            cls.uid == uid,
+            cls.username == username,
             cls.authority == authority,
         ).first()
 
     def __repr__(self):
         return '<User: %s>' % self.username
 
-
-def _username_to_uid(username):
-    # We normalize usernames by dots and case in order to discourage attempts
-    # at impersonation.
-    return username.replace('.', '').lower()
