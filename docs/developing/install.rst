@@ -5,6 +5,13 @@ The code for the https://hypothes.is/ website and API lives in a
 `Git repo named h`_. To get this code running in a local development
 environment the first thing you need to do is install h's system dependencies.
 
+.. seealso::
+
+   This page documents how to setup a development install of the Hypothesis
+   web service. For installing the Hypothesis client for development see
+   https://github.com/hypothesis/client/, and for the browser extension
+   see https://github.com/hypothesis/browser-extension.
+
 Follow either the
 `Installing the system dependencies on Ubuntu 14.04`_ or the
 `Installing the system dependencies on OS X`_ section below, depending on which
@@ -318,4 +325,4 @@ to either:
 * Prefix all ``docker`` commands with ``sudo``.
 
 
-.. include:: targets.rst
+.. _Git repo named h: https://github.com/hypothesis/h/
