@@ -70,6 +70,27 @@ Install the following packages:
 .. note:: Unfortunately you need to install the ``postgresql`` package, because
           Homebrew does not currently provide a standalone ``libpq`` package.
 
+
+Getting the h source code from GitHub
+-------------------------------------
+
+Use ``git`` to download the h source code:
+
+.. code-block:: bash
+
+    git clone https://github.com/hypothesis/h.git
+
+This will download the code into an ``h`` directory in your current working
+directory.
+
+Change into the ``h`` directory from the remainder of the installation
+process:
+
+.. code-block:: bash
+
+   cd h
+
+
 Installing the services
 -----------------------
 
@@ -150,26 +171,6 @@ Install ``gulp-cli`` to get the ``gulp`` command:
 .. code-block:: bash
 
     sudo npm install -g gulp-cli
-
-
-Getting the h source code from GitHub
--------------------------------------
-
-Use ``git`` to download the h source code:
-
-.. code-block:: bash
-
-    git clone https://github.com/hypothesis/h.git
-
-This will download the code into an ``h`` directory in your current working
-directory.
-
-Change into the ``h`` directory from the remainder of the installation
-process:
-
-.. code-block:: bash
-
-   cd h
 
 
 Creating a Python virtual environment
