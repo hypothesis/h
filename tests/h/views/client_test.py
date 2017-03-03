@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import json
 
-from mock import Mock
 from pyramid.httpexceptions import HTTPFound
 import pytest
 
@@ -24,7 +23,7 @@ def test_annotator_token_returns_token(generate_jwt, pyramid_request):
     assert result == generate_jwt.return_value
 
 
-@pytest.mark.usefixtures('client_assets_env', 'routes', 'pyramid_settings')
+@pytest.mark.usefixtures('routes', 'pyramid_settings')
 class TestSidebarApp(object):
 
     def test_it_includes_client_config(self, pyramid_request):
@@ -46,36 +45,10 @@ class TestSidebarApp(object):
 
         assert actual_config == expected_config
 
-    def test_it_sets_asset_urls(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = False
-
+    def test_it_sets_client_url(self, pyramid_request):
         ctx = client.sidebar_app(pyramid_request)
 
-        assert ctx['app_css_urls'] == ['/assets/client/app.css']
-        assert ctx['app_js_urls'] == ['/assets/client/app.js']
-
-    def test_uses_client_boot_script_when_enabled(self, pyramid_request):
-        pyramid_request.feature.flags['use_client_boot_script'] = True
-
-        ctx = client.sidebar_app(pyramid_request)
-
-        assert ctx['app_js_urls'] == ['/embed.js']
-        assert ctx['app_css_urls'] == []
-
-
-@pytest.mark.usefixtures('client_assets_env', 'routes')
-class TestEmbed(object):
-    def test_it_sets_asset_urls(self, pyramid_request):
-        ctx = client.embed(pyramid_request)
-        assert ctx['inject_resource_urls'] == [
-            'http://example.com/assets/client/polyfills.js',
-            'http://example.com/assets/client/inject.js',
-            'http://example.com/assets/client/inject.css',
-            ]
-
-    def test_it_sets_content_type(self, pyramid_request):
-        client.embed(pyramid_request)
-        assert pyramid_request.response.content_type == 'text/javascript'
+        assert ctx['client_url'] == '/embed.js'
 
 
 @pytest.mark.usefixtures('routes', 'pyramid_settings')
@@ -85,23 +58,6 @@ class TestEmbedRedirect(object):
 
         assert isinstance(rsp, HTTPFound)
         assert rsp.location == 'https://cdn.hypothes.is/hypothesis'
-
-
-@pytest.fixture
-def client_assets_env(pyramid_config):
-    assets_client_env = Mock(spec_set=['urls'])
-
-    bundles = {
-        'app_js': ['/assets/client/app.js'],
-        'app_css': ['/assets/client/app.css'],
-        'inject_js': ['/assets/client/polyfills.js', '/assets/client/inject.js'],
-        'inject_css': ['/assets/client/inject.css'],
-    }
-
-    def urls(bundle_name):
-        return bundles[bundle_name]
-    assets_client_env.urls = urls
-    pyramid_config.registry['assets_client_env'] = assets_client_env
 
 
 @pytest.fixture
@@ -120,7 +76,6 @@ def pyramid_settings(pyramid_settings):
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('api.index', '/api')
-    pyramid_config.add_route('assets_client', '/assets/client/{subpath}')
     pyramid_config.add_route('embed', '/embed.js')
     pyramid_config.add_route('index', '/')
     pyramid_config.add_route('sidebar_app', '/app.html')

@@ -10,7 +10,6 @@ from __future__ import unicode_literals
 
 import json
 
-from pyramid.config import not_
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
@@ -39,7 +38,7 @@ def _client_url(request):
     return request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
 
 
-def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
+def _app_html_context(api_url, service_url, sentry_public_dsn,
                       websocket_url, auth_domain, ga_client_tracking_id,
                       client_url):
     """
@@ -75,17 +74,9 @@ def _app_html_context(assets_env, api_url, service_url, sentry_public_dsn,
             'googleAnalytics': ga_client_tracking_id
         })
 
-    if client_url:
-        app_js_urls = [client_url]
-        app_css_urls = []
-    else:
-        app_js_urls = assets_env.urls('app_js')
-        app_css_urls = assets_env.urls('app_css')
-
     return {
         'app_config': json.dumps(app_config),
-        'app_css_urls': app_css_urls,
-        'app_js_urls': app_js_urls,
+        'client_url': client_url,
     }
 
 
@@ -101,17 +92,12 @@ def sidebar_app(request, extra=None):
 
     settings = request.registry.settings
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
-
-    if request.feature('use_client_boot_script'):
-        client_url = request.route_path('embed')
-    else:
-        client_url = None
+    client_url = request.route_path('embed')
 
     ctx = _app_html_context(api_url=request.route_url('api.index'),
                             client_url=client_url,
                             service_url=request.route_url('index'),
                             sentry_public_dsn=settings.get('h.client.sentry_dsn'),
-                            assets_env=request.registry['assets_client_env'],
                             websocket_url=settings.get('h.websocket_url'),
                             auth_domain=request.auth_domain,
                             ga_client_tracking_id=ga_client_tracking_id).copy()
@@ -138,32 +124,6 @@ def annotator_token(request):
 
 
 @view_config(route_name='embed',
-             renderer='h:templates/embed.js.jinja2',
-             has_feature_flag=not_('use_client_boot_script'))
-def embed(request):
-    """
-    Render the script which loads the Hypothesis client on a page.
-
-    This view renders a script which loads the assets required by the client.
-    """
-    request.response.content_type = 'text/javascript'
-
-    assets_env = request.registry['assets_client_env']
-    base_url = request.route_url('index')
-
-    def absolute_asset_urls(bundle_name):
-        return [urlparse.urljoin(base_url, url)
-                for url in assets_env.urls(bundle_name)]
-
-    return {
-        'app_html_url': request.route_url('sidebar_app'),
-        'inject_resource_urls': (absolute_asset_urls('inject_js') +
-                                 absolute_asset_urls('inject_css'))
-    }
-
-
-@view_config(route_name='embed',
-             has_feature_flag='use_client_boot_script',
              http_cache=(60 * 5, {'public': True}))
 def embed_redirect(request):
     """
