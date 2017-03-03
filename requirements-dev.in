@@ -5,3 +5,5 @@ honcho
 pep257
 prospector[with_pyroma]
 pyramid_debugtoolbar
+sphinx
+sphinx_rtd_theme
