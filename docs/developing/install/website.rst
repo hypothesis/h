@@ -8,7 +8,7 @@ environment the first thing you need to do is install h's system dependencies.
 Follow either the
 `Installing the system dependencies on Ubuntu 14.04`_ or the
 `Installing the system dependencies on OS X`_ section below, depending on which
-operating system you're using, then move on to `Installing the services`_ and
+operating system you're using, then move on to `Getting the h source code from GitHub`_ and
 the sections that follow it.
 
 
