@@ -67,6 +67,30 @@ def test_cannot_create_case_variant_of_user(db_session):
         db_session.flush()
 
 
+def test_filtering_by_username_matches_dot_variant_of_user(db_session):
+    fred = models.User(authority='example.com',
+                       username='fredbloggs',
+                       email='fred@example.com')
+    db_session.add(fred)
+    db_session.flush()
+
+    result = db_session.query(models.User).filter_by(username='fred.bloggs').one()
+
+    assert result == fred
+
+
+def test_filtering_by_username_matches_case_variant_of_user(db_session):
+    fred = models.User(authority='example.com',
+                       username='fredbloggs',
+                       email='fred@example.com')
+    db_session.add(fred)
+    db_session.flush()
+
+    result = db_session.query(models.User).filter_by(username='FredBloggs').one()
+
+    assert result == fred
+
+
 def test_userid_derived_from_username_and_authority():
     fred = models.User(authority='example.net',
                        username='fredbloggs',

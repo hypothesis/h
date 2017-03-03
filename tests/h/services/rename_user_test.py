@@ -32,9 +32,9 @@ class TestRenameUserService(object):
 
         It's possible to have two different usernames, for example "bob.smith"
         and "Bob.Smith", that are "equivalent" in that they both reduce to the
-        same uid "bobsmith". While we can't allow two different users to have
-        the usernames "bob.smith" and "Bob.Smith", we _should_ allow renaming
-        a single "bob.smith" user to "Bob.Smith".
+        same normalised username "bobsmith". While we can't allow two
+        different users to have the usernames "bob.smith" and "Bob.Smith", we
+        _should_ allow renaming a single "bob.smith" user to "Bob.Smith".
 
         get_by_username() returns a User whose username is the same as or
         equivalent to the given username. If the returned User is the same user

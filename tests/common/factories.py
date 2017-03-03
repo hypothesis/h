@@ -87,10 +87,6 @@ class User(ModelFactory):
     email = factory.Faker('email')
     registered_date = factory.Faker('date_time_this_decade')
 
-    @factory.lazy_attribute
-    def uid(self):
-        return self.username.replace('.', '').lower()
-
 
 class Group(ModelFactory):
 
