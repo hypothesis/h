@@ -13,7 +13,6 @@ import json
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
-from h._compat import urlparse
 from h import session as h_session
 from h.auth.tokens import generate_jwt
 from h.util.view import json_view
@@ -24,13 +23,6 @@ from h import __version__
 DEFAULT_CLIENT_URL = 'https://cdn.hypothes.is/hypothesis'
 
 
-def url_with_path(url):
-    if urlparse.urlparse(url).path == '':
-        return '{}/'.format(url)
-    else:
-        return url
-
-
 def _client_url(request):
     """
     Return the configured URL for the client.
@@ -38,22 +30,27 @@ def _client_url(request):
     return request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
 
 
-def _app_html_context(api_url, service_url, sentry_public_dsn,
-                      websocket_url, auth_domain, ga_client_tracking_id,
-                      client_url):
+@view_config(route_name='sidebar_app',
+             renderer='h:templates/app.html.jinja2')
+def sidebar_app(request, extra=None):
     """
-    Returns a dict of asset URLs and contents used by the sidebar app
-    HTML tempate.
+    Return the HTML for the Hypothesis client's sidebar application.
+
+    :param extra: A dict of optional properties specifying link tags and meta
+                  attributes to be included on the page.
     """
 
-    # the serviceUrl parameter must contain a path element
-    service_url = url_with_path(service_url)
+    settings = request.registry.settings
+    client_url = request.route_path('embed')
+    ga_client_tracking_id = settings.get('ga_client_tracking_id')
+    sentry_public_dsn = settings.get('h.client.sentry_dsn')
+    websocket_url = settings.get('h.websocket_url')
 
     app_config = {
-        'apiUrl': api_url,
-        'authDomain': auth_domain,
-        'serviceUrl': service_url,
-        'release': __version__
+        'apiUrl': request.route_url('api.index'),
+        'authDomain': request.auth_domain,
+        'release': __version__,
+        'serviceUrl': request.route_url('index'),
     }
 
     if websocket_url:
@@ -74,33 +71,11 @@ def _app_html_context(api_url, service_url, sentry_public_dsn,
             'googleAnalytics': ga_client_tracking_id
         })
 
-    return {
+    ctx = {
         'app_config': json.dumps(app_config),
         'client_url': client_url,
     }
 
-
-@view_config(route_name='sidebar_app',
-             renderer='h:templates/app.html.jinja2')
-def sidebar_app(request, extra=None):
-    """
-    Return the HTML for the Hypothesis client's sidebar application.
-
-    :param extra: A dict of optional properties specifying link tags and meta
-                  attributes to be included on the page.
-    """
-
-    settings = request.registry.settings
-    ga_client_tracking_id = settings.get('ga_client_tracking_id')
-    client_url = request.route_path('embed')
-
-    ctx = _app_html_context(api_url=request.route_url('api.index'),
-                            client_url=client_url,
-                            service_url=request.route_url('index'),
-                            sentry_public_dsn=settings.get('h.client.sentry_dsn'),
-                            websocket_url=settings.get('h.websocket_url'),
-                            auth_domain=request.auth_domain,
-                            ga_client_tracking_id=ga_client_tracking_id).copy()
     if extra is not None:
         ctx.update(extra)
 
