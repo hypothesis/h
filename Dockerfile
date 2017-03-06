@@ -51,7 +51,6 @@ COPY . .
 # Build frontend assets
 RUN npm install --production \
   && NODE_ENV=production node_modules/.bin/gulp build \
-  && (find node_modules -name hypothesis -prune -o -mindepth 1 -maxdepth 1 -print0 | xargs -0 rm -r) \
   && npm cache clean
 
 # Expose the default port.
