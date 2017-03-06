@@ -36,10 +36,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    'activity_pages': "Show the new activity pages?",
-    'search_page': "Show the activity pages search skeleton page?",
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
