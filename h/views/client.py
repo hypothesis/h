@@ -41,7 +41,6 @@ def sidebar_app(request, extra=None):
     """
 
     settings = request.registry.settings
-    client_url = request.route_path('embed')
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
     sentry_public_dsn = settings.get('h.client.sentry_dsn')
     websocket_url = settings.get('h.websocket_url')
@@ -73,7 +72,7 @@ def sidebar_app(request, extra=None):
 
     ctx = {
         'app_config': json.dumps(app_config),
-        'client_url': client_url,
+        'embed_url': request.route_path('embed'),
     }
 
     if extra is not None:
