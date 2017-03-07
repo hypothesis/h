@@ -59,7 +59,6 @@ def includeme(config):
     config.add_route('stream.tag_query', '/t/{tag}')
 
     # Assets
-    config.add_route('assets_client', '/assets/client/*subpath')
     config.add_route('assets', '/assets/*subpath')
 
     # API (other than those provided by memex)
