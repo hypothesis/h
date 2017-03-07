@@ -7,12 +7,16 @@
   {{ super() }}
   <script type="application/json" class="js-hypothesis-config">
     {
-      "firstRun": true, {# TODO: remove after 2016-09-01, by which time old clients will be gone. #}
       "openSidebar": true,
       "openLoginForm": true
     }
   </script>
   {% if not is_onboarding %}
+    <script type="application/json" class="js-hypothesis-config">
+    {
+      "sidebarAppUrl": "{{ request.route_url('sidebar_app') }}"
+    }
+    </script>
     <script async defer src="{{ embed_js_url }}"></script>
   {% endif %}
 {% endblock %}
