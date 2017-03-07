@@ -104,7 +104,7 @@ def includeme(config):
         "csp": {
             "font-src": ["'self'", "fonts.gstatic.com", client_host],
             "report-uri": [config.registry.settings.get("csp.report_uri")],
-            "script-src": ["'self'", client_host],
+            "script-src": ["'self'", client_host, "www.google-analytics.com"],
             "style-src": ["'self'", "fonts.googleapis.com", client_host],
         },
     })
