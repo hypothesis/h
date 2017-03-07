@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+from h._compat import urlparse
 import logging
 
 import transaction
@@ -11,6 +12,7 @@ from pyramid.settings import asbool
 from pyramid.tweens import EXCVIEW
 
 from h.config import configure
+from h.views.client import DEFAULT_CLIENT_URL
 
 log = logging.getLogger(__name__)
 
@@ -95,12 +97,15 @@ def includeme(config):
     # Enable a Content Security Policy
     # This is initially copied from:
     # https://github.com/pypa/warehouse/blob/e1cf03faf9bbaa15d67d0de2c70f9a9f732596aa/warehouse/config.py#L327
+    client_url = config.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
+    client_host = urlparse.urlparse(client_url).netloc
+
     config.add_settings({
         "csp": {
-            "font-src": ["'self'", "fonts.gstatic.com"],
+            "font-src": ["'self'", "fonts.gstatic.com", client_host],
             "report-uri": [config.registry.settings.get("csp.report_uri")],
-            "script-src": ["'self'"],
-            "style-src": ["'self'", "fonts.googleapis.com"],
+            "script-src": ["'self'", client_host],
+            "style-src": ["'self'", "fonts.googleapis.com", client_host],
         },
     })
 
