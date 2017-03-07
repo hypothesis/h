@@ -80,7 +80,6 @@ release = '0.0.2'
 # directories to ignore when looking for source files.
 exclude_patterns = [
     '_build',
-    'developing/install/targets.rst',
     ]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
