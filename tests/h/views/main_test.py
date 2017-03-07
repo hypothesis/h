@@ -139,17 +139,9 @@ def document_title(patch):
 
 
 @pytest.fixture
-def pyramid_config(pyramid_config):
-    # Pretend the client assets environment has been configured
-    pyramid_config.registry['assets_client_env'] = mock.Mock()
-    return pyramid_config
-
-
-@pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('api.annotation', '/api/ann/{id}')
     pyramid_config.add_route('api.index', '/api/index')
-    pyramid_config.add_route('assets_client', '/assets/client')
     pyramid_config.add_route('index', '/index')
 
 

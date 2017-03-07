@@ -55,7 +55,6 @@ def test_includeme():
         call('stream', '/stream'),
         call('stream.user_query', '/u/{user}'),
         call('stream.tag_query', '/t/{tag}'),
-        call('assets_client', '/assets/client/*subpath'),
         call('assets', '/assets/*subpath'),
         call('badge', '/api/badge'),
         call('api.profile', '/api/profile'),

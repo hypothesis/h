@@ -133,6 +133,7 @@ def _load_bundles(fp):
     parser.readfp(fp)
     return {k: aslist(v) for k, v in parser.items('bundles')}
 
+
 # Site assets
 assets_view = static_view('h:../build',
                           cache_max_age=None,
@@ -140,29 +141,16 @@ assets_view = static_view('h:../build',
 assets_view = _add_cors_header(assets_view)
 
 
-# Client assets
-assets_client_view = static_view('h:../node_modules/hypothesis/build',
-                                 cache_max_age=None,
-                                 use_subpath=True)
-assets_client_view = _add_cors_header(assets_client_view)
-
-
 def includeme(config):
     auto_reload = asbool(config.registry.settings.get('h.reload_assets', False))
 
     config.add_view(route_name='assets', view=assets_view)
-    config.add_view(route_name='assets_client', view=assets_client_view)
 
     assets_env = Environment('/assets',
                              'h/assets.ini',
                              'build/manifest.json',
                              auto_reload=auto_reload)
-    assets_client_env = Environment('/assets/client',
-                                    'h/assets_client.ini',
-                                    'node_modules/hypothesis/build/manifest.json',
-                                    auto_reload=auto_reload)
 
     # We store the environment objects on the registry so that the Jinja2
     # integration can be configured in app.py
     config.registry['assets_env'] = assets_env
-    config.registry['assets_client_env'] = assets_client_env

@@ -15,7 +15,6 @@ FEATURES = {
                                " updates to annotations in the client?"),
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
-    'use_client_boot_script': "Use the client's boot script?",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -39,6 +38,7 @@ FEATURES = {
 FEATURES_PENDING_REMOVAL = {
     'activity_pages': "Show the new activity pages?",
     'search_page': "Show the activity pages search skeleton page?",
+    'use_client_boot_script': "Use the client's boot script?",
 }
 
 

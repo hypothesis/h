@@ -9,9 +9,6 @@
      only ever displays a single route.
      #}
     <base target="_top" href="/" />
-  {% for url in app_css_urls %}
-    <link rel="stylesheet" href="{{ url }}">
-    {% endfor %}
     {% for attrs in meta_attrs -%}
       <meta {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
@@ -33,10 +30,8 @@
       {{ app_config | safe }}
     </script>
 
-    <!-- Scripts !-->
-    {% for url in app_js_urls %}
-    <script src="{{ url }}"></script>
-    {% endfor %}
-    
+    <!-- Client boot script !-->
+    <script src="{{ client_url }}"></script>
+
   </body>
 </html>
