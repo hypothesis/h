@@ -125,3 +125,16 @@ def redirect_tween_factory(handler, registry, redirects=REDIRECTS):
         return handler(request)
 
     return redirect_tween
+
+
+def security_header_tween_factory(handler, registry):
+    """Add security-related headers to every response."""
+    def security_header_tween(request):
+        resp = handler(request)
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+        resp.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+        resp.headers['X-XSS-Protection'] = '1; mode=block'
+        return resp
+
+    return security_header_tween

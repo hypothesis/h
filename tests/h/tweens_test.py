@@ -150,3 +150,13 @@ def test_tween_redirect_matches_in_order(pyramid_request, pyramid_config):
 
     assert response.status_code == 301
     assert response.location == 'http://example.com/bar'
+
+
+def test_tween_security_header_adds_headers(pyramid_request):
+    tween = tweens.security_header_tween_factory(lambda req: req.response,
+                                                 pyramid_request.registry)
+
+    response = tween(pyramid_request)
+
+    assert response.headers['Referrer-Policy'] == 'strict-origin-when-cross-origin'
+    assert response.headers['X-XSS-Protection'] == '1; mode=block'
