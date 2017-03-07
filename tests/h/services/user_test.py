@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import pytest
+from sqlalchemy.orm import sessionmaker
 
 from h.services.user import (
     UserNotActivated,
@@ -25,27 +26,6 @@ class TestUserService(object):
         result = svc.fetch('jacqui', 'foo.com')
 
         assert isinstance(result, User)
-
-    def test_fetch_caches_fetched_users(self, db_session, svc, users):
-        jacqui, _, _ = users
-
-        svc.fetch('acct:jacqui@foo.com')
-        db_session.delete(jacqui)
-        db_session.flush()
-        user = svc.fetch('acct:jacqui@foo.com')
-
-        assert user is not None
-        assert user.username == 'jacqui'
-
-    def test_flushes_cache_on_session_commit(self, db_session, svc, users):
-        jacqui, _, _ = users
-
-        svc.fetch('acct:jacqui@foo.com')
-        db_session.delete(jacqui)
-        db_session.commit()
-        user = svc.fetch('acct:jacqui@foo.com')
-
-        assert user is None
 
     def test_login_by_username(self, svc, users):
         _, steve, _ = users
@@ -118,6 +98,65 @@ class TestUserService(object):
                                 inactive=True)]
         db_session.flush()
         return users
+
+
+class TestUserServiceCaching(object):
+    def test_fetch_caches_fetched_users(self, db_session, svc, users):
+        jacqui, _, _ = users
+
+        svc.fetch('acct:jacqui@foo.com')
+        db_session.delete(jacqui)
+        db_session.flush()
+        user = svc.fetch('acct:jacqui@foo.com')
+
+        assert user is not None
+        assert user.username == 'jacqui'
+
+    def test_flushes_cache_on_transaction_close(self, db_session, svc, users):
+        jacqui, _, _ = users
+        jacqui = users[0]
+
+        svc.fetch('acct:jacqui@foo.com')
+        db_session.delete(jacqui)
+        db_session.commit()
+        db_session.transaction.close()
+
+        user = svc.fetch('acct:jacqui@foo.com')
+        assert user is None
+
+    @pytest.yield_fixture
+    def users(self, db_session, factories):
+        users = [factories.User.build(username='jacqui',
+                                      authority='foo.com'),
+                 factories.User.build(),
+                 factories.User.build()]
+        db_session.add_all(users)
+        db_session.flush()
+
+        try:
+            yield users
+        finally:
+            # Since the `db_session` used here does not automatically
+            # clean up after itself, we have to remove the created objects
+            # again.
+            db_session.query(User).delete()
+
+    @pytest.fixture
+    def svc(self, db_session):
+        return UserService(default_authority='example.com', session=db_session)
+
+    @pytest.yield_fixture
+    def db_session(self, db_engine):
+        # The implementation relies on a top-level transaction being closed.
+        # The normal `db_session` is running all tests in a sub-transaction,
+        # for faster resetting of the database to a previous state.
+        # We need to circumvent this for these tests, which is why we use
+        # create a brand new database session here.
+        session = sessionmaker()(bind=db_engine)
+        try:
+            yield session
+        finally:
+            session.close()
 
 
 class TestUserServiceFactory(object):
