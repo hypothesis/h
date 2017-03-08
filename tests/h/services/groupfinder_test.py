@@ -42,15 +42,35 @@ class TestGroupfinderService(object):
         assert group is not None
         assert group.pubid == pubid
 
-    def test_flushes_cache_on_session_commit(self, svc, factories, db_session):
+    def test_sets_up_cache_clearing_on_transaction_end(self, patch, db_session):
+        decorator = patch('h.services.groupfinder.util.db.on_transaction_end')
+
+        GroupfinderService(db_session, 'example.com')
+
+        decorator.assert_called_once_with(db_session)
+
+    def test_clears_cache_on_transaction_end(self, patch, db_session, factories):
+        funcs = {}
+
+        # We need to capture the inline `clear_cache` function so we can
+        # call it manually later
+        def on_transaction_end_decorator(session):
+            def on_transaction_end(func):
+                funcs['clear_cache'] = func
+            return on_transaction_end
+
+        decorator = patch('h.services.user.util.db.on_transaction_end')
+        decorator.side_effect = on_transaction_end_decorator
+
         group = factories.Group()
         pubid = group.pubid
-
+        svc = GroupfinderService(db_session, 'example.com')
         svc.find(pubid)
         db_session.delete(group)
-        db_session.commit()
-        group = svc.find(pubid)
 
+        funcs['clear_cache']()
+
+        group = svc.find(pubid)
         assert group is None
 
     @pytest.fixture

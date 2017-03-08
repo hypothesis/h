@@ -3,11 +3,11 @@
 from __future__ import unicode_literals
 
 from zope.interface import implementer
-import sqlalchemy
 
 from memex.interfaces import IGroupService
 
 from h import models
+from h import util
 from h.groups.util import WorldGroup
 
 
@@ -23,9 +23,8 @@ class GroupfinderService(object):
         self._cache = {}
 
         # But don't allow the cache to persist after the session is closed.
-        @sqlalchemy.event.listens_for(session, 'after_commit')
-        @sqlalchemy.event.listens_for(session, 'after_rollback')
-        def flush_cache(session):
+        @util.db.on_transaction_end(session)
+        def flush_cache():
             self._cache = {}
 
     def find(self, id_):
