@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-import sqlalchemy
-
 from h.models import Annotation, User
 from h import util
 
@@ -40,9 +38,8 @@ class UserService(object):
         self._cache = {}
 
         # But don't allow the cache to persist after the session is closed.
-        @sqlalchemy.event.listens_for(session, 'after_commit')
-        @sqlalchemy.event.listens_for(session, 'after_rollback')
-        def flush_cache(session):
+        @util.db.on_transaction_end(session)
+        def flush_cache():
             self._cache = {}
 
     def fetch(self, userid_or_username, authority=None):
