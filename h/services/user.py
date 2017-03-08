@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-import sqlalchemy
-
 from h.models import Annotation, User
 from h import util
 
@@ -40,17 +38,9 @@ class UserService(object):
         self._cache = {}
 
         # But don't allow the cache to persist after the session is closed.
-        #
-        # This makes sure that under all circumstances whenever the transaction
-        # ends the cache gets cleared. We used to only clear the cache on
-        # `after_commit` and `after_rollback`, but the latter only get called
-        # on explicit rollbacks, a rollback due to an exception does not fire
-        # off this event.
-        @sqlalchemy.event.listens_for(session, 'after_transaction_end')
-        def flush_cache(session, transaction):
-            # We only clear the cache when the top-level transaction finishes.
-            if transaction.parent is None:
-                self._cache = {}
+        @util.db.on_transaction_end(session)
+        def flush_cache():
+            self._cache = {}
 
     def fetch(self, userid_or_username, authority=None):
         """
