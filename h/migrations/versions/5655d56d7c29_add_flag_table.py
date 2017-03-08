@@ -1,0 +1,49 @@
+"""
+Add flag table
+
+Revision ID: 5655d56d7c29
+Revises: 7e2443f8d7d6
+Create Date: 2017-03-08 15:32:27.288684
+"""
+
+from __future__ import unicode_literals
+
+from alembic import op
+import sqlalchemy as sa
+
+from memex.db import types
+
+
+revision = '5655d56d7c29'
+down_revision = '7e2443f8d7d6'
+
+
+def upgrade():
+    op.create_table('flag',
+                    sa.Column('id',
+                              sa.Integer(),
+                              autoincrement=True,
+                              primary_key=True),
+                    sa.Column('created',
+                              sa.DateTime(),
+                              server_default=sa.func.now(),
+                              nullable=False),
+                    sa.Column('updated',
+                              sa.DateTime(),
+                              server_default=sa.func.now(),
+                              nullable=False),
+                    sa.Column('annotation_id',
+                              types.URLSafeUUID,
+                              nullable=False),
+                    sa.Column('user_id',
+                              sa.Integer(),
+                              nullable=False),
+                    sa.ForeignKeyConstraint(['annotation_id'], ['annotation.id'],
+                                            ondelete='cascade'),
+                    sa.ForeignKeyConstraint(['user_id'], ['user.id'],
+                                            ondelete='cascade'),
+                    sa.UniqueConstraint('annotation_id', 'user_id'))
+
+
+def downgrade():
+    op.drop_table('flag')
