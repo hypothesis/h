@@ -8,8 +8,16 @@ def csp_protected_view(view, info):
     A view deriver which adds Content-Security-Policy headers to responses.
 
     By default, a global policy is applied to every view.
+
+    Individual views can opt out of CSP altogether by specifying a view option
+    ``csp_insecure_optout=True``. This is not recommended.
     """
     if not info.registry.settings.get('csp.enabled', False):
+        return view
+
+    # Views can set ``csp_insecure_optout=True`` in their view options to
+    # disable CSP for the view.
+    if info.options.get('csp_insecure_optout'):
         return view
 
     policy = info.registry.settings.get('csp', {})
@@ -29,6 +37,9 @@ def csp_protected_view(view, info):
         resp.headers[header_name] = policy.format(request=request)
         return resp
     return wrapper_view
+
+
+csp_protected_view.options = ('csp_insecure_optout',)
 
 
 def includeme(config):

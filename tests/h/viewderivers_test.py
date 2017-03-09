@@ -60,6 +60,21 @@ class TestCSPProtectedView(object):
         assert response.headers['Content-Security-Policy-Report-Only'] == "script-src 'self'"
         assert 'Content-Security-Policy' not in response.headers
 
+    def test_optout(self, pyramid_request, derive_view):
+        """
+        Views should be able to opt out using the ``csp_insecure_optout`` view
+        option.
+        """
+        pyramid_request.registry.settings.update({
+            'csp.enabled': True,
+            'csp': {'script-src': ["'self'"]},
+        })
+        view = derive_view(_dummy_view, csp_insecure_optout=True)
+
+        response = view(None, pyramid_request)
+
+        assert 'Content-Security-Policy' not in response.headers
+
     @pytest.fixture
     def derive_view(self, pyramid_config):
         def _impl(view, **kwargs):
