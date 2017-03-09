@@ -21,11 +21,9 @@ def csp_protected_view(view, info):
         return view
 
     policy = info.registry.settings.get('csp', {})
-    policy = "; ".join([
-        " ".join([k] + [v2 for v2 in v if v2 is not None])
-        for k, v in sorted(policy.items())
-        if [v2 for v2 in v if v2 is not None]
-    ])
+    clauses = [" ".join([directive] + values)
+               for directive, values in sorted(policy.items())]
+    header_value = "; ".join(clauses)
 
     if info.registry.settings.get('csp.report_only', False):
         header_name = 'Content-Security-Policy-Report-Only'
@@ -34,7 +32,7 @@ def csp_protected_view(view, info):
 
     def wrapper_view(context, request):
         resp = view(context, request)
-        resp.headers[header_name] = policy.format(request=request)
+        resp.headers[header_name] = header_value
         return resp
     return wrapper_view
 
