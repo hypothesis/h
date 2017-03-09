@@ -62,6 +62,7 @@ def includeme(config):
     config.add_tween('h.tweens.csrf_tween_factory')
     config.add_tween('h.tweens.auth_token')
     config.add_tween('h.tweens.content_security_policy_tween_factory')
+    config.add_tween('h.tweens.security_header_tween_factory')
 
     config.add_renderer('csv', 'h.renderers.CSV')
     config.add_request_method(in_debug_mode, 'debug', reify=True)
