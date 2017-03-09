@@ -18,6 +18,7 @@ def init(engine, base=None, should_create=False, should_drop=False):
     if base is None:
         base = Base
     if should_drop:
+        base.metadata.reflect(engine)
         base.metadata.drop_all(engine)
     if should_create:
         # In order to be able to generate UUIDs, we load the uuid-ossp
