@@ -2,7 +2,6 @@
 
 import collections
 import logging
-import sys
 from pyramid import httpexceptions
 from pyramid.util import DottedNameResolver
 
@@ -79,30 +78,6 @@ def csrf_tween_factory(handler, registry):
         return response
 
     return csrf_tween
-
-
-def content_security_policy_tween_factory(handler, registry):
-    if not registry.settings.get('csp.enabled', False):
-        return handler
-
-    policy = registry.settings.get('csp', {})
-    policy = "; ".join([
-        " ".join([k] + [v2 for v2 in v if v2 is not None])
-        for k, v in sorted(policy.items())
-        if [v2 for v2 in v if v2 is not None]
-    ])
-
-    if registry.settings.get('csp.report_only', False):
-        header_name = 'Content-Security-Policy-Report-Only'
-    else:
-        header_name = 'Content-Security-Policy'
-
-    def content_security_policy_tween(request):
-        resp = handler(request)
-        resp.headers[header_name] = policy.format(request=request)
-        return resp
-
-    return content_security_policy_tween
 
 
 REDIRECTS = [
