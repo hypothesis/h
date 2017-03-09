@@ -16,13 +16,7 @@ def add_renderer_globals(event):
     event['feature'] = request.feature
 
     # Add Google Analytics
-    ga_tracking_id = request.registry.settings.get('ga_tracking_id')
-    if ga_tracking_id is not None:
-        event['ga_tracking_id'] = ga_tracking_id
-        if 'localhost' in request.host:
-            event['ga_cookie_domain'] = "none"
-        else:
-            event['ga_cookie_domain'] = "auto"
+    event['ga_tracking_id'] = request.registry.settings.get('ga_tracking_id')
 
 
 def publish_annotation_event(event):
