@@ -2,7 +2,7 @@
 Add flag table
 
 Revision ID: 5655d56d7c29
-Revises: 7e2443f8d7d6
+Revises: c322c57b49db
 Create Date: 2017-03-08 15:32:27.288684
 """
 
@@ -15,7 +15,7 @@ from memex.db import types
 
 
 revision = '5655d56d7c29'
-down_revision = '7e2443f8d7d6'
+down_revision = 'c322c57b49db'
 
 
 def upgrade():
