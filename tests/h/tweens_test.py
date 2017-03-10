@@ -82,5 +82,5 @@ def test_tween_security_header_adds_headers(pyramid_request):
 
     response = tween(pyramid_request)
 
-    assert response.headers['Referrer-Policy'] == 'strict-origin-when-cross-origin'
+    assert response.headers['Referrer-Policy'] == 'origin-when-cross-origin'
     assert response.headers['X-XSS-Protection'] == '1; mode=block'
