@@ -1,0 +1,5 @@
+{% if frontend_settings %}
+<script class="js-hypothesis-settings" type="application/json">
+{{ frontend_settings | to_json }}
+</script>
+{% endif %}

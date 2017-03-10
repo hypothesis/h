@@ -16,6 +16,61 @@ class FakeMailer(object):
         self.lastcall = (recipients, subject, body, html)
 
 
+@pytest.mark.usefixtures('routes')
+class TestAddRendererGlobals(object):
+
+    def test_adds_base_url(self, event):
+        subscribers.add_renderer_globals(event)
+
+        assert event['base_url'] == 'http://example.com/idx'
+
+    def test_adds_feature_flag_client(self, event, pyramid_request):
+        subscribers.add_renderer_globals(event)
+
+        assert event['feature'] == pyramid_request.feature
+
+    def test_adds_analytics_tracking_id(self, event, pyramid_request):
+        pyramid_request.registry.settings['ga_tracking_id'] = 'abcd1234'
+
+        subscribers.add_renderer_globals(event)
+
+        assert event['ga_tracking_id'] == 'abcd1234'
+
+    def test_adds_frontend_settings(self, event):
+        subscribers.add_renderer_globals(event)
+
+        assert event['frontend_settings'] == {}
+
+    def test_adds_frontend_settings_raven(self, event, pyramid_request):
+        settings = pyramid_request.registry.settings
+        settings['h.sentry_dsn_frontend'] = 'https://sentry.io/flibble'
+
+        subscribers.add_renderer_globals(event)
+        result = event['frontend_settings']['raven']
+
+        assert result['dsn'] == 'https://sentry.io/flibble'
+        assert result['release']
+        assert result['userid'] is None
+
+    def test_adds_frontend_settings_raven_user(self, event, pyramid_config, pyramid_request):
+        pyramid_config.testing_securitypolicy('acct:safet.baljić@example.com')
+        settings = pyramid_request.registry.settings
+        settings['h.sentry_dsn_frontend'] = 'https://sentry.io/flibble'
+
+        subscribers.add_renderer_globals(event)
+        result = event['frontend_settings']['raven']['userid']
+
+        assert result == 'acct:safet.baljić@example.com'
+
+    @pytest.fixture
+    def event(self, pyramid_request):
+        return {'request': pyramid_request}
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('index', '/idx')
+
+
 class TestPublishAnnotationEvent:
 
     def test_it_publishes_the_realtime_event(self, event):

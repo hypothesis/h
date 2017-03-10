@@ -89,6 +89,7 @@ SETTINGS = [
     # Sentry DSNs for frontend code should be of the public kind, lacking the
     # password component in the DSN URI.
     EnvSetting('h.sentry_dsn_client', 'SENTRY_DSN_CLIENT'),
+    EnvSetting('h.sentry_dsn_frontend', 'SENTRY_DSN_FRONTEND'),
     EnvSetting('h.websocket_url', 'WEBSOCKET_URL'),
 
     # Debug/development settings
