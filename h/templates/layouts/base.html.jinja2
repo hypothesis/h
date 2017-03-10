@@ -55,17 +55,7 @@
             in the DOM before header.js is included. #}
     {% endif %}
 
-    {% if request.sentry.get_public_dsn() %}
-      <script class="js-hypothesis-settings" type="application/json">
-        {
-          "raven": {
-            "dsn": "{{ request.sentry.get_public_dsn('https') }}",
-            "release": "{{ h_version }}",
-            "userid": {{ request.authenticated_userid | to_json }}
-          }
-        }
-      </script>
-    {% endif %}
+    {% include 'h:templates/includes/settings.html.jinja2' %}
 
     {% for url in asset_urls("header_js") %}
     <script src="{{ url }}"></script>

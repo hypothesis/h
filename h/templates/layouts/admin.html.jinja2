@@ -31,16 +31,7 @@
 <link rel="stylesheet" href="{{ url }}">
 {% endfor %}
 
-    {% if request.sentry.get_public_dsn() %}
-      <script class="js-hypothesis-settings" type="application/json">
-        {
-          "raven": {
-            "dsn": "{{ request.sentry.get_public_dsn('https') }}",
-            "release": "{{ h_version }}"
-          }
-        }
-      </script>
-    {% endif %}
+    {% include 'h:templates/includes/settings.html.jinja2' %}
   </head>
   <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">

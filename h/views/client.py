@@ -43,7 +43,7 @@ def sidebar_app(request, extra=None):
 
     settings = request.registry.settings
     ga_client_tracking_id = settings.get('ga_client_tracking_id')
-    sentry_public_dsn = settings.get('h.client.sentry_dsn')
+    sentry_public_dsn = settings.get('h.sentry_dsn_client')
     websocket_url = settings.get('h.websocket_url')
 
     app_config = {
