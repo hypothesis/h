@@ -41,6 +41,7 @@ from h.models.auth_ticket import AuthTicket
 from h.models.blocklist import Blocklist
 from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort
+from h.models.flag import Flag
 from h.models.group import Group
 from h.models.setting import Setting
 from h.models.subscriptions import Subscriptions
@@ -58,6 +59,7 @@ __all__ = (
     'DocumentURI',
     'Feature',
     'FeatureCohort',
+    'Flag',
     'Group',
     'Setting',
     'Subscriptions',
