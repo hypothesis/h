@@ -39,6 +39,8 @@ def create_app(global_config, **settings):
 
 
 def includeme(config):
+    settings = config.registry.settings
+
     # We need to include `h.models` before pretty much everything else to
     # avoid the possibility that one of the imports below directly or
     # indirectly imports `memex.models`. See the comment at the top of
@@ -94,20 +96,16 @@ def includeme(config):
     })
     config.include('pyramid_tm')
 
-    # Enable a Content Security Policy
-    # This is initially copied from:
-    # https://github.com/pypa/warehouse/blob/e1cf03faf9bbaa15d67d0de2c70f9a9f732596aa/warehouse/config.py#L327
-    client_url = config.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
+    # Define the global default Content Security Policy
+    client_url = settings.get('h.client_url', DEFAULT_CLIENT_URL)
     client_host = urlparse.urlparse(client_url).netloc
-
-    config.add_settings({
-        "csp": {
-            "font-src": ["'self'", "fonts.gstatic.com", client_host],
-            "report-uri": [config.registry.settings.get("csp.report_uri")],
-            "script-src": ["'self'", client_host, "www.google-analytics.com"],
-            "style-src": ["'self'", "fonts.googleapis.com", client_host],
-        },
-    })
+    settings['csp'] = {
+        "font-src": ["'self'", "fonts.gstatic.com", client_host],
+        "script-src": ["'self'", client_host, "www.google-analytics.com"],
+        "style-src": ["'self'", "fonts.googleapis.com", client_host],
+    }
+    if 'csp.report_uri' in settings:
+        settings['csp']['report-uri'] = [settings['csp.report_uri']]
 
     # API module
     #
