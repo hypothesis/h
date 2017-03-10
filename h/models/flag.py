@@ -12,16 +12,15 @@ from h.db.mixins import Timestamps
 
 class Flag(Base, Timestamps):
     """
-    A flag.
+    A flag representing a user request for moderator attention.
 
-    A user can flag up content, in this case just annotations,
-    which are then being moderated by group moderators.
+    Users can "flag" annotations if they believe that the annotation in question violates the
+    content policy of the group or service, or otherwise needs moderator attention.
     """
 
     __tablename__ = 'flag'
     __table_args__ = (sa.UniqueConstraint('annotation_id', 'user_id'),)
 
-    #: The id of the flag.
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
     annotation_id = sa.Column(types.URLSafeUUID,
