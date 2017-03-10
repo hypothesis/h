@@ -86,10 +86,10 @@ SETTINGS = [
     # label only.
     EnvSetting('h.env', 'ENV'),
     EnvSetting('h.proxy_auth', 'PROXY_AUTH', type=asbool),
+    # Sentry DSNs for frontend code should be of the public kind, lacking the
+    # password component in the DSN URI.
+    EnvSetting('h.sentry_dsn_client', 'SENTRY_DSN_CLIENT'),
     EnvSetting('h.websocket_url', 'WEBSOCKET_URL'),
-    # The client Sentry DSN should be of the public kind, lacking the password
-    # component in the DSN URI.
-    EnvSetting('h.client.sentry_dsn', 'SENTRY_DSN_CLIENT'),
 
     # Debug/development settings
     EnvSetting('debug_query', 'DEBUG_QUERY'),
