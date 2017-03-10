@@ -31,7 +31,8 @@ def _client_url(request):
 
 
 @view_config(route_name='sidebar_app',
-             renderer='h:templates/app.html.jinja2')
+             renderer='h:templates/app.html.jinja2',
+             csp_insecure_optout=True)
 def sidebar_app(request, extra=None):
     """
     Return the HTML for the Hypothesis client's sidebar application.

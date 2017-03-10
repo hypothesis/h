@@ -22,7 +22,8 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='annotation',
              permission='read',
-             renderer='h:templates/app.html.jinja2')
+             renderer='h:templates/app.html.jinja2',
+             csp_insecure_optout=True)
 def annotation_page(context, request):
     annotation = context.annotation
     document = annotation.document
@@ -59,7 +60,8 @@ def robots(context, request):
 
 
 @view_config(route_name='stream',
-             renderer='h:templates/app.html.jinja2')
+             renderer='h:templates/app.html.jinja2',
+             csp_insecure_optout=True)
 def stream(context, request):
     q = request.params.get('q', '').split(':', 1)
     if len(q) >= 2 and q[0] == 'tag':
