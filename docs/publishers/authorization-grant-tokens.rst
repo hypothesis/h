@@ -1,3 +1,5 @@
+.. _Generating authorization grant tokens:
+
 Generating authorization grant tokens
 #####################################
 
