@@ -98,7 +98,12 @@ def stream_user_redirect(request):
 
     # The client generates /u/ links which include the full account ID
     if user.startswith('acct:'):
-        user = split_user(user)['username']
+        try:
+            user = split_user(user)['username']
+        except ValueError:
+            # If it's not a valid userid, catch the exception and just treat
+            # the parameter as a literal username.
+            pass
 
     location = request.route_url('activity.user_search', username=user)
 
