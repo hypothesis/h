@@ -20,6 +20,7 @@
 
 .search-result-sidebar__section {
   margin-bottom: 26px;
+  @include pie-clearfix;
 }
 
 .search-result-sidebar__section:last-child {
