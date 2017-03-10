@@ -110,6 +110,14 @@ class TestStreamUserRedirect(object):
 
         assert exc.value.location == 'http://example.com/user/bob'
 
+    def test_doesnt_choke_on_invalid_userids(self, pyramid_request):
+        pyramid_request.matchdict['user'] = 'acct:bob'
+
+        with pytest.raises(httpexceptions.HTTPFound) as exc:
+            main.stream_user_redirect(pyramid_request)
+
+        assert exc.value.location == 'http://example.com/user/acct%3Abob'
+
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('activity.search', '/search')
