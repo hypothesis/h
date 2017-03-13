@@ -46,9 +46,7 @@ Join us in `#hypothes.is`_ on freenode_ for discussion.
 
 If you'd like to contribute to the project, you should also `subscribe`_ to the
 `development mailing list`_ and read our `Contributor's guide`_. Then consider
-getting started on one of the issues that are ready for work. Issues tagged with
-the label '`New Contributor Friendly`_' are ideal for those just getting
-started.
+getting started on one of the issues that are ready for work.
 
 Please note that this project is released with a Contributor Code of Conduct.
 By participating in this project you agree to abide by its terms.
@@ -58,7 +56,6 @@ By participating in this project you agree to abide by its terms.
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
 .. _development mailing list: https://groups.google.com/a/list.hypothes.is/forum/#!forum/dev
 .. _Contributor's guide: https://h.readthedocs.io/en/latest/developing/
-.. _New Contributor Friendly: https://github.com/hypothesis/h/issues?q=is%3Aopen+is%3Aissue+label%3A%22New+Contributor+Friendly%22
 
 
 License
