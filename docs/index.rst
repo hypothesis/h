@@ -6,7 +6,7 @@ that serves most of the https://hypothes.is/ website, including the web
 annotations API at https://hypothes.is/api/.
 The `Hypothesis client <https://github.com/hypothesis/client>`_
 is a browser-based annotator that is a client for the web service's API, see
-`the client's own documentation site <http://h.readthedocs.io/projects/client/>`_
+`the client's own documentation site <https://h.readthedocs.io/projects/client/>`_
 for docs about the client.
 
 This documentation is for:
@@ -22,7 +22,7 @@ Contents
 
    community
    publishers/index
-   The Hypothesis API <http://h.readthedocs.io/en/latest/api/>
+   The Hypothesis API <https://h.readthedocs.io/en/latest/api/>
    realtime
    developing/index
    CHANGES
