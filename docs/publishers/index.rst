@@ -7,5 +7,4 @@ content, the following documents will help you get started.
 .. toctree::
    :maxdepth: 1
 
-   embedding
    authorization-grant-tokens
