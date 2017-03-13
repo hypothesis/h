@@ -59,6 +59,7 @@ def test_includeme():
         call('badge', '/api/badge'),
         call('api.profile', '/api/profile'),
         call('api.debug_token', '/api/debug-token'),
+        call('api.flags', '/api/flags', factory='memex.resources:AnnotationResourceFactory'),
         call('token', '/api/token'),
         call('api.users', '/api/users'),
         call('session', '/app'),
