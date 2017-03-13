@@ -10,6 +10,7 @@ def includeme(config):
     config.register_service_factory('.auth_ticket.auth_ticket_service_factory',
                                     iface='pyramid_authsanity.interfaces.IAuthService')
     config.register_service_factory('.auth_token.auth_token_service_factory', name='auth_token')
+    config.register_service_factory('.flag.flag_service_factory', name='flag')
     config.register_service_factory('.group.groups_factory', name='group')
     config.register_service_factory('.authority_group.authority_group_factory', name='authority_group')
     config.register_service_factory('.nipsa.nipsa_factory', name='nipsa')
