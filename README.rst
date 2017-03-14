@@ -1,5 +1,5 @@
-Hypothesis
-==========
+Hypothesis Web Service
+======================
 
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
    :target: https://travis-ci.org/hypothesis/h
@@ -16,20 +16,11 @@ Hypothesis
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
    :alt: Python version badge
 
-
-About
------
-
-Hypothesis is a tool for annotating the web.
-
-- A service for storing community annotations
-- An account system for user registration
-- Authorization for client applications
-- A browser-based annotator client featuring:
-
-  - Chrome and Firefox browser extensions
-  - A bookmarklet
-  - A publisher embed code
+The Hypothesis web service is the web app that serves most of the
+https://hypothes.is/ website, including the web annotations API at
+https://hypothes.is/api/.
+The `Hypothesis client <https://github.com/hypothesis/client>`_
+is a browser-based annotator that is a client for the web service's API.
 
 
 Development
