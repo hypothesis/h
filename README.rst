@@ -1,5 +1,5 @@
-Hypothesis Web Service
-======================
+h
+=
 
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
    :target: https://travis-ci.org/hypothesis/h
@@ -16,11 +16,10 @@ Hypothesis Web Service
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
    :alt: Python version badge
 
-The Hypothesis web service is the web app that serves most of the
-https://hypothes.is/ website, including the web annotations API at
-https://hypothes.is/api/.
+h is the web app that serves most of the https://hypothes.is/ website,
+including the web annotations API at https://hypothes.is/api/.
 The `Hypothesis client <https://github.com/hypothesis/client>`_
-is a browser-based annotator that is a client for the web service's API.
+is a browser-based annotator that is a client for h's API.
 
 
 Development
