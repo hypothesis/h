@@ -6,8 +6,8 @@ from pyramid.view import view_config
 from pyramid import i18n
 
 from memex import search
-from memex.storage import fetch_ordered_annotations
 from h.feeds import render_atom, render_rss
+from h.storage import fetch_ordered_annotations
 
 
 _ = i18n.TranslationStringFactory(__package__)

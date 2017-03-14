@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from h import storage
 from h.celery import celery
 from h.indexer.reindexer import SETTING_NEW_INDEX
 
-from memex import storage
 from memex.search.index import index
 from memex.search.index import delete
 

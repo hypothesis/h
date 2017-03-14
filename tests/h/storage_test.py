@@ -7,13 +7,11 @@ import copy
 import pytest
 import mock
 
-from pyramid import security
-
-from memex import groups
-from memex import storage
 from memex import schemas
 from memex.models.annotation import Annotation
-from memex.models.document import Document, DocumentURI, DocumentMeta
+from memex.models.document import Document, DocumentURI
+
+from h import storage
 
 
 class FakeGroup(object):
@@ -470,12 +468,12 @@ class TestDeleteAnnotation(object):
 
 @pytest.fixture
 def fetch_annotation(patch):
-    return patch('memex.storage.fetch_annotation')
+    return patch('h.storage.fetch_annotation')
 
 
 @pytest.fixture
 def models(patch):
-    models = patch('memex.storage.models', autospec=False)
+    models = patch('h.storage.models', autospec=False)
     models.Annotation.return_value.is_reply = False
     return models
 
@@ -495,4 +493,4 @@ def session(db_session):
 
 @pytest.fixture
 def datetime(patch):
-    return patch('memex.storage.datetime')
+    return patch('h.storage.datetime')

@@ -8,7 +8,7 @@ PostgreSQL database.
 
 Please note: access to these model objects should almost certainly not be
 direct to the submodules of this package, but rather through the helper
-functions in `memex.storage`.
+functions in `h.storage`.
 """
 
 from memex.db import set_base

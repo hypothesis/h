@@ -3,7 +3,7 @@
 from collections import namedtuple
 import logging
 
-from memex import storage
+from h import storage
 from h.models import Subscriptions
 
 log = logging.getLogger(__name__)

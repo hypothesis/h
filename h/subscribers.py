@@ -3,7 +3,7 @@
 
 from h import __version__
 from h import emails
-from memex import storage
+from h import storage
 from h.notification import reply
 from h.tasks import mailer
 

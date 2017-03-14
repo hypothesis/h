@@ -291,7 +291,7 @@ class TestHandleFilterMessage(object):
 
         assert socket.filter is not None
 
-    @mock.patch('memex.storage.expand_uri')
+    @mock.patch('h.streamer.websocket.storage.expand_uri')
     def test_expands_uris_in_uri_filter_with_session(self, expand_uri, socket):
         expand_uri.return_value = ['http://example.com',
                                    'http://example.com/alter',
@@ -318,7 +318,7 @@ class TestHandleFilterMessage(object):
         assert 'http://example.com/alter' in uri_values
         assert 'http://example.com/print' in uri_values
 
-    @mock.patch('memex.storage.expand_uri')
+    @mock.patch('h.streamer.websocket.storage.expand_uri')
     def test_expands_uris_using_passed_session(self, expand_uri, socket):
         expand_uri.return_value = ['http://example.com', 'http://example.org/']
         session = mock.sentinel.db_session
