@@ -1,0 +1,12 @@
+{#
+  mc:disable-tracking disables click-tracking in MailChimp, and is necessary to
+  ensure that the activate link is not leaked (MailChimp click-tracking happens
+  over HTTP, not HTTPS):
+
+    https://mandrill.zendesk.com/hc/en-us/articles/205582927
+#}
+<p>
+An annotation  has been flagged. Please visit
+<a href="{{incontext_link}}" mc:disable-tracking>{{incontext_link}}</a>
+for more details.
+</p>
