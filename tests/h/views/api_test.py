@@ -7,10 +7,11 @@ from pyramid.config import Configurator
 from pyramid import testing
 
 from memex import presenters
-from memex import views
 from memex.resources import AnnotationResource
 from memex.schemas import ValidationError
 from memex.search.core import SearchResult
+
+from h.views import api as views
 
 
 class TestError(object):
@@ -119,10 +120,10 @@ class TestIndex(object):
 
     def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):
 
-        # Scan `memex.views` for API link metadata specified in @api_config
+        # Scan `h.views.api` for API link metadata specified in @api_config
         # declarations.
         config = Configurator()
-        config.scan('memex.views')
+        config.scan('h.views.api')
         pyramid_request.registry.api_links = config.registry.api_links
 
         pyramid_config.add_route('api.search', '/dummy/search')
@@ -220,7 +221,7 @@ class TestSearch(object):
 
     @pytest.fixture
     def search_lib(self, patch):
-        return patch('memex.views.search_lib')
+        return patch('h.views.api.search_lib')
 
     @pytest.fixture
     def search_run(self, search_lib):
@@ -228,7 +229,7 @@ class TestSearch(object):
 
     @pytest.fixture
     def storage(self, patch):
-        return patch('memex.views.storage')
+        return patch('h.views.api.storage')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -385,7 +386,7 @@ class TestReadJSONLD(object):
 
     @pytest.fixture
     def AnnotationJSONLDPresenter(self, patch):
-        return patch('memex.views.AnnotationJSONLDPresenter')
+        return patch('h.views.api.AnnotationJSONLDPresenter')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -554,17 +555,17 @@ class TestDelete(object):
 
 @pytest.fixture
 def AnnotationEvent(patch):
-    return patch('memex.views.AnnotationEvent')
+    return patch('h.views.api.AnnotationEvent')
 
 
 @pytest.fixture
 def AnnotationJSONPresenter(patch):
-    return patch('memex.views.AnnotationJSONPresenter')
+    return patch('h.views.api.AnnotationJSONPresenter')
 
 
 @pytest.fixture
 def annotation_resource(patch):
-    return patch('memex.views.AnnotationResource')
+    return patch('h.views.api.AnnotationResource')
 
 
 @pytest.fixture
@@ -589,14 +590,14 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def search_lib(patch):
-    return patch('memex.views.search_lib')
+    return patch('h.views.api.search_lib')
 
 
 @pytest.fixture
 def schemas(patch):
-    return patch('memex.views.schemas')
+    return patch('h.views.api.schemas')
 
 
 @pytest.fixture
 def storage(patch):
-    return patch('memex.views.storage')
+    return patch('h.views.api.storage')

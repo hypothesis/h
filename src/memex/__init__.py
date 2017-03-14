@@ -15,7 +15,6 @@ def includeme(config):
     config.include('memex.links')
     config.include('memex.presenters')
     config.include('memex.search')
-    config.include('memex.views')
 
     config.register_service_factory('memex.groups.default_group_service_factory',
                                     iface='memex.interfaces.IGroupService')

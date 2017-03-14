@@ -6,7 +6,7 @@ from pyramid import security
 
 from h import session as h_session
 from h.exceptions import APIError
-from memex.views import api_config
+from h.views.api import api_config
 
 
 @api_config(route_name='api.profile',
