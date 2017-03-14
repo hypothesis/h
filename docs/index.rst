@@ -5,14 +5,14 @@ Welcome to the h Documentation!
 https://hypothes.is/ website, including the web annotations API at
 https://hypothes.is/api/.
 The `Hypothesis client <https://github.com/hypothesis/client>`_
-is a browser-based annotator that is a client for the web service's API, see
+is a browser-based annotator that is a client for h's API, see
 `the client's own documentation site <https://h.readthedocs.io/projects/client/>`_
 for docs about the client.
 
 This documentation is for:
 
-* Developers working with data stored in the Hypothesis service.
-* Contributors to the Hypothesis service and client.
+* Developers working with data stored in h
+* Contributors to h
 
 Contents
 --------

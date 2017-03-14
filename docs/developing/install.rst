@@ -7,8 +7,8 @@ environment the first thing you need to do is install h's system dependencies.
 
 .. seealso::
 
-   This page documents how to setup a development install of the Hypothesis
-   web service. For installing the Hypothesis client for development see
+   This page documents how to setup a development install of h.
+   For installing the Hypothesis client for development see
    https://github.com/hypothesis/client/, and for the browser extension
    see https://github.com/hypothesis/browser-extension.
 
