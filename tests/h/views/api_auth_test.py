@@ -11,8 +11,8 @@ from h.services.auth_token import auth_token_service_factory
 from h.services.oauth import oauth_service_factory
 from h.services.user import user_service_factory
 from h.exceptions import OAuthTokenError
+from h.util.datetime import utc_iso8601
 from h.views import api_auth as views
-from memex.presenters import utc_iso8601
 
 
 @pytest.mark.usefixtures('user_service', 'oauth_service')

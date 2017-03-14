@@ -51,12 +51,30 @@ def incontext_link(request, annotation):
     return link
 
 
+def json_link(request, annotation):
+    return request.route_url('api.annotation', id=annotation.id)
+
+
+def jsonld_id_link(request, annotation):
+    return request.route_url('annotation', id=annotation.id)
+
+
 def includeme(config):
     # Add an annotation link generator for the `annotation` view -- this adds a
     # named link called "html" to API rendered views of annotations. See
-    # :py:mod:`memex.presenters` for details.
+    # :py:mod:`h.presenters` for details.
     config.add_annotation_link_generator('html', html_link)
 
     # Add an annotation link generator for viewing annotations in context on
     # the page on which they were made.
     config.add_annotation_link_generator('incontext', incontext_link)
+
+    # Add a default 'json' link type
+    config.add_annotation_link_generator('json', json_link)
+
+    # Add a 'jsonld_id' link type for generating the "id" field for JSON-LD
+    # annotations. This is hidden, and so not rendered in the annotation's
+    # "links" field.
+    config.add_annotation_link_generator('jsonld_id',
+                                         jsonld_id_link,
+                                         hidden=True)

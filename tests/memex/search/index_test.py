@@ -6,7 +6,7 @@ import pytest
 
 import elasticsearch
 
-from memex import presenters
+from h import presenters
 from memex.search import client
 from memex.search import index
 

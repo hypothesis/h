@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from h.exceptions import OAuthTokenError
 from h.util.view import cors_json_view
-from memex.presenters import utc_iso8601
+from h.util.datetime import utc_iso8601
 
 
 @cors_json_view(route_name='token', request_method='POST')

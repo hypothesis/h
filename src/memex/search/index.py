@@ -11,8 +11,8 @@ import sqlalchemy as sa
 from elasticsearch import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
+from h import presenters  # FIXME: this module needs to move to h
 from memex import models
-from memex import presenters
 from memex.events import AnnotationTransformEvent
 from memex.util.query import column_windows
 

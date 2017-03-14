@@ -173,7 +173,6 @@ def create_app(global_config, **settings):
     #   - the default presenters (and their link registrations)
     #   - the `request.es` property
     config.include('memex.links')
-    config.include('memex.presenters')
     config.include('memex.search')
 
     # We include links in order to set up the alternative link registrations

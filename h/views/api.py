@@ -24,13 +24,12 @@ import venusian
 from memex import models
 from memex.events import AnnotationEvent
 from memex.interfaces import IGroupService
-from memex.presenters import AnnotationJSONPresenter
-from memex.presenters import AnnotationJSONLDPresenter
 from memex.resources import AnnotationResource
 from memex import search as search_lib
 from memex import schemas
 
 from h import storage
+from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
 from h.util import cors
 
 _ = i18n.TranslationStringFactory(__package__)
