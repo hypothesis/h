@@ -1,9 +1,9 @@
-Welcome to the Hypothesis Web Service’s Documentation!
-======================================================
+Welcome to the h Documentation!
+===============================
 
-The `Hypothesis web service <https://github.com/hypothesis/h>` is the web app
-that serves most of the https://hypothes.is/ website, including the web
-annotations API at https://hypothes.is/api/.
+`h <https://github.com/hypothesis/h>`_ is the web app that serves most of the
+https://hypothes.is/ website, including the web annotations API at
+https://hypothes.is/api/.
 The `Hypothesis client <https://github.com/hypothesis/client>`_
 is a browser-based annotator that is a client for the web service's API, see
 `the client's own documentation site <https://h.readthedocs.io/projects/client/>`_
