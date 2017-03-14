@@ -21,7 +21,6 @@ from pyramid import security
 from sqlalchemy.orm import subqueryload
 import venusian
 
-from memex import cors
 from memex import models
 from memex.events import AnnotationEvent
 from memex.interfaces import IGroupService
@@ -32,8 +31,12 @@ from memex import search as search_lib
 from memex import schemas
 from memex import storage
 
+from h.util import cors
+
 _ = i18n.TranslationStringFactory(__package__)
 
+# FIXME: unify (or at least deduplicate) CORS policy between this file and
+#        `h.util.view`
 cors_policy = cors.policy(
     allow_headers=(
         'Authorization',

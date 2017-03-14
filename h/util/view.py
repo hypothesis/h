@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from pyramid.view import view_config
 
-from memex import cors
+from h.util import cors
 
 cors_policy = cors.policy(
     allow_headers=(
