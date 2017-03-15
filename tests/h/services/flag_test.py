@@ -53,6 +53,28 @@ class TestFlagServiceCreate(object):
                          .count() == 1
 
 
+@pytest.mark.usefixtures('flags')
+class TestFlagServiceList(object):
+    def test_it_filters_by_user(self, svc, users, flags):
+        expected = {f for f in flags if f.user == users['alice']}
+        assert set(svc.list(users['alice'])) == expected
+
+    @pytest.fixture
+    def users(self, factories):
+        return {'alice': factories.User(username='alice'),
+                'bob': factories.User(username='bob')}
+
+    @pytest.fixture
+    def flags(self, factories, users):
+        return [
+            factories.Flag(user=users['alice']),
+            factories.Flag(user=users['alice']),
+            factories.Flag(user=users['bob']),
+            factories.Flag(user=users['bob']),
+            factories.Flag(user=users['alice']),
+        ]
+
+
 class TestFlagServiceFactory(object):
     def test_it_returns_flag_service(self, pyramid_request):
         svc = flag.flag_service_factory(None, pyramid_request)
