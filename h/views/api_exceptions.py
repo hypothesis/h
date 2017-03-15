@@ -14,6 +14,7 @@ from pyramid.view import notfound_view_config
 
 from h.i18n import TranslationString as _
 from h.exceptions import APIError
+from h.schemas import ValidationError
 from h.util.view import handle_exception, json_view
 
 
@@ -32,6 +33,12 @@ def api_notfound(request):
 def api_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code
+    return {'status': 'failure', 'reason': context.message}
+
+
+@json_view(context=ValidationError, path_info='/api/')
+def api_validation_error(context, request):
+    request.response.status_code = 400
     return {'status': 'failure', 'reason': context.message}
 
 

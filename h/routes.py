@@ -65,6 +65,9 @@ def includeme(config):
     config.add_route('badge', '/api/badge')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
+    config.add_route('api.flags',
+                     '/api/flags',
+                     factory='memex.resources:AnnotationResourceFactory')
     config.add_route('token', '/api/token')
     config.add_route('api.users', '/api/users')
 
