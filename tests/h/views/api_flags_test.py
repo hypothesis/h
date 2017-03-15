@@ -107,7 +107,24 @@ class TestCreate(object):
 class TestIndex(object):
     def test_it_passes_user_filter(self, pyramid_request, flag_service):
         views.index(pyramid_request)
-        flag_service.list.assert_called_once_with(pyramid_request.authenticated_user)
+        flag_service.list.assert_called_once_with(pyramid_request.authenticated_user,
+                                                  group=None)
+
+    def test_it_passes_group_filter(self, pyramid_request, flag_service):
+        pyramid_request.GET['group'] = 'test-pubid'
+
+        views.index(pyramid_request)
+
+        flag_service.list.assert_called_once_with(mock.ANY,
+                                                  group='test-pubid')
+
+    def test_it_skips_empty_group_filter(self, pyramid_request, flag_service):
+        pyramid_request.GET['group'] = ''
+
+        views.index(pyramid_request)
+
+        flag_service.list.assert_called_once_with(mock.ANY,
+                                                  group=None)
 
     def test_it_renders_flags(self, pyramid_request, flags):
         expected = [{'annotation': f.annotation_id} for f in flags]

@@ -27,8 +27,12 @@ def create(context, request):
             description='List a users flagged annotations for review.',
             effective_principals=security.Authenticated)
 def index(request):
+    group = request.GET.get('group')
+    if not group:
+        group = None
+
     svc = request.find_service(name='flag')
-    flags = svc.list(request.authenticated_user)
+    flags = svc.list(request.authenticated_user, group=group)
     return [{'annotation': flag.annotation_id} for flag in flags]
 
 

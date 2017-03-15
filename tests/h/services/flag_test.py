@@ -6,7 +6,7 @@ import pytest
 
 from h.services import flag
 from h import models
-from h._compat import xrange
+from h._compat import text_type, xrange
 
 
 @pytest.mark.usefixtures('flags')
@@ -56,8 +56,13 @@ class TestFlagServiceCreate(object):
 @pytest.mark.usefixtures('flags')
 class TestFlagServiceList(object):
     def test_it_filters_by_user(self, svc, users, flags):
-        expected = {f for f in flags if f.user == users['alice']}
+        expected = {f for k, f in flags.iteritems() if k.startswith('alice-')}
         assert set(svc.list(users['alice'])) == expected
+
+    def test_it_optionally_filters_by_group(self, svc, users, flags, groups):
+        expected = [flags['alice-politics']]
+        result = svc.list(users['alice'], group=groups['politics']).all()
+        assert result == expected
 
     @pytest.fixture
     def users(self, factories):
@@ -65,14 +70,20 @@ class TestFlagServiceList(object):
                 'bob': factories.User(username='bob')}
 
     @pytest.fixture
-    def flags(self, factories, users):
-        return [
-            factories.Flag(user=users['alice']),
-            factories.Flag(user=users['alice']),
-            factories.Flag(user=users['bob']),
-            factories.Flag(user=users['bob']),
-            factories.Flag(user=users['alice']),
-        ]
+    def groups(self, factories):
+        return {'climate': text_type(factories.Group(name='Climate').pubid),
+                'politics': text_type(factories.Group(name='Politics').pubid)}
+
+    @pytest.fixture
+    def flags(self, factories, users, groups):
+        ann_climate = factories.Annotation(groupid=groups['climate'])
+        ann_politics = factories.Annotation(groupid=groups['politics'])
+
+        return {
+            'alice-climate': factories.Flag(user=users['alice'], annotation=ann_climate),
+            'alice-politics': factories.Flag(user=users['alice'], annotation=ann_politics),
+            'bob-politics': factories.Flag(user=users['bob'], annotation=ann_politics),
+        }
 
 
 class TestFlagServiceFactory(object):

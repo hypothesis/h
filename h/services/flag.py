@@ -50,18 +50,27 @@ class FlagService(object):
                            annotation=annotation)
         self.session.add(flag)
 
-    def list(self, user):
+    def list(self, user, group=None):
         """
         Return a list of flags made by the given user.
 
         :param user: The user to filter flags on.
         :type user: h.models.User
 
+        :param group: The annotation group pubid for filtering flags.
+        :type group: unicode
+
         :returns: list of flags (``h.models.Flag``)
         :rtype: list
         """
 
-        return self.session.query(models.Flag).filter_by(user=user)
+        query = self.session.query(models.Flag).filter_by(user=user)
+
+        if group is not None:
+            query = query.join(models.Annotation) \
+                         .filter(models.Annotation.groupid == group)
+
+        return query
 
 
 def flag_service_factory(context, request):
