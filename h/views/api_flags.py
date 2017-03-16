@@ -31,8 +31,10 @@ def index(request):
     if not group:
         group = None
 
+    uris = request.GET.getall('uri')
+
     svc = request.find_service(name='flag')
-    flags = svc.list(request.authenticated_user, group=group)
+    flags = svc.list(request.authenticated_user, group=group, uris=uris)
     return [{'annotation': flag.annotation_id} for flag in flags]
 
 

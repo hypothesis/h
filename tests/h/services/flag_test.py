@@ -64,6 +64,16 @@ class TestFlagServiceList(object):
         result = svc.list(users['alice'], group=groups['politics']).all()
         assert result == expected
 
+    def test_it_optionally_filters_by_uri(self, svc, users, flags):
+        expected = [flags['alice-climate']]
+        result = svc.list(users['alice'], uris=['https://science.org']).all()
+        assert result == expected
+
+    def test_it_supports_multiple_uri_filters(self, svc, users, flags):
+        expected = [flags['alice-climate'], flags['alice-politics']]
+        result = svc.list(users['alice'], uris=['https://science.org', 'https://news.com']).all()
+        assert result == expected
+
     @pytest.fixture
     def users(self, factories):
         return {'alice': factories.User(username='alice'),
@@ -75,9 +85,16 @@ class TestFlagServiceList(object):
                 'politics': text_type(factories.Group(name='Politics').pubid)}
 
     @pytest.fixture
-    def flags(self, factories, users, groups):
-        ann_climate = factories.Annotation(groupid=groups['climate'])
-        ann_politics = factories.Annotation(groupid=groups['politics'])
+    def flags(self, factories, users, groups, db_session):
+        ann_climate = factories.Annotation(groupid=groups['climate'],
+                                           target_uri='https://science.com')
+        factories.DocumentURI(claimant='https://science.org',
+                              uri='https://science.org',
+                              type='rel-alternate',
+                              document=ann_climate.document)
+
+        ann_politics = factories.Annotation(groupid=groups['politics'],
+                                            target_uri='https://news.com')
 
         return {
             'alice-climate': factories.Flag(user=users['alice'], annotation=ann_climate),

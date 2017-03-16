@@ -17,6 +17,7 @@ import sqlalchemy
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 from sqlalchemy.orm import sessionmaker
+from webob.multidict import MultiDict
 
 from h import db
 from h import models  # noqa: ensure base class set for memex
@@ -229,6 +230,9 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
     request.matched_route = mock.Mock()
     request.registry.settings = pyramid_settings
     request.is_xhr = False
+    request.params = MultiDict()
+    request.GET = request.params
+    request.POST = request.params
     return request
 
 

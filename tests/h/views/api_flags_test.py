@@ -108,7 +108,8 @@ class TestIndex(object):
     def test_it_passes_user_filter(self, pyramid_request, flag_service):
         views.index(pyramid_request)
         flag_service.list.assert_called_once_with(pyramid_request.authenticated_user,
-                                                  group=None)
+                                                  group=None,
+                                                  uris=[])
 
     def test_it_passes_group_filter(self, pyramid_request, flag_service):
         pyramid_request.GET['group'] = 'test-pubid'
@@ -116,7 +117,8 @@ class TestIndex(object):
         views.index(pyramid_request)
 
         flag_service.list.assert_called_once_with(mock.ANY,
-                                                  group='test-pubid')
+                                                  group='test-pubid',
+                                                  uris=[])
 
     def test_it_skips_empty_group_filter(self, pyramid_request, flag_service):
         pyramid_request.GET['group'] = ''
@@ -124,7 +126,18 @@ class TestIndex(object):
         views.index(pyramid_request)
 
         flag_service.list.assert_called_once_with(mock.ANY,
-                                                  group=None)
+                                                  group=None,
+                                                  uris=[])
+
+    def test_it_passes_uris_filter(self, pyramid_request, flag_service):
+        pyramid_request.GET.add('uri', 'https://example.com/document')
+        pyramid_request.GET.add('uri', 'https://example.org/document')
+
+        views.index(pyramid_request)
+
+        flag_service.list.assert_called_once_with(mock.ANY,
+                                                  group=mock.ANY,
+                                                  uris=['https://example.com/document', 'https://example.org/document'])
 
     def test_it_renders_flags(self, pyramid_request, flags):
         expected = [{'annotation': f.annotation_id} for f in flags]
