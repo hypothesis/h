@@ -13,6 +13,8 @@ log = logging.getLogger(__name__)
 FEATURES = {
     'defer_realtime_updates': ("Require a user action before applying real-time"
                                " updates to annotations in the client?"),
+    'filter_highlights': ("Filter highlights in document based on visible"
+                          " annotations in sidebar?"),
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
 }
