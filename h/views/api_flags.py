@@ -5,9 +5,8 @@ from __future__ import unicode_literals
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPNotFound
 
-from memex.views import api_config
-
 from h.schemas import ValidationError
+from h.views.api import api_config
 
 
 @api_config(route_name='api.flags',

@@ -61,15 +61,31 @@ def includeme(config):
     # Assets
     config.add_route('assets', '/assets/*subpath')
 
-    # API (other than those provided by memex)
-    config.add_route('badge', '/api/badge')
+    # API
+
+    # For historical reasons, the `api` route ends with a trailing slash. This
+    # is not (or should not) be necessary, but for now the client will
+    # construct URLs incorrectly if its `apiUrl` setting does not end in a
+    # trailing slash.
+    config.add_route('api.index', '/api/')
+    config.add_route('api.annotations', '/api/annotations')
+    config.add_route('api.annotation',
+                     '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
+                     factory='memex.resources:AnnotationResourceFactory',
+                     traverse='/{id}')
+    config.add_route('api.annotation.jsonld',
+                     '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
+                     factory='memex.resources:AnnotationResourceFactory',
+                     traverse='/{id}')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.flags',
                      '/api/flags',
                      factory='memex.resources:AnnotationResourceFactory')
-    config.add_route('token', '/api/token')
+    config.add_route('api.search', '/api/search')
     config.add_route('api.users', '/api/users')
+    config.add_route('badge', '/api/badge')
+    config.add_route('token', '/api/token')
 
     # Client
     config.add_route('session', '/app')

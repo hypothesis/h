@@ -18,11 +18,9 @@ objects and Pyramid ACLs in :mod:`memex.resources`.
 """
 from pyramid import i18n
 from pyramid import security
-from pyramid.view import view_config
 from sqlalchemy.orm import subqueryload
 import venusian
 
-from memex import cors
 from memex import models
 from memex.events import AnnotationEvent
 from memex.interfaces import IGroupService
@@ -33,8 +31,12 @@ from memex import search as search_lib
 from memex import schemas
 from memex import storage
 
+from h.util import cors
+
 _ = i18n.TranslationStringFactory(__package__)
 
+# FIXME: unify (or at least deduplicate) CORS policy between this file and
+#        `h.util.view`
 cors_policy = cors.policy(
     allow_headers=(
         'Authorization',
@@ -348,7 +350,3 @@ def _set_at_path(dict_, path, value):
         dict_[key] = value
     else:
         _set_at_path(dict_[key], path[1:], value)
-
-
-def includeme(config):
-    config.scan(__name__)
