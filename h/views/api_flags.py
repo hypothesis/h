@@ -21,6 +21,23 @@ def create(context, request):
     return HTTPNoContent()
 
 
+@api_config(route_name='api.flags',
+            request_method='GET',
+            link_name='flag.index',
+            description='List a users flagged annotations for review.',
+            effective_principals=security.Authenticated)
+def index(request):
+    group = request.GET.get('group')
+    if not group:
+        group = None
+
+    uris = request.GET.getall('uri')
+
+    svc = request.find_service(name='flag')
+    flags = svc.list(request.authenticated_user, group=group, uris=uris)
+    return [{'annotation': flag.annotation_id} for flag in flags]
+
+
 def _fetch_annotation(context, request):
     try:
         annotation_id = request.json_body.get('annotation')

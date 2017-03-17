@@ -101,3 +101,64 @@ class TestCreate(object):
         flag_service = mock.Mock(spec_set=['create'])
         pyramid_config.register_service(flag_service, name='flag')
         return flag_service
+
+
+@pytest.mark.usefixtures('flag_service')
+class TestIndex(object):
+    def test_it_passes_user_filter(self, pyramid_request, flag_service):
+        views.index(pyramid_request)
+        flag_service.list.assert_called_once_with(pyramid_request.authenticated_user,
+                                                  group=None,
+                                                  uris=[])
+
+    def test_it_passes_group_filter(self, pyramid_request, flag_service):
+        pyramid_request.GET['group'] = 'test-pubid'
+
+        views.index(pyramid_request)
+
+        flag_service.list.assert_called_once_with(mock.ANY,
+                                                  group='test-pubid',
+                                                  uris=[])
+
+    def test_it_skips_empty_group_filter(self, pyramid_request, flag_service):
+        pyramid_request.GET['group'] = ''
+
+        views.index(pyramid_request)
+
+        flag_service.list.assert_called_once_with(mock.ANY,
+                                                  group=None,
+                                                  uris=[])
+
+    def test_it_passes_uris_filter(self, pyramid_request, flag_service):
+        pyramid_request.GET.add('uri', 'https://example.com/document')
+        pyramid_request.GET.add('uri', 'https://example.org/document')
+
+        views.index(pyramid_request)
+
+        flag_service.list.assert_called_once_with(mock.ANY,
+                                                  group=mock.ANY,
+                                                  uris=['https://example.com/document', 'https://example.org/document'])
+
+    def test_it_renders_flags(self, pyramid_request, flags):
+        expected = [{'annotation': f.annotation_id} for f in flags]
+
+        response = views.index(pyramid_request)
+        assert response == expected
+
+    @pytest.fixture
+    def flags(self, factories):
+        return [factories.Flag.build(annotation_id='test-annotation-1'),
+                factories.Flag.build(annotation_id='test-annotation-2'),
+                factories.Flag.build(annotation_id='test-annotation-3')]
+
+    @pytest.fixture
+    def flag_service(self, pyramid_config, flags):
+        flag_service = mock.Mock(spec_set=['list'])
+        flag_service.list.return_value = flags
+        pyramid_config.register_service(flag_service, name='flag')
+        return flag_service
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.authenticated_user = mock.Mock()
+        return pyramid_request

@@ -32,7 +32,7 @@ class Flag(Base, Timestamps):
 
     user_id = sa.Column(sa.Integer,
                         sa.ForeignKey('user.id', ondelete='cascade'),
-                        nullable=False)
+                        nullable=False, index=True)
 
     #: The user who created the flag.
     user = sa.orm.relationship('User')
