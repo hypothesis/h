@@ -5,10 +5,10 @@ import logging
 
 from gevent.queue import Full
 
+from h import presenters
 from h import realtime
 from h import storage
 from h.realtime import Consumer
-from memex import presenters
 from memex.links import LinksService
 from memex.resources import AnnotationResource
 from h.auth.util import translate_annotation_principals

@@ -76,6 +76,24 @@ def test_incontext_link_skips_uri_for_pdfs_with_no_document(pyramid_request):
     assert link == 'https://hyp.is/123'
 
 
+def test_json_link(factories, pyramid_config, pyramid_request):
+    annotation = factories.Annotation(id='e22AJlHYQNCG70bXL7gr1w')
+    pyramid_config.add_route('api.annotation', '/annos/{id}')
+
+    link = links.json_link(pyramid_request, annotation)
+
+    assert link == 'http://example.com/annos/e22AJlHYQNCG70bXL7gr1w'
+
+
+def test_jsonld_id_link(factories, pyramid_config, pyramid_request):
+    annotation = factories.Annotation(id='e22AJlHYQNCG70bXL7gr1w')
+    pyramid_config.add_route('annotation', '/annos/{id}')
+
+    link = links.jsonld_id_link(pyramid_request, annotation)
+
+    assert link == 'http://example.com/annos/e22AJlHYQNCG70bXL7gr1w'
+
+
 @pytest.mark.parametrize('uri,formatted', [
     ('http://notsecure.com', 'notsecure.com'),
     ('https://secure.com', 'secure.com'),

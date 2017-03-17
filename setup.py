@@ -29,6 +29,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2.7',
 ]
 INSTALL_REQUIRES = [
+    'Jinja2>=2.8',
     'SQLAlchemy>=1.1.0',
     'bleach>=1.4.3,<1.5',
     'certifi',
