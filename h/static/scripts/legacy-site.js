@@ -30,3 +30,14 @@ if (chromeextInstaller) {
     event.preventDefault();
   });
 }
+
+const viaForm = document.querySelector('.js-via-form');
+if (viaForm) {
+  viaForm.addEventListener('submit', (event) => {
+    const url = event.target.elements.url.value;
+    if (url !== '') {
+      window.location.href = 'https://via.hypothes.is/' + url;
+    }
+    event.preventDefault();
+  });
+}

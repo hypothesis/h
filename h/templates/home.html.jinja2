@@ -133,12 +133,14 @@
                 </span>
 
                 <em class="or hidden-xs">Or...</em>
-                <form class="via" onsubmit="url = document.getElementById('search').value; if (url != '') { window.location.href = 'https://via.hypothes.is/h/' + url; } return false;">
+                <form class="via js-via-form">
                   <span class="input-group"
                         title="Insert a URL to annotate that page.">
-                    <input id="search" class="form-control" type="text"
-                            name="search" placeholder="Paste a link...">
-                    <span class="input-group-btn" data-via-button="">
+                    <input class="form-control"
+                           type="text"
+                           name="url"
+                           placeholder="Paste a link...">
+                    <span class="input-group-btn">
                       <button class="btn btn-primary" type="submit">
                         Annotate!
                       </button>
