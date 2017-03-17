@@ -10,7 +10,7 @@ from gevent.queue import Full
 import jsonschema
 from ws4py.websocket import WebSocket as _WebSocket
 
-from memex import storage
+from h import storage
 from h.streamer import filter
 
 log = logging.getLogger(__name__)

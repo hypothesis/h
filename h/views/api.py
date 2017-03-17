@@ -29,8 +29,8 @@ from memex.presenters import AnnotationJSONLDPresenter
 from memex.resources import AnnotationResource
 from memex import search as search_lib
 from memex import schemas
-from memex import storage
 
+from h import storage
 from h.util import cors
 
 _ = i18n.TranslationStringFactory(__package__)

@@ -8,10 +8,10 @@ from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h import models
+from h import storage
 from h.accounts.events import ActivationEvent
 from h.services.rename_user import UserRenameError
 from h.tasks.admin import rename_user
-from memex import storage
 from h.i18n import TranslationString as _
 
 

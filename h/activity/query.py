@@ -17,9 +17,9 @@ from sqlalchemy.orm import subqueryload
 
 from h import links
 from h import presenters
+from h import storage
 from h.activity import bucketing
 from h.models import Annotation, Document, Group
-from memex import storage
 
 
 class ActivityResults(namedtuple('ActivityResults', [

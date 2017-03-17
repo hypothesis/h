@@ -7,6 +7,16 @@ for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
 
+# FIXME: This module was originally written to be a single point of
+#        indirection through which the storage backend could be swapped out on
+#        the fly. This helped us to migrate from Elasticsearch-based
+#        persistence to PostgreSQL persistence.
+#
+#        The purpose of this module is now primarily to serve as a place to
+#        wrap up the business logic of creating and retrieving annotations. As
+#        such, it probably makes more sense for this to be split up into a
+#        couple of different services at some point.
+
 from datetime import datetime
 
 from pyramid import i18n
