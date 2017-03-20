@@ -12,223 +12,213 @@ class FakeGroup(object):
         self.is_public = is_public
 
 
-def test_model_sorts_groups(authenticated_request):
-    authenticated_request.set_groups([
-        FakeGroup('c', 'Group A'),
-        FakeGroup('b', 'Group B'),
-        FakeGroup('a', 'Group B'),
-    ])
-    session_model = session.model(authenticated_request)
+class TestModel(object):
+    def test_sorts_groups(self, authenticated_request):
+        authenticated_request.set_groups([
+            FakeGroup('c', 'Group A'),
+            FakeGroup('b', 'Group B'),
+            FakeGroup('a', 'Group B'),
+        ])
+        session_model = session.model(authenticated_request)
 
-    ids = [group['id'] for group in session_model['groups']]
+        ids = [group['id'] for group in session_model['groups']]
 
-    assert ids == ['__world__', 'c', 'a', 'b']
+        assert ids == ['__world__', 'c', 'a', 'b']
 
+    def test_world_group_is_public(self, authenticated_request):
+        model = session.model(authenticated_request)
+        world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
 
-def test_world_group_is_public_in_model(authenticated_request):
-    model = session.model(authenticated_request)
-    world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
+        assert world_group['public'] is True
 
-    assert world_group['public'] is True
+    def test_private_group_is_not_public(self, authenticated_request):
+        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
 
+        model = session.model(authenticated_request)
+        private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
 
-def test_private_group_is_not_public_in_model(authenticated_request):
-    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+        assert private_group['public'] is False
 
-    model = session.model(authenticated_request)
-    private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
+    def test_world_group_has_no_url(self, authenticated_request):
+        model = session.model(authenticated_request)
+        world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
 
-    assert private_group['public'] is False
+        assert 'url' not in world_group
 
+    def test_private_group_has_url(self, authenticated_request):
+        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
 
-def test_world_group_has_no_url_in_model(authenticated_request):
-    model = session.model(authenticated_request)
-    world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
+        model = session.model(authenticated_request)
+        private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
 
-    assert 'url' not in world_group
+        assert private_group['url']
 
+    def test_includes_features(self, authenticated_request):
+        feature_dict = {
+            'feature_one': True,
+            'feature_two': False,
+        }
+        authenticated_request.set_features(feature_dict)
 
-def test_private_group_has_url_in_model(authenticated_request):
-    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+        assert session.model(authenticated_request)['features'] == feature_dict
 
-    model = session.model(authenticated_request)
-    private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
+    def test_anonymous_hides_sidebar_tutorial(self, unauthenticated_request):
+        preferences = session.model(unauthenticated_request)['preferences']
 
-    assert private_group['url']
-
-
-def test_model_includes_features(authenticated_request):
-    feature_dict = {
-        'feature_one': True,
-        'feature_two': False,
-    }
-    authenticated_request.set_features(feature_dict)
-
-    assert session.model(authenticated_request)['features'] == feature_dict
-
-
-def test_anonymous_model_hides_sidebar_tutorial(unauthenticated_request):
-    preferences = session.model(unauthenticated_request)['preferences']
-
-    assert 'show_sidebar_tutorial' not in preferences
-
-
-@pytest.mark.parametrize('dismissed', [True, False])
-def test_authenticated_model_sidebar_tutorial(authenticated_request, dismissed):
-    authenticated_request.set_sidebar_tutorial_dismissed(dismissed)
-
-    preferences = session.model(authenticated_request)['preferences']
-
-    if dismissed:
         assert 'show_sidebar_tutorial' not in preferences
-    else:
-        assert preferences['show_sidebar_tutorial'] is True
+
+    @pytest.mark.parametrize('dismissed', [True, False])
+    def test_authenticated_sidebar_tutorial(self, authenticated_request, dismissed):
+        authenticated_request.set_sidebar_tutorial_dismissed(dismissed)
+
+        preferences = session.model(authenticated_request)['preferences']
+
+        if dismissed:
+            assert 'show_sidebar_tutorial' not in preferences
+        else:
+            assert preferences['show_sidebar_tutorial'] is True
 
 
-def test_profile_userid_unauthenticated(unauthenticated_request):
-    assert session.profile(unauthenticated_request)['userid'] is None
+class TestProfile(object):
+    def test_userid_unauthenticated(self, unauthenticated_request):
+        assert session.profile(unauthenticated_request)['userid'] is None
 
+    def test_userid_authenticated(self, authenticated_request):
+        profile = session.profile(authenticated_request)
+        assert profile['userid'] == u'acct:user@example.com'
 
-def test_profile_userid_authenticated(authenticated_request):
-    profile = session.profile(authenticated_request)
-    assert profile['userid'] == u'acct:user@example.com'
+    def test_sorts_groups(self, authenticated_request):
+        authenticated_request.set_groups([
+            FakeGroup('c', 'Group A'),
+            FakeGroup('b', 'Group B'),
+            FakeGroup('a', 'Group B'),
+        ])
+        profile = session.profile(authenticated_request)
 
+        ids = [group['id'] for group in profile['groups']]
 
-def test_profile_sorts_groups(authenticated_request):
-    authenticated_request.set_groups([
-        FakeGroup('c', 'Group A'),
-        FakeGroup('b', 'Group B'),
-        FakeGroup('a', 'Group B'),
-    ])
-    profile = session.profile(authenticated_request)
+        assert ids == ['__world__', 'c', 'a', 'b']
 
-    ids = [group['id'] for group in profile['groups']]
+    def test_authenticated_world_group(self, authenticated_request):
+        result = session.profile(authenticated_request)
 
-    assert ids == ['__world__', 'c', 'a', 'b']
+        assert '__world__' in [g['id'] for g in result['groups']]
 
+    def test_anonymous_world_group(self, unauthenticated_request):
+        result = session.profile(unauthenticated_request)
 
-def test_world_group_in_authenticated_profile(authenticated_request):
-    result = session.profile(authenticated_request)
+        assert '__world__' in [g['id'] for g in result['groups']]
 
-    assert '__world__' in [g['id'] for g in result['groups']]
+    def test_third_party_missing_world_group(self, third_party_request):
+        result = session.profile(third_party_request)
 
+        assert '__world__' not in [g['id'] for g in result['groups']]
 
-def test_world_group_in_anonymous_profile(unauthenticated_request):
-    result = session.profile(unauthenticated_request)
+    def test_world_group_is_public(self, authenticated_request):
+        profile = session.profile(authenticated_request)
+        world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
 
-    assert '__world__' in [g['id'] for g in result['groups']]
+        assert world_group['public'] is True
 
+    def test_private_group_is_not_public(self, authenticated_request):
+        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
 
-def test_world_group_not_in_third_party_profile(third_party_request):
-    result = session.profile(third_party_request)
+        profile = session.profile(authenticated_request)
+        private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
 
-    assert '__world__' not in [g['id'] for g in result['groups']]
+        assert private_group['public'] is False
 
+    def test_publisher_group_is_public(self, third_party_request, publisher_group):
+        profile = session.profile(third_party_request)
+        group = [g for g in profile['groups'] if g['id'] == publisher_group.pubid][0]
 
-def test_world_group_is_public_in_profile(authenticated_request):
-    profile = session.profile(authenticated_request)
-    world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
+        assert group['public'] is True
 
-    assert world_group['public'] is True
+    def test_world_group_has_no_url(self, authenticated_request):
+        profile = session.profile(authenticated_request)
+        world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
 
+        assert 'url' not in world_group
 
-def test_private_group_is_not_public_in_profile(authenticated_request):
-    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+    def test_private_group_has_url(self, authenticated_request):
+        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
 
-    profile = session.profile(authenticated_request)
-    private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
+        profile = session.profile(authenticated_request)
+        private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
 
-    assert private_group['public'] is False
+        assert private_group['url']
 
+    def test_publisher_group_has_no_url(self, third_party_request, publisher_group):
+        profile = session.profile(third_party_request)
+        group = [g for g in profile['groups'] if g['id'] == publisher_group.pubid][0]
 
-def test_publisher_group_is_public_in_profile(third_party_request, publisher_group):
-    profile = session.profile(third_party_request)
-    group = [g for g in profile['groups'] if g['id'] == publisher_group.pubid][0]
+        assert 'url' not in group
 
-    assert group['public'] is True
+    def test_includes_features(self, authenticated_request):
+        feature_dict = {
+            'feature_one': True,
+            'feature_two': False,
+        }
+        authenticated_request.set_features(feature_dict)
 
+        assert session.profile(authenticated_request)['features'] == feature_dict
 
-def test_world_group_has_no_url_in_profile(authenticated_request):
-    profile = session.profile(authenticated_request)
-    world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
+    def test_anonymous_hides_sidebar_tutorial(self, unauthenticated_request):
+        preferences = session.profile(unauthenticated_request)['preferences']
 
-    assert 'url' not in world_group
-
-
-def test_private_group_has_url_in_profile(authenticated_request):
-    authenticated_request.set_groups([FakeGroup('a', 'Group A')])
-
-    profile = session.profile(authenticated_request)
-    private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
-
-    assert private_group['url']
-
-
-def test_publisher_group_has_no_url_in_profile(third_party_request, publisher_group):
-    profile = session.profile(third_party_request)
-    group = [g for g in profile['groups'] if g['id'] == publisher_group.pubid][0]
-
-    assert 'url' not in group
-
-
-def test_profile_includes_features(authenticated_request):
-    feature_dict = {
-        'feature_one': True,
-        'feature_two': False,
-    }
-    authenticated_request.set_features(feature_dict)
-
-    assert session.profile(authenticated_request)['features'] == feature_dict
-
-
-def test_anonymous_profile_hides_sidebar_tutorial(unauthenticated_request):
-    preferences = session.profile(unauthenticated_request)['preferences']
-
-    assert 'show_sidebar_tutorial' not in preferences
-
-
-@pytest.mark.parametrize('dismissed', [True, False])
-def test_authenticated_profile_sidebar_tutorial(authenticated_request, dismissed):
-    authenticated_request.set_sidebar_tutorial_dismissed(dismissed)
-
-    preferences = session.profile(authenticated_request)['preferences']
-
-    if dismissed:
         assert 'show_sidebar_tutorial' not in preferences
-    else:
-        assert preferences['show_sidebar_tutorial'] is True
 
+    @pytest.mark.parametrize('dismissed', [True, False])
+    def test_authenticated_sidebar_tutorial(self, authenticated_request, dismissed):
+        authenticated_request.set_sidebar_tutorial_dismissed(dismissed)
 
-def test_authority_in_anonymous_profile(unauthenticated_request, auth_domain):
-    assert session.profile(unauthenticated_request)['authority'] == auth_domain
+        preferences = session.profile(authenticated_request)['preferences']
 
+        if dismissed:
+            assert 'show_sidebar_tutorial' not in preferences
+        else:
+            assert preferences['show_sidebar_tutorial'] is True
 
-def test_authority_override(unauthenticated_request):
-    unauthenticated_request.set_public_groups({'foo.com': []})
+    def test_anonymous_authority(self, unauthenticated_request, auth_domain):
+        assert session.profile(unauthenticated_request)['authority'] == auth_domain
 
-    profile = session.profile(unauthenticated_request, 'foo.com')
+    def test_authority_override(self, unauthenticated_request):
+        unauthenticated_request.set_public_groups({'foo.com': []})
 
-    assert profile['authority'] == 'foo.com'
+        profile = session.profile(unauthenticated_request, 'foo.com')
 
+        assert profile['authority'] == 'foo.com'
 
-def test_authority_in_authenticated_profile(authenticated_request, auth_domain):
-    assert session.profile(authenticated_request)['authority'] == auth_domain
+    def test_authenticated_authority(self, authenticated_request, auth_domain):
+        assert session.profile(authenticated_request)['authority'] == auth_domain
 
+    def test_authenticated_ignores_authority_override(self, authenticated_request, auth_domain):
+        profile = session.profile(authenticated_request, 'foo.com')
 
-def test_authority_ignored_for_authenticated_profile(authenticated_request, auth_domain):
-    profile = session.profile(authenticated_request, 'foo.com')
+        assert profile['authority'] == auth_domain
 
-    assert profile['authority'] == auth_domain
+    def test_third_party_authority(self, third_party_request, third_party_domain):
+        assert session.profile(third_party_request)['authority'] == third_party_domain
 
+    def test_third_party_ingores_authority_override(self, third_party_request, third_party_domain):
+        profile = session.profile(third_party_request, 'foo.com')
 
-def test_authority_in_third_party_profile(third_party_request, third_party_domain):
-    assert session.profile(third_party_request)['authority'] == third_party_domain
+        assert profile['authority'] == third_party_domain
 
+    @pytest.fixture
+    def third_party_domain(self):
+        return u'thirdparty.example.org'
 
-def test_authority_ignored_for_third_party_profile(third_party_request, third_party_domain):
-    profile = session.profile(third_party_request, 'foo.com')
+    @pytest.fixture
+    def third_party_request(self, auth_domain, third_party_domain, publisher_group):
+        return FakeRequest(auth_domain,
+                           u'acct:user@{}'.format(third_party_domain),
+                           third_party_domain,
+                           {third_party_domain: [publisher_group]})
 
-    assert profile['authority'] == third_party_domain
+    @pytest.fixture
+    def publisher_group(self):
+        return FakeGroup('abcdef', 'Publisher group', is_public=True)
 
 
 class FakeAuthorityGroupService(object):
@@ -283,18 +273,8 @@ def auth_domain():
 
 
 @pytest.fixture
-def third_party_domain():
-    return u'thirdparty.example.org'
-
-
-@pytest.fixture
 def world_group():
     return FakeGroup('__world__', 'Public', is_public=True)
-
-
-@pytest.fixture
-def publisher_group():
-    return FakeGroup('abcdef', 'Publisher group', is_public=True)
 
 
 @pytest.fixture
@@ -308,11 +288,3 @@ def authenticated_request(auth_domain, world_group):
                        u'acct:user@{}'.format(auth_domain),
                        auth_domain,
                        {auth_domain: [world_group]})
-
-
-@pytest.fixture
-def third_party_request(auth_domain, third_party_domain, publisher_group):
-    return FakeRequest(auth_domain,
-                       u'acct:user@{}'.format(third_party_domain),
-                       third_party_domain,
-                       {third_party_domain: [publisher_group]})
