@@ -8,7 +8,7 @@ CONF_TEMPLATE=/etc/nginx/nginx.conf.tpl
 CONF_DEST=/etc/nginx/nginx.conf
 
 if [ -n "$FALLBACK_UPSTREAM" ]; then
-    FALLBACK_TEXT="proxy_set_header Host \$host; proxy_pass $FALLBACK_UPSTREAM;"
+    FALLBACK_TEXT="proxy_set_header Host \$host; proxy_set_header X-Forwarded-Proto \$scheme; proxy_pass $FALLBACK_UPSTREAM;"
     sed -e '/# FALLBACK-START/,/# FALLBACK-END/c\'"$FALLBACK_TEXT" "$CONF_TEMPLATE"
 else
     cat "$CONF_TEMPLATE"
