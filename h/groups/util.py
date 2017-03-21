@@ -33,3 +33,7 @@ class WorldGroup(object):
     @property
     def is_public(self):
         return True
+
+    @property
+    def creator_id(self):
+        return None

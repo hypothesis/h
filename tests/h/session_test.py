@@ -5,11 +5,12 @@ from h import session
 
 
 class FakeGroup(object):
-    def __init__(self, pubid, name, is_public=False):
+    def __init__(self, pubid, name, is_public=False, creator_id=None):
         self.pubid = pubid
         self.name = name
         self.slug = pubid
         self.is_public = is_public
+        self.creator_id = creator_id
 
 
 class TestModel(object):
@@ -52,6 +53,27 @@ class TestModel(object):
         private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
 
         assert private_group['url']
+
+    def test_sets_group_moderator_true_when_creator(self, authenticated_request):
+        authenticated_request.set_groups([
+            FakeGroup('a', 'Group A', creator_id=authenticated_request.authenticated_user.id)])
+
+        model = session.model(authenticated_request)
+        private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
+
+        assert private_group['is_moderator'] is True
+
+    def test_sets_group_moderator_false_when_only_member(self, authenticated_request):
+        authenticated_request.set_groups([FakeGroup('a', 'Group A', creator_id=12)])
+
+        model = session.model(authenticated_request)
+        for group in model['groups']:
+            assert group['is_moderator'] is False
+
+    def test_sets_group_moderator_false_when_anonymous(self, unauthenticated_request):
+        model = session.model(unauthenticated_request)
+        for group in model['groups']:
+            assert group['is_moderator'] is False
 
     def test_includes_features(self, authenticated_request):
         feature_dict = {
@@ -218,7 +240,10 @@ class TestProfile(object):
 
     @pytest.fixture
     def publisher_group(self):
-        return FakeGroup('abcdef', 'Publisher group', is_public=True)
+        return FakeGroup(pubid='abcdef',
+                         name='Publisher group',
+                         is_public=True,
+                         creator_id=42)
 
 
 class FakeAuthorityGroupService(object):
@@ -239,7 +264,7 @@ class FakeRequest(object):
         if userid is None:
             self.authenticated_user = None
         else:
-            self.authenticated_user = mock.Mock(groups=[], authority=user_authority)
+            self.authenticated_user = mock.Mock(id=42, groups=[], authority=user_authority)
 
         self.feature = mock.Mock(spec_set=['all'])
         self.route_url = mock.Mock(return_value='/group/a')
@@ -274,7 +299,10 @@ def auth_domain():
 
 @pytest.fixture
 def world_group():
-    return FakeGroup('__world__', 'Public', is_public=True)
+    return FakeGroup(pubid='__world__',
+                     name='Public',
+                     is_public=True,
+                     creator_id=None)
 
 
 @pytest.fixture
