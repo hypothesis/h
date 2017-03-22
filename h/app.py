@@ -102,7 +102,12 @@ def includeme(config):
     settings['csp'] = {
         "font-src": ["'self'", "fonts.gstatic.com", client_host],
         "script-src": ["'self'", client_host, "www.google-analytics.com"],
-        "style-src": ["'self'", "fonts.googleapis.com", client_host],
+
+        # Allow inline styles until https://github.com/hypothesis/client/issues/293
+        # is resolved as otherwise our own tool would break on the site,
+        # including on /docs/help.
+        "style-src": ["'self'", "fonts.googleapis.com", client_host,
+                      "'unsafe-inline'"],
     }
     if 'csp.report_uri' in settings:
         settings['csp']['report-uri'] = [settings['csp.report_uri']]
