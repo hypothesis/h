@@ -1,0 +1,88 @@
+ADR 3: Resource-oriented, hierarchical API
+==========================================
+
+Context
+-------
+
+The problem
+~~~~~~~~~~~
+
+We don't currently have any explicitly agreed conventions or patterns for how we
+structure our API. As different parts of our API are implemented in different
+ways, people looking to integrate with our API are having a harder time than
+necessary learning how it works.
+
+The lack of agreed conventions also slows us down when designing new
+functionality, as we don't have a standard set of patterns to draw from.
+
+Extra context
+~~~~~~~~~~~~~
+
+The part of our API that deals with creating, retrieving and modifying
+annotations is currently resource-based, with ``GET``, ``POST``, ``PATCH`` and
+``DELETE`` requests to suitable URLs. This is also the style used in the W3C
+`Web Annotation Protocol`_.
+
+.. _Web Annotation Protocol: https://www.w3.org/TR/annotation-protocol/
+
+Some examples of other APIs that could provide inspiration:
+
+- The `GitHub API <https://developer.github.com/v3/>`_ (resource-based,
+  hierarchical style)
+- The `Slack Web API <https://api.slack.com/web>`_ (RPC style)
+
+Decision
+--------
+
+We're going to build our API in a resource-oriented, broadly RESTful style (with
+standard HTTP verbs operating on resources at URLs).
+
+We'll nest resources liberally. For instance, when flagging an annotation for a
+moderator's attention, we would use a ``PUT`` request to a sub-resource of the
+annotation::
+
+  PUT /api/annotations/<annid>/flag
+  Content-Type: application/json
+  
+  {"reason": "spam"}
+
+One advantage of this method is that parameters can often be made mandatory by
+construction: in the example above, it becomes impossible to flag an annotation
+without providing the annotation ID. This is similar to the approach GitHub
+takes for `locking issues`_.
+
+.. _locking issues: https://developer.github.com/v3/issues/#lock-an-issue
+
+The operation to remove such a flag would then be expressed with a ``DELETE``
+request to the same URL::
+
+  DELETE /api/annotations/<annid>/flag
+
+An example of a pattern we are *not* choosing to follow is to post these flags
+as top-level entities::
+
+  POST /api/flags
+  Content-Type: application/json
+
+  {"annotation": "<annid>"}
+
+While this is a reasonable approach to take, we think that the more hierarchical
+approach will make the relationships between different entities (in this case,
+annotations and their associated flags) easier to understand.
+
+Status
+------
+
+Proposed.
+
+Consequences
+------------
+
+With a set of default patterns for how we implement new functionality (or
+restructure existing functionality), this should result in a more consistent API
+and an easier time for those trying to integrate with our systems.
+
+Another benefit should be that this speeds up development, by giving us a base
+set of patterns from which to design new functionality. This should also make it
+easier for reviewers, as they can more confidently review a proposal if it
+follows these conventions, or look for more context if it doesn't.
