@@ -18,10 +18,8 @@ objects and Pyramid ACLs in :mod:`memex.resources`.
 """
 from pyramid import i18n
 from pyramid import security
-from sqlalchemy.orm import subqueryload
 import venusian
 
-from memex import models
 from memex.events import AnnotationEvent
 from memex.interfaces import IGroupService
 from memex.resources import AnnotationResource
@@ -194,13 +192,15 @@ def search(request):
                                separate_replies=separate_replies,
                                stats=stats).run(params)
 
+    svc = request.find_service(name='annotation_json_presentation')
+
     out = {
         'total': result.total,
-        'rows': _present_annotations(request, result.annotation_ids)
+        'rows': svc.present_all(result.annotation_ids)
     }
 
     if separate_replies:
-        out['replies'] = _present_annotations(request, result.reply_ids)
+        out['replies'] = svc.present_all(result.reply_ids)
 
     return out
 
@@ -308,21 +308,6 @@ def _json_payload(request):
         return request.json_body
     except ValueError:
         raise PayloadError()
-
-
-def _present_annotations(request, ids):
-    """Load annotations by id from the database and present them."""
-    def eager_load_documents(query):
-        return query.options(
-            subqueryload(models.Annotation.document))
-
-    annotations = storage.fetch_ordered_annotations(request.db, ids,
-                                                    query_processor=eager_load_documents)
-    group_service = request.find_service(IGroupService)
-    links_service = request.find_service(name='links')
-    return [AnnotationJSONPresenter(
-                AnnotationResource(ann, group_service, links_service)).asdict()
-            for ann in annotations]
 
 
 def _publish_annotation_event(request,

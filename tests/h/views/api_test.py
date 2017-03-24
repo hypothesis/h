@@ -150,7 +150,7 @@ class TestIndex(object):
         assert links['search']['url'] == host + '/dummy/search'
 
 
-@pytest.mark.usefixtures('group_service', 'links_service', 'search_lib')
+@pytest.mark.usefixtures('presentation_service', 'search_lib')
 class TestSearch(object):
 
     def test_it_searches(self, pyramid_request, search_lib):
@@ -164,57 +164,39 @@ class TestSearch(object):
                                              stats=pyramid_request.stats)
         search.run.assert_called_once_with(pyramid_request.params)
 
-    def test_it_loads_annotations_from_database(self, pyramid_request, search_run, storage):
+    def test_it_presents_search_results(self, pyramid_request, search_run, presentation_service):
         search_run.return_value = SearchResult(2, ['row-1', 'row-2'], [], {})
 
         views.search(pyramid_request)
 
-        storage.fetch_ordered_annotations.assert_called_once_with(
-            pyramid_request.db, ['row-1', 'row-2'], query_processor=mock.ANY)
+        presentation_service.present_all.assert_called_once_with(['row-1', 'row-2'])
 
-    def test_it_renders_search_results(self, links_service, pyramid_request, search_run, factories, group_service):
-        ann1 = AnnotationResource(factories.Annotation(userid='luke'), group_service, links_service)
-        ann2 = AnnotationResource(factories.Annotation(userid='sarah'), group_service, links_service)
-
-        search_run.return_value = SearchResult(2, [ann1.annotation.id, ann2.annotation.id], [], {})
+    def test_it_returns_search_results(self, pyramid_request, search_run, presentation_service):
+        search_run.return_value = SearchResult(2, ['row-1', 'row-2'], [], {})
 
         expected = {
             'total': 2,
-            'rows': [
-                presenters.AnnotationJSONPresenter(ann1).asdict(),
-                presenters.AnnotationJSONPresenter(ann2).asdict(),
-            ]
+            'rows': presentation_service.present_all.return_value
         }
 
         assert views.search(pyramid_request) == expected
 
-    def test_it_loads_replies_from_database(self, pyramid_request, search_run, storage):
+    def test_it_presents_replies(self, pyramid_request, search_run, presentation_service):
         pyramid_request.params = {'_separate_replies': '1'}
         search_run.return_value = SearchResult(1, ['row-1'], ['reply-1', 'reply-2'], {})
 
         views.search(pyramid_request)
 
-        assert mock.call(pyramid_request.db, ['reply-1', 'reply-2'],
-                         query_processor=mock.ANY) in storage.fetch_ordered_annotations.call_args_list
+        presentation_service.present_all.assert_called_with(['reply-1', 'reply-2'])
 
-    def test_it_renders_replies(self, links_service, pyramid_request, search_run, factories, group_service):
-        ann = AnnotationResource(factories.Annotation(userid='luke'), group_service, links_service)
-        reply1 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service, links_service)
-        reply2 = AnnotationResource(factories.Annotation(userid='sarah', references=[ann.annotation.id]), group_service, links_service)
-
-        search_run.return_value = SearchResult(1,
-                                               [ann.annotation.id],
-                                               [reply1.annotation.id, reply2.annotation.id], {})
-
+    def test_it_returns_replies(self, pyramid_request, search_run, presentation_service):
         pyramid_request.params = {'_separate_replies': '1'}
+        search_run.return_value = SearchResult(1, ['row-1'], ['reply-1', 'reply-2'], {})
 
         expected = {
             'total': 1,
-            'rows': [presenters.AnnotationJSONPresenter(ann).asdict()],
-            'replies': [
-                presenters.AnnotationJSONPresenter(reply1).asdict(),
-                presenters.AnnotationJSONPresenter(reply2).asdict(),
-            ]
+            'rows': presentation_service.present_all(['row-1']),
+            'replies': presentation_service.present_all(['reply-1', 'reply-2'])
         }
 
         assert views.search(pyramid_request) == expected
@@ -575,7 +557,7 @@ def links_service(pyramid_config):
 
 @pytest.fixture
 def presentation_service(pyramid_config):
-    svc = mock.Mock(spec_set=['present'])
+    svc = mock.Mock(spec_set=['present', 'present_all'])
     pyramid_config.register_service(svc, name='annotation_json_presentation')
     return svc
 
