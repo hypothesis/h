@@ -339,21 +339,19 @@ class TestCreate(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('AnnotationJSONPresenter', 'links_service')
+@pytest.mark.usefixtures('presentation_service')
 class TestRead(object):
 
     def test_it_returns_presented_annotation(self,
-                                             AnnotationJSONPresenter,
+                                             presentation_service,
                                              pyramid_request):
         context = mock.Mock()
-        presenter = mock.Mock()
-        AnnotationJSONPresenter.return_value = presenter
 
         result = views.read(context, pyramid_request)
 
-        AnnotationJSONPresenter.assert_called_once_with(context)
+        presentation_service.present.assert_called_once_with(context)
 
-        assert result == presenter.asdict()
+        assert result == presentation_service.present.return_value
 
 
 @pytest.mark.usefixtures('AnnotationJSONLDPresenter', 'links_service')
@@ -573,6 +571,13 @@ def links_service(pyramid_config):
     service = mock.Mock(spec_set=['get', 'get_all'])
     pyramid_config.register_service(service, name='links')
     return service
+
+
+@pytest.fixture
+def presentation_service(pyramid_config):
+    svc = mock.Mock(spec_set=['present'])
+    pyramid_config.register_service(svc, name='annotation_json_presentation')
+    return svc
 
 
 @pytest.fixture

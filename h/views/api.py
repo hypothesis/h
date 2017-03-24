@@ -233,8 +233,8 @@ def create(request):
             description='Fetch an annotation')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
-    presenter = AnnotationJSONPresenter(context)
-    return presenter.asdict()
+    svc = request.find_service(name='annotation_json_presentation')
+    return svc.present(context)
 
 
 @api_config(route_name='api.annotation.jsonld',
