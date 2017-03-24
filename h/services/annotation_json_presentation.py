@@ -18,8 +18,10 @@ class AnnotationJSONPresentationService(object):
         self.group_svc = group_svc
         self.links_svc = links_svc
 
+        self.formatters = []
+
     def present(self, annotation_resource):
-        presenter = presenters.AnnotationJSONPresenter(annotation_resource)
+        presenter = self.get_presenter(annotation_resource)
         return presenter.asdict()
 
     def present_all(self, annotation_ids):
@@ -30,9 +32,21 @@ class AnnotationJSONPresentationService(object):
         annotations = storage.fetch_ordered_annotations(
             self.session, annotation_ids, query_processor=eager_load_documents)
 
+        # preload formatters, so they can optimize database access
+        for formatter in self.formatters:
+            formatter.preload(annotation_ids)
+
         return [self.present(
                     resources.AnnotationResource(ann, self.group_svc, self.links_svc))
                 for ann in annotations]
+
+    def get_presenter(self, annotation_resource):
+        presenter = presenters.AnnotationJSONPresenter(annotation_resource)
+
+        for formatter in self.formatters:
+            presenter.add_formatter(formatter)
+
+        return presenter
 
 
 def annotation_json_presentation_service_factory(context, request):

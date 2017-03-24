@@ -9,16 +9,17 @@ from memex.interfaces import IGroupService
 
 from h.services.annotation_json_presentation import AnnotationJSONPresentationService
 from h.services.annotation_json_presentation import annotation_json_presentation_service_factory
+from h.presenters import AnnotationJSONPresenter
 
 
 @pytest.mark.usefixtures('presenters')
 class TestAnnotationJSONPresentationService(object):
-    def test_present_inits_presenter(self, svc, presenters):
-        resource = mock.Mock()
+    def test_present_gets_presenter(self, svc, patch, annotation_resource):
+        get_presenter = patch('h.services.annotation_json_presentation.AnnotationJSONPresentationService.get_presenter')
 
-        svc.present(resource)
+        svc.present(annotation_resource)
 
-        presenters.AnnotationJSONPresenter.assert_called_once_with(resource)
+        get_presenter.assert_called_once_with(svc, annotation_resource)
 
     def test_present_returns_presenter_dict(self, svc, presenters):
         presenter = presenters.AnnotationJSONPresenter.return_value
@@ -48,17 +49,49 @@ class TestAnnotationJSONPresentationService(object):
         svc.present_all(['ann-1'])
         present.assert_called_once_with(svc, resource)
 
+    def test_present_all_preloads_formatters(self, svc, storage):
+        formatter = mock.Mock(spec_set=['preload'])
+        svc.formatters = [formatter]
+
+        svc.present_all(['ann-1', 'ann-2'])
+
+        formatter.preload.assert_called_once_with(['ann-1', 'ann-2'])
+
     def test_returns_presented_annotations(self, svc, storage, present):
         storage.fetch_ordered_annotations.return_value = [mock.Mock()]
 
         result = svc.present_all(['ann-1'])
         assert result == [present.return_value]
 
+    def test_get_presenter_inits_presenter(self, svc, presenters, annotation_resource):
+        svc.get_presenter(annotation_resource)
+
+        presenters.AnnotationJSONPresenter.assert_called_once_with(annotation_resource)
+
+    def test_get_presenter_returns_presenter(self, svc):
+        resource = mock.Mock()
+
+        result = svc.get_presenter(resource)
+        assert isinstance(result, AnnotationJSONPresenter)
+
+    def test_get_presenter_adds_formatters(self, svc, annotation_resource, presenters):
+        formatters = [mock.Mock(), mock.Mock()]
+        svc.formatters = formatters
+        presenter = presenters.AnnotationJSONPresenter.return_value
+
+        svc.get_presenter(annotation_resource)
+
+        assert presenter.add_formatter.mock_calls == [mock.call(f) for f in formatters]
+
     @pytest.fixture
     def svc(self, db_session):
         group_svc = mock.Mock()
         links_svc = mock.Mock()
         return AnnotationJSONPresentationService(db_session, group_svc, links_svc)
+
+    @pytest.fixture
+    def annotation_resource(self):
+        return mock.Mock(spec_set=['annotation'], annotation=mock.Mock())
 
     @pytest.fixture
     def presenters(self, patch):
