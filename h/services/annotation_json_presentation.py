@@ -7,18 +7,21 @@ from sqlalchemy.orm import subqueryload
 from memex import resources
 from memex.interfaces import IGroupService
 
+from h import formatters
 from h import models
 from h import presenters
 from h import storage
 
 
 class AnnotationJSONPresentationService(object):
-    def __init__(self, session, group_svc, links_svc):
+    def __init__(self, session, authenticated_user, group_svc, links_svc):
         self.session = session
         self.group_svc = group_svc
         self.links_svc = links_svc
 
-        self.formatters = []
+        self.formatters = [
+            formatters.AnnotationFlagFormatter(self.session, authenticated_user)
+        ]
 
     def present(self, annotation_resource):
         presenter = self.get_presenter(annotation_resource)
@@ -52,6 +55,7 @@ class AnnotationJSONPresentationService(object):
 def annotation_json_presentation_service_factory(context, request):
     group_svc = request.find_service(IGroupService)
     links_svc = request.find_service(name='links')
-    return AnnotationJSONPresentationService(request.db,
-                                             group_svc,
-                                             links_svc)
+    return AnnotationJSONPresentationService(session=request.db,
+                                             authenticated_user=request.authenticated_user,
+                                             group_svc=group_svc,
+                                             links_svc=links_svc)

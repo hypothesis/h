@@ -14,6 +14,23 @@ from h.presenters import AnnotationJSONPresenter
 
 @pytest.mark.usefixtures('presenters')
 class TestAnnotationJSONPresentationService(object):
+    def test_initializes_flag_formatter(self, formatters):
+        AnnotationJSONPresentationService(session=mock.sentinel.session,
+                                          authenticated_user=mock.sentinel.authenticated_user,
+                                          group_svc=mock.sentinel.group_svc,
+                                          links_svc=mock.sentinel.links_svc)
+
+        formatters.AnnotationFlagFormatter.assert_called_once_with(mock.sentinel.session,
+                                                                   mock.sentinel.authenticated_user)
+
+    def test_it_configures_flag_formatter(self, formatters):
+        svc = AnnotationJSONPresentationService(session=mock.sentinel.session,
+                                                authenticated_user=mock.sentinel.authenticated_user,
+                                                group_svc=mock.sentinel.group_svc,
+                                                links_svc=mock.sentinel.links_svc)
+
+        assert formatters.AnnotationFlagFormatter.return_value in svc.formatters
+
     def test_present_gets_presenter(self, svc, patch, annotation_resource):
         get_presenter = patch('h.services.annotation_json_presentation.AnnotationJSONPresentationService.get_presenter')
 
@@ -87,7 +104,10 @@ class TestAnnotationJSONPresentationService(object):
     def svc(self, db_session):
         group_svc = mock.Mock()
         links_svc = mock.Mock()
-        return AnnotationJSONPresentationService(db_session, group_svc, links_svc)
+        return AnnotationJSONPresentationService(session=db_session,
+                                                 authenticated_user=None,
+                                                 group_svc=group_svc,
+                                                 links_svc=links_svc)
 
     @pytest.fixture
     def annotation_resource(self):
@@ -109,6 +129,10 @@ class TestAnnotationJSONPresentationService(object):
     def present(self, patch):
         return patch('h.services.annotation_json_presentation.AnnotationJSONPresentationService.present')
 
+    @pytest.fixture
+    def formatters(self, patch):
+        return patch('h.services.annotation_json_presentation.formatters')
+
 
 @pytest.mark.usefixtures('group_svc', 'links_svc')
 class TestAnnotationJSONPresentationServiceFactory(object):
@@ -117,20 +141,33 @@ class TestAnnotationJSONPresentationServiceFactory(object):
 
         assert isinstance(svc, AnnotationJSONPresentationService)
 
-    def test_provides_session(self, pyramid_request):
-        svc = annotation_json_presentation_service_factory(None, pyramid_request)
+    def test_provides_session(self, pyramid_request, service_class):
+        annotation_json_presentation_service_factory(None, pyramid_request)
 
-        assert svc.session == pyramid_request.db
+        _, kwargs = service_class.call_args
+        assert kwargs['session'] == pyramid_request.db
 
-    def test_provides_group_service(self, pyramid_request, group_svc):
-        svc = annotation_json_presentation_service_factory(None, pyramid_request)
+    def test_provides_authenticated_user(self, pyramid_request, service_class):
+        annotation_json_presentation_service_factory(None, pyramid_request)
 
-        assert svc.group_svc == group_svc
+        _, kwargs = service_class.call_args
+        assert kwargs['authenticated_user'] == pyramid_request.authenticated_user
 
-    def test_passes_links_service(self, pyramid_request, links_svc):
-        svc = annotation_json_presentation_service_factory(None, pyramid_request)
+    def test_provides_group_service(self, pyramid_request, service_class, group_svc):
+        annotation_json_presentation_service_factory(None, pyramid_request)
 
-        assert svc.links_svc == links_svc
+        _, kwargs = service_class.call_args
+        assert kwargs['group_svc'] == group_svc
+
+    def test_provides_links_service(self, pyramid_request, service_class, links_svc):
+        annotation_json_presentation_service_factory(None, pyramid_request)
+
+        _, kwargs = service_class.call_args
+        assert kwargs['links_svc'] == links_svc
+
+    @pytest.fixture
+    def service_class(self, patch):
+        return patch('h.services.annotation_json_presentation.AnnotationJSONPresentationService')
 
     @pytest.fixture
     def group_svc(self, pyramid_config):
@@ -143,3 +180,8 @@ class TestAnnotationJSONPresentationServiceFactory(object):
         svc = mock.Mock()
         pyramid_config.register_service(svc, name='links')
         return svc
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.authenticated_user = mock.Mock()
+        return pyramid_request
