@@ -6,7 +6,7 @@ import pytest
 
 from elasticsearch import RequestsHttpConnection
 
-from memex.search.client import get_client
+from h.search.client import get_client
 
 
 class TestClient(object):
@@ -81,8 +81,8 @@ class TestGetClient(object):
 
     @pytest.fixture
     def patched_client(self, patch):
-        return patch('memex.search.client.Client')
+        return patch('h.search.client.Client')
 
     @pytest.fixture
     def patched_aws_auth(self, patch):
-        return patch('memex.search.client.AWS4Auth')
+        return patch('h.search.client.AWS4Auth')

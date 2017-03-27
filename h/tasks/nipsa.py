@@ -45,7 +45,7 @@ def bulk_update_annotations(client, query, action):
     API.
 
     :param client: the Elasticsearch client instance
-    :type client: memex.search.client.Client
+    :type client: h.search.client.Client
 
     :param query: a query dict selecting annotations to update
     :type query: dict

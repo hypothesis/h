@@ -7,7 +7,7 @@ import sqlalchemy
 
 from h import db
 from h import models  # noqa: import to ensure memex model base class is set
-from memex import search
+from h import search
 
 log = logging.getLogger(__name__)
 

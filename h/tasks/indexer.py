@@ -3,9 +3,8 @@
 from h import storage
 from h.celery import celery
 from h.indexer.reindexer import SETTING_NEW_INDEX
-
-from memex.search.index import index
-from memex.search.index import delete
+from h.search.index import index
+from h.search.index import delete
 
 
 @celery.task

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 class GroupAuthFilter(object):
     """
-    A memex search filter that filters out groups the request isn't authorized to read.
+    A search filter that filters out groups the request isn't authorized to read.
     """
 
     def __init__(self, request):

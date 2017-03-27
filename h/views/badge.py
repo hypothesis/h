@@ -4,9 +4,8 @@ from __future__ import unicode_literals
 
 from pyramid import httpexceptions
 
-from h import models
+from h import models, search
 from h.util.view import json_view
-from memex import search
 
 
 @json_view(route_name='badge')

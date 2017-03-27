@@ -5,7 +5,7 @@ import os
 import click
 
 from h import indexer
-from memex.search import config
+from h.search import config
 
 
 @click.group()

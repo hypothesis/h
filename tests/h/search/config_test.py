@@ -8,7 +8,7 @@ import mock
 import pytest
 from elasticsearch.exceptions import NotFoundError
 
-from memex.search.config import (
+from h.search.config import (
     ANNOTATION_MAPPING,
     ANALYSIS_SETTINGS,
     init,
@@ -102,7 +102,7 @@ class TestInit(object):
 
     @pytest.fixture
     def configure_index(self, patch):
-        configure_index = patch('memex.search.config.configure_index')
+        configure_index = patch('h.search.config.configure_index')
         configure_index.return_value = 'foo-abcd1234'
         return configure_index
 
