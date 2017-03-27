@@ -2,12 +2,12 @@
 
 import logging
 
-from memex.search.config import (
+from h.search.config import (
     configure_index,
     get_aliased_index,
     update_aliased_index,
 )
-from memex.search.index import BatchIndexer
+from h.search.index import BatchIndexer
 
 log = logging.getLogger(__name__)
 

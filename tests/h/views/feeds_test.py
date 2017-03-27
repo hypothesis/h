@@ -101,7 +101,7 @@ def search(patch):
 
 @pytest.fixture
 def search_run(search):
-    from memex.search.core import SearchResult
+    from h.search.core import SearchResult
     result = SearchResult(total=123,
                           annotation_ids=['foo', 'bar'],
                           reply_ids=[],

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from memex.search.client import get_client
-from memex.search.config import init
-from memex.search.core import Search
-from memex.search.core import FILTERS_KEY
-from memex.search.core import MATCHERS_KEY
+from h.search.client import get_client
+from h.search.config import init
+from h.search.core import Search
+from h.search.core import FILTERS_KEY
+from h.search.core import MATCHERS_KEY
 
 __all__ = (
     'Search',

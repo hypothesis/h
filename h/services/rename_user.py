@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from h import models
-from memex.search import index
+from h.search import index
 
 
 class UserRenameError(Exception):

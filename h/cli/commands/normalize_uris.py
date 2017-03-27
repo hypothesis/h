@@ -3,9 +3,9 @@
 from collections import namedtuple
 import click
 
+from h.search import index
 from memex import models
 from memex import uri
-from memex.search import index
 
 
 class Window(namedtuple('Window', ['start', 'end'])):

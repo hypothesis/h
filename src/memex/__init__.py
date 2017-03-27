@@ -13,7 +13,6 @@ def includeme(config):
 
     config.include('memex.eventqueue')
     config.include('memex.links')
-    config.include('memex.search')
 
     config.register_service_factory('memex.groups.default_group_service_factory',
                                     iface='memex.interfaces.IGroupService')

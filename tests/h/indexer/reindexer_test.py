@@ -3,9 +3,8 @@
 import mock
 import pytest
 
-from memex.search import client
-
 from h.indexer.reindexer import reindex, SETTING_NEW_INDEX
+from h.search import client
 
 
 @pytest.mark.usefixtures('BatchIndexer',

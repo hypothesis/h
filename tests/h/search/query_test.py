@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 from hypothesis import given
 from webob import multidict
 
-from memex.search import query
+from h.search import query
 
 MISSING = object()
 
@@ -375,13 +375,13 @@ class TestUriFilter(object):
 
     @pytest.fixture
     def storage(self, patch):
-        storage = patch('memex.search.query.storage')
+        storage = patch('h.search.query.storage')
         storage.expand_uri.side_effect = lambda x: [x]
         return storage
 
     @pytest.fixture
     def uri(self, patch):
-        uri = patch('memex.search.query.uri')
+        uri = patch('h.search.query.uri')
         uri.normalize.side_effect = lambda x: x
         return uri
 

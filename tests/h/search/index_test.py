@@ -7,8 +7,8 @@ import pytest
 import elasticsearch
 
 from h import presenters
-from memex.search import client
-from memex.search import index
+from h.search import client
+from h.search import index
 
 
 @pytest.mark.usefixtures('presenters')
@@ -61,7 +61,7 @@ class TestIndexAnnotation:
 
     @pytest.fixture
     def presenters(self, patch):
-        presenters = patch('memex.search.index.presenters')
+        presenters = patch('h.search.index.presenters')
         presenter = presenters.AnnotationSearchIndexPresenter.return_value
         presenter.asdict.return_value = {
             'id': 'test_annotation_id',
@@ -293,11 +293,11 @@ class TestBatchIndexer(object):
 
     @pytest.fixture
     def index(self, patch):
-        return patch('memex.search.index.BatchIndexer.index')
+        return patch('h.search.index.BatchIndexer.index')
 
     @pytest.fixture
     def streaming_bulk(self, patch):
-        return patch('memex.search.index.es_helpers.streaming_bulk')
+        return patch('h.search.index.es_helpers.streaming_bulk')
 
 
 @pytest.fixture
@@ -310,4 +310,4 @@ def es():
 
 @pytest.fixture
 def AnnotationTransformEvent(patch):
-    return patch('memex.search.index.AnnotationTransformEvent')
+    return patch('h.search.index.AnnotationTransformEvent')

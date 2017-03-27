@@ -8,9 +8,9 @@ from pyramid import testing
 
 from memex.resources import AnnotationResource
 from memex.schemas import ValidationError
-from memex.search.core import SearchResult
 
 from h import presenters
+from h.search.core import SearchResult
 from h.views import api as views
 
 

@@ -7,7 +7,7 @@ from hypothesis import strategies as st
 from hypothesis import given
 from webob.multidict import MultiDict
 
-from memex.search import parser
+from h.search import parser
 
 
 @pytest.mark.parametrize("query_in,query_out", [

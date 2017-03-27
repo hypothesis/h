@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from elasticsearch import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
-from h import presenters  # FIXME: this module needs to move to h
+from h import presenters
 from memex import models
 from memex.events import AnnotationTransformEvent
 from memex.util.query import column_windows
@@ -35,7 +35,7 @@ def index(es, annotation, request, target_index=None):
     the given annotation then it will be updated.
 
     :param es: the Elasticsearch client object to use
-    :type es: memex.search.Client
+    :type es: h.search.Client
 
     :param annotation: the annotation to index
     :type annotation: memex.models.Annotation
@@ -69,7 +69,7 @@ def delete(es, annotation_id, target_index=None):
     about dubious operations while re-indexing when we use `op_type=create`.
 
     :param es: the Elasticsearch client object to use
-    :type es: memex.search.Client
+    :type es: h.search.Client
 
     :param annotation_id: the annotation id whose corresponding document to
         delete from the search index

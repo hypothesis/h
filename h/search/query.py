@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from h import storage  # FIXME: this module needs to move to h
+
+from h import storage
 from memex import uri
 
 LIMIT_DEFAULT = 20

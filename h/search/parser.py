@@ -2,7 +2,7 @@
 
 """
 The query parser which converts our subset of the Apache Lucene syntax and
-transforms it into a MultiDict structure that memex.search understands.
+transforms it into a MultiDict structure that h.search understands.
 """
 
 from __future__ import unicode_literals
@@ -80,10 +80,9 @@ def unparse(q):
     """
     Turn a dict-like object into a Lucene-like query string.
 
-    This can be considered the reverse of the
-    :py:func:`memex.search.parser.parse` function, as it can be used to
-    transform the MultiDict returned from that function back into a string
-    query.
+    This can be considered the reverse of the :py:func:`h.search.parser.parse`
+    function, as it can be used to transform the MultiDict returned from that
+    function back into a string query.
     """
     terms = []
 

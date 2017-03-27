@@ -5,7 +5,7 @@ from contextlib import contextmanager
 
 from elasticsearch.exceptions import ConnectionTimeout
 
-from memex.search import query
+from h.search import query
 
 FILTERS_KEY = 'memex.search.filters'
 MATCHERS_KEY = 'memex.search.matchers'

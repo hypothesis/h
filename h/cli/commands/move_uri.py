@@ -3,8 +3,8 @@
 import click
 
 from h import models
+from h.search.index import BatchIndexer
 from memex import uri
-from memex.search.index import BatchIndexer
 from memex.models import merge_documents
 
 

@@ -159,6 +159,7 @@ def create_app(global_config, **settings):
 
     config.include('h.authz')
     config.include('h.session')
+    config.include('h.search')
     config.include('h.sentry')
     config.include('h.stats')
 
@@ -166,14 +167,9 @@ def create_app(global_config, **settings):
     config.include('h.models')
     config.include('h.db')
 
-    # We have to include parts of the `memex` package in order to provide,
-    # among other things:
-    #
-    #   - the links service
-    #   - the default presenters (and their link registrations)
-    #   - the `request.es` property
+    # We have to include parts of the `memex` package in order to provide
+    # the links service.
     config.include('memex.links')
-    config.include('memex.search')
 
     # We include links in order to set up the alternative link registrations
     # for annotations.
@@ -191,4 +187,3 @@ def create_app(global_config, **settings):
     config.include('h.streamer')
 
     return config.make_wsgi_app()
-

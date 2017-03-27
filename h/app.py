@@ -135,6 +135,7 @@ def includeme(config):
     config.include('h.panels')
     config.include('h.realtime')
     config.include('h.routes')
+    config.include('h.search')
     config.include('h.sentry')
     config.include('h.services')
     config.include('h.session')
