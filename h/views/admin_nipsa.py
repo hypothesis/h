@@ -67,7 +67,3 @@ def nipsa_remove(request):
 def user_not_found(exc, request):
     request.session.flash(exc.message, 'error')
     return httpexceptions.HTTPFound(location=request.route_path('admin_nipsa'))
-
-
-def includeme(config):
-    config.scan(__name__)

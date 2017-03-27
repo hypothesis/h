@@ -36,7 +36,3 @@ def groups_index_csv(request):
     request.response.content_disposition = 'attachment;filename=' + filename
 
     return {'header': header, 'rows': rows}
-
-
-def includeme(config):
-    config.scan(__name__)

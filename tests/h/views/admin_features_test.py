@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 import mock
+import pytest
 
 from h import models
-from h.admin.views import features as views
+from h.views.admin_features import (
+    cohorts_add,
+    cohorts_edit,
+    cohorts_edit_add,
+    cohorts_edit_remove,
+    cohorts_index,
+    features_save,
+)
 
 
 class DummyFeature(object):
@@ -28,7 +35,7 @@ def test_features_save_sets_attributes_when_checkboxes_on(Feature, pyramid_reque
                             'foo[staff]': 'on',
                             'bar[admins]': 'on'}
 
-    views.features_save(pyramid_request)
+    features_save(pyramid_request)
 
     assert foo.everyone == foo.staff == bar.admins == True
 
@@ -41,7 +48,7 @@ def test_features_save_sets_attributes_when_checkboxes_off(Feature, pyramid_requ
     Feature.all.return_value = [foo]
     pyramid_request.POST = {}
 
-    views.features_save(pyramid_request)
+    features_save(pyramid_request)
 
     assert foo.everyone == foo.staff == False
 
@@ -53,7 +60,7 @@ def test_features_save_ignores_unknown_fields(Feature, pyramid_request):
     pyramid_request.POST = {'foo[wibble]': 'on',
                             'foo[admins]': 'ignoreme'}
 
-    views.features_save(pyramid_request)
+    features_save(pyramid_request)
 
     assert foo.admins == False
 
@@ -63,13 +70,13 @@ def test_features_save_checks_csrf_token(Feature, check_csrf_token, pyramid_requ
     Feature.all.return_value = []
     pyramid_request.POST = {}
 
-    views.features_save(pyramid_request)
+    features_save(pyramid_request)
 
     check_csrf_token.assert_called_with(pyramid_request)
 
 
 def test_cohorts_index_without_cohorts(pyramid_request):
-    result = views.cohorts_index({}, pyramid_request)
+    result = cohorts_index({}, pyramid_request)
     assert result["results"] == []
 
 
@@ -80,13 +87,13 @@ def test_cohorts_index_with_cohorts(pyramid_request):
     pyramid_request.db.add(cohort2)
     pyramid_request.db.flush()
 
-    result = views.cohorts_index({}, pyramid_request)
+    result = cohorts_index({}, pyramid_request)
     assert len(result["results"]) == 2
 
 
 def test_cohorts_add_creates_cohort_with_no_members(pyramid_request):
     pyramid_request.params['add'] = 'cohort'
-    views.cohorts_add(pyramid_request)
+    cohorts_add(pyramid_request)
 
     result = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').all()
     assert len(result) == 1
@@ -106,7 +113,7 @@ def test_cohorts_edit_add_user(factories, pyramid_request):
     pyramid_request.matchdict['id'] = cohort.id
     pyramid_request.params['add'] = user.username
     pyramid_request.params['authority'] = user.authority
-    views.cohorts_edit_add(pyramid_request)
+    cohorts_edit_add(pyramid_request)
 
     assert len(cohort.members) == 1
     assert cohort.members[0].username == user.username
@@ -122,7 +129,7 @@ def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
     pyramid_request.matchdict['id'] = cohort.id
     pyramid_request.params['add'] = '   benoit   '
     pyramid_request.params['authority'] = '    %s   ' % user.authority
-    views.cohorts_edit_add(pyramid_request)
+    cohorts_edit_add(pyramid_request)
 
     assert len(cohort.members) == 1
     assert cohort.members[0].username == user.username
@@ -140,7 +147,7 @@ def test_cohorts_edit_remove_user(factories, pyramid_request):
 
     pyramid_request.matchdict['id'] = cohort.id
     pyramid_request.params['remove'] = user.userid
-    views.cohorts_edit_remove(pyramid_request)
+    cohorts_edit_remove(pyramid_request)
 
     assert len(cohort.members) == 0
 
@@ -151,7 +158,7 @@ def test_cohorts_edit_with_no_users(pyramid_request):
     pyramid_request.db.flush()
 
     pyramid_request.matchdict['id'] = cohort.id
-    result = views.cohorts_edit({}, pyramid_request)
+    result = cohorts_edit({}, pyramid_request)
 
     assert result['cohort'].id == cohort.id
     assert len(result['cohort'].members) == 0
@@ -168,7 +175,7 @@ def test_cohorts_edit_with_users(factories, pyramid_request):
     pyramid_request.db.flush()
 
     pyramid_request.matchdict['id'] = cohort.id
-    result = views.cohorts_edit({}, pyramid_request)
+    result = cohorts_edit({}, pyramid_request)
 
     assert result['cohort'].id == cohort.id
     assert len(result['cohort'].members) == 2
@@ -185,7 +192,7 @@ def test_features_save_sets_cohorts_when_checkboxes_on(pyramid_request):
     pyramid_request.db.flush()
 
     pyramid_request.POST = {'feat[cohorts][cohort]': 'on'}
-    views.features_save(pyramid_request)
+    features_save(pyramid_request)
 
     feat = pyramid_request.db.query(models.Feature).filter_by(name='feat').first()
     cohort = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').first()
@@ -206,7 +213,7 @@ def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
     pyramid_request.db.flush()
 
     pyramid_request.POST = {'feat[cohorts][cohort]': 'off'}
-    views.features_save(pyramid_request)
+    features_save(pyramid_request)
 
     feat = pyramid_request.db.query(models.Feature).filter_by(name='feat').first()
     cohort = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').first()

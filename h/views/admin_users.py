@@ -171,7 +171,3 @@ def _form_request_user(request):
         raise UserNotFoundError("Could not find user with userid %s" % userid)
 
     return user
-
-
-def includeme(config):
-    config.scan(__name__)

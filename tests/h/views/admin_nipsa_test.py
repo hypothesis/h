@@ -2,16 +2,21 @@
 
 from __future__ import unicode_literals
 
-from pyramid import httpexceptions
 import pytest
+from pyramid import httpexceptions
 
-from h.admin.views import nipsa as views
+from h.views.admin_nipsa import (
+    UserNotFoundError,
+    nipsa_add,
+    nipsa_index,
+    nipsa_remove,
+)
 
 
 @pytest.mark.usefixtures('nipsa_service', 'routes', 'users')
 class TestNipsaIndex(object):
     def test_lists_flagged_usernames(self, pyramid_request):
-        result = views.nipsa_index(pyramid_request)
+        result = nipsa_index(pyramid_request)
 
         assert set(result['userids']) == set([
             'acct:kiki@example.com',
@@ -22,7 +27,7 @@ class TestNipsaIndex(object):
     def test_lists_flagged_usernames_no_results(self, nipsa_service, pyramid_request):
         nipsa_service.flagged = set([])
 
-        result = views.nipsa_index(pyramid_request)
+        result = nipsa_index(pyramid_request)
 
         assert result['userids'] == []
 
@@ -32,7 +37,7 @@ class TestNipsaAddRemove(object):
     def test_add_flags_user(self, nipsa_service, pyramid_request, users):
         pyramid_request.params = {"add": "carl", "authority": "foo.org"}
 
-        views.nipsa_add(pyramid_request)
+        nipsa_add(pyramid_request)
 
         assert users['carl'] in nipsa_service.flagged
 
@@ -40,13 +45,13 @@ class TestNipsaAddRemove(object):
     def test_add_raises_when_user_not_found(self, user, nipsa_service, pyramid_request):
         pyramid_request.params = {"add": user, "authority": "example.com"}
 
-        with pytest.raises(views.UserNotFoundError):
-            views.nipsa_add(pyramid_request)
+        with pytest.raises(UserNotFoundError):
+            nipsa_add(pyramid_request)
 
     def test_add_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"add": "carl", "authority": "foo.org"}
 
-        result = views.nipsa_add(pyramid_request)
+        result = nipsa_add(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/nipsa'
@@ -54,7 +59,7 @@ class TestNipsaAddRemove(object):
     def test_remove_unflags_user(self, nipsa_service, pyramid_request, users):
         pyramid_request.params = {"remove": "acct:kiki@example.com"}
 
-        views.nipsa_remove(pyramid_request)
+        nipsa_remove(pyramid_request)
 
         assert users['kiki'] not in nipsa_service.flagged
 
@@ -62,20 +67,20 @@ class TestNipsaAddRemove(object):
     def test_remove_raises_when_user_not_found(self, user, nipsa_service, pyramid_request):
         pyramid_request.params = {"remove": user}
 
-        with pytest.raises(views.UserNotFoundError):
-            views.nipsa_remove(pyramid_request)
+        with pytest.raises(UserNotFoundError):
+            nipsa_remove(pyramid_request)
 
     def test_form_request_user_strips_spaces(self, nipsa_service, pyramid_request, users):
         pyramid_request.params = {"add": "    carl   ", "authority": "   foo.org     "}
 
-        views.nipsa_add(pyramid_request)
+        nipsa_add(pyramid_request)
 
         assert users['carl'] in nipsa_service.flagged
 
     def test_remove_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"remove": "acct:ursula@foo.org"}
 
-        result = views.nipsa_remove(pyramid_request)
+        result = nipsa_remove(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/nipsa'

@@ -53,7 +53,3 @@ def staff_remove(request):
         user.staff = False
     index = request.route_path('admin_staff')
     return httpexceptions.HTTPSeeOther(location=index)
-
-
-def includeme(config):
-    config.scan(__name__)

@@ -3,22 +3,22 @@
 from __future__ import unicode_literals
 
 import mock
-from pyramid import httpexceptions
 import pytest
+from pyramid import httpexceptions
 
-from h.admin.views import staff as views
+from h.views.admin_staff import staff_add, staff_index, staff_remove
 
 
 @pytest.mark.usefixtures('routes')
 class TestStaffIndex(object):
     def test_when_no_staff(self, pyramid_request):
-        result = views.staff_index(pyramid_request)
+        result = staff_index(pyramid_request)
 
         assert result["staff"] == []
 
     @pytest.mark.usefixtures('users')
     def test_context_contains_staff_usernames(self, pyramid_request):
-        result = views.staff_index(pyramid_request)
+        result = staff_index(pyramid_request)
 
         assert set(result["staff"]) == set([
             "acct:agnos@example.com",
@@ -36,7 +36,7 @@ class TestStaffAddRemove(object):
             "authority": "foo.org"
         }
 
-        views.staff_add(pyramid_request)
+        staff_add(pyramid_request)
 
         assert users['eva'].staff
 
@@ -46,7 +46,7 @@ class TestStaffAddRemove(object):
             "authority": pyramid_request.auth_domain
         }
 
-        views.staff_add(pyramid_request)
+        staff_add(pyramid_request)
 
         assert users['agnos'].staff
 
@@ -56,7 +56,7 @@ class TestStaffAddRemove(object):
             "authority": "     foo.org   "
         }
 
-        views.staff_add(pyramid_request)
+        staff_add(pyramid_request)
 
         assert users['eva'].staff
 
@@ -66,7 +66,7 @@ class TestStaffAddRemove(object):
             "authority": pyramid_request.auth_domain
         }
 
-        result = views.staff_add(pyramid_request)
+        result = staff_add(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/staff'
@@ -77,7 +77,7 @@ class TestStaffAddRemove(object):
             "authority": pyramid_request.auth_domain
         }
 
-        result = views.staff_add(pyramid_request)
+        result = staff_add(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/staff'
@@ -89,28 +89,28 @@ class TestStaffAddRemove(object):
         }
         pyramid_request.session.flash = mock.Mock()
 
-        views.staff_add(pyramid_request)
+        staff_add(pyramid_request)
 
         assert pyramid_request.session.flash.call_count == 1
 
     def test_remove_makes_users_not_staff(self, pyramid_request, users):
         pyramid_request.params = {"remove": "acct:cristof@foo.org"}
 
-        views.staff_remove(pyramid_request)
+        staff_remove(pyramid_request)
 
         assert not users['cristof'].staff
 
     def test_remove_is_idempotent(self, pyramid_request, users):
         pyramid_request.params = {"remove": "acct:eva@example.com"}
 
-        views.staff_remove(pyramid_request)
+        staff_remove(pyramid_request)
 
         assert not users['eva'].staff
 
     def test_remove_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"remove": "acct:agnos@example.com"}
 
-        result = views.staff_remove(pyramid_request)
+        result = staff_remove(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/staff'
@@ -118,7 +118,7 @@ class TestStaffAddRemove(object):
     def test_remove_redirects_to_index_when_user_not_found(self, pyramid_request):
         pyramid_request.params = {"remove": "acct:florp@example.com"}
 
-        result = views.staff_remove(pyramid_request)
+        result = staff_remove(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/staff'

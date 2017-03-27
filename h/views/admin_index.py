@@ -19,7 +19,3 @@ def index(_):
             'version': __version__,
         }
     }
-
-
-def includeme(config):
-    config.scan(__name__)

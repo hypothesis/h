@@ -55,7 +55,3 @@ def admins_remove(request):
             user.admin = False
     index = request.route_path('admin_admins')
     return httpexceptions.HTTPSeeOther(location=index)
-
-
-def includeme(config):
-    config.scan(__name__)
