@@ -70,9 +70,9 @@ class TestFlagServiceList(object):
         assert result == expected
 
     def test_it_supports_multiple_uri_filters(self, svc, users, flags):
-        expected = [flags['alice-climate'], flags['alice-politics']]
+        expected = set([flags['alice-climate'], flags['alice-politics']])
         result = svc.list(users['alice'], uris=['https://science.org', 'https://news.com']).all()
-        assert result == expected
+        assert set(result) == expected
 
     @pytest.fixture
     def users(self, factories):
