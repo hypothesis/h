@@ -129,7 +129,6 @@ def includeme(config):
     config.include('h.auth')
     config.include('h.authz')
     config.include('h.db')
-    config.include('h.features')
     config.include('h.form')
     config.include('h.indexer')
     config.include('h.panels')

@@ -12,6 +12,7 @@ def includeme(config):
     config.register_service_factory('.auth_ticket.auth_ticket_service_factory',
                                     iface='pyramid_authsanity.interfaces.IAuthService')
     config.register_service_factory('.auth_token.auth_token_service_factory', name='auth_token')
+    config.register_service_factory('.feature.feature_service_factory', name='feature')
     config.register_service_factory('.flag.flag_service_factory', name='flag')
     config.register_service_factory('.group.groups_factory', name='group')
     config.register_service_factory('.authority_group.authority_group_factory', name='authority_group')
@@ -21,3 +22,7 @@ def includeme(config):
     config.register_service_factory('.settings.settings_factory', name='settings')
     config.register_service_factory('.user.user_service_factory', name='user')
     config.register_service_factory('.user_signup.user_signup_service_factory', name='user_signup')
+
+    config.add_request_method('.feature.FeatureRequestProperty',
+                              name='feature',
+                              reify=True)
