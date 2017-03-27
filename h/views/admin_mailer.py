@@ -34,7 +34,3 @@ def mailer_test(request):
     index = request.route_path('admin_mailer',
                                _query={'taskid': result.task_id})
     return HTTPSeeOther(location=index)
-
-
-def includeme(config):
-    config.scan(__name__)

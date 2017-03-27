@@ -3,23 +3,23 @@
 from __future__ import unicode_literals
 
 import mock
-from pyramid import httpexceptions
 import pytest
+from pyramid import httpexceptions
 
-from h.admin.views import admins as views
+from h.views.admin_admins import admins_add, admins_index, admins_remove
 
 
 @pytest.mark.usefixtures('routes')
 class TestAdminsIndex(object):
 
     def test_when_no_admins(self, pyramid_request):
-        result = views.admins_index(pyramid_request)
+        result = admins_index(pyramid_request)
 
         assert result["admin_users"] == []
 
     @pytest.mark.usefixtures('users')
     def test_context_contains_admin_usernames(self, pyramid_request):
-        result = views.admins_index(pyramid_request)
+        result = admins_index(pyramid_request)
 
         assert set(result["admin_users"]) == set([
             "acct:agnos@example.com",
@@ -37,7 +37,7 @@ class TestAdminsAddRemove(object):
             "authority": 'foo.org',
         }
 
-        views.admins_add(pyramid_request)
+        admins_add(pyramid_request)
 
         assert users['eva'].admin
 
@@ -47,14 +47,14 @@ class TestAdminsAddRemove(object):
             "authority": pyramid_request.auth_domain,
         }
 
-        views.admins_add(pyramid_request)
+        admins_add(pyramid_request)
 
         assert users['agnos'].admin
 
     def test_add_strips_spaces(self, pyramid_request, users):
         pyramid_request.params = {"add": "   david   ", "authority": "   example.com  "}
 
-        views.admins_add(pyramid_request)
+        admins_add(pyramid_request)
 
         assert users['david'].admin
 
@@ -64,7 +64,7 @@ class TestAdminsAddRemove(object):
             "authority": pyramid_request.auth_domain,
         }
 
-        result = views.admins_add(pyramid_request)
+        result = admins_add(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/admins'
@@ -75,7 +75,7 @@ class TestAdminsAddRemove(object):
             "authority": pyramid_request.auth_domain,
         }
 
-        result = views.admins_add(pyramid_request)
+        result = admins_add(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/admins'
@@ -87,38 +87,38 @@ class TestAdminsAddRemove(object):
         }
         pyramid_request.session.flash = mock.Mock()
 
-        views.admins_add(pyramid_request)
+        admins_add(pyramid_request)
 
         assert pyramid_request.session.flash.call_count == 1
 
     def test_remove_makes_users_not_admins(self, pyramid_request, users):
         pyramid_request.params = {"remove": "acct:cristof@foo.org"}
 
-        views.admins_remove(pyramid_request)
+        admins_remove(pyramid_request)
 
         assert not users['cristof'].admin
 
     def test_remove_is_idempotent(self, pyramid_request, users):
         pyramid_request.params = {"remove": "acct:eva@example.com"}
 
-        views.admins_remove(pyramid_request)
+        admins_remove(pyramid_request)
 
         assert not users['eva'].admin
 
     def test_remove_will_not_remove_last_admin(self, pyramid_request, users):
         pyramid_request.params = {"remove": "acct:cristof@foo.org"}
-        views.admins_remove(pyramid_request)
+        admins_remove(pyramid_request)
         pyramid_request.params = {"remove": "acct:bojan@example.com"}
-        views.admins_remove(pyramid_request)
+        admins_remove(pyramid_request)
         pyramid_request.params = {"remove": "acct:agnos@example.com"}
-        views.admins_remove(pyramid_request)
+        admins_remove(pyramid_request)
 
         assert users['agnos'].admin
 
     def test_remove_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"remove": "acct:agnos@example.com"}
 
-        result = views.admins_remove(pyramid_request)
+        result = admins_remove(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/admins'
@@ -126,7 +126,7 @@ class TestAdminsAddRemove(object):
     def test_remove_redirects_to_index_when_user_not_found(self, pyramid_request):
         pyramid_request.params = {"remove": "acct:florp@example.com"}
 
-        result = views.admins_remove(pyramid_request)
+        result = admins_remove(pyramid_request)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/admins'

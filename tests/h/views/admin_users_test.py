@@ -11,15 +11,22 @@ import pytest
 
 from h.services.annotation_stats import AnnotationStatsService
 from h.services.user import UserService
-from h.admin.views import users as views
 from h.models import Annotation
+from h.views.admin_users import (
+    UserDeletionError,
+    UserNotFoundError,
+    delete_user,
+    users_activate,
+    users_delete,
+    users_index,
+)
 
 users_index_fixtures = pytest.mark.usefixtures('models', 'annotation_stats_service')
 
 
 @users_index_fixtures
 def test_users_index(pyramid_request):
-    result = views.users_index(pyramid_request)
+    result = users_index(pyramid_request)
 
     assert result == {
         'default_authority': pyramid_request.auth_domain,
@@ -36,7 +43,7 @@ def test_users_index_looks_up_users_by_username(models, pyramid_request):
     models.User.get_by_username.return_value = None
     models.User.get_by_email.return_value = None
 
-    views.users_index(pyramid_request)
+    users_index(pyramid_request)
 
     models.User.get_by_username.assert_called_with(
         pyramid_request.db, "bob", "foo.org")
@@ -48,7 +55,7 @@ def test_users_index_looks_up_users_by_email(models, pyramid_request):
     models.User.get_by_username.return_value = None
     models.User.get_by_email.return_value = None
 
-    views.users_index(pyramid_request)
+    users_index(pyramid_request)
 
     models.User.get_by_email.assert_called_with(pyramid_request.db, "bob@builder.com", "foo.org")
 
@@ -59,7 +66,7 @@ def test_users_index_strips_spaces(models, pyramid_request):
     models.User.get_by_username.return_value = None
     models.User.get_by_email.return_value = None
 
-    views.users_index(pyramid_request)
+    users_index(pyramid_request)
 
     models.User.get_by_username.assert_called_with(pyramid_request.db, "bob", "foo.org")
 
@@ -71,7 +78,7 @@ def test_users_index_queries_annotation_count_by_userid(models, factories, pyram
     annotation_stats_service.user_annotation_counts.return_value = {'total': 8}
 
     pyramid_request.params = {"username": "bob", "authority": user.authority}
-    result = views.users_index(pyramid_request)
+    result = users_index(pyramid_request)
     assert result['user_meta']['annotations_count'] == 8
 
 
@@ -81,7 +88,7 @@ def test_users_index_no_user_found(models, pyramid_request):
     models.User.get_by_username.return_value = None
     models.User.get_by_email.return_value = None
 
-    result = views.users_index(pyramid_request)
+    result = users_index(pyramid_request)
 
     assert result == {
         'default_authority': "example.com",
@@ -98,7 +105,7 @@ def test_users_index_user_found(models, pyramid_request, db_session, factories):
     user = factories.User.build(username='bob', authority='foo.org')
     models.User.get_by_username.return_value = user
 
-    result = views.users_index(pyramid_request)
+    result = users_index(pyramid_request)
 
     assert result == {
         'default_authority': "example.com",
@@ -116,7 +123,7 @@ users_activate_fixtures = pytest.mark.usefixtures('user_service', 'ActivationEve
 def test_users_activate_gets_user(user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.org"}
 
-    views.users_activate(pyramid_request)
+    users_activate(pyramid_request)
 
     user_service.fetch.assert_called_once_with("acct:bob@example.org")
 
@@ -126,15 +133,15 @@ def test_users_activate_user_not_found_error(user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@foo.org"}
     user_service.fetch.return_value = None
 
-    with pytest.raises(views.UserNotFoundError):
-        views.users_activate(pyramid_request)
+    with pytest.raises(UserNotFoundError):
+        users_activate(pyramid_request)
 
 
 @users_activate_fixtures
 def test_users_activate_activates_user(user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.org"}
 
-    views.users_activate(pyramid_request)
+    users_activate(pyramid_request)
 
     user_service.fetch.return_value.activate.assert_called_once_with()
 
@@ -143,7 +150,7 @@ def test_users_activate_activates_user(user_service, pyramid_request):
 def test_users_activate_flashes_success(pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
-    views.users_activate(pyramid_request)
+    users_activate(pyramid_request)
     success_flash = pyramid_request.session.peek_flash('success')
 
     assert success_flash
@@ -153,7 +160,7 @@ def test_users_activate_flashes_success(pyramid_request):
 def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
-    views.users_activate(pyramid_request)
+    users_activate(pyramid_request)
 
     ActivationEvent.assert_called_once_with(pyramid_request,
                                             user_service.fetch.return_value)
@@ -163,7 +170,7 @@ def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyr
 def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
-    views.users_activate(pyramid_request)
+    users_activate(pyramid_request)
 
     notify.assert_called_once_with(ActivationEvent.return_value)
 
@@ -172,12 +179,12 @@ def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request):
 def test_users_activate_redirects(pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
-    result = views.users_activate(pyramid_request)
+    result = users_activate(pyramid_request)
 
     assert isinstance(result, httpexceptions.HTTPFound)
 
 
-users_delete_fixtures = pytest.mark.usefixtures('user_service', 'delete_user')
+users_delete_fixtures = pytest.mark.usefixtures('user_service', 'fake_delete_user')
 
 
 @users_delete_fixtures
@@ -186,31 +193,31 @@ def test_users_delete_user_not_found_error(user_service, pyramid_request):
 
     user_service.fetch.return_value = None
 
-    with pytest.raises(views.UserNotFoundError):
-        views.users_delete(pyramid_request)
+    with pytest.raises(UserNotFoundError):
+        users_delete(pyramid_request)
 
 
 @users_delete_fixtures
-def test_users_delete_deletes_user(user_service, delete_user, pyramid_request):
+def test_users_delete_deletes_user(user_service, fake_delete_user, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
     user = MagicMock()
 
     user_service.fetch.return_value = user
 
-    views.users_delete(pyramid_request)
+    users_delete(pyramid_request)
 
-    delete_user.assert_called_once_with(pyramid_request, user)
+    fake_delete_user.assert_called_once_with(pyramid_request, user)
 
 
 @users_delete_fixtures
-def test_users_delete_group_creator_error(user_service, delete_user, pyramid_request):
+def test_users_delete_group_creator_error(user_service, fake_delete_user, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
     user = MagicMock()
 
     user_service.fetch.return_value = user
-    delete_user.side_effect = views.UserDeletionError('group creator error')
+    fake_delete_user.side_effect = UserDeletionError('group creator error')
 
-    views.users_delete(pyramid_request)
+    users_delete(pyramid_request)
 
     assert pyramid_request.session.peek_flash('error') == [
         'group creator error'
@@ -228,8 +235,8 @@ def test_delete_user_raises_when_group_creator(models, pyramid_request):
 
     models.Group.created_by.return_value.count.return_value = 10
 
-    with pytest.raises(views.UserDeletionError):
-        views.delete_user(pyramid_request, user)
+    with pytest.raises(UserDeletionError):
+        delete_user(pyramid_request, user)
 
 
 @delete_user_fixtures
@@ -237,7 +244,7 @@ def test_delete_user_disassociate_group_memberships(fake_db_session, pyramid_req
     pyramid_request.db = fake_db_session
     user = Mock(groups=[Mock()])
 
-    views.delete_user(pyramid_request, user)
+    delete_user(pyramid_request, user)
 
     assert user.groups == []
 
@@ -247,7 +254,7 @@ def test_delete_user_queries_annotations(elasticsearch_helpers, factories, fake_
     pyramid_request.db = fake_db_session
     user = factories.User(username=u'bob')
 
-    views.delete_user(pyramid_request, user)
+    delete_user(pyramid_request, user)
 
     elasticsearch_helpers.scan.assert_called_once_with(
         client=pyramid_request.es.conn,
@@ -271,7 +278,7 @@ def test_delete_user_deletes_annotations(api_storage, elasticsearch_helpers, fak
 
     elasticsearch_helpers.scan.return_value = [annotation_1, annotation_2]
 
-    views.delete_user(pyramid_request, user)
+    delete_user(pyramid_request, user)
 
     assert api_storage.delete_annotation.mock_calls == [
         call(pyramid_request.db, 'annotation-1'),
@@ -284,7 +291,7 @@ def test_delete_user_deletes_user(fake_db_session, pyramid_request):
     pyramid_request.db = fake_db_session
     user = MagicMock()
 
-    views.delete_user(pyramid_request, user)
+    delete_user(pyramid_request, user)
 
     assert user in pyramid_request.db.deleted
 
@@ -302,27 +309,27 @@ def routes(pyramid_config):
 
 @pytest.fixture
 def ActivationEvent(patch):
-    return patch('h.admin.views.users.ActivationEvent')
+    return patch('h.views.admin_users.ActivationEvent')
 
 
 @pytest.fixture
 def api_storage(patch):
-    return patch('h.admin.views.users.storage')
+    return patch('h.views.admin_users.storage')
 
 
 @pytest.fixture
-def delete_user(patch):
-    return patch('h.admin.views.users.delete_user')
+def fake_delete_user(patch):
+    return patch('h.views.admin_users.delete_user')
 
 
 @pytest.fixture
 def elasticsearch_helpers(patch):
-    return patch('h.admin.views.users.es_helpers')
+    return patch('h.views.admin_users.es_helpers')
 
 
 @pytest.fixture
 def models(patch):
-    module = patch('h.admin.views.users.models')
+    module = patch('h.views.admin_users.models')
     module.Annotation = Annotation
     return module
 

@@ -129,7 +129,3 @@ def cohorts_edit_remove(request):
 
     url = request.route_url('admin_cohorts_edit', id=cohort_id)
     return httpexceptions.HTTPSeeOther(url)
-
-
-def includeme(config):
-    config.scan(__name__)

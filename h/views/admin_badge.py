@@ -48,7 +48,3 @@ def badge_remove(request):
 
     index = request.route_path('admin_badge')
     return httpexceptions.HTTPSeeOther(location=index)
-
-
-def includeme(config):
-    config.scan(__name__)
