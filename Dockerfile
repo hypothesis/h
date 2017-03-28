@@ -6,6 +6,7 @@ RUN apk-install \
     ca-certificates \
     collectd \
     collectd-nginx \
+    gettext \
     libffi \
     libpq \
     nginx \
