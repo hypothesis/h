@@ -17,6 +17,9 @@ http {
 
   access_log off;
 
+  # Dynamic DNS resolution of upstream hostnames requires a resolver to be set.
+  ${RESOLVER_DIRECTIVES}
+
   # We set fail_timeout=0 so that the upstream isn't marked as down if a single
   # request fails (e.g. if gunicorn kills a worker for taking too long to handle
   # a single request).
@@ -78,10 +81,7 @@ http {
     }
 
     location / {
-      # FALLBACK-START
-      add_header Content-Type "text/plain; charset=UTF-8";
-      return 200 "This URL path would fall through to WordPress in production.";
-      # FALLBACK-END
+      ${FALLBACK_DIRECTIVES}
     }
   }
 

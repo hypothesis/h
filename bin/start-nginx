@@ -7,11 +7,33 @@ set -eu
 CONF_TEMPLATE=/etc/nginx/nginx.conf.tpl
 CONF_DEST=/etc/nginx/nginx.conf
 
+# By default, the "fallback" URLs will return a placeholder message. If an
+# explicit upstream is given, we reverse proxy to it.
+FALLBACK_DIRECTIVES=$({
+    echo 'add_header Content-Type "text/plain; charset=UTF-8";'
+    echo 'return 200 "This URL path would fall through to WordPress in production.";'
+})
 if [ -n "$FALLBACK_UPSTREAM" ]; then
-    FALLBACK_TEXT="proxy_set_header Host \$host; proxy_pass $FALLBACK_UPSTREAM;"
-    sed -e '/# FALLBACK-START/,/# FALLBACK-END/c\'"$FALLBACK_TEXT" "$CONF_TEMPLATE"
-else
-    cat "$CONF_TEMPLATE"
-fi >"$CONF_DEST"
+    # We store the upstream endpoint in a variable to trigger dynamic resolution
+    # of the upstream hostname.
+    FALLBACK_DIRECTIVES=$({
+        echo 'proxy_set_header Host $host;'
+        echo 'set $fallback_upstream "'"${FALLBACK_UPSTREAM}"'";'
+        echo 'proxy_pass $fallback_upstream;'
+    })
+fi
+
+# Add "resolver" directives to the nginx config so that dynamic resolution can
+# occur.
+RESOLVER_DIRECTIVES=$({
+    printf "resolver "
+    printf "$(awk '$1=="nameserver" {print $2}' /etc/resolv.conf | xargs)"
+    printf ";\n"
+})
+
+# Write out nginx configuration file
+export FALLBACK_DIRECTIVES
+export RESOLVER_DIRECTIVES
+envsubst '$FALLBACK_DIRECTIVES $RESOLVER_DIRECTIVES' <"$CONF_TEMPLATE" >"$CONF_DEST"
 
 exec nginx
