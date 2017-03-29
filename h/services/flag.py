@@ -53,45 +53,6 @@ class FlagService(object):
                            annotation=annotation)
         self.session.add(flag)
 
-    def list(self, user, group=None, uris=None):
-        """
-        Return a list of flags made by the given user.
-
-        :param user: The user to filter flags on.
-        :type user: h.models.User
-
-        :param group: The annotation group pubid for filtering flags.
-        :type group: unicode
-
-        :param uris: A list of annotation uris for filtering flags.
-        :type uris: list of unicode
-
-        :returns: list of flags (``h.models.Flag``)
-        :rtype: list
-        """
-
-        query = self.session.query(models.Flag).filter_by(user=user)
-
-        joined_annotation = False
-
-        if group is not None:
-            joined_annotation = True
-            query = query.join(models.Annotation) \
-                         .filter(models.Annotation.groupid == group)
-
-        if uris:
-            query_uris = set()
-            for u in uris:
-                expanded = storage.expand_uri(self.session, u)
-                query_uris.update([uri.normalize(e) for e in expanded])
-
-            if not joined_annotation:
-                joined_annotation = True
-                query = query.join(models.Annotation)
-            query = query.filter(models.Annotation.target_uri_normalized.in_(query_uris))
-
-        return query
-
 
 def flag_service_factory(context, request):
     return FlagService(request.db)
