@@ -73,15 +73,16 @@ def includeme(config):
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
                      factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
+    config.add_route('api.annotation_flag',
+                     '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/flag',
+                     factory='memex.resources:AnnotationResourceFactory',
+                     traverse='/{id}')
     config.add_route('api.annotation.jsonld',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
                      factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
-    config.add_route('api.flags',
-                     '/api/flags',
-                     factory='memex.resources:AnnotationResourceFactory')
     config.add_route('api.search', '/api/search')
     config.add_route('api.users', '/api/users')
     config.add_route('badge', '/api/badge')
