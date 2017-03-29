@@ -25,17 +25,6 @@ class TestUserService(object):
 
         assert isinstance(result, User)
 
-    def test_fetch_caches_fetched_users(self, db_session, svc, users):
-        jacqui, _, _ = users
-
-        svc.fetch('acct:jacqui@foo.com')
-        db_session.delete(jacqui)
-        db_session.flush()
-        user = svc.fetch('acct:jacqui@foo.com')
-
-        assert user is not None
-        assert user.username == 'jacqui'
-
     def test_login_by_username(self, svc, users):
         _, steve, _ = users
         assert svc.login('steve', 'stevespassword') is steve
@@ -85,36 +74,6 @@ class TestUserService(object):
             svc.update_preferences(user, foo='bar', baz='qux')
 
         assert 'keys baz, foo are not allowed' in exc.value.message
-
-    def test_sets_up_cache_clearing_on_transaction_end(self, patch, db_session):
-        decorator = patch('h.services.user.util.db.on_transaction_end')
-
-        UserService(default_authority='example.com', session=db_session)
-
-        decorator.assert_called_once_with(db_session)
-
-    def test_clears_cache_on_transaction_end(self, patch, db_session, users):
-        funcs = {}
-
-        # We need to capture the inline `clear_cache` function so we can
-        # call it manually later
-        def on_transaction_end_decorator(session):
-            def on_transaction_end(func):
-                funcs['clear_cache'] = func
-            return on_transaction_end
-
-        decorator = patch('h.services.user.util.db.on_transaction_end')
-        decorator.side_effect = on_transaction_end_decorator
-
-        jacqui, _, _ = users
-        svc = UserService(default_authority='example.com', session=db_session)
-        svc.fetch('acct:jacqui@foo.com')
-        db_session.delete(jacqui)
-
-        funcs['clear_cache']()
-
-        user = svc.fetch('acct:jacqui@foo.com')
-        assert user is None
 
     @pytest.fixture
     def svc(self, db_session):

@@ -3,7 +3,8 @@
 from __future__ import unicode_literals
 
 from h.models import Annotation, User
-from h import util
+from h.util.db import lru_cache_in_transaction
+from h.util.user import split_user
 
 UPDATE_PREFS_ALLOWED_KEYS = set(['show_sidebar_tutorial'])
 
@@ -34,13 +35,7 @@ class UserService(object):
         self.default_authority = default_authority
         self.session = session
 
-        # Local cache of fetched users.
-        self._cache = {}
-
-        # But don't allow the cache to persist after the session is closed.
-        @util.db.on_transaction_end(session)
-        def flush_cache():
-            self._cache = {}
+        self._cached_fetch = lru_cache_in_transaction(self.session)(self._fetch)
 
     def fetch(self, userid_or_username, authority=None):
         """
@@ -63,20 +58,11 @@ class UserService(object):
             username = userid_or_username
         else:
             userid = userid_or_username
-            parts = util.user.split_user(userid)
+            parts = split_user(userid)
             username = parts['username']
             authority = parts['domain']
 
-        # The cache is keyed by (username, authority) tuples.
-        cache_key = (username, authority)
-
-        if cache_key not in self._cache:
-            self._cache[cache_key] = (self.session.query(User)
-                                      .filter_by(username=username)
-                                      .filter_by(authority=authority)
-                                      .one_or_none())
-
-        return self._cache[cache_key]
+        return self._cached_fetch(username, authority)
 
     def login(self, username_or_email, password):
         """
@@ -117,6 +103,12 @@ class UserService(object):
 
         if 'show_sidebar_tutorial' in kwargs:
             user.sidebar_tutorial_dismissed = not kwargs['show_sidebar_tutorial']
+
+    def _fetch(self, username, authority):
+        return (self.session.query(User)
+                    .filter_by(username=username)
+                    .filter_by(authority=authority)
+                    .one_or_none())
 
 
 def user_service_factory(context, request):
