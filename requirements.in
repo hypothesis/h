@@ -1,6 +1,7 @@
 PyJWT
 SQLAlchemy >= 1.1.4
 alembic
+backports.functools_lru_cache
 bcrypt
 celery == 3.1.25  # Pin to latest 3.1.x to ensure forwards-compat with 4.x
 certifi
