@@ -148,6 +148,15 @@ class Worker(GeventPyWSGIWorker):
 def create_app(global_config, **settings):
     config = configure(settings=settings)
 
+    # We need to include `h.models` before pretty much everything else to
+    # avoid the possibility that one of the imports below directly or
+    # indirectly imports `memex.models`. See the comment at the top of
+    # `h.models` for details.
+    #
+    # FIXME: h modules should not access `memex.models`, even indirectly,
+    # except through `h.models`.
+    config.include('h.models')
+
     config.include('pyramid_services')
 
     config.include('h.auth')
@@ -155,14 +164,11 @@ def create_app(global_config, **settings):
     config.set_authentication_policy('h.auth.WEBSOCKET_POLICY')
 
     config.include('h.authz')
+    config.include('h.db')
     config.include('h.session')
     config.include('h.search')
     config.include('h.sentry')
     config.include('h.stats')
-
-    # We have to include models and db to set up sqlalchemy metadata.
-    config.include('h.models')
-    config.include('h.db')
 
     # We have to include parts of the `memex` package in order to provide
     # the links service.
