@@ -142,18 +142,12 @@ class AuthController(object):
         return self.request.params.get('next', _login_redirect_url(self.request))
 
     def _login(self, user):
-        # Clear any cached feature flags
-        self.request.feature.clear()
-
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
         headers = security.remember(self.request, user.userid)
         return headers
 
     def _logout(self):
-        # Clear any cached feature flags
-        self.request.feature.clear()
-
         if self.request.authenticated_userid is not None:
             self.request.registry.notify(LogoutEvent(self.request))
             self.request.session.invalidate()

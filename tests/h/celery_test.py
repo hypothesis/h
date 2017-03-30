@@ -48,13 +48,6 @@ class TestCelery(object):
         register_logger_signal.assert_called_once_with(mock.sentinel.sentry,
                                                        loglevel=logging.ERROR)
 
-    def test_reset_feature_flags_resets_request_feature_flags(self):
-        sender = mock.Mock(spec=['app'])
-
-        celery.reset_feature_flags(sender)
-
-        sender.app.request.feature.clear.assert_called_once_with()
-
     def test_nipsa_cache(self, pyramid_config, pyramid_request):
         sender = mock.Mock(app=mock.Mock(request=pyramid_request))
         nipsa_svc = mock.Mock()

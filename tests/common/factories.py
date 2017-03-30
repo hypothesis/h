@@ -153,3 +153,15 @@ class Flag(ModelFactory):
 
     user = factory.SubFactory(User)
     annotation = factory.SubFactory(Annotation)
+
+
+class Feature(ModelFactory):
+
+    class Meta:  # pylint: disable=no-init, old-style-class
+        model = models.Feature
+
+
+class FeatureCohort(ModelFactory):
+
+    class Meta:  # pylint: disable=no-init, old-style-class
+        model = models.FeatureCohort

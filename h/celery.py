@@ -98,12 +98,6 @@ def bootstrap_worker(sender, **kwargs):
 
 
 @signals.task_prerun.connect
-def reset_feature_flags(sender, **kwargs):
-    """Reset feature flags before running each task."""
-    sender.app.request.feature.clear()
-
-
-@signals.task_prerun.connect
 def reset_nipsa_cache(sender, **kwargs):
     """Reset nipsa service cache before running each task."""
     svc = sender.app.request.find_service(name='nipsa')
