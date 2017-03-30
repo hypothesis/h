@@ -24,7 +24,7 @@ class AnnotationJSONPresentationService(object):
         ]
 
     def present(self, annotation_resource):
-        presenter = self.get_presenter(annotation_resource)
+        presenter = self._get_presenter(annotation_resource)
         return presenter.asdict()
 
     def present_all(self, annotation_ids):
@@ -43,7 +43,7 @@ class AnnotationJSONPresentationService(object):
                     resources.AnnotationResource(ann, self.group_svc, self.links_svc))
                 for ann in annotations]
 
-    def get_presenter(self, annotation_resource):
+    def _get_presenter(self, annotation_resource):
         presenter = presenters.AnnotationJSONPresenter(annotation_resource)
 
         for formatter in self.formatters:
