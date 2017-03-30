@@ -36,6 +36,7 @@ from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentMeta, DocumentURI
 
 from h.models.activation import Activation
+from h.models.annotation_moderation import AnnotationModeration
 from h.models.auth_client import AuthClient
 from h.models.auth_ticket import AuthTicket
 from h.models.blocklist import Blocklist
@@ -51,6 +52,7 @@ from h.models.user import User
 __all__ = (
     'Activation',
     'Annotation',
+    'AnnotationModeration',
     'AuthClient',
     'AuthTicket',
     'Blocklist',
