@@ -43,7 +43,6 @@ from gunicorn.workers.ggevent import (GeventPyWSGIWorker, PyWSGIHandler,
                                       PyWSGIServer)
 from ws4py import format_addresses
 
-from h import features
 from h.config import configure
 
 log = logging.getLogger(__name__)
@@ -148,8 +147,6 @@ class Worker(GeventPyWSGIWorker):
 
 def create_app(global_config, **settings):
     config = configure(settings=settings)
-
-    config.add_request_method(features.Client, name='feature', reify=True)
 
     config.include('pyramid_services')
 
