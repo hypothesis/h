@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 
 
 def includeme(config):
+    config.register_service_factory('.annotation_json_presentation.annotation_json_presentation_service_factory',
+                                    name='annotation_json_presentation')
     config.register_service_factory('.annotation_stats.annotation_stats_factory', name='annotation_stats')
     config.register_service_factory('.auth_ticket.auth_ticket_service_factory',
                                     iface='pyramid_authsanity.interfaces.IAuthService')

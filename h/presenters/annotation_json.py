@@ -5,7 +5,10 @@ from __future__ import unicode_literals
 import copy
 
 from pyramid import security
+from zope.interface.verify import verifyObject
+from zope.interface.exceptions import DoesNotImplement
 
+from h.formatters.interfaces import IAnnotationFormatter
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_json import DocumentJSONPresenter
 
@@ -13,6 +16,19 @@ from h.presenters.document_json import DocumentJSONPresenter
 class AnnotationJSONPresenter(AnnotationBasePresenter):
 
     """Present an annotation in the JSON format returned by API requests."""
+
+    def __init__(self, annotation_resource):
+        super(AnnotationJSONPresenter, self).__init__(annotation_resource)
+
+        self.formatters = []
+
+    def add_formatter(self, formatter):
+        try:
+            verifyObject(IAnnotationFormatter, formatter)
+        except DoesNotImplement:
+            raise ValueError('formatter is not implementing IAnnotationFormatter interface')
+
+        self.formatters.append(formatter)
 
     def asdict(self):
         docpresenter = DocumentJSONPresenter(self.annotation.document)
@@ -37,6 +53,9 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
 
         annotation = copy.copy(self.annotation.extra) or {}
         annotation.update(base)
+
+        for formatter in self.formatters:
+            annotation.update(formatter.format(self.annotation))
 
         return annotation
 
