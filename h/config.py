@@ -10,11 +10,14 @@ import os
 from pyramid.config import Configurator
 from pyramid.settings import asbool
 
-from h.settings import DockerSetting
-from h.settings import EnvSetting
-from h.settings import SettingError
-from h.settings import database_url
-from h.settings import mandrill_settings
+from h.settings import (
+    DeprecatedSetting,
+    DockerSetting,
+    EnvSetting,
+    SettingError,
+    database_url,
+    mandrill_settings,
+)
 
 __all__ = ('configure',)
 
@@ -75,6 +78,8 @@ SETTINGS = [
     EnvSetting('ga_tracking_id', 'GOOGLE_ANALYTICS_TRACKING_ID'),
     EnvSetting('ga_client_tracking_id', 'GOOGLE_ANALYTICS_CLIENT_TRACKING_ID'),
     EnvSetting('h.app_url', 'APP_URL'),
+    DeprecatedSetting(EnvSetting('h.authority', 'AUTH_DOMAIN'),
+                      message='use the AUTHORITY environment variable instead'),
     EnvSetting('h.authority', 'AUTHORITY'),
     EnvSetting('h.bouncer_url', 'BOUNCER_URL'),
     EnvSetting('h.client_id', 'CLIENT_ID'),

@@ -3,8 +3,43 @@
 from __future__ import unicode_literals
 
 import pytest
+import mock
 
 from h import settings
+
+
+class FakeSetting(object):
+    def __init__(self, result):
+        self.result = result
+
+    def __call__(self, environ):
+        return self.result
+
+    def __str__(self):
+        return 'fake setting'
+
+
+class TestDeprecatedSetting(object):
+    def test_emits_warnings_when_child_setting_is_used(self):
+        func = settings.DeprecatedSetting(FakeSetting(result={'foo': 'bar'}),
+                                          message='what to do instead')
+        func.warn = mock.Mock(spec_set=[])
+
+        result = func({})
+
+        assert result == {'foo': 'bar'}
+        func.warn.assert_called_once_with('use of fake setting is '
+                                          'deprecated: what to do instead')
+
+    def test_emits_no_warnings_when_unused(self):
+        func = settings.DeprecatedSetting(FakeSetting(result=None),
+                                          message='what to do instead')
+        func.warn = mock.Mock(spec_set=[])
+
+        result = func({})
+
+        assert result is None
+        assert not func.warn.called
 
 
 @pytest.mark.parametrize('setting,varname,type,environ,expected', (
