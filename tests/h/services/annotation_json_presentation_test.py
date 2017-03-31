@@ -30,6 +30,16 @@ class TestAnnotationJSONPresentationService(object):
         svc = self.svc(services)
         assert formatters.AnnotationHiddenFormatter.return_value in svc.formatters
 
+    def test_initializes_moderation_formatter(self, services, formatters):
+        self.svc(services)
+        formatters.AnnotationModerationFormatter.assert_called_once_with(mock.sentinel.db_session,
+                                                                         mock.sentinel.user,
+                                                                         mock.sentinel.has_permission)
+
+    def test_it_configures_moderation_formatter(self, services, formatters):
+        svc = self.svc(services)
+        assert formatters.AnnotationModerationFormatter.return_value in svc.formatters
+
     def test_present_inits_presenter(self, svc, presenters, annotation_resource):
         svc.present(annotation_resource)
 
@@ -93,7 +103,8 @@ class TestAnnotationJSONPresentationService(object):
                                                  group_svc=services['group'],
                                                  links_svc=services['links'],
                                                  flag_svc=services['flag'],
-                                                 moderation_svc=services['annotation_moderation'])
+                                                 moderation_svc=services['annotation_moderation'],
+                                                 has_permission=mock.sentinel.has_permission)
 
     @pytest.fixture
     def annotation_resource(self):
@@ -162,6 +173,12 @@ class TestAnnotationJSONPresentationServiceFactory(object):
 
         _, kwargs = service_class.call_args
         assert kwargs['moderation_svc'] == services['annotation_moderation']
+
+    def test_provides_has_permission(self, pyramid_request, service_class):
+        annotation_json_presentation_service_factory(None, pyramid_request)
+
+        _, kwargs = service_class.call_args
+        assert kwargs['has_permission'] == pyramid_request.has_permission
 
     @pytest.fixture
     def service_class(self, patch):
