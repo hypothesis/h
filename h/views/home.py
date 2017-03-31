@@ -25,8 +25,8 @@ def via_redirect(context, request):
 def index(context, request):
     context = {}
 
-    if request.authenticated_user:
-        username = request.authenticated_user.username
+    if request.user:
+        username = request.user.username
         context['username'] = username
         context['user_account_link'] = (
             request.route_url('stream.user_query', user=username)

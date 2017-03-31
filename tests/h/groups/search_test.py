@@ -11,7 +11,7 @@ from h.groups import search
 @pytest.mark.usefixtures('group_service')
 class TestGroupAuthFilter(object):
     def test_fetches_readable_groups(self, pyramid_request, group_service):
-        pyramid_request.authenticated_user = mock.sentinel.user
+        pyramid_request.user = mock.sentinel.user
 
         filter_ = search.GroupAuthFilter(pyramid_request)
         filter_({})
@@ -34,5 +34,5 @@ class TestGroupAuthFilter(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.authenticated_user = None
+        pyramid_request.user = None
         return pyramid_request

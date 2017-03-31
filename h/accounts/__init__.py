@@ -23,8 +23,8 @@ class JSONError(Error):
     pass
 
 
-def authenticated_user(request):
-    """Return the authenticated user or None.
+def get_user(request):
+    """Return the user for the request or None.
 
     :rtype: h.models.User or None
 
@@ -41,7 +41,7 @@ def authenticated_user(request):
 def includeme(config):
     """A local identity provider."""
 
-    # Add a `request.authenticated_user` property.
+    # Add a `request.user` property.
     #
     # N.B. we use `property=True` and not `reify=True` here because it is
     # important that responsibility for caching user lookups is left to the
@@ -50,7 +50,7 @@ def includeme(config):
     # This prevents retried requests (those that raise
     # `transaction.interfaces.TransientError`) gaining access to a stale
     # `User` instance.
-    config.add_request_method(authenticated_user, property=True)
+    config.add_request_method(get_user, name='user', property=True)
 
     config.include('.schemas')
     config.include('.subscribers')

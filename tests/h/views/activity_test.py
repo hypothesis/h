@@ -104,7 +104,7 @@ class TestSearchController(object):
 
     @pytest.fixture
     def pyramid_request(self, factories, pyramid_request):
-        pyramid_request.authenticated_user = factories.User()
+        pyramid_request.user = factories.User()
         return pyramid_request
 
 
@@ -165,7 +165,7 @@ class TestGroupSearchController(object):
                                                   pyramid_request,
                                                   search):
         for user in (None, group.creator, group.members[-1]):
-            pyramid_request.authenticated_user = user
+            pyramid_request.user = user
 
             controller.search()
 
@@ -176,20 +176,20 @@ class TestGroupSearchController(object):
     def test_search_just_returns_search_result_if_group_does_not_exist(
             self, controller, group, pyramid_request, search):
         for user in (None, group.creator, group.members[-1]):
-            pyramid_request.authenticated_user = user
+            pyramid_request.user = user
             pyramid_request.matchdict['pubid'] = 'does_not_exist'
 
             assert controller.search() == search.return_value
 
     def test_search_just_returns_search_result_if_user_not_logged_in(
             self, controller, pyramid_request, search):
-        pyramid_request.authenticated_user = None
+        pyramid_request.user = None
 
         assert controller.search() == search.return_value
 
     def test_search_just_returns_search_result_if_user_not_a_member_of_group(
             self, controller, factories, pyramid_request, search):
-        pyramid_request.authenticated_user = factories.User()
+        pyramid_request.user = factories.User()
 
         assert controller.search() == search.return_value
 
@@ -197,7 +197,7 @@ class TestGroupSearchController(object):
                                                                  controller,
                                                                  group,
                                                                  pyramid_request):
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         group_info = controller.search()['group']
 
@@ -213,7 +213,7 @@ class TestGroupSearchController(object):
         def fake_has_permission(permission, context=None):
             return permission != 'admin'
         pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         result = controller.search()
 
@@ -224,7 +224,7 @@ class TestGroupSearchController(object):
                                                                     group,
                                                                     pyramid_request):
         pyramid_request.has_permission = mock.Mock(return_value=True)
-        pyramid_request.authenticated_user = group.creator
+        pyramid_request.user = group.creator
 
         result = controller.search()
 
@@ -235,7 +235,7 @@ class TestGroupSearchController(object):
             controller,
             group,
             pyramid_request):
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
         pyramid_request.params['more_info'] = ''
 
         assert controller.search()['more_info'] is True
@@ -245,7 +245,7 @@ class TestGroupSearchController(object):
             controller,
             group,
             pyramid_request):
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         assert controller.search()['more_info'] is False
 
@@ -261,7 +261,7 @@ class TestGroupSearchController(object):
                                                     controller,
                                                     pyramid_request,
                                                     group):
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         result = controller.search()
 
@@ -273,7 +273,7 @@ class TestGroupSearchController(object):
                                                  controller,
                                                  pyramid_request,
                                                  group):
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         result = controller.search()
 
@@ -285,7 +285,7 @@ class TestGroupSearchController(object):
                                                      controller,
                                                      pyramid_request,
                                                      group):
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         faceted_user = group.members[0]
         pyramid_request.params = {'q': 'user:%s' % group.members[0].username}
@@ -305,7 +305,7 @@ class TestGroupSearchController(object):
         user_2 = factories.User()
         group.members = [user_1, user_2]
 
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         counts = {user_1.userid: 24, user_2.userid: 6}
         users_aggregation = [
@@ -326,7 +326,7 @@ class TestGroupSearchController(object):
     def test_search_returns_the_default_zero_message_to_the_template(
             self, controller, group, pyramid_request, search):
         """If there's a non-empty query it uses the default zero message."""
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
         search.return_value['q'] = 'foo'
 
         result = controller.search()
@@ -336,7 +336,7 @@ class TestGroupSearchController(object):
     def test_search_returns_the_group_zero_message_to_the_template(
             self, controller, group, pyramid_request, search):
         """If the query is empty it overrides the default zero message."""
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
         search.return_value['q'] = ''
 
         result = controller.search()
@@ -396,7 +396,7 @@ class TestGroupSearchController(object):
                                                                       controller,
                                                                       group,
                                                                       pyramid_request):
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
         result = controller.search()['stats']
 
         assert result['annotation_count'] == 5
@@ -407,7 +407,7 @@ class TestGroupSearchController(object):
                                                                    pyramid_request):
         """ It should not pass the annotation count to the view when the feature flag is turned off."""
 
-        pyramid_request.authenticated_user = group.members[-1]
+        pyramid_request.user = group.members[-1]
         pyramid_request.feature.flags['total_shared_annotations'] = False
         result = controller.search()['stats']
 
@@ -550,7 +550,7 @@ class TestGroupSearchController(object):
     def pyramid_request(self, group, pyramid_request):
         pyramid_request.matchdict['pubid'] = group.pubid
         pyramid_request.matchdict['slug'] = group.slug
-        pyramid_request.authenticated_user = None
+        pyramid_request.user = None
         return pyramid_request
 
     @pytest.fixture
@@ -658,7 +658,7 @@ class TestUserSearchController(object):
                                                         user):
         # The user whose page we're on is the same user as the authenticated
         # user.
-        pyramid_request.authenticated_user = user
+        pyramid_request.user = user
 
         user_details = controller.search()['user']
 
@@ -670,7 +670,7 @@ class TestUserSearchController(object):
                                                                pyramid_request):
         # The user whose page we're on is *not* the same user as the
         # authenticated user.
-        pyramid_request.authenticated_user = factories.User()
+        pyramid_request.user = factories.User()
 
         assert 'edit_url' not in controller.search()['user']
 
@@ -686,7 +686,7 @@ class TestUserSearchController(object):
     def test_search_returns_the_user_zero_message_to_the_template(
             self, controller, factories, pyramid_request, search, user):
         """If the query is empty it overrides the default zero message."""
-        pyramid_request.authenticated_user = factories.User()
+        pyramid_request.user = factories.User()
         search.return_value['q'] = ''
 
         result = controller.search()
@@ -749,7 +749,7 @@ class TestUserSearchController(object):
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
         pyramid_request.matchdict['username'] = user.username
-        pyramid_request.authenticated_user = user
+        pyramid_request.user = user
         return pyramid_request
 
     @pytest.fixture

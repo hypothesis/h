@@ -46,7 +46,7 @@ class TestFeatureRequestProperty(object):
     def pyramid_request(self, pyramid_request):
         # Remove the preexisting dummy feature client
         delattr(pyramid_request, 'feature')
-        pyramid_request.authenticated_user = mock.sentinel.user
+        pyramid_request.user = mock.sentinel.user
         return pyramid_request
 
 
@@ -188,5 +188,5 @@ class TestFeatureServiceFactory(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.sentinel.user
+        pyramid_request.user = mock.sentinel.user
         return pyramid_request

@@ -28,7 +28,7 @@ def update_preferences(request):
 
     svc = request.find_service(name='user')
     try:
-        svc.update_preferences(request.authenticated_user, **preferences)
+        svc.update_preferences(request.user, **preferences)
     except TypeError as e:
         raise APIError(e.message, status_code=400)
 

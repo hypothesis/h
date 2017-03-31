@@ -40,7 +40,7 @@ def ajax_payload(request, data):
 
 def _login_redirect_url(request):
     return request.route_url('activity.user_search',
-                             username=request.authenticated_user.username)
+                             username=request.user.username)
 
 
 @view_config(context=BadCSRFToken,
@@ -449,7 +449,7 @@ class ActivateController(object):
         except ValueError:
             raise httpexceptions.HTTPNotFound()
 
-        if id_ == self.request.authenticated_user.id:
+        if id_ == self.request.user.id:
             # The user is already logged in to the account (so the account
             # must already be activated).
             self.request.session.flash(jinja2.Markup(_(
@@ -521,14 +521,14 @@ class AccountController(object):
             on_failure=self._template_data)
 
     def update_email_address(self, appstruct):
-        self.request.authenticated_user.email = appstruct['email']
+        self.request.user.email = appstruct['email']
 
     def update_password(self, appstruct):
-        self.request.authenticated_user.password = appstruct['new_password']
+        self.request.user.password = appstruct['new_password']
 
     def _template_data(self):
         """Return the data needed to render accounts.html.jinja2."""
-        email = self.request.authenticated_user.email
+        email = self.request.user.email
         password_form = self.forms['password'].render()
         email_form = self.forms['email'].render({'email': email})
 
@@ -552,7 +552,7 @@ class EditProfileController(object):
     @view_config(request_method='GET')
     def get(self):
         """Render the 'Edit Profile' form"""
-        user = self.request.authenticated_user
+        user = self.request.user
         self.form.set_appstruct({
             'display_name': user.display_name or '',
             'description': user.description or '',
@@ -574,7 +574,7 @@ class EditProfileController(object):
         return {'form': self.form.render()}
 
     def _update_user(self, appstruct):
-        user = self.request.authenticated_user
+        user = self.request.user
         user.display_name = appstruct['display_name']
         user.description = appstruct['description']
         user.location = appstruct['location']
@@ -685,5 +685,5 @@ def dismiss_sidebar_tutorial(request):
     if request.authenticated_userid is None:
         raise accounts.JSONError()
     else:
-        request.authenticated_user.sidebar_tutorial_dismissed = True
+        request.user.sidebar_tutorial_dismissed = True
         return ajax_payload(request, {'status': 'okay'})

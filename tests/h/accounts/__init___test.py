@@ -6,7 +6,7 @@ from h import accounts
 
 
 @pytest.mark.usefixtures('user_service')
-class TestAuthenticatedUser(object):
+class TestGetUser(object):
     def test_fetches_user_using_service(self,
                                         factories,
                                         pyramid_config,
@@ -15,7 +15,7 @@ class TestAuthenticatedUser(object):
         pyramid_config.testing_securitypolicy('userid')
         user_service.fetch.return_value = factories.User.build()
 
-        accounts.authenticated_user(pyramid_request)
+        accounts.get_user(pyramid_request)
 
         user_service.fetch.assert_called_once_with('userid')
 
@@ -32,7 +32,7 @@ class TestAuthenticatedUser(object):
         """
         pyramid_request.session.invalidate = mock.Mock()
 
-        accounts.authenticated_user(pyramid_request)
+        accounts.get_user(pyramid_request)
 
         assert not pyramid_request.session.invalidate.called
 
@@ -44,7 +44,7 @@ class TestAuthenticatedUser(object):
         pyramid_config.testing_securitypolicy('userid')
         user = user_service.fetch.return_value = factories.User.build()
 
-        result = accounts.authenticated_user(pyramid_request)
+        result = accounts.get_user(pyramid_request)
 
         assert result == user
 

@@ -28,11 +28,11 @@ class FeatureRequestProperty(object):
 
     def __call__(self, name):
         """Get the status of feature flag `name` for the current user."""
-        return self.svc.enabled(name, user=self.request.authenticated_user)
+        return self.svc.enabled(name, user=self.request.user)
 
     def all(self):
         """Get the status of all feature flags for the current user."""
-        return self.svc.all(user=self.request.authenticated_user)
+        return self.svc.all(user=self.request.user)
 
 
 class FeatureService(object):

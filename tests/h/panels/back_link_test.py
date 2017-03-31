@@ -35,7 +35,7 @@ class TestBackLink(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.authenticated_user = Mock(username='currentuser')
+        pyramid_request.user = Mock(username='currentuser')
         return pyramid_request
 
     @pytest.fixture

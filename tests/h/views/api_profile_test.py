@@ -56,7 +56,7 @@ class TestUpdatePreferences(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
-        pyramid_request.authenticated_user = user
+        pyramid_request.user = user
         pyramid_request.json_body = {}
         return pyramid_request
 

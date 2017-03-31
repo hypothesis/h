@@ -32,7 +32,7 @@ class TestAnnotationFlagFormatter(object):
     def test_format_for_unauthenticated_user(self, db_session, factories):
         annotation = factories.Annotation()
         formatter = AnnotationFlagFormatter(db_session,
-                                            authenticated_user=None)
+                                            user=None)
 
         assert formatter.format(annotation) == {'flagged': False}
 

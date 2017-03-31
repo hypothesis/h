@@ -9,10 +9,10 @@ class GroupAuthFilter(object):
     """
 
     def __init__(self, request):
-        self.authenticated_user = request.authenticated_user
+        self.user = request.user
         self.session = request.db
         self.group_service = request.find_service(name='group')
 
     def __call__(self, _):
-        groups = self.group_service.groupids_readable_by(self.authenticated_user)
+        groups = self.group_service.groupids_readable_by(self.user)
         return {'terms': {'group': groups}}

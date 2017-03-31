@@ -454,7 +454,7 @@ class TestEmailChangeSchema(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_csrf_request, user):
-        pyramid_csrf_request.authenticated_user = user
+        pyramid_csrf_request.user = user
         return pyramid_csrf_request
 
     @pytest.fixture
@@ -480,7 +480,7 @@ class TestPasswordChangeSchema(object):
 
     def test_it_is_invalid_if_passwords_dont_match(self, pyramid_csrf_request):
         user = Mock()
-        pyramid_csrf_request.authenticated_user = user
+        pyramid_csrf_request.user = user
         schema = schemas.PasswordChangeSchema().bind(
             request=pyramid_csrf_request)
 
@@ -494,7 +494,7 @@ class TestPasswordChangeSchema(object):
     def test_it_is_invalid_if_current_password_is_wrong(self,
                                                         pyramid_csrf_request):
         user = Mock()
-        pyramid_csrf_request.authenticated_user = user
+        pyramid_csrf_request.user = user
         schema = schemas.PasswordChangeSchema().bind(
             request=pyramid_csrf_request)
         # The password does not check out

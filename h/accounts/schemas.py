@@ -277,7 +277,7 @@ class EmailChangeSchema(CSRFSchema):
         super(EmailChangeSchema, self).validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings['request']
-        user = request.authenticated_user
+        user = request.user
 
         if not user.check_password(value.get('password')):
             exc['password'] = _('Wrong password.')
@@ -303,7 +303,7 @@ class PasswordChangeSchema(CSRFSchema):
         super(PasswordChangeSchema, self).validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings['request']
-        user = request.authenticated_user
+        user = request.user
 
         if value.get('new_password') != value.get('new_password_confirm'):
             exc['new_password_confirm'] = _('The passwords must match')

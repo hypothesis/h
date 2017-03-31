@@ -11,7 +11,7 @@ def model(request):
     session['userid'] = request.authenticated_userid
     session['groups'] = _current_groups(request, request.auth_domain)
     session['features'] = request.feature.all()
-    session['preferences'] = _user_preferences(request.authenticated_user)
+    session['preferences'] = _user_preferences(request.user)
     return session
 
 
@@ -25,7 +25,7 @@ def profile(request, authority=None):
     request). This parameter is ignored for authenticated requests.
 
     """
-    user = request.authenticated_user
+    user = request.user
 
     if user is not None:
         authority = user.authority
@@ -62,7 +62,7 @@ def _current_groups(request, authority):
 
     """
 
-    user = request.authenticated_user
+    user = request.user
     authority_groups = (request.find_service(name='authority_group')
                         .public_groups(authority=authority))
 

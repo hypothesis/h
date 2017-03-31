@@ -18,7 +18,7 @@ def back_link(context, request):
     """
 
     referrer_path = urlparse.urlparse(request.referrer or '').path
-    current_username = request.authenticated_user.username
+    current_username = request.user.username
 
     if referrer_path == request.route_path('activity.user_search',
                                            username=current_username):

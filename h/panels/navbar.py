@@ -23,8 +23,8 @@ def navbar(context, request, search=None, opts=None):
     user_activity_url = None
     username = None
 
-    if request.authenticated_user:
-        for group in request.authenticated_user.groups:
+    if request.user:
+        for group in request.user.groups:
             groups_menu_items.append({
                 'title': group.name,
                 'link': request.route_url('group_read', pubid=group.pubid, slug=group.slug)
@@ -34,8 +34,8 @@ def navbar(context, request, search=None, opts=None):
                 'pubid': group.pubid
             })
         user_activity_url = request.route_url('activity.user_search',
-                                              username=request.authenticated_user.username)
-        username = request.authenticated_user.username
+                                              username=request.user.username)
+        username = request.user.username
 
     route = request.matched_route
 
