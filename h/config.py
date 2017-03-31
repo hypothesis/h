@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import socket
 
 from pyramid.config import Configurator
 from pyramid.settings import asbool
