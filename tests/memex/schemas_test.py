@@ -216,6 +216,7 @@ class TestCreateUpdateAnnotationSchema(object):
         'user',
         'id',
         'links',
+        'flagged',
     ])
     def test_it_removes_protected_fields(self, pyramid_request, validate, field):
         data = {}
@@ -380,6 +381,7 @@ class TestCreateUpdateAnnotationSchema(object):
             'target': [],
             'group': '__world__',
             'references': ['parent'],
+            'flagged': True,
 
             # These should end up in extra.
             'foo': 1,
