@@ -184,7 +184,7 @@ class TestHandleAnnotationEvent(object):
         message = {'action': '_', 'annotation_id': '_', 'src_client_id': '_'}
         session = mock.sentinel.db_session
         socket = FakeSocket('giraffe')
-        settings = {'h.auth_domain': 'example.org'}
+        settings = {'h.authority': 'example.org'}
 
         messages.handle_annotation_event(message, [socket], settings, session)
 

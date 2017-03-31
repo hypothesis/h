@@ -16,7 +16,7 @@ def admins_index(request):
     admins = request.db.query(models.User).filter(models.User.admin)
     return {
         "admin_users": [u.userid for u in admins],
-        "default_authority": request.auth_domain,
+        "default_authority": request.authority,
     }
 
 

@@ -16,7 +16,7 @@ def staff_index(request):
     staff = request.db.query(models.User).filter(models.User.staff)
     return {
         "staff": [u.userid for u in staff],
-        "default_authority": request.auth_domain,
+        "default_authority": request.authority,
     }
 
 

@@ -12,13 +12,13 @@ class WorldGroup(object):
     This is so we don't have to store a __world__ group in the database.
     """
 
-    def __init__(self, auth_domain):
-        self.auth_domain = auth_domain
+    def __init__(self, authority):
+        self.authority = authority
 
     def __acl__(self):
         return [
             (security.Allow, security.Everyone, 'read'),
-            (security.Allow, 'authority:{}'.format(self.auth_domain), 'write'),
+            (security.Allow, 'authority:{}'.format(self.authority), 'write'),
             security.DENY_ALL,
         ]
 

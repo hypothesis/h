@@ -61,7 +61,7 @@ def admin(ctx, username, authority, on):
     request = ctx.obj['bootstrap']()
 
     if not authority:
-        authority = request.auth_domain
+        authority = request.authority
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:

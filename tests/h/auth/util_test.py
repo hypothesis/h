@@ -159,15 +159,15 @@ def test_translate_annotation_principals(p_in, p_out):
 
 class TestAuthDomain(object):
     def test_it_returns_the_request_domain(self, pyramid_request):
-        assert util.auth_domain(pyramid_request) == pyramid_request.domain
+        assert util.authority(pyramid_request) == pyramid_request.domain
 
     def test_it_allows_overriding_request_domain(self, pyramid_request):
-        pyramid_request.registry.settings['h.auth_domain'] = 'foo.org'
-        assert util.auth_domain(pyramid_request) == u'foo.org'
+        pyramid_request.registry.settings['h.authority'] = 'foo.org'
+        assert util.authority(pyramid_request) == u'foo.org'
 
     def test_it_returns_text_type(self, pyramid_request):
         pyramid_request.domain = str(pyramid_request.domain)
-        assert type(util.auth_domain(pyramid_request)) == text_type
+        assert type(util.authority(pyramid_request)) == text_type
 
 
 @pytest.fixture

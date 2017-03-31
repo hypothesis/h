@@ -48,7 +48,7 @@ def sidebar_app(request, extra=None):
 
     app_config = {
         'apiUrl': request.route_url('api.index'),
-        'authDomain': request.auth_domain,
+        'authDomain': request.authority,
         'release': __version__,
         'serviceUrl': request.route_url('index'),
     }

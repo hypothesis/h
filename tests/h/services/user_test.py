@@ -104,10 +104,10 @@ class TestUserServiceFactory(object):
 
         assert isinstance(svc, UserService)
 
-    def test_provides_request_auth_domain_as_default_authority(self, pyramid_request):
+    def test_provides_request_authority_as_default_authority(self, pyramid_request):
         svc = user_service_factory(None, pyramid_request)
 
-        assert svc.default_authority == pyramid_request.auth_domain
+        assert svc.default_authority == pyramid_request.authority
 
     def test_provides_request_db_as_session(self, pyramid_request):
         svc = user_service_factory(None, pyramid_request)

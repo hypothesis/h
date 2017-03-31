@@ -179,8 +179,8 @@ class TestProfile(object):
         else:
             assert preferences['show_sidebar_tutorial'] is True
 
-    def test_anonymous_authority(self, unauthenticated_request, auth_domain):
-        assert session.profile(unauthenticated_request)['authority'] == auth_domain
+    def test_anonymous_authority(self, unauthenticated_request, authority):
+        assert session.profile(unauthenticated_request)['authority'] == authority
 
     def test_authority_override(self, unauthenticated_request):
         unauthenticated_request.set_public_groups({'foo.com': []})
@@ -189,13 +189,13 @@ class TestProfile(object):
 
         assert profile['authority'] == 'foo.com'
 
-    def test_authenticated_authority(self, authenticated_request, auth_domain):
-        assert session.profile(authenticated_request)['authority'] == auth_domain
+    def test_authenticated_authority(self, authenticated_request, authority):
+        assert session.profile(authenticated_request)['authority'] == authority
 
-    def test_authenticated_ignores_authority_override(self, authenticated_request, auth_domain):
+    def test_authenticated_ignores_authority_override(self, authenticated_request, authority):
         profile = session.profile(authenticated_request, 'foo.com')
 
-        assert profile['authority'] == auth_domain
+        assert profile['authority'] == authority
 
     def test_third_party_authority(self, third_party_request, third_party_domain):
         assert session.profile(third_party_request)['authority'] == third_party_domain
@@ -210,8 +210,8 @@ class TestProfile(object):
         return u'thirdparty.example.org'
 
     @pytest.fixture
-    def third_party_request(self, auth_domain, third_party_domain, publisher_group):
-        return FakeRequest(auth_domain,
+    def third_party_request(self, authority, third_party_domain, publisher_group):
+        return FakeRequest(authority,
                            u'acct:user@{}'.format(third_party_domain),
                            third_party_domain,
                            {third_party_domain: [publisher_group]})
@@ -232,8 +232,8 @@ class FakeAuthorityGroupService(object):
 
 class FakeRequest(object):
 
-    def __init__(self, auth_domain, userid, user_authority, public_groups):
-        self.auth_domain = auth_domain
+    def __init__(self, authority, userid, user_authority, public_groups):
+        self.authority = authority
         self.authenticated_userid = userid
 
         if userid is None:
@@ -268,7 +268,7 @@ class FakeRequest(object):
 
 
 @pytest.fixture
-def auth_domain():
+def authority():
     return u'example.com'
 
 
@@ -278,13 +278,13 @@ def world_group():
 
 
 @pytest.fixture
-def unauthenticated_request(auth_domain, world_group):
-    return FakeRequest(auth_domain, None, None, {auth_domain: [world_group]})
+def unauthenticated_request(authority, world_group):
+    return FakeRequest(authority, None, None, {authority: [world_group]})
 
 
 @pytest.fixture
-def authenticated_request(auth_domain, world_group):
-    return FakeRequest(auth_domain,
-                       u'acct:user@{}'.format(auth_domain),
-                       auth_domain,
-                       {auth_domain: [world_group]})
+def authenticated_request(authority, world_group):
+    return FakeRequest(authority,
+                       u'acct:user@{}'.format(authority),
+                       authority,
+                       {authority: [world_group]})

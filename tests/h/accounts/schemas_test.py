@@ -44,7 +44,7 @@ class TestUniqueEmail(object):
 
         user_model.get_by_email.assert_called_with(pyramid_request.db,
                                                    "foo@bar.com",
-                                                   pyramid_request.auth_domain)
+                                                   pyramid_request.authority)
 
     def test_it_is_invalid_when_user_exists(self, dummy_node):
         pytest.raises(colander.Invalid,

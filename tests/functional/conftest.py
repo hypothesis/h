@@ -12,7 +12,7 @@ TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
     'es.index': 'hypothesis-test',
     'h.app_url': 'http://example.com',
-    'h.auth_domain': 'example.com',
+    'h.authority': 'example.com',
     'h.client_secret': 'notsosecret',
     'pyramid.debug_all': True,
     'sqlalchemy.url': os.environ.get('TEST_DATABASE_URL',

@@ -92,7 +92,7 @@ def check_url(request, query, unparse=parser.unparse):
     elif _single_entry(query, 'user'):
         username = query.pop('user')
         user = request.find_service(name='user').fetch(username,
-                                                       request.auth_domain)
+                                                       request.authority)
         if user:
             redirect = request.route_path('activity.user_search',
                                           username=username,

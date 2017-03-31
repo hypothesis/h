@@ -114,7 +114,7 @@ class UserFactory(object):
 
     def __getitem__(self, username):
         user = self.request.find_service(name='user').fetch(
-            username, self.request.auth_domain)
+            username, self.request.authority)
 
         if not user:
             raise KeyError()
@@ -146,7 +146,7 @@ class User(Base):
     #: The "authority" for this user. This represents the "namespace" in which
     #: this user lives. By default, all users are created in the namespace
     #: corresponding to `request.domain`, but this can be overridden with the
-    #: `AUTH_DOMAIN` environment variable.
+    #: `h.authority` setting.
     authority = sa.Column('authority', sa.UnicodeText(), nullable=False)
 
     #: The display name which will be used when rendering an annotation.
