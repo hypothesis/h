@@ -68,7 +68,7 @@ def _current_groups(request, authority):
 
     groups = authority_groups + _user_groups(user)
 
-    return [_group_model(request.route_url, group) for group in groups]
+    return [_group_model(request.route_url, group, user) for group in groups]
 
 
 def _user_groups(user):
@@ -78,8 +78,12 @@ def _user_groups(user):
         return sorted(user.groups, key=_group_sort_key)
 
 
-def _group_model(route_url, group):
-    model = {'name': group.name, 'id': group.pubid, 'public': group.is_public}
+def _group_model(route_url, group, user):
+    is_moderator = user is not None and user.id == group.creator_id
+    model = {'name': group.name,
+             'id': group.pubid,
+             'public': group.is_public,
+             'is_moderator': is_moderator}
 
     # We currently want to show URLs for secret groups, but not for publisher
     # groups, and not for the `__world__` group (where it doesn't make sense).
@@ -89,6 +93,7 @@ def _group_model(route_url, group):
         model['url'] = route_url('group_read',
                                  pubid=group.pubid,
                                  slug=group.slug)
+
     return model
 
 
