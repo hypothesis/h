@@ -12,6 +12,3 @@ def includeme(config):
     config.include('memex.models')
 
     config.include('memex.links')
-
-    config.register_service_factory('memex.groups.default_group_service_factory',
-                                    iface='memex.interfaces.IGroupService')

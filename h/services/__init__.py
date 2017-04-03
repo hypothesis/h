@@ -15,6 +15,7 @@ def includeme(config):
     config.register_service_factory('.feature.feature_service_factory', name='feature')
     config.register_service_factory('.flag.flag_service_factory', name='flag')
     config.register_service_factory('.group.groups_factory', name='group')
+    config.register_service_factory('.groupfinder.groupfinder_service_factory', iface='h.interfaces.IGroupService')
     config.register_service_factory('.authority_group.authority_group_factory', name='authority_group')
     config.register_service_factory('.nipsa.nipsa_factory', name='nipsa')
     config.register_service_factory('.oauth.oauth_service_factory', name='oauth')

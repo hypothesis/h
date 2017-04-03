@@ -61,7 +61,7 @@ class TestAnnotationResourceFactory(object):
     @pytest.fixture
     def group_service(self, pyramid_config):
         group_service = Mock(spec_set=['find'])
-        pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
         return group_service
 
     @pytest.fixture
@@ -186,7 +186,7 @@ class TestAnnotationResource(object):
     def group_service(self, pyramid_config, groups):
         group_service = Mock(spec_set=['find'])
         group_service.find.side_effect = lambda groupid: groups.get(groupid)
-        pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
         return group_service
 
     @pytest.fixture

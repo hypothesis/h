@@ -120,10 +120,6 @@ def includeme(config):
     # - we can override behaviour from `memex` if necessary.
     config.include('memex', route_prefix='/api')
 
-    # Override memex group service
-    config.register_service_factory('h.services.groupfinder.groupfinder_service_factory',
-                                    iface='memex.interfaces.IGroupService')
-
     # Core site modules
     config.include('h.assets')
     config.include('h.auth')

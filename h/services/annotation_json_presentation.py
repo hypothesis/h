@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 from sqlalchemy.orm import subqueryload
 
 from memex import resources
-from memex.interfaces import IGroupService
 
 from h import formatters
 from h import models
 from h import presenters
 from h import storage
+from h.interfaces import IGroupService
 
 
 class AnnotationJSONPresentationService(object):

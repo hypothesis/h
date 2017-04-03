@@ -156,7 +156,7 @@ def routes(pyramid_config):
 @pytest.fixture
 def group_service(pyramid_config):
     group_service = mock.Mock(spec_set=['find'])
-    pyramid_config.register_service(group_service, iface='memex.interfaces.IGroupService')
+    pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
     return group_service
 
 

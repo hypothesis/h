@@ -20,13 +20,13 @@ from pyramid import i18n
 from pyramid import security
 import venusian
 
-from memex.interfaces import IGroupService
 from memex.resources import AnnotationResource
 from memex import schemas
 
 from h import search as search_lib
 from h import storage
 from h.events import AnnotationEvent
+from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
 from h.util import cors
 

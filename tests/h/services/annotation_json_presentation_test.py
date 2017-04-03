@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from memex.interfaces import IGroupService
-
+from h.interfaces import IGroupService
 from h.services.annotation_json_presentation import AnnotationJSONPresentationService
 from h.services.annotation_json_presentation import annotation_json_presentation_service_factory
 

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from pyramid import security
 
 from h import storage  # FIXME: this module needs to move to h
-from memex.interfaces import IGroupService
+from h.interfaces import IGroupService  # FIXME: this module needs to move to h
 
 
 class AnnotationResourceFactory(object):
