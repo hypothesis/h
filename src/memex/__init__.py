@@ -11,7 +11,6 @@ def includeme(config):
     # need be.
     config.include('memex.models')
 
-    config.include('memex.eventqueue')
     config.include('memex.links')
 
     config.register_service_factory('memex.groups.default_group_service_factory',

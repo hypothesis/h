@@ -3,7 +3,7 @@
 import mock
 import pytest
 
-from memex import eventqueue
+from h import eventqueue
 
 
 class TestEventQueue(object):
@@ -83,11 +83,11 @@ class TestEventQueue(object):
 
     @pytest.fixture
     def log(self, patch):
-        return patch('memex.eventqueue.log')
+        return patch('h.eventqueue.log')
 
     @pytest.fixture
     def publish_all(self, patch):
-        return patch('memex.eventqueue.EventQueue.publish_all')
+        return patch('h.eventqueue.EventQueue.publish_all')
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
