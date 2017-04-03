@@ -4,9 +4,8 @@ from __future__ import unicode_literals
 
 from zope.interface import implementer
 
-from memex.interfaces import IGroupService
-
 from h import models
+from h.interfaces import IGroupService
 from h.util.db import lru_cache_in_transaction
 from h.groups.util import WorldGroup
 
