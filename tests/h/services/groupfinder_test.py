@@ -20,10 +20,10 @@ class TestGroupfinderService(object):
 
         assert isinstance(group, WorldGroup)
 
-    def test_sets_auth_domain_on_world_group(self, svc):
+    def test_sets_authority_on_world_group(self, svc):
         group = svc.find('__world__')
 
-        assert group.auth_domain == 'example.com'
+        assert group.authority == 'example.com'
 
     def test_returns_none_when_not_found(self, svc, factories):
         factories.Group()
@@ -46,7 +46,7 @@ class TestGroupfinderServiceFactory(object):
 
         assert svc.session == pyramid_request.db
 
-    def test_provides_auth_domain(self, pyramid_request):
+    def test_provides_authority(self, pyramid_request):
         svc = groupfinder_service_factory(None, pyramid_request)
 
-        assert svc.auth_domain == pyramid_request.auth_domain
+        assert svc.authority == pyramid_request.authority

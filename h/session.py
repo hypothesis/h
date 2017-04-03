@@ -9,7 +9,7 @@ def model(request):
     session = {}
     session['csrf'] = request.session.get_csrf_token()
     session['userid'] = request.authenticated_userid
-    session['groups'] = _current_groups(request, request.auth_domain)
+    session['groups'] = _current_groups(request, request.authority)
     session['features'] = request.feature.all()
     session['preferences'] = _user_preferences(request.user)
     return session
@@ -21,7 +21,7 @@ def profile(request, authority=None):
 
     If the request is unauthenticated (and so not tied to a particular
     authority), the authority parameter can be used to override the authority
-    used to find public groups (by default, this is the `auth_domain` of the
+    used to find public groups (by default, this is the `authority` of the
     request). This parameter is ignored for authenticated requests.
 
     """
@@ -30,7 +30,7 @@ def profile(request, authority=None):
     if user is not None:
         authority = user.authority
     else:
-        authority = authority or request.auth_domain
+        authority = authority or request.authority
 
     profile = {}
     profile['userid'] = request.authenticated_userid

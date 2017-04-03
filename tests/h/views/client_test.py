@@ -67,7 +67,7 @@ def pyramid_settings(pyramid_settings):
         'ga_client_tracking_id': 'UA-4567',
         'h.sentry_dsn_client': 'test-sentry-dsn',
         'h.websocket_url': 'wss://example.com/ws',
-        'auth_domain': 'example.com'
+        'authority': 'example.com'
         })
 
     return pyramid_settings

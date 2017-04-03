@@ -50,7 +50,7 @@ def get_blacklist():
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
     request = node.bindings['request']
-    user = models.User.get_by_email(request.db, value, request.auth_domain)
+    user = models.User.get_by_email(request.db, value, request.authority)
     if user and user.userid != request.authenticated_userid:
         msg = _("Sorry, an account with this email address already exists.")
         raise colander.Invalid(node, msg)
@@ -59,7 +59,7 @@ def unique_email(node, value):
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     request = node.bindings['request']
-    user = models.User.get_by_username(request.db, value, request.auth_domain)
+    user = models.User.get_by_username(request.db, value, request.authority)
     if user:
         msg = _("This username is already taken.")
         raise colander.Invalid(node, msg)
@@ -181,7 +181,7 @@ class ForgotPasswordSchema(CSRFSchema):
 
         request = node.bindings['request']
         email = value.get('email')
-        user = models.User.get_by_email(request.db, email, request.auth_domain)
+        user = models.User.get_by_email(request.db, email, request.authority)
 
         if user is None:
             err = colander.Invalid(node)
@@ -245,7 +245,7 @@ class ResetCode(colander.SchemaType):
         except BadData:
             raise colander.Invalid(node, _('Wrong reset code.'))
 
-        user = models.User.get_by_username(request.db, username, request.auth_domain)
+        user = models.User.get_by_username(request.db, username, request.authority)
         if user is None:
             raise colander.Invalid(node, _('Your reset code is not valid'))
         if user.password_updated is not None and timestamp < user.password_updated:

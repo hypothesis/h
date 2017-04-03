@@ -8,7 +8,7 @@ from pyramid.authentication import RemoteUserAuthenticationPolicy
 import pyramid_authsanity
 
 from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
-from h.auth.util import auth_domain, groupfinder
+from h.auth.util import authority, groupfinder
 from h.security import derive_key
 
 __all__ = (
@@ -57,8 +57,8 @@ def includeme(config):
     # that include this one.
     config.set_authentication_policy(DEFAULT_POLICY)
 
-    # Allow retrieval of the auth_domain from the request object.
-    config.add_request_method(auth_domain, name='auth_domain', reify=True)
+    # Allow retrieval of the authority from the request object.
+    config.add_request_method(authority, name='authority', reify=True)
 
     # Allow retrieval of the auth token (if present) from the request object.
     config.add_request_method('.tokens.auth_token', reify=True)

@@ -15,9 +15,9 @@ from h.groups.util import WorldGroup
 # FIXME: rename / split existing GroupService and rename this.
 @implementer(IGroupService)
 class GroupfinderService(object):
-    def __init__(self, session, auth_domain):
+    def __init__(self, session, authority):
         self.session = session
-        self.auth_domain = auth_domain
+        self.authority = authority
 
         self._cached_find = lru_cache_in_transaction(self.session)(self._find)
 
@@ -26,7 +26,7 @@ class GroupfinderService(object):
 
     def _find(self, id_):
         if id_ == '__world__':
-            return WorldGroup(self.auth_domain)
+            return WorldGroup(self.authority)
 
         return (self.session.query(models.Group)
                     .filter_by(pubid=id_)
@@ -34,4 +34,4 @@ class GroupfinderService(object):
 
 
 def groupfinder_service_factory(context, request):
-    return GroupfinderService(request.db, request.auth_domain)
+    return GroupfinderService(request.db, request.authority)

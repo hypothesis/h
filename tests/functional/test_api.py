@@ -54,7 +54,7 @@ class TestAPI(object):
         Fetch an anonymous "profile".
 
         With no authentication and no authority parameter, this should default
-        to the site's `auth_domain` and show only the global group.
+        to the site's `authority` and show only the global group.
         """
 
         res = app.get('/api/profile')

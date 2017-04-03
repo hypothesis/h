@@ -101,10 +101,10 @@ def translate_annotation_principals(principals):
     return list(result)
 
 
-def auth_domain(request):
+def authority(request):
     """
-    Return the value of the h.auth_domain config settings.
+    Return the value of the h.authority config settings.
 
-    Falls back on returning request.domain if h.auth_domain isn't set.
+    Falls back on returning request.domain if h.authority isn't set.
     """
-    return text_type(request.registry.settings.get('h.auth_domain', request.domain))
+    return text_type(request.registry.settings.get('h.authority', request.domain))

@@ -2,11 +2,38 @@
 
 """Helpers for parsing settings from the environment."""
 
+from __future__ import unicode_literals
+
+import logging
 import string
+
+log = logging.getLogger(__name__)
 
 
 class SettingError(Exception):
     pass
+
+
+class DeprecatedSetting(object):
+    """A wrapper for deprecated settings which emits appropriate warnings."""
+
+    def __init__(self, setting, message):
+        self.setting = setting
+        self.message = message
+
+        # Test seam
+        self.warn = log.warn
+
+    def __call__(self, environ):
+        result = self.setting(environ)
+        if result is not None:
+            self.warn(self.warning)
+        return result
+
+    @property
+    def warning(self):
+        return 'use of {s} is deprecated: {m}'.format(s=self.setting,
+                                                      m=self.message)
 
 
 class EnvSetting(object):
@@ -32,6 +59,9 @@ class EnvSetting(object):
                                        typename=self.type.__name__,
                                        value=environ[self.varname]))
             return {self.setting: value}
+
+    def __str__(self):
+        return 'environment variable {name}'.format(name=self.varname)
 
 
 class DockerSetting(object):
