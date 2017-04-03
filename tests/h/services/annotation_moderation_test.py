@@ -9,6 +9,18 @@ from h.services.annotation_moderation import AnnotationModerationService
 from h.services.annotation_moderation import annotation_moderation_service_factory
 
 
+class TestAnnotationModerationServiceHidden(object):
+    def test_it_returns_true_for_moderated_annotation(self, svc, factories):
+        mod = factories.AnnotationModeration()
+
+        assert svc.hidden(mod.annotation.id) is True
+
+    def test_it_returns_false_for_non_moderated_annotation(self, svc, factories):
+        annotation = factories.Annotation()
+
+        assert svc.hidden(annotation.id) is False
+
+
 class TestAnnotationModerationServiceHide(object):
     def test_it_creates_annotation_moderation(self, svc, factories, db_session):
         annotation = factories.Annotation()
@@ -31,10 +43,6 @@ class TestAnnotationModerationServiceHide(object):
 
         assert count == 1
 
-    @pytest.fixture
-    def svc(self, db_session):
-        return AnnotationModerationService(db_session)
-
 
 class TestAnnotationNipsaServiceFactory(object):
     def test_it_returns_service(self, pyramid_request):
@@ -44,3 +52,8 @@ class TestAnnotationNipsaServiceFactory(object):
     def test_it_provides_request_db_as_session(self, pyramid_request):
         svc = annotation_moderation_service_factory(None, pyramid_request)
         assert svc.session == pyramid_request.db
+
+
+@pytest.fixture
+def svc(db_session):
+    return AnnotationModerationService(db_session)
