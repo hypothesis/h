@@ -12,8 +12,8 @@ from elasticsearch import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
 from h import presenters
+from h.events import AnnotationTransformEvent
 from memex import models
-from memex.events import AnnotationTransformEvent
 from memex.util.query import column_windows
 
 log = logging.getLogger(__name__)

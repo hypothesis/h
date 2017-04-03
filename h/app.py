@@ -55,9 +55,9 @@ def includeme(config):
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
     config.add_subscriber('h.subscribers.publish_annotation_event',
-                          'memex.events.AnnotationEvent')
+                          'h.events.AnnotationEvent')
     config.add_subscriber('h.subscribers.send_reply_notifications',
-                          'memex.events.AnnotationEvent')
+                          'h.events.AnnotationEvent')
 
     config.add_tween('h.tweens.conditional_http_tween_factory', under=EXCVIEW)
     config.add_tween('h.tweens.redirect_tween_factory')

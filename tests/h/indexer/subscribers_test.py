@@ -2,8 +2,7 @@
 
 import pytest
 
-from memex import events
-
+from h import events
 from h.indexer import subscribers
 
 
