@@ -60,6 +60,15 @@ class Activation(ModelFactory):
         force_flush = True
 
 
+class AnnotationModeration(ModelFactory):
+
+    class Meta(object):
+        model = models.AnnotationModeration
+        force_flush = True
+
+    annotation = factory.SubFactory(Annotation)
+
+
 class AuthClient(ModelFactory):
 
     class Meta(object):

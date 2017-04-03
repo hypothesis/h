@@ -77,6 +77,10 @@ def includeme(config):
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/flag',
                      factory='memex.resources:AnnotationResourceFactory',
                      traverse='/{id}')
+    config.add_route('api.annotation_hide',
+                     '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/hide',
+                     factory='memex.resources:AnnotationResourceFactory',
+                     traverse='/{id}')
     config.add_route('api.annotation.jsonld',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
                      factory='memex.resources:AnnotationResourceFactory',
