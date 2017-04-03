@@ -14,30 +14,30 @@ class TestNavbar(object):
         result = navbar({}, req)
         assert result['username'] is None
 
-    def test_it_sets_username_when_logged_in(self, req, authenticated_user):
-        req.authenticated_user = authenticated_user
+    def test_it_sets_username_when_logged_in(self, req, user):
+        req.user = user
         result = navbar({}, req)
 
         assert result['username'] == 'vannevar'
 
-    def test_it_lists_groups_when_logged_in(self, req, authenticated_user):
-        req.authenticated_user = authenticated_user
+    def test_it_lists_groups_when_logged_in(self, req, user):
+        req.user = user
         result = navbar({}, req)
 
         assert result['groups_menu_items'] == [
             {'title': g.name, 'link': 'http://example.com/groups/' + g.pubid + '/' + g.slug}
-            for g in authenticated_user.groups
+            for g in user.groups
         ]
 
-    def test_includes_groups_suggestions_when_logged_in(self, req, authenticated_user):
-        req.authenticated_user = authenticated_user
+    def test_includes_groups_suggestions_when_logged_in(self, req, user):
+        req.user = user
         result = navbar({}, req)
 
         assert result['groups_suggestions'] == [{'name': g.name, 'pubid': g.pubid}
-                                                for g in authenticated_user.groups]
+                                                for g in user.groups]
 
-    def test_username_url_when_logged_in(self, req, authenticated_user):
-        req.authenticated_user = authenticated_user
+    def test_username_url_when_logged_in(self, req, user):
+        req.user = user
         result = navbar({}, req)
 
         assert result['username_url'] == 'http://example.com/users/vannevar'
@@ -84,12 +84,12 @@ class TestNavbar(object):
         pyramid_config.add_route('logout', '/logout')
 
     @pytest.fixture
-    def authenticated_user(self, factories):
-        authenticated_user = factories.User(username='vannevar')
-        authenticated_user.groups = [factories.Group(), factories.Group()]
-        return authenticated_user
+    def user(self, factories):
+        user = factories.User(username='vannevar')
+        user.groups = [factories.Group(), factories.Group()]
+        return user
 
     @pytest.fixture
     def req(self, pyramid_request):
-        pyramid_request.authenticated_user = None
+        pyramid_request.user = None
         return pyramid_request

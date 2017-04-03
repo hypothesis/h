@@ -237,9 +237,9 @@ class FakeRequest(object):
         self.authenticated_userid = userid
 
         if userid is None:
-            self.authenticated_user = None
+            self.user = None
         else:
-            self.authenticated_user = mock.Mock(groups=[], authority=user_authority)
+            self.user = mock.Mock(groups=[], authority=user_authority)
 
         self.feature = mock.Mock(spec_set=['all'])
         self.route_url = mock.Mock(return_value='/group/a')
@@ -248,13 +248,13 @@ class FakeRequest(object):
         self._authority_group_service = FakeAuthorityGroupService(public_groups)
 
     def set_groups(self, groups):
-        self.authenticated_user.groups = groups
+        self.user.groups = groups
 
     def set_features(self, feature_dict):
         self.feature.all.return_value = feature_dict
 
     def set_sidebar_tutorial_dismissed(self, dismissed):
-        self.authenticated_user.sidebar_tutorial_dismissed = dismissed
+        self.user.sidebar_tutorial_dismissed = dismissed
 
     def set_public_groups(self, public_groups):
         self._authority_group_service = FakeAuthorityGroupService(public_groups)

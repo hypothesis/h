@@ -15,16 +15,16 @@ from h.services.annotation_json_presentation import annotation_json_presentation
 class TestAnnotationJSONPresentationService(object):
     def test_initializes_flag_formatter(self, formatters):
         AnnotationJSONPresentationService(session=mock.sentinel.session,
-                                          authenticated_user=mock.sentinel.authenticated_user,
+                                          user=mock.sentinel.user,
                                           group_svc=mock.sentinel.group_svc,
                                           links_svc=mock.sentinel.links_svc)
 
         formatters.AnnotationFlagFormatter.assert_called_once_with(mock.sentinel.session,
-                                                                   mock.sentinel.authenticated_user)
+                                                                   mock.sentinel.user)
 
     def test_it_configures_flag_formatter(self, formatters):
         svc = AnnotationJSONPresentationService(session=mock.sentinel.session,
-                                                authenticated_user=mock.sentinel.authenticated_user,
+                                                user=mock.sentinel.user,
                                                 group_svc=mock.sentinel.group_svc,
                                                 links_svc=mock.sentinel.links_svc)
 
@@ -91,7 +91,7 @@ class TestAnnotationJSONPresentationService(object):
         group_svc = mock.Mock()
         links_svc = mock.Mock()
         return AnnotationJSONPresentationService(session=db_session,
-                                                 authenticated_user=None,
+                                                 user=None,
                                                  group_svc=group_svc,
                                                  links_svc=links_svc)
 
@@ -133,11 +133,11 @@ class TestAnnotationJSONPresentationServiceFactory(object):
         _, kwargs = service_class.call_args
         assert kwargs['session'] == pyramid_request.db
 
-    def test_provides_authenticated_user(self, pyramid_request, service_class):
+    def test_provides_user(self, pyramid_request, service_class):
         annotation_json_presentation_service_factory(None, pyramid_request)
 
         _, kwargs = service_class.call_args
-        assert kwargs['authenticated_user'] == pyramid_request.authenticated_user
+        assert kwargs['user'] == pyramid_request.user
 
     def test_provides_group_service(self, pyramid_request, service_class, group_svc):
         annotation_json_presentation_service_factory(None, pyramid_request)
@@ -169,5 +169,5 @@ class TestAnnotationJSONPresentationServiceFactory(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock()
+        pyramid_request.user = mock.Mock()
         return pyramid_request

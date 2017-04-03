@@ -14,13 +14,13 @@ from h import storage
 
 
 class AnnotationJSONPresentationService(object):
-    def __init__(self, session, authenticated_user, group_svc, links_svc):
+    def __init__(self, session, user, group_svc, links_svc):
         self.session = session
         self.group_svc = group_svc
         self.links_svc = links_svc
 
         self.formatters = [
-            formatters.AnnotationFlagFormatter(self.session, authenticated_user)
+            formatters.AnnotationFlagFormatter(self.session, user)
         ]
 
     def present(self, annotation_resource):
@@ -56,6 +56,6 @@ def annotation_json_presentation_service_factory(context, request):
     group_svc = request.find_service(IGroupService)
     links_svc = request.find_service(name='links')
     return AnnotationJSONPresentationService(session=request.db,
-                                             authenticated_user=request.authenticated_user,
+                                             user=request.user,
                                              group_svc=group_svc,
                                              links_svc=links_svc)

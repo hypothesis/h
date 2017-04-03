@@ -51,8 +51,8 @@ class SearchController(object):
 
         groups_suggestions = []
 
-        if self.request.authenticated_user:
-            for group in self.request.authenticated_user.groups:
+        if self.request.user:
+            for group in self.request.user.groups:
                 groups_suggestions.append({
                     'name': group.name,
                     'pubid': group.pubid
@@ -108,7 +108,7 @@ class GroupSearchController(SearchController):
 
         result['opts'] = {'search_groupname': self.group.name}
 
-        if self.request.authenticated_user not in self.group.members:
+        if self.request.user not in self.group.members:
             return result
 
         def user_annotation_count(aggregation, userid):
@@ -307,12 +307,12 @@ class UserSearchController(SearchController):
             'orcid': self.user.orcid,
         }
 
-        if self.request.authenticated_user == self.user:
+        if self.request.user == self.user:
             result['user']['edit_url'] = self.request.route_url(
                 'account_profile')
 
         if not result.get('q'):
-            if self.request.authenticated_user == self.user:
+            if self.request.user == self.user:
                 # Tell the template that it should show "How to get started".
                 result['zero_message'] = '__SHOW_GETTING_STARTED__'
             else:

@@ -17,21 +17,21 @@ class AnnotationFlagFormatter(object):
     add: `"flagged": true` to the payload, otherwise `"flagged": false`.
     """
 
-    def __init__(self, session, authenticated_user=None):
+    def __init__(self, session, user=None):
         self.session = session
-        self.authenticated_user = authenticated_user
+        self.user = user
 
         # Local cache of flags. We don't need to care about detached
         # instances because we only store the annotation id and a boolean flag.
         self._cache = {}
 
     def preload(self, ids):
-        if self.authenticated_user is None:
+        if self.user is None:
             return
 
         query = self.session.query(models.Flag) \
                             .filter(models.Flag.annotation_id.in_(ids),
-                                    models.Flag.user == self.authenticated_user)
+                                    models.Flag.user == self.user)
 
         flags = {f.annotation_id: True for f in query}
 
@@ -49,7 +49,7 @@ class AnnotationFlagFormatter(object):
         return {'flagged': flagged}
 
     def _load(self, id_):
-        if self.authenticated_user is None:
+        if self.user is None:
             return False
 
         if id_ in self._cache:
@@ -57,7 +57,7 @@ class AnnotationFlagFormatter(object):
 
         flag = self.session.query(models.Flag) \
                            .filter_by(annotation_id=id_,
-                                      user=self.authenticated_user) \
+                                      user=self.user) \
                            .one_or_none()
 
         self._cache[id_] = (flag is not None)

@@ -17,7 +17,7 @@ class TestCreate(object):
 
         views.create(context, pyramid_request)
 
-        flag_service.create.assert_called_once_with(pyramid_request.authenticated_user,
+        flag_service.create.assert_called_once_with(pyramid_request.user,
                                                     context.annotation)
 
     def test_it_returns_no_content(self, pyramid_request):
@@ -28,7 +28,7 @@ class TestCreate(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock()
+        pyramid_request.user = mock.Mock()
         pyramid_request.json_body = {}
         return pyramid_request
 

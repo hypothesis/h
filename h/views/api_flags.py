@@ -16,5 +16,5 @@ from h.views.api import api_config
             permission='read')
 def create(context, request):
     svc = request.find_service(name='flag')
-    svc.create(request.authenticated_user, context.annotation)
+    svc.create(request.user, context.annotation)
     return HTTPNoContent()

@@ -68,14 +68,14 @@ class TestAuthController(object):
 
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
-        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
+        pyramid_request.user = mock.Mock(username='janedoe')
 
         with pytest.raises(httpexceptions.HTTPFound):
             views.AuthController(pyramid_request).post()
 
     def test_post_redirects_to_search_page_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
-        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
+        pyramid_request.user = mock.Mock(username='janedoe')
 
         with pytest.raises(httpexceptions.HTTPFound) as exc:
             views.AuthController(pyramid_request).post()
@@ -84,7 +84,7 @@ class TestAuthController(object):
 
     def test_post_redirects_to_next_param_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_request.params = {'next': '/foo/bar'}
-        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
+        pyramid_request.user = mock.Mock(username='janedoe')
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
 
         with pytest.raises(httpexceptions.HTTPFound) as e:
@@ -128,7 +128,7 @@ class TestAuthController(object):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
         user = factories.User(username='cara')
-        pyramid_request.authenticated_user = user
+        pyramid_request.user = user
         controller.form = form_validating_to({"user": user})
 
         result = controller.post()
@@ -144,7 +144,7 @@ class TestAuthController(object):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
         user = factories.User(username='cara')
-        pyramid_request.authenticated_user = user
+        pyramid_request.user = user
         controller.form = form_validating_to({"user": user})
 
         result = controller.post()
@@ -163,7 +163,7 @@ class TestAuthController(object):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         elephant = factories.User(username='avocado')
         controller = views.AuthController(pyramid_request)
-        pyramid_request.authenticated_user = elephant
+        pyramid_request.user = elephant
         controller.form = form_validating_to({"user": elephant})
 
         controller.post()
@@ -241,7 +241,7 @@ class TestAjaxAuthController(object):
                     'Could not parse request body as JSON: ')
 
     def test_login_raises_JSONError_on_non_object_json(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock(groups=[])
+        pyramid_request.user = mock.Mock(groups=[])
         pyramid_request.json_body = 'foo'
 
         controller = views.AjaxAuthController(pyramid_request)
@@ -525,7 +525,7 @@ class TestSignupController(object):
 
     def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
-        pyramid_request.authenticated_user = mock.Mock(username='janedoe')
+        pyramid_request.user = mock.Mock(username='janedoe')
         controller = views.SignupController(pyramid_request)
 
         with pytest.raises(httpexceptions.HTTPRedirection):
@@ -679,7 +679,7 @@ class TestActivateController(object):
         notify.assert_called_once_with(ActivationEvent.return_value)
 
     def test_get_when_logged_in_already_logged_in_when_id_not_an_int(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock(id=123, spec=['id'])
+        pyramid_request.user = mock.Mock(id=123, spec=['id'])
         pyramid_request.matchdict = {'id': 'abc',  # Not an int.
                                      'code': 'abc456'}
 
@@ -687,7 +687,7 @@ class TestActivateController(object):
             views.ActivateController(pyramid_request).get_when_logged_in()
 
     def test_get_when_logged_in_already_logged_in_to_same_account(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock(id=123, spec=['id'])
+        pyramid_request.user = mock.Mock(id=123, spec=['id'])
         pyramid_request.matchdict = {'id': '123',
                                      'code': 'abc456'}
 
@@ -700,7 +700,7 @@ class TestActivateController(object):
             "Your account has been activated and you're logged in")
 
     def test_get_when_logged_in_already_logged_in_to_different_account(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock(id=124, spec=['id'])
+        pyramid_request.user = mock.Mock(id=124, spec=['id'])
         pyramid_request.matchdict = {'id': '123',
                                      'code': 'abc456'}
 
@@ -731,17 +731,17 @@ class TestAccountController(object):
 
         controller.post_email_form()
 
-        assert pyramid_request.authenticated_user.email == 'new_email_address'
+        assert pyramid_request.user.email == 'new_email_address'
 
     def test_post_email_form_with_invalid_data_does_not_change_email(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
         controller.forms['email'] = invalid_form()
-        original_email = pyramid_request.authenticated_user.email
+        original_email = pyramid_request.user.email
 
         controller.post_email_form()
 
-        assert pyramid_request.authenticated_user.email == original_email
+        assert pyramid_request.user.email == original_email
 
     def test_post_email_form_with_invalid_data_returns_template_data(
             self, invalid_form, pyramid_request):
@@ -751,7 +751,7 @@ class TestAccountController(object):
         result = controller.post_email_form()
 
         assert result == {
-            'email': pyramid_request.authenticated_user.email,
+            'email': pyramid_request.user.email,
             'email_form': controller.forms['email'].render(),
             'password_form': controller.forms['password'].render(),
         }
@@ -764,11 +764,11 @@ class TestAccountController(object):
 
         controller.post_password_form()
 
-        assert pyramid_request.authenticated_user.check_password('my_new_password')
+        assert pyramid_request.user.check_password('my_new_password')
 
     def test_post_password_form_with_invalid_data_does_not_change_password(
             self, invalid_form, pyramid_request):
-        user = pyramid_request.authenticated_user
+        user = pyramid_request.user
         user.password = 'original password'
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
@@ -785,7 +785,7 @@ class TestAccountController(object):
         result = controller.post_password_form()
 
         assert result == {
-            'email': pyramid_request.authenticated_user.email,
+            'email': pyramid_request.user.email,
             'email_form': controller.forms['email'].render(),
             'password_form': controller.forms['password'].render(),
         }
@@ -793,7 +793,7 @@ class TestAccountController(object):
     @pytest.fixture
     def pyramid_request(self, factories, pyramid_request):
         pyramid_request.POST = {}
-        pyramid_request.authenticated_user = factories.User()
+        pyramid_request.user = factories.User()
         return pyramid_request
 
     @pytest.fixture
@@ -881,9 +881,9 @@ class TestNotificationsController(object):
 class TestEditProfileController(object):
 
     def test_get_reads_user_properties(self, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock()
+        pyramid_request.user = mock.Mock()
         pyramid_request.create_form.return_value = FakeForm()
-        user = pyramid_request.authenticated_user
+        user = pyramid_request.user
         user.display_name = 'Jim Smith'
         user.description = 'Job Description'
         user.orcid = 'ORCID ID'
@@ -903,8 +903,8 @@ class TestEditProfileController(object):
         }
 
     def test_post_sets_user_properties(self, form_validating_to, pyramid_request):
-        pyramid_request.authenticated_user = mock.Mock()
-        user = pyramid_request.authenticated_user
+        pyramid_request.user = mock.Mock()
+        user = pyramid_request.user
 
         ctrl = views.EditProfileController(pyramid_request)
         ctrl.form = form_validating_to({
