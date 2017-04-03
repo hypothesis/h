@@ -32,7 +32,7 @@ environment and contributing to h.
 Community
 ---------
 
-Join us in `#hypothes.is`_ on freenode_ for discussion.
+Join us on Slack_ or in `#hypothes.is`_ on freenode_ for discussion.
 
 If you'd like to contribute to the project, you should also `subscribe`_ to the
 `development mailing list`_ and read our `Contributor's guide`_. Then consider
@@ -41,6 +41,7 @@ getting started on one of the issues that are ready for work.
 Please note that this project is released with a Contributor Code of Conduct.
 By participating in this project you agree to abide by its terms.
 
+.. _Slack: https://slack.hypothes.is
 .. _#hypothes.is: https://www.irccloud.com/invite?channel=%23hypothes.is&amp;hostname=irc.freenode.net&amp;port=6667&amp;ssl=1
 .. _freenode: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
