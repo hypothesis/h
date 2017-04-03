@@ -216,7 +216,7 @@ class TestBatchIndexer(object):
             data = event.annotation_dict
             data['transformed'] = True
 
-        pyramid_config.add_subscriber(transform, 'memex.events.AnnotationTransformEvent')
+        pyramid_config.add_subscriber(transform, 'h.events.AnnotationTransformEvent')
 
         indexer.index()
 
