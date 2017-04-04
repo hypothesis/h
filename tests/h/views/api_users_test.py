@@ -185,6 +185,7 @@ def user_signup_service(db_session, factories, pyramid_config):
     service = Mock(spec_set=UserSignupService(default_authority='example.com',
                                               mailer=None,
                                               session=None,
+                                              password_service=None,
                                               signup_email=None,
                                               stats=None))
     pyramid_config.register_service(service, name='user_signup')

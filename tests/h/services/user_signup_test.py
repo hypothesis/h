@@ -5,11 +5,12 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
+from h.models import Activation, Subscriptions, User
+from h.services.user_password import UserPasswordService
 from h.services.user_signup import (
     UserSignupService,
     user_signup_service_factory,
 )
-from h.models import Activation, Subscriptions, User
 
 
 class TestUserSignupService(object):
@@ -52,6 +53,14 @@ class TestUserSignupService(object):
 
         assert user.authority == 'bar-client.com'
 
+    def test_signup_sets_password_using_password_service(self, svc, user_password_service):
+        user = svc.signup(username='foo',
+                          email='foo@bar.com',
+                          password='wibble')
+
+        user_password_service.update_password.assert_called_once_with(user, 'wibble')
+        assert user._password == 'fakehash'
+
     def test_passes_user_info_to_signup_email(self, svc, signup_email):
         user = svc.signup(username='foo', email='foo@bar.com')
 
@@ -91,10 +100,11 @@ class TestUserSignupService(object):
         stats.incr.assert_called_once_with('auth.local.register')
 
     @pytest.fixture
-    def svc(self, db_session, mailer, signup_email):
+    def svc(self, db_session, mailer, signup_email, user_password_service):
         return UserSignupService(default_authority='example.org',
                                  mailer=mailer,
                                  session=db_session,
+                                 password_service=user_password_service,
                                  signup_email=signup_email)
 
     @pytest.fixture
@@ -112,6 +122,7 @@ class TestUserSignupService(object):
         return mock.Mock(spec_set=['incr'])
 
 
+@pytest.mark.usefixtures('user_password_service')
 class TestUserSignupServiceFactory(object):
     def test_returns_user_signup_service(self, pyramid_request):
         svc = user_signup_service_factory(None, pyramid_request)
@@ -139,6 +150,12 @@ class TestUserSignupServiceFactory(object):
                                              email='foo@bar.com',
                                              activation_code='abc456')
 
+    def test_provides_user_password_service(self, pyramid_request):
+        svc = user_signup_service_factory(None, pyramid_request)
+        password_svc = pyramid_request.find_service(name='user_password')
+
+        assert svc.password_service == password_svc
+
     def test_provides_request_stats_as_stats(self, pyramid_request):
         svc = user_signup_service_factory(None, pyramid_request)
 
@@ -149,3 +166,15 @@ class TestUserSignupServiceFactory(object):
 def pyramid_request(pyramid_request):
     pyramid_request.stats = mock.Mock(spec_set=['incr'])
     return pyramid_request
+
+
+@pytest.fixture
+def user_password_service(pyramid_config):
+    service = mock.Mock(spec_set=UserPasswordService())
+
+    def password_setter(user, password):
+        user._password = 'fakehash'
+    service.update_password.side_effect = password_setter
+
+    pyramid_config.register_service(service, name='user_password')
+    return service

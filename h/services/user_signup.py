@@ -18,6 +18,7 @@ class UserSignupService(object):
                  mailer,
                  session,
                  signup_email,
+                 password_service,
                  stats=None):
         """
         Create a new user signup service.
@@ -26,12 +27,14 @@ class UserSignupService(object):
         :param mailer: a mailer (such as :py:mod:`h.tasks.mailer`)
         :param session: the SQLAlchemy session object
         :param signup_email: a function for generating a signup email
+        :param password_service: the user password service
         :param stats: the stats service
         """
         self.default_authority = default_authority
         self.mailer = mailer
         self.session = session
         self.signup_email = signup_email
+        self.password_service = password_service
         self.stats = stats
 
     def signup(self, require_activation=True, **kwargs):
@@ -44,15 +47,23 @@ class UserSignupService(object):
         :param require_activation: The name to use.
         :type require_activation: bool.
 
-        Remaining keyword arguments are passed to the
-        :py:class:`h.models.User` constructor.
+        Remaining keyword arguments are used to construct a new
+        :py:class:`h.models.User` object.
 
         :returns: the newly-created user object.
         :rtype: h.models.User
         """
         kwargs.setdefault('authority', self.default_authority)
+
+        # We extract any passed password as we use that separately to set the
+        # user's password.
+        password = kwargs.pop('password', None)
+
         user = User(**kwargs)
         self.session.add(user)
+
+        if password is not None:
+            self.password_service.update_password(user, password)
 
         # Create a new activation for the user
         if require_activation:
@@ -92,4 +103,5 @@ def user_signup_service_factory(context, request):
                              mailer=mailer,
                              session=request.db,
                              signup_email=partial(signup.generate, request),
+                             password_service=request.find_service(name='user_password'),
                              stats=request.stats)
