@@ -338,7 +338,6 @@ def models(patch):
 def user_service(pyramid_config, db_session):
     service = Mock(spec_set=UserService(default_authority='example.com',
                                         session=db_session))
-    service.login.return_value = None
     pyramid_config.register_service(service, name='user')
     return service
 

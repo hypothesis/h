@@ -4,13 +4,8 @@ from __future__ import unicode_literals
 
 import pytest
 
-from h.services.user import (
-    UserNotActivated,
-    UserNotKnown,
-    UserService,
-    user_service_factory,
-)
 from h.models import User
+from h.services.user import UserNotActivated, UserService, user_service_factory
 
 
 @pytest.mark.usefixtures('users')
@@ -25,33 +20,27 @@ class TestUserService(object):
 
         assert isinstance(result, User)
 
-    def test_login_by_username(self, svc, users):
+    def test_fetch_for_login_by_username(self, svc, users):
         _, steve, _ = users
-        assert svc.login('steve', 'stevespassword') is steve
+        assert svc.fetch_for_login('steve') is steve
 
-    def test_login_by_email(self, svc, users):
+    def test_fetch_for_login_by_email(self, svc, users):
         _, steve, _ = users
-        assert svc.login('steve@steveo.com', 'stevespassword') is steve
+        assert svc.fetch_for_login('steve@steveo.com') is steve
 
-    def test_login_bad_password(self, svc):
-        assert svc.login('steve', 'incorrect') is None
-        assert svc.login('steve@steveo.com', 'incorrect') is None
+    def test_fetch_for_login_by_username_wrong_authority(self, svc):
+        assert svc.fetch_for_login('jacqui') is None
 
-    def test_login_by_username_wrong_authority(self, svc):
-        with pytest.raises(UserNotKnown):
-            svc.login('jacqui', 'jacquispassword')
+    def test_fetch_for_login_by_email_wrong_authority(self, svc):
+        assert svc.fetch_for_login('jacqui@jj.com') is None
 
-    def test_login_by_email_wrong_authority(self, svc):
-        with pytest.raises(UserNotKnown):
-            svc.login('jacqui@jj.com', 'jacquispassword')
-
-    def test_login_by_username_not_activated(self, svc):
+    def test_fetch_for_login_by_username_not_activated(self, svc):
         with pytest.raises(UserNotActivated):
-            svc.login('mirthe', 'mirthespassword')
+            svc.fetch_for_login('mirthe')
 
-    def test_login_by_email_not_activated(self, svc, users):
+    def test_fetch_for_login_by_email_not_activated(self, svc, users):
         with pytest.raises(UserNotActivated):
-            svc.login('mirthe@deboer.com', 'mirthespassword')
+            svc.fetch_for_login('mirthe@deboer.com')
 
     def test_update_preferences_tutorial_enable(self, svc, factories):
         user = factories.User.build(sidebar_tutorial_dismissed=True)
@@ -83,16 +72,13 @@ class TestUserService(object):
     def users(self, db_session, factories):
         users = [factories.User(username='jacqui',
                                 email='jacqui@jj.com',
-                                authority='foo.com',
-                                password='jacquispassword'),
+                                authority='foo.com'),
                  factories.User(username='steve',
                                 email='steve@steveo.com',
-                                authority='example.com',
-                                password='stevespassword'),
+                                authority='example.com'),
                  factories.User(username='mirthe',
                                 email='mirthe@deboer.com',
                                 authority='example.com',
-                                password='mirthespassword',
                                 inactive=True)]
         db_session.flush()
         return users

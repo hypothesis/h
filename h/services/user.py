@@ -2,23 +2,15 @@
 
 from __future__ import unicode_literals
 
-from h.models import Annotation, User
+from h.models import User
 from h.util.db import lru_cache_in_transaction
 from h.util.user import split_user
 
 UPDATE_PREFS_ALLOWED_KEYS = set(['show_sidebar_tutorial'])
 
 
-class LoginError(Exception):
-    pass
-
-
-class UserNotActivated(LoginError):
+class UserNotActivated(Exception):
     """Tried to log in to an unactivated user account."""
-
-
-class UserNotKnown(LoginError):
-    """User not found while attempting to log in."""
 
 
 class UserService(object):
@@ -64,15 +56,17 @@ class UserService(object):
 
         return self._cached_fetch(username, authority)
 
-    def login(self, username_or_email, password):
+    def fetch_for_login(self, username_or_email):
         """
-        Attempt to login using *username_or_email* and *password*.
+        Fetch a user by data provided in the login field.
 
-        :returns: A user object if login succeeded, None otherwise.
+        This searches for a user by username in the default authority, or by
+        email in the default authority if `username_or_email` contains an "@"
+        character.
+
+        :returns: A user object if a user was found, None otherwise.
         :rtype: h.models.User or NoneType
         :raises UserNotActivated: When the user is not activated.
-        :raises UserNotKnown: When the user cannot be found in the default
-            authority.
         """
         filters = {'authority': self.default_authority}
         if '@' in username_or_email:
@@ -85,15 +79,12 @@ class UserService(object):
                 .one_or_none())
 
         if user is None:
-            raise UserNotKnown()
+            return None
 
         if not user.is_activated:
             raise UserNotActivated()
 
-        if user.check_password(password):
-            return user
-
-        return None
+        return user
 
     def update_preferences(self, user, **kwargs):
         invalid_keys = set(kwargs.keys()) - UPDATE_PREFS_ALLOWED_KEYS
