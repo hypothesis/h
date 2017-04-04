@@ -14,7 +14,7 @@ class TestUserPasswordService(object):
         assert not svc.check_password(user, 'anything')
 
     def test_check_password_false_with_empty_password(self, svc, user):
-        user._password = ''
+        user.password = ''
 
         assert not svc.check_password(user, '')
 
@@ -31,7 +31,7 @@ class TestUserPasswordService(object):
     def test_check_password_validates_old_style_passwords(self, svc, user):
         user.salt = 'somesalt'
         # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
-        user._password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
+        user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         assert not svc.check_password(user, 'somethingelse')
         assert svc.check_password(user, 'foobar')
@@ -39,27 +39,27 @@ class TestUserPasswordService(object):
     def test_check_password_upgrades_old_style_passwords(self, hasher, svc, user):
         user.salt = 'somesalt'
         # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
-        user._password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
+        user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         svc.check_password(user, 'foobar')
 
         assert user.salt is None
-        assert not hasher.needs_update(user._password)
+        assert not hasher.needs_update(user.password)
 
     def test_check_password_only_upgrades_when_password_is_correct(self, hasher, svc, user):
         user.salt = 'somesalt'
         # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
-        user._password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
+        user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         svc.check_password(user, 'donkeys')
 
         assert user.salt is not None
-        assert hasher.needs_update(user._password)
+        assert hasher.needs_update(user.password)
 
     def test_check_password_works_after_upgrade(self, svc, user):
         user.salt = 'somesalt'
         # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
-        user._password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
+        user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         svc.check_password(user, 'foobar')
 
@@ -67,15 +67,15 @@ class TestUserPasswordService(object):
 
     def test_check_password_upgrades_new_style_passwords(self, hasher, svc, user):
         # Generated with passlib.hash.bcrypt.encrypt('foobar', rounds=4, ident='2b')
-        user._password = '$2b$04$L2j.vXxlLt9JJNHHsy0EguslcaphW7vssSpHbhqCmf9ECsMiuTd1y'
+        user.password = '$2b$04$L2j.vXxlLt9JJNHHsy0EguslcaphW7vssSpHbhqCmf9ECsMiuTd1y'
 
         svc.check_password(user, 'foobar')
 
-        assert not hasher.needs_update(user._password)
+        assert not hasher.needs_update(user.password)
 
     def test_updating_password_unsets_salt(self, svc, user):
         user.salt = 'somesalt'
-        user._password = 'whatever'
+        user.password = 'whatever'
 
         svc.update_password(user, 'flibble')
 

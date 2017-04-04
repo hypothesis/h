@@ -7,12 +7,6 @@ import datetime
 from h._compat import text_type
 from h.security import password_context
 
-# FIXME: This service currently interacts with the underscored "_password"
-# property of the user model. This is to make it possible to roll this change
-# out incrementally. When all password checking functionality has been removed
-# from the user model, we should rename the password hash property to plain
-# "password" (no underscore) and use that in this service.
-
 
 class UserPasswordService(object):
 
@@ -30,7 +24,7 @@ class UserPasswordService(object):
 
     def check_password(self, user, password):
         """Check the password for this user, and upgrade it if necessary."""
-        if not user._password:
+        if not user.password:
             return False
 
         # Old-style separate salt.
@@ -39,7 +33,7 @@ class UserPasswordService(object):
         # users have updated their password by logging-in. (Check how many
         # users still have a non-null salt in the database.)
         if user.salt is not None:
-            verified = self.hasher.verify(password + user.salt, user._password)
+            verified = self.hasher.verify(password + user.salt, user.password)
 
             # If the password is correct, take this opportunity to upgrade the
             # password and remove the salt.
@@ -49,12 +43,12 @@ class UserPasswordService(object):
             return verified
 
         verified, new_hash = self.hasher.verify_and_update(password,
-                                                           user._password)
+                                                           user.password)
         if not verified:
             return False
 
         if new_hash is not None:
-            user._password = text_type(new_hash)
+            user.password = text_type(new_hash)
 
         return verified
 
@@ -63,7 +57,7 @@ class UserPasswordService(object):
         # Remove any existing explicit salt (the password context salts the
         # password automatically).
         user.salt = None
-        user._password = text_type(self.hasher.encrypt(new_password))
+        user.password = text_type(self.hasher.encrypt(new_password))
         user.password_updated = datetime.datetime.utcnow()
 
 

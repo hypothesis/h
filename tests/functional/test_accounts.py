@@ -93,7 +93,8 @@ class TestAccountSettings(object):
 
     @pytest.fixture
     def user(self, db_session, factories):
-        user = factories.User(password='pass')
+        # Password is 'pass'
+        user = factories.User(password='$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6')
         db_session.commit()
         return user
 

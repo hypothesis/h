@@ -12,7 +12,6 @@ from h.accounts import util
 from h.services.user import UserNotActivated
 from h.models.user import (
     EMAIL_MAX_LENGTH,
-    PASSWORD_MIN_LENGTH,
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
@@ -22,6 +21,7 @@ from h.schemas import JSONSchema
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
 
+PASSWORD_MIN_LENGTH = 2  # FIXME: this is ridiculous
 USERNAME_BLACKLIST = None
 
 

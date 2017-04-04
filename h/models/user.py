@@ -7,16 +7,14 @@ import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy.ext.declarative import declared_attr
 
-from h._compat import string_types, text_type
+from h._compat import string_types
 from h.db import Base
-from h.security import password_context
 from h.util.user import split_user
 
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
 USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
 EMAIL_MAX_LENGTH = 100
-PASSWORD_MIN_LENGTH = 2
 
 
 def _normalise_username(username):
@@ -238,7 +236,7 @@ class User(Base):
         session.delete(self.activation)
 
     #: Hashed password
-    _password = sa.Column('password', sa.UnicodeText(), nullable=True)
+    password = sa.Column(sa.UnicodeText(), nullable=True)
     #: Last password update
     password_updated = sa.Column(sa.DateTime(), nullable=True)
 
@@ -250,52 +248,6 @@ class User(Base):
     #: which were, sadly, double-salted. As users log in, we are slowly
     #: upgrading their passwords and setting this column to None.
     salt = sa.Column(sa.UnicodeText(), nullable=True)
-
-    @hybrid_property
-    def password(self):
-        return self._password
-
-    @password.setter
-    def password(self, secret):
-        if len(secret) < PASSWORD_MIN_LENGTH:
-            raise ValueError('password must be more than {min} characters '
-                             'long'.format(min=PASSWORD_MIN_LENGTH))
-        # Remove any existing explicit salt (the password context salts the
-        # password automatically).
-        self.salt = None
-        self._password = text_type(password_context.encrypt(secret))
-        self.password_updated = datetime.datetime.utcnow()
-
-    def check_password(self, secret):
-        """Check the passed password for this user."""
-        if not self.password:
-            return False
-
-        # Old-style separate salt.
-        #
-        # TODO: remove this deprecated code path when a suitable proportion of
-        # users have updated their password by logging-in. (Check how many
-        # users still have a non-null salt in the database.)
-        if self.salt is not None:
-            verified = password_context.verify(secret + self.salt,
-                                               self.password)
-
-            # If the password is correct, take this opportunity to upgrade the
-            # password and remove the salt.
-            if verified:
-                self.password = secret
-
-            return verified
-
-        verified, new_hash = password_context.verify_and_update(secret,
-                                                                self.password)
-        if not verified:
-            return False
-
-        if new_hash is not None:
-            self._password = text_type(new_hash)
-
-        return verified
 
     @sa.orm.validates('email')
     def validate_email(self, key, email):
@@ -345,4 +297,3 @@ class User(Base):
 
     def __repr__(self):
         return '<User: %s>' % self.username
-
