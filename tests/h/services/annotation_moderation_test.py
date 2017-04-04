@@ -44,6 +44,30 @@ class TestAnnotationModerationServiceHide(object):
         assert count == 1
 
 
+class TestAnnotationModerationServiceUnhide(object):
+    def test_it_unhides_given_annotation(self, svc, factories, db_session):
+        mod = factories.AnnotationModeration()
+        annotation = mod.annotation
+
+        svc.unhide(annotation)
+
+        assert svc.hidden(annotation.id) is False
+
+    def test_it_leaves_othes_annotations_hidden(self, svc, factories, db_session):
+        mod1, mod2 = factories.AnnotationModeration(), factories.AnnotationModeration()
+
+        svc.unhide(mod1.annotation)
+
+        assert svc.hidden(mod2.annotation.id) is True
+
+    def test_it_skips_hiding_annotation_when_not_hidden(self, svc, factories, db_session):
+        annotation = factories.Annotation()
+
+        svc.unhide(annotation)
+
+        assert svc.hidden(annotation.id) is False
+
+
 class TestAnnotationNipsaServiceFactory(object):
     def test_it_returns_service(self, pyramid_request):
         svc = annotation_moderation_service_factory(None, pyramid_request)
