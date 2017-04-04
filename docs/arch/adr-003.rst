@@ -73,7 +73,7 @@ annotations and their associated flags) easier to understand.
 Status
 ------
 
-Proposed.
+Accepted.
 
 Consequences
 ------------
