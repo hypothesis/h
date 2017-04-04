@@ -1,9 +1,24 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 
 def transform_annotation(event):
-    """Add a {"nipsa": True} field on annotations whose users are flagged."""
-    annotation = event.annotation_dict
-    nipsa_service = event.request.find_service(name='nipsa')
-    if 'user' in annotation and nipsa_service.is_flagged(annotation['user']):
-        annotation['nipsa'] = True
+    """Add a {"nipsa": True} field on moderated annotations or whose users are flagged."""
+    payload = event.annotation_dict
+
+    nipsa = _user_nipsa(event.request, payload)
+    nipsa = nipsa or _annotation_moderated(event.request, payload)
+
+    if nipsa:
+        payload['nipsa'] = True
+
+
+def _user_nipsa(request, payload):
+    nipsa_service = request.find_service(name='nipsa')
+    return 'user' in payload and nipsa_service.is_flagged(payload['user'])
+
+
+def _annotation_moderated(request, payload):
+    svc = request.find_service(name='annotation_moderation')
+    return svc.hidden(payload['id'])
