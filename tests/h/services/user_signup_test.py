@@ -59,7 +59,7 @@ class TestUserSignupService(object):
                           password='wibble')
 
         user_password_service.update_password.assert_called_once_with(user, 'wibble')
-        assert user._password == 'fakehash'
+        assert user.password == 'fakehash'
 
     def test_passes_user_info_to_signup_email(self, svc, signup_email):
         user = svc.signup(username='foo', email='foo@bar.com')
@@ -173,7 +173,7 @@ def user_password_service(pyramid_config):
     service = mock.Mock(spec_set=UserPasswordService())
 
     def password_setter(user, password):
-        user._password = 'fakehash'
+        user.password = 'fakehash'
     service.update_password.side_effect = password_setter
 
     pyramid_config.register_service(service, name='user_password')
