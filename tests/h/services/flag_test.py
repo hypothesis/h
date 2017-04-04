@@ -25,7 +25,7 @@ class TestFlagServiceFlagged(object):
 
     @pytest.fixture
     def flags(self, factories):
-        return [factories.Flag() for _ in xrange(3)]
+        return factories.Flag.create_batch(3)
 
 
 class TestFlagServiceCreate(object):

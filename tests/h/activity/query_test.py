@@ -583,7 +583,7 @@ class TestExecute(object):
 
 class TestFetchAnnotations(object):
     def test_it_returns_annotations_by_ids(self, db_session, factories):
-        annotations = [factories.Annotation() for _ in xrange(3)]
+        annotations = factories.Annotation.create_batch(3)
         ids = [a.id for a in annotations]
 
         result = fetch_annotations(db_session, ids)
