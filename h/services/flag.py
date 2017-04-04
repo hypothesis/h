@@ -41,6 +41,11 @@ class FlagService(object):
         :returns The subset of the IDs that the given user has flagged.
         :rtype set of unicode
         """
+        # SQLAlchemy doesn't behave in the way we might expect when handed an
+        # `in_` condition with an empty sequence
+        if not annotation_ids:
+            return set()
+
         query = self.session.query(models.Flag.annotation_id) \
                             .filter(models.Flag.annotation_id.in_(annotation_ids),
                                     models.Flag.user == user)
