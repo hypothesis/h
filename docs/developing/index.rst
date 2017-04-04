@@ -17,3 +17,4 @@ and how to contribute code or documentation to the project.
    documentation
    ssl
    making-changes-to-model-code
+   envvars
