@@ -9,7 +9,7 @@ from itsdangerous import BadData, SignatureExpired
 
 from h import i18n, models, validators
 from h.accounts import util
-from h.services.user import UserNotActivated, UserNotKnown
+from h.services.user import UserNotActivated
 from h.models.user import (
     EMAIL_MAX_LENGTH,
     PASSWORD_MIN_LENGTH,
@@ -145,14 +145,10 @@ class LoginSchema(CSRFSchema):
         password = value.get('password')
 
         user_service = request.find_service(name='user')
+        user_password_service = request.find_service(name='user_password')
 
         try:
-            user = user_service.login(username_or_email=username,
-                                      password=password)
-        except UserNotKnown:
-            err = colander.Invalid(node)
-            err['username'] = _('User does not exist.')
-            raise err
+            user = user_service.fetch_for_login(username_or_email=username)
         except UserNotActivated:
             err = colander.Invalid(node)
             err['username'] = _("Please check your email and open the link "
@@ -160,6 +156,11 @@ class LoginSchema(CSRFSchema):
             raise err
 
         if user is None:
+            err = colander.Invalid(node)
+            err['username'] = _('User does not exist.')
+            raise err
+
+        if not user_password_service.check_password(user, password):
             err = colander.Invalid(node)
             err['password'] = _('Wrong password.')
             raise err
@@ -277,9 +278,10 @@ class EmailChangeSchema(CSRFSchema):
         super(EmailChangeSchema, self).validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings['request']
+        svc = request.find_service(name='user_password')
         user = request.user
 
-        if not user.check_password(value.get('password')):
+        if not svc.check_password(user, value.get('password')):
             exc['password'] = _('Wrong password.')
 
         if exc.children:
@@ -303,12 +305,13 @@ class PasswordChangeSchema(CSRFSchema):
         super(PasswordChangeSchema, self).validator(node, value)
         exc = colander.Invalid(node)
         request = node.bindings['request']
+        svc = request.find_service(name='user_password')
         user = request.user
 
         if value.get('new_password') != value.get('new_password_confirm'):
             exc['new_password_confirm'] = _('The passwords must match')
 
-        if not user.check_password(value.get('password')):
+        if not svc.check_password(user, value.get('password')):
             exc['password'] = _('Wrong password.')
 
         if exc.children:
