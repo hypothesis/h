@@ -31,5 +31,9 @@ class WorldGroup(object):
         return '__world__'
 
     @property
+    def creator(self):
+        return None
+
+    @property
     def is_public(self):
         return True
