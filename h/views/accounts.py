@@ -314,7 +314,8 @@ class ResetController(object):
             raise httpexceptions.HTTPFound(self.request.route_path('index'))
 
     def _reset_password(self, user, password):
-        user.password = password
+        svc = self.request.find_service(name='user_password')
+        svc.update_password(user, password)
 
         self.request.session.flash(jinja2.Markup(_(
             'Your password has been reset. '
@@ -524,7 +525,8 @@ class AccountController(object):
         self.request.user.email = appstruct['email']
 
     def update_password(self, appstruct):
-        self.request.user.password = appstruct['new_password']
+        svc = self.request.find_service(name='user_password')
+        svc.update_password(self.request.user, appstruct['new_password'])
 
     def _template_data(self):
         """Return the data needed to render accounts.html.jinja2."""

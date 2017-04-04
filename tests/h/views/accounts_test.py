@@ -8,6 +8,7 @@ import deform
 from pyramid import httpexceptions
 
 from h import accounts
+from h.services.user_password import UserPasswordService
 from h.views import accounts as views
 
 
@@ -401,7 +402,7 @@ class TestForgotPasswordController(object):
         pyramid_config.add_route('account_reset', '/account/reset')
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('routes', 'user_password_service')
 class TestResetController(object):
 
     def test_post_returns_form_when_validation_fails(self,
@@ -417,15 +418,16 @@ class TestResetController(object):
     def test_post_sets_user_password_from_form(self,
                                                factories,
                                                form_validating_to,
-                                               pyramid_request):
-        elephant = factories.User(password='password1')
+                                               pyramid_request,
+                                               user_password_service):
+        elephant = factories.User()
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': elephant,
                                               'password': 's3cure!'})
 
         controller.post()
 
-        assert elephant.check_password('s3cure!')
+        user_password_service.update_password.assert_called_once_with(elephant, 's3cure!')
 
     @mock.patch('h.views.accounts.PasswordResetEvent', autospec=True)
     def test_post_emits_event(self,
@@ -434,7 +436,7 @@ class TestResetController(object):
                               form_validating_to,
                               notify,
                               pyramid_request):
-        user = factories.User(password='password1')
+        user = factories.User()
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': user,
                                               'password': 's3cure!'})
@@ -448,7 +450,7 @@ class TestResetController(object):
                                        factories,
                                        form_validating_to,
                                        pyramid_request):
-        user = factories.User(password='password1')
+        user = factories.User()
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': user,
                                               'password': 's3cure!'})
@@ -719,7 +721,7 @@ class TestActivateController(object):
         pyramid_config.add_route('logout', '/logout')
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('routes', 'user_password_service')
 class TestAccountController(object):
 
     def test_post_email_form_with_valid_data_changes_email(self,
@@ -757,25 +759,25 @@ class TestAccountController(object):
         }
 
     def test_post_password_form_with_valid_data_changes_password(
-            self, form_validating_to, pyramid_request):
+            self, form_validating_to, pyramid_request, user_password_service):
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = form_validating_to({
             'new_password': 'my_new_password'})
 
         controller.post_password_form()
 
-        assert pyramid_request.user.check_password('my_new_password')
+        user_password_service.update_password.assert_called_once_with(pyramid_request.user,
+                                                                      'my_new_password')
 
     def test_post_password_form_with_invalid_data_does_not_change_password(
-            self, invalid_form, pyramid_request):
+            self, invalid_form, pyramid_request, user_password_service):
         user = pyramid_request.user
-        user.password = 'original password'
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
 
         controller.post_password_form()
 
-        assert user.check_password('original password')
+        assert not user_password_service.update_password.called
 
     def test_post_password_form_with_invalid_data_returns_template_data(
             self, invalid_form, pyramid_request):
@@ -1033,6 +1035,13 @@ def mailer(patch):
 @pytest.fixture
 def models(patch):
     return patch('h.views.accounts.models')
+
+
+@pytest.fixture
+def user_password_service(pyramid_config):
+    service = mock.Mock(spec_set=UserPasswordService())
+    pyramid_config.register_service(service, name='user_password')
+    return service
 
 
 @pytest.fixture
