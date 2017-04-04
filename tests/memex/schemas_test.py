@@ -106,10 +106,10 @@ class TestCreateUpdateAnnotationSchema(object):
             'tags': ['foo', 'bar'],
             'target': [
                 {
-                    'selector': 'foo'
+                    'selector': [{'type': 'foo'}],
                 },
                 {
-                    'selector': 'foo'
+                    'selector': [{'type': 'bar'}],
                 },
             ],
             'text': 'foo',
@@ -192,6 +192,21 @@ class TestCreateUpdateAnnotationSchema(object):
 
         ({'target': [False]}, "target.0: False is not of type 'object'"),
 
+        ({'target': [{'selector': False}]},
+         "target.0.selector: False is not of type 'array'"),
+
+        ({'target': [{'selector': {'type': 'foo'}}]},
+         "target.0.selector: {u'type': u'foo'} is not of type 'array'"),
+
+        ({'target': [{'selector': [False]}]},
+         "target.0.selector.0: False is not of type 'object'"),
+
+        ({'target': [{'selector': [{}]}]},
+         "target.0.selector.0: 'type' is a required property"),
+
+        ({'target': [{'selector': [{'type': False}]}]},
+         "target.0.selector.0.type: False is not of type 'string'"),
+
         ({'text': False}, "text: False is not of type 'string'"),
 
         ({'uri': False}, "uri: False is not of type 'string'"),
@@ -255,14 +270,19 @@ class TestCreateUpdateAnnotationSchema(object):
         appstruct = validate(pyramid_request, {
             'target': [
                 {
-                    'foo': 'bar',  # This should be removed,
-                    'selector': 'the selectors',
+                    'foo': 'bar',  # This should be removed
+                    'selector': [{'type': 'FooSelector'},
+                                 {'type': 'BarSelector'}],
                 },
-                'this should be removed',
+                {
+                    # Additional targets are ignored.
+                    'selector': [{'type': 'BazSelector'}],
+                },
             ]
         })
 
-        assert appstruct['target_selectors'] == 'the selectors'
+        assert appstruct['target_selectors'] == [{'type': 'FooSelector'},
+                                                 {'type': 'BarSelector'}]
 
     def test_it_extracts_document_uris_from_the_document(
             self,
