@@ -17,8 +17,8 @@ class AnnotationFlagFormatter(object):
     add: `"flagged": true` to the payload, otherwise `"flagged": false`.
     """
 
-    def __init__(self, session, user=None):
-        self.session = session
+    def __init__(self, flag_service, user=None):
+        self.flag_service = flag_service
         self.user = user
 
         # Local cache of flags. We don't need to care about detached
@@ -29,36 +29,26 @@ class AnnotationFlagFormatter(object):
         if self.user is None:
             return
 
-        query = self.session.query(models.Flag) \
-                            .filter(models.Flag.annotation_id.in_(ids),
-                                    models.Flag.user == self.user)
+        flagged_ids = self.flag_service.all_flagged(user=self.user,
+                                                    annotation_ids=ids)
 
-        flags = {f.annotation_id: True for f in query}
-
-        # Set flags which have not been found explicitly to False to indicate
-        # that we already tried to load them.
-        missing_ids = set(ids) - set(flags.keys())
-        missing = {id_: False for id_ in missing_ids}
-        flags.update(missing)
-
+        flags = {id_: (id_ in flagged_ids) for id_ in ids}
         self._cache.update(flags)
         return flags
 
     def format(self, annotation):
-        flagged = self._load(annotation.id)
+        flagged = self._load(annotation)
         return {'flagged': flagged}
 
-    def _load(self, id_):
+    def _load(self, annotation):
         if self.user is None:
             return False
+
+        id_ = annotation.id
 
         if id_ in self._cache:
             return self._cache[id_]
 
-        flag = self.session.query(models.Flag) \
-                           .filter_by(annotation_id=id_,
-                                      user=self.user) \
-                           .one_or_none()
-
-        self._cache[id_] = (flag is not None)
+        flagged = self.flag_service.flagged(user=self.user, annotation=annotation)
+        self._cache[id_] = flagged
         return self._cache[id_]

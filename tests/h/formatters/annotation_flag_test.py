@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 from h.formatters.annotation_flag import AnnotationFlagFormatter
+from h.services.flag import FlagService
 
 
 class TestAnnotationFlagFormatter(object):
@@ -45,8 +46,12 @@ class TestAnnotationFlagFormatter(object):
         return factories.User()
 
     @pytest.fixture
-    def formatter(self, db_session, current_user):
-        return AnnotationFlagFormatter(db_session, current_user)
+    def formatter(self, flag_service, current_user):
+        return AnnotationFlagFormatter(flag_service, current_user)
+
+    @pytest.fixture
+    def flag_service(self, db_session):
+        return FlagService(db_session)
 
     @pytest.fixture
     def flags(self, factories, current_user, other_user):
