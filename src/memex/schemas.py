@@ -136,15 +136,21 @@ class AnnotationSchema(JSONSchema):
             },
             'target': {
                 'type': 'array',
-                'items': [
-                    {
-                        'type': 'object',
-                        'properties': {
-                            'selector': {
-                            },
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'selector': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'type': {'type': 'string'}
+                                },
+                                'required': ['type']
+                            }
                         },
                     },
-                ],
+                },
             },
             'text': {
                 'type': 'string',
