@@ -28,6 +28,30 @@ class FlagService(object):
         query = self.session.query(models.Flag).filter_by(user=user, annotation=annotation)
         return query.count() > 0
 
+    def all_flagged(self, user, annotation_ids):
+        """
+        Check which of the given annotation IDs the given user has flagged.
+
+        :param user: The user to check for a flag.
+        :type user: h.models.User
+
+        :param annotation_ids: The IDs of the annotations to check.
+        :type annotation_ids: sequence of unicode
+
+        :returns The subset of the IDs that the given user has flagged.
+        :rtype set of unicode
+        """
+        # SQLAlchemy doesn't behave in the way we might expect when handed an
+        # `in_` condition with an empty sequence
+        if not annotation_ids:
+            return set()
+
+        query = self.session.query(models.Flag.annotation_id) \
+                            .filter(models.Flag.annotation_id.in_(annotation_ids),
+                                    models.Flag.user == user)
+
+        return set([f.annotation_id for f in query])
+
     def create(self, user, annotation):
         """
         Create a flag for the given user and annotation.

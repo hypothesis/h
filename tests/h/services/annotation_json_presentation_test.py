@@ -16,16 +16,18 @@ class TestAnnotationJSONPresentationService(object):
         AnnotationJSONPresentationService(session=mock.sentinel.session,
                                           user=mock.sentinel.user,
                                           group_svc=mock.sentinel.group_svc,
-                                          links_svc=mock.sentinel.links_svc)
+                                          links_svc=mock.sentinel.links_svc,
+                                          flag_svc=mock.sentinel.flag_svc)
 
-        formatters.AnnotationFlagFormatter.assert_called_once_with(mock.sentinel.session,
+        formatters.AnnotationFlagFormatter.assert_called_once_with(mock.sentinel.flag_svc,
                                                                    mock.sentinel.user)
 
     def test_it_configures_flag_formatter(self, formatters):
         svc = AnnotationJSONPresentationService(session=mock.sentinel.session,
                                                 user=mock.sentinel.user,
                                                 group_svc=mock.sentinel.group_svc,
-                                                links_svc=mock.sentinel.links_svc)
+                                                links_svc=mock.sentinel.links_svc,
+                                                flag_svc=mock.sentinel.flag_svc)
 
         assert formatters.AnnotationFlagFormatter.return_value in svc.formatters
 
@@ -89,10 +91,12 @@ class TestAnnotationJSONPresentationService(object):
     def svc(self, db_session):
         group_svc = mock.Mock()
         links_svc = mock.Mock()
+        flag_svc = mock.Mock()
         return AnnotationJSONPresentationService(session=db_session,
                                                  user=None,
                                                  group_svc=group_svc,
-                                                 links_svc=links_svc)
+                                                 links_svc=links_svc,
+                                                 flag_svc=flag_svc)
 
     @pytest.fixture
     def annotation_resource(self):
@@ -119,7 +123,7 @@ class TestAnnotationJSONPresentationService(object):
         return patch('h.services.annotation_json_presentation.formatters')
 
 
-@pytest.mark.usefixtures('group_svc', 'links_svc')
+@pytest.mark.usefixtures('group_svc', 'links_svc', 'flag_svc')
 class TestAnnotationJSONPresentationServiceFactory(object):
     def test_returns_service(self, pyramid_request):
         svc = annotation_json_presentation_service_factory(None, pyramid_request)
@@ -150,6 +154,12 @@ class TestAnnotationJSONPresentationServiceFactory(object):
         _, kwargs = service_class.call_args
         assert kwargs['links_svc'] == links_svc
 
+    def test_provides_flag_service(self, pyramid_request, service_class, flag_svc):
+        annotation_json_presentation_service_factory(None, pyramid_request)
+
+        _, kwargs = service_class.call_args
+        assert kwargs['flag_svc'] == flag_svc
+
     @pytest.fixture
     def service_class(self, patch):
         return patch('h.services.annotation_json_presentation.AnnotationJSONPresentationService')
@@ -164,6 +174,12 @@ class TestAnnotationJSONPresentationServiceFactory(object):
     def links_svc(self, pyramid_config):
         svc = mock.Mock()
         pyramid_config.register_service(svc, name='links')
+        return svc
+
+    @pytest.fixture
+    def flag_svc(self, pyramid_config):
+        svc = mock.Mock()
+        pyramid_config.register_service(svc, name='flag')
         return svc
 
     @pytest.fixture
