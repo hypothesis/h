@@ -17,6 +17,15 @@ class TestCreate(object):
 
         moderation_service.hide.assert_called_once_with(resource.annotation)
 
+    def test_it_publishes_update_event(self, pyramid_request, resource, events):
+        views.create(resource, pyramid_request)
+
+        events.AnnotationEvent.assert_called_once_with(
+            pyramid_request, resource.annotation.id, 'update')
+
+        pyramid_request.notify_after_commit.assert_called_once_with(
+            events.AnnotationEvent.return_value)
+
     def test_it_renders_no_content(self, pyramid_request, resource):
         response = views.create(resource, pyramid_request)
         assert isinstance(response, HTTPNoContent)
@@ -45,3 +54,12 @@ class TestCreate(object):
         func = mock.Mock(return_value=True)
         pyramid_request.has_permission = func
         return func
+
+    @pytest.fixture
+    def events(self, patch):
+        return patch('h.views.api_moderation.events')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.notify_after_commit = mock.Mock()
+        return pyramid_request
