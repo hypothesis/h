@@ -51,6 +51,6 @@ class TestAnnotationFlagFormatter(object):
     @pytest.fixture
     def flags(self, factories, current_user, other_user):
         return {
-            current_user: [factories.Flag(user=current_user) for _ in range(3)],
-            other_user: [factories.Flag(user=other_user) for _ in range(2)],
+            current_user: factories.Flag.create_batch(3, user=current_user),
+            other_user: factories.Flag.create_batch(2, user=other_user),
         }
