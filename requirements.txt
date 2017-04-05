@@ -29,7 +29,7 @@ functools32==3.2.3.post2  # via jsonschema
 gevent==1.2.1
 greenlet==0.4.10          # via gevent
 gunicorn==19.6.0
-html5lib==0.9999999       # via bleach
+html5lib==0.999999999       # via bleach
 idna==2.1                 # via cryptography
 ipaddress==1.0.16         # via cryptography
 iso8601==0.1.11           # via colander
