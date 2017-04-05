@@ -36,6 +36,8 @@ class TestRender(object):
 class TestSanitize(object):
     @pytest.mark.parametrize("text,expected", [
         ('<a href="https://example.org">example</a>', '<a href="https://example.org" rel="nofollow noopener" target="_blank">example</a>'),
+        # Don't add rel and target attrs to mailto: links
+        ('<a href="mailto:foo@example.net">example</a>', None),
         ('<a title="foobar">example</a>', None),
         ('<a href="https://example.org" rel="nofollow noopener" target="_blank" title="foobar">example</a>', None),
         ('<blockquote>Foobar</blockquote>', None),

@@ -31,7 +31,7 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = [
     'Jinja2>=2.8',
     'SQLAlchemy>=1.1.0',
-    'bleach>=1.4.3,<1.5',
+    'bleach>=2.0,<2.1',
     'certifi',
     'elasticsearch>=1.1.0,<2.0.0',
     'jsonschema>=2.5.1,<2.6',

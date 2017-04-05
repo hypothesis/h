@@ -3,10 +3,11 @@
 from __future__ import unicode_literals
 
 import re
+from functools import partial
 
 import bleach
-from bleach import callbacks as linkify_callbacks
 import mistune
+from bleach.linkifier import LinkifyFilter
 
 LINK_REL = 'nofollow noopener'
 
@@ -17,7 +18,7 @@ MARKDOWN_TAGS = [
 ALLOWED_TAGS = set(bleach.ALLOWED_TAGS + MARKDOWN_TAGS)
 
 
-def _filter_link_attributes(name, value):
+def _filter_link_attributes(tag, name, value):
     if name in ['href', 'title']:
         return True
 
@@ -35,6 +36,8 @@ MARKDOWN_ATTRIBUTES = {
 }
 ALLOWED_ATTRIBUTES = dict(bleach.ALLOWED_ATTRIBUTES.items() + MARKDOWN_ATTRIBUTES.items())
 
+# Singleton instance of the bleach cleaner
+cleaner = None
 # Singleton instance of the Markdown instance
 markdown = None
 
@@ -86,23 +89,53 @@ def render(text):
 
 
 def sanitize(text):
-    linkified = bleach.linkify(text, callbacks=[
-        linkify_callbacks.target_blank,
-        linkify_rel,
-    ])
-
-    return bleach.clean(linkified,
-                        tags=ALLOWED_TAGS,
-                        attributes=ALLOWED_ATTRIBUTES)
+    cleaner = _get_cleaner()
+    return cleaner.clean(text)
 
 
-def linkify_rel(attrs, new=False):
-    if attrs['href'].startswith('mailto:'):
+def _linkify_target_blank(attrs, new=False):
+    # FIXME: when bleach>2.0.0 is released we can use
+    # bleach.callbacks.target_blank instead of this function. We have our own
+    # copy to work around a bug in 2.0.0:
+    #
+    #   https://github.com/mozilla/bleach/commit/b23c74c1ca5ffcbd308df93e79487fa92a6eb4a7
+    #
+    href_key = (None, 'href')
+
+    if href_key not in attrs:
         return attrs
 
-    attrs['rel'] = LINK_REL
+    if attrs[href_key].startswith('mailto:'):
+        return attrs
 
+    attrs[(None, 'target')] = '_blank'
     return attrs
+
+
+def _linkify_rel(attrs, new=False):
+    href_key = (None, 'href')
+
+    if href_key not in attrs:
+        return attrs
+
+    if attrs[href_key].startswith('mailto:'):
+        return attrs
+
+    attrs[(None, 'rel')] = LINK_REL
+    return attrs
+
+
+def _get_cleaner():
+    global cleaner
+    if cleaner is None:
+        linkify_filter = partial(LinkifyFilter, callbacks=[
+            _linkify_target_blank,
+            _linkify_rel,
+        ])
+        cleaner = bleach.Cleaner(tags=ALLOWED_TAGS,
+                                 attributes=ALLOWED_ATTRIBUTES,
+                                 filters=[linkify_filter])
+    return cleaner
 
 
 def _get_markdown():
