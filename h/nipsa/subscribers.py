@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 
 def transform_annotation(event):
-    """Add a {"nipsa": True} field on moderated annotations or whose users are flagged."""
+    """Add a {"nipsa": True} field on moderated annotations or those whose users are flagged."""
     payload = event.annotation_dict
 
     nipsa = _user_nipsa(event.request, payload)
