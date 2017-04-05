@@ -26,7 +26,7 @@ deform==0.9.9
 elasticsearch==1.9.0
 enum34==1.1.6
 functools32==3.2.3.post2  # via jsonschema
-gevent==1.1.2
+gevent==1.2.1
 greenlet==0.4.10          # via gevent
 gunicorn==19.6.0
 html5lib==0.9999999       # via bleach
