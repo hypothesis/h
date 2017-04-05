@@ -24,8 +24,8 @@ node_modules/
 *.pyc
 *.pyo
 
+*.pid
 *.log
 
 celerybeat-schedule
 celerybeat-schedule.*
-celerybeat.pid
