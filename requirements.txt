@@ -51,7 +51,7 @@ pyasn1==0.1.9             # via cryptography
 pycparser==2.14           # via cffi
 PyJWT==1.4.1
 pyparsing==2.1.5
-pyramid-authsanity==0.1.0a4
+git+https://github.com/usingnamespace/pyramid_authsanity.git@7d0b70582cd693052a62b4683e521c1f4e2b4aa8#egg=pyramid_authsanity
 pyramid-jinja2==2.6.2
 pyramid-layout==1.0
 pyramid-mailer==0.14.1

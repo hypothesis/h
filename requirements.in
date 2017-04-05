@@ -23,7 +23,9 @@ passlib
 psycogreen
 psycopg2
 pyramid
-pyramid_authsanity
+# Pin pyramid_authsanity to latest master until our bugfix
+# (https://github.com/usingnamespace/pyramid_authsanity/pull/7) is released.
+git+https://github.com/usingnamespace/pyramid_authsanity.git@7d0b70582cd693052a62b4683e521c1f4e2b4aa8#egg=pyramid_authsanity
 pyramid_layout
 pyramid-jinja2
 pyramid-services
