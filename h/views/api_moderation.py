@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPNotFound
 
+from h import events
 from h.views.api import api_config
 
 
@@ -19,4 +20,8 @@ def create(context, request):
 
     svc = request.find_service(name='annotation_moderation')
     svc.hide(context.annotation)
+
+    event = events.AnnotationEvent(request, context.annotation.id, 'update')
+    request.notify_after_commit(event)
+
     return HTTPNoContent()
