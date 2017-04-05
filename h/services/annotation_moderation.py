@@ -43,6 +43,20 @@ class AnnotationModerationService(object):
         mod = models.AnnotationModeration(annotation=annotation)
         self.session.add(mod)
 
+    def unhide(self, annotation):
+        """
+        Show a hidden annotation again to other users.
+
+        In case the given annotation is not moderated, this method is a no-op.
+
+        :param annotation: The annotation to unhide.
+        :type annotation: h.models.Annotation
+        """
+
+        self.session.query(models.AnnotationModeration) \
+                    .filter_by(annotation=annotation) \
+                    .delete()
+
 
 def annotation_moderation_service_factory(context, request):
     return AnnotationModerationService(request.db)
