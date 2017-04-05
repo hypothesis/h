@@ -30,7 +30,7 @@ class TestUserPasswordService(object):
 
     def test_check_password_validates_old_style_passwords(self, svc, user):
         user.salt = 'somesalt'
-        # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
+        # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
         user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         assert not svc.check_password(user, 'somethingelse')
@@ -38,7 +38,7 @@ class TestUserPasswordService(object):
 
     def test_check_password_upgrades_old_style_passwords(self, hasher, svc, user):
         user.salt = 'somesalt'
-        # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
+        # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
         user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         svc.check_password(user, 'foobar')
@@ -48,7 +48,7 @@ class TestUserPasswordService(object):
 
     def test_check_password_only_upgrades_when_password_is_correct(self, hasher, svc, user):
         user.salt = 'somesalt'
-        # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
+        # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
         user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         svc.check_password(user, 'donkeys')
@@ -58,7 +58,7 @@ class TestUserPasswordService(object):
 
     def test_check_password_works_after_upgrade(self, svc, user):
         user.salt = 'somesalt'
-        # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=4)
+        # Generated with passlib.hash.bcrypt.hash('foobar' + 'somesalt', rounds=4)
         user.password = '$2a$04$zDQnlV/YBG.ju2i14V15p.5nWYL52ZBqjGsBWgLAisGkEJw812BHy'
 
         svc.check_password(user, 'foobar')
@@ -66,7 +66,7 @@ class TestUserPasswordService(object):
         assert svc.check_password(user, 'foobar')
 
     def test_check_password_upgrades_new_style_passwords(self, hasher, svc, user):
-        # Generated with passlib.hash.bcrypt.encrypt('foobar', rounds=4, ident='2b')
+        # Generated with passlib.hash.bcrypt.hash('foobar', rounds=4, ident='2b')
         user.password = '$2b$04$L2j.vXxlLt9JJNHHsy0EguslcaphW7vssSpHbhqCmf9ECsMiuTd1y'
 
         svc.check_password(user, 'foobar')
