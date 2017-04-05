@@ -13,13 +13,13 @@ class IAnnotationFormatter(Interface):
     without putting everything in the annotation presenter, thus allowing better
     decoupling of code.
 
-    The main method is ``format(annotation)`` which is expected to return a
-    dictionary representation based on the passed-in annotation. If the
-    formatter depends on other data it should be able to load it on-demand
+    The main method is ``format(annotation_resource)`` which is expected to
+    return a dictionary representation based on the passed-in annotation. If
+    the formatter depends on other data it should be able to load it on-demand
     for the given annotation.
 
     Since we are rendering lists of potentially hundreds of annotations in one
-    request formatters need to be able to optimize the fetching of additional
+    request, formatters need to be able to optimize the fetching of additional
     data (e.g. from the database). Which is why this interface defines the
     ``preload(ids)`` method.
     Each formatter implementation is expected to handle a cache internally which
@@ -34,12 +34,12 @@ class IAnnotationFormatter(Interface):
         :type ids: list of unicode
         """
 
-    def format(annotation):  # noqa: N805
+    def format(annotation_resource):  # noqa: N805
         """
         Presents additional annotation data that will be served to API clients.
 
-        :param annotation: The annotation object that needs presenting.
-        :type annotation: memex.models.Annotation
+        :param annotation_resource: The annotation that needs presenting.
+        :type annotation_resource: h.resources.AnnotationResource
 
         :returns: A formatted dictionary.
         :rtype: dict
