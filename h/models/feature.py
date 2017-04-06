@@ -15,6 +15,8 @@ FEATURES = {
                                " updates to annotations in the client?"),
     'filter_highlights': ("Filter highlights in document based on visible"
                           " annotations in sidebar?"),
+    'flag_action': ("Enable user to flag inappropriate annotations in the "
+                    "client?"),
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
 }
