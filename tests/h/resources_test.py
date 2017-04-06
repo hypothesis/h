@@ -2,13 +2,13 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
 import pytest
+from mock import Mock
 
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from memex.resources import AnnotationResourceFactory, AnnotationResource
+from h.resources import AnnotationResource, AnnotationResourceFactory
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -56,7 +56,7 @@ class TestAnnotationResourceFactory(object):
 
     @pytest.fixture
     def storage(self, patch):
-        return patch('memex.resources.storage')
+        return patch('h.resources.storage')
 
     @pytest.fixture
     def group_service(self, pyramid_config):

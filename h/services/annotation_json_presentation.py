@@ -4,11 +4,10 @@ from __future__ import unicode_literals
 
 from sqlalchemy.orm import subqueryload
 
-from memex import resources
-
 from h import formatters
 from h import models
 from h import presenters
+from h import resources
 from h import storage
 from h.interfaces import IGroupService
 

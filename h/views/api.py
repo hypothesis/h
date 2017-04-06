@@ -14,19 +14,18 @@ It is worth noting up front that in general, authorization for requests made to
 each endpoint is handled outside of the body of the view functions. In
 particular, requests to the CRUD API endpoints are protected by the Pyramid
 authorization system. You can find the mapping between annotation "permissions"
-objects and Pyramid ACLs in :mod:`memex.resources`.
+objects and Pyramid ACLs in :mod:`h.resources`.
 """
 from pyramid import i18n
 from pyramid import security
 import venusian
-
-from memex.resources import AnnotationResource
 
 from h import search as search_lib
 from h import storage
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
+from h.resources import AnnotationResource
 from h.schemas import ValidationError
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.util import cors

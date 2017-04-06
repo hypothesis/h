@@ -8,7 +8,7 @@ import pytest
 
 from memex.models.annotation import Annotation
 from memex.models.document import Document
-from memex.resources import AnnotationResource
+from h.resources import AnnotationResource
 from h.views import main
 
 
