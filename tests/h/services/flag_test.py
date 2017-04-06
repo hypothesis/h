@@ -6,7 +6,6 @@ import pytest
 
 from h.services import flag
 from h import models
-from h._compat import text_type, xrange
 
 
 @pytest.mark.usefixtures('flags')
