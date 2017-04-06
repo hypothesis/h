@@ -21,6 +21,25 @@ class TestAnnotationModerationServiceHidden(object):
         assert svc.hidden(annotation.id) is False
 
 
+@pytest.mark.usefixtures('mods')
+class TestAnnotationModerationServiceAllHidden(object):
+    def test_it_lists_moderated_annotation_ids(self, svc, mods):
+        ids = [m.annotation.id for m in mods[0:-1]]
+        assert svc.all_hidden(ids) == set(ids)
+
+    def test_it_skips_non_moderated_annotations(self, svc, factories):
+        annotation = factories.Annotation()
+
+        assert svc.all_hidden([annotation.id]) == set()
+
+    def test_it_handles_with_no_ids(self, svc):
+        assert svc.all_hidden([]) == set()
+
+    @pytest.fixture
+    def mods(self, factories):
+        return factories.AnnotationModeration.create_batch(3)
+
+
 class TestAnnotationModerationServiceHide(object):
     def test_it_creates_annotation_moderation(self, svc, factories, db_session):
         annotation = factories.Annotation()

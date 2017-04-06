@@ -23,6 +23,24 @@ class AnnotationModerationService(object):
                         .filter_by(annotation_id=annotation_id)
         return self.session.query(q.exists()).scalar()
 
+    def all_hidden(self, annotation_ids):
+        """
+        Check which of the given annotation ids is hidden.
+
+        :param annotation_ids: The ids of the annotations to check.
+        :type annotation: list of unicode
+
+        :returns: The subset of the annotation ids that are hidden.
+        :rtype: set of unicode
+        """
+        if not annotation_ids:
+            return set()
+
+        query = self.session.query(models.AnnotationModeration.annotation_id) \
+                            .filter(models.AnnotationModeration.annotation_id.in_(annotation_ids))
+
+        return set([m.annotation_id for m in query])
+
     def hide(self, annotation):
         """
         Hide an annotation from other users.
