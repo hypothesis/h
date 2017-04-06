@@ -32,7 +32,7 @@ class TestAnnotationJSONPresentationService(object):
 
     def test_initializes_moderation_formatter(self, services, formatters):
         self.svc(services)
-        formatters.AnnotationModerationFormatter.assert_called_once_with(mock.sentinel.db_session,
+        formatters.AnnotationModerationFormatter.assert_called_once_with(services['flag_count'],
                                                                          mock.sentinel.user,
                                                                          mock.sentinel.has_permission)
 
@@ -103,6 +103,7 @@ class TestAnnotationJSONPresentationService(object):
                                                  group_svc=services['group'],
                                                  links_svc=services['links'],
                                                  flag_svc=services['flag'],
+                                                 flag_count_svc=services['flag_count'],
                                                  moderation_svc=services['annotation_moderation'],
                                                  has_permission=mock.sentinel.has_permission)
 
@@ -174,6 +175,12 @@ class TestAnnotationJSONPresentationServiceFactory(object):
         _, kwargs = service_class.call_args
         assert kwargs['moderation_svc'] == services['annotation_moderation']
 
+    def test_provides_flag_count_service(self, pyramid_request, service_class, services):
+        annotation_json_presentation_service_factory(None, pyramid_request)
+
+        _, kwargs = service_class.call_args
+        assert kwargs['flag_count_svc'] == services['flag_count']
+
     def test_provides_has_permission(self, pyramid_request, service_class):
         annotation_json_presentation_service_factory(None, pyramid_request)
 
@@ -194,7 +201,7 @@ class TestAnnotationJSONPresentationServiceFactory(object):
 def services(pyramid_config):
     service_mocks = {}
 
-    for name in ['links', 'flag', 'annotation_moderation']:
+    for name in ['links', 'flag', 'flag_count', 'annotation_moderation']:
         svc = mock.Mock()
         service_mocks[name] = svc
         pyramid_config.register_service(svc, name=name)
