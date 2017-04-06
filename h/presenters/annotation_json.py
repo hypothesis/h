@@ -55,7 +55,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         annotation.update(base)
 
         for formatter in self.formatters:
-            annotation.update(formatter.format(self.annotation))
+            annotation.update(formatter.format(self.annotation_resource))
 
         return annotation
 

@@ -2,10 +2,14 @@
 
 from __future__ import unicode_literals
 
+from collections import namedtuple
+
 import pytest
 
 from h.formatters.annotation_flag import AnnotationFlagFormatter
 from h.services.flag import FlagService
+
+FakeAnnotationResource = namedtuple('FakeAnnotationResource', ['annotation'])
 
 
 class TestAnnotationFlagFormatter(object):
@@ -23,19 +27,22 @@ class TestAnnotationFlagFormatter(object):
 
     def test_format_for_existing_flag(self, formatter, factories, current_user):
         flag = factories.Flag(user=current_user)
-        assert formatter.format(flag.annotation) == {'flagged': True}
+        annotation_resource = FakeAnnotationResource(flag.annotation)
+        assert formatter.format(annotation_resource) == {'flagged': True}
 
     def test_format_for_missing_flag(self, formatter, factories):
         annotation = factories.Annotation()
+        annotation_resource = FakeAnnotationResource(annotation)
 
-        assert formatter.format(annotation) == {'flagged': False}
+        assert formatter.format(annotation_resource) == {'flagged': False}
 
     def test_format_for_unauthenticated_user(self, db_session, factories):
         annotation = factories.Annotation()
+        annotation_resource = FakeAnnotationResource(annotation)
         formatter = AnnotationFlagFormatter(db_session,
                                             user=None)
 
-        assert formatter.format(annotation) == {'flagged': False}
+        assert formatter.format(annotation_resource) == {'flagged': False}
 
     @pytest.fixture
     def current_user(self, factories):

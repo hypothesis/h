@@ -28,6 +28,21 @@ class FakeFormatter(object):
         return self.data
 
 
+@implementer(IAnnotationFormatter)
+class IDDuplicatingFormatter(object):
+    """This formatter take the annotation's ID and adds it in another key.
+
+    The main purpose of it is to confirm that the presenter is passing in the
+    AnnotationResource object.
+    """
+
+    def preload(self, ids):
+        pass
+
+    def format(self, annotation_resource):
+        return {'duplicated-id': annotation_resource.annotation.id}
+
+
 class TestAnnotationJSONPresenter(object):
     def test_asdict(self, document_asdict, group_service, fake_links_service):
         ann = mock.Mock(id='the-id',
@@ -101,6 +116,17 @@ class TestAnnotationJSONPresenter(object):
 
         assert presented['flagged'] == 'nope'
         assert presented['nipsa'] == 'maybe'
+
+    def test_formatter_uses_annotation_resource(self, group_service, fake_links_service):
+        annotation = mock.Mock(id='the-id', extra={})
+        resource = AnnotationResource(annotation, group_service, fake_links_service)
+
+        presenter = AnnotationJSONPresenter(resource)
+        presenter.add_formatter(IDDuplicatingFormatter())
+
+        output = presenter.asdict()
+
+        assert output['duplicated-id'] == 'the-id'
 
     @pytest.mark.usefixtures('policy')
     @pytest.mark.parametrize('annotation,group_readable,action,expected', [
