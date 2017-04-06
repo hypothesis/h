@@ -3,13 +3,10 @@
 import mock
 import pytest
 
-from pyramid.config import Configurator
 from pyramid import testing
+from pyramid.config import Configurator
 
-from memex.resources import AnnotationResource
-from memex.schemas import ValidationError
-
-from h import presenters
+from h.schemas import ValidationError
 from h.search.core import SearchResult
 from h.views import api as views
 
@@ -216,9 +213,9 @@ class TestSearch(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
+                         'create_schema',
                          'links_service',
                          'group_service',
-                         'schemas',
                          'storage')
 class TestCreate(object):
 
@@ -233,21 +230,19 @@ class TestCreate(object):
             with pytest.raises(views.PayloadError):
                 views.create(pyramid_request)
 
-    def test_it_inits_CreateAnnotationSchema(self, pyramid_request, schemas):
+    def test_it_inits_CreateAnnotationSchema(self, pyramid_request, create_schema):
         views.create(pyramid_request)
 
-        schemas.CreateAnnotationSchema.assert_called_once_with(pyramid_request)
+        create_schema.assert_called_once_with(pyramid_request)
 
-    def test_it_validates_the_posted_data(self, pyramid_request, schemas):
+    def test_it_validates_the_posted_data(self, pyramid_request, create_schema):
         """It should call validate() with a request.json_body."""
         views.create(pyramid_request)
 
-        schemas.CreateAnnotationSchema.return_value.validate\
-            .assert_called_once_with(pyramid_request.json_body)
+        create_schema.return_value.validate.assert_called_once_with(pyramid_request.json_body)
 
-    def test_it_raises_if_validate_raises(self, pyramid_request, schemas):
-        schemas.CreateAnnotationSchema.return_value.validate.side_effect = (
-            ValidationError('asplode'))
+    def test_it_raises_if_validate_raises(self, pyramid_request, create_schema):
+        create_schema.return_value.validate.side_effect = ValidationError('asplode')
 
         with pytest.raises(ValidationError) as exc:
             views.create(pyramid_request)
@@ -257,9 +252,9 @@ class TestCreate(object):
     def test_it_creates_the_annotation_in_storage(self,
                                                   pyramid_request,
                                                   storage,
-                                                  schemas,
+                                                  create_schema,
                                                   group_service):
-        schema = schemas.CreateAnnotationSchema.return_value
+        schema = create_schema.return_value
 
         views.create(pyramid_request)
 
@@ -320,6 +315,10 @@ class TestCreate(object):
         pyramid_request.notify_after_commit = mock.Mock()
         return pyramid_request
 
+    @pytest.fixture
+    def create_schema(self, patch):
+        return patch('h.views.api.CreateAnnotationSchema')
+
 
 @pytest.mark.usefixtures('presentation_service')
 class TestRead(object):
@@ -373,19 +372,18 @@ class TestReadJSONLD(object):
                          'AnnotationJSONPresenter',
                          'links_service',
                          'group_service',
-                         'schemas',
+                         'update_schema',
                          'storage')
 class TestUpdate(object):
 
-    def test_it_inits_the_schema(self, pyramid_request, schemas):
+    def test_it_inits_the_schema(self, pyramid_request, update_schema):
         context = mock.Mock()
 
         views.update(context, pyramid_request)
 
-        schemas.UpdateAnnotationSchema.assert_called_once_with(
-            pyramid_request,
-            context.annotation.target_uri,
-            context.annotation.groupid)
+        update_schema.assert_called_once_with(pyramid_request,
+                                              context.annotation.target_uri,
+                                              context.annotation.groupid)
 
     def test_it_raises_if_json_parsing_fails(self, pyramid_request):
         """It raises PayloadError if parsing of the request body fails."""
@@ -398,17 +396,16 @@ class TestUpdate(object):
             with pytest.raises(views.PayloadError):
                 views.update(mock.Mock(), pyramid_request)
 
-    def test_it_validates_the_posted_data(self, pyramid_request, schemas):
+    def test_it_validates_the_posted_data(self, pyramid_request, update_schema):
         context = mock.Mock()
-        schema = schemas.UpdateAnnotationSchema.return_value
+        schema = update_schema.return_value
 
         views.update(context, pyramid_request)
 
         schema.validate.assert_called_once_with(pyramid_request.json_body)
 
-    def test_it_raises_if_validate_raises(self, pyramid_request, schemas):
-        schemas.UpdateAnnotationSchema.return_value.validate\
-            .side_effect = ValidationError('asplode')
+    def test_it_raises_if_validate_raises(self, pyramid_request, update_schema):
+        update_schema.return_value.validate.side_effect = ValidationError('asplode')
 
         with pytest.raises(ValidationError):
             views.update(mock.Mock(), pyramid_request)
@@ -416,9 +413,9 @@ class TestUpdate(object):
     def test_it_updates_the_annotation_in_storage(self,
                                                   pyramid_request,
                                                   storage,
-                                                  schemas):
+                                                  update_schema):
         context = mock.Mock()
-        schema = schemas.UpdateAnnotationSchema.return_value
+        schema = update_schema.return_value
         schema.validate.return_value = mock.sentinel.validated_data
 
         views.update(context, pyramid_request)
@@ -495,6 +492,10 @@ class TestUpdate(object):
         pyramid_request.json_body = {}
         pyramid_request.notify_after_commit = mock.Mock()
         return pyramid_request
+
+    @pytest.fixture
+    def update_schema(self, patch):
+        return patch('h.views.api.UpdateAnnotationSchema')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -578,11 +579,6 @@ def pyramid_request(pyramid_request):
 @pytest.fixture
 def search_lib(patch):
     return patch('h.views.api.search_lib')
-
-
-@pytest.fixture
-def schemas(patch):
-    return patch('h.views.api.schemas')
 
 
 @pytest.fixture

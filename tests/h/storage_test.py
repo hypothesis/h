@@ -7,11 +7,11 @@ import copy
 import pytest
 import mock
 
-from memex import schemas
 from memex.models.annotation import Annotation
 from memex.models.document import Document, DocumentURI
 
 from h import storage
+from h.schemas import ValidationError
 
 
 class FakeGroup(object):
@@ -147,7 +147,7 @@ class TestCreateAnnotation(object):
         # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
-        with pytest.raises(schemas.ValidationError) as exc:
+        with pytest.raises(ValidationError) as exc:
             storage.create_annotation(pyramid_request, data, group_service)
 
         assert str(exc.value).startswith('references.0: ')
@@ -179,7 +179,7 @@ class TestCreateAnnotation(object):
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
-        with pytest.raises(schemas.ValidationError) as exc:
+        with pytest.raises(ValidationError) as exc:
             storage.create_annotation(pyramid_request, data, group_service)
 
         assert str(exc.value).startswith('group: ')
@@ -191,7 +191,7 @@ class TestCreateAnnotation(object):
         data = self.annotation_data()
         data['groupid'] = 'missing-group'
 
-        with pytest.raises(schemas.ValidationError) as exc:
+        with pytest.raises(ValidationError) as exc:
             storage.create_annotation(pyramid_request, data, group_service)
 
         assert str(exc.value).startswith('group: ')
