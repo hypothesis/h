@@ -4,7 +4,6 @@ import logging
 
 import colander
 import deform
-from pyramid.session import check_csrf_token
 from itsdangerous import BadData, SignatureExpired
 
 from h import i18n, models, validators
@@ -16,19 +15,13 @@ from h.models.user import (
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
 )
-from h.schemas import JSONSchema
+from h.schemas.base import CSRFSchema, JSONSchema
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
 
 PASSWORD_MIN_LENGTH = 2  # FIXME: this is ridiculous
 USERNAME_BLACKLIST = None
-
-
-@colander.deferred
-def deferred_csrf_token(node, kw):
-    request = kw.get('request')
-    return request.session.get_csrf_token()
 
 
 def get_blacklist():
@@ -105,24 +98,6 @@ def new_password_node(**kwargs):
         colander.String(),
         validator=validators.Length(min=PASSWORD_MIN_LENGTH),
         **kwargs)
-
-
-class CSRFSchema(colander.Schema):
-    """
-    A CSRFSchema backward-compatible with the one from the hem module.
-
-    Unlike hem, this doesn't require that the csrf_token appear in the
-    serialized appstruct.
-    """
-
-    csrf_token = colander.SchemaNode(colander.String(),
-                                     widget=deform.widget.HiddenWidget(),
-                                     default=deferred_csrf_token,
-                                     missing=None)
-
-    def validator(self, form, value):
-        request = form.bindings['request']
-        check_csrf_token(request)
 
 
 class LoginSchema(CSRFSchema):
