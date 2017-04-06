@@ -196,6 +196,24 @@ class TestGroupService(object):
 
         assert group.pubid in service.groupids_readable_by(user)
 
+    def test_groupids_created_by_includes_created_groups(self, service, factories):
+        user = factories.User()
+        group = factories.Group(creator=user)
+
+        assert group.pubid in service.groupids_created_by(user)
+
+    def test_groupids_created_by_excludes_other_groups(self, service, db_session, factories):
+        user = factories.User()
+        private_group = factories.Group()
+        private_group.members.append(user)
+        factories.Group(readable_by=ReadableBy.world)
+        db_session.flush()
+
+        assert service.groupids_created_by(user) == []
+
+    def test_groupids_created_by_returns_empty_list_for_missing_user(self, service):
+        assert service.groupids_created_by(None) == []
+
     @pytest.fixture
     def group(self, users):
         return Group(name='Donkey Trust',

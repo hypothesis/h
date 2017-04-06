@@ -112,6 +112,17 @@ class GroupService(object):
 
         return ids
 
+    def groupids_created_by(self, user):
+        """
+        Return a list of pubids which the user created.
+
+        If the passed-in user is ``None``, this returns an empty list.
+        """
+        if user is None:
+            return []
+
+        return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
+
 
 def groups_factory(context, request):
     """Return a GroupService instance for the passed context and request."""

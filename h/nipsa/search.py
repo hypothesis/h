@@ -3,13 +3,14 @@
 
 class Filter(object):
     def __init__(self, request):
-        self.request = request
+        self.group_service = request.find_service(name='group')
+        self.user = request.user
 
     def __call__(self, _):
-        return nipsa_filter(self.request.authenticated_userid)
+        return nipsa_filter(self.group_service, self.user)
 
 
-def nipsa_filter(userid=None):
+def nipsa_filter(group_service, user=None):
     """Return an Elasticsearch filter for filtering out NIPSA'd annotations.
 
     The returned filter is suitable for inserting into an Es query dict.
@@ -24,19 +25,23 @@ def nipsa_filter(userid=None):
             }
         }
 
-    :param userid: The ID of a user whose annotations should not be filtered.
+    :param user: The user whose annotations should not be filtered.
         The returned filtered query won't filter out this user's annotations,
         even if the annotations have the NIPSA flag.
-    :type userid: unicode
-
+    :type user: h.models.User
     """
     # If any one of these "should" clauses is true then the annotation will
     # get through the filter.
     should_clauses = [{"not": {"term": {"nipsa": True}}}]
 
-    if userid is not None:
+    if user is not None:
         # Always show the logged-in user's annotations even if they have nipsa.
-        should_clauses.append({"term": {"user": userid.lower()}})
+        should_clauses.append({"term": {"user": user.userid.lower()}})
+
+        # Also include nipsa'd annotations for groups that the user created.
+        created_groups = group_service.groupids_created_by(user)
+        if created_groups:
+            should_clauses.append({"terms": {"group": created_groups}})
 
     return {"bool": {"should": should_clauses}}
 
