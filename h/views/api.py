@@ -21,13 +21,14 @@ from pyramid import security
 import venusian
 
 from memex.resources import AnnotationResource
-from memex import schemas
 
 from h import search as search_lib
 from h import storage
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
+from h.schemas import ValidationError
+from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.util import cors
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -144,7 +145,7 @@ def error_api(context, request):
     return {'status': 'failure', 'reason': context.message}
 
 
-@api_config(context=schemas.ValidationError)
+@api_config(context=ValidationError)
 def error_validation(context, request):
     request.response.status_code = 400
     return {'status': 'failure', 'reason': context.message}
@@ -212,7 +213,7 @@ def search(request):
             description='Create an annotation')
 def create(request):
     """Create an annotation from the POST payload."""
-    schema = schemas.CreateAnnotationSchema(request)
+    schema = CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
     group_service = request.find_service(IGroupService)
     annotation = storage.create_annotation(request, appstruct, group_service)
@@ -258,9 +259,9 @@ def update(context, request):
     if request.method == 'PUT' and hasattr(request, 'stats'):
         request.stats.incr('memex.api.deprecated.put_update_annotation')
 
-    schema = schemas.UpdateAnnotationSchema(request,
-                                            context.annotation.target_uri,
-                                            context.annotation.groupid)
+    schema = UpdateAnnotationSchema(request,
+                                    context.annotation.target_uri,
+                                    context.annotation.groupid)
     appstruct = schema.validate(_json_payload(request))
 
     annotation = storage.update_annotation(request.db,

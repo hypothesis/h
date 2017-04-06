@@ -21,7 +21,7 @@ from datetime import datetime
 
 from pyramid import i18n
 
-from memex import schemas
+from h import schemas
 from memex import models
 from memex.db import types
 

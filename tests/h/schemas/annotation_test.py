@@ -4,37 +4,8 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from memex import schemas
-
-
-class ExampleSchema(schemas.JSONSchema):
-    schema = {
-        b'$schema': b'http://json-schema.org/draft-04/schema#',
-        b'type': b'string',
-    }
-
-
-class TestJSONSchema(object):
-
-    def test_it_returns_data_when_valid(self):
-        data = "a string"
-
-        assert ExampleSchema().validate(data) == data
-
-    def test_it_raises_when_data_invalid(self):
-        data = 123  # not a string
-
-        with pytest.raises(schemas.ValidationError):
-            ExampleSchema().validate(data)
-
-    def test_it_sets_appropriate_error_message_when_data_invalid(self):
-        data = 123  # not a string
-
-        with pytest.raises(schemas.ValidationError) as e:
-            ExampleSchema().validate(data)
-
-        message = e.value.message
-        assert message.startswith("123 is not of type 'string'")
+from h.schemas import ValidationError
+from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 
 
 def create_annotation_schema_validate(request, data):
@@ -42,7 +13,7 @@ def create_annotation_schema_validate(request, data):
     if 'uri' not in data:
         data['uri'] = 'http://example.com/example'
 
-    schema = schemas.CreateAnnotationSchema(request)
+    schema = CreateAnnotationSchema(request)
     return schema.validate(data)
 
 
@@ -50,9 +21,9 @@ def update_annotation_schema_validate(request,
                                       data,
                                       existing_target_uri='',
                                       groupid=''):
-    schema = schemas.UpdateAnnotationSchema(request,
-                                            existing_target_uri,
-                                            groupid)
+    schema = UpdateAnnotationSchema(request,
+                                    existing_target_uri,
+                                    groupid)
     return schema.validate(data)
 
 
@@ -220,7 +191,7 @@ class TestCreateUpdateAnnotationSchema(object):
                                         validate,
                                         input_data,
                                         error_message):
-        with pytest.raises(schemas.ValidationError) as exc:
+        with pytest.raises(ValidationError) as exc:
             validate(pyramid_request, input_data)
 
         assert str(exc.value) == error_message
@@ -426,33 +397,33 @@ class TestCreateAnnotationSchema(object):
     def test_it_raises_if_data_has_no_uri(self, pyramid_request):
         data = self.valid_data()
         del data['uri']
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
-        with pytest.raises(schemas.ValidationError) as exc:
+        with pytest.raises(ValidationError) as exc:
             schema.validate(data)
 
         assert exc.value.message == "uri: 'uri' is a required property"
 
     def test_it_sets_userid(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy('acct:harriet@example.com')
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data())
 
         assert appstruct['userid'] == 'acct:harriet@example.com'
 
     def test_it_inserts_empty_string_if_data_contains_no_text(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         assert schema.validate(self.valid_data())['text'] == ''
 
     def test_it_inserts_empty_list_if_data_contains_no_tags(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         assert schema.validate(self.valid_data())['tags'] == []
 
     def test_it_replaces_private_permissions_with_shared_False(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data(
             permissions={'read': ['acct:harriet@example.com']}
@@ -462,7 +433,7 @@ class TestCreateAnnotationSchema(object):
         assert 'permissions' not in appstruct
 
     def test_it_replaces_shared_permissions_with_shared_True(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data(
             permissions={'read': ['group:__world__']},
@@ -473,14 +444,14 @@ class TestCreateAnnotationSchema(object):
         assert 'permissions' not in appstruct
 
     def test_it_defaults_to_private_if_no_permissions_object_sent(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data())
 
         assert appstruct['shared'] is False
 
     def test_it_renames_group_to_groupid(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data(group='foo'))
 
@@ -488,14 +459,14 @@ class TestCreateAnnotationSchema(object):
         assert 'group' not in appstruct
 
     def test_it_inserts_default_groupid_if_no_group(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data())
 
         assert appstruct['groupid'] == '__world__'
 
     def test_it_keeps_references(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data(
             references=['parent id', 'parent id 2']
@@ -504,14 +475,14 @@ class TestCreateAnnotationSchema(object):
         assert appstruct['references'] == ['parent id', 'parent id 2']
 
     def test_it_inserts_empty_list_if_no_references(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data())
 
         assert appstruct['references'] == []
 
     def test_it_deletes_groupid_for_replies(self, pyramid_request):
-        schema = schemas.CreateAnnotationSchema(pyramid_request)
+        schema = CreateAnnotationSchema(pyramid_request)
 
         appstruct = schema.validate(self.valid_data(
             group='foo',
@@ -532,7 +503,7 @@ class TestCreateAnnotationSchema(object):
 class TestUpdateAnnotationSchema(object):
 
     def test_you_cannot_change_an_annotations_group(self, pyramid_request):
-        schema = schemas.UpdateAnnotationSchema(pyramid_request, '', '')
+        schema = UpdateAnnotationSchema(pyramid_request, '', '')
 
         appstruct = schema.validate({
             'groupid': 'new-group',
@@ -546,7 +517,7 @@ class TestUpdateAnnotationSchema(object):
         assert 'group' not in appstruct.get('extra', {})
 
     def test_you_cannot_change_an_annotations_userid(self, pyramid_request):
-        schema = schemas.UpdateAnnotationSchema(pyramid_request, '', '')
+        schema = UpdateAnnotationSchema(pyramid_request, '', '')
 
         appstruct = schema.validate({'userid': 'new_userid'})
 
@@ -554,7 +525,7 @@ class TestUpdateAnnotationSchema(object):
         assert 'userid' not in appstruct.get('extra', {})
 
     def test_you_cannot_change_an_annotations_references(self, pyramid_request):
-        schema = schemas.UpdateAnnotationSchema(pyramid_request, '', '')
+        schema = UpdateAnnotationSchema(pyramid_request, '', '')
 
         appstruct = schema.validate({'references': ['new_parent']})
 
@@ -562,7 +533,7 @@ class TestUpdateAnnotationSchema(object):
         assert 'references' not in appstruct.get('extra', {})
 
     def test_it_replaces_private_permissions_with_shared_False(self, pyramid_request):
-        schema = schemas.UpdateAnnotationSchema(pyramid_request, '', '')
+        schema = UpdateAnnotationSchema(pyramid_request, '', '')
 
         appstruct = schema.validate({
             'permissions': {'read': ['acct:harriet@example.com']}
@@ -573,9 +544,7 @@ class TestUpdateAnnotationSchema(object):
         assert 'permissions' not in appstruct.get('extras', {})
 
     def test_it_replaces_shared_permissions_with_shared_True(self, pyramid_request):
-        schema = schemas.UpdateAnnotationSchema(pyramid_request,
-                                                '',
-                                                '__world__')
+        schema = UpdateAnnotationSchema(pyramid_request, '', '__world__')
 
         appstruct = schema.validate({
             'permissions': {'read': ['group:__world__']}
@@ -598,9 +567,9 @@ class TestUpdateAnnotationSchema(object):
 
         """
         document_data = {'foo': 'bar'}
-        schema = schemas.UpdateAnnotationSchema(pyramid_request,
-                                                mock.sentinel.target_uri,
-                                                '')
+        schema = UpdateAnnotationSchema(pyramid_request,
+                                        mock.sentinel.target_uri,
+                                        '')
 
         schema.validate({'document': document_data})
 
@@ -621,9 +590,9 @@ class TestUpdateAnnotationSchema(object):
 
         """
         document_data = {'foo': 'bar'}
-        schema = schemas.UpdateAnnotationSchema(pyramid_request,
-                                                mock.sentinel.target_uri,
-                                                '')
+        schema = UpdateAnnotationSchema(pyramid_request,
+                                        mock.sentinel.target_uri,
+                                        '')
 
         schema.validate({'document': document_data})
 
@@ -634,4 +603,4 @@ class TestUpdateAnnotationSchema(object):
 
 @pytest.fixture
 def parse_document_claims(patch):
-    return patch('memex.schemas.parse_document_claims')
+    return patch('h.schemas.annotation.parse_document_claims')
