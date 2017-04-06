@@ -71,7 +71,7 @@ def links_factory(context, request):
                         registry=request.registry)
 
 
-def add_annotation_link_generator(registry, name, generator, hidden=False):
+def add_annotation_link_generator(config, name, generator, hidden=False):
     """
     Registers a function which generates a named link for an annotation.
 
@@ -84,13 +84,7 @@ def add_annotation_link_generator(registry, name, generator, hidden=False):
     If `hidden` is True, then the link generator will not be included in the
     default links output when rendering annotations.
     """
+    registry = config.registry
     if LINK_GENERATORS_KEY not in registry:
         registry[LINK_GENERATORS_KEY] = {}
     registry[LINK_GENERATORS_KEY][name] = (generator, hidden)
-
-
-def _add_annotation_link_generator(config, name, generator, hidden=False):
-    add_annotation_link_generator(config.registry,
-                                  name,
-                                  generator,
-                                  hidden=hidden)

@@ -28,7 +28,7 @@ def includeme(config):
     config.register_service_factory('.user_signup.user_signup_service_factory', name='user_signup')
 
     config.add_directive('add_annotation_link_generator',
-                         '.links._add_annotation_link_generator')
+                         '.links.add_annotation_link_generator')
     config.add_request_method('.feature.FeatureRequestProperty',
                               name='feature',
                               reify=True)
