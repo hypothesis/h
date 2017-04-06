@@ -10,5 +10,3 @@ def includeme(config):
     # This must be included first so it can set up the model base class if
     # need be.
     config.include('memex.models')
-
-    config.include('memex.links')

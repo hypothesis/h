@@ -168,18 +168,12 @@ def create_app(global_config, **settings):
     config.include('h.session')
     config.include('h.search')
     config.include('h.sentry')
+    config.include('h.services')
     config.include('h.stats')
-
-    # We have to include parts of the `memex` package in order to provide
-    # the links service.
-    config.include('memex.links')
 
     # We include links in order to set up the alternative link registrations
     # for annotations.
     config.include('h.links')
-
-    # Access to services
-    config.include('h.services')
 
     # And finally we add routes. Static routes are not resolvable by HTTP
     # clients, but can be used for URL generation within the websocket server.

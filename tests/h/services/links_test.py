@@ -5,9 +5,11 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from memex.links import LinksService
-from memex.links import add_annotation_link_generator
-from memex.links import links_factory
+from h.services.links import (
+    LinksService,
+    add_annotation_link_generator,
+    links_factory,
+)
 
 
 class TestLinksService(object):
@@ -92,27 +94,25 @@ def registry(pyramid_config):
     pyramid_config.add_route('some.named.route', '/some/path')
     pyramid_config.add_route('param.route', '/annotations/{id}')
 
-    registry = pyramid_config.registry
-
-    add_annotation_link_generator(registry,
+    add_annotation_link_generator(pyramid_config,
                                   'giraffe',
                                   lambda r, a: 'http://giraffes.com')
-    add_annotation_link_generator(registry,
+    add_annotation_link_generator(pyramid_config,
                                   'elephant',
                                   lambda r, a: 'https://elephant.org')
-    add_annotation_link_generator(registry,
+    add_annotation_link_generator(pyramid_config,
                                   'kiwi',
                                   lambda r, a: 'http://kiwi.net',
                                   hidden=True)
-    add_annotation_link_generator(registry,
+    add_annotation_link_generator(pyramid_config,
                                   'returnsnone',
                                   lambda r, a: None)
-    add_annotation_link_generator(registry,
+    add_annotation_link_generator(pyramid_config,
                                   'namedroute',
                                   lambda r, a: r.route_url('some.named.route'))
-    add_annotation_link_generator(registry,
+    add_annotation_link_generator(pyramid_config,
                                   'paramroute',
                                   lambda r, a: r.route_url('param.route', id=a.id),
                                   hidden=True)
 
-    return registry
+    return pyramid_config.registry
