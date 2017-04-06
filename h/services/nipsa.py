@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from h.models import User
-from h.tasks.nipsa import add_nipsa, remove_nipsa
+from h.tasks.indexer import reindex_user_annotations
 
 
 class NipsaService(object):
@@ -40,7 +40,7 @@ class NipsaService(object):
         message for the user will still be published to the queue).
         """
         user.nipsa = True
-        add_nipsa.delay(user.userid)
+        reindex_user_annotations.delay(user.userid)
 
     def unflag(self, user):
         """
@@ -51,7 +51,7 @@ class NipsaService(object):
         queue).
         """
         user.nipsa = False
-        remove_nipsa.delay(user.userid)
+        reindex_user_annotations.delay(user.userid)
 
     def clear(self):
         self._flagged_userids = None

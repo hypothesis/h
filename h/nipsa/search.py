@@ -44,34 +44,3 @@ def nipsa_filter(group_service, user=None):
             should_clauses.append({"terms": {"group": created_groups}})
 
     return {"bool": {"should": should_clauses}}
-
-
-def query_for_users_annotations(userid):
-    """Return an Elasticsearch query for all the given user's annotations."""
-    return {
-        "query": {
-            "filtered": {
-                "filter": {
-                    "bool": {
-                        "must": [{"term": {"user": userid.lower()}}]
-                    }
-                }
-            }
-        }
-    }
-
-
-def nipsad_annotations(userid):
-    """Return an Elasticsearch query for the user's NIPSA'd annotations."""
-    query = query_for_users_annotations(userid)
-    query["query"]["filtered"]["filter"]["bool"]["must"].append(
-        {"term": {"nipsa": True}})
-    return query
-
-
-def not_nipsad_annotations(userid):
-    """Return an Elasticsearch query for the user's non-NIPSA'd annotations."""
-    query = query_for_users_annotations(userid)
-    query["query"]["filtered"]["filter"]["bool"]["must"].append(
-        {"not": {"term": {"nipsa": True}}})
-    return query
