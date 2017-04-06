@@ -9,8 +9,8 @@ from h import presenters
 from h import realtime
 from h import storage
 from h.realtime import Consumer
+from h.resources import AnnotationResource
 from memex.links import LinksService
-from memex.resources import AnnotationResource
 from h.auth.util import translate_annotation_principals
 from h.services.nipsa import NipsaService
 from h.services.groupfinder import GroupfinderService

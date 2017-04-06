@@ -7,7 +7,7 @@ import datetime
 import mock
 
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
-from memex.resources import AnnotationResource
+from h.resources import AnnotationResource
 
 
 class TestAnnotationJSONLDPresenter(object):
