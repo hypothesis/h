@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Tools for generating links to domain objects.
-"""
+
+"""Tools for generating links to domain objects. """
 
 from __future__ import unicode_literals
 
 from pyramid.request import Request
 
-LINK_GENERATORS_KEY = 'memex.links.link_generators'
+LINK_GENERATORS_KEY = 'h.links.link_generators'
 
 
 class LinksService(object):
@@ -95,10 +94,3 @@ def _add_annotation_link_generator(config, name, generator, hidden=False):
                                   name,
                                   generator,
                                   hidden=hidden)
-
-
-def includeme(config):  # pragma: no cover
-    config.register_service_factory(links_factory, name='links')
-
-    config.add_directive('add_annotation_link_generator',
-                         _add_annotation_link_generator)

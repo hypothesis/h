@@ -10,8 +10,8 @@ from h import realtime
 from h import storage
 from h.realtime import Consumer
 from h.resources import AnnotationResource
-from memex.links import LinksService
 from h.auth.util import translate_annotation_principals
+from h.services.links import LinksService
 from h.services.nipsa import NipsaService
 from h.services.groupfinder import GroupfinderService
 from h.streamer import websocket

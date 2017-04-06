@@ -5,9 +5,11 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from memex.links import LinksService
-from memex.links import add_annotation_link_generator
-from memex.links import links_factory
+from h.services.links import (
+    LinksService,
+    add_annotation_link_generator,
+    links_factory,
+)
 
 
 class TestLinksService(object):
