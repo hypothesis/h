@@ -25,11 +25,7 @@ class FakePermissionCheck(object):
 
 
 class TestAnnotationModerationFormatter(object):
-    def test_preload_sets_flag_counts(self, db_session, flagged, unflagged, user):
-        formatter = AnnotationModerationFormatter(db_session,
-                                                  user,
-                                                  has_permission=None)
-
+    def test_preload_sets_flag_counts(self, formatter, flagged, unflagged):
         preload = formatter.preload([flagged.id, unflagged.id])
 
         assert preload == {flagged.id: 2, unflagged.id: 0}
@@ -40,10 +36,7 @@ class TestAnnotationModerationFormatter(object):
                                                   has_permission=None)
         assert formatter.preload(['annotation-id']) is None
 
-    def test_preload_skipped_without_ids(self, db_session, user):
-        formatter = AnnotationModerationFormatter(db_session,
-                                                  user,
-                                                  has_permission=None)
+    def test_preload_skipped_without_ids(self, formatter):
         assert formatter.preload([]) is None
 
     def test_format_returns_empty_for_non_moderator(self, db_session, user, group, flagged, permission_denied):
@@ -54,28 +47,19 @@ class TestAnnotationModerationFormatter(object):
 
         assert formatter.format(annotation_resource) == {}
 
-    def test_format_returns_flag_count_for_moderator(self, db_session, user, group, flagged, permission_granted):
-        formatter = AnnotationModerationFormatter(db_session,
-                                                  user,
-                                                  permission_granted)
+    def test_format_returns_flag_count_for_moderator(self, formatter, group, flagged):
         annotation_resource = FakeAnnotationResource(flagged, group)
 
         output = formatter.format(annotation_resource)
         assert output == {'moderation': {'flagCount': 2}}
 
-    def test_format_returns_zero_flag_count(self, db_session, user, group, unflagged, permission_granted):
-        formatter = AnnotationModerationFormatter(db_session,
-                                                  user,
-                                                  permission_granted)
+    def test_format_returns_zero_flag_count(self, formatter, group, unflagged):
         annotation_resource = FakeAnnotationResource(unflagged, group)
 
         output = formatter.format(annotation_resource)
         assert output == {'moderation': {'flagCount': 0}}
 
-    def test_format_for_preloaded_annotation(self, db_session, user, group, flagged, permission_granted):
-        formatter = AnnotationModerationFormatter(db_session,
-                                                  user,
-                                                  permission_granted)
+    def test_format_for_preloaded_annotation(self, formatter, group, flagged):
         annotation_resource = FakeAnnotationResource(flagged, group)
 
         formatter.preload([flagged.id])
@@ -111,3 +95,10 @@ class TestAnnotationModerationFormatter(object):
     @pytest.fixture
     def unflagged(self, factories):
         return factories.Annotation()
+
+    @pytest.fixture
+    def formatter(self, db_session, user, permission_granted):
+        """A formatter with the most common configuration."""
+        return AnnotationModerationFormatter(db_session,
+                                             user,
+                                             permission_granted)
