@@ -1,7 +1,10 @@
-import mock
+# -*- encoding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import pytest
 
-from memex import parse_document_claims
+from h.util import document_claims
 
 
 class TestDocumentURIsFromLinks(object):
@@ -21,7 +24,7 @@ class TestDocumentURIsFromLinks(object):
         claimant = 'http://localhost:5000/docs/help'
         link_dicts = [{'href': claimant}]
 
-        document_uris = parse_document_claims.document_uris_from_links(
+        document_uris = document_claims.document_uris_from_links(
             link_dicts,
             claimant,
         )
@@ -44,7 +47,7 @@ class TestDocumentURIsFromLinks(object):
         """
         link_dicts = [{'href': 'doi:10.3389/fenvs.2014.00003'}]
 
-        document_uris = parse_document_claims.document_uris_from_links(
+        document_uris = document_claims.document_uris_from_links(
             link_dicts,
             claimant='http://localhost:5000/docs/help'
         )
@@ -55,7 +58,7 @@ class TestDocumentURIsFromLinks(object):
         pdf_url = 'http://example.com/example.pdf'
         link_dicts = [{'href': pdf_url, 'type': 'application/pdf'}]
 
-        document_uris = parse_document_claims.document_uris_from_links(
+        document_uris = document_claims.document_uris_from_links(
             link_dicts,
             claimant='http://localhost:5000/docs/help',
         )
@@ -67,7 +70,7 @@ class TestDocumentURIsFromLinks(object):
         alternate_url = 'http://example.com/alternate'
         link_dicts = [{'href': alternate_url, 'rel': 'alternate'}]
 
-        document_uris = parse_document_claims.document_uris_from_links(
+        document_uris = document_claims.document_uris_from_links(
             link_dicts,
             claimant='http://localhost:5000/docs/help',
         )
@@ -92,7 +95,7 @@ class TestDocumentURIsFromLinks(object):
         link_dicts = [{'href': 'http://example.com/example.html',
                        'type': 'text/html'}]
 
-        document_uris = parse_document_claims.document_uris_from_links(
+        document_uris = document_claims.document_uris_from_links(
             link_dicts,
             claimant='http://example.com/example.html',
         )
@@ -117,7 +120,7 @@ class TestDocumentURIsFromLinks(object):
             },
         ]
 
-        document_uris = parse_document_claims.document_uris_from_links(
+        document_uris = document_claims.document_uris_from_links(
             link_dicts,
             claimant='http://example.com/claimant.html',
         )
@@ -238,7 +241,7 @@ class TestDocumentMetasFromData(object):
     def test_document_metas_from_data(self, input_, output):
         claimant = 'http://example.com/claimant/'
 
-        document_metas = parse_document_claims.document_metas_from_data(
+        document_metas = document_claims.document_metas_from_data(
             document_data=input_,
             claimant=claimant)
 
@@ -256,7 +259,7 @@ class TestDocumentMetasFromData(object):
             ]
         }
 
-        document_metas = parse_document_claims.document_metas_from_data(
+        document_metas = document_claims.document_metas_from_data(
             document_data, 'http://example/claimant')
 
         assert document_metas == []
@@ -276,7 +279,7 @@ class TestDocumentMetasFromData(object):
             'site_title': 'the site title'
         }
 
-        document_metas = parse_document_claims.document_metas_from_data(
+        document_metas = document_claims.document_metas_from_data(
             document_data, claimant)
 
         assert len(document_metas) == len(document_data.items())
@@ -292,7 +295,7 @@ class TestDocumentMetasFromData(object):
         for title in (None, [None, None]):
             document_data = {'title': title}
 
-            document_metas = parse_document_claims.document_metas_from_data(
+            document_metas = document_claims.document_metas_from_data(
                 document_data, 'http://example/claimant')
 
             assert document_metas == []
@@ -302,7 +305,7 @@ class TestDocumentMetasFromData(object):
         for value in (None, [None, None]):
             document_data = {'foo': value}
 
-            document_metas = parse_document_claims.document_metas_from_data(
+            document_metas = document_claims.document_metas_from_data(
                 document_data, 'http://example/claimant')
 
             if not isinstance(value, list):
@@ -320,7 +323,7 @@ class TestDocumentMetasFromData(object):
         for title in ('', ['', '']):
             document_data = {'title': title}
 
-            document_metas = parse_document_claims.document_metas_from_data(
+            document_metas = document_claims.document_metas_from_data(
                 document_data, 'http://example/claimant')
 
             assert document_metas == []
@@ -330,7 +333,7 @@ class TestDocumentMetasFromData(object):
         for value in ('', ['', '']):
             document_data = {'foo': value}
 
-            document_metas = parse_document_claims.document_metas_from_data(
+            document_metas = document_claims.document_metas_from_data(
                 document_data, 'http://example/claimant')
 
             if not isinstance(value, list):
@@ -348,7 +351,7 @@ class TestDocumentMetasFromData(object):
         for title in (' ', [' ', ' '], '\n\n  \n'):
             document_data = {'title': title}
 
-            document_metas = parse_document_claims.document_metas_from_data(
+            document_metas = document_claims.document_metas_from_data(
                 document_data, 'http://example/claimant')
 
             assert document_metas == []
@@ -358,7 +361,7 @@ class TestDocumentMetasFromData(object):
         for value in (' ', [' ', ' '], '\n\n  \n'):
             document_data = {'foo': value}
 
-            document_metas = parse_document_claims.document_metas_from_data(
+            document_metas = document_claims.document_metas_from_data(
                 document_data, 'http://example/claimant')
 
             if not isinstance(value, list):
@@ -381,7 +384,7 @@ class TestDocumentURIsFromHighwirePDF(object):
                             'http://example.com/3.pdf'],
         }
 
-        document_uris = parse_document_claims.document_uris_from_highwire_pdf(
+        document_uris = document_claims.document_uris_from_highwire_pdf(
             highwire_dict,
             claimant='http://example.com/example.html',
         )
@@ -405,7 +408,7 @@ class TestDocumentURIsFromHighwireDOI(object):
                     'doi:10.1594/PANGAEA.726855'],
         }
 
-        document_uris = parse_document_claims.document_uris_from_highwire_doi(
+        document_uris = document_claims.document_uris_from_highwire_doi(
             highwire_dict,
             claimant='http://example.com/example.html',
         )
@@ -424,7 +427,7 @@ class TestDocumentURIsFromHighwireDOI(object):
         """If a highwire DOI doesn't begin with 'doi:' it is prepended."""
         highwire_dict = {'doi': ['10.10.1038/nphys1170']}
 
-        document_uris = parse_document_claims.document_uris_from_highwire_doi(
+        document_uris = document_claims.document_uris_from_highwire_doi(
             highwire_dict,
             claimant='http://example.com/example.html',
         )
@@ -436,7 +439,7 @@ class TestDocumentURIsFromHighwireDOI(object):
         for doi in ('', 'doi:'):
             highwire_dict = {'doi': [doi]}
 
-            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+            document_uris = document_claims.document_uris_from_highwire_doi(
                 highwire_dict,
                 claimant='http://example.com/example.html',
             )
@@ -447,7 +450,7 @@ class TestDocumentURIsFromHighwireDOI(object):
         for doi in (' ', 'doi: '):
             highwire_dict = {'doi': [doi]}
 
-            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+            document_uris = document_claims.document_uris_from_highwire_doi(
                 highwire_dict,
                 claimant='http://example.com/example.html',
             )
@@ -458,7 +461,7 @@ class TestDocumentURIsFromHighwireDOI(object):
         for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
             highwire_dict = {'doi': [doi]}
 
-            document_uris = parse_document_claims.document_uris_from_highwire_doi(
+            document_uris = document_claims.document_uris_from_highwire_doi(
                 highwire_dict,
                 claimant='http://example.com/example.html',
             )
@@ -478,7 +481,7 @@ class TestDocumentURIsFromDC(object):
             ]
         }
 
-        document_uris = parse_document_claims.document_uris_from_dc(
+        document_uris = document_claims.document_uris_from_dc(
             dc_dict,
             claimant='http://example.com/example.html',
         )
@@ -497,7 +500,7 @@ class TestDocumentURIsFromDC(object):
         """If a dc identifier doesn't begin with 'doi:' it is prepended."""
         dc_dict = {'identifier': ['10.10.1038/nphys1170']}
 
-        document_uris = parse_document_claims.document_uris_from_dc(
+        document_uris = document_claims.document_uris_from_dc(
             dc_dict,
             claimant='http://example.com/example.html',
         )
@@ -509,7 +512,7 @@ class TestDocumentURIsFromDC(object):
         for doi in ('', 'doi:'):
             dc_dict = {'identifier': [doi]}
 
-            document_uris = parse_document_claims.document_uris_from_dc(
+            document_uris = document_claims.document_uris_from_dc(
                 dc_dict,
                 claimant='http://example.com/example.html',
             )
@@ -520,7 +523,7 @@ class TestDocumentURIsFromDC(object):
         for doi in (' ', 'doi: '):
             dc_dict = {'identifier': [doi]}
 
-            document_uris = parse_document_claims.document_uris_from_dc(
+            document_uris = document_claims.document_uris_from_dc(
                 dc_dict,
                 claimant='http://example.com/example.html',
             )
@@ -531,7 +534,7 @@ class TestDocumentURIsFromDC(object):
         for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
             dc_dict = {'identifier': [doi]}
 
-            document_uris = parse_document_claims.document_uris_from_dc(
+            document_uris = document_claims.document_uris_from_dc(
                 dc_dict,
                 claimant='http://example.com/example.html',
             )
@@ -544,7 +547,7 @@ class TestDocumentURISelfClaim(object):
     def test_document_uri_self_claim(self):
         claimant = 'http://localhost:5000/docs/help'
 
-        document_uri = parse_document_claims.document_uri_self_claim(
+        document_uri = document_claims.document_uri_self_claim(
             claimant)
 
         assert document_uri == {
@@ -576,7 +579,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_links.return_value = [
             {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -592,7 +595,7 @@ class TestDocumentURIsFromData(object):
         document_data = {}  # No 'link' key.
         claimant = 'http://localhost:5000/docs/help'
 
-        parse_document_claims.document_uris_from_data(
+        document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -616,7 +619,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_highwire_pdf.return_value = [
             {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -632,7 +635,7 @@ class TestDocumentURIsFromData(object):
         document_data = {}  # No 'highwire' key.
         claimant = 'http://localhost:5000/docs/help'
 
-        parse_document_claims.document_uris_from_data(
+        document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -656,7 +659,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_highwire_doi.return_value = [
             {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -672,7 +675,7 @@ class TestDocumentURIsFromData(object):
         document_data = {}  # No 'highwire' key.
         claimant = 'http://localhost:5000/docs/help'
 
-        parse_document_claims.document_uris_from_data(
+        document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -695,7 +698,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_dc.return_value = [
             {'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -710,7 +713,7 @@ class TestDocumentURIsFromData(object):
         document_data = {}  # No 'dc' key.
         claimant = 'http://localhost:5000/docs/help'
 
-        parse_document_claims.document_uris_from_data(
+        document_claims.document_uris_from_data(
             document_data=document_data,
             claimant=claimant,
         )
@@ -721,7 +724,7 @@ class TestDocumentURIsFromData(object):
     def test_it_gets_self_claim_document_uris(self, document_uri_self_claim):
         claimant = 'http://example.com/claimant'
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             {}, claimant)
 
         document_uri_self_claim.assert_called_once_with(claimant)
@@ -739,7 +742,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_dc.return_value = [{'uri': None}]
         document_uri_self_claim.return_value = {'uri': None}
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             {}, 'http://example.com/claimant')
 
         assert document_uris == []
@@ -756,7 +759,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_dc.return_value = [{'uri': ''}]
         document_uri_self_claim.return_value = {'uri': ''}
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             {}, 'http://example.com/claimant')
 
         assert document_uris == []
@@ -766,7 +769,7 @@ class TestDocumentURIsFromData(object):
         for uri in (' ', '\n ', '\r\n', ' \t'):
             document_uri_self_claim.return_value = {'uri': uri}
 
-            document_uris = parse_document_claims.document_uris_from_data(
+            document_uris = document_claims.document_uris_from_data(
                 {}, 'http://example.com/claimant')
 
             assert document_uris == []
@@ -783,7 +786,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_highwire_doi.return_value = [{'uri': u} for u in uris]
         document_uris_from_dc.return_value = [{'uri': u} for u in uris]
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             {}, 'http://example.com/claimant')
 
         assert document_uris == [document_uri_self_claim.return_value]
@@ -816,7 +819,7 @@ class TestDocumentURIsFromData(object):
             {'uri': ' dc_3 '}
         ]
 
-        document_uris = parse_document_claims.document_uris_from_data(
+        document_uris = document_claims.document_uris_from_data(
             {}, 'http://example.com/claimant')
 
         assert document_uris == matchers.unordered_list([
@@ -841,30 +844,30 @@ class TestDocumentURIsFromData(object):
             document_uris_from_links.return_value = []
             document_uri_self_claim.return_value = {'uri': uri}
 
-            document_uris = parse_document_claims.document_uris_from_data(
+            document_uris = document_claims.document_uris_from_data(
                 {}, 'http://example.com/claimant')
 
             assert document_uris == [{'uri': uri.strip()}]
 
     @pytest.fixture
     def document_uris_from_dc(self, patch):
-        return patch('memex.parse_document_claims.document_uris_from_dc', return_value=[])
+        return patch('h.util.document_claims.document_uris_from_dc', return_value=[])
 
     @pytest.fixture
     def document_uris_from_highwire_pdf(self, patch):
-        return patch('memex.parse_document_claims.document_uris_from_highwire_pdf', return_value=[])
+        return patch('h.util.document_claims.document_uris_from_highwire_pdf', return_value=[])
 
     @pytest.fixture
     def document_uris_from_highwire_doi(self, patch):
-        return patch('memex.parse_document_claims.document_uris_from_highwire_doi', return_value=[])
+        return patch('h.util.document_claims.document_uris_from_highwire_doi', return_value=[])
 
     @pytest.fixture
     def document_uris_from_links(self, patch):
-        return patch('memex.parse_document_claims.document_uris_from_links', return_value=[])
+        return patch('h.util.document_claims.document_uris_from_links', return_value=[])
 
     @pytest.fixture
     def document_uri_self_claim(self, patch):
-        return patch('memex.parse_document_claims.document_uri_self_claim')
+        return patch('h.util.document_claims.document_uri_self_claim')
 
 
 def one(list_):
