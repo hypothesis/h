@@ -14,8 +14,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-
-from memex.db import types
+from h.db import types
 
 
 def upgrade():

@@ -21,11 +21,9 @@ from datetime import datetime
 
 from pyramid import i18n
 
-from h import models
+from h import models, schemas
+from h.db import types
 from h.models.document import update_document_metadata
-from h import schemas
-from memex.db import types
-
 
 _ = i18n.TranslationStringFactory(__package__)
 

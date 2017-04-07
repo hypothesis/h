@@ -9,10 +9,9 @@ from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 
-from h.db import Base
+from h.db import Base, types
 from memex import markdown
 from memex import uri
-from memex.db import types
 
 
 class Annotation(Base):

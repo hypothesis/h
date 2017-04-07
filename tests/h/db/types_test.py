@@ -4,7 +4,7 @@ import pytest
 
 from sqlalchemy.dialects.postgresql import dialect
 
-from memex.db import types
+from h.db import types
 
 UUID_FIXTURES = [
     # 16 byte UUIDv4s
