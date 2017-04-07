@@ -22,4 +22,4 @@ def _user_nipsa(request, payload):
 
 def _annotation_moderated(request, annotation):
     svc = request.find_service(name='annotation_moderation')
-    return svc.hidden(annotation.id)
+    return svc.hidden(annotation)
