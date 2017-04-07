@@ -14,7 +14,7 @@ from sqlalchemy.orm import subqueryload
 from h import models
 from h import presenters
 from h.events import AnnotationTransformEvent
-from memex.util.query import column_windows
+from h.util.query import column_windows
 
 log = logging.getLogger(__name__)
 
