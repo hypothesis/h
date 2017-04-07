@@ -20,6 +20,7 @@ class AnnotationTransformEvent(object):
     annotation just before it is indexed or in other use-cases.
     """
 
-    def __init__(self, request, annotation_dict):
+    def __init__(self, request, annotation, annotation_dict):
         self.request = request
+        self.annotation = annotation
         self.annotation_dict = annotation_dict

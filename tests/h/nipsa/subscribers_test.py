@@ -7,43 +7,54 @@ import pytest
 
 from h.nipsa import subscribers
 
-FakeEvent = namedtuple('FakeEvent', ['request', 'annotation_dict'])
+FakeEvent = namedtuple('FakeEvent', ['request', 'annotation', 'annotation_dict'])
+
+
+class FakeAnnotation(object):
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def id(self):
+        return self.data['id']
 
 
 @pytest.mark.usefixtures('nipsa_service', 'moderation_service')
 class TestTransformAnnotation(object):
     @pytest.mark.parametrize('ann,flagged', [
-        ({'id': 'ann-1', 'user': 'george'}, True),
-        ({'id': 'ann-2', 'user': 'georgia'}, False),
-        ({'id': 'ann-3'}, False),
+        (FakeAnnotation({'id': 'ann-1', 'user': 'george'}), True),
+        (FakeAnnotation({'id': 'ann-2', 'user': 'georgia'}), False),
+        (FakeAnnotation({'id': 'ann-3'}), False),
     ])
     def test_with_user_nipsa(self, ann, flagged, nipsa_service, pyramid_request):
         nipsa_service.is_flagged.return_value = flagged
         event = FakeEvent(request=pyramid_request,
-                          annotation_dict=ann)
+                          annotation=ann,
+                          annotation_dict=ann.data)
 
         subscribers.transform_annotation(event)
 
         if flagged:
-            assert ann['nipsa'] is True
+            assert ann.data['nipsa'] is True
         else:
-            assert 'nipsa' not in ann
+            assert 'nipsa' not in ann.data
 
     @pytest.mark.parametrize('ann,moderated', [
-        ({'id': 'normal'}, False),
-        ({'id': 'moderated'}, True)
+        (FakeAnnotation({'id': 'normal'}), False),
+        (FakeAnnotation({'id': 'moderated'}), True)
     ])
     def test_with_moderated_annotation(self, ann, moderated, moderation_service, pyramid_request):
         moderation_service.hidden.return_value = moderated
         event = FakeEvent(request=pyramid_request,
-                          annotation_dict=ann)
+                          annotation=ann,
+                          annotation_dict=ann.data)
 
         subscribers.transform_annotation(event)
 
         if moderated:
-            assert ann['nipsa'] is True
+            assert ann.data['nipsa'] is True
         else:
-            assert 'nipsa' not in ann
+            assert 'nipsa' not in ann.data
 
     @pytest.fixture
     def nipsa_service(self, pyramid_config):
