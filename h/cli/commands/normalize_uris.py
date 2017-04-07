@@ -6,7 +6,7 @@ import click
 from h import models
 from h.models.document import merge_documents
 from h.search import index
-from memex import uri
+from h.util import uri
 
 
 class Window(namedtuple('Window', ['start', 'end'])):

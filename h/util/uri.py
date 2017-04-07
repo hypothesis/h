@@ -62,13 +62,17 @@ This package is responsible for defining URI normalization routines for use
 elsewhere in the Hypothesis application. URI expansion is handled by
 :py:function:`h.storage.expand_uri`.
 """
+
 import re
 
-from memex._compat import text_type
-from memex._compat import urlparse
-from memex._compat import url_quote, url_quote_plus
-from memex._compat import url_unquote, url_unquote_plus
-
+from h._compat import (
+    text_type,
+    url_quote,
+    url_quote_plus,
+    url_unquote,
+    url_unquote_plus,
+    urlparse,
+)
 
 URL_SCHEMES = set(['http', 'https'])
 

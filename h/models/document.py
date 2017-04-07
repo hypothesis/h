@@ -13,7 +13,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from h._compat import urlparse
 from h.db import Base, mixins
 from h.models.annotation import Annotation
-from memex.uri import normalize as uri_normalize
+from h.util.uri import normalize as uri_normalize
 
 log = logging.getLogger(__name__)
 

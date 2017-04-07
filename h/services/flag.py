@@ -2,10 +2,7 @@
 
 from __future__ import unicode_literals
 
-from memex import uri
-
 from h import models
-from h import storage
 
 
 class FlagService(object):
