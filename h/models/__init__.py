@@ -18,28 +18,13 @@ key to. So for convenience the test module can instead just do
 
 """
 
-import h.db
-import memex.db
-
-# We want memex models and h models to share a base class (and hence a
-# metadata instance). This allows us to add relationships on
-# Annotation/Document from "outside" -- i.e. from the `h` package.
-#
-# Because metadata is filled at import time, we have to provide the Base class
-# for memex at import time too.
-#
-# Importing a memex model without having imported `h.models` will cause an
-# exception to be raised, and should be avoided.
-memex.db.set_base(h.db.Base)  # noqa
-
-from memex.models.annotation import Annotation
-from memex.models.document import Document, DocumentMeta, DocumentURI
-
 from h.models.activation import Activation
+from h.models.annotation import Annotation
 from h.models.annotation_moderation import AnnotationModeration
 from h.models.auth_client import AuthClient
 from h.models.auth_ticket import AuthTicket
 from h.models.blocklist import Blocklist
+from h.models.document import Document, DocumentMeta, DocumentURI
 from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort
 from h.models.flag import Flag
@@ -68,9 +53,3 @@ __all__ = (
     'Token',
     'User',
 )
-
-
-def includeme(_):
-    # This module is included for side-effects only. SQLAlchemy models register
-    # with the global metadata object when imported.
-    pass

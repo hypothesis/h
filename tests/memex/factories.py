@@ -9,7 +9,8 @@ import factory
 import faker
 from sqlalchemy import orm
 
-from memex import models
+from h import models
+from h.models.document import update_document_metadata
 
 FAKER = faker.Factory.create()
 SESSION = None
@@ -173,7 +174,7 @@ class Annotation(ModelFactory):
         if 'title' not in [m['type'] for m in document_meta_dicts]:
             document_meta_dicts.append(document_meta_dict(type='title'))
 
-        self.document = models.update_document_metadata(
+        self.document = update_document_metadata(
             orm.object_session(self),
             self.target_uri,
             document_meta_dicts=document_meta_dicts,

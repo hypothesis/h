@@ -6,7 +6,7 @@ from pyramid import security
 from sqlalchemy.orm import exc
 import slugify
 
-from memex import models
+from h.models.annotation import Annotation
 from h.db import Base
 from h.db import mixins
 from h import pubid
@@ -117,10 +117,12 @@ class Group(Base, mixins.Timestamps):
 
         """
         documents = []
+        # FIXME: this should probably use a relationship defined on the group
+        # so that we don't have to import the Annotation model explicitly.
         annotations = (
-            sa.orm.object_session(self).query(models.Annotation)
+            sa.orm.object_session(self).query(Annotation)
             .filter_by(groupid=self.pubid, shared=True)
-            .order_by(models.Annotation.updated.desc())
+            .order_by(Annotation.updated.desc())
             .limit(1000))
         for annotation in annotations:
             if annotation.document and annotation.document not in documents:

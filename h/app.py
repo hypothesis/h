@@ -41,15 +41,6 @@ def create_app(global_config, **settings):
 def includeme(config):
     settings = config.registry.settings
 
-    # We need to include `h.models` before pretty much everything else to
-    # avoid the possibility that one of the imports below directly or
-    # indirectly imports `memex.models`. See the comment at the top of
-    # `h.models` for details.
-    #
-    # FIXME: h modules should not access `memex.models`, even indirectly,
-    # except through `h.models`.
-    config.include('h.models')
-
     config.set_root_factory('h.resources:Root')
 
     config.add_subscriber('h.subscribers.add_renderer_globals',

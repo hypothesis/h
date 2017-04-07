@@ -8,7 +8,6 @@ import pytest
 
 import sqlalchemy as sa
 
-from memex import models  # noqa
 from memex.util.query import column_windows
 
 

@@ -11,9 +11,9 @@ import sqlalchemy as sa
 from elasticsearch import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
+from h import models
 from h import presenters
 from h.events import AnnotationTransformEvent
-from memex import models
 from memex.util.query import column_windows
 
 log = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def index(es, annotation, request, target_index=None):
     :type es: h.search.Client
 
     :param annotation: the annotation to index
-    :type annotation: memex.models.Annotation
+    :type annotation: h.models.Annotation
 
     :param target_index: the index name, uses default index if not given
     :type target_index: unicode

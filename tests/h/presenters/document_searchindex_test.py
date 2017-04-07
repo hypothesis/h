@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import pytest
 
+from h import models
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
-from memex import models
 
 
 class TestDocumentSearchIndexPresenter(object):

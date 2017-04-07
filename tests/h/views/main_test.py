@@ -6,8 +6,7 @@ import mock
 from pyramid import httpexceptions
 import pytest
 
-from memex.models.annotation import Annotation
-from memex.models.document import Document
+from h.models import Annotation
 from h.resources import AnnotationResource
 from h.views import main
 
@@ -17,19 +16,15 @@ def _fake_sidebar_app(request, extra):
 
 
 @pytest.mark.usefixtures('routes')
-def test_og_document(annotation_document, document_title, pyramid_request,
-                     group_service, links_service, sidebar_app):
-    annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
+def test_og_document(factories, pyramid_request, group_service, links_service, sidebar_app):
+    annotation = factories.Annotation(userid='acct:foo@example.com')
     context = AnnotationResource(annotation, group_service, links_service)
-    document = Document()
-    annotation_document.return_value = document
-    document_title.return_value = 'WikiHow — How to Make a ☆Starmap☆'
     sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)
 
     def test(d):
-        return 'foo' in d['content'] and 'Starmap' in d['content']
+        return 'foo@example.com' in d['content'] and annotation.document.title in d['content']
     assert any(test(d) for d in ctx['meta_attrs'])
 
 
@@ -130,20 +125,6 @@ class TestStreamUserRedirect(object):
 @pytest.fixture
 def sidebar_app(patch):
     return patch('h.views.main.sidebar_app')
-
-
-@pytest.fixture
-def annotation_document(patch):
-    return patch('memex.models.annotation.Annotation.document',
-                 autospec=None,
-                 new_callable=mock.PropertyMock)
-
-
-@pytest.fixture
-def document_title(patch):
-    return patch('memex.models.document.Document.title',
-                 autospec=None,
-                 new_callable=mock.PropertyMock)
 
 
 @pytest.fixture

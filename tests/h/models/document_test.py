@@ -8,8 +8,8 @@ import pytest
 import sqlalchemy as sa
 import transaction
 
-from memex import models
-from memex.models import document
+from h import models
+from h.models import document
 
 
 class TestDocumentFindByURIs(object):
@@ -953,19 +953,19 @@ class TestUpdateDocumentMetadata(object):
 
     @pytest.fixture
     def create_or_update_document_meta(self, patch):
-        return patch('memex.models.document.create_or_update_document_meta')
+        return patch('h.models.document.create_or_update_document_meta')
 
     @pytest.fixture
     def create_or_update_document_uri(self, patch):
-        return patch('memex.models.document.create_or_update_document_uri')
+        return patch('h.models.document.create_or_update_document_uri')
 
     @pytest.fixture
     def Document(self, patch):
-        return patch('memex.models.document.Document')
+        return patch('h.models.document.Document')
 
     @pytest.fixture
     def merge_documents(self, patch):
-        return patch('memex.models.document.merge_documents')
+        return patch('h.models.document.merge_documents')
 
     @pytest.fixture
     def session(self, db_session):
@@ -1018,4 +1018,4 @@ def mock_document_meta(document=None):
 
 @pytest.fixture
 def log(patch):
-    return patch('memex.models.document.log')
+    return patch('h.models.document.log')

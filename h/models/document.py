@@ -10,12 +10,10 @@ import transaction
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from memex.db import Base
-from memex.db import mixins
-from memex.models import Annotation
+from h._compat import urlparse
+from h.db import Base, mixins
+from h.models.annotation import Annotation
 from memex.uri import normalize as uri_normalize
-from memex._compat import urlparse
-
 
 log = logging.getLogger(__name__)
 
@@ -280,7 +278,7 @@ def create_or_update_document_uri(session,
 
     :param document: the Document that the new DocumentURI will belong to, if a
         new DocumentURI is created
-    :type document: memex.models.Document
+    :type document: h.models.Document
 
     :param created: the time that will be used as the .created time for the new
         DocumentURI, if a new one is created
@@ -355,7 +353,7 @@ def create_or_update_document_meta(session,
 
     :param document: the value to use for the DocumentMeta's document if a new
         DocumentMeta is created
-    :type document: memex.models.Document
+    :type document: h.models.Document
 
     :param created: the value to use for the DocumentMeta's created attribute
         if a new DocumentMeta is created
@@ -467,7 +465,7 @@ def update_document_metadata(session,
     :type updated: datetime.datetime
 
     :returns: the matched or created document
-    :rtype: memex.models.Document
+    :rtype: h.models.Document
     """
     if created is None:
         created = datetime.utcnow()

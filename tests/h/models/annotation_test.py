@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from pyramid import security
 import pytest
 
-from memex.models.annotation import Annotation
+from h.models.annotation import Annotation
 
 
 annotation_fixture = pytest.mark.usefixtures('annotation')
@@ -150,4 +150,4 @@ def annotation(db_session):
 
 @pytest.fixture
 def markdown(patch):
-    return patch('memex.models.annotation.markdown')
+    return patch('h.models.annotation.markdown')
