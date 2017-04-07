@@ -4,6 +4,7 @@ import click
 import sqlalchemy
 
 from h import models
+from h.views.admin_users import delete_user
 
 
 @click.group()
@@ -104,3 +105,29 @@ def password(ctx, username, authority, password):
     request.tm.commit()
 
     click.echo("Password changed for {}".format(username), err=True)
+
+
+@user.command()
+@click.argument('username')
+@click.option('--authority')
+@click.pass_context
+def delete(ctx, username, authority):
+    """
+    Deletes a user with all their group memberships and annotations.
+
+    You must specify the username of a user to delete.
+    """
+    request = ctx.obj['bootstrap']()
+
+    if not authority:
+        authority = request.authority
+
+    user = models.User.get_by_username(request.db, username, authority)
+    if user is None:
+        msg = 'no user with username "{}" and authority "{}"'.format(username, authority)
+        raise click.ClickException(msg)
+
+    delete_user(request, user)
+    request.tm.commit()
+
+    click.echo("User {} deleted.".format(username), err=True)

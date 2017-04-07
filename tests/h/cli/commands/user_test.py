@@ -185,6 +185,58 @@ class TestPasswordCommand(object):
         return user
 
 
+class TestDeleteUserCommand(object):
+    def test_it_deletes_user(self, cli, cliconfig, user, db_session, annotations):
+        result = cli.invoke(user_cli.delete,
+                            [user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+        user = db_session.query(models.User).filter_by(id=user.id).count() == 0
+
+    def test_it_deletes_user_with_specific_authority(self, cli, cliconfig, user, db_session, annotations):
+        user.authority = u'partner.org'
+        db_session.flush()
+
+        result = cli.invoke(user_cli.delete,
+                            [u'--authority', u'partner.org', user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+        assert db_session.query(models.User).filter_by(id=user.id).count() == 0
+
+    def test_it_errors_when_user_could_not_be_found(self, cli, cliconfig, user, db_session):
+        result = cli.invoke(user_cli.delete,
+                            ['bogus_%s' % user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 1
+        assert db_session.query(models.User).filter_by(id=user.id).count() == 1
+
+    def test_it_errors_when_user_with_specific_authority_could_not_be_found(
+            self, cli, cliconfig, user, db_session):
+
+        result = cli.invoke(user_cli.delete,
+                            ['--authority', 'foo.com', user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 1
+        assert db_session.query(models.User).filter_by(id=user.id).count() == 1
+
+    @pytest.fixture
+    def user(self, db_session, factories):
+        user = factories.User()
+        db_session.flush()
+        return user
+
+    @pytest.fixture
+    def annotations(self, pyramid_request, patch):
+        pyramid_request.es = mock.Mock()
+        es_helpers = patch('h.views.admin_users.es_helpers')
+        es_helpers.scan = mock.Mock(return_value=[])
+        return es_helpers.scan
+
+
 @pytest.fixture
 def signup_service():
     signup_service = mock.Mock(spec_set=['signup'])
