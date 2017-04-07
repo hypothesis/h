@@ -9,9 +9,9 @@ from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 
+from h.db import Base
 from memex import markdown
 from memex import uri
-from memex.db import Base
 from memex.db import types
 
 

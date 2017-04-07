@@ -147,16 +147,6 @@ class Worker(GeventPyWSGIWorker):
 
 def create_app(global_config, **settings):
     config = configure(settings=settings)
-
-    # We need to include `h.models` before pretty much everything else to
-    # avoid the possibility that one of the imports below directly or
-    # indirectly imports `memex.models`. See the comment at the top of
-    # `h.models` for details.
-    #
-    # FIXME: h modules should not access `memex.models`, even indirectly,
-    # except through `h.models`.
-    config.include('h.models')
-
     config.include('pyramid_services')
 
     config.include('h.auth')

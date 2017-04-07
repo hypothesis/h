@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 
+from h import models
 from h.presenters.document_json import DocumentJSONPresenter
-from memex import models
 
 
 class TestDocumentJSONPresenter(object):

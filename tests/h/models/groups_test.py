@@ -4,7 +4,6 @@ import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-import memex
 from h import models
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
@@ -219,7 +218,7 @@ class TestGroupACL(object):
 
 def annotation(session, document_, groupid, shared):
     """Add a new annotation of the given document to the db and return it."""
-    annotation_ = memex.models.Annotation(
+    annotation_ = models.Annotation(
         userid=u'fred', groupid=groupid, shared=shared,
         target_uri=document_.document_uris[0].uri,
         document_id=document_.id)
@@ -229,13 +228,13 @@ def annotation(session, document_, groupid, shared):
 
 def document(session, uri):
     """Add a new Document for the given uri to the db and return it."""
-    document_ = memex.models.Document()
+    document_ = models.Document()
     session.add(document_)
 
     # Flush the session so that document.id gets generated.
     session.flush()
 
-    session.add(memex.models.DocumentURI(
+    session.add(models.DocumentURI(
         claimant=uri, document_id=document_.id, uri=uri))
 
     return document_

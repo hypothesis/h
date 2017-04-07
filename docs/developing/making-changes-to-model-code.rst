@@ -156,13 +156,13 @@ implement it as two consecutive migration scripts instead.
 Don't import model classes into migration scripts
 =================================================
 
-Don't import model classes, for example
-``from memex.models import Annotation``, in migration scripts.
-Instead copy and paste the ``Annotation`` class into your migration script.
+Don't import model classes, for example ``from h.models import Annotation``,
+in migration scripts. Instead copy and paste the ``Annotation`` class into your
+migration script.
 
 This is because the script needs the schema of the ``Annotation`` class
 as it was at a particular point in time, which may be different from the
-schema in ``memex.models.Annotation`` when the script is run in the future.
+schema in ``h.models.Annotation`` when the script is run in the future.
 
 The script's copy of the class usually only needs to contain the definitions of
 the primary key column(s) and any other columns that the script uses, and only

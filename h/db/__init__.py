@@ -36,9 +36,6 @@ log = logging.getLogger(__name__)
 #
 #   http://docs.sqlalchemy.org/en/latest/core/constraints.html#configuring-constraint-naming-conventions
 #
-# N.B. This must be kept in sync with the naming conventions in
-# :py:mod:`memex.db`.
-#
 metadata = sqlalchemy.MetaData(naming_convention={
     "ix": "ix__%(column_0_label)s",
     "uq": "uq__%(table_name)s__%(column_0_name)s",
