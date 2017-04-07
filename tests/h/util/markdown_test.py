@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from memex import markdown
+from h.util import markdown
 
 
 class TestRender(object):
@@ -26,11 +26,11 @@ class TestRender(object):
 
     @pytest.fixture
     def markdown_render(self, patch):
-        return patch('memex.markdown.markdown')
+        return patch('h.util.markdown.markdown')
 
     @pytest.fixture
     def sanitize(self, patch):
-        return patch('memex.markdown.sanitize')
+        return patch('h.util.markdown.sanitize')
 
 
 class TestSanitize(object):
