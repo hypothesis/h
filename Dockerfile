@@ -49,6 +49,9 @@ RUN mkdir /etc/collectd/collectd.conf.d \
 # Copy the rest of the application files.
 COPY . .
 
+# If we're building from a git clone, ensure that .git is writeable
+RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
+
 # Build frontend assets
 RUN npm install --production \
   && NODE_ENV=production node_modules/.bin/gulp build \
