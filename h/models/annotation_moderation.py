@@ -26,7 +26,10 @@ class AnnotationModeration(Base, Timestamps):
 
     #: The annotation which has been flagged.
     annotation = sa.orm.relationship('Annotation',
-                                     backref=sa.orm.backref('moderation', uselist=False))
+                                     backref=sa.orm.backref('moderation',
+                                                            uselist=False,
+                                                            cascade='all, delete-orphan',
+                                                            passive_deletes=True))
 
     def __repr__(self):
         return '<AnnotationModeration annotation_id=%s>' % self.annotation_id

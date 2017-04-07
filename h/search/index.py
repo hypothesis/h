@@ -189,7 +189,8 @@ def _annotation_filter():
 def _eager_loaded_annotations(session):
     return session.query(models.Annotation).options(
         subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
-        subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
+        subqueryload(models.Annotation.document).subqueryload(models.Document.meta),
+        subqueryload(models.Annotation.moderation),
     )
 
 

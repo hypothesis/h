@@ -19,10 +19,7 @@ class AnnotationModerationService(object):
         :returns: true/false boolean
         :rtype: bool
         """
-        # We need to also check if the moderation model is in the
-        # session, in case it has just been deleted.
-        return (annotation.moderation is not None and
-                annotation.moderation in self.session)
+        return annotation.moderation is not None
 
     def all_hidden(self, annotation_ids):
         """
@@ -59,8 +56,7 @@ class AnnotationModerationService(object):
         if self.hidden(annotation):
             return
 
-        mod = models.AnnotationModeration(annotation=annotation)
-        self.session.add(mod)
+        annotation.moderation = models.AnnotationModeration()
 
     def unhide(self, annotation):
         """
@@ -72,9 +68,7 @@ class AnnotationModerationService(object):
         :type annotation: h.models.Annotation
         """
 
-        self.session.query(models.AnnotationModeration) \
-                    .filter_by(annotation=annotation) \
-                    .delete()
+        annotation.moderation = None
 
 
 def annotation_moderation_service_factory(context, request):
