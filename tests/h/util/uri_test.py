@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import pytest
 
-from memex import uri
-from memex._compat import text_type
+from h._compat import text_type
+from h.util import uri
 
 TEST_URLS = [
     # Should replace http and https protocol with httpx

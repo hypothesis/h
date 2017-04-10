@@ -18,7 +18,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import subqueryload
 
 from h.db import types
-from memex.uri import normalize as uri_normalize
+from h.util.uri import normalize as uri_normalize
 
 
 revision = 'bcdd81e23920'

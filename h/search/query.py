@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from h import storage
-from memex import uri
+from h.util import uri
 
 LIMIT_DEFAULT = 20
 LIMIT_MAX = 200
