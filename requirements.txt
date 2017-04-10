@@ -5,7 +5,6 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 
--e .
 alembic==0.8.7
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu

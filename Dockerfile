@@ -23,8 +23,7 @@ WORKDIR /var/lib/hypothesis
 RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx
 
 # Copy minimal data to allow installation of dependencies.
-COPY src/memex/__init__.py ./src/memex/
-COPY README.rst setup.* requirements.txt ./
+COPY requirements.txt ./
 
 # Install build deps, build, and then clean up.
 RUN apk-install --virtual build-deps \

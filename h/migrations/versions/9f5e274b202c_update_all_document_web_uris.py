@@ -17,7 +17,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import subqueryload
 
-from memex._compat import urlparse
+from h._compat import urlparse
 
 
 revision = '9f5e274b202c'
