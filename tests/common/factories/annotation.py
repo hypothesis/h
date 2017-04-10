@@ -1,108 +1,33 @@
 # -*- coding: utf-8 -*-
-"""Factory classes for easily generating test objects."""
 
 from __future__ import unicode_literals
 
 import random
 
 import factory
-import faker
 from sqlalchemy import orm
 
 from h import models
 from h.models.document import update_document_metadata
 
-FAKER = faker.Factory.create()
-SESSION = None
-
-
-class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:  # pylint: disable=no-init, old-style-class
-        abstract = True
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        # We override SQLAlchemyModelFactory's default _create classmethod so
-        # that rather than fetching the session from cls._meta (which is
-        # created at parse time... ugh) we fetch it from the SESSION global,
-        # which is dynamically filled out by the `factories` fixture when
-        # used.
-        if SESSION is None:
-            raise RuntimeError('no session: did you use the factories fixture?')
-        obj = model_class(*args, **kwargs)
-        SESSION.add(obj)
-        if cls._meta.force_flush:
-            SESSION.flush()
-        return obj
-
-
-class Document(ModelFactory):
-
-    class Meta:  # pylint: disable=no-init, old-style-class
-        model = models.Document
-
-
-class DocumentMeta(ModelFactory):
-
-    class Meta:  # pylint: disable=no-init, old-style-class
-        model = models.DocumentMeta
-
-    # Trying to add two DocumentMetas with the same claimant and type to the
-    # db will crash. We use a sequence instead of something like FAKER.url()
-    # for claimant here so that never happens (unless you pass in your own
-    # claimant).
-    claimant = factory.Sequence(
-        lambda n: 'http://example.com/document_' + str(n) + '/')
-
-    type = factory.Iterator([
-        'title', 'twitter.url.main_url', 'twitter.title', 'favicon'])
-    document = factory.SubFactory(Document)
-
-    @factory.lazy_attribute
-    def value(self):
-        if self.type == 'twitter.url.main_url':
-            return [FAKER.url()]
-        elif self.type == 'favicon':
-            return [FAKER.image_url()]
-        else:
-            return [FAKER.bs()]
-
-
-class DocumentURI(ModelFactory):
-
-    class Meta:  # pylint: disable=no-init, old-style-class
-        model = models.DocumentURI
-
-    # Trying to add two DocumentURIs with the same claimant, uri, type and
-    # content_type to the db will crash. We use a sequence instead of something
-    # like FAKER.url() for claimant here so that never happens (unless you pass
-    # in your own claimant).
-    claimant = factory.Sequence(
-        lambda n: 'http://example.com/document_' + str(n) + '/')
-
-    uri = factory.LazyAttribute(lambda obj: obj.claimant)
-    type = factory.Iterator(['rel-alternate', 'rel-canonical', 'highwire-pdf',
-                             'dc-doi'])
-    content_type = factory.Iterator(['text/html', 'application/pdf',
-                                     'text/plain'])
-    document = factory.SubFactory(Document)
+from .base import FAKER, ModelFactory
+from .document import Document, DocumentMeta, DocumentURI
 
 
 class Annotation(ModelFactory):
 
-    class Meta:  # pylint: disable=no-init, old-style-class
+    class Meta:
         model = models.Annotation
         force_flush = True  # Always flush the db to generate annotation.id.
 
-    tags = factory.LazyFunction(
-        lambda: FAKER.words(nb=random.randint(0, 5)))
+    tags = factory.LazyFunction(lambda: FAKER.words(nb=random.randint(0, 5)))
     target_uri = factory.Faker('uri')
     text = factory.Faker('paragraph')
     userid = factory.Faker('user_name')
     document = factory.SubFactory(Document)
 
     @factory.lazy_attribute
-    def target_selectors(self):  # pylint: disable=no-self-use
+    def target_selectors(self):
         return [
             {
                 'endContainer': '/div[1]/article[1]/section[1]/div[1]/div[2]/div[1]',
