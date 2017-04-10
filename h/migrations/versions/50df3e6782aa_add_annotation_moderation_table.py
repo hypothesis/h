@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 from alembic import op
 import sqlalchemy as sa
 
-from memex.db import types
+from h.db import types
 
 
 revision = '50df3e6782aa'

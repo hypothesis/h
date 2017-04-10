@@ -4,9 +4,7 @@ from __future__ import unicode_literals
 
 import sqlalchemy as sa
 
-from memex.db import types
-
-from h.db import Base
+from h.db import Base, types
 from h.db.mixins import Timestamps
 
 

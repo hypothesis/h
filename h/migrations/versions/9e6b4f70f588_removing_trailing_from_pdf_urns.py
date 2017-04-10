@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-from memex.db import types
+from h.db import types
 
 Base = declarative_base()
 Session = sessionmaker()
