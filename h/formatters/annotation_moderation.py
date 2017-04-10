@@ -23,21 +23,6 @@ class AnnotationModerationFormatter(object):
         self._user = user
         self._has_permission = has_permission
 
-        # Local cache of flag counts. We don't need to care about detached
-        # instances because we only store the annotation id and a count.
-        self._cache = {}
-
-    def preload(self, ids):
-        if self._user is None:
-            return
-
-        if not ids:
-            return
-
-        flag_counts = self._flag_count_svc.flag_counts(ids)
-        self._cache.update(flag_counts)
-        return flag_counts
-
     def format(self, annotation_resource):
         if not self._has_permission('admin', annotation_resource.group):
             return {}
@@ -46,11 +31,4 @@ class AnnotationModerationFormatter(object):
         return {'moderation': {'flagCount': flag_count}}
 
     def _load(self, annotation):
-        id_ = annotation.id
-
-        if id_ in self._cache:
-            return self._cache[id_]
-
-        flag_count = self._flag_count_svc.flag_count(annotation)
-        self._cache[id_] = flag_count
-        return flag_count
+        return self._flag_count_svc.flag_count(annotation)

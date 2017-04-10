@@ -49,5 +49,23 @@ class FlagCountService(object):
         return flag_counts
 
 
+class PreloadedFlagCountService(object):
+
+    def __init__(self, service, annotation_ids):
+        self._flag_counts = service.flag_counts(annotation_ids)
+
+    def flag_count(self, annotation):
+        if annotation.id not in self._flag_counts:
+            raise NotPreloadedError(annotation.id)
+
+        return self._flag_counts[annotation.id]
+
+
+class NotPreloadedError(Exception):
+    def __init__(self, annotation_id):
+        message = 'ID {} not in preloaded IDs'.format(annotation_id)
+        super(NotPreloadedError, self).__init__(message)
+
+
 def flag_count_service_factory(context, request):
     return FlagCountService(request.db)
