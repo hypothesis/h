@@ -44,7 +44,7 @@ test: node_modules/.uptodate
 ################################################################################
 
 # Fake targets to aid with deps installation
-.pydeps: setup.py requirements.txt
+.pydeps: requirements.txt
 	@echo installing python dependencies
 	@pip install --use-wheel -r requirements-dev.in tox
 	@touch $@

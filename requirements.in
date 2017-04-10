@@ -24,6 +24,7 @@ newrelic
 passlib
 psycogreen
 psycopg2
+pyparsing >= 2.1.5
 pyramid
 # Pin pyramid_authsanity to latest master until our bugfix
 # (https://github.com/usingnamespace/pyramid_authsanity/pull/7) is released.
@@ -36,10 +37,12 @@ pyramid_tm
 python-dateutil
 python-slugify < 1.2.0
 raven
+requests-aws4auth >= 0.9
 statsd
+transaction
 unicodecsv
+venusian
 wsaccel
 ws4py
+zope.interface
 zope.sqlalchemy
-
--e .  # memex

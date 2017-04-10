@@ -103,14 +103,6 @@ def includeme(config):
     if 'csp.report_uri' in settings:
         settings['csp']['report-uri'] = [settings['csp.report_uri']]
 
-    # API module
-    #
-    # We include this first so that:
-    # - configuration directives provided by modules in `memex` are available
-    #   to the rest of the application at startup.
-    # - we can override behaviour from `memex` if necessary.
-    config.include('memex', route_prefix='/api')
-
     # Core site modules
     config.include('h.assets')
     config.include('h.auth')
