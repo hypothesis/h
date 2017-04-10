@@ -7,6 +7,7 @@ from collections import namedtuple
 import pytest
 
 from h.formatters.annotation_moderation import AnnotationModerationFormatter
+from h.services.flag_count import FlagCountService
 
 FakeAnnotationResource = namedtuple('FakeAnnotationResource',
                                     ['annotation', 'group'])
@@ -30,8 +31,8 @@ class TestAnnotationModerationFormatter(object):
 
         assert preload == {flagged.id: 2, unflagged.id: 0}
 
-    def test_preload_skipped_without_user(self, db_session):
-        formatter = AnnotationModerationFormatter(db_session,
+    def test_preload_skipped_without_user(self, flag_count_svc):
+        formatter = AnnotationModerationFormatter(flag_count_svc,
                                                   user=None,
                                                   has_permission=None)
         assert formatter.preload(['annotation-id']) is None
@@ -39,8 +40,8 @@ class TestAnnotationModerationFormatter(object):
     def test_preload_skipped_without_ids(self, formatter):
         assert formatter.preload([]) is None
 
-    def test_format_returns_empty_for_non_moderator(self, db_session, user, group, flagged, permission_denied):
-        formatter = AnnotationModerationFormatter(db_session,
+    def test_format_returns_empty_for_non_moderator(self, flag_count_svc, user, group, flagged, permission_denied):
+        formatter = AnnotationModerationFormatter(flag_count_svc,
                                                   user,
                                                   permission_denied)
         annotation_resource = FakeAnnotationResource(flagged, group)
@@ -97,8 +98,12 @@ class TestAnnotationModerationFormatter(object):
         return factories.Annotation()
 
     @pytest.fixture
-    def formatter(self, db_session, user, permission_granted):
+    def formatter(self, flag_count_svc, user, permission_granted):
         """A formatter with the most common configuration."""
-        return AnnotationModerationFormatter(db_session,
+        return AnnotationModerationFormatter(flag_count_svc,
                                              user,
                                              permission_granted)
+
+    @pytest.fixture
+    def flag_count_svc(self, db_session):
+        return FlagCountService(db_session)

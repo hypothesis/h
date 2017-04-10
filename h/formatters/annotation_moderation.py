@@ -2,10 +2,8 @@
 
 from __future__ import unicode_literals
 
-import sqlalchemy as sa
 from zope.interface import implementer
 
-from h import models
 from h.formatters.interfaces import IAnnotationFormatter
 
 
@@ -20,8 +18,8 @@ class AnnotationModerationFormatter(object):
     flagged the annotation.
     """
 
-    def __init__(self, session, user, has_permission):
-        self._session = session
+    def __init__(self, flag_count_svc, user, has_permission):
+        self._flag_count_svc = flag_count_svc
         self._user = user
         self._has_permission = has_permission
 
@@ -36,32 +34,23 @@ class AnnotationModerationFormatter(object):
         if not ids:
             return
 
-        query = self._session.query(sa.func.count(models.Flag.id).label('flag_count'),
-                                    models.Flag.annotation_id) \
-                             .filter(models.Flag.annotation_id.in_(ids)) \
-                             .group_by(models.Flag.annotation_id)
-
-        flag_counts = {f.annotation_id: f.flag_count for f in query}
-        missing_ids = set(ids) - set(flag_counts.keys())
-        flag_counts.update({id_: 0 for id_ in missing_ids})
-
+        flag_counts = self._flag_count_svc.flag_counts(ids)
         self._cache.update(flag_counts)
-
         return flag_counts
 
     def format(self, annotation_resource):
         if not self._has_permission('admin', annotation_resource.group):
             return {}
 
-        flag_count = self._load(annotation_resource.annotation.id)
+        flag_count = self._load(annotation_resource.annotation)
         return {'moderation': {'flagCount': flag_count}}
 
-    def _load(self, id_):
+    def _load(self, annotation):
+        id_ = annotation.id
+
         if id_ in self._cache:
             return self._cache[id_]
 
-        flag_count = self._session.query(sa.func.count(models.Flag.id)) \
-                                  .filter_by(annotation_id=id_) \
-                                  .scalar()
+        flag_count = self._flag_count_svc.flag_count(annotation)
         self._cache[id_] = flag_count
         return flag_count

@@ -13,7 +13,7 @@ from h.interfaces import IGroupService
 
 
 class AnnotationJSONPresentationService(object):
-    def __init__(self, session, user, group_svc, links_svc, flag_svc, moderation_svc, has_permission):
+    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc, has_permission):
         self.session = session
         self.group_svc = group_svc
         self.links_svc = links_svc
@@ -21,7 +21,7 @@ class AnnotationJSONPresentationService(object):
         self.formatters = [
             formatters.AnnotationFlagFormatter(flag_svc, user),
             formatters.AnnotationHiddenFormatter(moderation_svc, user),
-            formatters.AnnotationModerationFormatter(self.session, user, has_permission)
+            formatters.AnnotationModerationFormatter(flag_count_svc, user, has_permission)
         ]
 
     def present(self, annotation_resource):
@@ -57,11 +57,13 @@ def annotation_json_presentation_service_factory(context, request):
     group_svc = request.find_service(IGroupService)
     links_svc = request.find_service(name='links')
     flag_svc = request.find_service(name='flag')
+    flag_count_svc = request.find_service(name='flag_count')
     moderation_svc = request.find_service(name='annotation_moderation')
     return AnnotationJSONPresentationService(session=request.db,
                                              user=request.user,
                                              group_svc=group_svc,
                                              links_svc=links_svc,
                                              flag_svc=flag_svc,
+                                             flag_count_svc=flag_count_svc,
                                              moderation_svc=moderation_svc,
                                              has_permission=request.has_permission)
