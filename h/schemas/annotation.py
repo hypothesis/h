@@ -264,7 +264,7 @@ def _format_jsonschema_error(error):
 
 def _remove_protected_fields(appstruct):
     # Some fields are not to be set by the user, ignore them.
-    for field in ['created', 'updated', 'user', 'id', 'links', 'flagged']:
+    for field in ['created', 'updated', 'user', 'id', 'links', 'flagged', 'hidden']:
         appstruct.pop(field, None)
 
 
