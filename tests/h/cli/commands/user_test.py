@@ -2,9 +2,11 @@
 
 import mock
 import pytest
+from passlib.context import CryptContext
 
 from h import models
 from h.cli.commands import user as user_cli
+from h.services.user_password import UserPasswordService
 
 
 class TestAddCommand(object):
@@ -126,6 +128,115 @@ class TestAdminCommand(object):
         return user
 
 
+class TestPasswordCommand(object):
+    def test_it_changes_password(self, cli, cliconfig, user, db_session, password_service):
+        result = cli.invoke(user_cli.password,
+                            [user.username,
+                             u'--password', u'newpass'],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        user = db_session.query(models.User).get(user.id)
+        assert password_service.check_password(user, 'newpass')
+
+    def test_it_changes_password_with_specific_authority(self, cli, cliconfig, user, db_session, password_service):
+        user.authority = u'partner.org'
+        db_session.flush()
+
+        result = cli.invoke(user_cli.password,
+                            [u'--authority', u'partner.org', user.username,
+                             u'--password', u'newpass'],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        user = db_session.query(models.User).get(user.id)
+        assert password_service.check_password(user, 'newpass')
+
+    def test_it_errors_when_user_could_not_be_found(self, cli, cliconfig, user, db_session, password_service):
+        result = cli.invoke(user_cli.password,
+                            ['bogus_%s' % user.username,
+                             u'--password', u'newpass'],
+                            obj=cliconfig)
+
+        assert result.exit_code == 1
+
+        user = db_session.query(models.User).get(user.id)
+        assert not password_service.check_password(user, 'newpass')
+
+    def test_it_errors_when_user_with_specific_authority_could_not_be_found(
+            self, cli, cliconfig, user, db_session, password_service):
+
+        result = cli.invoke(user_cli.password,
+                            ['--authority', 'foo.com', user.username,
+                             u'--password', u'newpass'],
+                            obj=cliconfig)
+
+        assert result.exit_code == 1
+
+        user = db_session.query(models.User).get(user.id)
+        assert not password_service.check_password(user, 'newpass')
+
+    @pytest.fixture
+    def user(self, db_session, factories):
+        user = factories.User()
+        db_session.flush()
+        return user
+
+
+class TestDeleteUserCommand(object):
+    def test_it_deletes_user(self, cli, cliconfig, user, db_session, annotations):
+        result = cli.invoke(user_cli.delete,
+                            [user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+        user = db_session.query(models.User).filter_by(id=user.id).count() == 0
+
+    def test_it_deletes_user_with_specific_authority(self, cli, cliconfig, user, db_session, annotations):
+        user.authority = u'partner.org'
+        db_session.flush()
+
+        result = cli.invoke(user_cli.delete,
+                            [u'--authority', u'partner.org', user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+        assert db_session.query(models.User).filter_by(id=user.id).count() == 0
+
+    def test_it_errors_when_user_could_not_be_found(self, cli, cliconfig, user, db_session):
+        result = cli.invoke(user_cli.delete,
+                            ['bogus_%s' % user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 1
+        assert db_session.query(models.User).filter_by(id=user.id).count() == 1
+
+    def test_it_errors_when_user_with_specific_authority_could_not_be_found(
+            self, cli, cliconfig, user, db_session):
+
+        result = cli.invoke(user_cli.delete,
+                            ['--authority', 'foo.com', user.username],
+                            obj=cliconfig)
+
+        assert result.exit_code == 1
+        assert db_session.query(models.User).filter_by(id=user.id).count() == 1
+
+    @pytest.fixture
+    def user(self, db_session, factories):
+        user = factories.User()
+        db_session.flush()
+        return user
+
+    @pytest.fixture
+    def annotations(self, pyramid_request, patch):
+        pyramid_request.es = mock.Mock()
+        es_helpers = patch('h.views.admin_users.es_helpers')
+        es_helpers.scan = mock.Mock(return_value=[])
+        return es_helpers.scan
+
+
 @pytest.fixture
 def signup_service():
     signup_service = mock.Mock(spec_set=['signup'])
@@ -133,8 +244,26 @@ def signup_service():
 
 
 @pytest.fixture
-def pyramid_config(pyramid_config, signup_service):
+def hasher():
+    # Use a much faster hasher for testing purposes. DO NOT use as few as
+    # 5 rounds of bcrypt in production code under ANY CIRCUMSTANCES.
+    return CryptContext(schemes=['bcrypt'],
+                        bcrypt__ident='2b',
+                        bcrypt__min_rounds=5,
+                        bcrypt__max_rounds=5)
+
+
+@pytest.fixture
+def password_service(hasher):
+    password_service = UserPasswordService()
+    password_service.hasher = hasher
+    return password_service
+
+
+@pytest.fixture
+def pyramid_config(pyramid_config, signup_service, password_service):
     pyramid_config.register_service(signup_service, name='user_signup')
+    pyramid_config.register_service(password_service, name='user_password')
     return pyramid_config
 
 
