@@ -49,6 +49,6 @@ class AnnotationHiddenFormatter(object):
         if id_ in self._cache:
             return self._cache[id_]
 
-        hidden = self.moderation_svc.hidden(annotation.id)
+        hidden = self.moderation_svc.hidden(annotation)
         self._cache[id_] = hidden
         return self._cache[id_]

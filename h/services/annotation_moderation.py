@@ -9,19 +9,17 @@ class AnnotationModerationService(object):
     def __init__(self, session):
         self.session = session
 
-    def hidden(self, annotation_id):
+    def hidden(self, annotation):
         """
         Check if an annotation id is hidden.
 
-        :param annotation_id: The id of the annotation to check.
-        :type annotation: unicode
+        :param annotation: The annotation to check.
+        :type annotation: h.models.Annotation
 
         :returns: true/false boolean
         :rtype: bool
         """
-        q = self.session.query(models.AnnotationModeration) \
-                        .filter_by(annotation_id=annotation_id)
-        return self.session.query(q.exists()).scalar()
+        return annotation.moderation is not None
 
     def all_hidden(self, annotation_ids):
         """
@@ -55,11 +53,10 @@ class AnnotationModerationService(object):
         :type annotation: h.models.Annotation
         """
 
-        if self.hidden(annotation.id):
+        if self.hidden(annotation):
             return
 
-        mod = models.AnnotationModeration(annotation=annotation)
-        self.session.add(mod)
+        annotation.moderation = models.AnnotationModeration()
 
     def unhide(self, annotation):
         """
@@ -71,9 +68,7 @@ class AnnotationModerationService(object):
         :type annotation: h.models.Annotation
         """
 
-        self.session.query(models.AnnotationModeration) \
-                    .filter_by(annotation=annotation) \
-                    .delete()
+        annotation.moderation = None
 
 
 def annotation_moderation_service_factory(context, request):

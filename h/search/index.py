@@ -46,7 +46,7 @@ def index(es, annotation, request, target_index=None):
     presenter = presenters.AnnotationSearchIndexPresenter(annotation)
     annotation_dict = presenter.asdict()
 
-    event = AnnotationTransformEvent(request, annotation_dict)
+    event = AnnotationTransformEvent(request, annotation, annotation_dict)
     request.registry.notify(event)
 
     if target_index is None:
@@ -149,7 +149,7 @@ class BatchIndexer(object):
                                  '_id': annotation.id}}
         data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
 
-        event = AnnotationTransformEvent(self.request, data)
+        event = AnnotationTransformEvent(self.request, annotation, data)
         self.request.registry.notify(event)
 
         return (action, data)
@@ -189,7 +189,8 @@ def _annotation_filter():
 def _eager_loaded_annotations(session):
     return session.query(models.Annotation).options(
         subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
-        subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
+        subqueryload(models.Annotation.document).subqueryload(models.Document.meta),
+        subqueryload(models.Annotation.moderation),
     )
 
 

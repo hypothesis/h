@@ -26,11 +26,12 @@ class TestIndexAnnotation:
                                                         es,
                                                         presenters,
                                                         pyramid_request):
+        annotation = mock.Mock()
         presented = presenters.AnnotationSearchIndexPresenter.return_value.asdict()
 
-        index.index(es, mock.Mock(), pyramid_request)
+        index.index(es, annotation, pyramid_request)
 
-        AnnotationTransformEvent.assert_called_once_with(pyramid_request, presented)
+        AnnotationTransformEvent.assert_called_once_with(pyramid_request, annotation, presented)
 
     def test_it_notifies_before_save_event(self,
                                            AnnotationTransformEvent,
@@ -193,6 +194,7 @@ class TestBatchIndexer(object):
                         '_id': annotation.id}},
             rendered
         )
+
     def test_index_emits_AnnotationTransformEvent_when_presenting_bulk_actions(self,
                                                                                db_session,
                                                                                indexer,
@@ -213,8 +215,9 @@ class TestBatchIndexer(object):
         streaming_bulk.side_effect = fake_streaming_bulk
 
         def transform(event):
-            data = event.annotation_dict
-            data['transformed'] = True
+            if event.annotation == annotation:
+                data = event.annotation_dict
+                data['transformed'] = True
 
         pyramid_config.add_subscriber(transform, 'h.events.AnnotationTransformEvent')
 
