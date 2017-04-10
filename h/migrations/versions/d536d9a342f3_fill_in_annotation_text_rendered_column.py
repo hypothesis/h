@@ -17,7 +17,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from memex import markdown
+from h.util import markdown
 
 
 revision = 'd536d9a342f3'

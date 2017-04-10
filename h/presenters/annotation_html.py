@@ -35,7 +35,7 @@ class AnnotationHTMLPresenter(object):
         The body text of this annotation.
 
         This return value of this field is marked safe because it is rendered
-        to HTML on write by :py:func:`memex.markdown.render`, which must take
+        to HTML on write by :py:func:`h.util.markdown.render`, which must take
         care of all necessary escaping.
         """
         if self.annotation.text_rendered:
