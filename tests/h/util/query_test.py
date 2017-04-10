@@ -8,7 +8,7 @@ import pytest
 
 import sqlalchemy as sa
 
-from memex.util.query import column_windows
+from h.util.query import column_windows
 
 
 meta = sa.MetaData()
