@@ -203,6 +203,8 @@ class TestCreateUpdateAnnotationSchema(object):
         'id',
         'links',
         'flagged',
+        'hidden',
+        'moderation',
     ])
     def test_it_removes_protected_fields(self, pyramid_request, validate, field):
         data = {}
