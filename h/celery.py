@@ -63,11 +63,11 @@ celery.conf.update(
         'h.tasks.cleanup',
         'h.tasks.indexer',
         'h.tasks.mailer',
-        'h.tasks.nipsa',
     ),
     CELERY_ROUTES={
         'h.tasks.indexer.add_annotation': 'indexer',
         'h.tasks.indexer.delete_annotation': 'indexer',
+        'h.tasks.indexer.reindex_user_annotations': 'indexer',
     },
     CELERY_TASK_SERIALIZER='json',
     CELERY_QUEUES=[

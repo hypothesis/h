@@ -8,7 +8,7 @@ from h.services.nipsa import NipsaService
 from h.services.nipsa import nipsa_factory
 
 
-@pytest.mark.usefixtures('users', 'add_nipsa', 'remove_nipsa')
+@pytest.mark.usefixtures('users', 'reindex_user_annotations')
 class TestNipsaService(object):
     def test_flagged_userids_returns_set_of_userids(self, db_session):
         svc = NipsaService(db_session)
@@ -35,12 +35,12 @@ class TestNipsaService(object):
 
         assert users['dominic'].nipsa is True
 
-    def test_flag_triggers_add_nipsa_job(self, db_session, users, add_nipsa):
+    def test_flag_triggers_reindex_job(self, db_session, users, reindex_user_annotations):
         svc = NipsaService(db_session)
 
         svc.flag(users['dominic'])
 
-        add_nipsa.delay.assert_called_once_with('acct:dominic@example.com')
+        reindex_user_annotations.delay.assert_called_once_with('acct:dominic@example.com')
 
     def test_unflag_sets_nipsa_false(self, db_session, users):
         svc = NipsaService(db_session)
@@ -49,12 +49,12 @@ class TestNipsaService(object):
 
         assert users['renata'].nipsa is False
 
-    def test_unflag_triggers_remove_nipsa_job(self, db_session, users, remove_nipsa):
+    def test_unflag_triggers_reindex_job(self, db_session, users, reindex_user_annotations):
         svc = NipsaService(db_session)
 
         svc.unflag(users['renata'])
 
-        remove_nipsa.delay.assert_called_once_with('acct:renata@example.com')
+        reindex_user_annotations.delay.assert_called_once_with('acct:renata@example.com')
 
     def test_clear_resets_cache(self, db_session, users):
         svc = NipsaService(db_session)
@@ -78,13 +78,8 @@ def test_nipsa_factory(pyramid_request):
 
 
 @pytest.fixture
-def add_nipsa(patch):
-    return patch('h.services.nipsa.add_nipsa')
-
-
-@pytest.fixture
-def remove_nipsa(patch):
-    return patch('h.services.nipsa.remove_nipsa')
+def reindex_user_annotations(patch):
+    return patch('h.services.nipsa.reindex_user_annotations')
 
 
 @pytest.fixture

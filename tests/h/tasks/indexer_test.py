@@ -105,6 +105,33 @@ class TestDeleteAnnotation(object):
         return patch('h.tasks.indexer.delete')
 
 
+@pytest.mark.usefixtures('celery')
+class TestReindexUserAnnotations(object):
+    def test_it_reindexes_users_annotations(self, batch_indexer, annotation_ids):
+        userid = annotation_ids.keys()[0]
+
+        indexer.reindex_user_annotations(userid)
+
+        args, _ = batch_indexer.return_value.index.call_args
+        actual = args[0]
+        expected = annotation_ids[userid]
+        assert sorted(expected) == sorted(actual)
+
+    @pytest.fixture
+    def batch_indexer(self, patch):
+        return patch('h.tasks.indexer.BatchIndexer')
+
+    @pytest.fixture
+    def annotation_ids(self, factories):
+        userid1 = 'acct:jeannie@example.com'
+        userid2 = 'acct:bob@example.com'
+
+        return {
+            userid1: [a.id for a in factories.Annotation.create_batch(3, userid=userid1)],
+            userid2: [a.id for a in factories.Annotation.create_batch(2, userid=userid2)],
+        }
+
+
 @pytest.fixture
 def celery(patch, pyramid_request):
     cel = patch('h.tasks.indexer.celery')
