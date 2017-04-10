@@ -258,30 +258,30 @@ class TestCreateUpdateAnnotationSchema(object):
     def test_it_extracts_document_uris_from_the_document(
             self,
             pyramid_request,
-            parse_document_claims,
+            document_claims,
             validate):
         target_uri = 'http://example.com/example'
         document_data = {'foo': 'bar'}
 
         validate(pyramid_request, {'document': document_data, 'uri': target_uri})
 
-        parse_document_claims.document_uris_from_data.assert_called_once_with(
+        document_claims.document_uris_from_data.assert_called_once_with(
             document_data,
             claimant=target_uri,
         )
 
     def test_it_puts_document_uris_in_appstruct(self,
-                                                parse_document_claims,
+                                                document_claims,
                                                 pyramid_request,
                                                 validate):
         appstruct = validate(pyramid_request, {'document': {}})
 
         assert appstruct['document']['document_uri_dicts'] == (
-            parse_document_claims.document_uris_from_data.return_value)
+            document_claims.document_uris_from_data.return_value)
 
     def test_it_extracts_document_metas_from_the_document(
             self,
-            parse_document_claims,
+            document_claims,
             pyramid_request,
             validate):
         document_data = {'foo': 'bar'}
@@ -290,14 +290,14 @@ class TestCreateUpdateAnnotationSchema(object):
         validate(pyramid_request,
                  {'document': {'foo': 'bar'}, 'uri': target_uri})
 
-        parse_document_claims.document_metas_from_data.assert_called_once_with(
+        document_claims.document_metas_from_data.assert_called_once_with(
             document_data,
             claimant=target_uri,
         )
 
     def test_it_does_not_pass_modified_dict_to_document_metas_from_data(
             self,
-            parse_document_claims,
+            document_claims,
             pyramid_request,
             validate):
         """
@@ -318,23 +318,23 @@ class TestCreateUpdateAnnotationSchema(object):
             document['new_key'] = 'new_value'
             document['top_level_key'] = 'new_value'
             document['sub_dict']['key'] = 'new_value'
-        parse_document_claims.document_uris_from_data.side_effect = (
+        document_claims.document_uris_from_data.side_effect = (
             document_uris_from_data)
 
         validate(pyramid_request, {'document': document})
 
         assert (
-            parse_document_claims.document_metas_from_data.call_args[0][0] ==
+            document_claims.document_metas_from_data.call_args[0][0] ==
             document)
 
     def test_it_puts_document_metas_in_appstruct(self,
-                                                 parse_document_claims,
+                                                 document_claims,
                                                  pyramid_request,
                                                  validate):
         appstruct = validate(pyramid_request, {'document': {}})
 
         assert appstruct['document']['document_meta_dicts'] == (
-            parse_document_claims.document_metas_from_data.return_value)
+            document_claims.document_metas_from_data.return_value)
 
     def test_it_clears_existing_keys_from_document(self, pyramid_request, validate):
         """
@@ -556,7 +556,7 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_passes_existing_target_uri_to_document_uris_from_data(
             self,
-            parse_document_claims,
+            document_claims,
             pyramid_request):
         """
         If no 'uri' is given it should use the existing target_uri.
@@ -573,13 +573,13 @@ class TestUpdateAnnotationSchema(object):
 
         schema.validate({'document': document_data})
 
-        parse_document_claims.document_uris_from_data.assert_called_once_with(
+        document_claims.document_uris_from_data.assert_called_once_with(
             document_data,
             claimant=mock.sentinel.target_uri)
 
     def test_it_passes_existing_target_uri_to_document_metas_from_data(
             self,
-            parse_document_claims,
+            document_claims,
             pyramid_request):
         """
         If no 'uri' is given it should use the existing target_uri.
@@ -596,11 +596,11 @@ class TestUpdateAnnotationSchema(object):
 
         schema.validate({'document': document_data})
 
-        parse_document_claims.document_metas_from_data.assert_called_once_with(
+        document_claims.document_metas_from_data.assert_called_once_with(
             document_data,
             claimant=mock.sentinel.target_uri)
 
 
 @pytest.fixture
-def parse_document_claims(patch):
-    return patch('h.schemas.annotation.parse_document_claims')
+def document_claims(patch):
+    return patch('h.schemas.annotation.document_claims')

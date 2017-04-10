@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 """
 Functions for parsing document claims data from the client.
 
@@ -9,6 +11,7 @@ The data is parsed into a format suitable for storage in our database model,
 and returned.
 
 """
+
 from __future__ import unicode_literals
 
 

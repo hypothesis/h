@@ -5,7 +5,7 @@ import copy
 from pyramid import i18n
 
 from h.schemas.base import JSONSchema, ValidationError
-from memex import parse_document_claims
+from h.util import document_claims
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -241,10 +241,10 @@ def _document(document, claimant):
 
     """
     document = document or {}
-    document_uri_dicts = parse_document_claims.document_uris_from_data(
+    document_uri_dicts = document_claims.document_uris_from_data(
         copy.deepcopy(document),
         claimant=claimant)
-    document_meta_dicts = parse_document_claims.document_metas_from_data(
+    document_meta_dicts = document_claims.document_metas_from_data(
         copy.deepcopy(document),
         claimant=claimant)
     return {
