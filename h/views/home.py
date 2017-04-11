@@ -33,3 +33,21 @@ def index(context, request):
         )
 
     return context
+
+
+@view_config(route_name='index',
+             request_method='GET',
+             feature='homepage_redirects')
+def index_redirect(context, request):
+    try:
+        redirect = request.registry.settings['h.homepage_redirect_url']
+    except KeyError:
+        # When the redirect URL isn't explicitly configured, we send people to
+        # the main activity stream.
+        redirect = request.route_url('activity.search')
+
+    if request.user is not None:
+        redirect = request.route_url('activity.user_search',
+                                     username=request.user.username)
+
+    raise httpexceptions.HTTPFound(redirect)

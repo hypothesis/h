@@ -89,6 +89,8 @@ SETTINGS = [
     # *not* toggle functionality based on this value. It is intended as a
     # label only.
     EnvSetting('h.env', 'ENV'),
+    # Where should logged-out users visiting the homepage be redirected?
+    EnvSetting('h.homepage_redirect_url', 'HOMEPAGE_REDIRECT_URL'),
     EnvSetting('h.proxy_auth', 'PROXY_AUTH', type=asbool),
     # Sentry DSNs for frontend code should be of the public kind, lacking the
     # password component in the DSN URI.

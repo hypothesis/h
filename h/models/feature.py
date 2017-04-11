@@ -17,6 +17,7 @@ FEATURES = {
                           " annotations in sidebar?"),
     'flag_action': ("Enable user to flag inappropriate annotations in the "
                     "client?"),
+    'homepage_redirects': "Enable homepage redirects (for WordPress migration)?",
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
 }
