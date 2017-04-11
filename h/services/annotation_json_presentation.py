@@ -45,12 +45,8 @@ class AnnotationJSONPresentationService(object):
                 for ann in annotations]
 
     def _get_presenter(self, annotation_resource):
-        presenter = presenters.AnnotationJSONPresenter(annotation_resource)
-
-        for formatter in self.formatters:
-            presenter.add_formatter(formatter)
-
-        return presenter
+        return presenters.AnnotationJSONPresenter(annotation_resource,
+                                                  self.formatters)
 
 
 def annotation_json_presentation_service_factory(context, request):
