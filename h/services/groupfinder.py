@@ -10,7 +10,8 @@ from h.util.db import lru_cache_in_transaction
 from h.groups.util import WorldGroup
 
 
-# Ideally this would be called the GroupService to match nomenclature in memex.
+# Ideally this would be called the GroupService to match the nomenclature of
+# the interface.
 # FIXME: rename / split existing GroupService and rename this.
 @implementer(IGroupService)
 class GroupfinderService(object):
