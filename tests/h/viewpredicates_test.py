@@ -2,24 +2,24 @@
 
 import mock
 
-from h.views import predicates
+from h.viewpredicates import FeaturePredicate
 
 
 class TestFeaturePredicate(object):
 
     def test_text(self):
-        predicate = predicates.FeaturePredicate('foo', mock.sentinel.config)
+        predicate = FeaturePredicate('foo', mock.sentinel.config)
 
         assert predicate.text() == 'feature = foo'
 
     def test_phash(self):
-        predicate = predicates.FeaturePredicate('foo', mock.sentinel.config)
+        predicate = FeaturePredicate('foo', mock.sentinel.config)
 
         assert predicate.phash() == 'feature = foo'
 
     def test__call__(self):
         request = mock.Mock(spec_set=['feature'])
-        predicate = predicates.FeaturePredicate('bar', mock.sentinel.config)
+        predicate = FeaturePredicate('bar', mock.sentinel.config)
 
         result = predicate(mock.sentinel.context, request)
 
