@@ -69,28 +69,6 @@ def test_env_setting_returns_nicer_error_for_type_failure():
         func({'PORT': 'notanint'})
 
 
-@pytest.mark.parametrize('setting,link,pattern,environ,expected', (
-    # Should return None if any of the required vars aren't set
-    ('database_url', 'db', 'db://{addr}', {}, None),
-    ('database_url', 'db', 'db://{addr}', {'DB_HOST': 'foo'}, None),
-    ('database_url', 'db', 'db://{host}:{port}', {'DB_ADDR': 'foo'}, None),
-
-    # Should return the settings object if all of the parts are available
-    ('database_url', 'db', 'db://{addr}',
-     {'DB_ADDR': 'foo'},
-     {'database_url': 'db://foo'}),
-    ('database_url', 'db', 'db://{host}:{port}',
-     {'DB_HOST': 'foo', 'DB_PORT': '123'},
-     {'database_url': 'db://foo:123'}),
-))
-def test_docker_setting(setting, link, pattern, environ, expected):
-    func = settings.DockerSetting(setting, link, pattern)
-
-    result = func(environ)
-
-    assert result == expected
-
-
 def test_database_url():
     url = 'postgres://postgres:1234/database'
     expected = 'postgresql+psycopg2://postgres:1234/database'

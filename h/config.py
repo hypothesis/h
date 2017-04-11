@@ -12,7 +12,6 @@ from pyramid.settings import asbool
 
 from h.settings import (
     DeprecatedSetting,
-    DockerSetting,
     EnvSetting,
     SettingError,
     database_url,
@@ -32,18 +31,7 @@ DEFAULT_SALT = (b"\xbc\x9ck!k\x81(\xb6I\xaa\x90\x0f'}\x07\xa1P\xd9\xb7\xcb"
 
 # The list of all settings read from the system environment. These are in
 # reverse-priority order, meaning that later settings trump earlier settings.
-# In general, automatic setup (such as Docker links) is overridden by explicit
-# settings.
 SETTINGS = [
-    # Automatic configuration of remote services via Docker links
-    DockerSetting('es.host', 'elasticsearch',
-                  pattern='http://{port_9200_tcp_addr}:{port_9200_tcp_port}'),
-    DockerSetting('mail.host', 'mail',
-                  pattern='{port_25_tcp_addr}'),
-    DockerSetting('mail.port', 'mail', pattern='{port_25_tcp_port}'),
-    DockerSetting('statsd.host', 'statsd', pattern='{port_8125_udp_addr}'),
-    DockerSetting('statsd.port', 'statsd', pattern='{port_8125_udp_port}'),
-
     # Mailer configuration for Mandrill
     mandrill_settings,
 
