@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import logging
-import string
 
 log = logging.getLogger(__name__)
 
@@ -62,31 +61,6 @@ class EnvSetting(object):
 
     def __str__(self):
         return 'environment variable {name}'.format(name=self.varname)
-
-
-class DockerSetting(object):
-
-    """A setting read from Docker link environment variables."""
-
-    def __init__(self, setting, link, pattern):
-        self.setting = setting
-        self.link = link.upper()
-        self.pattern = pattern
-
-        # Determine the settings that need to be present
-        formatter = string.Formatter()
-        self.placeholders = [field
-                             for _, field, _, _ in formatter.parse(pattern)
-                             if field is not None]
-
-    def __call__(self, environ):
-        try:
-            values = {x: environ['{}_{}'.format(self.link, x.upper())]
-                      for x in self.placeholders}
-        except KeyError:
-            pass
-        else:
-            return {self.setting: self.pattern.format(**values)}
 
 
 def database_url(url):
