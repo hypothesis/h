@@ -11,7 +11,7 @@ This document is a living guide, and is at risk of becoming outdated as we
 continually improve the software. If you spot things that are out of date,
 please submit a pull request to update this document.
 
-**This guide was last updated on 9 Jan 2017.**
+**This guide was last updated on 11 Apr 2017.**
 
 ----------------------------
 A lightning guide to Pyramid
@@ -47,9 +47,7 @@ The important parts of the ``h`` application can be broken down into:
 
 Models
     SQLAlchemy_ models representing the data objects that live in our database.
-
-    With a few important exceptions (see :ref:`memex`, below), these live in
-    :py:mod:`h.models`.
+    These live in :py:mod:`h.models`.
 
 Views (and templates)
     Views are code that is called in response to a particular request. Templates
@@ -82,40 +80,7 @@ booting application. Others may be business logic that dates from before we
 introduced the `services pattern`_, and thus might be more appropriately moved
 into a service in the future.
 
-There is one important part of the ``h`` repository codebase that we haven't yet
-talked about, and that's :ref:`memex`.
-
 .. _SQLAlchemy: http://www.sqlalchemy.org/
 .. _Celery: http://www.celeryproject.org/
 .. _services pattern: https://h.readthedocs.io/en/latest/arch/adr-002/
 
-.. _memex:
-
------
-Memex
------
-
-The ``h`` web application is the software we use to run `our public web
-annotation service`_. As such, it serves our organisational and operational
-needs, and we aren't currently building it as if others will pick it up and use
-it as-is. In order words, it's `coded in the open`_ rather than truly open
-source.
-
-With a view to releasing an important part of the software as true open-source
-software that we support and which can be easily reused by others, the ``h``
-repository also contains an installable Python package called ``memex``
-alongside the main ``h`` application.
-
-Memex is intended to be a Pyramid add-on which is responsible for storing
-annotation data and exposing it over an HTTP API. We ourselves use memex to
-provide part of the API for https://hypothes.is/.
-
-Memex, as an installable package, lives in ``src/memex/``, and its installation
-is controlled by ``setup.py`` in the repository root rather than by the
-``requirements.*`` files used by ``h``.
-
-As of early January 2017, we have not yet released a version of Memex to PyPI,
-but we hope to in the near future.
-
-.. _our public web annotation service: https://hypothes.is
-.. _coded in the open: https://gds.blog.gov.uk/2012/10/12/coding-in-the-open/
