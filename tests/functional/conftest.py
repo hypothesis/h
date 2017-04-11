@@ -55,7 +55,6 @@ def factories(db_session):
 @pytest.fixture(scope='session', autouse=True)
 def init_db(db_engine):
     from h import db
-    from h import models  # noqa
     db.init(db_engine, should_drop=True, should_create=True)
 
 
