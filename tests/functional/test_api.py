@@ -26,7 +26,7 @@ class TestAPI(object):
         Write an annotation to a group that doesn't allow writes.
 
         This is a basic test to check that h is correctly configuring the
-        memex groupfinder. Because memex is permissive by default.
+        groupfinder.
         """
 
         user, token = user_with_token
