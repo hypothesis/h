@@ -7,8 +7,8 @@ from elasticsearch.exceptions import ConnectionTimeout
 
 from h.search import query
 
-FILTERS_KEY = 'memex.search.filters'
-MATCHERS_KEY = 'memex.search.matchers'
+FILTERS_KEY = 'h.search.filters'
+MATCHERS_KEY = 'h.search.matchers'
 
 log = logging.getLogger(__name__)
 
