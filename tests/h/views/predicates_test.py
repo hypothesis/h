@@ -1,26 +1,25 @@
+# -*- coding: utf-8 -*-
+
 import mock
 
 from h.views import predicates
 
 
-class TestHasFeatureFlagPredicate(object):
+class TestFeaturePredicate(object):
 
     def test_text(self):
-        predicate = predicates.HasFeatureFlagPredicate('foo',
-                                                       mock.sentinel.config)
+        predicate = predicates.FeaturePredicate('foo', mock.sentinel.config)
 
-        assert predicate.text() == 'has_feature_flag = foo'
+        assert predicate.text() == 'feature = foo'
 
     def test_phash(self):
-        predicate = predicates.HasFeatureFlagPredicate('foo',
-                                                       mock.sentinel.config)
+        predicate = predicates.FeaturePredicate('foo', mock.sentinel.config)
 
-        assert predicate.phash() == 'has_feature_flag = foo'
+        assert predicate.phash() == 'feature = foo'
 
     def test__call__(self):
         request = mock.Mock(spec_set=['feature'])
-        predicate = predicates.HasFeatureFlagPredicate('bar',
-                                                       mock.sentinel.config)
+        predicate = predicates.FeaturePredicate('bar', mock.sentinel.config)
 
         result = predicate(mock.sentinel.context, request)
 
