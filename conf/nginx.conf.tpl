@@ -26,6 +26,11 @@ http {
   upstream web { server unix:/tmp/gunicorn-web.sock fail_timeout=0; }
   upstream websocket { server unix:/tmp/gunicorn-websocket.sock fail_timeout=0; }
 
+  map $http_hypothesis_test_migration $default_upstream {
+    default $fallback_upstream;
+    1 http://web;
+  }
+
   server {
     listen 5000;
 
@@ -38,6 +43,12 @@ http {
     rewrite ^/app/embed.js /embed.js;
     rewrite ^/minutes/(\d+)/(.*) https://hypothesis-meeting-logs.s3.amazonaws.com/$1/$2 redirect;
     rewrite ^/minutes/(.*) https://shrub.appspot.com/hypothesis-meeting-logs/$1 redirect;
+
+
+    # Set the fallback upstream URL.
+    # We store the upstream endpoint in a variable to trigger dynamic resolution
+    # of the upstream hostname.
+    set $fallback_upstream ${FALLBACK_UPSTREAM};
 
     location = /xmlrpc.php {
       return 499;
@@ -81,7 +92,16 @@ http {
     }
 
     location / {
-      ${FALLBACK_DIRECTIVES}
+      proxy_pass $default_upstream;
+      proxy_http_version 1.1;
+      proxy_connect_timeout 10s;
+      proxy_send_timeout 10s;
+      proxy_read_timeout 10s;
+      proxy_redirect off;
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-Server $http_host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Request-Start "t=${msec}";
     }
   }
 

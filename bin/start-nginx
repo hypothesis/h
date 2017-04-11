@@ -7,20 +7,9 @@ set -eu
 CONF_TEMPLATE=/etc/nginx/nginx.conf.tpl
 CONF_DEST=/etc/nginx/nginx.conf
 
-# By default, the "fallback" URLs will return a placeholder message. If an
-# explicit upstream is given, we reverse proxy to it.
-FALLBACK_DIRECTIVES=$({
-    echo 'add_header Content-Type "text/plain; charset=UTF-8";'
-    echo 'return 200 "This URL path would fall through to WordPress in production.";'
-})
-if [ -n "$FALLBACK_UPSTREAM" ]; then
-    # We store the upstream endpoint in a variable to trigger dynamic resolution
-    # of the upstream hostname.
-    FALLBACK_DIRECTIVES=$({
-        echo 'proxy_set_header Host $host;'
-        echo 'set $fallback_upstream "'"${FALLBACK_UPSTREAM}"'";'
-        echo 'proxy_pass $fallback_upstream;'
-    })
+# By default, we use the web service as the fallthrough URL.
+if [ -z "$FALLBACK_UPSTREAM" ]; then
+    FALLBACK_UPSTREAM="http://web"
 fi
 
 # Add "resolver" directives to the nginx config so that dynamic resolution can
@@ -32,8 +21,8 @@ RESOLVER_DIRECTIVES=$({
 })
 
 # Write out nginx configuration file
-export FALLBACK_DIRECTIVES
+export FALLBACK_UPSTREAM
 export RESOLVER_DIRECTIVES
-envsubst '$FALLBACK_DIRECTIVES $RESOLVER_DIRECTIVES' <"$CONF_TEMPLATE" >"$CONF_DEST"
+envsubst '$FALLBACK_UPSTREAM $RESOLVER_DIRECTIVES' <"$CONF_TEMPLATE" >"$CONF_DEST"
 
 exec nginx
