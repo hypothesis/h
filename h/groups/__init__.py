@@ -2,4 +2,4 @@
 
 
 def includeme(config):
-    config.memex_add_search_filter('h.groups.search.GroupAuthFilter')
+    config.add_search_filter('h.groups.search.GroupAuthFilter')

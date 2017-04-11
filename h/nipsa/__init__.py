@@ -8,4 +8,4 @@ def includeme(config):
                           'h.events.AnnotationTransformEvent')
 
     # Register an additional filter with the API search module
-    config.memex_add_search_filter('h.nipsa.search.Filter')
+    config.add_search_filter('h.nipsa.search.Filter')
