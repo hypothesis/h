@@ -57,6 +57,7 @@ def test_includeme():
         call('stream.tag_query', '/t/{tag}'),
         call('assets', '/assets/*subpath'),
         call('api.index', '/api/'),
+        call('api.links', '/api/links'),
         call('api.annotations', '/api/annotations'),
         call('api.annotation',
              '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',

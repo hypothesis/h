@@ -126,6 +126,7 @@ class TestIndex(object):
         pyramid_config.add_route('api.search', '/dummy/search')
         pyramid_config.add_route('api.annotations', '/dummy/annotations')
         pyramid_config.add_route('api.annotation', '/dummy/annotations/:id')
+        pyramid_config.add_route('api.links', '/dummy/links')
 
         result = views.index(testing.DummyResource(), pyramid_request)
 
@@ -146,6 +147,32 @@ class TestIndex(object):
         assert links['search']['method'] == 'GET'
         assert links['search']['url'] == host + '/dummy/search'
 
+
+class TestLinks(object):
+
+    def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):
+        pyramid_config.add_route('account', '/account/settings')
+        pyramid_config.add_route('forgot_password', '/forgot-password')
+        pyramid_config.add_route('group_leave', '/groups/{pubid}/leave')
+        pyramid_config.add_route('group_create', '/groups/new')
+        pyramid_config.add_route('help', '/docs/help')
+        pyramid_config.add_route('activity.search', '/search')
+        pyramid_config.add_route('signup', '/signup')
+        pyramid_config.add_route('stream.user_query', '/u/{user}')
+
+        links = views.links(testing.DummyResource(), pyramid_request)
+
+        host = 'http://example.com'  # Pyramid's default host URL.
+        assert links == {
+            'account.settings': host + '/account/settings',
+            'forgot-password': host + '/forgot-password',
+            'groups.leave': host + '/groups/:id/leave',
+            'groups.new': host + '/groups/new',
+            'help': host + '/docs/help',
+            'search.tag': host + '/search?q=tag:":tag"',
+            'signup': host + '/signup',
+            'user': host + '/u/:user',
+        }
 
 @pytest.mark.usefixtures('presentation_service', 'search_lib')
 class TestSearch(object):

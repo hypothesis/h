@@ -179,6 +179,32 @@ def index(context, request):
     }
 
 
+@api_config(route_name='api.links',
+            link_name='links',
+            description='URL templates for generating URLs for HTML pages')
+def links(context, request):
+    group_leave_url = request.route_url('group_leave', pubid='_id_')
+    group_leave_url = group_leave_url.replace('_id_', ':id')
+
+    tag_search_url = request.route_url('activity.search',
+                                       _query={'q': '_query_'})
+    tag_search_url = tag_search_url.replace('_query_', 'tag:":tag"')
+
+    user_url = request.route_url('stream.user_query', user='_user_')
+    user_url = user_url.replace('_user_', ':user')
+
+    return {
+        'account.settings': request.route_url('account'),
+        'forgot-password': request.route_url('forgot_password'),
+        'groups.leave': group_leave_url,
+        'groups.new': request.route_url('group_create'),
+        'help': request.route_url('help'),
+        'search.tag': tag_search_url,
+        'signup': request.route_url('signup'),
+        'user': user_url,
+    }
+
+
 @api_config(route_name='api.search',
             link_name='search',
             description='Search for annotations')
