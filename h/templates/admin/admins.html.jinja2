@@ -15,6 +15,7 @@
     </div>
     <div class="panel-body">
       <form method="POST" class="form-inline">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <div class="form-group">
           <label for="add">Username</label>
           <input type="text" class="form-control" name="add">
@@ -34,8 +35,9 @@
     </div>
     <div class="panel-body">
       <form
-        method="POST" 
+        method="POST"
         action="{{ request.route_url('admin_admins') }}">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul>
           {% for user in admin_users %}
             <li>
