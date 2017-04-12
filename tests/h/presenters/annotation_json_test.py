@@ -109,20 +109,40 @@ class TestAnnotationJSONPresenter(object):
         ann = mock.Mock(id='the-real-id', extra={})
         resource = AnnotationResource(ann, group_service, fake_links_service)
 
-        presenter = AnnotationJSONPresenter(resource)
-        presenter.add_formatter(FakeFormatter({'flagged': 'nope'}))
-        presenter.add_formatter(FakeFormatter({'nipsa': 'maybe'}))
+        formatters = [
+            FakeFormatter({'flagged': 'nope'}),
+            FakeFormatter({'nipsa': 'maybe'})
+        ]
+        presenter = AnnotationJSONPresenter(resource, formatters)
         presented = presenter.asdict()
 
         assert presented['flagged'] == 'nope'
         assert presented['nipsa'] == 'maybe'
 
+    def test_immutable_formatters(self, group_service, fake_links_service):
+        """Double-check we can't mutate the formatters list after the fact.
+
+        This is an extra check just to make sure we can't accidentally change
+        the constructor so that it simply aliases the list that's passed in,
+        leaving us open to all kinds of mutability horrors.
+
+        """
+        ann = mock.Mock(id='the-real-id', extra={})
+        resource = AnnotationResource(ann, group_service, fake_links_service)
+
+        formatters = [FakeFormatter({'flagged': 'nope'})]
+        presenter = AnnotationJSONPresenter(resource, formatters)
+        formatters.append(FakeFormatter({'enterprise': 'synergy'}))
+        presented = presenter.asdict()
+
+        assert 'enterprise' not in presented
+
     def test_formatter_uses_annotation_resource(self, group_service, fake_links_service):
         annotation = mock.Mock(id='the-id', extra={})
         resource = AnnotationResource(annotation, group_service, fake_links_service)
 
-        presenter = AnnotationJSONPresenter(resource)
-        presenter.add_formatter(IDDuplicatingFormatter())
+        formatters = [IDDuplicatingFormatter()]
+        presenter = AnnotationJSONPresenter(resource, formatters)
 
         output = presenter.asdict()
 
@@ -155,21 +175,9 @@ class TestAnnotationJSONPresenter(object):
         presenter = AnnotationJSONPresenter(resource)
         assert expected == presenter.permissions[action]
 
-    def test_add_formatter(self):
-        presenter = AnnotationJSONPresenter(mock.Mock())
-
-        formatter = FakeFormatter()
-
-        presenter.add_formatter(formatter)
-        assert formatter in presenter.formatters
-
-    def test_add_formatter_raises_for_wrong_formatter_type(self):
-        presenter = AnnotationJSONPresenter(mock.Mock())
-
-        formatter = mock.Mock()
-
+    def test_exception_for_wrong_formatter_type(self):
         with pytest.raises(ValueError) as exc:
-            presenter.add_formatter(formatter)
+            AnnotationJSONPresenter(mock.Mock(), formatters=[mock.Mock()])
 
         assert 'not implementing IAnnotationFormatter interface' in exc.value.message
 

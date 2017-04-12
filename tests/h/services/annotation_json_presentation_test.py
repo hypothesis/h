@@ -43,16 +43,15 @@ class TestAnnotationJSONPresentationService(object):
     def test_present_inits_presenter(self, svc, presenters, annotation_resource):
         svc.present(annotation_resource)
 
-        presenters.AnnotationJSONPresenter.assert_called_once_with(annotation_resource)
+        presenters.AnnotationJSONPresenter.assert_called_once_with(annotation_resource, mock.ANY)
 
     def test_present_adds_formatters(self, svc, annotation_resource, presenters):
         formatters = [mock.Mock(), mock.Mock()]
         svc.formatters = formatters
-        presenter = presenters.AnnotationJSONPresenter.return_value
 
         svc.present(annotation_resource)
 
-        assert presenter.add_formatter.mock_calls == [mock.call(f) for f in formatters]
+        presenters.AnnotationJSONPresenter.assert_called_once_with(mock.ANY, formatters)
 
     def test_present_returns_presenter_dict(self, svc, presenters):
         presenter = presenters.AnnotationJSONPresenter.return_value
