@@ -24,7 +24,8 @@ def staff_index(request):
              request_method='POST',
              request_param='add',
              renderer='h:templates/admin/staff.html.jinja2',
-             permission='admin_staff')
+             permission='admin_staff',
+             require_csrf=True)
 def staff_add(request):
     """Make a given user a staff member."""
     username = request.params['add'].strip()
@@ -44,7 +45,8 @@ def staff_add(request):
              request_method='POST',
              request_param='remove',
              renderer='h:templates/admin/staff.html.jinja2',
-             permission='admin_staff')
+             permission='admin_staff',
+             require_csrf=True)
 def staff_remove(request):
     """Remove a user from the staff."""
     userid = request.params['remove']
