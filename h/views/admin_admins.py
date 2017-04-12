@@ -24,7 +24,8 @@ def admins_index(request):
              request_method='POST',
              request_param='add',
              renderer='h:templates/admin/admins.html.jinja2',
-             permission='admin_admins')
+             permission='admin_admins',
+             require_csrf=True)
 def admins_add(request):
     """Make a given user an admin."""
     username = request.params['add'].strip()
@@ -44,7 +45,8 @@ def admins_add(request):
              request_method='POST',
              request_param='remove',
              renderer='h:templates/admin/admins.html.jinja2',
-             permission='admin_admins')
+             permission='admin_admins',
+             require_csrf=True)
 def admins_remove(request):
     """Remove a user from the admins."""
     n_admins = request.db.query(models.User).filter(models.User.admin).count()

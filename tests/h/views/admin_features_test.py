@@ -22,8 +22,7 @@ class DummyFeature(object):
         self.staff = False
 
 
-features_save_fixtures = pytest.mark.usefixtures('Feature',
-                                                 'check_csrf_token')
+features_save_fixtures = pytest.mark.usefixtures('Feature')
 
 
 @features_save_fixtures
@@ -63,16 +62,6 @@ def test_features_save_ignores_unknown_fields(Feature, pyramid_request):
     features_save(pyramid_request)
 
     assert foo.admins == False
-
-
-@features_save_fixtures
-def test_features_save_checks_csrf_token(Feature, check_csrf_token, pyramid_request):
-    Feature.all.return_value = []
-    pyramid_request.POST = {}
-
-    features_save(pyramid_request)
-
-    check_csrf_token.assert_called_with(pyramid_request)
 
 
 def test_cohorts_index_without_cohorts(pyramid_request):
@@ -181,7 +170,6 @@ def test_cohorts_edit_with_users(factories, pyramid_request):
     assert len(result['cohort'].members) == 2
 
 
-@pytest.mark.usefixtures('check_csrf_token')
 @mock.patch.dict('h.models.feature.FEATURES', {'feat': 'A test feature'})
 def test_features_save_sets_cohorts_when_checkboxes_on(pyramid_request):
     feat = models.Feature(name='feat')
@@ -201,7 +189,6 @@ def test_features_save_sets_cohorts_when_checkboxes_on(pyramid_request):
     assert cohort in feat.cohorts
 
 
-@pytest.mark.usefixtures('check_csrf_token')
 @mock.patch.dict('h.models.feature.FEATURES', {'feat': 'A test feature'})
 def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
     feat = models.Feature(name='feat')
@@ -232,8 +219,3 @@ def routes(pyramid_config):
 @pytest.fixture
 def Feature(patch):
     return patch('h.models.Feature')
-
-
-@pytest.fixture
-def check_csrf_token(patch):
-    return patch('pyramid.session.check_csrf_token')

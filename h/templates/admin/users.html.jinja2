@@ -40,6 +40,9 @@
                       class="users-activate-form"
                       method="POST">
                   <input type="hidden"
+                         name="csrf_token"
+                         value="{{ request.session.get_csrf_token() }}">
+                  <input type="hidden"
                          name="userid"
                          value="{{user.userid}}">
                   <button class="btn btn-primary btn-xs" type="submit">
@@ -67,6 +70,7 @@
       <h3>Please-be-careful Zone</h3>
 
       <form method="POST" action="{{request.route_path('admin_users_rename')}}" class="form-inline">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <input type="hidden" name="userid" value="{{user.userid}}">
         <input type="text" name="new_username" placeholder="New Username">
         <button class="btn" type="submit">Change username</button>
@@ -77,6 +81,7 @@
       <form method="POST"
             action="{{request.route_path('admin_users_delete')}}"
             class="form-inline js-users-delete-form">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <input type="hidden" name="userid" value="{{user.userid}}">
 
         {% if user_meta['annotations_count'] > 100 %}

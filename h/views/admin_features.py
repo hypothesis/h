@@ -22,9 +22,9 @@ def features_index(request):
 
 @view_config(route_name='admin_features',
              request_method='POST',
-             permission='admin_features')
+             permission='admin_features',
+             require_csrf=True)
 def features_save(request):
-    session.check_csrf_token(request)
     for feat in models.Feature.all(request.db):
         for attr in ['everyone', 'admins', 'staff']:
             val = request.POST.get('{0}[{1}]'.format(feat.name, attr))
@@ -60,7 +60,8 @@ def cohorts_index(context, request):
              request_method='POST',
              request_param='add',
              renderer='h:templates/admin/cohorts.html.jinja2',
-             permission='admin_features')
+             permission='admin_features',
+             require_csrf=True)
 def cohorts_add(request):
     """Create a new feature cohort."""
     cohort_name = request.params['add']
@@ -89,7 +90,8 @@ def cohorts_edit(context, request):
              request_method='POST',
              request_param='add',
              renderer='h:templates/admin/edit_cohort.html.jinja2',
-             permission='admin_features')
+             permission='admin_features',
+             require_csrf=True)
 def cohorts_edit_add(request):
     member_name = request.params['add'].strip()
     member_authority = request.params['authority'].strip()
@@ -113,7 +115,8 @@ def cohorts_edit_add(request):
              request_method='POST',
              request_param='remove',
              renderer='h:templates/admin/edit_cohort.html.jinja2',
-             permission='admin_features')
+             permission='admin_features',
+             require_csrf=True)
 def cohorts_edit_remove(request):
     member_userid = request.params['remove']
     cohort_id = request.matchdict['id']

@@ -26,7 +26,8 @@ def nipsa_index(request):
 @view_config(route_name='admin_nipsa',
              request_method='POST',
              request_param='add',
-             permission='admin_nipsa')
+             permission='admin_nipsa',
+             require_csrf=True)
 def nipsa_add(request):
     username = request.params['add'].strip()
     authority = request.params['authority'].strip()
@@ -47,7 +48,8 @@ def nipsa_add(request):
 @view_config(route_name='admin_nipsa',
              request_method='POST',
              request_param='remove',
-             permission='admin_nipsa')
+             permission='admin_nipsa',
+             require_csrf=True)
 def nipsa_remove(request):
     userid = request.params['remove']
     user = request.db.query(models.User).filter_by(userid=userid).first()

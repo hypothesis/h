@@ -19,7 +19,8 @@ def badge_index(request):
 @view_config(route_name='admin_badge',
              request_method='POST',
              request_param='add',
-             permission='admin_badge')
+             permission='admin_badge',
+             require_csrf=True)
 def badge_add(request):
     uri = request.params['add']
     item = models.Blocklist(uri=uri)
@@ -41,7 +42,8 @@ def badge_add(request):
 @view_config(route_name='admin_badge',
              request_method='POST',
              request_param='remove',
-             permission='admin_badge')
+             permission='admin_badge',
+             require_csrf=True)
 def badge_remove(request):
     uri = request.params['remove']
     request.db.query(models.Blocklist).filter_by(uri=uri).delete()

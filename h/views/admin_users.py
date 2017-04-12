@@ -57,7 +57,8 @@ def users_index(request):
 @view_config(route_name='admin_users_activate',
              request_method='POST',
              request_param='userid',
-             permission='admin_users')
+             permission='admin_users',
+             require_csrf=True)
 def users_activate(request):
     user = _form_request_user(request)
 
@@ -77,7 +78,8 @@ def users_activate(request):
 
 @view_config(route_name='admin_users_rename',
              request_method='POST',
-             permission='admin_users')
+             permission='admin_users',
+             require_csrf=True)
 def users_rename(request):
     user = _form_request_user(request)
 
@@ -109,7 +111,8 @@ def users_rename(request):
 
 @view_config(route_name='admin_users_delete',
              request_method='POST',
-             permission='admin_users')
+             permission='admin_users',
+             require_csrf=True)
 def users_delete(request):
     user = _form_request_user(request)
 
