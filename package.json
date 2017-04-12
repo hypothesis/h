@@ -67,7 +67,7 @@
     "websocket": "^1.0.22"
   },
   "engines": {
-    "node": "0.10.x"
+    "node": ">=6"
   },
   "repository": {
     "type": "git",
