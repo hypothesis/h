@@ -488,7 +488,7 @@ class TestUpdate(object):
 
         views.update(mock.Mock(), pyramid_request)
 
-        pyramid_request.stats.incr.assert_called_once_with('memex.api.deprecated.put_update_annotation')
+        pyramid_request.stats.incr.assert_called_once_with('api.deprecated.put_update_annotation')
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
