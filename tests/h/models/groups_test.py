@@ -196,6 +196,12 @@ class TestGroupACL(object):
     def test_creator_has_admin_permissions(self, group, authz_policy):
         assert authz_policy.permits(group, 'acct:luke@example.com', 'admin')
 
+    def test_no_admin_permission_when_no_creator(self, group, authz_policy):
+        group.creator = None
+
+        principals = authz_policy.principals_allowed_by_permission(group, 'admin')
+        assert len(principals) == 0
+
     def test_fallback_is_deny_all(self, group, authz_policy):
         assert not authz_policy.permits(group, [security.Everyone], 'foobar')
 

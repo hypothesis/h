@@ -24,13 +24,21 @@ def groups_index_csv(request):
 
     header = ['Group name', 'Group URL', 'Creator username',
               'Creator email', 'Number of members']
-    rows = [[group.name,
+    rows = []
+    for group in groups:
+        creator_name = None
+        creator_email = None
+        if group.creator:
+            creator_name = group.creator.username
+            creator_email = group.creator.email
+
+        rows.append([
              request.route_url('group_read',
                                pubid=group.pubid,
                                slug=group.slug),
-             group.creator.username,
-             group.creator.email,
-             len(group.members)] for group in groups]
+             creator_name,
+             creator_email,
+             len(group.members)])
 
     filename = 'groups.csv'
     request.response.content_disposition = 'attachment;filename=' + filename
