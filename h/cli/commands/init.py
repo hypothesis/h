@@ -29,7 +29,7 @@ def _init_db(settings):
         engine.execute('select 1 from alembic_version')
     except sqlalchemy.exc.ProgrammingError:
         log.info("initializing database")
-        db.init(engine, should_create=True)
+        db.init(engine, should_create=True, authority=settings['h.authority'])
     else:
         log.info("detected alembic_version table, skipping db initialization")
 

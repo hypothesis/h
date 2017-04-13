@@ -24,6 +24,7 @@ from h import form
 from h.settings import database_url
 from h._compat import text_type
 
+TEST_AUTHORITY = 'example.com'
 TEST_DATABASE_URL = database_url(os.environ.get('TEST_DATABASE_URL',
                                                 'postgresql://postgres@localhost/htest'))
 
@@ -104,7 +105,7 @@ def cli():
 def db_engine():
     """Set up the database connection and create tables."""
     engine = sqlalchemy.create_engine(TEST_DATABASE_URL)
-    db.init(engine, should_create=True, should_drop=True)
+    db.init(engine, should_create=True, should_drop=True, authority=TEST_AUTHORITY)
     return engine
 
 
@@ -224,7 +225,7 @@ def pyramid_config(pyramid_settings, pyramid_request):
 def pyramid_request(db_session, fake_feature, pyramid_settings):
     """Dummy Pyramid request object."""
     request = testing.DummyRequest(db=db_session, feature=fake_feature)
-    request.authority = text_type(request.domain)
+    request.authority = text_type(TEST_AUTHORITY)
     request.create_form = mock.Mock()
     request.matched_route = mock.Mock()
     request.registry.settings = pyramid_settings

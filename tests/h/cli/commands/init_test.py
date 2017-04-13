@@ -16,11 +16,14 @@ class TestInitCommand(object):
                                   db_engine,
                                   pyramid_settings):
         db.make_engine.return_value = db_engine
+        pyramid_settings['h.authority'] = 'foobar.org'
 
         result = cli.invoke(init_cli.init, obj=cliconfig)
 
         db.make_engine.assert_called_once_with(pyramid_settings)
-        db.init.assert_called_once_with(db_engine, should_create=True)
+        db.init.assert_called_once_with(db_engine,
+                                        should_create=True,
+                                        authority='foobar.org')
         assert result.exit_code == 0
 
     def test_skips_database_init_if_alembic_managed(self,

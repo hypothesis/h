@@ -55,7 +55,8 @@ def factories(db_session):
 @pytest.fixture(scope='session', autouse=True)
 def init_db(db_engine):
     from h import db
-    db.init(db_engine, should_drop=True, should_create=True)
+    authority = TEST_SETTINGS['h.authority']
+    db.init(db_engine, should_drop=True, should_create=True, authority=authority)
 
 
 @pytest.fixture(scope='session', autouse=True)
