@@ -68,6 +68,7 @@ def includeme(config):
     # construct URLs incorrectly if its `apiUrl` setting does not end in a
     # trailing slash.
     config.add_route('api.index', '/api/')
+    config.add_route('api.links', '/api/links')
     config.add_route('api.annotations', '/api/annotations')
     config.add_route('api.annotation',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
