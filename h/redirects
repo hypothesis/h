@@ -1,0 +1,12 @@
+# Redirects to be checked before passing a request on to the application.
+#
+# Note that if this file is removed or incorrectly formatted, the application
+# will fail to boot. For details of the format, see h/util/redirects.py.
+
+# Legacy application URLs
+/profile/notifications internal-prefix account_notifications
+/profile/developer     internal-prefix account_developer
+/profile               internal-prefix account
+/register              internal-prefix signup
+/forgot_password       internal-prefix forgot_password
+/reset_password        internal-prefix account_reset
