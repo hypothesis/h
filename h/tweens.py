@@ -2,8 +2,13 @@
 
 import collections
 import logging
+from codecs import open
+
 from pyramid import httpexceptions
 from pyramid.util import DottedNameResolver
+
+from h.util.redirects import parse as parse_redirects
+from h.util.redirects import lookup as lookup_redirects
 
 log = logging.getLogger(__name__)
 resolver = DottedNameResolver(None)
@@ -80,23 +85,18 @@ def csrf_tween_factory(handler, registry):
     return csrf_tween
 
 
-REDIRECTS = [
-    ('/profile/notifications', 'account_notifications'),
-    ('/profile/developer', 'account_developer'),
-    ('/profile', 'account'),
-    ('/register', 'signup'),
-    ('/forgot_password', 'forgot_password'),
-    ('/reset_password', 'account_reset'),
-]
+def redirect_tween_factory(handler, registry, redirects=None):
+    if redirects is None:
+        # N.B. If we fail to load or parse the redirects file, the application
+        # will fail to boot. This is deliberate: a missing/corrupt redirects
+        # file should result in a healthcheck failure.
+        with open('h/redirects', encoding='utf-8') as fp:
+            redirects = parse_redirects(fp)
 
-
-def redirect_tween_factory(handler, registry, redirects=REDIRECTS):
     def redirect_tween(request):
-        for old_path, route_name in redirects:
-            if request.path.startswith(old_path):
-                url = request.route_url(route_name)
-                suffix = request.path.replace(old_path, '', 1)
-                return httpexceptions.HTTPMovedPermanently(location=(url + suffix))
+        url = lookup_redirects(redirects, request)
+        if url is not None:
+            return httpexceptions.HTTPMovedPermanently(location=url)
         return handler(request)
 
     return redirect_tween
