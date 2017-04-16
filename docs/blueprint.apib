@@ -1,0 +1,487 @@
+FORMAT: 1A
+HOST: https://hypothes.is
+
+# Hypothes.is
+[Hypothes.is](http://hypothes.is/) provides an implementation of the [Annotator](http://annotatorjs.org/)
+Storage API.
+
+## API Entry [/api]
+
+### Retrieve service doc [GET]
++ Response 200 (application/json)
+
+        {
+          "message": "Annotator Store API",
+          "links": {
+            "search": {
+              "desc": "Basic search API",
+              "method": "GET",
+              "url": "https://hypothes.is/api/search"
+            },
+            "annotation": {
+              "create": {
+                "desc": "Create a new annotation",
+                "method": "POST",
+                "url": "https://hypothes.is/api/annotations"
+              },
+              "update": {
+                "desc": "Update an existing annotation",
+                "method": "PUT",
+                "url": "https://hypothes.is/api/annotations/:id"
+              },
+              "delete": {
+                "desc": "Delete an annotation",
+                "method": "DELETE",
+                "url": "https://hypothes.is/api/annotations/:id"
+              },
+              "read": {
+                "desc": "Get an existing annotation",
+                "method": "GET",
+                "url": "https://hypothes.is/api/annotations/:id"
+              }
+            }
+          }
+        }
+
+## Annotation Collection [/api/annotations{?limit,offset}]
+
++ Model (application/json)
+
+            [
+              {
+                "tags": [],
+                "references": [
+                  "iHNf1mBeTrS0ClW_2rF3Iw"
+                ],
+                "updated": "2015-02-05T16:54:00.156927+00:00",
+                "created": "2015-02-05T15:54:59.597989+00:00",
+                "text": "The 5 \"encouraging facts\" about climate change the author mentions are:\n\n> in the previous 15 years [...] we’re seeing about 90% less temperature rise than expected\n\n> Antarctic sea ice [...] is increasing\n\n> sea levels are rising, but the rise is not accelerating\n\n> a decrease in the world’s surface that has been afflicted by droughts since 1982\n\n> the trend for landfalling typhoons around the Philippines has declined \n",
+                "permissions": {
+                  "update": [
+                    "acct:emvincent@hypothes.is"
+                  ],
+                  "admin": [
+                    "acct:emvincent@hypothes.is"
+                  ],
+                  "delete": [
+                    "acct:emvincent@hypothes.is"
+                  ],
+                  "read": [
+                    "group:__world__"
+                  ]
+                },
+                "uri": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+                "id": "LM-oVYS-TvauHw7bLK7XTw",
+                "consumer": "00000000-0000-0000-0000-000000000000",
+                "user": "acct:emvincent@hypothes.is"
+              },
+              {
+                "tags": [
+                  "reference needed"
+                ],
+                "document": {
+                  "prism": {},
+                  "title": [
+                    "The Alarming Thing About Climate Alarmism"
+                  ],
+                  "link": [
+                    {
+                      "href": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462"
+                    },
+                    {
+                      "href": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+                      "rel": "canonical",
+                      "type": ""
+                    }
+                  ],
+                  "highwire": {},
+                  "dc": {},
+                  "eprints": {},
+                  "facebook": {
+                    "title": [
+                      "The Alarming Thing About Climate Alarmism"
+                    ],
+                    "image": [
+                      "http://si.wsj.net/public/resources/images/ED-AT234_lombor_G_20150201121817.jpg"
+                    ],
+                    "description": [
+                      "In The Wall Street Journal, Bjorn Lomborg writes that exaggerated, worst-case claims about climate change result in bad policy and they ignore a wealth of encouraging data."
+                    ],
+                    "url": [
+                      "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462"
+                    ],
+                    "image:width": [
+                      "553"
+                    ],
+                    "locale": [
+                      "en_US"
+                    ],
+                    "image:height": [
+                      "369"
+                    ],
+                    "site_name": [
+                      "WSJ"
+                    ],
+                    "type": [
+                      "article"
+                    ]
+                  },
+                  "twitter": {
+                    "card": [
+                      "summary_large_image"
+                    ],
+                    "title": [
+                      "The Alarming Thing About Climate Alarmism"
+                    ],
+                    "image": [
+                      "http://si.wsj.net/public/resources/images/ED-AT234_lombor_D_20150201121817.jpg"
+                    ],
+                    "description": [
+                      "In The Wall Street Journal, Bjorn Lomborg writes that exaggerated, worst-case claims about climate change result in bad policy and they ignore a wealth of encouraging data."
+                    ],
+                    "site": [
+                      "@WSJ"
+                    ],
+                    "domain": [
+                      "wsj.com"
+                    ],
+                    "image:src": [
+                      "http://si.wsj.net/public/resources/images/ED-AT234_lombor_G_20150201121817.jpg"
+                    ]
+                  }
+                },
+                "updated": "2015-02-05T16:52:50.441027+00:00",
+                "created": "2015-02-05T15:53:15.924190+00:00",
+                "text": "This is a strong claim; a strong reference would be needed to back it up.\nIn this article, the author provides 5 facts about the changing climate to back this assertion. This is far from sufficient to give credit to the author's claim, especially since several of these facts are only one aspect of the story, as shown by the scientists' comments below.\n\n",
+                "permissions": {
+                  "update": [
+                    "acct:emvincent@hypothes.is"
+                  ],
+                  "admin": [
+                    "acct:emvincent@hypothes.is"
+                  ],
+                  "delete": [
+                    "acct:emvincent@hypothes.is"
+                  ],
+                  "read": [
+                    "group:__world__"
+                  ]
+                },
+                "uri": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+                "target": [
+                  {
+                    "selector": [
+                      {
+                        "endOffset": 258,
+                        "startContainer": "/div[2]/div[4]/div[3]/article[1]/div[1]/div[1]/div[1]/div[1]/p[1]",
+                        "startOffset": 217,
+                        "type": "RangeSelector",
+                        "endContainer": "/div[2]/div[4]/div[3]/article[1]/div[1]/div[1]/div[1]/div[1]/p[1]"
+                      },
+                      {
+                        "end": 587,
+                        "start": 546,
+                        "type": "TextPositionSelector"
+                      },
+                      {
+                        "prefix": "han expected. This ignores that",
+                        "type": "TextQuoteSelector",
+                        "suffix": ". The latest study from the Unit",
+                        "exact": "much of the data are actually encouraging"
+                      },
+                      {
+                        "value": "",
+                        "type": "FragmentSelector"
+                      }
+                    ],
+                    "pos": {
+                      "height": 19,
+                      "top": 442
+                    },
+                    "source": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462"
+                  }
+                ],
+                "consumer": "00000000-0000-0000-0000-000000000000",
+                "id": "iHNf1mBeTrS0ClW_2rF3Iw",
+                "user": "acct:emvincent@hypothes.is"
+              }
+            ]
+
+### Annotation List [GET]
+Returns the most recent 20 annotations
+
++ Response 200 (application/json)
+
+    [Annotation Collection][]
+
+### Create an Annotation [POST]
++ Request (application/json)
+
+        {
+          "tags": [],
+          "text": "The 5 \"encouraging facts\" about climate change the author mentions are:\n\n> in the previous 15 years [...] we’re seeing about 90% less temperature rise than expected\n\n> Antarctic sea ice [...] is increasing\n\n> sea levels are rising, but the rise is not accelerating\n\n> a decrease in the world’s surface that has been afflicted by droughts since 1982\n\n> the trend for landfalling typhoons around the Philippines has declined \n",
+          "uri": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+          "consumer": "00000000-0000-0000-0000-000000000000",
+          "user": "acct:emvincent@hypothes.is"
+        }
+
++ Response 201 (application/json)
+
+        {
+          "tags": [],
+          "references": [
+            "iHNf1mBeTrS0ClW_2rF3Iw"
+          ],
+          "updated": "2015-02-05T16:54:00.156927+00:00",
+          "created": "2015-02-05T15:54:59.597989+00:00",
+          "text": "The 5 \"encouraging facts\" about climate change the author mentions are:\n\n> in the previous 15 years [...] we’re seeing about 90% less temperature rise than expected\n\n> Antarctic sea ice [...] is increasing\n\n> sea levels are rising, but the rise is not accelerating\n\n> a decrease in the world’s surface that has been afflicted by droughts since 1982\n\n> the trend for landfalling typhoons around the Philippines has declined \n",
+          "permissions": {
+            "update": [
+              "acct:emvincent@hypothes.is"
+            ],
+            "admin": [
+              "acct:emvincent@hypothes.is"
+            ],
+            "delete": [
+              "acct:emvincent@hypothes.is"
+            ],
+            "read": [
+              "group:__world__"
+            ]
+          },
+          "uri": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+          "id": "LM-oVYS-TvauHw7bLK7XTw",
+          "consumer": "00000000-0000-0000-0000-000000000000",
+          "user": "acct:emvincent@hypothes.is"
+        }
+
+## Annotation [/api/annotations/{id}]
+A single Annotation object with all its details
+
++ Parameters
+    + id (required, string) ... `id` of the Annotation to perform action with. Has example value.
+
++ Model (application/json)
+
+    JSON representation of a single annotation.
+
+    + Body
+
+            {
+              "tags": [],
+              "references": [
+                "iHNf1mBeTrS0ClW_2rF3Iw"
+              ],
+              "updated": "2015-02-05T16:54:00.156927+00:00",
+              "created": "2015-02-05T15:54:59.597989+00:00",
+              "text": "The 5 \"encouraging facts\" about climate change the author mentions are:\n\n> in the previous 15 years [...] we’re seeing about 90% less temperature rise than expected\n\n> Antarctic sea ice [...] is increasing\n\n> sea levels are rising, but the rise is not accelerating\n\n> a decrease in the world’s surface that has been afflicted by droughts since 1982\n\n> the trend for landfalling typhoons around the Philippines has declined \n",
+              "permissions": {
+                "update": [
+                  "acct:emvincent@hypothes.is"
+                ],
+                "admin": [
+                  "acct:emvincent@hypothes.is"
+                ],
+                "delete": [
+                  "acct:emvincent@hypothes.is"
+                ],
+                "read": [
+                  "group:__world__"
+                ]
+              },
+              "uri": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+              "id": "LM-oVYS-TvauHw7bLK7XTw",
+              "consumer": "00000000-0000-0000-0000-000000000000",
+              "user": "acct:emvincent@hypothes.is"
+            }
+
+### Retrieve an Annotation [GET]
++ Response 200 (application/json)
+
+    [Annotation][]
+
+### Update an Annotation [PUT]
++ Request (application/json)
+
+    [Annotation][]
+
++ Response 204
+
+### Remove an Annotation [DELETE]
++ Response 204
+
+## Search Annotations [/api/search{?limit,uri,user,quote,text}]
+Search the primary annotations index.
+
++ Parameters
+    + limit (optional, string) ... number of results to return
+    + uri (optional, string) ... url encoded uri to get annotations for
+    + user (optional, string) ... get annotations for a particular user.
+    + quote (optional, string) ... words that the annotation is quoting.
+    + text (optional, string) ... search annotation text.
+
+### Retrieve Search Results [GET]
++ Response 200 (application/json)
+
+            {
+                "total": 8792,
+                "rows": [
+                  {
+                    "tags": [],
+                    "references": [
+                      "iHNf1mBeTrS0ClW_2rF3Iw"
+                    ],
+                    "updated": "2015-02-05T16:54:00.156927+00:00",
+                    "created": "2015-02-05T15:54:59.597989+00:00",
+                    "text": "The 5 \"encouraging facts\" about climate change the author mentions are:\n\n> in the previous 15 years [...] we’re seeing about 90% less temperature rise than expected\n\n> Antarctic sea ice [...] is increasing\n\n> sea levels are rising, but the rise is not accelerating\n\n> a decrease in the world’s surface that has been afflicted by droughts since 1982\n\n> the trend for landfalling typhoons around the Philippines has declined \n",
+                    "permissions": {
+                      "update": [
+                        "acct:emvincent@hypothes.is"
+                      ],
+                      "admin": [
+                        "acct:emvincent@hypothes.is"
+                      ],
+                      "delete": [
+                        "acct:emvincent@hypothes.is"
+                      ],
+                      "read": [
+                        "group:__world__"
+                      ]
+                    },
+                    "uri": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+                    "id": "LM-oVYS-TvauHw7bLK7XTw",
+                    "consumer": "00000000-0000-0000-0000-000000000000",
+                    "user": "acct:emvincent@hypothes.is"
+                  },
+                  {
+                    "tags": [
+                      "reference needed"
+                    ],
+                    "document": {
+                      "prism": {},
+                      "title": [
+                        "The Alarming Thing About Climate Alarmism"
+                      ],
+                      "link": [
+                        {
+                          "href": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462"
+                        },
+                        {
+                          "href": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+                          "rel": "canonical",
+                          "type": ""
+                        }
+                      ],
+                      "highwire": {},
+                      "dc": {},
+                      "eprints": {},
+                      "facebook": {
+                        "title": [
+                          "The Alarming Thing About Climate Alarmism"
+                        ],
+                        "image": [
+                          "http://si.wsj.net/public/resources/images/ED-AT234_lombor_G_20150201121817.jpg"
+                        ],
+                        "description": [
+                          "In The Wall Street Journal, Bjorn Lomborg writes that exaggerated, worst-case claims about climate change result in bad policy and they ignore a wealth of encouraging data."
+                        ],
+                        "url": [
+                          "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462"
+                        ],
+                        "image:width": [
+                          "553"
+                        ],
+                        "locale": [
+                          "en_US"
+                        ],
+                        "image:height": [
+                          "369"
+                        ],
+                        "site_name": [
+                          "WSJ"
+                        ],
+                        "type": [
+                          "article"
+                        ]
+                      },
+                      "twitter": {
+                        "card": [
+                          "summary_large_image"
+                        ],
+                        "title": [
+                          "The Alarming Thing About Climate Alarmism"
+                        ],
+                        "image": [
+                          "http://si.wsj.net/public/resources/images/ED-AT234_lombor_D_20150201121817.jpg"
+                        ],
+                        "description": [
+                          "In The Wall Street Journal, Bjorn Lomborg writes that exaggerated, worst-case claims about climate change result in bad policy and they ignore a wealth of encouraging data."
+                        ],
+                        "site": [
+                          "@WSJ"
+                        ],
+                        "domain": [
+                          "wsj.com"
+                        ],
+                        "image:src": [
+                          "http://si.wsj.net/public/resources/images/ED-AT234_lombor_G_20150201121817.jpg"
+                        ]
+                      }
+                    },
+                    "updated": "2015-02-05T16:52:50.441027+00:00",
+                    "created": "2015-02-05T15:53:15.924190+00:00",
+                    "text": "This is a strong claim; a strong reference would be needed to back it up.\nIn this article, the author provides 5 facts about the changing climate to back this assertion. This is far from sufficient to give credit to the author's claim, especially since several of these facts are only one aspect of the story, as shown by the scientists' comments below.\n\n",
+                    "permissions": {
+                      "update": [
+                        "acct:emvincent@hypothes.is"
+                      ],
+                      "admin": [
+                        "acct:emvincent@hypothes.is"
+                      ],
+                      "delete": [
+                        "acct:emvincent@hypothes.is"
+                      ],
+                      "read": [
+                        "group:__world__"
+                      ]
+                    },
+                    "uri": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462",
+                    "target": [
+                      {
+                        "selector": [
+                          {
+                            "endOffset": 258,
+                            "startContainer": "/div[2]/div[4]/div[3]/article[1]/div[1]/div[1]/div[1]/div[1]/p[1]",
+                            "startOffset": 217,
+                            "type": "RangeSelector",
+                            "endContainer": "/div[2]/div[4]/div[3]/article[1]/div[1]/div[1]/div[1]/div[1]/p[1]"
+                          },
+                          {
+                            "end": 587,
+                            "start": 546,
+                            "type": "TextPositionSelector"
+                          },
+                          {
+                            "prefix": "han expected. This ignores that",
+                            "type": "TextQuoteSelector",
+                            "suffix": ". The latest study from the Unit",
+                            "exact": "much of the data are actually encouraging"
+                          },
+                          {
+                            "value": "",
+                            "type": "FragmentSelector"
+                          }
+                        ],
+                        "pos": {
+                          "height": 19,
+                          "top": 442
+                        },
+                        "source": "http://www.wsj.com/articles/bjorn-lomborg-the-alarming-thing-about-climate-alarmism-1422832462"
+                      }
+                    ],
+                    "consumer": "00000000-0000-0000-0000-000000000000",
+                    "id": "iHNf1mBeTrS0ClW_2rF3Iw",
+                    "user": "acct:emvincent@hypothes.is"
+                  }
+                ]
+            }
