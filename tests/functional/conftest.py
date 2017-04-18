@@ -22,8 +22,12 @@ TEST_SETTINGS = {
 
 @pytest.fixture
 def app(pyramid_app, db_engine):
+    from h import db
+
     _clean_database(db_engine)
     _clean_elasticsearch(TEST_SETTINGS)
+    db.init(db_engine, authority=TEST_SETTINGS['h.authority'])
+
     return TestApp(pyramid_app)
 
 

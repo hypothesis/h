@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import pytest
 
-from h.groups.util import WorldGroup
 from h.services.groupfinder import groupfinder_service_factory
 from h.services.groupfinder import GroupfinderService
 
@@ -14,11 +13,6 @@ class TestGroupfinderService(object):
         group = factories.Group()
 
         assert svc.find(group.pubid) == group
-
-    def test_returns_correct_group_for_world(self, svc):
-        group = svc.find('__world__')
-
-        assert isinstance(group, WorldGroup)
 
     def test_sets_authority_on_world_group(self, svc):
         group = svc.find('__world__')

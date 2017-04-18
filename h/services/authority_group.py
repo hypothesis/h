@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from h import models
-from h.groups import util
 from h.models import group
 
 
@@ -21,10 +20,7 @@ class AuthorityGroupService(object):
         self._authority = authority
 
     def public_groups(self, authority):
-        if authority == self._authority:
-            return [util.WorldGroup(self._authority)]
-        else:
-            return (self._session.query(models.Group)
+        return (self._session.query(models.Group)
                     .filter_by(authority=authority,
                                readable_by=group.ReadableBy.world)
                     .all())
