@@ -22,11 +22,11 @@ import venusian
 
 from h import search as search_lib
 from h import storage
+from h.exceptions import PayloadError
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
 from h.resources import AnnotationResource
-from h.schemas import ValidationError
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.util import cors
 
@@ -43,26 +43,6 @@ cors_policy = cors.policy(
     ),
     allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'),
     allow_preflight=True)
-
-
-class APIError(Exception):
-
-    """Base exception for problems handling API requests."""
-
-    def __init__(self, message, status_code=500):
-        self.status_code = status_code
-        super(APIError, self).__init__(message)
-
-
-class PayloadError(APIError):
-
-    """Exception raised for API requests made with missing/invalid payloads."""
-
-    def __init__(self):
-        super(PayloadError, self).__init__(
-            _('Expected a valid JSON payload, but none was found!'),
-            status_code=400
-        )
 
 
 def add_api_view(config, view, link_name=None, description=None, **settings):
@@ -136,18 +116,6 @@ def api_config(link_name=None, description=None, **settings):
         return wrapped
 
     return wrapper
-
-
-@api_config(context=APIError)
-def error_api(context, request):
-    request.response.status_code = context.status_code
-    return {'status': 'failure', 'reason': context.message}
-
-
-@api_config(context=ValidationError)
-def error_validation(context, request):
-    request.response.status_code = 400
-    return {'status': 'failure', 'reason': context.message}
 
 
 @api_config(route_name='api.index')

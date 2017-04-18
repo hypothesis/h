@@ -11,30 +11,6 @@ from h.search.core import SearchResult
 from h.views import api as views
 
 
-class TestError(object):
-
-    def test_it_sets_status_code_from_error(self, pyramid_request):
-        exc = views.APIError("it exploded", status_code=429)
-
-        views.error_api(exc, pyramid_request)
-
-        assert pyramid_request.response.status_code == 429
-
-    def test_it_returns_status_object(self, pyramid_request):
-        exc = views.APIError("it exploded", status_code=429)
-
-        result = views.error_api(exc, pyramid_request)
-
-        assert result == {'status': 'failure', 'reason': 'it exploded'}
-
-    def test_it_sets_bad_request_status_code(self, pyramid_request):
-        exc = mock.Mock(message="it exploded")
-
-        views.error_validation(exc, pyramid_request)
-
-        assert pyramid_request.response.status_code == 400
-
-
 class TestAddApiView(object):
     def test_it_sets_accept_setting(self, pyramid_config, view):
         views.add_api_view(pyramid_config, view)

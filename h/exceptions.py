@@ -7,8 +7,6 @@ from __future__ import unicode_literals
 from h.i18n import TranslationString as _
 
 
-# N.B. This class **only** covers exceptions thrown by API code provided by
-# the h package. memex code has its own base APIError class.
 class APIError(Exception):
 
     """Base exception for problems handling API requests."""
@@ -42,3 +40,15 @@ class OAuthTokenError(APIError):
     def __init__(self, message, type_, status_code=400):
         self.type = type_
         super(OAuthTokenError, self).__init__(message, status_code=status_code)
+
+
+class PayloadError(APIError):
+
+    """
+    Exception raised for API requests made with missing/invalid
+    payloads.
+    """
+
+    def __init__(self):
+        message = _('Expected a valid JSON payload, but none was found!')
+        super(PayloadError, self).__init__(message, status_code=400)
