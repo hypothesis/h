@@ -28,6 +28,7 @@ class Annotation(Base):
         #
         sa.Index('ix__annotation_tags', 'tags', postgresql_using='gin'),
         sa.Index('ix__annotation_updated', 'updated'),
+        sa.Index('ix__annotation_thread_root', sa.text('("references"[1])')),
     )
 
     #: Annotation ID: these are stored as UUIDs in the database, and mapped
