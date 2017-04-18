@@ -15,6 +15,12 @@ In order to make it easy for us to help you, please note the following:
 3. Fill out the information requested by the template below. If you can't supply
    all the information, don't worry, but do please use the template.
 -->
+
+### I checked, if the bug is already listed
+
+- [ ] yes
+- [ ] no ([Please do so :smile:](https://github.com/hypothesis/h/issues))
+
 ### Steps to reproduce
 1.
 2.
