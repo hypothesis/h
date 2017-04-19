@@ -140,14 +140,5 @@ def test_deleting_tags_inline_is_persisted(db_session, factories):
 
 
 @pytest.fixture
-def annotation(db_session):
-    ann = Annotation(userid="testuser", target_uri="http://example.com")
-
-    db_session.add(ann)
-    db_session.flush()
-    return ann
-
-
-@pytest.fixture
 def markdown(patch):
     return patch('h.models.annotation.markdown')
