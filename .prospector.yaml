@@ -15,6 +15,14 @@ pep257:
     - D203 # "1 blank line required before class docstring" conflicts with
            # another pep257 rule D211 "No blank lines allowed before class
            # docstring"!
+
+    # "Missing docstring" warnings:
+    - D100
+    - D101
+    - D102
+    - D103
+    - D104
+    - D105
 pyflakes:
   run: false
 
