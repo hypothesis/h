@@ -59,7 +59,7 @@ class Group(Base, mixins.Timestamps):
     # currently, but it seems careless to lose this information when in the
     # future these people may be the first admins of their groups.
     creator_id = sa.Column(
-        sa.Integer, sa.ForeignKey('user.id'), nullable=False)
+        sa.Integer, sa.ForeignKey('user.id'))
     creator = sa.orm.relationship('User')
 
     description = sa.Column(sa.UnicodeText())
@@ -147,7 +147,8 @@ class Group(Base, mixins.Timestamps):
         if write_principal is not None:
             terms.append((security.Allow, write_principal, 'write'))
 
-        terms.append((security.Allow, self.creator.userid, 'admin'))
+        if self.creator:
+            terms.append((security.Allow, self.creator.userid, 'admin'))
         terms.append(security.DENY_ALL)
 
         return terms
