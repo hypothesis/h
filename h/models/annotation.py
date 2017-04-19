@@ -28,6 +28,10 @@ class Annotation(Base):
         #
         sa.Index('ix__annotation_tags', 'tags', postgresql_using='gin'),
         sa.Index('ix__annotation_updated', 'updated'),
+
+        # This is a functional index on the *first* of the annotation's
+        # references, pointing to the top-level annotation it refers to. We're
+        # using 1 here because Postgres uses 1-based array indexing.
         sa.Index('ix__annotation_thread_root', sa.text('("references"[1])')),
     )
 
@@ -89,7 +93,7 @@ class Annotation(Base):
                                  server_default=sa.func.jsonb('[]'))
 
     #: An array of annotation IDs which are ancestors of this annotation.
-    references = sa.Column(pg.ARRAY(types.URLSafeUUID),
+    references = sa.Column(pg.ARRAY(types.URLSafeUUID, zero_indexes=True),
                            default=list,
                            server_default=sa.text('ARRAY[]::uuid[]'))
 
