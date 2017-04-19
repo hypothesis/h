@@ -136,6 +136,31 @@ def test_deleting_tags_inline_is_persisted(db_session, factories):
     assert 'foo' not in annotation.tags
 
 
+class TestThread(object):
+
+    def test_empty_thread(self, root):
+        assert root.thread == []
+
+    def test_thread_with_replies(self, root, reply, subreply):
+        assert set(root.thread) == set([reply, subreply])
+
+    @pytest.mark.usefixtures('subreply')
+    def test_reply_has_no_thread(self, reply):
+        assert reply.thread == []
+
+    @pytest.fixture
+    def root(self, factories):
+        return factories.Annotation()
+
+    @pytest.fixture
+    def reply(self, factories, root):
+        return factories.Annotation(references=[root.id])
+
+    @pytest.fixture
+    def subreply(self, factories, root, reply):
+        return factories.Annotation(references=[root.id, reply.id])
+
+
 @pytest.fixture
 def markdown(patch):
     return patch('h.models.annotation.markdown')

@@ -115,6 +115,12 @@ class Annotation(Base):
 
     document = sa.orm.relationship('Document', backref='annotations')
 
+    thread = sa.orm.relationship('Annotation',
+                                 primaryjoin=(sa.orm.foreign(id) ==
+                                              sa.orm.remote(references[0])),
+                                 viewonly=True,
+                                 uselist=True)
+
     @hybrid_property
     def target_uri(self):
         return self._target_uri
