@@ -105,10 +105,6 @@ ANNOTATION_MAPPING = {
         'document': {
             'enabled': False,  # not indexed
         },
-        'thread': {
-            'type': 'string',
-            'analyzer': 'thread'
-        },
         'group': {
             'type': 'string',
         }
@@ -149,9 +145,6 @@ ANALYSIS_SETTINGS = {
         }
     },
     'analyzer': {
-        'thread': {
-            'tokenizer': 'path_hierarchy'
-        },
         'uri': {
             'tokenizer': 'keyword',
             'char_filter': ['strip_scheme'],
