@@ -40,7 +40,6 @@ raven
 requests-aws4auth >= 0.9
 statsd
 transaction
-unicodecsv
 venusian
 wsaccel
 ws4py
