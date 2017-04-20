@@ -20,16 +20,16 @@ function canLozengify(phrase) {
   if (!phrase) {
     return false;
   }
-  // if phrase starts with a double quote, it has to end with one
-  if (phrase.indexOf('"') === 0 && phrase.indexOf('"', 1) !== phrase.length - 1) {
+  // if a phrase starts with a double quote, it has to have a closing double quote
+  if (phrase.indexOf('"') === 0 && (phrase.indexOf('"', 1) > phrase.length - 1 || phrase.indexOf('"', 1) < 0)) {
+    return false;
+  }
+  // if a phrase starts with a single quote, it has to have a closing double quote
+  if (phrase.indexOf("'") === 0 && (phrase.indexOf("'", 1) > phrase.length - 1 || phrase.indexOf("'", 1) < 0)) {
     return false;
   }
   // if phrase ends with a double quote it has to start with one
   if (phrase.indexOf('"', 1) === phrase.length - 1 && phrase.indexOf('"') !== 0) {
-    return false;
-  }
-  // if phrase starts with a single quote, it has to end with one
-  if (phrase.indexOf("'") === 0 && phrase.indexOf("'", 1) !== phrase.length - 1) {
     return false;
   }
   // if phrase ends with a single quote it has to start with one
