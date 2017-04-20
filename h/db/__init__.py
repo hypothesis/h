@@ -49,7 +49,7 @@ Base = declarative_base(metadata=metadata)
 Session = sessionmaker()
 
 
-def init(engine, base=Base, should_create=False, should_drop=False):
+def init(engine, base=Base, should_create=False, should_drop=False, authority=None):
     """Initialise the database tables managed by `h.db`."""
     # Import models package to populate the metadata
     import h.models  # noqa
@@ -61,6 +61,8 @@ def init(engine, base=Base, should_create=False, should_drop=False):
         # extension.
         engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
+
+    _maybe_create_world_group(engine, authority)
 
 
 def make_engine(settings):
@@ -101,6 +103,24 @@ def _session(request):
         session.close()
 
     return session
+
+
+def _maybe_create_world_group(engine, authority):
+    from h import models
+    from h.models.group import ReadableBy, WriteableBy
+    session = Session(bind=engine)
+    world_group = session.query(models.Group).filter_by(pubid='__world__').one_or_none()
+    if world_group is None:
+        world_group = models.Group(name='Public',
+                                   authority=authority,
+                                   joinable_by=None,
+                                   readable_by=ReadableBy.world,
+                                   writeable_by=WriteableBy.authority)
+        world_group.pubid = '__world__'
+        session.add(world_group)
+
+    session.commit()
+    session.close()
 
 
 def includeme(config):

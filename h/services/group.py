@@ -107,10 +107,7 @@ class GroupService(object):
             readable_member = sa.and_(Group.readable_by == ReadableBy.members, Group.members.any(User.id == user.id))
             readable = sa.or_(readable, readable_member)
 
-        ids = [record.pubid for record in self.session.query(Group.pubid).filter(readable)]
-        ids.insert(0, '__world__')
-
-        return ids
+        return [record.pubid for record in self.session.query(Group.pubid).filter(readable)]
 
     def groupids_created_by(self, user):
         """

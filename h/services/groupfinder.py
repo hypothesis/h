@@ -7,7 +7,6 @@ from zope.interface import implementer
 from h import models
 from h.interfaces import IGroupService
 from h.util.db import lru_cache_in_transaction
-from h.groups.util import WorldGroup
 
 
 # Ideally this would be called the GroupService to match the nomenclature of
@@ -25,9 +24,6 @@ class GroupfinderService(object):
         return self._cached_find(id_)
 
     def _find(self, id_):
-        if id_ == '__world__':
-            return WorldGroup(self.authority)
-
         return (self.session.query(models.Group)
                     .filter_by(pubid=id_)
                     .one_or_none())
