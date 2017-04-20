@@ -141,12 +141,22 @@ class TestThread(object):
     def test_empty_thread(self, root):
         assert root.thread == []
 
+    def test_empty_thread_ids(self, root):
+        assert root.thread_ids == []
+
     def test_thread_with_replies(self, root, reply, subreply):
         assert set(root.thread) == set([reply, subreply])
+
+    def test_thread_ids_with_replies(self, root, reply, subreply):
+        assert set(root.thread_ids) == set([reply.id, subreply.id])
 
     @pytest.mark.usefixtures('subreply')
     def test_reply_has_no_thread(self, reply):
         assert reply.thread == []
+
+    @pytest.mark.usefixtures('subreply')
+    def test_reply_has_no_thread_ids(self, reply):
+        assert reply.thread_ids == []
 
     @pytest.fixture
     def root(self, factories):

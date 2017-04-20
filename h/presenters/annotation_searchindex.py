@@ -29,6 +29,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             'shared': self.annotation.shared,
             'target': self.target,
             'document': docpresenter.asdict(),
+            'thread_ids': self.annotation.thread_ids
         }
 
         result['target'][0]['scope'] = [self.annotation.target_uri_normalized]

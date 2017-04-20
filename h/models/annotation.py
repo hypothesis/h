@@ -153,6 +153,10 @@ class Annotation(Base):
         return self._text_rendered
 
     @property
+    def thread_ids(self):
+        return [thread_annotation.id for thread_annotation in self.thread]
+
+    @property
     def parent_id(self):
         """
         Return the ID of the annotation that this annotation is a reply to.
