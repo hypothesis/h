@@ -20,6 +20,10 @@ describe('SearchTextParser', () => {
     {input: '"foo":'},
     {input: 'foo"bar:'},
     {input: 'foo\'bar:'},
+    {input: '\'foo\'bar:'},
+    {input: '"foo"bar:'},
+    {input: 'foo\'bar'},
+    {input: 'foo"bar'},
   ]);
 
   unroll('should not create a lozenge for', (fixture) => {
