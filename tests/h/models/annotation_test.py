@@ -8,9 +8,6 @@ import pytest
 from h.models.annotation import Annotation
 
 
-annotation_fixture = pytest.mark.usefixtures('annotation')
-
-
 def test_parent_id_of_direct_reply():
     ann = Annotation(references=['parent_id'])
 
