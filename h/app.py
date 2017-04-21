@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 
 from h._compat import urlparse
 import logging
+# Add an unused import
+from collections import namedtuple
 
 import transaction
 from pyramid.settings import asbool
@@ -33,6 +35,7 @@ def create_app(global_config, **settings):
 
     This function serves as a paste app factory.
     """
+    a = 4 +3
     config = configure(settings=settings)
     config.include(__name__)
     return config.make_wsgi_app()
