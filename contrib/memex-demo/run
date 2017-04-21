@@ -1,0 +1,11 @@
+#!/bin/sh
+
+: ${DATABASE_URL:=postgresql://postgres@localhost/memex}
+: ${ELASTICSEARCH_HOST:=http://localhost:9200}
+: ${ELASTICSEARCH_INDEX:=memex}
+
+set -eu
+export DATABASE_URL
+export ELASTICSEARCH_HOST
+export ELASTICSEARCH_INDEX
+exec gunicorn 'app:create_app()'
