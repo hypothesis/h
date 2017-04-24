@@ -39,12 +39,6 @@ http {
 
     root /var/www;
 
-    rewrite ^/index\.html$ / permanent;
-    rewrite ^/app/embed.js /embed.js;
-    rewrite ^/minutes/(\d+)/(.*) https://hypothesis-meeting-logs.s3.amazonaws.com/$1/$2 redirect;
-    rewrite ^/minutes/(.*) https://shrub.appspot.com/hypothesis-meeting-logs/$1 redirect;
-
-
     # Set the fallback upstream URL.
     # We store the upstream endpoint in a variable to trigger dynamic resolution
     # of the upstream hostname.
