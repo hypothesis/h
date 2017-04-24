@@ -3,6 +3,10 @@
 # Note that if this file is removed or incorrectly formatted, the application
 # will fail to boot. For details of the format, see h/util/redirects.py.
 
+# Ancient redirect
+/index.html            internal-exact index
+/app/embed.js          internal-exact embed
+
 # Legacy application URLs
 /profile/notifications internal-prefix account_notifications
 /profile/developer     internal-prefix account_developer
