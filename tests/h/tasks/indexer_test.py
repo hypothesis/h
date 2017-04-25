@@ -21,16 +21,16 @@ class FakeSettingsService(object):
 @pytest.mark.usefixtures('celery', 'index', 'settings_service')
 class TestAddAnnotation(object):
 
-    def test_it_fetches_the_annotation(self, fetch_annotation, celery):
+    def test_it_fetches_the_annotation(self, fetch_annotation, annotation, celery):
         id_ = 'test-annotation-id'
+        fetch_annotation.return_value = annotation
 
         indexer.add_annotation(id_)
 
         fetch_annotation.assert_called_once_with(celery.request.db, id_)
 
-    def test_it_calls_index_with_annotation(self, fetch_annotation, index, celery):
+    def test_it_calls_index_with_annotation(self, fetch_annotation, annotation, index, celery):
         id_ = 'test-annotation-id'
-        annotation = mock.Mock(id=id_)
         fetch_annotation.return_value = annotation
 
         indexer.add_annotation(id_)
@@ -44,26 +44,33 @@ class TestAddAnnotation(object):
 
         assert index.called is False
 
-    def test_during_reindex_adds_to_current_index(self, fetch_annotation, index, celery, settings_service):
+    def test_during_reindex_adds_to_current_index(self, fetch_annotation, annotation, index, celery, settings_service):
         settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
-        fetch_annotation.return_value = mock.sentinel.annotation
+        fetch_annotation.return_value = annotation
 
         indexer.add_annotation('test-annotation-id')
 
         index.assert_any_call(celery.request.es,
-                              mock.sentinel.annotation,
+                              annotation,
                               celery.request)
 
-    def test_during_reindex_adds_to_new_index(self, fetch_annotation, index, celery, settings_service):
+    def test_during_reindex_adds_to_new_index(self, fetch_annotation, annotation, index, celery, settings_service):
         settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
-        fetch_annotation.return_value = mock.sentinel.annotation
+        fetch_annotation.return_value = annotation
 
         indexer.add_annotation('test-annotation-id')
 
         index.assert_any_call(celery.request.es,
-                              mock.sentinel.annotation,
+                              annotation,
                               celery.request,
                               target_index='hypothesis-abcdef123')
+
+    def test_it_indexes_thread_root(self, fetch_annotation, reply, delay):
+        fetch_annotation.return_value = reply
+
+        indexer.add_annotation('test-annotation-id')
+
+        delay.assert_called_once_with('root-id')
 
     @pytest.fixture
     def index(self, patch):
@@ -72,6 +79,20 @@ class TestAddAnnotation(object):
     @pytest.fixture
     def fetch_annotation(self, patch):
         return patch('h.tasks.indexer.storage.fetch_annotation')
+
+    @pytest.fixture
+    def annotation(self):
+        return mock.Mock(spec_set=['is_reply'], is_reply=False)
+
+    @pytest.fixture
+    def reply(self):
+        return mock.Mock(spec_set=['is_reply', 'thread_root_id'],
+                         is_reply=True,
+                         thread_root_id='root-id')
+
+    @pytest.fixture
+    def delay(self, patch):
+        return patch('h.tasks.indexer.add_annotation.delay')
 
 
 @pytest.mark.usefixtures('celery', 'delete', 'settings_service')
