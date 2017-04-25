@@ -27,6 +27,7 @@ class TestAnnotationSearchIndexPresenter(object):
             shared=True,
             target_selectors=[{'TestSelector': 'foobar'}],
             references=['referenced-id-1', 'referenced-id-2'],
+            thread_ids=['thread-id-1', 'thread-id-2'],
             extra={'extra-1': 'foo', 'extra-2': 'bar'})
         DocumentSearchIndexPresenter.return_value.asdict.return_value = {'foo': 'bar'}
 
@@ -49,6 +50,7 @@ class TestAnnotationSearchIndexPresenter(object):
                         'selector': [{'TestSelector': 'foobar'}]}],
             'document': {'foo': 'bar'},
             'references': ['referenced-id-1', 'referenced-id-2'],
+            'thread_ids': ['thread-id-1', 'thread-id-2'],
         }
 
     def test_it_copies_target_uri_normalized_to_target_scope(self):

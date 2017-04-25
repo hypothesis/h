@@ -107,6 +107,9 @@ ANNOTATION_MAPPING = {
         },
         'group': {
             'type': 'string',
+        },
+        'thread_ids': {
+            'type': 'string', 'index': 'not_analyzed'
         }
     }
 }
