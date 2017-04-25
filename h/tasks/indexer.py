@@ -21,6 +21,8 @@ def add_annotation(id_):
             index(celery.request.es, annotation, celery.request,
                   target_index=future_index)
 
+        if annotation.is_reply:
+            add_annotation.delay(annotation.thread_root_id)
 
 @celery.task
 def delete_annotation(id_):

@@ -157,6 +157,10 @@ class Annotation(Base):
         return [thread_annotation.id for thread_annotation in self.thread]
 
     @property
+    def is_reply(self):
+        return bool(self.references)
+
+    @property
     def parent_id(self):
         """
         Return the ID of the annotation that this annotation is a reply to.

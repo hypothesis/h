@@ -20,6 +20,18 @@ def test_parent_id_of_reply_to_reply():
     assert ann.parent_id == 'parent_id'
 
 
+def test_reply_is_reply():
+    ann = Annotation(references=['parent_id'])
+
+    assert ann.is_reply is True
+
+
+def test_non_reply_is_not_reply():
+    ann = Annotation()
+
+    assert ann.is_reply is False
+
+
 def test_parent_id_of_annotation():
     ann = Annotation()
 
