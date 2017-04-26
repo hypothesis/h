@@ -346,6 +346,7 @@ $stats-icon-column-width: 20px;
   .search-results,
   .search-result-zero {
     margin-right: 0;
+    flex-basis: auto;
   }
 
   .search-result-zero {
