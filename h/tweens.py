@@ -108,9 +108,11 @@ def security_header_tween_factory(handler, registry):
         resp = handler(request)
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
         #
-        # We'd like to use strict-origin-when-cross-origin here, but this
-        # doesn't yet have wide browser support.
-        resp.headers['Referrer-Policy'] = 'origin-when-cross-origin'
+        # Browsers should respect the last value they recognise from this
+        # list, thus browsers that don't support
+        # strict-origin-when-cross-origin will fall back to
+        # origin-when-cross-origin.
+        resp.headers['Referrer-Policy'] = 'origin-when-cross-origin, strict-origin-when-cross-origin'
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
         resp.headers['X-XSS-Protection'] = '1; mode=block'
         return resp
