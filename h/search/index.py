@@ -125,7 +125,7 @@ class BatchIndexer(object):
                                                 ids=annotation_ids)
 
         # Report indexing status as we go
-        annotations = _log_status(annotations)
+        annotations = _log_status(annotations, log_every=PG_WINDOW_SIZE)
 
         indexing = es_helpers.streaming_bulk(self.es_client.conn, annotations,
                                              chunk_size=ES_CHUNK_SIZE,
