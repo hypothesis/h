@@ -32,7 +32,10 @@ def nipsa_filter(group_service, user=None):
     """
     # If any one of these "should" clauses is true then the annotation will
     # get through the filter.
-    should_clauses = [{"not": {"term": {"nipsa": True}}}]
+    should_clauses = [
+        {"not": {"term": {"nipsa": True}}},
+        {"exists": {"field": "thread_ids"}},
+    ]
 
     if user is not None:
         # Always show the logged-in user's annotations even if they have nipsa.

@@ -48,7 +48,8 @@ def test_nipsa_filter_filters_out_nipsad_annotations(group_service):
     assert search.nipsa_filter(group_service) == {
         "bool": {
             "should": [
-                {'not': {'term': {'nipsa': True}}}
+                {'not': {'term': {'nipsa': True}}},
+                {'exists': {'field': 'thread_ids'}},
             ]
         }
     }
