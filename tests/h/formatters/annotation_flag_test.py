@@ -36,10 +36,10 @@ class TestAnnotationFlagFormatter(object):
 
         assert formatter.format(annotation_resource) == {'flagged': False}
 
-    def test_format_for_unauthenticated_user(self, db_session, factories):
+    def test_format_for_unauthenticated_user(self, flag_service, factories):
         annotation = factories.Annotation()
         annotation_resource = FakeAnnotationResource(annotation)
-        formatter = AnnotationFlagFormatter(db_session,
+        formatter = AnnotationFlagFormatter(flag_service,
                                             user=None)
 
         assert formatter.format(annotation_resource) == {'flagged': False}
