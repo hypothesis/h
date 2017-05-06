@@ -66,7 +66,7 @@ def _current_groups(request, authority):
     authority_groups = (request.find_service(name='authority_group')
                         .public_groups(authority=authority))
 
-    groups = authority_groups + _user_groups(user)
+    groups = set(authority_groups + _user_groups(user))
 
     return [_group_model(request.route_url, group) for group in groups]
 
