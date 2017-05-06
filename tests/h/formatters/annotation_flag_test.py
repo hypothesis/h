@@ -13,17 +13,6 @@ FakeAnnotationResource = namedtuple('FakeAnnotationResource', ['annotation'])
 
 
 class TestAnnotationFlagFormatter(object):
-    def test_preload_sets_found_flags_to_true(self, flags, formatter, current_user):
-        annotation_ids = [f.annotation_id for f in flags[current_user]]
-
-        expected = {id_: True for id_ in annotation_ids}
-        assert formatter.preload(annotation_ids) == expected
-
-    def test_preload_sets_missing_flags_to_false(self, flags, formatter, other_user):
-        annotation_ids = [f.annotation_id for f in flags[other_user]]
-
-        expected = {id_: False for id_ in annotation_ids}
-        assert formatter.preload(annotation_ids) == expected
 
     def test_format_for_existing_flag(self, formatter, factories, current_user):
         flag = factories.Flag(user=current_user)

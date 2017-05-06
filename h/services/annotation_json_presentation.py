@@ -11,6 +11,7 @@ from h import resources
 from h import storage
 from h.interfaces import IGroupService
 from h.services.flag_count import PreloadedFlagCountService
+from h.services.flag import PreloadedFlagService
 
 
 class AnnotationJSONPresentationService(object):
@@ -43,8 +44,9 @@ class AnnotationJSONPresentationService(object):
     def _preloaded_formatters(self, annotation_ids):
         flag_count_svc = PreloadedFlagCountService(self.flag_count_svc,
                                                    annotation_ids)
+        flag_svc = PreloadedFlagService(self.flag_svc, self.user, annotation_ids)
         return [
-            formatters.AnnotationFlagFormatter(self.flag_svc, self.user),
+            formatters.AnnotationFlagFormatter(flag_svc, self.user),
             formatters.AnnotationHiddenFormatter(self.moderation_svc,
                                                  self._moderator_check,
                                                  self.user),
