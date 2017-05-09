@@ -8,6 +8,7 @@ const TEMPLATE = `<div class="js-search-bucket">
     <a data-ref="domainLink">foo.com</a>
   </div>
   <div data-ref="content"></div>
+  <a data-ref="title"></a>
   <button data-ref="collapseView"></button>
 </div>
 `;
