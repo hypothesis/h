@@ -46,11 +46,11 @@
     </div>
   </header>
   {% if presented_annotation.annotation.quote %}
-    <section class="annotation-card__quote">
+    <section role="navigation" class="annotation-card__quote">
       {{ presented_annotation.annotation.quote }}
     </section>
   {% endif %}
-  <section class="annotation-card__text">
+  <section role="navigation" class="annotation-card__text">
     {{ presented_annotation.annotation.text_rendered }}
   </section>
   <section class="annotation-card__tags">

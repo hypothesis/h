@@ -33,6 +33,11 @@ class SearchBucketController extends Controller {
       this.setState({expanded: !this.state.expanded});
     });
 
+    this.refs.title.addEventListener('click', (event) => {
+      this.setState({expanded: !this.state.expanded});
+      event.stopPropagation();
+    });
+
     this.refs.collapseView.addEventListener('click', () => {
       this.setState({expanded: !this.state.expanded});
     });

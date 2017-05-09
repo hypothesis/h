@@ -110,13 +110,13 @@
          {{ svg_icon('up-right-arrow', css_class='search-result-bucket__incontext-icon') }}</a>
     </div>
     <div class="search-result-bucket__title-and-annotations-count">
-        <div class="search-result-bucket__title">
+        <a href="#" class="search-result-bucket__title">
         {% if bucket.title %}
             {{ bucket.title }}
         {% else %}
             {% trans %}Untitled document{% endtrans %}
         {% endif %}
-        </div>
+        </a>
         <div class="search-result-bucket__annotations-count">
         <div class="search-result-bucket__annotations-count-container">
             {{ bucket.annotations_count }}
