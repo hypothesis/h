@@ -16,18 +16,18 @@
 <li class="annotation-card">
   <header class="annotation-card__header">
     <div class="annotation-card__username-timestamp">
-      <a href="{{ request.route_url('activity.user_search', username=presented_annotation.annotation.username) }}"
+      <a title="username" href="{{ request.route_url('activity.user_search', username=presented_annotation.annotation.username) }}"
         class="annotation-card__username">
         {{ presented_annotation.annotation.username }}
       </a>
-      <a href="{{ request.route_url('annotation', id=presented_annotation.annotation.id) }}"
+      <a title="date" href="{{ request.route_url('annotation', id=presented_annotation.annotation.id) }}"
         class="annotation-card__timestamp">
         {{ presented_annotation.annotation.updated.strftime('%d %b %Y') }}
       </a>
     </div>
     <div class="annotation-card__share-info">
       {% if presented_annotation.group %}
-        <a href="{{ request.route_url('group_read', pubid=presented_annotation.group.pubid, slug=presented_annotation.group.slug) }}"
+        <a title="group" href="{{ request.route_url('group_read', pubid=presented_annotation.group.pubid, slug=presented_annotation.group.slug) }}"
           class="annotation-card__groupname">
             in
             {{ svg_icon('groups', 'annotation-card__groups-icon') }}
@@ -46,14 +46,14 @@
     </div>
   </header>
   {% if presented_annotation.annotation.quote %}
-    <section role="navigation" class="annotation-card__quote">
+    <section title="annotation quote" role="navigation" class="annotation-card__quote">
       {{ presented_annotation.annotation.quote }}
     </section>
   {% endif %}
-  <section role="navigation" class="annotation-card__text">
+  <section title="annotation body" role="navigation" class="annotation-card__text">
     {{ presented_annotation.annotation.text_rendered }}
   </section>
-  <section class="annotation-card__tags">
+  <section title="tags" role="navigation" class="annotation-card__tags">
     {% for tag in presented_annotation.annotation.tags%}
       <a class="annotation-card__tag" href="{{ tag_link(tag) }}">
         {{ tag }}
