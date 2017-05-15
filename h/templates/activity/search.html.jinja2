@@ -43,10 +43,10 @@
     <div class="search-bucket-stats__val"></div>
   {% endif %}
   {% if bucket.tags %}
-    <div class="search-bucket-stats__key">
+    <header role="banner" title="tags" class="search-bucket-stats__key">
       {{ svg_icon('tag', css_class='search-bucket-stats__icon') }}
       {% trans %}Tags{% endtrans %}
-    </div>
+    </header>
     <ul class="search-bucket-stats__val">
       {% for tag in bucket.tags %}
         <li><a class="link--plain"
@@ -54,10 +54,10 @@
       {% endfor %}
     </ul>
   {% endif %}
-  <div class="search-bucket-stats__key">
+  <header role="banner" title="annotators" class="search-bucket-stats__key">
     {{ svg_icon('account', css_class='search-bucket-stats__icon') }}
     {% trans %}Annotators{% endtrans %}
-  </div>
+  </header>
   <ul class="search-bucket-stats__val">
     {% for user in bucket.users %}
       <li class="search-bucket-stats__username">
@@ -67,10 +67,10 @@
     {% endfor %}
   </ul>
   {% if bucket.uri %}
-    <div class="search-bucket-stats__key">
+    <header role="banner" title="url" div class="search-bucket-stats__key">
       {{ svg_icon('link', css_class='search-bucket-stats__icon') }}
       {% trans %}URL{% endtrans %}
-    </div>
+    </header>
     <div class="search-bucket-stats__val search-bucket-stats__url">
         <a class="link--plain"
            rel="nofollow noopener"
@@ -117,11 +117,11 @@
             {% trans %}Untitled document{% endtrans %}
         {% endif %}
         </a>
-        <div class="search-result-bucket__annotations-count">
+        <header role="banner" title="annotation count" class="search-result-bucket__annotations-count">
         <div class="search-result-bucket__annotations-count-container">
             {{ bucket.annotations_count }}
         </div>
-    </div>
+        </header>
     </div>
   </div>
 
