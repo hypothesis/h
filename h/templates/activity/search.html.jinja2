@@ -43,7 +43,7 @@
     <div class="search-bucket-stats__val"></div>
   {% endif %}
   {% if bucket.tags %}
-    <div role="navigation" title="tags" class="search-bucket-stats__key">
+    <div class="search-bucket-stats__key">
       {{ svg_icon('tag', css_class='search-bucket-stats__icon') }}
       {% trans %}Tags{% endtrans %}
     </div>
@@ -54,7 +54,7 @@
       {% endfor %}
     </ul>
   {% endif %}
-  <div role="navigation" title="annotators" class="search-bucket-stats__key">
+  <div class="search-bucket-stats__key">
     {{ svg_icon('account', css_class='search-bucket-stats__icon') }}
     {% trans %}Annotators{% endtrans %}
   </div>
@@ -67,7 +67,7 @@
     {% endfor %}
   </ul>
   {% if bucket.uri %}
-    <div role="navigation" title="URL" class="search-bucket-stats__key">
+    <div class="search-bucket-stats__key">
       {{ svg_icon('link', css_class='search-bucket-stats__icon') }}
       {% trans %}URL{% endtrans %}
     </div>
@@ -117,7 +117,7 @@
             {% trans %}Untitled document{% endtrans %}
         {% endif %}
         </a>
-        <div role="navigation" title="annotation count" class="search-result-bucket__annotations-count">
+        <div class="search-result-bucket__annotations-count">
         <div class="search-result-bucket__annotations-count-container">
             {{ bucket.annotations_count }}
         </div>
