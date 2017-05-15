@@ -9,7 +9,6 @@ import copy
 import colander
 import deform
 import jsonschema
-from jsonschema.exceptions import best_match
 from pyramid.session import check_csrf_token
 
 
@@ -66,9 +65,11 @@ class JSONSchema(object):
         """
         # Take a copy to ensure we don't modify what we were passed.
         appstruct = copy.deepcopy(data)
-        error = best_match(self.validator.iter_errors(appstruct))
-        if error is not None:
-            raise ValidationError(_format_jsonschema_error(error))
+
+        errors = list(self.validator.iter_errors(appstruct))
+        if errors:
+            msg = ', '.join([_format_jsonschema_error(e) for e in errors])
+            raise ValidationError(msg)
         return appstruct
 
 

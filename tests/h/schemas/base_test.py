@@ -17,7 +17,12 @@ class ExampleCSRFSchema(CSRFSchema):
 class ExampleJSONSchema(JSONSchema):
     schema = {
         b'$schema': b'http://json-schema.org/draft-04/schema#',
-        b'type': b'string',
+        b'type': b'object',
+        b'properties': {
+            b'foo': {b'type': b'string'},
+            b'bar': {b'type': b'integer'},
+        },
+        b'required': [b'foo', b'bar'],
     }
 
 
@@ -45,21 +50,30 @@ class TestCSRFSchema(object):
 
 class TestJSONSchema(object):
     def test_it_returns_data_when_valid(self):
-        data = "a string"
+        data = {'foo': 'baz', 'bar': 123}
 
         assert ExampleJSONSchema().validate(data) == data
 
     def test_it_raises_when_data_invalid(self):
-        data = 123  # not a string
+        data = 123  # not an object
 
         with pytest.raises(ValidationError):
             ExampleJSONSchema().validate(data)
 
     def test_it_sets_appropriate_error_message_when_data_invalid(self):
-        data = 123  # not a string
+        data = {'foo': 'baz'}  # required bar is missing
 
         with pytest.raises(ValidationError) as e:
             ExampleJSONSchema().validate(data)
 
         message = e.value.message
-        assert message.startswith("123 is not of type 'string'")
+        assert message.startswith("'bar' is a required property")
+
+    def test_it_returns_all_errors_in_message(self):
+        data = {}  # missing both required fields
+
+        with pytest.raises(ValidationError) as e:
+            ExampleJSONSchema().validate(data)
+
+        message = e.value.message
+        assert message.startswith("'foo' is a required property, 'bar' is a required property")
