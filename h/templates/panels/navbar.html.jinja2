@@ -74,20 +74,21 @@
         </a>
       </span>
       <span class="nav-bar-links__item">
-      {% call dropdown_menu(groups_menu_items, title='Groups', footer_item=create_group_item) %}
-        <a class="nav-bar-links__link" href="">Groups
-          <span class="nav-bar-links__dropdown-arrow">▾</span>
-        </a>
+      {% call dropdown_menu(groups_menu_items,
+                            link_class='nav-bar-links__link',
+                            title='Groups',
+                            footer_item=create_group_item) %}
+        Groups <span class="nav-bar-links__dropdown-arrow">▾</span>
       {% endcall %}
       </span>
       <span class="nav-bar-links__item">
-      {% call dropdown_menu(settings_menu_items, title='Settings', footer_item=signout_item) %}
-        <a class="nav-bar-links__link"
-           href="{{ request.route_url("account") }}"
-           title="Settings">
+      {% call dropdown_menu(settings_menu_items,
+                            link_class='nav-bar-links__link',
+                            fallback_link='{{ request.route_url("account") }}',
+                            title='Settings',
+                            footer_item=signout_item) %}
           {{ svg_icon('settings') }}
           <span class="nav-bar-links__dropdown-arrow" href="">▾</span>
-        </a>
       {% endcall %}
       </span>
       {% else %}

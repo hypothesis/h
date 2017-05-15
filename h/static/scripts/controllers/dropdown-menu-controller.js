@@ -41,6 +41,7 @@ class DropdownMenuController extends Controller {
 
   update(state) {
     setElementState(this.refs.dropdownMenuContent, {open: state.open});
+    this.refs.dropdownMenuToggle.setAttribute('aria-expanded', state.open.toString());
   }
 }
 

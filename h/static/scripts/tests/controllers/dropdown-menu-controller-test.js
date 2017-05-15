@@ -5,7 +5,7 @@ const util = require('./util');
 
 const TEMPLATE = [
   '<div class="js-dropdown-menu">',
-  '<span data-ref="dropdownMenuToggle">Toggle</span>',
+  '<a href="#" data-ref="dropdownMenuToggle">Toggle</a>',
   '<span data-ref="dropdownMenuContent">Menu</span>',
   '</div>',
 ].join('\n');
@@ -34,6 +34,13 @@ describe('DropdownMenuController', () => {
     assert.isTrue(isOpen());
     toggleEl.dispatchEvent(new Event('click'));
     assert.isFalse(isOpen());
+  });
+
+  it('should toggle expanded state on click', () => {
+    toggleEl.dispatchEvent(new Event('click'));
+    assert.equal(toggleEl.getAttribute('aria-expanded'), 'true');
+    toggleEl.dispatchEvent(new Event('click'));
+    assert.equal(toggleEl.getAttribute('aria-expanded'), 'false');
   });
 
   it('should close menu on click outside', () => {
