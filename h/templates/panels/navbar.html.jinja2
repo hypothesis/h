@@ -34,7 +34,8 @@
       <form class="search-bar"
             data-ref="searchBarForm"
             id="search-bar"
-            action="{{ search_url }}">
+            action="{{ search_url }}"
+            role="search">
 
         {#- This seemingly pointless <input> is actually needed to make the
             form work correctly. If you remove this input then when the user
@@ -53,11 +54,15 @@
           {% endif %}
 
           <input class="search-bar__input js-input-autofocus"
+                 aria-autocomplete="list"
+                 aria-label="Search annotations"
+                 aria-haspopup="true"
                  autocapitalize="off"
                  autocomplete="off"
                  data-ref="searchBarInput"
                  name="q"
                  placeholder="Search…"
+                 role="combobox"
                  value="{{ q }}">
         </div>
       </form>
