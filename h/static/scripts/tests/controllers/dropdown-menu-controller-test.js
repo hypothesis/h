@@ -29,28 +29,32 @@ describe('DropdownMenuController', () => {
     return menuEl.classList.contains('is-open');
   }
 
+  function clickMenuLink() {
+    toggleEl.dispatchEvent(new Event('click', { cancelable: true }));
+  }
+
   it('should toggle menu on click', () => {
-    toggleEl.dispatchEvent(new Event('click'));
+    clickMenuLink();
     assert.isTrue(isOpen());
-    toggleEl.dispatchEvent(new Event('click'));
+    clickMenuLink();
     assert.isFalse(isOpen());
   });
 
   it('should toggle expanded state on click', () => {
-    toggleEl.dispatchEvent(new Event('click'));
+    clickMenuLink();
     assert.equal(toggleEl.getAttribute('aria-expanded'), 'true');
-    toggleEl.dispatchEvent(new Event('click'));
+    clickMenuLink();
     assert.equal(toggleEl.getAttribute('aria-expanded'), 'false');
   });
 
   it('should close menu on click outside', () => {
-    toggleEl.dispatchEvent(new Event('click'));
+    clickMenuLink();
     document.body.dispatchEvent(new Event('click'));
     assert.isFalse(isOpen());
   });
 
   it('should not close menu on click inside', () => {
-    toggleEl.dispatchEvent(new Event('click'));
+    clickMenuLink();
     menuEl.dispatchEvent(new Event('click'));
     assert.isTrue(isOpen());
   });
