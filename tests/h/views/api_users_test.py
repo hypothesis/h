@@ -158,6 +158,27 @@ class TestCreate(object):
 
         assert ('email address %s already exists' % existing_user.email) in str(exc.value)
 
+    @pytest.mark.usefixtures('valid_auth')
+    def test_combines_unique_username_email_errors(self,
+                                                   pyramid_request,
+                                                   valid_payload,
+                                                   db_session,
+                                                   factories,
+                                                   auth_client):
+        existing_user = factories.User(authority=auth_client.authority)
+        db_session.flush()
+
+        payload = valid_payload
+        payload['email'] = existing_user.email
+        payload['username'] = existing_user.username
+        pyramid_request.json_body = payload
+
+        with pytest.raises(ValidationError) as exc:
+            create(pyramid_request)
+
+        assert ('email address %s already exists' % existing_user.email) in str(exc.value)
+        assert ('username %s already exists' % existing_user.username) in str(exc.value)
+
     @pytest.fixture
     def schemas(self, patch):
         return patch('h.views.api_users.schemas')

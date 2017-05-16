@@ -52,19 +52,22 @@ def _check_authority(client, data):
 
 
 def _check_existing_user(session, data):
+    errors = []
+
     existing_user = models.User.get_by_email(session,
                                              data['email'],
                                              data['authority'])
     if existing_user:
-        msg = "user with email address %s already exists" % data['email']
-        raise ValidationError(msg)
+        errors.append("user with email address %s already exists" % data['email'])
 
     existing_user = models.User.get_by_username(session,
                                                 data['username'],
                                                 data['authority'])
     if existing_user:
-        msg = "user with username %s already exists" % data['username']
-        raise ValidationError(msg)
+        errors.append("user with username %s already exists" % data['username'])
+
+    if errors:
+        raise ValidationError(', '.join(errors))
 
 
 def _request_client(request):
