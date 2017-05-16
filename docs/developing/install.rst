@@ -37,6 +37,7 @@ Install the following packages:
         libffi-dev \
         libfontconfig \
         libpq-dev \
+        libssl-dev \
         python-dev \
         python-pip \
         python-virtualenv
