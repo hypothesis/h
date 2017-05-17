@@ -42,6 +42,6 @@ statsd
 transaction
 venusian
 wsaccel
-ws4py
+ws4py >= 0.4.0
 zope.interface
 zope.sqlalchemy
