@@ -8,6 +8,7 @@ const TEMPLATE = `<div class="js-search-bucket">
     <a data-ref="domainLink">foo.com</a>
   </div>
   <div data-ref="content"></div>
+  <a data-ref="title"></a>
   <button data-ref="collapseView"></button>
 </div>
 `;
@@ -65,6 +66,14 @@ describe('SearchBucketController', () => {
     ctrl.scrollTo = sinon.stub();
     ctrl.refs.header.dispatchEvent(new Event('click'));
     assert.calledWith(ctrl.scrollTo, ctrl.element);
+  });
+
+  it('sets ARIA expanded state when expanded or collapsed', () => {
+    ctrl.refs.title.dispatchEvent(new Event('click'));
+    assert.equal(ctrl.refs.title.getAttribute('aria-expanded'), 'true');
+
+    ctrl.refs.title.dispatchEvent(new Event('click'));
+    assert.equal(ctrl.refs.title.getAttribute('aria-expanded'), 'false');
   });
 
   it('collapses search results on initial load', () => {
