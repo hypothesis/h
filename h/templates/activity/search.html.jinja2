@@ -117,11 +117,12 @@
             {% trans %}Untitled document{% endtrans %}
         {% endif %}
         </a>
-        <header role="banner" title="annotation count" class="search-result-bucket__annotations-count">
-        <div class="search-result-bucket__annotations-count-container">
-            {{ bucket.annotations_count }}
+        <div title="{{ bucket.annotations_count }} annotations added"
+             class="search-result-bucket__annotations-count">
+          <div class="search-result-bucket__annotations-count-container">
+              {{ bucket.annotations_count }}
+          </div>
         </div>
-        </header>
     </div>
   </div>
 
