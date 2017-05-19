@@ -43,10 +43,10 @@
     <div class="search-bucket-stats__val"></div>
   {% endif %}
   {% if bucket.tags %}
-    <header role="banner" title="tags" class="search-bucket-stats__key">
+    <h4 title="tags" class="search-bucket-stats__key">
       {{ svg_icon('tag', css_class='search-bucket-stats__icon') }}
       {% trans %}Tags{% endtrans %}
-    </header>
+    </h4>
     <ul class="search-bucket-stats__val">
       {% for tag in bucket.tags %}
         <li><a class="link--plain"
@@ -54,10 +54,10 @@
       {% endfor %}
     </ul>
   {% endif %}
-  <header role="banner" title="annotators" class="search-bucket-stats__key">
+  <h4 title="annotators" class="search-bucket-stats__key">
     {{ svg_icon('account', css_class='search-bucket-stats__icon') }}
     {% trans %}Annotators{% endtrans %}
-  </header>
+  </h4>
   <ul class="search-bucket-stats__val">
     {% for user in bucket.users %}
       <li class="search-bucket-stats__username">
@@ -67,10 +67,10 @@
     {% endfor %}
   </ul>
   {% if bucket.uri %}
-    <header role="banner" title="url" div class="search-bucket-stats__key">
+    <h4 title="url" div class="search-bucket-stats__key">
       {{ svg_icon('link', css_class='search-bucket-stats__icon') }}
       {% trans %}URL{% endtrans %}
-    </header>
+    </h4>
     <div class="search-bucket-stats__val search-bucket-stats__url">
         <a class="link--plain"
            rel="nofollow noopener"
