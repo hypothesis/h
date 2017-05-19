@@ -374,16 +374,18 @@
         <div class="search-results__total"> {{search_results.total}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
         {% endif %}
 
-        <ol class="search-results__list">
+        <ol class="search-results__list"
+            role="list"
+            aria-label="Search results grouped by date">
           {% for timeframe in search_results.timeframes %}
           <li class="search-result__timeframe">
             {{ timeframe.label }}
           </li>
-          <li>
-            {% for bucket in timeframe.document_buckets.values() %}
+          {% for bucket in timeframe.document_buckets.values() %}
+          <li role="listitem">
             {{ search_result_bucket(bucket) }}
-            {% endfor %}
           </li>
+          {% endfor %}
           {% endfor %}
         </ol>
 
