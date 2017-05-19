@@ -53,6 +53,8 @@ class SearchBucketController extends Controller {
     setElementState(this.refs.content, {expanded: state.expanded});
     setElementState(this.element, {expanded: state.expanded});
 
+    this.refs.title.setAttribute('aria-expanded', state.expanded.toString());
+
     // Scroll to element when expanded, except on initial load
     if (typeof prevState.expanded !== 'undefined' && state.expanded) {
       this.scrollTo(this.element);

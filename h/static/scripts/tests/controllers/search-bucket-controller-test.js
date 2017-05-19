@@ -68,6 +68,14 @@ describe('SearchBucketController', () => {
     assert.calledWith(ctrl.scrollTo, ctrl.element);
   });
 
+  it('sets ARIA expanded state when expanded or collapsed', () => {
+    ctrl.refs.title.dispatchEvent(new Event('click'));
+    assert.equal(ctrl.refs.title.getAttribute('aria-expanded'), 'true');
+
+    ctrl.refs.title.dispatchEvent(new Event('click'));
+    assert.equal(ctrl.refs.title.getAttribute('aria-expanded'), 'false');
+  });
+
   it('collapses search results on initial load', () => {
     assert.isFalse(ctrl.state.expanded);
   });
