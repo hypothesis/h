@@ -5,29 +5,37 @@
 
   Usage:
     {% call dropdown_menu(items, title='Menu') %}
-      <a href="/link-used-if-JS-is-inactive">Menu</a>
+      Menu
     {% endcall %}
 
   :param items: List of items to include in the menu
+  :param fallback_link: Fallback URL for menu link if JS fails to load
+  :param link_class: CSS class for menu link
   :param title: Title to display at the top of the menu
   :param footer_item: Optional item to display at the bottom of the menu,
                       visually separated from the rest of the menu items
 #}
-{% macro dropdown_menu(items, title='', footer_item=None) -%}
+{% macro dropdown_menu(items, fallback_link = '#', link_class = '', title='', footer_item=None) -%}
 <div class="dropdown-menu js-dropdown-menu">
-  <span data-ref="dropdownMenuToggle">
+  <a aria-expanded="false"
+     aria-haspopup="true"
+     aria-label="{{ title }}"
+     class="{{ link_class }}"
+     data-ref="dropdownMenuToggle"
+     href="{{ fallback_link }}"
+     title="{{ title }}">
     {{ caller() }}
-  </span>
+  </a>
   <div class="dropdown-menu__menu" data-ref="dropdownMenuContent">
     <h2 class="dropdown-menu__title">{{ title }}</h2>
-    <ul>
+    <ul role="menu">
       {% for item in items %}
-      <li>
+      <li role="menuitem">
         <a class="dropdown-menu__item" href="{{ item.link }}">{{ item.title }}</a>
       </li>
       {% endfor %}
       {% if footer_item %}
-      <li>
+      <li role="menuitem">
         <a class="dropdown-menu__item dropdown-menu__item--footer"
            href="{{ footer_item.link }}">{{ footer_item.title }}</a>
       </li>
