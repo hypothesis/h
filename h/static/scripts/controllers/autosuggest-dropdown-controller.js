@@ -22,7 +22,7 @@ class AutosuggestDropdownController extends Controller {
    *   and input changes made by user. The function will receieve the full list
    *   and the current value of the input. This is meant to be an pure function
    *   that will return a filtered list based on the consumer's domain needs.
-   * @properly {Function} onSelect - called once the user has made a selection of an
+   * @property {Function} onSelect - called once the user has made a selection of an
    *   item in the autosuggest. It will receive the item selected as the only argument.
    * @property {Object} [classNames] - this is the enumerated list of class name
    *   overrides for consumers to customize the UI.
@@ -312,6 +312,7 @@ class AutosuggestDropdownController extends Controller {
     this._suggestionContainer.appendChild(this._header);
 
     this._listContainer = document.createElement('ul');
+    this._listContainer.setAttribute('role', 'listbox');
     this._listContainer.classList.add(this.options.classNames.list);
     this._suggestionContainer.appendChild(this._listContainer);
 
@@ -336,6 +337,7 @@ class AutosuggestDropdownController extends Controller {
 
     this.state.list.forEach((listItem) => {
       const li = document.createElement('li');
+      li.setAttribute('role', 'option');
       li.classList.add(this.options.classNames.item);
       li.setAttribute('data-suggestion-id', listItem.__suggestionId);
 
