@@ -56,6 +56,8 @@ class GroupService(object):
                       creator=creator,
                       description=description)
 
+        group.members.append(creator)
+
         access_flags = GROUP_ACCESS_FLAGS.get(type_)
         if access_flags is None:
             raise ValueError('Invalid group type %s' % type_)

@@ -87,10 +87,6 @@ class Group(Base, mixins.Timestamps):
     def __init__(self, **kwargs):
         super(Group, self).__init__(**kwargs)
 
-        creator = kwargs.get('creator')
-        if creator:
-            self.members.append(creator)
-
     @sa.orm.validates('name')
     def validate_name(self, key, name):
         if not GROUP_NAME_MIN_LENGTH <= len(name) <= GROUP_NAME_MAX_LENGTH:

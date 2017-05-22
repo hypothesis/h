@@ -15,13 +15,6 @@ def test_init_sets_given_attributes():
     assert group.authority == 'example.com'
 
 
-def test_init_adds_creator_as_member():
-    creator = models.User()
-    group = models.Group(creator=creator)
-
-    assert creator in group.members
-
-
 def test_with_short_name():
     """Should raise ValueError if name shorter than 4 characters."""
     with pytest.raises(ValueError):

@@ -23,6 +23,7 @@ class Group(ModelFactory):
     joinable_by = JoinableBy.authority
     readable_by = ReadableBy.members
     writeable_by = WriteableBy.members
+    members = factory.LazyAttribute(lambda obj: [obj.creator])
 
 
 class PublisherGroup(Group):
