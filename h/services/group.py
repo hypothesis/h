@@ -62,6 +62,9 @@ class GroupService(object):
         for attr, value in access_flags.iteritems():
             setattr(group, attr, value)
 
+        if group.joinable_by is not None:
+            group.members.append(creator)
+
         self.session.add(group)
         self.session.flush()
 

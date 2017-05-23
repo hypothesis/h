@@ -15,13 +15,6 @@ def test_init_sets_given_attributes():
     assert group.authority == 'example.com'
 
 
-def test_init_adds_creator_as_member():
-    creator = models.User()
-    group = models.Group(creator=creator)
-
-    assert creator in group.members
-
-
 def test_with_short_name():
     """Should raise ValueError if name shorter than 4 characters."""
     with pytest.raises(ValueError):
@@ -64,7 +57,7 @@ def test_created_by(db_session, factories):
     group_1 = models.Group(name=name_1, authority='foobar.com', creator=user)
     group_2 = models.Group(name=name_2, authority='foobar.com', creator=user)
 
-    db_session.add(group_1, group_2)
+    db_session.add_all([group_1, group_2])
     db_session.flush()
 
     assert models.Group.created_by(db_session, user).all() == [group_1, group_2]

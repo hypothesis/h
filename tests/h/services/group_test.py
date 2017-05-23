@@ -54,6 +54,20 @@ class TestGroupService(object):
 
         assert group.description is None
 
+    def test_create_adds_group_creator_to_members(self, db_session, users):
+        svc = GroupService(db_session, users.get)
+
+        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+
+        assert users['cazimir'] in group.members
+
+    def test_create_doesnt_add_group_creator_to_members_for_publisher_groups(self, db_session, users):
+        svc = GroupService(db_session, users.get)
+
+        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='publisher')
+
+        assert users['cazimir'] not in group.members
+
     @pytest.mark.parametrize('group_type,flag,expected_value', [
         ('private', 'joinable_by', JoinableBy.authority),
         ('private', 'readable_by', ReadableBy.members),

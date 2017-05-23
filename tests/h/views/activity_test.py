@@ -927,6 +927,7 @@ def group(factories):
     factories.Group()
 
     group = factories.Group()
+
     group.members.extend([factories.User(), factories.User()])
     return group
 
