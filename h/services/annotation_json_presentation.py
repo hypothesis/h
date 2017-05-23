@@ -10,6 +10,7 @@ from h import presenters
 from h import resources
 from h import storage
 from h.interfaces import IGroupService
+from h.services.annotation_moderation import PreloadedAnnotationModerationService
 from h.services.flag_count import PreloadedFlagCountService
 from h.services.flag import PreloadedFlagService
 
@@ -29,35 +30,42 @@ class AnnotationJSONPresentationService(object):
     def _moderator_check(group):
         return self.has_permission('admin', group)
 
-    def _formatters(self):
-
+    def _formatters(self, preload_ids=None):
         return [
-            formatters.AnnotationFlagFormatter(self.flag_svc, self.user),
-            formatters.AnnotationHiddenFormatter(self.moderation_svc,
-                                                 self._moderator_check,
-                                                 self.user),
-            formatters.AnnotationModerationFormatter(self.flag_count_svc,
-                                                     self.user,
-                                                     self.has_permission)
+            formatters.AnnotationFlagFormatter(
+                self._flag_svc(preload_ids),
+                self.user
+            ),
+            formatters.AnnotationHiddenFormatter(
+                self._moderation_svc(preload_ids),
+                self._moderator_check,
+                self.user
+            ),
+            formatters.AnnotationModerationFormatter(
+                self._flag_count_svc(preload_ids),
+                self.user,
+                self.has_permission
+            )
         ]
 
-    def _preloaded_formatters(self, annotation_ids):
-        flag_count_svc = PreloadedFlagCountService(self.flag_count_svc,
-                                                   annotation_ids)
-        flag_svc = PreloadedFlagService(self.flag_svc, self.user, annotation_ids)
-        moderation_svc = PreloadedAnnotationModerationService(self.moderation_svc,
-                                                              annotation_ids)
+    def _flag_svc(self, preload_ids):
+        if preload_ids:
+            return PreloadedFlagService(self.flag_svc, self.user, preload_ids)
+        else:
+            return self.flag_svc
 
-        return [
-            formatters.AnnotationFlagFormatter(flag_svc, self.user),
-            formatters.AnnotationHiddenFormatter(moderation_svc,
-                                                 self._moderator_check,
-                                                 self.user),
-            formatters.AnnotationModerationFormatter(flag_count_svc,
-                                                     self.user,
-                                                     self.has_permission)
-        ]
+    def _flag_count_svc(self, preload_ids):
+        if preload_ids:
+            return PreloadedFlagCountService(self.flag_count_svc, preload_ids)
+        else:
+            return self.flag_count_svc
 
+    def _moderation_svc(self, preload_ids):
+        if preload_ids:
+            return PreloadedAnnotationModerationService(self.moderation_svc,
+                                                        preload_ids)
+        else:
+            return self.moderation_svc
 
     def present(self, annotation_resource):
         presenter = self._get_presenter(annotation_resource, self._formatters())
@@ -71,7 +79,7 @@ class AnnotationJSONPresentationService(object):
         annotations = storage.fetch_ordered_annotations(
             self.session, annotation_ids, query_processor=eager_load_documents)
 
-        formatters = self._preloaded_formatters(annotation_ids)
+        formatters = self._formatters(preload_ids=annotation_ids)
 
         ars = [resources.AnnotationResource(ann, self.group_svc, self.links_svc)
                      for ann in annotations]
