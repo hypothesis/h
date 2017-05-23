@@ -7,10 +7,10 @@ import pytest
 from h import models
 from h.services.annotation_moderation import (
     AnnotationModerationService,
-    NotPreloadedError,
     PreloadedAnnotationModerationService,
     annotation_moderation_service_factory,
 )
+from h.services.exceptions import NotPreloadedError
 
 
 class TestAnnotationModerationServiceHidden(object):

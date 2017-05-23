@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import sqlalchemy as sa
 
 from h.models import Flag
+from .exceptions import NotPreloadedError
 
 
 class FlagCountService(object):
@@ -59,12 +60,6 @@ class PreloadedFlagCountService(object):
             raise NotPreloadedError(annotation.id)
 
         return self._flag_counts[annotation.id]
-
-
-class NotPreloadedError(Exception):
-    def __init__(self, annotation_id):
-        message = 'ID {} not in preloaded IDs'.format(annotation_id)
-        super(NotPreloadedError, self).__init__(message)
 
 
 def flag_count_service_factory(context, request):

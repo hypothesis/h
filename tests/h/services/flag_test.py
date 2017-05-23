@@ -7,10 +7,10 @@ import pytest
 from h import models
 from h.services.flag import (
     FlagService,
-    NotPreloadedError,
     PreloadedFlagService,
     flag_service_factory,
 )
+from h.services.exceptions import NotPreloadedError
 
 
 @pytest.mark.usefixtures('flags')

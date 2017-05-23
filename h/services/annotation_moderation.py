@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from h import models
+from .exceptions import NotPreloadedError
 
 
 class AnnotationModerationService(object):
@@ -82,12 +83,6 @@ class PreloadedAnnotationModerationService(object):
             raise NotPreloadedError(annotation.id)
 
         return annotation.id in self._hidden_ids
-
-
-class NotPreloadedError(Exception):
-    def __init__(self, annotation_id):
-        message = 'ID {} not in preloaded IDs'.format(annotation_id)
-        super(NotPreloadedError, self).__init__(message)
 
 
 def annotation_moderation_service_factory(context, request):
