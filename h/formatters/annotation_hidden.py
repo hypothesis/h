@@ -29,17 +29,6 @@ class AnnotationHiddenFormatter(object):
         self._moderator_check = moderator_check
         self._user = user
 
-        # Local cache of hidden flags. We don't need to care about detached
-        # instances because we only store the annotation id and a boolean flag.
-        self._cache = {}
-
-    def preload(self, ids):
-        hidden_ids = self._moderation_svc.all_hidden(ids)
-
-        hidden = {id_: (id_ in hidden_ids) for id_ in ids}
-        self._cache.update(hidden)
-        return hidden
-
     def format(self, annotation_resource):
         annotation = annotation_resource.annotation
         group = annotation_resource.group
@@ -62,11 +51,4 @@ class AnnotationHiddenFormatter(object):
         return self._user and self._user.userid == annotation.userid
 
     def _is_hidden(self, annotation):
-        id_ = annotation.id
-
-        if id_ in self._cache:
-            return self._cache[id_]
-
-        hidden = self._moderation_svc.hidden(annotation)
-        self._cache[id_] = hidden
-        return self._cache[id_]
+        return self._moderation_svc.hidden(annotation)

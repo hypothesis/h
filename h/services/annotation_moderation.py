@@ -71,5 +71,24 @@ class AnnotationModerationService(object):
         annotation.moderation = None
 
 
+class PreloadedAnnotationModerationService(object):
+
+    def __init__(self, service, annotation_ids):
+        self._annotation_ids = annotation_ids
+        self._hidden_ids = service.all_hidden(annotation_ids)
+
+    def hidden(self, annotation):
+        if annotation.id not in self._annotation_ids:
+            raise NotPreloadedError(annotation.id)
+
+        return annotation.id in self._hidden_ids
+
+
+class NotPreloadedError(Exception):
+    def __init__(self, annotation_id):
+        message = 'ID {} not in preloaded IDs'.format(annotation_id)
+        super(NotPreloadedError, self).__init__(message)
+
+
 def annotation_moderation_service_factory(context, request):
     return AnnotationModerationService(request.db)

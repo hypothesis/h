@@ -45,9 +45,12 @@ class AnnotationJSONPresentationService(object):
         flag_count_svc = PreloadedFlagCountService(self.flag_count_svc,
                                                    annotation_ids)
         flag_svc = PreloadedFlagService(self.flag_svc, self.user, annotation_ids)
+        moderation_svc = PreloadedAnnotationModerationService(self.moderation_svc,
+                                                              annotation_ids)
+
         return [
             formatters.AnnotationFlagFormatter(flag_svc, self.user),
-            formatters.AnnotationHiddenFormatter(self.moderation_svc,
+            formatters.AnnotationHiddenFormatter(moderation_svc,
                                                  self._moderator_check,
                                                  self.user),
             formatters.AnnotationModerationFormatter(flag_count_svc,
