@@ -100,8 +100,8 @@
 /fact-checking-the-candidates/                         exact https://web.hypothes.is/fact-checking-the-candidates/
 /faq                                                   exact https://web.hypothes.is/faq/
 /faq/                                                  exact https://web.hypothes.is/faq/
-/faqv1                                                 exact https://web.hypothes.is/faqv1/
-/faqv1/                                                exact https://web.hypothes.is/faqv1/
+/faqv1                                                 exact https://web.hypothes.is/faq/
+/faqv1/                                                exact https://web.hypothes.is/faq/
 /financial-information                                 exact https://web.hypothes.is/financial-information/
 /financial-information/                                exact https://web.hypothes.is/financial-information/
 /for-publishers                                        exact https://web.hypothes.is/publishing/
