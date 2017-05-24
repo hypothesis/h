@@ -6,7 +6,6 @@ RUN apk-install \
     ca-certificates \
     collectd \
     collectd-nginx \
-    gettext \
     libffi \
     libpq \
     nginx \
@@ -35,10 +34,8 @@ RUN apk-install --virtual build-deps \
   && pip install --no-cache-dir -r requirements.txt \
   && apk del build-deps
 
-# Copy default nginx config and template
-COPY conf/nginx.conf.tpl /etc/nginx/nginx.conf.tpl
-COPY conf/nginx.conf.tpl /etc/nginx/nginx.conf
-RUN chown hypothesis:hypothesis /etc/nginx/nginx.conf
+# Copy nginx config
+COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 # Copy collectd config
 COPY conf/collectd.conf /etc/collectd/collectd.conf
