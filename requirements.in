@@ -26,9 +26,7 @@ psycogreen
 psycopg2
 pyparsing >= 2.1.5
 pyramid
-# Pin pyramid_authsanity to latest master until our bugfix
-# (https://github.com/usingnamespace/pyramid_authsanity/pull/7) is released.
-git+https://github.com/usingnamespace/pyramid_authsanity.git@7d0b70582cd693052a62b4683e521c1f4e2b4aa8#egg=pyramid_authsanity
+pyramid_authsanity >= 1.0.0  # 1.0.0 fixes an IE bug: https://git.io/vH3mi
 pyramid_layout
 pyramid-jinja2
 pyramid-services
