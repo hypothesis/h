@@ -1,0 +1,47 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block header %}
+  {% include "h:templates/includes/logo-header.html.jinja2" %}
+{% endblock %}
+
+{% block page_title %}Authorize application{% endblock %}
+
+{% block content %}
+  <div class="form-container content">
+    <h2>Authorize app?</h2>
+    <p>
+      <b>{{ client_name }}</b> wants to read and update data
+      in your Hypothesis account <b>{{ username }}</b>.
+    </p>
+
+    <form class="form js-authorize-form" method="POST">
+      <div class="form-actions">
+        <div class="form-actions__buttons">
+          <button type="submit" class="btn" data-ref="acceptBtn">Accept</button>
+          <button type="button" class="btn btn--cancel" data-ref="cancelBtn">Cancel</button>
+        </div>
+      </div>
+
+      {# Parameters from the initial request #}
+      <input type="hidden" name="response_mode" value="{{ response_mode }}">
+      <input type="hidden" name="response_type" value="{{ response_type }}">
+      <input type="hidden" name="client_id" value="{{ client_id }}">
+
+      {% if origin %}
+      <input type="hidden" name="origin" value="{{ origin }}">
+      {% endif %}
+
+      {% if redirect_uri %}
+      <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+      {% endif %}
+
+      {% if state %}
+      <input type="hidden" name="state" value="{{ state }}" data-ref="stateInput">
+      {% endif %}
+    </form>
+    <footer class="form-footer">
+      Don't have a Hypothesis account?
+      <a class="link--footer" href="{{ request.route_path('signup') }}">Sign up</a>
+    </footer>
+  </div>
+{% endblock content %}

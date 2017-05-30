@@ -101,6 +101,10 @@ var bundles = [{
   // Header script inserted inline at the top of the page
   name: 'header',
   entry: './h/static/scripts/header',
+},{
+  // Helper script for the OAuth post-authorization page.
+  name: 'post-auth',
+  entry: './h/static/scripts/post-auth',
 }];
 
 var bundleConfigs = bundles.map(function (config) {

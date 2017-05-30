@@ -149,6 +149,25 @@ class OAuthService(object):
 
         return token
 
+    def create_grant_token(self, user, authclient):
+        """
+        Generate a JWT bearer grant token for a user.
+
+        :param user: The user to generate the token for.
+        :type user: h.models.User
+        :param authclient: The OAuth client that is going to use the token.
+        :type authclient: h.models.AuthClient
+        """
+        now = datetime.datetime.utcnow()
+        claims = {
+            'aud': self.domain,
+            'iss': authclient.id,
+            'sub': 'acct:{}@{}'.format(user.username, user.authority),
+            'nbf': now,
+            'exp': now + datetime.timedelta(minutes=5),
+        }
+        return jwt.encode(claims, authclient.secret, algorithm='HS256')
+
 
 class GrantToken(object):
     """
