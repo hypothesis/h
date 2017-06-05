@@ -10,6 +10,7 @@ from h.views.admin_features import (
     cohorts_edit_add,
     cohorts_edit_remove,
     cohorts_index,
+    features_index,
     features_save,
 )
 
@@ -23,6 +24,17 @@ class DummyFeature(object):
 
 
 features_save_fixtures = pytest.mark.usefixtures('Feature')
+
+
+def test_features_index_sorts_features(Feature, pyramid_request):
+    alpha = DummyFeature(name='alpha')
+    beta = DummyFeature(name='beta')
+    delta = DummyFeature(name='delta')
+    Feature.all.return_value = [beta, delta, alpha]
+
+    ctx = features_index(pyramid_request)
+
+    assert ctx['features'] == [alpha, beta, delta]
 
 
 @features_save_fixtures
