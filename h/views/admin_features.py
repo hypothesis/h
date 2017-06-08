@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from pyramid import httpexceptions
-from pyramid import session
 from pyramid.view import view_config
 
 from h import models
@@ -14,8 +13,11 @@ from h.i18n import TranslationString as _
              renderer='h:templates/admin/features.html.jinja2',
              permission='admin_features')
 def features_index(request):
+
+    features = sorted(models.Feature.all(request.db), key=lambda f: f.name)
+
     return {
-        "features": models.Feature.all(request.db),
+        "features": features,
         "cohorts": request.db.query(models.FeatureCohort).all(),
     }
 
