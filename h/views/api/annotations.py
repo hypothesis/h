@@ -22,6 +22,7 @@ from pyramid import security
 import newrelic.agent
 
 from h import search as search_lib
+from h.search import UriFilter
 from h import storage
 from h.exceptions import PayloadError
 from h.events import AnnotationEvent
@@ -108,9 +109,12 @@ def search(request):
     separate_replies = params.pop('_separate_replies', False)
 
     stats = getattr(request, 'stats', None)
-    result = search_lib.Search(request,
+
+    search = search_lib.Search(request,
                                separate_replies=separate_replies,
-                               stats=stats).run(params)
+                               stats=stats)
+    search.append_modifier(UriFilter(request))
+    result = search.run(params)
 
     svc = request.find_service(name='annotation_json_presentation')
 

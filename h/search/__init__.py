@@ -4,10 +4,12 @@ from __future__ import unicode_literals
 from h.search.client import get_client
 from h.search.config import init
 from h.search.core import Search
-from h.search.query import TopLevelAnnotationsFilter
-from h.search.query import AuthorityFilter
-from h.search.query import TagsAggregation
-from h.search.query import UsersAggregation
+from h.search.query import (TopLevelAnnotationsFilter,
+                            AuthorityFilter,
+                            TagsAggregation,
+                            UsersAggregation,
+                            UriCombinedWildcardFilter,
+                            UriFilter)
 
 __all__ = (
     'Search',
@@ -15,6 +17,8 @@ __all__ = (
     'AuthorityFilter',
     'TagsAggregation',
     'UsersAggregation',
+    'UriCombinedWildcardFilter',
+    'UriFilter',
     'get_client',
     'init',
 )

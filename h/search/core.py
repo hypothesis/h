@@ -45,7 +45,6 @@ class Search(object):
                            query.Limiter(),
                            query.DeletedFilter(),
                            query.AuthFilter(request),
-                           query.UriFilter(request),
                            query.GroupFilter(),
                            query.GroupAuthFilter(request),
                            query.UserFilter(),
