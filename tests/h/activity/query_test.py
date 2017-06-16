@@ -217,6 +217,7 @@ class TestCheckURL(object):
                          'bucketing',
                          'presenters',
                          'AuthorityFilter',
+                         'UriCombinedWildcardFilter',
                          'Search',
                          'TagsAggregation',
                          'TopLevelAnnotationsFilter',
@@ -250,6 +251,15 @@ class TestExecute(object):
 
         AuthorityFilter.assert_called_once_with(pyramid_request.default_authority)
         search.append_modifier.assert_any_call(AuthorityFilter.return_value)
+
+    def test_it_recognizes_wildcards_in_uri_url(self,
+                                                pyramid_request,
+                                                search,
+                                                UriCombinedWildcardFilter):
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        UriCombinedWildcardFilter.assert_called_once_with(pyramid_request)
+        search.append_modifier.assert_any_call(UriCombinedWildcardFilter.return_value)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
                                                             pyramid_request,
@@ -619,6 +629,10 @@ class TestExecute(object):
     @pytest.fixture
     def AuthorityFilter(self, patch):
         return patch('h.activity.query.AuthorityFilter')
+
+    @pytest.fixture
+    def UriCombinedWildcardFilter(self, patch):
+        return patch('h.activity.query.UriCombinedWildcardFilter')
 
     @pytest.fixture
     def TopLevelAnnotationsFilter(self, patch):

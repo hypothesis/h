@@ -19,7 +19,7 @@ from h.search import (TopLevelAnnotationsFilter,
                       AuthorityFilter,
                       TagsAggregation,
                       UsersAggregation,
-                      UriFilter)
+                      UriCombinedWildcardFilter)
 
 
 class ActivityResults(namedtuple('ActivityResults', [
@@ -168,7 +168,7 @@ def _execute_search(request, query, page_size):
     search = Search(request, stats=request.stats)
     search.append_modifier(AuthorityFilter(authority=request.default_authority))
     search.append_modifier(TopLevelAnnotationsFilter())
-    search.append_modifier(UriFilter(request=request))
+    search.append_modifier(UriCombinedWildcardFilter(request=request))
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 
