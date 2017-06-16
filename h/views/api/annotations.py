@@ -22,7 +22,7 @@ from pyramid import security
 import newrelic.agent
 
 from h import search as search_lib
-from h.search import UriFilter
+from h.search import UriCombinedWildcardFilter
 from h import storage
 from h.exceptions import PayloadError
 from h.events import AnnotationEvent
@@ -113,7 +113,7 @@ def search(request):
     search = search_lib.Search(request,
                                separate_replies=separate_replies,
                                stats=stats)
-    search.append_modifier(UriFilter(request))
+    search.append_modifier(UriCombinedWildcardFilter(request, separate_keys=True))
     result = search.run(params)
 
     svc = request.find_service(name='annotation_json_presentation')

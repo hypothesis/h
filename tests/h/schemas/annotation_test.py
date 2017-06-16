@@ -628,6 +628,7 @@ class TestSearchParamsSchema(object):
             'text': "text me",
             'uri': "foobar.com",
             'uri.parts': "bbc",
+            'wildcard_uri': "http://foo.com/*",
             'url': "https://foobar.com",
             'any': "foo",
             'user': "pooky",
@@ -647,6 +648,7 @@ class TestSearchParamsSchema(object):
             'text': "text me",
             'uri': "foobar.com",
             'uri.parts': "bbc",
+            'wildcard_uri': "http://foo.com/*",
             'url': "https://foobar.com",
             'any': "foo",
             'user': "pooky",
@@ -757,6 +759,16 @@ class TestSearchParamsSchema(object):
 
         assert params["offset"] == 0
         assert params["search_after"] == "2009-02-16"
+
+    @pytest.mark.parametrize('wildcard_uri', (
+        "https://localhost:3000*",
+        "file://localhost*/foo.pdf",
+    ))
+    def test_raises_if_wildcards_are_in_domain(self, schema, wildcard_uri):
+        input_params = NestedMultiDict(MultiDict({"wildcard_uri": wildcard_uri}))
+
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, input_params)
 
     @pytest.fixture
     def schema(self):
