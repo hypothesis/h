@@ -57,7 +57,7 @@ class AnnotationJSONPresentationService(object):
 
 
 def annotation_json_presentation_service_factory(context, request):
-    jsonld = context.request.GET.pop('jsonld', False) is not False
+    jsonld = context is not None and context.request.GET.pop('jsonld', False) is not False
     group_svc = request.find_service(IGroupService)
     links_svc = request.find_service(name='links')
     flag_svc = request.find_service(name='flag')
