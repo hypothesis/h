@@ -105,7 +105,8 @@ class TestAnnotationJSONPresentationService(object):
                                                  flag_svc=services['flag'],
                                                  flag_count_svc=services['flag_count'],
                                                  moderation_svc=services['annotation_moderation'],
-                                                 has_permission=mock.sentinel.has_permission)
+                                                 has_permission=mock.sentinel.has_permission,
+                                                 jsonld=False)
 
     @pytest.fixture
     def annotation_resource(self):
