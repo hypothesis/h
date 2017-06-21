@@ -1,73 +1,71 @@
 #!groovy
 
+@Library('pipeline-library') _
+
+def img
+
 node {
-    // -------------------------------------------------------------------------
-    stage 'Build'
+    stage('build') {
+        checkout(scm)
+        img = buildApp(name: 'hypothesis/hypothesis')
+    }
 
-    checkout scm
+    stage('test') {
+        hostIp = sh(script: 'facter ipaddress_eth0', returnStdout: true).trim()
 
-    buildVersion = sh(
-        script: 'python -c "import h; print(h.__version__)"',
-        returnStdout: true
-    ).trim()
+        postgres = docker.image('postgres:9.4').run('-P -e POSTGRES_DB=htest')
+        databaseUrl = "postgresql://postgres@${hostIp}:${containerPort(postgres, 5432)}/htest"
 
-    // Docker tags may not contain '+'
-    dockerTag = buildVersion.replace('+', '-')
+        elasticsearch = docker.image('nickstenning/elasticsearch-icu').run('-P', "-Des.cluster.name=${currentBuild.displayName}")
+        elasticsearchHost = "http://${hostIp}:${containerPort(elasticsearch, 9200)}"
 
-    // Set build metadata
-    currentBuild.displayName = buildVersion
-    currentBuild.description = "Docker: ${dockerTag}"
+        rabbit = docker.image('rabbitmq').run('-P')
+        brokerUrl = "amqp://guest:guest@${hostIp}:${containerPort(rabbit, 5672)}//"
 
-    // Build docker image
-    sh "make docker DOCKER_TAG=${dockerTag}"
-    img = docker.image "hypothesis/hypothesis:${dockerTag}"
+        try {
+            testApp(image: img, runArgs: "-u root " +
+                                         "-e BROKER_URL=${brokerUrl} " +
+                                         "-e ELASTICSEARCH_HOST=${elasticsearchHost} " +
+                                         "-e TEST_DATABASE_URL=${databaseUrl}") {
+                // Test dependencies
+                sh 'apk-install build-base libffi-dev postgresql-dev python-dev'
+                sh 'pip install -q tox'
 
-    // -------------------------------------------------------------------------
-    stage 'Test'
-
-    hostIp = sh(script: 'facter ipaddress_eth0', returnStdout: true).trim()
-
-    postgres = docker.image('postgres:9.4').run('-P -e POSTGRES_DB=htest')
-    databaseUrl = "postgresql://postgres@${hostIp}:${containerPort(postgres, 5432)}/htest"
-
-    elasticsearch = docker.image('nickstenning/elasticsearch-icu').run('-P', "-Des.cluster.name=${buildVersion}")
-    elasticsearchHost = "http://${hostIp}:${containerPort(elasticsearch, 9200)}"
-
-    rabbit = docker.image('rabbitmq').run('-P')
-    brokerUrl = "amqp://guest:guest@${hostIp}:${containerPort(rabbit, 5672)}//"
-
-    try {
-        // Run our Python tests inside the built container
-        img.inside("-u root " +
-                   "-e BROKER_URL=${brokerUrl} " +
-                   "-e ELASTICSEARCH_HOST=${elasticsearchHost} " +
-                   "-e TEST_DATABASE_URL=${databaseUrl}") {
-            // Test dependencies
-            sh 'apk-install build-base libffi-dev postgresql-dev python-dev'
-            sh 'pip install -q tox'
-
-            // Unit tests
-            sh 'cd /var/lib/hypothesis && tox'
-            // Functional tests
-            sh 'cd /var/lib/hypothesis && tox -e functional'
+                // Unit tests
+                sh 'cd /var/lib/hypothesis && tox'
+                // Functional tests
+                sh 'cd /var/lib/hypothesis && tox -e functional'
+            }
+        } finally {
+            rabbit.stop()
+            elasticsearch.stop()
+            postgres.stop()
         }
-    } finally {
-        rabbit.stop()
-        elasticsearch.stop()
-        postgres.stop()
     }
 
-    // We only push the image to the Docker Hub if we're on master
-    if (env.BRANCH_NAME != 'master') {
-        return
+    onlyOnMaster {
+        stage('release') {
+            releaseApp(image: img)
+        }
+    }
+}
+
+onlyOnMaster {
+    milestone()
+    stage('qa deploy') {
+        lock(resource: 'h-qa-deploy', inversePrecedence: true) {
+            milestone()
+            deployApp(image: img, app: 'h', env: 'qa')
+        }
     }
 
-    // -------------------------------------------------------------------------
-    stage 'Push'
-
-    docker.withRegistry('', 'docker-hub-build') {
-        img.push()
-        img.push('latest')
+    milestone()
+    stage('prod deploy') {
+        input(message: "Deploy to prod?")
+        lock(resource: 'h-prod-deploy', inversePrecedence: true) {
+            milestone()
+            deployApp(image: img, app: 'h', env: 'prod')
+        }
     }
 }
 
