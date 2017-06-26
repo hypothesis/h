@@ -38,7 +38,9 @@ class TestSidebarApp(object):
                     'release': __version__
                 },
                 'authDomain': 'example.com',
-                'googleAnalytics': 'UA-4567'
+                'googleAnalytics': 'UA-4567',
+                'oauthClientId': 'test-client-id',
+                'oauthEnabled': True,
                 }
 
         actual_config = json.loads(ctx['app_config'])
@@ -49,6 +51,14 @@ class TestSidebarApp(object):
         ctx = client.sidebar_app(pyramid_request)
 
         assert ctx['embed_url'] == '/embed.js'
+
+    def test_it_disables_oauth(self, pyramid_request):
+        pyramid_request.feature.flags['client_oauth'] = False
+
+        ctx = client.sidebar_app(pyramid_request)
+        cfg = json.loads(ctx['app_config'])
+
+        assert cfg['oauthEnabled'] is False
 
 
 @pytest.mark.usefixtures('routes', 'pyramid_settings')
@@ -65,6 +75,7 @@ def pyramid_settings(pyramid_settings):
 
     pyramid_settings.update({
         'ga_client_tracking_id': 'UA-4567',
+        'h.client_oauth_id': 'test-client-id',
         'h.sentry_dsn_client': 'test-sentry-dsn',
         'h.websocket_url': 'wss://example.com/ws',
         'authority': 'example.com'
