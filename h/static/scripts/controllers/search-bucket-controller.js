@@ -30,12 +30,18 @@ class SearchBucketController extends Controller {
       if (this.refs.domainLink.contains(event.target)) {
         return;
       }
+
+      event.stopPropagation();
+      event.preventDefault();
+
       this.setState({expanded: !this.state.expanded});
     });
 
     this.refs.title.addEventListener('click', (event) => {
-      this.setState({expanded: !this.state.expanded});
       event.stopPropagation();
+      event.preventDefault();
+
+      this.setState({expanded: !this.state.expanded});
     });
 
     this.refs.collapseView.addEventListener('click', () => {
