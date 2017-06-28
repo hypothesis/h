@@ -56,7 +56,8 @@ def sidebar_app(request, extra=None):
         # that it is available as soon as the client starts before
         # API tokens are fetched.
         #
-        # This should be removed once OAuth for first-party accounts is shipped.
+        # TODO - This should be removed once OAuth for first-party accounts is
+        #        shipped.
         'oauthEnabled': request.feature('client_oauth'),
 
         'release': __version__,
