@@ -11,6 +11,8 @@ from h.db import Base
 log = logging.getLogger(__name__)
 
 FEATURES = {
+    'client_oauth': ("Use OAuth for first party accounts in client? "
+                     "(Only takes effect if enabled for everyone)"),
     'defer_realtime_updates': ("Require a user action before applying real-time"
                                " updates to annotations in the client?"),
     'filter_highlights': ("Filter highlights in document based on visible"
@@ -19,11 +21,10 @@ FEATURES = {
                     "client?"),
     'homepage_redirects': "Enable homepage redirects (for WordPress migration)?",
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
+    'overlay_highlighter': "Use the new overlay highlighter?",
     'search_for_doi': "Use DOI metadata when searching for annotations on the current page?",
     'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
-    'overlay_highlighter': "Use the new overlay highlighter?",
     'view-switcher': 'Use the new-style [Annotations|Page Notes|Orphans] view switcher control at the top of the sidebar',
-
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
