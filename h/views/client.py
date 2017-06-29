@@ -9,6 +9,7 @@ Views which exist either to serve or support the Hypothesis client.
 from __future__ import unicode_literals
 
 import json
+import time
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
@@ -27,7 +28,11 @@ def _client_url(request):
     """
     Return the configured URL for the client.
     """
-    return request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
+    url = request.registry.settings.get('h.client_url', DEFAULT_CLIENT_URL)
+
+    if request.feature('embed_cachebuster'):
+        url += '?cachebuster=' + str(int(time.time()))
+    return url
 
 
 @view_config(route_name='sidebar_app',

@@ -15,6 +15,8 @@ FEATURES = {
                      "(Only takes effect if enabled for everyone)"),
     'defer_realtime_updates': ("Require a user action before applying real-time"
                                " updates to annotations in the client?"),
+    'embed_cachebuster': ("Cache-bust client entry point URL to prevent browser/CDN from "
+                          "using a cached version?"),
     'filter_highlights': ("Filter highlights in document based on visible"
                           " annotations in sidebar?"),
     'flag_action': ("Enable user to flag inappropriate annotations in the "

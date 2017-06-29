@@ -64,10 +64,20 @@ class TestSidebarApp(object):
 @pytest.mark.usefixtures('routes', 'pyramid_settings')
 class TestEmbedRedirect(object):
     def test_redirects_to_client_boot_script(self, pyramid_request):
+        pyramid_request.feature.flags['embed_cachebuster'] = False
+
         rsp = client.embed_redirect(pyramid_request)
 
         assert isinstance(rsp, HTTPFound)
         assert rsp.location == 'https://cdn.hypothes.is/hypothesis'
+
+    def test_adds_cachebuster(self, pyramid_request):
+        pyramid_request.feature.flags['embed_cachebuster'] = True
+
+        rsp = client.embed_redirect(pyramid_request)
+
+        assert isinstance(rsp, HTTPFound)
+        assert '?cachebuster=' in rsp.location
 
 
 @pytest.fixture
