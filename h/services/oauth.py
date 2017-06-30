@@ -162,7 +162,7 @@ class OAuthService(object):
         claims = {
             'aud': self.domain,
             'iss': authclient.id,
-            'sub': 'acct:{}@{}'.format(user.username, user.authority),
+            'sub': user.userid,
             'nbf': now,
             'exp': now + datetime.timedelta(minutes=5),
         }
