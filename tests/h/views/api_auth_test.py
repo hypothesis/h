@@ -79,7 +79,10 @@ class TestOAuthAuthorizeController(object):
         assert ctx['state'] == 'a_random_string'
 
     @pytest.fixture
-    def auth_ctrl(self, factories, pyramid_config, pyramid_request):
+    def auth_ctrl(self, pyramid_config, pyramid_request):
+        """
+        Configure a valid request for `OAuthAuthorizeController.get`.
+        """
         pyramid_config.testing_securitypolicy('acct:fred@example.org')
 
         pyramid_request.GET['client_id'] = 'valid_id'
@@ -90,7 +93,10 @@ class TestOAuthAuthorizeController(object):
         return views.OAuthAuthorizeController(pyramid_request)
 
     @pytest.fixture
-    def post_auth_ctrl(self, factories, pyramid_config, pyramid_request):
+    def post_auth_ctrl(self, pyramid_config, pyramid_request):
+        """
+        Configure a valid request for `OAuthAuthorizeController.post`.
+        """
         pyramid_config.testing_securitypolicy('acct:fred@example.org')
 
         pyramid_request.POST['client_id'] = 'valid_id'
