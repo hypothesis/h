@@ -80,7 +80,7 @@ class OAuthAuthorizeController(object):
         params = self.request.params
 
         client_id = params.get('client_id', '')
-        authclient = self.oauth_svc._get_authclient_by_id(client_id)
+        authclient = self.oauth_svc.get_authclient_by_id(client_id)
         if not authclient:
             raise HTTPBadRequest('Unknown client ID "{}"'.format(client_id))
 

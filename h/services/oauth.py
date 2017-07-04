@@ -75,7 +75,7 @@ class OAuthService(object):
 
         token = GrantToken(body['assertion'])
 
-        authclient = self._get_authclient_by_id(token.issuer)
+        authclient = self.get_authclient_by_id(token.issuer)
         if not authclient:
             raise OAuthTokenError('grant token issuer (iss) is invalid', 'invalid_grant')
 
@@ -93,7 +93,12 @@ class OAuthService(object):
 
         return (user, authclient)
 
-    def _get_authclient_by_id(self, client_id):
+    def get_authclient_by_id(self, client_id):
+        """
+        Return the AuthClient with the given ID.
+
+        Returns `False` if no such client exists.
+        """
         try:
             return self.session.query(models.AuthClient).get(client_id)
         except sa.exc.StatementError as exc:

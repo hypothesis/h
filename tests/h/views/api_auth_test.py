@@ -22,7 +22,7 @@ class TestOAuthAuthorizeController(object):
     def test_get_verifies_client_id(self, auth_ctrl, pyramid_request,
                                     oauth_service):
 
-        oauth_service._get_authclient_by_id.return_value = None
+        oauth_service.get_authclient_by_id.return_value = None
 
         with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
             auth_ctrl.get()
