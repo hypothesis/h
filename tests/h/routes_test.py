@@ -80,6 +80,7 @@ def test_includeme():
         call('api.users', '/api/users'),
         call('badge', '/api/badge'),
         call('token', '/api/token'),
+        call('oauth_authorize', '/oauth/authorize'),
         call('session', '/app'),
         call('sidebar_app', '/app.html'),
         call('embed', '/embed.js'),

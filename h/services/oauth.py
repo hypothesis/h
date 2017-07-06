@@ -75,7 +75,7 @@ class OAuthService(object):
 
         token = GrantToken(body['assertion'])
 
-        authclient = self._get_authclient_by_id(token.issuer)
+        authclient = self.get_authclient_by_id(token.issuer)
         if not authclient:
             raise OAuthTokenError('grant token issuer (iss) is invalid', 'invalid_grant')
 
@@ -93,7 +93,12 @@ class OAuthService(object):
 
         return (user, authclient)
 
-    def _get_authclient_by_id(self, client_id):
+    def get_authclient_by_id(self, client_id):
+        """
+        Return the AuthClient with the given ID.
+
+        Returns `None` if no such client exists.
+        """
         try:
             return self.session.query(models.AuthClient).get(client_id)
         except sa.exc.StatementError as exc:
@@ -148,6 +153,25 @@ class OAuthService(object):
         self.session.add(token)
 
         return token
+
+    def create_grant_token(self, user, authclient):
+        """
+        Generate a JWT bearer grant token for a user.
+
+        :param user: The user to generate the token for.
+        :type user: h.models.User
+        :param authclient: The OAuth client that is going to use the token.
+        :type authclient: h.models.AuthClient
+        """
+        now = datetime.datetime.utcnow()
+        claims = {
+            'aud': self.domain,
+            'iss': authclient.id,
+            'sub': user.userid,
+            'nbf': now,
+            'exp': now + datetime.timedelta(minutes=5),
+        }
+        return jwt.encode(claims, authclient.secret, algorithm='HS256')
 
 
 class GrantToken(object):

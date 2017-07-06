@@ -478,18 +478,35 @@ class TestOAuthServiceCreateToken(object):
         return oauth.OAuthService(db_session, user_service, pyramid_request.domain)
 
     @pytest.fixture
-    def user(self, db_session, factories):
-        user = factories.User()
-        db_session.add(user)
-        db_session.flush()
-        return user
-
-    @pytest.fixture
     def authclient(self, db_session):
         client = models.AuthClient(authority='partner.org', secret='bogus')
         db_session.add(client)
         db_session.flush()
         return client
+
+
+class TestOAuthServiceCreateGrantToken(object):
+    """
+    Tests for ``OAuthService.create_grant_token``.
+    """
+
+    def test_it_returns_a_valid_token(self, db_session, pyramid_request, user, user_service):
+        client = models.AuthClient(authority='partner.org', secret='bogus')
+        db_session.add(client)
+        db_session.flush()
+
+        svc = oauth.OAuthService(db_session, user_service,
+                                 pyramid_request.domain)
+
+        token = svc.create_grant_token(user, client)
+
+        decoded = jwt.decode(token, key=client.secret, leeway=240,
+                             algorithms=['HS256'],
+                             audience=pyramid_request.domain)
+
+        assert decoded['aud'] == pyramid_request.domain
+        assert decoded['iss'] == client.id
+        assert decoded['sub'] == user.userid
 
 
 @pytest.mark.usefixtures('user_service')
@@ -518,6 +535,14 @@ def user_service(db_session, pyramid_config):
                                          session=db_session))
     pyramid_config.register_service(service, name='user')
     return service
+
+
+@pytest.fixture
+def user(db_session, factories):
+    user = factories.User()
+    db_session.add(user)
+    db_session.flush()
+    return user
 
 
 @pytest.fixture

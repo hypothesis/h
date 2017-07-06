@@ -9,6 +9,7 @@ if (settings.raven) {
 
 require('./polyfills');
 
+const AuthorizeFormController = require('./controllers/authorize-form-controller');
 const CharacterLimitController = require('./controllers/character-limit-controller');
 const CopyButtonController = require('./controllers/copy-button-controller');
 const ConfirmSubmitController = require('./controllers/confirm-submit-controller');
@@ -25,6 +26,7 @@ const TooltipController = require('./controllers/tooltip-controller');
 const upgradeElements = require('./base/upgrade-elements');
 
 const controllers = {
+  '.js-authorize-form': AuthorizeFormController,
   '.js-character-limit': CharacterLimitController,
   '.js-copy-button': CopyButtonController,
   '.js-confirm-submit': ConfirmSubmitController,
