@@ -97,7 +97,7 @@ class OAuthService(object):
         """
         Return the AuthClient with the given ID.
 
-        Returns `False` if no such client exists.
+        Returns `None` if no such client exists.
         """
         try:
             return self.session.query(models.AuthClient).get(client_id)
