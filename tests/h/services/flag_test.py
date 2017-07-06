@@ -4,8 +4,13 @@ from __future__ import unicode_literals
 
 import pytest
 
-from h.services import flag
 from h import models
+from h.services.flag import (
+    FlagService,
+    PreloadedFlagService,
+    flag_service_factory,
+)
+from h.services.exceptions import NotPreloadedError
 
 
 @pytest.mark.usefixtures('flags')
@@ -69,16 +74,50 @@ class TestFlagServiceCreate(object):
                          .count() == 1
 
 
+class TestPreloadedFlagService(object):
+
+    def test_flagged_annotation(self, svc, flags):
+        flag = flags[-1]
+        psvc = PreloadedFlagService(svc, flag.user, [flag.annotation.id])
+
+        assert psvc.flagged(flag.annotation) is True
+
+    def test_unflagged_annotation(self, svc, factories):
+        user = factories.User()
+        annotation = factories.Annotation()
+        psvc = PreloadedFlagService(svc, user, [annotation.id])
+
+        assert psvc.flagged(annotation) is False
+
+    def test_no_user(self, svc, flags):
+        annotation = flags[-1].annotation
+        psvc = PreloadedFlagService(svc, None, [annotation.id])
+
+        assert psvc.flagged(annotation) is False
+
+    def test_unloaded_id(self, svc, factories):
+        annotation = factories.Annotation()
+        user = factories.User()
+        psvc = PreloadedFlagService(svc, user, [])
+
+        with pytest.raises(NotPreloadedError):
+            psvc.flagged(annotation)
+
+    @pytest.fixture
+    def flags(self, factories):
+        return factories.Flag.create_batch(3)
+
+
 class TestFlagServiceFactory(object):
     def test_it_returns_flag_service(self, pyramid_request):
-        svc = flag.flag_service_factory(None, pyramid_request)
-        assert isinstance(svc, flag.FlagService)
+        svc = flag_service_factory(None, pyramid_request)
+        assert isinstance(svc, FlagService)
 
     def test_it_provides_request_db_as_session(self, pyramid_request):
-        svc = flag.flag_service_factory(None, pyramid_request)
+        svc = flag_service_factory(None, pyramid_request)
         assert svc.session == pyramid_request.db
 
 
 @pytest.fixture
 def svc(db_session):
-    return flag.FlagService(db_session)
+    return FlagService(db_session)

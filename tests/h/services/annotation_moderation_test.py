@@ -5,8 +5,12 @@ from __future__ import unicode_literals
 import pytest
 
 from h import models
-from h.services.annotation_moderation import AnnotationModerationService
-from h.services.annotation_moderation import annotation_moderation_service_factory
+from h.services.annotation_moderation import (
+    AnnotationModerationService,
+    PreloadedAnnotationModerationService,
+    annotation_moderation_service_factory,
+)
+from h.services.exceptions import NotPreloadedError
 
 
 class TestAnnotationModerationServiceHidden(object):
@@ -85,6 +89,29 @@ class TestAnnotationModerationServiceUnhide(object):
         svc.unhide(annotation)
 
         assert svc.hidden(annotation) is False
+
+
+class TestPreloadedAnnotationModerationService(object):
+
+    def test_hidden_annotation(self, svc, factories):
+        moderation = factories.AnnotationModeration()
+        annotation_ids = [moderation.annotation.id]
+        psvc = PreloadedAnnotationModerationService(svc, annotation_ids)
+
+        assert psvc.hidden(moderation.annotation) is True
+
+    def test_visible_annotation(self, svc, factories):
+        annotation = factories.Annotation()
+        psvc = PreloadedAnnotationModerationService(svc, [annotation.id])
+
+        assert psvc.hidden(annotation) is False
+
+    def test_unloaded_id(self, svc, factories):
+        annotation = factories.Annotation()
+        psvc = PreloadedAnnotationModerationService(svc, [])
+
+        with pytest.raises(NotPreloadedError):
+            psvc.hidden(annotation)
 
 
 class TestAnnotationNipsaServiceFactory(object):

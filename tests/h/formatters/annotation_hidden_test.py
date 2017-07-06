@@ -12,26 +12,6 @@ from h.services.annotation_moderation import AnnotationModerationService
 FakeAnnotationResource = namedtuple('FakeAnnotationResource', ['annotation', 'group'])
 
 
-class TestAnnotationHiddenFormatter(object):
-    def test_preload_sets_founds_hidden_annotations_to_true(self, annotations, formatter):
-        annotation_ids = [a.id for a in annotations['hidden']]
-
-        expected = {id_: True for id_ in annotation_ids}
-        assert formatter.preload(annotation_ids) == expected
-
-    def test_preload_sets_missing_flags_to_false(self, annotations, formatter):
-        annotation_ids = [a.id for a in annotations['public']]
-
-        expected = {id_: False for id_ in annotation_ids}
-        assert formatter.preload(annotation_ids) == expected
-
-    @pytest.fixture
-    def annotations(self, factories):
-        hidden = [mod.annotation for mod in factories.AnnotationModeration.create_batch(3)]
-        public = factories.Annotation.create_batch(2)
-        return {'hidden': hidden, 'public': public}
-
-
 class TestAnonymousUserHiding(object):
     """An anonymous user will see redacted annotations when they're hidden."""
 

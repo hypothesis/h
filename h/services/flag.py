@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from h import models
+from .exceptions import NotPreloadedError
 
 
 class FlagService(object):
@@ -73,6 +74,22 @@ class FlagService(object):
         flag = models.Flag(user=user,
                            annotation=annotation)
         self.session.add(flag)
+
+
+class PreloadedFlagService(object):
+
+    def __init__(self, service, user, annotation_ids):
+        self._annotation_ids = set(annotation_ids)
+        if user:
+            self._flagged_ids = service.all_flagged(user, annotation_ids)
+        else:
+            self._flagged_ids = set()
+
+    def flagged(self, annotation):
+        if annotation.id not in self._annotation_ids:
+            raise NotPreloadedError(annotation.id)
+
+        return annotation.id in self._flagged_ids
 
 
 def flag_service_factory(context, request):

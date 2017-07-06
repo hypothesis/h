@@ -34,16 +34,37 @@ class TestFlagCountService(object):
 
         assert flag_counts[flagged.id] == 2
 
-    @pytest.fixture
-    def unflagged(self, factories):
-        return factories.Annotation()
+class TestPreloadedFlagCountService(object):
 
-    @pytest.fixture
-    def flagged(self, factories):
-        annotation = factories.Annotation()
-        factories.Flag.create_batch(2, annotation=annotation)
-        return annotation
+    def test_unflagged_annotation(self, svc, unflagged):
+        psvc = flag_count.PreloadedFlagCountService(svc, [unflagged.id])
 
-    @pytest.fixture
-    def svc(self, db_session):
-        return flag_count.FlagCountService(db_session)
+        assert psvc.flag_count(unflagged) == 0
+
+    def test_flagged_annotation(self, svc, flagged):
+        psvc = flag_count.PreloadedFlagCountService(svc, [flagged.id])
+
+        assert psvc.flag_count(flagged) == 2
+
+    def test_unloaded_id(self, svc, unflagged):
+        psvc = flag_count.PreloadedFlagCountService(svc, [])
+
+        with pytest.raises(flag_count.NotPreloadedError):
+            psvc.flag_count(unflagged)
+
+
+@pytest.fixture
+def svc(db_session):
+    return flag_count.FlagCountService(db_session)
+
+
+@pytest.fixture
+def unflagged(factories):
+    return factories.Annotation()
+
+
+@pytest.fixture
+def flagged(factories):
+    annotation = factories.Annotation()
+    factories.Flag.create_batch(2, annotation=annotation)
+    return annotation

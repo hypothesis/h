@@ -17,22 +17,7 @@ class IAnnotationFormatter(Interface):
     return a dictionary representation based on the passed-in annotation. If
     the formatter depends on other data it should be able to load it on-demand
     for the given annotation.
-
-    Since we are rendering lists of potentially hundreds of annotations in one
-    request, formatters need to be able to optimize the fetching of additional
-    data (e.g. from the database). Which is why this interface defines the
-    ``preload(ids)`` method.
-    Each formatter implementation is expected to handle a cache internally which
-    is being preloaded with said method.
     """
-
-    def preload(ids):  # noqa: N805
-        """
-        Batch load data based on annotation ids.
-
-        :param ids: List of annotation ids based on which data should be preloaded.
-        :type ids: list of unicode
-        """
 
     def format(annotation_resource):  # noqa: N805
         """
