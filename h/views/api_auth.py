@@ -84,6 +84,10 @@ class OAuthAuthorizeController(object):
         if not authclient:
             raise HTTPBadRequest('Unknown client ID "{}"'.format(client_id))
 
+        if authclient.authority != self.request.authority:
+            raise HTTPBadRequest('Client "{}" not allowed to authorize "{}" users'.format(
+                                 client_id, self.request.authority))
+
         response_type = params.get('response_type')
         if response_type != 'code':
             raise HTTPBadRequest('Unsupported response type "{}"'

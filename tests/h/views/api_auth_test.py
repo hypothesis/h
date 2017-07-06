@@ -19,8 +19,8 @@ from h.views import api_auth as views
 
 @pytest.mark.usefixtures('routes', 'user_service', 'oauth_service')
 class TestOAuthAuthorizeController(object):
-    def test_get_verifies_client_id(self, auth_ctrl, pyramid_request,
-                                    oauth_service):
+    def test_get_raises_if_client_id_invalid(self, auth_ctrl, pyramid_request,
+                                             oauth_service):
 
         oauth_service.get_authclient_by_id.return_value = None
 
@@ -28,6 +28,18 @@ class TestOAuthAuthorizeController(object):
             auth_ctrl.get()
 
         assert 'Unknown client ID' in exc.value.message
+
+    def test_get_raises_if_client_authority_incorrect(self, auth_ctrl, pyramid_request,
+                                                      oauth_service):
+
+        auth_client = mock.Mock(authority='publisher.org')
+
+        oauth_service.get_authclient_by_id.return_value = auth_client
+
+        with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
+            auth_ctrl.get()
+
+        assert 'not allowed to authorize' in exc.value.message
 
     def test_get_verifies_response_mode(self, auth_ctrl, pyramid_request):
         pyramid_request.GET['response_mode'] = 'invalid_mode'
@@ -109,6 +121,9 @@ class TestOAuthAuthorizeController(object):
     @pytest.fixture
     def oauth_service(self, pyramid_config, pyramid_request):
         svc = mock.Mock(spec_set=oauth_service_factory(None, pyramid_request))
+
+        svc.get_authclient_by_id.return_value = mock.Mock(authority='example.com')
+
         pyramid_config.register_service(svc, name='oauth')
         return svc
 
