@@ -13,10 +13,11 @@ from h.interfaces import IGroupService
 
 
 class AnnotationJSONPresentationService(object):
-    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc, has_permission):
+    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc, has_permission, jsonld):
         self.session = session
         self.group_svc = group_svc
         self.links_svc = links_svc
+        self.jsonld = jsonld
 
         def moderator_check(group):
             return has_permission('admin', group)
@@ -48,11 +49,15 @@ class AnnotationJSONPresentationService(object):
                 for ann in annotations]
 
     def _get_presenter(self, annotation_resource):
-        return presenters.AnnotationJSONPresenter(annotation_resource,
-                                                  self.formatters)
+        if self.jsonld:
+            return presenters.AnnotationJSONLDPresenter(annotation_resource)
+        else:
+            return presenters.AnnotationJSONPresenter(annotation_resource,
+                                                      self.formatters)
 
 
 def annotation_json_presentation_service_factory(context, request):
+    jsonld = context is not None and context.request.GET.pop('jsonld', False) is not False
     group_svc = request.find_service(IGroupService)
     links_svc = request.find_service(name='links')
     flag_svc = request.find_service(name='flag')
@@ -65,4 +70,5 @@ def annotation_json_presentation_service_factory(context, request):
                                              flag_svc=flag_svc,
                                              flag_count_svc=flag_count_svc,
                                              moderation_svc=moderation_svc,
-                                             has_permission=request.has_permission)
+                                             has_permission=request.has_permission,
+                                             jsonld=jsonld)
