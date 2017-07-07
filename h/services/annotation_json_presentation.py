@@ -13,7 +13,7 @@ from h.interfaces import IGroupService
 
 
 class AnnotationJSONPresentationService(object):
-    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, 
+    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc,
                  moderation_svc, has_permission, json_flavor=None):
         self.session = session
         self.group_svc = group_svc

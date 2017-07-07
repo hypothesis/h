@@ -291,6 +291,7 @@ def _json_payload(request):
     except ValueError:
         raise PayloadError()
 
+
 def _call_search_lib(request, json_presenter=None):
     """Search the database for annotations matching with the given query."""
     params = request.params.copy()
