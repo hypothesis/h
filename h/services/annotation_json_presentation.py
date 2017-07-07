@@ -13,10 +13,12 @@ from h.interfaces import IGroupService
 
 
 class AnnotationJSONPresentationService(object):
-    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc, has_permission):
+    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, 
+                 moderation_svc, has_permission, json_flavor=None):
         self.session = session
         self.group_svc = group_svc
         self.links_svc = links_svc
+        self.json_flavor = json_flavor
 
         def moderator_check(group):
             return has_permission('admin', group)
@@ -48,16 +50,15 @@ class AnnotationJSONPresentationService(object):
                 for ann in annotations]
 
     def _get_presenter(self, annotation_resource):
-        return presenters.AnnotationJSONPresenter(annotation_resource,
-                                                  self.formatters)
+        if self.json_flavor == 'jsonld':
+            return presenters.AnnotationJSONLDPresenter(annotation_resource)
+        else:
+            return presenters.AnnotationJSONPresenter(annotation_resource,
+                                                      self.formatters)
 
 
 def annotation_json_presentation_service_factory(context, request):
-    group_svc = request.find_service(IGroupService)
-    links_svc = request.find_service(name='links')
-    flag_svc = request.find_service(name='flag')
-    flag_count_svc = request.find_service(name='flag_count')
-    moderation_svc = request.find_service(name='annotation_moderation')
+    (group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc) = _find_services(request)
     return AnnotationJSONPresentationService(session=request.db,
                                              user=request.user,
                                              group_svc=group_svc,
@@ -66,3 +67,24 @@ def annotation_json_presentation_service_factory(context, request):
                                              flag_count_svc=flag_count_svc,
                                              moderation_svc=moderation_svc,
                                              has_permission=request.has_permission)
+
+def annotation_jsonld_presentation_service_factory(context, request):
+    (group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc) = _find_services(request)
+    return AnnotationJSONPresentationService(session=request.db,
+                                             user=request.user,
+                                             group_svc=group_svc,
+                                             links_svc=links_svc,
+                                             flag_svc=flag_svc,
+                                             flag_count_svc=flag_count_svc,
+                                             moderation_svc=moderation_svc,
+                                             has_permission=request.has_permission,
+                                             json_flavor='jsonld')
+
+
+def _find_services(request):
+    group_svc = request.find_service(IGroupService)
+    links_svc = request.find_service(name='links')
+    flag_svc = request.find_service(name='flag')
+    flag_count_svc = request.find_service(name='flag_count')
+    moderation_svc = request.find_service(name='annotation_moderation')
+    return (group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc)

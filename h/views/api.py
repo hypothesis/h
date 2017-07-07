@@ -175,28 +175,16 @@ def links(context, request):
 
 @api_config(route_name='api.search',
             link_name='search',
-            description='Search for annotations')
+            description='Search for annotations, return legacy json')
 def search(request):
-    """Search the database for annotations matching with the given query."""
-    params = request.params.copy()
+    return _call_search_lib(request, 'annotation_json_presentation')
 
-    separate_replies = params.pop('_separate_replies', False)
-    stats = getattr(request, 'stats', None)
-    result = search_lib.Search(request,
-                               separate_replies=separate_replies,
-                               stats=stats).run(params)
 
-    svc = request.find_service(name='annotation_json_presentation')
-
-    out = {
-        'total': result.total,
-        'rows': svc.present_all(result.annotation_ids)
-    }
-
-    if separate_replies:
-        out['replies'] = svc.present_all(result.reply_ids)
-
-    return out
+@api_config(route_name='api.search.jsonld',
+            link_name='search.jsonld',
+            description='Search for annotations, return jsonld')
+def search_jsonld(request):
+    return _call_search_lib(request, 'annotation_jsonld_presentation')
 
 
 @api_config(route_name='api.annotations',
@@ -302,6 +290,28 @@ def _json_payload(request):
         return request.json_body
     except ValueError:
         raise PayloadError()
+
+def _call_search_lib(request, json_presenter=None):
+    """Search the database for annotations matching with the given query."""
+    params = request.params.copy()
+
+    separate_replies = params.pop('_separate_replies', False)
+    stats = getattr(request, 'stats', None)
+    result = search_lib.Search(request,
+                               separate_replies=separate_replies,
+                               stats=stats).run(params)
+
+    svc = request.find_service(name=json_presenter)
+
+    out = {
+        'total': result.total,
+        'rows': svc.present_all(result.annotation_ids)
+    }
+
+    if separate_replies:
+        out['replies'] = svc.present_all(result.reply_ids)
+
+    return out
 
 
 def _publish_annotation_event(request,

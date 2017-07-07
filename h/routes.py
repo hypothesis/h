@@ -88,6 +88,7 @@ def includeme(config):
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.search', '/api/search')
+    config.add_route('api.search.jsonld', '/api/search.jsonld')
     config.add_route('api.users', '/api/users')
     config.add_route('badge', '/api/badge')
     config.add_route('token', '/api/token')

@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 
 
 def includeme(config):
+    config.register_service_factory('.annotation_json_presentation.annotation_jsonld_presentation_service_factory',
+                                    name='annotation_jsonld_presentation')
     config.register_service_factory('.annotation_json_presentation.annotation_json_presentation_service_factory',
                                     name='annotation_json_presentation')
     config.register_service_factory('.annotation_moderation.annotation_moderation_service_factory', name='annotation_moderation')
