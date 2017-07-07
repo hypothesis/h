@@ -77,6 +77,7 @@ def test_includeme():
         call('api.profile', '/api/profile'),
         call('api.debug_token', '/api/debug-token'),
         call('api.search', '/api/search'),
+        call('api.search.jsonld', '/api/search.jsonld'),
         call('api.users', '/api/users'),
         call('badge', '/api/badge'),
         call('token', '/api/token'),

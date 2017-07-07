@@ -100,6 +100,7 @@ class TestIndex(object):
         pyramid_request.registry.api_links = config.registry.api_links
 
         pyramid_config.add_route('api.search', '/dummy/search')
+        pyramid_config.add_route('api.search.jsonld', '/dummy/search.jsonld')
         pyramid_config.add_route('api.annotations', '/dummy/annotations')
         pyramid_config.add_route('api.annotation', '/dummy/annotations/:id')
         pyramid_config.add_route('api.links', '/dummy/links')
