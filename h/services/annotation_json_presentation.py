@@ -68,6 +68,7 @@ def annotation_json_presentation_service_factory(context, request):
                                              moderation_svc=moderation_svc,
                                              has_permission=request.has_permission)
 
+
 def annotation_jsonld_presentation_service_factory(context, request):
     (group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc) = _find_services(request)
     return AnnotationJSONPresentationService(session=request.db,
