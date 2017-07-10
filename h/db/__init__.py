@@ -111,7 +111,7 @@ def _maybe_create_world_group(engine, authority):
     session = Session(bind=engine)
     world_group = session.query(models.Group).filter_by(pubid='__world__').one_or_none()
     if world_group is None:
-        world_group = models.Group(name='Public',
+        world_group = models.Group(name=u'Public',
                                    authority=authority,
                                    joinable_by=None,
                                    readable_by=ReadableBy.world,
