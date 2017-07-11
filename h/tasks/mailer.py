@@ -10,9 +10,11 @@ import smtplib
 import pyramid_mailer
 import pyramid_mailer.message
 
-from h.celery import celery
+from h.celery import celery, get_task_logger
 
 __all__ = ('send',)
+
+log = get_task_logger(__name__)
 
 
 @celery.task(bind=True, max_retries=3)
@@ -35,6 +37,8 @@ def send(self, recipients, subject, body, html=None):
                                            html=html)
     mailer = pyramid_mailer.get_mailer(celery.request)
     try:
+        if celery.request.debug:
+            log.info("emailing in debug mode: check the `mail/' directory")
         mailer.send_immediately(email)
     except (smtplib.socket.error, smtplib.SMTPException) as exc:
         # Exponential backoff in case the SMTP service is having problems.

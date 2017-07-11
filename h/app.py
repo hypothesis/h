@@ -71,7 +71,10 @@ def includeme(config):
 
     config.registry.settings.setdefault('mail.default_sender',
                                         '"Annotation Daemon" <no-reply@localhost>')
-    config.include('pyramid_mailer')
+    if asbool(config.registry.settings.get('h.debug')):
+        config.include('pyramid_mailer.debug')
+    else:
+        config.include('pyramid_mailer')
 
     # Pyramid service layer: provides infrastructure for registering and
     # retrieving services bound to the request.
@@ -132,4 +135,3 @@ def includeme(config):
     # Debugging assistance
     if asbool(config.registry.settings.get('h.debug')):
         config.include('pyramid_debugtoolbar')
-        config.include('h.debug')
