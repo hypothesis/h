@@ -98,6 +98,8 @@ class AuthClient(Base, Timestamps):
     #: Authorization response type used by this client.
     response_type = sa.Column(sa.Enum(ResponseType, name='authclient_response_type'),
                               nullable=True)
+    #: Redirect URI for OAuth 2 authorization code grant type.
+    redirect_uri = sa.Column(sa.UnicodeText, nullable=True)
 
     def __repr__(self):
         return 'AuthClient(id={self.id!r})'.format(self=self)
