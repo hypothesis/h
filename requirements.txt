@@ -41,6 +41,7 @@ mako==1.0.4               # via alembic
 markupsafe==0.23          # via jinja2, mako, pyramid-jinja2
 mistune==0.7.3
 newrelic==2.68.0.50
+oauthlib==2.0.2
 packaging==16.8           # via cryptography
 passlib==1.7.1
 pastedeploy==1.5.2        # via pyramid
