@@ -9,6 +9,7 @@ from .annotation import Annotation
 from .annotation_moderation import AnnotationModeration
 from .auth_client import AuthClient
 from .auth_ticket import AuthTicket
+from .authz_code import AuthzCode
 from .document import Document, DocumentMeta, DocumentURI
 from .feature import Feature
 from .feature_cohort import FeatureCohort
@@ -24,6 +25,7 @@ __all__ = (
     'AnnotationModeration',
     'AuthClient',
     'AuthTicket',
+    'AuthzCode',
     'Document',
     'DocumentMeta',
     'DocumentURI',

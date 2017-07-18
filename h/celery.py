@@ -42,6 +42,10 @@ celery.conf.update(
             'task': 'h.tasks.cleanup.purge_expired_auth_tickets',
             'schedule': timedelta(hours=1)
         },
+        'purge-expired-authzcodes': {
+            'task': 'h.tasks.cleanup.purge_expired_authz_codes',
+            'schedule': timedelta(hours=1)
+        },
         'purge-expired-tokens': {
             'task': 'h.tasks.cleanup.purge_expired_tokens',
             'schedule': timedelta(hours=1)

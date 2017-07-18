@@ -2,136 +2,150 @@
 
 from __future__ import unicode_literals
 
-from h._compat import url_quote
 import datetime
 
 import mock
 import pytest
+
+from oauthlib.oauth2 import InvalidRequestFatalError
 from pyramid import httpexceptions
 
+from h._compat import url_quote
+from h.exceptions import OAuthTokenError
+from h.models.auth_client import ResponseType
 from h.services.auth_token import auth_token_service_factory
 from h.services.oauth import oauth_service_factory
+from h.services.oauth_validator import (
+    DEFAULT_SCOPES,
+    oauth_validator_service_factory,
+)
 from h.services.user import user_service_factory
-from h.exceptions import OAuthTokenError
 from h.util.datetime import utc_iso8601
 from h.views import api_auth as views
 
 
-@pytest.mark.usefixtures('routes', 'user_service', 'oauth_service')
+@pytest.mark.usefixtures('routes', 'oauth_validator', 'user_svc')
 class TestOAuthAuthorizeController(object):
-    def test_get_raises_if_client_id_invalid(self, auth_ctrl, pyramid_request,
-                                             oauth_service):
+    def test_it_inits_oauthlib_client(self, pyramid_request, oauth_validator, patch):
+        oauth_cls = patch('h.views.api_auth.WebApplicationServer')
+        views.OAuthAuthorizeController(pyramid_request)
+        oauth_cls.assert_called_once_with(oauth_validator)
 
-        oauth_service.get_authclient_by_id.return_value = None
+    @pytest.mark.usefixtures('authenticated_user')
+    def test_get_validates_request(self, oauth, controller, pyramid_request):
+        controller.get()
 
-        with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
-            auth_ctrl.get()
+        oauth.validate_authorization_request.assert_called_once_with(
+            pyramid_request.url)
 
-        assert 'Unknown client ID' in exc.value.message
+    def test_get_raises_for_invalid_request(self, oauth, controller):
+        oauth.validate_authorization_request.side_effect = InvalidRequestFatalError('boom!')
 
-    def test_get_raises_if_client_authority_incorrect(self, auth_ctrl, pyramid_request,
-                                                      oauth_service):
+        with pytest.raises(InvalidRequestFatalError) as exc:
+            controller.get()
 
-        auth_client = mock.Mock(authority='publisher.org')
+        assert exc.value.description == 'boom!'
 
-        oauth_service.get_authclient_by_id.return_value = auth_client
-
-        with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
-            auth_ctrl.get()
-
-        assert 'not allowed to authorize' in exc.value.message
-
-    def test_get_verifies_response_mode(self, auth_ctrl, pyramid_request):
-        pyramid_request.GET['response_mode'] = 'invalid_mode'
-
-        with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
-            auth_ctrl.get()
-
-        assert 'Unsupported response mode' in exc.value.message
-
-    def test_get_verifies_response_type(self, auth_ctrl, pyramid_request):
-        pyramid_request.GET['response_type'] = 'invalid_type'
-
-        with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
-            auth_ctrl.get()
-
-        assert 'Unsupported response type' in exc.value.message
-
-    def test_get_redirects_if_user_not_logged_in(self, auth_ctrl,
-                                                 pyramid_config, pyramid_request):
-        pyramid_config.testing_securitypolicy(None)
-        pyramid_request.url = 'http://example.com/auth?client_id=bar'
-
+    def test_get_redirects_to_login_when_not_authenticated(self, controller, pyramid_request):
         with pytest.raises(httpexceptions.HTTPFound) as exc:
-            auth_ctrl.get()
+            controller.get()
 
         assert exc.value.location == 'http://example.com/login?next={}'.format(
                                        url_quote(pyramid_request.url, safe=''))
 
-    def test_get_returns_expected_context(self, auth_ctrl, user_service):
-        ctx = auth_ctrl.get()
+    @pytest.mark.usefixtures('oauth')
+    def test_get_returns_expected_context(self, controller, auth_client, authenticated_user):
+        assert controller.get() == {
+            'client_id': auth_client.id,
+            'client_name': auth_client.name,
+            'response_type': auth_client.response_type.value,
+            'state': 'foobar',
+            'username': authenticated_user.username,
+        }
 
-        assert ctx == {'username': user_service.fetch.return_value.username,
-                       'client_name': 'Hypothesis',
-                       'client_id': 'valid_id',
-                       'response_type': 'code',
-                       'response_mode': 'web_message',
-                       'state': 'a_random_string'}
+    def test_post_validates_request(self, oauth, controller, pyramid_request, authenticated_user):
+        pyramid_request.url = 'http://example.com/auth?client_id=the-client-id' + \
+                                                     '&response_type=code' + \
+                                                     '&state=foobar' + \
+                                                     '&scope=exploit'
 
-    def test_post_returns_auth_code(self, post_auth_ctrl, oauth_service):
-        ctx = post_auth_ctrl.post()
-        assert ctx['code'] == oauth_service.create_grant_token.return_value
+        controller.post()
 
-    def test_post_sets_origin(self, post_auth_ctrl):
-        ctx = post_auth_ctrl.post()
-        assert ctx['origin'] == 'http://example.com'
+        oauth.create_authorization_response.assert_called_once_with(
+            pyramid_request.url,
+            credentials={'user': authenticated_user},
+            scopes=DEFAULT_SCOPES)
 
-    def test_post_returns_state(self, post_auth_ctrl, pyramid_request):
-        ctx = post_auth_ctrl.post()
-        assert ctx['state'] == 'a_random_string'
+    @pytest.mark.usefixtures('oauth')
+    def test_post_redirects_to_client(self, controller, auth_client):
+        response = controller.post()
+        expected = '{}?code=abcdef123456'.format(auth_client.redirect_uri)
+
+        assert response.location == expected
+
+    @pytest.mark.usefixtures('authenticated_user')
+    def test_post_raises_for_invalid_request(self, oauth, controller):
+        oauth.create_authorization_response.side_effect = InvalidRequestFatalError('boom!')
+
+        with pytest.raises(InvalidRequestFatalError) as exc:
+            controller.post()
+
+        assert exc.value.description == 'boom!'
 
     @pytest.fixture
-    def auth_ctrl(self, pyramid_config, pyramid_request):
-        """
-        Configure a valid request for `OAuthAuthorizeController.get`.
-        """
-        pyramid_config.testing_securitypolicy('acct:fred@example.org')
-
-        pyramid_request.GET['client_id'] = 'valid_id'
-        pyramid_request.GET['response_mode'] = 'web_message'
-        pyramid_request.GET['response_type'] = 'code'
-        pyramid_request.GET['state'] = 'a_random_string'
-
+    def controller(self, pyramid_request):
         return views.OAuthAuthorizeController(pyramid_request)
 
     @pytest.fixture
-    def post_auth_ctrl(self, pyramid_config, pyramid_request):
-        """
-        Configure a valid request for `OAuthAuthorizeController.post`.
-        """
-        pyramid_config.testing_securitypolicy('acct:fred@example.org')
-
-        pyramid_request.POST['client_id'] = 'valid_id'
-        pyramid_request.POST['response_mode'] = 'web_message'
-        pyramid_request.POST['response_type'] = 'code'
-        pyramid_request.POST['state'] = 'a_random_string'
-
-        return views.OAuthAuthorizeController(pyramid_request)
-
-    @pytest.fixture
-    def oauth_service(self, pyramid_config, pyramid_request):
-        svc = mock.Mock(spec_set=oauth_service_factory(None, pyramid_request))
-
-        svc.get_authclient_by_id.return_value = mock.Mock(authority='example.com')
-
-        pyramid_config.register_service(svc, name='oauth')
+    def oauth_validator(self, pyramid_config, pyramid_request):
+        svc = mock.Mock(spec=oauth_validator_service_factory(None, pyramid_request))
+        pyramid_config.register_service(svc, name='oauth_validator')
         return svc
 
     @pytest.fixture
-    def user_service(self, pyramid_config, pyramid_request):
+    def oauth(self, patch, auth_client):
+        oauth_cls = patch('h.views.api_auth.WebApplicationServer')
+        oauth = oauth_cls.return_value
+
+        scopes = ['annotation:read', 'annotation:write']
+        credentials = {'client_id': auth_client.id, 'state': 'foobar'}
+        oauth.validate_authorization_request = mock.Mock(return_value=(scopes, credentials))
+
+        headers = {'Location': '{}?code=abcdef123456'.format(auth_client.redirect_uri)}
+        body = None
+        status = 302
+        oauth.create_authorization_response = mock.Mock(return_value=(headers, body, status))
+
+        return oauth
+
+    @pytest.fixture
+    def auth_client(self, factories):
+        return factories.AuthClient(name='Test Client',
+                                    redirect_uri='http://client.com/auth/callback',
+                                    response_type=ResponseType.code)
+
+    @pytest.fixture
+    def user_svc(self, pyramid_config, pyramid_request):
         svc = mock.Mock(spec_set=user_service_factory(None, pyramid_request))
         pyramid_config.register_service(svc, name='user')
         return svc
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.url = 'http://example.com/auth?client_id=the-client-id&response_type=code&state=foobar'
+        return pyramid_request
+
+    @pytest.fixture
+    def authenticated_user(self, factories, pyramid_config, user_svc):
+        user = factories.User.build()
+        pyramid_config.testing_securitypolicy(user.userid)
+
+        def fake_fetch(userid):
+            if userid == user.userid:
+                return user
+        user_svc.fetch.side_effect = fake_fetch
+
+        return user
 
     @pytest.fixture
     def routes(self, pyramid_config):

@@ -18,3 +18,4 @@ class AuthClient(ModelFactory):
 
     authority = 'example.com'
     secret = factory.LazyAttribute(lambda _: text_type(FAKER.sha256()))
+    redirect_uri = 'https://example.com/auth/callback'
