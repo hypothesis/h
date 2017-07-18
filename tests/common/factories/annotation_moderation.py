@@ -12,6 +12,6 @@ class AnnotationModeration(ModelFactory):
 
     class Meta:
         model = models.AnnotationModeration
-        force_flush = True
+        sqlalchemy_session_persistence = 'flush'
 
     annotation = factory.SubFactory(Annotation)

@@ -14,7 +14,7 @@ class AuthClient(ModelFactory):
 
     class Meta:
         model = models.AuthClient
-        force_flush = True
+        sqlalchemy_session_persistence = 'flush'
 
     authority = 'example.com'
     secret = factory.LazyAttribute(lambda _: text_type(FAKER.sha256()))
