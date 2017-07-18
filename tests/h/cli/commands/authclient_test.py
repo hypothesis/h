@@ -29,7 +29,7 @@ class TestAddCommand(object):
         assert result.exit_code == 0
 
         authclient = db_session.query(models.AuthClient).filter(
-                   models.AuthClient.authority == 'publisher.org').first()
+                   models.AuthClient.authority == u'publisher.org').first()
         return (authclient, result.output)
 
 

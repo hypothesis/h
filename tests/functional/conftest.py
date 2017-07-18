@@ -7,6 +7,8 @@ import os
 import pytest
 from webtest import TestApp
 
+from h._compat import text_type
+
 
 TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
@@ -26,7 +28,7 @@ def app(pyramid_app, db_engine):
 
     _clean_database(db_engine)
     _clean_elasticsearch(TEST_SETTINGS)
-    db.init(db_engine, authority=TEST_SETTINGS['h.authority'])
+    db.init(db_engine, authority=text_type(TEST_SETTINGS['h.authority']))
 
     return TestApp(pyramid_app)
 
@@ -59,7 +61,7 @@ def factories(db_session):
 @pytest.fixture(scope='session', autouse=True)
 def init_db(db_engine):
     from h import db
-    authority = TEST_SETTINGS['h.authority']
+    authority = text_type(TEST_SETTINGS['h.authority'])
     db.init(db_engine, should_drop=True, should_create=True, authority=authority)
 
 
