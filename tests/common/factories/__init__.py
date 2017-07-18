@@ -7,7 +7,7 @@ from .base import set_session
 from .activation import Activation
 from .annotation import Annotation
 from .annotation_moderation import AnnotationModeration
-from .auth_client import AuthClient
+from .auth_client import AuthClient, ConfidentialAuthClient
 from .auth_ticket import AuthTicket
 from .authz_code import AuthzCode
 from .document import Document, DocumentMeta, DocumentURI
@@ -26,6 +26,7 @@ __all__ = (
     'AuthClient',
     'AuthTicket',
     'AuthzCode',
+    'ConfidentialAuthClient',
     'Document',
     'DocumentMeta',
     'DocumentURI',

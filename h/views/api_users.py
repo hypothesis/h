@@ -87,6 +87,8 @@ def _request_client(request):
         raise ClientUnauthorized()
     if client is None:
         raise ClientUnauthorized()
+    if client.secret is None:  # client is not confidential
+        raise ClientUnauthorized()
 
     if not hmac.compare_digest(client.secret, client_secret):
         raise ClientUnauthorized()

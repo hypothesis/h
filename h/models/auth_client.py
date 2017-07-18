@@ -8,7 +8,6 @@ from sqlalchemy.dialects import postgresql
 
 from h.db import Base
 from h.db.mixins import Timestamps
-from h.security import token_urlsafe
 
 
 class GrantType(enum.Enum):
@@ -86,7 +85,7 @@ class AuthClient(Base, Timestamps):
     name = sa.Column(sa.UnicodeText, nullable=True)
 
     #: Client secret
-    secret = sa.Column(sa.UnicodeText, default=token_urlsafe, nullable=False)
+    secret = sa.Column(sa.UnicodeText, nullable=True)
 
     #: Authority for which this client is allowed to authorize users.
     authority = sa.Column(sa.UnicodeText, nullable=False)
