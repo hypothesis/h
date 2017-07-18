@@ -61,7 +61,7 @@ def test_feed_from_annotations_html_links(factories):
 
 def test_feed_from_annotations_item_titles(factories):
     """Feed items should include the annotation's document's title."""
-    document = factories.Document(title='Hello, World')
+    document = factories.Document(title=u'Hello, World')
     annotation = factories.Annotation(document=document)
 
     feed = rss.feed_from_annotations(

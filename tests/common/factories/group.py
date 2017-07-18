@@ -15,7 +15,7 @@ class Group(ModelFactory):
 
     class Meta:
         model = models.Group
-        force_flush = True
+        sqlalchemy_session_persistence = 'flush'
 
     name = factory.Sequence(lambda n: 'Test Group {n}'.format(n=str(n)))
     authority = 'example.com'
