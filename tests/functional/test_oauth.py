@@ -150,7 +150,7 @@ class TestOAuth(object):
 
     @pytest.fixture
     def authclient(self, db_session, factories):
-        authclient = factories.AuthClient()
+        authclient = factories.ConfidentialAuthClient()
         db_session.commit()
         return authclient
 
