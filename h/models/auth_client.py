@@ -101,5 +101,12 @@ class AuthClient(Base, Timestamps):
     #: Redirect URI for OAuth 2 authorization code grant type.
     redirect_uri = sa.Column(sa.UnicodeText, nullable=True)
 
+    #: Is this client trusted? That is, is this client one that we control?
+    #: Trusted clients don't require explicit authorization from a user.
+    trusted = sa.Column(sa.Boolean,
+                        default=False,
+                        server_default=sa.sql.expression.false(),
+                        nullable=False)
+
     def __repr__(self):
         return 'AuthClient(id={self.id!r})'.format(self=self)
