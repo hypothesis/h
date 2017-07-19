@@ -7,7 +7,7 @@ import datetime
 import mock
 import pytest
 
-from oauthlib.oauth2 import InvalidRequestFatalError
+from oauthlib.oauth2 import InvalidRequestFatalError, WebApplicationServer
 from pyramid import httpexceptions
 
 from h._compat import url_quote
@@ -32,14 +32,14 @@ class TestOAuthAuthorizeController(object):
         oauth_cls.assert_called_once_with(oauth_validator)
 
     @pytest.mark.usefixtures('authenticated_user')
-    def test_get_validates_request(self, oauth, controller, pyramid_request):
+    def test_get_validates_request(self, controller, pyramid_request):
         controller.get()
 
-        oauth.validate_authorization_request.assert_called_once_with(
+        controller.oauth.validate_authorization_request.assert_called_once_with(
             pyramid_request.url)
 
-    def test_get_raises_for_invalid_request(self, oauth, controller):
-        oauth.validate_authorization_request.side_effect = InvalidRequestFatalError('boom!')
+    def test_get_raises_for_invalid_request(self, controller):
+        controller.oauth.validate_authorization_request.side_effect = InvalidRequestFatalError('boom!')
 
         with pytest.raises(InvalidRequestFatalError) as exc:
             controller.get()
@@ -53,7 +53,6 @@ class TestOAuthAuthorizeController(object):
         assert exc.value.location == 'http://example.com/login?next={}'.format(
                                        url_quote(pyramid_request.url, safe=''))
 
-    @pytest.mark.usefixtures('oauth')
     def test_get_returns_expected_context(self, controller, auth_client, authenticated_user):
         assert controller.get() == {
             'client_id': auth_client.id,
@@ -63,7 +62,7 @@ class TestOAuthAuthorizeController(object):
             'username': authenticated_user.username,
         }
 
-    def test_post_validates_request(self, oauth, controller, pyramid_request, authenticated_user):
+    def test_post_creates_authorization_response(self, controller, pyramid_request, authenticated_user):
         pyramid_request.url = 'http://example.com/auth?client_id=the-client-id' + \
                                                      '&response_type=code' + \
                                                      '&state=foobar' + \
@@ -71,12 +70,11 @@ class TestOAuthAuthorizeController(object):
 
         controller.post()
 
-        oauth.create_authorization_response.assert_called_once_with(
+        controller.oauth.create_authorization_response.assert_called_once_with(
             pyramid_request.url,
             credentials={'user': authenticated_user},
             scopes=DEFAULT_SCOPES)
 
-    @pytest.mark.usefixtures('oauth')
     def test_post_redirects_to_client(self, controller, auth_client):
         response = controller.post()
         expected = '{}?code=abcdef123456'.format(auth_client.redirect_uri)
@@ -84,8 +82,8 @@ class TestOAuthAuthorizeController(object):
         assert response.location == expected
 
     @pytest.mark.usefixtures('authenticated_user')
-    def test_post_raises_for_invalid_request(self, oauth, controller):
-        oauth.create_authorization_response.side_effect = InvalidRequestFatalError('boom!')
+    def test_post_raises_for_invalid_request(self, controller):
+        controller.oauth.create_authorization_response.side_effect = InvalidRequestFatalError('boom!')
 
         with pytest.raises(InvalidRequestFatalError) as exc:
             controller.post()
@@ -93,30 +91,30 @@ class TestOAuthAuthorizeController(object):
         assert exc.value.description == 'boom!'
 
     @pytest.fixture
-    def controller(self, pyramid_request):
-        return views.OAuthAuthorizeController(pyramid_request)
+    def controller(self, oauth_server, pyramid_request):
+        return views.OAuthAuthorizeController(pyramid_request,
+                                              oauth_server=oauth_server)
+
+    @pytest.fixture
+    def oauth_server(self, auth_client):
+        oauth_server = mock.create_autospec(WebApplicationServer)
+
+        scopes = ['annotation:read', 'annotation:write']
+        credentials = {'client_id': auth_client.id, 'state': 'foobar'}
+        oauth_server.return_value.validate_authorization_request.return_value = (scopes, credentials)
+
+        headers = {'Location': '{}?code=abcdef123456'.format(auth_client.redirect_uri)}
+        body = None
+        status = 302
+        oauth_server.return_value.create_authorization_response.return_value = (headers, body, status)
+
+        return oauth_server
 
     @pytest.fixture
     def oauth_validator(self, pyramid_config, pyramid_request):
         svc = mock.Mock(spec=oauth_validator_service_factory(None, pyramid_request))
         pyramid_config.register_service(svc, name='oauth_validator')
         return svc
-
-    @pytest.fixture
-    def oauth(self, patch, auth_client):
-        oauth_cls = patch('h.views.api_auth.WebApplicationServer')
-        oauth = oauth_cls.return_value
-
-        scopes = ['annotation:read', 'annotation:write']
-        credentials = {'client_id': auth_client.id, 'state': 'foobar'}
-        oauth.validate_authorization_request = mock.Mock(return_value=(scopes, credentials))
-
-        headers = {'Location': '{}?code=abcdef123456'.format(auth_client.redirect_uri)}
-        body = None
-        status = 302
-        oauth.create_authorization_response = mock.Mock(return_value=(headers, body, status))
-
-        return oauth
 
     @pytest.fixture
     def auth_client(self, factories):

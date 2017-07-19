@@ -24,12 +24,14 @@ log = logging.getLogger(__name__)
 
 @view_defaults(route_name='oauth_authorize')
 class OAuthAuthorizeController(object):
-    def __init__(self, request):
+    def __init__(self, request, oauth_server=None):
         self.request = request
+        oauth_server = oauth_server or WebApplicationServer  # Test seam
+
         self.user_svc = self.request.find_service(name='user')
 
         validator = self.request.find_service(name='oauth_validator')
-        self.oauth = WebApplicationServer(validator)
+        self.oauth = oauth_server(validator)
 
     @view_config(request_method='GET',
                  renderer='h:templates/oauth/authorize.html.jinja2')
