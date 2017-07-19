@@ -8,6 +8,7 @@ from oauthlib.oauth2 import InvalidClientIdError, RequestValidator
 from sqlalchemy.exc import StatementError
 
 from h import models
+from h.models.auth_client import GrantType as AuthClientGrantType
 from h.util.db import lru_cache_in_transaction
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
@@ -25,6 +26,12 @@ class OAuthValidatorService(RequestValidator):
         self.session = session
 
         self._cached_find_client = lru_cache_in_transaction(self.session)(self._find_client)
+
+    def authenticate_client_id(self, client_id, request, *args, **kwargs):
+        """Authenticates a client_id, returns True if the client_id exists."""
+        client = self.find_client(client_id)
+        request.client = client
+        return (client is not None)
 
     def find_client(self, id_):
         return self._cached_find_client(id_)
@@ -54,11 +61,26 @@ class OAuthValidatorService(RequestValidator):
         self.session.add(authzcode)
         return authzcode
 
+    def save_bearer_token(self, token, request, *args, **kwargs):
+        oauth_token = models.Token(userid=request.user.userid,
+                                   value=token['access_token'],
+                                   refresh_token=token['refresh_token'],
+                                   expires=(utcnow() + datetime.timedelta(seconds=token['expires_in'])),
+                                   authclient=request.client)
+        self.session.add(oauth_token)
+        return oauth_token
+
     def validate_client_id(self, client_id, request, *args, **kwargs):
         """Checks if the provided client_id belongs to a valid AuthClient."""
 
         client = self.find_client(client_id)
         return (client is not None)
+
+    def validate_grant_type(self, client_id, grant_type, client, request, *args, **kwargs):
+        if client.grant_type is None:
+            return False
+
+        return (grant_type == client.grant_type.value)
 
     def validate_redirect_uri(self, client_id, redirect_uri, request, *args, **kwargs):
         """Validate that the provided ``redirect_uri`` matches the one stored on the client."""
@@ -84,6 +106,9 @@ class OAuthValidatorService(RequestValidator):
         return (scopes == default_scopes)
 
     def _find_client(self, id_):
+        if id_ is None:
+            return None
+
         try:
             return self.session.query(models.AuthClient).get(id_)
         except StatementError:

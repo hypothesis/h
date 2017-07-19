@@ -8,15 +8,34 @@ import uuid
 import mock
 import pytest
 
+from oauthlib.common import Request as OAuthRequest
 from oauthlib.oauth2 import InvalidClientIdError
 
-from h._compat import text_type
 from h import models
-from h.models.auth_client import ResponseType
+from h._compat import text_type
+from h.models.auth_client import GrantType as AuthClientGrantType
+from h.models.auth_client import ResponseType as AuthClientResponseType
 from h.services.oauth_validator import (
     OAuthValidatorService,
     oauth_validator_service_factory,
 )
+
+
+class TestAuthenticateClientId(object):
+    def test_returns_true_when_client_found(self, svc, client, oauth_request):
+        assert svc.authenticate_client_id(client.id, oauth_request) is True
+
+    def test_sets_client_on_request_when_found(self, svc, client, oauth_request):
+        assert oauth_request.client is None
+        svc.authenticate_client_id(client.id, oauth_request)
+        assert oauth_request.client == client
+
+    def test_returns_false_when_client_missing(self, svc, oauth_request):
+        assert svc.authenticate_client_id(text_type(uuid.uuid1()), oauth_request) is False
+
+    @pytest.fixture
+    def oauth_request(self):
+        return OAuthRequest('/')
 
 
 class TestFindClient(object):
@@ -89,9 +108,42 @@ class TestSaveAuthorizationCode(object):
     def oauth_request(self, factories):
         return mock.Mock(user=factories.User(), spec_set=['user'])
 
+
+class TestSaveBearerToken(object):
+    def test_it_saves_token(self, svc, db_session, token_payload, oauth_request):
+        assert db_session.query(models.Token).count() == 0
+        svc.save_bearer_token(token_payload, oauth_request)
+        assert db_session.query(models.Token).count() == 1
+
+    def test_it_sets_userid(self, svc, token_payload, oauth_request):
+        token = svc.save_bearer_token(token_payload, oauth_request)
+        assert token.userid == oauth_request.user.userid
+
+    def test_it_sets_value(self, svc, token_payload, oauth_request):
+        token = svc.save_bearer_token(token_payload, oauth_request)
+        assert token.value == 'test-access-token'
+
+    def test_it_sets_expires(self, svc, token_payload, oauth_request, utcnow):
+        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)
+
+        token = svc.save_bearer_token(token_payload, oauth_request)
+        assert token.expires == datetime.datetime(2017, 7, 13, 19, 29, 28)
+
+    def test_it_sets_authclient(self, svc, token_payload, oauth_request):
+        token = svc.save_bearer_token(token_payload, oauth_request)
+        assert token.refresh_token == 'test-refresh-token'
+
     @pytest.fixture
-    def utcnow(self, patch):
-        return patch('h.services.oauth_validator.utcnow')
+    def oauth_request(self, factories):
+        return OAuthRequest('/', body={'user': factories.User()})
+
+    @pytest.fixture
+    def token_payload(self):
+        return {
+            'access_token': 'test-access-token',
+            'refresh_token': 'test-refresh-token',
+            'expires_in': 3600,
+        }
 
 
 class TestValidateClientId(object):
@@ -101,6 +153,30 @@ class TestValidateClientId(object):
     def test_returns_false_for_missing_client(self, svc):
         id_ = text_type(uuid.uuid1())
         assert svc.validate_client_id(id_, None) is False
+
+
+class TestValidateGrantType(object):
+    def test_returns_false_when_client_does_not_have_grant_types(self, svc, client, oauth_request):
+        client.grant_type = None
+
+        result = svc.validate_grant_type(client.id, 'authorization_code', client, oauth_request)
+        assert result is False
+
+    def test_returns_true_when_grant_type_matches_client(self, svc, client, oauth_request):
+        client.grant_type = AuthClientGrantType.authorization_code
+
+        result = svc.validate_grant_type(client.id, 'authorization_code', client, oauth_request)
+        assert result is True
+
+    def test_returns_false_when_grant_type_does_not_match_client(self, svc, client, oauth_request):
+        client.grant_type = AuthClientGrantType.client_credentials
+
+        result = svc.validate_grant_type(client.id, 'authorization_code', client, oauth_request)
+        assert result is False
+
+    @pytest.fixture
+    def oauth_request(self):
+        return OAuthRequest('/')
 
 
 class TestValidateRedirectUri(object):
@@ -140,7 +216,7 @@ class TestValidateResponseType(object):
 
     @pytest.fixture
     def client(self, factories):
-        return factories.AuthClient(response_type=ResponseType.code)
+        return factories.AuthClient(response_type=AuthClientResponseType.code)
 
 
 class TestValidateScopes(object):
@@ -175,3 +251,8 @@ def svc(db_session):
 @pytest.fixture
 def client(factories):
     return factories.AuthClient()
+
+
+@pytest.fixture
+def utcnow(patch):
+    return patch('h.services.oauth_validator.utcnow')
