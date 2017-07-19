@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from oauthlib.oauth2 import InvalidGrantError
+from oauthlib.oauth2 import InvalidGrantError, InvalidRequestFatalError
 
 
 class MissingJWTGrantTokenClaimError(InvalidGrantError):
@@ -19,3 +19,7 @@ class InvalidJWTGrantTokenClaimError(InvalidGrantError):
             self.description = 'Invalid grant token {} ({}).'.format(claim_description, claim)
         else:
             self.description = 'Invalid grant token {}.'.format(claim)
+
+
+class InvalidRefreshTokenError(InvalidRequestFatalError):
+    description = 'Invalid refresh_token.'
