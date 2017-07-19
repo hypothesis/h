@@ -8,7 +8,7 @@ import factory
 
 from h import models, security
 from h.services.developer_token import PREFIX as DEVELOPER_TOKEN_PREFIX
-from h.services.oauth import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
+from h.services.oauth_provider import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
 
 from .auth_client import AuthClient
 from .base import FAKER, ModelFactory

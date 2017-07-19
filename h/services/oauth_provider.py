@@ -16,6 +16,8 @@ from h.oauth import InvalidRefreshTokenError, JWTAuthorizationGrant
 from h.security import token_urlsafe
 
 TOKEN_TTL = datetime.timedelta(hours=1).total_seconds()
+ACCESS_TOKEN_PREFIX = '5768-'
+REFRESH_TOKEN_PREFIX = '4657-'
 
 
 class OAuthProviderService(AuthorizationEndpoint, TokenEndpoint):
@@ -71,10 +73,10 @@ class OAuthProviderService(AuthorizationEndpoint, TokenEndpoint):
             raise InvalidRefreshTokenError()
 
     def generate_access_token(self, oauth_request):
-        return '5768-{}'.format(token_urlsafe())
+        return ACCESS_TOKEN_PREFIX + token_urlsafe()
 
     def generate_refresh_token(self, oauth_request):
-        return '4657-{}'.format(token_urlsafe())
+        return REFRESH_TOKEN_PREFIX + token_urlsafe()
 
 
 def oauth_provider_service_factory(context, request):
