@@ -24,7 +24,7 @@ from h.util.datetime import utc_iso8601
 from h.views import api_auth as views
 
 
-@pytest.mark.usefixtures('routes', 'oauth_validator', 'user_svc')
+@pytest.mark.usefixtures('routes', 'user_svc', 'oauth_validator')
 class TestOAuthAuthorizeController(object):
     def test_it_inits_oauthlib_client(self, pyramid_request, oauth_validator, patch):
         oauth_cls = patch('h.views.api_auth.WebApplicationServer')
