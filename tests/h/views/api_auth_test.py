@@ -62,6 +62,24 @@ class TestOAuthAuthorizeController(object):
             'username': authenticated_user.username,
         }
 
+    def test_get_creates_authorization_response_for_trusted_clients(self, controller, auth_client, authenticated_user, pyramid_request):
+        auth_client.trusted = True
+
+        controller.get()
+
+        controller.oauth.create_authorization_response.assert_called_once_with(
+            pyramid_request.url,
+            credentials={'user': authenticated_user},
+            scopes=DEFAULT_SCOPES)
+
+    def test_returns_redirect_immediately_for_trusted_clients(self, controller, auth_client, authenticated_user, pyramid_request):
+        auth_client.trusted = True
+
+        response = controller.get()
+        expected = '{}?code=abcdef123456'.format(auth_client.redirect_uri)
+
+        assert response.location == expected
+
     def test_post_creates_authorization_response(self, controller, pyramid_request, authenticated_user):
         pyramid_request.url = 'http://example.com/auth?client_id=the-client-id' + \
                                                      '&response_type=code' + \
