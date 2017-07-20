@@ -24,12 +24,14 @@ log = logging.getLogger(__name__)
 
 @view_defaults(route_name='oauth_authorize')
 class OAuthAuthorizeController(object):
-    def __init__(self, request):
+    def __init__(self, request, oauth_server=None):
         self.request = request
+        oauth_server = oauth_server or WebApplicationServer  # Test seam
+
         self.user_svc = self.request.find_service(name='user')
 
         validator = self.request.find_service(name='oauth_validator')
-        self.oauth = WebApplicationServer(validator)
+        self.oauth = oauth_server(validator)
 
     @view_config(request_method='GET',
                  renderer='h:templates/oauth/authorize.html.jinja2')
@@ -41,10 +43,17 @@ class OAuthAuthorizeController(object):
                               'next': self.request.url}))
 
         client_id = credentials.get('client_id')
-        state = credentials.get('state')
-
-        user = self.user_svc.fetch(self.request.authenticated_userid)
         client = self.request.db.query(models.AuthClient).get(client_id)
+
+        # If the client is "trusted" -- which means its code is
+        # owned/controlled by us -- then we don't ask the user to explicitly
+        # authorize it. It is assumed to be authorized to act on behalf of the
+        # logged-in user.
+        if client.trusted:
+            return self._authorized_response()
+
+        state = credentials.get('state')
+        user = self.user_svc.fetch(self.request.authenticated_userid)
 
         return {'username': user.username,
                 'client_name': client.name,
@@ -55,6 +64,9 @@ class OAuthAuthorizeController(object):
     @view_config(request_method='POST',
                  effective_principals=security.Authenticated)
     def post(self):
+        return self._authorized_response()
+
+    def _authorized_response(self):
         # We don't support scopes at the moment, but oauthlib does need a scope,
         # so we're explicitly overwriting whatever the client provides.
         scopes = DEFAULT_SCOPES
