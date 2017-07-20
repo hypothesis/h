@@ -108,7 +108,7 @@ def user(db_session, factories):
 
 @pytest.fixture
 def user_with_token(user, db_session, factories):
-    token = factories.Token(userid=user.userid)
+    token = factories.DeveloperToken(userid=user.userid)
     db_session.add(token)
     db_session.commit()
     return (user, token)
@@ -137,7 +137,7 @@ def publisher_group(auth_client, db_session, factories):
 
 @pytest.fixture
 def third_party_user_with_token(third_party_user, db_session, factories):
-    token = factories.Token(userid=third_party_user.userid)
+    token = factories.DeveloperToken(userid=third_party_user.userid)
     db_session.commit()
     return (third_party_user, token)
 

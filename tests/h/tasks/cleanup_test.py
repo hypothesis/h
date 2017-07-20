@@ -101,24 +101,24 @@ class TestPurgeExpiredAuthzCodes(object):
 @pytest.mark.usefixtures('celery')
 class TestPurgeExpiredTokens(object):
     def test_it_removes_expired_tokens(self, db_session, factories):
-        factories.Token(expires=datetime(2014, 5, 6, 7, 8, 9))
-        factories.Token(expires=(datetime.utcnow() - timedelta(seconds=1)))
+        factories.DeveloperToken(expires=datetime(2014, 5, 6, 7, 8, 9))
+        factories.DeveloperToken(expires=(datetime.utcnow() - timedelta(seconds=1)))
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
         assert db_session.query(Token).count() == 0
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
-        factories.Token(expires=datetime(2014, 5, 6, 7, 8, 9))
-        factories.Token(expires=(datetime.utcnow() + timedelta(hours=1)))
+        factories.DeveloperToken(expires=datetime(2014, 5, 6, 7, 8, 9))
+        factories.DeveloperToken(expires=(datetime.utcnow() + timedelta(hours=1)))
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
         assert db_session.query(Token).count() == 1
 
     def test_it_leaves_tickets_without_an_expiration_date(self, db_session, factories):
-        factories.Token(expires=None)
-        factories.Token(expires=None)
+        factories.DeveloperToken(expires=None)
+        factories.DeveloperToken(expires=None)
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()

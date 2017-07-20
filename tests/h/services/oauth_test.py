@@ -434,7 +434,7 @@ class TestOAuthServiceVerifyRefreshTokenRequest(object):
         fixture.
 
         """
-        return factories.Token(refresh_token=refresh_token)
+        return factories.DeveloperToken(refresh_token=refresh_token)
 
     @pytest.fixture
     def user(self, token):
@@ -472,6 +472,20 @@ class TestOAuthServiceCreateToken(object):
     def test_it_sets_the_passed_in_authclient(self, svc, user, authclient):
         token = svc.create_token(user, authclient)
         assert token.authclient == authclient
+
+    def test_it_generates_token_value(self, svc, user, authclient, patch):
+        token_urlsafe = patch('h.services.oauth.security.token_urlsafe')
+        token_urlsafe.return_value = 'very-secret-token'
+
+        token = svc.create_token(user, authclient)
+        assert token.value == '5768-very-secret-token'
+
+    def test_it_generates_refresh_token(self, svc, user, authclient, patch):
+        token_urlsafe = patch('h.services.oauth.security.token_urlsafe')
+        token_urlsafe.return_value = 'top-secret-token'
+
+        token = svc.create_token(user, authclient)
+        assert token.refresh_token == '4657-top-secret-token'
 
     @pytest.fixture
     def svc(self, pyramid_request, db_session, user_service):

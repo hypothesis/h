@@ -16,7 +16,7 @@ from h._compat import text_type
 
 class TestAuthTokenService(object):
     def test_validate_returns_database_token(self, svc, factories):
-        token_model = factories.Token(expires=self.time(1))
+        token_model = factories.DeveloperToken(expires=self.time(1))
 
         result = svc.validate(token_model.value)
 
@@ -24,7 +24,7 @@ class TestAuthTokenService(object):
         assert result.userid == token_model.userid
 
     def test_validate_caches_database_token(self, svc, factories, db_session):
-        token_model = factories.Token(expires=self.time(1))
+        token_model = factories.DeveloperToken(expires=self.time(1))
 
         svc.validate(token_model.value)
         db_session.delete(token_model)
@@ -33,7 +33,7 @@ class TestAuthTokenService(object):
         assert result is not None
 
     def test_validate_returns_none_for_cached_invalid_token(self, svc, factories, db_session):
-        token_model = factories.Token(expires=self.time(-1))
+        token_model = factories.DeveloperToken(expires=self.time(-1))
 
         svc.validate(token_model.value)
         db_session.delete(token_model)
@@ -42,7 +42,7 @@ class TestAuthTokenService(object):
         assert result is None
 
     def test_validate_returns_none_for_invalid_database_token(self, svc, factories):
-        token_model = factories.Token(expires=self.time(-1))
+        token_model = factories.DeveloperToken(expires=self.time(-1))
 
         result = svc.validate(token_model.value)
 
@@ -80,7 +80,7 @@ class TestAuthTokenService(object):
 
     @pytest.fixture
     def token(self, factories):
-        return factories.Token()
+        return factories.DeveloperToken()
 
     def time(self, days_delta=0):
         return datetime.datetime.utcnow() + datetime.timedelta(days=days_delta)

@@ -8,6 +8,7 @@ import deform
 from pyramid import httpexceptions
 
 from h import accounts
+from h.services.developer_token import developer_token_service_factory
 from h.services.user_password import UserPasswordService
 from h.views import accounts as views
 
@@ -925,81 +926,65 @@ class TestEditProfileController(object):
         assert user.location == 'Paris'
 
 
-@pytest.mark.usefixtures('models')
+@pytest.mark.usefixtures('authenticated_userid', 'token_service')
 class TestDeveloperController(object):
+    def test_get_fetches_token(self, controller, token_service, authenticated_userid):
+        controller.get()
 
-    def test_get_gets_token_for_authenticated_userid(self, models, pyramid_request):
-        views.DeveloperController(pyramid_request).get()
+        token_service.fetch.assert_called_once_with(authenticated_userid)
 
-        models.Token.get_dev_token_by_userid.assert_called_once_with(
-            pyramid_request.db,
-            pyramid_request.authenticated_userid)
+    def test_get_returns_token_for_authenticated_user(self, controller, token_service):
+        assert controller.get() == {'token': token_service.fetch.return_value.value}
 
-    def test_get_returns_token(self, models, pyramid_request):
-        models.Token.get_dev_token_by_userid.return_value.value = u'abc123'
+    def test_get_returns_empty_context_for_missing_token(self, controller, token_service):
+        token_service.fetch.return_value = None
 
-        data = views.DeveloperController(pyramid_request).get()
+        assert controller.get() == {}
 
-        assert data.get('token') == u'abc123'
+    def test_post_fetches_token(self, controller, token_service, authenticated_userid):
+        controller.post()
 
-    def test_get_with_no_token(self, models, pyramid_request):
-        models.Token.get_dev_token_by_userid.return_value = None
+        token_service.fetch.assert_called_once_with(authenticated_userid)
 
-        result = views.DeveloperController(pyramid_request).get()
+    def test_post_regenerates_token_when_found(self, controller, token_service):
+        controller.post()
 
-        assert result == {}
+        token_service.regenerate.assert_called_once_with(token_service.fetch.return_value)
 
-    def test_post_gets_token_for_authenticated_userid(self, models, pyramid_request):
-        views.DeveloperController(pyramid_request).post()
+    def test_post_returns_regenerated_token_when_found(self, controller, token_service):
+        result = controller.post()
 
-        models.Token.get_dev_token_by_userid.assert_called_once_with(
-            pyramid_request.db,
-            pyramid_request.authenticated_userid)
+        assert result == {'token': token_service.regenerate.return_value.value}
 
-    def test_post_calls_regenerate(self, models, pyramid_request):
-        """If the user already has a token it should regenerate it."""
-        views.DeveloperController(pyramid_request).post()
+    def test_post_creates_new_token_when_not_found(self, controller, token_service, authenticated_userid):
+        token_service.fetch.return_value = None
 
-        models.Token.get_dev_token_by_userid.return_value.regenerate.assert_called_with()
+        controller.post()
 
-    def test_post_inits_new_token_for_authenticated_userid(self, models, pyramid_request):
-        """If the user doesn't have a token yet it should generate one."""
-        models.Token.get_dev_token_by_userid.return_value = None
+        token_service.create.assert_called_once_with(authenticated_userid)
 
-        views.DeveloperController(pyramid_request).post()
+    def test_post_returns_new_token_when_not_found(self, controller, token_service):
+        token_service.fetch.return_value = None
 
-        models.Token.assert_called_once_with(userid=pyramid_request.authenticated_userid)
+        result = controller.post()
 
-    def test_post_adds_new_token_to_db(self, models, pyramid_request):
-        """If the user doesn't have a token yet it should add one to the db."""
-        models.Token.get_dev_token_by_userid.return_value = None
-
-        views.DeveloperController(pyramid_request).post()
-
-        assert models.Token.return_value in pyramid_request.db.added
-
-        models.Token.assert_called_once_with(userid=pyramid_request.authenticated_userid)
-
-    def test_post_returns_token_after_regenerating(self, models, pyramid_request):
-        """After regenerating a token it should return its new value."""
-        data = views.DeveloperController(pyramid_request).post()
-
-        assert data['token'] == models.Token.get_dev_token_by_userid.return_value.value
-
-    def test_post_returns_token_after_generating(self, models, pyramid_request):
-        """After generating a new token it should return its value."""
-        models.Token.get_dev_token_by_userid.return_value = None
-
-        data = views.DeveloperController(pyramid_request).post()
-
-        assert data['token'] == models.Token.return_value.value
+        assert result == {'token': token_service.create.return_value.value}
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, fake_db_session):
-        # Override the database session with a fake session implementation.
-        # FIXME: don't mock models...
-        pyramid_request.db = fake_db_session
-        return pyramid_request
+    def controller(self, pyramid_request):
+        return views.DeveloperController(pyramid_request)
+
+    @pytest.fixture
+    def token_service(self, pyramid_config, pyramid_request):
+        svc = mock.Mock(spec=developer_token_service_factory(None, pyramid_request))
+        pyramid_config.register_service(svc, name='developer_token')
+        return svc
+
+    @pytest.fixture
+    def authenticated_userid(self, pyramid_config):
+        userid = 'acct:jane@example.com'
+        pyramid_config.testing_securitypolicy(userid)
+        return userid
 
 
 @pytest.fixture

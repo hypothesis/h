@@ -2,15 +2,12 @@
 
 from __future__ import unicode_literals
 
-import binascii
 import datetime
-import os
 
 import sqlalchemy
 from sqlalchemy.dialects import postgresql
 
 from h import security
-from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
 from h.db import mixins
 
@@ -29,10 +26,6 @@ class Token(Base, mixins.Timestamps):
     """
 
     __tablename__ = 'token'
-
-    #: A prefix that identifies a token as an API access token (as opposed to
-    #: for example, one of the short-lived JWTs that the client uses).
-    prefix = u'6879-'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            autoincrement=True,
@@ -65,13 +58,6 @@ class Token(Base, mixins.Timestamps):
     #: A NULL value means it is a developer token.
     authclient = sqlalchemy.orm.relationship('AuthClient')
 
-    def __init__(self, **kwargs):
-        super(Token, self).__init__(**kwargs)
-        self.regenerate()
-
-        if self.expires:
-            self.refresh_token = security.token_urlsafe()
-
     @property
     def expired(self):
         """True if this token has expired, False otherwise."""
@@ -93,13 +79,3 @@ class Token(Base, mixins.Timestamps):
         # For example 2.3 beccomes 2, but 2.9 also becomes 2.
         ttl_in_seconds_truncated = int(ttl_in_seconds)
         return ttl_in_seconds_truncated
-
-    @classmethod
-    def get_dev_token_by_userid(cls, session, userid):
-        return (session.query(cls)
-                .filter_by(userid=userid, authclient=None)
-                .order_by(cls.created.desc())
-                .first())
-
-    def regenerate(self):
-        self.value = self.prefix + security.token_urlsafe()

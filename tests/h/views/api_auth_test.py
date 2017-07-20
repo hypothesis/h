@@ -192,7 +192,7 @@ class TestAccessToken(object):
         assert response['token_type'] == 'bearer'
 
     def test_it_returns_expires_in_if_the_token_expires(self, factories, pyramid_request, oauth_service):
-        token = factories.Token(
+        token = factories.DeveloperToken(
             expires=datetime.datetime.utcnow() + datetime.timedelta(hours=1))
         oauth_service.create_token.return_value = token
 
@@ -219,7 +219,7 @@ class TestAccessToken(object):
 
     @pytest.fixture
     def token(self, factories):
-        return factories.Token()
+        return factories.DeveloperToken()
 
     @pytest.fixture
     def user_service(self, pyramid_config, pyramid_request):
@@ -299,11 +299,11 @@ class TestDebugToken(object):
     def oauth_token(self, factories):
         authclient = factories.AuthClient(name='Example Client')
         expires = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
-        return factories.Token(authclient=authclient, expires=expires)
+        return factories.DeveloperToken(authclient=authclient, expires=expires)
 
     @pytest.fixture
     def developer_token(self, factories):
-        return factories.Token()
+        return factories.DeveloperToken()
 
 
 class TestAPITokenError(object):
