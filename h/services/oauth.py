@@ -8,11 +8,15 @@ import jwt
 import sqlalchemy as sa
 
 from h import models
+from h import security
 from h.exceptions import OAuthTokenError
 from h._compat import text_type
 
 # TTL of an OAuth token
 TOKEN_TTL = datetime.timedelta(hours=1)
+
+ACCESS_TOKEN_PREFIX = '5768-'
+REFRESH_TOKEN_PREFIX = '4657-'
 
 
 class OAuthService(object):
@@ -147,8 +151,13 @@ class OAuthService(object):
 
         :rtype: h.models.Token
         """
+        value = ACCESS_TOKEN_PREFIX + security.token_urlsafe()
+        refresh_token = REFRESH_TOKEN_PREFIX + security.token_urlsafe()
+
         token = models.Token(userid=user.userid,
+                             value=value,
                              expires=(utcnow() + TOKEN_TTL),
+                             refresh_token=refresh_token,
                              authclient=authclient)
         self.session.add(token)
 

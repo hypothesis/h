@@ -16,7 +16,7 @@ from .feature_cohort import FeatureCohort
 from .flag import Flag
 from .group import Group, PublisherGroup
 from .setting import Setting
-from .token import Token
+from .token import DeveloperToken
 from .user import User
 
 __all__ = (
@@ -27,6 +27,7 @@ __all__ = (
     'AuthTicket',
     'AuthzCode',
     'ConfidentialAuthClient',
+    'DeveloperToken',
     'Document',
     'DocumentMeta',
     'DocumentURI',
@@ -36,7 +37,6 @@ __all__ = (
     'Group',
     'PublisherGroup',
     'Setting',
-    'Token',
     'User',
     'set_session',
 )
