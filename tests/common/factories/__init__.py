@@ -16,7 +16,7 @@ from .feature_cohort import FeatureCohort
 from .flag import Flag
 from .group import Group, PublisherGroup
 from .setting import Setting
-from .token import DeveloperToken
+from .token import DeveloperToken, OAuth2Token
 from .user import User
 
 __all__ = (
@@ -35,6 +35,7 @@ __all__ = (
     'FeatureCohort',
     'Flag',
     'Group',
+    'OAuth2Token',
     'PublisherGroup',
     'Setting',
     'User',

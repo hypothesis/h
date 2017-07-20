@@ -6,8 +6,11 @@ from __future__ import unicode_literals
 import calendar
 import datetime
 
-import jwt
 import pytest
+
+import jwt
+
+from h.models.auth_client import GrantType
 
 
 @pytest.mark.functional
@@ -150,7 +153,7 @@ class TestOAuth(object):
 
     @pytest.fixture
     def authclient(self, db_session, factories):
-        authclient = factories.ConfidentialAuthClient()
+        authclient = factories.ConfidentialAuthClient(grant_type=GrantType.jwt_bearer)
         db_session.commit()
         return authclient
 
