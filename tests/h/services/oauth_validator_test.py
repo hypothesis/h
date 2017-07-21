@@ -16,6 +16,7 @@ from h._compat import text_type
 from h.models.auth_client import GrantType as AuthClientGrantType
 from h.models.auth_client import ResponseType as AuthClientResponseType
 from h.services.oauth_validator import (
+    Client,
     OAuthValidatorService,
     oauth_validator_service_factory,
 )
@@ -33,7 +34,8 @@ class TestAuthenticateClient(object):
         oauth_request.client_secret = client.secret
 
         svc.authenticate_client(oauth_request)
-        assert oauth_request.client == client
+        assert oauth_request.client.client_id == client.id
+        assert oauth_request.client.authclient == client
 
     def test_returns_false_for_missing_request_parameters(self, svc, oauth_request):
         assert svc.authenticate_client(oauth_request) is False
@@ -66,7 +68,8 @@ class TestAuthenticateClientId(object):
     def test_sets_client_on_request_when_found(self, svc, client, oauth_request):
         assert oauth_request.client is None
         svc.authenticate_client_id(client.id, oauth_request)
-        assert oauth_request.client == client
+        assert oauth_request.client.client_id == client.id
+        assert oauth_request.client.authclient == client
 
     def test_returns_false_when_client_missing(self, svc, oauth_request):
         assert svc.authenticate_client_id(text_type(uuid.uuid1()), oauth_request) is False
@@ -222,7 +225,8 @@ class TestSaveBearerToken(object):
 
     @pytest.fixture
     def oauth_request(self, factories):
-        return OAuthRequest('/', body={'user': factories.User()})
+        return OAuthRequest('/', body={'user': factories.User(),
+                                       'client': Client(factories.AuthClient())})
 
     @pytest.fixture
     def token_payload(self):
@@ -244,32 +248,36 @@ class TestValidateClientId(object):
 
 class TestValidateGrantType(object):
     def test_returns_false_when_client_does_not_have_grant_types(self, svc, client, oauth_request):
-        client.grant_type = None
+        client.authclient.grant_type = None
 
-        result = svc.validate_grant_type(client.id, 'authorization_code', client, oauth_request)
+        result = svc.validate_grant_type(client.client_id, 'authorization_code', client, oauth_request)
         assert result is False
 
     def test_returns_true_when_grant_type_matches_client(self, svc, client, oauth_request):
-        client.grant_type = AuthClientGrantType.authorization_code
+        client.authclient.grant_type = AuthClientGrantType.authorization_code
 
-        result = svc.validate_grant_type(client.id, 'authorization_code', client, oauth_request)
+        result = svc.validate_grant_type(client.client_id, 'authorization_code', client, oauth_request)
         assert result is True
 
     def test_returns_true_when_refresh_token_and_client_does_not_match(self, svc, client, oauth_request):
-        client.grant_type = AuthClientGrantType.authorization_code
+        client.authclient.grant_type = AuthClientGrantType.authorization_code
 
-        result = svc.validate_grant_type(client.id, 'refresh_token', client, oauth_request)
+        result = svc.validate_grant_type(client.client_id, 'refresh_token', client, oauth_request)
         assert result is True
 
     def test_returns_false_when_grant_type_does_not_match_client(self, svc, client, oauth_request):
-        client.grant_type = AuthClientGrantType.client_credentials
+        client.authclient.grant_type = AuthClientGrantType.client_credentials
 
-        result = svc.validate_grant_type(client.id, 'authorization_code', client, oauth_request)
+        result = svc.validate_grant_type(client.client_id, 'authorization_code', client, oauth_request)
         assert result is False
 
     @pytest.fixture
     def oauth_request(self):
         return OAuthRequest('/')
+
+    @pytest.fixture
+    def client(self, factories):
+        return Client(factories.AuthClient())
 
 
 class TestValidateRedirectUri(object):
@@ -305,7 +313,7 @@ class TestValidateRefreshToken(object):
         assert result is False
 
     def test_returns_false_when_token_client_does_not_match_request_client(self, svc, oauth_request, token, factories):
-        request_client = factories.AuthClient()
+        request_client = Client(factories.AuthClient())
         result = svc.validate_refresh_token(token.refresh_token, request_client, oauth_request)
         assert result is False
 
@@ -330,7 +338,11 @@ class TestValidateRefreshToken(object):
 
     @pytest.fixture
     def token(self, factories, client):
-        return factories.OAuth2Token(authclient=client)
+        return factories.OAuth2Token(authclient=client.authclient)
+
+    @pytest.fixture
+    def client(self, factories):
+        return Client(factories.AuthClient())
 
 
 class TestValidateResponseType(object):
