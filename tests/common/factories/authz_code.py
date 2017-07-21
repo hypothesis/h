@@ -28,6 +28,7 @@ class AuthzCode(ModelFactory):
 
     class Meta:
         model = models.AuthzCode
+        sqlalchemy_session_persistence = 'flush'
 
     user = factory.SubFactory(User)
     authclient = factory.SubFactory(AuthClient)

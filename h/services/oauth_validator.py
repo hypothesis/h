@@ -34,6 +34,7 @@ class OAuthValidatorService(RequestValidator):
         self.session = session
         self.user_svc = user_svc
 
+        self._cached_find_authz_code = lru_cache_in_transaction(self.session)(self._find_authz_code)
         self._cached_find_client = lru_cache_in_transaction(self.session)(self._find_client)
         self._cached_find_refresh_token = lru_cache_in_transaction(self.session)(self._find_refresh_token)
 
@@ -81,6 +82,28 @@ class OAuthValidatorService(RequestValidator):
 
         return (client.secret is not None)
 
+    def confirm_redirect_uri(self, client_id, code, redirect_uri, client, *args, **kwargs):
+        """
+        Validate that the redirect_uri didn't get tampered with.
+
+        RFC 6749 mandates checking the ``redirect_uri`` from when an authorization
+        code gets created to when it is getting exchanged for an access token.
+        The client can pass a ``redirect_uri`` in the token request, this should then
+        be checked against the one that was used in the authorization request.
+
+        We don't support non-registered redirect uris where the client can decide
+        when it is doing the authorization request, so we just check that if the
+        ``redirect_uri`` was included in the token request it matches the
+        registered ``redirect_uri`` of the client.
+        """
+        if not redirect_uri:
+            return True
+
+        return (redirect_uri == client.authclient.redirect_uri)
+
+    def find_authz_code(self, code):
+        return self._cached_find_authz_code(code)
+
     def find_client(self, id_):
         return self._cached_find_client(id_)
 
@@ -101,6 +124,12 @@ class OAuthValidatorService(RequestValidator):
     def get_original_scopes(self, refresh_token, request, *args, **kwargs):
         """As we don't supports scopes, this returns the default scopes."""
         return self.get_default_scopes(self, request.client_id, request)
+
+    def invalidate_authorization_code(self, client_id, code, request, *args, **kwargs):
+        """Delete authorization code once it has been exchanged for an access token."""
+        authz_code = self.find_authz_code(code)
+        if authz_code:
+            self.session.delete(authz_code)
 
     def save_authorization_code(self, client_id, code, request, *args, **kwargs):
         client = self.find_client(client_id)
@@ -131,6 +160,35 @@ class OAuthValidatorService(RequestValidator):
 
         client = self.find_client(client_id)
         return (client is not None)
+
+    def validate_code(self, client_id, code, client, request, *args, **kwargs):
+        """
+        Validate an authorization code.
+
+        Check that the authorization code supplied with an access token request
+        a) exists, b) has not expired, and c) is associated with the client
+        identified in the request. If we return True from this function, we can
+        assume that it is safe to issue an access token fo the requesting client.
+
+        This function also finds the user associated with the given authorization
+        code, and sets it on the given oauth reques object as the ``user`` property.
+        It also finds the scopes associated with the authorization code, and sets it
+        as well on the request object as ``scopes``.
+        """
+        authz_code = self.find_authz_code(code)
+        if authz_code is None:
+            return False
+
+        if authz_code.expires < utcnow():
+            return False
+
+        if authz_code.authclient.id != client_id:
+            return False
+
+        request.user = authz_code.user
+        request.scopes = self.get_default_scopes(client_id, request)
+
+        return True
 
     def validate_grant_type(self, client_id, grant_type, client, request, *args, **kwargs):
         """Validates that the given client is allowed to use the give grant type."""
@@ -184,6 +242,14 @@ class OAuthValidatorService(RequestValidator):
         # We only allow the (dummy) default scopes for now.
         default_scopes = self.get_default_scopes(client_id, request, *args, **kwargs)
         return (scopes == default_scopes)
+
+    def _find_authz_code(self, code):
+        if code is None:
+            return None
+
+        return (self.session.query(models.AuthzCode)
+                            .filter_by(code=code)
+                            .one_or_none())
 
     def _find_client(self, id_):
         if id_ is None:
