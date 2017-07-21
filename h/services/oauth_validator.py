@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import hmac
 
 from oauthlib.oauth2 import InvalidClientIdError, RequestValidator
 from sqlalchemy.exc import StatementError
@@ -28,6 +29,19 @@ class OAuthValidatorService(RequestValidator):
 
         self._cached_find_client = lru_cache_in_transaction(self.session)(self._find_client)
         self._cached_find_refresh_token = lru_cache_in_transaction(self.session)(self._find_refresh_token)
+
+    def authenticate_client(self, request, *args, **kwargs):
+        """Authenticates a client, returns True if the client exists and its secret matches the request."""
+        client = self.find_client(request.client_id)
+
+        if client is None:
+            return False
+
+        if not hmac.compare_digest(client.secret, request.client_secret):
+            return False
+
+        request.client = client
+        return True
 
     def authenticate_client_id(self, client_id, request, *args, **kwargs):
         """Authenticates a client_id, returns True if the client_id exists."""

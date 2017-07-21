@@ -21,6 +21,44 @@ from h.services.oauth_validator import (
 )
 
 
+class TestAuthenticateClient(object):
+    def test_returns_true_when_client_secret_matches_request(self, svc, client, oauth_request):
+        oauth_request.client_id = client.id
+        oauth_request.client_secret = client.secret
+
+        assert svc.authenticate_client(oauth_request) is True
+
+    def test_sets_client_on_request_when_authentication_succeded(self, svc, client, oauth_request):
+        oauth_request.client_id = client.id
+        oauth_request.client_secret = client.secret
+
+        svc.authenticate_client(oauth_request)
+        assert oauth_request.client == client
+
+    def test_returns_false_for_missing_request_parameters(self, svc, oauth_request):
+        assert svc.authenticate_client(oauth_request) is False
+
+    def test_returns_false_for_missing_client(self, svc, client, oauth_request):
+        oauth_request.client_id = uuid.uuid1()
+        oauth_request.client_secret = client.secret
+
+        assert svc.authenticate_client(oauth_request) is False
+
+    def test_returns_false_when_secrets_do_not_match(self, svc, client, oauth_request):
+        oauth_request.client_id = client.id
+        oauth_request.client_secret = 'this-is-invalid'
+
+        assert svc.authenticate_client(oauth_request) is False
+
+    @pytest.fixture
+    def oauth_request(self):
+        return OAuthRequest('/')
+
+    @pytest.fixture
+    def client(self, factories):
+        return factories.ConfidentialAuthClient()
+
+
 class TestAuthenticateClientId(object):
     def test_returns_true_when_client_found(self, svc, client, oauth_request):
         assert svc.authenticate_client_id(client.id, oauth_request) is True
