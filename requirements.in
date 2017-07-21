@@ -21,6 +21,7 @@ jsonschema
 kombu <3.1 # Pinned because of celery pin
 mistune
 newrelic
+oauthlib
 passlib
 psycogreen
 psycopg2

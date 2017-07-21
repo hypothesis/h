@@ -37,6 +37,13 @@ def purge_expired_auth_tickets():
 
 
 @celery.task
+def purge_expired_authz_codes():
+    celery.request.db.query(models.AuthzCode) \
+        .filter(models.AuthzCode.expires < datetime.utcnow()) \
+        .delete()
+
+
+@celery.task
 def purge_expired_tokens():
     celery.request.db.query(models.Token) \
         .filter(models.Token.expires < datetime.utcnow()) \

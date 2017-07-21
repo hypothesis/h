@@ -11,9 +11,6 @@ class TestAuthClient(object):
     def test_has_id(self, client):
         assert client.id
 
-    def test_has_secret(self, client):
-        assert client.secret
-
     @pytest.fixture
     def client(self, db_session):
         client = AuthClient(authority='example.com')

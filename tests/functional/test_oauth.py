@@ -35,7 +35,7 @@ class TestOAuth(object):
     def test_request_fails_if_access_token_expired(self, app, authclient,
                                                    db_session, factories,
                                                    userid):
-        token = factories.Token(
+        token = factories.DeveloperToken(
             expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1))
         token = token.value
         db_session.commit()
@@ -96,7 +96,7 @@ class TestOAuth(object):
                                                           db_session,
                                                           factories,
                                                           userid):
-        token = factories.Token(
+        token = factories.DeveloperToken(
             expires=datetime.datetime.utcnow() - datetime.timedelta(hours=1))
         refresh_token = token.refresh_token
         db_session.commit()
@@ -150,7 +150,7 @@ class TestOAuth(object):
 
     @pytest.fixture
     def authclient(self, db_session, factories):
-        authclient = factories.AuthClient()
+        authclient = factories.ConfidentialAuthClient()
         db_session.commit()
         return authclient
 

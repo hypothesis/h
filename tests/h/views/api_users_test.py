@@ -89,6 +89,14 @@ class TestCreate(object):
         with pytest.raises(ClientUnauthorized):
             create(pyramid_request)
 
+    def test_raises_for_public_client(self, factories, basic_auth_creds, pyramid_request, valid_payload):
+        auth_client = factories.AuthClient(authority='weylandindustries.com')
+        basic_auth_creds.return_value = (auth_client.id, '')
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(ClientUnauthorized):
+            create(pyramid_request)
+
     @pytest.mark.usefixtures('valid_auth')
     def test_it_validates_the_input(self, pyramid_request, valid_payload, schemas):
         create_schema = schemas.CreateUserAPISchema.return_value
@@ -186,7 +194,7 @@ class TestCreate(object):
 
 @pytest.fixture
 def auth_client(factories):
-    return factories.AuthClient(authority='weylandindustries.com')
+    return factories.ConfidentialAuthClient(authority='weylandindustries.com')
 
 
 @pytest.fixture

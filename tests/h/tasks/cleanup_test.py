@@ -6,10 +6,11 @@ from datetime import (datetime, timedelta)
 
 import pytest
 
-from h.models import Annotation, AuthTicket, Token
+from h.models import Annotation, AuthTicket, AuthzCode, Token
 from h.tasks.cleanup import (
     purge_deleted_annotations,
     purge_expired_auth_tickets,
+    purge_expired_authz_codes,
     purge_expired_tokens,
     purge_removed_features,
 )
@@ -73,26 +74,51 @@ class TestPurgeExpiredAuthTickets(object):
 
 
 @pytest.mark.usefixtures('celery')
+class TestPurgeExpiredAuthzCodes(object):
+    def test_it_removes_expired_authz_codes(self, db_session, factories):
+        authz_codes = [
+            factories.AuthzCode(expires=datetime(2014, 5, 6, 7, 8, 9)),
+            factories.AuthzCode(expires=(datetime.utcnow() - timedelta(seconds=1))),
+        ]
+        db_session.add_all(authz_codes)
+
+        assert db_session.query(AuthzCode).count() == 2
+        purge_expired_authz_codes()
+        assert db_session.query(AuthzCode).count() == 0
+
+    def test_it_leaves_valid_authz_codes(self, db_session, factories):
+        authz_codes = [
+            factories.AuthzCode(expires=datetime(2014, 5, 6, 7, 8, 9)),
+            factories.AuthzCode(expires=(datetime.utcnow() + timedelta(hours=1))),
+        ]
+        db_session.add_all(authz_codes)
+
+        assert db_session.query(AuthzCode).count() == 2
+        purge_expired_authz_codes()
+        assert db_session.query(AuthzCode).count() == 1
+
+
+@pytest.mark.usefixtures('celery')
 class TestPurgeExpiredTokens(object):
     def test_it_removes_expired_tokens(self, db_session, factories):
-        factories.Token(expires=datetime(2014, 5, 6, 7, 8, 9))
-        factories.Token(expires=(datetime.utcnow() - timedelta(seconds=1)))
+        factories.DeveloperToken(expires=datetime(2014, 5, 6, 7, 8, 9))
+        factories.DeveloperToken(expires=(datetime.utcnow() - timedelta(seconds=1)))
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
         assert db_session.query(Token).count() == 0
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
-        factories.Token(expires=datetime(2014, 5, 6, 7, 8, 9))
-        factories.Token(expires=(datetime.utcnow() + timedelta(hours=1)))
+        factories.DeveloperToken(expires=datetime(2014, 5, 6, 7, 8, 9))
+        factories.DeveloperToken(expires=(datetime.utcnow() + timedelta(hours=1)))
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
         assert db_session.query(Token).count() == 1
 
     def test_it_leaves_tickets_without_an_expiration_date(self, db_session, factories):
-        factories.Token(expires=None)
-        factories.Token(expires=None)
+        factories.DeveloperToken(expires=None)
+        factories.DeveloperToken(expires=None)
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
