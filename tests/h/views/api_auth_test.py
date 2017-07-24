@@ -129,7 +129,7 @@ class TestOAuthAuthorizeController(object):
         return oauth_server
 
     @pytest.fixture
-    def oauth_validator(self, pyramid_config, pyramid_request):
+    def oauth_validator(self, pyramid_config, pyramid_request, user_svc):
         svc = mock.Mock(spec=oauth_validator_service_factory(None, pyramid_request))
         pyramid_config.register_service(svc, name='oauth_validator')
         return svc
