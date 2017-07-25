@@ -22,7 +22,6 @@ def includeme(config):
     config.register_service_factory('.groupfinder.groupfinder_service_factory', iface='h.interfaces.IGroupService')
     config.register_service_factory('.links.links_factory', name='links')
     config.register_service_factory('.nipsa.nipsa_factory', name='nipsa')
-    config.register_service_factory('.oauth.oauth_service_factory', name='oauth')
     config.register_service_factory('.oauth_provider.oauth_provider_service_factory', name='oauth_provider')
     config.register_service_factory('.oauth_validator.oauth_validator_service_factory', name='oauth_validator')
     config.register_service_factory('.rename_user.rename_user_factory', name='rename_user')
