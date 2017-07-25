@@ -15,6 +15,7 @@ from oauthlib.oauth2.rfc6749 import errors
 
 from h.oauth.jwt_grant import JWTAuthorizationGrant
 from h.services.user import user_service_factory
+from h.services.oauth_validator import Client
 
 
 class TestJWTAuthorizationGrantCreateTokenResponse(object):
@@ -107,7 +108,7 @@ class TestJWTAuthorizationGrantValidateTokenRequest(object):
             grant.validate_token_request(oauth_request)
 
     def test_verifies_grant_token(self, grant, oauth_request):
-        oauth_request.client.secret = 'bogus'
+        oauth_request.client.authclient.secret = 'bogus'
 
         with pytest.raises(errors.InvalidGrantError) as exc:
             grant.validate_token_request(oauth_request)
@@ -160,7 +161,7 @@ def oauth_request(authclient, user):
     jwttok = jwt.encode(claims, authclient.secret, algorithm='HS256')
 
     return OAuthRequest('/', body={'assertion': jwttok,
-                                   'client': authclient})
+                                   'client': Client(authclient)})
 
 
 @pytest.fixture

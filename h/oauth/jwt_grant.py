@@ -114,13 +114,15 @@ class JWTAuthorizationGrant(GrantTypeBase):
         # Ensure client is authorized use of this grant type
         self.validate_grant_type(request)
 
-        verified_token = token.verified(key=request.client.secret, audience=self.domain)
+        authclient = request.client.authclient
+
+        verified_token = token.verified(key=authclient.secret, audience=self.domain)
 
         user = self.user_svc.fetch(verified_token.subject)
         if user is None:
             raise errors.InvalidGrantError('Grant token subject (sub) could not be found.')
 
-        if user.authority != request.client.authority:
+        if user.authority != authclient.authority:
             raise errors.InvalidGrantError('Grant token subject (sub) does not match issuer (iss).')
 
         request.user = user
