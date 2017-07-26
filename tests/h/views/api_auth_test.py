@@ -103,7 +103,7 @@ class TestOAuthAuthorizeController(object):
 
     @pytest.fixture
     def controller(self, pyramid_request):
-        return views.OAuthAuthorizeController(pyramid_request)
+        return views.OAuthAuthorizeController(None, pyramid_request)
 
     @pytest.fixture
     def oauth_provider(self, pyramid_config, auth_client):
