@@ -11,6 +11,7 @@ from pyramid.httpexceptions import HTTPFound, exception_response
 from pyramid.view import view_config, view_defaults
 
 from h import models
+from h._compat import urlparse
 from h.exceptions import OAuthTokenError
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
@@ -31,6 +32,78 @@ class OAuthAuthorizeController(object):
     @view_config(request_method='GET',
                  renderer='h:templates/oauth/authorize.html.jinja2')
     def get(self):
+        """
+        Validate the OAuth authorization request.
+
+        If the authorization request is valid and the client is untrusted,
+        this will render an authorization page allowing the user to
+        accept or decline the request.
+
+        If the authorization request is valid and the client is trusted,
+        this will skip the users' confirmation and create an authorization
+        code and deliver it to the client application.
+        """
+        return self._authorize()
+
+    @view_config(request_method='GET',
+                 request_param='response_mode=web_message',
+                 renderer='h:templates/oauth/authorize.html.jinja2')
+    def get_web_message(self):
+        """
+        Validate the OAuth authorization request for response mode ``web_response``.
+
+        This is doing the same as ``get``, but it will deliver the
+        authorization code (if the client is trusted) as a ``web_response``.
+        More information about ``web_response`` is in draft-sakimura-oauth_.
+
+        .. _draft-sakimura-oauth: https://tools.ietf.org/html/draft-sakimura-oauth-wmrm-00
+        """
+        response = self._authorize()
+
+        if isinstance(response, HTTPFound):
+            self.request.override_renderer = 'h:templates/oauth/authorize_web_message.html.jinja2'
+            return self._render_web_message_response(response.location)
+
+        return response
+
+    @view_config(request_method='POST',
+                 effective_principals=security.Authenticated,
+                 renderer='json')
+    def post(self):
+        """
+        Create an OAuth authorization code.
+
+        This validates the request and creates an OAuth authorization code
+        for the authenticated user, it then returns this to the client.
+        """
+        return self._authorized_response()
+
+    @view_config(request_method='POST',
+                 request_param='response_mode=web_message',
+                 effective_principals=security.Authenticated,
+                 renderer='h:templates/oauth/authorize_web_message.html.jinja2')
+    def post_web_message(self):
+        """
+        Create an OAuth authorization code.
+
+        This is doing the same as ``post``, but it will deliver the
+        authorization code as a ``web_response``.
+        More information about ``web_response`` is in draft-sakimura-oauth_.
+
+        .. _draft-sakimura-oauth: https://tools.ietf.org/html/draft-sakimura-oauth-wmrm-00
+        """
+        found = self._authorized_response()
+        return self._render_web_message_response(found.location)
+
+    @view_config(context=OAuth2Error,
+                 renderer='h:templates/oauth/error.html.jinja2')
+    def error(self):
+        description = self.context.description
+        if not self.context.description:
+            description = 'Error: {}'.format(self.context.error)
+        return {'description': description}
+
+    def _authorize(self):
         scopes, credentials = self.oauth.validate_authorization_request(self.request.url)
 
         if self.request.authenticated_userid is None:
@@ -49,25 +122,14 @@ class OAuthAuthorizeController(object):
 
         state = credentials.get('state')
         user = self.user_svc.fetch(self.request.authenticated_userid)
+        response_mode = credentials.get('request').response_mode
 
         return {'username': user.username,
                 'client_name': client.name,
                 'client_id': client.id,
+                'response_mode': response_mode,
                 'response_type': client.response_type.value,
                 'state': state}
-
-    @view_config(request_method='POST',
-                 effective_principals=security.Authenticated)
-    def post(self):
-        return self._authorized_response()
-
-    @view_config(context=OAuth2Error,
-                 renderer='h:templates/oauth/error.html.jinja2')
-    def error(self):
-        description = self.context.description
-        if not self.context.description:
-            description = 'Error: {}'.format(self.context.error)
-        return {'description': description}
 
     def _authorized_response(self):
         # We don't support scopes at the moment, but oauthlib does need a scope,
@@ -84,6 +146,22 @@ class OAuthAuthorizeController(object):
         except KeyError:
             client_id = self.request.params.get('client_id')
             raise RuntimeError('created authorisation code for client "{}" but got no redirect location'.format(client_id))
+
+    def _render_web_message_response(self, redirect_uri):
+        location = urlparse.urlparse(redirect_uri)
+        params = urlparse.parse_qs(location.query)
+        origin = '{l.scheme}://{l.netloc}'.format(l=location)
+
+        state = None
+        states = params.get('state', [])
+        if states:
+            state = states[0]
+
+        return {
+            'code': params.get('code', [])[0],
+            'origin': origin,
+            'state': state,
+        }
 
 
 class OAuthAccessTokenController(object):
