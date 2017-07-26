@@ -440,6 +440,12 @@ class TestValidateResponseType(object):
         id_ = text_type(uuid.uuid1())
         assert svc.validate_response_type(id_, 'code', None) is False
 
+    def test_returns_false_for_missing_client_response_type(self, svc, client):
+        client.response_type = None
+
+        actual = svc.validate_response_type(client.id, 'code', None)
+        assert actual is False
+
     @pytest.fixture
     def client(self, factories):
         return factories.AuthClient(response_type=AuthClientResponseType.code)
