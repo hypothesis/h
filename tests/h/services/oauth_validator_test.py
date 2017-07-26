@@ -53,10 +53,6 @@ class TestAuthenticateClient(object):
         assert svc.authenticate_client(oauth_request) is False
 
     @pytest.fixture
-    def oauth_request(self):
-        return OAuthRequest('/')
-
-    @pytest.fixture
     def client(self, factories):
         return factories.ConfidentialAuthClient()
 
@@ -73,10 +69,6 @@ class TestAuthenticateClientId(object):
 
     def test_returns_false_when_client_missing(self, svc, oauth_request):
         assert svc.authenticate_client_id(text_type(uuid.uuid1()), oauth_request) is False
-
-    @pytest.fixture
-    def oauth_request(self):
-        return OAuthRequest('/')
 
 
 class TestClientAuthenticationRequired(object):
@@ -103,6 +95,39 @@ class TestClientAuthenticationRequired(object):
     @pytest.fixture
     def oauth_request(self):
         return OAuthRequest('/', body={'grant_type': 'authorization_code'})
+
+
+class TestConfirmRedirectUri(object):
+    def test_returns_true_for_matching_redirect_uris(self, svc, client):
+        result = svc.confirm_redirect_uri(client.client_id, 'test-authz-code', client.authclient.redirect_uri, client)
+        assert result is True
+
+    def test_returns_true_when_redirect_uri_not_provided(self, svc, client):
+        result = svc.confirm_redirect_uri(client.client_id, 'test-authz-code', None, client)
+        assert result is True
+
+    def test_returns_false_when_redirect_uris_do_not_match(self, svc, client):
+        result = svc.confirm_redirect_uri(client.client_id, 'test-authz-code', 'invalid', client)
+        assert result is False
+
+    @pytest.fixture
+    def client(self, factories):
+        return Client(factories.AuthClient())
+
+
+class TestFindAuthzCode(object):
+    def test_returns_authz_code(self, svc, authz_code):
+        assert svc.find_authz_code(authz_code.code) == authz_code
+
+    def test_returns_none_when_not_found(self, svc):
+        assert svc.find_authz_code('missing') is None
+
+    def test_returns_none_for_none_code(self, svc):
+        assert svc.find_authz_code(None) is None
+
+    @pytest.fixture
+    def authz_code(self, factories):
+        return factories.AuthzCode()
 
 
 class TestFindClient(object):
@@ -159,6 +184,32 @@ class TestGetOriginalScopes(object):
         oauth_request = mock.Mock()
         assert (svc.get_original_scopes(refresh_token, oauth_request) ==
                 svc.get_default_scopes('something', oauth_request))
+
+
+class TestInvalidateAuthorizationCode(object):
+    def test_it_deletes_authz_code(self, svc, oauth_request, factories, db_session):
+        authz_code_1 = factories.AuthzCode()
+        id_1 = authz_code_1.id
+        authz_code_2 = factories.AuthzCode(authclient=authz_code_1.authclient)
+        id_2 = authz_code_2.id
+
+        svc.invalidate_authorization_code(authz_code_1.authclient.id, authz_code_1.code, oauth_request)
+        db_session.flush()
+
+        assert db_session.query(models.AuthzCode).get(id_1) is None
+        assert db_session.query(models.AuthzCode).get(id_2) is not None
+
+    def test_it_skips_deleting_when_authz_code_is_missing(self, svc, oauth_request, db_session, factories):
+        keep_code = factories.AuthzCode()
+
+        svc.invalidate_authorization_code(keep_code.authclient.id, 'missing', oauth_request)
+        db_session.flush()
+
+        assert db_session.query(models.AuthzCode).get(keep_code.id) is not None
+
+    @pytest.fixture
+    def authz_code(self, factories):
+        return factories.AuthzCode()
 
 
 class TestSaveAuthorizationCode(object):
@@ -246,6 +297,45 @@ class TestValidateClientId(object):
         assert svc.validate_client_id(id_, None) is False
 
 
+class TestValidateCode(object):
+    def test_returns_true_for_correct_code(self, svc, authz_code, client, oauth_request):
+        result = svc.validate_code(client.client_id, authz_code.code, client, oauth_request)
+        assert result is True
+
+    def test_sets_user_on_request(self, svc, authz_code, client, oauth_request):
+        assert oauth_request.user is None
+        svc.validate_code(client.client_id, authz_code.code, client, oauth_request)
+        assert oauth_request.user == authz_code.user
+
+    def test_sets_scopes_on_request(self, svc, authz_code, client, oauth_request):
+        assert oauth_request.scopes is None
+        svc.validate_code(client.client_id, authz_code.code, client, oauth_request)
+        assert oauth_request.scopes == svc.get_default_scopes(client.client_id, oauth_request)
+
+    def test_returns_false_for_missing_code(self, svc, client, oauth_request):
+        result = svc.validate_code(client.client_id, 'missing', client, oauth_request)
+        assert result is False
+
+    def test_returns_false_when_clients_do_not_match(self, svc, client, oauth_request, factories):
+        authz_code = factories.AuthzCode()
+        result = svc.validate_code(client.client_id, authz_code.code, client, oauth_request)
+        assert result is False
+
+    def test_returns_false_when_expired(self, svc, authz_code, client, oauth_request):
+        authz_code.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+
+        result = svc.validate_code(client.client_id, authz_code.code, client, oauth_request)
+        assert result is False
+
+    @pytest.fixture
+    def authz_code(self, factories, client):
+        return factories.AuthzCode(authclient=client.authclient)
+
+    @pytest.fixture
+    def client(self, factories):
+        return Client(factories.AuthClient())
+
+
 class TestValidateGrantType(object):
     def test_returns_false_when_client_does_not_have_grant_types(self, svc, client, oauth_request):
         client.authclient.grant_type = None
@@ -270,10 +360,6 @@ class TestValidateGrantType(object):
 
         result = svc.validate_grant_type(client.client_id, 'authorization_code', client, oauth_request)
         assert result is False
-
-    @pytest.fixture
-    def oauth_request(self):
-        return OAuthRequest('/')
 
     @pytest.fixture
     def client(self, factories):
@@ -331,10 +417,6 @@ class TestValidateRefreshToken(object):
         assert oauth_request.user is None
         svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert oauth_request.user.userid == token.userid
-
-    @pytest.fixture
-    def oauth_request(self):
-        return OAuthRequest('/')
 
     @pytest.fixture
     def token(self, factories, client):
@@ -395,6 +477,11 @@ class TestOAuthValidatorServiceFactory(object):
 @pytest.fixture
 def svc(db_session, user_svc):
     return OAuthValidatorService(db_session, user_svc)
+
+
+@pytest.fixture
+def oauth_request():
+    return OAuthRequest('/')
 
 
 @pytest.fixture
