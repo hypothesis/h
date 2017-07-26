@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import hmac
 
 from oauthlib.oauth2 import InvalidClientIdError, RequestValidator
 from sqlalchemy.exc import StatementError
@@ -13,6 +14,13 @@ from h.util.db import lru_cache_in_transaction
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
 DEFAULT_SCOPES = ['annotation:read', 'annotation:write']
+
+
+class Client(object):
+    """A wrapper which responds to `client_id` which oauthlib expects in `request.client`."""
+    def __init__(self, authclient):
+        self.authclient = authclient
+        self.client_id = authclient.id
 
 
 class OAuthValidatorService(RequestValidator):
@@ -29,11 +37,28 @@ class OAuthValidatorService(RequestValidator):
         self._cached_find_client = lru_cache_in_transaction(self.session)(self._find_client)
         self._cached_find_refresh_token = lru_cache_in_transaction(self.session)(self._find_refresh_token)
 
+    def authenticate_client(self, request, *args, **kwargs):
+        """Authenticates a client, returns True if the client exists and its secret matches the request."""
+        client = self.find_client(request.client_id)
+
+        if client is None:
+            return False
+
+        if not hmac.compare_digest(client.secret, request.client_secret):
+            return False
+
+        request.client = Client(client)
+        return True
+
     def authenticate_client_id(self, client_id, request, *args, **kwargs):
         """Authenticates a client_id, returns True if the client_id exists."""
         client = self.find_client(client_id)
-        request.client = client
-        return (client is not None)
+
+        if client is None:
+            return False
+
+        request.client = Client(client)
+        return True
 
     def client_authentication_required(self, request, *args, **kwargs):
         """
@@ -97,7 +122,7 @@ class OAuthValidatorService(RequestValidator):
                                    value=token['access_token'],
                                    refresh_token=token['refresh_token'],
                                    expires=(utcnow() + datetime.timedelta(seconds=token['expires_in'])),
-                                   authclient=request.client)
+                                   authclient=request.client.authclient)
         self.session.add(oauth_token)
         return oauth_token
 
@@ -109,13 +134,13 @@ class OAuthValidatorService(RequestValidator):
 
     def validate_grant_type(self, client_id, grant_type, client, request, *args, **kwargs):
         """Validates that the given client is allowed to use the give grant type."""
-        if client.grant_type is None:
+        if client.authclient.grant_type is None:
             return False
 
         if grant_type == 'refresh_token':
             return True
 
-        return (grant_type == client.grant_type.value)
+        return (grant_type == client.authclient.grant_type.value)
 
     def validate_redirect_uri(self, client_id, redirect_uri, request, *args, **kwargs):
         """Validate that the provided ``redirect_uri`` matches the one stored on the client."""
@@ -139,7 +164,7 @@ class OAuthValidatorService(RequestValidator):
         """
         token = self.find_refresh_token(refresh_token)
 
-        if not token or token.expired or token.authclient != client:
+        if not token or token.expired or token.authclient.id != client.client_id:
             return False
 
         request.user = self.user_svc.fetch(token.userid)
