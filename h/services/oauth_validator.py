@@ -45,7 +45,12 @@ class OAuthValidatorService(RequestValidator):
         if client is None:
             return False
 
-        if not hmac.compare_digest(client.secret, request.client_secret):
+        provided_secret = request.client_secret
+        if request.client_secret is None:
+            # hmac.compare_digest raises when one value is `None`
+            provided_secret = ''
+
+        if not hmac.compare_digest(client.secret, provided_secret):
             return False
 
         request.client = Client(client)
