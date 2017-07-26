@@ -10,6 +10,7 @@ from pyramid.security import (
 )
 
 from h import storage
+from h.models import AuthClient
 from h.auth import role
 from h.interfaces import IGroupService
 
@@ -80,6 +81,29 @@ class AnnotationResource(object):
         acl.append(DENY_ALL)
 
         return acl
+
+
+class AuthClientFactory(object):
+
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, client_id):
+        try:
+            client = self.request.db.query(AuthClient) \
+                                    .filter_by(id=client_id).one()
+
+            # Inherit global ACL.
+            # See `pyramid.authorization.ACLAuthorizationPolicy` docs.
+            #
+            # Other resources do not currently do this, but we rely on it for
+            # this resource because it is used within the /admin pages.
+            client.__parent__ = Root(self.request)
+
+            return client
+        except:
+            # No such client found or not a valid UUID.
+            raise KeyError()
 
 
 def _group_principals(group):

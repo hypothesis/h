@@ -1,3 +1,16 @@
+@import 'partials-v2/base';
+@import 'partials-v2/util';
+
+// Components
+@import 'partials-v2/btn';
+@import 'partials-v2/form-actions';
+@import 'partials-v2/form-checkbox';
+@import 'partials-v2/form-container';
+@import 'partials-v2/form-input';
+@import 'partials-v2/form';
+@import 'partials-v2/svg-icon';
+@import 'partials-v2/tooltip';
+
 body {
   padding-top: 50px;
 }

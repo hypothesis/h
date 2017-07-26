@@ -1,0 +1,46 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'oauth' %}
+{% set page_title = 'OAuth clients' %}
+
+{% block content %}
+  <p>
+    OAuth clients are web or native applications that users can authorize
+    to access their private Hypothesis data.
+  </p>
+
+  <p>
+    <a href="{{ request.route_url('admin_oauthclients_create') }}">
+      Register a new OAuth client
+    </a>
+  </p>
+
+  <table class="table table-striped">
+    <thead>
+      <th>Name</th>
+      <th>ID</th>
+      <th>Authority<sup>1</sup></th>
+      <th>Trusted<sup>2</sup> ?</th>
+    </thead>
+    <tbody>
+      {% for client in clients %}
+      <tr>
+        <td><a href="{{ request.route_url('admin_oauthclients_edit', id=client.id) }}">{{ client.name }}</a></td>
+        <td>{{ client.id }}</td>
+        <td>{{ client.authority }}</td>
+        <td>{{ client.trusted }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p>
+    <sup>1</sup> Clients can only access user data for accounts associated with
+    their authority.
+  </p>
+  <p>
+    <sup>2</sup> Trusted clients do not require explicit user approval to
+    access their data.
+  </p>
+
+{% endblock %}
