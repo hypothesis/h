@@ -233,7 +233,8 @@ class OAuthValidatorService(RequestValidator):
 
         client = self.find_client(client_id)
         if client is not None:
-            return (client.response_type.value == response_type)
+            return (client.response_type is not None and
+                    client.response_type.value == response_type)
         return False
 
     def validate_scopes(self, client_id, scopes, request, *args, **kwargs):
