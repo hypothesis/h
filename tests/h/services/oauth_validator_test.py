@@ -37,7 +37,11 @@ class TestAuthenticateClient(object):
         assert oauth_request.client.client_id == client.id
         assert oauth_request.client.authclient == client
 
-    def test_returns_false_for_missing_request_parameters(self, svc, oauth_request):
+    def test_returns_false_for_missing_client_id_request_param(self, svc, client, oauth_request):
+        assert svc.authenticate_client(oauth_request) is False
+
+    def test_returns_false_for_missing_client_secret_request_param(self, svc, client, oauth_request):
+        oauth_request.client_id = client.id
         assert svc.authenticate_client(oauth_request) is False
 
     def test_returns_false_for_missing_client(self, svc, client, oauth_request):
