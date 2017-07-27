@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
-from oauthlib.oauth2 import InvalidRequestError, InvalidRequestFatalError
+from oauthlib.oauth2 import OAuth2Error
 from pyramid import security
 from pyramid.httpexceptions import HTTPFound, exception_response
 from pyramid.view import view_config, view_defaults
@@ -21,7 +21,8 @@ log = logging.getLogger(__name__)
 
 @view_defaults(route_name='oauth_authorize')
 class OAuthAuthorizeController(object):
-    def __init__(self, request):
+    def __init__(self, context, request):
+        self.context = context
         self.request = request
 
         self.user_svc = self.request.find_service(name='user')
@@ -60,6 +61,14 @@ class OAuthAuthorizeController(object):
     def post(self):
         return self._authorized_response()
 
+    @view_config(context=OAuth2Error,
+                 renderer='h:templates/oauth/error.html.jinja2')
+    def error(self):
+        description = self.context.description
+        if not self.context.description:
+            description = 'Error: {}'.format(self.context.error)
+        return {'description': description}
+
     def _authorized_response(self):
         # We don't support scopes at the moment, but oauthlib does need a scope,
         # so we're explicitly overwriting whatever the client provides.
@@ -75,18 +84,6 @@ class OAuthAuthorizeController(object):
         except KeyError:
             client_id = self.request.params.get('client_id')
             raise RuntimeError('created authorisation code for client "{}" but got no redirect location'.format(client_id))
-
-
-@view_defaults(renderer='h:templates/oauth/error.html.jinja2')
-class OAuthAuthorizeErrorController(object):
-    def __init__(self, context, request):
-        self.context = context
-        self.request = request
-
-    @view_config(context=InvalidRequestFatalError)
-    @view_config(context=InvalidRequestError)
-    def invalid_authorize_request(self):
-        return {'description': self.context.description}
 
 
 class OAuthAccessTokenController(object):

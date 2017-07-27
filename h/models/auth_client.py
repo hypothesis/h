@@ -75,6 +75,8 @@ class AuthClient(Base, Timestamps):
     """
 
     __tablename__ = 'authclient'
+    __table_args__ = (sa.CheckConstraint("(grant_type != 'authorization_code') OR (redirect_uri IS NOT NULL)",
+                                         name='authz_grant_redirect_uri'),)
 
     #: Public client identifier
     id = sa.Column(postgresql.UUID,
