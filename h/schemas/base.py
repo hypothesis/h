@@ -82,6 +82,9 @@ def enum_type(enum_cls):
     """
     class EnumType(colander.SchemaType):
         def deserialize(self, node, cstruct):
+            if cstruct == colander.null:
+                return None
+
             try:
                 return enum_cls(cstruct)
             except ValueError:

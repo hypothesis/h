@@ -98,6 +98,10 @@ class TestEnumType(object):
         node = Mock()
         assert color_type.serialize(node, None) == ''
 
+    def test_deserialize_returns_none_if_value_is_null(self, color_type):
+        node = Mock()
+        assert color_type.deserialize(node, colander.null) is None
+
     def test_deserialize_returns_an_enum(self, color_type):
         node = Mock()
         assert color_type.deserialize(node, 'red') == Color.red

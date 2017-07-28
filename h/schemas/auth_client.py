@@ -27,10 +27,12 @@ class CreateAuthClientSchema(CSRFSchema):
                          'can interact with'))
 
     grant_type = colander.SchemaNode(GrantTypeSchemaType(),
+                                     missing=None,
                                      title=_('Grant type'),
                                      hint=_('This specifies what type of authentication is used'))
 
     response_type = colander.SchemaNode(ResponseTypeSchemaType(),
+                                        missing=None,
                                         title=_('Response type'),
                                         hint=_('Specifies what kind of authorization response '
                                                'is returned to the client'))
