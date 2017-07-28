@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import colander
 
 from h import i18n
@@ -35,8 +37,9 @@ class CreateAuthClientSchema(CSRFSchema):
 
     trusted = colander.SchemaNode(
                 colander.Boolean(),
-                title=_('Trusted'),
-                hint=_('Trusted clients do not require user approval'))
+                title=_('Trusted ⚠️'),
+                hint=_('Trusted clients do not require user approval. '
+                       '⚠️ Only enable this for official Hypothesis clients.'))
 
     redirect_url = colander.SchemaNode(
                      colander.String(),
