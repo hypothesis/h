@@ -180,6 +180,23 @@ class OAuthAccessTokenController(object):
             raise exception_response(status, body=body)
 
 
+@view_defaults(route_name='oauth_revoke')
+class OAuthRevocationController(object):
+    def __init__(self, request):
+        self.request = request
+
+        self.oauth = self.request.find_service(name='oauth_provider')
+
+    @cors_json_view(request_method='POST')
+    def post(self):
+        headers, body, status = self.oauth.create_revocation_response(
+            self.request.url, self.request.method, self.request.POST, self.request.headers)
+        if status == 200:
+            return {}
+        else:
+            raise exception_response(status, body=body)
+
+
 @cors_json_view(route_name='api.debug_token', request_method='GET')
 def debug_token(request):
     if not request.auth_token:
