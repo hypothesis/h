@@ -58,7 +58,7 @@ FEATURECOHORT_FEATURE_TABLE = sa.Table(
               nullable=False),
     sa.Column('feature_id',
               sa.Integer(),
-              sa.ForeignKey('feature.id'),
+              sa.ForeignKey('feature.id', ondelete='cascade'),
               nullable=False),
     sa.UniqueConstraint('cohort_id', 'feature_id'),
 )
