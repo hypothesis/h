@@ -137,6 +137,20 @@ class OAuthValidatorService(RequestValidator):
         if authz_code:
             self.session.delete(authz_code)
 
+    def invalidate_refresh_token(self, refresh_token, request, *args, **kwargs):
+        """
+        Shorten expiration of a refresh token.
+
+        We do this to make sure the client could try the refresh token again within
+        a short amount of time to gracefully recover from network connection issues.
+        """
+        token = self.find_refresh_token(refresh_token)
+
+        new_ttl = datetime.timedelta(minutes=3)
+        now = utcnow()
+        if (token.refresh_token_expires - now) > new_ttl:
+            token.refresh_token_expires = now + new_ttl
+
     def revoke_token(self, token, token_type_hint, request, *args, **kwargs):
         """
         Revoke a token.
@@ -184,6 +198,11 @@ class OAuthValidatorService(RequestValidator):
                                    refresh_token_expires=refresh_token_expires,
                                    authclient=request.client.authclient)
         self.session.add(oauth_token)
+
+        # oauthlib does not provide a proper hook for this, so we need to call it ourselves here.
+        if request.grant_type == 'refresh_token':
+            self.invalidate_refresh_token(request.refresh_token, request)
+
         return oauth_token
 
     def validate_client_id(self, client_id, request, *args, **kwargs):
