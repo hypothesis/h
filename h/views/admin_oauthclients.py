@@ -13,6 +13,13 @@ from h.schemas.auth_client import CreateAuthClientSchema, EditAuthClientSchema
 _ = i18n.TranslationString
 
 
+def _response_type_for_grant_type(grant_type):
+    if grant_type == GrantType.authorization_code:
+        return ResponseType.code
+    else:
+        return None
+
+
 @view_config(route_name='admin_oauthclients',
              renderer='h:templates/admin/oauthclients.html.jinja2',
              permission='admin_oauthclients')
@@ -48,10 +55,11 @@ class AuthClientCreateController(object):
     @view_config(request_method='POST')
     def post(self):
         def on_success(appstruct):
+            grant_type = appstruct['grant_type']
             client = AuthClient(name=appstruct['name'],
                                 authority=appstruct['authority'],
                                 grant_type=appstruct['grant_type'],
-                                response_type=appstruct['response_type'],
+                                response_type=_response_type_for_grant_type(grant_type),
                                 trusted=appstruct['trusted'],
                                 redirect_uri=appstruct['redirect_url'])
 
@@ -101,14 +109,13 @@ class AuthClientEditController(object):
         client = self.client
 
         def on_success(appstruct):
-            # The "client_id" and "client_secret" properties are currently
-            # read-only and not updated here.
+            grant_type = appstruct['grant_type']
 
             client.authority = appstruct['authority']
-            client.grant_type = appstruct['grant_type']
+            client.grant_type = grant_type
             client.name = appstruct['name']
             client.redirect_uri = appstruct['redirect_url']
-            client.response_type = appstruct['response_type']
+            client.response_type = _response_type_for_grant_type(grant_type)
             client.trusted = appstruct['trusted']
 
             return self._template_context()

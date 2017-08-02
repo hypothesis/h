@@ -68,6 +68,21 @@ class TestAuthClientCreateController(object):
                           .filter_by(name='Third Party App') \
                           .one()
 
+    @pytest.mark.parametrize('grant_type, expected_response_type', [
+        ('authorization_code', ResponseType.code),
+        ('jwt_bearer', None),
+    ])
+    def test_post_sets_response_type(self, form_post, pyramid_request,
+                                     grant_type, expected_response_type):
+        pyramid_request.POST = form_post
+        pyramid_request.POST['grant_type'] = grant_type
+        ctrl = AuthClientCreateController(pyramid_request)
+
+        ctrl.post()
+
+        client = pyramid_request.db.query(AuthClient).one()
+        assert client.response_type == expected_response_type
+
     def test_post_redirects_to_edit_view(self, form_post, pyramid_request):
         pyramid_request.POST = form_post
         ctrl = AuthClientCreateController(pyramid_request)
@@ -100,6 +115,20 @@ class TestAuthClientEditController(object):
 
         assert authclient.name == 'new-name'
         assert ctx['form'] == self._expected_form(authclient)
+
+    @pytest.mark.parametrize('grant_type, expected_response_type', [
+        ('authorization_code', ResponseType.code),
+        ('jwt_bearer', None),
+    ])
+    def test_update_sets_response_type(self, authclient, form_post, pyramid_request,
+                                       grant_type, expected_response_type):
+        pyramid_request.POST = form_post
+        pyramid_request.POST['grant_type'] = grant_type
+        ctrl = AuthClientEditController(authclient, pyramid_request)
+
+        ctrl.update()
+
+        assert authclient.response_type == expected_response_type
 
     def test_delete_removes_authclient(self, authclient, pyramid_request):
         pyramid_request.db.delete = create_autospec(pyramid_request.db.delete, return_value=None)

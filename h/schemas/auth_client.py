@@ -5,12 +5,11 @@ from __future__ import unicode_literals
 import colander
 
 from h import i18n
-from h.models.auth_client import GrantType, ResponseType
+from h.models.auth_client import GrantType
 from h.schemas.base import CSRFSchema, enum_type
 
 _ = i18n.TranslationString
 GrantTypeSchemaType = enum_type(GrantType)
-ResponseTypeSchemaType = enum_type(ResponseType)
 
 
 class CreateAuthClientSchema(CSRFSchema):
@@ -29,13 +28,7 @@ class CreateAuthClientSchema(CSRFSchema):
     grant_type = colander.SchemaNode(GrantTypeSchemaType(),
                                      missing=None,
                                      title=_('Grant type'),
-                                     hint=_('This specifies what type of authentication is used'))
-
-    response_type = colander.SchemaNode(ResponseTypeSchemaType(),
-                                        missing=None,
-                                        title=_('Response type'),
-                                        hint=_('Specifies what kind of authorization response '
-                                               'is returned to the client'))
+                                     hint=_('"authorization_code" or "jwt_bearer"'))
 
     trusted = colander.SchemaNode(
                 colander.Boolean(),
@@ -48,7 +41,7 @@ class CreateAuthClientSchema(CSRFSchema):
                      missing=None,
                      title=_('Redirect URL'),
                      hint=_('The browser will redirect to this URL after '
-                            'authorization'))
+                            'authorization. Required if grant type is "authorization_code"'))
 
 
 class EditAuthClientSchema(CreateAuthClientSchema):
