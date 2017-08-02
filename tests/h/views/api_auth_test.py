@@ -9,6 +9,7 @@ import mock
 import pytest
 
 from oauthlib.oauth2 import InvalidRequestFatalError
+from oauthlib.common import Request as OAuthRequest
 from pyramid import httpexceptions
 
 from h._compat import url_quote
@@ -25,95 +26,168 @@ from h.views import api_auth as views
 @pytest.mark.usefixtures('routes', 'oauth_provider', 'user_svc')
 class TestOAuthAuthorizeController(object):
     @pytest.mark.usefixtures('authenticated_user')
-    def test_get_validates_request(self, controller, pyramid_request):
-        controller.get()
+    @pytest.mark.parametrize('view_name', ['get', 'get_web_message'])
+    def test_get_validates_request(self, controller, pyramid_request, view_name):
+        view = getattr(controller, view_name)
+        view()
 
         controller.oauth.validate_authorization_request.assert_called_once_with(
             pyramid_request.url)
 
-    def test_get_raises_for_invalid_request(self, controller):
+    @pytest.mark.parametrize('view_name', ['get', 'get_web_message'])
+    def test_get_raises_for_invalid_request(self, controller, view_name):
         controller.oauth.validate_authorization_request.side_effect = InvalidRequestFatalError('boom!')
 
         with pytest.raises(InvalidRequestFatalError) as exc:
-            controller.get()
+            view = getattr(controller, view_name)
+            view()
 
         assert exc.value.description == 'boom!'
 
-    def test_get_redirects_to_login_when_not_authenticated(self, controller, pyramid_request):
+    @pytest.mark.parametrize('view_name', ['get', 'get_web_message'])
+    def test_get_redirects_to_login_when_not_authenticated(self, controller, pyramid_request, view_name):
         with pytest.raises(httpexceptions.HTTPFound) as exc:
-            controller.get()
+            view = getattr(controller, view_name)
+            view()
 
         assert exc.value.location == 'http://example.com/login?next={}'.format(
                                        url_quote(pyramid_request.url, safe=''))
 
-    def test_get_returns_expected_context(self, controller, auth_client, authenticated_user):
-        assert controller.get() == {
+    @pytest.mark.parametrize('response_mode,view_name', [
+        (None, 'get'),
+        ('web_message', 'get_web_message'),
+    ])
+    def test_get_returns_expected_context(self, controller, auth_client, authenticated_user, oauth_request, response_mode, view_name):
+        oauth_request.response_mode = response_mode
+
+        view = getattr(controller, view_name)
+        assert view() == {
             'client_id': auth_client.id,
             'client_name': auth_client.name,
+            'response_mode': response_mode,
             'response_type': auth_client.response_type.value,
             'state': 'foobar',
             'username': authenticated_user.username,
         }
 
-    def test_get_creates_authorization_response_for_trusted_clients(self, controller, auth_client, authenticated_user, pyramid_request):
+    @pytest.mark.parametrize('view_name', ['get', 'get_web_message'])
+    def test_get_creates_authorization_response_for_trusted_clients(self, controller, auth_client, authenticated_user, pyramid_request, view_name):
         auth_client.trusted = True
 
-        controller.get()
+        view = getattr(controller, view_name)
+        view()
 
         controller.oauth.create_authorization_response.assert_called_once_with(
             pyramid_request.url,
             credentials={'user': authenticated_user},
             scopes=DEFAULT_SCOPES)
 
-    def test_returns_redirect_immediately_for_trusted_clients(self, controller, auth_client, authenticated_user, pyramid_request):
+    def test_get_returns_redirect_immediately_for_trusted_clients(self, controller, auth_client, authenticated_user, pyramid_request):
         auth_client.trusted = True
 
         response = controller.get()
-        expected = '{}?code=abcdef123456'.format(auth_client.redirect_uri)
+        expected = '{}?code=abcdef123456&state=foobar'.format(auth_client.redirect_uri)
 
         assert response.location == expected
 
-    def test_post_creates_authorization_response(self, controller, pyramid_request, authenticated_user):
+    @pytest.mark.usefixtures('authenticated_user')
+    def test_get_web_message_renders_template_for_trusted_clients(self, controller, auth_client):
+        auth_client.trusted = True
+
+        assert controller.request.override_renderer is None
+        controller.get_web_message()
+        assert controller.request.override_renderer == 'h:templates/oauth/authorize_web_message.html.jinja2'
+
+    @pytest.mark.usefixtures('authenticated_user')
+    def test_get_web_message_returns_context_for_trusted_clients(self, controller, auth_client):
+        auth_client.trusted = True
+
+        response = controller.get_web_message()
+
+        assert response == {
+            'code': 'abcdef123456',
+            'origin': 'http://client.com',
+            'state': 'foobar',
+        }
+
+    @pytest.mark.usefixtures('authenticated_user')
+    def test_get_web_message_allows_empty_state_in_context_for_trusted_clients(self, controller, auth_client, oauth_provider):
+        auth_client.trusted = True
+
+        headers = {'Location': '{}?code=abcdef123456'.format(auth_client.redirect_uri)}
+        oauth_provider.create_authorization_response.return_value = (headers, None, 302)
+
+        response = controller.get_web_message()
+        assert response['state'] is None
+
+    @pytest.mark.parametrize('view_name', ['post', 'post_web_message'])
+    def test_post_creates_authorization_response(self, controller, pyramid_request, authenticated_user, view_name):
         pyramid_request.url = 'http://example.com/auth?client_id=the-client-id' + \
                                                      '&response_type=code' + \
                                                      '&state=foobar' + \
                                                      '&scope=exploit'
 
-        controller.post()
+        view = getattr(controller, view_name)
+        view()
 
         controller.oauth.create_authorization_response.assert_called_once_with(
             pyramid_request.url,
             credentials={'user': authenticated_user},
             scopes=DEFAULT_SCOPES)
 
-    def test_post_redirects_to_client(self, controller, auth_client):
-        response = controller.post()
-        expected = '{}?code=abcdef123456'.format(auth_client.redirect_uri)
-
-        assert response.location == expected
-
     @pytest.mark.usefixtures('authenticated_user')
-    def test_post_raises_for_invalid_request(self, controller):
+    @pytest.mark.parametrize('view_name', ['post', 'post_web_message'])
+    def test_post_raises_for_invalid_request(self, controller, view_name):
         controller.oauth.create_authorization_response.side_effect = InvalidRequestFatalError('boom!')
 
         with pytest.raises(InvalidRequestFatalError) as exc:
-            controller.post()
+            view = getattr(controller, view_name)
+            view()
 
         assert exc.value.description == 'boom!'
 
+    def test_post_redirects_to_client(self, controller, auth_client):
+        response = controller.post()
+        expected = '{}?code=abcdef123456&state=foobar'.format(auth_client.redirect_uri)
+
+        assert response.location == expected
+
+    def test_post_web_message_returns_expected_context(self, controller, auth_client):
+        response = controller.post_web_message()
+
+        assert response == {
+            'code': 'abcdef123456',
+            'origin': 'http://client.com',
+            'state': 'foobar',
+        }
+
+    def test_post_web_message_allows_empty_state_in_context(self, controller, auth_client, oauth_provider):
+        auth_client.trusted = True
+
+        headers = {'Location': '{}?code=abcdef123456'.format(auth_client.redirect_uri)}
+        oauth_provider.create_authorization_response.return_value = (headers, None, 302)
+
+        response = controller.post_web_message()
+        assert response['state'] is None
+
     @pytest.fixture
     def controller(self, pyramid_request):
+        pyramid_request.override_renderer = None
         return views.OAuthAuthorizeController(None, pyramid_request)
 
     @pytest.fixture
-    def oauth_provider(self, pyramid_config, auth_client):
+    def oauth_request(self):
+        return OAuthRequest('/')
+
+    @pytest.fixture
+    def oauth_provider(self, pyramid_config, auth_client, oauth_request):
         svc = mock.create_autospec(OAuthProviderService, instance=True)
 
         scopes = ['annotation:read', 'annotation:write']
-        credentials = {'client_id': auth_client.id, 'state': 'foobar'}
+        credentials = {'client_id': auth_client.id, 'state': 'foobar', 'request': oauth_request}
         svc.validate_authorization_request.return_value = (scopes, credentials)
 
-        headers = {'Location': '{}?code=abcdef123456'.format(auth_client.redirect_uri)}
+        headers = {'Location': '{}?code=abcdef123456&state=foobar'.format(auth_client.redirect_uri)}
         body = None
         status = 302
         svc.create_authorization_response.return_value = (headers, body, status)
