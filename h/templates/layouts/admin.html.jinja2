@@ -1,16 +1,18 @@
 {%- set nav_pages = [
     ('index', 'admin_index', 'Home', []),
+
+    ('admins', 'admin_admins', 'Administrators', []),
+    ('badge', 'admin_badge', 'Badge', []),
     ('features', 'admin_features', 'Feature flags', [
       ('features', 'admin_features', 'Manage feature flags'),
       ('cohorts', 'admin_cohorts', 'Manage feature cohorts'),
     ]),
+    ('groups', 'admin_groups', 'Groups', []),
     ('mailer', 'admin_mailer', 'Mailer', []),
     ('nipsa', 'admin_nipsa', 'NIPSA', []),
-    ('admins', 'admin_admins', 'Administrators', []),
+    ('oauth', 'admin_oauthclients', 'OAuth clients', []),
     ('staff', 'admin_staff', 'Staff', []),
     ('users', 'admin_users', 'Users', []),
-    ('groups', 'admin_groups', 'Groups', []),
-    ('badge', 'admin_badge', 'Badge', []),
 ] -%}
 
 {%- set page_id = page_id|default('home') -%}
@@ -30,6 +32,10 @@
   {% for url in asset_urls("admin_css") %}
 <link rel="stylesheet" href="{{ url }}">
 {% endfor %}
+
+    {% for url in asset_urls("header_js") %}
+    <script src="{{ url }}"></script>
+    {% endfor %}
 
     {% include 'h:templates/includes/settings.html.jinja2' %}
   </head>

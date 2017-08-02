@@ -42,6 +42,12 @@ def includeme(config):
     config.add_route('admin_mailer', '/admin/mailer')
     config.add_route('admin_mailer_test', '/admin/mailer/test')
     config.add_route('admin_nipsa', '/admin/nipsa')
+    config.add_route('admin_oauthclients', '/admin/oauthclients')
+    config.add_route('admin_oauthclients_create', '/admin/oauthclients/new')
+    config.add_route('admin_oauthclients_edit',
+                     '/admin/oauthclients/{id}',
+                     factory='h.resources.AuthClientFactory',
+                     traverse='/{id}')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
     config.add_route('admin_users_activate', '/admin/users/activate')
@@ -92,6 +98,7 @@ def includeme(config):
     config.add_route('badge', '/api/badge')
     config.add_route('token', '/api/token')
     config.add_route('oauth_authorize', '/oauth/authorize')
+    config.add_route('oauth_revoke', '/oauth/revoke')
 
     # Client
     config.add_route('session', '/app')

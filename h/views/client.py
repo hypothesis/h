@@ -58,6 +58,7 @@ def sidebar_app(request, extra=None):
         # OAuth config.
         'oauthAuthorizeUrl': request.route_url('oauth_authorize'),
         'oauthClientId': settings.get('h.client_oauth_id'),
+        'oauthRevokeUrl': request.route_url('oauth_revoke'),
 
         # The OAuth feature flag is included as part of the `app.html` config
         # rather than being delivered via the "features" key in /api/profile so

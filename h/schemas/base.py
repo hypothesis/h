@@ -73,6 +73,32 @@ class JSONSchema(object):
         return appstruct
 
 
+def enum_type(enum_cls):
+    """
+    Return a `colander.Type` implementation for a field with a given enum type.
+
+    :param enum_cls: The enum class
+    :type enum_cls: enum.Enum
+    """
+    class EnumType(colander.SchemaType):
+        def deserialize(self, node, cstruct):
+            if cstruct == colander.null:
+                return None
+
+            try:
+                return enum_cls[cstruct]
+            except KeyError:
+                msg = '"{}" is not a known value'.format(cstruct)
+                raise colander.Invalid(node, msg)
+
+        def serialize(self, node, appstruct):
+            if not appstruct:
+                return ''
+            return appstruct.name
+
+    return EnumType
+
+
 def _format_jsonschema_error(error):
     """Format a :py:class:`jsonschema.ValidationError` as a string."""
     if error.path:
