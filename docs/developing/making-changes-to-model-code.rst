@@ -43,11 +43,11 @@ migration scripts. See the Alembic docs (and look at existing scripts in
 for details. The ``hypothesis migrate`` command is a wrapper around Alembic. The
 basic steps to create a new migration script for h are:
 
-1. Create the revision script by running ``./bin/hypothesis migrate revision``, for example:
+1. Create the revision script by running ``bin/hypothesis migrate revision``, for example:
 
    .. code-block:: bash
 
-      ./bin/hypothesis migrate revision -m "Add the foobar table"
+      bin/hypothesis migrate revision -m "Add the foobar table"
 
    This will create a new script in ``h/migrations/versions/``.
 
@@ -71,7 +71,7 @@ basic steps to create a new migration script for h are:
 
    .. code-block:: bash
 
-      ./bin/hypothesis migrate stamp <revision_id>
+      bin/hypothesis migrate stamp <revision_id>
 
    ``<revision_id>`` should be the revision corresponding to the version of the
    code that was present when the current database was created. The will
@@ -85,7 +85,7 @@ basic steps to create a new migration script for h are:
 
    .. code-block:: bash
 
-      ./bin/hypothesis migrate upgrade head
+      bin/hypothesis migrate upgrade head
 
    After running this command inspect your database's schema to check that it's
    as expected, and run h to check that everything is working.
@@ -100,14 +100,14 @@ basic steps to create a new migration script for h are:
 
    .. code-block:: bash
 
-      ./bin/hypothesis migrate downgrade -1
+      bin/hypothesis migrate downgrade -1
 
    After running this command inspect your database's schema to check that it's
    as expected. You can then upgrade it again:
 
    .. code-block:: bash
 
-      ./bin/hypothesis migrate upgrade +1
+      bin/hypothesis migrate upgrade +1
 
 Batch deletes and updates in migration scripts
 ==============================================
