@@ -304,9 +304,20 @@ class TestSaveBearerToken(object):
         token = svc.save_bearer_token(token_payload, oauth_request)
         assert token.expires == datetime.datetime(2017, 7, 13, 19, 29, 28)
 
+    def test_it_sets_refresh_token_expires(self, svc, token_payload, oauth_request, utcnow):
+        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)
+
+        token = svc.save_bearer_token(token_payload, oauth_request)
+        assert token.refresh_token_expires == datetime.datetime(2017, 7, 13, 20, 29, 28)
+
     def test_it_sets_authclient(self, svc, token_payload, oauth_request):
         token = svc.save_bearer_token(token_payload, oauth_request)
         assert token.refresh_token == 'test-refresh-token'
+
+    def test_it_removes_refresh_token_expires_in_from_payload(self, svc, token_payload, oauth_request):
+        assert 'refresh_token_expires_in' in token_payload
+        svc.save_bearer_token(token_payload, oauth_request)
+        assert 'refresh_token_expires_in' not in token_payload
 
     @pytest.fixture
     def oauth_request(self, factories):
@@ -319,6 +330,7 @@ class TestSaveBearerToken(object):
             'access_token': 'test-access-token',
             'refresh_token': 'test-refresh-token',
             'expires_in': 3600,
+            'refresh_token_expires_in': 7200,
         }
 
 

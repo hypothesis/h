@@ -172,10 +172,16 @@ class OAuthValidatorService(RequestValidator):
 
     def save_bearer_token(self, token, request, *args, **kwargs):
         """Saves a generated bearer token for the authenticated user to the database."""
+        expires = utcnow() + datetime.timedelta(seconds=token['expires_in'])
+
+        refresh_token_expires = utcnow() + datetime.timedelta(seconds=token['refresh_token_expires_in'])
+        del token['refresh_token_expires_in']  # We don't want to render this in the response.
+
         oauth_token = models.Token(userid=request.user.userid,
                                    value=token['access_token'],
                                    refresh_token=token['refresh_token'],
-                                   expires=(utcnow() + datetime.timedelta(seconds=token['expires_in'])),
+                                   expires=expires,
+                                   refresh_token_expires=refresh_token_expires,
                                    authclient=request.client.authclient)
         self.session.add(oauth_token)
         return oauth_token
