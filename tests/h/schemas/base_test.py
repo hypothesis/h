@@ -2,12 +2,15 @@
 
 from __future__ import unicode_literals
 
+import enum
+from mock import Mock
 import pytest
 
+import colander
 from pyramid.exceptions import BadCSRFToken
 
 from h.schemas import ValidationError
-from h.schemas.base import CSRFSchema, JSONSchema
+from h.schemas.base import enum_type, CSRFSchema, JSONSchema
 
 
 class ExampleCSRFSchema(CSRFSchema):
@@ -77,3 +80,37 @@ class TestJSONSchema(object):
 
         message = e.value.message
         assert message.startswith("'foo' is a required property, 'bar' is a required property")
+
+
+class Color(enum.Enum):
+        red = '#ff0000'
+        green = '#00ff00'
+        blue = '#0000ff'
+
+
+class TestEnumType(object):
+
+    def test_serialize_returns_a_string(self, color_type):
+        node = Mock()
+        assert color_type.serialize(node, Color.red) == 'red'
+
+    def test_serialize_returns_an_empty_string_if_value_is_none(self, color_type):
+        node = Mock()
+        assert color_type.serialize(node, None) == ''
+
+    def test_deserialize_returns_none_if_value_is_null(self, color_type):
+        node = Mock()
+        assert color_type.deserialize(node, colander.null) is None
+
+    def test_deserialize_returns_an_enum(self, color_type):
+        node = Mock()
+        assert color_type.deserialize(node, 'red') == Color.red
+
+    def test_deserialize_raises_if_value_unknown(self, color_type):
+        node = Mock()
+        with pytest.raises(colander.Invalid):
+            color_type.deserialize(node, 'rebeccapurple')
+
+    @pytest.fixture
+    def color_type(self):
+        return enum_type(Color)()

@@ -8,7 +8,8 @@ from mock import Mock
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from h.resources import AnnotationResource, AnnotationResourceFactory
+from h.models import AuthClient
+from h.resources import AnnotationResource, AnnotationResourceFactory, AuthClientFactory
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -194,6 +195,26 @@ class TestAnnotationResource(object):
         service = Mock(spec_set=['get', 'get_all'])
         pyramid_config.register_service(service, name='links')
         return service
+
+
+class TestAuthClientResourceFactory(object):
+    def test_get_item_returns_an_authclient(self, pyramid_request):
+        authclient = AuthClient(name='test', authority='example.com')
+        pyramid_request.db.add(authclient)
+        pyramid_request.db.flush()
+
+        factory = AuthClientFactory(pyramid_request)
+        assert factory[authclient.id] == authclient
+
+    def test_get_item_returns_keyerror_if_not_found(self, pyramid_request):
+        factory = AuthClientFactory(pyramid_request)
+        with pytest.raises(KeyError):
+            factory['E19D247D-1F07-4E91-B40D-00DF22E693E4']
+
+    def test_get_item_returns_keyerror_if_invalid(self, pyramid_request):
+        factory = AuthClientFactory(pyramid_request)
+        with pytest.raises(KeyError):
+            factory['not-a-uuid']
 
 
 class FakeGroup(object):
