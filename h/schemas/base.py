@@ -86,8 +86,8 @@ def enum_type(enum_cls):
                 return None
 
             try:
-                return enum_cls(cstruct)
-            except ValueError:
+                return enum_cls[cstruct]
+            except KeyError:
                 msg = '"{}" is not a known value'.format(cstruct)
                 raise colander.Invalid(node, msg)
 

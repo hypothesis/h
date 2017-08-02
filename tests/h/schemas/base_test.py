@@ -83,9 +83,9 @@ class TestJSONSchema(object):
 
 
 class Color(enum.Enum):
-        red = 'red'
-        green = 'green'
-        blue = 'blue'
+        red = '#ff0000'
+        green = '#00ff00'
+        blue = '#0000ff'
 
 
 class TestEnumType(object):

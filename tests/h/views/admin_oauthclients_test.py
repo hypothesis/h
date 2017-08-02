@@ -25,9 +25,9 @@ class FakeForm(object):
         self.appstruct = {}
         for name, value in items:
             if name == 'grant_type':
-                value = GrantType(value)
+                value = GrantType[value]
             elif name == 'response_type':
-                value = ResponseType(value)
+                value = ResponseType[value]
             self.appstruct[name] = value
         return self.appstruct
 
