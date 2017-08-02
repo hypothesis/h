@@ -100,17 +100,7 @@ class AuthClientEditController(object):
 
     @view_config(request_method='GET')
     def read(self):
-        client = self.client
-        self.form.set_appstruct({
-            'authority': client.authority,
-            'client_id': client.id,
-            'client_secret': client.secret or '',
-            'grant_type': client.grant_type,
-            'name': client.name,
-            'redirect_url': client.redirect_uri or '',
-            'response_type': client.response_type,
-            'trusted': client.trusted,
-        })
+        self._update_appstruct()
         return self._template_context()
 
     @view_config(request_method='POST')
@@ -127,11 +117,26 @@ class AuthClientEditController(object):
             client.response_type = _response_type_for_grant_type(grant_type)
             client.trusted = appstruct['trusted']
 
+            self._update_appstruct()
+
             return self._template_context()
 
         return form.handle_form_submission(self.request, self.form,
                                            on_success=on_success,
                                            on_failure=self._template_context)
+
+    def _update_appstruct(self):
+        client = self.client
+        self.form.set_appstruct({
+            'authority': client.authority,
+            'client_id': client.id,
+            'client_secret': client.secret or '',
+            'grant_type': client.grant_type,
+            'name': client.name,
+            'redirect_url': client.redirect_uri or '',
+            'response_type': client.response_type,
+            'trusted': client.trusted,
+        })
 
     def _template_context(self):
         return {'form': self.form.render()}

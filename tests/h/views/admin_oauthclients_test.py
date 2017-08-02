@@ -151,6 +151,21 @@ class TestAuthClientEditController(object):
 
         assert authclient.response_type == expected_response_type
 
+    def test_update_does_not_update_read_only_fields(self, authclient, form_post, pyramid_request):
+        # Attempt to modify read-only ID and secret fields.
+        old_id = authclient.id
+        old_secret = authclient.secret
+        form_post['client_id'] = 'new-id'
+        form_post['client_secret'] = 'new-secret'
+        pyramid_request.POST = form_post
+        ctrl = AuthClientEditController(authclient, pyramid_request)
+
+        ctx = ctrl.update()
+
+        assert authclient.id == old_id
+        assert authclient.secret == old_secret
+        assert ctx['form'] == self._expected_form(authclient)
+
     def test_delete_removes_authclient(self, authclient, pyramid_request):
         pyramid_request.db.delete = create_autospec(pyramid_request.db.delete, return_value=None)
         ctrl = AuthClientEditController(authclient, pyramid_request)
