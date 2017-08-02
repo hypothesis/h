@@ -9,6 +9,7 @@ from h import i18n
 from h.models import AuthClient
 from h.models.auth_client import GrantType, ResponseType
 from h.schemas.auth_client import CreateAuthClientSchema, EditAuthClientSchema
+from h.security import token_urlsafe
 
 _ = i18n.TranslationString
 
@@ -35,9 +36,10 @@ def index(request):
                renderer='h:templates/admin/oauthclients_create.html.jinja2')
 class AuthClientCreateController(object):
 
-    def __init__(self, request):
+    def __init__(self, request, secret_gen=token_urlsafe):
         self.request = request
         self.schema = CreateAuthClientSchema().bind(request=request)
+        self.secret_gen = secret_gen
         self.form = request.create_form(self.schema,
                                         buttons=(_('Register client'),))
 
@@ -56,10 +58,17 @@ class AuthClientCreateController(object):
     def post(self):
         def on_success(appstruct):
             grant_type = appstruct['grant_type']
+
+            if grant_type == GrantType.jwt_bearer:
+                secret = self.secret_gen()
+            else:
+                secret = None
+
             client = AuthClient(name=appstruct['name'],
                                 authority=appstruct['authority'],
                                 grant_type=appstruct['grant_type'],
                                 response_type=_response_type_for_grant_type(grant_type),
+                                secret=secret,
                                 trusted=appstruct['trusted'],
                                 redirect_uri=appstruct['redirect_url'])
 
