@@ -28,7 +28,8 @@ class CreateAuthClientSchema(CSRFSchema):
     grant_type = colander.SchemaNode(GrantTypeSchemaType(),
                                      missing=None,
                                      title=_('Grant type'),
-                                     hint=_('"authorization_code" or "jwt_bearer"'))
+                                     hint=_('"authorization_code" for most applications, '
+                                            '"jwt_bearer" for keys for JWT grants used by publishers'))
 
     trusted = colander.SchemaNode(
                 colander.Boolean(),
@@ -56,4 +57,7 @@ class EditAuthClientSchema(CreateAuthClientSchema):
     client_secret = colander.SchemaNode(
                       colander.String(),
                       missing=None,
-                      title=_('Client secret'))
+                      title=_('Client secret'),
+                      hint=_('Secret used to authenticate confidential clients '
+                             '(ie. those which do not perform token exchange '
+                             'directly in the browser)'))
