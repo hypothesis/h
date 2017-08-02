@@ -253,7 +253,7 @@ class OAuthValidatorService(RequestValidator):
         """
         token = self.find_refresh_token(refresh_token)
 
-        if not token or token.expired or token.authclient.id != client.client_id:
+        if not token or token.refresh_token_expired or token.authclient.id != client.client_id:
             return False
 
         request.user = self.user_svc.fetch(token.userid)

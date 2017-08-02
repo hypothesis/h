@@ -37,6 +37,23 @@ class TestToken(object):
 
         assert token.expired is True
 
+    def test_refresh_token_expired_is_false_if_in_future(self):
+        refresh_token_expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        token = Token(refresh_token_expires=refresh_token_expires)
+
+        assert token.refresh_token_expired is False
+
+    def test_refresh_token_expired_is_false_if_none(self):
+        token = Token(refresh_token_expires=None)
+
+        assert token.refresh_token_expired is False
+
+    def test_refresh_token_expired_is_true_if_in_past(self):
+        refresh_token_expires = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        token = Token(refresh_token_expires=refresh_token_expires)
+
+        assert token.refresh_token_expired is True
+
     @pytest.fixture
     def security(self, patch):
         security = patch('h.models.token.security')

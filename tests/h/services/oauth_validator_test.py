@@ -439,8 +439,8 @@ class TestValidateRefreshToken(object):
         result = svc.validate_refresh_token('missing', client, oauth_request)
         assert result is False
 
-    def test_returns_false_when_token_expired(self, svc, client, oauth_request, token):
-        token.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
+    def test_returns_false_when_refresh_token_expired(self, svc, client, oauth_request, token):
+        token.refresh_token_expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert result is False
 
@@ -450,6 +450,11 @@ class TestValidateRefreshToken(object):
         assert result is False
 
     def test_returns_true_when_token_valid(self, svc, client, oauth_request, token):
+        result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
+        assert result is True
+
+    def test_returns_true_when_access_token_expired(self, svc, client, oauth_request, token):
+        token.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert result is True
 

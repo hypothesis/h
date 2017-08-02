@@ -65,9 +65,17 @@ class Token(Base, mixins.Timestamps):
 
     @property
     def expired(self):
-        """True if this token has expired, False otherwise."""
+        """True if this access token has expired, False otherwise."""
         if self.expires:
             return datetime.datetime.utcnow() > self.expires
+
+        return False
+
+    @property
+    def refresh_token_expired(self):
+        """True if this refresh token has expired, False otherwise."""
+        if self.refresh_token_expires:
+            return datetime.datetime.utcnow() > self.refresh_token_expires
 
         return False
 
