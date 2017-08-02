@@ -49,6 +49,11 @@ class Token(Base, mixins.Timestamps):
                                       unique=True,
                                       nullable=True)
 
+    #: A timestamp after which this token's refresh token will no longer be
+    #: considered valid. A NULL value in this column indicates a refresh token
+    #: that does not expire.
+    refresh_token_expires = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
+
     _authclient_id = sqlalchemy.Column('authclient_id',
                                        postgresql.UUID(),
                                        sqlalchemy.ForeignKey('authclient.id', ondelete='cascade'),
