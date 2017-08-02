@@ -10,6 +10,7 @@ from sqlalchemy.exc import StatementError
 
 from h import models
 from h.models.auth_client import GrantType as AuthClientGrantType
+from h.services.oauth_provider import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
 from h.util.db import lru_cache_in_transaction
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
@@ -135,6 +136,25 @@ class OAuthValidatorService(RequestValidator):
         authz_code = self.find_authz_code(code)
         if authz_code:
             self.session.delete(authz_code)
+
+    def revoke_token(self, token, token_type_hint, request, *args, **kwargs):
+        """
+        Revoke a token.
+
+        We ignore the hint because we can infer the type based on the prefix of the
+        token string. This also silently ignores tokens that don't exist, this is
+        according to `RFC 7009`_.
+
+        .. _`RFC 7009`: https://tools.ietf.org/html/rfc7009
+        """
+        tok = None
+        if token.startswith(ACCESS_TOKEN_PREFIX):
+            tok = self.session.query(models.Token).filter_by(value=token).one_or_none()
+        elif token.startswith(REFRESH_TOKEN_PREFIX):
+            tok = self.session.query(models.Token).filter_by(refresh_token=token).one_or_none()
+
+        if tok:
+            self.session.delete(tok)
 
     def save_authorization_code(self, client_id, code, request, *args, **kwargs):
         client = self.find_client(client_id)

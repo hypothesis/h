@@ -216,6 +216,36 @@ class TestInvalidateAuthorizationCode(object):
         return factories.AuthzCode()
 
 
+class TestRevokeToken(object):
+    def test_it_deletes_token_when_access_token(self, svc, factories, db_session, oauth_request):
+        token = factories.OAuth2Token()
+        assert db_session.query(models.Token).count() == 1
+
+        svc.revoke_token(token.value, None, oauth_request)
+        assert db_session.query(models.Token).count() == 0
+
+    def test_it_deletes_token_when_refresh_token(self, svc, factories, db_session, oauth_request):
+        token = factories.OAuth2Token()
+        assert db_session.query(models.Token).count() == 1
+
+        svc.revoke_token(token.refresh_token, None, oauth_request)
+        assert db_session.query(models.Token).count() == 0
+
+    def test_it_ignores_other_tokens(self, svc, factories, db_session, oauth_request):
+        token = factories.DeveloperToken()
+        assert db_session.query(models.Token).count() == 1
+
+        svc.revoke_token(token.value, None, oauth_request)
+        assert db_session.query(models.Token).count() == 1
+
+    def test_it_is_noop_when_token_is_missing(self, svc, factories, db_session, oauth_request):
+        token = factories.OAuth2Token()
+        tok = token.value
+        db_session.delete(token)
+
+        svc.revoke_token(tok, None, oauth_request)
+
+
 class TestSaveAuthorizationCode(object):
     def test_it_raises_for_missing_client(self, svc, code, oauth_request):
         id_ = text_type(uuid.uuid1())

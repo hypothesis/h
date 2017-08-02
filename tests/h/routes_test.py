@@ -81,6 +81,7 @@ def test_includeme():
         call('badge', '/api/badge'),
         call('token', '/api/token'),
         call('oauth_authorize', '/oauth/authorize'),
+        call('oauth_revoke', '/oauth/revoke'),
         call('session', '/app'),
         call('sidebar_app', '/app.html'),
         call('embed', '/embed.js'),

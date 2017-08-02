@@ -9,6 +9,7 @@ from oauthlib.oauth2 import (
     AuthorizationEndpoint,
     BearerToken,
     RefreshTokenGrant,
+    RevocationEndpoint,
     TokenEndpoint,
 )
 
@@ -20,7 +21,7 @@ ACCESS_TOKEN_PREFIX = '5768-'
 REFRESH_TOKEN_PREFIX = '4657-'
 
 
-class OAuthProviderService(AuthorizationEndpoint, TokenEndpoint):
+class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpoint):
     """
     The OAuth 2 provider service.
 
@@ -57,6 +58,7 @@ class OAuthProviderService(AuthorizationEndpoint, TokenEndpoint):
                                    'urn:ietf:params:oauth:grant-type:jwt-bearer': jwt_auth_grant,
                                },
                                default_token_type=bearer)
+        RevocationEndpoint.__init__(self, oauth_validator)
 
     def load_client_id_from_refresh_token(self, request):
         """

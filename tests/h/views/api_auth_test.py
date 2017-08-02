@@ -268,6 +268,41 @@ class TestOAuthAccessTokenController(object):
         return svc
 
 
+@pytest.mark.usefixtures('oauth_provider')
+class TestOAuthRevocationController(object):
+    def test_it_creates_revocation_response(self, pyramid_request, controller, oauth_provider):
+        controller.post()
+        oauth_provider.create_revocation_response.assert_called_once_with(
+                pyramid_request.url, pyramid_request.method, pyramid_request.POST, pyramid_request.headers)
+
+    def test_it_returns_empty_response_on_success(self, controller):
+        response = controller.post()
+        assert response == {}
+
+    def test_it_raises_when_error(self, controller, oauth_provider):
+        body = json.dumps({'error': 'invalid_request'})
+        oauth_provider.create_revocation_response.return_value = ({}, body, 400)
+
+        with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
+            controller.post()
+
+        assert exc.value.body == body
+
+    @pytest.fixture
+    def controller(self, pyramid_request):
+        pyramid_request.method = 'POST'
+        pyramid_request.POST['token'] = 'the-token'
+        pyramid_request.headers = {'X-Test-ID': '1234'}
+        return views.OAuthRevocationController(pyramid_request)
+
+    @pytest.fixture
+    def oauth_provider(self, pyramid_config):
+        svc = mock.Mock(spec_set=['create_revocation_response'])
+        svc.create_revocation_response.return_value = ({}, '{}', 200)
+        pyramid_config.register_service(svc, name='oauth_provider')
+        return svc
+
+
 class TestDebugToken(object):
     def test_it_raises_error_when_token_is_missing(self, pyramid_request):
         pyramid_request.auth_token = None
