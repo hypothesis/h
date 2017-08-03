@@ -5,10 +5,11 @@ from __future__ import unicode_literals
 import pytest
 from mock import Mock
 
-from h.services.user_signup import UserSignupService
 from h.exceptions import ClientUnauthorized
-from h.views.api_users import create
+from h.models.auth_client import GrantType
 from h.schemas import ValidationError
+from h.services.user_signup import UserSignupService
+from h.views.api_users import create
 
 
 @pytest.mark.usefixtures('auth_client',
@@ -92,6 +93,15 @@ class TestCreate(object):
     def test_raises_for_public_client(self, factories, basic_auth_creds, pyramid_request, valid_payload):
         auth_client = factories.AuthClient(authority='weylandindustries.com')
         basic_auth_creds.return_value = (auth_client.id, '')
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(ClientUnauthorized):
+            create(pyramid_request)
+
+    def test_raises_for_invalid_client_grant_type(self, factories, basic_auth_creds, pyramid_request, valid_payload):
+        auth_client = factories.ConfidentialAuthClient(authority='weylandindustries.com',
+                                                       grant_type=GrantType.authorization_code)
+        basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
         pyramid_request.json_body = valid_payload
 
         with pytest.raises(ClientUnauthorized):
@@ -194,7 +204,8 @@ class TestCreate(object):
 
 @pytest.fixture
 def auth_client(factories):
-    return factories.ConfidentialAuthClient(authority='weylandindustries.com')
+    return factories.ConfidentialAuthClient(authority='weylandindustries.com',
+                                            grant_type=GrantType.client_credentials)
 
 
 @pytest.fixture
