@@ -29,7 +29,8 @@ class CreateAuthClientSchema(CSRFSchema):
                                      missing=None,
                                      title=_('Grant type'),
                                      hint=_('"authorization_code" for most applications, '
-                                            '"jwt_bearer" for keys for JWT grants used by publishers'))
+                                            '"jwt_bearer" for keys for JWT grants used by publishers, '
+                                            '"client_credentials" for allowing access to the user creation API'))
 
     trusted = colander.SchemaNode(
                 colander.Boolean(),
