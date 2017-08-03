@@ -216,6 +216,25 @@ class TestInvalidateAuthorizationCode(object):
         return factories.AuthzCode()
 
 
+class TestInvalidateRefreshToken(object):
+    def test_it_shortens_refresh_token_expires(self, svc, oauth_request, token, utcnow):
+        utcnow.return_value = datetime.datetime(2017, 8, 2, 18, 36, 53)
+
+        svc.invalidate_refresh_token(token.refresh_token, oauth_request)
+        assert token.refresh_token_expires == datetime.datetime(2017, 8, 2, 18, 39, 53)
+
+    def test_it_is_noop_when_refresh_token_expires_within_new_ttl(self, svc, oauth_request, token, utcnow):
+        utcnow.return_value = datetime.datetime(2017, 8, 2, 18, 36, 53)
+        token.refresh_token_expires = datetime.datetime(2017, 8, 2, 18, 37, 53)
+
+        svc.invalidate_refresh_token(token.refresh_token, oauth_request)
+        assert token.refresh_token_expires == datetime.datetime(2017, 8, 2, 18, 37, 53)
+
+    @pytest.fixture
+    def token(self, factories):
+        return factories.OAuth2Token()
+
+
 class TestRevokeToken(object):
     def test_it_deletes_token_when_access_token(self, svc, factories, db_session, oauth_request):
         token = factories.OAuth2Token()
@@ -304,9 +323,36 @@ class TestSaveBearerToken(object):
         token = svc.save_bearer_token(token_payload, oauth_request)
         assert token.expires == datetime.datetime(2017, 7, 13, 19, 29, 28)
 
+    def test_it_sets_refresh_token_expires(self, svc, token_payload, oauth_request, utcnow):
+        utcnow.return_value = datetime.datetime(2017, 7, 13, 18, 29, 28)
+
+        token = svc.save_bearer_token(token_payload, oauth_request)
+        assert token.refresh_token_expires == datetime.datetime(2017, 7, 13, 20, 29, 28)
+
     def test_it_sets_authclient(self, svc, token_payload, oauth_request):
         token = svc.save_bearer_token(token_payload, oauth_request)
         assert token.refresh_token == 'test-refresh-token'
+
+    def test_it_removes_refresh_token_expires_in_from_payload(self, svc, token_payload, oauth_request):
+        assert 'refresh_token_expires_in' in token_payload
+        svc.save_bearer_token(token_payload, oauth_request)
+        assert 'refresh_token_expires_in' not in token_payload
+
+    def test_it_invalidates_old_refresh_token(self, svc, token_payload, oauth_request, patch):
+        invalidate_refresh_token = patch('h.services.oauth_validator.OAuthValidatorService.invalidate_refresh_token')
+        oauth_request.grant_type = 'refresh_token'
+        oauth_request.refresh_token = 'the-refresh-token'
+
+        svc.save_bearer_token(token_payload, oauth_request)
+
+        invalidate_refresh_token.assert_called_once_with(svc, 'the-refresh-token', oauth_request)
+
+    def test_it_skips_invalidating_old_refresh_token_when_not_refresh_grant(self, svc, token_payload, oauth_request, patch):
+        invalidate_refresh_token = patch('h.services.oauth_validator.OAuthValidatorService.invalidate_refresh_token')
+
+        svc.save_bearer_token(token_payload, oauth_request)
+
+        assert not invalidate_refresh_token.called
 
     @pytest.fixture
     def oauth_request(self, factories):
@@ -319,6 +365,7 @@ class TestSaveBearerToken(object):
             'access_token': 'test-access-token',
             'refresh_token': 'test-refresh-token',
             'expires_in': 3600,
+            'refresh_token_expires_in': 7200,
         }
 
 
@@ -427,8 +474,8 @@ class TestValidateRefreshToken(object):
         result = svc.validate_refresh_token('missing', client, oauth_request)
         assert result is False
 
-    def test_returns_false_when_token_expired(self, svc, client, oauth_request, token):
-        token.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
+    def test_returns_false_when_refresh_token_expired(self, svc, client, oauth_request, token):
+        token.refresh_token_expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert result is False
 
@@ -438,6 +485,11 @@ class TestValidateRefreshToken(object):
         assert result is False
 
     def test_returns_true_when_token_valid(self, svc, client, oauth_request, token):
+        result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
+        assert result is True
+
+    def test_returns_true_when_access_token_expired(self, svc, client, oauth_request, token):
+        token.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert result is True
 

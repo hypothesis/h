@@ -7,18 +7,22 @@ import datetime
 from oauthlib.oauth2 import (
     AuthorizationCodeGrant,
     AuthorizationEndpoint,
-    BearerToken,
     RefreshTokenGrant,
     RevocationEndpoint,
     TokenEndpoint,
 )
 
-from h.oauth import InvalidRefreshTokenError, JWTAuthorizationGrant
+from h.oauth import (
+    BearerToken,
+    InvalidRefreshTokenError,
+    JWTAuthorizationGrant,
+)
 from h.security import token_urlsafe
 
-TOKEN_TTL = datetime.timedelta(hours=1).total_seconds()
 ACCESS_TOKEN_PREFIX = '5768-'
+ACCESS_TOKEN_TTL = datetime.timedelta(hours=1).total_seconds()
 REFRESH_TOKEN_PREFIX = '4657-'
+REFRESH_TOKEN_TTL = datetime.timedelta(days=7).total_seconds()
 
 
 class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpoint):
@@ -44,8 +48,9 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
 
         bearer = BearerToken(oauth_validator,
                              token_generator=self.generate_access_token,
-                             expires_in=TOKEN_TTL,
-                             refresh_token_generator=self.generate_refresh_token)
+                             expires_in=ACCESS_TOKEN_TTL,
+                             refresh_token_generator=self.generate_refresh_token,
+                             refresh_token_expires_in=REFRESH_TOKEN_TTL)
 
         AuthorizationEndpoint.__init__(self,
                                        default_response_type='code',

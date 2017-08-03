@@ -137,6 +137,20 @@ class OAuthValidatorService(RequestValidator):
         if authz_code:
             self.session.delete(authz_code)
 
+    def invalidate_refresh_token(self, refresh_token, request, *args, **kwargs):
+        """
+        Shorten expiration of a refresh token.
+
+        We do this to make sure the client could try the refresh token again within
+        a short amount of time to gracefully recover from network connection issues.
+        """
+        token = self.find_refresh_token(refresh_token)
+
+        new_ttl = datetime.timedelta(minutes=3)
+        now = utcnow()
+        if (token.refresh_token_expires - now) > new_ttl:
+            token.refresh_token_expires = now + new_ttl
+
     def revoke_token(self, token, token_type_hint, request, *args, **kwargs):
         """
         Revoke a token.
@@ -172,12 +186,23 @@ class OAuthValidatorService(RequestValidator):
 
     def save_bearer_token(self, token, request, *args, **kwargs):
         """Saves a generated bearer token for the authenticated user to the database."""
+        expires = utcnow() + datetime.timedelta(seconds=token['expires_in'])
+
+        refresh_token_expires = utcnow() + datetime.timedelta(seconds=token['refresh_token_expires_in'])
+        del token['refresh_token_expires_in']  # We don't want to render this in the response.
+
         oauth_token = models.Token(userid=request.user.userid,
                                    value=token['access_token'],
                                    refresh_token=token['refresh_token'],
-                                   expires=(utcnow() + datetime.timedelta(seconds=token['expires_in'])),
+                                   expires=expires,
+                                   refresh_token_expires=refresh_token_expires,
                                    authclient=request.client.authclient)
         self.session.add(oauth_token)
+
+        # oauthlib does not provide a proper hook for this, so we need to call it ourselves here.
+        if request.grant_type == 'refresh_token':
+            self.invalidate_refresh_token(request.refresh_token, request)
+
         return oauth_token
 
     def validate_client_id(self, client_id, request, *args, **kwargs):
@@ -247,7 +272,7 @@ class OAuthValidatorService(RequestValidator):
         """
         token = self.find_refresh_token(refresh_token)
 
-        if not token or token.expired or token.authclient.id != client.client_id:
+        if not token or token.refresh_token_expired or token.authclient.id != client.client_id:
             return False
 
         request.user = self.user_svc.fetch(token.userid)
