@@ -59,7 +59,7 @@ class AuthClientCreateController(object):
         def on_success(appstruct):
             grant_type = appstruct['grant_type']
 
-            if grant_type == GrantType.jwt_bearer:
+            if grant_type in [GrantType.jwt_bearer, GrantType.client_credentials]:
                 secret = self.secret_gen()
             else:
                 secret = None

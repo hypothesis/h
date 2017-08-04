@@ -10,6 +10,7 @@ from h import models
 from h.accounts import schemas
 from h.auth.util import basic_auth_creds
 from h.exceptions import ClientUnauthorized
+from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.util.view import json_view
 
@@ -88,6 +89,8 @@ def _request_client(request):
     if client is None:
         raise ClientUnauthorized()
     if client.secret is None:  # client is not confidential
+        raise ClientUnauthorized()
+    if client.grant_type != GrantType.client_credentials:  # client not allowed to create users
         raise ClientUnauthorized()
 
     if not hmac.compare_digest(client.secret, client_secret):
