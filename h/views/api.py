@@ -161,12 +161,17 @@ def links(context, request):
     user_url = request.route_url('stream.user_query', user='_user_')
     user_url = user_url.replace('_user_', ':user')
 
+    oauth_authorize_url = request.route_url('oauth_authorize')
+    oauth_revoke_url = request.route_url('oauth_revoke')
+
     return {
         'account.settings': request.route_url('account'),
         'forgot-password': request.route_url('forgot_password'),
         'groups.leave': group_leave_url,
         'groups.new': request.route_url('group_create'),
         'help': request.route_url('help'),
+        'oauth.authorize': oauth_authorize_url,
+        'oauth.revoke': oauth_revoke_url,
         'search.tag': tag_search_url,
         'signup': request.route_url('signup'),
         'user': user_url,
