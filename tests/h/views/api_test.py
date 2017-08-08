@@ -132,6 +132,8 @@ class TestLinks(object):
         pyramid_config.add_route('group_leave', '/groups/{pubid}/leave')
         pyramid_config.add_route('group_create', '/groups/new')
         pyramid_config.add_route('help', '/docs/help')
+        pyramid_config.add_route('oauth_authorize', '/oauth/authorize')
+        pyramid_config.add_route('oauth_revoke', '/oauth/revoke')
         pyramid_config.add_route('activity.search', '/search')
         pyramid_config.add_route('signup', '/signup')
         pyramid_config.add_route('stream.user_query', '/u/{user}')
@@ -145,6 +147,8 @@ class TestLinks(object):
             'groups.leave': host + '/groups/:id/leave',
             'groups.new': host + '/groups/new',
             'help': host + '/docs/help',
+            'oauth.authorize': host + '/oauth/authorize',
+            'oauth.revoke': host + '/oauth/revoke',
             'search.tag': host + '/search?q=tag:":tag"',
             'signup': host + '/signup',
             'user': host + '/u/:user',
