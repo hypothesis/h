@@ -79,7 +79,7 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
         request_method = (request_method,)
     if len(request_method) == 0:
         request_method = ('DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT',)
-    settings['request_method'] = request_method + ('OPTIONS',)
+    settings['request_method'] = request_method
 
     if link_name:
         link = {'name': link_name,
@@ -94,6 +94,7 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
         registry.api_links.append(link)
 
     config.add_view(view=view, **settings)
+    cors.add_preflight_view(config, settings['route_name'], cors_policy)
 
 
 def api_config(link_name=None, description=None, **settings):

@@ -11,48 +11,51 @@ from h.search.core import SearchResult
 from h.views import api as views
 
 
+@pytest.mark.usefixtures('cors')
 class TestAddApiView(object):
     def test_it_sets_accept_setting(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
+        views.add_api_view(pyramid_config, view, route_name='thing.read')
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['accept'] == 'application/json'
 
     def test_it_allows_accept_setting_override(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view, accept='application/xml')
+        views.add_api_view(pyramid_config, view, accept='application/xml',
+                           route_name='thing.read')
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['accept'] == 'application/xml'
 
     def test_it_sets_renderer_setting(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
+        views.add_api_view(pyramid_config, view, route_name='thing.read')
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['renderer'] == 'json'
 
     def test_it_allows_renderer_setting_override(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view, renderer='xml')
+        views.add_api_view(pyramid_config, view, route_name='thing.read', renderer='xml')
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['renderer'] == 'xml'
 
     def test_it_sets_cors_decorator(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
+        views.add_api_view(pyramid_config, view, route_name='thing.read')
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['decorator'] == views.cors_policy
 
+    def test_it_adds_cors_preflight_view(self, pyramid_config, view, cors):
+        views.add_api_view(pyramid_config, view, route_name='thing.read')
+        ([_, route_name, policy], _) = cors.add_preflight_view.call_args
+        assert route_name == 'thing.read'
+        assert policy == views.cors_policy
+
     def test_it_allows_decorator_override(self, pyramid_config, view):
         decorator = mock.Mock()
-        views.add_api_view(pyramid_config, view, decorator=decorator)
+        views.add_api_view(pyramid_config, view, route_name='thing.read', decorator=decorator)
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['decorator'] == decorator
 
-    def test_it_adds_OPTIONS_to_allowed_request_methods(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view, request_method='DELETE')
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['request_method'] == ('DELETE', 'OPTIONS')
-
     def test_it_adds_all_request_methods_when_not_defined(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
+        views.add_api_view(pyramid_config, view, route_name='thing.read')
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['request_method'] == (
-            'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'OPTIONS')
+            'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT')
 
     @pytest.mark.parametrize('link_name,description,request_method,expected_method', [
         ('thing.read', 'Fetch a thing', None, 'GET'),
@@ -83,6 +86,10 @@ class TestAddApiView(object):
     def pyramid_config(self, pyramid_config):
         pyramid_config.add_view = mock.Mock()
         return pyramid_config
+
+    @pytest.fixture
+    def cors(self, patch):
+        return patch('h.views.api.cors')
 
     @pytest.fixture
     def view(self):
@@ -153,6 +160,7 @@ class TestLinks(object):
             'signup': host + '/signup',
             'user': host + '/u/:user',
         }
+
 
 @pytest.mark.usefixtures('presentation_service', 'search_lib')
 class TestSearch(object):

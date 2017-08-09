@@ -6,7 +6,7 @@ from pyramid.request import Request
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPBadRequest
 
-from h.util.cors import policy, set_cors_headers
+from h.util.cors import add_preflight_view, policy, set_cors_headers
 
 
 def test_cors_passes_through_non_preflight():
@@ -217,6 +217,38 @@ class TestCorsViewDecorator(object):
     @pytest.fixture
     def set_cors_headers(self, patch):
         return patch('h.util.cors.set_cors_headers')
+
+
+class TestAddPreflightView(object):
+
+    def test_it_adds_preflight_view(self, pyramid_config):
+        def view(request):
+            pass  # noop
+        cors_policy = policy()
+        pyramid_config.add_route('api.read_thing', '/api/thing')
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+        app = pyramid_config.make_wsgi_app()
+
+        headers = {'Origin': 'https://custom-client.herokuapp.com',
+                   'Access-Control-Request-Method': 'POST'}
+        request = Request.blank('/api/thing', method='OPTIONS', headers=headers)
+        resp = request.get_response(app)
+
+        assert resp.status_code == 200
+        assert resp.body == ''
+
+    def test_it_adds_one_preflight_view_per_route(self, pyramid_config):
+        cors_policy = policy()
+        pyramid_config.add_route('api.read_thing', '/api/thing')
+        pyramid_config.add_view = mock.Mock()
+
+        def view(request):
+            pass  # noop
+
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+
+        assert pyramid_config.add_view.call_count == 1
 
 
 # A tiny WSGI application used for testing the middleware
