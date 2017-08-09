@@ -29,20 +29,9 @@ from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
 from h.resources import AnnotationResource
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.util import cors
+from h.util.view import cors_policy
 
 _ = i18n.TranslationStringFactory(__package__)
-
-# FIXME: unify (or at least deduplicate) CORS policy between this file and
-#        `h.util.view`
-cors_policy = cors.policy(
-    allow_headers=(
-        'Authorization',
-        'Content-Type',
-        'X-Annotator-Auth-Token',
-        'X-Client-Id',
-    ),
-    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'),
-    allow_preflight=True)
 
 
 def add_api_view(config, view, link_name=None, description=None, **settings):

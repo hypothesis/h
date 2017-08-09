@@ -10,8 +10,9 @@ cors_policy = cors.policy(
     allow_headers=(
         'Authorization',
         'Content-Type',
+        'X-Client-Id',
     ),
-    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
+    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'),
     allow_preflight=True)
 
 
