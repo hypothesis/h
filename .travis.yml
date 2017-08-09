@@ -1,6 +1,7 @@
 # use Travis container build infrastructure
 sudo: false
 matrix:
+  fast_finish: true
   include:
     # Python (backend) tests
     - env: ACTION=tox
