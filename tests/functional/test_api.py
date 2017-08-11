@@ -89,6 +89,24 @@ class TestAPI(object):
         group_ids = [group['id'] for group in res.json['groups']]
         assert group_ids == [publisher_group.pubid]
 
+    def test_cors_preflight(self, app):
+        # Simulate a CORS preflight request made by the browser from a client
+        # hosted on a domain other than the one the service is running on.
+        #
+        # Note that no `Authorization` header is set.
+        origin = 'https://custom-client.herokuapp.com'
+        headers = {'Access-Control-Request-Headers': str('authorization,content-type'),
+                   'Access-Control-Request-Method': str('POST'),
+                   'Origin': str(origin)}
+
+        res = app.options('/api/annotations', headers=headers)
+
+        assert res.status_code == 200
+        assert res.headers['Access-Control-Allow-Origin'] == str(origin)
+        assert 'POST' in res.headers['Access-Control-Allow-Methods']
+        for header in ['Authorization', 'Content-Type', 'X-Client-Id']:
+            assert header in res.headers['Access-Control-Allow-Headers']
+
 
 @pytest.fixture
 def annotation(db_session, factories):

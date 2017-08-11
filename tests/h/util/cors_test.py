@@ -6,7 +6,7 @@ from pyramid.request import Request
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPBadRequest
 
-from h.util.cors import policy, set_cors_headers
+from h.util.cors import add_preflight_view, policy, set_cors_headers
 
 
 def test_cors_passes_through_non_preflight():
@@ -57,7 +57,7 @@ def test_cors_sets_allow_origin_for_preflight(headers):
     assert resp.headers['Access-Control-Allow-Origin'] == 'http://example.com'
 
 
-def test_cors_sets_allow_methods_OPTIONS_for_preflight(headers):
+def test_cors_sets_allow_methods_OPTIONS_for_preflight(headers):  # noqa
     request = Request.blank('/', method='OPTIONS', headers=headers)
 
     resp = request.get_response(wsgi_testapp)
@@ -138,40 +138,6 @@ class TestCorsViewDecorator(object):
 
         assert response.body == 'OK'
 
-    def test_it_calls_wrapped_view_for_preflight_request_when_disabled(self,
-                                                                       pyramid_request,
-                                                                       testview):
-        cors_policy = policy(allow_preflight=False)
-        pyramid_request.request_method = 'OPTIONS'
-
-        cors_policy(testview)(None, pyramid_request)
-
-        assert testview.called
-
-    def test_it_skips_wrapped_view_for_preflight_request_when_enabled(self,
-                                                                      pyramid_request,
-                                                                      testview):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
-
-        cors_policy(testview)(None, pyramid_request)
-
-        assert not testview.called
-
-    def test_it_returns_empty_response_for_preflight_request_when_enabled(self,
-                                                                          pyramid_request,
-                                                                          testview):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
-
-        response = cors_policy(testview)(None, pyramid_request)
-
-        assert response.body == ''
-
     def test_it_sets_cors_headers(self, pyramid_request, testview, set_cors_headers):
         cors_policy = policy()
 
@@ -186,30 +152,6 @@ class TestCorsViewDecorator(object):
 
         assert response == set_cors_headers.return_value
 
-    def test_it_sets_cors_headers_for_preflight_request_when_enabled(self,
-                                                                     pyramid_request,
-                                                                     testview,
-                                                                     set_cors_headers):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
-
-        cors_policy(testview)(None, pyramid_request)
-
-        assert set_cors_headers.called
-
-    def test_it_returns_set_cors_headers_value_for_preflight_request_when_enabled(
-            self, pyramid_request, testview, set_cors_headers):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
-
-        response = cors_policy(testview)(None, pyramid_request)
-
-        assert response == set_cors_headers.return_value
-
     @pytest.fixture
     def testview(self):
         return mock.Mock(return_value=Response('OK'))
@@ -217,6 +159,50 @@ class TestCorsViewDecorator(object):
     @pytest.fixture
     def set_cors_headers(self, patch):
         return patch('h.util.cors.set_cors_headers')
+
+
+class TestAddPreflightView(object):
+
+    def test_it_adds_preflight_view(self, pyramid_config):
+        def view(request):
+            pass  # noop
+        cors_policy = policy()
+        pyramid_config.add_route('api.read_thing', '/api/thing')
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+        app = pyramid_config.make_wsgi_app()
+
+        headers = {'Origin': 'https://custom-client.herokuapp.com',
+                   'Access-Control-Request-Method': 'POST'}
+        request = Request.blank('/api/thing', method='OPTIONS', headers=headers)
+        resp = request.get_response(app)
+
+        assert resp.status_code == 200
+        assert resp.body == ''
+
+    def test_preflight_view_uses_cors_decorator(self, pyramid_config):
+        def view(request):
+            pass  # noop
+        cors_policy = policy()
+        pyramid_config.add_route('api.read_thing', '/api/thing')
+        pyramid_config.add_view = mock.Mock()
+
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['decorator'] == cors_policy
+
+    def test_it_adds_one_preflight_view_per_route(self, pyramid_config):
+        cors_policy = policy()
+        pyramid_config.add_route('api.read_thing', '/api/thing')
+        pyramid_config.add_view = mock.Mock()
+
+        def view(request):
+            pass  # noop
+
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+
+        assert pyramid_config.add_view.call_count == 1
 
 
 # A tiny WSGI application used for testing the middleware

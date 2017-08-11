@@ -32,8 +32,6 @@ from h.util import cors
 
 _ = i18n.TranslationStringFactory(__package__)
 
-# FIXME: unify (or at least deduplicate) CORS policy between this file and
-#        `h.util.view`
 cors_policy = cors.policy(
     allow_headers=(
         'Authorization',
@@ -41,11 +39,11 @@ cors_policy = cors.policy(
         'X-Annotator-Auth-Token',
         'X-Client-Id',
     ),
-    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'),
-    allow_preflight=True)
+    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'))
 
 
-def add_api_view(config, view, link_name=None, description=None, **settings):
+def add_api_view(config, view, link_name=None, description=None,
+                 enable_preflight=True, **settings):
 
     """
     Add a view configuration for an API view.
@@ -60,6 +58,9 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
     :param link_name: Dotted path of the metadata for this route in the output
                       of the `api.index` view
     :param description: Description of the view to use in the `api.index` view
+    :param enable_preflight: If `True` add support for CORS preflight requests
+                             for this view. If `True`, a `route_name` must be
+                             specified.
     :param settings: Arguments to pass on to `config.add_view`
     """
 
@@ -74,13 +75,6 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
     settings.setdefault('renderer', 'json')
     settings.setdefault('decorator', cors_policy)
 
-    request_method = settings.get('request_method', ())
-    if not isinstance(request_method, tuple):
-        request_method = (request_method,)
-    if len(request_method) == 0:
-        request_method = ('DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT',)
-    settings['request_method'] = request_method + ('OPTIONS',)
-
     if link_name:
         link = {'name': link_name,
                 'method': primary_method,
@@ -94,6 +88,8 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
         registry.api_links.append(link)
 
     config.add_view(view=view, **settings)
+    if enable_preflight:
+        cors.add_preflight_view(config, settings['route_name'], cors_policy)
 
 
 def api_config(link_name=None, description=None, **settings):
@@ -112,7 +108,14 @@ def api_config(link_name=None, description=None, **settings):
                      **settings)
 
     def wrapper(wrapped):
-        venusian.attach(wrapped, callback, category='pyramid')
+        info = venusian.attach(wrapped, callback, category='pyramid')
+
+        # Support use as a class method decorator.
+        # Taken from Pyramid's `view_config` decorator implementation.
+        if info.scope == 'class':
+            if settings.get('attr') is None:
+                settings['attr'] = wrapped.__name__
+
         return wrapped
 
     return wrapper
