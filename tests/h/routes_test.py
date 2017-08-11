@@ -14,8 +14,8 @@ def test_includeme():
 
     # This may look like a ridiculous test, but the cost of keeping it
     # up-to-date is hopefully pretty low (run the tests with -vv, copy the new
-    # expected value) and it serves as a check to ensure that any changes made
-    # to the routes were intended.
+    # expected value, strip out any Unicode prefixes) and it serves as a check
+    # to ensure that any changes made to the routes were intended.
     assert config.add_route.mock_calls == [
         call('index', '/'),
         call('robots', '/robots.txt'),
@@ -79,6 +79,7 @@ def test_includeme():
              traverse='/{id}'),
         call('api.profile', '/api/profile'),
         call('api.debug_token', '/api/debug-token'),
+        call('api.group_member', '/api/groups/{pubid}/members/me', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('api.search', '/api/search'),
         call('api.users', '/api/users'),
         call('badge', '/api/badge'),
