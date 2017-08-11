@@ -11,8 +11,7 @@ cors_policy = cors.policy(
         'Authorization',
         'Content-Type',
     ),
-    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'),
-    allow_preflight=True)
+    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
 
 
 def handle_exception(request):

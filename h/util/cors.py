@@ -6,7 +6,6 @@ from pyramid.response import Response
 def policy(allow_credentials=False,
            allow_headers=None,
            allow_methods=None,
-           allow_preflight=False,
            expose_headers=None,
            max_age=86400):
     """
@@ -28,10 +27,7 @@ def policy(allow_credentials=False,
 
     def cors_decorator(wrapped):
         def wrapper(context, request):
-            if allow_preflight and request.method == 'OPTIONS':
-                response = Response()
-            else:
-                response = wrapped(context, request)
+            response = wrapped(context, request)
             return set_cors_headers(request, response,
                                     allow_credentials=allow_credentials,
                                     allow_headers=allow_headers,

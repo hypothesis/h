@@ -41,8 +41,7 @@ cors_policy = cors.policy(
         'X-Annotator-Auth-Token',
         'X-Client-Id',
     ),
-    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'),
-    allow_preflight=True)
+    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'))
 
 
 def add_api_view(config, view, link_name=None, description=None, **settings):

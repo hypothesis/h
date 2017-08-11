@@ -57,7 +57,7 @@ def test_cors_sets_allow_origin_for_preflight(headers):
     assert resp.headers['Access-Control-Allow-Origin'] == 'http://example.com'
 
 
-def test_cors_sets_allow_methods_OPTIONS_for_preflight(headers):
+def test_cors_sets_allow_methods_OPTIONS_for_preflight(headers):  # noqa
     request = Request.blank('/', method='OPTIONS', headers=headers)
 
     resp = request.get_response(wsgi_testapp)
@@ -138,40 +138,6 @@ class TestCorsViewDecorator(object):
 
         assert response.body == 'OK'
 
-    def test_it_calls_wrapped_view_for_preflight_request_when_disabled(self,
-                                                                       pyramid_request,
-                                                                       testview):
-        cors_policy = policy(allow_preflight=False)
-        pyramid_request.request_method = 'OPTIONS'
-
-        cors_policy(testview)(None, pyramid_request)
-
-        assert testview.called
-
-    def test_it_skips_wrapped_view_for_preflight_request_when_enabled(self,
-                                                                      pyramid_request,
-                                                                      testview):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
-
-        cors_policy(testview)(None, pyramid_request)
-
-        assert not testview.called
-
-    def test_it_returns_empty_response_for_preflight_request_when_enabled(self,
-                                                                          pyramid_request,
-                                                                          testview):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
-
-        response = cors_policy(testview)(None, pyramid_request)
-
-        assert response.body == ''
-
     def test_it_sets_cors_headers(self, pyramid_request, testview, set_cors_headers):
         cors_policy = policy()
 
@@ -181,30 +147,6 @@ class TestCorsViewDecorator(object):
 
     def test_it_returns_set_cors_headers_value(self, pyramid_request, testview, set_cors_headers):
         cors_policy = policy()
-
-        response = cors_policy(testview)(None, pyramid_request)
-
-        assert response == set_cors_headers.return_value
-
-    def test_it_sets_cors_headers_for_preflight_request_when_enabled(self,
-                                                                     pyramid_request,
-                                                                     testview,
-                                                                     set_cors_headers):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
-
-        cors_policy(testview)(None, pyramid_request)
-
-        assert set_cors_headers.called
-
-    def test_it_returns_set_cors_headers_value_for_preflight_request_when_enabled(
-            self, pyramid_request, testview, set_cors_headers):
-        cors_policy = policy(allow_preflight=True)
-        pyramid_request.method = 'OPTIONS'
-        pyramid_request.headers['Origin'] = 'https://example.org'
-        pyramid_request.headers['Access-Control-Request-Method'] = 'GET'
 
         response = cors_policy(testview)(None, pyramid_request)
 
@@ -236,6 +178,18 @@ class TestAddPreflightView(object):
 
         assert resp.status_code == 200
         assert resp.body == ''
+
+    def test_preflight_view_uses_cors_decorator(self, pyramid_config):
+        def view(request):
+            pass  # noop
+        cors_policy = policy()
+        pyramid_config.add_route('api.read_thing', '/api/thing')
+        pyramid_config.add_view = mock.Mock()
+
+        add_preflight_view(pyramid_config, 'api.read_thing', cors_policy)
+
+        (_, kwargs) = pyramid_config.add_view.call_args
+        assert kwargs['decorator'] == cors_policy
 
     def test_it_adds_one_preflight_view_per_route(self, pyramid_config):
         cors_policy = policy()
