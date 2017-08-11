@@ -105,7 +105,14 @@ def api_config(link_name=None, description=None, **settings):
                      **settings)
 
     def wrapper(wrapped):
-        venusian.attach(wrapped, callback, category='pyramid')
+        info = venusian.attach(wrapped, callback, category='pyramid')
+
+        # Support use as a class method decorator.
+        # Taken from Pyramid's `view_config` decorator implementation.
+        if info.scope == 'class':
+            if settings.get('attr') is None:
+                settings['attr'] = wrapped.__name__
+
         return wrapped
 
     return wrapper
