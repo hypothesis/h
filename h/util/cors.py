@@ -106,10 +106,10 @@ def add_preflight_view(config, route_name, cors_policy):
     # For a given route there may be multiple views with different predicates
     # (eg. to handle authenticated vs unauthenticated users). However we only
     # want one preflight view.
-    if not hasattr(config.registry, 'preflighted_views'):
-        config.registry.preflighted_views = set()
+    if not hasattr(config.registry, 'cors_preflighted_views'):
+        config.registry.cors_preflighted_views = set()
 
-    if route_name in config.registry.preflighted_views:
+    if route_name in config.registry.cors_preflighted_views:
         return
 
     def preflight_view(context, request):
@@ -117,4 +117,4 @@ def add_preflight_view(config, route_name, cors_policy):
 
     config.add_view(preflight_view, decorator=cors_policy,
                     route_name=route_name, request_method='OPTIONS')
-    config.registry.preflighted_views.add(route_name)
+    config.registry.cors_preflighted_views.add(route_name)
