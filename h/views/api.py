@@ -73,13 +73,6 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
     settings.setdefault('renderer', 'json')
     settings.setdefault('decorator', cors_policy)
 
-    request_method = settings.get('request_method', ())
-    if not isinstance(request_method, tuple):
-        request_method = (request_method,)
-    if len(request_method) == 0:
-        request_method = ('DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT',)
-    settings['request_method'] = request_method
-
     if link_name:
         link = {'name': link_name,
                 'method': primary_method,

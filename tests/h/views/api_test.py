@@ -51,12 +51,6 @@ class TestAddApiView(object):
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['decorator'] == decorator
 
-    def test_it_adds_all_request_methods_when_not_defined(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view, route_name='thing.read')
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['request_method'] == (
-            'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT')
-
     @pytest.mark.parametrize('link_name,description,request_method,expected_method', [
         ('thing.read', 'Fetch a thing', None, 'GET'),
         ('thing.update', 'Update a thing', ('PUT', 'PATCH'), 'PUT'),
