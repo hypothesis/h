@@ -32,8 +32,6 @@ from h.util import cors
 
 _ = i18n.TranslationStringFactory(__package__)
 
-# FIXME: unify (or at least deduplicate) CORS policy between this file and
-#        `h.util.view`
 cors_policy = cors.policy(
     allow_headers=(
         'Authorization',
@@ -44,7 +42,8 @@ cors_policy = cors.policy(
     allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'))
 
 
-def add_api_view(config, view, link_name=None, description=None, **settings):
+def add_api_view(config, view, link_name=None, description=None,
+                 enable_preflight=True, **settings):
 
     """
     Add a view configuration for an API view.
@@ -59,6 +58,9 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
     :param link_name: Dotted path of the metadata for this route in the output
                       of the `api.index` view
     :param description: Description of the view to use in the `api.index` view
+    :param enable_preflight: If `True` add support for CORS preflight requests
+                             for this view. If `True`, a `route_name` must be
+                             specified.
     :param settings: Arguments to pass on to `config.add_view`
     """
 
@@ -86,7 +88,8 @@ def add_api_view(config, view, link_name=None, description=None, **settings):
         registry.api_links.append(link)
 
     config.add_view(view=view, **settings)
-    cors.add_preflight_view(config, settings['route_name'], cors_policy)
+    if enable_preflight:
+        cors.add_preflight_view(config, settings['route_name'], cors_policy)
 
 
 def api_config(link_name=None, description=None, **settings):

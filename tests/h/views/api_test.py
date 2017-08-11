@@ -45,6 +45,11 @@ class TestAddApiView(object):
         assert route_name == 'thing.read'
         assert policy == views.cors_policy
 
+    def test_it_does_not_add_cors_preflight_view_if_disabled(self, pyramid_config, view, cors):
+        views.add_api_view(pyramid_config, view, route_name='thing.read',
+                           enable_preflight=False)
+        assert cors.add_preflight_view.call_count == 0
+
     def test_it_allows_decorator_override(self, pyramid_config, view):
         decorator = mock.Mock()
         views.add_api_view(pyramid_config, view, route_name='thing.read', decorator=decorator)
