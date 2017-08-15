@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import sqlalchemy as sa
+
 from h.models import User
 from h.util.db import lru_cache_in_transaction
 from h.util.user import split_user
@@ -64,18 +66,21 @@ class UserService(object):
         email in the default authority if `username_or_email` contains an "@"
         character.
 
+        When fetching by an email address we use a case-insensitive query.
+
         :returns: A user object if a user was found, None otherwise.
         :rtype: h.models.User or NoneType
         :raises UserNotActivated: When the user is not activated.
         """
-        filters = {'authority': self.default_authority}
+        filters = [(User.authority == self.default_authority)]
         if '@' in username_or_email:
-            filters['email'] = username_or_email
+            filters.append(
+                sa.func.lower(User.email) == username_or_email.lower())
         else:
-            filters['username'] = username_or_email
+            filters.append(User.username == username_or_email)
 
         user = (self.session.query(User)
-                .filter_by(**filters)
+                .filter(*filters)
                 .one_or_none())
 
         if user is None:
