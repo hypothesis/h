@@ -47,6 +47,7 @@ class RenameUserService(object):
         new_userid = user.userid
 
         self._purge_auth_tickets(user)
+        self._purge_tokens(user)
 
         ids = self._change_annotations(old_userid, new_userid)
 
@@ -55,6 +56,11 @@ class RenameUserService(object):
     def _purge_auth_tickets(self, user):
         self.session.query(models.AuthTicket) \
             .filter(models.AuthTicket.user_id == user.id) \
+            .delete()
+
+    def _purge_tokens(self, user):
+        self.session.query(models.Token) \
+            .filter(models.Token.userid == user.userid) \
             .delete()
 
     def _change_annotations(self, old_userid, new_userid):
