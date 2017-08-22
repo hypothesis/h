@@ -115,6 +115,7 @@ def includeme(config):
     config.include('h.indexer')
     config.include('h.panels')
     config.include('h.realtime')
+    config.include('h.renderers')
     config.include('h.routes')
     config.include('h.search')
     config.include('h.sentry')
