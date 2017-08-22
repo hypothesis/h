@@ -318,6 +318,31 @@ paths:
             $ref: '#/definitions/Error'
       security:
         - authClientCredentials: []
+  /groups/{id}/members/{user}:
+    delete:
+      summary: Remove a member from a group
+      operationId: deleteGroupMember
+      parameters:
+        - name: id
+          in: path
+          description: Public ID of the group
+          required: true
+          type: string
+        - name: user
+          in: path
+          description: |
+            The user to remove from the group. For now, only the value `me` is
+            supported, representing the currently-authenticated user.
+          required: true
+          type: string
+          enum: ['me']
+      responses:
+        '204':
+          description: Success
+        '404':
+          description: Group not found
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   NewAnnotation:
     $ref: './schemas/annotation-schema.json'
