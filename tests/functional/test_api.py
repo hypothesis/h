@@ -7,6 +7,16 @@ import pytest
 
 @pytest.mark.functional
 class TestAPI(object):
+    def test_api_index(self, app):
+        """
+        Test the API index view.
+
+        This view is tested more thoroughly in the view tests, but this test
+        checks the view doesn't error out and returns appropriate-looking JSON.
+        """
+        res = app.get('/api/')
+        assert 'links' in res.json
+
     def test_annotation_read(self, app, annotation):
         """Fetch an annotation by ID."""
         res = app.get('/api/annotations/' + annotation.id,
