@@ -51,14 +51,14 @@ class TestAddApiView(object):
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs['decorator'] == decorator
 
-    @pytest.mark.parametrize('link_name,description,request_method,expected_method', [
-        ('thing.read', 'Fetch a thing', None, 'GET'),
-        ('thing.update', 'Update a thing', ('PUT', 'PATCH'), 'PUT'),
-        ('thing.delete', 'Delete a thing', 'DELETE', 'DELETE'),
+    @pytest.mark.parametrize('link_name,route_name,description,request_method,expected_method', [
+        ('read', 'thing.read', 'Fetch a thing', None, 'GET'),
+        ('update', 'thing.update', 'Update a thing', ('PUT', 'PATCH'), 'PUT'),
+        ('delete', 'thing.delete', 'Delete a thing', 'DELETE', 'DELETE'),
     ])
     def test_it_adds_api_links_to_registry(self, pyramid_config, view,
-                                           link_name, description, request_method,
-                                           expected_method):
+                                           link_name, route_name, description,
+                                           request_method, expected_method):
         kwargs = {}
         if request_method:
             kwargs['request_method'] = request_method
@@ -66,14 +66,14 @@ class TestAddApiView(object):
         api_config.add_api_view(pyramid_config, view=view,
                                 link_name=link_name,
                                 description=description,
-                                route_name=link_name,
+                                route_name=route_name,
                                 **kwargs)
 
         assert pyramid_config.registry.api_links == [{
             'name': link_name,
             'description': description,
             'method': expected_method,
-            'route_name': link_name,
+            'route_name': route_name,
         }]
 
     @pytest.fixture
