@@ -50,7 +50,7 @@ class TestOAuthAuthorizeController(object):
             view = getattr(controller, view_name)
             view()
 
-        assert exc.value.location == 'http://example.com/login?next={}'.format(
+        assert exc.value.location == 'http://example.com/login?next={}&for_oauth=True'.format(
                                        url_quote(pyramid_request.url, safe=''))
 
     @pytest.mark.parametrize('response_mode,view_name', [

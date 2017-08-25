@@ -108,7 +108,8 @@ class OAuthAuthorizeController(object):
 
         if self.request.authenticated_userid is None:
             raise HTTPFound(self.request.route_url('login', _query={
-                              'next': self.request.url}))
+                              'next': self.request.url,
+                              'for_oauth': True}))
 
         client_id = credentials.get('client_id')
         client = self.request.db.query(models.AuthClient).get(client_id)

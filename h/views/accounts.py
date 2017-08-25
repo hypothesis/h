@@ -110,6 +110,13 @@ class AuthController(object):
 
         return {'form': self.form.render()}
 
+    @view_config(request_method='GET',
+                 request_param='for_oauth',
+                 renderer='h:templates/accounts/login_oauth.html.jinja2')
+    def get_oauth(self):
+        """Render the login page, in the context of an OAuth flow."""
+        return {'form': self.form.render()}
+
     @view_config(request_method='POST')
     def post(self):
         """Log the user in and redirect them."""

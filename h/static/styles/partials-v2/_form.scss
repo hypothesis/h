@@ -44,6 +44,18 @@
   font-size: $title-font-size;
 }
 
+.form-header--center {
+  margin-top: 30px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.form-header__logo {
+  color: $grey-6;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
 .form-description {
   margin-bottom: 30px;
 
@@ -62,6 +74,15 @@
 
   border-top: 1px solid $grey-3;
   padding-top: 15px;
+}
+
+// A more compact form footer, suitable for use in small popup windows or when
+// trying to fit the whole form into a single screen on mobile.
+.form-footer--compact {
+  @include form-footer;
+
+  border-top: 1px solid $grey-3;
+  padding-top: 10px;
 }
 
 // A form footer with no top border, useful for additional sections at the
