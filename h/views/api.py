@@ -62,6 +62,7 @@ def index(context, request):
 
 @api_config(route_name='api.links',
             link_name='links',
+            renderer='json_sorted',
             description='URL templates for generating URLs for HTML pages')
 def links(context, request):
     group_leave_url = request.route_url('group_leave', pubid='_id_')
