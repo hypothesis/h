@@ -72,6 +72,9 @@ def includeme(config):
     # is not (or should not) be necessary, but for now the client will
     # construct URLs incorrectly if its `apiUrl` setting does not end in a
     # trailing slash.
+    #
+    # Any new parameter names will require a corresponding change to the link
+    # template generator in `h/views/api.py`
     config.add_route('api.index', '/api/')
     config.add_route('api.links', '/api/links')
     config.add_route('api.annotations', '/api/annotations')
