@@ -97,7 +97,7 @@ def includeme(config):
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.group_member',
-                     '/api/groups/{pubid}/members/me',
+                     '/api/groups/{pubid}/members/{user}',
                      factory='h.models.group:GroupFactory',
                      traverse='/{pubid}')
     config.add_route('api.search', '/api/search')

@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from pyramid import security
-from pyramid.httpexceptions import HTTPNoContent
+from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 
 from h.views.api import api_config
 
@@ -17,7 +17,10 @@ def remove_member(group, request):
     """Remove a member from the given group."""
 
     # Currently, we only support removing the requesting user
-    userid = request.authenticated_userid
+    if request.matchdict.get('user') == 'me':
+        userid = request.authenticated_userid
+    else:
+        raise HTTPBadRequest('Only the "me" user value is currently supported')
 
     group_service = request.find_service(name='group')
     group_service.member_leave(group, userid)
