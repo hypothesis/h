@@ -27,7 +27,7 @@ from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
 from h.resources import AnnotationResource
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
-from h.views.api_config import api_config
+from h.views.api_config import api_config, AngularRouteTemplater
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -40,16 +40,17 @@ def index(context, request):
 
     api_links = request.registry.api_links
 
+    # We currently need to keep a list of the parameter names we use in our API
+    # paths and pass these explicitly into the templater. As and when new
+    # parameter names are added, we'll need to add them here, or this view will
+    # break (and get caught by the `test_api_index` functional test).
+    templater = AngularRouteTemplater(request.route_url, params=['id'])
+
     links = {}
     for link in api_links:
         method_info = {
             'method': link['method'],
-
-            # For routes that include an id, generate a route URL with `:id` in
-            # the output. We can't just use `:id` as the `id` param value because
-            # `route_url` URL-encodes parameters.
-            'url': request.route_url(link['route_name'],
-                                     id='_id_').replace('_id_', ':id'),
+            'url': templater.route_template(link['route_name']),
             'desc': link['description'],
         }
         _set_at_path(links, link['name'].split('.'), method_info)
