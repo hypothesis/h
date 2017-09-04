@@ -70,12 +70,11 @@ def links(context, request):
     group_leave_url = request.route_url('group_leave', pubid='_id_')
     group_leave_url = group_leave_url.replace('_id_', ':id')
 
+    templater = AngularRouteTemplater(request.route_url, params=['user'])
+
     tag_search_url = request.route_url('activity.search',
                                        _query={'q': '_query_'})
     tag_search_url = tag_search_url.replace('_query_', 'tag:":tag"')
-
-    user_url = request.route_url('stream.user_query', user='_user_')
-    user_url = user_url.replace('_user_', ':user')
 
     oauth_authorize_url = request.route_url('oauth_authorize')
     oauth_revoke_url = request.route_url('oauth_revoke')
@@ -90,7 +89,7 @@ def links(context, request):
         'oauth.revoke': oauth_revoke_url,
         'search.tag': tag_search_url,
         'signup': request.route_url('signup'),
-        'user': user_url,
+        'user': templater.route_template('stream.user_query'),
     }
 
 
