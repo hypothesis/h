@@ -31,6 +31,7 @@ from h.views.api_config import api_config, AngularRouteTemplater
 
 _ = i18n.TranslationStringFactory(__package__)
 
+
 @api_config(route_name='api.index')
 def index(context, request):
     """Return the API descriptor document.
@@ -67,9 +68,6 @@ def index(context, request):
             renderer='json_sorted',
             description='URL templates for generating URLs for HTML pages')
 def links(context, request):
-    group_leave_url = request.route_url('group_leave', pubid='_id_')
-    group_leave_url = group_leave_url.replace('_id_', ':id')
-
     templater = AngularRouteTemplater(request.route_url, params=['user'])
 
     tag_search_url = request.route_url('activity.search',
@@ -82,7 +80,6 @@ def links(context, request):
     return {
         'account.settings': request.route_url('account'),
         'forgot-password': request.route_url('forgot_password'),
-        'groups.leave': group_leave_url,
         'groups.new': request.route_url('group_create'),
         'help': request.route_url('help'),
         'oauth.authorize': oauth_authorize_url,
