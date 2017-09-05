@@ -65,11 +65,9 @@ class RenameUserService(object):
             .delete()
 
     def _update_tokens(self, old_userid, new_userid):
-        user_tokens = self.session.query(models.Token) \
-                          .filter(models.Token.userid == old_userid)
-
-        for token in user_tokens:
-            token.userid = new_userid
+        self.session.query(models.Token) \
+            .filter(models.Token.userid == old_userid) \
+            .update({'userid': new_userid}, synchronize_session='fetch')
 
     def _change_annotations(self, old_userid, new_userid):
         annotations = self._fetch_annotations(old_userid)
