@@ -122,10 +122,6 @@ def includeme(config):
                      '/groups/{pubid}/edit',
                      factory='h.models.group:GroupFactory',
                      traverse='/{pubid}')
-    config.add_route('group_leave',
-                     '/groups/{pubid}/leave',
-                     factory='h.models.group:GroupFactory',
-                     traverse='/{pubid}')
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route('group_read',
                      '/groups/{pubid}/{slug:[^/]*}',

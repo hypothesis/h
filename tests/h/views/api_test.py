@@ -51,7 +51,6 @@ class TestLinks(object):
     def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):
         pyramid_config.add_route('account', '/account/settings')
         pyramid_config.add_route('forgot_password', '/forgot-password')
-        pyramid_config.add_route('group_leave', '/groups/{pubid}/leave')
         pyramid_config.add_route('group_create', '/groups/new')
         pyramid_config.add_route('help', '/docs/help')
         pyramid_config.add_route('oauth_authorize', '/oauth/authorize')
@@ -66,7 +65,6 @@ class TestLinks(object):
         assert links == {
             'account.settings': host + '/account/settings',
             'forgot-password': host + '/forgot-password',
-            'groups.leave': host + '/groups/:id/leave',
             'groups.new': host + '/groups/new',
             'help': host + '/docs/help',
             'oauth.authorize': host + '/oauth/authorize',

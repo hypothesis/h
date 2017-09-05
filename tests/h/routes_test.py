@@ -93,7 +93,6 @@ def test_includeme():
         call('stream_rss', '/stream.rss'),
         call('group_create', '/groups/new'),
         call('group_edit', '/groups/{pubid}/edit', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
-        call('group_leave', '/groups/{pubid}/leave', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('group_read', '/groups/{pubid}/{slug:[^/]*}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('group_read_noslug', '/groups/{pubid}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('help', '/docs/help'),
