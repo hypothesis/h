@@ -42,20 +42,32 @@ class RenameUserService(object):
         self.check(user, new_username)
 
         old_userid = user.userid
-
         user.username = new_username
         new_userid = user.userid
 
+        # Remove auth tickets when renaming the user. We cannot just update the
+        # denormalized `user_userid` of these because the previous userid values
+        # will have been serialized into the session cookies stored in the
+        # user's browser. See
+        # https://michael.merickel.org/projects/pyramid_auth_demo/auth_vs_auth.html
         self._purge_auth_tickets(user)
 
-        ids = self._change_annotations(old_userid, new_userid)
+        # For OAuth tokens, only the token's value is stored by clients, so we
+        # can just update the userid.
+        self._update_tokens(old_userid, new_userid)
 
+        ids = self._change_annotations(old_userid, new_userid)
         self.reindex(ids)
 
     def _purge_auth_tickets(self, user):
         self.session.query(models.AuthTicket) \
             .filter(models.AuthTicket.user_id == user.id) \
             .delete()
+
+    def _update_tokens(self, old_userid, new_userid):
+        self.session.query(models.Token) \
+            .filter(models.Token.userid == old_userid) \
+            .update({'userid': new_userid}, synchronize_session='fetch')
 
     def _change_annotations(self, old_userid, new_userid):
         annotations = self._fetch_annotations(old_userid)

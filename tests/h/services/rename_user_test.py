@@ -64,6 +64,17 @@ class TestRenameUserService(object):
         count = db_session.query(models.AuthTicket).filter(models.AuthTicket.id.in_(ids)).count()
         assert count == 0
 
+    def test_rename_updates_tokens(self, service, user, db_session, factories):
+        token = models.Token(userid=user.userid, value='foo')
+        db_session.add(token)
+
+        service.rename(user, 'panda')
+
+        updated_token = db_session.query(models.Token) \
+                                  .filter(models.Token.id == token.id) \
+                                  .one()
+        assert updated_token.userid == user.userid
+
     def test_rename_changes_the_users_annotations_userid(self, service, user, annotations, db_session):
         service.rename(user, 'panda')
 
