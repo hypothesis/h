@@ -12,7 +12,7 @@ from oauthlib.oauth2 import InvalidRequestFatalError
 from oauthlib.common import Request as OAuthRequest
 from pyramid import httpexceptions
 
-from h._compat import url_quote
+from h._compat import urlparse
 from h.exceptions import OAuthTokenError
 from h.models.auth_client import ResponseType
 from h.services.auth_token import auth_token_service_factory
@@ -50,8 +50,10 @@ class TestOAuthAuthorizeController(object):
             view = getattr(controller, view_name)
             view()
 
-        assert exc.value.location == 'http://example.com/login?next={}&for_oauth=True'.format(
-                                       url_quote(pyramid_request.url, safe=''))
+        parsed_url = urlparse.urlparse(exc.value.location)
+        assert parsed_url.path == '/login'
+        assert urlparse.parse_qs(parsed_url.query) == {'next': [pyramid_request.url],
+                                                       'for_oauth': ['True']}
 
     @pytest.mark.parametrize('response_mode,view_name', [
         (None, 'get'),
