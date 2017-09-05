@@ -1,23 +1,22 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% block header %}
-  {% include "h:templates/includes/logo-header.html.jinja2" %}
-{% endblock %}
-
 {% block page_title %}Authorize application{% endblock %}
 
 {% block content %}
   <div class="form-container content">
-    <h2>Authorize app?</h2>
-    <p>
-      <b>{{ client_name }}</b> wants to read and update data
-      in your Hypothesis account <b>{{ username }}</b>.
+    <h1 class="form-header form-header--center">
+      Authorize access
+      {{ svg_icon('logo', 'form-header__logo') }}
+    </h1>
+    <p class="text">
+      <b>{{ client_name }}</b> is requesting access to your Hypothesis account
+      <b>{{ username }}</b>.
     </p>
 
     <form class="form js-authorize-form" method="POST">
       <div class="form-actions">
         <div class="form-actions__buttons">
-          <button type="submit" class="btn" data-ref="acceptBtn">Accept</button>
+          <button type="submit" class="btn" data-ref="acceptBtn">Allow</button>
           <button type="button" class="btn btn--cancel" data-ref="cancelBtn">Cancel</button>
         </div>
       </div>
@@ -39,9 +38,5 @@
       <input type="hidden" name="state" value="{{ state }}" data-ref="stateInput">
       {% endif %}
     </form>
-    <footer class="form-footer">
-      Don't have a Hypothesis account?
-      <a class="link--footer" href="{{ request.route_path('signup') }}">Sign up</a>
-    </footer>
   </div>
 {% endblock content %}
