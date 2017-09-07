@@ -410,6 +410,18 @@ class TestDOIURIFromString(object):
     def test_it_prepends_doi_prefix(self, doi):
         assert doi_uri_from_string(doi) == 'doi:{}'.format(strip_prefix('doi:', doi))
 
+    @pytest.mark.parametrize('url', [
+        'http://doi.org/10.1234/5678',
+        'https://doi.org/10.1234/5678',
+        'http://dx.doi.org/10.1234/5678',
+        'https://dx.doi.org/10.1234/5678',
+    ])
+    def test_it_allows_doi_urls(self, url):
+        # Many sites store DOI URLs rather than just identifiers in DOI fields.
+        # We should ideally normalize the different forms, but for now we just
+        # continue to accept them.
+        assert doi_uri_from_string(url) == 'doi:{}'.format(url)
+
     @pytest.mark.parametrize('doi', [
         # Empty
         'doi:', '',
@@ -422,6 +434,9 @@ class TestDOIURIFromString(object):
         '1234.5678',
         '10.0.0.1',
         '10.0/1234',
+
+        # Non-DOI URLs
+        'https://publisher.org/foo.html',
     ])
     def test_it_returns_none_if_invalid(self, doi):
         assert doi_uri_from_string(doi) is None

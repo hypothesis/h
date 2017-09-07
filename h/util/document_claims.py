@@ -22,7 +22,10 @@ import re
 # See https://www.doi.org/doi_handbook/2_Numbering.html#2.2 The registrant code
 # is not specified as numeric there but is currently always a 4+ digit value.
 # See https://www.doi.org/overview/DOI_article_ELIS3.pdf.
-DOI_PATTERN = re.compile('10\.[0-9]{4,}[.0-9]*/.*')
+#
+# This also accepts DOIs represented as URLs (eg.
+# "https://doi.org/10.1000/123456").
+DOI_PATTERN = re.compile('(https?://(dx\.)?doi\.org/)?10\.[0-9]{4,}[.0-9]*/.*')
 
 
 def document_uris_from_data(document_data, claimant):
