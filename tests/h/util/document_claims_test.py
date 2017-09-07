@@ -415,8 +415,15 @@ class TestDOIURIFromString(object):
         'doi:', '',
         # Whitespace only
         'doi: ', ' ',
+
+        # Strings that do not match the DOI syntax.
+        '9.1234/567',
+        'chapter1/section1',
+        '1234.5678',
+        '10.0.0.1',
+        '10.0/1234',
     ])
-    def test_it_returns_none_if_empty(self, doi):
+    def test_it_returns_none_if_invalid(self, doi):
         assert doi_uri_from_string(doi) is None
 
     @pytest.mark.parametrize('doi', [
@@ -430,7 +437,7 @@ class TestDocumentURIsFromHighwireDOI(object):
 
     def test_highwire_doi_values_produce_highwire_doi_document_uris(self):
         highwire_dict = {
-            'doi': ['doi:10.10.1038/nphys1170', 'doi:10.1002/0470841559.ch1',
+            'doi': ['doi:10.1038/nphys1170', 'doi:10.1002/0470841559.ch1',
                     'doi:10.1594/PANGAEA.726855'],
         }
 
@@ -465,7 +472,7 @@ class TestDocumentURIsFromDC(object):
         """Each 'identifier' list item in the 'dc' dict becomes a doc URI."""
         dc_dict = {
             'identifier': [
-                'doi:10.10.1038/nphys1170',
+                'doi:10.1038/nphys1170',
                 'doi:10.1002/0470841559.ch1',
                 'doi:10.1594/PANGAEA.726855'
             ]
