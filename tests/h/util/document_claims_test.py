@@ -2,9 +2,11 @@
 
 from __future__ import unicode_literals
 
+import re
 import pytest
 
 from h.util import document_claims
+from h.util.document_claims import doi_uri_from_string
 
 
 class TestDocumentURIsFromLinks(object):
@@ -103,7 +105,7 @@ class TestDocumentURIsFromLinks(object):
         assert one(
             [d for d in document_uris if d.get('content_type') == 'text/html'])
 
-    def test_it_returns_multiple_document_URI_dicts(self):
+    def test_it_returns_multiple_document_URI_dicts(self):  # noqa
         """If there are multiple claims it should return multiple dicts."""
         link_dicts = [
             {
@@ -223,11 +225,11 @@ class TestDocumentMetasFromData(object):
         (
             {
                 'foo': ['   My Document',
-                          'My Document   ',
-                          ' My Document ',
-                          '\nMy Document\n\n',
-                          '\rMy Document\r\n',
-                          '\tMy Document \t \t '],
+                        'My Document   ',
+                        ' My Document ',
+                        '\nMy Document\n\n',
+                        '\rMy Document\r\n',
+                        '\tMy Document \t \t '],
 
             },
             {
@@ -400,6 +402,30 @@ class TestDocumentURIsFromHighwirePDF(object):
             }
 
 
+class TestDOIURIFromString(object):
+    @pytest.mark.parametrize('doi', [
+        '10.1001/1234',
+        'doi:10.1001/1234',
+    ])
+    def test_it_prepends_doi_prefix(self, doi):
+        assert doi_uri_from_string(doi) == 'doi:{}'.format(strip_prefix('doi:', doi))
+
+    @pytest.mark.parametrize('doi', [
+        # Empty
+        'doi:', '',
+        # Whitespace only
+        'doi: ', ' ',
+    ])
+    def test_it_returns_none_if_empty(self, doi):
+        assert doi_uri_from_string(doi) is None
+
+    @pytest.mark.parametrize('doi', [
+        '  doi: 10.1234/5678',
+    ])
+    def test_it_strips_whitespace(self, doi):
+        assert doi_uri_from_string(doi) == re.sub('\\s+', '', doi)
+
+
 class TestDocumentURIsFromHighwireDOI(object):
 
     def test_highwire_doi_values_produce_highwire_doi_document_uris(self):
@@ -423,50 +449,14 @@ class TestDocumentURIsFromHighwireDOI(object):
                 'content_type': '',
             }
 
-    def test_doi_is_prepended_to_highwire_dois(self):
-        """If a highwire DOI doesn't begin with 'doi:' it is prepended."""
-        highwire_dict = {'doi': ['10.10.1038/nphys1170']}
-
+    def test_it_ignores_invalid_dois(self):
+        """If `doi_uri_from_string` returns `None`, the identifier is ignored."""
+        highwire_dict = {'doi': ['doi:']}
         document_uris = document_claims.document_uris_from_highwire_doi(
             highwire_dict,
             claimant='http://example.com/example.html',
         )
-
-        expected_uri = 'doi:' + highwire_dict['doi'][0]
-        one([d for d in document_uris if d.get('uri') == expected_uri])
-
-    def test_empty_string_dois_are_ignored(self):
-        for doi in ('', 'doi:'):
-            highwire_dict = {'doi': [doi]}
-
-            document_uris = document_claims.document_uris_from_highwire_doi(
-                highwire_dict,
-                claimant='http://example.com/example.html',
-            )
-
-            assert document_uris == []
-
-    def test_whitespace_only_dois_are_ignored(self):
-        for doi in (' ', 'doi: '):
-            highwire_dict = {'doi': [doi]}
-
-            document_uris = document_claims.document_uris_from_highwire_doi(
-                highwire_dict,
-                claimant='http://example.com/example.html',
-            )
-
-            assert document_uris == []
-
-    def test_whitespace_is_stripped_from_dois(self):
-        for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
-            highwire_dict = {'doi': [doi]}
-
-            document_uris = document_claims.document_uris_from_highwire_doi(
-                highwire_dict,
-                claimant='http://example.com/example.html',
-            )
-
-            assert [d['uri'] for d in document_uris] == ['doi:foo']
+        assert len(document_uris) == 0
 
 
 class TestDocumentURIsFromDC(object):
@@ -496,50 +486,14 @@ class TestDocumentURIsFromDC(object):
                 'content_type': '',
             }
 
-    def test_doi_is_prepended_to_dc_identifiers(self):
-        """If a dc identifier doesn't begin with 'doi:' it is prepended."""
-        dc_dict = {'identifier': ['10.10.1038/nphys1170']}
-
+    def test_it_ignores_invalid_dois(self):
+        """If `doi_uri_from_string` returns `None`, the identifier is ignored."""
+        dc_dict = {'identifier': ['doi:']}
         document_uris = document_claims.document_uris_from_dc(
             dc_dict,
             claimant='http://example.com/example.html',
         )
-
-        expected_uri = 'doi:' + dc_dict['identifier'][0]
-        one([d for d in document_uris if d.get('uri') == expected_uri])
-
-    def test_empty_string_dois_are_ignored(self):
-        for doi in ('', 'doi:'):
-            dc_dict = {'identifier': [doi]}
-
-            document_uris = document_claims.document_uris_from_dc(
-                dc_dict,
-                claimant='http://example.com/example.html',
-            )
-
-            assert document_uris == []
-
-    def test_whitespace_only_dois_are_ignored(self):
-        for doi in (' ', 'doi: '):
-            dc_dict = {'identifier': [doi]}
-
-            document_uris = document_claims.document_uris_from_dc(
-                dc_dict,
-                claimant='http://example.com/example.html',
-            )
-
-            assert document_uris == []
-
-    def test_whitespace_is_stripped_from_dois(self):
-        for doi in (' foo ', 'doi: foo ', ' doi:foo ', ' doi: foo '):
-            dc_dict = {'identifier': [doi]}
-
-            document_uris = document_claims.document_uris_from_dc(
-                dc_dict,
-                claimant='http://example.com/example.html',
-            )
-
-            assert [d['uri'] for d in document_uris] == ['doi:foo']
+        assert len(document_uris) == 0
 
 
 class TestDocumentURISelfClaim(object):
@@ -873,3 +827,10 @@ class TestDocumentURIsFromData(object):
 def one(list_):
     assert len(list_) == 1
     return list_[0]
+
+
+def strip_prefix(prefix, s):
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    else:
+        return s
