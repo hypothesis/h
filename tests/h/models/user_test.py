@@ -98,7 +98,7 @@ def test_userid_derived_from_username_and_authority():
     assert fred.userid == 'acct:fredbloggs@example.net'
 
 
-def test_userid_as_class_property(db_session):
+def test_userid_equals_query(db_session):
     fred = models.User(authority='example.net',
                        username='fredbloggs',
                        email='fred@example.com')
@@ -112,12 +112,63 @@ def test_userid_as_class_property(db_session):
     assert result == fred
 
 
-def test_userid_as_class_property_invalid_userid(db_session):
+def test_userid_equals_query_with_invalid_userid(db_session):
     # This is to ensure that we don't expose the ValueError that could
     # potentially be thrown by split_user.
 
     result = (db_session.query(models.User)
               .filter_by(userid='fredbloggsexample.net')
+              .all())
+
+    assert result == []
+
+
+def test_userid_in_query(db_session):
+    fred = models.User(authority='example.net',
+                       username='fredbloggs',
+                       email='fred@example.net')
+    alice = models.User(authority='foobar.com',
+                        username='alicewrites',
+                        email='alice@foobar.com')
+    db_session.add_all([fred, alice])
+    db_session.flush()
+
+    result = (db_session.query(models.User)
+              .filter(models.User.userid.in_(['acct:fredbloggs@example.net',
+                                              'acct:alicewrites@foobar.com',
+                                              'acct:missing@bla.org']))
+              .all())
+
+    assert len(result) == 2
+    assert fred in result
+    assert alice in result
+
+
+def test_userid_in_query_with_invalid_userid_mixed_in(db_session):
+    # This is to ensure that we don't expose the ValueError that could
+    # potentially be thrown by split_user.
+
+    fred = models.User(authority='example.net',
+                       username='fredbloggs',
+                       email='fred@example.com')
+    db_session.add(fred)
+    db_session.flush()
+
+    result = (db_session.query(models.User)
+              .filter(models.User.userid.in_(['acct:fredbloggs@example.net',
+                                              'invalid']))
+              .all())
+
+    assert len(result) == 1
+    assert fred in result
+
+
+def test_userid_in_query_with_only_invalid_userid(db_session):
+    # This is to ensure that we don't expose the ValueError that could
+    # potentially be thrown by split_user.
+
+    result = (db_session.query(models.User)
+              .filter(models.User.userid.in_(['fredbloggsexample.net']))
               .all())
 
     assert result == []
