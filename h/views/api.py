@@ -18,7 +18,6 @@ objects and Pyramid ACLs in :mod:`h.resources`.
 """
 from pyramid import i18n
 from pyramid import security
-import venusian
 
 from h import search as search_lib
 from h import storage
@@ -28,94 +27,9 @@ from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
 from h.resources import AnnotationResource
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
-from h.util import cors
+from h.views.api_config import api_config, AngularRouteTemplater
 
 _ = i18n.TranslationStringFactory(__package__)
-
-# FIXME: unify (or at least deduplicate) CORS policy between this file and
-#        `h.util.view`
-cors_policy = cors.policy(
-    allow_headers=(
-        'Authorization',
-        'Content-Type',
-        'X-Annotator-Auth-Token',
-        'X-Client-Id',
-    ),
-    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'),
-    allow_preflight=True)
-
-
-def add_api_view(config, view, link_name=None, description=None, **settings):
-
-    """
-    Add a view configuration for an API view.
-
-    This adds a new view using `config.add_view` with appropriate defaults for
-    API methods (JSON in & out, CORS support). Additionally if `link_name` is
-    specified it adds the view to the list of views returned by the `api.index`
-    route.
-
-    :param config: The Pyramid `Configurator`
-    :param view: The view callable
-    :param link_name: Dotted path of the metadata for this route in the output
-                      of the `api.index` view
-    :param description: Description of the view to use in the `api.index` view
-    :param settings: Arguments to pass on to `config.add_view`
-    """
-
-    # Get the HTTP method for use in the API links metadata
-    primary_method = settings.get('request_method', 'GET')
-    if isinstance(primary_method, tuple):
-        # If the view matches multiple methods, assume the first one is
-        # preferred
-        primary_method = primary_method[0]
-
-    settings.setdefault('accept', 'application/json')
-    settings.setdefault('renderer', 'json')
-    settings.setdefault('decorator', cors_policy)
-
-    request_method = settings.get('request_method', ())
-    if not isinstance(request_method, tuple):
-        request_method = (request_method,)
-    if len(request_method) == 0:
-        request_method = ('DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT',)
-    settings['request_method'] = request_method + ('OPTIONS',)
-
-    if link_name:
-        link = {'name': link_name,
-                'method': primary_method,
-                'route_name': settings.get('route_name'),
-                'description': description,
-                }
-
-        registry = config.registry
-        if not hasattr(registry, 'api_links'):
-            registry.api_links = []
-        registry.api_links.append(link)
-
-    config.add_view(view=view, **settings)
-
-
-def api_config(link_name=None, description=None, **settings):
-    """
-    A view configuration decorator for API views.
-
-    This is similar to Pyramid's `view_config` except that it uses
-    `add_api_view` to register the view instead of `context.add_view`.
-    """
-
-    def callback(context, name, ob):
-        add_api_view(context.config,
-                     view=ob,
-                     link_name=link_name,
-                     description=description,
-                     **settings)
-
-    def wrapper(wrapped):
-        venusian.attach(wrapped, callback, category='pyramid')
-        return wrapped
-
-    return wrapper
 
 
 @api_config(route_name='api.index')
@@ -127,16 +41,18 @@ def index(context, request):
 
     api_links = request.registry.api_links
 
+    # We currently need to keep a list of the parameter names we use in our API
+    # paths and pass these explicitly into the templater. As and when new
+    # parameter names are added, we'll need to add them here, or this view will
+    # break (and get caught by the `test_api_index` functional test).
+    templater = AngularRouteTemplater(request.route_url,
+                                      params=['id', 'pubid', 'user'])
+
     links = {}
     for link in api_links:
         method_info = {
             'method': link['method'],
-
-            # For routes that include an id, generate a route URL with `:id` in
-            # the output. We can't just use `:id` as the `id` param value because
-            # `route_url` URL-encodes parameters.
-            'url': request.route_url(link['route_name'],
-                                     id='_id_').replace('_id_', ':id'),
+            'url': templater.route_template(link['route_name']),
             'desc': link['description'],
         }
         _set_at_path(links, link['name'].split('.'), method_info)
@@ -149,27 +65,28 @@ def index(context, request):
 
 @api_config(route_name='api.links',
             link_name='links',
+            renderer='json_sorted',
             description='URL templates for generating URLs for HTML pages')
 def links(context, request):
-    group_leave_url = request.route_url('group_leave', pubid='_id_')
-    group_leave_url = group_leave_url.replace('_id_', ':id')
+    templater = AngularRouteTemplater(request.route_url, params=['user'])
 
     tag_search_url = request.route_url('activity.search',
                                        _query={'q': '_query_'})
     tag_search_url = tag_search_url.replace('_query_', 'tag:":tag"')
 
-    user_url = request.route_url('stream.user_query', user='_user_')
-    user_url = user_url.replace('_user_', ':user')
+    oauth_authorize_url = request.route_url('oauth_authorize')
+    oauth_revoke_url = request.route_url('oauth_revoke')
 
     return {
         'account.settings': request.route_url('account'),
         'forgot-password': request.route_url('forgot_password'),
-        'groups.leave': group_leave_url,
         'groups.new': request.route_url('group_create'),
         'help': request.route_url('help'),
+        'oauth.authorize': oauth_authorize_url,
+        'oauth.revoke': oauth_revoke_url,
         'search.tag': tag_search_url,
         'signup': request.route_url('signup'),
-        'user': user_url,
+        'user': templater.route_template('stream.user_query'),
     }
 
 

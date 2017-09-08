@@ -104,6 +104,9 @@ class AuthController(object):
         self.logout_redirect = self.request.route_url('index')
 
     @view_config(request_method='GET')
+    @view_config(request_method='GET',
+                 request_param='for_oauth',
+                 renderer='h:templates/accounts/login_oauth.html.jinja2')
     def get(self):
         """Render the login page, including the login form."""
         self._redirect_if_logged_in()

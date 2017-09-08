@@ -182,27 +182,6 @@ def test_read_noslug_redirects(pyramid_request):
     assert exc.value.location == '/g/abc123/some-slug'
 
 
-@pytest.mark.usefixtures('group_service', 'routes')
-class TestGroupLeave(object):
-    def test_leaves_group(self,
-                          group_service,
-                          pyramid_config,
-                          pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_config.testing_securitypolicy('marcela')
-
-        views.leave(group, pyramid_request)
-
-        assert (group, 'marcela') in group_service.left
-
-    def test_returns_nocontent(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-
-        result = views.leave(group, pyramid_request)
-
-        assert isinstance(result, HTTPNoContent)
-
-
 class FakeGroup(object):
     def __init__(self, pubid, slug, joinable_by=JoinableBy.authority):
         self.pubid = pubid

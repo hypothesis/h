@@ -124,6 +124,30 @@ class TestOAuth(object):
             status=401,
         )
 
+    def test_revoke_token(self, app, authclient, userid):
+        response = self.get_access_token(app, authclient, userid)
+        refresh_token = response['refresh_token']
+
+        app.post(
+            '/oauth/revoke',
+            {
+                'token': refresh_token,
+            },
+            status=200,
+        )
+
+    @pytest.mark.parametrize('method, path', [
+        ('POST', '/api/token'),
+        ('POST', '/oauth/revoke'),
+    ])
+    def test_oauth_routes_support_cors_preflight(self, app, method, path):
+        app.options(
+            path,
+            headers={'Origin': str('https://third-party-client.herokuapp.com'),
+                     'Access-Control-Request-Method': str(method)},
+            status=200,
+        )
+
     def get_access_token(self, app, authclient, userid):
         """Get an access token by POSTing a grant token to /api/token."""
         claims = {

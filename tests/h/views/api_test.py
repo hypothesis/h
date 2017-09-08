@@ -11,84 +11,6 @@ from h.search.core import SearchResult
 from h.views import api as views
 
 
-class TestAddApiView(object):
-    def test_it_sets_accept_setting(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['accept'] == 'application/json'
-
-    def test_it_allows_accept_setting_override(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view, accept='application/xml')
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['accept'] == 'application/xml'
-
-    def test_it_sets_renderer_setting(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['renderer'] == 'json'
-
-    def test_it_allows_renderer_setting_override(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view, renderer='xml')
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['renderer'] == 'xml'
-
-    def test_it_sets_cors_decorator(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['decorator'] == views.cors_policy
-
-    def test_it_allows_decorator_override(self, pyramid_config, view):
-        decorator = mock.Mock()
-        views.add_api_view(pyramid_config, view, decorator=decorator)
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['decorator'] == decorator
-
-    def test_it_adds_OPTIONS_to_allowed_request_methods(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view, request_method='DELETE')
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['request_method'] == ('DELETE', 'OPTIONS')
-
-    def test_it_adds_all_request_methods_when_not_defined(self, pyramid_config, view):
-        views.add_api_view(pyramid_config, view)
-        (_, kwargs) = pyramid_config.add_view.call_args
-        assert kwargs['request_method'] == (
-            'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT', 'OPTIONS')
-
-    @pytest.mark.parametrize('link_name,description,request_method,expected_method', [
-        ('thing.read', 'Fetch a thing', None, 'GET'),
-        ('thing.update', 'Update a thing', ('PUT', 'PATCH'), 'PUT'),
-        ('thing.delete', 'Delete a thing', 'DELETE', 'DELETE'),
-    ])
-    def test_it_adds_api_links_to_registry(self, pyramid_config, view,
-                                           link_name, description, request_method,
-                                           expected_method):
-        kwargs = {}
-        if request_method:
-            kwargs['request_method'] = request_method
-
-        views.add_api_view(pyramid_config, view=view,
-                           link_name=link_name,
-                           description=description,
-                           route_name=link_name,
-                           **kwargs)
-
-        assert pyramid_config.registry.api_links == [{
-            'name': link_name,
-            'description': description,
-            'method': expected_method,
-            'route_name': link_name,
-        }]
-
-    @pytest.fixture
-    def pyramid_config(self, pyramid_config):
-        pyramid_config.add_view = mock.Mock()
-        return pyramid_config
-
-    @pytest.fixture
-    def view(self):
-        return mock.Mock()
-
-
 class TestIndex(object):
 
     def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):
@@ -129,9 +51,10 @@ class TestLinks(object):
     def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):
         pyramid_config.add_route('account', '/account/settings')
         pyramid_config.add_route('forgot_password', '/forgot-password')
-        pyramid_config.add_route('group_leave', '/groups/{pubid}/leave')
         pyramid_config.add_route('group_create', '/groups/new')
         pyramid_config.add_route('help', '/docs/help')
+        pyramid_config.add_route('oauth_authorize', '/oauth/authorize')
+        pyramid_config.add_route('oauth_revoke', '/oauth/revoke')
         pyramid_config.add_route('activity.search', '/search')
         pyramid_config.add_route('signup', '/signup')
         pyramid_config.add_route('stream.user_query', '/u/{user}')
@@ -142,13 +65,15 @@ class TestLinks(object):
         assert links == {
             'account.settings': host + '/account/settings',
             'forgot-password': host + '/forgot-password',
-            'groups.leave': host + '/groups/:id/leave',
             'groups.new': host + '/groups/new',
             'help': host + '/docs/help',
+            'oauth.authorize': host + '/oauth/authorize',
+            'oauth.revoke': host + '/oauth/revoke',
             'search.tag': host + '/search?q=tag:":tag"',
             'signup': host + '/signup',
             'user': host + '/u/:user',
         }
+
 
 @pytest.mark.usefixtures('presentation_service', 'search_lib')
 class TestSearch(object):

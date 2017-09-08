@@ -27,6 +27,7 @@ class TestUserService(object):
     def test_fetch_for_login_by_email(self, svc, users):
         _, steve, _ = users
         assert svc.fetch_for_login('steve@steveo.com') is steve
+        assert svc.fetch_for_login('StEvE@steveo.COM') is steve
 
     def test_fetch_for_login_by_username_wrong_authority(self, svc):
         assert svc.fetch_for_login('jacqui') is None

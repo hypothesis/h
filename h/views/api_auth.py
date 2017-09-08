@@ -15,7 +15,7 @@ from h._compat import urlparse
 from h.exceptions import OAuthTokenError
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
-from h.util.view import cors_json_view
+from h.views.api_config import api_config
 
 log = logging.getLogger(__name__)
 
@@ -108,7 +108,8 @@ class OAuthAuthorizeController(object):
 
         if self.request.authenticated_userid is None:
             raise HTTPFound(self.request.route_url('login', _query={
-                              'next': self.request.url}))
+                              'next': self.request.url,
+                              'for_oauth': True}))
 
         client_id = credentials.get('client_id')
         client = self.request.db.query(models.AuthClient).get(client_id)
@@ -170,7 +171,7 @@ class OAuthAccessTokenController(object):
 
         self.oauth = self.request.find_service(name='oauth_provider')
 
-    @cors_json_view(route_name='token', request_method='POST')
+    @api_config(route_name='token', request_method='POST')
     def post(self):
         headers, body, status = self.oauth.create_token_response(
             self.request.url, self.request.method, self.request.POST, self.request.headers)
@@ -180,14 +181,13 @@ class OAuthAccessTokenController(object):
             raise exception_response(status, body=body)
 
 
-@view_defaults(route_name='oauth_revoke')
 class OAuthRevocationController(object):
     def __init__(self, request):
         self.request = request
 
         self.oauth = self.request.find_service(name='oauth_provider')
 
-    @cors_json_view(request_method='POST')
+    @api_config(route_name='oauth_revoke', request_method='POST')
     def post(self):
         headers, body, status = self.oauth.create_revocation_response(
             self.request.url, self.request.method, self.request.POST, self.request.headers)
@@ -197,7 +197,7 @@ class OAuthRevocationController(object):
             raise exception_response(status, body=body)
 
 
-@cors_json_view(route_name='api.debug_token', request_method='GET')
+@api_config(route_name='api.debug_token', request_method='GET')
 def debug_token(request):
     if not request.auth_token:
         raise OAuthTokenError('Bearer token is missing in Authorization HTTP header',
@@ -215,7 +215,10 @@ def debug_token(request):
     return _present_debug_token(token)
 
 
-@cors_json_view(context=OAuthTokenError)
+@api_config(context=OAuthTokenError,
+            # This is a handler called only if a request fails, so the CORS
+            # preflight request will have been handled by the original view.
+            enable_preflight=False)
 def api_token_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code

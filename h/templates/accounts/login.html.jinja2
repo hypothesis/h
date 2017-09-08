@@ -9,7 +9,9 @@
 {% block content %}
   <div class="form-container content">
     <h1 class="form-header">Log in</h1>
+
     {{ form }}
+
     <footer class="form-footer">
       Don't have a Hypothesis account?
       <a class="link--footer" href="{{ request.route_path('signup') }}">Sign up</a>

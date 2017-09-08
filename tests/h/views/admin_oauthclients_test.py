@@ -94,6 +94,17 @@ class TestAuthClientCreateController(object):
         client = pyramid_request.db.query(AuthClient).one()
         assert client.secret == 'keep-me-secret'
 
+    def test_post_generates_secret_for_client_credentials_clients(self, form_post, pyramid_request):
+        pyramid_request.POST = form_post
+        pyramid_request.POST['grant_type'] = 'client_credentials'
+        secret_gen = Mock(return_value='keep-me-secret')
+        ctrl = AuthClientCreateController(pyramid_request, secret_gen=secret_gen)
+
+        ctrl.post()
+
+        client = pyramid_request.db.query(AuthClient).one()
+        assert client.secret == 'keep-me-secret'
+
     def test_post_does_not_generate_secret_for_authcode_clients(self, form_post, pyramid_request):
         pyramid_request.POST = form_post
         pyramid_request.POST['grant_type'] = 'authorization_code'

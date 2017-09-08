@@ -6,23 +6,28 @@ from pyramid.response import Response
 def policy(allow_credentials=False,
            allow_headers=None,
            allow_methods=None,
-           allow_preflight=False,
            expose_headers=None,
            max_age=86400):
     """
-    View decorator that provides CORS support.
+    View decorator factory that provides CORS support.
 
     CORS stands for "Cross-Origin Resource Sharing," and is a protocol
     implemented in browsers to allow safe dispatch of XMLHttpRequests across
     origins.
+
+    To CORS-enable a view:
+
+     1. Create a decorator using this function and set it as the view's
+        decorator when calling `add_view`.
+     2. To support requests that do not qualify as "simple requests" [1], add a
+        preflight view using `add_preflight_view`.
+
+    [1] https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Simple_requests
     """
 
     def cors_decorator(wrapped):
         def wrapper(context, request):
-            if allow_preflight and request.method == 'OPTIONS':
-                response = Response()
-            else:
-                response = wrapped(context, request)
+            response = wrapped(context, request)
             return set_cors_headers(request, response,
                                     allow_credentials=allow_credentials,
                                     allow_headers=allow_headers,
@@ -87,3 +92,29 @@ def set_cors_headers(request, response,
         headers['Access-Control-Expose-Headers'] = ', '.join(expose_headers)
 
     return response
+
+
+def add_preflight_view(config, route_name, cors_policy):
+    """
+    Add a view to handle CORS preflight requests for a given route.
+
+    :param route_name: The route
+    :param cors_policy: CORS policy created via a call to `policy`.
+    """
+    # Keep track of which routes already have preflight views registered.
+    #
+    # For a given route there may be multiple views with different predicates
+    # (eg. to handle authenticated vs unauthenticated users). However we only
+    # want one preflight view.
+    if not hasattr(config.registry, 'cors_preflighted_views'):
+        config.registry.cors_preflighted_views = set()
+
+    if route_name in config.registry.cors_preflighted_views:
+        return
+
+    def preflight_view(context, request):
+        return Response()
+
+    config.add_view(preflight_view, decorator=cors_policy,
+                    route_name=route_name, request_method='OPTIONS')
+    config.registry.cors_preflighted_views.add(route_name)

@@ -34,4 +34,5 @@ class OAuth2Token(ModelFactory):
     value = factory.LazyAttribute(lambda _: (ACCESS_TOKEN_PREFIX + security.token_urlsafe()))
     refresh_token = factory.LazyAttribute(lambda _: (REFRESH_TOKEN_PREFIX + security.token_urlsafe()))
     expires = factory.LazyAttribute(lambda _: (datetime.utcnow() + timedelta(hours=1)))
+    refresh_token_expires = factory.LazyAttribute(lambda _: (datetime.utcnow() + timedelta(days=7)))
     authclient = factory.SubFactory(AuthClient)

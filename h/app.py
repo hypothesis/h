@@ -53,7 +53,6 @@ def includeme(config):
     config.add_tween('h.tweens.conditional_http_tween_factory', under=EXCVIEW)
     config.add_tween('h.tweens.redirect_tween_factory')
     config.add_tween('h.tweens.csrf_tween_factory')
-    config.add_tween('h.tweens.auth_token')
     config.add_tween('h.tweens.security_header_tween_factory')
 
     config.add_request_method(in_debug_mode, 'debug', reify=True)
@@ -115,6 +114,7 @@ def includeme(config):
     config.include('h.indexer')
     config.include('h.panels')
     config.include('h.realtime')
+    config.include('h.renderers')
     config.include('h.routes')
     config.include('h.search')
     config.include('h.sentry')
