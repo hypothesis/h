@@ -73,6 +73,48 @@ class UserService(object):
 
         return self._cache[cache_key]
 
+    def fetch_all(self, userids):
+        """
+        Fetch a list of users by their userids.
+
+        This function fetches users based on the list, adds them to the internal
+        cache and then returns the list of users. This is especially useful
+        when needing to access multiple user objects without loading them one-by-one.
+
+        It will only attempt to load the users that aren't already cached.
+
+        Userids that cannot be found will not be in the cache, so subsequent calls to `.fetch`
+        are trying to load them again.
+
+        :param userids: a list of userid strings.
+
+        :returns: a list with the found user instances
+        :rtype: list of h.models.User
+        """
+        if not userids:
+            return []
+
+        cache_keys = {}
+        for userid in userids:
+            try:
+                val = split_user(userid)
+                key = (val['username'], val['domain'])
+                cache_keys[key] = userid
+            except ValueError:
+                continue
+
+        userid_tuples = set(cache_keys.keys())
+        missing_tuples = userid_tuples - set(self._cache.keys())
+        missing_ids = [v for k, v in cache_keys.iteritems() if k in missing_tuples]
+
+        if missing_ids:
+            users = self.session.query(User).filter(User.userid.in_(missing_ids))
+            for user in users:
+                cache_key = (user.username, user.authority)
+                self._cache[cache_key] = user
+
+        return [v for k, v in self._cache.iteritems() if k in cache_keys.keys()]
+
     def fetch_for_login(self, username_or_email):
         """
         Fetch a user by data provided in the login field.

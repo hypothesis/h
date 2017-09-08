@@ -31,6 +31,24 @@ class TestUserService(object):
         assert user is not None
         assert user.username == 'jacqui'
 
+    def test_fetch_all_retrieves_users_by_userid(self, svc):
+        result = svc.fetch_all(['acct:jacqui@foo.com', 'acct:steve@example.com'])
+
+        assert len(result) == 2
+        assert isinstance(result[0], User)
+        assert isinstance(result[1], User)
+
+    def test_fetch_all_caches_fetched_users(self, db_session, svc, users):
+        jacqui, _, _ = users
+
+        svc.fetch_all(['acct:jacqui@foo.com'])
+        db_session.delete(jacqui)
+        db_session.flush()
+
+        result = svc.fetch_all(['acct:jacqui@foo.com'])
+        assert len(result) == 1
+        assert result[0].username == 'jacqui'
+
     def test_fetch_for_login_by_username(self, svc, users):
         _, steve, _ = users
         assert svc.fetch_for_login('steve') is steve
