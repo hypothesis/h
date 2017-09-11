@@ -81,6 +81,7 @@ def test_includeme():
         call('api.debug_token', '/api/debug-token'),
         call('api.group_member', '/api/groups/{pubid}/members/{user}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('api.search', '/api/search'),
+        call('api.search.jsonld', '/api/search.jsonld'),
         call('api.users', '/api/users'),
         call('badge', '/api/badge'),
         call('token', '/api/token'),

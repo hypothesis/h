@@ -101,6 +101,7 @@ def includeme(config):
                      factory='h.models.group:GroupFactory',
                      traverse='/{pubid}')
     config.add_route('api.search', '/api/search')
+    config.add_route('api.search.jsonld', '/api/search.jsonld')
     config.add_route('api.users', '/api/users')
     config.add_route('badge', '/api/badge')
     config.add_route('token', '/api/token')
