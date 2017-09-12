@@ -103,6 +103,23 @@ class UserIDComparator(Comparator):
                                   val['domain'])
         return self.__clause_element__() == other
 
+    def in_(self, userids):
+        others = []
+        for userid in userids:
+            try:
+                val = split_user(userid)
+            except ValueError:
+                continue
+
+            other = sa.tuple_(_normalise_username(val['username']),
+                              val['domain'])
+            others.append(other)
+
+        if not others:
+            return False
+
+        return self.__clause_element__().in_(others)
+
 
 class UserFactory(object):
     """Root resource for routes that look up User objects by traversal."""

@@ -271,7 +271,8 @@ def _remove_protected_fields(appstruct):
                   'links',
                   'flagged',
                   'hidden',
-                  'moderation']:
+                  'moderation',
+                  'user_info']:
         appstruct.pop(field, None)
 
 

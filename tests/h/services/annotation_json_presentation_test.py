@@ -41,6 +41,19 @@ class TestAnnotationJSONPresentationService(object):
         svc = self.svc(services)
         assert formatters.AnnotationModerationFormatter.return_value in svc.formatters
 
+    def test_initializes_user_info_formatter(self, services, formatters):
+        self.svc(services)
+        formatters.AnnotationUserInfoFormatter.assert_called_once_with(mock.sentinel.db_session,
+                                                                       services['user'])
+
+    def test_it_configures_user_info_formatter(self, services, formatters):
+        svc = self.svc(services)
+        assert formatters.AnnotationUserInfoFormatter.return_value in svc.formatters
+
+    def test_it_skips_configuring_user_info_formatter_when_told_to(self, services, formatters):
+        svc = self.svc(services, render_user_info=False)
+        assert formatters.AnnotationUserInfoFormatter.return_value not in svc.formatters
+
     def test_present_inits_presenter(self, svc, presenters, annotation_resource):
         svc.present(annotation_resource)
 
@@ -97,7 +110,7 @@ class TestAnnotationJSONPresentationService(object):
         assert result == [present.return_value]
 
     @pytest.fixture
-    def svc(self, services):
+    def svc(self, services, render_user_info=True):
         return AnnotationJSONPresentationService(session=mock.sentinel.db_session,
                                                  user=mock.sentinel.user,
                                                  group_svc=services['group'],
@@ -105,7 +118,9 @@ class TestAnnotationJSONPresentationService(object):
                                                  flag_svc=services['flag'],
                                                  flag_count_svc=services['flag_count'],
                                                  moderation_svc=services['annotation_moderation'],
-                                                 has_permission=mock.sentinel.has_permission)
+                                                 user_svc=services['user'],
+                                                 has_permission=mock.sentinel.has_permission,
+                                                 render_user_info=render_user_info)
 
     @pytest.fixture
     def annotation_resource(self):
@@ -201,7 +216,7 @@ class TestAnnotationJSONPresentationServiceFactory(object):
 def services(pyramid_config):
     service_mocks = {}
 
-    for name in ['links', 'flag', 'flag_count', 'annotation_moderation']:
+    for name in ['links', 'flag', 'flag_count', 'annotation_moderation', 'user']:
         svc = mock.Mock()
         service_mocks[name] = svc
         pyramid_config.register_service(svc, name=name)
