@@ -13,7 +13,7 @@ from h.interfaces import IGroupService
 
 
 class AnnotationJSONPresentationService(object):
-    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc, has_permission):
+    def __init__(self, session, user, group_svc, links_svc, flag_svc, flag_count_svc, moderation_svc, user_svc, has_permission):
         self.session = session
         self.group_svc = group_svc
         self.links_svc = links_svc
@@ -24,7 +24,8 @@ class AnnotationJSONPresentationService(object):
         self.formatters = [
             formatters.AnnotationFlagFormatter(flag_svc, user),
             formatters.AnnotationHiddenFormatter(moderation_svc, moderator_check, user),
-            formatters.AnnotationModerationFormatter(flag_count_svc, user, has_permission)
+            formatters.AnnotationModerationFormatter(flag_count_svc, user, has_permission),
+            formatters.AnnotationUserInfoFormatter(self.session, user_svc),
         ]
 
     def present(self, annotation_resource):
@@ -58,6 +59,7 @@ def annotation_json_presentation_service_factory(context, request):
     flag_svc = request.find_service(name='flag')
     flag_count_svc = request.find_service(name='flag_count')
     moderation_svc = request.find_service(name='annotation_moderation')
+    user_svc = request.find_service(name='user')
     return AnnotationJSONPresentationService(session=request.db,
                                              user=request.user,
                                              group_svc=group_svc,
@@ -65,4 +67,5 @@ def annotation_json_presentation_service_factory(context, request):
                                              flag_svc=flag_svc,
                                              flag_count_svc=flag_count_svc,
                                              moderation_svc=moderation_svc,
+                                             user_svc=user_svc,
                                              has_permission=request.has_permission)
