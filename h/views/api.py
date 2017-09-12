@@ -24,7 +24,7 @@ from h import storage
 from h.exceptions import PayloadError
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
-from h.presenters import AnnotationJSONPresenter, AnnotationJSONLDPresenter
+from h.presenters import AnnotationJSONLDPresenter
 from h.resources import AnnotationResource
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.views.api_config import api_config, AngularRouteTemplater
@@ -130,11 +130,9 @@ def create(request):
 
     _publish_annotation_event(request, annotation, 'create')
 
-    links_service = request.find_service(name='links')
-    group_service = request.find_service(IGroupService)
-    resource = AnnotationResource(annotation, group_service, links_service)
-    presenter = AnnotationJSONPresenter(resource)
-    return presenter.asdict()
+    svc = request.find_service(name='annotation_json_presentation')
+    annotation_resource = _annotation_resource(request, annotation)
+    return svc.present(annotation_resource)
 
 
 @api_config(route_name='api.annotation',
@@ -180,11 +178,9 @@ def update(context, request):
 
     _publish_annotation_event(request, annotation, 'update')
 
-    links_service = request.find_service(name='links')
-    group_service = request.find_service(IGroupService)
-    resource = AnnotationResource(annotation, group_service, links_service)
-    presenter = AnnotationJSONPresenter(resource)
-    return presenter.asdict()
+    svc = request.find_service(name='annotation_json_presentation')
+    annotation_resource = _annotation_resource(request, annotation)
+    return svc.present(annotation_resource)
 
 
 @api_config(route_name='api.annotation',
@@ -245,3 +241,9 @@ def _set_at_path(dict_, path, value):
         dict_[key] = value
     else:
         _set_at_path(dict_[key], path[1:], value)
+
+
+def _annotation_resource(request, annotation):
+    group_service = request.find_service(IGroupService)
+    links_service = request.find_service(name='links')
+    return AnnotationResource(annotation, group_service, links_service)
