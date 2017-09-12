@@ -54,6 +54,7 @@ def includeme(config):
     config.add_tween('h.tweens.redirect_tween_factory')
     config.add_tween('h.tweens.csrf_tween_factory')
     config.add_tween('h.tweens.security_header_tween_factory')
+    config.add_tween('h.tweens.cache_header_tween_factory')
 
     config.add_request_method(in_debug_mode, 'debug', reify=True)
 

@@ -103,3 +103,19 @@ def security_header_tween_factory(handler, registry):
         return resp
 
     return security_header_tween
+
+
+def cache_header_tween_factory(handler, registry):
+    """
+    Sets default caching headers on responses depending on the content type.
+    """
+    def cache_header_tween(request):
+        resp = handler(request)
+
+        # Require revalidation before using any cached API responses.
+        if 'application/json' in resp.headers['Content-Type']:
+            resp.headers.setdefault('Cache-Control', 'no-cache')
+
+        return resp
+
+    return cache_header_tween
