@@ -205,6 +205,15 @@ class TestProfile(object):
 
         assert profile['authority'] == third_party_domain
 
+    def test_user_info_authenticated(self, authenticated_request, patch):
+        profile = session.profile(authenticated_request)
+        user_info = profile['user_info']
+        assert user_info['display_name'] == authenticated_request.user.display_name
+
+    def test_user_info_unauthenticated(self, unauthenticated_request):
+        profile = session.profile(unauthenticated_request)
+        assert 'user_info' not in profile
+
     @pytest.fixture
     def third_party_domain(self):
         return u'thirdparty.example.org'
