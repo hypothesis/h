@@ -221,6 +221,23 @@ class TestProfile(object):
         return FakeGroup('abcdef', 'Publisher group', is_public=True)
 
 
+class TestUserInfo(object):
+    def test_returns_user_info_object(self, factories):
+        user = factories.User.build(display_name='Jane Doe')
+
+        result = session.user_info(user)
+        assert result == {'user_info': {'display_name': 'Jane Doe'}}
+
+    def test_allows_null_display_name(self, factories):
+        user = factories.User.build(display_name=None)
+
+        result = session.user_info(user)
+        assert result == {'user_info': {'display_name': None}}
+
+    def test_format_returns_empty_dict_when_user_missing(self):
+        assert session.user_info(None) == {}
+
+
 class FakeAuthorityGroupService(object):
 
     def __init__(self, public_groups):

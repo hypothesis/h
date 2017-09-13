@@ -41,6 +41,23 @@ def profile(request, authority=None):
     return profile
 
 
+def user_info(user):
+    """
+    Returns the `user_info` JSON object.
+
+    This is being used in the JSON representation of an annotation,
+    and for the user profile.
+    """
+    if user is None:
+        return {}
+
+    return {
+        'user_info': {
+            'display_name': user.display_name,
+        }
+    }
+
+
 def pop_flash(request):
     return {k: request.session.pop_flash(k)
             for k in ['error', 'info', 'warning', 'success']}
