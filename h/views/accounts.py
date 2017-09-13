@@ -114,6 +114,9 @@ class AuthController(object):
         return {'form': self.form.render()}
 
     @view_config(request_method='POST')
+    @view_config(request_method='POST',
+                 request_param='for_oauth',
+                 renderer='h:templates/accounts/login_oauth.html.jinja2')
     def post(self):
         """Log the user in and redirect them."""
         self._redirect_if_logged_in()
