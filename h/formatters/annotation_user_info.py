@@ -15,6 +15,9 @@ class AnnotationUserInfoFormatter(object):
         self.user_svc = user_svc
 
     def preload(self, ids):
+        if not ids:
+            return
+
         userids = {t[0] for t in self.session.query(models.Annotation.userid).filter(models.Annotation.id.in_(ids))}
         self.user_svc.fetch_all(userids)
 

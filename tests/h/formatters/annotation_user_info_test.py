@@ -22,6 +22,10 @@ class TestAnnotationUserInfoFormatter(object):
         user_svc.fetch_all.assert_called_once_with(
                 set([annotation_1.userid, annotation_2.userid]))
 
+    def test_preload_skips_fetching_for_empty_ids(self, formatter, user_svc):
+        formatter.preload([])
+        assert not user_svc.fetch_all.called
+
     def test_format_fetches_user_by_id(self, formatter, factories, user_svc):
         annotation = factories.Annotation.build()
         resource = FakeAnnotationResource(annotation)
