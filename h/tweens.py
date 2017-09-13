@@ -113,7 +113,7 @@ def cache_header_tween_factory(handler, registry):
         resp = handler(request)
 
         # Require revalidation before using any cached API responses.
-        if 'application/json' in resp.headers['Content-Type']:
+        if 'application/json' in resp.headers.get('Content-Type', []):
             resp.headers.setdefault('Cache-Control', 'no-cache')
 
         return resp

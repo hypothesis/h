@@ -63,13 +63,21 @@ def test_tween_security_header_adds_headers(pyramid_request):
 
 
 @pytest.mark.parametrize('content_type, expected_cc_header', [
+    # Web pages.
     ('text/html', None),
+
+    # An API or XHR response.
     ('application/json', 'no-cache'),
+
+    # A response with no content (eg. 204 response to a `DELETE` request).
+    (None, None),
 ])
 def test_tween_cache_header_adds_headers(pyramid_request, content_type, expected_cc_header):
     tween = tweens.cache_header_tween_factory(lambda req: req.response,
                                               pyramid_request.registry)
-    pyramid_request.response.headers['Content-Type'] = content_type
+
+    if content_type is not None:
+        pyramid_request.response.headers['Content-Type'] = content_type
 
     response = tween(pyramid_request)
 
