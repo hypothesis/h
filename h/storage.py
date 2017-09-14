@@ -23,6 +23,7 @@ from pyramid import i18n
 
 from h import models, schemas
 from h.db import types
+from h.events import AnnotationEvent
 from h.models.document import update_document_metadata
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -145,10 +146,12 @@ def create_annotation(request, data, group_service):
     request.db.add(annotation)
     request.db.flush()
 
+    _publish_annotation_event(request, annotation, 'create')
+
     return annotation
 
 
-def update_annotation(session, id_, data):
+def update_annotation(request, id_, data):
     """
     Update an existing annotation and its associated document metadata.
 
@@ -175,7 +178,7 @@ def update_annotation(session, id_, data):
     # annotation object.
     document = data.pop('document', None)
 
-    annotation = session.query(models.Annotation).get(id_)
+    annotation = request.db.query(models.Annotation).get(id_)
     annotation.updated = updated
 
     annotation.extra.update(data.pop('extra', {}))
@@ -186,17 +189,19 @@ def update_annotation(session, id_, data):
     if document:
         document_uri_dicts = document['document_uri_dicts']
         document_meta_dicts = document['document_meta_dicts']
-        document = update_document_metadata(session,
+        document = update_document_metadata(request.db,
                                             annotation.target_uri,
                                             document_meta_dicts,
                                             document_uri_dicts,
                                             updated=updated)
         annotation.document = document
 
+    _publish_annotation_event(request, annotation, 'update')
+
     return annotation
 
 
-def delete_annotation(session, id_):
+def delete_annotation(request, id_):
     """
     Delete the annotation with the given id.
 
@@ -206,9 +211,13 @@ def delete_annotation(session, id_):
     :param id_: the annotation ID
     :type id_: str
     """
-    annotation = session.query(models.Annotation).get(id_)
+    annotation = request.db.query(models.Annotation).get(id_)
     annotation.updated = datetime.utcnow()
     annotation.deleted = True
+
+    _publish_annotation_event(request, annotation, 'delete')
+
+    return annotation
 
 
 def expand_uri(session, uri):
@@ -242,3 +251,11 @@ def expand_uri(session, uri):
             return [uri]
 
     return [docuri.uri for docuri in docuris]
+
+
+def _publish_annotation_event(request,
+                              annotation,
+                              action):
+    """Publish an event to the annotations queue for this annotation action."""
+    event = AnnotationEvent(request, annotation.id, action)
+    request.notify_after_commit(event)

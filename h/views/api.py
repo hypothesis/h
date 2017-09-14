@@ -22,7 +22,6 @@ from pyramid import security
 from h import search as search_lib
 from h import storage
 from h.exceptions import PayloadError
-from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
 from h.resources import AnnotationResource
@@ -128,8 +127,6 @@ def create(request):
     group_service = request.find_service(IGroupService)
     annotation = storage.create_annotation(request, appstruct, group_service)
 
-    _publish_annotation_event(request, annotation, 'create')
-
     svc = request.find_service(name='annotation_json_presentation')
     annotation_resource = _annotation_resource(request, annotation)
     return svc.present(annotation_resource)
@@ -172,11 +169,9 @@ def update(context, request):
                                     context.annotation.groupid)
     appstruct = schema.validate(_json_payload(request))
 
-    annotation = storage.update_annotation(request.db,
+    annotation = storage.update_annotation(request,
                                            context.annotation.id,
                                            appstruct)
-
-    _publish_annotation_event(request, annotation, 'update')
 
     svc = request.find_service(name='annotation_json_presentation')
     annotation_resource = _annotation_resource(request, annotation)
@@ -190,18 +185,7 @@ def update(context, request):
             description='Delete an annotation')
 def delete(context, request):
     """Delete the specified annotation."""
-    storage.delete_annotation(request.db, context.annotation.id)
-
-    # N.B. We publish the original model (including all the original annotation
-    # fields) so that queue subscribers have context needed to decide how to
-    # process the delete event. For example, the streamer needs to know the
-    # target URLs of the deleted annotation in order to know which clients to
-    # forward the delete event to.
-    _publish_annotation_event(
-        request,
-        context.annotation,
-        'delete')
-
+    storage.delete_annotation(request, context.annotation.id)
     return {'id': context.annotation.id, 'deleted': True}
 
 
@@ -215,14 +199,6 @@ def _json_payload(request):
         return request.json_body
     except ValueError:
         raise PayloadError()
-
-
-def _publish_annotation_event(request,
-                              annotation,
-                              action):
-    """Publish an event to the annotations queue for this annotation action."""
-    event = AnnotationEvent(request, annotation.id, action)
-    request.notify_after_commit(event)
 
 
 def _set_at_path(dict_, path, value):

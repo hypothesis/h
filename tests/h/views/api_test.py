@@ -139,8 +139,7 @@ class TestSearch(object):
         return patch('h.views.api.storage')
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
-                         'create_schema',
+@pytest.mark.usefixtures('create_schema',
                          'links_service',
                          'group_service',
                          'presentation_service',
@@ -158,7 +157,7 @@ class TestCreate(object):
             with pytest.raises(views.PayloadError):
                 views.create(pyramid_request)
 
-    def test_it_inits_CreateAnnotationSchema(self, pyramid_request, create_schema):
+    def test_it_inits_CreateAnnotationSchema(self, pyramid_request, create_schema):  # noqa: N802
         views.create(pyramid_request)
 
         create_schema.assert_called_once_with(pyramid_request)
@@ -198,21 +197,6 @@ class TestCreate(object):
             views.create(pyramid_request)
 
         assert exc.value.message == 'asplode'
-
-    def test_it_publishes_annotation_event(self,
-                                           AnnotationEvent,
-                                           pyramid_request,
-                                           storage):
-        """It publishes an annotation "create" event for the annotation."""
-        views.create(pyramid_request)
-
-        annotation = storage.create_annotation.return_value
-
-        AnnotationEvent.assert_called_once_with(pyramid_request,
-                                                annotation.id,
-                                                'create')
-        pyramid_request.notify_after_commit.assert_called_once_with(
-            AnnotationEvent.return_value)
 
     def test_it_initialises_annotation_resource(self,
                                                 storage,
@@ -271,7 +255,7 @@ class TestRead(object):
 @pytest.mark.usefixtures('AnnotationJSONLDPresenter', 'links_service')
 class TestReadJSONLD(object):
 
-    def test_it_sets_correct_content_type(self, AnnotationJSONLDPresenter, pyramid_request):
+    def test_it_sets_correct_content_type(self, AnnotationJSONLDPresenter, pyramid_request):  # noqa: N803
         AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
 
         context = mock.Mock()
@@ -283,7 +267,7 @@ class TestReadJSONLD(object):
             'profile': 'http://foo.com/context.jsonld'
         }
 
-    def test_it_returns_presented_annotation(self,
+    def test_it_returns_presented_annotation(self,  # noqa: N803
                                              AnnotationJSONLDPresenter,
                                              pyramid_request):
         context = mock.Mock()
@@ -297,12 +281,11 @@ class TestReadJSONLD(object):
         assert result == presenter.asdict()
 
     @pytest.fixture
-    def AnnotationJSONLDPresenter(self, patch):
+    def AnnotationJSONLDPresenter(self, patch):  # noqa: N802
         return patch('h.views.api.AnnotationJSONLDPresenter')
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
-                         'links_service',
+@pytest.mark.usefixtures('links_service',
                          'group_service',
                          'presentation_service',
                          'update_schema',
@@ -354,7 +337,7 @@ class TestUpdate(object):
         views.update(context, pyramid_request)
 
         storage.update_annotation.assert_called_once_with(
-            pyramid_request.db,
+            pyramid_request,
             context.annotation.id,
             mock.sentinel.validated_data
         )
@@ -364,24 +347,6 @@ class TestUpdate(object):
 
         with pytest.raises(ValidationError):
             views.update(mock.Mock(), pyramid_request)
-
-    def test_it_inits_an_AnnotationEvent(self,
-                                         AnnotationEvent,
-                                         storage,
-                                         pyramid_request):
-        context = mock.Mock()
-
-        views.update(context, pyramid_request)
-
-        AnnotationEvent.assert_called_once_with(pyramid_request,
-                                                storage.update_annotation.return_value.id,
-                                                'update')
-
-    def test_it_fires_the_AnnotationEvent(self, AnnotationEvent, pyramid_request):
-        views.update(mock.Mock(), pyramid_request)
-
-        pyramid_request.notify_after_commit.assert_called_once_with(
-            AnnotationEvent.return_value)
 
     def test_it_initialises_annotation_resource(self,
                                                 storage,
@@ -432,8 +397,7 @@ class TestUpdate(object):
         return patch('h.views.api.UpdateAnnotationSchema')
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
-                         'links_service',
+@pytest.mark.usefixtures('links_service',
                          'storage')
 class TestDelete(object):
 
@@ -442,21 +406,8 @@ class TestDelete(object):
 
         views.delete(context, pyramid_request)
 
-        storage.delete_annotation.assert_called_once_with(pyramid_request.db,
+        storage.delete_annotation.assert_called_once_with(pyramid_request,
                                                           context.annotation.id)
-
-    def test_it_inits_and_fires_an_AnnotationEvent(self,
-                                                   AnnotationEvent,
-                                                   pyramid_request):
-        context = mock.Mock()
-        event = AnnotationEvent.return_value
-
-        views.delete(context, pyramid_request)
-
-        AnnotationEvent.assert_called_once_with(pyramid_request,
-                                                context.annotation.id,
-                                                'delete')
-        pyramid_request.notify_after_commit.assert_called_once_with(event)
 
     def test_it_returns_object(self, pyramid_request):
         context = mock.Mock()
@@ -464,11 +415,6 @@ class TestDelete(object):
         result = views.delete(context, pyramid_request)
 
         assert result == {'id': context.annotation.id, 'deleted': True}
-
-
-@pytest.fixture
-def AnnotationEvent(patch):
-    return patch('h.views.api.AnnotationEvent')
 
 
 @pytest.fixture

@@ -7,6 +7,7 @@ import copy
 import pytest
 import mock
 
+from h.events import AnnotationEvent
 from h.models.annotation import Annotation
 from h.models.document import Document, DocumentURI
 
@@ -196,7 +197,7 @@ class TestCreateAnnotation(object):
 
         assert str(exc.value).startswith('group: ')
 
-    def test_it_inits_an_Annotation_model(self, models, pyramid_request, group_service):
+    def test_it_inits_an_Annotation_model(self, models, pyramid_request, group_service):  # noqa N802
         data = self.annotation_data()
 
         storage.create_annotation(pyramid_request, copy.deepcopy(data), group_service)
@@ -204,7 +205,8 @@ class TestCreateAnnotation(object):
         del data['document']
         models.Annotation.assert_called_once_with(**data)
 
-    def test_it_adds_the_annotation_to_the_database(self, models, pyramid_request, group_service):
+    def test_it_adds_the_annotation_to_the_database(self, fake_db_session, models, pyramid_request, group_service):
+        pyramid_request.db = fake_db_session
         storage.create_annotation(pyramid_request, self.annotation_data(), group_service)
 
         assert models.Annotation.return_value in pyramid_request.db.added
@@ -267,6 +269,14 @@ class TestCreateAnnotation(object):
 
         storage.create_annotation(pyramid_request, data, group_service)
 
+    def test_it_publishes_annotation_event(self, pyramid_request, group_service, matchers):
+        data = self.annotation_data()
+        ann = storage.create_annotation(pyramid_request, data, group_service)
+
+        event = AnnotationEvent(pyramid_request, ann.id, 'create')
+        event_matcher = matchers.same_dicts(event)
+        pyramid_request.notify_after_commit.assert_called_with(event_matcher)
+
     @pytest.fixture
     def group_service(self, pyramid_config):
         group_service = mock.Mock(spec_set=['find'])
@@ -296,21 +306,21 @@ class TestUpdateAnnotation(object):
     def test_it_gets_the_annotation_model(self,
                                           annotation_data,
                                           models,
-                                          session):
-        storage.update_annotation(session,
+                                          pyramid_request):
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
 
-        session.query.assert_called_once_with(models.Annotation)
-        session.query.return_value.get.assert_called_once_with(
+        pyramid_request.db.query.assert_called_once_with(models.Annotation)
+        pyramid_request.db.query.return_value.get.assert_called_once_with(
             'test_annotation_id')
 
-    def test_it_adds_new_extras(self, annotation_data, session):
-        annotation = session.query.return_value.get.return_value
+    def test_it_adds_new_extras(self, annotation_data, pyramid_request):
+        annotation = pyramid_request.db.query.return_value.get.return_value
         annotation.extra = {}
         annotation_data['extra'] = {'foo': 'bar'}
 
-        storage.update_annotation(session,
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
 
@@ -318,12 +328,12 @@ class TestUpdateAnnotation(object):
 
     def test_it_overwrites_existing_extras(self,
                                            annotation_data,
-                                           session):
-        annotation = session.query.return_value.get.return_value
+                                           pyramid_request):
+        annotation = pyramid_request.db.query.return_value.get.return_value
         annotation.extra = {'foo': 'original_value'}
         annotation_data['extra'] = {'foo': 'new_value'}
 
-        storage.update_annotation(session,
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
 
@@ -331,15 +341,15 @@ class TestUpdateAnnotation(object):
 
     def test_it_does_not_change_extras_that_are_not_sent(self,
                                                          annotation_data,
-                                                         session):
-        annotation = session.query.return_value.get.return_value
+                                                         pyramid_request):
+        annotation = pyramid_request.db.query.return_value.get.return_value
         annotation.extra = {
             'one': 1,
             'two': 2,
         }
         annotation_data['extra'] = {'two': 22}
 
-        storage.update_annotation(session,
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
 
@@ -347,28 +357,28 @@ class TestUpdateAnnotation(object):
 
     def test_it_does_not_change_extras_if_none_are_sent(self,
                                                         annotation_data,
-                                                        session):
-        annotation = session.query.return_value.get.return_value
+                                                        pyramid_request):
+        annotation = pyramid_request.db.query.return_value.get.return_value
         annotation.extra = {'one': 1, 'two': 2}
         assert not annotation_data.get('extra')
 
-        storage.update_annotation(session,
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
 
         assert annotation.extra == {'one': 1, 'two': 2}
 
-    def test_it_changes_the_updated_timestamp(self, annotation_data, session, datetime):
-        annotation = storage.update_annotation(session,
+    def test_it_changes_the_updated_timestamp(self, annotation_data, pyramid_request, datetime):
+        annotation = storage.update_annotation(pyramid_request,
                                                'test_annotation_id',
                                                annotation_data)
 
         assert annotation.updated == datetime.utcnow()
 
-    def test_it_updates_the_annotation(self, annotation_data, session):
-        annotation = session.query.return_value.get.return_value
+    def test_it_updates_the_annotation(self, annotation_data, pyramid_request):
+        annotation = pyramid_request.db.query.return_value.get.return_value
 
-        storage.update_annotation(session,
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
 
@@ -378,21 +388,21 @@ class TestUpdateAnnotation(object):
     def test_it_updates_the_document_metadata_from_the_annotation(
             self,
             annotation_data,
-            session,
+            pyramid_request,
             datetime,
             update_document_metadata):
-        annotation = session.query.return_value.get.return_value
+        annotation = pyramid_request.db.query.return_value.get.return_value
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
         annotation_data['document']['document_uri_dicts'] = (
             mock.sentinel.document_uri_dicts)
 
-        storage.update_annotation(session,
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
 
         update_document_metadata.assert_called_once_with(
-            session,
+            pyramid_request.db,
             annotation.target_uri,
             mock.sentinel.document_meta_dicts,
             mock.sentinel.document_uri_dicts,
@@ -401,36 +411,43 @@ class TestUpdateAnnotation(object):
 
     def test_it_updates_the_annotations_document_id(self,
                                                     annotation_data,
-                                                    session,
+                                                    pyramid_request,
                                                     update_document_metadata):
-        annotation = session.query.return_value.get.return_value
+        annotation = pyramid_request.db.query.return_value.get.return_value
         document = mock.Mock()
         update_document_metadata.return_value = document
 
-        storage.update_annotation(session,
+        storage.update_annotation(pyramid_request,
                                   'test_annotation_id',
                                   annotation_data)
         assert annotation.document == document
 
-    def test_it_returns_the_annotation(self, annotation_data, session):
-        annotation = storage.update_annotation(session,
+    def test_it_returns_the_annotation(self, annotation_data, pyramid_request):
+        annotation = storage.update_annotation(pyramid_request,
                                                'test_annotation_id',
                                                annotation_data)
 
-        assert annotation == session.query.return_value.get.return_value
+        assert annotation == pyramid_request.db.query.return_value.get.return_value
 
     def test_it_does_not_crash_if_no_document_in_data(self,
-                                                      session):
-        storage.update_annotation(session, 'test_annotation_id', {})
+                                                      pyramid_request):
+        storage.update_annotation(pyramid_request, 'test_annotation_id', {})
 
     def test_it_does_not_call_update_document_meta_if_no_document_in_data(
             self,
-            session,
+            pyramid_request,
             update_document_metadata):
 
-        storage.update_annotation(session, 'test_annotation_id', {})
+        storage.update_annotation(pyramid_request, 'test_annotation_id', {})
 
         assert not update_document_metadata.called
+
+    def test_it_publishes_annotation_event(self, pyramid_request, matchers):
+        ann = storage.update_annotation(pyramid_request, 'test_annotation_id', {})
+
+        event = AnnotationEvent(pyramid_request, ann.id, 'update')
+        event_matcher = matchers.same_dicts(event)
+        pyramid_request.notify_after_commit.assert_called_with(event_matcher)
 
     @pytest.fixture
     def annotation_data(self):
@@ -453,19 +470,28 @@ class TestUpdateAnnotation(object):
 
 class TestDeleteAnnotation(object):
 
-    def test_it_marks_the_annotation_as_deleted(self, db_session, factories):
+    def test_it_marks_the_annotation_as_deleted(self, db_session, factories, pyramid_request):
+        pyramid_request.db = db_session
         ann = factories.Annotation()
 
-        storage.delete_annotation(db_session, ann.id)
+        storage.delete_annotation(pyramid_request, ann.id)
 
         assert ann.deleted
 
-    def test_it_touches_the_updated_field(self, db_session, factories, datetime):
+    def test_it_touches_the_updated_field(self, db_session, pyramid_request, factories, datetime):
+        pyramid_request.db = db_session
         ann = factories.Annotation()
 
-        storage.delete_annotation(db_session, ann.id)
+        storage.delete_annotation(pyramid_request, ann.id)
 
         assert ann.updated == datetime.utcnow()
+
+    def test_it_publishes_annotation_event(self, pyramid_request, matchers):
+        ann = storage.delete_annotation(pyramid_request, 'test_annotation_id')
+
+        event = AnnotationEvent(pyramid_request, ann.id, 'delete')
+        event_matcher = matchers.same_dicts(event)
+        pyramid_request.notify_after_commit.assert_called_with(event_matcher)
 
 
 @pytest.fixture
@@ -486,8 +512,9 @@ def update_document_metadata(patch):
 
 
 @pytest.fixture
-def pyramid_request(fake_db_session, pyramid_request):
-    pyramid_request.db = fake_db_session
+def pyramid_request(pyramid_request, session):
+    pyramid_request.db = session
+    pyramid_request.notify_after_commit = mock.Mock(spec_set=[])
     return pyramid_request
 
 
