@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+
 from h import tweens
 from h.util.redirects import Redirect
 
@@ -58,3 +60,25 @@ def test_tween_security_header_adds_headers(pyramid_request):
 
     assert response.headers['Referrer-Policy'] == 'origin-when-cross-origin, strict-origin-when-cross-origin'
     assert response.headers['X-XSS-Protection'] == '1; mode=block'
+
+
+@pytest.mark.parametrize('content_type, expected_cc_header', [
+    # Web pages.
+    ('text/html', None),
+
+    # An API or XHR response.
+    ('application/json', 'no-cache'),
+
+    # A response with no content (eg. 204 response to a `DELETE` request).
+    (None, None),
+])
+def test_tween_cache_header_adds_headers(pyramid_request, content_type, expected_cc_header):
+    tween = tweens.cache_header_tween_factory(lambda req: req.response,
+                                              pyramid_request.registry)
+
+    if content_type is not None:
+        pyramid_request.response.headers['Content-Type'] = content_type
+
+    response = tween(pyramid_request)
+
+    assert response.headers.get('Cache-Control') == expected_cc_header
