@@ -12,7 +12,7 @@ from h import storage
 from h.accounts.events import ActivationEvent
 from h.services.rename_user import UserRenameError
 from h.tasks.admin import rename_user
-from h.i18n import TranslationString as _
+from h.i18n import TranslationString as _  # noqa: N813
 
 
 class UserDeletionError(Exception):
@@ -149,7 +149,7 @@ def delete_user(request, user):
     query = _all_user_annotations_query(request, user)
     annotations = es_helpers.scan(client=request.es.conn, query={'query': query})
     for annotation in annotations:
-        storage.delete_annotation(request.db, annotation['_id'])
+        storage.delete_annotation(request, annotation['_id'])
 
     request.db.delete(user)
 

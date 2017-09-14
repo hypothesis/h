@@ -281,8 +281,8 @@ def test_delete_user_deletes_annotations(api_storage, elasticsearch_helpers, fak
     delete_user(pyramid_request, user)
 
     assert api_storage.delete_annotation.mock_calls == [
-        call(pyramid_request.db, 'annotation-1'),
-        call(pyramid_request.db, 'annotation-2')
+        call(pyramid_request, 'annotation-1'),
+        call(pyramid_request, 'annotation-2')
     ]
 
 
