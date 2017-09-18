@@ -186,7 +186,7 @@ class TestPasswordCommand(object):
 
 
 class TestDeleteUserCommand(object):
-    def test_it_deletes_user(self, cli, cliconfig, user, db_session, annotations):
+    def test_it_deletes_user(self, cli, cliconfig, user, db_session):
         result = cli.invoke(user_cli.delete,
                             [user.username],
                             obj=cliconfig)
@@ -194,7 +194,7 @@ class TestDeleteUserCommand(object):
         assert result.exit_code == 0
         user = db_session.query(models.User).filter_by(id=user.id).count() == 0
 
-    def test_it_deletes_user_with_specific_authority(self, cli, cliconfig, user, db_session, annotations):
+    def test_it_deletes_user_with_specific_authority(self, cli, cliconfig, user, db_session):
         user.authority = u'partner.org'
         db_session.flush()
 
@@ -228,13 +228,6 @@ class TestDeleteUserCommand(object):
         user = factories.User()
         db_session.flush()
         return user
-
-    @pytest.fixture
-    def annotations(self, pyramid_request, patch):
-        pyramid_request.es = mock.Mock()
-        es_helpers = patch('h.views.admin_users.es_helpers')
-        es_helpers.scan = mock.Mock(return_value=[])
-        return es_helpers.scan
 
 
 @pytest.fixture
