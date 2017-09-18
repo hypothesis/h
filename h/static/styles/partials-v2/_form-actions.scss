@@ -22,10 +22,3 @@
 .form-actions.is-saving {
   opacity: .5;
 }
-
-.form-actions__message {
-  @include font-small;
-
-  color: $grey-4;
-  padding-left: 15px;
-}
