@@ -27,6 +27,10 @@
       <span>{% trans %}Unable to save changes: {% endtrans %}</span>
       <span data-ref="formSubmitErrorMessage"></span>
     </div>
+    {% if field.use_inline_editing %}
+    <button type="button"
+            class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
+    {% endif %}
     <div class="u-stretch"></div>
     <div class="form-actions__buttons">
       {%- for button in field.buttons -%}
@@ -41,7 +45,6 @@
                 >
         {{ _(button.title) }}
         </button>
-        <button class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
       {% endfor -%}
     </div>
   </div>
