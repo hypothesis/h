@@ -205,6 +205,15 @@ class TestProfile(object):
 
         assert profile['authority'] == third_party_domain
 
+    def test_user_info_authenticated(self, authenticated_request, patch):
+        profile = session.profile(authenticated_request)
+        user_info = profile['user_info']
+        assert user_info['display_name'] == authenticated_request.user.display_name
+
+    def test_user_info_unauthenticated(self, unauthenticated_request):
+        profile = session.profile(unauthenticated_request)
+        assert 'user_info' not in profile
+
     @pytest.fixture
     def third_party_domain(self):
         return u'thirdparty.example.org'
@@ -219,6 +228,23 @@ class TestProfile(object):
     @pytest.fixture
     def publisher_group(self):
         return FakeGroup('abcdef', 'Publisher group', is_public=True)
+
+
+class TestUserInfo(object):
+    def test_returns_user_info_object(self, factories):
+        user = factories.User.build(display_name='Jane Doe')
+
+        result = session.user_info(user)
+        assert result == {'user_info': {'display_name': 'Jane Doe'}}
+
+    def test_allows_null_display_name(self, factories):
+        user = factories.User.build(display_name=None)
+
+        result = session.user_info(user)
+        assert result == {'user_info': {'display_name': None}}
+
+    def test_format_returns_empty_dict_when_user_missing(self):
+        assert session.user_info(None) == {}
 
 
 class FakeAuthorityGroupService(object):

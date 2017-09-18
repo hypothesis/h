@@ -34,29 +34,26 @@ class TestAnnotationUserInfoFormatter(object):
 
         user_svc.fetch.assert_called_once_with(annotation.userid)
 
-    def test_format_returns_user_info_object(self, formatter, user_svc):
-        user_svc.fetch.return_value = mock.Mock(display_name='Jane Doe')
-        resource = FakeAnnotationResource(mock.Mock())
+    def test_format_uses_user_info(self, formatter, user_svc, user_info):
+        user = mock.Mock(display_name='Jane Doe')
+        user_svc.fetch.return_value = user
 
-        result = formatter.format(resource)
-        assert result == {'user_info': {'display_name': 'Jane Doe'}}
+        formatter.format(FakeAnnotationResource(mock.Mock()))
 
-    def test_format_allows_null_display_name(self, formatter, user_svc):
-        user_svc.fetch.return_value = mock.Mock(display_name=None)
-        resource = FakeAnnotationResource(mock.Mock())
+        user_info.assert_called_once_with(user)
 
-        result = formatter.format(resource)
-        assert result == {'user_info': {'display_name': None}}
+    def test_format_returns_formatted_user_info(self, formatter, user_info):
+        result = formatter.format(FakeAnnotationResource(mock.Mock()))
 
-    def test_format_returns_empty_dict_when_user_missing(self, formatter, user_svc):
-        user_svc.fetch.return_value = None
-        resource = FakeAnnotationResource(mock.Mock())
-
-        assert formatter.format(resource) == {}
+        assert result == user_info.return_value
 
     @pytest.fixture
     def formatter(self, db_session, user_svc):
         return AnnotationUserInfoFormatter(db_session, user_svc)
+
+    @pytest.fixture
+    def user_info(self, patch):
+        return patch('h.formatters.annotation_user_info.user_info')
 
     @pytest.fixture
     def user_svc(self):

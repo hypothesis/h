@@ -6,6 +6,7 @@ from zope.interface import implementer
 
 from h import models
 from h.formatters.interfaces import IAnnotationFormatter
+from h.session import user_info
 
 
 @implementer(IAnnotationFormatter)
@@ -23,12 +24,4 @@ class AnnotationUserInfoFormatter(object):
 
     def format(self, annotation_resource):
         user = self.user_svc.fetch(annotation_resource.annotation.userid)
-
-        if user is None:
-            return {}
-
-        return {
-            'user_info': {
-                'display_name': user.display_name,
-            }
-        }
+        return user_info(user)
