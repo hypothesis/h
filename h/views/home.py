@@ -20,24 +20,7 @@ def via_redirect(context, request):
 
 
 @view_config(route_name='index',
-             request_method='GET',
-             renderer='h:templates/home.html.jinja2')
-def index(context, request):
-    context = {}
-
-    if request.user:
-        username = request.user.username
-        context['username'] = username
-        context['user_account_link'] = (
-            request.route_url('stream.user_query', user=username)
-        )
-
-    return context
-
-
-@view_config(route_name='index',
-             request_method='GET',
-             feature='homepage_redirects')
+             request_method='GET')
 def index_redirect(context, request):
     try:
         redirect = request.registry.settings['h.homepage_redirect_url']
