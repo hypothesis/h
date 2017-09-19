@@ -377,6 +377,7 @@ class CreateUserAPISchema(JSONSchema):
             'email': {
                 'type': 'string',
                 'format': 'email',
+                'maxLength': EMAIL_MAX_LENGTH,
             },
             'display_name': {
                 'type': 'string',

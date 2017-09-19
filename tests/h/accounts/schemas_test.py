@@ -629,6 +629,16 @@ class TestCreateUserAPISchema(object):
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
+    def test_it_raises_when_email_too_long(self, schema, payload):
+        payload['email'] = ('dagrun.bibianne.selen.asya.'
+                            'dagrun.bibianne.selen.asya.'
+                            'dagrun.bibianne.selen.asya.'
+                            'dagrun.bibianne.selen.asya'
+                            '@foobar.com')
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
     def test_it_raises_when_display_name_not_a_string(self, schema, payload):
         payload['display_name'] = 42
 
