@@ -9,6 +9,7 @@ from pyramid.view import view_config
 from h import models
 from h import storage
 from h.accounts.events import ActivationEvent
+from h.events import AnnotationEvent
 from h.services.rename_user import UserRenameError
 from h.tasks.admin import rename_user
 from h.i18n import TranslationString as _  # noqa
@@ -148,6 +149,8 @@ def delete_user(request, user):
                             .filter_by(userid=user.userid)
     for annotation in annotations:
         storage.delete_annotation(request.db, annotation.id)
+        event = AnnotationEvent(request, annotation.id, 'delete')
+        request.notify_after_commit(event)
 
     request.db.delete(user)
 
