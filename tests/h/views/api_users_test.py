@@ -3,9 +3,9 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock
+from mock import Mock, PropertyMock
 
-from h.exceptions import ClientUnauthorized
+from h.exceptions import ClientUnauthorized, PayloadError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
@@ -198,6 +198,13 @@ class TestCreate(object):
 
         assert ('email address %s already exists' % existing_user.email) in str(exc.value)
         assert ('username %s already exists' % existing_user.username) in str(exc.value)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_for_invalid_json_body(self, pyramid_request, patch):
+        type(pyramid_request).json_body = PropertyMock(side_effect=ValueError())
+
+        with pytest.raises(PayloadError):
+            create(pyramid_request)
 
     @pytest.fixture
     def schemas(self, patch):
