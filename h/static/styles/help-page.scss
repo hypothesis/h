@@ -5,15 +5,23 @@
 // Components
 @import 'partials-v2/masthead';
 
-// Legacy styles
-@import 'partials/grid';
-
 // Help page specific element styles
 a {
   color: $brand;
 }
 
 // Help-page components
+
+.columns {
+  display: flex;
+  flex-direction: row;
+}
+
+.columns__col-1-2 {
+  flex-shrink: 1;
+  width: 50%;
+}
+
 .styled-text {
   @include styled-text;
 }
