@@ -29,3 +29,7 @@ node_modules/
 
 celerybeat-schedule
 celerybeat-schedule.*
+
+.idea
+.env
+.python-version
