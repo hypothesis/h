@@ -312,7 +312,7 @@ class EditProfileSchema(CSRFSchema):
     display_name = colander.SchemaNode(
         colander.String(),
         missing=None,
-        validator=validators.Length(max=30),
+        validator=validators.Length(max=DISPLAY_NAME_MAX_LENGTH),
         title=_('Display name'))
 
     description = colander.SchemaNode(
@@ -370,8 +370,8 @@ class CreateUserAPISchema(JSONSchema):
             },
             'username': {
                 'type': 'string',
-                'minLength': 3,
-                'maxLength': 30,
+                'minLength': USERNAME_MIN_LENGTH,
+                'maxLength': USERNAME_MAX_LENGTH,
                 'pattern': '^[A-Za-z0-9._]+$',
             },
             'email': {
