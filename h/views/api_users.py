@@ -39,13 +39,8 @@ def create(request):
 
     user_signup_service = request.find_service(name='user_signup')
     user = user_signup_service.signup(require_activation=False, **appstruct)
-    return {
-        'authority': user.authority,
-        'email': user.email,
-        'userid': user.userid,
-        'username': user.username,
-        'display_name': user.display_name,
-    }
+    presenter = UserJSONPresenter(user)
+    return presenter.asdict()
 
 
 @json_view(route_name='api.user', request_method='PATCH')

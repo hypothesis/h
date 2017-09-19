@@ -103,26 +103,6 @@ class TestCreateAndUpdateAuth(object):
                          'basic_auth_creds',
                          'user_signup_service')
 class TestCreate(object):
-
-    @pytest.mark.usefixtures('valid_auth')
-    def test_returns_user_object(self,
-                                 factories,
-                                 pyramid_request,
-                                 user_signup_service,
-                                 valid_payload):
-        pyramid_request.json_body = valid_payload
-        user_signup_service.signup.return_value = factories.User.build(**valid_payload)
-
-        result = create(pyramid_request)
-
-        assert result == {
-            'userid': 'acct:jeremy@weylandindustries.com',
-            'username': 'jeremy',
-            'display_name': 'Jeremy Weyland',
-            'email': 'jeremy@weylandtech.com',
-            'authority': 'weylandindustries.com',
-        }
-
     @pytest.mark.usefixtures('valid_auth')
     def test_signs_up_user(self,
                            factories,
@@ -140,6 +120,20 @@ class TestCreate(object):
             username='jeremy',
             email='jeremy@weylandtech.com',
             display_name='Jeremy Weyland')
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_it_presents_user(self, pyramid_request, valid_payload, user, presenter):
+        pyramid_request.json_body = valid_payload
+        create(pyramid_request)
+
+        presenter.assert_called_once_with(user)
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_it_returns_presented_user(self, pyramid_request, valid_payload, presenter):
+        pyramid_request.json_body = valid_payload
+        result = create(pyramid_request)
+
+        assert result == presenter.return_value.asdict()
 
     @pytest.mark.usefixtures('valid_auth')
     def test_it_validates_the_input(self, pyramid_request, valid_payload, schemas):
@@ -321,19 +315,11 @@ class TestUpdate(object):
         return pyramid_request
 
     @pytest.fixture
-    def user(self, factories, auth_client):
-        return factories.User(authority=auth_client.authority)
-
-    @pytest.fixture
     def valid_payload(self):
         return {
             'email': 'jeremy@weylandtech.com',
             'display_name': 'Jeremy Weyland',
         }
-
-    @pytest.fixture
-    def presenter(self, patch):
-        return patch('h.views.api_users.UserJSONPresenter')
 
     @pytest.fixture
     def user_svc(self, pyramid_config, user):
@@ -368,13 +354,14 @@ def valid_auth(basic_auth_creds, auth_client):
 
 
 @pytest.fixture
-def user_signup_service(db_session, factories, pyramid_config):
+def user_signup_service(db_session, pyramid_config, user):
     service = Mock(spec_set=UserSignupService(default_authority='example.com',
                                               mailer=None,
                                               session=None,
                                               password_service=None,
                                               signup_email=None,
                                               stats=None))
+    service.signup.return_value = user
     pyramid_config.register_service(service, name='user_signup')
     return service
 
@@ -382,3 +369,13 @@ def user_signup_service(db_session, factories, pyramid_config):
 @pytest.fixture
 def schemas(patch):
     return patch('h.views.api_users.schemas')
+
+
+@pytest.fixture
+def presenter(patch):
+    return patch('h.views.api_users.UserJSONPresenter')
+
+
+@pytest.fixture
+def user(factories, auth_client):
+    return factories.User(authority=auth_client.authority)
