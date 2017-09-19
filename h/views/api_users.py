@@ -5,12 +5,14 @@ from __future__ import unicode_literals
 import hmac
 
 import sqlalchemy as sa
+from pyramid.exceptions import HTTPNotFound
 
 from h import models
 from h.accounts import schemas
 from h.auth.util import basic_auth_creds
 from h.exceptions import ClientUnauthorized, PayloadError
 from h.models.auth_client import GrantType
+from h.presenters import UserJSONPresenter
 from h.schemas import ValidationError
 from h.util.view import json_view
 
@@ -44,6 +46,31 @@ def create(request):
         'username': user.username,
         'display_name': user.display_name,
     }
+
+
+@json_view(route_name='api.user', request_method='PATCH')
+def update(request):
+    """
+    Update a user.
+
+    This API endpoint allows authorised clients (those able to provide a valid
+    Client ID and Client Secret) to update users in their authority.
+    """
+    client = _request_client(request)
+
+    user_svc = request.find_service(name='user')
+    user = user_svc.fetch(request.matchdict['username'],
+                          client.authority)
+    if user is None:
+        raise HTTPNotFound()
+
+    schema = schemas.UpdateUserAPISchema()
+    appstruct = schema.validate(_json_payload(request))
+
+    _update_user(user, appstruct)
+
+    presenter = UserJSONPresenter(user)
+    return presenter.asdict()
 
 
 def _check_authority(client, data):
@@ -98,6 +125,13 @@ def _request_client(request):
         raise ClientUnauthorized()
 
     return client
+
+
+def _update_user(user, appstruct):
+    if 'email' in appstruct:
+        user.email = appstruct['email']
+    if 'display_name' in appstruct:
+        user.display_name = appstruct['display_name']
 
 
 def _json_payload(request):

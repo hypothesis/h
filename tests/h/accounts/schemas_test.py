@@ -665,6 +665,59 @@ class TestCreateUserAPISchema(object):
         return schemas.CreateUserAPISchema()
 
 
+class TestUpdateUserAPISchema(object):
+    def test_it_raises_when_email_empty(self, schema, payload):
+        payload['email'] = ''
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_email_not_a_string(self, schema, payload):
+        payload['email'] = {'foo': 'bar'}
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_email_format_invalid(self, schema, payload):
+        payload['email'] = 'not-an-email'
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_email_too_long(self, schema, payload):
+        payload['email'] = ('dagrun.bibianne.selen.asya.'
+                            'dagrun.bibianne.selen.asya.'
+                            'dagrun.bibianne.selen.asya.'
+                            'dagrun.bibianne.selen.asya'
+                            '@foobar.com')
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_display_name_not_a_string(self, schema, payload):
+        payload['display_name'] = 42
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_display_name_too_long(self, schema, payload):
+        payload['display_name'] = 'Dagrun Bibianne Selen Asya Foobar'
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    @pytest.fixture
+    def payload(self):
+        return {
+            'email': 'dagrun@foobar.org',
+            'display_name': 'Dagrun Foobar',
+        }
+
+    @pytest.fixture
+    def schema(self):
+        return schemas.UpdateUserAPISchema()
+
+
 @pytest.fixture
 def validate_url(patch):
     return patch('h.accounts.schemas.util.validate_url')
