@@ -15,6 +15,7 @@ USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
 USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
 EMAIL_MAX_LENGTH = 100
+DISPLAY_NAME_MAX_LENGTH = 30
 
 
 def _normalise_username(username):

@@ -10,6 +10,7 @@ from h import i18n, models, validators
 from h.accounts import util
 from h.services.user import UserNotActivated
 from h.models.user import (
+    DISPLAY_NAME_MAX_LENGTH,
     EMAIL_MAX_LENGTH,
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
@@ -311,7 +312,7 @@ class EditProfileSchema(CSRFSchema):
     display_name = colander.SchemaNode(
         colander.String(),
         missing=None,
-        validator=validators.Length(max=30),
+        validator=validators.Length(max=DISPLAY_NAME_MAX_LENGTH),
         title=_('Display name'))
 
     description = colander.SchemaNode(
@@ -369,13 +370,18 @@ class CreateUserAPISchema(JSONSchema):
             },
             'username': {
                 'type': 'string',
-                'minLength': 3,
-                'maxLength': 30,
+                'minLength': USERNAME_MIN_LENGTH,
+                'maxLength': USERNAME_MAX_LENGTH,
                 'pattern': '^[A-Za-z0-9._]+$',
             },
             'email': {
                 'type': 'string',
                 'format': 'email',
+                'maxLength': EMAIL_MAX_LENGTH,
+            },
+            'display_name': {
+                'type': 'string',
+                'maxLength': DISPLAY_NAME_MAX_LENGTH,
             },
         },
         'required': [

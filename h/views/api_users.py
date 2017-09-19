@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from h import models
 from h.accounts import schemas
 from h.auth.util import basic_auth_creds
-from h.exceptions import ClientUnauthorized
+from h.exceptions import ClientUnauthorized, PayloadError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.util.view import json_view
@@ -28,7 +28,7 @@ def create(request):
     client = _request_client(request)
 
     schema = schemas.CreateUserAPISchema()
-    appstruct = schema.validate(request.json_body)
+    appstruct = schema.validate(_json_payload(request))
 
     _check_authority(client, appstruct)
     appstruct['authority'] = client.authority
@@ -42,6 +42,7 @@ def create(request):
         'email': user.email,
         'userid': user.userid,
         'username': user.username,
+        'display_name': user.display_name,
     }
 
 
@@ -97,3 +98,10 @@ def _request_client(request):
         raise ClientUnauthorized()
 
     return client
+
+
+def _json_payload(request):
+    try:
+        return request.json_body
+    except ValueError:
+        raise PayloadError()

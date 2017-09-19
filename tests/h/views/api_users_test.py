@@ -3,9 +3,9 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock
+from mock import Mock, PropertyMock
 
-from h.exceptions import ClientUnauthorized
+from h.exceptions import ClientUnauthorized, PayloadError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
@@ -31,6 +31,7 @@ class TestCreate(object):
         assert result == {
             'userid': 'acct:jeremy@weylandindustries.com',
             'username': 'jeremy',
+            'display_name': 'Jeremy Weyland',
             'email': 'jeremy@weylandtech.com',
             'authority': 'weylandindustries.com',
         }
@@ -50,7 +51,8 @@ class TestCreate(object):
             require_activation=False,
             authority='weylandindustries.com',
             username='jeremy',
-            email='jeremy@weylandtech.com')
+            email='jeremy@weylandtech.com',
+            display_name='Jeremy Weyland')
 
     def test_raises_when_no_creds(self, pyramid_request, valid_payload):
         pyramid_request.json_body = valid_payload
@@ -197,6 +199,13 @@ class TestCreate(object):
         assert ('email address %s already exists' % existing_user.email) in str(exc.value)
         assert ('username %s already exists' % existing_user.username) in str(exc.value)
 
+    @pytest.mark.usefixtures('valid_auth')
+    def test_raises_for_invalid_json_body(self, pyramid_request, patch):
+        type(pyramid_request).json_body = PropertyMock(side_effect=ValueError())
+
+        with pytest.raises(PayloadError):
+            create(pyramid_request)
+
     @pytest.fixture
     def schemas(self, patch):
         return patch('h.views.api_users.schemas')
@@ -238,4 +247,5 @@ def valid_payload():
         'authority': 'weylandindustries.com',
         'email': 'jeremy@weylandtech.com',
         'username': 'jeremy',
+        'display_name': 'Jeremy Weyland',
     }
