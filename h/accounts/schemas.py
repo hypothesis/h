@@ -10,6 +10,7 @@ from h import i18n, models, validators
 from h.accounts import util
 from h.services.user import UserNotActivated
 from h.models.user import (
+    DISPLAY_NAME_MAX_LENGTH,
     EMAIL_MAX_LENGTH,
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
@@ -376,6 +377,10 @@ class CreateUserAPISchema(JSONSchema):
             'email': {
                 'type': 'string',
                 'format': 'email',
+            },
+            'display_name': {
+                'type': 'string',
+                'maxLength': DISPLAY_NAME_MAX_LENGTH,
             },
         },
         'required': [

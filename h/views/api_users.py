@@ -42,6 +42,7 @@ def create(request):
         'email': user.email,
         'userid': user.userid,
         'username': user.username,
+        'display_name': user.display_name,
     }
 
 

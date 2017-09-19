@@ -629,12 +629,25 @@ class TestCreateUserAPISchema(object):
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
+    def test_it_raises_when_display_name_not_a_string(self, schema, payload):
+        payload['display_name'] = 42
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
+    def test_it_raises_when_display_name_too_long(self, schema, payload):
+        payload['display_name'] = 'Dagrun Bibianne Selen Asya Foobar'
+
+        with pytest.raises(ValidationError):
+            schema.validate(payload)
+
     @pytest.fixture
     def payload(self):
         return {
             'authority': 'foobar.org',
             'username': 'dagrun',
             'email': 'dagrun@foobar.org',
+            'display_name': 'Dagrun Foobar',
         }
 
     @pytest.fixture
