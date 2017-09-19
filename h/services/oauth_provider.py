@@ -17,6 +17,7 @@ from h.oauth import (
     InvalidRefreshTokenError,
     JWTAuthorizationGrant,
 )
+from h.oauth.ox_jwt_grant import OpenStaxJWTAuthorizationGrant
 from h.security import token_urlsafe
 
 ACCESS_TOKEN_PREFIX = '5768-'
@@ -41,7 +42,7 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         self.oauth_validator = oauth_validator
 
         auth_code_grant = AuthorizationCodeGrant(oauth_validator)
-        jwt_auth_grant = JWTAuthorizationGrant(oauth_validator, user_svc, domain)
+        jwt_auth_grant = OpenStaxJWTAuthorizationGrant(oauth_validator, user_svc, domain)
         refresh_grant = RefreshTokenGrant(oauth_validator)
 
         refresh_grant.custom_validators.pre_token.append(self.load_client_id_from_refresh_token)
