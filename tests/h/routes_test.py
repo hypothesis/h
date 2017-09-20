@@ -82,6 +82,7 @@ def test_includeme():
         call('api.group_member', '/api/groups/{pubid}/members/{user}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('api.search', '/api/search'),
         call('api.users', '/api/users'),
+        call('api.user', '/api/users/{username}'),
         call('badge', '/api/badge'),
         call('token', '/api/token'),
         call('oauth_authorize', '/oauth/authorize'),

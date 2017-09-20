@@ -318,6 +318,31 @@ paths:
             $ref: '#/definitions/Error'
       security:
         - authClientCredentials: []
+  /users/{username}:
+    patch:
+      summary: Update an existing user
+      description: |
+        Only for specific auth clients, this API call allows clients with a
+        designated authority to update users within their authority.
+      operationId: updateUser
+      parameters:
+        - name: user
+          in: body
+          description: User to be created
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateUser'
+      responses:
+        '200':
+          description: User successfully updated
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Could not update user from your request
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - authClientCredentials: []
   /groups/{id}/members/{user}:
     delete:
       summary: Remove a member from a group
@@ -381,6 +406,8 @@ definitions:
         type: integer
   NewUser:
     $ref: './schemas/new-user-schema.json'
+  UpdateUser:
+    $ref: './schemas/update-user-schema.json'
   User:
     $ref: './schemas/user-schema.json'
   Profile:
