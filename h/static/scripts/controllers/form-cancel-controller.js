@@ -17,12 +17,7 @@ class FormCancelController extends Controller {
 
     element.addEventListener('click', (event) => {
       event.preventDefault();
-
-      if (window_.history.length > 1) {
-        window_.history.back();
-      } else {
-        window_.close();
-      }
+      window_.close();
     });
   }
 }
