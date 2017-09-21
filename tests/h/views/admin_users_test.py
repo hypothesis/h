@@ -9,6 +9,7 @@ from mock import call
 from pyramid import httpexceptions
 import pytest
 
+from h.events import AnnotationEvent
 from h.services.annotation_stats import AnnotationStatsService
 from h.services.user import UserService
 from h.models import Annotation
@@ -265,6 +266,20 @@ def test_delete_user_deletes_annotations(api_storage, db_session, factories, pyr
 
 
 @delete_user_fixtures
+def test_delete_user_publishes_event(api_storage, db_session, factories, matchers, pyramid_request):
+    pyramid_request.db = db_session
+    user = factories.User()
+    ann = factories.Annotation(userid=user.userid)
+
+    delete_user(pyramid_request, user)
+
+    expected_event = AnnotationEvent(pyramid_request, ann.id, 'delete')
+    actual_event = pyramid_request.notify_after_commit.call_args[0][0]
+    assert (expected_event.request, expected_event.annotation_id, expected_event.action) == \
+           (actual_event.request, actual_event.annotation_id, actual_event.action)
+
+
+@delete_user_fixtures
 def test_delete_user_deletes_user(db_session, factories, pyramid_request):
     pyramid_request.db = db_session
     user = factories.User()
@@ -276,7 +291,7 @@ def test_delete_user_deletes_user(db_session, factories, pyramid_request):
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
-    pyramid_request.es = mock.MagicMock()
+    pyramid_request.notify_after_commit = mock.Mock()
     return pyramid_request
 
 
