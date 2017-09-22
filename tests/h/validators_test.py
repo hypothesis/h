@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pytest
 
 from mock import Mock
@@ -13,6 +15,7 @@ class TestEmail(object):
         'international@xn--domain.com',
         'jim.smith@gmail.com',
         'jim.smith@foo.bar.com',
+        'a.range!of#punctuation-chars$are+accepted@gmail.com',
     ])
     def test_accepts_valid_addresses(self, schema_node, email):
         validator = Email()
@@ -20,6 +23,13 @@ class TestEmail(object):
 
     @pytest.mark.parametrize('email', [
         ' spaces @ spaces.com',
+        'sorry-ascii-only-🤠@gmail.com',
+        'no-domain-part@',
+        '@no-local-part.com',
+        'no-at-separator',
+
+        # A non-TLD part is required, but the TLD itself is optional.
+        'local@.only-a-tld',
     ])
     def test_rejects_invalid_addresses(self, schema_node, email):
         validator = Email()
