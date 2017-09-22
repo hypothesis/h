@@ -9,7 +9,7 @@
   margin-bottom: 30px;
 
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: center;
   position: relative;
   z-index: $zindex-modal-content;
@@ -21,11 +21,4 @@
 
 .form-actions.is-saving {
   opacity: .5;
-}
-
-.form-actions__message {
-  @include font-small;
-
-  color: $grey-4;
-  padding-left: 15px;
 }

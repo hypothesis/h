@@ -15,15 +15,26 @@
     {{ field.renderer(field.widget.item_template, field=f, cstruct=cstruct.get(f.name, null)) }}
   {% endfor -%}
 
+  {% if field.footer %}
+  <div class="form-presubmit-footer">
+    <span>{{ field.footer | safe }}</span>
+  </div>
+  {% endif %}
+
   <div class="form-actions {% if field.use_inline_editing %} is-hidden-when-loading {% endif %}"
        data-ref="formActions">
     <div class="form__submit-error" data-ref="formSubmitError">
       <span>{% trans %}Unable to save changes: {% endtrans %}</span>
       <span data-ref="formSubmitErrorMessage"></span>
     </div>
-    <div class="form-actions__message">
-      {%- if field.footer %}{{ field.footer | safe }}{% endif -%}
-    </div>
+    {% if field.use_inline_editing %}
+    <button type="button"
+            class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
+    {% endif %}
+    {% if field.show_cancel_button %}
+    <button type="button"
+            class="btn btn--cancel js-form-cancel">Cancel</button>
+    {% endif %}
     <div class="u-stretch"></div>
     <div class="form-actions__buttons">
       {%- for button in field.buttons -%}
@@ -38,7 +49,6 @@
                 >
         {{ _(button.title) }}
         </button>
-        <button class="btn btn--cancel is-hidden" data-ref="cancelBtn">Cancel</button>
       {% endfor -%}
     </div>
   </div>

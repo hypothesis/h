@@ -97,9 +97,12 @@ class AuthController(object):
 
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
+
+        show_cancel_button = bool(request.params.get('for_oauth', False))
         self.form = request.create_form(self.schema,
                                         buttons=(_('Log in'),),
-                                        footer=form_footer)
+                                        footer=form_footer,
+                                        show_cancel_button=show_cancel_button)
 
         self.logout_redirect = self.request.route_url('index')
 
