@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+import pytest
+from mock import Mock
 
 import colander
-from mock import Mock
-import pytest
 
 from h.validators import Email
 
