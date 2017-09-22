@@ -42,9 +42,9 @@
         <section class="help-page-section">
           <h2 id="installation" class="help-page-heading">Installation</h2>
           <p class="help-page-lede">There are a couple of installations of Hypothesis to choose from:</p>
-          <div class="numbered-list grid">
-            <div class="column-desktop-1-2"><div class="numbered-list-item">If you want to annotate and comment on documents then install our <a href="{{ request.route_url('chrome-extension') }}">browser extension</a>.</div></div>
-            <div class="column-desktop-1-2"><div class="numbered-list-item">If you wish to install Hypothesis on your own site then head over to GitHub.</div></div>
+          <div class="numbered-list columns">
+            <div class="columns__col-1-2"><div class="numbered-list-item">If you want to annotate and comment on documents then install our <a href="{{ request.route_url('chrome-extension') }}">browser extension</a>.</div></div>
+            <div class="columns__col-1-2"><div class="numbered-list-item">If you wish to install Hypothesis on your own site then head over to GitHub.</div></div>
           </div>
         </section>
       {% endif %}
@@ -53,9 +53,9 @@
           <h2 id="getting-started" class="help-page-heading">Getting started</h2>
           <p class="help-page-lede">Now you have the extension up and running. It's time to
             start annotating some documents.</p>
-          <div class="numbered-list grid">
-            <div class="column-desktop-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-            <div class="column-desktop-1-2"><div class="numbered-list-item">Go forth and annotate! Enable the sidebar via the button in the location bar.</div></div>
+          <div class="numbered-list columns">
+            <div class="columns__col-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
+            <div class="columns__col-1-2"><div class="numbered-list-item">Go forth and annotate! Enable the sidebar via the button in the location bar.</div></div>
           </div>
         </section>
       {% endif %}
@@ -90,8 +90,8 @@
         <h2 id="key-features" class="help-page-heading">Privacy</h2>
         <p class="help-page-lede">Annotations are either public and visible to everyone
           or private and visible only to you.</p>
-        <div class="grid feature-content">
-          <section class="feature column-desktop-1-2">
+        <div class="columns feature-content">
+          <section class="feature columns__col-1-2">
             <h3 class="feature-heading"><i class="feature-icon h-icon-public"></i> Public</h3>
             <div class="feature-content styled-text">
               <p>These annotations are visible to everyone both in the
@@ -99,7 +99,7 @@
                 href="{{request.route_url('stream')}}">public stream</a>.</p>
             </div>
           </section>
-          <section class="feature column-desktop-1-2">
+          <section class="feature columns__col-1-2">
             <h3 class="feature-heading"><i class="feature-icon h-icon-lock"></i> Private</h3>
             <div class="feature-content">
               <p>Private annotations are visible only to you when logged in.</p>
