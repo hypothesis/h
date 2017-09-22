@@ -20,6 +20,11 @@ a {
 .columns__col-1-2 {
   flex-shrink: 1;
   width: 50%;
+
+  margin-left: 20px;
+  &:first-child {
+    margin-left: 0;
+  }
 }
 
 .styled-text {
