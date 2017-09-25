@@ -38,7 +38,9 @@ def profile(request, authority=None):
     profile['groups'] = _current_groups(request, authority)
     profile['features'] = request.feature.all()
     profile['preferences'] = _user_preferences(user)
-    profile.update(user_info(user))
+
+    if request.feature('api_render_user_info'):
+        profile.update(user_info(user))
 
     return profile
 
