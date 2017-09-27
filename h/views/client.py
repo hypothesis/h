@@ -14,9 +14,7 @@ import time
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
-from h import session as h_session
 from h.auth.tokens import generate_jwt
-from h.util.view import json_view
 from h import __version__
 
 # Default URL for the client, which points to the latest version of the client
@@ -130,10 +128,3 @@ def embed_redirect(request):
     client, typically hosted on a CDN.
     """
     return HTTPFound(_client_url(request))
-
-
-@json_view(route_name='session', http_cache=0)
-def session_view(request):
-    flash = h_session.pop_flash(request)
-    model = h_session.model(request)
-    return dict(status='okay', flash=flash, model=model)
