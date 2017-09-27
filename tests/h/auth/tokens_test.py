@@ -147,14 +147,5 @@ class TestAuthToken(object):
         assert result is None
 
 
-@pytest.fixture
-def pyramid_settings(pyramid_settings):
-    pyramid_settings.update({
-        'h.client_id': 'id',
-        'h.client_secret': 'secret',
-    })
-    return pyramid_settings
-
-
 def _seconds_from_now(seconds):
     return datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
