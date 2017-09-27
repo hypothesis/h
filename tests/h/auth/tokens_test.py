@@ -107,35 +107,6 @@ class TestLegacyClientJWT(object):
         assert result.userid is None
 
 
-def test_generate_jwt_calls_encode(jwt_, pyramid_config, pyramid_request):
-    """It should pass the right arguments to encode()."""
-    pyramid_config.testing_securitypolicy('acct:testuser@hypothes.is')
-    before = datetime.datetime.utcnow()
-
-    tokens.generate_jwt(pyramid_request, 3600)
-
-    assert jwt_.encode.call_args[0][0]['sub'] == 'acct:testuser@hypothes.is', (
-        "It should encode the userid as 'sub'")
-    after = datetime.datetime.utcnow() + datetime.timedelta(seconds=3600)
-    assert before < jwt_.encode.call_args[0][0]['exp'] < after, (
-        "It should encode the expiration time as 'exp'")
-    assert jwt_.encode.call_args[1]['algorithm'] == 'HS256', (
-        "It should pass the right algorithm to encode()")
-
-
-def test_generate_jwt_when_authenticated_userid_is_None(jwt_, pyramid_request):
-    """It should work when request.authenticated_userid is None."""
-    tokens.generate_jwt(pyramid_request, 3600)
-
-    assert jwt_.encode.call_args[0][0]['sub'] is None
-
-
-def test_generate_jwt_returns_token(jwt_, pyramid_request):
-    result = tokens.generate_jwt(pyramid_request, 3600)
-
-    assert result == jwt_.encode.return_value
-
-
 class TestAuthToken(object):
     def test_retrieves_token_for_request(self, pyramid_request):
         pyramid_request.headers['Authorization'] = 'Bearer abcdef123'
@@ -183,11 +154,6 @@ def pyramid_settings(pyramid_settings):
         'h.client_secret': 'secret',
     })
     return pyramid_settings
-
-
-@pytest.fixture
-def jwt_(patch):
-    return patch('h.auth.tokens.jwt')
 
 
 def _seconds_from_now(seconds):

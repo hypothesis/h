@@ -61,40 +61,6 @@ class LegacyClientJWT(object):
         return self.payload.get('sub')
 
 
-def generate_jwt(request, expires_in):
-    """Return a signed JSON Web Token for the given request.
-
-    The token can be used in the Authorization header in subsequent requests to
-    the API to authenticate the user identified by the
-    request.authenticated_userid of the _current_ request.
-
-    :param request: the HTTP request to return a token for, the token will
-        authenticate the userid given by this request's authenticated_userid
-        property
-    :type request: pyramid.request.Request
-
-    :param expires_in: when the returned token should expire, in seconds from
-        the current time
-    :type expires_in: int
-
-    :returns: a signed JSON Web Token
-    :rtype: string
-
-    """
-    now = datetime.datetime.utcnow().replace(microsecond=0)
-
-    claims = {
-        'iss': request.registry.settings['h.client_id'],
-        'sub': request.authenticated_userid,
-        'exp': now + datetime.timedelta(seconds=expires_in),
-        'iat': now,
-    }
-
-    return jwt.encode(claims,
-                      request.registry.settings['h.client_secret'],
-                      algorithm='HS256')
-
-
 def auth_token(request):
     """
     Fetch the token (if any) associated with a request.
