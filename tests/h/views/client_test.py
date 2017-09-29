@@ -41,6 +41,7 @@ class TestSidebarApp(object):
                 'googleAnalytics': 'UA-4567',
                 'oauthClientId': 'test-client-id',
                 'oauthEnabled': True,
+                'rpcAllowedOrigins': 'https://lti.hypothes.is',
                 }
 
         actual_config = json.loads(ctx['app_config'])
@@ -88,6 +89,7 @@ def pyramid_settings(pyramid_settings):
         'h.client_oauth_id': 'test-client-id',
         'h.sentry_dsn_client': 'test-sentry-dsn',
         'h.websocket_url': 'wss://example.com/ws',
+        'h.client_rpc_allowed_origins': 'https://lti.hypothes.is',
         'authority': 'example.com'
         })
 

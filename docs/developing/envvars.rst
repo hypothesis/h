@@ -13,3 +13,9 @@ This section documents the environment variables supported by h.
 
    The OAuth client ID for the Hypothesis client on pages that embed it using
    the service's /embed.js script.
+
+.. envvar:: CLIENT_RPC_ALLOWED_ORIGINS
+
+   The list of origins that the client will respond to cross-origin RPC
+   requests from. A space-separated list of origins. For example:
+   ``https://lti.hypothes.is https://example.com http://localhost.com:8001``.
