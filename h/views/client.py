@@ -69,6 +69,10 @@ def sidebar_app(request, extra=None):
 
         'release': __version__,
         'serviceUrl': request.route_url('index'),
+
+        # The list of origins that the client will respond to cross-origin RPC
+        # requests from.
+        'rpcAllowedOrigins': settings.get('h.client_rpc_allowed_origins'),
     }
 
     if websocket_url:
