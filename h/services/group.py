@@ -18,6 +18,12 @@ GROUP_ACCESS_FLAGS = {
         'joinable_by': None,
         'readable_by': ReadableBy.world,
         'writeable_by': WriteableBy.authority,
+    },
+    # https://docs.google.com/document/d/1tsyUGDfLLaQsa4Pmc-loHRcYCIe4Q56meery6Be6CoA/edit#heading=h.ge43xo9poyis
+    'public': {
+        'joinable_by': None,
+        'readable_by': ReadableBy.world,
+        'writeable_by': WriteableBy.members,
     }
 }
 

@@ -74,7 +74,11 @@ class TestGroupService(object):
         ('private', 'writeable_by', WriteableBy.members),
         ('publisher', 'joinable_by', None),
         ('publisher', 'readable_by', ReadableBy.world),
-        ('publisher', 'writeable_by', WriteableBy.authority)])
+        ('publisher', 'writeable_by', WriteableBy.authority),
+        ('public', 'joinable_by', None),
+        ('public', 'readable_by', ReadableBy.world),
+        ('public', 'writeable_by', WriteableBy.members),
+        ])
     def test_create_sets_access_flags_for_group_types(self,
                                                       db_session,
                                                       users,
@@ -175,7 +179,6 @@ class TestGroupService(object):
         svc.member_leave(group, 'cazimir')
 
         publish.assert_called_once_with('group-leave', 'abc123', 'cazimir')
-
 
     @pytest.mark.parametrize('with_user', [True, False])
     def test_groupids_readable_by_includes_world(self, with_user, service, db_session, factories):

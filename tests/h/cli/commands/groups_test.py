@@ -21,6 +21,23 @@ class TestAddCommand(object):
                                                 userid='acct:admin@publisher.org',
                                                 type_='publisher')
 
+    def test_it_creates_a_public_group(self, cli, cliconfig, group_service):
+        name = 'Public Group Name'
+        creator = 'admin'
+        authority = 'publisher.org'
+        result = cli.invoke(groups_cli.add_public_group,
+                            [u'--name', name,
+                             u'--authority', authority,
+                             u'--creator', creator],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        group_service.create.assert_called_with(authority=authority,
+                                                name=name,
+                                                userid='acct:{0}@{1}'.format(creator, authority),
+                                                type_='public')
+
 
 @pytest.fixture
 def group_service(pyramid_config):
