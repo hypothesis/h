@@ -43,7 +43,8 @@ class TestGroupService(object):
     def test_create_sets_description_when_present(self, db_session, users):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', 'all about ant eaters')
+        group = svc.create('Anteater fans', 'foobar.com',
+                           'cazimir', 'all about ant eaters')
 
         assert group.description == 'all about ant eaters'
 
@@ -64,7 +65,8 @@ class TestGroupService(object):
     def test_create_doesnt_add_group_creator_to_members_for_publisher_groups(self, db_session, users):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='publisher')
+        group = svc.create('Anteater fans', 'foobar.com',
+                           'cazimir', type_='publisher')
 
         assert users['cazimir'] not in group.members
 
@@ -78,7 +80,10 @@ class TestGroupService(object):
         ('public', 'joinable_by', None),
         ('public', 'readable_by', ReadableBy.world),
         ('public', 'writeable_by', WriteableBy.members),
-        ])
+        ('open', 'joinable_by', None),
+        ('open', 'readable_by', ReadableBy.world),
+        ('open', 'writeable_by', WriteableBy.authority),
+    ])
     def test_create_sets_access_flags_for_group_types(self,
                                                       db_session,
                                                       users,
@@ -87,7 +92,8 @@ class TestGroupService(object):
                                                       expected_value):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_=group_type)
+        group = svc.create('Anteater fans', 'foobar.com',
+                           'cazimir', type_=group_type)
 
         assert getattr(group, flag) == expected_value
 

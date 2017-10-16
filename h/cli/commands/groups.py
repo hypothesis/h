@@ -42,6 +42,22 @@ def add_public_group(ctx, name, authority, creator):
     _create_group('public', ctx, name, authority, creator)
 
 
+@groups.command('add-open-group')
+@click.option('--name', prompt=True, help="The name of the group")
+@click.option('--authority', prompt=True,
+              help="The authority which the group is associated with")
+@click.option('--creator', prompt=True,
+              help="The username of the group's creator")
+@click.pass_context
+def add_open_group(ctx, name, authority, creator):
+    """
+    Create a new "open" group.
+
+    Create a new group which everyone can read and any logged-in user can write to
+    """
+    _create_group('open', ctx, name, authority, creator)
+
+
 def _create_group(type, ctx, name, authority, creator):
     """
     Create a group using group service

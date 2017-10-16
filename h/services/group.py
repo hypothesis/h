@@ -13,7 +13,7 @@ GROUP_ACCESS_FLAGS = {
         'joinable_by': JoinableBy.authority,
         'readable_by': ReadableBy.members,
         'writeable_by': WriteableBy.members,
-     },
+    },
     'publisher': {
         'joinable_by': None,
         'readable_by': ReadableBy.world,
@@ -24,6 +24,11 @@ GROUP_ACCESS_FLAGS = {
         'joinable_by': None,
         'readable_by': ReadableBy.world,
         'writeable_by': WriteableBy.members,
+    },
+    'open': {
+        'joinable_by': None,
+        'readable_by': ReadableBy.world,
+        'writeable_by': WriteableBy.authority,
     }
 }
 
@@ -113,7 +118,8 @@ class GroupService(object):
         readable = (Group.readable_by == ReadableBy.world)
 
         if user is not None:
-            readable_member = sa.and_(Group.readable_by == ReadableBy.members, Group.members.any(User.id == user.id))
+            readable_member = sa.and_(
+                Group.readable_by == ReadableBy.members, Group.members.any(User.id == user.id))
             readable = sa.or_(readable, readable_member)
 
         return [record.pubid for record in self.session.query(Group.pubid).filter(readable)]

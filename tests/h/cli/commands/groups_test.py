@@ -35,8 +35,27 @@ class TestAddCommand(object):
 
         group_service.create.assert_called_with(authority=authority,
                                                 name=name,
-                                                userid='acct:{0}@{1}'.format(creator, authority),
+                                                userid='acct:{0}@{1}'.format(
+                                                    creator, authority),
                                                 type_='public')
+
+    def test_it_creates_a_open_group(self, cli, cliconfig, group_service):
+        name = 'Open Group Name'
+        creator = 'admin'
+        authority = 'publisher.org'
+        result = cli.invoke(groups_cli.add_open_group,
+                            [u'--name', name,
+                             u'--authority', authority,
+                             u'--creator', creator],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        group_service.create.assert_called_with(authority=authority,
+                                                name=name,
+                                                userid='acct:{0}@{1}'.format(
+                                                    creator, authority),
+                                                type_='open')
 
 
 @pytest.fixture
