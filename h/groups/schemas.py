@@ -28,7 +28,6 @@ def unblacklisted_group_name_slug(node, value, blacklist=GROUPSLUG_BLACKLIST):
 
 
 def group_schema(autofocus_name=False):
-
     """Return a schema for the form for creating or editing a group."""
 
     schema = CSRFSchema()
@@ -37,7 +36,8 @@ def group_schema(autofocus_name=False):
         name='name',
         title=_("Name"),
         validator=colander.All(
-            validators.Length(min=GROUP_NAME_MIN_LENGTH, max=GROUP_NAME_MAX_LENGTH),
+            validators.Length(min=GROUP_NAME_MIN_LENGTH,
+                              max=GROUP_NAME_MAX_LENGTH),
             unblacklisted_group_name_slug),
         widget=deform.widget.TextInputWidget(
             autofocus=autofocus_name,
@@ -62,4 +62,21 @@ def group_schema(autofocus_name=False):
     schema.add(name)
     schema.add(description)
 
+    return schema
+
+
+def admin_group_create_schema():
+    schema = group_schema()
+    group_type = colander.SchemaNode(
+        colander.String(),
+        name='group_type',
+        title=_("Group Type"),
+        validator=colander.OneOf(['public', 'open']),
+        widget=deform.widget.SelectWidget(
+            values=[
+                ['public', 'Public'], ['open', 'Open']
+            ]
+        )
+    )
+    schema.add(group_type)
     return schema
