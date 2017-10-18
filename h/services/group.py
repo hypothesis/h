@@ -10,16 +10,20 @@ from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 GROUP_TYPES = {
     'private': {
-        'description': 'Anyone can join. Members can read/write.'
+        'description': 'Anyone can join. Members can read/write.',
+        'creator_is_immediate_member': True
     },
     'publisher': {
-        'description': 'Anyone can read. Anyone in authority can write. Intended for 3rd-party namespaces.'
+        'description': 'Anyone can read. Anyone in authority can write. Intended for 3rd-party namespaces.',
+        'creator_is_immediate_member': False
     },
     'public': {
-        'description': 'Anyone can read. Members can write. Group creator can invite members.'
+        'description': 'Anyone can read. Members can write. Group creator can invite members.',
+        'creator_is_immediate_member': True
     },
     'open': {
-        'description': 'Anyone can read. Anyone in authority can write. Intended for h namespace.'
+        'description': 'Anyone can read. Anyone in authority can write. Intended for h namespace.',
+        'creator_is_immediate_member': True
     }
 }
 
@@ -88,7 +92,7 @@ class GroupService(object):
         for attr, value in access_flags.iteritems():
             setattr(group, attr, value)
 
-        if group.joinable_by is not None:
+        if GROUP_TYPES[type_].get('creator_is_immediate_member'):
             group.members.append(creator)
 
         self.session.add(group)
