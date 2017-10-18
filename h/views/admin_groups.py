@@ -12,6 +12,8 @@ from h import models
 from h import paginator
 from h.groups import schemas
 
+from jinja2 import Markup
+
 _ = i18n.TranslationString
 
 
@@ -62,18 +64,25 @@ class AdminGroupCreateController(object):
                 name=appstruct['name'],
                 authority=self.request.authority,
                 description=appstruct.get('description'),
-                userid=self.request.authenticated_userid)
+                userid=self.request.authenticated_userid,
+                type_=appstruct['group_type'])
+            group_url = self.request.route_path('group_read',
+                                                pubid=group.pubid,
+                                                slug=group.slug)
+            self.request.session.flash(Markup(
+                'Group Created <a href="{url}">{url}</a>'.format(url=group_url)), queue='success')
+            return httpexceptions.HTTPSeeOther(self.request.url)
 
-            url = self.request.route_path('group_read',
-                                          pubid=group.pubid,
-                                          slug=group.slug)
-            return httpexceptions.HTTPSeeOther(url)
+        def on_failure(exception):
+            print "on_failure", exception
+            return self._template_data()
 
         return form.handle_form_submission(
             self.request,
             self.form,
             on_success=on_success,
-            on_failure=self._template_data)
+            on_failure=on_failure,
+            flash=False)
 
     def _template_data(self):
         """Return the data needed to render this controller's page."""
