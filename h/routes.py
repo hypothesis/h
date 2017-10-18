@@ -19,10 +19,12 @@ def includeme(config):
     config.add_route('account_reset_with_code', '/account/reset/{code}')
     config.add_route('account', '/account/settings')
     config.add_route('account_profile', '/account/profile')
-    config.add_route('account_notifications', '/account/settings/notifications')
+    config.add_route('account_notifications',
+                     '/account/settings/notifications')
     config.add_route('account_developer', '/account/developer')
     config.add_route('claim_account_legacy', '/claim_account/{token}')
-    config.add_route('dismiss_sidebar_tutorial', '/app/dismiss_sidebar_tutorial')
+    config.add_route('dismiss_sidebar_tutorial',
+                     '/app/dismiss_sidebar_tutorial')
 
     # Activity
     config.add_route('activity.search', '/search')
@@ -39,6 +41,7 @@ def includeme(config):
     config.add_route('admin_cohorts', '/admin/features/cohorts')
     config.add_route('admin_cohorts_edit', '/admin/features/cohorts/{id}')
     config.add_route('admin_groups', '/admin/groups')
+    config.add_route('admin_groups_create', '/admin/groups/create')
     config.add_route('admin_mailer', '/admin/mailer')
     config.add_route('admin_mailer_test', '/admin/mailer/test')
     config.add_route('admin_nipsa', '/admin/nipsa')
