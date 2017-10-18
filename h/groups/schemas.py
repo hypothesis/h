@@ -8,6 +8,7 @@ import slugify
 from h import i18n
 from h import validators
 from h.accounts.schemas import CSRFSchema
+from h.services.group import GROUP_TYPES
 from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
     GROUP_NAME_MIN_LENGTH,
@@ -65,16 +66,19 @@ def group_schema(autofocus_name=False):
     return schema
 
 
-def admin_group_create_schema():
+def admin_group_create_schema(group_types=GROUP_TYPES):
     schema = group_schema()
     group_type = colander.SchemaNode(
         colander.String(),
         name='group_type',
         title=_("Group Type"),
-        validator=colander.OneOf(['public', 'open']),
+        validator=colander.OneOf(group_types.keys()),
         widget=deform.widget.SelectWidget(
             values=[
-                ['public', 'Public'], ['open', 'Open']
+                [group_type, '{title} - {description}'.format(
+                    title=group_type.capitalize(), description=group_type_info['description'])]
+                for [group_type, group_type_info]
+                in group_types.items()
             ]
         )
     )

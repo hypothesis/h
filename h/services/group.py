@@ -8,6 +8,21 @@ from h import session
 from h.models import Annotation, Group, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
+GROUP_TYPES = {
+    'private': {
+        'description': 'Anyone can join. Members can read/write.'
+    },
+    'publisher': {
+        'description': 'Anyone can read. Anyone in authority can write. Intended for 3rd-party namespaces.'
+    },
+    'public': {
+        'description': 'Anyone can read. Members can write. Group creator can invite members.'
+    },
+    'open': {
+        'description': 'Anyone can read. Anyone in authority can write. Intended for h namespace.'
+    }
+}
+
 GROUP_ACCESS_FLAGS = {
     'private': {
         'joinable_by': JoinableBy.authority,
