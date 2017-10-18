@@ -55,20 +55,23 @@ class TestGroupService(object):
 
         assert group.description is None
 
-    def test_create_adds_group_creator_to_members(self, db_session, users):
+    @pytest.mark.parametrize(('group_type', 'creator_should_be_member'), [
+        (None, True),
+        ('private', True),
+        ('publisher', False),
+        ('open', True),
+        ('public', True),
+    ])
+    def test_create_adds_group_creator_to_members(self, db_session, users, group_type, creator_should_be_member):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', **dict(filter(bool, [
+            # don't pass type_ kwarg if group_type is none
+            ['type_', group_type] if group_type else None]
+        )))
 
-        assert users['cazimir'] in group.members
-
-    def test_create_doesnt_add_group_creator_to_members_for_publisher_groups(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com',
-                           'cazimir', type_='publisher')
-
-        assert users['cazimir'] not in group.members
+        creator_is_member = users['cazimir'] in group.members
+        assert creator_is_member == creator_should_be_member
 
     @pytest.mark.parametrize('group_type,flag,expected_value', [
         ('private', 'joinable_by', JoinableBy.authority),
