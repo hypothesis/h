@@ -187,11 +187,19 @@ class AdminGroupMembersController(object):
 
             def validator(self, form, value):
                 group = GroupFactory(controller.request)[value['pubid']]
-                if value.get('username') and value.get('email'):
+                user_fields = ('username', 'email')
+                user_query = dict([field, value[field]]
+                                  for field in user_fields)
+                if all(user_query.values()):
                     err = colander.Invalid(
-                        form, 'Provide one of username or email, but not both')
-                    err['username'] = 'not allowed with email'
-                    err['email'] = 'not allowed with username'
+                        form, 'Provide one of {0}, but not both'.format(', '.join(user_fields)))
+                    for field, value in user_query.items():
+                        err[field] = 'not allowed with {0}'.format(
+                            ', '.join(f for f in user_fields if f != field))
+                    raise err
+                elif not any(user_query.values()):
+                    err = colander.Invalid(
+                        form, 'Provide one of {0}'.format(', '.join(user_fields)))
                     raise err
                 user = controller._query_user(value)
                 if not user:
