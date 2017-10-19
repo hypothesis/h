@@ -45,15 +45,15 @@ def admin_user_and_password(db_session, factories):
     return (user, password)
 
 
-def _members_res_has_user(res, user):
+def _group_read_res_has_user(res, user):
     all_member_els = res.html.select('[typeof=User]')
     member_el = filter(lambda e: e.select_one(
-        '[property=userid]').text == user.userid, all_member_els)
+        '[property=userid]').text.strip() == user.userid, all_member_els)
     return member_el
 
 
 @pytest.mark.functional
-class TestAdminGroupMembers(object):
+class TestAdminGroupRead(object):
     """Tests for the /admin/groups/{pubid}/{slug}/members page."""
 
     def test_can_add_member_by_username(self, app, admin_user_and_password, group, user_to_add):
@@ -61,16 +61,16 @@ class TestAdminGroupMembers(object):
         app = _login(app, admin_user.username, admin_user_password)
         form_submit_res = _add_member(
             app, user_to_add, group, auth_with_fields=('username',))
-        members_res = form_submit_res.follow()
-        assert _members_res_has_user(members_res, user_to_add)
+        group_read_res = form_submit_res.follow()
+        assert _group_read_res_has_user(group_read_res, user_to_add)
 
     def test_can_add_member_by_email(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
         form_submit_res = _add_member(
             app, user_to_add, group, auth_with_fields=('email',))
-        members_res = form_submit_res.follow()
-        assert _members_res_has_user(members_res, user_to_add)
+        group_read_res = form_submit_res.follow()
+        assert _group_read_res_has_user(group_read_res, user_to_add)
 
     def test_cant_add_by_both_username_and_email(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
@@ -78,7 +78,7 @@ class TestAdminGroupMembers(object):
         form_submit_res = _add_member(app, user_to_add, group, auth_with_fields=(
             'email', 'username'), expect_errors=True)
         assert form_submit_res.status_code == 400
-        assert not _members_res_has_user(form_submit_res, user_to_add)
+        assert not _group_read_res_has_user(form_submit_res, user_to_add)
 
     def test_can_remove_member(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
@@ -86,19 +86,19 @@ class TestAdminGroupMembers(object):
         add_member_res = _add_member(app, user_to_add, group)
         member = user_to_add
         res = app.get(
-            '/admin/groups/{pubid}/{slug}/members/'.format(pubid=group.pubid, slug=group.slug))
+            '/admin/groups/{pubid}/{slug}/'.format(pubid=group.pubid, slug=group.slug))
         all_member_els = res.html.select('[typeof=User]')
         member_el = filter(lambda e: e.select_one(
-            '[property=userid]').text == member.userid, all_member_els)
+            '[property=userid]').text.strip() == member.userid, all_member_els)
         assert member_el
         remove_member_el = member_el[0].select_one(
-            '.test-TestAdminGroupMembers__remove-member')
+            '.test-TestAdminGroupRead__remove-member')
         assert remove_member_el
         remove_member_form_el = remove_member_el.select_one('form')
         remove_member_form = Form(res, unicode(remove_member_form_el))
         remove_member_res = remove_member_form.submit()
-        members_res = remove_member_res.follow()
-        assert not _members_res_has_user(members_res, member)
+        group_read_res = remove_member_res.follow()
+        assert not _group_read_res_has_user(group_read_res, member)
 
     @pytest.fixture
     def group(self, db_session, factories):
@@ -120,9 +120,9 @@ def _logout(app):
 
 
 def _add_member(app, user_to_add, group, auth_with_fields=('email',), expect_errors=False):
-    admin_group_members_url = '/admin/groups/{pubid}/{slug}/members/'.format(
+    admin_group_url = '/admin/groups/{pubid}/{slug}/'.format(
         pubid=group.pubid, slug=group.slug)
-    res = app.get(admin_group_members_url)
+    res = app.get(admin_group_url)
     add_member_form = res.forms['admin-group-add-member-form']
     for field in auth_with_fields:
         add_member_form[field] = getattr(user_to_add, field)

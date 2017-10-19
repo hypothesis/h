@@ -97,8 +97,8 @@ class AdminGroupCreateController(object):
         return {'form': self.form.render()}
 
 
-@view_defaults(route_name='admin_group_members',
-               renderer='h:templates/admin/groups_members.html.jinja2',
+@view_defaults(route_name='admin_group_read',
+               renderer='h:templates/admin/group_read.html.jinja2',
                permission='admin_groups',
                effective_principals=security.Authenticated)
 class AdminGroupMembersController(object):
@@ -174,7 +174,7 @@ class AdminGroupMembersController(object):
         group_filters = dict([field, form_values[field]] for field in (
             'username', 'email') if form_values.get(field))
         user = self.request.db.query(User).filter(or_(
-            *[getattr(User, field) == form_values for [field, form_values] in group_filters.items()])).one()
+            *[getattr(User, field) == form_values for [field, form_values] in group_filters.items()])).first()
         return user
 
     def _remove_member_formid(self):
