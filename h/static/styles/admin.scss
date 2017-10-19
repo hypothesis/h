@@ -37,3 +37,9 @@ body {
     list-style-type: none;
   }
 }
+
+.admin-group-remove-member-form__form {
+  & .form-actions {
+    margin: 0;
+  }
+}

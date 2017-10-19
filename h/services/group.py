@@ -52,6 +52,20 @@ GROUP_ACCESS_FLAGS = {
 }
 
 
+def get_group_type(group):
+    for group_type_name, access_flags in GROUP_ACCESS_FLAGS.items():
+        if group_type_name == 'publisher':
+            # don't label things publisher for now as it will also match on 'open'
+            # Gienin the future this function might need to look at settings and group.authority to distinguish between publisher/open
+            continue
+        for field, value in access_flags.items():
+            if getattr(group, field) != value:
+                # continue to next group_type
+                break
+            return group_type_name
+    return None
+
+
 class GroupService(object):
 
     """A service for manipulating groups and group membership."""

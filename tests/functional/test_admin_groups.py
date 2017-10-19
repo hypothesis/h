@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 from h.services.group import GROUP_TYPES
+from webtest.forms import Form
 
 authority = 'example.com'
 
@@ -79,15 +80,25 @@ class TestAdminGroupMembers(object):
         assert form_submit_res.status_code == 400
         assert not _members_res_has_user(form_submit_res, user_to_add)
 
-    def test_can_remove_member(self, app, admin_user_and_password, group, member):
+    def test_can_remove_member(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
+        add_member_res = _add_member(app, user_to_add, group)
+        member = user_to_add
         res = app.get(
             '/admin/groups/{pubid}/{slug}/members/'.format(pubid=group.pubid, slug=group.slug))
         all_member_els = res.html.select('[typeof=User]')
         member_el = filter(lambda e: e.select_one(
             '[property=userid]').text == member.userid, all_member_els)
         assert member_el
+        remove_member_el = member_el[0].select_one(
+            '.test-TestAdminGroupMembers__remove-member')
+        assert remove_member_el
+        remove_member_form_el = remove_member_el.select_one('form')
+        remove_member_form = Form(res, unicode(remove_member_form_el))
+        remove_member_res = remove_member_form.submit()
+        members_res = remove_member_res.follow()
+        assert not _members_res_has_user(members_res, member)
 
     @pytest.fixture
     def group(self, db_session, factories):
@@ -102,15 +113,6 @@ class TestAdminGroupMembers(object):
             username='member', authority=authority, email='member@email.com')
         db_session.commit()
         return user
-
-    @pytest.fixture
-    def member(self, app, admin_user_and_password, group, user_to_add):
-        admin_user, admin_user_password = admin_user_and_password
-        app = _login(app, admin_user.username, admin_user_password)
-        _add_member(app, user_to_add, group)
-        member = user_to_add
-        _logout(app)
-        return member
 
 
 def _logout(app):

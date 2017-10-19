@@ -1,9 +1,27 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
 {% set page_id = 'group_members' %}
-{% set page_title = 'Group Members' %}
+{% set page_title = '{group}'.format(group=group.name) %}
 
 {% block content %}
+  <h2>Details</h2>
+  {% set group_url = request.route_url('group_read_noslug', pubid=group.pubid) %}
+  <dl>
+    <dt>authority</dt>
+      <dd>{{ group.authority }}</dd>
+    <dt>type</dt>
+      <dd>{{ get_group_type(group) }} - {{ get_group_type_description(get_group_type(group)) }}</dd>
+    <dt>URL</dt>
+      <dd><a href="{{ group_url }}">{{ group_url }}</a></dd>
+    <dt>pubid</dt>
+      <dd>{{ group.pubid }}</dd>
+    <dt>id</dt>
+      <dd>{{ group.id }}</dd>
+    <dt>creator</dt>
+      {% set group_creator_url = request.route_url('activity.user_search', username=group.creator.username) %}
+      <dd><a href="{{ group_creator_url }}">{{ group.creator.userid }}</a></dd>
+  </dl>
+
   <h2>Add Member</h2>
   {{ add_member_form }}
 
@@ -13,15 +31,27 @@
       <thead>
         <tr>
           <th>userid</th>
-          <th>user</th>
+          <th>username</th>
+          <th>email</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for user in results %}
           <tr typeof="User">
-            <td property="userid">{{ user.userid }}</td>
             {% set user_url = request.route_url('activity.user_search', username=user.username) %}
-            <td><a href="{{ user_url }}">{{ user_url }}</a></td>
+            <td property="userid">
+              <a href="{{ user_url }}">
+                {{ user.userid }}
+              </a>
+            </td>
+            <td>{{ user.username }}</td>
+            <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+            <td>
+              <span class="test-TestAdminGroupMembers__remove-member">
+                {{ remove_member_form(group, user.userid).render() }}
+              </span>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
