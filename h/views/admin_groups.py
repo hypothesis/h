@@ -20,6 +20,8 @@ from jinja2 import Markup
 
 _ = i18n.TranslationString
 
+admin_form_class = 'admin-form__form'
+
 
 @view_config(route_name='admin_groups',
              request_method='GET',
@@ -51,7 +53,8 @@ class AdminGroupCreateController(object):
                                          'js-create-group-create-btn')
         self.form = request.create_form(self.schema,
                                         formid='admin-group-create-form',
-                                        css_class='admin-group-create-form__form',
+                                        css_class=' '.join(
+                                            [admin_form_class, 'admin-group-create-form__form']),
                                         buttons=(submit,))
 
     @view_config(request_method='GET')
@@ -108,7 +111,8 @@ class AdminGroupMembersController(object):
                                         appstruct=dict(
                                             pubid=self.request.context.pubid),
                                         formid='admin-group-add-member-form',
-                                        css_class='admin-group-add-member-form__form',
+                                        css_class=' '.join(
+                                            [admin_form_class, 'admin-group-add-member-form__form']),
                                         buttons=(deform.Button(
                                             title=_(
                                                 'Add Member to Group'),
