@@ -68,6 +68,18 @@ class TestAdminGroupMembers(object):
         add_member_form['email'] = user_to_add.email
         form_submit_res = add_member_form.submit().follow()
 
+    def test_cant_add_by_both_username_and_email(self, app, admin_user_and_password, group, user_to_add):
+        admin_user, admin_user_password = admin_user_and_password
+        app = _login(app, admin_user.username, admin_user_password)
+        admin_group_members_url = '/admin/groups/{pubid}/{slug}/members/'.format(
+            pubid=group.pubid, slug=group.slug)
+        res = app.get(admin_group_members_url)
+        add_member_form = res.forms['admin-group-add-member-form']
+        add_member_form['email'] = user_to_add.email
+        add_member_form['username'] = user_to_add.username
+        form_submit_res = add_member_form.submit(expect_errors=True)
+        assert form_submit_res.status_code == 400
+
     @pytest.fixture
     def group(self, db_session, factories):
         group = factories.Group(
