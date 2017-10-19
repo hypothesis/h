@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import colander
 import deform
 
 from pyramid import httpexceptions
@@ -10,8 +11,10 @@ from h import form
 from h import i18n
 from h import models
 from h import paginator
+from h.accounts.schemas import CSRFSchema
 from h.groups import schemas
-
+from h.models.group import GroupFactory
+from h.models.user import UserFactory
 from jinja2 import Markup
 
 _ = i18n.TranslationString
@@ -74,7 +77,6 @@ class AdminGroupCreateController(object):
             return httpexceptions.HTTPSeeOther(self.request.url)
 
         def on_failure(exception):
-            print "on_failure", exception
             return self._template_data()
 
         return form.handle_form_submission(
@@ -87,3 +89,97 @@ class AdminGroupCreateController(object):
     def _template_data(self):
         """Return the data needed to render this controller's page."""
         return {'form': self.form.render()}
+
+
+@view_defaults(route_name='admin_group_members',
+               renderer='h:templates/admin/groups_members.html.jinja2',
+               permission='admin_groups',
+               effective_principals=security.Authenticated)
+class AdminGroupMembersController(object):
+    """
+    Controller for feature that lets user create a new group
+    """
+
+    def __init__(self, request):
+        self.request = request
+        self.schema = self._add_member_schema.bind(request=self.request)
+        self.form = request.create_form(self.schema,
+                                        appstruct=dict(
+                                            pubid=self.request.context.pubid),
+                                        formid='admin-group-add-member-form',
+                                        css_class='admin-group-add-member-form__form',
+                                        buttons=(deform.Button(
+                                            title=_(
+                                                'Add Member to Group'),
+                                            css_class='primary-action-btn '
+                                            'admin-group-add-member-form__submit-btn '
+                                            'js-group-add-member-btn'),))
+
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the existing members"""
+        context = self._template_data()
+        return context
+
+    @view_config(request_method='POST')
+    def post(self):
+        """Respond to a submission of the create group form."""
+        def on_success(appstruct):
+            group = GroupFactory(self.request)[appstruct['pubid']]
+            user = self.request.find_service(name='user').fetch(
+                appstruct['username'], group.authority)
+            assert user
+            groups_service = self.request.find_service(name='group')
+            groups_service.member_join(group, user.userid)
+            self.request.session.flash('Added {user} to group'.format(
+                user=user.username), queue='success')
+            return httpexceptions.HTTPSeeOther(self.request.url)
+
+        def on_failure(exception):
+            return self._template_data()
+
+        return form.handle_form_submission(
+            self.request,
+            self.form,
+            on_success=on_success,
+            on_failure=on_failure,
+            flash=False)
+
+    def _template_data(self):
+        @paginator.paginate_query
+        def get_paging_context(group, request):
+            query = request.db.query(models.User).filter(
+                models.User.groups.contains(group))
+            return query
+        context = get_paging_context(self.request.context, self.request)
+        context.update(dict(group=self.request.context,
+                            add_member_form=self.form.render()))
+        return context
+
+    @property
+    def _add_member_schema(self):
+        request = self.request
+
+        class AddMemberSchema(CSRFSchema):
+            username = colander.SchemaNode(
+                colander.String(),
+                name='username',
+                title=_("Username"),
+                widget=deform.widget.TextInputWidget(),)
+            pubid = colander.SchemaNode(
+                colander.String(),
+                name='pubid',
+                widget=deform.widget.HiddenWidget(),)
+
+            def validator(self, form, value):
+                group = GroupFactory(request)[value['pubid']]
+                user = request.find_service(name='user').fetch(
+                    value['username'], group.authority)
+                if not user:
+                    err = colander.Invalid(form)
+                    err['username'] = "User not found"
+                    raise err
+
+        schema = AddMemberSchema()
+
+        return schema
