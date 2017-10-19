@@ -18,8 +18,8 @@
       </thead>
       <tbody>
         {% for user in results %}
-          <tr>
-            <td>{{ user.userid }}</td>
+          <tr typeof="User">
+            <td property="userid">{{ user.userid }}</td>
             {% set user_url = request.route_url('activity.user_search', username=user.username) %}
             <td><a href="{{ user_url }}">{{ user_url }}</a></td>
           </tr>
