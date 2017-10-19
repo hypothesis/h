@@ -75,7 +75,7 @@ class AdminGroupCreateController(object):
                 description=form_data.get('description'),
                 userid=self.request.authenticated_userid,
                 type_=form_data['group_type'])
-            group_url = self.request.route_path('group_read',
+            group_url = self.request.route_path('admin_group_read',
                                                 pubid=group.pubid,
                                                 slug=group.slug)
             self.request.session.flash(Markup(
@@ -101,7 +101,7 @@ class AdminGroupCreateController(object):
                renderer='h:templates/admin/group_read.html.jinja2',
                permission='admin_groups',
                effective_principals=security.Authenticated)
-class AdminGroupMembersController(object):
+class AdminGroupReadController(object):
     """
     Controller for feature that lets user create a new group
     """
@@ -146,7 +146,10 @@ class AdminGroupMembersController(object):
             raise ValueError('unexpected form kind in on_success')
 
         def on_failure(exception):
-            return self._template_data()
+            kwargs = dict()
+            if isinstance(form_for_formid.schema, AddMemberSchema):
+                kwargs.update(add_member_form=form_for_formid)
+            return self._template_data(**kwargs)
 
         return form.handle_form_submission(
             self.request,
@@ -155,7 +158,7 @@ class AdminGroupMembersController(object):
             on_failure=on_failure,
             flash=False)
 
-    def _template_data(self):
+    def _template_data(self, add_member_form=None):
         @paginator.paginate_query
         def get_paging_context(group, request):
             query = request.db.query(models.User).filter(
@@ -166,7 +169,7 @@ class AdminGroupMembersController(object):
                             get_group_type=get_group_type,
                             get_group_type_description=lambda group_type: GROUP_TYPES[
                                 group_type]['description'],
-                            add_member_form=self._create_add_member_form().render(),
+                            add_member_form=add_member_form or self._create_add_member_form(),
                             remove_member_form=self._create_remove_member_form,))
         return context
 
@@ -278,10 +281,11 @@ class AddMemberSchema(CSRFSchema):
             err = colander.Invalid(
                 form, 'Provide one of {0}'.format(', '.join(user_fields)))
             raise err
-        user = self._query_user(value)
+        user = self._query_user(user_query)
         if not user:
             err = colander.Invalid(form)
-            err['username'] = "User not found"
+            for field in [field for field, value in user_query.items() if value]:
+                err[field] = 'user not found'
             raise err
 
 
