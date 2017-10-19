@@ -41,5 +41,9 @@ body {
 .admin-group-remove-member-form__form {
   & .form-actions {
     margin: 0;
+
+    & .u-stretch {
+      flex-grow: unset;
+    }
   }
 }
