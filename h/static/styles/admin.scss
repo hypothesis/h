@@ -31,3 +31,9 @@ body {
 .pager .pager__item--more {
   border: none;
 }
+
+.admin-form__form {
+  & .form-input__error-list {
+    list-style-type: none;
+  }
+}
