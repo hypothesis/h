@@ -13,6 +13,7 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>Authority</th>
           <th>Type</th>
           <th>URL</th>
           <th>Created by</th>
@@ -24,6 +25,7 @@
           {% set group_admin_url = request.route_url('admin_group_read', pubid=group.pubid, slug=group.slug) %}
           <tr>
             <td><a href="{{ group_admin_url }}">{{ group.name }}</a></td>
+            <td>{{ group.authority }}</td>
             <td>
               <span title="{{ get_group_type_description(get_group_type(group)) }}">{{ get_group_type(group) }}</span>
             </td>
