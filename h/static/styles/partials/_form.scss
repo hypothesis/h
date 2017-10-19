@@ -31,6 +31,10 @@
   }
 }
 
+.form__errors {
+  color: $brand;
+}
+
 .form.is-editing > .form__backdrop {
   display: block;
 }
