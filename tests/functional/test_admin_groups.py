@@ -48,7 +48,7 @@ def admin_user_and_password(db_session, factories):
 class TestAdminGroupMembers(object):
     """Tests for the /admin/groups/{pubid}/{slug}/members page."""
 
-    def test_can_add_member(self, app, admin_user_and_password, group, user_to_add):
+    def test_can_add_member_by_username(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
         admin_group_members_url = '/admin/groups/{pubid}/{slug}/members/'.format(
@@ -56,11 +56,17 @@ class TestAdminGroupMembers(object):
         res = app.get(admin_group_members_url)
         add_member_form = res.forms['admin-group-add-member-form']
         add_member_form['username'] = user_to_add.username
-        # add_member_form['name'] = 'Public Group for Test'
-        # add_member_form['description'] = 'description of awesome group'
-        # add_member_form['group_type'].select(group_type)
         form_submit_res = add_member_form.submit().follow()
-        # assert form_submit_res.text.startswith('<!DOCTYPE html>')
+
+    def test_can_add_member_by_email(self, app, admin_user_and_password, group, user_to_add):
+        admin_user, admin_user_password = admin_user_and_password
+        app = _login(app, admin_user.username, admin_user_password)
+        admin_group_members_url = '/admin/groups/{pubid}/{slug}/members/'.format(
+            pubid=group.pubid, slug=group.slug)
+        res = app.get(admin_group_members_url)
+        add_member_form = res.forms['admin-group-add-member-form']
+        add_member_form['email'] = user_to_add.email
+        form_submit_res = add_member_form.submit().follow()
 
     @pytest.fixture
     def group(self, db_session, factories):
@@ -71,6 +77,7 @@ class TestAdminGroupMembers(object):
 
     @pytest.fixture
     def user_to_add(self, db_session, factories):
-        user = factories.User(username='member', authority=authority)
+        user = factories.User(
+            username='member', authority=authority, email='member@email.com')
         db_session.commit()
         return user

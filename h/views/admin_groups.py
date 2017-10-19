@@ -6,6 +6,7 @@ from pyramid import httpexceptions
 from pyramid import security
 from pyramid.config import not_
 from pyramid.view import view_config, view_defaults
+from sqlalchemy import or_
 
 from h import form
 from h import i18n
@@ -14,7 +15,7 @@ from h import paginator
 from h.accounts.schemas import CSRFSchema
 from h.groups import schemas
 from h.models.group import GroupFactory
-from h.models.user import UserFactory
+from h.models.user import User, UserFactory
 from jinja2 import Markup
 
 _ = i18n.TranslationString
@@ -126,8 +127,7 @@ class AdminGroupMembersController(object):
         """Respond to a submission of the create group form."""
         def on_success(appstruct):
             group = GroupFactory(self.request)[appstruct['pubid']]
-            user = self.request.find_service(name='user').fetch(
-                appstruct['username'], group.authority)
+            user = self._query_user(appstruct)
             assert user
             groups_service = self.request.find_service(name='group')
             groups_service.member_join(group, user.userid)
@@ -156,15 +156,29 @@ class AdminGroupMembersController(object):
                             add_member_form=self.form.render()))
         return context
 
+    def _query_user(self, form_values):
+        group_filters = dict([field, form_values[field]] for field in (
+            'username', 'email') if form_values.get(field))
+        user = self.request.db.query(User).filter(or_(
+            *[getattr(User, field) == form_values for [field, form_values] in group_filters.items()])).one()
+        return user
+
     @property
     def _add_member_schema(self):
-        request = self.request
+        controller = self
 
         class AddMemberSchema(CSRFSchema):
             username = colander.SchemaNode(
                 colander.String(),
+                missing=None,
                 name='username',
                 title=_("Username"),
+                widget=deform.widget.TextInputWidget(),)
+            email = colander.SchemaNode(
+                colander.String(),
+                missing=None,
+                name='email',
+                title=_("email"),
                 widget=deform.widget.TextInputWidget(),)
             pubid = colander.SchemaNode(
                 colander.String(),
@@ -172,9 +186,14 @@ class AdminGroupMembersController(object):
                 widget=deform.widget.HiddenWidget(),)
 
             def validator(self, form, value):
-                group = GroupFactory(request)[value['pubid']]
-                user = request.find_service(name='user').fetch(
-                    value['username'], group.authority)
+                group = GroupFactory(controller.request)[value['pubid']]
+                if value.get('username') and value.get('email'):
+                    err = colander.Invalid(
+                        form, 'Provide one of username or email, but not both')
+                    err['username'] = 'not allowed with email'
+                    err['email'] = 'not allowed with username'
+                    raise err
+                user = controller._query_user(value)
                 if not user:
                     err = colander.Invalid(form)
                     err['username'] = "User not found"
