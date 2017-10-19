@@ -25,13 +25,20 @@ _ = i18n.TranslationString
 admin_form_class = 'admin-form__form'
 
 
+def _get_group_type_description(
+    group_type): return GROUP_TYPES[group_type]['description']
+
+
 @view_config(route_name='admin_groups',
              request_method='GET',
              renderer='h:templates/admin/groups.html.jinja2',
              permission='admin_groups')
-@paginator.paginate_query
 def groups_index(context, request):
-    return request.db.query(models.Group).order_by(models.Group.created.desc())
+    context = dict(get_group_type=get_group_type,
+                   get_group_type_description=_get_group_type_description,)
+    context.update(**paginator.paginate_query(lambda group, request: request.db.query(
+        models.Group).order_by(models.Group.created.desc()))(context, request))
+    return context
 
 
 @view_defaults(route_name='admin_groups_create',
@@ -167,8 +174,7 @@ class AdminGroupReadController(object):
         context = get_paging_context(self.request.context, self.request)
         context.update(dict(group=self.request.context,
                             get_group_type=get_group_type,
-                            get_group_type_description=lambda group_type: GROUP_TYPES[
-                                group_type]['description'],
+                            get_group_type_description=_get_group_type_description,
                             add_member_form=add_member_form or self._create_add_member_form(),
                             remove_member_form=self._create_remove_member_form,))
         return context
