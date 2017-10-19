@@ -15,7 +15,8 @@ GROUP_TYPES = {
     },
     'publisher': {
         'description': 'Anyone can read. Anyone in authority can write. Intended for 3rd-party namespaces.',
-        'creator_is_immediate_member': False
+        'creator_is_immediate_member': False,
+        'matches_request': lambda group, request: request.domain != group.authority
     },
     'public': {
         'description': 'Anyone can read. Members can write. Group creator can invite members.',
@@ -52,17 +53,18 @@ GROUP_ACCESS_FLAGS = {
 }
 
 
-def get_group_type(group):
+def get_group_type(group, request=None):
     for group_type_name, access_flags in GROUP_ACCESS_FLAGS.items():
-        if group_type_name == 'publisher':
-            # don't label things publisher for now as it will also match on 'open'
-            # Gienin the future this function might need to look at settings and group.authority to distinguish between publisher/open
-            continue
         for field, value in access_flags.items():
             if getattr(group, field) != value:
                 # continue to next group_type
                 break
-            return group_type_name
+        matches_request = GROUP_TYPES.get(
+            group_type_name, {}).get('matches_request')
+        if request and callable(matches_request):
+            if not matches_request(group, request):
+                continue
+        return group_type_name
     return None
 
 
