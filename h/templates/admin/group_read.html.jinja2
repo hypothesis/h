@@ -10,7 +10,8 @@
     <dt>authority</dt>
       <dd>{{ group.authority }}</dd>
     <dt>type</dt>
-      <dd>{{ get_group_type(group) }} - {{ get_group_type_description(get_group_type(group)) }}</dd>
+      {% set group_type = get_group_type(group) %}
+      <dd>{{ group_type }} - {{ get_group_type_description(group_type) }}</dd>
     <dt>URL</dt>
       <dd><a href="{{ group_url }}">{{ group_url }}</a></dd>
     <dt>pubid</dt>
