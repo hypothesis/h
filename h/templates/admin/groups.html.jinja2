@@ -20,8 +20,9 @@
       </thead>
       <tbody>
         {% for group in results %}
+          {% set group_admin_url = request.route_url('admin_group_read', pubid=group.pubid, slug=group.slug) %}
           <tr>
-            <td>{{ group.name }}</td>
+            <td><a href="{{ group_admin_url }}">{{ group.name }}</a></td>
             <td>
               {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
               <a href="{{ group_url }}">
@@ -36,7 +37,7 @@
               {% endif %}
             </td>
             <td>
-              <a href="{{ request.route_url('admin_group_members', pubid=group.pubid, slug=group.slug) }}">
+              <a href="{{ group_admin_url }}#members">
                 {{ group.members|length }}
               </a>
             </td>
