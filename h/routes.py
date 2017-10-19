@@ -42,6 +42,11 @@ def includeme(config):
     config.add_route('admin_cohorts_edit', '/admin/features/cohorts/{id}')
     config.add_route('admin_groups', '/admin/groups')
     config.add_route('admin_groups_create', '/admin/groups/create')
+    # Match "/<pubid>/": we redirect to the version with the slug.
+    config.add_route('admin_group_members',
+                     '/admin/groups/{pubid}/{slug:[^/]*}/members/',
+                     factory='h.resources.GroupFactory',
+                     traverse='/{pubid}')
     config.add_route('admin_mailer', '/admin/mailer')
     config.add_route('admin_mailer_test', '/admin/mailer/test')
     config.add_route('admin_nipsa', '/admin/nipsa')

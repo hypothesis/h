@@ -1,0 +1,43 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'group_members' %}
+{% set page_title = 'Group Members' %}
+
+{% block content %}
+  <h2>Add Member</h2>
+  {{ add_member_form }}
+
+  <h2>All Members</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>userid</th>
+          <th>user</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in results %}
+          <tr>
+            <td>{{ user.userid }}</td>
+            {% set user_url = request.route_url('activity.user_search', username=user.username) %}
+            <td><a href="{{ user_url }}">{{ user_url }}</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "h:templates/includes/paginator.html.jinja2" %}
+  <footer class="form-footer">
+    {# This form has at least one required field. If that changes we should update this footer. #}
+    <span class="form-footer__required">
+      <span class="form-footer__symbol">
+      *
+      </span>
+      <span class="form-footer__text">
+        Required
+      </span>
+    </span>
+  </footer>
+{% endblock %}

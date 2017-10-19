@@ -35,7 +35,11 @@
                 </a>
               {% endif %}
             </td>
-            <td>{{ group.members|length }}</td>
+            <td>
+              <a href="{{ request.route_url('admin_group_members', pubid=group.pubid, slug=group.slug) }}">
+                {{ group.members|length }}
+              </a>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
