@@ -67,9 +67,11 @@ repoze.lru==0.6           # via pyramid
 repoze.sendmail==4.3      # via pyramid-mailer
 requests-aws4auth==0.9
 requests==2.13.0          # via requests-aws4auth
+rfc3987==1.3.7
 six==1.10.0               # via bcrypt, bleach, cryptography, html5lib, packaging, python-dateutil
 sqlalchemy==1.1.4
 statsd==3.2.1
+strict-rfc3339==0.7
 transaction==2.1.2
 translationstring==1.3    # via colander, deform, pyramid
 unidecode==0.4.19         # via python-slugify
