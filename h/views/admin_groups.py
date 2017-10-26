@@ -25,6 +25,13 @@ _ = i18n.TranslationString
 admin_form_class = 'admin-form__form'
 
 
+def admin_form_creator(request):
+    """return a function that will create a form configured for the admin"""
+    def create_form(*args, **kwargs):
+        return request.create_form(*args, **kwargs)
+    return create_form
+
+
 def _get_group_type_description(
     group_type): return GROUP_TYPES[group_type]['description']
 
@@ -60,11 +67,12 @@ class AdminGroupCreateController(object):
                                css_class='primary-action-btn '
                                          'admin-group-create-form__submit-btn '
                                          'js-create-group-create-btn')
-        self.form = request.create_form(self.schema,
-                                        formid='admin-group-create-form',
-                                        css_class=' '.join(
-                                            [admin_form_class, 'admin-group-create-form__form']),
-                                        buttons=(submit,))
+        self.form = admin_form_creator(self.request)(
+            self.schema,
+            formid='admin-group-create-form',
+            css_class=' '.join(
+                [admin_form_class, 'admin-group-create-form__form']),
+            buttons=(submit,))
 
     @view_config(request_method='GET')
     def get(self):
@@ -104,151 +112,92 @@ class AdminGroupCreateController(object):
         return {'form': self.form.render()}
 
 
-@view_defaults(route_name='admin_group_read',
-               renderer='h:templates/admin/group_read.html.jinja2',
-               permission='admin_groups',
-               effective_principals=security.Authenticated)
-class AdminGroupReadController(object):
-    """
-    Controller for feature that lets user create a new group
-    """
-
-    def __init__(self, request):
-        self.request = request
-
-    @view_config(request_method='GET')
-    def get(self):
-        """Render the existing members"""
-        context = self._template_data()
-        return context
-
-    @view_config(request_method='POST')
-    def post(self):
-        """Respond to a submission of the create group form."""
-
-        form_for_formid = self._form_for_formid(
-            self.request.POST['__formid__'])
-
-        def on_success(form_data):
-            form_kind = form_for_formid
-            if isinstance(form_for_formid.schema, AddMemberSchema):
-                group = GroupFactory(self.request)[form_data['pubid']]
-                user = self._query_user(form_data)
-                assert user
-                groups_service = self.request.find_service(name='group')
-                groups_service.member_join(group, user.userid)
-                self.request.session.flash('Added {user} to group'.format(
-                    user=user.username), queue='success')
-                return httpexceptions.HTTPSeeOther(self.request.url)
-            elif isinstance(form_for_formid.schema, RemoveMemberSchema):
-                group = GroupFactory(self.request)[form_data['pubid']]
-                user = self.request.find_service(
-                    name='user').fetch(form_data['userid'])
-                assert user
-                groups_service = self.request.find_service(name='group')
-                groups_service.member_leave(group, user.userid)
-                self.request.session.flash('Removed {user} from group'.format(
-                    user=user.username), queue='success')
-                return httpexceptions.HTTPSeeOther(self.request.url)
-            raise ValueError('unexpected form kind in on_success')
-
-        def on_failure(exception):
-            kwargs = dict()
-            if isinstance(form_for_formid.schema, AddMemberSchema):
-                kwargs.update(add_member_form=form_for_formid)
-            return self._template_data(**kwargs)
-
-        return form.handle_form_submission(
-            self.request,
-            form_for_formid,
-            on_success=on_success,
-            on_failure=on_failure,
-            flash=False)
-
-    def _template_data(self, add_member_form=None):
-        @paginator.paginate_query
-        def get_paging_context(group, request):
-            query = request.db.query(models.User).filter(
-                models.User.groups.contains(group))
-            return query
-        context = get_paging_context(self.request.context, self.request)
-        context.update(dict(group=self.request.context,
-                            get_group_type=get_group_type,
-                            get_group_type_description=_get_group_type_description,
-                            add_member_form=add_member_form or self._create_add_member_form(),
-                            remove_member_form=self._create_remove_member_form,))
-        return context
-
-    def _query_user(self, form_values):
-        group_filters = dict([field, form_values[field]] for field in (
-            'username', 'email') if form_values.get(field))
-        user = self.request.db.query(User).filter(or_(
-            *[getattr(User, field) == form_values for [field, form_values] in group_filters.items()])).first()
-        return user
-
-    def _remove_member_formid(self):
-        return 'admin-group-remove-member-form'
-
-    def _form_for_formid(self, formid):
-        if re.search(r'^admin-group-remove-member-form', formid):
-            # it's a remove form
-            return self._create_remove_member_form()
-        elif re.search(r'^admin-group-add-member-form', formid):
-            return self._create_add_member_form()
-        raise ValueError(
-            "don't know how to create form for formid {0}".format(formid))
-
-    def _create_add_member_form(self,
-                                formid='admin-group-add-member-form',
-                                css_class=' '.join(
-                                    [admin_form_class, 'admin-group-add-member-form__form']),
-                                buttons=None):
-        schema = self._add_member_schema
-        form = self.request.create_form(schema,
-                                        appstruct=dict(
-                                            pubid=self.request.context.pubid),
-                                        formid=formid,
-                                        css_class=css_class,
-                                        buttons=buttons or (deform.Button(
-                                            title=_(
-                                                'Add Member to Group'),
-                                            css_class='primary-action-btn '
-                                            'admin-group-add-member-form__submit-btn '
-                                            'js-group-add-member-btn'),))
-        return form
-
-    def _create_remove_member_form(self, group=None, userid=None):
-        schema = self._remove_member_schema
-        appstruct = dict()
-        if group:
-            appstruct.update(pubid=group.pubid)
-        if userid:
-            appstruct.update(userid=userid)
-        form = self.request.create_form(schema,
-                                        appstruct=appstruct,
-                                        formid=self._remove_member_formid(),
-                                        css_class=' '.join(
-                                            [admin_form_class, 'admin-group-remove-member-form__form']),
-                                        buttons=[
-                                            deform.Button(
-                                                title=_('Remove'),
-                                                css_class=' '.join(['primary-action-btn ',
-                                                                    'admin-group-remove-member-form__submit-btn']),)
-                                        ],)
-        return form
-
-    @property
-    def _remove_member_schema(self):
-        schema = RemoveMemberSchema().bind(request=self.request)
-        return schema
-
-    @property
-    def _add_member_schema(self):
-        schema = AddMemberSchema(self._query_user).bind(request=self.request)
-        return schema
+class Username(colander.TupleSchema):
+    username = colander.SchemaNode(
+        colander.String(),
+        name='username',
+        title=_("Username"),)
 
 
-class AddMemberSchema(CSRFSchema):
+class CSVScalarWidget(deform.widget.TextAreaCSVWidget):
+    def _split(self, values_string):
+        return re.split('[,\n ]', values_string)
+
+    def serialize(self, field, cstruct, *args, **kwargs):
+        # make tuples since that's
+        cstruct_tuples = ((s,) for s in cstruct) if cstruct else cstruct
+        return super(CSVScalarWidget, self).serialize(field, cstruct_tuples, *args, **kwargs)
+
+    def deserialize(self, field, pstruct):
+        if pstruct is colander.null:
+            return colander.null
+        if not pstruct.strip():
+            return colander.null
+        entries = filter(bool, map(lambda s: s.strip(), self._split(pstruct)))
+        return entries
+
+    def handle_error(self, field, error):
+        msgs = []
+        if error.msg:
+            field.error = error
+        else:
+            for e in error.children:
+                msgs.append('value %s: %s' % (e.pos + 1, e[1]))
+            field.error = colander.Invalid(field.schema, '\n'.join(msgs))
+
+
+class UserIdentifier(colander.SchemaNode):
+    name = 'user_identifier'
+
+    def validator(self, *args, **kwargs):
+        schema_node = self
+
+        def does_user_exist(user_identifier):
+            schema_node = self
+            fields = ('username', 'email')
+            # any user where one of fields matches one of the user_identifiers
+            # @TODO (bengo) filter by authority?
+            request = self.bindings['request']
+            users = request.db.query(User).filter(
+                or_(*[getattr(User, field) == user_identifier for field in fields])).all()
+            return users
+        validate = colander.Function(
+            does_user_exist, msg='User does not exist')
+        return validate(*args, **kwargs)
+
+    def schema_type(self):
+        return colander.String()
+
+
+def validate_pubid(node, value):
+    return GroupFactory(node.bindings['request'])[value]
+
+
+class AddGroupMemberSchema(CSRFSchema):
+    pubid = colander.SchemaNode(
+        colander.String(),
+        name='pubid',
+        widget=deform.widget.HiddenWidget(),
+        validator=validate_pubid)
+
+    def __init__(self, *args, **kwargs):
+        if 'query_user' in kwargs:
+            self._query_user = kwargs.pop('query_user')
+        super(AddGroupMemberSchema, self).__init__(*args, **kwargs)
+
+    def _query_user(self, query):
+        raise NotImplementedError
+
+
+class AddMultipleMembersSchema(AddGroupMemberSchema):
+    user_identifiers = colander.SchemaNode(
+        colander.Sequence(),
+        UserIdentifier(),
+        description='Enter one or more usernames and/or email addresses',
+        widget=CSVScalarWidget())
+
+
+class AddMemberByUsernameOrEmailSchema(AddGroupMemberSchema):
     username = colander.SchemaNode(
         colander.String(),
         missing=None,
@@ -261,14 +210,9 @@ class AddMemberSchema(CSRFSchema):
         name='email',
         title=_("email"),
         widget=deform.widget.TextInputWidget(),)
-    pubid = colander.SchemaNode(
-        colander.String(),
-        name='pubid',
-        widget=deform.widget.HiddenWidget(),)
 
-    def __init__(self, query_user, *args, **kwargs):
-        super(AddMemberSchema, self).__init__(*args, **kwargs)
-        self._query_user = query_user
+    def __init__(self, *args, **kwargs):
+        super(AddMemberByUsernameOrEmailSchema, self).__init__(*args, **kwargs)
 
     def validator(self, form, value):
         request = form.bindings['request']
@@ -313,3 +257,166 @@ class RemoveMemberSchema(CSRFSchema):
             exc = colander.Invalid(form)
             exc['user'] = 'there is no matching user in this group'
             raise exc
+
+
+@view_defaults(route_name='admin_group_read',
+               renderer='h:templates/admin/group_read.html.jinja2',
+               permission='admin_groups',
+               effective_principals=security.Authenticated)
+class AdminGroupReadController(object):
+    """
+    Controller for feature that lets user create a new group
+    """
+    AddMemberFormSchema = AddMultipleMembersSchema
+
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the existing members"""
+        context = self._template_data()
+        return context
+
+    @view_config(request_method='POST')
+    def post(self):
+        """Respond to a submission of the create group form."""
+
+        form_for_formid = self._form_for_formid(
+            self.request.POST['__formid__'])
+
+        def on_success(form_data):
+            form_kind = form_for_formid
+            if isinstance(form_for_formid.schema, self.AddMemberFormSchema):
+                group = GroupFactory(self.request)[form_data['pubid']]
+                users = self._query_users(**form_data)
+                assert users
+                groups_service = self.request.find_service(name='group')
+
+                def add_user(user):
+                    assert user.authority == group.authority
+                    groups_service.member_join(group, user.userid)
+                    return user
+                added_users = map(add_user, users)
+                self.request.session.flash('Added {user} to group'.format(user=users[0].username if len(users) == 1 else '{num} users'.format(num=len(users))),
+                                           queue='success')
+                return httpexceptions.HTTPSeeOther(self.request.url)
+            elif isinstance(form_for_formid.schema, RemoveMemberSchema):
+                group = GroupFactory(self.request)[form_data['pubid']]
+                user = self.request.find_service(
+                    name='user').fetch(form_data['userid'])
+                assert user
+                groups_service = self.request.find_service(name='group')
+                groups_service.member_leave(group, user.userid)
+                self.request.session.flash('Removed {user} from group'.format(
+                    user=user.username), queue='success')
+                return httpexceptions.HTTPSeeOther(self.request.url)
+            raise ValueError('unexpected form kind in on_success')
+
+        def on_failure(exception):
+            kwargs = dict()
+            if isinstance(form_for_formid.schema, self.AddMemberFormSchema):
+                kwargs.update(add_member_form=form_for_formid)
+            return self._template_data(**kwargs)
+
+        return form.handle_form_submission(
+            self.request,
+            form_for_formid,
+            on_success=on_success,
+            on_failure=on_failure,
+            flash=False)
+
+    def _template_data(self, add_member_form=None):
+        @paginator.paginate_query
+        def get_paging_context(group, request):
+            query = request.db.query(models.User).filter(
+                models.User.groups.contains(group))
+            return query
+        context = get_paging_context(self.request.context, self.request)
+        context.update(dict(group=self.request.context,
+                            get_group_type=get_group_type,
+                            get_group_type_description=_get_group_type_description,
+                            add_member_form=add_member_form or self._create_add_member_form(),
+                            remove_member_form=self._create_remove_member_form,))
+        return context
+
+    def _query_user(self, form_data):
+        group_filters = dict([field, form_data[field]] for field in (
+            'username', 'email') if form_data.get(field))
+        user = self.request.db.query(User).filter(or_(
+            *[getattr(User, field) == form_data for [field, form_data] in group_filters.items()])).first()
+        return user
+
+    def _query_users(self, **kwargs):
+        if 'user_identifiers' not in kwargs:
+            return self._query_user(self, kwargs)
+        user_identifiers = kwargs.get('user_identifiers', [])
+        fields = ('username', 'email')
+        # any user where one of fields matches one of the user_identifiers
+        # @TODO (bengo) filter by authority?
+        users_query = self.request.db.query(User).filter(or_(
+            *[getattr(User, field) == value for field in fields for value in user_identifiers])).all()
+        return users_query
+
+    def _remove_member_formid(self):
+        return 'admin-group-remove-member-form'
+
+    def _form_for_formid(self, formid):
+        if re.search(r'^admin-group-remove-member-form', formid):
+            # it's a remove form
+            return self._create_remove_member_form()
+        elif re.search(r'^admin-group-add-member-form', formid):
+            return self._create_add_member_form()
+        raise ValueError(
+            "don't know how to create form for formid {0}".format(formid))
+
+    def _create_add_member_form(self,
+                                formid='admin-group-add-member-form',
+                                css_class=' '.join(
+                                    [admin_form_class, 'admin-group-add-member-form__form']),
+                                buttons=None):
+        schema = self._add_member_schema
+        form = admin_form_creator(self.request)(
+            schema,
+            appstruct=dict(
+                pubid=self.request.context.pubid),
+            formid=formid,
+            css_class=css_class,
+            buttons=buttons or (deform.Button(
+                title=_(
+                    'Add Member to Group'),
+                css_class='primary-action-btn '
+                'admin-group-add-member-form__submit-btn '
+                'js-group-add-member-btn'),))
+        return form
+
+    def _create_remove_member_form(self, group=None, userid=None):
+        schema = self._remove_member_schema
+        appstruct = dict()
+        if group:
+            appstruct.update(pubid=group.pubid)
+        if userid:
+            appstruct.update(userid=userid)
+        form = admin_form_creator(self.request)(
+            schema,
+            appstruct=appstruct,
+            formid=self._remove_member_formid(),
+            css_class=' '.join(
+                [admin_form_class, 'admin-group-remove-member-form__form']),
+            buttons=[
+                deform.Button(
+                    title=_('Remove'),
+                    css_class=' '.join(['primary-action-btn ',
+                                        'admin-group-remove-member-form__submit-btn']),)
+            ],)
+        return form
+
+    @property
+    def _remove_member_schema(self):
+        schema = RemoveMemberSchema().bind(request=self.request)
+        return schema
+
+    @property
+    def _add_member_schema(self):
+        schema = self.AddMemberFormSchema().bind(request=self.request)
+        return schema
