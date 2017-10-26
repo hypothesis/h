@@ -3,11 +3,17 @@
 from __future__ import unicode_literals
 
 import pytest
+import random
+import string
 
 from h.services.group import GROUP_TYPES
 from webtest.forms import Form
 
-authority = 'example.com'
+DEFAULT_AUTHORITY = 'example.com'
+
+
+def randomstr(n): return ''.join(
+    [random.choice(string.lowercase) for i in xrange(n)])
 
 
 @pytest.mark.functional
@@ -39,7 +45,7 @@ def _login(app, username, password):
 def admin_user_and_password(db_session, factories):
     # Password is 'pass'
     password = 'pass'
-    user = factories.User(admin=True, username='admin', authority=authority,
+    user = factories.User(admin=True, username='admin', authority=DEFAULT_AUTHORITY,
                           password='$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6')
     db_session.commit()
     return (user, password)
@@ -56,34 +62,67 @@ def _group_read_res_has_user(res, user):
 class TestAdminGroupRead(object):
     """Tests for the /admin/groups/{pubid}/{slug}/members page."""
 
+    def test_cant_add_no_one(self, app, admin_user_and_password, group):
+        admin_user, admin_user_password = admin_user_and_password
+        app = _login(app, admin_user.username, admin_user_password)
+        form_submit_res = _add_members(app, '', group, expect_errors=True)
+        assert form_submit_res.status_code == 400
+
     def test_can_add_member_by_username(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
-        form_submit_res = _add_member(
-            app, user_to_add, group, auth_with_fields=('username',))
+        form_submit_res = _add_members(app, user_to_add.username, group)
         group_read_res = form_submit_res.follow()
         assert _group_read_res_has_user(group_read_res, user_to_add)
 
     def test_can_add_member_by_email(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
-        form_submit_res = _add_member(
-            app, user_to_add, group, auth_with_fields=('email',))
+        form_submit_res = _add_members(app, user_to_add.email, group)
         group_read_res = form_submit_res.follow()
         assert _group_read_res_has_user(group_read_res, user_to_add)
 
-    def test_cant_add_by_both_username_and_email(self, app, admin_user_and_password, group, user_to_add):
+    def test_can_add_same_user_by_both_username_and_email(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
-        form_submit_res = _add_member(app, user_to_add, group, auth_with_fields=(
-            'email', 'username'), expect_errors=True)
-        assert form_submit_res.status_code == 400
-        assert not _group_read_res_has_user(form_submit_res, user_to_add)
+        form_submit_res = _add_members(app, ','.join(
+            [user_to_add.username, user_to_add.email]), group)
+        assert _group_read_res_has_user(form_submit_res.follow(), user_to_add)
+
+    def test_can_add_multiple_users(self, app, admin_user_and_password, group, create_user):
+        admin_user, admin_user_password = admin_user_and_password
+        app = _login(app, admin_user.username, admin_user_password)
+
+        def create_users(n): return [create_user() for user in range(n)]
+        # end-user should be able to delmit user identifiers with any of these
+        delimiters = [' ', ',', '\n']
+        # end-user can identify a user to add by any of these user model fields
+        fields = ['username', 'email']
+        users_to_add_by = dict(delimiter=dict([d, create_users(2)] for d in delimiters),
+                               field=dict([field, create_users(2)] for field in fields),)
+        users_to_add = [user for add_by_value in users_to_add_by.values(
+        ) for users in add_by_value.values() for user in users]
+
+        add_members_str = '\n'.join(
+            # fields
+            [user_str
+             for field, users in users_to_add_by['field'].items()
+             for user_str in map(lambda u: getattr(u, field), users)]
+            +
+            # delimiters
+            [d.join(map(lambda u: u.username, users))
+             for d, users in users_to_add_by['delimiter'].items()],
+        )
+        form_submit_res = _add_members(app, add_members_str, group)
+
+        group_read_res = form_submit_res.follow()
+        for user in users_to_add:
+            assert _group_read_res_has_user(group_read_res, user)
 
     def test_can_remove_member(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
-        add_member_res = _add_member(app, user_to_add, group)
+        add_member_res = _add_members(app, user_to_add.username, group)
         member = user_to_add
         res = app.get(
             '/admin/groups/{pubid}/{slug}/'.format(pubid=group.pubid, slug=group.slug))
@@ -103,20 +142,42 @@ class TestAdminGroupRead(object):
     @pytest.fixture
     def group(self, db_session, factories):
         group = factories.Group(
-            name=u'TestAdminGroupMember', authority=authority)
+            name=u'TestAdminGroupMember', authority=DEFAULT_AUTHORITY)
         db_session.commit()
         return group
 
     @pytest.fixture
-    def user_to_add(self, db_session, factories):
-        user = factories.User(
-            username='member', authority=authority, email='member@email.com')
-        db_session.commit()
-        return user
+    def user_to_add(self, create_user):
+        return create_user(username='user_to_add')
+
+    @pytest.fixture
+    def create_user(self, db_session, factories):
+        def create_user(*args, **kwargs):
+            kwargs = kwargs.copy()
+            username = kwargs.setdefault('username', randomstr(16))
+            authority = kwargs.setdefault('authority', DEFAULT_AUTHORITY)
+            email = kwargs.setdefault(
+                'email', '{username}@email.com'.format(username=username))
+            user = factories.User(**kwargs)
+            db_session.commit()
+            return user
+        return create_user
 
 
 def _logout(app):
     app.get('/logout')
+
+
+def _add_members(app, members_str, group, expect_errors=False):
+    admin_group_url = '/admin/groups/{pubid}/{slug}/'.format(
+        pubid=group.pubid, slug=group.slug)
+    res = app.get(admin_group_url)
+    add_member_form = res.forms['admin-group-add-member-form']
+    add_member_form['user_identifiers'] = members_str
+    form_submit_res = add_member_form.submit(expect_errors=expect_errors)
+    return form_submit_res
+
+# Useful with AddMemberByUsernameOrEmailSchema
 
 
 def _add_member(app, user_to_add, group, auth_with_fields=('email',), expect_errors=False):
