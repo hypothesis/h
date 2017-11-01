@@ -5,7 +5,6 @@ import re
 
 from pyramid import httpexceptions
 from pyramid import security
-from pyramid.config import not_
 from pyramid.view import view_config, view_defaults
 from sqlalchemy import or_
 
@@ -146,6 +145,7 @@ class CSVScalarWidget(deform.widget.TextAreaCSVWidget):
     This is a little different in that its for a sequence of scalars (like
     strings), and you can put multiple items in the sequence on the same line.
     """
+
     def _split(self, values_string):
         """Split the textarea input into a list of scalar values"""
         return re.split('[,\n ]', values_string)
@@ -348,8 +348,13 @@ class AdminGroupReadController(object):
                     groups_service.member_join(group, user.userid)
                     return user
                 added_users = map(add_user, users)
-                self.request.session.flash('Added {user} to group'.format(user=added_users[0].username if len(added_users) == 1 else '{num} users'.format(num=len(added_users))),
-                                           queue='success')
+                self.request.session.flash(
+                    'Added {user} to group'.format(
+                        user=added_users[0].username
+                        if len(added_users) == 1
+                        else '{num} users'.format(um=len(added_users))),
+                    queue='success'
+                )
                 return httpexceptions.HTTPSeeOther(self.request.url)
             elif isinstance(form_for_formid.schema, RemoveMemberSchema):
                 # remove user from group
