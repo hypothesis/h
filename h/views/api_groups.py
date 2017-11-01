@@ -6,6 +6,7 @@ from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 
 from h.views.api import api_config
+from h.views.api_config import cors_policy
 
 
 @api_config(route_name='api.group_member',
@@ -26,3 +27,28 @@ def remove_member(group, request):
     group_service.member_leave(group, userid)
 
     return HTTPNoContent()
+
+
+@api_config(route_name='api.group_read',
+            request_method='GET',
+            description='Read a Group',
+            renderer='json')
+def get_group(group, request):
+    return dict((f, getattr(group, f, None)) for f in ('pubid', 'description', 'name'))
+
+
+@api_config(route_name='api.group_read_noslug',
+            link_name='group.read',
+            request_method='GET',
+            decorator=cors_policy)
+def read_noslug(group, request):
+    redirect_to_with_slug(group, request)
+
+
+def redirect_to_with_slug(group, request):
+    """Redirect if the request slug does not match that of the group."""
+    slug = request.matchdict.get('slug')
+    if slug is None or slug != group.slug:
+        path = request.route_path(
+            'api.group_read', pubid=group.pubid, slug=group.slug)
+        raise httpexceptions.HTTPMovedPermanently(path)

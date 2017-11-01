@@ -109,7 +109,7 @@ class AdminGroupCreateController(object):
             groups_service = self.request.find_service(name='group')
             group = groups_service.create(
                 name=form_data['name'],
-                authority=self.request.authority,
+                authority=form_data['authority'],
                 description=form_data.get('description'),
                 userid=self.request.authenticated_userid,
                 type_=form_data['group_type'])

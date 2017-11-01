@@ -10,6 +10,8 @@ from h import form
 from h import i18n
 from h.groups import schemas
 
+from h.views.api_config import cors_policy
+
 _ = i18n.TranslationString
 
 
@@ -107,6 +109,7 @@ class GroupEditController(object):
 
 @view_config(route_name='group_read',
              request_method='GET',
+             accept='text/html',
              renderer='h:templates/groups/join.html.jinja2',
              effective_principals=not_(security.Authenticated))
 def read_unauthenticated(group, request):
@@ -117,6 +120,28 @@ def read_unauthenticated(group, request):
         raise httpexceptions.HTTPNotFound()
 
     return {'group': group}
+
+
+@view_config(route_name='group_read',
+             request_method='GET',
+             accept='application/json',
+             renderer='json',
+             effective_principals=not_(security.Authenticated),
+             decorator=cors_policy)
+def read_unauthenticated_json(group, request):
+    """If the end-user wants json, redirect to the API"""
+    url = request.route_path('api.group_read',
+                             pubid=group.pubid,
+                             slug=group.slug)
+    return httpexceptions.HTTPSeeOther(url)
+
+
+@view_config(route_name='group_read',
+             request_method='OPTIONS',
+             decorator=cors_policy,
+             renderer='json')
+def options_group_read(group, request):
+    return {}
 
 
 @view_config(route_name='group_read_noslug', request_method='GET')
@@ -130,4 +155,4 @@ def check_slug(group, request):
     if slug is None or slug != group.slug:
         path = request.route_path(
             'group_read', pubid=group.pubid, slug=group.slug)
-        raise httpexceptions.HTTPMovedPermanently(path)
+        return httpexceptions.HTTPMovedPermanently(path)

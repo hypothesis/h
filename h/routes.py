@@ -104,6 +104,14 @@ def includeme(config):
                      traverse='/{id}')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
+    config.add_route('api.group_read',
+                     '/api/groups/{pubid}/{slug:[^/]*}',
+                     factory='h.models.group:GroupFactory',
+                     traverse='/{pubid}')
+    config.add_route('api.group_read_noslug',
+                     '/api/groups/{pubid}',
+                     factory='h.models.group:GroupFactory',
+                     traverse='/{pubid}')
     config.add_route('api.group_member',
                      '/api/groups/{pubid}/members/{user}',
                      factory='h.models.group:GroupFactory',
