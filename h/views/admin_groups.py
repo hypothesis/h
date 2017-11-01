@@ -48,6 +48,29 @@ def groups_index(context, request):
     return context
 
 
+def admin_group_create_schema():
+    schema = schemas.group_schema()
+    schema.add(colander.SchemaNode(colander.String(),
+                                   name='authority',
+                                   title=_("Authority"),
+                                   ))
+    schema.add(colander.SchemaNode(colander.String(),
+                                   name='group_type',
+                                   title=_("Group Type"),
+                                   validator=colander.OneOf(
+                                       GROUP_TYPES.keys()),
+                                   widget=deform.widget.SelectWidget(
+        values=[
+            [group_type, '{title} - {description}'.format(
+                title=group_type.capitalize(), description=group_type_info['description'])]
+            for [group_type, group_type_info]
+            in GROUP_TYPES.items()
+        ]
+    )
+    ))
+    return schema
+
+
 @view_defaults(route_name='admin_groups_create',
                renderer='h:templates/admin/groups_create.html.jinja2',
                permission='admin_groups',
@@ -59,9 +82,7 @@ class AdminGroupCreateController(object):
 
     def __init__(self, request):
         self.request = request
-
-        self.schema = schemas.admin_group_create_schema().bind(
-            request=self.request)
+        self.schema = admin_group_create_schema().bind(request=self.request)
 
         submit = deform.Button(title=_('Create a new group'),
                                css_class='primary-action-btn '
@@ -69,6 +90,7 @@ class AdminGroupCreateController(object):
                                          'js-create-group-create-btn')
         self.form = admin_form_creator(self.request)(
             self.schema,
+            appstruct=dict(authority=self.request.authority),
             formid='admin-group-create-form',
             css_class=' '.join(
                 [admin_form_class, 'admin-group-create-form__form']),
@@ -154,12 +176,17 @@ class UserIdentifier(colander.SchemaNode):
 
         def does_user_exist(user_identifier):
             schema_node = self
+            required_group = schema_node.bindings.get('group')
             fields = ('username', 'email')
             # any user where one of fields matches one of the user_identifiers
             # @TODO (bengo) filter by authority?
             request = self.bindings['request']
+            user_identifiers_match = or_(
+                *[getattr(User, field) == user_identifier for field in fields])
+            has_group_authority = (
+                models.User.authority == required_group.authority) if required_group else True
             users = request.db.query(User).filter(
-                or_(*[getattr(User, field) == user_identifier for field in fields])).all()
+                user_identifiers_match & has_group_authority).all()
             return users
         validate = colander.Function(
             does_user_exist, msg='User does not exist')
@@ -418,5 +445,6 @@ class AdminGroupReadController(object):
 
     @property
     def _add_member_schema(self):
-        schema = self.AddMemberFormSchema().bind(request=self.request)
+        schema = self.AddMemberFormSchema().bind(request=self.request,
+                                                 group=self.request.context)
         return schema
