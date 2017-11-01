@@ -42,6 +42,8 @@ def test_includeme():
         call('admin_cohorts', '/admin/features/cohorts'),
         call('admin_cohorts_edit', '/admin/features/cohorts/{id}'),
         call('admin_groups', '/admin/groups'),
+        call('admin_groups_create', '/admin/groups/create'),
+        call('admin_group_read', '/admin/groups/{pubid}/{slug:[^/]*}/', factory='h.resources.GroupFactory', traverse='/{pubid}'),
         call('admin_mailer', '/admin/mailer'),
         call('admin_mailer_test', '/admin/mailer/test'),
         call('admin_nipsa', '/admin/nipsa'),
