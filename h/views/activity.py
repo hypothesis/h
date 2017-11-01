@@ -106,6 +106,7 @@ class GroupSearchController(SearchController):
 
         result = super(GroupSearchController, self).search()
 
+        result['show_invite_new_user'] = bool(self.group.joinable_by)
         result['opts'] = {'search_groupname': self.group.name}
 
         if self.request.user not in self.group.members:
@@ -118,7 +119,8 @@ class GroupSearchController(SearchController):
             return 0
 
         q = query.extract(self.request)
-        users_aggregation = result['search_results'].aggregations.get('users', [])
+        users_aggregation = result['search_results'].aggregations.get(
+            'users', [])
         members = [{'username': u.username,
                     'userid': u.userid,
                     'count': user_annotation_count(users_aggregation,

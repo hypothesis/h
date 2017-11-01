@@ -9,6 +9,7 @@ from pyramid import httpexceptions
 
 from h.activity.query import ActivityResults
 from h.views import activity
+from h.models.group import JoinableBy
 
 
 @pytest.mark.usefixtures('annotation_stats_service', 'paginate', 'query', 'routes')
@@ -121,7 +122,8 @@ class TestGroupSearchController(object):
                 return False
             if permission == 'join':
                 return True
-        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.has_permission = mock.Mock(
+            side_effect=fake_has_permission)
         pyramid_request.override_renderer = mock.PropertyMock()
 
         result = controller.search()
@@ -133,7 +135,8 @@ class TestGroupSearchController(object):
         def fake_has_permission(permission, context=None):
             if permission in ('read', 'join'):
                 return False
-        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.has_permission = mock.Mock(
+            side_effect=fake_has_permission)
 
         with pytest.raises(httpexceptions.HTTPNotFound):
             controller.search()
@@ -212,7 +215,8 @@ class TestGroupSearchController(object):
                                                                  pyramid_request):
         def fake_has_permission(permission, context=None):
             return permission != 'admin'
-        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.has_permission = mock.Mock(
+            side_effect=fake_has_permission)
         pyramid_request.user = group.members[-1]
 
         result = controller.search()
@@ -293,7 +297,8 @@ class TestGroupSearchController(object):
         result = controller.search()
 
         for member in result['group']['members']:
-            assert member['faceted_by'] is (member['userid'] == faceted_user.userid)
+            assert member['faceted_by'] is (
+                member['userid'] == faceted_user.userid)
 
     def test_search_returns_annotation_count_for_group_members(self,
                                                                controller,
@@ -314,7 +319,8 @@ class TestGroupSearchController(object):
         ]
         search.return_value = {
             'search_results': ActivityResults(total=200,
-                                              aggregations={'users': users_aggregation},
+                                              aggregations={
+                                                  'users': users_aggregation},
                                               timeframes=[]),
         }
 
@@ -383,13 +389,15 @@ class TestGroupSearchController(object):
 
         controller.join()
 
-        group_service.member_join.assert_called_once_with(group, 'acct:doe@example.org')
+        group_service.member_join.assert_called_once_with(
+            group, 'acct:doe@example.org')
 
     def test_join_redirects_to_search_page(self, controller, group, pyramid_request):
         result = controller.join()
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
-        expected = pyramid_request.route_url('group_read', pubid=group.pubid, slug=group.slug)
+        expected = pyramid_request.route_url(
+            'group_read', pubid=group.pubid, slug=group.slug)
         assert result.location == expected
 
     def test_search_passes_the_group_annotation_count_to_the_template(self,
@@ -498,6 +506,18 @@ class TestGroupSearchController(object):
         assert result.location == (
             'http://example.com/groups/{pubid}/{slug}'
             '?q=user%3Afoo+user%3Abar'.format(pubid=group.pubid, slug=group.slug))
+
+    @pytest.mark.parametrize(('joinable_by', 'expected_show_invite_new_user'), [
+        (None, False),
+        (JoinableBy.authority, True),
+    ])
+    def test_show_invite_new_user(self, group, pyramid_request, joinable_by, expected_show_invite_new_user):
+        """show_invite_new_user is falsy when the group is not joinable"""
+        group.joinable_by = joinable_by
+        controller = self.controller(group, pyramid_request)
+        result = controller.search()
+        assert result.get(
+            'show_invite_new_user') == expected_show_invite_new_user
 
     @pytest.mark.parametrize('q', ['user:fred', '  user:fred   '])
     def test_toggle_user_facet_removes_empty_query(self,
@@ -931,7 +951,8 @@ def routes(pyramid_config):
 
 @pytest.fixture
 def annotation_stats_service(pyramid_config):
-    pyramid_config.register_service(FakeAnnotationStatsService(), name='annotation_stats')
+    pyramid_config.register_service(
+        FakeAnnotationStatsService(), name='annotation_stats')
 
 
 @pytest.fixture
