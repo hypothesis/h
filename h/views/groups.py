@@ -40,7 +40,6 @@ class GroupCreateController(object):
     def post(self):
         """Respond to a submission of the create group form."""
         def on_success(appstruct):
-            print 'form post appstruct', appstruct
             groups_service = self.request.find_service(name='group')
             group = groups_service.create(
                 name=appstruct['name'],
