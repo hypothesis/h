@@ -60,7 +60,9 @@ def _group_read_res_has_user(res, user):
 
 @pytest.mark.functional
 class TestAdminGroupRead(object):
-    """Tests for the /admin/groups/{pubid}/{slug}/members page."""
+    """
+    Tests for the /admin/groups/{pubid}/{slug}/members page.
+    """
 
     def test_cant_add_no_one(self, app, admin_user_and_password, group):
         admin_user, admin_user_password = admin_user_and_password
@@ -138,6 +140,14 @@ class TestAdminGroupRead(object):
         remove_member_res = remove_member_form.submit()
         group_read_res = remove_member_res.follow()
         assert not _group_read_res_has_user(group_read_res, member)
+
+    def test_cant_add_user_from_other_authority(self, app, admin_user_and_password, group, create_user):
+        admin_user, admin_user_password = admin_user_and_password
+        app = _login(app, admin_user.username, admin_user_password)
+        authority_b_user = create_user(authority='bengo.is')
+        form_submit_res = _add_members(
+            app, authority_b_user.email, group, expect_errors=True)
+        assert form_submit_res.status_code == 400
 
     @pytest.fixture
     def group(self, db_session, factories):
