@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import deform
 import mock
 import pytest
 
@@ -176,15 +177,15 @@ class TestHandleFormSubmission(object):
 
     def test_if_validation_fails_it_calls_on_failure(self,
                                                      pyramid_request,
-                                                     invalid_form):
+                                                     invalid_form,
+                                                     matchers):
         on_failure = mock_callable()
 
         form.handle_form_submission(pyramid_request,
                                     invalid_form(),
                                     mock.sentinel.on_success,
                                     on_failure)
-
-        on_failure.assert_called_once_with()
+        on_failure.assert_called_once_with(exception=matchers.instance_of(deform.ValidationFailure))
 
     def test_if_validation_fails_it_calls_to_xhr_response(self,
                                                           invalid_form,
