@@ -88,7 +88,7 @@ def _current_groups(request, authority):
                         .public_groups(authority=authority))
 
     groups = _deduplicate(
-        authority_groups + _user_groups(user), lambda g: g.id)
+        authority_groups + _user_groups(user), lambda g: g.pubid)
 
     return [_group_model(request.route_url, group) for group in groups]
 
