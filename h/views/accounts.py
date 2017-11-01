@@ -537,7 +537,7 @@ class AccountController(object):
         svc = self.request.find_service(name='user_password')
         svc.update_password(self.request.user, appstruct['new_password'])
 
-    def _template_data(self):
+    def _template_data(self, **kwargs):
         """Return the data needed to render accounts.html.jinja2."""
         email = self.request.user.email
         password_form = self.forms['password'].render()
@@ -581,7 +581,7 @@ class EditProfileController(object):
             on_success=self._update_user,
             on_failure=self._template_data)
 
-    def _template_data(self):
+    def _template_data(self, **kwargs):
         return {'form': self.form.render()}
 
     def _update_user(self, appstruct):
@@ -628,7 +628,7 @@ class NotificationsController(object):
         for n in self._user_notifications():
             n.active = n.type in appstruct['notifications']
 
-    def _template_data(self):
+    def _template_data(self, **kwargs):
         return {'form': self.form.render()}
 
     def _user_notifications(self):
