@@ -107,11 +107,21 @@ class AuthClientFactory(object):
 
 
 class GroupFactory(object):
+    """
+    dict-like for looking up Group models by pubid.
+    Values will have .__parent__ set to request's root resource (and thus overlay the root ACL)
+    """
 
     def __init__(self, request):
+        """
+        :param Request request: http request of end-user who's looking up the group
+        """
         self.request = request
 
     def __getitem__(self, pubid):
+        """
+        :param str pubid: pubid of Group to lookup
+        """
         try:
             group = self.request.db.query(Group) \
                 .filter_by(pubid=pubid).one()
@@ -123,7 +133,7 @@ class GroupFactory(object):
 
             return group
         except:
-            # No such group found or not a valid UUID.
+            # No such group found
             raise KeyError()
 
 

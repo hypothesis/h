@@ -32,8 +32,9 @@ def admin_form_creator(request):
     return create_form
 
 
-def _get_group_type_description(
-    group_type): return GROUP_TYPES[group_type]['description']
+def _get_group_type_description(group_type):
+    """get the description of a given group type"""
+    return GROUP_TYPES[group_type]['description']
 
 
 @view_config(route_name='admin_groups',
@@ -49,6 +50,7 @@ def groups_index(context, request):
 
 
 def admin_group_create_schema():
+    """Schema for creating a group in the admin"""
     schema = schemas.group_schema()
     schema.add(colander.SchemaNode(colander.String(),
                                    name='authority',
@@ -134,20 +136,23 @@ class AdminGroupCreateController(object):
         return {'form': self.form.render()}
 
 
-class Username(colander.TupleSchema):
-    username = colander.SchemaNode(
-        colander.String(),
-        name='username',
-        title=_("Username"),)
-
-
 class CSVScalarWidget(deform.widget.TextAreaCSVWidget):
+    """
+    Widget for editing a Sequence of values via a textarea.
+    Each item is delimited by a comma, space, or newline.
+
+    The TextAreaCSVWidget is for sequences of objects (mappings), so each row is
+    newline-delmited, and within a row, each column is comma delimited.
+    This is a little different in that its for a sequence of scalars (like
+    strings), and you can put multiple items in the sequence on the same line.
+    """
     def _split(self, values_string):
+        """Split the textarea input into a list of scalar values"""
         return re.split('[,\n ]', values_string)
 
     def serialize(self, field, cstruct, *args, **kwargs):
-        # make tuples since that's
-        cstruct_tuples = ((s,) for s in cstruct) if cstruct else cstruct
+        # make 1-tuples since that's what super expects
+        cstruct_tuples=((s,) for s in cstruct) if cstruct else cstruct
         return super(CSVScalarWidget, self).serialize(field, cstruct_tuples, *args, **kwargs)
 
     def deserialize(self, field, pstruct):
@@ -155,10 +160,14 @@ class CSVScalarWidget(deform.widget.TextAreaCSVWidget):
             return colander.null
         if not pstruct.strip():
             return colander.null
-        entries = filter(bool, map(lambda s: s.strip(), self._split(pstruct)))
+        entries=filter(bool, map(lambda s: s.strip(), self._split(pstruct)))
         return entries
 
     def handle_error(self, field, error):
+        """
+        Handle an error validating one of the items in this sequence (so it is shown to the user)
+        Concatenate all the errors and we'll show that next to the textarea
+        """
         msgs = []
         if error.msg:
             field.error = error
@@ -169,6 +178,10 @@ class CSVScalarWidget(deform.widget.TextAreaCSVWidget):
 
 
 class UserIdentifier(colander.SchemaNode):
+    """
+    SchemaNode for some string that can be used to lookup a User
+    (i.e. username or email)
+    """
     name = 'user_identifier'
 
     def validator(self, *args, **kwargs):
@@ -183,12 +196,12 @@ class UserIdentifier(colander.SchemaNode):
             request = self.bindings['request']
             user_identifiers_match = or_(
                 *[getattr(User, field) == user_identifier for field in fields])
-            has_group_authority = (
+            has_group_authority=(
                 models.User.authority == required_group.authority) if required_group else True
-            users = request.db.query(User).filter(
+            users=request.db.query(User).filter(
                 user_identifiers_match & has_group_authority).all()
             return users
-        validate = colander.Function(
+        validate=colander.Function(
             does_user_exist, msg='User does not exist')
         return validate(*args, **kwargs)
 
@@ -196,16 +209,19 @@ class UserIdentifier(colander.SchemaNode):
         return colander.String()
 
 
-def validate_pubid(node, value):
+def validate_pubid_is_existing_group(node, value):
     return GroupFactory(node.bindings['request'])[value]
 
 
 class AddGroupMemberSchema(CSRFSchema):
+    """Schema for form that adds a user to a group"""
+    # pubid identifies the Group.
+    # Subclasses define other fields to identify the user to add as a member
     pubid = colander.SchemaNode(
         colander.String(),
         name='pubid',
         widget=deform.widget.HiddenWidget(),
-        validator=validate_pubid)
+        validator=validate_pubid_is_existing_group)
 
     def __init__(self, *args, **kwargs):
         if 'query_user' in kwargs:
@@ -213,10 +229,12 @@ class AddGroupMemberSchema(CSRFSchema):
         super(AddGroupMemberSchema, self).__init__(*args, **kwargs)
 
     def _query_user(self, query):
+        """Will be called with user fields to lookup a User"""
         raise NotImplementedError
 
 
 class AddMultipleMembersSchema(AddGroupMemberSchema):
+    """Schema for form that allows adding multiple users at a time to a group"""
     user_identifiers = colander.SchemaNode(
         colander.Sequence(),
         UserIdentifier(),
@@ -225,6 +243,10 @@ class AddMultipleMembersSchema(AddGroupMemberSchema):
 
 
 class AddMemberByUsernameOrEmailSchema(AddGroupMemberSchema):
+    """
+    Schema for form that allows adding a user to a group by entering either
+    their username or their email
+    """
     username = colander.SchemaNode(
         colander.String(),
         missing=None,
@@ -267,6 +289,7 @@ class AddMemberByUsernameOrEmailSchema(AddGroupMemberSchema):
 
 
 class RemoveMemberSchema(CSRFSchema):
+    """Schema for form for removing a user from a group."""
     userid = colander.SchemaNode(
         colander.String(),
         name='userid',
@@ -292,9 +315,11 @@ class RemoveMemberSchema(CSRFSchema):
                effective_principals=security.Authenticated)
 class AdminGroupReadController(object):
     """
-    Controller for feature that lets user create a new group
+    Controller for feature that lets user read a single group, see it details,
+    and add/remove group members.
     """
     AddMemberFormSchema = AddMultipleMembersSchema
+    _remove_member_formid = 'admin-group-remove-member-form'
 
     def __init__(self, request):
         self.request = request
@@ -307,14 +332,16 @@ class AdminGroupReadController(object):
 
     @view_config(request_method='POST')
     def post(self):
-        """Respond to a submission of the create group form."""
+        """Respond to a submission of one of the add/remove member forms"""
 
+        # Which Form class is being submitted?
         form_for_formid = self._form_for_formid(
             self.request.POST['__formid__'])
 
         def on_success(form_data):
             form_kind = form_for_formid
             if isinstance(form_for_formid.schema, self.AddMemberFormSchema):
+                # add users to group
                 group = GroupFactory(self.request)[form_data['pubid']]
                 users = self._query_users(**form_data)
                 assert users
@@ -329,6 +356,7 @@ class AdminGroupReadController(object):
                                            queue='success')
                 return httpexceptions.HTTPSeeOther(self.request.url)
             elif isinstance(form_for_formid.schema, RemoveMemberSchema):
+                # remove user from group
                 group = GroupFactory(self.request)[form_data['pubid']]
                 user = self.request.find_service(
                     name='user').fetch(form_data['userid'])
@@ -343,6 +371,8 @@ class AdminGroupReadController(object):
         def on_failure(exception):
             kwargs = dict()
             if isinstance(form_for_formid.schema, self.AddMemberFormSchema):
+                # render template with this form so we render any the validation
+                # errors
                 kwargs.update(add_member_form=form_for_formid)
             return self._template_data(**kwargs)
 
@@ -354,6 +384,7 @@ class AdminGroupReadController(object):
             flash=False)
 
     def _template_data(self, add_member_form=None):
+        """build common context dict for template"""
         @paginator.paginate_query
         def get_paging_context(group, request):
             query = request.db.query(models.User).filter(
@@ -368,6 +399,7 @@ class AdminGroupReadController(object):
         return context
 
     def _query_user(self, form_data):
+        """lookup a User model from form_data"""
         group_filters = dict([field, form_data[field]] for field in (
             'username', 'email') if form_data.get(field))
         user = self.request.db.query(User).filter(or_(
@@ -375,6 +407,7 @@ class AdminGroupReadController(object):
         return user
 
     def _query_users(self, **kwargs):
+        """lookup one or more Users from form_data"""
         if 'user_identifiers' not in kwargs:
             return self._query_user(self, kwargs)
         user_identifiers = kwargs.get('user_identifiers', [])
@@ -385,10 +418,8 @@ class AdminGroupReadController(object):
             *[getattr(User, field) == value for field in fields for value in user_identifiers])).all()
         return users_query
 
-    def _remove_member_formid(self):
-        return 'admin-group-remove-member-form'
-
     def _form_for_formid(self, formid):
+        """given a formid value, return a Form that can validate the form_data"""
         if re.search(r'^admin-group-remove-member-form', formid):
             # it's a remove form
             return self._create_remove_member_form()
@@ -427,7 +458,7 @@ class AdminGroupReadController(object):
         form = admin_form_creator(self.request)(
             schema,
             appstruct=appstruct,
-            formid=self._remove_member_formid(),
+            formid=self._remove_member_formid,
             css_class=' '.join(
                 [admin_form_class, 'admin-group-remove-member-form__form']),
             buttons=[
