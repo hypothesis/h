@@ -54,6 +54,7 @@ GROUP_ACCESS_FLAGS = {
 
 
 def get_group_type(group, request=None):
+    """given a Group, try to figure out what 'type' it is"""
     for group_type_name, access_flags in GROUP_ACCESS_FLAGS.items():
         for field, value in access_flags.items():
             if getattr(group, field) != value:
