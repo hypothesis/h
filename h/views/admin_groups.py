@@ -16,7 +16,7 @@ from h import paginator
 from h.accounts.schemas import CSRFSchema
 from h.groups import schemas
 from h.models.group import GroupFactory
-from h.models.user import User, UserFactory
+from h.models.user import User
 from jinja2 import Markup
 from h.services.group import get_group_type, GROUP_TYPES
 
@@ -152,7 +152,7 @@ class CSVScalarWidget(deform.widget.TextAreaCSVWidget):
 
     def serialize(self, field, cstruct, *args, **kwargs):
         # make 1-tuples since that's what super expects
-        cstruct_tuples=((s,) for s in cstruct) if cstruct else cstruct
+        cstruct_tuples = ((s,) for s in cstruct) if cstruct else cstruct
         return super(CSVScalarWidget, self).serialize(field, cstruct_tuples, *args, **kwargs)
 
     def deserialize(self, field, pstruct):
@@ -160,7 +160,7 @@ class CSVScalarWidget(deform.widget.TextAreaCSVWidget):
             return colander.null
         if not pstruct.strip():
             return colander.null
-        entries=filter(bool, map(lambda s: s.strip(), self._split(pstruct)))
+        entries = filter(bool, map(lambda s: s.strip(), self._split(pstruct)))
         return entries
 
     def handle_error(self, field, error):
@@ -185,23 +185,20 @@ class UserIdentifier(colander.SchemaNode):
     name = 'user_identifier'
 
     def validator(self, *args, **kwargs):
-        schema_node = self
-
         def does_user_exist(user_identifier):
-            schema_node = self
-            required_group = schema_node.bindings.get('group')
+            required_group = self.bindings.get('group')
             fields = ('username', 'email')
             # any user where one of fields matches one of the user_identifiers
             # @TODO (bengo) filter by authority?
             request = self.bindings['request']
             user_identifiers_match = or_(
                 *[getattr(User, field) == user_identifier for field in fields])
-            has_group_authority=(
+            has_group_authority = (
                 models.User.authority == required_group.authority) if required_group else True
-            users=request.db.query(User).filter(
+            users = request.db.query(User).filter(
                 user_identifiers_match & has_group_authority).all()
             return users
-        validate=colander.Function(
+        validate = colander.Function(
             does_user_exist, msg='User does not exist')
         return validate(*args, **kwargs)
 
@@ -265,7 +262,7 @@ class AddMemberByUsernameOrEmailSchema(AddGroupMemberSchema):
 
     def validator(self, form, value):
         request = form.bindings['request']
-        group = GroupFactory(request)[value['pubid']]
+        GroupFactory(request)[value['pubid']]
         user_fields = ('username', 'email')
         user_query = dict([field, value[field]]
                           for field in user_fields)
@@ -339,7 +336,6 @@ class AdminGroupReadController(object):
             self.request.POST['__formid__'])
 
         def on_success(form_data):
-            form_kind = form_for_formid
             if isinstance(form_for_formid.schema, self.AddMemberFormSchema):
                 # add users to group
                 group = GroupFactory(self.request)[form_data['pubid']]
@@ -352,7 +348,7 @@ class AdminGroupReadController(object):
                     groups_service.member_join(group, user.userid)
                     return user
                 added_users = map(add_user, users)
-                self.request.session.flash('Added {user} to group'.format(user=users[0].username if len(users) == 1 else '{num} users'.format(num=len(users))),
+                self.request.session.flash('Added {user} to group'.format(user=added_users[0].username if len(added_users) == 1 else '{num} users'.format(num=len(added_users))),
                                            queue='success')
                 return httpexceptions.HTTPSeeOther(self.request.url)
             elif isinstance(form_for_formid.schema, RemoveMemberSchema):

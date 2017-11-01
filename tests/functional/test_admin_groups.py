@@ -13,7 +13,7 @@ DEFAULT_AUTHORITY = 'example.com'
 
 
 def randomstr(n): return ''.join(
-    [random.choice(string.lowercase) for i in xrange(n)])
+    [random.choice(string.lowercase) for i in range(n)])
 
 
 @pytest.mark.functional
@@ -124,7 +124,7 @@ class TestAdminGroupRead(object):
     def test_can_remove_member(self, app, admin_user_and_password, group, user_to_add):
         admin_user, admin_user_password = admin_user_and_password
         app = _login(app, admin_user.username, admin_user_password)
-        add_member_res = _add_members(app, user_to_add.username, group)
+        _add_members(app, user_to_add.username, group)
         member = user_to_add
         res = app.get(
             '/admin/groups/{pubid}/{slug}/'.format(pubid=group.pubid, slug=group.slug))
@@ -136,7 +136,7 @@ class TestAdminGroupRead(object):
             '.test-TestAdminGroupRead__remove-member')
         assert remove_member_el
         remove_member_form_el = remove_member_el.select_one('form')
-        remove_member_form = Form(res, unicode(remove_member_form_el))
+        remove_member_form = Form(res, str(remove_member_form_el))
         remove_member_res = remove_member_form.submit()
         group_read_res = remove_member_res.follow()
         assert not _group_read_res_has_user(group_read_res, member)
@@ -165,8 +165,8 @@ class TestAdminGroupRead(object):
         def create_user(*args, **kwargs):
             kwargs = kwargs.copy()
             username = kwargs.setdefault('username', randomstr(16))
-            authority = kwargs.setdefault('authority', DEFAULT_AUTHORITY)
-            email = kwargs.setdefault(
+            kwargs.setdefault('authority', DEFAULT_AUTHORITY)
+            kwargs.setdefault(
                 'email', '{username}@email.com'.format(username=username))
             user = factories.User(**kwargs)
             db_session.commit()
