@@ -84,9 +84,9 @@ class TestJoinCommand(object):
         db_session.commit()
 
         result = cli.invoke(groups_cli.join,
-                            [u'--user', username_of_user_to_add,
+                            [u'--user', user_to_add.username,
                              u'--authority', authority,
-                             u'--group', pubid],
+                             u'--group', group.pubid],
                             obj=cliconfig)
 
         assert result.exit_code == 0
