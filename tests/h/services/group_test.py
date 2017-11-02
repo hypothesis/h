@@ -109,7 +109,10 @@ class TestGroupService(object):
         (None, True),
     ])
     def test_get_group_type(self, pyramid_request, db_session, users, group_type, use_h_authority):
-        h_authority = unicode(pyramid_request.domain)
+        def ensure_unicode(maybe_bytes):
+            return maybe_bytes.decode() if isinstance(maybe_bytes, bytes) else maybe_bytes
+        # python2 will have request.domain as a bytes. case to unicode str to prevent downstream type warnings
+        h_authority = ensure_unicode(pyramid_request.domain)
         publisher_authority = 'publisher.test_groupids_created_by_excludes_other_groups'
         svc = GroupService(db_session, users.get)
         group = svc.create('Group of type {}'.format(group_type),
