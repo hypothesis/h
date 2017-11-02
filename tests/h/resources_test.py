@@ -7,9 +7,10 @@ from mock import Mock
 
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.traversal import find_root
 
-from h.models import AuthClient
-from h.resources import AnnotationResource, AnnotationResourceFactory, AuthClientFactory
+from h.models import AuthClient, Group
+from h.resources import Root, AnnotationResource, AnnotationResourceFactory, AuthClientFactory, GroupFactory
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -18,7 +19,8 @@ class TestAnnotationResourceFactory(object):
         factory = AnnotationResourceFactory(pyramid_request)
 
         factory['123']
-        storage.fetch_annotation.assert_called_once_with(pyramid_request.db, '123')
+        storage.fetch_annotation.assert_called_once_with(
+            pyramid_request.db, '123')
 
     def test_get_item_returns_annotation_resource(self, pyramid_request, storage):
         factory = AnnotationResourceFactory(pyramid_request)
@@ -62,7 +64,8 @@ class TestAnnotationResourceFactory(object):
     @pytest.fixture
     def group_service(self, pyramid_config):
         group_service = Mock(spec_set=['find'])
-        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
+        pyramid_config.register_service(
+            group_service, iface='h.interfaces.IGroupService')
         return group_service
 
     @pytest.fixture
@@ -187,7 +190,8 @@ class TestAnnotationResource(object):
     def group_service(self, pyramid_config, groups):
         group_service = Mock(spec_set=['find'])
         group_service.find.side_effect = lambda groupid: groups.get(groupid)
-        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
+        pyramid_config.register_service(
+            group_service, iface='h.interfaces.IGroupService')
         return group_service
 
     @pytest.fixture
@@ -220,3 +224,25 @@ class TestAuthClientResourceFactory(object):
 class FakeGroup(object):
     def __init__(self, principals):
         self.__acl__ = [(security.Allow, p, 'read') for p in principals]
+
+
+class TestGroupResourceFactory(object):
+    def test_get_item_returns_an_group(self, pyramid_request):
+        group = Group(name='test', authority='example.com')
+        pyramid_request.db.add(group)
+        pyramid_request.db.flush()
+
+        factory = GroupFactory(pyramid_request)
+        group_resource = factory[group.pubid]
+        assert group_resource == group
+        assert isinstance(find_root(group_resource), Root)
+
+    def test_get_item_returns_keyerror_if_not_found(self, pyramid_request):
+        factory = GroupFactory(pyramid_request)
+        with pytest.raises(KeyError):
+            factory['E19D247D-1F07-4E91-B40D-00DF22E693E4']
+
+    def test_get_item_returns_keyerror_if_invalid(self, pyramid_request):
+        factory = GroupFactory(pyramid_request)
+        with pytest.raises(KeyError):
+            factory[1]
