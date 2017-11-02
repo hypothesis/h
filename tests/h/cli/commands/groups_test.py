@@ -60,7 +60,7 @@ class TestAddCommand(object):
 
 @pytest.fixture
 def group_service(pyramid_config):
-    group_service = mock.Mock(spec_set=['create'])
+    group_service = mock.Mock(spec_set=['create', 'member_join'])
     return group_service
 
 
@@ -69,3 +69,28 @@ def cliconfig(pyramid_config, pyramid_request, group_service):
     pyramid_config.register_service(group_service, name='group')
     pyramid_request.tm = mock.Mock()
     return {'bootstrap': mock.Mock(return_value=pyramid_request)}
+
+
+class TestJoinCommand(object):
+    """test cli group join --name username --authority localhost --group pubid"""
+
+    def test_it_adds_user_to_group(self, db_session, cli, cliconfig, group_service, factories):
+        authority = u'publisher.org'
+        username_of_user_to_add = u'ben'
+        user_to_add = factories.User(
+            username=username_of_user_to_add, authority=authority)
+        pubid = u'pubid'
+        group = factories.Group(pubid=pubid)
+        db_session.commit()
+
+        result = cli.invoke(groups_cli.join,
+                            [u'--user', username_of_user_to_add,
+                             u'--authority', authority,
+                             u'--group', pubid],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        group_service.member_join.assert_called_once()
+        first_call_args = group_service.member_join.call_args[0]
+        assert first_call_args[0].pubid == 'pubid'

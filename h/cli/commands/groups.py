@@ -86,9 +86,11 @@ def join(ctx, user, authority, group):
     group_id = group
     request = ctx.obj['bootstrap']()
 
-    user = User.get_by_username(request.db, user, authority)
+    username = user
+    user = User.get_by_username(request.db, username, authority)
     if not user:
-        raise ValueError('Could not find user {0}@{1}'.format(user, authority))
+        raise ValueError(
+            'Could not find user {0}@{1}'.format(username, authority))
 
     group = request.db.query(Group).filter_by(pubid=group_id).one_or_none()
     if not group:
