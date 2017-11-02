@@ -56,10 +56,12 @@ GROUP_ACCESS_FLAGS = {
 def get_group_type(group, request=None):
     """given a Group, try to figure out what 'type' it is"""
     for group_type_name, access_flags in GROUP_ACCESS_FLAGS.items():
-        for field, value in access_flags.items():
-            if getattr(group, field) != value:
-                # continue to next group_type
-                break
+        has_correct_access_flags = all((getattr(group, field) == value) for (
+            field, value) in access_flags.items())
+        if not has_correct_access_flags:
+            continue
+        # has correct access flags for this group_type_name
+        # some group types (open/publisher) can only be discriminated based on an incomig web request
         matches_request = GROUP_TYPES.get(
             group_type_name, {}).get('matches_request')
         if request and callable(matches_request):
