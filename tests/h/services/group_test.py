@@ -105,15 +105,20 @@ class TestGroupService(object):
         ('private', True),
         ('public', True),
         ('open', True),
-        ('publisher', False), ])
+        ('publisher', False),
+        (None, True),
+    ])
     def test_get_group_type(self, pyramid_request, db_session, users, group_type, use_h_authority):
-        h_authority = pyramid_request.domain
+        h_authority = unicode(pyramid_request.domain)
         publisher_authority = 'publisher.test_groupids_created_by_excludes_other_groups'
         svc = GroupService(db_session, users.get)
         group = svc.create('Group of type {}'.format(group_type),
                            h_authority if use_h_authority else publisher_authority,
                            'cazimir',
-                           type_=group_type)
+                           type_=group_type or u'public')
+        if not group_type:
+            # modify group so it doesnt correspond to any group_type
+            group.joinable_by = 'fake'
         assert get_group_type(group, pyramid_request) == group_type
 
     def test_create_raises_for_invalid_group_type(self, db_session, users):
