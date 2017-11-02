@@ -112,11 +112,12 @@ class TestGroupService(object):
         def ensure_unicode(maybe_bytes):
             return maybe_bytes.decode() if isinstance(maybe_bytes, bytes) else maybe_bytes
         # python2 will have request.domain as a bytes. case to unicode str to prevent downstream type warnings
-        h_authority = ensure_unicode(pyramid_request.domain)
-        publisher_authority = 'publisher.test_groupids_created_by_excludes_other_groups'
+        h_authority = pyramid_request.domain
+        publisher_authority = 'publisher.org'
         svc = GroupService(db_session, users.get)
         group = svc.create('Group of type {}'.format(group_type),
-                           h_authority if use_h_authority else publisher_authority,
+                           ensure_unicode(
+                               h_authority if use_h_authority else publisher_authority),
                            'cazimir',
                            type_=group_type or u'public')
         if not group_type:

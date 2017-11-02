@@ -8,6 +8,12 @@ from h import session
 from h.models import Annotation, Group, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
+
+def authority_is_primary_for_request(request, authority):
+    """is the provided authority the one we'd consider the "hypothes.is" authority in production?"""
+    return request.domain == authority
+
+
 GROUP_TYPES = {
     'private': {
         'description': 'Anyone can join. Members can read/write.',
@@ -16,7 +22,7 @@ GROUP_TYPES = {
     'publisher': {
         'description': 'Anyone can read. Anyone in authority can write. Intended for 3rd-party namespaces.',
         'creator_is_immediate_member': False,
-        'matches_request': lambda group, request: request.domain != group.authority
+        'matches_request': lambda group, request: not authority_is_primary_for_request(request, group.authority),
     },
     'public': {
         'description': 'Anyone can read. Members can write. Group creator can invite members.',
@@ -24,7 +30,8 @@ GROUP_TYPES = {
     },
     'open': {
         'description': 'Anyone can read. Anyone in authority can write. Intended for h namespace.',
-        'creator_is_immediate_member': True
+        'creator_is_immediate_member': True,
+        'matches_request': lambda group, request: authority_is_primary_for_request(request, group.authority),
     }
 }
 
