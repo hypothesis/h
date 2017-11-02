@@ -228,7 +228,7 @@ class FakeGroup(object):
 
 class TestGroupResourceFactory(object):
     def test_get_item_returns_an_group(self, pyramid_request):
-        group = Group(name='test', authority='example.com')
+        group = Group(name='test', authority=u'example.com')
         pyramid_request.db.add(group)
         pyramid_request.db.flush()
 
