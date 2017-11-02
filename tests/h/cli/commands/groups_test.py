@@ -80,7 +80,7 @@ class TestJoinCommand(object):
         user_to_add = factories.User(
             username=username_of_user_to_add, authority=authority)
         pubid = u'pubid'
-        group = factories.Group(pubid=pubid)
+        group = factories.Group(pubid=pubid, authority=authority)
         db_session.commit()
 
         result = cli.invoke(groups_cli.join,
@@ -94,3 +94,36 @@ class TestJoinCommand(object):
         group_service.member_join.assert_called_once()
         first_call_args = group_service.member_join.call_args[0]
         assert first_call_args[0].pubid == 'pubid'
+
+    def test_error_when_user_doesnt_exist(self, db_session, cli, cliconfig, group_service, factories):
+        authority = u'publisher.org'
+        username_of_user_to_add = u'ben'
+        pubid = u'pubid'
+        group = factories.Group(pubid=pubid, authority=authority)
+        db_session.commit()
+
+        result = cli.invoke(groups_cli.join,
+                            [u'--user', username_of_user_to_add,
+                             u'--authority', authority,
+                             u'--group', group.pubid],
+                            obj=cliconfig)
+
+        assert result.exit_code == -1
+        assert username_of_user_to_add in result.exception.message
+
+    def test_error_when_group_doesnt_exist(self, db_session, cli, cliconfig, group_service, factories):
+        authority = u'publisher.org'
+        username_of_user_to_add = u'ben'
+        user_to_add = factories.User(
+            username=username_of_user_to_add, authority=authority)
+        pubid = u'pubid'
+        db_session.commit()
+
+        result = cli.invoke(groups_cli.join,
+                            [u'--user', user_to_add.username,
+                             u'--authority', authority,
+                             u'--group', pubid],
+                            obj=cliconfig)
+
+        assert result.exit_code == -1
+        assert pubid in result.exception.message
