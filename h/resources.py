@@ -16,6 +16,7 @@ from h.interfaces import IGroupService
 
 
 class Root(object):
+    __parent__ = None
     __acl__ = [
         (Allow, role.Staff, 'admin_index'),
         (Allow, role.Staff, 'admin_groups'),
