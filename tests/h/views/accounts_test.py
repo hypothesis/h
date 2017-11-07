@@ -561,7 +561,7 @@ class TestActivateController(object):
         assert success_flash
         assert success_flash[0].startswith("Your account has been activated")
 
-    def test_get_when_not_logged_in_successful_creates_ActivationEvent(
+    def test_get_when_not_logged_in_successful_creates_ActivationEvent(  # noqa
             self,
             pyramid_request,
             user_model,
@@ -574,7 +574,7 @@ class TestActivateController(object):
         ActivationEvent.assert_called_once_with(
             pyramid_request, user_model.get_by_activation.return_value)
 
-    def test_get_when_not_logged_in_successful_notifies(self,
+    def test_get_when_not_logged_in_successful_notifies(self,  # noqa: N803
                                                         notify,
                                                         pyramid_request,
                                                         user_model,
@@ -677,7 +677,6 @@ class TestAccountController(object):
 
     def test_post_password_form_with_invalid_data_does_not_change_password(
             self, invalid_form, pyramid_request, user_password_service):
-        user = pyramid_request.user
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
 
@@ -913,7 +912,7 @@ def activation_model(patch):
 
 
 @pytest.fixture
-def ActivationEvent(patch):
+def ActivationEvent(patch):  # noqa: N802
     return patch('h.views.accounts.ActivationEvent')
 
 
