@@ -54,59 +54,6 @@ INVALID_TOKEN_EXAMPLES = [
 ]
 
 
-class TestLegacyClientJWT(object):
-    @pytest.mark.parametrize('get_token', VALID_TOKEN_EXAMPLES)
-    def test_ok_for_valid_jwt(self, get_token):
-        token = get_token('secrets!')
-
-        result = tokens.LegacyClientJWT(token, key='secrets!')
-
-        assert isinstance(result, tokens.LegacyClientJWT)
-
-    @pytest.mark.parametrize('get_token', INVALID_TOKEN_EXAMPLES)
-    def test_raises_for_invalid_jwt(self, get_token):
-        token = get_token('secrets!')
-
-        with pytest.raises(jwt.InvalidTokenError):
-            tokens.LegacyClientJWT(token,
-                                   key='secrets!')
-
-    def test_payload(self):
-        payload = {'exp': _seconds_from_now(3600),
-                   'sub': 'foobar'}
-        token = jwt.encode(payload, key='s3cr37')
-
-        result = tokens.LegacyClientJWT(token, key='s3cr37')
-
-        assert result.payload == payload
-
-    def test_always_valid(self):
-        payload = {'exp': _seconds_from_now(3600),
-                   'sub': 'foobar'}
-        token = jwt.encode(payload, key='s3cr37')
-
-        result = tokens.LegacyClientJWT(token, key='s3cr37')
-
-        assert result.is_valid()
-
-    def test_userid_gets_payload_sub(self):
-        payload = {'exp': _seconds_from_now(3600),
-                   'sub': 'foobar'}
-        token = jwt.encode(payload, key='s3cr37')
-
-        result = tokens.LegacyClientJWT(token, key='s3cr37')
-
-        assert result.userid == 'foobar'
-
-    def test_userid_none_if_sub_missing(self):
-        payload = {'exp': _seconds_from_now(3600)}
-        token = jwt.encode(payload, key='s3cr37')
-
-        result = tokens.LegacyClientJWT(token, key='s3cr37')
-
-        assert result.userid is None
-
-
 class TestAuthToken(object):
     def test_retrieves_token_for_request(self, pyramid_request):
         pyramid_request.headers['Authorization'] = 'Bearer abcdef123'

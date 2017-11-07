@@ -2,7 +2,6 @@
 
 import datetime
 
-import jwt
 from zope.interface import implementer
 
 from h._compat import text_type
@@ -33,32 +32,6 @@ class Token(object):
             return True
         now = datetime.datetime.utcnow()
         return now < self.expires
-
-
-@implementer(IAuthenticationToken)
-class LegacyClientJWT(object):
-
-    """
-    A wrapper around JWT issued to the Hypothesis client.
-
-    Exposes the standard "auth token" interface on top of legacy tokens.
-    """
-
-    def __init__(self, body, key, leeway=240):
-        self.payload = jwt.decode(body,
-                                  key=key,
-                                  leeway=leeway,
-                                  algorithms=['HS256'])
-
-    def is_valid(self):
-        """Check if the token is valid. Always true for JWTs."""
-        # JWT validity checks happen at construction time. If an instance is
-        # successfully constructed, it is by definition valid.
-        return True
-
-    @property
-    def userid(self):
-        return self.payload.get('sub')
 
 
 def auth_token(request):
