@@ -17,7 +17,7 @@ class AuthTokenService(object):
 
         This will return a token object implementing
         ``h.auth.interfaces.IAuthenticationToken``, or ``None`` when the token
-        cannot be found, is not a legacy JWT token, or is not valid.
+        cannot be found, or is not valid.
 
         :param token_str: the token string
         :type token_str: unicode
