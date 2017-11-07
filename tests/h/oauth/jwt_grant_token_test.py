@@ -173,15 +173,6 @@ class TestVerifiedJWTGrantToken(object):
 
         assert exc.value.description == 'Grant token is not yet valid.'
 
-    def test_init_raises_for_iat_claim_in_future(self, claims):
-        claims['iat'] = epoch(delta=timedelta(minutes=13))
-        jwttok = jwt_token(claims)
-
-        with pytest.raises(InvalidGrantError) as exc:
-            VerifiedJWTGrantToken(jwttok, 'top-secret', 'test-audience')
-
-        assert exc.value.description == 'Grant token issue time (iat) is in the future.'
-
     def test_expiry_returns_exp_claim(self, claims):
         now = datetime.utcnow().replace(microsecond=0)
         delta = timedelta(minutes=2)
