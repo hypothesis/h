@@ -4,14 +4,10 @@ from __future__ import unicode_literals
 
 import datetime
 
-import jwt
-import mock
 import pytest
 
-from h.auth.tokens import LegacyClientJWT
 from h.services.auth_token import AuthTokenService
 from h.services.auth_token import auth_token_service_factory
-from h._compat import text_type
 
 
 class TestAuthTokenService(object):
@@ -48,20 +44,6 @@ class TestAuthTokenService(object):
 
         assert result is None
 
-    def test_validate_returns_legacy_client_token(self, svc):
-        token = text_type(jwt.encode({'exp': self.time(1)}, key='secret'))
-
-        result = svc.validate(token)
-
-        assert isinstance(result, LegacyClientJWT)
-
-    def test_validate_returns_none_for_invalid_legacy_client_token(self, svc):
-        token = text_type(jwt.encode({'exp': self.time(-1)}, key='secret'))
-
-        result = svc.validate(token)
-
-        assert result is None
-
     def test_validate_returns_none_for_non_existing_token(self, svc):
         result = svc.validate('abcde123')
 
@@ -76,7 +58,7 @@ class TestAuthTokenService(object):
 
     @pytest.fixture
     def svc(self, db_session):
-        return AuthTokenService(db_session, 'secret')
+        return AuthTokenService(db_session)
 
     @pytest.fixture
     def token(self, factories):
@@ -96,17 +78,7 @@ class TestAuthTokenServiceFactory(object):
     def test_it_passes_session(self, pyramid_request, mocked_service):
         auth_token_service_factory(None, pyramid_request)
 
-        mocked_service.assert_called_once_with(pyramid_request.db, mock.ANY)
-
-    def test_it_passes_client_secret(self, pyramid_request, mocked_service):
-        auth_token_service_factory(None, pyramid_request)
-
-        mocked_service.assert_called_once_with(mock.ANY, 'the-secret')
-
-    @pytest.fixture
-    def pyramid_settings(self, pyramid_settings):
-        pyramid_settings['h.client_secret'] = 'the-secret'
-        return pyramid_settings
+        mocked_service.assert_called_once_with(pyramid_request.db)
 
     @pytest.fixture
     def mocked_service(self, patch):
