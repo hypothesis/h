@@ -561,7 +561,7 @@ class TestActivateController(object):
         assert success_flash
         assert success_flash[0].startswith("Your account has been activated")
 
-    def test_get_when_not_logged_in_successful_creates_ActivationEvent(  # noqa
+    def test_get_when_not_logged_in_successful_creates_ActivationEvent(  # noqa: N802, N803
             self,
             pyramid_request,
             user_model,
