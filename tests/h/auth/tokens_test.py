@@ -48,11 +48,6 @@ INVALID_TOKEN_EXAMPLES = [
     lambda k: jwt.encode({'exp': _seconds_from_now(-3600)},
                          key=k),
 
-    # Issued in the future
-    lambda k: jwt.encode({'exp': _seconds_from_now(3600),
-                          'iat': _seconds_from_now(1800)},
-                         key=k),
-
     # Incorrect encoding key
     lambda k: jwt.encode({'exp': _seconds_from_now(3600)},
                          key='somethingelse'),
