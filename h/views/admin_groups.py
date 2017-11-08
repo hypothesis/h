@@ -352,7 +352,7 @@ class AdminGroupReadController(object):
                     'Added {user} to group'.format(
                         user=added_users[0].username
                         if len(added_users) == 1
-                        else '{num} users'.format(um=len(added_users))),
+                        else '{num} users'.format(num=len(added_users))),
                     queue='success'
                 )
                 return httpexceptions.HTTPSeeOther(self.request.url)
