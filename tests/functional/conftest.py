@@ -15,7 +15,6 @@ TEST_SETTINGS = {
     'es.index': 'hypothesis-test',
     'h.app_url': 'http://example.com',
     'h.authority': 'example.com',
-    'h.client_secret': 'notsosecret',
     'pyramid.debug_all': True,
     'sqlalchemy.url': os.environ.get('TEST_DATABASE_URL',
                                      'postgresql://postgres@localhost/htest')
