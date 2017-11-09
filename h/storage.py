@@ -97,7 +97,7 @@ def create_annotation(request, data, group_service):
     :type group_service: h.interfaces.IGroupService
 
     :returns: the created and flushed annotation
-    :rtype: dict
+    :rtype: h.models.Annotation
     """
     created = updated = datetime.utcnow()
 
