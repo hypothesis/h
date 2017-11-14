@@ -87,7 +87,6 @@ def test_includeme():
         call('token', '/api/token'),
         call('oauth_authorize', '/oauth/authorize'),
         call('oauth_revoke', '/oauth/revoke'),
-        call('session', '/app'),
         call('sidebar_app', '/app.html'),
         call('embed', '/embed.js'),
         call('stream_atom', '/stream.atom'),

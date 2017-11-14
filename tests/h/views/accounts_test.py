@@ -4,10 +4,8 @@
 import mock
 import pytest
 
-import deform
 from pyramid import httpexceptions
 
-from h import accounts
 from h.services.developer_token import developer_token_service_factory
 from h.services.user_password import UserPasswordService
 from h.views import accounts as views
@@ -211,99 +209,6 @@ class TestAuthController(object):
         pyramid_config.add_route('forgot_password', '/forgot')
         pyramid_config.add_route('index', '/index')
         pyramid_config.add_route('stream', '/stream')
-
-
-@pytest.mark.usefixtures('session')
-class TestAjaxAuthController(object):
-
-    def test_login_returns_status_okay_when_validation_succeeds(self,
-                                                                factories,
-                                                                form_validating_to,
-                                                                pyramid_request):
-        pyramid_request.json_body = {}
-        controller = views.AjaxAuthController(pyramid_request)
-        controller.form = form_validating_to({'user': factories.User(username='bob')})
-
-        result = controller.login()
-
-        assert result['status'] == 'okay'
-
-    def test_login_raises_JSONError_on_non_json_body(self, pyramid_request):
-        type(pyramid_request).json_body = {}
-        with mock.patch.object(type(pyramid_request),
-                               'json_body',
-                               new_callable=mock.PropertyMock) as json_body:
-            json_body.side_effect = ValueError()
-
-            controller = views.AjaxAuthController(pyramid_request)
-
-            with pytest.raises(accounts.JSONError) as exc_info:
-                controller.login()
-                assert exc_info.value.message.startswith(
-                    'Could not parse request body as JSON: ')
-
-    def test_login_raises_JSONError_on_non_object_json(self, pyramid_request):
-        pyramid_request.user = mock.Mock(groups=[])
-        pyramid_request.json_body = 'foo'
-
-        controller = views.AjaxAuthController(pyramid_request)
-        expected_message = 'Request JSON body must have a top-level object'
-
-        with pytest.raises(accounts.JSONError) as exc_info:
-            controller.login()
-
-        assert exc_info.value.message == expected_message
-
-    def test_login_converts_non_string_usernames_to_strings(self, pyramid_csrf_request):
-        for input_, expected_output in ((None, ''),
-                                        (23, '23'),
-                                        (True, 'True')):
-            pyramid_csrf_request.json_body = {'username': input_,
-                                              'password': 'pass'}
-            controller = views.AjaxAuthController(pyramid_csrf_request)
-            controller.form.validate = mock.Mock(
-                return_value={'user': mock.Mock()})
-
-            controller.login()
-
-            assert controller.form.validate.called
-            pstruct = controller.form.validate.call_args[0][0]
-            assert sorted(pstruct) == sorted([('username', expected_output),
-                                              ('password', 'pass')])
-
-    def test_login_converts_non_string_passwords_to_strings(self, pyramid_csrf_request):
-        for input_, expected_output in ((None, ''),
-                                        (23, '23'),
-                                        (True, 'True')):
-            pyramid_csrf_request.json_body = {'username': 'user',
-                                              'password': input_}
-            controller = views.AjaxAuthController(pyramid_csrf_request)
-            controller.form.validate = mock.Mock(
-                return_value={'user': mock.Mock()})
-
-            controller.login()
-
-            assert controller.form.validate.called
-            pstruct = controller.form.validate.call_args[0][0]
-            assert sorted(pstruct) == sorted([('username', 'user'),
-                                              ('password', expected_output)])
-
-    def test_login_raises_ValidationFailure_on_ValidationFailure(self,
-                                                                 invalid_form,
-                                                                 pyramid_request):
-        pyramid_request.json_body = {}
-        controller = views.AjaxAuthController(pyramid_request)
-        controller.form = invalid_form({'password': 'too short'})
-
-        with pytest.raises(deform.ValidationFailure) as exc_info:
-            controller.login()
-
-        assert exc_info.value.error.asdict() == {'password': 'too short'}
-
-    def test_logout_returns_status_okay(self, pyramid_request):
-        result = views.AjaxAuthController(pyramid_request).logout()
-
-        assert result['status'] == 'okay'
 
 
 @pytest.mark.usefixtures('activation_model',
@@ -656,7 +561,7 @@ class TestActivateController(object):
         assert success_flash
         assert success_flash[0].startswith("Your account has been activated")
 
-    def test_get_when_not_logged_in_successful_creates_ActivationEvent(
+    def test_get_when_not_logged_in_successful_creates_ActivationEvent(  # noqa: N802, N803
             self,
             pyramid_request,
             user_model,
@@ -669,7 +574,7 @@ class TestActivateController(object):
         ActivationEvent.assert_called_once_with(
             pyramid_request, user_model.get_by_activation.return_value)
 
-    def test_get_when_not_logged_in_successful_notifies(self,
+    def test_get_when_not_logged_in_successful_notifies(self,  # noqa: N803
                                                         notify,
                                                         pyramid_request,
                                                         user_model,
@@ -772,7 +677,6 @@ class TestAccountController(object):
 
     def test_post_password_form_with_invalid_data_does_not_change_password(
             self, invalid_form, pyramid_request, user_password_service):
-        user = pyramid_request.user
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
 
@@ -1008,7 +912,7 @@ def activation_model(patch):
 
 
 @pytest.fixture
-def ActivationEvent(patch):
+def ActivationEvent(patch):  # noqa: N802
     return patch('h.views.accounts.ActivationEvent')
 
 

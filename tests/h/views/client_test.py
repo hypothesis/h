@@ -11,18 +11,6 @@ from h.views import client
 from h import __version__
 
 
-def test_annotator_token_calls_generate_jwt(generate_jwt, pyramid_request):
-    client.annotator_token(pyramid_request)
-
-    generate_jwt.assert_called_once_with(pyramid_request, 3600)
-
-
-def test_annotator_token_returns_token(generate_jwt, pyramid_request):
-    result = client.annotator_token(pyramid_request)
-
-    assert result == generate_jwt.return_value
-
-
 @pytest.mark.usefixtures('routes', 'pyramid_settings')
 class TestSidebarApp(object):
 
@@ -104,10 +92,3 @@ def routes(pyramid_config):
     pyramid_config.add_route('sidebar_app', '/app.html')
     pyramid_config.add_route('oauth_authorize', '/oauth/authorize')
     pyramid_config.add_route('oauth_revoke', '/oauth/revoke')
-
-
-@pytest.fixture
-def generate_jwt(patch):
-    func = patch('h.views.client.generate_jwt')
-    func.return_value = 'abc123'
-    return func

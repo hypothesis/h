@@ -2,17 +2,13 @@
 
 from __future__ import unicode_literals
 
-import jwt
-
 from h import models
-from h.auth.tokens import LegacyClientJWT, Token
+from h.auth.tokens import Token
 
 
 class AuthTokenService(object):
-    def __init__(self, session, client_secret):
+    def __init__(self, session):
         self._session = session
-        self._client_secret = client_secret
-
         self._validate_cache = {}
 
     def validate(self, token_str):
@@ -21,7 +17,7 @@ class AuthTokenService(object):
 
         This will return a token object implementing
         ``h.auth.interfaces.IAuthenticationToken``, or ``None`` when the token
-        cannot be found, is not a legacy JWT token, or is not valid.
+        cannot be found, or is not valid.
 
         :param token_str: the token string
         :type token_str: unicode
@@ -64,17 +60,8 @@ class AuthTokenService(object):
             token = Token(token_model)
             return token
 
-        # If we've got this far it's possible the token is a legacy client JWT.
-        return _maybe_jwt(token_str, self._client_secret)
+        return None
 
 
 def auth_token_service_factory(context, request):
-    client_secret = request.registry.settings['h.client_secret']
-    return AuthTokenService(request.db, client_secret)
-
-
-def _maybe_jwt(token, client_secret):
-    try:
-        return LegacyClientJWT(token, key=client_secret)
-    except jwt.InvalidTokenError:
-        return None
+    return AuthTokenService(request.db)
