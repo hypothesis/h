@@ -22,7 +22,6 @@ Contents
 
    community
    publishers/index
-   The Hypothesis API <https://h.readthedocs.io/en/latest/api/>
-   realtime
+   api/index
    developing/index
    CHANGES
