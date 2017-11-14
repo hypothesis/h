@@ -1,5 +1,5 @@
 Authorization
-#############
+=============
 
 API requests which only read public data do not require authorization.
 

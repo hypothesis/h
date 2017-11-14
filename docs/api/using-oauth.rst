@@ -1,5 +1,5 @@
 Using OAuth
-###########
+===========
 
 `OAuth <https://en.wikipedia.org/wiki/OAuth>`_ is an open standard that enables
 users to grant an application (an "OAuth client") the ability to interact with a
