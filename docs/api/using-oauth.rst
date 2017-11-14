@@ -66,10 +66,52 @@ The h service implements the standard OAuth flow, with the following endpoints:
 - Token exchange: ``POST /oauth/token``
 - Token refresh: ``POST /oauth/token``
 
-See the `Authorization section
-<https://aaronparecki.com/oauth-2-simplified/#authorization>`_ of "OAuth 2
-simplified" for a description of how to implement the authorization flow for
-different types of client.
+In order to implement the flow, your application must do the following:
+
+1. When a user clicks the "Login" link, the application should open the h
+   service's authorization page at ``/oauth/authorize`` using the query
+   parameters described in `4.1.1 Authorization Request
+   <https://tools.ietf.org/html/rfc6749#section-4.1.1>`_.
+
+   *Example request:*
+
+   .. code-block:: http
+
+      GET /oauth/authorize?client_id=510cd02e-767b-11e7-b34b-ebcff2e51409&redirect_uri=https%3A%2F%2Fmyapp.com%2Fauthorize&response_type=code&state=aa3d3062b4dbe0a1 HTTP/1.1
+
+2. After the user authorizes the application, it will receive an authorization
+   code via a call to the redirect URI. The application must exchange this code
+   for an access token by making a request to the ``POST /oauth/token`` endpoint
+   as described in `4.1.3 Access Token Request
+   <https://tools.ietf.org/html/rfc6749#section-4.1.3>`_.
+
+   *Example request:*
+
+   .. code-block:: http
+
+      POST /oauth/token HTTP/1.1
+      Content-Type: application/x-www-form-urlencoded
+
+      client_id=631206c8-7792-11e7-90b3-872e79925778&code=V1bjcvKDivRUc6Sg1jhEc8ckDwyLNG&grant_type=authorization_code
+
+   *Example response:*
+
+   .. code-block:: json
+
+      {
+        "token_type": "Bearer",
+        "access_token": "5768-mfoPT52ogx0Si7NkU8QFicj183Wz1O4OQmbNIvBhjTQ",
+        "expires_in": 3600,
+        "refresh_token": "4657-dkJGNdVn8dmhDvgCHVPmIJ2Zi0cYQgDNb7RWXkpGIZs",
+        "scope": "annotation:read annotation:write"
+      }
+
+3. Once the application has an access token, it can make API requests and
+   connect to the real time API. See :doc:`authorization` for details of how
+   to include this token in requests.
+4. The access token expires after a while, and must be refreshed by making a
+   request to the ``POST /oauth/token`` endpoint as described in `6. Refreshing
+   an access token <https://tools.ietf.org/html/rfc6749#section-6>`_.
 
 Further reading
 ---------------
