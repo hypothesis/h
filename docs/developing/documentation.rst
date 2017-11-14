@@ -1,5 +1,5 @@
 Writing documentation
-#####################
+=====================
 
 To build the documentation issue the ``make dirhtml`` command from the ``docs``
 directory:
