@@ -1,5 +1,5 @@
 Code style
-##########
+==========
 
 This section contains some code style guidelines for the different programming
 languages used in the project.
