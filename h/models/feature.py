@@ -26,6 +26,7 @@ FEATURES = {
     'search_for_doi': "Use DOI metadata when searching for annotations on the current page?",
     'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
     'api_render_user_info': "Return users' extended info in API responses?",
+    'client_display_names': "Render display names instead of user names in the client",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
