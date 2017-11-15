@@ -114,6 +114,27 @@ In order to implement the flow, your application must do the following:
    request to the ``POST /api/token`` endpoint as described in `6. Refreshing
    an access token <https://tools.ietf.org/html/rfc6749#section-6>`_.
 
+   *Example request:*
+
+   .. code-block:: http
+
+      POST /api/token HTTP/1.1
+      Content-Type: application/x-www-form-urlencoded
+
+      grant_type=refresh_token&refresh_token=4657-diyCpZ9oPRBaBkaW6ZrKgI0yagvZ9yBgLmxJ9k4HfeM
+
+   *Example response:*
+
+   .. code-block:: json
+
+      {
+        "token_type": "Bearer",
+        "access_token": "5768-8CHodeMUAPCLmuBooabXolnpHReBUI5cC3txCXk7sQA",
+        "expires_in": 3600,
+        "refresh_token": "4657-11f1CUrhZs29QvXpywDpsXFwlfl_wPEIY5N8whwUrRw",
+        "scope": "annotation:read annotation:write"
+      }
+
 Further reading
 ---------------
 
