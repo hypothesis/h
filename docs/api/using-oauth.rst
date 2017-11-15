@@ -60,7 +60,9 @@ client:
 Implementing the OAuth flow
 ---------------------------
 
-The h service implements the standard OAuth flow, with the following endpoints:
+The h service implements the `"Authorization code grant"
+<https://tools.ietf.org/html/rfc6749#section-4.1>`_ OAuth flow, with the
+following endpoints:
 
 - Authorization endpoint: ``/oauth/authorize``
 - Token endpoint: ``/api/token``
