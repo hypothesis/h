@@ -30,7 +30,6 @@ greenlet==0.4.10          # via gevent
 gunicorn==19.6.0
 html5lib==0.999999999     # via bleach
 idna==2.5                 # via cryptography
-ipaddress==1.0.18         # via cryptography
 iso8601==0.1.11           # via colander
 itsdangerous==0.24
 jinja2==2.8               # via deform-jinja2, pyramid-jinja2
@@ -47,7 +46,7 @@ passlib==1.7.1
 pastedeploy==1.5.2        # via pyramid
 peppercorn==0.5           # via deform
 psycogreen==1.0
-psycopg2==2.6.2
+psycopg2==2.7.3.2
 pycparser==2.14           # via cffi
 pyjwt==1.5.3
 pyparsing==2.1.10
