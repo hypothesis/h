@@ -24,4 +24,3 @@ Contents
    publishers/index
    api/index
    developing/index
-   CHANGES
