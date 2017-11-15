@@ -17,7 +17,7 @@ works as follows:
    asked to approve access.
 
 3. If they approve, the authorization endpoint will send an authorization code
-   back to the application (via a redirect or ``window.postMessage`` call).
+   back to the application (via a redirect).
 
 4. The application exchanges the authorization code for a pair of tokens using
    the h service's ``POST /api/token`` endpoint: A short-lived access token to
@@ -31,8 +31,8 @@ To build an application for Hypothesis that uses OAuth, there are two steps:
 1. Register an OAuth client for your application in the h service.
 
 2. Implement the client-side part of the OAuth flow above in your application.
-   Since OAuth is a widely implemented standard, there are many existing
-   libraries for various languages which you can use.
+   You may be able to use an existing OAuth 2 client library for your language
+   and platform.
 
 .. _registering-an-oauth-client:
 
@@ -43,8 +43,7 @@ To register an OAuth client, go to the `/admin/oauthclients` page on the h
 service. To register an OAuth client on the public h service at
 https://hypothes.is, please contact us.
 
-As an admin of the "h" service you can register a client for a browser-based
-client:
+To register a new client as an admin of the "h" service:
 
 1. Go to `/admin/oauthclients` and click "Register a new OAuth client".
 
