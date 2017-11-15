@@ -134,6 +134,25 @@ In order to implement the flow, your application must do the following:
         "scope": "annotation:read annotation:write"
       }
 
+Revoking tokens
+---------------
+
+If your application no longer needs an OAuth token, for example because a user
+has logged out of your application which uses Hypothesis accounts, it is good
+practice to revoke the access and refresh tokens.
+
+Hypothesis implements the `OAuth 2 Token Revocation endpoint
+<https://tools.ietf.org/html/rfc7009>`_ at ``/oauth/revoke``.
+
+*Example request:*
+
+.. code-block:: http
+
+   POST /oauth/revoke HTTP/1.1
+   Content-Type: application/x-www-form-urlencoded
+
+   token=5768-yXoTA2R94b5fB0dTBbXHSvc_IX4I1Gc_bGQ4KyjM5dY
+
 Further reading
 ---------------
 
@@ -141,3 +160,5 @@ Further reading
   good introduction for developers.
 - The `OAuth specification <https://tools.ietf.org/html/rfc6749>`_ describes the
   standard in detail.
+- The `OAuth Token Revocation specification <https://tools.ietf.org/html/rfc7009>`_
+  describes an extension to support revoking tokens.
