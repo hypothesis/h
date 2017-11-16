@@ -1,63 +1,13 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Hypothesis
+  title: Hypothesis API Reference
   description: |
-    # Hypothesis API documentation
+    # Hypothesis API Reference
 
-    This document details the Hypothesis public HTTP API. It is targeted at
-    developers interested in integrating functionality from Hypothesis into
-    their own applications.
-
-    ## Authorization
-
-    ### API tokens
-    Some of the API URLs documented below require a valid API token.
-    To use these API URLs you should:
-
-    1. Generate yourself an API token on your [Hypothesis developer
-       page](https://hypothes.is/account/developer) (you must be logged in to
-       Hypothesis to get to this page).
-    2. Put the API token in the `Authorization` header in your request.
-
-    *Example request:*
-
-        GET /api
-        Host: hypothes.is
-        Accept: application/json
-        Authorization: Bearer 6879-nUYZBzc15MsjDDicz-0xEaKBrVGGruwCHW9-p8BMqq4
-
-    (Replace `6879-nUYZBzc15MsjDDicz-0xEaKBrVGGruwCHW9-p8BMqq4` with your own API token.)
-
-    ### Client credentials direct authorization
-    The user creation API is intended for use by "third-party accounts" clients.
-    These endpoints are authenticated by HTTP Basic Auth using your client ID as
-    the username and your client secret as the password.
-
-    For example, with client details as follows
-
-        Client ID: 96653f8e-80be-11e6-b32b-c7bcde86613a
-        Client Secret: E-hReVMuRyZbyr1GikieEw4JslaM6sDpb18_9V59PFw
-
-    you can compute the Authorization header [as described in
-    RFC7617](https://tools.ietf.org/html/rfc7617):
-
-        $ echo -n '96653f8e-80be-11e6-b32b-c7bcde86613a:E-hReVMuRyZbyr1GikieEw4JslaM6sDpb18_9V59PFw' | base64
-        OTY2NTNmOGUtODBiZS0xMWU2LWIzMmItYzdiY2RlODY2MTNhOkUtaFJlVk11UnlaYnlyMUdpa2llRXc0SnNsYU02c0RwYjE4XzlWNTlQRnc=
-
-    *Example request:*
-
-        POST /users
-        Host: hypothes.is
-        Accept: application/json
-        Content-Type: application/json
-        Authorization: Basic OTY2NTNmOGUtODBiZS0xMWU2LWIzMmItYzdiY2RlODY2MTNhOkUtaFJlVk11UnlaYnlyMUdpa2llRXc0SnNsYU02c0RwYjE4XzlWNTlQRnc=
-
-        {
-          "authority": "example.com",
-          "username": "jbloggs1",
-          "email": "jbloggs1@example.com"
-        }
+    This is a reference for the Hypothesis HTTP API.
+    See [the API overview](../api/) for an introduction to the API and information
+    on how authorization works.
 
   termsOfService: https://hypothes.is/terms-of-service
   license:

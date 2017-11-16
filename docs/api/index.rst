@@ -7,5 +7,6 @@ write data from the Hypothesis service.
 .. toctree::
    :maxdepth: 1
 
+   authorization
    API Reference <../api-reference/index>
    realtime
