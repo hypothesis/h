@@ -24,7 +24,7 @@ works as follows:
    authorize API requests, and a long-lived refresh token.
 
 5. When the access token expires, the application obtains a new access token
-   using the ``POST /api/token`` endpoint.
+   by submitting the refresh token to the ``POST /api/token`` endpoint.
 
 To build an application for Hypothesis that uses OAuth, there are two steps:
 
@@ -39,9 +39,9 @@ To build an application for Hypothesis that uses OAuth, there are two steps:
 Registering an OAuth client
 ---------------------------
 
-To register an OAuth client, go to the `/admin/oauthclients` page on the h
-service. To register an OAuth client on the public h service at
-https://hypothes.is, please contact us.
+To register an OAuth client on an instance of the h service for which you have
+admin access, go to the `/admin/oauthclients` page. To register an OAuth client
+on the public h service at https://hypothes.is, please contact us.
 
 To register a new client as an admin of the "h" service:
 
