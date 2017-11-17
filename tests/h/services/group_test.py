@@ -7,6 +7,7 @@ import pytest
 
 from h.models import Group
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
+from h.services.group import get_group_type
 from h.services.group import GroupService
 from h.services.group import groups_factory
 
@@ -43,7 +44,8 @@ class TestGroupService(object):
     def test_create_sets_description_when_present(self, db_session, users):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', 'all about ant eaters')
+        group = svc.create('Anteater fans', 'foobar.com',
+                           'cazimir', 'all about ant eaters')
 
         assert group.description == 'all about ant eaters'
 
@@ -54,19 +56,23 @@ class TestGroupService(object):
 
         assert group.description is None
 
-    def test_create_adds_group_creator_to_members(self, db_session, users):
+    @pytest.mark.parametrize(('group_type', 'creator_should_be_member'), [
+        (None, True),
+        ('private', True),
+        ('publisher', False),
+        ('open', True),
+        ('public', True),
+    ])
+    def test_create_adds_group_creator_to_members(self, db_session, users, group_type, creator_should_be_member):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', **dict(filter(bool, [
+            # don't pass type_ kwarg if group_type is none
+            ['type_', group_type] if group_type else None]
+        )))
 
-        assert users['cazimir'] in group.members
-
-    def test_create_doesnt_add_group_creator_to_members_for_publisher_groups(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='publisher')
-
-        assert users['cazimir'] not in group.members
+        creator_is_member = users['cazimir'] in group.members
+        assert creator_is_member == creator_should_be_member
 
     @pytest.mark.parametrize('group_type,flag,expected_value', [
         ('private', 'joinable_by', JoinableBy.authority),
@@ -74,7 +80,14 @@ class TestGroupService(object):
         ('private', 'writeable_by', WriteableBy.members),
         ('publisher', 'joinable_by', None),
         ('publisher', 'readable_by', ReadableBy.world),
-        ('publisher', 'writeable_by', WriteableBy.authority)])
+        ('publisher', 'writeable_by', WriteableBy.authority),
+        ('public', 'joinable_by', None),
+        ('public', 'readable_by', ReadableBy.world),
+        ('public', 'writeable_by', WriteableBy.members),
+        ('open', 'joinable_by', None),
+        ('open', 'readable_by', ReadableBy.world),
+        ('open', 'writeable_by', WriteableBy.authority),
+    ])
     def test_create_sets_access_flags_for_group_types(self,
                                                       db_session,
                                                       users,
@@ -83,9 +96,34 @@ class TestGroupService(object):
                                                       expected_value):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_=group_type)
+        group = svc.create('Anteater fans', 'foobar.com',
+                           'cazimir', type_=group_type)
 
         assert getattr(group, flag) == expected_value
+
+    @pytest.mark.parametrize(('group_type', 'use_h_authority'), [
+        ('private', True),
+        ('public', True),
+        ('open', True),
+        ('publisher', False),
+        (None, True),
+    ])
+    def test_get_group_type(self, pyramid_request, db_session, users, group_type, use_h_authority):
+        def ensure_unicode(maybe_bytes):
+            return maybe_bytes.decode() if isinstance(maybe_bytes, bytes) else maybe_bytes
+        # python2 will have request.domain as a bytes. case to unicode str to prevent downstream type warnings
+        h_authority = pyramid_request.domain
+        publisher_authority = 'publisher.org'
+        svc = GroupService(db_session, users.get)
+        group = svc.create('Group of type {}'.format(group_type),
+                           ensure_unicode(
+                               h_authority if use_h_authority else publisher_authority),
+                           'cazimir',
+                           type_=group_type or u'public')
+        if not group_type:
+            # modify group so it doesnt correspond to any group_type
+            group.joinable_by = 'fake'
+        assert get_group_type(group, pyramid_request) == group_type
 
     def test_create_raises_for_invalid_group_type(self, db_session, users):
         svc = GroupService(db_session, users.get)
@@ -175,7 +213,6 @@ class TestGroupService(object):
         svc.member_leave(group, 'cazimir')
 
         publish.assert_called_once_with('group-leave', 'abc123', 'cazimir')
-
 
     @pytest.mark.parametrize('with_user', [True, False])
     def test_groupids_readable_by_includes_world(self, with_user, service, db_session, factories):

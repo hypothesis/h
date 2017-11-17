@@ -106,6 +106,7 @@ class GroupSearchController(SearchController):
 
         result = super(GroupSearchController, self).search()
 
+        result['show_invite_new_user'] = bool(self.group.joinable_by)
         result['opts'] = {'search_groupname': self.group.name}
 
         if self.request.user not in self.group.members:
@@ -118,7 +119,8 @@ class GroupSearchController(SearchController):
             return 0
 
         q = query.extract(self.request)
-        users_aggregation = result['search_results'].aggregations.get('users', [])
+        users_aggregation = result['search_results'].aggregations.get(
+            'users', [])
         members = [{'username': u.username,
                     'userid': u.userid,
                     'count': user_annotation_count(users_aggregation,
@@ -131,7 +133,8 @@ class GroupSearchController(SearchController):
 
         group_annotation_count = None
         if self.request.feature('total_shared_annotations'):
-            group_annotation_count = self.request.find_service(name='annotation_stats').group_annotation_count(self.group.pubid)
+            group_annotation_count = self.request.find_service(
+                name='annotation_stats').group_annotation_count(self.group.pubid)
 
         result['stats'] = {
             'annotation_count': group_annotation_count,
@@ -288,7 +291,8 @@ class UserSearchController(SearchController):
 
         annotation_count = None
         if self.request.feature('total_shared_annotations'):
-            user_annotation_counts = self.request.find_service(name='annotation_stats').user_annotation_counts(self.user.userid)
+            user_annotation_counts = self.request.find_service(
+                name='annotation_stats').user_annotation_counts(self.user.userid)
             annotation_count = user_annotation_counts['public']
             if self.request.authenticated_userid == self.user.userid:
                 annotation_count = user_annotation_counts['total']

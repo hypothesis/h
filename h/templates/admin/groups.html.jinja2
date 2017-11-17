@@ -5,7 +5,7 @@
 
 {% block content %}
   <p>
-    On this page you can see a list of all the groups and their details.
+    On this page you can see a list of all the groups and their details. Or <a href="{{ request.route_url('admin_groups_create') }}">click here to create a group</a>.
   </p>
 
   <div class="table-responsive">
@@ -13,6 +13,8 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>Authority</th>
+          <th>Type</th>
           <th>URL</th>
           <th>Created by</th>
           <th>Members</th>
@@ -20,8 +22,14 @@
       </thead>
       <tbody>
         {% for group in results %}
+          {% set group_admin_url = request.route_url('admin_group_read', pubid=group.pubid, slug=group.slug) %}
           <tr>
-            <td>{{ group.name }}</td>
+            <td><a href="{{ group_admin_url }}">{{ group.name }}</a></td>
+            <td>{{ group.authority }}</td>
+            <td>
+              {% set group_type = get_group_type(group, request) %}
+              <span title="{{ get_group_type_description(group_type) }}">{{ group_type }}</span>
+            </td>
             <td>
               {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
               <a href="{{ group_url }}">
@@ -35,7 +43,11 @@
                 </a>
               {% endif %}
             </td>
-            <td>{{ group.members|length }}</td>
+            <td>
+              <a href="{{ group_admin_url }}#members">
+                {{ group.members|length }}
+              </a>
+            </td>
           </tr>
         {% endfor %}
       </tbody>

@@ -28,7 +28,7 @@ class GroupCreateController(object):
                                          'group-form__submit-btn '
                                          'js-create-group-create-btn')
         self.form = request.create_form(self.schema,
-                                        css_class='group-form__form',
+                                        css_class='admin-create-group-form__form',
                                         buttons=(submit,))
 
     @view_config(request_method='GET')
@@ -87,10 +87,10 @@ class GroupEditController(object):
     @view_config(request_method='POST')
     def post(self):
         return form.handle_form_submission(
-                self.request,
-                self.form,
-                on_success=self._update_group,
-                on_failure=self._template_data)
+            self.request,
+            self.form,
+            on_success=self._update_group,
+            on_failure=self._template_data)
 
     def _template_data(self):
         return {
@@ -128,5 +128,6 @@ def check_slug(group, request):
     """Redirect if the request slug does not match that of the group."""
     slug = request.matchdict.get('slug')
     if slug is None or slug != group.slug:
-        path = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
+        path = request.route_path(
+            'group_read', pubid=group.pubid, slug=group.slug)
         raise httpexceptions.HTTPMovedPermanently(path)

@@ -1,0 +1,75 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'admin_group_read' %}
+{% set page_title = '{group}'.format(group=group.name) %}
+
+{% block content %}
+  <h2>Details</h2>
+  {% set group_url = request.route_url('group_read_noslug', pubid=group.pubid) %}
+  <dl>
+    <dt>authority</dt>
+      <dd>{{ group.authority }}</dd>
+    <dt>type</dt>
+      {% set group_type = get_group_type(group) %}
+      <dd>{{ group_type }} - {{ get_group_type_description(group_type) }}</dd>
+    <dt>URL</dt>
+      <dd><a href="{{ group_url }}">{{ group_url }}</a></dd>
+    <dt>pubid</dt>
+      <dd>{{ group.pubid }}</dd>
+    <dt>id</dt>
+      <dd>{{ group.id }}</dd>
+    <dt>creator</dt>
+      {% set group_creator_url = request.route_url('activity.user_search', username=group.creator.username) %}
+      <dd><a href="{{ group_creator_url }}">{{ group.creator.userid }}</a></dd>
+  </dl>
+
+  <a name="members"></a>
+  <h2>Add Member</h2>
+  {{ add_member_form.render() }}
+
+  <h2>All Members</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>userid</th>
+          <th>username</th>
+          <th>email</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in results %}
+          <tr typeof="User">
+            {% set user_url = request.route_url('activity.user_search', username=user.username) %}
+            <td property="userid">
+              <a href="{{ user_url }}">
+                {{ user.userid }}
+              </a>
+            </td>
+            <td>{{ user.username }}</td>
+            <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+            <td>
+              <span class="test-TestAdminGroupRead__remove-member">
+                {{ remove_member_form(group, user.userid).render() }}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "h:templates/includes/paginator.html.jinja2" %}
+  <footer class="form-footer">
+    {# This form has at least one required field. If that changes we should update this footer. #}
+    <span class="form-footer__required">
+      <span class="form-footer__symbol">
+      *
+      </span>
+      <span class="form-footer__text">
+        Required
+      </span>
+    </span>
+  </footer>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'groups_create' %}
+{% set page_title = 'Create a new group' %}
+
+{% block content %}
+  <p>
+    On this page you can create a new group
+  </p>
+
+  {{ form }}
+
+  <footer class="form-footer">
+    {# This form has at least one required field. If that changes we should update this footer. #}
+    <span class="form-footer__required">
+      <span class="form-footer__symbol">
+      *
+      </span>
+      <span class="form-footer__text">
+        Required
+      </span>
+    </span>
+  </footer>
+{% endblock %}

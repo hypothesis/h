@@ -31,3 +31,19 @@ body {
 .pager .pager__item--more {
   border: none;
 }
+
+.admin-form__form {
+  & .form-input__error-list {
+    list-style-type: none;
+  }
+}
+
+.admin-group-remove-member-form__form {
+  & .form-actions {
+    margin: 0;
+
+    & .u-stretch {
+      flex-grow: unset;
+    }
+  }
+}

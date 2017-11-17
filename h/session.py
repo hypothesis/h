@@ -87,9 +87,26 @@ def _current_groups(request, authority):
     authority_groups = (request.find_service(name='authority_group')
                         .public_groups(authority=authority))
 
-    groups = authority_groups + _user_groups(user)
+    groups = _deduplicate(
+        authority_groups + _user_groups(user), lambda g: g.pubid)
 
     return [_group_model(request.route_url, group) for group in groups]
+
+
+def _deduplicate(items, get_key=lambda x: x):
+    """
+    Given a list of items, return another list that has duplicates removed.
+    Where 'duplicate' means the same return value of get_key(item).
+    """
+    seen_keys = []
+    unique = []
+    for item in items:
+        key = get_key(item)
+        if key in seen_keys:
+            continue
+        unique.append(item)
+        seen_keys.append(key)
+    return unique
 
 
 def _user_groups(user):
