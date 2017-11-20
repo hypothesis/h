@@ -4,6 +4,7 @@ import deform
 from pyramid import httpexceptions
 from pyramid import security
 from pyramid.config import not_
+from pyramid.exceptions import HTTPNotFound
 from pyramid.view import view_config, view_defaults
 
 from h import form
@@ -130,6 +131,8 @@ def read_unauthenticated(group, request):
              decorator=cors_policy)
 def read_unauthenticated_json(group, request):
     """If the end-user wants json, redirect to the API"""
+    if not group:
+        raise HTTPNotFound()
     url = request.route_path('api.group_read',
                              pubid=group.pubid,
                              slug=group.slug)
@@ -155,4 +158,4 @@ def check_slug(group, request):
     if slug is None or slug != group.slug:
         path = request.route_path(
             'group_read', pubid=group.pubid, slug=group.slug)
-        return httpexceptions.HTTPMovedPermanently(path)
+        raise httpexceptions.HTTPMovedPermanently(path)

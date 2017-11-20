@@ -54,7 +54,8 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert group_service.created == [('my_new_group', 'example.com', 'ariadna', 'foobar')]
+        assert group_service.created == [
+            ('my_new_group', 'example.com', 'ariadna', 'foobar')]
 
     def test_post_redirects_if_form_valid(self,
                                           controller,
@@ -92,7 +93,8 @@ class TestGroupCreateController(object):
             return on_failure()
         handle_form_submission.side_effect = return_on_failure
 
-        assert controller.post() == {'form': controller.form.render.return_value}
+        assert controller.post() == {
+            'form': controller.form.render.return_value}
 
     @pytest.fixture
     def controller(self, pyramid_request):
@@ -171,6 +173,20 @@ class TestGroupReadUnauthenticated(object):
         with pytest.raises(HTTPNotFound):
             views.read_unauthenticated(group, pyramid_request)
 
+    def test_json_request_redirects_to_api(self, pyramid_request):
+        """
+        Requesting JSON from a Group URL will redirect to the API to return documented JSON format.
+        The client will request this when fetching page-configured groups (which are configured by URL)
+        """
+        group = FakeGroup('abc123', 'some-slug')
+        pyramid_request.matchdict['slug'] = 'some-slug'
+        pyramid_request.headers['accept'] = 'application/json'
+
+        result = views.read_unauthenticated_json(group, pyramid_request)
+        assert result.status_code == 303
+        assert result.location == '/api/groups/{}/{}'.format(
+            group.pubid, group.slug)
+
 
 @pytest.mark.usefixtures('routes')
 def test_read_noslug_redirects(pyramid_request):
@@ -238,3 +254,7 @@ def group_service(pyramid_config):
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('group_read', '/g/{pubid}/{slug}')
+    pyramid_config.add_route('api.group_read',
+                             '/api/groups/{pubid}/{slug:[^/]*}',
+                             factory='h.models.group:GroupFactory',
+                             traverse='/{pubid}')
