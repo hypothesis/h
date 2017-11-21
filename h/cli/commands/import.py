@@ -7,9 +7,8 @@ from h.schemas.annotation_import import AnnotationImportSchema
 
 
 @click.command('import')
-@click.pass_context
 @click.argument('annotation_file', type=click.File('rb'))
-def import_annotations(ctx, annotation_file):
+def import_annotations(annotation_file):
 
     with annotation_file:
         raw_annotations = json.load(annotation_file)
