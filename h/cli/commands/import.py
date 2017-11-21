@@ -5,8 +5,6 @@ import json
 
 from h.schemas.annotation_import import AnnotationImportSchema
 
-# from h import models
-
 
 @click.command('import')
 @click.pass_context
