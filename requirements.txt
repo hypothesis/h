@@ -30,6 +30,7 @@ greenlet==0.4.10          # via gevent
 gunicorn==19.6.0
 html5lib==0.999999999     # via bleach
 idna==2.5                 # via cryptography
+ipaddress==1.0.18         # via cryptography
 iso8601==0.1.11           # via colander
 itsdangerous==0.24
 jinja2==2.8               # via deform-jinja2, pyramid-jinja2
