@@ -37,6 +37,9 @@ def import_annotations(annotation_file):
     profile = requests.get(profile_url, headers=auth_headers).json()
 
     err_echo('Importing as {}'.format(profile['userid']))
+
+    create_annotation_url = api_index['links']['annotation']['create']['url']
+
     with annotation_file:
         raw_annotations = json.load(annotation_file)
 
@@ -67,3 +70,10 @@ def import_annotations(annotation_file):
 
     for annotation in top_level:
         err_echo(json.dumps(top_level_payload(annotation), indent=2))
+        create_response = requests.post(create_annotation_url,
+                                        json=top_level_payload(annotation),
+                                        headers=auth_headers)
+        if not create_response.ok:
+            err_reason = create_response.json().get('reason')
+            err_echo('Could not create {}. Error: {}'.format(annotation['id'], err_reason))
+            raise click.Abort()
