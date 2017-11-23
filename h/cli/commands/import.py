@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import click
 import json
+
+import click
 
 from h.schemas.annotation_import import AnnotationImportSchema
 
