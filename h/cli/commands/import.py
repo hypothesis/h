@@ -4,6 +4,7 @@ from os import getenv
 import json
 
 import click
+import requests
 
 from h.schemas.annotation_import import AnnotationImportSchema
 
@@ -23,7 +24,19 @@ def required_envvar(envvar):
 @click.argument('annotation_file', type=click.File('rb'))
 def import_annotations(annotation_file):
 
+    token = required_envvar('H_API_TOKEN')
+    api_root = required_envvar('H_API_ROOT')
     group_id = required_envvar('H_GROUP')
+
+    auth_headers = {'Authorization': 'Bearer {}'.format(token)}
+
+    api_index = requests.get(api_root).json()
+
+    profile_url = api_index['links']['profile']['read']['url']
+
+    profile = requests.get(profile_url, headers=auth_headers).json()
+
+    err_echo('Importing as {}'.format(profile['userid']))
     with annotation_file:
         raw_annotations = json.load(annotation_file)
 
