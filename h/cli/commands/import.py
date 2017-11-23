@@ -59,6 +59,7 @@ def import_annotations(annotation_file):
 
     def top_level_payload(annotation):
         return {
+                'imported_id': annotation['id'],
                 'group': group_id,
                 'permissions': shared_permissions,
                 'references': [],
