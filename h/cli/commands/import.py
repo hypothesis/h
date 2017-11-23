@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from os import getenv
 import json
 
 import click
@@ -11,10 +12,18 @@ def err_echo(message):
     click.echo(message, err=True)
 
 
+def required_envvar(envvar):
+    result = getenv(envvar)
+    if not result:
+        raise click.ClickException('The {} environment variable is required'.format(envvar))
+    return result
+
+
 @click.command('import')
 @click.argument('annotation_file', type=click.File('rb'))
 def import_annotations(annotation_file):
 
+    group_id = required_envvar('H_GROUP')
     with annotation_file:
         raw_annotations = json.load(annotation_file)
 
@@ -25,7 +34,6 @@ def import_annotations(annotation_file):
 
     top_level = [a for a in validated_annotations if a['motivation'] == 'commenting']
     replies = [a for a in validated_annotations if a['motivation'] == 'replying']
-    group_id = 'foobangwibble'
     err_echo('{} top-level annotations'.format(len(top_level)))
     err_echo('{} replies'.format(len(replies)))
 
