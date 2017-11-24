@@ -2,6 +2,7 @@
 
 from os import getenv
 import json
+from collections import namedtuple
 
 import click
 import requests
@@ -55,33 +56,79 @@ def import_annotations(annotation_file):
     err_echo('{} top-level annotations'.format(len(top_level)))
     err_echo('{} replies'.format(len(replies)))
 
-    shared_permissions = {
-            'read': ['group:{}'.format(group_id)],
-    }
+    child_map = {annotation['id']: [] for annotation in validated_annotations}
+    for reply in replies:
+        child_map[reply['target']].append(reply)
 
-    def top_level_payload(annotation):
+    def build_tree(root, override_uri=None):
+        """Recursively build a tree of Annotation objects.
+
+        Because we need to assign every reply to have the same target URI as its parent, we need to
+        pass the `override_uri` parameter down to subsequent invocations of this function.
+
+        This function pulls in two values from its containing scope: `child_map` and `group_id`.
+
+        """
+        uri = override_uri or root['target']
+        return Annotation(id=root['id'],
+                          group_id=group_id,
+                          text=root['body'][0]['value'],
+                          uri=uri,
+                          children=[build_tree(c, uri) for c in child_map[root['id']]])
+
+    annotation_trees = [build_tree(root) for root in top_level]
+
+    for tree_root in annotation_trees:
+        process_tree(create_annotation_url, auth_headers, tree_root, references=[], debug=debug)
+
+
+class Annotation(namedtuple('Annotation', ['id', 'group_id', 'text', 'uri', 'children'])):
+    """An individual annotation for import.
+
+    This class has two purposes: to define how the annotation serialises into an API payload, and to
+    track any annotations that directly reference this one. This lets us feed the ID of the
+    generated annotation into the `references` fields of its children.
+
+    """
+
+    def payload(self, references):
+        permissions = {
+                'read': ['group:{}'.format(self.group_id)],
+        }
         return {
-                'imported_id': annotation['id'],
-                'group': group_id,
-                'permissions': shared_permissions,
-                'references': [],
+                'imported_id': self.id,
+                'group': self.group_id,
+                'permissions': permissions,
+                'references': references,
                 'tags': [],
                 'target': [],
-                'text': annotation['body'][0]['value'],
-                'uri': annotation['target'],
+                'text': self.text,
+                'uri': self.uri,
         }
 
-    for annotation in top_level:
-        if debug:
-            err_echo(json.dumps(top_level_payload(annotation), indent=2))
-        create_response = requests.post(create_annotation_url,
-                                        json=top_level_payload(annotation),
-                                        headers=auth_headers)
-        if not create_response.ok:
-            err_reason = create_response.json().get('reason')
-            err_echo('Could not create {}. Error: {}'.format(annotation['id'], err_reason))
-            raise click.Abort()
-        if debug:
-            err_echo(json.dumps(create_response.json(), indent=2))
 
-        click.echo('{} {}'.format(annotation['id'], create_response.json()['id']))
+def process_tree(create_annotation_url, auth_headers, root, references, debug=False):
+    """Recursively process a tree of Annotation objects."""
+    created_id = created_annotation_id(create_annotation_url, auth_headers, root, references, debug)
+    click.echo('{} {}'.format(root.id, created_id))
+    for child in root.children:
+        process_tree(create_annotation_url, auth_headers, child, references + [created_id], debug)
+
+
+def created_annotation_id(create_annotation_url, auth_headers, annotation, references, debug=False):
+    """Create an annotation through the API and return the ID assigned."""
+    payload = annotation.payload(references)
+
+    if debug:
+        err_echo(json.dumps(payload, indent=2))
+
+    create_response = requests.post(create_annotation_url, json=payload, headers=auth_headers)
+
+    if not create_response.ok:
+        err_reason = create_response.json().get('reason')
+        err_echo('Could not create {}. Error: {}'.format(annotation['id'], err_reason))
+        raise click.Abort()
+    if debug:
+        err_echo(json.dumps(create_response.json(), indent=2))
+
+    return create_response.json()['id']
