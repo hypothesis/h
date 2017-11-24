@@ -37,7 +37,9 @@ python-dateutil
 python-slugify < 1.2.0
 raven
 requests-aws4auth >= 0.9
+rfc3987
 statsd
+strict-rfc3339
 transaction
 venusian
 wsaccel
