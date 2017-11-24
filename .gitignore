@@ -4,6 +4,9 @@ dist/
 docs/_build/
 node_modules/
 
+# Pyramid debug mailer
+mail/
+
 # py.test state cache
 .cache/
 .coverage
