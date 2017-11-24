@@ -83,3 +83,5 @@ def import_annotations(annotation_file):
             raise click.Abort()
         if debug:
             err_echo(json.dumps(create_response.json(), indent=2))
+
+        click.echo('{} {}'.format(annotation['id'], create_response.json()['id']))
