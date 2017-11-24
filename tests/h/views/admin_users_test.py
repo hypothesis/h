@@ -9,6 +9,7 @@ from mock import call
 from pyramid import httpexceptions
 import pytest
 
+from h.events import AnnotationEvent
 from h.services.annotation_stats import AnnotationStatsService
 from h.services.user import UserService
 from h.models import Annotation
@@ -157,7 +158,7 @@ def test_users_activate_flashes_success(pyramid_request):
 
 
 @users_activate_fixtures
-def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyramid_request):
+def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyramid_request): # noqa N803
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
     users_activate(pyramid_request)
@@ -167,7 +168,7 @@ def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyr
 
 
 @users_activate_fixtures
-def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request):
+def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request): # noqa N802
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
     users_activate(pyramid_request)
@@ -223,8 +224,8 @@ def test_users_delete_group_creator_error(user_service, fake_delete_user, pyrami
         'group creator error'
     ]
 
+
 delete_user_fixtures = pytest.mark.usefixtures('api_storage',
-                                               'elasticsearch_helpers',
                                                'models',
                                                'user_created_no_groups')
 
@@ -240,9 +241,9 @@ def test_delete_user_raises_when_group_creator(models, pyramid_request):
 
 
 @delete_user_fixtures
-def test_delete_user_disassociate_group_memberships(fake_db_session, pyramid_request):
-    pyramid_request.db = fake_db_session
-    user = Mock(groups=[Mock()])
+def test_delete_user_disassociate_group_memberships(db_session, factories, pyramid_request):
+    pyramid_request.db = db_session
+    user = factories.User()
 
     delete_user(pyramid_request, user)
 
@@ -250,55 +251,47 @@ def test_delete_user_disassociate_group_memberships(fake_db_session, pyramid_req
 
 
 @delete_user_fixtures
-def test_delete_user_queries_annotations(elasticsearch_helpers, factories, fake_db_session, pyramid_request):
-    pyramid_request.db = fake_db_session
-    user = factories.User(username=u'bob')
+def test_delete_user_deletes_annotations(api_storage, db_session, factories, pyramid_request):
+    pyramid_request.db = db_session
+    user = factories.User(username='bob')
+    anns = [factories.Annotation(userid=user.userid),
+            factories.Annotation(userid=user.userid)]
 
     delete_user(pyramid_request, user)
 
-    elasticsearch_helpers.scan.assert_called_once_with(
-        client=pyramid_request.es.conn,
-        query={
-            'query': {
-                'filtered': {
-                    'filter': {'term': {'user': u'acct:bob@example.com'}},
-                    'query': {'match_all': {}}
-                }
-            }
-        }
-    )
+    api_storage.delete_annotation.assert_has_calls([
+        call(pyramid_request.db, anns[0].id),
+        call(pyramid_request.db, anns[1].id),
+    ], any_order=True)
 
 
 @delete_user_fixtures
-def test_delete_user_deletes_annotations(api_storage, elasticsearch_helpers, fake_db_session, pyramid_request):
-    pyramid_request.db = fake_db_session
-    user = MagicMock()
-    annotation_1 = {'_id': 'annotation-1'}
-    annotation_2 = {'_id': 'annotation-2'}
-
-    elasticsearch_helpers.scan.return_value = [annotation_1, annotation_2]
+def test_delete_user_publishes_event(api_storage, db_session, factories, matchers, pyramid_request):
+    pyramid_request.db = db_session
+    user = factories.User()
+    ann = factories.Annotation(userid=user.userid)
 
     delete_user(pyramid_request, user)
 
-    assert api_storage.delete_annotation.mock_calls == [
-        call(pyramid_request.db, 'annotation-1'),
-        call(pyramid_request.db, 'annotation-2')
-    ]
+    expected_event = AnnotationEvent(pyramid_request, ann.id, 'delete')
+    actual_event = pyramid_request.notify_after_commit.call_args[0][0]
+    assert (expected_event.request, expected_event.annotation_id, expected_event.action) == \
+           (actual_event.request, actual_event.annotation_id, actual_event.action)
 
 
 @delete_user_fixtures
-def test_delete_user_deletes_user(fake_db_session, pyramid_request):
-    pyramid_request.db = fake_db_session
-    user = MagicMock()
+def test_delete_user_deletes_user(db_session, factories, pyramid_request):
+    pyramid_request.db = db_session
+    user = factories.User()
 
     delete_user(pyramid_request, user)
 
-    assert user in pyramid_request.db.deleted
+    assert user in db_session.deleted
 
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
-    pyramid_request.es = mock.MagicMock()
+    pyramid_request.notify_after_commit = mock.Mock()
     return pyramid_request
 
 
@@ -308,7 +301,7 @@ def routes(pyramid_config):
 
 
 @pytest.fixture
-def ActivationEvent(patch):
+def ActivationEvent(patch):  # noqa N802
     return patch('h.views.admin_users.ActivationEvent')
 
 
@@ -320,11 +313,6 @@ def api_storage(patch):
 @pytest.fixture
 def fake_delete_user(patch):
     return patch('h.views.admin_users.delete_user')
-
-
-@pytest.fixture
-def elasticsearch_helpers(patch):
-    return patch('h.views.admin_users.es_helpers')
 
 
 @pytest.fixture

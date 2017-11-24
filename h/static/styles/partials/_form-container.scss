@@ -1,0 +1,24 @@
+// A container for forms that are centered on a page.
+// Used for pages whose primary purpose is to display a form.
+// ---------------------------------------------------------
+
+@at-root {
+  $h-padding: 15px;
+  .form-container {
+    margin-left: auto;
+    margin-right: auto;
+
+    // Max width of form fields should be 500px. It is set to 530px here to
+    // account for the padding
+    max-width: 530px;
+
+    // Account form padding is set to align left edge of form with left edge of
+    // masthead
+    padding-left: $h-padding;
+    padding-right: $h-padding;
+  }
+
+  .form-container--popup {
+    max-width: #{340px + ($h-padding * 2)};
+  }
+}

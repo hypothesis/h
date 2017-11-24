@@ -102,13 +102,13 @@ def includeme(config):
                      traverse='/{pubid}')
     config.add_route('api.search', '/api/search')
     config.add_route('api.users', '/api/users')
+    config.add_route('api.user', '/api/users/{username}')
     config.add_route('badge', '/api/badge')
     config.add_route('token', '/api/token')
     config.add_route('oauth_authorize', '/oauth/authorize')
     config.add_route('oauth_revoke', '/oauth/revoke')
 
     # Client
-    config.add_route('session', '/app')
     config.add_route('sidebar_app', '/app.html')
     config.add_route('embed', '/embed.js')
 

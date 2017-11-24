@@ -85,19 +85,21 @@ def fetch_ordered_annotations(session, ids, query_processor=None):
 
 def create_annotation(request, data, group_service):
     """
-    Create an annotation from passed data.
+    Create an annotation from already-validated data.
 
     :param request: the request object
     :type request: pyramid.request.Request
 
-    :param data: a dictionary of annotation properties
+    :param data: an annotation data dict that has already been validated by
+        :py:class:`h.schemas.annotation.CreateAnnotationSchema`
     :type data: dict
 
-    :param group_service: a service object that adheres to ``h.interfaces.IGroupService``
-    :type group_service: h.interfaces.IGroupService
+    :param group_service: a service object that implements
+        :py:class:`h.interfaces.IGroupService`
+    :type group_service: :py:class:`h.interfaces.IGroupService`
 
     :returns: the created and flushed annotation
-    :rtype: dict
+    :rtype: :py:class:`h.models.Annotation`
     """
     created = updated = datetime.utcnow()
 

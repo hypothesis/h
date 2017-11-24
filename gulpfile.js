@@ -94,10 +94,6 @@ var bundles = [{
   name: 'admin-site',
   entry: './h/static/scripts/admin-site',
 },{
-  // Legacy site bundle (for old homepage)
-  name: 'legacy-site',
-  entry: './h/static/scripts/legacy-site',
-},{
   // Header script inserted inline at the top of the page
   name: 'header',
   entry: './h/static/scripts/header',
@@ -131,14 +127,6 @@ function rewriteCSSURL(url) {
 
 gulp.task('build-vendor-css', function () {
   var vendorCSSFiles = [
-    // `front-page.css` is a pre-built bundle of legacy CSS used by the home
-    // page
-    './h/static/styles/front-page.css',
-
-    // `legacy-site.css` is a pre-built bundle of legacy CSS used by the
-    // login and account settings pages
-    './h/static/styles/legacy-site.css',
-
     // Icon font
     './h/static/styles/vendor/icomoon.css',
     './node_modules/bootstrap/dist/css/bootstrap.css',
@@ -158,7 +146,6 @@ var styleBundleEntryFiles = [
   './h/static/styles/admin.scss',
   './h/static/styles/help-page.scss',
   './h/static/styles/site.scss',
-  './h/static/styles/old-home.scss',
 ];
 
 function buildStyleBundle(entryFile, options) {

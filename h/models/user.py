@@ -15,6 +15,7 @@ USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
 USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
 EMAIL_MAX_LENGTH = 100
+DISPLAY_NAME_MAX_LENGTH = 30
 
 
 def _normalise_username(username):
@@ -102,6 +103,23 @@ class UserIDComparator(Comparator):
                 other = sa.tuple_(_normalise_username(val['username']),
                                   val['domain'])
         return self.__clause_element__() == other
+
+    def in_(self, userids):
+        others = []
+        for userid in userids:
+            try:
+                val = split_user(userid)
+            except ValueError:
+                continue
+
+            other = sa.tuple_(_normalise_username(val['username']),
+                              val['domain'])
+            others.append(other)
+
+        if not others:
+            return False
+
+        return self.__clause_element__().in_(others)
 
 
 class UserFactory(object):

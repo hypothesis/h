@@ -14,9 +14,6 @@ import time
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
-from h import session as h_session
-from h.auth.tokens import generate_jwt
-from h.util.view import json_view
 from h import __version__
 
 # Default URL for the client, which points to the latest version of the client
@@ -54,21 +51,13 @@ def sidebar_app(request, extra=None):
     app_config = {
         'apiUrl': request.route_url('api.index'),
         'authDomain': request.authority,
-
-        # OAuth config.
         'oauthClientId': settings.get('h.client_oauth_id'),
-
-        # The OAuth feature flag is included as part of the `app.html` config
-        # rather than being delivered via the "features" key in /api/profile so
-        # that it is available as soon as the client starts before
-        # API tokens are fetched.
-        #
-        # TODO - This should be removed once OAuth for first-party accounts is
-        #        shipped.
-        'oauthEnabled': request.feature('client_oauth'),
-
         'release': __version__,
         'serviceUrl': request.route_url('index'),
+
+        # The list of origins that the client will respond to cross-origin RPC
+        # requests from.
+        'rpcAllowedOrigins': settings.get('h.client_rpc_allowed_origins'),
     }
 
     if websocket_url:
@@ -100,22 +89,6 @@ def sidebar_app(request, extra=None):
     return ctx
 
 
-# This view requires credentials (a cookie) so is not currently accessible
-# off-origin, unlike the rest of the API. Given that this method of
-# authenticating to the API is not intended to remain, this seems like a
-# limitation we do not need to lift any time soon.
-@view_config(route_name='token', renderer='string', request_method='GET')
-def annotator_token(request):
-    """
-    Return a JWT access token for the given request.
-
-    The token can be used in the Authorization header in subsequent requests to
-    the API to authenticate the user identified by the
-    request.authenticated_userid of the _current_ request, which may be None.
-    """
-    return generate_jwt(request, 3600)
-
-
 @view_config(route_name='embed',
              http_cache=(60 * 5, {'public': True}))
 def embed_redirect(request):
@@ -126,10 +99,3 @@ def embed_redirect(request):
     client, typically hosted on a CDN.
     """
     return HTTPFound(_client_url(request))
-
-
-@json_view(route_name='session', http_cache=0)
-def session_view(request):
-    flash = h_session.pop_flash(request)
-    model = h_session.model(request)
-    return dict(status='okay', flash=flash, model=model)

@@ -1,5 +1,0 @@
-include AUTHORS CHANGES CODE_OF_CONDUCT LICENSE NOTICE
-include *.rst
-graft src
-global-exclude __pycache__
-global-exclude *.py[co]

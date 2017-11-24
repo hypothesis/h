@@ -24,8 +24,13 @@ sub, sup {
   position: relative;
 }
 
-sup {top: -.5em;}
-sub {bottom: -.25em;}
+sup {
+  top: -.5em;
+}
+
+sub {
+  bottom: -.25em;
+}
 
 pre {
   white-space: pre;
@@ -33,8 +38,13 @@ pre {
   word-wrap: break-word;
 }
 
-b, strong {font-weight: bold;}
-abbr[title] {border-bottom: 1px dotted;}
+b, strong {
+  font-weight: bold;
+}
+
+abbr[title] {
+  border-bottom: 1px dotted;
+}
 
 a img, img {
   -ms-interpolation-mode: bicubic;
@@ -54,7 +64,9 @@ input[type="submit"] {
   -webkit-appearance: button;
 }
 
-textarea {overflow: auto;}
+textarea {
+  overflow: auto;
+}
 
 img::selection,
 img::-moz-selection {

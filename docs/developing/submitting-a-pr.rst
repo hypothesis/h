@@ -1,5 +1,5 @@
 Submitting a Pull Request
-#########################
+=========================
 
 To submit code or documentation to h you should submit a pull request.
 
@@ -52,9 +52,6 @@ Some things to remember when submitting or reviewing a pull request:
   have any harness set up yet.
 
   For how to run the tests, see :ref:`running-the-tests`.
-
-- Your pull request should add a line to the :doc:`changelog </CHANGES>`
-  briefly describing the change and giving its GitHub pull request number.
 
 .. _docstrings: http://legacy.python.org/dev/peps/pep-0257/
 .. _ngdoc: https://github.com/angular/angular.js/wiki/Writing-AngularJS-Documentation

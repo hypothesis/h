@@ -41,7 +41,7 @@ class TestNipsaAddRemove(object):
 
         assert users['carl'] in nipsa_service.flagged
 
-    @pytest.mark.parametrize('user', ['', 'donkeys', '\x00'])
+    @pytest.mark.parametrize('user', ['', 'donkeys'])
     def test_add_raises_when_user_not_found(self, user, nipsa_service, pyramid_request):
         pyramid_request.params = {"add": user, "authority": "example.com"}
 

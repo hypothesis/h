@@ -97,9 +97,12 @@ class AuthController(object):
 
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
+
+        show_cancel_button = bool(request.params.get('for_oauth', False))
         self.form = request.create_form(self.schema,
                                         buttons=(_('Log in'),),
-                                        footer=form_footer)
+                                        footer=form_footer,
+                                        show_cancel_button=show_cancel_button)
 
         self.logout_redirect = self.request.route_url('index')
 
@@ -114,6 +117,9 @@ class AuthController(object):
         return {'form': self.form.render()}
 
     @view_config(request_method='POST')
+    @view_config(request_method='POST',
+                 request_param='for_oauth',
+                 renderer='h:templates/accounts/login_oauth.html.jinja2')
     def post(self):
         """Log the user in and redirect them."""
         self._redirect_if_logged_in()
@@ -156,49 +162,6 @@ class AuthController(object):
             self.request.session.invalidate()
         headers = security.forget(self.request)
         return headers
-
-
-@view_defaults(route_name='session',
-               accept='application/json',
-               renderer='json')
-class AjaxAuthController(AuthController):
-
-    def __init__(self, request):
-        self.request = request
-        self.schema = schemas.LoginSchema().bind(request=self.request)
-        self.form = request.create_form(self.schema)
-
-    @view_config(request_param='__formid__=login')
-    def login(self):
-        try:
-            json_body = self.request.json_body
-        except ValueError as exc:
-            raise accounts.JSONError(
-                _('Could not parse request body as JSON: {message}'.format(
-                    message=exc.message)))
-
-        if not isinstance(json_body, dict):
-            raise accounts.JSONError(
-                _('Request JSON body must have a top-level object'))
-
-        # Transform non-string usernames and password into strings.
-        # Deform crashes otherwise.
-        json_body['username'] = unicode(json_body.get('username') or '')
-        json_body['password'] = unicode(json_body.get('password') or '')
-
-        appstruct = self.form.validate(json_body.items())
-
-        user = appstruct['user']
-        headers = self._login(user)
-        self.request.response.headers.extend(headers)
-
-        return ajax_payload(self.request, {'status': 'okay'})
-
-    @view_config(request_param='__formid__=logout')
-    def logout(self):
-        headers = self._logout()
-        self.request.response.headers.extend(headers)
-        return ajax_payload(self.request, {'status': 'okay'})
 
 
 @view_defaults(route_name='forgot_password',

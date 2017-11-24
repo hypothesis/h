@@ -367,7 +367,6 @@ class TestDebugToken(object):
 
     @pytest.fixture
     def token_service(self, pyramid_config, pyramid_request):
-        pyramid_config.registry.settings['h.client_secret'] = 'notsosecretafterall'
         svc = mock.Mock(spec_set=auth_token_service_factory(None, pyramid_request))
         pyramid_config.register_service(svc, name='auth_token')
         return svc

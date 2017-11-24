@@ -1,27 +1,46 @@
-$base-font-size: 16px;
-$base-line-height: 22px;
-
 @import 'partials/base';
 @import 'partials/reset';
-@import 'partials/forms';
-@import 'partials/grid';
 @import 'partials/elements';
 
-@import 'partials/styled-text';
+// Components
+@import 'partials/masthead';
 
-// FIXME: unify this partial and this entrypoint
-@import 'partials/help-page';
+// Help page specific element styles
+a {
+  color: $brand;
+}
 
-body {
-  background: #fff;
+// Help-page components
+
+.columns {
+  display: flex;
+  flex-direction: row;
+}
+
+.columns__col-1-2 {
+  flex-shrink: 1;
+  width: 50%;
+
+  margin-left: 20px;
+  &:first-child {
+    margin-left: 0;
+  }
+}
+
+.styled-text {
+  @include styled-text;
 }
 
 .help-page {
   padding-top: 2.5em;
   padding-bottom: 2.5em;
-  background: $body-background;
-  font-family: 'Lato', sans-serif !important;
+
+  background: white;
+  color: $grey-6;
+
+  font-family: 'Lato', $sans-font-family;
   font-weight: 300;
+  line-height: 22px;
 
   @include breakpoint(920px) {
     padding-right: 460px;
@@ -48,7 +67,7 @@ body {
 }
 
 .help-page-heading {
-  color: $gray-darker;
+  color: $grey-6;
   margin-bottom: 1em;
   font-weight: 400;
   font-size: 1.1em;
@@ -78,7 +97,7 @@ body {
   display: block;
 
   @include breakpoint(920px) {
-    border: $gray-lighter dotted 2px;
+    border: $grey-3 dotted 2px;
     border-radius: 3px;
   }
 }
@@ -98,7 +117,7 @@ body {
   top: 60px;
   right: 60px;
   width: 210px;
-  color: $gray-light;
+  color: $grey-4;
   text-align: right;
 
   @include icons {
@@ -136,7 +155,7 @@ body {
     left: 0;
     width: 2.125em;
     height: 1.8125em;
-    border: .125em solid $brand-color;
+    border: .125em solid $brand;
     border-radius: 50%;
     text-align: center;
     padding-top: .3125em; // 24px == Line height of text.
@@ -148,7 +167,7 @@ body {
 }
 
 .feature-heading {
-  color: $gray-darker;
+  color: $grey-6;
   font-size: 1em;
   font-weight: 400;
   margin-bottom: .555em;
@@ -165,7 +184,7 @@ body {
 
 .bookmarklet {
   white-space: nowrap;
-  color: $gray-darker;
+  color: $grey-6;
   padding: 2px 4px;
   border: 1px solid;
   border-radius: 2px;

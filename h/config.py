@@ -8,7 +8,7 @@ import logging
 import os
 
 from pyramid.config import Configurator
-from pyramid.settings import asbool
+from pyramid.settings import asbool, aslist
 
 from h.settings import (
     DeprecatedSetting,
@@ -71,17 +71,17 @@ SETTINGS = [
     EnvSetting('h.authority', 'AUTHORITY'),
     EnvSetting('h.bouncer_url', 'BOUNCER_URL'),
 
-    # ID and secret used for the issuer when signing JWT tokens for legacy API
-    # auth.
-    EnvSetting('h.client_id', 'CLIENT_ID'),
-    EnvSetting('h.client_secret', 'CLIENT_SECRET'),
-
     EnvSetting('h.client_url', 'CLIENT_URL'),
 
     # ID for the OAuth authclient that the embedded client should use when
     # making requests to OAuth endpoints. As a public client, it does not have a
     # secret.
     EnvSetting('h.client_oauth_id', 'CLIENT_OAUTH_ID'),
+
+    # The list of origins that the client will respond to cross-origin RPC
+    # requests from.
+    EnvSetting('h.client_rpc_allowed_origins',
+               'CLIENT_RPC_ALLOWED_ORIGINS', type=aslist),
 
     # Environment name, provided by the deployment environment. Please do
     # *not* toggle functionality based on this value. It is intended as a

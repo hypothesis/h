@@ -1,5 +1,5 @@
-The Hypothesis Real Time API
-============================
+Real Time API
+=============
 
 .. warning::
 

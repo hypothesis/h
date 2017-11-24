@@ -1,5 +1,5 @@
 Contributor License Agreement
-#############################
+=============================
 
 Before submitting significant contributions, we ask that you sign one of
 our Contributor License Agreements. This practice ensures that the

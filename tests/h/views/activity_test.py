@@ -401,18 +401,6 @@ class TestGroupSearchController(object):
 
         assert result['annotation_count'] == 5
 
-    def test_search_does_not_pass_annotation_count_to_the_template(self,
-                                                                   controller,
-                                                                   group,
-                                                                   pyramid_request):
-        """ It should not pass the annotation count to the view when the feature flag is turned off."""
-
-        pyramid_request.user = group.members[-1]
-        pyramid_request.feature.flags['total_shared_annotations'] = False
-        result = controller.search()['stats']
-
-        assert result['annotation_count'] is None
-
     @pytest.mark.parametrize('q', ['', '   '])
     def test_leave_removes_empty_query_from_url(self,
                                                 controller,
@@ -613,16 +601,6 @@ class TestUserSearchController(object):
 
         assert stats['annotation_count'] == 6
 
-    def test_search_does_not_pass_the_user_annotation_counts_to_the_template(self,
-                                                                             controller,
-                                                                             pyramid_request):
-        """ It should not pass the annotation counts to the view when the feature flag is turned off."""
-
-        pyramid_request.feature.flags['total_shared_annotations'] = False
-        result = controller.search()['stats']
-
-        assert result['annotation_count'] is None
-
     def test_search_passes_public_annotation_counts_to_the_template(self,
                                                                     controller,
                                                                     factories,
@@ -633,7 +611,6 @@ class TestUserSearchController(object):
         if the user whose page we are on is different from the authenticated user.
 
         """
-        pyramid_request.feature.flags['total_shared_annotations'] = True
         pyramid_config.testing_securitypolicy(factories.User().userid)
 
         stats = controller.search()['stats']

@@ -205,20 +205,52 @@ class TestProfile(object):
 
         assert profile['authority'] == third_party_domain
 
+    def test_user_info_authenticated(self, authenticated_request, patch):
+        profile = session.profile(authenticated_request)
+        user_info = profile['user_info']
+        assert user_info['display_name'] == authenticated_request.user.display_name
+
+    def test_user_info_authenticated_when_flag_off(self, authenticated_request):
+        authenticated_request.feature.flags['api_render_user_info'] = False
+        profile = session.profile(authenticated_request)
+        assert 'user_info' not in profile
+
+    def test_user_info_unauthenticated(self, unauthenticated_request):
+        profile = session.profile(unauthenticated_request)
+        assert 'user_info' not in profile
+
     @pytest.fixture
     def third_party_domain(self):
         return u'thirdparty.example.org'
 
     @pytest.fixture
-    def third_party_request(self, authority, third_party_domain, publisher_group):
+    def third_party_request(self, authority, third_party_domain, publisher_group, fake_feature):
         return FakeRequest(authority,
                            u'acct:user@{}'.format(third_party_domain),
                            third_party_domain,
-                           {third_party_domain: [publisher_group]})
+                           {third_party_domain: [publisher_group]},
+                           fake_feature)
 
     @pytest.fixture
     def publisher_group(self):
         return FakeGroup('abcdef', 'Publisher group', is_public=True)
+
+
+class TestUserInfo(object):
+    def test_returns_user_info_object(self, factories):
+        user = factories.User.build(display_name='Jane Doe')
+
+        result = session.user_info(user)
+        assert result == {'user_info': {'display_name': 'Jane Doe'}}
+
+    def test_allows_null_display_name(self, factories):
+        user = factories.User.build(display_name=None)
+
+        result = session.user_info(user)
+        assert result == {'user_info': {'display_name': None}}
+
+    def test_format_returns_empty_dict_when_user_missing(self):
+        assert session.user_info(None) == {}
 
 
 class FakeAuthorityGroupService(object):
@@ -232,7 +264,8 @@ class FakeAuthorityGroupService(object):
 
 class FakeRequest(object):
 
-    def __init__(self, authority, userid, user_authority, public_groups):
+    def __init__(self, authority, userid, user_authority, public_groups,
+                 fake_feature):
         self.authority = authority
         self.authenticated_userid = userid
 
@@ -241,7 +274,7 @@ class FakeRequest(object):
         else:
             self.user = mock.Mock(groups=[], authority=user_authority)
 
-        self.feature = mock.Mock(spec_set=['all'])
+        self.feature = fake_feature
         self.route_url = mock.Mock(return_value='/group/a')
         self.session = mock.Mock(get_csrf_token=lambda: '__CSRF__')
 
@@ -251,7 +284,7 @@ class FakeRequest(object):
         self.user.groups = groups
 
     def set_features(self, feature_dict):
-        self.feature.all.return_value = feature_dict
+        self.feature.flags = feature_dict
 
     def set_sidebar_tutorial_dismissed(self, dismissed):
         self.user.sidebar_tutorial_dismissed = dismissed
@@ -278,13 +311,15 @@ def world_group():
 
 
 @pytest.fixture
-def unauthenticated_request(authority, world_group):
-    return FakeRequest(authority, None, None, {authority: [world_group]})
+def unauthenticated_request(authority, world_group, fake_feature):
+    return FakeRequest(authority, None, None, {authority: [world_group]},
+                       fake_feature)
 
 
 @pytest.fixture
-def authenticated_request(authority, world_group):
+def authenticated_request(authority, world_group, fake_feature):
     return FakeRequest(authority,
                        u'acct:user@{}'.format(authority),
                        authority,
-                       {authority: [world_group]})
+                       {authority: [world_group]},
+                       fake_feature)

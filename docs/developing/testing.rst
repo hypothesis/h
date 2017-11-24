@@ -1,5 +1,5 @@
 Testing
-#######
+=======
 
 This section covers writing tests for the ``h`` codebase.
 

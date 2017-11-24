@@ -11,18 +11,6 @@ from h.views import client
 from h import __version__
 
 
-def test_annotator_token_calls_generate_jwt(generate_jwt, pyramid_request):
-    client.annotator_token(pyramid_request)
-
-    generate_jwt.assert_called_once_with(pyramid_request, 3600)
-
-
-def test_annotator_token_returns_token(generate_jwt, pyramid_request):
-    result = client.annotator_token(pyramid_request)
-
-    assert result == generate_jwt.return_value
-
-
 @pytest.mark.usefixtures('routes', 'pyramid_settings')
 class TestSidebarApp(object):
 
@@ -40,7 +28,7 @@ class TestSidebarApp(object):
                 'authDomain': 'example.com',
                 'googleAnalytics': 'UA-4567',
                 'oauthClientId': 'test-client-id',
-                'oauthEnabled': True,
+                'rpcAllowedOrigins': 'https://lti.hypothes.is',
                 }
 
         actual_config = json.loads(ctx['app_config'])
@@ -51,14 +39,6 @@ class TestSidebarApp(object):
         ctx = client.sidebar_app(pyramid_request)
 
         assert ctx['embed_url'] == '/embed.js'
-
-    def test_it_disables_oauth(self, pyramid_request):
-        pyramid_request.feature.flags['client_oauth'] = False
-
-        ctx = client.sidebar_app(pyramid_request)
-        cfg = json.loads(ctx['app_config'])
-
-        assert cfg['oauthEnabled'] is False
 
 
 @pytest.mark.usefixtures('routes', 'pyramid_settings')
@@ -88,6 +68,7 @@ def pyramid_settings(pyramid_settings):
         'h.client_oauth_id': 'test-client-id',
         'h.sentry_dsn_client': 'test-sentry-dsn',
         'h.websocket_url': 'wss://example.com/ws',
+        'h.client_rpc_allowed_origins': 'https://lti.hypothes.is',
         'authority': 'example.com'
         })
 
@@ -102,10 +83,3 @@ def routes(pyramid_config):
     pyramid_config.add_route('sidebar_app', '/app.html')
     pyramid_config.add_route('oauth_authorize', '/oauth/authorize')
     pyramid_config.add_route('oauth_revoke', '/oauth/revoke')
-
-
-@pytest.fixture
-def generate_jwt(patch):
-    func = patch('h.views.client.generate_jwt')
-    func.return_value = 'abc123'
-    return func

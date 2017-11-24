@@ -48,6 +48,9 @@ class DummyFeature(object):
     def __call__(self, name, *args, **kwargs):
         return self.flags.get(name, True)
 
+    def all(self):
+        return self.flags
+
     def load(self):
         self.loaded = True
 
