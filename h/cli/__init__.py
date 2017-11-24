@@ -18,6 +18,7 @@ SUBCOMMANDS = (
     'h.cli.commands.celery.celery',
     'h.cli.commands.devserver.devserver',
     'h.cli.commands.groups.groups',
+    'h.cli.commands.import.import_annotations',
     'h.cli.commands.init.init',
     'h.cli.commands.initdb.initdb',
     'h.cli.commands.migrate.migrate',
