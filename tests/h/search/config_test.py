@@ -18,6 +18,13 @@ from h.search.config import (
 )
 
 
+def test_authority_filter():
+    patterns = ANALYSIS_SETTINGS['filter']['authority']['patterns']
+    assert(captures(patterns, 'acct:mark@partner.org') == [
+        'partner.org'
+    ])
+
+
 def test_strip_scheme_char_filter():
     f = ANALYSIS_SETTINGS['char_filter']['strip_scheme']
     p = f['pattern']
