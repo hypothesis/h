@@ -11,8 +11,6 @@ from h.db import Base
 log = logging.getLogger(__name__)
 
 FEATURES = {
-    'client_oauth': ("Use OAuth for first party accounts in client? "
-                     "(Only takes effect if enabled for everyone)"),
     'embed_cachebuster': ("Cache-bust client entry point URL to prevent browser/CDN from "
                           "using a cached version?"),
     'filter_highlights': ("Filter highlights in document based on visible"
@@ -45,6 +43,8 @@ FEATURES = {
 #
 FEATURES_PENDING_REMOVAL = {
     'activity_pages': "Show the new activity pages?",
+    'client_oauth': ("Use OAuth for first party accounts in client? "
+                     "(Only takes effect if enabled for everyone)"),
     'defer_realtime_updates': ("Require a user action before applying real-time"
                                " updates to annotations in the client?"),
     'homepage_redirects': "Enable homepage redirects (for WordPress migration)?",

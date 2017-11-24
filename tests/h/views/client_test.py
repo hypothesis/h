@@ -28,7 +28,6 @@ class TestSidebarApp(object):
                 'authDomain': 'example.com',
                 'googleAnalytics': 'UA-4567',
                 'oauthClientId': 'test-client-id',
-                'oauthEnabled': True,
                 'rpcAllowedOrigins': 'https://lti.hypothes.is',
                 }
 
@@ -40,14 +39,6 @@ class TestSidebarApp(object):
         ctx = client.sidebar_app(pyramid_request)
 
         assert ctx['embed_url'] == '/embed.js'
-
-    def test_it_disables_oauth(self, pyramid_request):
-        pyramid_request.feature.flags['client_oauth'] = False
-
-        ctx = client.sidebar_app(pyramid_request)
-        cfg = json.loads(ctx['app_config'])
-
-        assert cfg['oauthEnabled'] is False
 
 
 @pytest.mark.usefixtures('routes', 'pyramid_settings')

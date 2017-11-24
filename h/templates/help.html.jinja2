@@ -19,17 +19,6 @@
     </script>
     <script async defer src="{{ embed_js_url }}"></script>
   {% endif %}
-  {#
-    Make the help page usable for testing OAuth login to the client
-    by visiting `/docs/help?__feature__[client_oauth]`.
-  #}
-  {% if request.feature('client_oauth') %}
-    <script type="application/json" class="js-hypothesis-config">
-    {
-      "oauthEnabled": true
-    }
-    </script>
-  {% endif %}
 {% endblock %}
 
 {% block content %}
