@@ -28,6 +28,8 @@ def import_annotations(annotation_file):
     api_root = required_envvar('H_API_ROOT')
     group_id = required_envvar('H_GROUP')
 
+    debug = bool(getenv('H_DEBUG'))
+
     auth_headers = {'Authorization': 'Bearer {}'.format(token)}
 
     api_index = requests.get(api_root).json()
@@ -70,7 +72,8 @@ def import_annotations(annotation_file):
         }
 
     for annotation in top_level:
-        err_echo(json.dumps(top_level_payload(annotation), indent=2))
+        if debug:
+            err_echo(json.dumps(top_level_payload(annotation), indent=2))
         create_response = requests.post(create_annotation_url,
                                         json=top_level_payload(annotation),
                                         headers=auth_headers)
@@ -78,3 +81,5 @@ def import_annotations(annotation_file):
             err_reason = create_response.json().get('reason')
             err_echo('Could not create {}. Error: {}'.format(annotation['id'], err_reason))
             raise click.Abort()
+        if debug:
+            err_echo(json.dumps(create_response.json(), indent=2))
