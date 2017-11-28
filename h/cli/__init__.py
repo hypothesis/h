@@ -14,6 +14,7 @@ from h import __version__
 log = logging.getLogger('h')
 
 SUBCOMMANDS = (
+    'h.cli.commands.annotation_id.annotation_id',
     'h.cli.commands.authclient.authclient',
     'h.cli.commands.celery.celery',
     'h.cli.commands.devserver.devserver',
