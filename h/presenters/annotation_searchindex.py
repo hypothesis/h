@@ -16,6 +16,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         docpresenter = DocumentSearchIndexPresenter(self.annotation.document)
 
         result = {
+            'authority': self.annotation.userid,
             'id': self.annotation.id,
             'created': self.created,
             'updated': self.updated,

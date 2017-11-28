@@ -34,6 +34,7 @@ class TestAnnotationSearchIndexPresenter(object):
         annotation_dict = AnnotationSearchIndexPresenter(annotation).asdict()
 
         assert annotation_dict == {
+            'authority': 'acct:luke@hypothes.is',
             'id': 'xyz123',
             'created': '2016-02-24T18:03:25.000768+00:00',
             'updated': '2016-02-29T10:24:05.000564+00:00',

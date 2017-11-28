@@ -24,6 +24,7 @@ ANNOTATION_MAPPING = {
     'analyzer': 'keyword',
     'properties': {
         'annotator_schema_version': {'type': 'string'},
+        'authority': {'type': 'string', 'index': 'analyzed', 'analyzer': 'authority'},
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
         'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
@@ -123,6 +124,11 @@ ANALYSIS_SETTINGS = {
         },
     },
     'filter': {
+        'authority': {
+            'type': 'pattern_capture',
+            'preserve_original': 'false',
+            'patterns': ['^acct:.*@(.+)$']
+        },
         'path_url': {
             'type': 'pattern_capture',
             'preserve_original': 'false',
@@ -148,6 +154,10 @@ ANALYSIS_SETTINGS = {
         }
     },
     'analyzer': {
+        'authority': {
+            'tokenizer': 'keyword',
+            'filter': ['authority'],
+        },
         'uri': {
             'tokenizer': 'keyword',
             'char_filter': ['strip_scheme'],
