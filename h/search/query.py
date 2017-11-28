@@ -107,6 +107,19 @@ class TopLevelAnnotationsFilter(object):
         return {'missing': {'field': 'references'}}
 
 
+class AuthorityFilter(object):
+
+    """
+    Match only annotations created by users belonging to a specific authority.
+    """
+
+    def __init__(self, authority):
+        self.authority = authority
+
+    def __call__(self, params):
+        return {'term': {'authority': self.authority}}
+
+
 class AuthFilter(object):
 
     """
