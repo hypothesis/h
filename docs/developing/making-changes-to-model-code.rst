@@ -41,7 +41,7 @@ We use `Alembic <https://alembic.readthedocs.io/en/latest/>`_ to create and run
 migration scripts. See the Alembic docs (and look at existing scripts in
 `h/migrations/versions <https://github.com/hypothesis/h/tree/master/h/migrations/versions>`_)
 for details. The ``hypothesis migrate`` command is a wrapper around Alembic. The
-basic steps to create a new migration script for h are:
+steps to create a new migration script for h are:
 
 1. Create the revision script by running ``bin/hypothesis migrate revision``, for example:
 

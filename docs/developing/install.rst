@@ -135,7 +135,7 @@ can be installed on:
 
    .. note::
 
-      If at any point you want to shut the containers down, you can simply
+      If at any point you want to shut the containers down, you can
       interrupt the ``docker-compose`` command. If you want to run the
       containers in the background, you can run ``docker-compose up -d``.
 
