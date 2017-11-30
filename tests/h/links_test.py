@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import mock
 import pytest
 
+from h import models
 from h import links
 
 
@@ -21,6 +23,39 @@ class FakeDocumentURI(object):
 class FakeDocument(object):
     def __init__(self):
         self.document_uris = []
+
+
+@pytest.mark.usefixtures('routes')
+class TestHTMLLink(object):
+
+    def test_html_link_returns_links_for_first_party_annotations(
+            self, annotation, pyramid_request):
+        # Specify the authority so that it's a first-party annotation.
+        annotation.authority = pyramid_request.authority
+
+        link = links.html_link(pyramid_request, annotation)
+
+        assert link == 'http://example.com/a/ANNOTATION_ID'
+
+    def test_html_link_returns_None_for_third_party_annotations(
+            self, annotation, pyramid_request):
+        # Specify the authority so that it's a third-party annotation.
+        annotation.authority = 'elifesciences.org'
+
+        assert links.html_link(pyramid_request, annotation) is None
+
+    @pytest.fixture
+    def annotation(self):
+        return mock.create_autospec(
+            models.Annotation,
+            spec_set=True,
+            instance=True,
+            id='ANNOTATION_ID',
+        )
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('annotation', '/a/{id}')
 
 
 def test_incontext_link(pyramid_request):
