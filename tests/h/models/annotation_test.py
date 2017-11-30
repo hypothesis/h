@@ -78,6 +78,18 @@ def test_text_setter_renders_markdown(markdown):
     annotation.text_rendered == markdown.render.return_value
 
 
+@pytest.mark.parametrize('userid,authority', [
+    ('acct:bmason@hypothes.is', 'hypothes.is'),
+    ('acct:kaylawatson@elifesciences.org', 'elifesciences.org'),
+])
+def test_authority(factories, userid, authority):
+    assert factories.Annotation(userid=userid).authority == authority
+
+
+def test_authority_when_annotation_has_no_userid():
+    assert Annotation().authority is None
+
+
 def test_setting_extras_inline_is_persisted(db_session, factories):
     """
     In-place changes to Annotation.extra should be persisted.
