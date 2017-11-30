@@ -250,6 +250,11 @@ class TestBuilder(object):
         }
 
 
+def test_authority_filter_adds_authority_term():
+    filter_ = query.AuthorityFilter(authority='partner.org')
+    assert filter_({}) == {'term': {'authority': 'partner.org'}}
+
+
 class TestAuthFilter(object):
     def test_unauthenticated(self):
         request = mock.Mock(authenticated_userid=None)
