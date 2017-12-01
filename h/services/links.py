@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 
 from pyramid.request import Request
 
+from h.auth import authority
+
 LINK_GENERATORS_KEY = 'h.links.link_generators'
 
 
@@ -45,6 +47,10 @@ class LinksService(object):
         # be used by link generators.
         self._request = Request.blank('/', base_url=base_url)
         self._request.registry = registry
+
+        # Allow retrieval of the authority from the fake request object, the
+        # same as we do for real requests.
+        self._request.set_property(authority, name='authority', reify=True)
 
     def get(self, annotation, name):
         """Get the link named `name` for the passed `annotation`."""

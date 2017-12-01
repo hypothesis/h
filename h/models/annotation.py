@@ -11,6 +11,7 @@ from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from h.db import Base, types
 from h.util import markdown, uri
+from h.util.user import split_user
 
 
 class Annotation(Base):
@@ -186,6 +187,23 @@ class Annotation(Base):
         else:
             return self.id
 
+    @property
+    def authority(self):
+        """
+        Return the authority of the user and group this annotation belongs to.
+
+        For example, returns "hypothes.is" for Hypothesis first-party
+        annotations, or "elifesciences.org" for eLife third-party annotations.
+
+        If this annotation doesn't have a userid (which is possible for
+        annotations that haven't been saved to the DB yet) then return None.
+
+        :raises ValueError: if the annotation's userid is invalid
+
+        """
+        if self.userid is None:
+            return None
+        return split_user(self.userid)['domain']
 
     def __repr__(self):
         return '<Annotation %s>' % self.id
