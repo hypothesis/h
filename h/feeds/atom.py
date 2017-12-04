@@ -32,11 +32,14 @@ def _feed_entry_from_annotation(
         "updated": _utc_iso8601_string(annotation.updated),
         "published": _utc_iso8601_string(annotation.created),
         "content": annotation.description,
-        "links": [
-            {"rel": "alternate", "type": "text/html",
-             "href": annotation_url(annotation.annotation)},
-        ]
+        "links": [],
     }
+
+    html_link = annotation_url(annotation.annotation)
+    if html_link:
+        entry["links"].append(
+            {"rel": "alternate", "type": "text/html", "href": html_link})
+
     if annotation_api_url:
         entry["links"].append(
             {"rel": "alternate", "type": "application/json",
