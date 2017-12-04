@@ -67,7 +67,7 @@ def render_rss(request, annotations, rss_url, html_url, title, description):
     """
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
-        return request.route_url('annotation', id=annotation.id)
+        return request.find_service(name='links').get(annotation, 'html')
 
     def annotation_api_url(annotation):
         """Return the JSON API URL for the given annotation."""

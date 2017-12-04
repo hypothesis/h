@@ -38,14 +38,19 @@ def _feed_item_from_annotation(annotation, annotation_url, annotation_api_url):
         name = util.user.split_user(annotation.userid)["username"]
     except ValueError:
         name = annotation.userid
-    return {
+    item = {
         "author": {"name": name},
         "title": annotation.title,
         "description": annotation.description,
         "pubDate": _pubDate_string(annotation.created),
         "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_api_url),
-        "link": annotation_url(annotation)
     }
+
+    link = annotation_url(annotation.annotation)
+    if link:
+        item["link"] = link
+
+    return item
 
 
 def feed_from_annotations(annotations, annotation_url, annotation_api_url,
