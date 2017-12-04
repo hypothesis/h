@@ -13,6 +13,7 @@ class FakeAnnotation(object):
         self.references = None
         self.target_uri = 'http://example.com/foo/bar'
         self.document = None
+        self.authority = 'example.com'
 
 
 class FakeDocumentURI(object):
@@ -64,6 +65,13 @@ def test_incontext_link(pyramid_request):
     link = links.incontext_link(pyramid_request, annotation)
 
     assert link == 'https://hyp.is/123/example.com/foo/bar'
+
+
+def test_incontext_link_returns_None_for_third_party_annotations(pyramid_request):
+    annotation = FakeAnnotation()
+    annotation.authority = 'elifesciences.org'
+
+    assert links.incontext_link(pyramid_request, annotation) is None
 
 
 @pytest.mark.parametrize('target_uri,expected', [

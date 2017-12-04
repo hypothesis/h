@@ -26,8 +26,7 @@ def pretty_link(url):
 
 def html_link(request, annotation):
     """Return a link to an HTML representation of the given annotation, or None."""
-    is_third_party_annotation = annotation.authority != request.authority
-    if is_third_party_annotation:
+    if _is_third_party_annotation(request, annotation):
         # We don't currently support HTML representations of third party
         # annotations.
         return None
@@ -36,6 +35,10 @@ def html_link(request, annotation):
 
 def incontext_link(request, annotation):
     """Generate a link to an annotation on the page where it was made."""
+    if _is_third_party_annotation(request, annotation):
+        # We don't currently support incontext links to third party annotations
+        return None
+
     bouncer_url = request.registry.settings.get('h.bouncer_url')
     if not bouncer_url:
         return None
@@ -62,6 +65,10 @@ def json_link(request, annotation):
 
 def jsonld_id_link(request, annotation):
     return request.route_url('annotation', id=annotation.id)
+
+
+def _is_third_party_annotation(request, annotation):
+    return annotation.authority != request.authority
 
 
 def includeme(config):
