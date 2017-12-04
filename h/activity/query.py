@@ -134,6 +134,7 @@ def execute(request, query, page_size):
                 bucket.presented_annotations.append({
                     'annotation': presenters.AnnotationHTMLPresenter(annotation),
                     'group': groups.get(annotation.groupid),
+                    'html_link': links.html_link(request, annotation),
                     'incontext_link': links.incontext_link(request, annotation)
                 })
 

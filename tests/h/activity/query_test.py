@@ -441,6 +441,29 @@ class TestExecute(object):
             assert presented_annotation['incontext_link'] == (
                 'incontext_link_for_annotation_{id}'.format(id=presented_annotation['annotation'].annotation.id))
 
+    def test_it_returns_each_annotations_html_link(self,
+                                                   annotations,
+                                                   links,
+                                                   pyramid_request):
+        def html_link(request, annotation):
+            assert request == pyramid_request, (
+                "It should always pass the request to html_link")
+            # Return a predictable per-annotation value for the html link.
+            return 'html_link_for_annotation_{id}'.format(id=annotation.id)
+
+        links.html_link.side_effect = html_link
+
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        presented_annotations = []
+        for timeframe in result.timeframes:
+            for bucket in timeframe.document_buckets.values():
+                presented_annotations.extend(bucket.presented_annotations)
+
+        for presented_annotation in presented_annotations:
+            assert presented_annotation['html_link'] == (
+                'html_link_for_annotation_{id}'.format(id=presented_annotation['annotation'].annotation.id))
+
     def test_it_returns_the_total_number_of_matching_annotations(
             self, pyramid_request):
         assert execute(pyramid_request, MultiDict(), self.PAGE_SIZE).total == 20
