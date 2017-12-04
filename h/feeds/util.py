@@ -7,7 +7,7 @@ from h._compat import urlparse
 FEED_TAG_DATE='2015-09'
 
 
-def tag_uri_for_annotation(annotation, annotation_url):
+def tag_uri_for_annotation(annotation, annotation_api_url):
     """Return a tag URI (unique identifier) for the given annotation.
 
     Suitable for use as the value of the <id> element of an <entry> in an
@@ -17,7 +17,7 @@ def tag_uri_for_annotation(annotation, annotation_url):
     :rtype: string
 
     """
-    domain = urlparse.urlparse(annotation_url(annotation)).hostname
+    domain = urlparse.urlparse(annotation_api_url(annotation)).hostname
     return u"tag:{domain},{date}:{id_}".format(domain=domain,
                                                date=FEED_TAG_DATE,
                                                id_=annotation.id)

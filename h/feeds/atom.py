@@ -26,7 +26,7 @@ def _feed_entry_from_annotation(
 
     entry = {
         "id": h.feeds.util.tag_uri_for_annotation(
-            annotation.annotation, annotation_url),
+            annotation.annotation, annotation_api_url),
         "author": {"name": name},
         "title": annotation.title,
         "updated": _utc_iso8601_string(annotation.updated),
@@ -51,7 +51,7 @@ def _utc_iso8601_string(timestamp):
 
 
 def feed_from_annotations(
-        annotations, atom_url, annotation_url, annotation_api_url=None,
+        annotations, atom_url, annotation_url, annotation_api_url,
         html_url=None, title=None, subtitle=None):
     """Return an Atom feed for the given list of annotations.
 

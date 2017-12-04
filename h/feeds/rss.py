@@ -25,7 +25,7 @@ def _pubDate_string(timestamp):
     return formatdate(timegm(timestamp.utctimetuple()))
 
 
-def _feed_item_from_annotation(annotation, annotation_url):
+def _feed_item_from_annotation(annotation, annotation_url, annotation_api_url):
     """Return an RSS feed item for the given annotation.
 
     :returns: A logical representation of the RSS feed item as a dict,
@@ -43,13 +43,13 @@ def _feed_item_from_annotation(annotation, annotation_url):
         "title": annotation.title,
         "description": annotation.description,
         "pubDate": _pubDate_string(annotation.created),
-        "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
+        "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_api_url),
         "link": annotation_url(annotation)
     }
 
 
-def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
-                          title, description):
+def feed_from_annotations(annotations, annotation_url, annotation_api_url,
+                          rss_url, html_url, title, description):
     """Return an RSS feed for the given list of annotations.
 
     :returns: A logical representation of an RSS feed as a Python dict
@@ -68,7 +68,7 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
         # This is called entries not items so as not to clash with the dict's
         # standard .items() method.
         'entries': [
-            _feed_item_from_annotation(annotation, annotation_url)
+            _feed_item_from_annotation(annotation, annotation_url, annotation_api_url)
             for annotation in annotations]
     }
 
