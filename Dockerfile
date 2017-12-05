@@ -20,6 +20,9 @@ WORKDIR /var/lib/hypothesis
 
 # Ensure nginx state and log directories writeable by unprivileged user.
 RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx
+# /var/lib/nginx/tmp seems to be 700, so still not writable?
+# I thought nginx would run as the hypothesis user though
+# changing its permissions to 777 doesn't seem to have an effect
 
 # Copy minimal data to allow installation of dependencies.
 COPY requirements.txt ./
