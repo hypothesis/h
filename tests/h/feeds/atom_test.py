@@ -21,20 +21,20 @@ def _annotation(**kwargs):
 
 
 def test_feed_id():
-    feed = atom.feed_from_annotations([], 'atom_url', mock.Mock())
+    feed = atom.feed_from_annotations([], 'atom_url', mock.Mock(), mock.Mock())
 
     assert feed['id'] == 'atom_url'
 
 
 def test_feed_title():
-    feed = atom.feed_from_annotations([], mock.Mock(), mock.Mock(),
+    feed = atom.feed_from_annotations([], mock.Mock(), mock.Mock(), mock.Mock(),
                                       title='foo')
 
     assert feed['title'] == 'foo'
 
 
 def test_feed_subtitle():
-    feed = atom.feed_from_annotations([], mock.Mock(), mock.Mock(),
+    feed = atom.feed_from_annotations([], mock.Mock(), mock.Mock(), mock.Mock(),
                                       subtitle='bar')
 
     assert feed['subtitle'] == 'bar'
@@ -57,7 +57,8 @@ def test_feed_contains_entries(_feed_entry_from_annotation, factories):
     _feed_entry_from_annotation.side_effect = pop
 
     feed = atom.feed_from_annotations(
-        annotations, annotations_url_function, annotations_api_url_function)
+        annotations, mock.sentinel.atom_url, annotations_url_function,
+        annotations_api_url_function)
 
     assert feed['entries'] == [
         "feed entry for annotation 1",
@@ -68,7 +69,7 @@ def test_feed_contains_entries(_feed_entry_from_annotation, factories):
 
 def test_atom_url_link():
     """The feed should contain a link to its Atom URL."""
-    feed = atom.feed_from_annotations([], 'atom_url', mock.Mock())
+    feed = atom.feed_from_annotations([], 'atom_url', mock.Mock(), mock.Mock())
 
     assert feed['links'][0] == {
         'rel': 'self', 'type': 'application/atom+xml', 'href': 'atom_url'}
@@ -77,7 +78,7 @@ def test_atom_url_link():
 def test_html_url_link():
     """The feed should contain a link to its corresponding HTML page."""
     feed = atom.feed_from_annotations(
-        [], mock.Mock(), mock.Mock(), html_url='html_url')
+        [], mock.Mock(), mock.Mock(), mock.Mock(), html_url='html_url')
 
     assert feed['links'][1] == {
         'rel': 'alternate', 'type': 'text/html', 'href': 'html_url'}
@@ -88,12 +89,14 @@ def test_entry_id(util, factories):
     """The ids of feed entries should come from tag_uri_for_annotation()."""
     annotation = factories.Annotation()
     annotations_url_function = lambda annotation: "annotation url"
+    annotations_api_url_function = lambda annotation: "annotation api url"
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", annotations_url_function)
+        [annotation], "atom_url", annotations_url_function,
+        annotation_api_url=annotations_api_url_function)
 
     util.tag_uri_for_annotation.assert_called_once_with(
-        annotation, annotations_url_function)
+        annotation, annotations_api_url_function)
     assert feed['entries'][0]['id'] == util.tag_uri_for_annotation.return_value
 
 
@@ -102,7 +105,8 @@ def test_entry_author(factories):
     annotation = factories.Annotation(userid=u'acct:nobu@hypothes.is')
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url")
+        [annotation], "atom_url", lambda annotation: "annotation url",
+        lambda annotation: "annotation api url")
 
     assert feed['entries'][0]['author']['name'] == 'nobu'
 
@@ -114,7 +118,8 @@ def test_entry_title(factories):
         annotation = factories.Annotation()
 
         feed = atom.feed_from_annotations(
-            [annotation], "atom_url", lambda annotation: "annotation url")
+            [annotation], "atom_url", lambda annotation: "annotation url",
+            lambda annotation: "annotation api url")
 
         mock_title.assert_called_once_with()
         assert feed['entries'][0]['title'] == mock_title.return_value
@@ -126,7 +131,8 @@ def test_entry_updated():
         updated=datetime(year=2016, month=2, day=29, hour=16, minute=39, second=12, microsecond=537626))
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url")
+        [annotation], "atom_url", lambda annotation: "annotation url",
+        lambda annotation: "annotation api url")
 
     assert feed['entries'][0]['updated'] == '2016-02-29T16:39:12.537626+00:00'
 
@@ -137,7 +143,8 @@ def test_entry_published():
         created=datetime(year=2016, month=5, day=31, hour=12, minute=15, second=45, microsecond=537626))
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url")
+        [annotation], "atom_url", lambda annotation: "annotation url",
+        lambda annotation: "annotation api url")
 
     assert feed['entries'][0]['published'] == '2016-05-31T12:15:45.537626+00:00'
 
@@ -150,7 +157,8 @@ def test_entry_content(factories):
         annotation = factories.Annotation()
 
         feed = atom.feed_from_annotations(
-            [annotation], "atom_url", lambda annotation: "annotation url")
+            [annotation], "atom_url", lambda annotation: "annotation url",
+            lambda annotation: "annotation api url")
 
         mock_description.assert_called_once_with()
         assert feed['entries'][0]['content'] == mock_description.return_value
@@ -163,7 +171,7 @@ def test_annotation_url_links(_, factories):
     annotation_url = mock.Mock()
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", annotation_url)
+        [annotation], "atom_url", annotation_url, mock.Mock())
 
     annotation_url.assert_called_once_with(annotation)
     assert feed['entries'][0]['links'][0] == {
@@ -197,6 +205,7 @@ def test_feed_updated():
     ]
 
     feed = atom.feed_from_annotations(
-        annotations, "atom_url", lambda annotation: "annotation url")
+        annotations, "atom_url", lambda annotation: "annotation url",
+        lambda annotation: "annotation api url")
 
     assert feed['updated'] == '2015-03-11T10:45:54.537626+00:00'
