@@ -23,7 +23,7 @@ render the feed to RSS XML.
        <description>{{ item.description|safe }}</description>
        <pubDate>{{ item.pubDate }}</pubDate>
        <guid isPermaLink="false">{{ item.guid }}</guid>
-       <link>{{ item.link }}</link>
+       {% if item.link %}<link>{{ item.link }}</link>{% endif %}
        <dc:creator><![CDATA[{{ item.author.name }}]]></dc:creator>
     </item>
     {% endfor %}

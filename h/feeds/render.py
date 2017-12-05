@@ -27,7 +27,7 @@ def render_atom(request, annotations, atom_url, html_url, title, subtitle):
     """
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
-        return request.route_url('annotation', id=annotation.id)
+        return request.find_service(name='links').get(annotation, 'html')
 
     def annotation_api_url(annotation):
         """Return the JSON API URL for the given annotation."""
@@ -67,12 +67,16 @@ def render_rss(request, annotations, rss_url, html_url, title, description):
     """
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
-        return request.route_url('annotation', id=annotation.id)
+        return request.find_service(name='links').get(annotation, 'html')
+
+    def annotation_api_url(annotation):
+        """Return the JSON API URL for the given annotation."""
+        return request.route_url('api.annotation', id=annotation.id)
 
     feed = rss.feed_from_annotations(
         annotations=annotations, annotation_url=annotation_url,
-        rss_url=rss_url, html_url=html_url, title=title,
-        description=description)
+        annotation_api_url=annotation_api_url, rss_url=rss_url,
+        html_url=html_url, title=title, description=description)
 
     response = renderers.render_to_response(
         'h:templates/rss.xml.jinja2', {"feed": feed}, request=request)
