@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import datetime
 
 import mock
@@ -37,11 +39,11 @@ class TestGenerate(object):
             'document_title': 'My fascinating page',
             'document_url': 'http://example.org/',
             'parent': notification.parent,
-            'parent_user': parent_user,
+            'parent_user_display_name': parent_user.display_name,
             'parent_user_url': 'http://example.com/stream/user/patricia',
             'reply': notification.reply,
             'reply_url': links.incontext_link.return_value,
-            'reply_user': reply_user,
+            'reply_user_display_name': reply_user.display_name,
             'reply_user_url': 'http://example.com/stream/user/ron',
             'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
         }
@@ -85,14 +87,31 @@ class TestGenerate(object):
             'document_title': 'My fascinating page',
             'document_url': 'http://example.org/',
             'parent': notification.parent,
-            'parent_user': parent_user,
+            'parent_user_display_name': parent_user.display_name,
             'parent_user_url': 'http://example.com/stream/user/patricia',
             'reply': notification.reply,
             'reply_url': 'http://example.com/ann/bar456',
-            'reply_user': reply_user,
+            'reply_user_display_name': reply_user.display_name,
             'reply_user_url': 'http://example.com/stream/user/ron',
             'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
         }
+        html_renderer.assert_(**expected_context)
+        text_renderer.assert_(**expected_context)
+
+    def test_returns_usernames_if_no_display_names(self,
+                                                   notification,
+                                                   pyramid_request,
+                                                   html_renderer,
+                                                   text_renderer,
+                                                   parent_user,
+                                                   reply_user):
+        parent_user.display_name = None
+        reply_user.display_name = None
+
+        generate(pyramid_request, notification)
+
+        expected_context = {'parent_user_display_name': parent_user.username,
+                            'reply_user_display_name': reply_user.username}
         html_renderer.assert_(**expected_context)
         text_renderer.assert_(**expected_context)
 
@@ -109,7 +128,13 @@ class TestGenerate(object):
         assert html == 'HTML output'
         assert text == 'Text output'
 
-    def test_returns_subject_with_reply_username(self, notification, pyramid_request):
+    def test_returns_subject_with_reply_display_name(self, notification, pyramid_request, reply_user):
+        _, subject, _, _ = generate(pyramid_request, notification)
+
+        assert subject == 'Ron Burgundy has replied to your annotation'
+
+    def test_returns_subject_with_reply_username(self, notification, pyramid_request, reply_user):
+        reply_user.display_name = None
         _, subject, _, _ = generate(pyramid_request, notification)
 
         assert subject == 'ron has replied to your annotation'
@@ -175,7 +200,8 @@ class TestGenerate(object):
 
     @pytest.fixture
     def parent_user(self, factories):
-        return factories.User(username=u'patricia', email=u'pat@ric.ia')
+        return factories.User(username=u'patricia', email=u'pat@ric.ia',
+                              display_name='Patricia Demylus')
 
     @pytest.fixture
     def reply(self):
@@ -189,7 +215,8 @@ class TestGenerate(object):
 
     @pytest.fixture
     def reply_user(self, factories):
-        return factories.User(username=u'ron', email=u'ron@thesmiths.com')
+        return factories.User(username=u'ron', email=u'ron@thesmiths.com',
+                              display_name='Ron Burgundy')
 
     @pytest.fixture
     def routes(self, pyramid_config):

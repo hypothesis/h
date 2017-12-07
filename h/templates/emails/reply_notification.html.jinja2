@@ -1,5 +1,5 @@
 <p>
-  <a href="{{ reply_user_url }}">{{ reply_user.username }}</a>
+  <a href="{{ reply_user_url }}">{{ reply_user_display_name }}</a>
   has
   <a href="{{ reply_url }}">replied to your annotation</a>
   on
@@ -9,7 +9,7 @@
 <p>
   On
   {{ parent.created | human_timestamp }}
-  <a href="{{ parent_user_url }}">{{ parent_user.username }}</a>
+  <a href="{{ parent_user_url }}">{{ parent_user_display_name }}</a>
   commented:
 </p>
 
@@ -18,7 +18,7 @@
 <p>
   On
   {{ reply.created | human_timestamp }}
-  <a href="{{ reply_user_url }}">{{ reply_user.username }}</a>
+  <a href="{{ reply_user_url }}">{{ reply_user_display_name }}</a>
   replied:
 </p>
 
