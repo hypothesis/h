@@ -7,7 +7,7 @@ import pytest
 
 from h.emails.reply_notification import generate
 from h.models import Annotation
-from h.models import Document, DocumentMeta
+from h.models import Document
 from h.notification.reply import Notification
 
 
@@ -86,7 +86,7 @@ class TestGenerate(object):
             'document_url': 'http://example.org/',
             'parent': notification.parent,
             'parent_user': parent_user,
-            'reply_user_url': 'http://example.com/stream/user/patricia',
+            'parent_user_url': 'http://example.com/stream/user/patricia',
             'reply': notification.reply,
             'reply_url': 'http://example.com/ann/bar456',
             'reply_user': reply_user,
