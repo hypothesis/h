@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 
 from h import models
 from h.cli.commands import user as user_cli
+from h.services.delete_user import DeleteUserService
 from h.services.user_password import UserPasswordService
 
 
@@ -254,9 +255,16 @@ def password_service(hasher):
 
 
 @pytest.fixture
-def pyramid_config(pyramid_config, signup_service, password_service):
+def delete_user_service(pyramid_request):
+    return DeleteUserService(request=pyramid_request)
+
+
+@pytest.fixture
+def pyramid_config(pyramid_config, signup_service, password_service,
+                   delete_user_service):
     pyramid_config.register_service(signup_service, name='user_signup')
     pyramid_config.register_service(password_service, name='user_password')
+    pyramid_config.register_service(delete_user_service, name='delete_user')
     return pyramid_config
 
 
