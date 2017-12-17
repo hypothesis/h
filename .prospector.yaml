@@ -15,6 +15,9 @@ pep257:
     - D203 # "1 blank line required before class docstring" conflicts with
            # another pep257 rule D211 "No blank lines allowed before class
            # docstring"!
+    - D212 # "Multi-line docstring summary should start at the first line"
+           # conflicts with another pep257 rule D213 "Multi-line docstring 
+           # summary should start at the second line"
 pyflakes:
   run: false
 
