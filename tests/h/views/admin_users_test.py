@@ -181,10 +181,6 @@ def test_users_activate_redirects(pyramid_request):
     assert isinstance(result, httpexceptions.HTTPFound)
 
 
-users_delete_fixtures = pytest.mark.usefixtures('user_service')
-
-
-@users_delete_fixtures
 def test_users_delete_user_not_found_error(user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@foo.org"}
 
@@ -194,7 +190,6 @@ def test_users_delete_user_not_found_error(user_service, pyramid_request):
         users_delete(pyramid_request)
 
 
-@users_delete_fixtures
 def test_users_delete_deletes_user(user_service, delete_user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
     user = MagicMock()
@@ -206,7 +201,6 @@ def test_users_delete_deletes_user(user_service, delete_user_service, pyramid_re
     delete_user_service.delete.assert_called_once_with(user)
 
 
-@users_delete_fixtures
 def test_users_delete_reports_error(user_service, delete_user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
     user = MagicMock()
