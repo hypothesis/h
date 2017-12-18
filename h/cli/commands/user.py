@@ -4,7 +4,6 @@ import click
 import sqlalchemy
 
 from h import models
-from h.views.admin_users import delete_user
 
 
 @click.group()
@@ -127,7 +126,8 @@ def delete(ctx, username, authority):
         msg = 'no user with username "{}" and authority "{}"'.format(username, authority)
         raise click.ClickException(msg)
 
-    delete_user(request, user)
+    svc = request.find_service(name='delete_user')
+    svc.delete(user)
     request.tm.commit()
 
     click.echo("User {} deleted.".format(username), err=True)

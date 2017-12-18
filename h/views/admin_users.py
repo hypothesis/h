@@ -7,16 +7,11 @@ from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h import models
-from h import storage
 from h.accounts.events import ActivationEvent
-from h.events import AnnotationEvent
+from h.services.delete_user import UserDeleteError
 from h.services.rename_user import UserRenameError
 from h.tasks.admin import rename_user
 from h.i18n import TranslationString as _  # noqa
-
-
-class UserDeletionError(Exception):
-    pass
 
 
 class UserNotFoundError(Exception):
@@ -115,12 +110,13 @@ def users_rename(request):
              require_csrf=True)
 def users_delete(request):
     user = _form_request_user(request)
+    svc = request.find_service(name='delete_user')
 
     try:
-        delete_user(request, user)
+        svc.delete(user)
         request.session.flash(
             'Successfully deleted user %s with authority %s' % (user.username, user.authority), 'success')
-    except UserDeletionError as e:
+    except UserDeleteError as e:
         request.session.flash(str(e), 'error')
 
     return httpexceptions.HTTPFound(
@@ -131,28 +127,6 @@ def users_delete(request):
 def user_not_found(exc, request):
     request.session.flash(jinja2.Markup(_(exc.message)), 'error')
     return httpexceptions.HTTPFound(location=request.route_path('admin_users'))
-
-
-def delete_user(request, user):
-    """
-    Deletes a user with all their group memberships and annotations.
-
-    Raises UserDeletionError when deletion fails with the appropriate error
-    message.
-    """
-
-    if models.Group.created_by(request.db, user).count() > 0:
-        raise UserDeletionError('Cannot delete user who is a group creator.')
-
-    user.groups = []
-    annotations = request.db.query(models.Annotation) \
-                            .filter_by(userid=user.userid)
-    for annotation in annotations:
-        storage.delete_annotation(request.db, annotation.id)
-        event = AnnotationEvent(request, annotation.id, 'delete')
-        request.notify_after_commit(event)
-
-    request.db.delete(user)
 
 
 def _form_request_user(request):
