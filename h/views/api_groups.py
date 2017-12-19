@@ -36,6 +36,7 @@ def remove_member(group, request):
 def get_group(group, request):
     return dict([(f, getattr(group, f, None)) for f in ('description', 'name')], id=group.pubid)
 
+
 @api_config(route_name='api.group_read_noslug',
             link_name='group.read',
             request_method='GET',
