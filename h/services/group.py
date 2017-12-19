@@ -9,11 +9,6 @@ from h.models import Annotation, Group, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 
-def authority_is_primary_for_request(request, authority):
-    """is the provided authority the one we'd consider the "hypothes.is" authority in production?"""
-    return request.domain == authority
-
-
 GROUP_TYPES = {
     'private': {
         'description': 'Anyone can join. Members can read/write.',
