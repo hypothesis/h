@@ -81,6 +81,8 @@ def test_includeme():
              traverse='/{id}'),
         call('api.profile', '/api/profile'),
         call('api.debug_token', '/api/debug-token'),
+        call('api.group_read', '/api/groups/{pubid}/{slug:[^/]*}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
+        call('api.group_read_noslug', '/api/groups/{pubid}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('api.group_member', '/api/groups/{pubid}/members/{user}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('api.search', '/api/search'),
         call('api.users', '/api/users'),
