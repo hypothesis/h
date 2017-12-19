@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from h.events import AnnotationEvent
-from h.models import Annotation
+from h.models import Annotation, Group
 from h import storage
 
 
@@ -29,7 +29,9 @@ class DeleteUserService(object):
         # We check for non-empty `group_ids` before querying the DB to avoid an
         # expensive SQL query if `in_` is given an empty list (see
         # https://stackoverflow.com/questions/23523147/)
-        group_ids = [g.pubid for g in user.groups]
+        created_groups = self.request.db.query(Group) \
+                                        .filter(Group.creator == user)
+        group_ids = [g.pubid for g in created_groups]
         if len(group_ids) > 0:
             other_user_group_anns = self.request.db.query(Annotation) \
                                                    .filter(Annotation.groupid.in_(group_ids),
@@ -47,7 +49,7 @@ class DeleteUserService(object):
             self.request.notify_after_commit(event)
 
         # Delete groups created by this user.
-        for group in user.groups:
+        for group in created_groups:
             self.request.db.delete(group)
 
         # Finally, delete the user.

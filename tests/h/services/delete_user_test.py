@@ -69,6 +69,15 @@ class TestDeleteUserService(object):
         with pytest.raises(UserDeleteError):
             svc.delete(user)
 
+    def test_delete_user_removes_only_groups_created_by_user(self, db_session, group_with_two_users, pyramid_request, svc):
+        pyramid_request.db = db_session
+        (group, user, other_user, user_ann, other_user_ann) = group_with_two_users
+
+        # Delete the user who is a member of the group, but did not create it.
+        svc.delete(other_user)
+
+        assert group not in db_session.deleted
+
     @pytest.fixture
     def svc(self, db_session, pyramid_request):
         pyramid_request.db = db_session
