@@ -52,12 +52,6 @@ def get_group_type(group, request=None):
         if not has_correct_access_flags:
             continue
         # has correct access flags for this group_type_name
-        # some group types (open/publisher) can only be discriminated based on an incomig web request
-        matches_request = GROUP_TYPES.get(
-            group_type_name, {}).get('matches_request')
-        if request and callable(matches_request):
-            if not matches_request(group, request):
-                continue
         return group_type_name
     return None
 
