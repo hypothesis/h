@@ -23,7 +23,7 @@ def add_publisher_group(ctx, name, authority, creator):
     Create a new group which everyone can read but which only users belonging
     to a given authority can write to.
     """
-    _create_group('publisher', ctx, name, authority, creator)
+    _create_group('open', ctx, name, authority, creator)
 
 
 @groups.command('add-public-group')

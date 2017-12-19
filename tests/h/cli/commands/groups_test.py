@@ -8,6 +8,25 @@ from h.cli.commands import groups as groups_cli
 
 class TestAddCommand(object):
 
+    def test_it_creates_a_publisher_group(self, cli, cliconfig, group_service):
+        """this is deprecated and now called 'open', but keeping this to not break scripts"""
+        name = 'Publisher Group Name'
+        creator = 'admin'
+        authority = 'publisher.org'
+        result = cli.invoke(groups_cli.add_publisher_group,
+                            [u'--name', name,
+                             u'--authority', authority,
+                             u'--creator', creator],
+                            obj=cliconfig)
+
+        assert result.exit_code == 0
+
+        group_service.create.assert_called_with(authority=authority,
+                                                name=name,
+                                                userid='acct:{0}@{1}'.format(
+                                                    creator, authority),
+                                                type_='open')
+
     def test_it_creates_a_public_group(self, cli, cliconfig, group_service):
         name = 'Public Group Name'
         creator = 'admin'
