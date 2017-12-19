@@ -96,7 +96,7 @@ class GroupService(object):
         for attr, value in access_flags.iteritems():
             setattr(group, attr, value)
 
-        if GROUP_TYPES[type_].get('creator_is_immediate_member'):
+        if GROUP_TYPES[type_]['creator_is_immediate_member']:
             group.members.append(creator)
 
         self.session.add(group)
