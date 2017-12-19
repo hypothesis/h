@@ -127,9 +127,8 @@ def read_unauthenticated(group, request):
              request_method='GET',
              accept='application/json',
              renderer='json',
-             effective_principals=not_(security.Authenticated),
              decorator=cors_policy)
-def read_unauthenticated_json(group, request):
+def read_group_json(group, request):
     """If the end-user wants json, redirect to the API"""
     if not group:
         raise HTTPNotFound()

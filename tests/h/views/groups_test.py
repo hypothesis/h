@@ -182,7 +182,7 @@ class TestGroupReadUnauthenticated(object):
         pyramid_request.matchdict['slug'] = 'some-slug'
         pyramid_request.headers['accept'] = 'application/json'
 
-        result = views.read_unauthenticated_json(group, pyramid_request)
+        result = views.read_group_json(group, pyramid_request)
         assert result.status_code == 303
         assert result.location == '/api/groups/{}/{}'.format(
             group.pubid, group.slug)
