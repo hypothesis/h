@@ -4,6 +4,14 @@ import mock
 from h import session
 
 
+class TestDeduplicate(object):
+    def test_deduplicates(self):
+        group = dict(pubid='fake')
+        items = [group] * 2
+        deduplicated = session.deduplicate(items, lambda g: g.get('pubid'))
+        assert len(deduplicated) == 1
+
+
 class FakeGroup(object):
     def __init__(self, pubid, name, is_public=False):
         self.pubid = pubid
