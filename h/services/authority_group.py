@@ -23,7 +23,7 @@ class AuthorityGroupService(object):
         return (self._session.query(models.Group)
                     .filter_by(authority=authority,
                                readable_by=group.ReadableBy.world,
-                               writeable_by=group.WriteableBy.members)
+                               writeable_by=group.WriteableBy.authority)
                     .all())
 
 
