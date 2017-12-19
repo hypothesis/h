@@ -19,19 +19,13 @@ GROUP_TYPES = {
         'description': 'Anyone can join. Members can read/write.',
         'creator_is_immediate_member': True
     },
-    'publisher': {
-        'description': 'Anyone can read. Anyone in authority can write. Intended for 3rd-party namespaces.',
-        'creator_is_immediate_member': False,
-        'matches_request': lambda group, request: not authority_is_primary_for_request(request, group.authority),
-    },
     'public': {
         'description': 'Anyone can read. Members can write. Group creator can invite members.',
         'creator_is_immediate_member': True
     },
     'open': {
-        'description': 'Anyone can read. Anyone in authority can write. Intended for h namespace.',
-        'creator_is_immediate_member': True,
-        'matches_request': lambda group, request: authority_is_primary_for_request(request, group.authority),
+        'description': 'Anyone can read. Anyone in authority can write.',
+        'creator_is_immediate_member': True
     }
 }
 
@@ -40,11 +34,6 @@ GROUP_ACCESS_FLAGS = {
         'joinable_by': JoinableBy.authority,
         'readable_by': ReadableBy.members,
         'writeable_by': WriteableBy.members,
-    },
-    'publisher': {
-        'joinable_by': None,
-        'readable_by': ReadableBy.world,
-        'writeable_by': WriteableBy.authority,
     },
     # https://docs.google.com/document/d/1tsyUGDfLLaQsa4Pmc-loHRcYCIe4Q56meery6Be6CoA/edit#heading=h.ge43xo9poyis
     'public': {

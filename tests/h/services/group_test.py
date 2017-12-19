@@ -59,7 +59,6 @@ class TestGroupService(object):
     @pytest.mark.parametrize(('group_type', 'creator_should_be_member'), [
         (None, True),
         ('private', True),
-        ('publisher', False),
         ('open', True),
         ('public', True),
     ])
@@ -78,9 +77,6 @@ class TestGroupService(object):
         ('private', 'joinable_by', JoinableBy.authority),
         ('private', 'readable_by', ReadableBy.members),
         ('private', 'writeable_by', WriteableBy.members),
-        ('publisher', 'joinable_by', None),
-        ('publisher', 'readable_by', ReadableBy.world),
-        ('publisher', 'writeable_by', WriteableBy.authority),
         ('public', 'joinable_by', None),
         ('public', 'readable_by', ReadableBy.world),
         ('public', 'writeable_by', WriteableBy.members),
@@ -105,7 +101,6 @@ class TestGroupService(object):
         ('private', True),
         ('public', True),
         ('open', True),
-        ('publisher', False),
         (None, True),
     ])
     def test_get_group_type(self, pyramid_request, db_session, users, group_type, use_h_authority):
