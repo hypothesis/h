@@ -24,7 +24,7 @@ GROUP_TYPES = {
         'creator_is_immediate_member': True
     },
     'open': {
-        'description': 'Anyone can read. Anyone in authority can write.',
+        'description': 'Anyone can read. Anyone in namespace can write.',
         'creator_is_immediate_member': True
     }
 }

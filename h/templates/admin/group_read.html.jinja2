@@ -7,7 +7,7 @@
   <h2>Details</h2>
   {% set group_url = request.route_url('group_read_noslug', pubid=group.pubid) %}
   <dl>
-    <dt>authority</dt>
+    <dt>namespace/authority</dt>
       <dd>{{ group.authority }}</dd>
     <dt>type</dt>
       {% set group_type = get_group_type(group) %}

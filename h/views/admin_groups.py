@@ -53,7 +53,7 @@ def admin_group_create_schema():
     schema = schemas.group_schema()
     schema.add(colander.SchemaNode(colander.String(),
                                    name='authority',
-                                   title=_("Authority"),
+                                   title=_("Namespace"),
                                    ))
     schema.add(colander.SchemaNode(colander.String(),
                                    name='group_type',
