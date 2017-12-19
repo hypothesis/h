@@ -191,8 +191,8 @@ class TestGroupReadUnauthenticated(object):
         pyramid_request.matchdict['slug'] = 'some-slug'
         pyramid_request.headers['accept'] = 'application/json'
         group = None
-        with pytest.raises(HTTPNotFound) as exc:
-            result = views.read_group_json(group, pyramid_request)
+        with pytest.raises(HTTPNotFound):
+            views.read_group_json(group, pyramid_request)
 
     def test_options_request(self, pyramid_request):
         """
