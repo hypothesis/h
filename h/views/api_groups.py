@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from pyramid import security
-from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPMovedPermanently
 
 from h.views.api import api_config
 from h.views.api_config import cors_policy
@@ -50,4 +50,4 @@ def redirect_to_with_slug(group, request):
     if slug is None or slug != group.slug:
         path = request.route_path(
             'api.group_read', pubid=group.pubid, slug=group.slug)
-        raise httpexceptions.HTTPMovedPermanently(path)
+        raise HTTPMovedPermanently(path)
