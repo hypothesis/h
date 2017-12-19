@@ -187,6 +187,24 @@ class TestGroupReadUnauthenticated(object):
         assert result.location == '/api/groups/{}/{}'.format(
             group.pubid, group.slug)
 
+    def test_json_request_bad_group_404s(self, pyramid_request):
+        pyramid_request.matchdict['slug'] = 'some-slug'
+        pyramid_request.headers['accept'] = 'application/json'
+        group = None
+        with pytest.raises(HTTPNotFound) as exc:
+            result = views.read_group_json(group, pyramid_request)
+
+    def test_options_request(self, pyramid_request):
+        """
+        Requesting JSON from a Group URL will redirect to the API to return documented JSON format.
+        The client will request this when fetching page-configured groups (which are configured by URL)
+        """
+        group = FakeGroup('abc123', 'some-slug')
+        pyramid_request.matchdict['slug'] = 'some-slug'
+        pyramid_request.headers['accept'] = 'application/json'
+        result = views.options_group_read(group, pyramid_request)
+        assert result == {}
+
 
 @pytest.mark.usefixtures('routes')
 def test_read_noslug_redirects(pyramid_request):
