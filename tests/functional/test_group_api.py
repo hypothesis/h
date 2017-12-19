@@ -8,6 +8,12 @@ import pytest
 @pytest.mark.functional
 class TestGroupAPI(object):
 
+    def test_get_group(self, app, group):
+        headers = dict()
+        response = app.get('/api/groups/{}'.format(group.pubid),
+                           headers=headers).maybe_follow()
+        assert response.json.get('id')
+
     def test_leave_group(self, app, group, group_member_with_token):
         """Test a request to leave a group through the API."""
 
