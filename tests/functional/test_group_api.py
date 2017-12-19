@@ -10,9 +10,16 @@ class TestGroupAPI(object):
 
     def test_get_group(self, app, group):
         headers = dict()
+        response = app.get('/api/groups/{}/{}'.format(group.pubid, group.slug),
+                           headers=headers).maybe_follow()
+        assert response.json.get('id')
+
+    def test_read_noslug(self, app, group):
+        headers = dict()
         response = app.get('/api/groups/{}'.format(group.pubid),
                            headers=headers).maybe_follow()
         assert response.json.get('id')
+
 
     def test_leave_group(self, app, group, group_member_with_token):
         """Test a request to leave a group through the API."""
@@ -31,7 +38,7 @@ class TestGroupAPI(object):
 
 @pytest.fixture
 def group(db_session, factories):
-    group = factories.Group()
+    group = factories.Group(name='group-fixture', description='group-fixture description')
     db_session.commit()
     return group
 
