@@ -6,25 +6,14 @@ import pytest
 from mock import Mock, call
 
 from h.events import AnnotationEvent
+from h.models import Annotation, Document, Group
 from h.services.delete_user import (
     UserDeleteError,
     delete_user_service_factory,
 )
 
-delete_user_fixtures = pytest.mark.usefixtures('api_storage',
-                                               'user_created_no_groups')
 
-
-@delete_user_fixtures
 class TestDeleteUserService(object):
-
-    def test_delete_raises_when_group_creator(self, Group, svc): # noqa N803
-        user = Mock()
-
-        Group.created_by.return_value.count.return_value = 10
-
-        with pytest.raises(UserDeleteError):
-            svc.delete(user)
 
     def test_delete_disassociate_group_memberships(self, factories, svc):
         user = factories.User()
@@ -64,16 +53,34 @@ class TestDeleteUserService(object):
 
         assert user in db_session.deleted
 
+    def test_delete_user_removes_groups_if_no_collaborators(self, db_session, group_with_two_users, pyramid_request, svc):
+        pyramid_request.db = db_session
+        (group, creator, member, creator_ann, member_ann) = group_with_two_users
+        db_session.delete(member_ann)
+
+        svc.delete(creator)
+
+        assert group in db_session.deleted
+
+    def test_delete_user_fails_if_groups_have_collaborators(self, db_session, group_with_two_users, pyramid_request, svc):
+        pyramid_request.db = db_session
+        (group, creator, member, creator_ann, member_ann) = group_with_two_users
+
+        with pytest.raises(UserDeleteError):
+            svc.delete(creator)
+
+    def test_delete_user_removes_only_groups_created_by_user(self, db_session, group_with_two_users, pyramid_request, svc):
+        pyramid_request.db = db_session
+        (group, creator, member, creator_ann, member_ann) = group_with_two_users
+
+        svc.delete(member)
+
+        assert group not in db_session.deleted
+
     @pytest.fixture
     def svc(self, db_session, pyramid_request):
         pyramid_request.db = db_session
         return delete_user_service_factory({}, pyramid_request)
-
-
-@pytest.fixture
-def user_created_no_groups(Group): # noqa N803
-    # By default, pretend that all users are the creators of 0 groups.
-    Group.created_by.return_value.count.return_value = 0
 
 
 @pytest.fixture
@@ -88,5 +95,23 @@ def api_storage(patch):
 
 
 @pytest.fixture
-def Group(patch): # noqa N802
-    return patch('h.services.delete_user.Group')
+def group_with_two_users(db_session, factories):
+    """
+    Create a group with two members and an annotation created by each.
+    """
+    creator = factories.User()
+    member = factories.User()
+
+    group = Group(authority=creator.authority, creator=creator, members=[creator, member],
+                  name='test', pubid='group_with_two_users')
+    db_session.add(group)
+
+    doc = Document(web_uri='https://example.org')
+    creator_ann = Annotation(userid=creator.userid, groupid=group.pubid, document=doc)
+    member_ann = Annotation(userid=member.userid, groupid=group.pubid, document=doc)
+
+    db_session.add(creator_ann)
+    db_session.add(member_ann)
+    db_session.flush()
+
+    return (group, creator, member, creator_ann, member_ann)
