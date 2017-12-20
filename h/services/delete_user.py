@@ -23,24 +23,34 @@ class DeleteUserService(object):
         message.
         """
 
-        # Check whether this user has created any groups that others have
-        # annotated in.
-        #
+        created_groups = self.request.db.query(Group) \
+                                        .filter(Group.creator == user)
+        if self._groups_have_anns_from_other_users(created_groups, user):
+            raise UserDeleteError('Other users have annotated in groups created by this user')
+
+        self._delete_annotations(user)
+        self._delete_groups(created_groups)
+        self.request.db.delete(user)
+
+    def _groups_have_anns_from_other_users(self, groups, user):
+        """
+        Return `True` if users other than `user` have annotated in `groups`.
+        """
+        group_ids = [g.pubid for g in groups]
+
         # We check for non-empty `group_ids` before querying the DB to avoid an
         # expensive SQL query if `in_` is given an empty list (see
         # https://stackoverflow.com/questions/23523147/)
-        created_groups = self.request.db.query(Group) \
-                                        .filter(Group.creator == user)
-        group_ids = [g.pubid for g in created_groups]
-        if len(group_ids) > 0:
-            other_user_ann_count = self.request.db.query(Annotation) \
-                                                  .filter(Annotation.groupid.in_(group_ids),
-                                                          Annotation.userid != user.userid) \
-                                                  .count()
-            if other_user_ann_count > 0:
-                raise UserDeleteError('Other users have annotated in groups created by this user')
+        if len(group_ids) == 0:
+            return False
 
-        # Delete the user's annotations
+        other_user_ann_count = self.request.db.query(Annotation) \
+                                              .filter(Annotation.groupid.in_(group_ids),
+                                                      Annotation.userid != user.userid) \
+                                              .count()
+        return other_user_ann_count > 0
+
+    def _delete_annotations(self, user):
         annotations = self.request.db.query(Annotation) \
                                      .filter_by(userid=user.userid)
         for annotation in annotations:
@@ -48,12 +58,9 @@ class DeleteUserService(object):
             event = AnnotationEvent(self.request, annotation.id, 'delete')
             self.request.notify_after_commit(event)
 
-        # Delete groups created by this user.
-        for group in created_groups:
+    def _delete_groups(self, groups):
+        for group in groups:
             self.request.db.delete(group)
-
-        # Finally, delete the user.
-        self.request.db.delete(user)
 
 
 def delete_user_service_factory(context, request):
