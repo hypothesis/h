@@ -33,11 +33,11 @@ class DeleteUserService(object):
                                         .filter(Group.creator == user)
         group_ids = [g.pubid for g in created_groups]
         if len(group_ids) > 0:
-            other_user_group_anns = self.request.db.query(Annotation) \
-                                                   .filter(Annotation.groupid.in_(group_ids),
-                                                           Annotation.userid != user.userid) \
-                                                   .count()
-            if other_user_group_anns > 0:
+            other_user_ann_count = self.request.db.query(Annotation) \
+                                                  .filter(Annotation.groupid.in_(group_ids),
+                                                          Annotation.userid != user.userid) \
+                                                  .count()
+            if other_user_ann_count > 0:
                 raise UserDeleteError('Other users have annotated in groups created by this user')
 
         # Delete the user's annotations
