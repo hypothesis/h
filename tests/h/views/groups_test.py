@@ -229,7 +229,7 @@ class FakeGroupService(object):
         self.joined = []
         self.left = []
 
-    def create(self, name, authority, userid, description):
+    def create(self, name, authority, userid, description=None):
         self.created.append((name, authority, userid, description))
         return FakeGroup('abc123', 'fake-group')
 

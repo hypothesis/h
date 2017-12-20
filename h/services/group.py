@@ -72,6 +72,11 @@ class GroupService(object):
         self.user_fetcher = user_fetcher
         self.publish = publish
 
+    def get_by_pubid(self, pubid):
+        """get a single group by providing its pubid"""
+        group = self.session.query(Group).filter_by(pubid=pubid).one()
+        return group
+
     def create(self, name, authority, userid, description=None, type_='private'):
         """
         Create a new group.
