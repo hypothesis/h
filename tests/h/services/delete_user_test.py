@@ -55,26 +55,25 @@ class TestDeleteUserService(object):
 
     def test_delete_user_removes_groups_if_no_collaborators(self, db_session, group_with_two_users, pyramid_request, svc):
         pyramid_request.db = db_session
-        (group, user, other_user, user_ann, other_user_ann) = group_with_two_users
-        db_session.delete(other_user_ann)
+        (group, creator, member, creator_ann, member_ann) = group_with_two_users
+        db_session.delete(member_ann)
 
-        svc.delete(user)
+        svc.delete(creator)
 
         assert group in db_session.deleted
 
     def test_delete_user_fails_if_groups_have_collaborators(self, db_session, group_with_two_users, pyramid_request, svc):
         pyramid_request.db = db_session
-        (group, user, other_user, user_ann, other_user_ann) = group_with_two_users
+        (group, creator, member, creator_ann, member_ann) = group_with_two_users
 
         with pytest.raises(UserDeleteError):
-            svc.delete(user)
+            svc.delete(creator)
 
     def test_delete_user_removes_only_groups_created_by_user(self, db_session, group_with_two_users, pyramid_request, svc):
         pyramid_request.db = db_session
-        (group, user, other_user, user_ann, other_user_ann) = group_with_two_users
+        (group, creator, member, creator_ann, member_ann) = group_with_two_users
 
-        # Delete the user who is a member of the group, but did not create it.
-        svc.delete(other_user)
+        svc.delete(member)
 
         assert group not in db_session.deleted
 
@@ -100,19 +99,19 @@ def group_with_two_users(db_session, factories):
     """
     Create a group with two members and an annotation created by each.
     """
-    user = factories.User()
-    other_user = factories.User()
+    creator = factories.User()
+    member = factories.User()
 
-    group = Group(authority=user.authority, creator=user, members=[user, other_user],
+    group = Group(authority=creator.authority, creator=creator, members=[creator, member],
                   name='test', pubid='group_with_two_users')
     db_session.add(group)
 
     doc = Document(web_uri='https://example.org')
-    user_ann = Annotation(userid=user.userid, groupid=group.pubid, document=doc)
-    other_user_ann = Annotation(userid=other_user.userid, groupid=group.pubid,
-                                document=doc)
-    db_session.add(user_ann)
-    db_session.add(other_user_ann)
+    creator_ann = Annotation(userid=creator.userid, groupid=group.pubid, document=doc)
+    member_ann = Annotation(userid=member.userid, groupid=group.pubid, document=doc)
+
+    db_session.add(creator_ann)
+    db_session.add(member_ann)
     db_session.flush()
 
-    return (group, user, other_user, user_ann, other_user_ann)
+    return (group, creator, member, creator_ann, member_ann)
