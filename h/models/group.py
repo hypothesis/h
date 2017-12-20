@@ -23,7 +23,7 @@ class GroupFactory(object):
 
     def __getitem__(self, pubid):
         try:
-            group_service = request.find_service(name='group')
+            group_service = self.request.find_service(name='group')
             return group_service.get_by_pubid(pubid=pubid)
         except exc.NoResultFound:
             raise KeyError()
