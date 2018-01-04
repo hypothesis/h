@@ -165,6 +165,38 @@ class TestGenerate(object):
 
         generate(pyramid_request, notification)
 
+    def test_urls_not_set_for_third_party_users(self,
+                                                notification,
+                                                pyramid_request,
+                                                html_renderer,
+                                                text_renderer):
+        pyramid_request.authority = 'foo.org'
+        expected_context = {
+            'parent_user_url': None,
+            'reply_user_url': None,
+        }
+
+        generate(pyramid_request, notification)
+
+        html_renderer.assert_(**expected_context)
+        text_renderer.assert_(**expected_context)
+
+    def test_urls_set_for_first_party_users(self,
+                                            notification,
+                                            pyramid_request,
+                                            html_renderer,
+                                            text_renderer):
+        expected_context = {
+            'parent_user_url': 'http://example.com/stream/user/patricia',
+            'reply_user_url': 'http://example.com/stream/user/ron',
+        }
+
+        generate(pyramid_request, notification)
+
+        html_renderer.assert_(**expected_context)
+        text_renderer.assert_(**expected_context)
+
+
     @pytest.fixture
     def document(self, db_session):
         doc = Document(title=u'My fascinating page')
