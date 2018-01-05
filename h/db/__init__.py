@@ -86,7 +86,11 @@ def _session(request):
 
     # Track uncommitted changes so we can verify that everything was either
     # committed or rolled back when the request finishes.
-    tracker = Tracker(session)
+    db_session_checks = request.registry.settings.get('h.db_session_checks', True)
+    if db_session_checks:
+        tracker = Tracker(session)
+    else:
+        tracker = None
 
     # pyramid_tm doesn't always close the database session for us.
     #
@@ -102,7 +106,7 @@ def _session(request):
     # See: https://github.com/Pylons/pyramid_tm/issues/40
     @request.add_finished_callback
     def close_the_sqlalchemy_session(request):
-        changes = tracker.uncommitted_changes()
+        changes = tracker.uncommitted_changes() if tracker else []
         if changes:
             msg = 'closing a session with uncommitted changes'
             request.sentry.captureMessage(msg, stack=True, extra={
