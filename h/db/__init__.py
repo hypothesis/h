@@ -108,11 +108,11 @@ def _session(request):
     def close_the_sqlalchemy_session(request):
         changes = tracker.uncommitted_changes() if tracker else []
         if changes:
-            msg = 'closing a session with uncommitted changes'
-            request.sentry.captureMessage(msg, stack=True, extra={
+            msg = 'closing a session with uncommitted changes %s'
+            log.warn(msg, changes, extra={
+                'stack': True,
                 'changes': changes,
             })
-            log.warn('{} {}'.format(msg, changes))
         session.close()
 
     return session
