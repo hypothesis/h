@@ -21,6 +21,8 @@ import zope.sqlalchemy.datamanager
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from h.util.session_tracker import Tracker
+
 __all__ = (
     'Base',
     'Session',
@@ -82,6 +84,14 @@ def _session(request):
     else:
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
+    # Track uncommitted changes so we can verify that everything was either
+    # committed or rolled back when the request finishes.
+    db_session_checks = request.registry.settings.get('h.db_session_checks', True)
+    if db_session_checks:
+        tracker = Tracker(session)
+    else:
+        tracker = None
+
     # pyramid_tm doesn't always close the database session for us.
     #
     # For example if an exception view accesses the session and causes a new
@@ -96,10 +106,13 @@ def _session(request):
     # See: https://github.com/Pylons/pyramid_tm/issues/40
     @request.add_finished_callback
     def close_the_sqlalchemy_session(request):
-        if session.dirty:
-            request.sentry.captureMessage('closing a dirty session', stack=True, extra={
-                'dirty': session.dirty,
+        changes = tracker.uncommitted_changes() if tracker else []
+        if changes:
+            msg = 'closing a session with uncommitted changes'
+            request.sentry.captureMessage(msg, stack=True, extra={
+                'changes': changes,
             })
+            log.warn('{} {}'.format(msg, changes))
         session.close()
 
     return session

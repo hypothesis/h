@@ -83,6 +83,8 @@ SETTINGS = [
     EnvSetting('h.client_rpc_allowed_origins',
                'CLIENT_RPC_ALLOWED_ORIGINS', type=aslist),
 
+    EnvSetting('h.db_session_checks', 'DB_SESSION_CHECKS', type=asbool),
+
     # Environment name, provided by the deployment environment. Please do
     # *not* toggle functionality based on this value. It is intended as a
     # label only.
