@@ -37,6 +37,12 @@ def generate(request, notification):
     unsubscribe_token = _unsubscribe_token(request, parent_user)
     unsubscribe_url = request.route_url('unsubscribe', token=unsubscribe_token)
 
+    if notification.reply_user.authority != request.authority:
+        reply_user_url = None
+
+    if notification.parent_user.authority != request.authority:
+        parent_user_url = None
+
     context = {
         'document_title': document_title,
         'document_url': notification.parent.target_uri,
