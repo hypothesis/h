@@ -20,8 +20,9 @@
         class="annotation-card__username">
         {{ presented_annotation.annotation.username }}
       </a>
-      <a title="date" href="{{ request.route_url('annotation', id=presented_annotation.annotation.id) }}"
-        class="annotation-card__timestamp">
+      <a title="date"
+         {% if presented_annotation.html_link %}href="{{ presented_annotation.html_link }}"{% endif %}
+         class="annotation-card__timestamp">
         {{ presented_annotation.annotation.updated.strftime('%d %b %Y') }}
       </a>
     </div>

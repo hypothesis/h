@@ -104,30 +104,6 @@ class Group(Base, mixins.Timestamps):
     def is_public(self):
         return self.readable_by == ReadableBy.world
 
-    def documents(self, limit=25):
-        """
-        Return this group's most recently annotated documents.
-
-        Only returns documents that have shared annotations in this group,
-        not documents that only have private annotations in the group.
-
-        """
-        documents = []
-        # FIXME: this should probably use a relationship defined on the group
-        # so that we don't have to import the Annotation model explicitly.
-        annotations = (
-            sa.orm.object_session(self).query(Annotation)
-            .filter_by(groupid=self.pubid, shared=True)
-            .order_by(Annotation.updated.desc())
-            .limit(1000))
-        for annotation in annotations:
-            if annotation.document and annotation.document not in documents:
-                documents.append(annotation.document)
-                if len(documents) >= limit:
-                    break
-
-        return documents
-
     def __acl__(self):
         terms = []
 

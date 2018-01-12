@@ -1,5 +1,9 @@
 <p>
-  <a href="{{ reply_user_url }}">{{ reply_user.username }}</a>
+  {% if reply_user_url %}
+    <a href="{{ reply_user_url }}">{{ reply_user_display_name }}</a>
+  {% else %}
+    {{ reply_user_display_name }}
+  {% endif %}
   has
   <a href="{{ reply_url }}">replied to your annotation</a>
   on
@@ -9,7 +13,11 @@
 <p>
   On
   {{ parent.created | human_timestamp }}
-  <a href="{{ parent_user_url }}">{{ parent_user.username }}</a>
+  {% if parent_user_url %}
+    <a href="{{ parent_user_url }}">{{ parent_user_display_name }}</a>
+  {% else %}
+    {{ parent_user_display_name }}
+  {% endif %}
   commented:
 </p>
 
@@ -18,7 +26,11 @@
 <p>
   On
   {{ reply.created | human_timestamp }}
-  <a href="{{ reply_user_url }}">{{ reply_user.username }}</a>
+  {% if reply_user_url %}
+    <a href="{{ reply_user_url }}">{{ reply_user_display_name }}</a>
+  {% else %}
+    {{ reply_user_display_name }}
+  {% endif %}
   replied:
 </p>
 

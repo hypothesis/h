@@ -3,7 +3,6 @@
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
-from h import auth
 from h import form
 from h import i18n
 from h.models import AuthClient
@@ -47,7 +46,7 @@ class AuthClientCreateController(object):
     def get(self):
         # Set useful defaults for new clients.
         self.form.set_appstruct({
-            'authority': auth.authority(self.request),
+            'authority': self.request.authority,
             'grant_type': GrantType.authorization_code,
             'response_type': ResponseType.code,
             'trusted': False,

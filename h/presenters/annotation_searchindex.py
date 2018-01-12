@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
+from h.util.user import split_user
 
 
 class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
@@ -14,8 +15,10 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
 
     def asdict(self):
         docpresenter = DocumentSearchIndexPresenter(self.annotation.document)
+        userid_parts = split_user(self.annotation.userid)
 
         result = {
+            'authority': userid_parts['domain'],
             'id': self.annotation.id,
             'created': self.created,
             'updated': self.updated,

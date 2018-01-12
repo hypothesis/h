@@ -16,6 +16,7 @@ from h.models import Annotation, Document, Group
 from h.search import Search
 from h.search import parser
 from h.search.query import (
+    AuthorityFilter,
     TagsAggregation,
     TopLevelAnnotationsFilter,
     UsersAggregation,
@@ -133,6 +134,7 @@ def execute(request, query, page_size):
                 bucket.presented_annotations.append({
                     'annotation': presenters.AnnotationHTMLPresenter(annotation),
                     'group': groups.get(annotation.groupid),
+                    'html_link': links.html_link(request, annotation),
                     'incontext_link': links.incontext_link(request, annotation)
                 })
 
@@ -163,6 +165,7 @@ def fetch_annotations(session, ids):
 @newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
     search = Search(request, stats=request.stats)
+    search.append_filter(AuthorityFilter(authority=request.authority))
     search.append_filter(TopLevelAnnotationsFilter())
     for agg in aggregations_for(query):
         search.append_aggregation(agg)

@@ -58,7 +58,6 @@ def index(context, request):
         _set_at_path(links, link['name'].split('.'), method_info)
 
     return {
-        'message': "Annotator Store API",
         'links': links,
     }
 

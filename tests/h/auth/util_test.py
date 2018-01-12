@@ -158,7 +158,11 @@ def test_translate_annotation_principals(p_in, p_out):
 
 
 class TestAuthDomain(object):
-    def test_it_returns_the_request_domain(self, pyramid_request):
+    def test_it_returns_the_request_domain_if_authority_isnt_set(
+            self, pyramid_request):
+        # Make sure h.authority isn't set.
+        pyramid_request.registry.settings.pop('h.authority', None)
+
         assert util.authority(pyramid_request) == pyramid_request.domain
 
     def test_it_allows_overriding_request_domain(self, pyramid_request):

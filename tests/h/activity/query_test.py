@@ -195,6 +195,7 @@ class TestCheckURL(object):
                          '_fetch_groups',
                          'bucketing',
                          'presenters',
+                         'AuthorityFilter',
                          'Search',
                          'TagsAggregation',
                          'TopLevelAnnotationsFilter',
@@ -217,8 +218,16 @@ class TestExecute(object):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         TopLevelAnnotationsFilter.assert_called_once_with()
-        search.append_filter.assert_called_once_with(
-            TopLevelAnnotationsFilter.return_value)
+        search.append_filter.assert_any_call(TopLevelAnnotationsFilter.return_value)
+
+    def test_it_only_shows_annotations_from_current_authority(self,
+                                                              pyramid_request,
+                                                              search,
+                                                              AuthorityFilter):
+        execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        AuthorityFilter.assert_called_once_with(pyramid_request.authority)
+        search.append_filter.assert_any_call(AuthorityFilter.return_value)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
                                                             pyramid_request,
@@ -432,6 +441,29 @@ class TestExecute(object):
             assert presented_annotation['incontext_link'] == (
                 'incontext_link_for_annotation_{id}'.format(id=presented_annotation['annotation'].annotation.id))
 
+    def test_it_returns_each_annotations_html_link(self,
+                                                   annotations,
+                                                   links,
+                                                   pyramid_request):
+        def html_link(request, annotation):
+            assert request == pyramid_request, (
+                "It should always pass the request to html_link")
+            # Return a predictable per-annotation value for the html link.
+            return 'html_link_for_annotation_{id}'.format(id=annotation.id)
+
+        links.html_link.side_effect = html_link
+
+        result = execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
+
+        presented_annotations = []
+        for timeframe in result.timeframes:
+            for bucket in timeframe.document_buckets.values():
+                presented_annotations.extend(bucket.presented_annotations)
+
+        for presented_annotation in presented_annotations:
+            assert presented_annotation['html_link'] == (
+                'html_link_for_annotation_{id}'.format(id=presented_annotation['annotation'].annotation.id))
+
     def test_it_returns_the_total_number_of_matching_annotations(
             self, pyramid_request):
         assert execute(pyramid_request, MultiDict(), self.PAGE_SIZE).total == 20
@@ -566,6 +598,10 @@ class TestExecute(object):
     @pytest.fixture
     def TagsAggregation(self, patch):
         return patch('h.activity.query.TagsAggregation')
+
+    @pytest.fixture
+    def AuthorityFilter(self, patch):
+        return patch('h.activity.query.AuthorityFilter')
 
     @pytest.fixture
     def TopLevelAnnotationsFilter(self, patch):

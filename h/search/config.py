@@ -24,6 +24,7 @@ ANNOTATION_MAPPING = {
     'analyzer': 'keyword',
     'properties': {
         'annotator_schema_version': {'type': 'string'},
+        'authority': {'type': 'string', 'index': 'not_analyzed'},
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
         'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
