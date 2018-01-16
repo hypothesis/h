@@ -163,7 +163,7 @@ can be installed on:
 
    .. code-block:: bash
 
-      docker-compose logs rabbitmq
+      docker-compose logs rabbit
 
    For more on how to use Docker and Docker Compose see the `Docker website`_.
 
