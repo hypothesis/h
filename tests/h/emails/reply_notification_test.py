@@ -98,6 +98,20 @@ class TestGenerate(object):
         html_renderer.assert_(**expected_context)
         text_renderer.assert_(**expected_context)
 
+    def test_supports_non_ascii_display_names(self,
+                                              notification,
+                                              pyramid_request,
+                                              html_renderer,
+                                              text_renderer,
+                                              parent_user,
+                                              reply_user):
+        parent_user.display_name = 'Parent 👩'
+        reply_user.display_name = 'Child 👧'
+
+        (_, subject, _, _) = generate(pyramid_request, notification)
+
+        assert subject == 'Child 👧 has replied to your annotation'
+
     def test_returns_usernames_if_no_display_names(self,
                                                    notification,
                                                    pyramid_request,
