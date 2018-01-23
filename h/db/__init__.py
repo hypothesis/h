@@ -115,13 +115,25 @@ def _session(request):
             })
         session.close()
 
-        # zope.sqlalchemy maintains an internal `id(session) => state` map with
-        # an entry for each active DB session which is registered with it.
+        # Remove stale sqlalchemy session IDs from zope.sqlalchemy's _SESSION_STATE.
         #
-        # Entries are normally cleared at the end of a request when the
-        # transaction manager (`request.tm`) commits. DB writes after this can
-        # leave stale entries in the map which can cause problems in future
-        # requests if another session gets the same ID as the current one.
+        # _SESSION_STATE is a dict whose keys are the Python object IDs of
+        # sqlalchemy sessions. A session's ID is normally removed from
+        # _SESSION_STATE at the end of processing that session's request. But
+        # if something opens a new DB session by accessing the DB after the
+        # transaction manager has committed then that session's ID is **never**
+        # removed from _SESSION_STATE even after the session object has been
+        # garbage collected.
+        #
+        # If a future request's session then happens to get the same Python
+        # object ID as one of these "stale" IDs not removed from
+        # _SESSION_STATE, then zope.sqlalchemy does not join that sqlalchemy
+        # session to the transaction manager's transaction because it thinks it
+        # has already done so. As a result, that session is never committed
+        # (annotations are not saved, etc).
+        #
+        # To prevent that from happening we remove stale IDs from
+        # _SESSION_STATE here.
         dm = zope.sqlalchemy.datamanager
         if len(dm._SESSION_STATE) > 0:
             log.warn('request ended with non-empty zope.sqlalchemy state', extra={
