@@ -95,7 +95,7 @@ def configure_environment(config):  # pragma: no cover
     config.registry[ENVIRONMENT_KEY] = create_environment(base)
 
 
-def handle_form_submission(request, form, on_success, on_failure):
+def handle_form_submission(request, form, on_success, on_failure, flash=True):
     """
     Handle the submission of the given form in a standard way.
 
@@ -125,8 +125,8 @@ def handle_form_submission(request, form, on_success, on_failure):
     """
     try:
         appstruct = form.validate(request.POST.items())
-    except deform.ValidationFailure:
-        result = on_failure()
+    except deform.ValidationFailure as e:
+        result = on_failure(exception=e)
         request.response.status_int = 400
     else:
         result = on_success(appstruct)
@@ -134,7 +134,7 @@ def handle_form_submission(request, form, on_success, on_failure):
         if result is None:
             result = httpexceptions.HTTPFound(location=request.url)
 
-        if not request.is_xhr:
+        if flash and not request.is_xhr:
             request.session.flash(_("Success. We've saved your changes."),
                                   'success')
 

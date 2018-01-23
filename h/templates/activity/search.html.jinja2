@@ -272,20 +272,22 @@
       </form>
     </section>
 
-    <h3 class="group-invite__title">
-      {% trans %}Invite new members{% endtrans %}
-    </h3>
-    Sharing the link below lets people join this group:
-    <div class="group-invite__container js-copy-button">
-      <input class="group-invite__input js-select-onfocus"
-             data-ref="input"
-             value="{{ group.url }}">
-      <button class="group-invite__clipboard-button"
-              data-ref="button"
-              title="Copy to clipboard">
-        {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
-      </button>
-    </div>
+    {% if show_invite_new_user %}
+      <h3 class="group-invite__title">
+        {% trans %}Invite new members{% endtrans %}
+      </h3>
+      Sharing the link below lets people join this group:
+      <div class="group-invite__container js-copy-button">
+        <input class="group-invite__input js-select-onfocus"
+               data-ref="input"
+               value="{{ group.url }}">
+        <button class="group-invite__clipboard-button"
+                data-ref="button"
+                title="Copy to clipboard">
+          {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
+        </button>
+      </div>
+    {% endif %}
   {% endcall %}
 {% endmacro %}
 

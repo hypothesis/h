@@ -10,12 +10,13 @@ from pyramid.security import (
 )
 
 from h import storage
-from h.models import AuthClient
+from h.models import AuthClient, Group
 from h.auth import role
 from h.interfaces import IGroupService
 
 
 class Root(object):
+    __parent__ = None
     __acl__ = [
         (Allow, role.Staff, 'admin_index'),
         (Allow, role.Staff, 'admin_groups'),
@@ -103,6 +104,37 @@ class AuthClientFactory(object):
             return client
         except:
             # No such client found or not a valid UUID.
+            raise KeyError()
+
+
+class GroupFactory(object):
+    """
+    dict-like for looking up Group models by pubid.
+    Values will have .__parent__ set to request's root resource (and thus overlay the root ACL)
+    """
+
+    def __init__(self, request):
+        """
+        :param Request request: http request of end-user who's looking up the group
+        """
+        self.request = request
+
+    def __getitem__(self, pubid):
+        """
+        :param str pubid: pubid of Group to lookup
+        """
+        try:
+            group = self.request.db.query(Group) \
+                .filter_by(pubid=pubid).one()
+
+            # Inherit global ACL.
+            # See `pyramid.authorization.ACLAuthorizationPolicy` docs.
+            # @TODO (bengo): Can I just put this in the model definition or even h.db:Base?
+            group.__parent__ = Root(self.request)
+
+            return group
+        except:
+            # No such group found
             raise KeyError()
 
 

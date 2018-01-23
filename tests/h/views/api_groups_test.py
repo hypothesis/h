@@ -5,9 +5,43 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPMovedPermanently
+
+from .groups_test import FakeGroupService
 
 from h.views import api_groups as views
+
+
+@pytest.mark.usefixtures('group_service')
+class TestRead(object):
+
+    def test_read_noslug(self, pyramid_request, group_service):
+        group = group_service.create(u'test_read_noslug', 'localhost', 0)
+        pyramid_request.matchdict[u'pubid'] = group.pubid
+
+        # request.route_path is not defined on DummyRequest
+        def _route_path(route_name, pubid, slug):
+            return '/api/groups/{pubid}/{slug}'.format(pubid=pubid, slug=slug)
+
+        pyramid_request.route_path = _route_path
+        with pytest.raises(HTTPMovedPermanently) as redirect_exc:
+            views.read_noslug(group, pyramid_request)
+        assert redirect_exc.value.headers.get('Location')
+
+    def test_get_group(self, pyramid_request, group_service):
+        group = group_service.create(u'test_read_noslug', 'localhost', 0)
+        pyramid_request.matchdict[u'slug'] = group.slug
+        pyramid_request.matchdict[u'pubid'] = group.pubid
+        response = views.get_group(group, pyramid_request)
+        assert response
+        for k in ('id', 'name', 'description'):
+            assert k in response
+
+    @pytest.fixture
+    def group_service(self, pyramid_config):
+        service = FakeGroupService()
+        pyramid_config.register_service(service, name='group')
+        return service
 
 
 @pytest.mark.usefixtures('authenticated_userid', 'group_service')

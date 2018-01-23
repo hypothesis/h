@@ -23,7 +23,8 @@ class GroupFactory(object):
 
     def __getitem__(self, pubid):
         try:
-            return self.request.db.query(Group).filter_by(pubid=pubid).one()
+            group_service = self.request.find_service(name='group')
+            return group_service.get_by_pubid(pubid=pubid)
         except exc.NoResultFound:
             raise KeyError()
 
@@ -121,7 +122,6 @@ class Group(Base, mixins.Timestamps):
 
         if self.creator:
             terms.append((security.Allow, self.creator.userid, 'admin'))
-        terms.append(security.DENY_ALL)
 
         return terms
 

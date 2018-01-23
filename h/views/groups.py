@@ -4,11 +4,14 @@ import deform
 from pyramid import httpexceptions
 from pyramid import security
 from pyramid.config import not_
+from pyramid.exceptions import HTTPNotFound
 from pyramid.view import view_config, view_defaults
 
 from h import form
 from h import i18n
 from h.groups import schemas
+
+from h.views.api_config import cors_policy
 
 _ = i18n.TranslationString
 
@@ -28,7 +31,7 @@ class GroupCreateController(object):
                                          'group-form__submit-btn '
                                          'js-create-group-create-btn')
         self.form = request.create_form(self.schema,
-                                        css_class='group-form__form',
+                                        css_class='admin-create-group-form__form',
                                         buttons=(submit,))
 
     @view_config(request_method='GET')
@@ -87,10 +90,10 @@ class GroupEditController(object):
     @view_config(request_method='POST')
     def post(self):
         return form.handle_form_submission(
-                self.request,
-                self.form,
-                on_success=self._update_group,
-                on_failure=self._template_data)
+            self.request,
+            self.form,
+            on_success=self._update_group,
+            on_failure=self._template_data)
 
     def _template_data(self):
         return {
@@ -107,6 +110,7 @@ class GroupEditController(object):
 
 @view_config(route_name='group_read',
              request_method='GET',
+             accept='text/html',
              renderer='h:templates/groups/join.html.jinja2',
              effective_principals=not_(security.Authenticated))
 def read_unauthenticated(group, request):
@@ -119,6 +123,29 @@ def read_unauthenticated(group, request):
     return {'group': group}
 
 
+@view_config(route_name='group_read',
+             request_method='GET',
+             accept='application/json',
+             renderer='json',
+             decorator=cors_policy)
+def read_group_json(group, request):
+    """If the end-user wants json, redirect to the API"""
+    if not group:
+        raise HTTPNotFound()
+    url = request.route_path('api.group_read',
+                             pubid=group.pubid,
+                             slug=group.slug)
+    return httpexceptions.HTTPSeeOther(url)
+
+
+@view_config(route_name='group_read',
+             request_method='OPTIONS',
+             decorator=cors_policy,
+             renderer='json')
+def options_group_read(group, request):
+    return {}
+
+
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read_noslug(group, request):
     check_slug(group, request)
@@ -128,5 +155,6 @@ def check_slug(group, request):
     """Redirect if the request slug does not match that of the group."""
     slug = request.matchdict.get('slug')
     if slug is None or slug != group.slug:
-        path = request.route_path('group_read', pubid=group.pubid, slug=group.slug)
+        path = request.route_path(
+            'group_read', pubid=group.pubid, slug=group.slug)
         raise httpexceptions.HTTPMovedPermanently(path)
