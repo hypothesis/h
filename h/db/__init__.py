@@ -117,6 +117,10 @@ def _session(request):
 
         # Remove stale sqlalchemy session IDs from zope.sqlalchemy's _SESSION_STATE.
         #
+        # TODO: Once https://github.com/zopefoundation/zope.sqlalchemy/pull/23
+        # has been merged and we upgrade to a new version of zope.sqlalchemy
+        # that includes it, we can remove this workaround.
+        #
         # _SESSION_STATE is a dict whose keys are the Python object IDs of
         # sqlalchemy sessions. A session's ID is normally removed from
         # _SESSION_STATE at the end of processing that session's request. But
@@ -134,6 +138,7 @@ def _session(request):
         #
         # To prevent that from happening we remove stale IDs from
         # _SESSION_STATE here.
+        #
         dm = zope.sqlalchemy.datamanager
         if len(dm._SESSION_STATE) > 0:
             log.warn('request ended with non-empty zope.sqlalchemy state', extra={
