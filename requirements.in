@@ -43,4 +43,4 @@ venusian
 wsaccel
 ws4py >= 0.4.0
 zope.interface
-zope.sqlalchemy
+zope.sqlalchemy # Pinned to fork in requirements.txt for https://github.com/zopefoundation/zope.sqlalchemy/pull/23

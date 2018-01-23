@@ -76,6 +76,9 @@ def _session(request):
     engine = request.registry['sqlalchemy.engine']
     session = Session(bind=engine)
 
+    # Guard against re-occurrence of https://github.com/hypothesis/h/issues/4704
+    assert session not in zope.sqlalchemy.datamanager._SESSION_STATE
+
     # If the request has a transaction manager, associate the session with it.
     try:
         tm = request.tm
@@ -114,22 +117,6 @@ def _session(request):
                 'changes': changes,
             })
         session.close()
-
-        # zope.sqlalchemy maintains an internal `id(session) => state` map with
-        # an entry for each active DB session which is registered with it.
-        #
-        # Entries are normally cleared at the end of a request when the
-        # transaction manager (`request.tm`) commits. DB writes after this can
-        # leave stale entries in the map which can cause problems in future
-        # requests if another session gets the same ID as the current one.
-        dm = zope.sqlalchemy.datamanager
-        if len(dm._SESSION_STATE) > 0:
-            log.warn('request ended with non-empty zope.sqlalchemy state', extra={
-                'data': {
-                    'zope.sqlalchemy.datamanager._SESSION_STATE': dm._SESSION_STATE,
-                },
-            })
-            dm._SESSION_STATE = {}
 
     return session
 
