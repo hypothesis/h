@@ -168,6 +168,34 @@ paths:
           description: Profile information
           schema:
             $ref: '#/definitions/Profile'
+  /profile/groups:
+    get:
+      summary: Get list of groups for profile
+      description: >
+        Retrieve a list of accessible, applicable groups.
+
+      parameters:
+        - name: authority
+          in: query
+          description: >
+            Used to identify available public groups.
+            Applies only to non-authorized requests.
+          required: false
+          type: string
+          default: "hypothes.is"
+        - name: document_url
+          in: query
+          description: >
+            The URI for the current annotation target document.
+            All scoped public groups that apply to this URI will be included.
+          required: false
+          type: string
+          format: uri
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/GroupResults'
   /search:
     get:
       summary: Search for annotations
@@ -354,6 +382,12 @@ definitions:
       total:
         description: Total number of results matching query.
         type: integer
+  GroupResults:
+    type: array
+    items:
+      $ref: '#/definitions/Group'
+  Group:
+    $ref: './schemas/group-schema.json'
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:
