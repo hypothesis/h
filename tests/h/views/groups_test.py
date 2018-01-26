@@ -146,33 +146,6 @@ class TestGroupEditController(object):
 
 
 @pytest.mark.usefixtures('routes')
-class TestGroupReadUnauthenticated(object):
-    def test_redirects_if_slug_incorrect(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_request.matchdict['slug'] = 'another-slug'
-
-        with pytest.raises(HTTPMovedPermanently) as exc:
-            views.read_unauthenticated(group, pyramid_request)
-
-        assert exc.value.location == '/g/abc123/some-slug'
-
-    def test_returns_template_context(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_request.matchdict['slug'] = 'some-slug'
-
-        result = views.read_unauthenticated(group, pyramid_request)
-
-        assert result == {'group': group}
-
-    def test_raises_not_found_when_not_joinable(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug', joinable_by=None)
-        pyramid_request.matchdict['slug'] = 'some-slug'
-
-        with pytest.raises(HTTPNotFound):
-            views.read_unauthenticated(group, pyramid_request)
-
-
-@pytest.mark.usefixtures('routes')
 def test_read_noslug_redirects(pyramid_request):
     group = FakeGroup('abc123', 'some-slug')
 

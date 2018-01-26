@@ -113,7 +113,7 @@ class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
 
-    def test_search_renders_join_template(self, controller, pyramid_request, group):
+    def test_renders_join_template_when_no_read_permission(self, controller, pyramid_request, group):
         """When the request has no read permission but join, it should render the join template."""
 
         def fake_has_permission(permission, context=None):
@@ -129,10 +129,26 @@ class TestGroupSearchController(object):
         assert 'join.html' in pyramid_request.override_renderer
         assert result == {'group': group}
 
-    def test_raises_not_found_when_no_read_or_join_permissions(self, controller, pyramid_request):
+    def test_renders_join_template_when_not_logged_in(self, controller, factories, pyramid_request, group):
+        """
+        If user is logged out and has no read permission, prompt to login and join.
+        """
         def fake_has_permission(permission, context=None):
             if permission in ('read', 'join'):
                 return False
+        pyramid_request.user = None
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+
+        result = controller.search()
+
+        assert 'join.html' in pyramid_request.override_renderer
+        assert result == {'group': group}
+
+    def test_raises_not_found_when_no_read_or_join_permissions(self, controller, factories, pyramid_request):
+        def fake_has_permission(permission, context=None):
+            if permission in ('read', 'join'):
+                return False
+        pyramid_request.user = factories.User()  # User logged in
         pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
 
         with pytest.raises(httpexceptions.HTTPNotFound):

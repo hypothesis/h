@@ -8,7 +8,6 @@ import urlparse
 
 from jinja2 import Markup
 from pyramid import httpexceptions
-from pyramid import security
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
@@ -87,7 +86,6 @@ class SearchController(object):
 
 @view_defaults(route_name='group_read',
                renderer='h:templates/activity/search.html.jinja2',
-               effective_principals=security.Authenticated,
                request_method='GET')
 class GroupSearchController(SearchController):
     """View callables unique to the "group_read" route."""
@@ -257,9 +255,15 @@ class GroupSearchController(SearchController):
 
     def _check_access_permissions(self):
         if not self.request.has_permission('read', self.group):
-            if self.request.has_permission('join', self.group):
+            show_join_page = self.request.has_permission('join', self.group)
+            if not self.request.user:
+                # Show a page which will prompt the user to login to join.
+                show_join_page = True
+
+            if show_join_page:
                 self.request.override_renderer = 'h:templates/groups/join.html.jinja2'
                 return {'group': self.group}
+
             raise httpexceptions.HTTPNotFound()
 
 
