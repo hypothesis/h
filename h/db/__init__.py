@@ -141,11 +141,6 @@ def _session(request):
         #
         dm = zope.sqlalchemy.datamanager
         if len(dm._SESSION_STATE) > 0:
-            log.warn('request ended with non-empty zope.sqlalchemy state', extra={
-                'data': {
-                    'zope.sqlalchemy.datamanager._SESSION_STATE': dm._SESSION_STATE,
-                },
-            })
             dm._SESSION_STATE = {}
 
     return session
