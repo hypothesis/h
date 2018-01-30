@@ -33,3 +33,11 @@ def update_preferences(request):
         raise APIError(e.message, status_code=400)
 
     return h_session.profile(request)
+
+@api_config(route_name='api.profile_groups',
+            request_method='GET',
+            link_name='profile_groups.read',
+            description="Fetch the user's groups")
+def profile(request):
+    authority = request.params.get('authority')
+    return h_session.profile(request, authority)

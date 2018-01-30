@@ -78,6 +78,7 @@ def test_includeme():
              factory='h.resources:AnnotationResourceFactory',
              traverse='/{id}'),
         call('api.profile', '/api/profile'),
+        call('api.profile_groups', '/api/profile/groups'),
         call('api.debug_token', '/api/debug-token'),
         call('api.group_member', '/api/groups/{pubid}/members/{user}', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
         call('api.search', '/api/search'),
