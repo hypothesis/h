@@ -38,6 +38,7 @@ def update_preferences(request):
             request_method='GET',
             link_name='profile_groups.read',
             description="Fetch the user's groups")
-def profile(request):
+def profile_groups(request):
     authority = request.params.get('authority')
-    return h_session.profile(request, authority)
+    svc = request.find_service(name='profile_group')
+    return svc.all(request.user, authority)

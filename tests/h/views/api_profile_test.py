@@ -24,20 +24,35 @@ class TestProfile(object):
         session_profile.assert_called_once_with(pyramid_request, 'foo.com')
         assert result == session_profile.return_value
 
+@pytest.mark.usefixtures('profile_group_service')
 class TestProfileGroups(object):
-    def test_profile_view_proxies_to_session(self, session_profile, pyramid_request):
-        result = api_profile.profile(pyramid_request)
+    def test_profile_groups_proxies_to_service(self, pyramid_request, profile_group_service):
+        result = api_profile.profile_groups(pyramid_request)
 
-        session_profile.assert_called_once_with(pyramid_request, None)
-        assert result == session_profile.return_value
+        assert profile_group_service.called_once()
 
-    def test_profile_passes_authority_parameter(self, session_profile, pyramid_request):
+    def test_profile_groups_passes_authority_parameter(self, pyramid_request, profile_group_service):
         pyramid_request.params = {'authority': 'foo.com'}
 
-        result = api_profile.profile(pyramid_request)
+        result = api_profile.profile_groups(pyramid_request)
 
-        session_profile.assert_called_once_with(pyramid_request, 'foo.com')
-        assert result == session_profile.return_value
+        assert profile_group_service.called_once_with(pyramid_request, 'foo.com')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
+        pyramid_request.json_body = {}
+        return pyramid_request
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User.build()
+
+    @pytest.fixture
+    def profile_group_service(self, pyramid_config):
+        svc = mock.Mock()
+        pyramid_config.register_service(svc, name='profile_group')
+        return svc
 
 @pytest.mark.usefixtures('user_service', 'session_profile')
 class TestUpdatePreferences(object):
