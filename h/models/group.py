@@ -55,9 +55,6 @@ class Group(Base, mixins.Timestamps):
     authority = sa.Column(sa.UnicodeText(), nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
-    # We store information about who created the group -- we don't use this
-    # currently, but it seems careless to lose this information when in the
-    # future these people may be the first admins of their groups.
     creator_id = sa.Column(
         sa.Integer, sa.ForeignKey('user.id'))
     creator = sa.orm.relationship('User')
