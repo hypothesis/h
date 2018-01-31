@@ -102,7 +102,7 @@ def _user_groups(user):
 def _group_model(route_url, group):
     model = {'name': group.name, 'id': group.pubid, 'public': group.is_public}
 
-    # We currently want to show URLs for secret groups, but not for publisher
+    # We currently want to show URLs for secret groups, but not for open
     # groups, and not for the `__world__` group (where it doesn't make sense).
     # This is currently all non-public groups, which saves us needing to do a
     # check in here on the group's authority.
