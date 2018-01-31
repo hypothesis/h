@@ -13,8 +13,7 @@ from h.services.profile_group import profile_groups_factory
 class TestProfileGroupService(object):
     def test_all_returns_private_groups_for_user(self, db_session, user):
         open_grp_svc = FakeAuthorityGroupService([])
-        svc = ProfileGroupService(db_session,
-                                  open_group_finder=open_grp_svc.public_groups)
+        svc = ProfileGroupService(db_session, open_group_finder=open_grp_svc.public_groups)
 
         groups = svc.all(user)
 
@@ -23,17 +22,13 @@ class TestProfileGroupService(object):
 
     def test_all_returns_no_private_groups_for_no_user(self, db_session):
         open_group_svc = FakeAuthorityGroupService([])
-        svc = ProfileGroupService(
-          db_session,
-          open_group_finder=open_group_svc.public_groups
-        )
+        svc = ProfileGroupService(db_session, open_group_finder=open_group_svc.public_groups)
 
         groups = svc.all(user=None)
 
         assert groups == []
 
-    def test_all_returns_world_group_for_no_user(self,
-                                                 db_session, world_group):
+    def test_all_returns_world_group_for_no_user(self, db_session, world_group):
         auth_group_svc = FakeAuthorityGroupService([world_group])
         svc = ProfileGroupService(db_session, open_group_finder=auth_group_svc.public_groups)
 
@@ -43,8 +38,7 @@ class TestProfileGroupService(object):
 
     def test_all_returns_open_groups_for_no_user(self, db_session, open_groups):
         auth_group_svc = FakeAuthorityGroupService(open_groups)
-        svc = ProfileGroupService(db_session,
-                                  open_group_finder=auth_group_svc.public_groups)
+        svc = ProfileGroupService(db_session, open_group_finder=auth_group_svc.public_groups)
 
         groups = svc.all(user=None)
 
@@ -53,22 +47,24 @@ class TestProfileGroupService(object):
     def test_all_proxies_authority_parameter_to_svc(self, db_session):
         auth_group_svc = mock.Mock(spec_set=['public_groups'])
         auth_group_svc.public_groups.return_value = []
-        svc = ProfileGroupService(db_session,
-                                  open_group_finder=auth_group_svc.public_groups)
+        svc = ProfileGroupService(db_session, open_group_finder=auth_group_svc.public_groups)
 
         svc.all(user=None, authority="foo")
 
         auth_group_svc.public_groups.assert_called_once_with("foo")
 
-    def test_all_includes_group_attributes(self, db_session, open_groups, user):
+    @pytest.mark.parametrize('attribute', [
+        ('id'),
+        ('name'),
+        ('public')
+    ])
+    def test_all_includes_group_attributes(self, db_session, open_groups, user, attribute):
         auth_group_svc = FakeAuthorityGroupService(open_groups)
         svc = ProfileGroupService(db_session, open_group_finder=auth_group_svc.public_groups)
 
         groups = svc.all(user)
 
-        assert 'id' in groups[0]
-        assert 'name' in groups[0]
-        assert 'public' in groups[0]
+        assert attribute in groups[0]
 
 
 @pytest.mark.usefixtures('authority_group_service')
