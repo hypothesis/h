@@ -34,6 +34,7 @@ def update_preferences(request):
 
     return h_session.profile(request)
 
+
 @api_config(route_name='api.profile_groups',
             request_method='GET',
             link_name='profile_groups.read',
