@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sqlalchemy as sa
-
-from h import session as h_session
 
 class ProfileGroupService(object):
 
@@ -33,6 +30,7 @@ class ProfileGroupService(object):
     def _group_model(self, group):
         model = {'name': group.name, 'id': group.pubid, 'public': group.is_public}
         return model
+
 
 def profile_groups_factory(context, request):
     """Return a ProfileGroupService instance for the passed context and request."""
