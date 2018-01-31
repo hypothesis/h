@@ -174,6 +174,9 @@ paths:
       description: >
         Retrieve a list of accessible, applicable groups.
 
+        Note: This API service is pre-release and currently under development.
+        Be aware that parameters and response body will be changing.
+
       parameters:
         - name: authority
           in: query
@@ -183,19 +186,11 @@ paths:
           required: false
           type: string
           default: "hypothes.is"
-        - name: document_url
-          in: query
-          description: >
-            The URI for the current annotation target document.
-            All scoped public groups that apply to this URI will be included.
-          required: false
-          type: string
-          format: uri
       responses:
         '200':
           description: Success
           schema:
-            $ref: '#/definitions/GroupResults'
+            $ref: '#/definitions/ProfileGroupResults'
   /search:
     get:
       summary: Search for annotations
@@ -382,12 +377,12 @@ definitions:
       total:
         description: Total number of results matching query.
         type: integer
-  GroupResults:
+  ProfileGroupResults:
     type: array
     items:
-      $ref: '#/definitions/Group'
-  Group:
-    $ref: './schemas/group-schema.json'
+      $ref: '#/definitions/ProfileGroup'
+  ProfileGroup:
+    $ref: './schemas/profile-group-schema.json'
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:
