@@ -8,17 +8,17 @@ def groups():
     """Manage groups."""
 
 
-@groups.command('add-publisher-group')
+@groups.command('add-open-group')
 @click.option('--name', prompt=True, help="The name of the group")
 @click.option('--authority', prompt=True, help="The authority which the group is associated with")
 @click.option('--creator', prompt=True, help="The username of the group's creator")
 @click.pass_context
-def add_publisher_group(ctx, name, authority, creator):
+def add_open_group(ctx, name, authority, creator):
     """
-    Create a new "publisher" group.
+    Create a new open group.
 
-    Create a new group which everyone can read but which only users belonging
-    to a given authority can write to.
+    Create a new group that everyone can read and any logged-in user belonging
+    to the same authority as the group and write to.
     """
     request = ctx.obj['bootstrap']()
 
@@ -26,6 +26,6 @@ def add_publisher_group(ctx, name, authority, creator):
                                                            authority=authority)
     group_svc = request.find_service(name='group')
     group_svc.create(name=name, authority=authority, userid=creator_userid,
-                     type_='publisher')
+                     type_='open')
 
     request.tm.commit()
