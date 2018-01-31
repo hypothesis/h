@@ -128,9 +128,9 @@ class TestProfile(object):
 
         assert private_group['public'] is False
 
-    def test_publisher_group_is_public(self, third_party_request, publisher_group):
+    def test_open_group_is_public(self, third_party_request, open_group):
         profile = session.profile(third_party_request)
-        group = [g for g in profile['groups'] if g['id'] == publisher_group.pubid][0]
+        group = [g for g in profile['groups'] if g['id'] == open_group.pubid][0]
 
         assert group['public'] is True
 
@@ -148,9 +148,9 @@ class TestProfile(object):
 
         assert private_group['url']
 
-    def test_publisher_group_has_no_url(self, third_party_request, publisher_group):
+    def test_open_group_has_no_url(self, third_party_request, open_group):
         profile = session.profile(third_party_request)
-        group = [g for g in profile['groups'] if g['id'] == publisher_group.pubid][0]
+        group = [g for g in profile['groups'] if g['id'] == open_group.pubid][0]
 
         assert 'url' not in group
 
@@ -224,16 +224,16 @@ class TestProfile(object):
         return u'thirdparty.example.org'
 
     @pytest.fixture
-    def third_party_request(self, authority, third_party_domain, publisher_group, fake_feature):
+    def third_party_request(self, authority, third_party_domain, open_group, fake_feature):
         return FakeRequest(authority,
                            u'acct:user@{}'.format(third_party_domain),
                            third_party_domain,
-                           {third_party_domain: [publisher_group]},
+                           {third_party_domain: [open_group]},
                            fake_feature)
 
     @pytest.fixture
-    def publisher_group(self):
-        return FakeGroup('abcdef', 'Publisher group', is_public=True)
+    def open_group(self):
+        return FakeGroup('abcdef', 'Open group', is_public=True)
 
 
 class TestUserInfo(object):

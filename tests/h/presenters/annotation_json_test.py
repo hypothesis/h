@@ -154,7 +154,7 @@ class TestAnnotationJSONPresenter(object):
         (mock.Mock(userid='acct:luke', groupid='abcde', shared=False), 'members', 'read', ['acct:luke']),
         (mock.Mock(groupid='__world__', shared=True), 'world', 'read', ['group:__world__']),
         (mock.Mock(groupid='lulapalooza', shared=True), 'members', 'read', ['group:lulapalooza']),
-        (mock.Mock(groupid='publisher', shared=True), 'world', 'read', ['group:__world__']),
+        (mock.Mock(groupid='open', shared=True), 'world', 'read', ['group:__world__']),
         (mock.Mock(userid='acct:luke'), None, 'admin', ['acct:luke']),
         (mock.Mock(userid='acct:luke'), None, 'update', ['acct:luke']),
         (mock.Mock(userid='acct:luke'), None, 'delete', ['acct:luke']),
