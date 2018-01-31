@@ -14,7 +14,7 @@ GROUP_ACCESS_FLAGS = {
         'readable_by': ReadableBy.members,
         'writeable_by': WriteableBy.members,
      },
-    'publisher': {
+    'open': {
         'joinable_by': None,
         'readable_by': ReadableBy.world,
         'writeable_by': WriteableBy.authority,
@@ -45,7 +45,7 @@ class GroupService(object):
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
         :param description: the description of the group
-        :param type_: the type of group (private or publisher) which sets the
+        :param type_: the type of group (private or open) which sets the
                       appropriate access flags
 
         :returns: the created group

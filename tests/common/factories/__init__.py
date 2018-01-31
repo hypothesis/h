@@ -14,7 +14,7 @@ from .document import Document, DocumentMeta, DocumentURI
 from .feature import Feature
 from .feature_cohort import FeatureCohort
 from .flag import Flag
-from .group import Group, PublisherGroup
+from .group import Group, OpenGroup
 from .setting import Setting
 from .token import DeveloperToken, OAuth2Token
 from .user import User
@@ -36,7 +36,7 @@ __all__ = (
     'Flag',
     'Group',
     'OAuth2Token',
-    'PublisherGroup',
+    'OpenGroup',
     'Setting',
     'User',
     'set_session',

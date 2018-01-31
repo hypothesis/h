@@ -61,10 +61,10 @@ class TestGroupService(object):
 
         assert users['cazimir'] in group.members
 
-    def test_create_doesnt_add_group_creator_to_members_for_publisher_groups(self, db_session, users):
+    def test_create_doesnt_add_group_creator_to_members_for_open_groups(self, db_session, users):
         svc = GroupService(db_session, users.get)
 
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='publisher')
+        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='open')
 
         assert users['cazimir'] not in group.members
 
@@ -72,9 +72,9 @@ class TestGroupService(object):
         ('private', 'joinable_by', JoinableBy.authority),
         ('private', 'readable_by', ReadableBy.members),
         ('private', 'writeable_by', WriteableBy.members),
-        ('publisher', 'joinable_by', None),
-        ('publisher', 'readable_by', ReadableBy.world),
-        ('publisher', 'writeable_by', WriteableBy.authority)])
+        ('open', 'joinable_by', None),
+        ('open', 'readable_by', ReadableBy.world),
+        ('open', 'writeable_by', WriteableBy.authority)])
     def test_create_sets_access_flags_for_group_types(self,
                                                       db_session,
                                                       users,
