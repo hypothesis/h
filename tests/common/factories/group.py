@@ -26,9 +26,9 @@ class Group(ModelFactory):
     members = factory.LazyAttribute(lambda obj: [obj.creator])
 
 
-class PublisherGroup(Group):
+class OpenGroup(Group):
 
-    name = factory.Sequence(lambda n: 'Test Publisher Group {n}'.format(n=str(n)))
+    name = factory.Sequence(lambda n: 'Test Open Group {n}'.format(n=str(n)))
 
     joinable_by = None
     readable_by = ReadableBy.world

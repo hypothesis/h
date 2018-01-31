@@ -85,7 +85,7 @@ class TestAPI(object):
         assert res.json['userid'] == user.userid
         assert [group['id'] for group in res.json['groups']] == ['__world__']
 
-    def test_third_party_profile_api(self, app, publisher_group, third_party_user_with_token):
+    def test_third_party_profile_api(self, app, open_group, third_party_user_with_token):
         """Fetch a profile for a third-party account."""
 
         user, token = third_party_user_with_token
@@ -97,7 +97,7 @@ class TestAPI(object):
         assert res.json['userid'] == user.userid
 
         group_ids = [group['id'] for group in res.json['groups']]
-        assert group_ids == [publisher_group.pubid]
+        assert group_ids == [open_group.pubid]
 
     def test_cors_preflight(self, app):
         # Simulate a CORS preflight request made by the browser from a client
@@ -157,8 +157,8 @@ def third_party_user(auth_client, db_session, factories):
 
 
 @pytest.fixture
-def publisher_group(auth_client, db_session, factories):
-    group = factories.PublisherGroup(authority=auth_client.authority)
+def open_group(auth_client, db_session, factories):
+    group = factories.OpenGroup(authority=auth_client.authority)
     db_session.commit()
     return group
 
