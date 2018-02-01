@@ -95,6 +95,7 @@ def includeme(config):
                      factory='h.resources:AnnotationResourceFactory',
                      traverse='/{id}')
     config.add_route('api.profile', '/api/profile')
+    config.add_route('api.profile_groups', '/api/groups')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.group_member',
                      '/api/groups/{pubid}/members/{user}',

@@ -168,6 +168,29 @@ paths:
           description: Profile information
           schema:
             $ref: '#/definitions/Profile'
+  /groups:
+    get:
+      summary: Get list of groups
+      description: >
+        Retrieve a list of accessible, applicable groups.
+
+        Note: This API service is pre-release and currently under development.
+        Be aware that parameters and response body will be changing.
+
+      parameters:
+        - name: authority
+          in: query
+          description: >
+            Used to identify available public groups.
+            Applies only to non-authorized requests.
+          required: false
+          type: string
+          default: "hypothes.is"
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/ProfileGroupResults'
   /search:
     get:
       summary: Search for annotations
@@ -354,6 +377,12 @@ definitions:
       total:
         description: Total number of results matching query.
         type: integer
+  ProfileGroupResults:
+    type: array
+    items:
+      $ref: '#/definitions/ProfileGroup'
+  ProfileGroup:
+    $ref: './schemas/profile-group-schema.json'
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:

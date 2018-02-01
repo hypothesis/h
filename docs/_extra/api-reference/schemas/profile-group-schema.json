@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "public"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "public": {
+      "type": "boolean",
+      "description": "indicates whether a group's annotations are world-readable"
+    }
+  }
+}
