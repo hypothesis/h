@@ -67,15 +67,6 @@ def pop_flash(request):
             for k in ['error', 'info', 'warning', 'success']}
 
 
-def _group_sort_key(group):
-    """Sort private groups for the session model list"""
-
-    # groups are sorted first by name but also by ID
-    # so that multiple groups with the same name are displayed
-    # in a consistent order in clients
-    return (group.name.lower(), group.pubid)
-
-
 def _current_groups(request, authority):
     """Return a list of the groups the current user is a member of.
 
@@ -87,16 +78,17 @@ def _current_groups(request, authority):
     authority_groups = (request.find_service(name='authority_group')
                         .public_groups(authority=authority))
 
-    groups = authority_groups + _user_groups(user)
+    groups = authority_groups + _user_groups(user, request)
 
     return [_group_model(request.route_url, group) for group in groups]
 
 
-def _user_groups(user):
+def _user_groups(user, request):
     if user is None:
         return []
     else:
-        return sorted(user.groups, key=_group_sort_key)
+        profile_groups_svc = request.find_service(name='profile_group')
+        return profile_groups_svc.sort(user.groups)
 
 
 def _group_model(route_url, group):
