@@ -18,6 +18,10 @@ class ProfileGroupService(object):
         self.route_url = route_url
         self.open_group_finder = open_group_finder
 
+    def sort(self, groups):
+        """ sort a list of groups of a single type """
+        return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
+
     def all(self, user=None, authority=None):
         """ return a list of all user groups"""
 
@@ -26,7 +30,7 @@ class ProfileGroupService(object):
         if user is not None:
             private_groups = user.groups
 
-        groups = open_groups + private_groups
+        groups = self.sort(open_groups) + self.sort(private_groups)
 
         return [self._group_model(group) for group in groups]
 
