@@ -5,7 +5,7 @@ from functools import partial
 import sqlalchemy as sa
 
 from h import session
-from h.models import Annotation, Group, User
+from h.models import Annotation, Group, GroupScope, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 GROUP_ACCESS_FLAGS = {
@@ -71,6 +71,32 @@ class GroupService(object):
         if self.publish:
             self.publish('group-join', group.pubid, userid)
 
+        return group
+
+    def create_open_group(self, name, authority, userid, hostnames, description=None):
+
+        def _get_or_create_groupscope(hostname):
+            try:
+                groupscope = self.session.query(GroupScope).filter_by(hostname=hostname).one()
+            except sa.orm.exc.NoResultFound:
+                groupscope = GroupScope(hostname=hostname)
+            return groupscope
+
+        scopes = [_get_or_create_groupscope(h) for h in hostnames]
+
+        group = Group(name=name,
+                      authority=authority,
+                      creator=self.user_fetcher(userid),
+                      scopes=scopes,
+                      description=description,
+                      joinable_by=None,
+                      readable_by=ReadableBy.world,
+                      writeable_by=WriteableBy.authority,
+                      )
+
+        self.session.add(group)
+        self.session.flush()
+        self.publish('group-join', group.pubid, userid)
         return group
 
     def member_join(self, group, userid):
