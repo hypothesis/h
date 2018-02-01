@@ -33,15 +33,15 @@ class GroupService(object):
         self.user_fetcher = user_fetcher
         self.publish = publish
 
-    def create(self, name, userid, description=None, type_='private'):
+    def create(self, name, userid, description=None):
         """
-        Create a new group.
+        Create a new private group.
+
+        A private group is one that only members can read or write.
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
         :param description: the description of the group
-        :param type_: the type of group (private or open) which sets the
-                      appropriate access flags
 
         :returns: the created group
         """
@@ -51,9 +51,7 @@ class GroupService(object):
                       creator=creator,
                       description=description)
 
-        access_flags = GROUP_ACCESS_FLAGS.get(type_)
-        if access_flags is None:
-            raise ValueError('Invalid group type %s' % type_)
+        access_flags = GROUP_ACCESS_FLAGS.get('private')
         for attr, value in access_flags.iteritems():
             setattr(group, attr, value)
 

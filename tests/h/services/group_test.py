@@ -48,7 +48,7 @@ class TestGroupService(object):
         assert users['cazimir'] in group.members
 
     def test_create_doesnt_add_group_creator_to_members_for_open_groups(self, service, users):
-        group = service.create('Anteater fans', 'cazimir', type_='open')
+        group = service.create_open_group('Anteater fans', 'cazimir')
 
         assert users['cazimir'] not in group.members
 
@@ -60,10 +60,6 @@ class TestGroupService(object):
         group = service.create('Anteater fans', 'cazimir')
 
         assert getattr(group, flag) == expected_value
-
-    def test_create_raises_for_invalid_group_type(self, service):
-        with pytest.raises(ValueError):
-            service.create('Anteater fans', 'cazimir', type_='foo')
 
     def test_create_adds_group_to_session(self, db_session, service):
         group = service.create('Anteater fans', 'cazimir')
