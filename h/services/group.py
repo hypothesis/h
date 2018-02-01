@@ -72,6 +72,30 @@ class GroupService(object):
 
         return group
 
+    def create_open_group(self, name, userid, description=None):
+        """
+        Create a new open group.
+
+        An open group is one that anyone can read or write.
+
+        :param name: the human-readable name of the group
+        :param userid: the userid of the group creator
+        :param description: the description of the group
+
+        :returns: the created group
+        """
+        creator = self.user_fetcher(userid)
+        group = Group(name=name,
+                      authority=creator.authority,
+                      creator=creator,
+                      description=description,
+                      joinable_by=None,
+                      readable_by=ReadableBy.world,
+                      writeable_by=WriteableBy.authority,
+                      )
+        self.session.add(group)
+        return group
+
     def member_join(self, group, userid):
         """Add `userid` to the member list of `group`."""
         user = self.user_fetcher(userid)

@@ -25,6 +25,6 @@ def add_open_group(ctx, name, authority, creator):
     creator_userid = u'acct:{username}@{authority}'.format(username=creator,
                                                            authority=authority)
     group_svc = request.find_service(name='group')
-    group_svc.create(name=name, userid=creator_userid, type_='open')
+    group_svc.create_open_group(name=name, userid=creator_userid)
 
     request.tm.commit()

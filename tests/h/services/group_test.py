@@ -52,19 +52,12 @@ class TestGroupService(object):
 
         assert users['cazimir'] not in group.members
 
-    @pytest.mark.parametrize('group_type,flag,expected_value', [
-        ('private', 'joinable_by', JoinableBy.authority),
-        ('private', 'readable_by', ReadableBy.members),
-        ('private', 'writeable_by', WriteableBy.members),
-        ('open', 'joinable_by', None),
-        ('open', 'readable_by', ReadableBy.world),
-        ('open', 'writeable_by', WriteableBy.authority)])
-    def test_create_sets_access_flags_for_group_types(self,
-                                                      service,
-                                                      group_type,
-                                                      flag,
-                                                      expected_value):
-        group = service.create('Anteater fans', 'cazimir', type_=group_type)
+    @pytest.mark.parametrize('flag,expected_value', [
+        ('joinable_by', JoinableBy.authority),
+        ('readable_by', ReadableBy.members),
+        ('writeable_by', WriteableBy.members)])
+    def test_create_sets_access_flags(self, service, flag, expected_value):
+        group = service.create('Anteater fans', 'cazimir')
 
         assert getattr(group, flag) == expected_value
 
@@ -87,6 +80,27 @@ class TestGroupService(object):
         group = service.create('Dishwasher disassemblers', 'theresa')
 
         publish.assert_called_once_with('group-join', group.pubid, 'acct:theresa@example.com')
+
+    def test_create_open_group_returns_group(self, service, users):
+        creator = users['cazimir']
+
+        group = service.create_open_group(name='test_group',
+                                          userid=creator.username,
+                                          description='test_description')
+
+        assert group.name == 'test_group'
+        assert group.authority == 'example.com'
+        assert group.creator == creator
+        assert group.description == 'test_description'
+        assert group.joinable_by is None
+        assert group.readable_by == ReadableBy.world
+        assert group.writeable_by == WriteableBy.authority
+
+    def test_create_open_group_description_defaults_to_None(self, service):
+        # Create a group with no `description` argument.
+        group = service.create_open_group(name='test_group', userid='cazimir')
+
+        assert group.description is None
 
     def test_member_join_adds_user_to_group(self, service, group, users):
         service.member_join(group, 'theresa')
