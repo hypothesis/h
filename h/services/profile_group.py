@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+
 class ProfileGroupService(object):
 
     """A service for retrieving groups associated with users."""
