@@ -168,9 +168,9 @@ paths:
           description: Profile information
           schema:
             $ref: '#/definitions/Profile'
-  /profile/groups:
+  /groups:
     get:
-      summary: Get list of groups for profile
+      summary: Get list of groups
       description: >
         Retrieve a list of accessible, applicable groups.
 
