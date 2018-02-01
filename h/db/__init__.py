@@ -115,34 +115,6 @@ def _session(request):
             })
         session.close()
 
-        # Remove stale sqlalchemy session IDs from zope.sqlalchemy's _SESSION_STATE.
-        #
-        # TODO: Once https://github.com/zopefoundation/zope.sqlalchemy/pull/23
-        # has been merged and we upgrade to a new version of zope.sqlalchemy
-        # that includes it, we can remove this workaround.
-        #
-        # _SESSION_STATE is a dict whose keys are the Python object IDs of
-        # sqlalchemy sessions. A session's ID is normally removed from
-        # _SESSION_STATE at the end of processing that session's request. But
-        # if something opens a new DB session by accessing the DB after the
-        # transaction manager has committed then that session's ID is **never**
-        # removed from _SESSION_STATE even after the session object has been
-        # garbage collected.
-        #
-        # If a future request's session then happens to get the same Python
-        # object ID as one of these "stale" IDs not removed from
-        # _SESSION_STATE, then zope.sqlalchemy does not join that sqlalchemy
-        # session to the transaction manager's transaction because it thinks it
-        # has already done so. As a result, that session is never committed
-        # (annotations are not saved, etc).
-        #
-        # To prevent that from happening we remove stale IDs from
-        # _SESSION_STATE here.
-        #
-        dm = zope.sqlalchemy.datamanager
-        if len(dm._SESSION_STATE) > 0:
-            dm._SESSION_STATE = {}
-
     return session
 
 

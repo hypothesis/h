@@ -43,5 +43,4 @@ venusian
 wsaccel
 ws4py >= 0.4.0
 zope.interface
-zope.sqlalchemy # When upgrading zope.sqlalchemy check if we can remove our
-                # _SESSION_STATE workaround yet. (See TODO in db/__init__.py)
+zope.sqlalchemy >= 1.0
