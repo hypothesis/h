@@ -8,14 +8,6 @@ from h import session
 from h.models import Group, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
-GROUP_ACCESS_FLAGS = {
-    'private': {
-        'joinable_by': JoinableBy.authority,
-        'readable_by': ReadableBy.members,
-        'writeable_by': WriteableBy.members,
-    }
-}
-
 
 class GroupService(object):
 
@@ -49,11 +41,11 @@ class GroupService(object):
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
-                      description=description)
-
-        access_flags = GROUP_ACCESS_FLAGS.get('private')
-        for attr, value in access_flags.iteritems():
-            setattr(group, attr, value)
+                      description=description,
+                      joinable_by=JoinableBy.authority,
+                      readable_by=ReadableBy.members,
+                      writeable_by=WriteableBy.members,
+                      )
 
         if group.joinable_by is not None:
             group.members.append(creator)
