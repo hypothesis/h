@@ -29,7 +29,16 @@ matrix:
     - env: ACTION=frontend-lint
       language: node_js
       node_js: '6.7'
-      script: gulp lint
+      script:
+        gulp lint
+
+    # Lint backend code
+    - env: ACTION=backend-lint
+      language: python
+      python: '2.7'
+      script:
+        make lint
+
 
 cache:
   directories:

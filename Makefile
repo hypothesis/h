@@ -41,6 +41,10 @@ test: node_modules/.uptodate
 	tox
 	$(GULP) test
 
+.PHONY: lint
+lint: .pydeps
+	flake8 h
+
 ################################################################################
 
 # Fake targets to aid with deps installation
