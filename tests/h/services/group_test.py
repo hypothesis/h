@@ -83,11 +83,8 @@ class TestGroupService(object):
         assert group.id
         assert group.pubid
 
-    def test_create_publishes_join_event(self, db_session, users):
-        publish = mock.Mock(spec_set=[])
-        svc = GroupService(db_session, users.get, publish=publish)
-
-        group = svc.create('Dishwasher disassemblers', 'foobar.com', 'theresa')
+    def test_create_publishes_join_event(self, service, publish):
+        group = service.create('Dishwasher disassemblers', 'foobar.com', 'theresa')
 
         publish.assert_called_once_with('group-join', group.pubid, 'theresa')
 
@@ -102,12 +99,10 @@ class TestGroupService(object):
 
         assert group.members.count(users['theresa']) == 1
 
-    def test_member_join_publishes_join_event(self, db_session, group, users):
-        publish = mock.Mock(spec_set=[])
-        svc = GroupService(db_session, users.get, publish=publish)
+    def test_member_join_publishes_join_event(self, service, publish, group):
         group.pubid = 'abc123'
 
-        svc.member_join(group, 'theresa')
+        service.member_join(group, 'theresa')
 
         publish.assert_called_once_with('group-join', 'abc123', 'theresa')
 
@@ -132,19 +127,16 @@ class TestGroupService(object):
 
         assert users['cazimir'] not in group.members
 
-    def test_member_leave_publishes_leave_event(self, db_session, users):
-        publish = mock.Mock(spec_set=[])
-        svc = GroupService(db_session, users.get, publish=publish)
+    def test_member_leave_publishes_leave_event(self, service, users, publish):
         group = Group(name='Donkey Trust',
                       authority='foobari.com',
                       creator=users['theresa'])
         group.members.append(users['cazimir'])
         group.pubid = 'abc123'
 
-        svc.member_leave(group, 'cazimir')
+        service.member_leave(group, 'cazimir')
 
         publish.assert_called_once_with('group-leave', 'abc123', 'cazimir')
-
 
     @pytest.mark.parametrize('with_user', [True, False])
     def test_groupids_readable_by_includes_world(self, with_user, service, db_session, factories):
@@ -204,8 +196,12 @@ class TestGroupService(object):
                      creator=users['cazimir'])
 
     @pytest.fixture
-    def service(self, db_session, users):
-        return GroupService(db_session, users.get)
+    def publish(self):
+        return mock.Mock(spec_set=[])
+
+    @pytest.fixture
+    def service(self, db_session, users, publish):
+        return GroupService(db_session, users.get, publish=publish)
 
 
 @pytest.mark.usefixtures('user_service')
