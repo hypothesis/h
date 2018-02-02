@@ -7,7 +7,7 @@ class ProfileGroupService(object):
 
     """A service for retrieving groups associated with users."""
 
-    def __init__(self, session, route_url, open_group_finder):
+    def __init__(self, session, request_authority, route_url, open_group_finder):
         """
         Create a new profile_groups service.
 
@@ -17,6 +17,7 @@ class ProfileGroupService(object):
         self.session = session
         self.route_url = route_url
         self.open_group_finder = open_group_finder
+        self.request_authority = request_authority
 
     def sort(self, groups):
         """ sort a list of groups of a single type """
@@ -24,6 +25,12 @@ class ProfileGroupService(object):
 
     def all(self, user=None, authority=None):
         """ return a list of all user groups"""
+
+        # passed authority is overridden by user authority
+        if user is not None:
+            authority = user.authority
+        else:
+            authority = authority or self.request_authority
 
         open_groups = self.open_group_finder(authority) or []
         private_groups = []
@@ -57,5 +64,6 @@ def profile_groups_factory(context, request):
     """Return a ProfileGroupService instance for the passed context and request."""
     auth_group_svc = request.find_service(name='authority_group')
     return ProfileGroupService(session=request.db,
+                               request_authority=request.authority,
                                route_url=request.route_url,
                                open_group_finder=auth_group_svc.public_groups)

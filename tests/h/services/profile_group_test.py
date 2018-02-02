@@ -108,6 +108,7 @@ class TestProfileGroupService(object):
         auth_group_svc.public_groups.return_value = []
         svc = ProfileGroupService(
           db_session,
+          request_authority=pyramid_request.authority,
           route_url=pyramid_request.route_url,
           open_group_finder=auth_group_svc.public_groups
         )
@@ -169,6 +170,33 @@ class TestProfileGroupsFactory(object):
         authority_group_service.public_groups.assert_called_once_with('foo')
 
 
+@pytest.mark.usefixtures('authority_group_service')
+class TestProfileGroupsAuthority(object):
+    def test_accepts_any_authority_for_unauthed_user(self, pyramid_request, authority_group_service):
+        svc = profile_groups_factory(None, pyramid_request)
+
+        svc.all(authority='foo')
+
+        authority_group_service.public_groups.assert_called_once_with('foo')
+
+    def test_overrides_authority_with_user_authority(self, pyramid_request, factories, authority_group_service):
+        pyramid_request.authority = 'rando.com'
+        svc = profile_groups_factory(None, pyramid_request)
+        user = factories.User()
+
+        svc.all(user)
+
+        authority_group_service.public_groups.assert_called_once_with(user.authority)
+
+    def test_authority_default_to_request_for_unauthenticated_user(self, pyramid_request, authority_group_service):
+        pyramid_request.authority = 'rando.com'
+        svc = profile_groups_factory(None, pyramid_request)
+
+        svc.all()
+
+        authority_group_service.public_groups.assert_called_once_with('rando.com')
+
+
 class FakeAuthorityGroupService(object):
 
     def __init__(self, public_groups):
@@ -213,7 +241,7 @@ def pyramid_request(pyramid_request):
 
 
 @pytest.fixture
-def profile_group_factory(db_session, pyramid_request):
+def profile_group_factory(db_session, pyramid_request, request_authority=None):
     """
     Return a callable that will create a ProfileGroupService.
 
@@ -221,9 +249,12 @@ def profile_group_factory(db_session, pyramid_request):
     with a fake AuthorityGroupService whose ``public_groups``
     will return the passed ``open_groups``
     """
+    r_authority = request_authority or pyramid_request.authority
+
     def service_builder(open_groups):
         return ProfileGroupService(
           session=db_session,
+          request_authority=r_authority,
           route_url=pyramid_request.route_url,
           open_group_finder=FakeAuthorityGroupService(open_groups).public_groups
          )
