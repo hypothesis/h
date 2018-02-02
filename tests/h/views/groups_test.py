@@ -9,6 +9,7 @@ from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
 from h.views import groups as views
 from h.models import (Group, User)
 from h.models.group import JoinableBy
+from h.services.group import GroupService
 
 
 @pytest.mark.usefixtures('group_service', 'handle_form_submission', 'routes')
@@ -54,7 +55,9 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert group_service.created == [('my_new_group', 'example.com', 'ariadna', 'foobar')]
+        assert group_service.create.call_args_list == [
+            mock.call(name='my_new_group', authority='example.com', userid='ariadna', description='foobar'),
+        ]
 
     def test_post_redirects_if_form_valid(self,
                                           controller,
@@ -81,7 +84,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert group_service.created == []
+        assert not group_service.create.called
 
     def test_post_returns_template_data_if_form_invalid(self,
                                                         controller,
@@ -189,23 +192,6 @@ class FakeGroup(object):
         self.joinable_by = joinable_by
 
 
-class FakeGroupService(object):
-    def __init__(self):
-        self.created = []
-        self.joined = []
-        self.left = []
-
-    def create(self, name, authority, userid, description):
-        self.created.append((name, authority, userid, description))
-        return FakeGroup('abc123', 'fake-group')
-
-    def member_join(self, group, userid):
-        self.joined.append((group, userid))
-
-    def member_leave(self, group, userid):
-        self.left.append((group, userid))
-
-
 class FakeForm(object):
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
@@ -230,7 +216,8 @@ def invalid_form():
 
 @pytest.fixture
 def group_service(pyramid_config):
-    service = FakeGroupService()
+    service = mock.create_autospec(GroupService, spec_set=True, instance=True)
+    service.create.return_value = FakeGroup('abc123', 'fake-group')
     pyramid_config.register_service(service, name='group')
     return service
 
