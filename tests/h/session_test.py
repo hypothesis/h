@@ -13,17 +13,15 @@ class FakeGroup(object):
 
 
 class TestModel(object):
-    def test_sorts_groups(self, authenticated_request):
+    def test_proxies_sorting_to_service(self, authenticated_request):
         authenticated_request.set_groups([
             FakeGroup('c', 'Group A'),
             FakeGroup('b', 'Group B'),
             FakeGroup('a', 'Group B'),
         ])
-        session_model = session.model(authenticated_request)
+        session.model(authenticated_request)
 
-        ids = [group['id'] for group in session_model['groups']]
-
-        assert ids == ['__world__', 'c', 'a', 'b']
+        authenticated_request._profile_group_service.sort.assert_called_once()
 
     def test_world_group_is_public(self, authenticated_request):
         model = session.model(authenticated_request)
@@ -87,17 +85,15 @@ class TestProfile(object):
         profile = session.profile(authenticated_request)
         assert profile['userid'] == u'acct:user@example.com'
 
-    def test_sorts_groups(self, authenticated_request):
+    def test_proxies_sorting_to_service(self, authenticated_request):
         authenticated_request.set_groups([
             FakeGroup('c', 'Group A'),
             FakeGroup('b', 'Group B'),
             FakeGroup('a', 'Group B'),
         ])
-        profile = session.profile(authenticated_request)
+        session.profile(authenticated_request)
 
-        ids = [group['id'] for group in profile['groups']]
-
-        assert ids == ['__world__', 'c', 'a', 'b']
+        authenticated_request._profile_group_service.sort.assert_called_once()
 
     def test_authenticated_world_group(self, authenticated_request):
         result = session.profile(authenticated_request)
@@ -279,6 +275,8 @@ class FakeRequest(object):
         self.session = mock.Mock(get_csrf_token=lambda: '__CSRF__')
 
         self._authority_group_service = FakeAuthorityGroupService(public_groups)
+        self._profile_group_service = mock.Mock(spec_set=['sort'])
+        self._profile_group_service.sort = mock.Mock(side_effect=lambda groups: groups)
 
     def set_groups(self, groups):
         self.user.groups = groups
@@ -295,6 +293,8 @@ class FakeRequest(object):
     def find_service(self, **kwargs):
         if kwargs == {'name': 'authority_group'}:
             return self._authority_group_service
+        elif kwargs == {'name': 'profile_group'}:
+            return self._profile_group_service
         else:
             raise AssertionError('find_service called with unrecognised args '
                                  '{}'.format(kwargs))
