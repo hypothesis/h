@@ -13,11 +13,6 @@ GROUP_ACCESS_FLAGS = {
         'joinable_by': JoinableBy.authority,
         'readable_by': ReadableBy.members,
         'writeable_by': WriteableBy.members,
-     },
-    'open': {
-        'joinable_by': None,
-        'readable_by': ReadableBy.world,
-        'writeable_by': WriteableBy.authority,
     }
 }
 
