@@ -12,42 +12,42 @@ from h.services.group import groups_factory
 
 
 class TestGroupService(object):
-    def test_create_returns_group(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_returns_group(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert isinstance(group, Group)
 
-    def test_create_sets_group_name(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_name(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.name == 'Anteater fans'
 
-    def test_create_sets_group_authority(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_authority(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.authority == 'example.com'
 
-    def test_create_sets_group_creator(self, service, users):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_creator(self, service, users):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.creator == users['cazimir']
 
-    def test_create_sets_description_when_present(self, service):
-        group = service.create('Anteater fans', 'cazimir', 'all about ant eaters')
+    def test_create_private_group_sets_description_when_present(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir', 'all about ant eaters')
 
         assert group.description == 'all about ant eaters'
 
-    def test_create_skips_setting_description_when_missing(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_skips_setting_description_when_missing(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.description is None
 
-    def test_create_adds_group_creator_to_members(self, service, users):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_adds_group_creator_to_members(self, service, users):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert users['cazimir'] in group.members
 
-    def test_create_doesnt_add_group_creator_to_members_for_open_groups(self, service, users):
+    def test_create_private_group_doesnt_add_group_creator_to_members_for_open_groups(self, service, users):
         group = service.create_open_group('Anteater fans', 'cazimir')
 
         assert users['cazimir'] not in group.members
@@ -56,24 +56,24 @@ class TestGroupService(object):
         ('joinable_by', JoinableBy.authority),
         ('readable_by', ReadableBy.members),
         ('writeable_by', WriteableBy.members)])
-    def test_create_sets_access_flags(self, service, flag, expected_value):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_access_flags(self, service, flag, expected_value):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert getattr(group, flag) == expected_value
 
-    def test_create_adds_group_to_session(self, db_session, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_adds_group_to_session(self, db_session, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group in db_session
 
-    def test_create_sets_group_ids(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_ids(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.id
         assert group.pubid
 
-    def test_create_publishes_join_event(self, service, publish):
-        group = service.create('Dishwasher disassemblers', 'theresa')
+    def test_create_private_group_publishes_join_event(self, service, publish):
+        group = service.create_private_group('Dishwasher disassemblers', 'theresa')
 
         publish.assert_called_once_with('group-join', group.pubid, 'acct:theresa@example.com')
 

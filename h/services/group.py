@@ -25,7 +25,7 @@ class GroupService(object):
         self.user_fetcher = user_fetcher
         self.publish = publish
 
-    def create(self, name, userid, description=None):
+    def create_private_group(self, name, userid, description=None):
         """
         Create a new private group.
 
