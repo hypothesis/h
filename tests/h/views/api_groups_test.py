@@ -10,6 +10,37 @@ from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 from h.views import api_groups as views
 
 
+@pytest.mark.usefixtures('profile_group_service')
+class TestGroups(object):
+    def test_groups_proxies_to_service(self, pyramid_request, profile_group_service):
+        views.groups(pyramid_request)
+
+        assert profile_group_service.called_once()
+
+    def test_groups_passes_authority_parameter(self, pyramid_request, profile_group_service):
+        pyramid_request.params = {'authority': 'foo.com'}
+
+        views.groups(pyramid_request)
+
+        assert profile_group_service.called_once_with(pyramid_request, 'foo.com')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.user = user
+        pyramid_request.json_body = {}
+        return pyramid_request
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User.build()
+
+    @pytest.fixture
+    def profile_group_service(self, pyramid_config):
+        svc = mock.Mock()
+        pyramid_config.register_service(svc, name='profile_group')
+        return svc
+
+
 @pytest.mark.usefixtures('authenticated_userid', 'group_service')
 class TestRemoveMember(object):
 
