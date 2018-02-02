@@ -24,7 +24,7 @@ class TestAddCommand(object):
 
 
 @pytest.fixture
-def group_service(pyramid_config):
+def group_service():
     return mock.create_autospec(GroupService, spec_set=True, instance=True)
 
 
