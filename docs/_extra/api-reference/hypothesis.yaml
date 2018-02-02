@@ -186,6 +186,14 @@ paths:
           required: false
           type: string
           default: "hypothes.is"
+        - name: document_uri
+          in: query
+          description: >
+            The URI of the document currently being annotated.
+            Used to filter in appropriate open groups
+          required: false
+          type: string
+          format: uri
       responses:
         '200':
           description: Success
