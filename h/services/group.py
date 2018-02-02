@@ -47,8 +47,7 @@ class GroupService(object):
                       writeable_by=WriteableBy.members,
                       )
 
-        if group.joinable_by is not None:
-            group.members.append(creator)
+        group.members.append(creator)
 
         self.session.add(group)
         self.session.flush()
