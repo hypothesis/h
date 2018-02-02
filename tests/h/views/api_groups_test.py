@@ -24,6 +24,13 @@ class TestGroups(object):
 
         assert profile_group_service.called_once_with(pyramid_request, 'foo.com')
 
+    def test_groups_passes_document_uri_parameter(self, pyramid_request, profile_group_service):
+        pyramid_request.params = {'document_uri': 'foo.example.com'}
+
+        views.groups(pyramid_request)
+
+        assert profile_group_service.called_once_with(pyramid_request, document_uri='foo.example.com')
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
         pyramid_request.user = user

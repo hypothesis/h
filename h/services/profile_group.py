@@ -23,7 +23,7 @@ class ProfileGroupService(object):
         """ sort a list of groups of a single type """
         return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
 
-    def all(self, user=None, authority=None):
+    def all(self, user=None, authority=None, document_uri=None):
         """ return a list of all user groups"""
 
         # passed authority is overridden by user authority
