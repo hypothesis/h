@@ -9,7 +9,6 @@ from h.util.logging_filters import ExceptionFilter
 
 
 class TestLoggingFilters(object):
-    """Test logging filters."""
 
     def test_raises_if_invalid_level_name(self):
         with pytest.raises(ValueError):
