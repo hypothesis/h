@@ -100,7 +100,7 @@ def process_work_queue(settings, queue, session_factory=None):
         except (KeyboardInterrupt, SystemExit):
             session.rollback()
             raise
-        except:
+        except:  # noqa: E722
             log.exception('Caught exception handling streamer message:')
             session.rollback()
         else:
@@ -125,7 +125,7 @@ def supervise(greenlets):
         gevent.joinall(greenlets, raise_error=True)
     except (KeyboardInterrupt, SystemExit):
         raise
-    except:
+    except:  # noqa: E722
         log.critical('Unexpected exception in streamer greenlet:',
                      exc_info=True)
     else:

@@ -101,7 +101,7 @@ class AuthClientFactory(object):
             client.__parent__ = Root(self.request)
 
             return client
-        except:
+        except:  # noqa: E722
             # No such client found or not a valid UUID.
             raise KeyError()
 

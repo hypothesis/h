@@ -137,7 +137,7 @@ class Search(object):
         except ConnectionTimeout:
             s.incr('search.query.timeout')
             raise
-        except:
+        except:  # noqa: E722
             s.incr('search.query.error')
             raise
         finally:
