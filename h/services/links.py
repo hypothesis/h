@@ -63,9 +63,9 @@ class LinksService(object):
         for name, (g, hidden) in self.registry[LINK_GENERATORS_KEY].items():
             if hidden:
                 continue
-            l = g(self._request, annotation)
-            if l is not None:
-                links[name] = l
+            link = g(self._request, annotation)
+            if link is not None:
+                links[name] = link
         return links
 
 
