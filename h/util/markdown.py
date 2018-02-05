@@ -30,6 +30,7 @@ def _filter_link_attributes(tag, name, value):
 
     return False
 
+
 MARKDOWN_ATTRIBUTES = {
     'a': _filter_link_attributes,
     'img': ['alt', 'src', 'title'],

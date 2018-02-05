@@ -24,6 +24,7 @@ def add_annotation(id_):
         if annotation.is_reply:
             add_annotation.delay(annotation.thread_root_id)
 
+
 @celery.task
 def delete_annotation(id_):
     delete(celery.request.es, id_)
