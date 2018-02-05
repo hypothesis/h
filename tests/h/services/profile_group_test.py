@@ -6,6 +6,7 @@ import mock
 import pytest
 
 from h.models.group import ReadableBy, WriteableBy
+from h.services.authority_group import AuthorityGroupService
 from h.services.profile_group import ProfileGroupService
 from h.services.profile_group import profile_groups_factory
 
@@ -197,15 +198,6 @@ class TestProfileGroupsAuthority(object):
         authority_group_service.public_groups.assert_called_once_with('rando.com')
 
 
-class FakeAuthorityGroupService(object):
-
-    def __init__(self, public_groups):
-        self._public_groups = public_groups
-
-    def public_groups(self, authority):
-        return self._public_groups
-
-
 @pytest.fixture
 def user(factories):
     user = factories.User(username='freya')
@@ -252,10 +244,14 @@ def profile_group_factory(db_session, pyramid_request, request_authority=None):
     r_authority = request_authority or pyramid_request.authority
 
     def service_builder(open_groups):
+        authority_group_svc = mock.create_autospec(AuthorityGroupService,
+                                                   spec_set=True,
+                                                   instance=True)
+        authority_group_svc.public_groups.return_value = open_groups
         return ProfileGroupService(
           session=db_session,
           request_authority=r_authority,
           route_url=pyramid_request.route_url,
-          open_group_finder=FakeAuthorityGroupService(open_groups).public_groups
+          open_group_finder=authority_group_svc.public_groups
          )
     return service_builder
