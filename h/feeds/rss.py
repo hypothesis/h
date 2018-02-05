@@ -13,7 +13,7 @@ import h.feeds.util
 _ = i18n.TranslationStringFactory(__package__)
 
 
-def _pubDate_string(timestamp):
+def _pubdate_string(timestamp):
     """Return a RFC2822-formatted pubDate string for the given timestamp.
 
     Return a pubDate string like 'Tue, 03 Jun 2003 09:39:21 -0000'.
@@ -42,7 +42,7 @@ def _feed_item_from_annotation(annotation, annotation_url):
         "author": {"name": name},
         "title": annotation.title,
         "description": annotation.description,
-        "pubDate": _pubDate_string(annotation.created),
+        "pubDate": _pubdate_string(annotation.created),
         "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
         "link": annotation_url(annotation)
     }
@@ -73,6 +73,6 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
     }
 
     if annotations:
-        feed['pubDate'] = _pubDate_string(annotations[0].updated)
+        feed['pubDate'] = _pubdate_string(annotations[0].updated)
 
     return feed
