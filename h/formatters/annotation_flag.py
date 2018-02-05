@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from zope.interface import implementer
 
-from h import models
 from h.formatters.interfaces import IAnnotationFormatter
 
 

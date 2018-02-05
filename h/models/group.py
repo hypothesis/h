@@ -6,7 +6,6 @@ from pyramid import security
 from sqlalchemy.orm import exc
 import slugify
 
-from h.models.annotation import Annotation
 from h.db import Base
 from h.db import mixins
 from h import pubid

@@ -3,7 +3,6 @@
 import datetime
 from functools import partial
 import json
-import re
 
 try:
     from xml.etree import cElementTree as ElementTree
