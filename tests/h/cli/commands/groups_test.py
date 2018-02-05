@@ -4,6 +4,7 @@ import mock
 import pytest
 
 from h.cli.commands import groups as groups_cli
+from h.services.group import GroupService
 
 
 class TestAddCommand(object):
@@ -23,9 +24,8 @@ class TestAddCommand(object):
 
 
 @pytest.fixture
-def group_service(pyramid_config):
-    group_service = mock.Mock(spec_set=['create'])
-    return group_service
+def group_service():
+    return mock.create_autospec(GroupService, spec_set=True, instance=True)
 
 
 @pytest.fixture
