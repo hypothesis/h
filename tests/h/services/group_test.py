@@ -12,59 +12,43 @@ from h.services.group import groups_factory
 
 
 class TestGroupService(object):
-    def test_create_returns_group(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_returns_group(self, service):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert isinstance(group, Group)
 
-    def test_create_sets_group_name(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_sets_group_name(self, service):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert group.name == 'Anteater fans'
 
-    def test_create_sets_group_authority(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_sets_group_authority(self, service):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert group.authority == 'foobar.com'
 
-    def test_create_sets_group_creator(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_sets_group_creator(self, service, users):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert group.creator == users['cazimir']
 
-    def test_create_sets_description_when_present(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', 'all about ant eaters')
+    def test_create_sets_description_when_present(self, service):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir', 'all about ant eaters')
 
         assert group.description == 'all about ant eaters'
 
-    def test_create_skips_setting_description_when_missing(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_skips_setting_description_when_missing(self, service):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert group.description is None
 
-    def test_create_adds_group_creator_to_members(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_adds_group_creator_to_members(self, service, users):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert users['cazimir'] in group.members
 
-    def test_create_doesnt_add_group_creator_to_members_for_open_groups(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='open')
+    def test_create_doesnt_add_group_creator_to_members_for_open_groups(self, service, users):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir', type_='open')
 
         assert users['cazimir'] not in group.members
 
@@ -76,106 +60,83 @@ class TestGroupService(object):
         ('open', 'readable_by', ReadableBy.world),
         ('open', 'writeable_by', WriteableBy.authority)])
     def test_create_sets_access_flags_for_group_types(self,
-                                                      db_session,
-                                                      users,
+                                                      service,
                                                       group_type,
                                                       flag,
                                                       expected_value):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir', type_=group_type)
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir', type_=group_type)
 
         assert getattr(group, flag) == expected_value
 
-    def test_create_raises_for_invalid_group_type(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
+    def test_create_raises_for_invalid_group_type(self, service):
         with pytest.raises(ValueError):
-            svc.create('Anteater fans', 'foobar.com', 'cazimir', type_='foo')
+            service.create('Anteater fans', 'foobar.com', 'cazimir', type_='foo')
 
-    def test_create_adds_group_to_session(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_adds_group_to_session(self, db_session, service):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert group in db_session
 
-    def test_create_sets_group_ids(self, db_session, users):
-        svc = GroupService(db_session, users.get)
-
-        group = svc.create('Anteater fans', 'foobar.com', 'cazimir')
+    def test_create_sets_group_ids(self, service):
+        group = service.create('Anteater fans', 'foobar.com', 'cazimir')
 
         assert group.id
         assert group.pubid
 
-    def test_create_publishes_join_event(self, db_session, users):
-        publish = mock.Mock(spec_set=[])
-        svc = GroupService(db_session, users.get, publish=publish)
-
-        group = svc.create('Dishwasher disassemblers', 'foobar.com', 'theresa')
+    def test_create_publishes_join_event(self, service, publish):
+        group = service.create('Dishwasher disassemblers', 'foobar.com', 'theresa')
 
         publish.assert_called_once_with('group-join', group.pubid, 'theresa')
 
-    def test_member_join_adds_user_to_group(self, db_session, group, users):
-        svc = GroupService(db_session, users.get)
-
-        svc.member_join(group, 'theresa')
+    def test_member_join_adds_user_to_group(self, service, group, users):
+        service.member_join(group, 'theresa')
 
         assert users['theresa'] in group.members
 
-    def test_member_join_is_idempotent(self, db_session, group, users):
-        svc = GroupService(db_session, users.get)
-
-        svc.member_join(group, 'theresa')
-        svc.member_join(group, 'theresa')
+    def test_member_join_is_idempotent(self, service, group, users):
+        service.member_join(group, 'theresa')
+        service.member_join(group, 'theresa')
 
         assert group.members.count(users['theresa']) == 1
 
-    def test_member_join_publishes_join_event(self, db_session, group, users):
-        publish = mock.Mock(spec_set=[])
-        svc = GroupService(db_session, users.get, publish=publish)
+    def test_member_join_publishes_join_event(self, service, publish, group):
         group.pubid = 'abc123'
 
-        svc.member_join(group, 'theresa')
+        service.member_join(group, 'theresa')
 
         publish.assert_called_once_with('group-join', 'abc123', 'theresa')
 
-    def test_member_leave_removes_user_from_group(self, db_session, users):
-        svc = GroupService(db_session, users.get)
+    def test_member_leave_removes_user_from_group(self, service, users):
         group = Group(name='Theresa and her buddies',
                       authority='foobar.com',
                       creator=users['theresa'])
         group.members.append(users['cazimir'])
 
-        svc.member_leave(group, 'cazimir')
+        service.member_leave(group, 'cazimir')
 
         assert users['cazimir'] not in group.members
 
-    def test_member_leave_is_idempotent(self, db_session, users):
-        svc = GroupService(db_session, users.get)
+    def test_member_leave_is_idempotent(self, service, users):
         group = Group(name='Theresa and her buddies',
                       authority='foobar.com',
                       creator=users['theresa'])
         group.members.append(users['cazimir'])
 
-        svc.member_leave(group, 'cazimir')
-        svc.member_leave(group, 'cazimir')
+        service.member_leave(group, 'cazimir')
+        service.member_leave(group, 'cazimir')
 
         assert users['cazimir'] not in group.members
 
-    def test_member_leave_publishes_leave_event(self, db_session, users):
-        publish = mock.Mock(spec_set=[])
-        svc = GroupService(db_session, users.get, publish=publish)
+    def test_member_leave_publishes_leave_event(self, service, users, publish):
         group = Group(name='Donkey Trust',
                       authority='foobari.com',
                       creator=users['theresa'])
         group.members.append(users['cazimir'])
         group.pubid = 'abc123'
 
-        svc.member_leave(group, 'cazimir')
+        service.member_leave(group, 'cazimir')
 
         publish.assert_called_once_with('group-leave', 'abc123', 'cazimir')
-
 
     @pytest.mark.parametrize('with_user', [True, False])
     def test_groupids_readable_by_includes_world(self, with_user, service, db_session, factories):
@@ -235,8 +196,12 @@ class TestGroupService(object):
                      creator=users['cazimir'])
 
     @pytest.fixture
-    def service(self, db_session, users):
-        return GroupService(db_session, users.get)
+    def publish(self):
+        return mock.Mock(spec_set=[])
+
+    @pytest.fixture
+    def service(self, db_session, users, publish):
+        return GroupService(db_session, users.get, publish=publish)
 
 
 @pytest.mark.usefixtures('user_service')
