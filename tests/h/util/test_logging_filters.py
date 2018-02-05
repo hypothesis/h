@@ -5,46 +5,49 @@ from __future__ import unicode_literals
 import pytest
 import logging
 from requests.exceptions import ReadTimeout
-from h.search.logging_filters import FilterExceptions
+from h.util.logging_filters import FilterExceptions
 
 
 class TestLoggingFilters(object):
     """Test logging filters."""
 
-    def test_filter_bad_level(self):  #pylint: disable=no-self-use
+    def test_filter_bad_level(self):
         with pytest.raises(ValueError):
             FilterExceptions((("requests.exceptions.ReadTimeout", "WARNI"),))
 
-    def test_filter_wrong_exception_name(self):  #pylint: disable=no-self-use
+    def test_filter_wrong_exception_name(self):
         with pytest.raises(ValueError):
             FilterExceptions((("requests.exceptions.Bugga", "WARN"),))
 
-    def test_filter_wrong_module_name(self):  #pylint: disable=no-self-use
+    def test_filter_wrong_module_name(self):
         with pytest.raises(ValueError):
             FilterExceptions((("requests.bad.ReadTimeout", "WARN"),))
 
-    def test_filter_no_log(self, logger):  #pylint: disable=no-self-use,redefined-outer-name
+    def test_filter_level_as_num(self, logger):
+        FilterExceptions((("requests.exceptions.ReadTimeout", logging.WARNING),))
+
+    def test_filter_no_log(self, logger):
         try:
             raise ReadTimeout("this is a test read timeout error")
         except ReadTimeout:
             logger.warn("warning", exc_info=True)
         assert not logger.handlers[0].handler_called, "Didn't filter out log message when it should have!!"
 
-    def test_filter_log_level_mistmatch(self, logger):  #pylint: disable=no-self-use,redefined-outer-name
+    def test_filter_log_level_mistmatch(self, logger):
         try:
             raise ReadTimeout("this is a test read timeout error")
         except ReadTimeout:
             logger.critical("critical", exc_info=True)
         assert logger.handlers[0].handler_called, "Filtered out log message when it shouldn't have!!"
 
-    def test_filter_log_exception_mismatch(self, logger):  #pylint: disable=no-self-use,redefined-outer-name
+    def test_filter_log_exception_mismatch(self, logger):
         try:
             raise Exception("this is a test read timeout error")
         except Exception:
             logger.warn("warning", exc_info=True)
         assert logger.handlers[0].handler_called, "Filtered out log message when it shouldn't have!!"
 
-    def test_filter_no_exc_info(self, logger):  #pylint: disable=no-self-use,redefined-outer-name
+    def test_filter_no_exc_info(self, logger):
         try:
             raise ReadTimeout("this is a test read timeout error")
         except ReadTimeout:

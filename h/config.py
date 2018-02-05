@@ -17,7 +17,7 @@ from h.settings import (
     database_url,
     mandrill_settings,
 )
-from h.search.logging_filters import FilterExceptions
+from h.util.logging_filters import FilterExceptions
 
 __all__ = ('configure',)
 

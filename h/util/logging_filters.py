@@ -4,6 +4,14 @@
 import logging
 
 
+LEVELS = {"CRITICAL": 50,
+          "ERROR": 40,
+          "WARNING": 30,
+          "INFO": 20,
+          "DEBUG": 10,
+          "NOTSET": 0}
+
+
 class FilterExceptions(logging.Filter):
     """Filter out the specified exceptions with specified logging level."""
 
@@ -14,11 +22,9 @@ class FilterExceptions(logging.Filter):
         ignore_exceptions: a tuple of tuples ((exception type, loglevel))
                            example: (("requests.exceptions.ReadTimeout", "WARNING"),)
         """
-        logging_level_names = {level_name:
-                               (getattr(logging, level_name)
-                                if isinstance(level_name, str)
-                                else level_name)
-                               for level_name in logging._levelNames}  #pylint: disable=protected-access
+        super(FilterExceptions, self).__init__()
+        logging_level_names = {val: val for val in LEVELS.values()}
+        logging_level_names.update(LEVELS)
         self._ignore_exceptions = []
         for (exc_type, exc_level) in ignore_exceptions:
             exception_idx = exc_type.rfind('.')
@@ -33,7 +39,6 @@ class FilterExceptions(logging.Filter):
             except (ImportError, AttributeError):
                 raise ValueError('The exception path does not exist ({}.{}).'
                                  .format(module, exception))
-        super(FilterExceptions, self).__init__()
 
     def filter(self, record):
         """Filter out the specified exceptions with specified logging level."""
