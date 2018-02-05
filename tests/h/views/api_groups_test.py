@@ -8,6 +8,7 @@ import pytest
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 
 from h.views import api_groups as views
+from h.services.profile_group import ProfileGroupService
 
 
 @pytest.mark.usefixtures('profile_group_service')
@@ -15,21 +16,23 @@ class TestGroups(object):
     def test_groups_proxies_to_service(self, pyramid_request, profile_group_service):
         views.groups(pyramid_request)
 
-        assert profile_group_service.called_once()
+        profile_group_service.all.assert_called_once()
 
     def test_groups_passes_authority_parameter(self, pyramid_request, profile_group_service):
         pyramid_request.params = {'authority': 'foo.com'}
 
         views.groups(pyramid_request)
 
-        assert profile_group_service.called_once_with(pyramid_request, 'foo.com')
+        c_args, c_kwargs = profile_group_service.all.call_args
+        assert c_kwargs['authority'] == 'foo.com'
 
     def test_groups_passes_document_uri_parameter(self, pyramid_request, profile_group_service):
         pyramid_request.params = {'document_uri': 'foo.example.com'}
 
         views.groups(pyramid_request)
 
-        assert profile_group_service.called_once_with(pyramid_request, document_uri='foo.example.com')
+        c_args, c_kwargs = profile_group_service.all.call_args
+        assert c_kwargs['document_uri'] == 'foo.example.com'
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
@@ -43,7 +46,7 @@ class TestGroups(object):
 
     @pytest.fixture
     def profile_group_service(self, pyramid_config):
-        svc = mock.Mock()
+        svc = mock.create_autospec(ProfileGroupService, spec_set=True, instance=True)
         pyramid_config.register_service(svc, name='profile_group')
         return svc
 
