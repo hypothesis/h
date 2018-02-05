@@ -8,6 +8,17 @@ from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 from h.views.api import api_config
 
 
+@api_config(route_name='api.groups',
+            request_method='GET',
+            link_name='groups.read',
+            description="Fetch the user's groups")
+def groups(request):
+    authority = request.params.get('authority')
+    document_uri = request.params.get('document_uri')
+    svc = request.find_service(name='profile_group')
+    return svc.all(request.user, authority, document_uri)
+
+
 @api_config(route_name='api.group_member',
             request_method='DELETE',
             link_name='group.member.delete',
