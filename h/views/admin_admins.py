@@ -4,7 +4,7 @@ from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h import models
-from h.i18n import TranslationString as _
+from h.i18n import TranslationString as _  # noqa: N813
 
 
 @view_config(route_name='admin_admins',
