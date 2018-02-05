@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-"""Test logging filters."""
 from __future__ import unicode_literals
 
 import pytest
@@ -8,7 +7,7 @@ from requests.exceptions import ReadTimeout
 from h.util.logging_filters import ExceptionFilter
 
 
-class TestLoggingFilters(object):
+class TestExceptionFilter(object):
 
     def test_raises_if_invalid_level_name(self):
         with pytest.raises(ValueError):
