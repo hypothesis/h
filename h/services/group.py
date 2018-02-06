@@ -26,7 +26,7 @@ class GroupService(object):
 
     """A service for manipulating groups and group membership."""
 
-    def __init__(self, session, user_fetcher, publish=None):
+    def __init__(self, session, user_fetcher, publish):
         """
         Create a new groups service.
 
@@ -68,8 +68,7 @@ class GroupService(object):
         self.session.add(group)
         self.session.flush()
 
-        if self.publish:
-            self.publish('group-join', group.pubid, userid)
+        self.publish('group-join', group.pubid, userid)
 
         return group
 
@@ -82,8 +81,7 @@ class GroupService(object):
 
         group.members.append(user)
 
-        if self.publish:
-            self.publish('group-join', group.pubid, userid)
+        self.publish('group-join', group.pubid, userid)
 
     def member_leave(self, group, userid):
         """Remove `userid` from the member list of `group`."""
@@ -94,8 +92,7 @@ class GroupService(object):
 
         group.members.remove(user)
 
-        if self.publish:
-            self.publish('group-leave', group.pubid, userid)
+        self.publish('group-leave', group.pubid, userid)
 
     def groupids_readable_by(self, user):
         """
