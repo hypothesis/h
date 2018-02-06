@@ -86,7 +86,7 @@ class TestGroupService(object):
     def test_create_publishes_join_event(self, service, publish):
         group = service.create('Dishwasher disassemblers', 'foobar.com', 'theresa')
 
-        publish.assert_called_once_with('group-join', group.pubid, 'theresa')
+        publish.assert_called_once_with('group-join', group.pubid, 'acct:theresa@example.com')
 
     def test_member_join_adds_user_to_group(self, service, group, users):
         service.member_join(group, 'theresa')

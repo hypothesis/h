@@ -68,7 +68,7 @@ class GroupService(object):
         self.session.add(group)
         self.session.flush()
 
-        self.publish('group-join', group.pubid, userid)
+        self.publish('group-join', group.pubid, group.creator.userid)
 
         return group
 
