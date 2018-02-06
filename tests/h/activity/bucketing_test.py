@@ -190,7 +190,7 @@ class TestDocumentBucket(object):
         assert bucket.incontext_link(request) == incontext_link.return_value
 
     def test_incontext_link_returns_none_if_bucket_empty(self, document, patch):
-        incontext_link = patch('h.links.incontext_link')
+        patch('h.links.incontext_link')
         bucket = bucketing.DocumentBucket(document)
         request = Mock()
 

@@ -533,7 +533,7 @@ class TestPasswordChangeSchema(object):
 class TestEditProfileSchema(object):
     def test_accepts_valid_input(self, pyramid_csrf_request):
         schema = schemas.EditProfileSchema().bind(request=pyramid_csrf_request)
-        appstruct = schema.deserialize({
+        schema.deserialize({
             'display_name': 'Michael Granitzer',
             'description': 'Professor at University of Passau',
             'link': 'http://mgrani.github.io/',
