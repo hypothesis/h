@@ -44,6 +44,7 @@ test: node_modules/.uptodate
 .PHONY: lint
 lint: .pydeps
 	flake8 h
+	flake8 tests
 
 ################################################################################
 
