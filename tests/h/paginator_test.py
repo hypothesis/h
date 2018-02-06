@@ -26,7 +26,7 @@ class TestPaginate(object):
       ('60',  [1, '...', 57, 58, 59, 60]),
 
       # If the current page is in the middle.
-      ('30',  [1, '...',27, 28, 29, 30, 31, 32, 33, '...', 60]),
+      ('30',  [1, '...', 27, 28, 29, 30, 31, 32, 33, '...', 60]),
 
       # If the current page is near the first page.
       ('2',  [1, 2, 3, 4, 5, '...', 60]),

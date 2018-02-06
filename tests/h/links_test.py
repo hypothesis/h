@@ -136,7 +136,7 @@ def test_jsonld_id_link(factories, pyramid_config, pyramid_request):
     ('http://www.google.com', 'google.com'),
     ('http://site.com/with-a-path', 'site.com/with-a-path'),
     ('https://site.com/with-a-path?q=and-a-query-string', 'site.com/with-a-path'),
-    ('http://site.com/path%20with%20spaces','site.com/path with spaces'),
+    ('http://site.com/path%20with%20spaces', 'site.com/path with spaces'),
     ('', ''),
     ('site.com/no-scheme', 'site.com/no-scheme'),
     ('does not look like a URL', 'does not look like a URL'),

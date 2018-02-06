@@ -120,9 +120,9 @@ class TestAPI(object):
 
 @pytest.fixture
 def annotation(db_session, factories):
-    ann =  factories.Annotation(userid='acct:testuser@example.com',
-                                groupid='__world__',
-                                shared=True)
+    ann = factories.Annotation(userid='acct:testuser@example.com',
+                               groupid='__world__',
+                               shared=True)
     db_session.commit()
     return ann
 
