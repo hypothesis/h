@@ -47,11 +47,6 @@ class TestGroupService(object):
 
         assert users['cazimir'] in group.members
 
-    def test_create_private_group_doesnt_add_group_creator_to_members_for_open_groups(self, service, users):
-        group = service.create_open_group('Anteater fans', 'cazimir')
-
-        assert users['cazimir'] not in group.members
-
     @pytest.mark.parametrize('flag,expected_value', [
         ('joinable_by', JoinableBy.authority),
         ('readable_by', ReadableBy.members),
