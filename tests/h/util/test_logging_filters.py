@@ -11,18 +11,10 @@ class TestExceptionFilter(object):
 
     def test_raises_if_invalid_level_name(self):
         with pytest.raises(ValueError):
-            ExceptionFilter((("requests.exceptions.ReadTimeout", "WARNI"),))
-
-    def test_raises_if_invalid_exception_name(self):
-        with pytest.raises(ValueError):
-            ExceptionFilter((("requests.exceptions.Bugga", "WARN"),))
-
-    def test_raises_if_invalid_module_name(self):
-        with pytest.raises(ValueError):
-            ExceptionFilter((("requests.bad.ReadTimeout", "WARN"),))
+            ExceptionFilter((("ReadTimeout", "WARNI"),))
 
     def test_specify_level_as_int(self, logger):
-        ExceptionFilter((("requests.exceptions.ReadTimeout", logging.WARNING),))
+        ExceptionFilter((("ReadTimeout", logging.WARNING),))
 
     def test_does_not_log_specified_exceptions(self, logger):
         try:
@@ -63,5 +55,5 @@ def logger():
 
     log = logging.Logger('test_logger')
     log.addHandler(TestHandler())
-    log.addFilter(ExceptionFilter((("requests.exceptions.ReadTimeout", "WARNING"),)))
+    log.addFilter(ExceptionFilter((("ReadTimeout", "WARNING"),)))
     return log

@@ -19,9 +19,11 @@ class ExceptionFilter(logging.Filter):
     def __init__(self, ignore_exceptions):
         """
         Configure filtering out of the specified exceptions with specified logging level.
+        Note if there are multiple exceptions that have the same name this will filter
+        out all exceptions with that name.
 
-        ignore_exceptions: a tuple of tuples ((exception type, loglevel))
-                           example: (("requests.exceptions.ReadTimeout", "WARNING"),)
+        ignore_exceptions: a tuple of tuples ((exception name, loglevel))
+                           example: (("ReadTimeout", "WARNING"),)
         """
         super(ExceptionFilter, self).__init__()
 
@@ -30,24 +32,18 @@ class ExceptionFilter(logging.Filter):
         logging_levels.update(LEVELS)
 
         self._ignore_exceptions = []
-        for (exc_type, exc_level) in ignore_exceptions:
-            exception_idx = exc_type.rfind('.')
-            module, exception = exc_type[:exception_idx], exc_type[exception_idx+1:]
+        for (exc_name, exc_level) in ignore_exceptions:
             try:
-                self._ignore_exceptions.append((logging_levels[exc_level],
-                                                getattr(__import__(module), exception)))
+                self._ignore_exceptions.append((logging_levels[exc_level], exc_name))
             except KeyError:
                 raise ValueError("""The logging level provided ({})
                                  is invalid. Valid options: {}"""
                                  .format(exc_level, logging_levels.keys()))
-            except (ImportError, AttributeError):
-                raise ValueError('The exception path does not exist ({}.{}).'
-                                 .format(module, exception))
 
     def filter(self, record):
         """Filter out the specified exceptions with specified logging level."""
         if record.exc_info:
             for filter_level, filter_exc in self._ignore_exceptions:
-                if record.exc_info[0] is filter_exc and record.levelno == filter_level:
+                if record.exc_info[0].__name__ == filter_exc and record.levelno == filter_level:
                     return False
         return True

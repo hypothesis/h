@@ -138,6 +138,6 @@ def configure(environ=None, settings=None):
 
     # Add ES logging filter to filter out ReadTimeout warnings
     es_logger = logging.getLogger('elasticsearch')
-    es_logger.addFilter(ExceptionFilter((("requests.exceptions.ReadTimeout", "WARNING"),)))
+    es_logger.addFilter(ExceptionFilter((("ReadTimeout", "WARNING"),)))
 
     return Configurator(settings=settings)
