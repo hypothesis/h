@@ -9,7 +9,6 @@ import pytest
 from h.models import Token
 
 
-@pytest.mark.usefixtures('security')
 class TestToken(object):
     def test_ttl_is_none_if_token_has_no_expires(self):
         assert Token().ttl is None
@@ -53,25 +52,6 @@ class TestToken(object):
         token = Token(refresh_token_expires=refresh_token_expires)
 
         assert token.refresh_token_expired is True
-
-    @pytest.fixture
-    def security(self, patch):
-        security = patch('h.models.token.security')
-
-        class TestTokenGenerator(object):
-            """Return "TOKEN_1", then "TOKEN_2" and so on."""
-
-            def __init__(self):
-                self.i = 1
-                self.generated_tokens = []
-
-            def __call__(self):
-                self.generated_tokens.append("TOKEN_" + str(self.i))
-                self.i += 1
-                return self.generated_tokens[-1]
-
-        security.token_urlsafe.side_effect = TestTokenGenerator()
-        return security
 
 
 def one_hour_from_now():

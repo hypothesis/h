@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 from pyramid.view import forbidden_view_config
 from pyramid.view import notfound_view_config
 
-from h.i18n import TranslationString as _
+from h.i18n import TranslationString as _  # noqa: N813
 from h.exceptions import APIError
 from h.schemas import ValidationError
 from h.util.view import handle_exception, json_view

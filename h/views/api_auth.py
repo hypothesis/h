@@ -151,7 +151,7 @@ class OAuthAuthorizeController(object):
     def _render_web_message_response(self, redirect_uri):
         location = urlparse.urlparse(redirect_uri)
         params = urlparse.parse_qs(location.query)
-        origin = '{l.scheme}://{l.netloc}'.format(l=location)
+        origin = '{url.scheme}://{url.netloc}'.format(url=location)
 
         state = None
         states = params.get('state', [])

@@ -12,7 +12,7 @@ from h import links
 from h import presenters
 from h import storage
 from h.activity import bucketing
-from h.models import Annotation, Document, Group
+from h.models import Annotation, Group
 from h.search import Search
 from h.search import parser
 from h.search.query import (

@@ -5,7 +5,7 @@ from functools import partial
 import sqlalchemy as sa
 
 from h import session
-from h.models import Annotation, Group, User
+from h.models import Group, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 GROUP_ACCESS_FLAGS = {

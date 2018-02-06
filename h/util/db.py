@@ -10,7 +10,7 @@ except ImportError:
 import sqlalchemy
 
 
-class lru_cache_in_transaction(object):
+class lru_cache_in_transaction(object):  # noqa: N801
     """
     Decorator to wrap a function with a memoizing callable that saves up to
     the `maxsize` most recent calls. The underlying cache is automatically

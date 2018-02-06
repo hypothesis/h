@@ -13,7 +13,7 @@ from pyramid.view import view_defaults
 
 from h import util
 from h.activity import query
-from h.i18n import TranslationString as _
+from h.i18n import TranslationString as _  # noqa: N813
 from h.links import pretty_link
 from h.paginator import paginate
 from h.search import parser

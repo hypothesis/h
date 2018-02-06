@@ -82,6 +82,7 @@ def run_migrations_online():
     finally:
         connection.close()
 
+
 configure_logging()
 
 if context.is_offline_mode():

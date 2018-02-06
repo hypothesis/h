@@ -142,7 +142,7 @@ class User(Base):
     __tablename__ = 'user'
 
     @declared_attr
-    def __table_args__(cls):
+    def __table_args__(cls):  # noqa: N805
         return (
             # (email, authority) must be unique
             sa.UniqueConstraint('email', 'authority'),
@@ -214,7 +214,7 @@ class User(Base):
         self._username = value
 
     @username.comparator
-    def username(cls):
+    def username(cls):  # noqa: N805
         return UsernameComparator(cls._username)
 
     @hybrid_property
@@ -223,7 +223,7 @@ class User(Base):
                                                      authority=self.authority)
 
     @userid.comparator
-    def userid(cls):
+    def userid(cls):  # noqa: N805
         return UserIDComparator(cls.username, cls.authority)
 
     email = sa.Column(sa.UnicodeText(), nullable=False)
