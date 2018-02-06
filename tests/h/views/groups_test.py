@@ -56,7 +56,7 @@ class TestGroupCreateController(object):
         controller.post()
 
         assert group_service.create.call_args_list == [
-            mock.call(name='my_new_group', authority='example.com', userid='ariadna', description='foobar'),
+            mock.call(name='my_new_group', userid='ariadna', description='foobar'),
         ]
 
     def test_post_redirects_if_form_valid(self,

@@ -42,7 +42,6 @@ class GroupCreateController(object):
             groups_service = self.request.find_service(name='group')
             group = groups_service.create(
                 name=appstruct['name'],
-                authority=self.request.authority,
                 description=appstruct.get('description'),
                 userid=self.request.authenticated_userid)
 

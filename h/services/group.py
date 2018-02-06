@@ -38,7 +38,7 @@ class GroupService(object):
         self.user_fetcher = user_fetcher
         self.publish = publish
 
-    def create(self, name, authority, userid, description=None, type_='private'):
+    def create(self, name, userid, description=None, type_='private'):
         """
         Create a new group.
 
@@ -52,7 +52,7 @@ class GroupService(object):
         """
         creator = self.user_fetcher(userid)
         group = Group(name=name,
-                      authority=authority,
+                      authority=creator.authority,
                       creator=creator,
                       description=description)
 
