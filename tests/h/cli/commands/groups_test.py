@@ -18,7 +18,6 @@ class TestAddCommand(object):
         assert result.exit_code == 0
 
         group_service.create.assert_called_with(name=u'Publisher',
-                                                authority=u'publisher.org',
                                                 userid='acct:admin@publisher.org',
                                                 type_='open')
 
