@@ -985,8 +985,10 @@ def mock_db_session():
     class DB(object):
         def add(self, obj):
             pass
+
         def query(self, cls):
             pass
+
         def flush(self):
             pass
     return mock.Mock(spec=DB())

@@ -181,6 +181,7 @@ def user_service(pyramid_config):
     pyramid_config.register_service(service, name='user')
     return service
 
+
 @pytest.fixture
 def principals_for_user(patch):
     return patch('h.auth.util.principals_for_user')

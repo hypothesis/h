@@ -143,7 +143,6 @@ class TestCheckURL(object):
 
         assert check_url(pyramid_request, query) is None
 
-
     def test_removes_user_term_from_query(self, pyramid_request, unparse):
         query = MultiDict({'user': 'jose'})
 

@@ -513,7 +513,6 @@ class TestUpdateAnnotationSchema(object):
             'group': 'new-group'
         })
 
-
         assert 'groupid' not in appstruct
         assert 'groupid' not in appstruct.get('extra', {})
         assert 'group' not in appstruct

@@ -56,6 +56,7 @@ class DummyFeature(object):
     def clear(self):
         self.flags = {}
 
+
 class DummySession(object):
 
     """

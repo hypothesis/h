@@ -52,6 +52,7 @@ def test_feed_contains_entries(_feed_entry_from_annotation, factories):
         "feed entry for annotation 2",
         "feed entry for annotation 3"
     ]
+
     def pop(*args, **kwargs):
         return entries.pop(0)
     _feed_entry_from_annotation.side_effect = pop
