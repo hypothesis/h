@@ -16,7 +16,9 @@ def groups(request):
     authority = request.params.get('authority')
     document_uri = request.params.get('document_uri')
     svc = request.find_service(name='profile_group')
-    return svc.all(request.user, authority, document_uri)
+    return svc.all(user=request.user,
+                   authority=authority,
+                   document_uri=document_uri)
 
 
 @api_config(route_name='api.group_member',
