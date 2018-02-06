@@ -56,7 +56,7 @@ class GroupService(object):
         """
         Create a new open group.
 
-        An open group is one that anyone can read or write.
+        An open group is one that anyone in the same authority can read or write.
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
