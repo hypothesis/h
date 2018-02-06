@@ -3,8 +3,7 @@
 import deform
 import mock
 import pytest
-from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPNotFound)
+from pyramid.httpexceptions import HTTPMovedPermanently
 
 from h.views import groups as views
 from h.models import (Group, User)

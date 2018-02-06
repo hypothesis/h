@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-import elasticsearch
-
 from h import presenters
 from h.search import client
 from h.search import index
