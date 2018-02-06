@@ -97,7 +97,7 @@ class TestBuilder(object):
 
         q = builder.build({})
 
-        assert q["sort"][0]["updated"]["ignore_unmapped"] == True
+        assert q["sort"][0]["updated"]["ignore_unmapped"] is True
 
     def test_with_custom_sort(self):
         """Custom sorts are returned in the query dict."""

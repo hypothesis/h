@@ -194,7 +194,7 @@ class TestDocumentBucket(object):
         bucket = bucketing.DocumentBucket(document)
         request = Mock()
 
-        assert bucket.incontext_link(request) == None
+        assert bucket.incontext_link(request) is None
 
     @pytest.fixture
     def document(self, db_session):
