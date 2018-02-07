@@ -1,11 +1,6 @@
-/h/h/db/types.py:88:
 /h/h/models/document.py:482:
 /h/h/search/config.py:190:
 /h/tests/h/auth/util_test.py:69:
-/h/tests/h/cli/commands/annotation_id_test.py:11:
-/h/tests/h/db/types_test.py:57:
-/h/tests/h/feeds/rss_test.py:93:
-/h/tests/h/feeds/util_test.py:17:
 /h/tests/h/jinja_extension_test.py:48:
 /h/tests/h/jinja_extension_test.py:55:
 /h/tests/h/jinja_extension_test.py:63:

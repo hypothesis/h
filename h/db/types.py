@@ -2,6 +2,7 @@
 
 """Custom SQLAlchemy types for use with the Annotations API database."""
 
+from h._compat import string_types
 import binascii
 import base64
 import uuid
@@ -85,10 +86,20 @@ class AnnotationSelectorJSONB(types.TypeDecorator):
 
 
 def _get_hex_from_urlsafe(value):
-    bytestr = bytes(value)
+    """
+    Convert a URL-safe base 64 ID to a hex UUID.
+
+    :type value: unicode
+    :rtype: unicode
+    """
 
     def _fail():
         raise InvalidUUID('{0!r} is not a valid encoded UUID'.format(value))
+
+    if not isinstance(value, string_types):
+        raise InvalidUUID('`value` is {}, expected one of {}'.format(type(value), string_types))
+
+    bytestr = value.encode()
 
     if len(bytestr) == 22:
         # 22-char inputs represent 16 bytes of data, which when normally
@@ -96,18 +107,18 @@ def _get_hex_from_urlsafe(value):
         # that back before decoding.
         try:
             data = _must_b64_decode(bytestr + b'==', expected_size=16)
-        except TypeError:
+        except (TypeError, binascii.Error):
             _fail()
-        return binascii.hexlify(data)
+        return binascii.hexlify(data).decode()
 
     if len(bytestr) == 20:
         # 20-char inputs represent 15 bytes of data, which requires no padding
         # corrections.
         try:
             data = _must_b64_decode(bytestr, expected_size=15)
-        except TypeError:
+        except (TypeError, binascii.Error):
             _fail()
-        hexstring = binascii.hexlify(data)
+        hexstring = binascii.hexlify(data).decode()
         # These are ElasticSearch flake IDs, so to convert them into UUIDs we
         # insert the magic nibbles at the appropriate points. See the comments
         # on ES_FLAKE_MAGIC_BYTE for details.
@@ -122,6 +133,16 @@ def _get_hex_from_urlsafe(value):
 
 
 def _get_urlsafe_from_hex(value):
+    """
+    Convert a hex UUID to a URL-safe base 64 ID.
+
+    :type value: unicode
+    :rtype: unicode
+    """
+
+    if not isinstance(value, string_types):
+        raise ValueError('`value` is {}, expected one of {}'.format(type(value), string_types))
+
     # Validate and normalise hex string
     hexstring = uuid.UUID(hex=value).hex
 
@@ -134,11 +155,11 @@ def _get_urlsafe_from_hex(value):
         data = binascii.unhexlify(hexstring[0:12] +
                                   hexstring[13:16] +
                                   hexstring[17:32])
-        return base64.urlsafe_b64encode(data)
+        return base64.urlsafe_b64encode(data).decode()
 
     # Encode UUID bytes and strip two bytes of padding
     data = binascii.unhexlify(hexstring)
-    return base64.urlsafe_b64encode(data)[:-2]
+    return base64.urlsafe_b64encode(data)[:-2].decode()
 
 
 def _must_b64_decode(data, expected_size=None):
