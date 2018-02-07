@@ -405,7 +405,7 @@ class TestCreateAnnotationSchema(object):
         with pytest.raises(ValidationError) as exc:
             schema.validate(data)
 
-        assert exc.value.message == "uri: 'uri' is a required property"
+        assert str(exc.value) == "uri: 'uri' is a required property"
 
     def test_it_sets_userid(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy('acct:harriet@example.com')

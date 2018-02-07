@@ -41,7 +41,7 @@ class TestUpdatePreferences(object):
         with pytest.raises(APIError) as exc:
             api_profile.update_preferences(pyramid_request)
 
-        assert exc.value.message == 'uh oh, wrong prefs'
+        assert str(exc.value) == 'uh oh, wrong prefs'
 
     def test_handles_missing_preferences_payload(self, pyramid_request):
         pyramid_request.json_body = {'foo': 'bar'}

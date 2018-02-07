@@ -179,7 +179,7 @@ class TestAnnotationJSONPresenter(object):
         with pytest.raises(ValueError) as exc:
             AnnotationJSONPresenter(mock.Mock(), formatters=[mock.Mock()])
 
-        assert 'not implementing IAnnotationFormatter interface' in exc.value.message
+        assert 'not implementing IAnnotationFormatter interface' in str(exc.value)
 
     @pytest.fixture
     def document_asdict(self, patch):

@@ -25,7 +25,7 @@ class TestRenameUserService(object):
 
         with pytest.raises(UserRenameError) as err:
             service.check(user, 'panda')
-        assert err.value.message == 'Another user already has the username "panda"'
+        assert str(err.value) == 'Another user already has the username "panda"'
 
     @mock.patch('h.models.user.User.get_by_username')
     def test_check_returns_True_if_new_username_equivalent_to_old(self, get_by_username, service, user):

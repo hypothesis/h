@@ -33,13 +33,13 @@ def api_notfound(request):
 def api_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code
-    return {'status': 'failure', 'reason': context.message}
+    return {'status': 'failure', 'reason': str(context)}
 
 
 @json_view(context=ValidationError, path_info='/api/')
 def api_validation_error(context, request):
     request.response.status_code = 400
-    return {'status': 'failure', 'reason': context.message}
+    return {'status': 'failure', 'reason': str(context)}
 
 
 @json_view(context=Exception)

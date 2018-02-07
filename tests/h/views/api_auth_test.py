@@ -313,7 +313,7 @@ class TestDebugToken(object):
             views.debug_token(pyramid_request)
 
         assert exc.value.type == 'missing_token'
-        assert 'Bearer token is missing' in exc.value.message
+        assert 'Bearer token is missing' in str(exc.value)
 
     def test_it_raises_error_when_token_is_empty(self, pyramid_request):
         pyramid_request.auth_token = ''
@@ -322,7 +322,7 @@ class TestDebugToken(object):
             views.debug_token(pyramid_request)
 
         assert exc.value.type == 'missing_token'
-        assert 'Bearer token is missing' in exc.value.message
+        assert 'Bearer token is missing' in str(exc.value)
 
     def test_it_validates_token(self, pyramid_request, token_service):
         pyramid_request.auth_token = 'the-access-token'
@@ -339,7 +339,7 @@ class TestDebugToken(object):
             views.debug_token(pyramid_request)
 
         assert exc.value.type == 'missing_token'
-        assert 'Bearer token does not exist or is expired' in exc.value.message
+        assert 'Bearer token does not exist or is expired' in str(exc.value)
 
     def test_returns_debug_data_for_oauth_token(self, pyramid_request, token_service, oauth_token):
         pyramid_request.auth_token = oauth_token.value

@@ -90,7 +90,7 @@ class TestInit(object):
         with pytest.raises(RuntimeError) as e:
             init(client)
 
-        assert 'plugin is not installed' in e.value.message
+        assert 'plugin is not installed' in str(e.value)
 
     @pytest.fixture
     def client(self, client):

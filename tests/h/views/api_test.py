@@ -175,7 +175,7 @@ class TestCreate(object):
         with pytest.raises(ValidationError) as exc:
             views.create(pyramid_request)
 
-        assert exc.value.message == 'asplode'
+        assert str(exc.value) == 'asplode'
 
     def test_it_creates_the_annotation_in_storage(self,
                                                   pyramid_request,
@@ -197,7 +197,7 @@ class TestCreate(object):
         with pytest.raises(ValidationError) as exc:
             views.create(pyramid_request)
 
-        assert exc.value.message == 'asplode'
+        assert str(exc.value) == 'asplode'
 
     def test_it_publishes_annotation_event(self,
                                            AnnotationEvent,
