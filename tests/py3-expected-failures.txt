@@ -1,5 +1,4 @@
 /h/h/models/document.py:482:
-/h/h/search/config.py:190:
 /h/tests/h/auth/util_test.py:69:
 /h/tests/h/jinja_extension_test.py:48:
 /h/tests/h/jinja_extension_test.py:55:
@@ -9,4 +8,3 @@
 /h/tests/h/schemas/base_test.py:64:
 /h/tests/h/schemas/base_test.py:70:
 /h/tests/h/schemas/base_test.py:79:
-/h/tests/h/search/config_test.py:58:
