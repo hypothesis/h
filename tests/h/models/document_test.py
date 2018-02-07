@@ -961,7 +961,9 @@ class TestUpdateDocumentMetadata(object):
 
     @pytest.fixture
     def Document(self, patch):
-        return patch('h.models.document.Document')
+        Document = patch('h.models.document.Document')
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
+        return Document
 
     @pytest.fixture
     def merge_documents(self, patch):
