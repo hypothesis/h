@@ -31,8 +31,8 @@ class TestDeriveKey(object):
         """
         assume(info_a != info_b)
 
-        info_a_bytes = bytes(info_a)
-        info_b_bytes = bytes(info_b)
+        info_a_bytes = info_a.encode('utf-8')
+        info_b_bytes = info_b.encode('utf-8')
 
         derived_a = derive_key(key, salt, info_a_bytes)
         derived_b = derive_key(key, salt, info_b_bytes)
@@ -47,7 +47,7 @@ class TestDeriveKey(object):
         """If the key is rotated, the output should change."""
         assume(key_a != key_b)
 
-        info_bytes = bytes(info)
+        info_bytes = info.encode('utf-8')
 
         derived_a = derive_key(key_a, salt, info_bytes)
         derived_b = derive_key(key_b, salt, info_bytes)
@@ -62,7 +62,7 @@ class TestDeriveKey(object):
         """If the salt is changed, the output should change."""
         assume(salt_a != salt_b)
 
-        info_bytes = bytes(info)
+        info_bytes = info.encode('utf-8')
 
         derived_a = derive_key(key, salt_a, info_bytes)
         derived_b = derive_key(key, salt_b, info_bytes)
@@ -74,7 +74,7 @@ class TestDeriveKey(object):
            salt=REASONABLE_SALT)
     def test_consistent_output(self, info, key, salt):
         """For fixed key, salt, info, the output should be constant."""
-        info_bytes = bytes(info)
+        info_bytes = info.encode('utf-8')
 
         derived_a = derive_key(key, salt, info_bytes)
         derived_b = derive_key(key, salt, info_bytes)
@@ -85,7 +85,7 @@ class TestDeriveKey(object):
            key=REASONABLE_KEY_MATERIAL,
            salt=REASONABLE_SALT)
     def test_output(self, info, key, salt):
-        info_bytes = bytes(info)
+        info_bytes = info.encode('utf-8')
 
         derived = derive_key(key, salt, info_bytes)
 
