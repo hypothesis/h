@@ -164,7 +164,7 @@ class TestToXHRResponse(object):
 @pytest.mark.usefixtures('to_xhr_response')
 class TestHandleFormSubmission(object):
 
-    def test_it_calls_validate(self, pyramid_request):
+    def test_it_calls_validate(self, pyramid_request, matchers):
         form_ = mock.Mock(spec_set=['validate'])
 
         form.handle_form_submission(pyramid_request,
@@ -172,7 +172,8 @@ class TestHandleFormSubmission(object):
                                     mock_callable(),
                                     mock.sentinel.on_failure)
 
-        form_.validate.assert_called_once_with(pyramid_request.POST.items())
+        post_items = matchers.iterable_with(list(pyramid_request.POST.items()))
+        form_.validate.assert_called_once_with(post_items)
 
     def test_if_validation_fails_it_calls_on_failure(self,
                                                      pyramid_request,
