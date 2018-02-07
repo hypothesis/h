@@ -2,13 +2,8 @@
 /h/h/db/types.py:88:
 /h/h/models/document.py:482:
 /h/h/search/config.py:190:
-/h/h/search/config.py:217:
-/h/h/search/core.py:116:
-/h/h/search/parser.py:89:
-/h/h/services/user.py:108:
 /h/h/settings.py:53:
 /h/h/streamer/websocket.py:68:
-/h/h/util/document_claims.py:143:
 /h/h/util/uri.py:140:
 /h/h/views/api_auth.py:226:
 /h/h/views/api_exceptions.py:36:
@@ -38,7 +33,6 @@
 /h/tests/h/schemas/base_test.py:79:
 /h/tests/h/search/config_test.py:58:
 /h/tests/h/search/config_test.py:93:
-/h/tests/h/search/query_test.py:92:
 /h/tests/h/security_test.py:34:
 /h/tests/h/security_test.py:50:
 /h/tests/h/security_test.py:65:
@@ -50,8 +44,6 @@
 /h/tests/h/tasks/admin_test.py:14:
 /h/tests/h/util/cors_test.py:139:
 /h/tests/h/util/cors_test.py:180:
-/h/tests/h/util/document_claims_test.py:34:
-/h/tests/h/util/document_claims_test.py:57:
 /h/tests/h/util/redirects_test.py:145:
 /h/tests/h/util/redirects_test.py:150:
 /h/tests/h/views/api_auth_test.py:255:

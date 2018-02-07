@@ -89,7 +89,7 @@ class TestBuilder(object):
 
         sort = q["sort"]
         assert len(sort) == 1
-        assert sort[0].keys() == ["updated"]
+        assert list(sort[0].keys()) == ["updated"]
 
     def test_sort_includes_ignore_unmapped(self):
         """'ignore_unmapped': True is used in the sort clause."""

@@ -214,7 +214,7 @@ def get_aliased_index(client):
     if len(result) > 1:
         raise RuntimeError("We don't support managing aliases that "
                            "point to multiple indices at the moment!")
-    return result.keys()[0]
+    return list(result.keys())[0]
 
 
 def update_aliased_index(client, new_target):
