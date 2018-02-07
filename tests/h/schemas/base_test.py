@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+from h._compat import PY2
 import enum
 from mock import Mock
 import pytest
@@ -18,14 +19,18 @@ class ExampleCSRFSchema(CSRFSchema):
 
 
 class ExampleJSONSchema(JSONSchema):
+    # Use `bytes` for property names in Py 2 so that exception messages about
+    # missing properties have the same content in Py 2 + Py 3.
+    prop_name_type = bytes if PY2 else str
+
     schema = {
-        b'$schema': b'http://json-schema.org/draft-04/schema#',
-        b'type': b'object',
-        b'properties': {
-            b'foo': {b'type': b'string'},
-            b'bar': {b'type': b'integer'},
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'type': 'object',
+        'properties': {
+            prop_name_type('foo'): {'type': 'string'},
+            prop_name_type('bar'): {'type': 'integer'},
         },
-        b'required': [b'foo', b'bar'],
+        'required': [prop_name_type('foo'), prop_name_type('bar')],
     }
 
 
