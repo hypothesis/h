@@ -12,8 +12,9 @@ def groups():
 @click.option('--name', prompt=True, help="The name of the group")
 @click.option('--authority', prompt=True, help="The authority which the group is associated with")
 @click.option('--creator', prompt=True, help="The username of the group's creator")
+@click.option('--hostname', prompt=True, multiple=True, help="The hostname(s) that the group should be scoped to")
 @click.pass_context
-def add_open_group(ctx, name, authority, creator):
+def add_open_group(ctx, name, authority, creator, hostname):
     """
     Create a new open group.
 
@@ -25,6 +26,7 @@ def add_open_group(ctx, name, authority, creator):
     creator_userid = u'acct:{username}@{authority}'.format(username=creator,
                                                            authority=authority)
     group_svc = request.find_service(name='group')
-    group_svc.create_open_group(name=name, userid=creator_userid)
+    group_svc.create_open_group(
+        name=name, userid=creator_userid, hostnames=hostname)
 
     request.tm.commit()
