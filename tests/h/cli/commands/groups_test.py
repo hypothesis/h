@@ -17,9 +17,8 @@ class TestAddCommand(object):
 
         assert result.exit_code == 0
 
-        group_service.create.assert_called_with(name=u'Publisher',
-                                                userid='acct:admin@publisher.org',
-                                                type_='open')
+        group_service.create_open_group.assert_called_once_with(
+            name=u'Publisher', userid='acct:admin@publisher.org')
 
 
 @pytest.fixture

@@ -12,81 +12,86 @@ from h.services.group import groups_factory
 
 
 class TestGroupService(object):
-    def test_create_returns_group(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_returns_group(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert isinstance(group, Group)
 
-    def test_create_sets_group_name(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_name(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.name == 'Anteater fans'
 
-    def test_create_sets_group_authority(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_authority(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.authority == 'example.com'
 
-    def test_create_sets_group_creator(self, service, users):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_creator(self, service, users):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.creator == users['cazimir']
 
-    def test_create_sets_description_when_present(self, service):
-        group = service.create('Anteater fans', 'cazimir', 'all about ant eaters')
+    def test_create_private_group_sets_description_when_present(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir', 'all about ant eaters')
 
         assert group.description == 'all about ant eaters'
 
-    def test_create_skips_setting_description_when_missing(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_skips_setting_description_when_missing(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.description is None
 
-    def test_create_adds_group_creator_to_members(self, service, users):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_adds_group_creator_to_members(self, service, users):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert users['cazimir'] in group.members
 
-    def test_create_doesnt_add_group_creator_to_members_for_open_groups(self, service, users):
-        group = service.create('Anteater fans', 'cazimir', type_='open')
-
-        assert users['cazimir'] not in group.members
-
-    @pytest.mark.parametrize('group_type,flag,expected_value', [
-        ('private', 'joinable_by', JoinableBy.authority),
-        ('private', 'readable_by', ReadableBy.members),
-        ('private', 'writeable_by', WriteableBy.members),
-        ('open', 'joinable_by', None),
-        ('open', 'readable_by', ReadableBy.world),
-        ('open', 'writeable_by', WriteableBy.authority)])
-    def test_create_sets_access_flags_for_group_types(self,
-                                                      service,
-                                                      group_type,
-                                                      flag,
-                                                      expected_value):
-        group = service.create('Anteater fans', 'cazimir', type_=group_type)
+    @pytest.mark.parametrize('flag,expected_value', [
+        ('joinable_by', JoinableBy.authority),
+        ('readable_by', ReadableBy.members),
+        ('writeable_by', WriteableBy.members)])
+    def test_create_private_group_sets_access_flags(self, service, flag, expected_value):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert getattr(group, flag) == expected_value
 
-    def test_create_raises_for_invalid_group_type(self, service):
-        with pytest.raises(ValueError):
-            service.create('Anteater fans', 'cazimir', type_='foo')
-
-    def test_create_adds_group_to_session(self, db_session, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_adds_group_to_session(self, db_session, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group in db_session
 
-    def test_create_sets_group_ids(self, service):
-        group = service.create('Anteater fans', 'cazimir')
+    def test_create_private_group_sets_group_ids(self, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
 
         assert group.id
         assert group.pubid
 
-    def test_create_publishes_join_event(self, service, publish):
-        group = service.create('Dishwasher disassemblers', 'theresa')
+    def test_create_private_group_publishes_join_event(self, service, publish):
+        group = service.create_private_group('Dishwasher disassemblers', 'theresa')
 
         publish.assert_called_once_with('group-join', group.pubid, 'acct:theresa@example.com')
+
+    def test_create_open_group_returns_group(self, service, users):
+        creator = users['cazimir']
+
+        group = service.create_open_group(name='test_group',
+                                          userid=creator.username,
+                                          description='test_description')
+
+        assert group.name == 'test_group'
+        assert group.authority == 'example.com'
+        assert group.creator == creator
+        assert group.description == 'test_description'
+        assert group.joinable_by is None
+        assert group.readable_by == ReadableBy.world
+        assert group.writeable_by == WriteableBy.authority
+
+    def test_create_open_group_description_defaults_to_None(self, service):
+        # Create a group with no `description` argument.
+        group = service.create_open_group(name='test_group', userid='cazimir')
+
+        assert group.description is None
 
     def test_member_join_adds_user_to_group(self, service, group, users):
         service.member_join(group, 'theresa')
