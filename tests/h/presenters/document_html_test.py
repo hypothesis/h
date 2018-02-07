@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from h._compat import text_type
+
 import pytest
 import mock
 import jinja2
@@ -152,7 +154,7 @@ class TestDocumentHTMLPresenter(object):
         filename.return_value = ""
         uri.return_value = u""
 
-        assert isinstance(self.presenter().hostname_or_filename, unicode)
+        assert isinstance(self.presenter().hostname_or_filename, text_type)
 
     @hostname_or_filename_fixtures
     def test_hostname_or_filename_with_nonsense_uri(self, uri, filename):
@@ -162,7 +164,7 @@ class TestDocumentHTMLPresenter(object):
         # trip up .hostname_or_filename.
         uri.return_value = u"foobar"
 
-        assert isinstance(self.presenter().hostname_or_filename, unicode)
+        assert isinstance(self.presenter().hostname_or_filename, text_type)
 
     title_fixtures = pytest.mark.usefixtures('uri', 'filename')
 
@@ -234,7 +236,7 @@ class TestDocumentHTMLPresenter(object):
         uri.return_value = u"http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
 
-        assert isinstance(self.presenter(title=title).title, unicode)
+        assert isinstance(self.presenter(title=title).title, text_type)
 
     @title_fixtures
     def test_title_when_document_has_empty_string_for_title(self,
