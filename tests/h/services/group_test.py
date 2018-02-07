@@ -5,10 +5,12 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.models import Group
+from h.models import Group, GroupScope
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.services.group import GroupService
 from h.services.group import groups_factory
+
+from tests.common.matchers import Matcher
 
 
 class TestGroupService(object):
@@ -77,6 +79,7 @@ class TestGroupService(object):
 
         group = service.create_open_group(name='test_group',
                                           userid=creator.username,
+                                          origins=['https://biopub.org'],
                                           description='test_description')
 
         assert group.name == 'test_group'
@@ -87,9 +90,39 @@ class TestGroupService(object):
         assert group.readable_by == ReadableBy.world
         assert group.writeable_by == WriteableBy.authority
 
+    def test_create_open_group_sets_scopes(self, service, matchers, users):
+        origins = ['https://biopub.org', 'http://example.com', 'https://wikipedia.com']
+
+        group = service.create_open_group(name='test_group',
+                                          userid=users['cazimir'].username,
+                                          origins=origins,
+                                          description='test_description')
+
+        assert group.scopes == matchers.unordered_list([
+            GroupScopeWithOrigin(h) for h in origins])
+
+    def test_create_open_group_always_creates_new_scopes(self, db_session, factories, service, users, matchers):
+        # It always creates a new scope, even if a scope with the given origin
+        # already exists (this is because a single scope can only belong to
+        # one group, so the existing scope can't be reused with the new group).
+        origins = ['https://biopub.org', 'http://example.com']
+        scopes = [factories.GroupScope(origin=h) for h in origins]
+
+        group = service.create_open_group(name='test_group',
+                                          userid=users['cazimir'].username,
+                                          origins=origins,
+                                          description='test_description')
+
+        # It should reuse the GroupScopes already in the DB, not try to create
+        # new ones.
+        for scope in scopes:
+            assert scope not in group.scopes
+
     def test_create_open_group_description_defaults_to_None(self, service):
         # Create a group with no `description` argument.
-        group = service.create_open_group(name='test_group', userid='cazimir')
+        group = service.create_open_group(name='test_group',
+                                          userid='cazimir',
+                                          origins=['https://biopub.org'])
 
         assert group.description is None
 
@@ -242,6 +275,18 @@ class TestGroupsFactory(object):
             'userid': 'theresa',
             'group': 'abc123',
         })
+
+
+class GroupScopeWithOrigin(Matcher):
+    """Matches any GroupScope with the given origin."""
+
+    def __init__(self, origin):
+        self.origin = origin
+
+    def __eq__(self, group_scope):
+        if not isinstance(group_scope, GroupScope):
+            return False
+        return group_scope.origin == self.origin
 
 
 @pytest.fixture

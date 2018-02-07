@@ -5,7 +5,7 @@ from functools import partial
 import sqlalchemy as sa
 
 from h import session
-from h.models import Group, User
+from h.models import Group, GroupScope, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 
@@ -52,7 +52,7 @@ class GroupService(object):
         self.publish('group-join', group.pubid, group.creator.userid)
         return group
 
-    def create_open_group(self, name, userid, description=None):
+    def create_open_group(self, name, userid, origins, description=None):
         """
         Create a new open group.
 
@@ -70,6 +70,7 @@ class GroupService(object):
                             joinable_by=None,
                             readable_by=ReadableBy.world,
                             writeable_by=WriteableBy.authority,
+                            scopes=[GroupScope(origin=o) for o in origins],
                             )
 
     def member_join(self, group, userid):
@@ -120,7 +121,7 @@ class GroupService(object):
 
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
-    def _create(self, name, userid, description, joinable_by, readable_by, writeable_by):
+    def _create(self, name, userid, description, joinable_by, readable_by, writeable_by, scopes=[]):
         """Create a group and save it to the DB."""
         creator = self.user_fetcher(userid)
         group = Group(name=name,
@@ -130,6 +131,7 @@ class GroupService(object):
                       joinable_by=joinable_by,
                       readable_by=readable_by,
                       writeable_by=writeable_by,
+                      scopes=scopes,
                       )
         self.session.add(group)
         return group
