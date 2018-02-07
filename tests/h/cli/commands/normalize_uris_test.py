@@ -150,7 +150,7 @@ def test_it_reindexes_changed_annotations(req, index, factories, db_session):
     annotation_1._target_uri_normalized = 'http://example.org'
     annotation_2 = factories.Annotation(userid='luke',
                                         target_uri='http://example.net/')
-    annotation_2._target_uri_normalized='http://example.net'
+    annotation_2._target_uri_normalized = 'http://example.net'
     db_session.flush()
 
     indexer = index.BatchIndexer.return_value
@@ -162,8 +162,7 @@ def test_it_reindexes_changed_annotations(req, index, factories, db_session):
 
 
 def test_it_skips_reindexing_unaltered_annotations(req, index, factories, db_session):
-    annotation_1 = factories.Annotation(userid='luke',
-                                        target_uri='http://example.org/')
+    factories.Annotation(userid='luke', target_uri='http://example.org/')
     annotation_2 = factories.Annotation(userid='luke',
                                         target_uri='http://example.net/')
     annotation_2._target_uri_normalized = 'http://example.net'

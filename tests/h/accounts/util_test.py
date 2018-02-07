@@ -2,6 +2,7 @@ import pytest
 
 from h.accounts.util import validate_orcid, validate_url
 
+
 def test_validate_url_rejects_urls_without_domains():
     with pytest.raises(ValueError):
         validate_url('http:///path')

@@ -191,7 +191,7 @@ def test_cannot_create_user_with_invalid_chars():
 
 def test_cannot_create_user_with_too_long_email():
     with pytest.raises(ValueError):
-        models.User(email='bob@b' + 'o'*100 +'b.com')
+        models.User(email='bob@b' + 'o' * 100 + 'b.com')
 
 
 def test_User_activate_activates_user(db_session):

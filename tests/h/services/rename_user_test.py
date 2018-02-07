@@ -18,7 +18,7 @@ class TestRenameUserService(object):
         assert service.check(user, 'panda') is True
 
     def test_check_raises_when_new_userid_is_already_taken(self, service, user, db_session, factories):
-        user_taken = factories.User(username='panda')
+        factories.User(username='panda')
         db_session.flush()
 
         with pytest.raises(UserRenameError) as err:

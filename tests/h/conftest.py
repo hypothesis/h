@@ -20,7 +20,6 @@ from sqlalchemy.orm import sessionmaker
 from webob.multidict import MultiDict
 
 from h import db
-from h import form
 from h.settings import database_url
 from h._compat import text_type
 
@@ -56,6 +55,7 @@ class DummyFeature(object):
 
     def clear(self):
         self.flags = {}
+
 
 class DummySession(object):
 

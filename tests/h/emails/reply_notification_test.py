@@ -210,7 +210,6 @@ class TestGenerate(object):
         html_renderer.assert_(**expected_context)
         text_renderer.assert_(**expected_context)
 
-
     @pytest.fixture
     def document(self, db_session):
         doc = Document(title=u'My fascinating page')

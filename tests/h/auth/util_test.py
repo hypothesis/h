@@ -29,7 +29,7 @@ FakeGroup = namedtuple('FakeGroup', ['pubid'])
 #
 #     CTL            =  %x00-1F / %x7F
 #
-CONTROL_CHARS = set(chr(n) for n in range(0x00, 0x1F+1)) | set('\x7f')
+CONTROL_CHARS = set(chr(n) for n in range(0x00, 0x1F + 1)) | set('\x7f')
 
 # Furthermore, from RFC 7617:
 #
@@ -180,6 +180,7 @@ def user_service(pyramid_config):
     service.fetch.return_value = None
     pyramid_config.register_service(service, name='user')
     return service
+
 
 @pytest.fixture
 def principals_for_user(patch):

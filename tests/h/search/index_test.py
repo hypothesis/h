@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-import elasticsearch
-
 from h import presenters
 from h.search import client
 from h.search import index
@@ -117,7 +115,7 @@ class TestBatchIndexer(object):
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
     def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
-        ann_1, ann_2 = factories.Annotation(), factories.Annotation()
+        _, ann_2 = factories.Annotation(), factories.Annotation()  # noqa: F841
 
         indexer.index([ann_2.id])
 

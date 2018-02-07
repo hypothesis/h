@@ -58,7 +58,7 @@ class TestAnnotationJSONLDPresenter(object):
         resource = AnnotationResource(annotation, group_service, fake_links_service)
 
         presenter = AnnotationJSONLDPresenter(resource)
-        _ = presenter.id
+        presenter.id
 
         assert fake_links_service.last_annotation == annotation
 

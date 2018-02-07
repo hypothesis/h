@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import pytest
-import mock
 from pyramid import httpexceptions
 
 from h.views import help
