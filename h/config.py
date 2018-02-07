@@ -17,6 +17,7 @@ from h.settings import (
     database_url,
     mandrill_settings,
 )
+from h.util.logging_filters import ExceptionFilter
 
 __all__ = ('configure',)
 
@@ -134,5 +135,9 @@ def configure(environ=None, settings=None):
         if settings['debug_query'] == 'trace':
             level = logging.DEBUG
         logging.getLogger('sqlalchemy.engine').setLevel(level)
+
+    # Add ES logging filter to filter out ReadTimeout warnings
+    es_logger = logging.getLogger('elasticsearch')
+    es_logger.addFilter(ExceptionFilter((("ReadTimeout", "WARNING"),)))
 
     return Configurator(settings=settings)
