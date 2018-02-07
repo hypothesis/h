@@ -136,7 +136,7 @@ class TestCorsViewDecorator(object):
 
         response = cors_policy(testview)(None, pyramid_request)
 
-        assert response.body == 'OK'
+        assert response.body == b'OK'
 
     def test_it_sets_cors_headers(self, pyramid_request, testview, set_cors_headers):
         cors_policy = policy()
@@ -177,7 +177,7 @@ class TestAddPreflightView(object):
         resp = request.get_response(app)
 
         assert resp.status_code == 200
-        assert resp.body == ''
+        assert resp.body == b''
 
     def test_preflight_view_uses_cors_decorator(self, pyramid_config):
         def view(request):
