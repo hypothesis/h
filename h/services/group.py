@@ -40,9 +40,7 @@ class GroupService(object):
         group = self._create(name=name,
                              userid=userid,
                              description=description,
-                             joinable_by=JoinableBy.authority,
-                             readable_by=ReadableBy.members,
-                             writeable_by=WriteableBy.members,
+                             access_flags=_PrivateGroupMatcher,
                              )
         group.members.append(group.creator)
 
@@ -67,9 +65,7 @@ class GroupService(object):
         return self._create(name=name,
                             userid=userid,
                             description=description,
-                            joinable_by=None,
-                            readable_by=ReadableBy.world,
-                            writeable_by=WriteableBy.authority,
+                            access_flags=_OpenGroupMatcher,
                             )
 
     def type(self, group):
@@ -136,16 +132,16 @@ class GroupService(object):
 
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
-    def _create(self, name, userid, description, joinable_by, readable_by, writeable_by):
+    def _create(self, name, userid, description, access_flags):
         """Create a group and save it to the DB."""
         creator = self.user_fetcher(userid)
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
                       description=description,
-                      joinable_by=joinable_by,
-                      readable_by=readable_by,
-                      writeable_by=writeable_by,
+                      joinable_by=access_flags.joinable_by,
+                      readable_by=access_flags.readable_by,
+                      writeable_by=access_flags.writeable_by,
                       )
         self.session.add(group)
         return group
