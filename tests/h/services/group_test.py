@@ -93,6 +93,23 @@ class TestGroupService(object):
 
         assert group.description is None
 
+    def test_type_returns_open_for_open_groups(self, service, factories):
+        assert service.type(factories.OpenGroup()) == 'open'
+
+    def test_type_returns_private_for_private_groups(self, service, factories):
+        assert service.type(factories.Group()) == 'private'
+
+    def test_type_raises_for_unknown_type_of_group(self, service, factories):
+        group = factories.Group()
+        # Set the group's access flags to an invalid / unused combination.
+        group.joinable_by = None
+        group.readable_by = ReadableBy.members
+        group.writeable_by = WriteableBy.authority
+
+        expected_err = "^This group doesn't seem to match any known type"
+        with pytest.raises(ValueError, match=expected_err):
+            service.type(group)
+
     def test_member_join_adds_user_to_group(self, service, group, users):
         service.member_join(group, 'theresa')
 

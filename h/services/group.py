@@ -40,9 +40,7 @@ class GroupService(object):
         group = self._create(name=name,
                              userid=userid,
                              description=description,
-                             joinable_by=JoinableBy.authority,
-                             readable_by=ReadableBy.members,
-                             writeable_by=WriteableBy.members,
+                             access_flags=_PrivateGroupMatcher,
                              )
         group.members.append(group.creator)
 
@@ -67,10 +65,24 @@ class GroupService(object):
         return self._create(name=name,
                             userid=userid,
                             description=description,
-                            joinable_by=None,
-                            readable_by=ReadableBy.world,
-                            writeable_by=WriteableBy.authority,
+                            access_flags=_OpenGroupMatcher,
                             )
+
+    def type(self, group):
+        """
+        Return the "type" of the given group, e.g. "open" or "private".
+
+        :rtype: string
+        :raises ValueError: if the type of the given group isn't recognized
+
+        """
+        for group_matcher in (_OpenGroupMatcher(), _PrivateGroupMatcher()):
+            if group_matcher == group:
+                return group_matcher.type_
+
+        raise ValueError(
+            "This group doesn't seem to match any known type of group. "
+            "This shouldn't be in the database!")
 
     def member_join(self, group, userid):
         """Add `userid` to the member list of `group`."""
@@ -120,16 +132,16 @@ class GroupService(object):
 
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
-    def _create(self, name, userid, description, joinable_by, readable_by, writeable_by):
+    def _create(self, name, userid, description, access_flags):
         """Create a group and save it to the DB."""
         creator = self.user_fetcher(userid)
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
                       description=description,
-                      joinable_by=joinable_by,
-                      readable_by=readable_by,
-                      writeable_by=writeable_by,
+                      joinable_by=access_flags.joinable_by,
+                      readable_by=access_flags.readable_by,
+                      writeable_by=access_flags.writeable_by,
                       )
         self.session.add(group)
         return group
@@ -150,3 +162,37 @@ def _publish(request, event_type, groupid, userid):
         'userid': userid,
         'group': groupid,
     })
+
+
+class _GroupMatcher(object):
+    """Abstract base class for group matcher classes."""
+
+    def __eq__(self, other):
+        """Return True if other has the same access flags as this matcher."""
+        attrs = ('joinable_by', 'readable_by', 'writeable_by')
+        for attr in attrs:
+            self_attr = getattr(self, attr)
+            other_attr = getattr(other, attr, None)
+            if self_attr != other_attr:
+                return False
+        return True
+
+    def __ne__(self, other):
+        """Return True if other has different access flags than this matcher."""
+        return not self.__eq__(other)
+
+
+class _OpenGroupMatcher(_GroupMatcher):
+    """An object that's equal to any open group."""
+    type_ = 'open'
+    joinable_by = None
+    readable_by = ReadableBy.world
+    writeable_by = WriteableBy.authority
+
+
+class _PrivateGroupMatcher(_GroupMatcher):
+    """An object that's equal to any private group."""
+    type_ = 'private'
+    joinable_by = JoinableBy.authority
+    readable_by = ReadableBy.members
+    writeable_by = WriteableBy.members
