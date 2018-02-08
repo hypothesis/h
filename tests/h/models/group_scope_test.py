@@ -9,7 +9,6 @@ from h.models import GroupScope
 
 
 class TestGroupScope(object):
-
     def test_save_and_retrieve_hostname(self, db_session, factories):
         hostname = 'test_hostname'
         factories.GroupScope(hostname=hostname)
@@ -23,12 +22,14 @@ class TestGroupScope(object):
 
     def test_hostname_must_be_unique(self, db_session):
         hostname = 'test_hostname'
-        db_session.add_all((GroupScope(hostname=hostname), GroupScope(hostname=hostname)))
+        db_session.add_all((GroupScope(hostname=hostname),
+                            GroupScope(hostname=hostname)))
 
         with pytest.raises(IntegrityError):
             db_session.flush()
 
-    def test_a_single_group_can_have_many_scopes(self, db_session, factories, matchers):
+    def test_a_single_group_can_have_many_scopes(self, db_session, factories,
+                                                 matchers):
         group = factories.Group()
         group_scopes = [
             factories.GroupScope(groups=[group]),
@@ -40,7 +41,8 @@ class TestGroupScope(object):
 
         assert group.scopes == matchers.unordered_list(group_scopes)
 
-    def test_a_single_scope_can_have_many_groups(self, db_session, factories, matchers):
+    def test_a_single_scope_can_have_many_groups(self, db_session, factories,
+                                                 matchers):
         groups = [factories.Group(), factories.Group(), factories.Group()]
         group_scope = factories.GroupScope(groups=groups)
         db_session.add(group_scope)
