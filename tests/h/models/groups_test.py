@@ -41,6 +41,26 @@ def test_slug(db_session, factories):
     assert group.slug == "my-hypothesis-group"
 
 
+def test_type_returns_open_for_open_groups(factories):
+    assert factories.OpenGroup().type == 'open'
+
+
+def test_type_returns_private_for_private_groups(factories):
+    assert factories.Group().type == 'private'
+
+
+def test_type_raises_for_unknown_type_of_group(factories):
+    group = factories.Group()
+    # Set the group's access flags to an invalid / unused combination.
+    group.joinable_by = None
+    group.readable_by = ReadableBy.members
+    group.writeable_by = WriteableBy.authority
+
+    expected_err = "^This group doesn't seem to match any known type"
+    with pytest.raises(ValueError, match=expected_err):
+        group.type
+
+
 def test_repr(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()

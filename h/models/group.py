@@ -99,6 +99,23 @@ class Group(Base, mixins.Timestamps):
         return slugify.slugify(self.name)
 
     @property
+    def type(self):
+        """
+        The "type" of this group, e.g. "open" or "private".
+
+        :rtype: string
+        :raises ValueError: if the type of the group isn't recognized
+
+        """
+        for group_matcher in (_OpenGroupMatcher(), _PrivateGroupMatcher()):
+            if self == group_matcher:
+                return group_matcher.type_
+
+        raise ValueError(
+            "This group doesn't seem to match any known type of group. "
+            "This shouldn't be in the database!")
+
+    @property
     def is_public(self):
         return self.readable_by == ReadableBy.world
 
@@ -150,6 +167,40 @@ def _write_principal(group):
         WriteableBy.authority: 'authority:{}'.format(group.authority),
         WriteableBy.members: 'group:{}'.format(group.pubid),
     }.get(group.writeable_by)
+
+
+class _GroupMatcher(object):
+    """Abstract base class for group matcher classes."""
+
+    def __eq__(self, other):
+        """Return True if other has the same access flags as this matcher."""
+        attrs = ('joinable_by', 'readable_by', 'writeable_by')
+        for attr in attrs:
+            self_attr = getattr(self, attr)
+            other_attr = getattr(other, attr, None)
+            if self_attr != other_attr:
+                return False
+        return True
+
+    def __ne__(self, other):
+        """Return True if other has different access flags than this matcher."""
+        return not self.__eq__(other)
+
+
+class _OpenGroupMatcher(_GroupMatcher):
+    """An object that's equal to any open group."""
+    type_ = 'open'
+    joinable_by = None
+    readable_by = ReadableBy.world
+    writeable_by = WriteableBy.authority
+
+
+class _PrivateGroupMatcher(_GroupMatcher):
+    """An object that's equal to any private group."""
+    type_ = 'private'
+    joinable_by = JoinableBy.authority
+    readable_by = ReadableBy.members
+    writeable_by = WriteableBy.members
 
 
 USER_GROUP_TABLE = sa.Table(
