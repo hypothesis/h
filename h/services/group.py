@@ -6,7 +6,7 @@ import sqlalchemy as sa
 
 from h import session
 from h.models import Group, GroupScope, User
-from h.models.group import JoinableBy, ReadableBy, WriteableBy
+from h.models.group import ReadableBy, OpenGroupMatcher, PrivateGroupMatcher
 
 
 class GroupService(object):
@@ -40,9 +40,7 @@ class GroupService(object):
         group = self._create(name=name,
                              userid=userid,
                              description=description,
-                             joinable_by=JoinableBy.authority,
-                             readable_by=ReadableBy.members,
-                             writeable_by=WriteableBy.members,
+                             access_flags=PrivateGroupMatcher,
                              )
         group.members.append(group.creator)
 
@@ -67,9 +65,7 @@ class GroupService(object):
         return self._create(name=name,
                             userid=userid,
                             description=description,
-                            joinable_by=None,
-                            readable_by=ReadableBy.world,
-                            writeable_by=WriteableBy.authority,
+                            access_flags=OpenGroupMatcher,
                             scopes=[GroupScope(origin=o) for o in origins],
                             )
 
@@ -121,16 +117,16 @@ class GroupService(object):
 
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
-    def _create(self, name, userid, description, joinable_by, readable_by, writeable_by, scopes=[]):
+    def _create(self, name, userid, description, access_flags, scopes=[]):
         """Create a group and save it to the DB."""
         creator = self.user_fetcher(userid)
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
                       description=description,
-                      joinable_by=joinable_by,
-                      readable_by=readable_by,
-                      writeable_by=writeable_by,
+                      joinable_by=access_flags.joinable_by,
+                      readable_by=access_flags.readable_by,
+                      writeable_by=access_flags.writeable_by,
                       scopes=scopes,
                       )
         self.session.add(group)

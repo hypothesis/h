@@ -107,7 +107,7 @@ class Group(Base, mixins.Timestamps):
         :raises ValueError: if the type of the group isn't recognized
 
         """
-        for group_matcher in (_OpenGroupMatcher(), _PrivateGroupMatcher()):
+        for group_matcher in (OpenGroupMatcher(), PrivateGroupMatcher()):
             if self == group_matcher:
                 return group_matcher.type_
 
@@ -187,7 +187,7 @@ class _GroupMatcher(object):
         return not self.__eq__(other)
 
 
-class _OpenGroupMatcher(_GroupMatcher):
+class OpenGroupMatcher(_GroupMatcher):
     """An object that's equal to any open group."""
     type_ = 'open'
     joinable_by = None
@@ -195,7 +195,7 @@ class _OpenGroupMatcher(_GroupMatcher):
     writeable_by = WriteableBy.authority
 
 
-class _PrivateGroupMatcher(_GroupMatcher):
+class PrivateGroupMatcher(_GroupMatcher):
     """An object that's equal to any private group."""
     type_ = 'private'
     joinable_by = JoinableBy.authority
