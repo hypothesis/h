@@ -27,8 +27,7 @@ class GroupScope(Base):
 
 GROUP_GROUPSCOPE_TABLE = sa.Table(
     'group_groupscope', Base.metadata,
-    sa.Column('id', sa.Integer, autoincrement=True, primary_key=True),
-    sa.Column('group_id', sa.Integer, sa.ForeignKey('group.id')),
-    sa.Column('groupscope_id', sa.Integer, sa.ForeignKey('groupscope.id')),
-    sa.UniqueConstraint('group_id', 'groupscope_id'),
+    sa.Column('group_id', sa.Integer, sa.ForeignKey('group.id'), nullable=False),
+    sa.Column('groupscope_id', sa.Integer, sa.ForeignKey('groupscope.id'), nullable=False),
+    sa.PrimaryKeyConstraint('group_id', 'groupscope_id'),
 )
