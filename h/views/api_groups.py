@@ -15,10 +15,10 @@ from h.views.api import api_config
 def groups(request):
     authority = request.params.get('authority')
     document_uri = request.params.get('document_uri')
-    svc = request.find_service(name='profile_group')
-    return svc.all(user=request.user,
-                   authority=authority,
-                   document_uri=document_uri)
+    svc = request.find_service(name='list_groups')
+    return svc.all_groups(user=request.user,
+                          authority=authority,
+                          document_uri=document_uri)
 
 
 @api_config(route_name='api.group_member',
