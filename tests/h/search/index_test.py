@@ -98,9 +98,18 @@ class TestBatchIndexer(object):
 
         indexer.index()
 
-        streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, matchers.iterable_with([ann_1, ann_2]),
-            chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
+        assert streaming_bulk.call_count == 1
+
+        args = streaming_bulk.call_args[0]
+        kwargs = streaming_bulk.call_args[1]
+
+        assert len(args) == 2
+        assert args[0] == indexer.es_client.conn
+        assert list(args[1]) == [ann_1, ann_2]
+
+        assert kwargs.keys() == matchers.unordered_list((
+            'chunk_size', 'raise_on_error', 'expand_action_callback'))
+        assert kwargs['raise_on_error'] is False
 
     def test_index_skips_deleted_annotations_when_indexing_all(self, db_session, indexer, matchers, streaming_bulk, factories):
         ann_1, ann_2 = factories.Annotation(), factories.Annotation()
