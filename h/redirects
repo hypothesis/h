@@ -76,10 +76,10 @@
 /contact/                                              exact https://web.hypothes.is/contact/
 /contribute                                            exact https://web.hypothes.is/developers/
 /contribute/                                           exact https://web.hypothes.is/developers/
-/contribute/entity-cla                                 exact https://web.hypothes.is/developers/
-/contribute/entity-cla/                                exact https://web.hypothes.is/developers/
-/contribute/individual-cla                             exact https://web.hypothes.is/developers/
-/contribute/individual-cla/                            exact https://web.hypothes.is/developers/
+/contribute/entity-cla                                 exact https://web.hypothes.is/developers/entity-cla/
+/contribute/entity-cla/                                exact https://web.hypothes.is/developers/entity-cla/
+/contribute/individual-cla                             exact https://web.hypothes.is/developers/individual-cla/
+/contribute/individual-cla/                            exact https://web.hypothes.is/developers/individual-cla/
 /creating-groups                                       exact https://web.hypothes.is/creating-groups/
 /creating-groups/                                      exact https://web.hypothes.is/creating-groups/
 /curate-a-novel-chapter                                exact https://web.hypothes.is/curate-a-novel-chapter/
