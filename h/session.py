@@ -75,20 +75,10 @@ def _current_groups(request, authority):
     """
 
     user = request.user
-    authority_groups = (request.find_service(name='authority_group')
-                        .public_groups(authority=authority))
-
-    groups = authority_groups + _user_groups(user, request)
+    svc = request.find_service(name='list_groups')
+    groups = svc.all_groups(user=user, authority=authority)
 
     return [_group_model(request.route_url, group) for group in groups]
-
-
-def _user_groups(user, request):
-    if user is None:
-        return []
-    else:
-        profile_groups_svc = request.find_service(name='profile_group')
-        return profile_groups_svc.sort(user.groups)
 
 
 def _group_model(route_url, group):
