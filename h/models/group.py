@@ -80,6 +80,8 @@ class Group(Base, mixins.Timestamps):
         'User', secondary='user_group', backref=sa.orm.backref(
             'groups', order_by='Group.name'))
 
+    scopes = sa.orm.relationship('GroupScope', backref='group', cascade='all, delete-orphan')
+
     def __init__(self, **kwargs):
         super(Group, self).__init__(**kwargs)
 
