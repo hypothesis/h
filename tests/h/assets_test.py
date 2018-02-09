@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sys import version_info
-from StringIO import StringIO
+from h._compat import StringIO
 
 from mock import patch
 import pytest

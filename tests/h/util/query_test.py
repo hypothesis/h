@@ -22,6 +22,11 @@ test_cw = sa.Table(
     sa.Column('enabled', sa.Boolean, nullable=False),
 )
 
+try:
+    ASCII_LOWERCASE = string.ascii_lowercase
+except AttributeError:
+    ASCII_LOWERCASE = string.lowercase
+
 
 @pytest.mark.usefixtures('cw_table')
 class TestColumnWindows(object):
@@ -32,12 +37,12 @@ class TestColumnWindows(object):
         (13, ['abcdefghijklm', 'nopqrstuvwxyz']),
         (10, ['abcdefghij', 'klmnopqrst', 'uvwxyz']),
         (5, ['abcde', 'fghij', 'klmno', 'pqrst', 'uvwxy', 'z']),
-        (1, [l for l in string.lowercase]),
+        (1, [l for l in ASCII_LOWERCASE]),
     ])
     def test_basic_windowing(self, db_session, windowsize, expected):
         """Check that windowing returns the correct batches of rows."""
         testdata = [{'name': text_type(l), 'enabled': True}
-                    for l in string.lowercase]
+                    for l in ASCII_LOWERCASE]
         db_session.execute(test_cw.insert().values(testdata))
 
         windows = column_windows(db_session,
@@ -51,13 +56,13 @@ class TestColumnWindows(object):
         (13, ['abcdefghijklm']),
         (10, ['abcdefghij', 'klm']),
         (3, ['abc', 'def', 'ghi', 'jkl', 'm']),
-        (1, [l for l in string.lowercase[:13]]),
+        (1, [l for l in ASCII_LOWERCASE[:13]]),
     ])
     def test_filtered_windowing(self, db_session, windowsize, expected):
         """Check that windowing respects the where clause."""
         testdata = []
-        enabled = string.lowercase[:13]
-        disabled = string.lowercase[13:]
+        enabled = ASCII_LOWERCASE[:13]
+        disabled = ASCII_LOWERCASE[13:]
         testdata.extend([{'name': text_type(l), 'enabled': True} for l in enabled])
         testdata.extend([{'name': text_type(l), 'enabled': False} for l in disabled])
         db_session.execute(test_cw.insert().values(testdata))
