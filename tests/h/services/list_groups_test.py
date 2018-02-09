@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-import mock
 import pytest
 
 from h.services.list_groups import ListGroupsService
@@ -12,35 +11,35 @@ from h.services.list_groups import list_groups_factory
 class TestListGroupsAllGroups(object):
 
     def test_returns_open_groups_when_no_user(self, list_groups_service, open_groups):
-        open_group_ids = {group.pubid for group in open_groups}
-        open_group_ids.add('__world__')
+        open_group_pubids = {group.pubid for group in open_groups}
+        open_group_pubids.add('__world__')
 
         groups = list_groups_service.all_groups()
 
-        assert {group['id'] for group in groups} == open_group_ids
+        assert {group.pubid for group in groups} == open_group_pubids
         for group in groups:
-            assert group['type'] == 'open'
+            assert group.is_public
 
     def test_returns_all_group_types_when_user(self, list_groups_service, factories):
         user = factories.User()
         user.groups = [factories.Group(), factories.Group()]
-        expected_ids = [group.pubid for group in user.groups]
-        expected_ids.append('__world__')
+        expected_pubids = [group.pubid for group in user.groups]
+        expected_pubids.append('__world__')
 
         groups = list_groups_service.all_groups(user=user)
 
-        group_ids = [group['id'] for group in groups]
-        for expected_id in expected_ids:
-            assert expected_id in group_ids
+        group_pubids = [group.pubid for group in groups]
+        for expected_id in expected_pubids:
+            assert expected_id in group_pubids
 
     def test_ignores_authority_when_user_present(self, list_groups_service, factories, authority_open_groups):
         user = factories.User(authority='foo.com')
         another_authority_open_group = factories.OpenGroup(authority='somewhere-else.com')
-        auth_group_ids = {group.pubid for group in authority_open_groups}
+        auth_group_ids = {group.id for group in authority_open_groups}
 
         groups = list_groups_service.all_groups(user=user, authority='somewhere-else.com')
 
-        group_ids = {group['id'] for group in groups}
+        group_ids = {group.id for group in groups}
         assert group_ids == auth_group_ids
         assert another_authority_open_group.pubid not in group_ids
 
@@ -55,7 +54,7 @@ class TestListGroupsAllGroups(object):
         groups = list_groups_service.all_groups(user=user)
 
         # open groups first
-        assert [group['id'] for group in groups] == ['azaz', 'zaza', 'zoinks', 'aaaa', 'zzzz']
+        assert [group.pubid for group in groups] == ['azaz', 'zaza', 'zoinks', 'aaaa', 'zzzz']
 
     def test_groups_are_sorted_alphabetically(self, list_groups_service, factories):
         user = factories.User(authority='z.com')
@@ -83,21 +82,6 @@ class TestListGroupsAllGroups(object):
 
 class TestListGroupsPrivateGroups(object):
 
-    @pytest.mark.parametrize('attribute', [
-        ('id'),
-        ('name'),
-        ('public'),
-        ('scoped'),
-        ('type')
-    ])
-    def test_returns_formatted_groups(self, list_groups_service, factories, attribute):
-        user = factories.User()
-        user.groups = [factories.Group()]
-
-        groups = list_groups_service.private_groups(user)
-
-        assert attribute in groups[0]
-
     def test_returns_private_groups_only(self, list_groups_service, factories):
         user = factories.User()
         user.groups = [factories.Group(), factories.Group(), factories.Group()]
@@ -106,7 +90,7 @@ class TestListGroupsPrivateGroups(object):
 
         assert len(groups) == 3
         for group in groups:
-            assert group['type'] == 'private'
+            assert not group.is_public
 
     def test_returns_empty_when_user_no_private_groups(self, list_groups_service, factories):
         user = factories.User()
@@ -129,7 +113,7 @@ class TestListGroupsPrivateGroups(object):
 
         groups = list_groups_service.private_groups(user=user)
 
-        assert [group['id'] for group in groups] == ['zoinks', 'aaaa', 'zzzz']
+        assert [group.pubid for group in groups] == ['zoinks', 'aaaa', 'zzzz']
 
 
 class TestListGroupsOpenGroups(object):
@@ -139,7 +123,7 @@ class TestListGroupsOpenGroups(object):
 
         groups = list_groups_service.open_groups(authority='foo.com')
 
-        assert {group['name'] for group in groups} == o_group_names
+        assert {group.name for group in groups} == o_group_names
 
     def test_no_groups_from_mismatched_authority(self, list_groups_service, authority_open_groups):
 
@@ -150,7 +134,7 @@ class TestListGroupsOpenGroups(object):
     def test_returns_groups_from_default_authority(self, list_groups_service):
         groups = list_groups_service.open_groups()
 
-        assert groups[0]['id'] == '__world__'
+        assert groups[0].pubid == '__world__'
 
     def test_returns_groups_for_user_authority(self, list_groups_service, authority_open_groups, factories):
         user = factories.User(authority='foo.com')
@@ -158,7 +142,7 @@ class TestListGroupsOpenGroups(object):
 
         o_groups = list_groups_service.open_groups(user=user)
 
-        assert {group['name'] for group in o_groups} == o_group_names
+        assert {group.name for group in o_groups} == o_group_names
 
     def test_ignores_authority_if_user(self, list_groups_service, authority_open_groups, factories):
         user = factories.User(authority='somethingelse.com')
@@ -174,7 +158,7 @@ class TestListGroupsOpenGroups(object):
 
         groups = list_groups_service.open_groups(authority='z.com')
 
-        assert [group['id'] for group in groups] == ['zoinks', 'aaaa', 'zzzz']
+        assert [group.pubid for group in groups] == ['zoinks', 'aaaa', 'zzzz']
 
 
 class TestListGroupsFactory(object):
@@ -200,7 +184,6 @@ def authority_open_groups(factories):
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
-    pyramid_request.route_url = mock.Mock(return_value='/group/a')
     return pyramid_request
 
 
@@ -208,6 +191,5 @@ def pyramid_request(pyramid_request):
 def list_groups_service(pyramid_request, db_session):
     return ListGroupsService(
         session=db_session,
-        request_authority=pyramid_request.authority,
-        route_url=pyramid_request.route_url
+        request_authority=pyramid_request.authority
     )
