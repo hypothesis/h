@@ -24,7 +24,7 @@ deform-jinja2==0.5
 deform==0.9.9
 elasticsearch==1.9.0
 enum34==1.1.6
-functools32==3.2.3.post2  # via jsonschema
+functools32==3.2.3.post2 ; python_version < "3.0"
 gevent==1.2.1
 greenlet==0.4.10          # via gevent
 gunicorn==19.6.0
