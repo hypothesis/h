@@ -110,6 +110,7 @@ class GroupSearchController(SearchController):
         # and the user is not in the list of members
         if self.group.joinable_by and (self.request.user not in self.group.members):
             return result
+
         def user_annotation_count(aggregation, userid):
             for user in aggregation:
                 if user['user'] == userid:

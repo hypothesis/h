@@ -109,6 +109,454 @@ class TestSearchController(object):
 
 
 @pytest.mark.usefixtures('annotation_stats_service', 'group_service', 'routes', 'search')
+class TestOpenGroupSearchController(object):
+
+    """Tests unique to GroupSearchController."""
+
+    def test_renders_join_template_when_no_read_permission(self, controller, pyramid_request, open_group):
+        """When the request has no read permission but join, it should render the join template."""
+
+        def fake_has_permission(permission, context=None):
+            if permission == 'read':
+                return False
+            if permission == 'join':
+                return True
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.override_renderer = mock.PropertyMock()
+
+        result = controller.search()
+
+        assert 'join.html' in pyramid_request.override_renderer
+        assert result == {'group': open_group}
+
+    def test_renders_join_template_when_not_logged_in(self, controller, factories, pyramid_request, open_group):
+        """
+        If user is logged out and has no read permission, prompt to login and join.
+        """
+        def fake_has_permission(permission, context=None):
+            if permission in ('read', 'join'):
+                return False
+        pyramid_request.user = None
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+
+        result = controller.search()
+
+        assert 'join.html' in pyramid_request.override_renderer
+        assert result == {'group': open_group}
+
+    def test_raises_not_found_when_no_read_or_join_permissions(self, controller, factories, pyramid_request):
+        def fake_has_permission(permission, context=None):
+            if permission in ('read', 'join'):
+                return False
+        pyramid_request.user = factories.User()  # User logged in
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            controller.search()
+
+    def test_search_redirects_if_slug_wrong(self,
+                                            controller,
+                                            open_group,
+                                            pyramid_request):
+        """
+        If the slug in the URL is wrong it should redirect to the right one.
+
+        For example /groups/<pubid>/foobar redirects to /groups/<pubid>/<slug>.
+
+        The other 'group_read' views on h.views.groups do this, this tests that
+        the ones in h.views.activity do as well.
+
+        """
+        pyramid_request.matchdict['slug'] = 'wrong'
+
+        with pytest.raises(httpexceptions.HTTPMovedPermanently) as exc:
+            controller.search()
+
+        assert exc.value.location == '/groups/{pubid}/{slug}'.format(
+            pubid=open_group.pubid, slug=open_group.slug)
+
+    def test_search_calls_search_with_the_request(self,
+                                                  controller,
+                                                  factories,
+                                                  open_group,
+                                                  pyramid_request,
+                                                  search):
+        for user in (None, open_group.creator, factories.User()):
+            pyramid_request.user = user
+
+            controller.search()
+
+            search.assert_called_once_with(controller)
+
+            search.reset_mock()
+
+    def test_search_just_returns_search_result_if_group_does_not_exist(
+            self, controller, factories, open_group, pyramid_request, search):
+        for user in (None, open_group.creator, factories.User()):
+            pyramid_request.user = user
+            pyramid_request.matchdict['pubid'] = 'does_not_exist'
+
+            assert controller.search() == search.return_value
+
+    def test_search_just_returns_search_result_if_user_not_logged_in(
+            self, controller, pyramid_request, search):
+        pyramid_request.user = None
+
+        assert controller.search() == search.return_value
+
+    def test_search_just_returns_search_result_if_user_not_a_member_of_group(
+            self, controller, factories, pyramid_request, search):
+        pyramid_request.user = factories.User()
+
+        assert controller.search() == search.return_value
+
+    def test_search_returns_group_info_if_user_a_member_of_group(self,
+                                                                 controller,
+                                                                 factories,
+                                                                 open_group,
+                                                                 pyramid_request):
+        pyramid_request.user = factories.User()
+
+        group_info = controller.search()['group']
+
+        assert group_info['created'] == open_group.created.strftime('%B, %Y')
+        assert group_info['description'] == open_group.description
+        assert group_info['name'] == open_group.name
+        assert group_info['pubid'] == open_group.pubid
+
+    def test_search_does_not_show_the_edit_link_to_group_members(self,
+                                                                 controller,
+                                                                 factories,
+                                                                 open_group,
+                                                                 pyramid_request):
+        def fake_has_permission(permission, context=None):
+            return permission != 'admin'
+        pyramid_request.has_permission = mock.Mock(side_effect=fake_has_permission)
+        pyramid_request.user = factories.User()
+
+        result = controller.search()
+
+        assert 'group_edit_url' not in result
+
+    def test_search_does_show_the_group_edit_link_to_group_creators(self,
+                                                                    controller,
+                                                                    open_group,
+                                                                    pyramid_request):
+        pyramid_request.has_permission = mock.Mock(return_value=True)
+        pyramid_request.user = open_group.creator
+
+        result = controller.search()
+
+        assert 'group_edit_url' in result
+
+    def test_search_shows_the_more_info_version_of_the_page_if_more_info_is_in_the_request_params(
+            self,
+            controller,
+            factories,
+            open_group,
+            pyramid_request):
+        pyramid_request.user = factories.User()
+        pyramid_request.params['more_info'] = ''
+
+        assert controller.search()['more_info'] is True
+
+    def test_search_shows_the_normal_version_of_the_page_if_more_info_is_not_in_the_request_params(
+            self,
+            controller,
+            factories,
+            open_group,
+            pyramid_request):
+        pyramid_request.user = factories.User()
+
+        assert controller.search()['more_info'] is False
+
+    def test_search_returns_name_in_opts(self,
+                                         controller,
+                                         open_group,
+                                         pyramid_request):
+        result = controller.search()
+
+        assert result['opts']['search_groupname'] == open_group.name
+
+    def test_search_returns_group_moderators_usernames(self,
+                                                 controller,
+                                                 factories,
+                                                 pyramid_request,
+                                                 open_group):
+        pyramid_request.user = factories.User()
+
+        result = controller.search()
+
+        actual = set([m['username'] for m in result['group']['moderators']])
+        expected = set([open_group.creator.username])
+        assert actual == expected
+
+    def test_search_returns_group_moderators_userid(self,
+                                                 controller,
+                                                 factories,
+                                                 pyramid_request,
+                                                 open_group):
+        pyramid_request.user = factories.User()
+
+        result = controller.search()
+
+        actual = set([m['userid'] for m in result['group']['moderators']])
+        expected = set([open_group.creator.userid])
+        assert actual == expected
+
+    def test_search_returns_group_moderators(self,
+                                                     controller,
+                                                     factories,
+                                                     pyramid_request,
+                                                     open_group):
+        pyramid_request.user = factories.User()
+
+        pyramid_request.params = {'q': 'user:%s' % "does_not_matter"}
+
+        result = controller.search()
+        assert result['group']['members'] is None, "Open group search should return members=None."
+        for moderator in result['group']['moderators']:
+            assert not moderator['faceted_by']
+
+    def test_search_returns_annotation_count_for_group_members(self,
+                                                               controller,
+                                                               pyramid_request,
+                                                               open_group,
+                                                               search,
+                                                               factories):
+        user_1 = open_group.creator
+        user_2 = factories.User()
+
+        pyramid_request.user = factories.User()
+
+        counts = {user_1.userid: 24, user_2.userid: 6}
+        users_aggregation = [
+            {'user': user_1.userid, 'count': counts[user_1.userid]},
+            {'user': user_2.userid, 'count': counts[user_2.userid]},
+        ]
+        search.return_value = {
+            'search_results': ActivityResults(total=200,
+                                              aggregations={'users': users_aggregation},
+                                              timeframes=[]),
+        }
+
+        result = controller.search()
+        for moderator in result['group']['moderators']:
+            assert moderator['count'] == counts[moderator['userid']]
+
+    def test_search_returns_the_default_zero_message_to_the_template(
+            self, controller, factories, open_group, pyramid_request, search):
+        """If there's a non-empty query it uses the default zero message."""
+        pyramid_request.user = factories.User()
+        search.return_value['q'] = 'foo'
+
+        result = controller.search()
+
+        assert result['zero_message'] == 'No annotations matched your search.'
+
+    def test_search_returns_the_group_zero_message_to_the_template(
+            self, controller, factories, open_group, pyramid_request, search):
+        """If the query is empty it overrides the default zero message."""
+        pyramid_request.user = factories.User()
+        search.return_value['q'] = ''
+
+        result = controller.search()
+
+        assert result['zero_message'] == (
+            "The group “{name}” has not made any annotations yet.".format(
+                name=open_group.name))
+
+    def test_leave_redirects_to_the_search_page(self,
+                                                controller,
+                                                open_group,
+                                                group_leave_request):
+        # This should be in the redirect URL.
+        group_leave_request.POST['q'] = 'foo bar gar'
+        # This should *not* be in the redirect URL.
+        group_leave_request.POST['group_leave'] = open_group.pubid
+
+        result = controller.leave()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == 'http://example.com/search?q=foo+bar+gar'
+
+    def test_join_raises_not_found_when_not_joinable(self, controller, pyramid_request):
+        pyramid_request.has_permission = mock.Mock(return_value=False)
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            controller.join()
+
+    def test_join_adds_group_member(self, controller, open_group, pyramid_request, pyramid_config, group_service):
+        pyramid_config.testing_securitypolicy('acct:doe@example.org')
+
+        controller.join()
+
+        group_service.member_join.assert_called_once_with(open_group, 'acct:doe@example.org')
+
+    def test_join_redirects_to_search_page(self, controller, open_group, pyramid_request):
+        result = controller.join()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        expected = pyramid_request.route_url('group_read', pubid=open_group.pubid, slug=open_group.slug)
+        assert result.location == expected
+
+    def test_search_passes_the_group_annotation_count_to_the_template(self,
+                                                                      controller,
+                                                                      factories,
+                                                                      open_group,
+                                                                      pyramid_request):
+        pyramid_request.user = factories.User()
+        result = controller.search()['stats']
+
+        assert result['annotation_count'] == 5
+
+    @pytest.mark.parametrize('q', ['', '   '])
+    def test_leave_removes_empty_query_from_url(self,
+                                                controller,
+                                                open_group,
+                                                group_leave_request,
+                                                q):
+        """
+        It should remove an empty q from the URL it redirects to.
+
+        We don't want to redirect to a URL with a pointless trailing empty ?q=.
+
+        """
+        group_leave_request.POST['q'] = q
+        group_leave_request.POST['group_leave'] = open_group.pubid
+
+        result = controller.leave()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == 'http://example.com/search'
+
+    def test_back_redirects_to_group_search(self,
+                                            controller,
+                                            open_group,
+                                            pyramid_request):
+        """It should redirect and preserve the search query param."""
+        pyramid_request.matched_route = mock.Mock()
+        pyramid_request.matched_route.name = 'group_read'
+        pyramid_request.params = {'q': 'foo bar', 'back': ''}
+
+        result = controller.back()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}?q=foo+bar'.format(
+                pubid=open_group.pubid, slug=open_group.slug))
+
+    @pytest.mark.usefixtures('toggle_user_facet_request')
+    def test_toggle_user_facet_returns_a_redirect(self, controller):
+        result = controller.toggle_user_facet()
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+
+    @pytest.mark.usefixtures('toggle_user_facet_request')
+    def test_toggle_user_facet_adds_the_user_facet_into_the_url(self,
+                                                                controller,
+                                                                open_group):
+        result = controller.toggle_user_facet()
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=user%3Afred'.format(pubid=open_group.pubid, slug=open_group.slug))
+
+    def test_toggle_user_facet_removes_the_user_facet_from_the_url(self,
+                                                                   controller,
+                                                                   open_group,
+                                                                   toggle_user_facet_request):
+        toggle_user_facet_request.params['q'] = 'user:"fred"'
+
+        result = controller.toggle_user_facet()
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}'.format(
+                pubid=open_group.pubid, slug=open_group.slug))
+
+    def test_toggle_user_facet_preserves_query_when_adding_user_facet(self,
+                                                                      controller,
+                                                                      open_group,
+                                                                      toggle_user_facet_request):
+        toggle_user_facet_request.params['q'] = 'foo bar'
+
+        result = controller.toggle_user_facet()
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=foo+bar+user%3Afred'.format(pubid=open_group.pubid, slug=open_group.slug))
+
+    def test_toggle_user_facet_preserves_query_when_removing_user_facet(self,
+                                                                        controller,
+                                                                        open_group,
+                                                                        toggle_user_facet_request):
+        toggle_user_facet_request.params['q'] = 'user:"fred" foo bar'
+
+        result = controller.toggle_user_facet()
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=foo+bar'.format(pubid=open_group.pubid, slug=open_group.slug))
+
+    def test_toggle_user_facet_preserves_query_when_removing_one_of_multiple_username_facets(
+            self, controller, open_group, toggle_user_facet_request):
+        toggle_user_facet_request.params['q'] = 'user:"foo" user:"fred" user:"bar"'
+
+        result = controller.toggle_user_facet()
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}'
+            '?q=user%3Afoo+user%3Abar'.format(pubid=open_group.pubid, slug=open_group.slug))
+
+    @pytest.mark.parametrize('q', ['user:fred', '  user:fred   '])
+    def test_toggle_user_facet_removes_empty_query(self,
+                                                   controller,
+                                                   open_group,
+                                                   toggle_user_facet_request,
+                                                   q):
+        """
+        It should remove an empty query from the URL.
+
+        We don't want to redirect to a URL with a pointless trailing empty ?q=.
+
+        """
+        toggle_user_facet_request.params['q'] = q
+
+        result = controller.toggle_user_facet()
+
+        assert result.location == (
+            'http://example.com/groups/{pubid}/{slug}'.format(
+                pubid=open_group.pubid, slug=open_group.slug))
+
+    @pytest.fixture
+    def controller(self, open_group, pyramid_request):
+        return activity.GroupSearchController(open_group, pyramid_request)
+
+    @pytest.fixture
+    def group_leave_request(self, open_group, pyramid_request):
+        pyramid_request.POST = {'group_leave': open_group.pubid}
+        return pyramid_request
+
+    @pytest.fixture
+    def group_service(self, patch, pyramid_config):
+        group_service = patch('h.services.group.GroupService')
+        pyramid_config.register_service(group_service, name='group')
+        return group_service
+
+    @pytest.fixture
+    def pyramid_request(self, open_group, pyramid_request):
+        pyramid_request.matchdict['pubid'] = open_group.pubid
+        pyramid_request.matchdict['slug'] = open_group.slug
+        pyramid_request.user = None
+        return pyramid_request
+
+    @pytest.fixture
+    def toggle_user_facet_request(self, open_group, pyramid_request):
+        pyramid_request.params['toggle_user_facet'] = 'acct:fred@hypothes.is'
+        return pyramid_request
+
+
+@pytest.mark.usefixtures('annotation_stats_service', 'group_service', 'routes', 'search')
 class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
@@ -917,12 +1365,23 @@ def group(factories):
     # Create some other groups as well, just to make sure it gets the right
     # one from the db.
     factories.Group()
-    factories.Group()
+    factories.OpenGroup()
 
     group = factories.Group()
 
     group.members.extend([factories.User(), factories.User()])
     return group
+
+
+@pytest.fixture
+def open_group(factories):
+    # Create some other groups as well, just to make sure it gets the right
+    # one from the db.
+    factories.Group()
+    factories.OpenGroup()
+
+    open_group = factories.OpenGroup()
+    return open_group
 
 
 @pytest.fixture
