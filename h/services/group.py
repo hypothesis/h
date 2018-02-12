@@ -40,7 +40,7 @@ class GroupService(object):
         group = self._create(name=name,
                              userid=userid,
                              description=description,
-                             access_flags=PrivateGroupTypeFlags,
+                             type_flags=PrivateGroupTypeFlags,
                              )
         group.members.append(group.creator)
 
@@ -65,7 +65,7 @@ class GroupService(object):
         return self._create(name=name,
                             userid=userid,
                             description=description,
-                            access_flags=OpenGroupTypeFlags,
+                            type_flags=OpenGroupTypeFlags,
                             scopes=[GroupScope(origin=o) for o in origins],
                             )
 
@@ -117,16 +117,16 @@ class GroupService(object):
 
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
-    def _create(self, name, userid, description, access_flags, scopes=[]):
+    def _create(self, name, userid, description, type_flags, scopes=[]):
         """Create a group and save it to the DB."""
         creator = self.user_fetcher(userid)
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
                       description=description,
-                      joinable_by=access_flags.joinable_by,
-                      readable_by=access_flags.readable_by,
-                      writeable_by=access_flags.writeable_by,
+                      joinable_by=type_flags.joinable_by,
+                      readable_by=type_flags.readable_by,
+                      writeable_by=type_flags.writeable_by,
                       scopes=scopes,
                       )
         self.session.add(group)
