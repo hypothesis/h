@@ -61,6 +61,13 @@ def test_type_raises_for_unknown_type_of_group(factories):
         group.type
 
 
+def test_you_cannot_set_type(factories):
+    group = factories.Group()
+
+    with pytest.raises(AttributeError, match="can't set attribute"):
+        group.type = 'open'
+
+
 def test_repr(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()
