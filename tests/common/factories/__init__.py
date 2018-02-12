@@ -15,6 +15,7 @@ from .feature import Feature
 from .feature_cohort import FeatureCohort
 from .flag import Flag
 from .group import Group, OpenGroup
+from .group_scope import GroupScope
 from .setting import Setting
 from .token import DeveloperToken, OAuth2Token
 from .user import User
@@ -35,6 +36,7 @@ __all__ = (
     'FeatureCohort',
     'Flag',
     'Group',
+    'GroupScope',
     'OAuth2Token',
     'OpenGroup',
     'Setting',
