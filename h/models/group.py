@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
+
 import enum
 import sqlalchemy as sa
 from pyramid import security
@@ -107,9 +109,14 @@ class Group(Base, mixins.Timestamps):
         :raises ValueError: if the type of the group isn't recognized
 
         """
-        for type_flags in (OpenGroupTypeFlags(), PrivateGroupTypeFlags()):
-            if self == type_flags:
-                return type_flags.type_
+        self_type_flags = TypeFlags(
+            joinable_by=self.joinable_by,
+            readable_by=self.readable_by,
+            writeable_by=self.writeable_by)
+
+        for type_, type_flags in (('open', open_group_type_flags), ('private', private_group_type_flags)):
+            if self_type_flags == type_flags:
+                return type_
 
         raise ValueError(
             "This group doesn't seem to match any known type of group. "
@@ -169,48 +176,19 @@ def _write_principal(group):
     }.get(group.writeable_by)
 
 
-class _GroupTypeFlags(object):
-    """Abstract base class for group type flags classes."""
-
-    def __eq__(self, other):
-        """Return True if other has the same access flags as this matcher."""
-        attrs = ('joinable_by', 'readable_by', 'writeable_by')
-        for attr in attrs:
-            self_attr = getattr(self, attr)
-            other_attr = getattr(other, attr, None)
-            if self_attr != other_attr:
-                return False
-        return True
-
-    def __ne__(self, other):
-        """Return True if other has different access flags than this matcher."""
-        return not self.__eq__(other)
+TypeFlags = namedtuple('TypeFlags', 'joinable_by readable_by writeable_by')
 
 
-class OpenGroupTypeFlags(_GroupTypeFlags):
-    """
-    A container for the property values that define an "open"-type group.
-
-    An instance of this class will also be == to any "open"-type group.
-
-    """
-    type_ = 'open'
-    joinable_by = None
-    readable_by = ReadableBy.world
-    writeable_by = WriteableBy.authority
+open_group_type_flags = TypeFlags(
+    joinable_by=None,
+    readable_by=ReadableBy.world,
+    writeable_by=WriteableBy.authority)
 
 
-class PrivateGroupTypeFlags(_GroupTypeFlags):
-    """
-    A container for the property values that define a "private"-type group.
-
-    An instance of this class will also be == to any "private"-type group.
-
-    """
-    type_ = 'private'
-    joinable_by = JoinableBy.authority
-    readable_by = ReadableBy.members
-    writeable_by = WriteableBy.members
+private_group_type_flags = TypeFlags(
+    joinable_by=JoinableBy.authority,
+    readable_by=ReadableBy.members,
+    writeable_by=WriteableBy.members)
 
 
 USER_GROUP_TABLE = sa.Table(
