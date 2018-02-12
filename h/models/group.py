@@ -107,9 +107,9 @@ class Group(Base, mixins.Timestamps):
         :raises ValueError: if the type of the group isn't recognized
 
         """
-        for group_matcher in (OpenGroupMatcher(), PrivateGroupMatcher()):
-            if self == group_matcher:
-                return group_matcher.type_
+        for type_flags in (OpenGroupTypeFlags(), PrivateGroupTypeFlags()):
+            if self == type_flags:
+                return type_flags.type_
 
         raise ValueError(
             "This group doesn't seem to match any known type of group. "
@@ -169,8 +169,8 @@ def _write_principal(group):
     }.get(group.writeable_by)
 
 
-class _GroupMatcher(object):
-    """Abstract base class for group matcher classes."""
+class _GroupTypeFlags(object):
+    """Abstract base class for group type flags classes."""
 
     def __eq__(self, other):
         """Return True if other has the same access flags as this matcher."""
@@ -187,16 +187,26 @@ class _GroupMatcher(object):
         return not self.__eq__(other)
 
 
-class OpenGroupMatcher(_GroupMatcher):
-    """An object that's equal to any open group."""
+class OpenGroupTypeFlags(_GroupTypeFlags):
+    """
+    A container for the property values that define an "open"-type group.
+
+    An instance of this class will also be == to any "open"-type group.
+
+    """
     type_ = 'open'
     joinable_by = None
     readable_by = ReadableBy.world
     writeable_by = WriteableBy.authority
 
 
-class PrivateGroupMatcher(_GroupMatcher):
-    """An object that's equal to any private group."""
+class PrivateGroupTypeFlags(_GroupTypeFlags):
+    """
+    A container for the property values that define a "private"-type group.
+
+    An instance of this class will also be == to any "private"-type group.
+
+    """
     type_ = 'private'
     joinable_by = JoinableBy.authority
     readable_by = ReadableBy.members

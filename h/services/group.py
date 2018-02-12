@@ -6,7 +6,7 @@ import sqlalchemy as sa
 
 from h import session
 from h.models import Group, GroupScope, User
-from h.models.group import ReadableBy, OpenGroupMatcher, PrivateGroupMatcher
+from h.models.group import ReadableBy, OpenGroupTypeFlags, PrivateGroupTypeFlags
 
 
 class GroupService(object):
@@ -40,7 +40,7 @@ class GroupService(object):
         group = self._create(name=name,
                              userid=userid,
                              description=description,
-                             access_flags=PrivateGroupMatcher,
+                             access_flags=PrivateGroupTypeFlags,
                              )
         group.members.append(group.creator)
 
@@ -65,7 +65,7 @@ class GroupService(object):
         return self._create(name=name,
                             userid=userid,
                             description=description,
-                            access_flags=OpenGroupMatcher,
+                            access_flags=OpenGroupTypeFlags,
                             scopes=[GroupScope(origin=o) for o in origins],
                             )
 
