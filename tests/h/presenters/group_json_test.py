@@ -104,8 +104,3 @@ class TestGroupsJSONPresenter(object):
 @pytest.fixture
 def group_json_presenter(patch):
     return patch('h.presenters.group_json.GroupJSONPresenter')
-
-
-@pytest.fixture
-def group_json_presenter_asdict(patch):
-    return patch('h.presenters.group_json.GroupJSONPresenter.asdict')
