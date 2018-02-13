@@ -56,7 +56,6 @@ class TestGroupJSONPresenter(object):
         presenter = GroupJSONPresenter(group, route_url=route_url)
 
         model = presenter.asdict()
-        print model
 
         assert model['urls']['group'] == '/group/a'
         assert model['url'] == '/group/a'
