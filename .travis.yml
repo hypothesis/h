@@ -15,6 +15,16 @@ matrix:
         tox -e coverage
         tox -e codecov
 
+    - env: ACTION=tox-py3
+      language: python
+      python: '3.6'
+      addons:
+        postgresql: '9.4'
+      install: pip install tox
+      before_script: createdb htest
+      script:
+        make test-py3
+
     # Test web application frontend
     - env: ACTION=gulp
       language: node_js

@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 
-import urlparse
+from h._compat import urlparse
 
 from jinja2 import Markup
 from pyramid import httpexceptions
