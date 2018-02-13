@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
-from h.presenters import GroupJSONPresenter
+from h.presenters import GroupsJSONPresenter
 from h.views.api import api_config
 
 
@@ -19,7 +19,7 @@ def groups(request):
     all_groups = svc.all_groups(user=request.user,
                                 authority=authority,
                                 document_uri=document_uri)
-    all_groups = [GroupJSONPresenter(group, request.route_url).asdict() for group in all_groups]
+    all_groups = GroupsJSONPresenter(groups, request.route_url).asdicts()
     return all_groups
 
 

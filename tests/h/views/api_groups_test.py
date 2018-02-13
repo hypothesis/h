@@ -12,7 +12,7 @@ from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
 
 
-@pytest.mark.usefixtures('GroupJSONPresenter')
+@pytest.mark.usefixtures('GroupsJSONPresenter')
 class TestGroups(object):
 
     def test_all_groups_proxies_to_service(self, anonymous_request, list_groups_service):
@@ -44,20 +44,12 @@ class TestGroups(object):
             document_uri='http://example.com/thisthing.html'
         )
 
-    def test_uses_presenter_for_formatting(self, anonymous_request, open_groups, list_groups_service, GroupJSONPresenter):  # noqa: N803
+    def test_uses_presenter_for_formatting(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
         list_groups_service.all_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
-        assert GroupJSONPresenter.call_count == 2
-
-    def test_returns_formatted_groups(self, anonymous_request, open_groups, list_groups_service, GroupJSONPresenter):  # noqa: N803
-        list_groups_service.all_groups.return_value = open_groups
-        GroupJSONPresenter.asdict.return_value = {'foo': 'bar'}
-
-        result = views.groups(anonymous_request)
-
-        assert result == [GroupJSONPresenter(group, None).asdict() for group in open_groups]
+        assert GroupsJSONPresenter.call_count == 1
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
@@ -130,11 +122,6 @@ class TestRemoveMember(object):
         userid = 'acct:bob@example.org'
         pyramid_config.testing_securitypolicy(userid)
         return userid
-
-
-@pytest.fixture
-def GroupJSONPresenter(patch):  # noqa: N802
-    return patch('h.views.api_groups.GroupJSONPresenter')
 
 
 @pytest.fixture
