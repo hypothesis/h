@@ -29,13 +29,13 @@ def navbar(context, request, search=None, opts=None):
                 'title': group.name,
                 'link': request.route_url('group_read', pubid=group.pubid, slug=group.slug)
             })
-            groups_suggestions.append({
-                'name': group.name,
-                'pubid': group.pubid
-            })
         user_activity_url = request.route_url('activity.user_search',
                                               username=request.user.username)
         username = request.user.username
+    # Make all groups associated with the user visible in the search auto complete.
+    list_group_service = request.find_service(name='list_groups')
+    groups = list_group_service.associated_groups(request.user)
+    groups_suggestions = [{'name': group.name, 'pubid': group.pubid} for group in groups]
 
     route = request.matched_route
 
