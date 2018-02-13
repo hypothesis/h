@@ -15,6 +15,12 @@ h
    :alt: License badge
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
    :alt: Python version badge
+.. image:: https://pyup.io/repos/github/hypothesis/h/shield.svg
+   :target: https://pyup.io/repos/github/hypothesis/h/
+   :alt: Updates
+.. image:: https://pyup.io/repos/github/hypothesis/h/python-3-shield.svg
+   :target: https://pyup.io/repos/github/hypothesis/h/
+   :alt: Python 3
 
 h is the web app that serves most of the https://hypothes.is/ website,
 including the web annotations API at https://hypothes.is/api/.
