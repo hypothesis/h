@@ -46,6 +46,7 @@ test-py3: node_modules/.uptodate
 	@pip install -q tox
 	# 1. Run tox, configured to print just one line per error in the form `{path}:{line no}:{line}`.
 	# 2. Extract unique error locations and write to file.
+	@mkdir -p .tox
 	tox -e py36 -- --tb=line --no-print-logs tests/h/ | tee .tox/py36-log
 	cat .tox/py36-log | egrep -o '/h/[^:]+:[0-9]+:' | sort | uniq > tests/py3-actual-failures.txt
 	# 3. Compare actual and expected failures, this command will fail if they differ.
