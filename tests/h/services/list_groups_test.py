@@ -64,7 +64,7 @@ class TestListGroupsAllGroups(object):
 
         groups = list_groups_service.all_groups(user=user)
 
-        assert [group.name for group in groups] == ['foobar', 'Lilac']
+        assert [group['name'] for group in groups] == ['foobar', 'Lilac']
 
     def test_user_groups_not_mutated(self, list_groups_service, factories):
         user = factories.User(authority='z.com')
