@@ -36,7 +36,7 @@ class GroupJSONPresenter(object):
         return model
 
 
-class GroupsJSONPresenter(GroupJSONPresenter):
+class GroupsJSONPresenter(object):
     """Present a list of groups as JSON"""
 
     def __init__(self, groups, route_url=None):
@@ -44,4 +44,4 @@ class GroupsJSONPresenter(GroupJSONPresenter):
         self._route_url = route_url
 
     def asdicts(self):
-        return [self._model(group) for group in self.groups]
+        return [GroupJSONPresenter(group, self._route_url).asdict() for group in self.groups]
