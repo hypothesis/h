@@ -1,4 +1,3 @@
-/h/h/cli/commands/normalize_uris.py:142:
 /h/h/db/types.py:88:
 /h/h/models/document.py:482:
 /h/h/search/config.py:190:
@@ -14,9 +13,6 @@
 /h/h/views/api_exceptions.py:36:
 /h/h/views/api_exceptions.py:42:
 /h/h/views/api_profile.py:33:
-/h/tests/h/activity/bucketing_test.py:122:
-/h/tests/h/activity/bucketing_test.py:81:
-/h/tests/h/activity/bucketing_test.py:91:
 /h/tests/h/auth/util_test.py:69:
 /h/tests/h/cli/commands/annotation_id_test.py:11:
 /h/tests/h/cli/commands/search_test.py:42:
@@ -44,8 +40,7 @@
 /h/tests/h/security_test.py:65:
 /h/tests/h/security_test.py:77:
 /h/tests/h/security_test.py:88:
-/h/tests/h/services/rename_user_test.py:26:
-/h/tests/h/services/rename_user_test.py:60:
+/h/tests/h/services/rename_user_test.py:28:
 /h/tests/h/services/user_test.py:95:
 /h/tests/h/tasks/admin_test.py:14:
 /h/tests/h/util/cors_test.py:139:

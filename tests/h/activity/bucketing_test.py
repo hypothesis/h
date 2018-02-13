@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from h._compat import xrange
+
 import datetime
 import pytest
 from mock import Mock
