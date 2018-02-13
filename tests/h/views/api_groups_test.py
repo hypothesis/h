@@ -71,12 +71,6 @@ class TestGroups(object):
         pyramid_request.user = None
         return pyramid_request
 
-    @pytest.fixture
-    def user_with_private_groups(self, factories):
-        user = factories.User()
-        user.groups = [factories.Group(), factories.Group()]
-        return user
-
 
 @pytest.mark.usefixtures('authenticated_userid', 'group_service')
 class TestRemoveMember(object):
