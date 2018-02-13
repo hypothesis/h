@@ -38,7 +38,7 @@ class Tracker(object):
         changed = copy(self._flushed_changes)
         changed.update(self._unflushed_changes())
 
-        return list(changed.iteritems())
+        return list(changed.items())
 
     def _unflushed_changes(self):
         """

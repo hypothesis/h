@@ -113,7 +113,7 @@ class Search(object):
             return {}
 
         results = {}
-        for key, result in aggregations.iteritems():
+        for key, result in aggregations.items():
             for agg in self.builder.aggregations:
                 if key != agg.key:
                     continue

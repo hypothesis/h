@@ -86,7 +86,7 @@ def unparse(q):
     """
     terms = []
 
-    for key, val in q.iteritems():
+    for key, val in q.items():
         if key == 'any':
             terms.append(_escape_term(val))
         else:

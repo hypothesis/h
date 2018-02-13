@@ -131,7 +131,7 @@ class TestDeleteAnnotation(object):
 @pytest.mark.usefixtures('celery')
 class TestReindexUserAnnotations(object):
     def test_it_reindexes_users_annotations(self, batch_indexer, annotation_ids):
-        userid = annotation_ids.keys()[0]
+        userid = list(annotation_ids.keys())[0]
 
         indexer.reindex_user_annotations(userid)
 
