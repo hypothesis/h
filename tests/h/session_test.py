@@ -2,6 +2,7 @@ import pytest
 import mock
 
 from h import session
+from h.services.list_groups import ListGroupsService
 
 
 class FakeGroup(object):
@@ -13,43 +14,55 @@ class FakeGroup(object):
 
 
 class TestModel(object):
-    def test_proxies_sorting_to_service(self, authenticated_request):
-        authenticated_request.set_groups([
-            FakeGroup('c', 'Group A'),
-            FakeGroup('b', 'Group B'),
-            FakeGroup('a', 'Group B'),
-        ])
+    def test_proxies_group_lookup_to_service(self, authenticated_request):
+        svc = authenticated_request.find_service(name='list_groups')
+
         session.model(authenticated_request)
 
-        authenticated_request._profile_group_service.sort.assert_called_once()
+        svc.all_groups.assert_called_once_with(user=authenticated_request.user,
+                                               authority=authenticated_request.authority)
 
-    def test_world_group_is_public(self, authenticated_request):
+    def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
+        svc = unauthenticated_request.find_service(name='list_groups')
+
+        session.model(unauthenticated_request)
+
+        svc.all_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+                                               user=None)
+
+    def test_open_group_is_public(self, unauthenticated_request, world_group):
+        svc = unauthenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [world_group]
+
+        model = session.model(unauthenticated_request)
+
+        assert model['groups'][0]['public']
+
+    def test_private_group_is_not_public(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [a_group]
+
         model = session.model(authenticated_request)
-        world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
 
-        assert world_group['public'] is True
+        assert not model['groups'][0]['public']
 
-    def test_private_group_is_not_public(self, authenticated_request):
-        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+    def test_open_group_has_no_url(self, unauthenticated_request, world_group):
+        svc = unauthenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [world_group]
 
-        model = session.model(authenticated_request)
-        private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
+        model = session.model(unauthenticated_request)
 
-        assert private_group['public'] is False
+        assert not model['groups'][0].get('url')
 
-    def test_world_group_has_no_url(self, authenticated_request):
-        model = session.model(authenticated_request)
-        world_group = [g for g in model['groups'] if g['id'] == '__world__'][0]
-
-        assert 'url' not in world_group
-
-    def test_private_group_has_url(self, authenticated_request):
-        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+    def test_private_group_has_url(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [a_group]
 
         model = session.model(authenticated_request)
-        private_group = [g for g in model['groups'] if g['id'] == 'a'][0]
 
-        assert private_group['url']
+        assert model['groups'][0]['url']
 
     def test_includes_features(self, authenticated_request):
         feature_dict = {
@@ -85,70 +98,55 @@ class TestProfile(object):
         profile = session.profile(authenticated_request)
         assert profile['userid'] == u'acct:user@example.com'
 
-    def test_proxies_sorting_to_service(self, authenticated_request):
-        authenticated_request.set_groups([
-            FakeGroup('c', 'Group A'),
-            FakeGroup('b', 'Group B'),
-            FakeGroup('a', 'Group B'),
-        ])
+    def test_proxies_group_lookup_to_service(self, authenticated_request):
+        svc = authenticated_request.find_service(name='list_groups')
+
         session.profile(authenticated_request)
 
-        authenticated_request._profile_group_service.sort.assert_called_once()
+        svc.all_groups.assert_called_once_with(user=authenticated_request.user,
+                                               authority=authenticated_request.authority)
 
-    def test_authenticated_world_group(self, authenticated_request):
-        result = session.profile(authenticated_request)
+    def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
+        svc = unauthenticated_request.find_service(name='list_groups')
 
-        assert '__world__' in [g['id'] for g in result['groups']]
+        session.profile(unauthenticated_request)
 
-    def test_anonymous_world_group(self, unauthenticated_request):
-        result = session.profile(unauthenticated_request)
+        svc.all_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+                                               user=None)
 
-        assert '__world__' in [g['id'] for g in result['groups']]
+    def test_open_group_is_public(self, unauthenticated_request, world_group):
+        svc = unauthenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [world_group]
 
-    def test_third_party_missing_world_group(self, third_party_request):
-        result = session.profile(third_party_request)
+        profile = session.profile(unauthenticated_request)
 
-        assert '__world__' not in [g['id'] for g in result['groups']]
+        assert profile['groups'][0]['public']
 
-    def test_world_group_is_public(self, authenticated_request):
-        profile = session.profile(authenticated_request)
-        world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
-
-        assert world_group['public'] is True
-
-    def test_private_group_is_not_public(self, authenticated_request):
-        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+    def test_private_group_is_not_public(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
-        private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
 
-        assert private_group['public'] is False
+        assert not profile['groups'][0]['public']
 
-    def test_open_group_is_public(self, third_party_request, open_group):
-        profile = session.profile(third_party_request)
-        group = [g for g in profile['groups'] if g['id'] == open_group.pubid][0]
+    def test_open_group_has_no_url(self, unauthenticated_request, world_group):
+        svc = unauthenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [world_group]
 
-        assert group['public'] is True
+        profile = session.profile(unauthenticated_request)
 
-    def test_world_group_has_no_url(self, authenticated_request):
-        profile = session.profile(authenticated_request)
-        world_group = [g for g in profile['groups'] if g['id'] == '__world__'][0]
+        assert not profile['groups'][0].get('url')
 
-        assert 'url' not in world_group
-
-    def test_private_group_has_url(self, authenticated_request):
-        authenticated_request.set_groups([FakeGroup('a', 'Group A')])
+    def test_private_group_has_url(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.all_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
-        private_group = [g for g in profile['groups'] if g['id'] == 'a'][0]
 
-        assert private_group['url']
-
-    def test_open_group_has_no_url(self, third_party_request, open_group):
-        profile = session.profile(third_party_request)
-        group = [g for g in profile['groups'] if g['id'] == open_group.pubid][0]
-
-        assert 'url' not in group
+        assert profile['groups'][0]['url']
 
     def test_includes_features(self, authenticated_request):
         feature_dict = {
@@ -179,8 +177,6 @@ class TestProfile(object):
         assert session.profile(unauthenticated_request)['authority'] == authority
 
     def test_authority_override(self, unauthenticated_request):
-        unauthenticated_request.set_public_groups({'foo.com': []})
-
         profile = session.profile(unauthenticated_request, 'foo.com')
 
         assert profile['authority'] == 'foo.com'
@@ -220,16 +216,11 @@ class TestProfile(object):
         return u'thirdparty.example.org'
 
     @pytest.fixture
-    def third_party_request(self, authority, third_party_domain, open_group, fake_feature):
+    def third_party_request(self, authority, third_party_domain, fake_feature):
         return FakeRequest(authority,
                            u'acct:user@{}'.format(third_party_domain),
                            third_party_domain,
-                           {third_party_domain: [open_group]},
                            fake_feature)
-
-    @pytest.fixture
-    def open_group(self):
-        return FakeGroup('abcdef', 'Open group', is_public=True)
 
 
 class TestUserInfo(object):
@@ -249,18 +240,18 @@ class TestUserInfo(object):
         assert session.user_info(None) == {}
 
 
-class FakeAuthorityGroupService(object):
+class FakeListGroupsService(object):
 
-    def __init__(self, public_groups):
-        self._public_groups = public_groups
+    def __init__(self, open_groups):
+        self._open_groups = open_groups
 
-    def public_groups(self, authority):
-        return self._public_groups[authority]
+    def open_groups(self, authority):
+        return self._open_groups[authority]
 
 
 class FakeRequest(object):
 
-    def __init__(self, authority, userid, user_authority, public_groups,
+    def __init__(self, authority, userid, user_authority,
                  fake_feature):
         self.authority = authority
         self.authenticated_userid = userid
@@ -274,12 +265,7 @@ class FakeRequest(object):
         self.route_url = mock.Mock(return_value='/group/a')
         self.session = mock.Mock(get_csrf_token=lambda: '__CSRF__')
 
-        self._authority_group_service = FakeAuthorityGroupService(public_groups)
-        self._profile_group_service = mock.Mock(spec_set=['sort'])
-        self._profile_group_service.sort = mock.Mock(side_effect=lambda groups: groups)
-
-    def set_groups(self, groups):
-        self.user.groups = groups
+        self._list_groups_service = mock.create_autospec(ListGroupsService, spec_set=True, instance=True)
 
     def set_features(self, feature_dict):
         self.feature.flags = feature_dict
@@ -287,14 +273,9 @@ class FakeRequest(object):
     def set_sidebar_tutorial_dismissed(self, dismissed):
         self.user.sidebar_tutorial_dismissed = dismissed
 
-    def set_public_groups(self, public_groups):
-        self._authority_group_service = FakeAuthorityGroupService(public_groups)
-
     def find_service(self, **kwargs):
-        if kwargs == {'name': 'authority_group'}:
-            return self._authority_group_service
-        elif kwargs == {'name': 'profile_group'}:
-            return self._profile_group_service
+        if kwargs == {'name': 'list_groups'}:
+            return self._list_groups_service
         else:
             raise AssertionError('find_service called with unrecognised args '
                                  '{}'.format(kwargs))
@@ -306,20 +287,19 @@ def authority():
 
 
 @pytest.fixture
-def world_group():
-    return FakeGroup('__world__', 'Public', is_public=True)
-
-
-@pytest.fixture
-def unauthenticated_request(authority, world_group, fake_feature):
-    return FakeRequest(authority, None, None, {authority: [world_group]},
+def unauthenticated_request(authority, fake_feature):
+    return FakeRequest(authority, None, None,
                        fake_feature)
 
 
 @pytest.fixture
-def authenticated_request(authority, world_group, fake_feature):
+def authenticated_request(authority, fake_feature):
     return FakeRequest(authority,
                        u'acct:user@{}'.format(authority),
                        authority,
-                       {authority: [world_group]},
                        fake_feature)
+
+
+@pytest.fixture
+def world_group(factories):
+    return factories.OpenGroup(name=u'Public', pubid='__worldish__')
