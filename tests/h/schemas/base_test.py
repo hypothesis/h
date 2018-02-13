@@ -69,7 +69,7 @@ class TestJSONSchema(object):
         with pytest.raises(ValidationError) as e:
             ExampleJSONSchema().validate(data)
 
-        message = e.value.message
+        message = str(e.value)
         assert message.startswith("'bar' is a required property")
 
     def test_it_returns_all_errors_in_message(self):
@@ -78,7 +78,7 @@ class TestJSONSchema(object):
         with pytest.raises(ValidationError) as e:
             ExampleJSONSchema().validate(data)
 
-        message = e.value.message
+        message = str(e.value)
         assert message.startswith("'foo' is a required property, 'bar' is a required property")
 
 

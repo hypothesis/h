@@ -74,7 +74,7 @@ def error_json(error, request):
     request.response.status_code = 400
     return {
         'status': 'failure',
-        'reason': error.message
+        'reason': str(error),
     }
 
 

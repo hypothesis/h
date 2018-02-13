@@ -30,6 +30,6 @@ def update_preferences(request):
     try:
         svc.update_preferences(request.user, **preferences)
     except TypeError as e:
-        raise APIError(e.message, status_code=400)
+        raise APIError(str(e), status_code=400)
 
     return h_session.profile(request)

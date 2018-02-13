@@ -9,7 +9,7 @@ class TestAPIError(object):
     def test_message(self):
         exc = APIError('some message')
 
-        assert exc.message == 'some message'
+        assert str(exc) == 'some message'
 
     def test_default_status_code(self):
         exc = APIError('some message')
@@ -26,7 +26,7 @@ class TestClientUnauthorized(object):
     def test_message(self):
         exc = ClientUnauthorized()
 
-        assert 'credentials are invalid' in exc.message
+        assert 'credentials are invalid' in str(exc)
 
     def test_status_code(self):
         exc = ClientUnauthorized()

@@ -21,7 +21,7 @@ class TestStatus(object):
         with pytest.raises(APIError) as exc:
             status(pyramid_request)
 
-        assert 'Database connection failed' in exc.value.message
+        assert 'Database connection failed' in str(exc.value)
 
     @pytest.fixture
     def db(self, pyramid_request):

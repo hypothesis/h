@@ -223,8 +223,8 @@ def api_token_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code
     resp = {'error': context.type}
-    if context.message:
-        resp['error_description'] = context.message
+    if context.args[0]:
+        resp['error_description'] = str(context)
     return resp
 
 

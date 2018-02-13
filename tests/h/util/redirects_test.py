@@ -142,9 +142,9 @@ class TestParse(object):
     def test_misformatted_line_raises(self):
         with pytest.raises(ParseError) as e:
             parse(['/foo exact somethingelse http://giraffe.com/bar'])
-        assert 'invalid' in e.value.message
+        assert 'invalid' in str(e.value)
 
     def test_unknown_type_raises(self):
         with pytest.raises(ParseError) as e:
             parse(['/foo magic http://giraffe.com/bar'])
-        assert 'type' in e.value.message
+        assert 'type' in str(e.value)

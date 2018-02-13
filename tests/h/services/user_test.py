@@ -92,7 +92,7 @@ class TestUserService(object):
         with pytest.raises(TypeError) as exc:
             svc.update_preferences(user, foo='bar', baz='qux')
 
-        assert 'keys baz, foo are not allowed' in exc.value.message
+        assert 'keys baz, foo are not allowed' in str(exc.value)
 
     def test_sets_up_cache_clearing_on_transaction_end(self, patch, db_session):
         decorator = patch('h.services.user.on_transaction_end')
