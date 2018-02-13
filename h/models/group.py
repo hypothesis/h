@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
+
 import enum
 import sqlalchemy as sa
 from pyramid import security
@@ -99,6 +101,28 @@ class Group(Base, mixins.Timestamps):
         return slugify.slugify(self.name)
 
     @property
+    def type(self):
+        """
+        The "type" of this group, e.g. "open" or "private".
+
+        :rtype: string
+        :raises ValueError: if the type of the group isn't recognized
+
+        """
+        self_type_flags = TypeFlags(
+            joinable_by=self.joinable_by,
+            readable_by=self.readable_by,
+            writeable_by=self.writeable_by)
+
+        for type_, type_flags in (('open', OPEN_GROUP_TYPE_FLAGS), ('private', PRIVATE_GROUP_TYPE_FLAGS)):
+            if self_type_flags == type_flags:
+                return type_
+
+        raise ValueError(
+            "This group doesn't seem to match any known type of group. "
+            "This shouldn't be in the database!")
+
+    @property
     def is_public(self):
         return self.readable_by == ReadableBy.world
 
@@ -150,6 +174,21 @@ def _write_principal(group):
         WriteableBy.authority: 'authority:{}'.format(group.authority),
         WriteableBy.members: 'group:{}'.format(group.pubid),
     }.get(group.writeable_by)
+
+
+TypeFlags = namedtuple('TypeFlags', 'joinable_by readable_by writeable_by')
+
+
+OPEN_GROUP_TYPE_FLAGS = TypeFlags(
+    joinable_by=None,
+    readable_by=ReadableBy.world,
+    writeable_by=WriteableBy.authority)
+
+
+PRIVATE_GROUP_TYPE_FLAGS = TypeFlags(
+    joinable_by=JoinableBy.authority,
+    readable_by=ReadableBy.members,
+    writeable_by=WriteableBy.members)
 
 
 USER_GROUP_TABLE = sa.Table(
