@@ -14,6 +14,7 @@ h
    :target: https://github.com/hypothesis/h/blob/master/LICENSE
    :alt: License badge
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
+   :target: https://github.com/hypothesis/h/
    :alt: Python version badge
 .. image:: https://pyup.io/repos/github/hypothesis/h/shield.svg
    :target: https://pyup.io/repos/github/hypothesis/h/
