@@ -11,44 +11,68 @@ from h.views import api_groups as views
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
 
+pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
+
 
 class TestGroups(object):
-    def test_groups_proxies_to_service(self, pyramid_request, list_groups_service):
-        views.groups(pyramid_request)
 
-        list_groups_service.all_groups.assert_called_once()
+    def test_all_groups_proxies_to_service(self, anonymous_request, list_groups_service):
+        views.groups(anonymous_request)
 
-    def test_groups_passes_authority_parameter(self, pyramid_request, list_groups_service):
-        pyramid_request.params = {'authority': 'foo.com'}
+        list_groups_service.all_groups.assert_called_once_with(
+            user=None,
+            authority=None,
+            document_uri=None
+        )
 
-        views.groups(pyramid_request)
+    def test_all_groups_proxies_authority_param(self, anonymous_request, list_groups_service):
+        anonymous_request.params['authority'] = 'foo.com'
+        views.groups(anonymous_request)
 
-        c_args, c_kwargs = list_groups_service.all_groups.call_args
-        assert c_kwargs['authority'] == 'foo.com'
+        list_groups_service.all_groups.assert_called_once_with(
+            user=None,
+            authority='foo.com',
+            document_uri=None
+        )
 
-    def test_groups_passes_document_uri_parameter(self, pyramid_request, list_groups_service):
-        pyramid_request.params = {'document_uri': 'foo.example.com'}
+    def test_all_groups_proxies_document_uri_param(self, anonymous_request, list_groups_service):
+        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
+        views.groups(anonymous_request)
 
-        views.groups(pyramid_request)
+        list_groups_service.all_groups.assert_called_once_with(
+            user=None,
+            authority=None,
+            document_uri='http://example.com/thisthing.html'
+        )
 
-        c_args, c_kwargs = list_groups_service.all_groups.call_args
-        assert c_kwargs['document_uri'] == 'foo.example.com'
+    def test_uses_presenter_for_formatting(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+        list_groups_service.all_groups.return_value = open_groups
+
+        views.groups(anonymous_request)
+
+        GroupsJSONPresenter.assert_called_once_with(open_groups, anonymous_request.route_url)
+
+    def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+        list_groups_service.all_groups.return_value = open_groups
+
+        result = views.groups(anonymous_request)
+
+        assert result == GroupsJSONPresenter(open_groups, anonymous_request).asdicts.return_value
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, user):
-        pyramid_request.user = user
-        pyramid_request.json_body = {}
-        return pyramid_request
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User.build()
+    def open_groups(self, factories):
+        return [factories.OpenGroup(), factories.OpenGroup()]
 
     @pytest.fixture
     def list_groups_service(self, pyramid_config):
         svc = mock.create_autospec(ListGroupsService, spec_set=True, instance=True)
         pyramid_config.register_service(svc, name='list_groups')
         return svc
+
+    @pytest.fixture
+    def anonymous_request(self, pyramid_request):
+        pyramid_request.user = None
+        return pyramid_request
 
 
 @pytest.mark.usefixtures('authenticated_userid', 'group_service')
@@ -95,3 +119,8 @@ class TestRemoveMember(object):
         userid = 'acct:bob@example.org'
         pyramid_config.testing_securitypolicy(userid)
         return userid
+
+
+@pytest.fixture
+def GroupsJSONPresenter(patch):  # noqa: N802
+    return patch('h.views.api_groups.GroupsJSONPresenter')

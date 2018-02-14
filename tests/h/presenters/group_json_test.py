@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import pytest
 import mock
 
 from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
@@ -63,6 +64,16 @@ class TestGroupJSONPresenter(object):
 
 class TestGroupsJSONPresenter(object):
 
+    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_):  # noqa: [N802, N803]
+        groups = [factories.Group(), factories.OpenGroup()]
+        route_url = mock.Mock()
+        presenter = GroupsJSONPresenter(groups, route_url=route_url)
+        expected_call_args = [mock.call(group, route_url) for group in groups]
+
+        presenter.asdicts()
+
+        assert GroupJSONPresenter_.call_args_list == expected_call_args
+
     def test_asdicts_returns_list_of_dicts(self, factories):
         groups = [factories.Group(name=u'filbert'), factories.OpenGroup(name=u'delbert')]
         presenter = GroupsJSONPresenter(groups)
@@ -81,3 +92,8 @@ class TestGroupsJSONPresenter(object):
         for group in result:
             assert group['url']
             assert group['urls']['group']
+
+
+@pytest.fixture
+def GroupJSONPresenter_(patch):  # noqa: N802
+    return patch('h.presenters.group_json.GroupJSONPresenter')
