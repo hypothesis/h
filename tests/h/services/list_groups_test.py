@@ -187,6 +187,19 @@ class TestListGroupsParseOrigin(object):
         assert result == document_uri[1]
 
 
+class TestListGroupsWorldGroup(object):
+
+    def test_it_returns_world_group_for_authority(self, list_groups_service, pyramid_request):
+        result = list_groups_service._world_group(pyramid_request.authority)
+
+        assert result.pubid == u'__world__'
+
+    def test_it_returns_world_group_for_authority_only(self, list_groups_service):
+        result = list_groups_service._world_group('dingdong')
+
+        assert result is None
+
+
 class TestListGroupsFactory(object):
 
     def test_list_groups_factory(self, pyramid_request):

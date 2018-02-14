@@ -97,6 +97,23 @@ class ListGroupsService(object):
         """ sort a list of groups of a single type """
         return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
 
+    def _world_group(self, authority):
+        """
+        Return the world group for the given authority, if any.
+
+        Return the so-called 'world-readable Public group' (or channel) for
+        the indicated authority.
+
+        The Public group is special: at present its metadata makes it look
+        identical to any non-scoped open group. Its only distinguishing
+        characteristic is its unique and predictable ``pubid``
+        """
+        return (self._session.query(models.Group)
+                    .filter_by(authority=authority,
+                               readable_by=group.ReadableBy.world,
+                               pubid=u'__world__')
+                    .one_or_none())
+
 
 def list_groups_factory(context, request):
     """Return a ListGroupsService instance for the passed context and request."""
