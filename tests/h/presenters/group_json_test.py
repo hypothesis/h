@@ -64,22 +64,15 @@ class TestGroupJSONPresenter(object):
 
 class TestGroupsJSONPresenter(object):
 
-    def test_asdicts_creates_GroupJSONPresenter_objects(self, factories, group_json_presenter):  # noqa: N802
+    def test_proxies_to_GroupJSONPresenter(self, factories, group_json_presenter):  # noqa: N802
         groups = [factories.Group(), factories.OpenGroup()]
-        presenter = GroupsJSONPresenter(groups)
-
-        presenter.asdicts()
-
-        assert group_json_presenter.call_count == 2
-
-    def test_asdicts_passes_route_url(self, factories, group_json_presenter):
-        groups = [factories.Group()]
         route_url = mock.Mock()
         presenter = GroupsJSONPresenter(groups, route_url=route_url)
+        expected_call_args = [mock.call(group, route_url) for group in groups]
 
         presenter.asdicts()
 
-        group_json_presenter.assert_called_with(groups[0], route_url=route_url)
+        assert group_json_presenter.call_args_list == expected_call_args
 
     def test_asdicts_returns_list_of_dicts(self, factories):
         groups = [factories.Group(name=u'filbert'), factories.OpenGroup(name=u'delbert')]
