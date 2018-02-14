@@ -19,7 +19,7 @@ def groups(request):
     all_groups = svc.all_groups(user=request.user,
                                 authority=authority,
                                 document_uri=document_uri)
-    all_groups = GroupsJSONPresenter(groups, request.route_url).asdicts()
+    all_groups = GroupsJSONPresenter(all_groups, request.route_url).asdicts()
     return all_groups
 
 

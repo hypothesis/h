@@ -11,8 +11,9 @@ from h.views import api_groups as views
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
 
+pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
 
-@pytest.mark.usefixtures('GroupsJSONPresenter')
+
 class TestGroups(object):
 
     def test_all_groups_proxies_to_service(self, anonymous_request, list_groups_service):
@@ -49,7 +50,14 @@ class TestGroups(object):
 
         views.groups(anonymous_request)
 
-        assert GroupsJSONPresenter.call_count == 1
+        GroupsJSONPresenter.assert_called_once_with(open_groups, anonymous_request.route_url)
+
+    def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+        list_groups_service.all_groups.return_value = open_groups
+
+        result = views.groups(anonymous_request)
+
+        assert result == GroupsJSONPresenter(open_groups, anonymous_request).asdicts.return_value
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
