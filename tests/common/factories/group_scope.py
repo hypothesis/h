@@ -7,7 +7,6 @@ import factory
 from h import models
 
 from .base import ModelFactory
-from .group import OpenGroup
 
 
 class GroupScope(ModelFactory):
@@ -15,4 +14,4 @@ class GroupScope(ModelFactory):
         model = models.GroupScope
 
     origin = factory.Faker('url')
-    group = factory.SubFactory(OpenGroup)
+    group = factory.SubFactory('tests.common.factories.OpenGroup')

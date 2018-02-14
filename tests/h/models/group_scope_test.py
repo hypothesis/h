@@ -104,9 +104,12 @@ class TestGroupScope(object):
         group_1 = factories.OpenGroup()
         group_2 = factories.OpenGroup()
         group_3 = factories.OpenGroup()
-        factories.GroupScope(origin=origin, group=group_1)
-        factories.GroupScope(origin=origin, group=group_2)
-        factories.GroupScope(origin=origin, group=group_3)
+        db_session.add_all((
+            factories.GroupScope(origin=origin, group=group_1),
+            factories.GroupScope(origin=origin, group=group_2),
+            factories.GroupScope(origin=origin, group=group_3),
+        ))
+        db_session.flush()
 
         db_session.delete(group_1.scopes[0])
         db_session.flush()
