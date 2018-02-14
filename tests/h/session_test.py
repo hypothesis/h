@@ -5,14 +5,6 @@ from h import session
 from h.services.list_groups import ListGroupsService
 
 
-class FakeGroup(object):
-    def __init__(self, pubid, name, is_public=False):
-        self.pubid = pubid
-        self.name = name
-        self.slug = pubid
-        self.is_public = is_public
-
-
 class TestModel(object):
     def test_proxies_group_lookup_to_service(self, authenticated_request):
         svc = authenticated_request.find_service(name='list_groups')
@@ -238,15 +230,6 @@ class TestUserInfo(object):
 
     def test_format_returns_empty_dict_when_user_missing(self):
         assert session.user_info(None) == {}
-
-
-class FakeListGroupsService(object):
-
-    def __init__(self, open_groups):
-        self._open_groups = open_groups
-
-    def open_groups(self, authority):
-        return self._open_groups[authority]
 
 
 class FakeRequest(object):
