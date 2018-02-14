@@ -60,11 +60,6 @@ class TestGroups(object):
         assert result == GroupsJSONPresenter(open_groups, anonymous_request).asdicts.return_value
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.route_url = mock.Mock(return_value='/groups/foo')
-        return pyramid_request
-
-    @pytest.fixture
     def open_groups(self, factories):
         return [factories.OpenGroup(), factories.OpenGroup()]
 
