@@ -64,7 +64,7 @@ class TestGroupJSONPresenter(object):
 
 class TestGroupsJSONPresenter(object):
 
-    def test_proxies_to_GroupJSONPresenter(self, factories, group_json_presenter):  # noqa: N802
+    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_):  # noqa: [N802, N803]
         groups = [factories.Group(), factories.OpenGroup()]
         route_url = mock.Mock()
         presenter = GroupsJSONPresenter(groups, route_url=route_url)
@@ -72,7 +72,7 @@ class TestGroupsJSONPresenter(object):
 
         presenter.asdicts()
 
-        assert group_json_presenter.call_args_list == expected_call_args
+        assert GroupJSONPresenter_.call_args_list == expected_call_args
 
     def test_asdicts_returns_list_of_dicts(self, factories):
         groups = [factories.Group(name=u'filbert'), factories.OpenGroup(name=u'delbert')]
@@ -95,5 +95,5 @@ class TestGroupsJSONPresenter(object):
 
 
 @pytest.fixture
-def group_json_presenter(patch):
+def GroupJSONPresenter_(patch):  # noqa: N802
     return patch('h.presenters.group_json.GroupJSONPresenter')
