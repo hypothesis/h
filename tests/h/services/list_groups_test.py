@@ -161,6 +161,32 @@ class TestListGroupsOpenGroups(object):
         assert [group.pubid for group in groups] == ['zoinks', 'aaaa', 'zzzz']
 
 
+class TestListGroupsParseOrigin(object):
+
+    @pytest.mark.parametrize('document_uri', [
+        (u'http://www.foo.bar:80/ding', u'http://www.foo.bar:80'),
+        (u'http://www.foo.bar:80/', u'http://www.foo.bar:80'),
+        (u'http://www.foo.bar:80/flop.html', u'http://www.foo.bar:80'),
+        (u'http://www.foo.bar:80/flop.html#fragment', u'http://www.foo.bar:80'),
+        (u'https://foo.bar/', u'https://foo.bar'),
+        (u'https://userfoo:hitherepassword@foo.bar/zowie/bang.pdf', u'https://userfoo:hitherepassword@foo.bar'),
+        (u'//zounds.com', u'//zounds.com')
+    ])
+    def test_it_returns_origin_from_uri_string(self, list_groups_service, document_uri):
+        result = list_groups_service._parse_origin(document_uri[0])
+
+        assert result == document_uri[1]
+
+    @pytest.mark.parametrize('document_uri', [
+        (None, None),
+        ('foobar', None)
+    ])
+    def test_it_returns_none_for_none_or_invalid(self, list_groups_service, document_uri):
+        result = list_groups_service._parse_origin(document_uri[0])
+
+        assert result == document_uri[1]
+
+
 class TestListGroupsFactory(object):
 
     def test_list_groups_factory(self, pyramid_request):

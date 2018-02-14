@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from h import models
 from h.models import group
+from h._compat import urlparse
 
 
 class ListGroupsService(object):
@@ -73,6 +74,24 @@ class ListGroupsService(object):
         if user is None:
             return []
         return self._sort(user.groups)
+
+    def _parse_origin(self, uri):
+        """
+        Return the origin of a URI or None if empty or invalid.
+
+        Per https://tools.ietf.org/html/rfc6454#section-7 :
+        Return ``<scheme> + '://' + <host> + <port>``
+        for a URI.
+
+        :param uri: URI string
+        """
+
+        if uri is None:
+            return None
+        parsed = urlparse.urlsplit(uri)
+        # netloc contains both host and port
+        origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, '', '', '')
+        return origin.geturl() or None
 
     def _sort(self, groups):
         """ sort a list of groups of a single type """
