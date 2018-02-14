@@ -252,7 +252,7 @@ class TestOAuthAccessTokenController(object):
         with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
             controller.post()
 
-        assert exc.value.body == body
+        assert exc.value.body == body.encode()
 
     @pytest.fixture
     def controller(self, pyramid_request):
@@ -288,7 +288,7 @@ class TestOAuthRevocationController(object):
         with pytest.raises(httpexceptions.HTTPBadRequest) as exc:
             controller.post()
 
-        assert exc.value.body == body
+        assert exc.value.body == body.encode()
 
     @pytest.fixture
     def controller(self, pyramid_request):

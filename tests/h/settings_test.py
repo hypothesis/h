@@ -42,6 +42,10 @@ class TestDeprecatedSetting(object):
         assert not func.warn.called
 
 
+def asutf8(str):
+    return str.encode()
+
+
 @pytest.mark.parametrize('setting,varname,type,environ,expected', (
     # Should return None when the env var in question isn't set
     ('foo', 'FOO', None, {}, None),
@@ -51,7 +55,7 @@ class TestDeprecatedSetting(object):
     ('foo.bar', 'FOO', None, {'FOO': 'baz'}, {'foo.bar': 'baz'}),
 
     # Should coerce the result using the passed type
-    ('foo', 'FOO', bytes, {'FOO': 'bar'}, {'foo': b'bar'}),
+    ('foo', 'FOO', asutf8, {'FOO': 'bar'}, {'foo': b'bar'}),
     ('app_port', 'PORT', int, {'PORT': '123'}, {'app_port': 123}),
 ))
 def test_env_setting(setting, varname, type, environ, expected):
