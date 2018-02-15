@@ -34,6 +34,7 @@ class OpenGroup(Group):
     joinable_by = None
     readable_by = ReadableBy.world
     writeable_by = WriteableBy.authority
+    members = []
 
     @factory.post_generation
     def scopes(self, create, scopes=0, **kwargs):
