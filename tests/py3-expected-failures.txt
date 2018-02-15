@@ -1,7 +1,6 @@
 /h/h/db/types.py:88:
 /h/h/models/document.py:482:
 /h/h/search/config.py:190:
-/h/h/streamer/websocket.py:68:
 /h/h/util/uri.py:140:
 /h/tests/h/auth/util_test.py:69:
 /h/tests/h/cli/commands/annotation_id_test.py:11:
