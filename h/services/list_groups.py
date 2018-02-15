@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from h import models
 from h.models import group
+from h._compat import urlparse
 
 
 class ListGroupsService(object):
@@ -46,12 +47,12 @@ class ListGroupsService(object):
         Return a list of groups filtered on user, authority, document_uri.
         Include all types of relevant groups (open and private).
         """
-        open_groups = self.open_groups(user, authority, document_uri)
-        private_groups = self.private_groups(user)
+        open_groups = self._open_groups(user, authority, document_uri)
+        private_groups = self._private_groups(user)
 
         return open_groups + private_groups
 
-    def open_groups(self, user=None, authority=None, document_uri=None):
+    def _open_groups(self, user=None, authority=None, document_uri=None):
         """
         Return all matching open groups for the authority and target URI.
 
@@ -67,16 +68,51 @@ class ListGroupsService(object):
                       .all())
         return self._sort(groups)
 
-    def private_groups(self, user=None):
+    def _private_groups(self, user=None):
         """Return this user's private groups per user.groups."""
 
         if user is None:
             return []
         return self._sort(user.groups)
 
+    def _parse_origin(self, uri):
+        """
+        Return the origin of a URI or None if empty or invalid.
+
+        Per https://tools.ietf.org/html/rfc6454#section-7 :
+        Return ``<scheme> + '://' + <host> + <port>``
+        for a URI.
+
+        :param uri: URI string
+        """
+
+        if uri is None:
+            return None
+        parsed = urlparse.urlsplit(uri)
+        # netloc contains both host and port
+        origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, '', '', '')
+        return origin.geturl() or None
+
     def _sort(self, groups):
         """ sort a list of groups of a single type """
         return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
+
+    def _world_group(self, authority):
+        """
+        Return the world group for the given authority, if any.
+
+        Return the so-called 'world-readable Public group' (or channel) for
+        the indicated authority.
+
+        The Public group is special: at present its metadata makes it look
+        identical to any non-scoped open group. Its only distinguishing
+        characteristic is its unique and predictable ``pubid``
+        """
+        return (self._session.query(models.Group)
+                    .filter_by(authority=authority,
+                               readable_by=group.ReadableBy.world,
+                               pubid=u'__world__')
+                    .one_or_none())
 
 
 def list_groups_factory(context, request):
