@@ -163,7 +163,7 @@ class TestListGroupsOpenGroups(object):
 
 class TestListGroupsParseOrigin(object):
 
-    @pytest.mark.parametrize('document_uri', [
+    @pytest.mark.parametrize('document_uri,expected_origin', [
         (u'http://www.foo.bar:80/ding', u'http://www.foo.bar:80'),
         (u'http://www.foo.bar:80/', u'http://www.foo.bar:80'),
         (u'http://www.foo.bar:80/flop.html', u'http://www.foo.bar:80'),
@@ -172,19 +172,19 @@ class TestListGroupsParseOrigin(object):
         (u'https://userfoo:hitherepassword@foo.bar/zowie/bang.pdf', u'https://userfoo:hitherepassword@foo.bar'),
         (u'//zounds.com', u'//zounds.com')
     ])
-    def test_it_returns_origin_from_uri_string(self, list_groups_service, document_uri):
-        result = list_groups_service._parse_origin(document_uri[0])
+    def test_it_returns_origin_from_uri_string(self, list_groups_service, document_uri, expected_origin):
+        result = list_groups_service._parse_origin(document_uri)
 
-        assert result == document_uri[1]
+        assert result == expected_origin
 
-    @pytest.mark.parametrize('document_uri', [
+    @pytest.mark.parametrize('document_uri,expected_origin', [
         (None, None),
         ('foobar', None)
     ])
-    def test_it_returns_none_for_none_or_invalid(self, list_groups_service, document_uri):
-        result = list_groups_service._parse_origin(document_uri[0])
+    def test_it_returns_none_for_none_or_invalid(self, list_groups_service, document_uri, expected_origin):
+        result = list_groups_service._parse_origin(document_uri)
 
-        assert result == document_uri[1]
+        assert result == expected_origin
 
 
 class TestListGroupsWorldGroup(object):
