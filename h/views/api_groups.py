@@ -16,9 +16,23 @@ def groups(request):
     authority = request.params.get('authority')
     document_uri = request.params.get('document_uri')
     svc = request.find_service(name='list_groups')
-    all_groups = svc.all_groups(user=request.user,
-                                authority=authority,
-                                document_uri=document_uri)
+
+    if request.feature('filter_groups_by_scope'):
+        # Filter open groups by scope against the ``document_uri`` param.
+        # The different handling of authority here is part of this
+        # feature — authority "babysitting" is going to be moving
+        # out of the service and back to the view's...purview.
+        if request.user is not None:
+            authority = request.user.authority
+        else:
+            authority = authority or request.authority
+        all_groups = svc.request_groups(user=request.user,
+                                        authority=authority,
+                                        document_uri=document_uri)
+    else:
+        all_groups = svc.all_groups(user=request.user,
+                                    authority=authority,
+                                    document_uri=document_uri)
     all_groups = GroupsJSONPresenter(all_groups, request.route_url).asdicts()
     return all_groups
 
