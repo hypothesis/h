@@ -8,6 +8,7 @@ from h import models
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 from .base import ModelFactory
+from .group_scope import GroupScope
 from .user import User
 
 
@@ -33,3 +34,10 @@ class OpenGroup(Group):
     joinable_by = None
     readable_by = ReadableBy.world
     writeable_by = WriteableBy.authority
+
+    @factory.post_generation
+    def scopes(self, create, scopes=0, **kwargs):
+        if isinstance(scopes, int):
+            scopes = [GroupScope(group=self) for _ in range(0, scopes)]
+
+        self.scopes = scopes or []
