@@ -140,9 +140,6 @@ def _get_urlsafe_from_hex(value):
     :rtype: unicode
     """
 
-    if not isinstance(value, string_types):
-        raise ValueError('`value` is {}, expected one of {}'.format(type(value), string_types))
-
     # Validate and normalise hex string
     hexstring = uuid.UUID(hex=value).hex
 
