@@ -20,6 +20,13 @@ class TestListGroupsAllGroups(object):
         for group in groups:
             assert group.is_public
 
+    def test_returns_scoped_open_groups_when_no_user(self, list_groups_service, scoped_group_builder):
+        scoped_group = scoped_group_builder('http://foo.com', authority='zow.com')
+
+        groups = list_groups_service.all_groups(authority='zow.com')
+
+        assert scoped_group in groups
+
     def test_returns_all_group_types_when_user(self, list_groups_service, factories):
         user = factories.User()
         user.groups = [factories.Group(), factories.Group()]
@@ -31,6 +38,15 @@ class TestListGroupsAllGroups(object):
         group_pubids = [group.pubid for group in groups]
         for expected_id in expected_pubids:
             assert expected_id in group_pubids
+
+    def test_returns_scoped_open_groups_when_user(self, list_groups_service, factories, scoped_group_builder):
+        user = factories.User(authority='zow.com')
+        scoped_group = scoped_group_builder('http://foo.com', authority='zow.com')
+
+        # scoped groups returned even when no URI/origin match
+        groups = list_groups_service.all_groups(user=user)
+
+        assert scoped_group in groups
 
     def test_ignores_authority_when_user_present(self, list_groups_service, factories, authority_open_groups):
         user = factories.User(authority='foo.com')
@@ -78,6 +94,115 @@ class TestListGroupsAllGroups(object):
     @pytest.fixture
     def open_groups(self, factories):
         return [factories.OpenGroup(), factories.OpenGroup()]
+
+
+class TestListGroupsRequestGroups(object):
+
+    def test_returns_scoped_open_groups_no_user(self, authority, document_uri, scoped_open_groups, list_groups_service):
+        results = list_groups_service.request_groups(authority=authority,
+                                                     document_uri=document_uri)
+        assert results == scoped_open_groups
+
+    def test_returns_no_unscoped_groups_no_user(self, authority, document_uri, scoped_open_groups, unscoped_open_groups, list_groups_service):
+        results = list_groups_service.request_groups(authority=authority,
+                                                     document_uri=document_uri)
+
+        assert results == scoped_open_groups
+        for unscoped_group in unscoped_open_groups:
+            assert unscoped_group not in results
+
+    def test_returns_world_group_no_user_no_uri(self, default_authority, list_groups_service):
+        results = list_groups_service.request_groups(authority=default_authority)
+
+        assert results[0].pubid == '__world__'
+
+    def test_returns_no_private_groups_no_user(self, default_authority, document_uri,  scoped_open_groups, unscoped_open_groups, list_groups_service):
+        results = list_groups_service.request_groups(authority=default_authority, document_uri=document_uri)
+
+        for group in results:
+            assert group.type == 'open'
+
+    def test_returns_groups_sorted_no_user(self, default_authority, document_uri, origin, scoped_group_builder, list_groups_service):
+        scoped_group = scoped_group_builder(origin=origin, authority=default_authority)
+
+        results = list_groups_service.request_groups(authority=default_authority, document_uri=document_uri)
+
+        assert results[0] == scoped_group
+        assert results[1].pubid == '__world__'
+
+    def test_returns_scoped_open_groups_with_user(self, document_uri, user, scoped_open_groups, list_groups_service):
+        results = list_groups_service.request_groups(user=user, authority=user.authority, document_uri=document_uri)
+
+        assert results == scoped_open_groups
+
+    def test_returns_no_unscoped_groups_with_user(self, document_uri, user, scoped_open_groups, unscoped_open_groups, list_groups_service):
+        results = list_groups_service.request_groups(user=user, authority=user.authority, document_uri=document_uri)
+
+        for group in unscoped_open_groups:
+            assert group not in results
+
+    def test_returns_world_group_with_user(self, factories, list_groups_service):
+        user = factories.User()
+        results = list_groups_service.request_groups(user=user, authority=user.authority)
+
+        assert results[0].pubid == '__world__'
+
+    def test_returns_private_groups_with_user(self, factories, scoped_open_groups, unscoped_open_groups, list_groups_service):
+        user = factories.User()
+        user.groups = [factories.Group(), factories.Group()]
+
+        results = list_groups_service.request_groups(user=user, authority=user.authority)
+
+        for group in user.groups:
+            assert group in results
+
+    def test_returns_groups_sorted_with_user(self, document_uri, factories, origin, scoped_group_builder, list_groups_service):
+        user = factories.User()
+        user.groups = [factories.Group()]
+        scoped_open_group = scoped_group_builder(origin, authority=user.authority)
+        unscoped_open_group = factories.OpenGroup(authority=user.authority)
+
+        results = list_groups_service.request_groups(user=user, authority=user.authority, document_uri=document_uri)
+
+        assert results[0] == scoped_open_group
+        assert unscoped_open_group not in results
+        assert results[1].pubid == '__world__'
+        assert results[2] == user.groups[0]
+
+    @pytest.fixture
+    def origin(self):
+        return 'http://www.zow.com'
+
+    @pytest.fixture
+    def authority(self):
+        return 'zow.com'
+
+    @pytest.fixture
+    def scoped_open_groups(self, scoped_group_builder, origin, authority):
+        return [
+            scoped_group_builder(origin, authority=authority),
+            scoped_group_builder(origin, authority=authority)
+        ]
+
+    @pytest.fixture
+    def unscoped_open_groups(self, factories, authority):
+        return [
+            factories.OpenGroup(authority=authority),
+            factories.OpenGroup(authority=authority)
+        ]
+
+    @pytest.fixture
+    def default_authority(self, pyramid_request):
+        # __world__ group exists on the default authority
+        return pyramid_request.authority
+
+    @pytest.fixture
+    def user(self, factories, authority):
+        return factories.User(authority=authority)
+
+    @pytest.fixture
+    def document_uri(self):
+        return 'http://www.zow.com/foo/bar/baz.html'
 
 
 class TestListGroupsPrivateGroups(object):
@@ -131,6 +256,16 @@ class TestListGroupsOpenGroups(object):
 
         assert groups == []
 
+    def test_returns_groups_with_scope(self, list_groups_service, factories):
+        # Temporary: test that service returns scoped open groups even with no
+        # document_uri
+        group_scope = factories.GroupScope.build(group=None, origin='www.foo.bar')
+        group = factories.OpenGroup(scopes=[group_scope], authority='ding.com')
+
+        groups = list_groups_service._open_groups(authority='ding.com')
+
+        assert group in groups
+
     def test_returns_groups_from_default_authority(self, list_groups_service):
         groups = list_groups_service._open_groups()
 
@@ -159,6 +294,58 @@ class TestListGroupsOpenGroups(object):
         groups = list_groups_service._open_groups(authority='z.com')
 
         assert [group.pubid for group in groups] == ['zoinks', 'aaaa', 'zzzz']
+
+
+class TestListGroupsScopedOpenGroups(object):
+
+    def test_it_returns_scoped_groups_for_authority(self, list_groups_service, scoped_group_builder, factories):
+        scoped_group = scoped_group_builder('http://www.zow.com', authority='zow.com')
+        unscoped_group = factories.OpenGroup(authority='zow.com')
+
+        results = list_groups_service._scoped_open_groups('zow.com', 'http://www.zow.com')
+
+        assert scoped_group in results
+        assert unscoped_group not in results
+
+    def test_it_sorts_scoped_groups(self, list_groups_service, scoped_group_builder):
+        scoped_group_builder('http://www.zow.com', name='aaaa', pubid='zzzz', authority='zow.com')
+        scoped_group_builder('http://www.zow.com', name='AAAA', pubid='bbbb', authority='zow.com')
+        scoped_group_builder('http://www.zow.com', name='aaaa', pubid='aaaa', authority='zow.com')
+
+        results = list_groups_service._scoped_open_groups('zow.com', 'http://www.zow.com')
+
+        pubids = [group.pubid for group in results]
+        assert pubids == ['aaaa', 'bbbb', 'zzzz']
+
+    def test_it_returns_only_groups_matching_authority(self, list_groups_service, scoped_group_builder):
+        auth_scoped_group = scoped_group_builder('http://www.zow.com', name='Authority', authority='zow.com')
+        other_scoped_group = scoped_group_builder('http://www.zow.com', name='Not Authority', authority='yow.com')
+
+        results = list_groups_service._scoped_open_groups('zow.com', 'http://www.zow.com')
+
+        assert auth_scoped_group in results
+        assert other_scoped_group not in results
+
+    def test_it_returns_scoped_groups_for_uri(self, list_groups_service, scoped_group_builder):
+        scoped_group = scoped_group_builder('http://www.zow.com', authority='zow.com')
+
+        results = list_groups_service._scoped_open_groups('zow.com', 'http://www.zow.com/foo/bar/baz.html')
+
+        assert scoped_group in results
+
+    def test_group_scope_must_match_origin(self, list_groups_service, scoped_group_builder):
+        scoped_group = scoped_group_builder('http://www.zow.com', authority='zow.com')
+
+        results = list_groups_service._scoped_open_groups('zow.com', 'http://zow.com/')
+
+        assert scoped_group not in results
+
+    def test_it_returns_empty_on_bad_uri(self, list_groups_service, factories):
+        factories.OpenGroup(authority='zow.com')
+
+        results = list_groups_service._scoped_open_groups('zow.com', 'bogus_uri')
+
+        assert results == []
 
 
 class TestListGroupsParseOrigin(object):
@@ -232,3 +419,19 @@ def list_groups_service(pyramid_request, db_session):
         session=db_session,
         request_authority=pyramid_request.authority
     )
+
+
+@pytest.fixture
+def scope_factory(factories):
+    def scope_builder(origin, group=None):
+        return factories.GroupScope.build(origin=origin, group=group)
+    return scope_builder
+
+
+@pytest.fixture
+def scoped_group_builder(factories, scope_factory):
+    def group_builder(origin, **kwargs):
+        scope = scope_factory(origin, group=None)
+        group = factories.OpenGroup(scopes=[scope], **kwargs)
+        return group
+    return group_builder
