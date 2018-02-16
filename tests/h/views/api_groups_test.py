@@ -25,23 +25,14 @@ class TestGroupsWithScope(object):
             document_uri=None
         )
 
-    def test_proxies_authority_param(self, anonymous_request, list_groups_service):
+    def test_proxies_request_params(self, anonymous_request, list_groups_service):
+        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
         anonymous_request.params['authority'] = 'foo.com'
         views.groups(anonymous_request)
 
         list_groups_service.request_groups.assert_called_once_with(
             user=None,
             authority='foo.com',
-            document_uri=None
-        )
-
-    def test_proxies_document_uri_param(self, anonymous_request, list_groups_service):
-        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
-        views.groups(anonymous_request)
-
-        list_groups_service.request_groups.assert_called_once_with(
-            user=None,
-            authority=anonymous_request.authority,
             document_uri='http://example.com/thisthing.html'
         )
 
