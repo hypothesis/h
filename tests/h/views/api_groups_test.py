@@ -9,9 +9,10 @@ from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 
 from h.views import api_groups as views
 from h.services.list_groups import ListGroupsService
+from h.services.group_json_presentation import GroupJSONPresentationService
 from h.services.group import GroupService
 
-pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
+pytestmark = pytest.mark.usefixtures('group_json_presentation_svc')
 
 
 class TestGroupsWithScope(object):
@@ -96,19 +97,13 @@ class TestGroups(object):
             document_uri='http://example.com/thisthing.html'
         )
 
-    def test_uses_presenter_for_formatting(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
-        list_groups_service.all_groups.return_value = open_groups
-
-        views.groups(anonymous_request)
-
-        GroupsJSONPresenter.assert_called_once_with(open_groups, anonymous_request.route_url)
-
-    def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+    def test_uses_presentation_service_for_formatting(self, anonymous_request, open_groups, list_groups_service, group_json_presentation_svc):  # noqa: N803
         list_groups_service.all_groups.return_value = open_groups
 
         result = views.groups(anonymous_request)
 
-        assert result == GroupsJSONPresenter(open_groups, anonymous_request).asdicts.return_value
+        group_json_presentation_svc.present_all.assert_called_once_with(open_groups)
+        assert result == group_json_presentation_svc.present_all(open_groups)
 
     @pytest.fixture
     def open_groups(self, factories):
@@ -173,8 +168,10 @@ class TestRemoveMember(object):
 
 
 @pytest.fixture
-def GroupsJSONPresenter(patch):  # noqa: N802
-    return patch('h.views.api_groups.GroupsJSONPresenter')
+def group_json_presentation_svc(patch, pyramid_config):  # noqa: N802
+    service = mock.create_autospec(GroupJSONPresentationService, spec_set=True, instance=True)
+    pyramid_config.register_service(service, name='group_json_presentation')
+    return service
 
 
 @pytest.fixture
