@@ -26,6 +26,20 @@ class TestGroupJSONPresentationService(object):
         GroupsJSONPresenter.assert_called_once_with(groups, svc.get_links)
         GroupsJSONPresenter(groups).asdicts.assert_called_once()
 
+    def test_get_links_returns_group_url_if_same_authority(self, svc, factories, routes):
+        group = factories.Group()
+
+        links = svc.get_links(group)
+
+        assert 'group' in links
+
+    def test_get_links_returns_no_group_url_if_mismatched_authority(self, svc, factories, routes):
+        group = factories.Group(authority='ding.com')
+
+        links = svc.get_links(group)
+
+        assert 'group' not in links
+
 
 class TestGroupJSONPresentationFactory(object):
 
@@ -43,6 +57,11 @@ def GroupJSONPresenter(patch):  # noqa: N802
 @pytest.fixture
 def GroupsJSONPresenter(patch):  # noqa: N802
     return patch('h.services.group_json_presentation.GroupsJSONPresenter')
+
+
+@pytest.fixture
+def routes(pyramid_config):
+    pyramid_config.add_route('group_read', '/g/{pubid}/{slug}')
 
 
 @pytest.fixture

@@ -21,9 +21,10 @@ class GroupJSONPresentationService(object):
 
     def get_links(self, group):
         links = {}
-        links['group'] = self._route_url('group_read',
-                                         pubid=group.pubid,
-                                         slug=group.slug)
+        if group.authority == self._request_authority:
+            links['group'] = self._route_url('group_read',
+                                             pubid=group.pubid,
+                                             slug=group.slug)
         return links
 
 
