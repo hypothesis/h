@@ -14,8 +14,7 @@ class ListGroupsService(object):
 
     This service filters groups by user session, scope, etc.
 
-    ALl public methods return a list of relevant groups,
-    as dicts (see _group_model) for consumption by e.g. API services.
+    ALl public methods return a list of relevant group model objects.
     """
 
     def __init__(self, session, request_authority):
@@ -44,24 +43,38 @@ class ListGroupsService(object):
         """
         Return a list of groups relevant to this session/profile (i.e. user).
 
-        Return a list of groups filtered on user, authority, document_uri.
-        Include all types of relevant groups (open and private).
+        Return a list of groups filtered on user and authority. All open
+        groups matching the authority will be included.
         """
-        open_groups = self._open_groups(user, authority, document_uri)
+        all_open_groups = self._open_groups(user, authority)
         private_groups = self._private_groups(user)
 
-        return open_groups + private_groups
+        return all_open_groups + private_groups
 
-    def _open_groups(self, user=None, authority=None, document_uri=None):
+    def request_groups(self, authority, user=None, document_uri=None):
         """
-        Return all matching open groups for the authority and target URI.
+        Return a list of groups relevant to this request and user combination.
 
-        Return matching open groups for the authority (or request_authority
-        default), filtered by scope as per ``document_uri``.
+        Return a list of groups filtered on user, authority, document_uri.
+        Include all types of relevant groups (open and private).
+
+        Open groups will be filtered by scope (via document_uri).
+        """
+        scoped_open_groups = self._scoped_open_groups(authority, document_uri)
+
+        world_group = self._world_group(authority)
+        world_group = [world_group] if world_group else []
+
+        private_groups = self._private_groups(user)
+
+        return scoped_open_groups + world_group + private_groups
+
+    def _open_groups(self, user=None, authority=None):
+        """
+        Return all open groups for the authority.
         """
 
         authority = self._authority(user, authority)
-        # TODO This is going to change once scopes and model updates in place
         groups = (self._session.query(models.Group)
                       .filter_by(authority=authority,
                                  readable_by=group.ReadableBy.world)
@@ -92,6 +105,21 @@ class ListGroupsService(object):
         # netloc contains both host and port
         origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, '', '', '')
         return origin.geturl() or None
+
+    def _scoped_open_groups(self, authority, document_uri):
+        """Return scoped groups for the URI and authority"""
+        origin = self._parse_origin(document_uri)
+        if not origin:
+            return []
+
+        groups = (self._session.query(models.GroupScope, models.Group)
+                      .filter(models.Group.id == models.GroupScope.group_id)
+                      .filter(models.GroupScope.origin == origin)
+                      .filter(models.Group.authority == authority)
+                      .all())
+
+        scoped_groups = [group for groupscope, group in groups]
+        return self._sort(scoped_groups)
 
     def _sort(self, groups):
         """ sort a list of groups of a single type """

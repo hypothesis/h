@@ -15,6 +15,8 @@ FEATURES = {
                           "using a cached version?"),
     'filter_highlights': ("Filter highlights in document based on visible"
                           " annotations in sidebar?"),
+    'filter_groups_by_scope': ("Only show open groups that match current authority and"
+                               " 'document_uri'? Non-scoped groups won't be returned"),
     'overlay_highlighter': "Use the new overlay highlighter?",
     'api_render_user_info': "Return users' extended info in API responses?",
     'client_display_names': "Render display names instead of user names in the client",

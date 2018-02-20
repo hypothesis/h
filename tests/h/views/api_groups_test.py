@@ -14,9 +14,60 @@ from h.services.group import GroupService
 pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
 
 
+class TestGroupsWithScope(object):
+
+    def test_proxies_to_service(self, anonymous_request, list_groups_service):
+        views.groups(anonymous_request)
+
+        list_groups_service.request_groups.assert_called_once_with(
+            user=None,
+            authority=anonymous_request.authority,
+            document_uri=None
+        )
+
+    def test_proxies_request_params(self, anonymous_request, list_groups_service):
+        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
+        anonymous_request.params['authority'] = 'foo.com'
+        views.groups(anonymous_request)
+
+        list_groups_service.request_groups.assert_called_once_with(
+            user=None,
+            authority='foo.com',
+            document_uri='http://example.com/thisthing.html'
+        )
+
+    def test_overrides_authority_with_user_authority(self, authenticated_request, list_groups_service):
+        authenticated_request.params['authority'] = 'foo.com'
+
+        views.groups(authenticated_request)
+
+        list_groups_service.request_groups.assert_called_once_with(
+            user=authenticated_request.user,
+            authority=authenticated_request.user.authority,
+            document_uri=None
+        )
+
+    @pytest.fixture
+    def list_groups_service(self, pyramid_config):
+        svc = mock.create_autospec(ListGroupsService, spec_set=True, instance=True)
+        pyramid_config.register_service(svc, name='list_groups')
+        return svc
+
+    @pytest.fixture
+    def anonymous_request(self, pyramid_request):
+        pyramid_request.user = None
+        return pyramid_request
+
+    @pytest.fixture
+    def authenticated_request(self, pyramid_request, factories):
+        pyramid_request.user = factories.User()
+        return pyramid_request
+
+
+@pytest.mark.usefixtures('scope_feature_off')
 class TestGroups(object):
 
-    def test_all_groups_proxies_to_service(self, anonymous_request, list_groups_service):
+    def test_proxies_to_service(self, anonymous_request, list_groups_service):
         views.groups(anonymous_request)
 
         list_groups_service.all_groups.assert_called_once_with(
@@ -25,7 +76,7 @@ class TestGroups(object):
             document_uri=None
         )
 
-    def test_all_groups_proxies_authority_param(self, anonymous_request, list_groups_service):
+    def test_proxies_authority_param(self, anonymous_request, list_groups_service):
         anonymous_request.params['authority'] = 'foo.com'
         views.groups(anonymous_request)
 
@@ -35,7 +86,7 @@ class TestGroups(object):
             document_uri=None
         )
 
-    def test_all_groups_proxies_document_uri_param(self, anonymous_request, list_groups_service):
+    def test_proxies_document_uri_param(self, anonymous_request, list_groups_service):
         anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
         views.groups(anonymous_request)
 
@@ -124,3 +175,8 @@ class TestRemoveMember(object):
 @pytest.fixture
 def GroupsJSONPresenter(patch):  # noqa: N802
     return patch('h.views.api_groups.GroupsJSONPresenter')
+
+
+@pytest.fixture
+def scope_feature_off(pyramid_request):
+    pyramid_request.feature.flags['filter_groups_by_scope'] = False

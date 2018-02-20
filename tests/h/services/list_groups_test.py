@@ -10,194 +10,153 @@ from h.services.list_groups import list_groups_factory
 
 class TestListGroupsAllGroups(object):
 
-    def test_returns_open_groups_when_no_user(self, list_groups_service, open_groups):
-        open_group_pubids = {group.pubid for group in open_groups}
-        open_group_pubids.add('__world__')
+    def test_returns_world_group_if_no_user(self, svc):
+        results = svc.all_groups()
 
-        groups = list_groups_service.all_groups()
+        assert u'__world__' in [group.pubid for group in results]
 
-        assert {group.pubid for group in groups} == open_group_pubids
-        for group in groups:
-            assert group.is_public
+    def test_returns_scoped_open_groups_if_no_user(self, svc, authority, scoped_open_groups):
+        results = svc.all_groups(authority=authority)
 
-    def test_returns_all_group_types_when_user(self, list_groups_service, factories):
-        user = factories.User()
-        user.groups = [factories.Group(), factories.Group()]
-        expected_pubids = [group.pubid for group in user.groups]
-        expected_pubids.append('__world__')
+        assert results == scoped_open_groups
 
-        groups = list_groups_service.all_groups(user=user)
+    def test_returns_unscoped_open_groups_if_no_user(self, svc, authority, unscoped_open_groups):
+        results = svc.all_groups(authority=authority)
 
-        group_pubids = [group.pubid for group in groups]
-        for expected_id in expected_pubids:
-            assert expected_id in group_pubids
+        assert results == unscoped_open_groups
 
-    def test_ignores_authority_when_user_present(self, list_groups_service, factories, authority_open_groups):
-        user = factories.User(authority='foo.com')
-        another_authority_open_group = factories.OpenGroup(authority='somewhere-else.com')
-        auth_group_ids = {group.id for group in authority_open_groups}
+    def test_returns_all_open_groups_if_no_user(self, svc, authority, scoped_open_groups, unscoped_open_groups):
+        results = svc.all_groups(authority=authority)
 
-        groups = list_groups_service.all_groups(user=user, authority='somewhere-else.com')
+        for s_group in scoped_open_groups:
+            assert s_group in results
+        for u_group in unscoped_open_groups:
+            assert u_group in results
 
-        group_ids = {group.id for group in groups}
-        assert group_ids == auth_group_ids
-        assert another_authority_open_group.pubid not in group_ids
+    def test_returns_only_open_groups_if_no_user(self, svc, authority, scoped_open_groups, unscoped_open_groups):
+        results = svc.all_groups(authority=authority)
 
-    def test_groups_are_sorted(self, list_groups_service, factories):
-        user = factories.User(authority='z.com')
-        user.groups = [factories.Group(name='alpha', pubid='zzzz', authority='z.com'),
-                       factories.Group(name='alpha', pubid='aaaa', authority='z.com'),
-                       factories.Group(name='aardvark', pubid='zoinks', authority='z.com')]
-        factories.OpenGroup(name='alpha', pubid='zaza', authority='z.com')
-        factories.OpenGroup(name='alpha', pubid='azaz', authority='z.com')
+        for group in results:
+            assert group.type == 'open'
 
-        groups = list_groups_service.all_groups(user=user)
+    def test_returns_world_group_if_user(self, svc, default_user):
+        results = svc.all_groups(user=default_user)
 
-        # open groups first
-        assert [group.pubid for group in groups] == ['azaz', 'zaza', 'zoinks', 'aaaa', 'zzzz']
+        assert u'__world__' in [group.pubid for group in results]
 
-    def test_groups_are_sorted_alphabetically(self, list_groups_service, factories):
-        user = factories.User(authority='z.com')
-        user.groups = [factories.Group(name='Lilac', authority='z.com'),
-                       factories.Group(name='foobar', authority='z.com')]
+    def test_returns_scoped_open_groups_if_user(self, svc, user, scoped_open_groups):
+        results = svc.all_groups(user=user)
 
-        groups = list_groups_service.all_groups(user=user)
+        assert results == scoped_open_groups
 
-        assert [group.name for group in groups] == ['foobar', 'Lilac']
+    def test_returns_unscoped_open_groups_if_user(self, svc, user, unscoped_open_groups):
+        results = svc.all_groups(user=user)
 
-    def test_user_groups_not_mutated(self, list_groups_service, factories):
-        user = factories.User(authority='z.com')
-        user.groups = [factories.Group(name='Lilac', authority='z.com'),
-                       factories.Group(name='Alpha', authority='z.com'),
-                       factories.Group(name='foobar', authority='z.com')]
+        assert results == unscoped_open_groups
 
-        list_groups_service.all_groups(user=user)
+    def test_returns_all_open_groups_if_user(self, svc, user, scoped_open_groups, unscoped_open_groups):
+        expected_ids = {group.id for group in (scoped_open_groups + unscoped_open_groups)}
 
-        assert [group.name for group in user.groups] == ['Lilac', 'Alpha', 'foobar']
+        results = svc.all_groups(user=user)
+        actual_ids = {group.id for group in results}
 
-    @pytest.fixture
-    def open_groups(self, factories):
-        return [factories.OpenGroup(), factories.OpenGroup()]
+        assert actual_ids == expected_ids
 
+    def test_returns_private_groups_if_user(self, svc, user, private_groups):
+        user.groups = private_groups
 
-class TestListGroupsPrivateGroups(object):
+        results = svc.all_groups(user=user)
 
-    def test_returns_private_groups_only(self, list_groups_service, factories):
-        user = factories.User()
-        user.groups = [factories.Group(), factories.Group(), factories.Group()]
+        assert results == private_groups
 
-        groups = list_groups_service._private_groups(user)
+    def test_returns_open_and_private_groups_if_user(self, svc, user, scoped_open_groups, unscoped_open_groups, private_groups):
+        user.groups = private_groups
+        expected_ids = {group.id for group in (scoped_open_groups + unscoped_open_groups + private_groups)}
 
-        assert len(groups) == 3
-        for group in groups:
-            assert not group.is_public
+        results = svc.all_groups(user=user)
+        actual_ids = {group.id for group in results}
 
-    def test_returns_empty_when_user_no_private_groups(self, list_groups_service, factories):
-        user = factories.User()
+        assert actual_ids == expected_ids
 
-        groups = list_groups_service._private_groups(user)
+    def test_returns_groups_matching_authority_if_no_user(self, svc, alternate_authority, alternate_unscoped_open_groups, unscoped_open_groups):
+        results = svc.all_groups(authority=alternate_authority)
 
-        assert groups == []
+        assert results == alternate_unscoped_open_groups
 
-    def test_returns_no_groups_for_no_user(self, list_groups_service):
+    def test_returns_groups_for_user_authority(self, svc, user, unscoped_open_groups):
+        expected_ids = {group.id for group in unscoped_open_groups}
 
-        groups = list_groups_service._private_groups(user=None)
+        results = svc.all_groups(user=user)
 
-        assert groups == []
+        actual_ids = {group.id for group in results}
+        assert actual_ids == expected_ids
 
-    def test_groups_are_sorted(self, list_groups_service, factories):
-        user = factories.User(authority='z.com')
-        user.groups = [factories.Group(name='alpha', pubid='zzzz', authority='z.com'),
-                       factories.Group(name='alpha', pubid='aaaa', authority='z.com'),
-                       factories.Group(name='aardvark', pubid='zoinks', authority='z.com')]
+    def test_overrides_authority_param_if_user(self, svc, user, alternate_authority, alternate_unscoped_open_groups, unscoped_open_groups):
+        # User has a different authority than authority param
+        expected_ids = {group.id for group in unscoped_open_groups}
 
-        groups = list_groups_service._private_groups(user=user)
+        results = svc.all_groups(user=user, authority=alternate_authority)
 
-        assert [group.pubid for group in groups] == ['zoinks', 'aaaa', 'zzzz']
+        actual_ids = {group.id for group in results}
+        assert actual_ids == expected_ids
+
+    def test_sorts_groups_by_type(self, svc, user, mixed_groups):
+        expected_sorted_types = ['open', 'open', 'open', 'open', 'private', 'private']
+        results = svc.all_groups(user=user)
+
+        assert [group.type for group in results] == expected_sorted_types
+
+    def test_sorts_groups_alphabetically(self, svc, user, mixed_groups):
+        expected_sorted_pubids = ['wadsworth', 'xander', 'yaks', 'zebra', 'spectacle', 'yams']
+        results = svc.all_groups(user=user)
+
+        assert [group.pubid for group in results] == expected_sorted_pubids
 
 
-class TestListGroupsOpenGroups(object):
+class TestListGroupsRequestGroups(object):
 
-    def test_returns_authority_open_groups(self, list_groups_service, authority_open_groups):
-        o_group_names = {o_group.name for o_group in authority_open_groups}
+    def test_it_returns_world_group(self, svc, default_authority):
+        results = svc.request_groups(authority=default_authority)
 
-        groups = list_groups_service._open_groups(authority='foo.com')
+        assert results[0].pubid == u'__world__'
 
-        assert {group.name for group in groups} == o_group_names
+    def test_it_returns_matching_scoped_open_groups(self, svc, authority, document_uri, scoped_open_groups):
+        results = svc.request_groups(authority=authority, document_uri=document_uri)
 
-    def test_no_groups_from_mismatched_authority(self, list_groups_service, authority_open_groups):
+        assert results == scoped_open_groups
 
-        groups = list_groups_service._open_groups(authority='bar.com')
+    def test_it_returns_no_scoped_groups_if_uri_missing(self, svc, authority, scoped_open_groups):
+        results = svc.request_groups(authority=authority)
 
-        assert groups == []
+        assert results == []
 
-    def test_returns_groups_from_default_authority(self, list_groups_service):
-        groups = list_groups_service._open_groups()
+    def test_it_returns_no_unscoped_open_groups(self, svc, authority, scoped_open_groups, unscoped_open_groups):
+        results = svc.request_groups(authority=authority)
 
-        assert groups[0].pubid == '__world__'
+        assert results == []
 
-    def test_returns_groups_for_user_authority(self, list_groups_service, authority_open_groups, factories):
-        user = factories.User(authority='foo.com')
-        o_group_names = {o_group.name for o_group in authority_open_groups}
+    def test_it_returns_private_groups_if_user(self, svc, user, authority, private_groups):
+        user.groups = private_groups
+        results = svc.request_groups(user=user, authority=authority)
 
-        o_groups = list_groups_service._open_groups(user=user)
+        assert results == private_groups
 
-        assert {group.name for group in o_groups} == o_group_names
+    def test_returned_open_groups_must_match_authority(self, svc, alternate_authority, unscoped_open_groups, scoped_open_groups):
+        results = svc.request_groups(authority=alternate_authority)
 
-    def test_ignores_authority_if_user(self, list_groups_service, authority_open_groups, factories):
-        user = factories.User(authority='somethingelse.com')
+        assert results == []
 
-        o_groups = list_groups_service._open_groups(user=user, authority='foo.com')
+    def test_groups_are_sorted_by_type(self, svc, user, mixed_groups, authority, document_uri):
+        expected_sorted_types = ['open', 'open', 'private', 'private']
+        results = svc.request_groups(user=user, authority=authority, document_uri=document_uri)
 
-        assert o_groups == []
+        assert [group.type for group in results] == expected_sorted_types
 
-    def test_groups_are_sorted(self, list_groups_service, factories):
-        factories.OpenGroup(name='alpha', pubid='zzzz', authority='z.com')
-        factories.OpenGroup(name='alpha', pubid='aaaa', authority='z.com')
-        factories.OpenGroup(name='aardvark', pubid='zoinks', authority='z.com')
+    def test_groups_are_sorted_alphabetically(self, svc, user, mixed_groups, authority, document_uri):
+        expected_sorted_pubids = ['wadsworth', 'yaks', 'spectacle', 'yams']
+        results = svc.request_groups(user=user, authority=authority, document_uri=document_uri)
 
-        groups = list_groups_service._open_groups(authority='z.com')
-
-        assert [group.pubid for group in groups] == ['zoinks', 'aaaa', 'zzzz']
-
-
-class TestListGroupsParseOrigin(object):
-
-    @pytest.mark.parametrize('document_uri,expected_origin', [
-        (u'http://www.foo.bar:80/ding', u'http://www.foo.bar:80'),
-        (u'http://www.foo.bar:80/', u'http://www.foo.bar:80'),
-        (u'http://www.foo.bar:80/flop.html', u'http://www.foo.bar:80'),
-        (u'http://www.foo.bar:80/flop.html#fragment', u'http://www.foo.bar:80'),
-        (u'https://foo.bar/', u'https://foo.bar'),
-        (u'https://userfoo:hitherepassword@foo.bar/zowie/bang.pdf', u'https://userfoo:hitherepassword@foo.bar'),
-        (u'//zounds.com', u'//zounds.com')
-    ])
-    def test_it_returns_origin_from_uri_string(self, list_groups_service, document_uri, expected_origin):
-        result = list_groups_service._parse_origin(document_uri)
-
-        assert result == expected_origin
-
-    @pytest.mark.parametrize('document_uri,expected_origin', [
-        (None, None),
-        ('foobar', None)
-    ])
-    def test_it_returns_none_for_none_or_invalid(self, list_groups_service, document_uri, expected_origin):
-        result = list_groups_service._parse_origin(document_uri)
-
-        assert result == expected_origin
-
-
-class TestListGroupsWorldGroup(object):
-
-    def test_it_returns_world_group_for_authority(self, list_groups_service, pyramid_request):
-        result = list_groups_service._world_group(pyramid_request.authority)
-
-        assert result.pubid == u'__world__'
-
-    def test_it_returns_world_group_for_authority_only(self, list_groups_service):
-        result = list_groups_service._world_group('dingdong')
-
-        assert result is None
+        assert [group.pubid for group in results] == expected_sorted_pubids
 
 
 class TestListGroupsFactory(object):
@@ -216,18 +175,112 @@ class TestListGroupsFactory(object):
 
 
 @pytest.fixture
-def authority_open_groups(factories):
-    return [factories.OpenGroup(authority='foo.com'),
-            factories.OpenGroup(authority='foo.com')]
+def authority():
+    """Return a consistent, different authority for groups in these tests"""
+    return 'surreptitious.com'
 
 
 @pytest.fixture
-def pyramid_request(pyramid_request):
-    return pyramid_request
+def default_authority(pyramid_request):
+    """
+    Return the test env request's default authority, i.e. 'example.com'
+
+    Return the default authority—this automatically has a `__world__` group
+    """
+    return pyramid_request.authority
 
 
 @pytest.fixture
-def list_groups_service(pyramid_request, db_session):
+def alternate_authority():
+    return 'bar.com'
+
+
+@pytest.fixture
+def default_user(factories, default_authority):
+    return factories.User(authority=default_authority)
+
+
+@pytest.fixture
+def user(factories, authority):
+    return factories.User(authority=authority)
+
+
+@pytest.fixture
+def alternate_user(factories, alternate_authority):
+    return factories.User(authority=alternate_authority)
+
+
+@pytest.fixture
+def origin():
+    return 'http://foo.com'
+
+
+@pytest.fixture
+def document_uri():
+    return 'http://foo.com/bar/fun.html'
+
+
+@pytest.fixture
+def scoped_open_groups(factories, authority, origin):
+    return [
+        factories.OpenGroup(authority=authority,
+                            scopes=[factories.GroupScope(origin=origin)]),
+        factories.OpenGroup(authority=authority,
+                            scopes=[factories.GroupScope(origin=origin)])
+    ]
+
+
+@pytest.fixture
+def unscoped_open_groups(factories, authority):
+    return [
+        factories.OpenGroup(authority=authority),
+        factories.OpenGroup(authority=authority)
+    ]
+
+
+@pytest.fixture
+def alternate_unscoped_open_groups(factories, alternate_authority):
+    return [
+        factories.OpenGroup(authority=alternate_authority),
+        factories.OpenGroup(authority=alternate_authority)
+    ]
+
+
+@pytest.fixture
+def private_groups(factories, authority):
+    return [
+        factories.Group(authority=authority),
+        factories.Group(authority=authority)
+    ]
+
+
+@pytest.fixture
+def mixed_groups(factories, user, authority, origin):
+    """Return a list of open groups with different names and scope/not scoped"""
+    user.groups = [
+        factories.Group(name='Yams', pubid='yams', authority=authority),
+        factories.Group(name='Spectacle', pubid='spectacle', authority=authority)
+    ]
+    return [
+        factories.OpenGroup(name='Zebra',
+                            pubid='zebra',
+                            authority=authority),
+        factories.OpenGroup(name='Yaks',
+                            pubid='yaks',
+                            authority=authority,
+                            scopes=[factories.GroupScope(origin=origin)]),
+        factories.OpenGroup(name='Xander',
+                            pubid='xander',
+                            authority=authority),
+        factories.OpenGroup(name='wadsworth',
+                            pubid='wadsworth',
+                            authority=authority,
+                            scopes=[factories.GroupScope(origin=origin)])
+    ]
+
+
+@pytest.fixture
+def svc(pyramid_request, db_session):
     return ListGroupsService(
         session=db_session,
         request_authority=pyramid_request.authority
