@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
-from h.presenters import GroupsJSONPresenter
 from h.views.api import api_config
 
 
@@ -15,7 +14,8 @@ from h.views.api import api_config
 def groups(request):
     authority = request.params.get('authority')
     document_uri = request.params.get('document_uri')
-    svc = request.find_service(name='list_groups')
+    list_svc = request.find_service(name='list_groups')
+    presentation_svc = request.find_service(name='group_json_presentation')
 
     if request.feature('filter_groups_by_scope'):
         # Filter open groups by scope against the ``document_uri`` param.
@@ -26,15 +26,14 @@ def groups(request):
             authority = request.user.authority
         else:
             authority = authority or request.authority
-        all_groups = svc.request_groups(user=request.user,
-                                        authority=authority,
-                                        document_uri=document_uri)
+        all_groups = list_svc.request_groups(user=request.user,
+                                             authority=authority,
+                                             document_uri=document_uri)
     else:
-        all_groups = svc.all_groups(user=request.user,
-                                    authority=authority,
-                                    document_uri=document_uri)
-    all_groups = GroupsJSONPresenter(all_groups, request.route_url).asdicts()
-    return all_groups
+        all_groups = list_svc.all_groups(user=request.user,
+                                         authority=authority,
+                                         document_uri=document_uri)
+    return presentation_svc.present_all(all_groups)
 
 
 @api_config(route_name='api.group_member',

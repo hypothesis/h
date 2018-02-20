@@ -24,7 +24,7 @@ class TestGroupJSONPresenter(object):
             'urls': {}
         }
 
-    def test_open_group_asdict_no_urls(self, factories):
+    def test_open_group_asdict_without_link_service(self, factories):
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
 
@@ -39,36 +39,42 @@ class TestGroupJSONPresenter(object):
             'urls': {}
         }
 
-    def test_private_group_asdict_with_urls(self, factories):
-        group = factories.Group(name='My Group',
-                                pubid='mygroup')
-        route_url = mock.Mock(return_value='/group/a')
-        presenter = GroupJSONPresenter(group, route_url=route_url)
-
-        model = presenter.asdict()
-
-        assert model['urls']['group'] == '/group/a'
-        assert model['url'] == '/group/a'
-
-    def test_open_group_asdict_with_urls(self, factories):
+    def test_urls_are_injected(self, factories, link_svc):
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
-        route_url = mock.Mock(return_value='/group/a')
-        presenter = GroupJSONPresenter(group, route_url=route_url)
+
+        presenter = GroupJSONPresenter(group, link_svc)
+        presenter.asdict()
+
+        link_svc.assert_called_once_with(group)
+
+    def test_private_group_asdict_with_urls(self, factories, link_svc):
+        group = factories.Group(name='My Group',
+                                pubid='mygroup')
+        presenter = GroupJSONPresenter(group, link_svc)
 
         model = presenter.asdict()
 
-        assert model['urls']['group'] == '/group/a'
-        assert model['url'] == '/group/a'
+        assert model['urls'] == link_svc.return_value
+        assert 'url' in model
+
+    def test_open_group_asdict_with_populated_urls(self, factories, link_svc):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        presenter = GroupJSONPresenter(group, link_svc)
+
+        model = presenter.asdict()
+
+        assert model['urls']['group'] == 'foo'
+        assert model['url'] == 'foo'
 
 
 class TestGroupsJSONPresenter(object):
 
-    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_):  # noqa: [N802, N803]
+    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_, link_svc):  # noqa: [N802, N803]
         groups = [factories.Group(), factories.OpenGroup()]
-        route_url = mock.Mock()
-        presenter = GroupsJSONPresenter(groups, route_url=route_url)
-        expected_call_args = [mock.call(group, route_url) for group in groups]
+        presenter = GroupsJSONPresenter(groups, link_svc)
+        expected_call_args = [mock.call(group, link_svc) for group in groups]
 
         presenter.asdicts()
 
@@ -82,16 +88,20 @@ class TestGroupsJSONPresenter(object):
 
         assert [group['name'] for group in result] == [u'filbert', u'delbert']
 
-    def test_asdicts_injects_urls(self, factories):
-        route_url = mock.Mock(return_value='/group/a')
+    def test_asdicts_injects_urls(self, factories, link_svc):
         groups = [factories.Group(), factories.OpenGroup()]
-        presenter = GroupsJSONPresenter(groups, route_url)
+        presenter = GroupsJSONPresenter(groups, link_svc)
 
         result = presenter.asdicts()
 
         for group in result:
             assert group['url']
             assert group['urls']['group']
+
+
+@pytest.fixture
+def link_svc():
+    return mock.Mock(return_value={'group': 'foo'})
 
 
 @pytest.fixture
