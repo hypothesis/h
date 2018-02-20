@@ -10,20 +10,20 @@ from h.services.group_json_presentation import group_json_presentation_service_f
 
 class TestGroupJSONPresentationService(object):
 
-    def test_present_proxies_to_presenter(self, svc, GroupJSONPresenter, pyramid_request, factories):  # noqa: N803
+    def test_present_proxies_to_presenter(self, svc, GroupJSONPresenter, factories):  # noqa: N803
         group = factories.Group()
 
         svc.present(group)
 
-        GroupJSONPresenter.assert_called_once_with(group, pyramid_request.route_url)
+        GroupJSONPresenter.assert_called_once_with(group, svc.get_links)
         GroupJSONPresenter(group).asdict.assert_called_once()
 
-    def test_present_all_proxies_to_presenter(self, svc, GroupsJSONPresenter, pyramid_request, factories):  # noqa: N803
+    def test_present_all_proxies_to_presenter(self, svc, GroupsJSONPresenter, factories):  # noqa: N803
         groups = [factories.Group(), factories.Group()]
 
         svc.present_all(groups)
 
-        GroupsJSONPresenter.assert_called_once_with(groups, pyramid_request.route_url)
+        GroupsJSONPresenter.assert_called_once_with(groups, svc.get_links)
         GroupsJSONPresenter(groups).asdicts.assert_called_once()
 
 

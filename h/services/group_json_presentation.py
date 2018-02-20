@@ -12,12 +12,19 @@ class GroupJSONPresentationService(object):
         self._route_url = route_url
 
     def present(self, group):
-        presenter = GroupJSONPresenter(group, self._route_url)
+        presenter = GroupJSONPresenter(group, self.get_links)
         return presenter.asdict()
 
     def present_all(self, groups):
-        presenter = GroupsJSONPresenter(groups, self._route_url)
+        presenter = GroupsJSONPresenter(groups, self.get_links)
         return presenter.asdicts()
+
+    def get_links(self, group):
+        links = {}
+        links['group'] = self._route_url('group_read',
+                                         pubid=group.pubid,
+                                         slug=group.slug)
+        return links
 
 
 def group_json_presentation_service_factory(context, request):
