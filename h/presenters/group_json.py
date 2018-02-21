@@ -18,8 +18,8 @@ class GroupJSONPresenter(object):
           'name': group.name,
           'id': group.pubid,
           'public': group.is_public,
-          'scoped': False,  # TODO
-          'type': 'open' if group.is_public else 'private'  # TODO
+          'scoped': True if group.scopes else False,
+          'type': group.type
         }
         model = self._inject_urls(group, model)
         return model

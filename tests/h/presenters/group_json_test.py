@@ -39,6 +39,22 @@ class TestGroupJSONPresenter(object):
             'urls': {}
         }
 
+    def test_open_scoped_group_asdict(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='groupy',
+                                    scopes=[factories.GroupScope(origin='http://foo.com')])
+
+        presenter = GroupJSONPresenter(group)
+
+        assert presenter.asdict() == {
+            'name': 'My Group',
+            'id': 'groupy',
+            'type': 'open',
+            'public': True,
+            'scoped': True,
+            'urls': {}
+        }
+
     def test_private_group_asdict_with_urls(self, factories):
         group = factories.Group(name='My Group',
                                 pubid='mygroup')
