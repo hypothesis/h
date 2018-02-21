@@ -76,7 +76,10 @@ def _current_groups(request, authority):
 
     user = request.user
     svc = request.find_service(name='list_groups')
-    groups = svc.all_groups(user=user, authority=authority)
+    if request.feature('filter_groups_by_scope'):
+        groups = svc.request_groups(user=user, authority=authority)
+    else:
+        groups = svc.all_groups(user=user, authority=authority)
 
     return [_group_model(request.route_url, group) for group in groups]
 
