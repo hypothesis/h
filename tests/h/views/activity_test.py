@@ -116,8 +116,7 @@ class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
 
-    @pytest.mark.parametrize('test_group', GROUP_TYPE_OPTIONS, indirect=['test_group'])
-    def test_renders_join_template_when_no_read_permission(self, controller, pyramid_request, test_group):
+    def test_renders_join_template_when_no_read_permission(self, controller, pyramid_request, group):
         """When the request has no read permission but join, it should render the join template."""
 
         def fake_has_permission(permission, context=None):
@@ -131,10 +130,9 @@ class TestGroupSearchController(object):
         result = controller.search()
 
         assert 'join.html' in pyramid_request.override_renderer
-        assert result == {'group': test_group}
+        assert result == {'group': group}
 
-    @pytest.mark.parametrize('test_group', GROUP_TYPE_OPTIONS, indirect=['test_group'])
-    def test_renders_join_template_when_not_logged_in(self, controller, factories, pyramid_request, test_group):
+    def test_renders_join_template_when_not_logged_in(self, controller, factories, pyramid_request, group):
         """
         If user is logged out and has no read permission, prompt to login and join.
         """
@@ -146,7 +144,7 @@ class TestGroupSearchController(object):
         result = controller.search()
 
         assert 'join.html' in pyramid_request.override_renderer
-        assert result == {'group': test_group}
+        assert result == {'group': group}
 
     @pytest.mark.parametrize('test_group,test_user', [('group', 'member')], indirect=['test_group', 'test_user'])
     def test_raises_not_found_when_no_read_or_join_permissions(self, controller, factories, pyramid_request, test_group, test_user):
@@ -232,13 +230,12 @@ class TestGroupSearchController(object):
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
                              indirect=['test_group', 'test_user'])
-    def test_search_returns_group_info_if_user_is_member_of_group(self,
+    def test_search_returns_group_info_if_user_has_read_permissions(self,
                                                                  controller,
                                                                  factories,
                                                                  test_group,
                                                                  test_user,
                                                                  pyramid_request):
-        # Technically open groups don't have members but this should work for them with any user.
         group_info = controller.search()['group']
 
         assert group_info['created'] == test_group.created.strftime('%B, %Y')
@@ -364,18 +361,17 @@ class TestGroupSearchController(object):
         for member in result['group']['members']:
             assert member['faceted_by'] is (member['userid'] == faceted_user.userid)
 
-    @pytest.mark.parametrize('test_group', ['group'], indirect=['test_group'])
     def test_search_returns_annotation_count_for_group_members(self,
                                                                controller,
                                                                pyramid_request,
-                                                               test_group,
+                                                               group,
                                                                search,
                                                                factories):
         user_1 = factories.User()
         user_2 = factories.User()
-        test_group.members = [user_1, user_2]
+        group.members = [user_1, user_2]
 
-        pyramid_request.user = test_group.members[-1]
+        pyramid_request.user = group.members[-1]
 
         counts = {user_1.userid: 24, user_2.userid: 6}
         users_aggregation = [
@@ -509,35 +505,32 @@ class TestGroupSearchController(object):
         group_service.member_leave.assert_called_once_with(
             test_group, test_user.userid)
 
-    @pytest.mark.parametrize('test_group', ['group'], indirect=['test_group'])
     def test_leave_redirects_to_the_search_page(self,
                                                 controller,
-                                                test_group,
+                                                group,
                                                 group_leave_request):
         # This should be in the redirect URL.
         group_leave_request.POST['q'] = 'foo bar gar'
         # This should *not* be in the redirect URL.
-        group_leave_request.POST['group_leave'] = test_group.pubid
+        group_leave_request.POST['group_leave'] = group.pubid
 
         result = controller.leave()
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == 'http://example.com/search?q=foo+bar+gar'
 
-    @pytest.mark.parametrize('test_group', ['group'], indirect=['test_group'])
-    def test_join_raises_not_found_when_not_joinable(self, controller, pyramid_request, test_group):
+    def test_join_raises_not_found_when_not_joinable(self, controller, pyramid_request, group):
         pyramid_request.has_permission = mock.Mock(return_value=False)
 
         with pytest.raises(httpexceptions.HTTPNotFound):
             controller.join()
 
-    @pytest.mark.parametrize('test_group', ['group'], indirect=['test_group'])
-    def test_join_adds_group_member(self, controller, test_group, pyramid_request, pyramid_config, group_service):
+    def test_join_adds_group_member(self, controller, group, pyramid_request, pyramid_config, group_service):
         pyramid_config.testing_securitypolicy('acct:doe@example.org')
 
         controller.join()
 
-        group_service.member_join.assert_called_once_with(test_group, 'acct:doe@example.org')
+        group_service.member_join.assert_called_once_with(group, 'acct:doe@example.org')
 
     @pytest.mark.parametrize('test_group', GROUP_TYPE_OPTIONS, indirect=['test_group'])
     def test_join_redirects_to_search_page(self, controller, test_group, pyramid_request):
@@ -711,14 +704,18 @@ class TestGroupSearchController(object):
                 "user": factories.User()}
 
     @pytest.fixture
-    def controller(self, request, pyramid_request):
-        group = request.getfixturevalue('test_group')
-        return activity.GroupSearchController(group, pyramid_request)
+    def controller(self, request, group, pyramid_request):
+        test_group = group
+        if 'test_group' in request.fixturenames:
+            test_group = request.getfixturevalue('test_group')
+        return activity.GroupSearchController(test_group, pyramid_request)
 
     @pytest.fixture
-    def group_leave_request(self, request, pyramid_request):
-        group = request.getfixturevalue('test_group')
-        pyramid_request.POST = {'group_leave': group.pubid}
+    def group_leave_request(self, request, group, pyramid_request):
+        test_group = group
+        if 'test_group' in request.fixturenames:
+            test_group = request.getfixturevalue('test_group')
+        pyramid_request.POST = {'group_leave': test_group.pubid}
         return pyramid_request
 
     @pytest.fixture
@@ -728,10 +725,12 @@ class TestGroupSearchController(object):
         return group_service
 
     @pytest.fixture
-    def pyramid_request(self, request, pyramid_request):
-        group = request.getfixturevalue('test_group')
-        pyramid_request.matchdict['pubid'] = group.pubid
-        pyramid_request.matchdict['slug'] = group.slug
+    def pyramid_request(self, request, group, pyramid_request):
+        test_group = group
+        if 'test_group' in request.fixturenames:
+            test_group = request.getfixturevalue('test_group')
+        pyramid_request.matchdict['pubid'] = test_group.pubid
+        pyramid_request.matchdict['slug'] = test_group.slug
         pyramid_request.user = None
         if 'test_user' in request.fixturenames:
             pyramid_request.user = request.getfixturevalue('test_user')
