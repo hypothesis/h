@@ -1106,11 +1106,6 @@ def group(factories):
 
 @pytest.fixture
 def no_creator_group(factories):
-    # Create some other groups as well, just to make sure it gets the right
-    # one from the db.
-    factories.Group()
-    factories.OpenGroup()
-
     group = factories.Group()
     group.creator = None
     group.members.extend([factories.User(), factories.User()])
@@ -1130,11 +1125,6 @@ def open_group(factories):
 
 @pytest.fixture
 def no_creator_open_group(factories):
-    # Create some other groups as well, just to make sure it gets the right
-    # one from the db.
-    factories.Group()
-    factories.OpenGroup()
-
     open_group = factories.OpenGroup()
     open_group.creator = None
     return open_group
