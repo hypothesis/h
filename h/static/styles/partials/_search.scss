@@ -59,7 +59,6 @@
 .search-results__total {
   color: $brand;
   margin-bottom: 25px;
-  word-spacing: 4px;
 }
 
 .search-results__list {
@@ -95,6 +94,7 @@
 }
 
 .search-result__timeframe {
+  color: $grey-4;
   font-weight: bold;
   padding-bottom: 10px;
   border-bottom: 1px solid $grey-2;
