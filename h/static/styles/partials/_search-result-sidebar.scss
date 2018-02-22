@@ -53,6 +53,10 @@
 }
 
 .search-result-sidebar__annotations-count {
+  color: $grey-4;
+}
+
+.search-result-sidebar__creator {
   color: $grey-5;
 }
 
@@ -75,6 +79,7 @@
 
 .search-result-sidebar__tag-container {
   display: flex;
+  color: $grey-6;
 }
 
 .search-result-sidebar__tag-count {
