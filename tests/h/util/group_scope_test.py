@@ -16,7 +16,8 @@ from h.util import group_scope as scope_util
     ('foo', None),
     ('foo.com', None),
     ('http://www.foo.com/bar/baz.html?query=whatever', 'http://www.foo.com'),
-    ('', None)
+    ('', None),
+    (None, None)
 ])
 def test_it_parses_scope_from_uri(uri, expected_scope):
     scope = scope_util.uri_scope(uri)
