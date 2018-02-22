@@ -23,6 +23,7 @@ from pyramid import i18n
 
 from h import models, schemas
 from h.db import types
+from h.util.group_scope import match as group_scope_match
 from h.models.document import update_document_metadata
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -130,6 +131,15 @@ def create_annotation(request, data, group_service):
         raise schemas.ValidationError('group: ' +
                                       _('You may not create annotations '
                                         'in the specified group!'))
+
+    if request.feature('filter_groups_by_scope') and group.scopes:
+        # The scope (origin) of the target URI must match at least one
+        # of a group's defined scopes, if the group has any
+        group_scopes = [scope.origin for scope in group.scopes]
+        if not group_scope_match(data['target_uri'], group_scopes):
+            raise schemas.ValidationError('group scope: ' +
+                                          _('Annotations for this target URI '
+                                            'are not allowed in this group'))
 
     annotation = models.Annotation(**data)
     annotation.created = created
