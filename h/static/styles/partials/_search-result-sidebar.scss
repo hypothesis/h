@@ -64,7 +64,6 @@
   display: flex;
   flex-wrap: wrap;
   max-width: 350px;
-  margin-top: 30px;
 }
 
 .search-result-sidebar__tag {
@@ -73,7 +72,11 @@
   border-radius: 2px;
   margin-bottom: 5px;
   margin-right: 5px;
-  padding: 5px;
+  padding-bottom: 1px;
+  padding-top: 1px;
+  padding-left: 3px;
+  padding-right: 3px;
+  border-radius: 3px 3px;
   font-weight: bold;
 }
 
@@ -84,7 +87,7 @@
 
 .search-result-sidebar__tag-count {
   color: $grey-4;
-  margin-left: 10px;
+  margin-left: 5px;
   font-weight: normal;
 }
 
