@@ -5,6 +5,7 @@ from h import session
 from h.services.list_groups import ListGroupsService
 
 
+@pytest.mark.usefixtures('scope_feature_off')
 class TestModel(object):
     def test_proxies_group_lookup_to_service(self, authenticated_request):
         svc = authenticated_request.find_service(name='list_groups')
@@ -82,6 +83,43 @@ class TestModel(object):
             assert preferences['show_sidebar_tutorial'] is True
 
 
+class TestModelWithScopedGroups(object):
+    def test_proxies_group_lookup_to_service(self, authenticated_request):
+        svc = authenticated_request.find_service(name='list_groups')
+
+        session.model(authenticated_request)
+
+        svc.request_groups.assert_called_once_with(user=authenticated_request.user,
+                                                   authority=authenticated_request.authority)
+
+    def test_private_group_is_not_public(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.request_groups.return_value = [a_group]
+
+        model = session.model(authenticated_request)
+
+        assert not model['groups'][0]['public']
+
+    def test_open_group_has_no_url(self, unauthenticated_request, world_group):
+        svc = unauthenticated_request.find_service(name='list_groups')
+        svc.request_groups.return_value = [world_group]
+
+        model = session.model(unauthenticated_request)
+
+        assert not model['groups'][0].get('url')
+
+    def test_private_group_has_url(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.request_groups.return_value = [a_group]
+
+        model = session.model(authenticated_request)
+
+        assert model['groups'][0]['url']
+
+
+@pytest.mark.usefixtures('scope_feature_off')
 class TestProfile(object):
     def test_userid_unauthenticated(self, unauthenticated_request):
         assert session.profile(unauthenticated_request)['userid'] is None
@@ -215,6 +253,43 @@ class TestProfile(object):
                            fake_feature)
 
 
+class TestProfileWithScopedGroups(object):
+
+    def test_proxies_group_lookup_to_service(self, authenticated_request):
+        svc = authenticated_request.find_service(name='list_groups')
+
+        session.profile(authenticated_request)
+
+        svc.request_groups.assert_called_once_with(user=authenticated_request.user,
+                                                   authority=authenticated_request.authority)
+
+    def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
+        svc = unauthenticated_request.find_service(name='list_groups')
+
+        session.profile(unauthenticated_request)
+
+        svc.request_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+                                                   user=None)
+
+    def test_private_group_is_not_public(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.request_groups.return_value = [a_group]
+
+        profile = session.profile(authenticated_request)
+
+        assert not profile['groups'][0]['public']
+
+    def test_private_group_has_url(self, authenticated_request, factories):
+        a_group = factories.Group()
+        svc = authenticated_request.find_service(name='list_groups')
+        svc.request_groups.return_value = [a_group]
+
+        profile = session.profile(authenticated_request)
+
+        assert profile['groups'][0]['url']
+
+
 class TestUserInfo(object):
     def test_returns_user_info_object(self, factories):
         user = factories.User.build(display_name='Jane Doe')
@@ -286,3 +361,8 @@ def authenticated_request(authority, fake_feature):
 @pytest.fixture
 def world_group(factories):
     return factories.OpenGroup(name=u'Public', pubid='__worldish__')
+
+
+@pytest.fixture
+def scope_feature_off(pyramid_request):
+    pyramid_request.feature.flags['filter_groups_by_scope'] = False
