@@ -6,7 +6,11 @@
 
 .search-result-sidebar__title {
   margin-top: 0;
-  margin-bottom: 26px;
+  margin-bottom: 20px;
+}
+
+.search-result-sidebar__subtitle {
+  margin-bottom: 9px;
 }
 
 .search-result-sidebar__title,
@@ -23,12 +27,8 @@
   @include pie-clearfix;
 }
 
-.search-result-sidebar__section:last-child {
+.search-result-sidebar__share-link {
   margin-bottom: 0;
-}
-
-.search-result-sidebar__section p:first-of-type {
-  margin-top: 0;
 }
 
 .search-result-sidebar__section p:last-of-type {
