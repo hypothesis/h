@@ -13,5 +13,7 @@ class IGroupService(Interface):
         :param id_: The group id.
         :type id_: unicode
 
-        :returns A group object with an ``__acl__()`` method.
+        :returns A group object with:
+          * an ``__acl__()`` method
+          * a ``scopes`` property (``list``)
         """
