@@ -1093,13 +1093,7 @@ class FakeAnnotationStatsService(object):
 
 @pytest.fixture
 def group(factories):
-    # Create some other groups as well, just to make sure it gets the right
-    # one from the db.
-    factories.Group()
-    factories.OpenGroup()
-
     group = factories.Group()
-
     group.members.extend([factories.User(), factories.User()])
     return group
 
@@ -1114,11 +1108,6 @@ def no_creator_group(factories):
 
 @pytest.fixture
 def open_group(factories):
-    # Create some other groups as well, just to make sure it gets the right
-    # one from the db.
-    factories.Group()
-    factories.OpenGroup()
-
     open_group = factories.OpenGroup()
     return open_group
 
