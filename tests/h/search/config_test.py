@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from h._compat import url_quote_plus
+
 import itertools
 import re
-import urllib
 
 import mock
 import pytest
@@ -55,7 +56,7 @@ def test_uri_part_tokenizer():
         'http', '', '', 'a', 'b', 'foo', 'bar', 'c', 'd', 'stuff'
     ])
 
-    text = urllib.quote_plus(text)
+    text = url_quote_plus(text)
     assert(re.split(pattern, 'http://jump.to/?u=' + text) == [
         'http', '', '', 'jump', 'to', '', 'u',
         'http', '', '', 'a', 'b', 'foo', 'bar', 'c', 'd', 'stuff'

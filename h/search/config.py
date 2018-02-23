@@ -298,4 +298,4 @@ def _update_index_mappings(conn, name, mappings):
 
 def _random_id():
     """Generate a short random hex string."""
-    return binascii.hexlify(os.urandom(4))
+    return binascii.hexlify(os.urandom(4)).decode()
