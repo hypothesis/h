@@ -26,6 +26,7 @@ class Filters(Extension):
 
         environment.filters['to_json'] = to_json
         environment.filters['human_timestamp'] = human_timestamp
+        environment.filters['format_number'] = format_number
 
 
 def human_timestamp(timestamp, now=datetime.datetime.utcnow):
@@ -34,6 +35,10 @@ def human_timestamp(timestamp, now=datetime.datetime.utcnow):
     if timestamp.year < now().year:
         fmt = '%d %B %Y at %H:%M'
     return timestamp.strftime(fmt)
+
+
+def format_number(num):
+    return "{:,}".format(num)
 
 
 def to_json(value):
