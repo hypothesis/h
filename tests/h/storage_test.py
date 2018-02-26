@@ -18,6 +18,10 @@ class FakeGroup(object):
     def __acl__(self):
         return []
 
+    @property
+    def scopes(self):
+        return []
+
 
 class TestFetchAnnotation(object):
 
@@ -184,6 +188,74 @@ class TestCreateAnnotation(object):
 
         assert str(exc.value).startswith('group: ')
 
+    def test_it_allows_when_unscoped_group(self, pyramid_request, pyramid_config, group_service, factories, models):
+        group_service.find.return_value = factories.OpenGroup()
+
+        data = self.annotation_data()
+        data['target_uri'] = 'http://www.foo.com/boo/bah.html'
+
+        # this should not raise
+        result = storage.create_annotation(pyramid_request, data, group_service)
+
+        assert result == models.Annotation.return_value
+
+    def test_it_allows_when_target_uri_matches_single_group_scope(self,
+                                                                  pyramid_request,
+                                                                  pyramid_config,
+                                                                  group_service,
+                                                                  scoped_open_group,
+                                                                  models):
+        group_service.find.return_value = scoped_open_group
+
+        data = self.annotation_data()
+        data['target_uri'] = 'http://www.foo.com/boo/bah.html'
+
+        # this should not raise
+        result = storage.create_annotation(pyramid_request, data, group_service)
+
+        assert result == models.Annotation.return_value
+
+    def test_it_allows_when_target_uri_matches_multiple_group_scope(self,
+                                                                    pyramid_request,
+                                                                    pyramid_config,
+                                                                    group_service,
+                                                                    factories,
+                                                                    models):
+        scope = factories.GroupScope(origin='http://www.foo.com')
+        scope2 = factories.GroupScope(origin='http://www.bar.com')
+        group_service.find.return_value = factories.OpenGroup(scopes=[scope, scope2])
+
+        data = self.annotation_data()
+        data['target_uri'] = 'http://www.bar.com/boo/bah.html'
+
+        # this should not raise
+        result = storage.create_annotation(pyramid_request, data, group_service)
+
+        assert result == models.Annotation.return_value
+
+    def test_it_raises_when_group_scope_mismatch(self, pyramid_request, pyramid_config, group_service, scoped_open_group):
+        group_service.find.return_value = scoped_open_group
+
+        data = self.annotation_data()
+        data['target_uri'] = 'http://www.bar.com/bing.html'
+
+        with pytest.raises(ValidationError) as exc:
+            storage.create_annotation(pyramid_request, data, group_service)
+
+        assert str(exc.value).startswith('group scope: ')
+
+    @pytest.mark.usefixtures('scope_feature_off')
+    def test_it_allows_mismatched_scope_when_feature_flag_off(self, pyramid_request, pyramid_config, group_service, scoped_open_group, models):
+        group_service.find.return_value = scoped_open_group
+
+        data = self.annotation_data()
+        data['target_uri'] = 'http://www.baz.com/boo/bah.html'
+
+        # this should not raise
+        result = storage.create_annotation(pyramid_request, data, group_service)
+
+        assert result == models.Annotation.return_value
+
     def test_it_raises_when_group_could_not_be_found(self, pyramid_request, pyramid_config, group_service):
         pyramid_config.testing_securitypolicy('userid', permissive=True)
         group_service.find.return_value = None
@@ -268,8 +340,10 @@ class TestCreateAnnotation(object):
         storage.create_annotation(pyramid_request, data, group_service)
 
     @pytest.fixture
-    def group_service(self, pyramid_config):
+    def group_service(self, pyramid_config, factories):
+        open_group = factories.OpenGroup()
         group_service = mock.Mock(spec_set=['find'])
+        group_service.find.return_value = open_group
         pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
         return group_service
 
@@ -501,3 +575,14 @@ def session(db_session):
 @pytest.fixture
 def datetime(patch):
     return patch('h.storage.datetime')
+
+
+@pytest.fixture
+def scoped_open_group(factories):
+    scope = factories.GroupScope(origin='http://www.foo.com')
+    return factories.OpenGroup(scopes=[scope])
+
+
+@pytest.fixture
+def scope_feature_off(pyramid_request):
+    pyramid_request.feature.flags['filter_groups_by_scope'] = False
