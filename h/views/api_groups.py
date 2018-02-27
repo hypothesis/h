@@ -15,7 +15,8 @@ from h.views.api import api_config
 def groups(request):
     authority = request.params.get('authority')
     document_uri = request.params.get('document_uri')
-    svc = request.find_service(name='list_groups')
+    list_svc = request.find_service(name='list_groups')
+    links_svc = request.find_service(name='group_links')
 
     if request.feature('filter_groups_by_scope'):
         # Filter open groups by scope against the ``document_uri`` param.
@@ -26,14 +27,14 @@ def groups(request):
             authority = request.user.authority
         else:
             authority = authority or request.authority
-        all_groups = svc.request_groups(user=request.user,
-                                        authority=authority,
-                                        document_uri=document_uri)
+        all_groups = list_svc.request_groups(user=request.user,
+                                             authority=authority,
+                                             document_uri=document_uri)
     else:
-        all_groups = svc.all_groups(user=request.user,
-                                    authority=authority,
-                                    document_uri=document_uri)
-    all_groups = GroupsJSONPresenter(all_groups, request.route_url).asdicts()
+        all_groups = list_svc.all_groups(user=request.user,
+                                         authority=authority,
+                                         document_uri=document_uri)
+    all_groups = GroupsJSONPresenter(all_groups, links_svc).asdicts()
     return all_groups
 
 
