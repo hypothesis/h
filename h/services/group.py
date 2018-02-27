@@ -6,7 +6,7 @@ import sqlalchemy as sa
 
 from h import session
 from h.models import Group, GroupScope, User
-from h.models.group import ReadableBy, OPEN_GROUP_TYPE_FLAGS, PRIVATE_GROUP_TYPE_FLAGS
+from h.models.group import ReadableBy, OPEN_GROUP_TYPE_FLAGS, PRIVATE_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
 
 
 class GroupService(object):
@@ -37,18 +37,12 @@ class GroupService(object):
 
         :returns: the created group
         """
-        group = self._create(name=name,
-                             userid=userid,
-                             description=description,
-                             type_flags=PRIVATE_GROUP_TYPE_FLAGS,
-                             )
-        group.members.append(group.creator)
-
-        # Flush the DB to generate group.pubid before publish()ing it.
-        self.session.flush()
-
-        self.publish('group-join', group.pubid, group.creator.userid)
-        return group
+        return self._create(name=name,
+                            userid=userid,
+                            description=description,
+                            type_flags=PRIVATE_GROUP_TYPE_FLAGS,
+                            add_creator_as_member=True,
+                            )
 
     def create_open_group(self, name, userid, origins, description=None):
         """
@@ -58,6 +52,7 @@ class GroupService(object):
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
+        :param origins: the list of origins that the group will be scoped to
         :param description: the description of the group
 
         :returns: the created group
@@ -66,7 +61,30 @@ class GroupService(object):
                             userid=userid,
                             description=description,
                             type_flags=OPEN_GROUP_TYPE_FLAGS,
-                            scopes=[GroupScope(origin=o) for o in origins],
+                            origins=origins,
+                            add_creator_as_member=False,
+                            )
+
+    def create_restricted_group(self, name, userid, origins, description=None):
+        """
+        Create a new restricted group.
+
+        A restricted group is one that anyone in the same authority can read but
+        only members can write.
+
+        :param name: the human-readable name of the group
+        :param userid: the userid of the group creator
+        :param origins: the list of origins that the group will be scoped to
+        :param description: the description of the group
+
+        :returns: the created group
+        """
+        return self._create(name=name,
+                            userid=userid,
+                            description=description,
+                            type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
+                            origins=origins,
+                            add_creator_as_member=True,
                             )
 
     def member_join(self, group, userid):
@@ -117,9 +135,20 @@ class GroupService(object):
 
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
-    def _create(self, name, userid, description, type_flags, scopes=[]):
-        """Create a group and save it to the DB."""
+    def _create(self, name, userid, description, type_flags, origins=[], add_creator_as_member=False):
+        """
+        Create a group and save it to the DB.
+
+        :param name: the human-readable name of the group
+        :param userid: the userid of the group creator
+        :param description: the description of the group
+        :param type_flags: the type of this group
+        :param origins: the list of origins that the group will be scoped to
+        :param add_creator_as_member: if the group creator should be added as a member
+        """
         creator = self.user_fetcher(userid)
+        scopes = [GroupScope(origin=o) for o in origins]
+
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
@@ -130,6 +159,15 @@ class GroupService(object):
                       scopes=scopes,
                       )
         self.session.add(group)
+
+        if add_creator_as_member:
+            group.members.append(group.creator)
+
+            # Flush the DB to generate group.pubid before publish()ing it.
+            self.session.flush()
+
+            self.publish('group-join', group.pubid, group.creator.userid)
+
         return group
 
 
