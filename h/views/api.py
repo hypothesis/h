@@ -170,10 +170,12 @@ def update(context, request):
                                     context.annotation.target_uri,
                                     context.annotation.groupid)
     appstruct = schema.validate(_json_payload(request))
+    group_service = request.find_service(IGroupService)
 
     annotation = storage.update_annotation(request.db,
                                            context.annotation.id,
-                                           appstruct)
+                                           appstruct,
+                                           group_service)
 
     _publish_annotation_event(request, annotation, 'update')
 

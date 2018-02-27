@@ -339,14 +339,6 @@ class TestCreateAnnotation(object):
 
         storage.create_annotation(pyramid_request, data, group_service)
 
-    @pytest.fixture
-    def group_service(self, pyramid_config, factories):
-        open_group = factories.OpenGroup()
-        group_service = mock.Mock(spec_set=['find'])
-        group_service.find.return_value = open_group
-        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
-        return group_service
-
     def annotation_data(self):
         return {
             'userid': 'acct:test@localhost',
@@ -370,42 +362,48 @@ class TestUpdateAnnotation(object):
     def test_it_gets_the_annotation_model(self,
                                           annotation_data,
                                           models,
-                                          session):
+                                          session,
+                                          group_service):
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
 
         session.query.assert_called_once_with(models.Annotation)
         session.query.return_value.get.assert_called_once_with(
             'test_annotation_id')
 
-    def test_it_adds_new_extras(self, annotation_data, session):
+    def test_it_adds_new_extras(self, annotation_data, session, group_service):
         annotation = session.query.return_value.get.return_value
         annotation.extra = {}
         annotation_data['extra'] = {'foo': 'bar'}
 
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
 
         assert annotation.extra == {'foo': 'bar'}
 
     def test_it_overwrites_existing_extras(self,
                                            annotation_data,
-                                           session):
+                                           session,
+                                           group_service):
         annotation = session.query.return_value.get.return_value
         annotation.extra = {'foo': 'original_value'}
         annotation_data['extra'] = {'foo': 'new_value'}
 
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
 
         assert annotation.extra == {'foo': 'new_value'}
 
     def test_it_does_not_change_extras_that_are_not_sent(self,
                                                          annotation_data,
-                                                         session):
+                                                         session,
+                                                         group_service):
         annotation = session.query.return_value.get.return_value
         annotation.extra = {
             'one': 1,
@@ -415,36 +413,41 @@ class TestUpdateAnnotation(object):
 
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
 
         assert annotation.extra['one'] == 1
 
     def test_it_does_not_change_extras_if_none_are_sent(self,
                                                         annotation_data,
-                                                        session):
+                                                        session,
+                                                        group_service):
         annotation = session.query.return_value.get.return_value
         annotation.extra = {'one': 1, 'two': 2}
         assert not annotation_data.get('extra')
 
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
 
         assert annotation.extra == {'one': 1, 'two': 2}
 
-    def test_it_changes_the_updated_timestamp(self, annotation_data, session, datetime):
+    def test_it_changes_the_updated_timestamp(self, annotation_data, session, datetime, group_service):
         annotation = storage.update_annotation(session,
                                                'test_annotation_id',
-                                               annotation_data)
+                                               annotation_data,
+                                               group_service)
 
         assert annotation.updated == datetime.utcnow()
 
-    def test_it_updates_the_annotation(self, annotation_data, session):
+    def test_it_updates_the_annotation(self, annotation_data, session, group_service):
         annotation = session.query.return_value.get.return_value
 
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
 
         for key, value in annotation_data.items():
             assert getattr(annotation, key) == value
@@ -454,7 +457,8 @@ class TestUpdateAnnotation(object):
             annotation_data,
             session,
             datetime,
-            update_document_metadata):
+            update_document_metadata,
+            group_service):
         annotation = session.query.return_value.get.return_value
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
@@ -463,7 +467,8 @@ class TestUpdateAnnotation(object):
 
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
 
         update_document_metadata.assert_called_once_with(
             session,
@@ -476,33 +481,38 @@ class TestUpdateAnnotation(object):
     def test_it_updates_the_annotations_document_id(self,
                                                     annotation_data,
                                                     session,
-                                                    update_document_metadata):
+                                                    update_document_metadata,
+                                                    group_service):
         annotation = session.query.return_value.get.return_value
         document = mock.Mock()
         update_document_metadata.return_value = document
 
         storage.update_annotation(session,
                                   'test_annotation_id',
-                                  annotation_data)
+                                  annotation_data,
+                                  group_service)
         assert annotation.document == document
 
     def test_it_returns_the_annotation(self, annotation_data, session):
         annotation = storage.update_annotation(session,
                                                'test_annotation_id',
-                                               annotation_data)
+                                               annotation_data,
+                                               group_service)
 
         assert annotation == session.query.return_value.get.return_value
 
     def test_it_does_not_crash_if_no_document_in_data(self,
-                                                      session):
-        storage.update_annotation(session, 'test_annotation_id', {})
+                                                      session,
+                                                      group_service):
+        storage.update_annotation(session, 'test_annotation_id', {}, group_service)
 
     def test_it_does_not_call_update_document_meta_if_no_document_in_data(
             self,
             session,
-            update_document_metadata):
+            update_document_metadata,
+            group_service):
 
-        storage.update_annotation(session, 'test_annotation_id', {})
+        storage.update_annotation(session, 'test_annotation_id', {}, group_service)
 
         assert not update_document_metadata.called
 
@@ -581,6 +591,15 @@ def datetime(patch):
 def scoped_open_group(factories):
     scope = factories.GroupScope(origin='http://www.foo.com')
     return factories.OpenGroup(scopes=[scope])
+
+
+@pytest.fixture
+def group_service(pyramid_config, factories):
+    open_group = factories.OpenGroup()
+    group_service = mock.Mock(spec_set=['find'])
+    group_service.find.return_value = open_group
+    pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
+    return group_service
 
 
 @pytest.fixture

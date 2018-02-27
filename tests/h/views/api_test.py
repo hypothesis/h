@@ -346,7 +346,8 @@ class TestUpdate(object):
     def test_it_updates_the_annotation_in_storage(self,
                                                   pyramid_request,
                                                   storage,
-                                                  update_schema):
+                                                  update_schema,
+                                                  group_service):
         context = mock.Mock()
         schema = update_schema.return_value
         schema.validate.return_value = mock.sentinel.validated_data
@@ -356,7 +357,8 @@ class TestUpdate(object):
         storage.update_annotation.assert_called_once_with(
             pyramid_request.db,
             context.annotation.id,
-            mock.sentinel.validated_data
+            mock.sentinel.validated_data,
+            group_service
         )
 
     def test_it_raises_if_storage_raises(self, pyramid_request, storage):

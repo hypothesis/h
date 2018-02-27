@@ -160,7 +160,7 @@ def create_annotation(request, data, group_service):
     return annotation
 
 
-def update_annotation(session, id_, data):
+def update_annotation(session, id_, data, group_service):
     """
     Update an existing annotation and its associated document metadata.
 
