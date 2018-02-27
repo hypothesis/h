@@ -211,7 +211,7 @@
 </section>
 {% endmacro %}
 
-{% macro sidebar(title, description) %}
+{% macro sidebar(title) %}
 <aside class="search-result-sidebar {%- if not more_info %} search-result-hide-on-small-screens{% endif %}">
 
   {#- This form element is needed for Internet Explorer because it
@@ -221,21 +221,22 @@
 
     <h1 class="search-result-sidebar__title">{{ title }}</h1>
 
-    {% if description %}
-    <section class="search-result-sidebar__section">
-      {% for paragraph in description.split('\n') %}
-        <p>{{ paragraph }}</p>
-      {% endfor %}
-    </section>
-    {% endif %}
-
     {{ caller() }}
   </form>
 </aside>
 {% endmacro %}
 
 {% macro group_sidebar(group, group_edit_url, total, stats) %}
-  {% call sidebar(group.name, group.description) %}
+  {% call sidebar(group.name) %}
+
+    {% if group.description %}
+    <section class="search-result-sidebar__section">
+      {% for paragraph in group.description.split('\n') %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </section>
+    {% endif %}
+
     <section class="search-result-sidebar__section">
       <dl>
         <dt class="search-result-sidebar__dt">
@@ -310,7 +311,16 @@
 {% endmacro %}
 
 {% macro user_sidebar(user, stats) %}
-  {% call sidebar(user.name, user.description) %}
+  {% call sidebar(user.name) %}
+
+    {% if user.description %}
+    <section class="search-result-sidebar__section">
+      {% for paragraph in user.description.split('\n') %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </section>
+    {% endif %}
+
     <section class="search-result-sidebar__section">
       <dl>
         {% if stats.annotation_count %}
