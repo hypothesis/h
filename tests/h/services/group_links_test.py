@@ -36,7 +36,7 @@ class TestGroupLinksFactory(object):
 
         svc = group_links_factory(None, pyramid_request)
 
-        assert svc._authority == 'bar.com'
+        assert svc._default_authority == 'bar.com'
 
 
 @pytest.fixture
@@ -47,6 +47,6 @@ def routes(pyramid_config):
 @pytest.fixture
 def svc(pyramid_request, db_session):
     return GroupLinksService(
-        request_authority=pyramid_request.authority,
+        default_authority=pyramid_request.authority,
         route_url=pyramid_request.route_url
     )
