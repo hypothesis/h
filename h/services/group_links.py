@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 class GroupLinksService(object):
 
     """
-    A service for providing appropriate links for a given group object
+    A service for providing appropriate links (URLs) for a given group object
     """
 
     def __init__(self, request_authority, route_url):
@@ -14,12 +14,13 @@ class GroupLinksService(object):
         Create a group_links service.
 
         :param request_authority: The request's "default" authority
+        :param route_url: The request's route_url method for building URLs
         """
         self._authority = request_authority
         self._route_url = route_url
 
     def get_all(self, group):
-        """Return all links"""
+        """Return a dict of all applicable links for this group"""
         links = {}
         if group.authority == self._authority:
             # Only groups for the default authority should have an activity page
