@@ -31,20 +31,21 @@
   margin-bottom: 0;
 }
 
-.search-result-sidebar__section p:last-of-type {
-  margin-bottom: 0;
+.search-result-sidebar__subsection {
+  margin-top: 17px;
 }
 
-.search-result-sidebar__dt {
+.search-result-sidebar__subsection-p {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.search-result-sidebar__subsection-key {
   font-weight: bold;
-  float: left;
-  clear: left;
-  margin-right: 3px;
 }
 
-.search-result-sidebar__dd {
-  float: left;
-  margin-left: 0;
+.search-result-sidebar__subsection-val {
+  color: $grey-6;
 }
 
 .search-result-sidebar-title__annotations-count {
