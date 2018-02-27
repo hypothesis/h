@@ -172,7 +172,7 @@ def update(context, request):
     appstruct = schema.validate(_json_payload(request))
     group_service = request.find_service(IGroupService)
 
-    annotation = storage.update_annotation(request.db,
+    annotation = storage.update_annotation(request,
                                            context.annotation.id,
                                            appstruct,
                                            group_service)

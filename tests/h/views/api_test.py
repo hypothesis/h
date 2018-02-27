@@ -355,7 +355,7 @@ class TestUpdate(object):
         views.update(context, pyramid_request)
 
         storage.update_annotation.assert_called_once_with(
-            pyramid_request.db,
+            pyramid_request,
             context.annotation.id,
             mock.sentinel.validated_data,
             group_service
