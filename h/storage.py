@@ -132,14 +132,8 @@ def create_annotation(request, data, group_service):
                                       _('You may not create annotations '
                                         'in the specified group!'))
 
-    if request.feature('filter_groups_by_scope') and group.scopes:
-        # The scope (origin) of the target URI must match at least one
-        # of a group's defined scopes, if the group has any
-        group_scopes = [scope.origin for scope in group.scopes]
-        if not group_scope_match(data['target_uri'], group_scopes):
-            raise schemas.ValidationError('group scope: ' +
-                                          _('Annotations for this target URI '
-                                            'are not allowed in this group'))
+    if request.feature('filter_groups_by_scope'):
+        _validate_group_scope(group, data['target_uri'])
 
     annotation = models.Annotation(**data)
     annotation.created = created
@@ -197,14 +191,8 @@ def update_annotation(request, id_, data, group_service):
     if group is None:
         raise schemas.ValidationError('group: ' +
                                       _('Invalid group specified for annotation'))
-    if request.feature('filter_groups_by_scope') and group.scopes:
-        # The scope (origin) of the target URI must match at least one
-        # of a group's defined scopes, if the group has any
-        group_scopes = [scope.origin for scope in group.scopes]
-        if not group_scope_match(data['target_uri'], group_scopes):
-            raise schemas.ValidationError('group scope: ' +
-                                          _('Annotations for this target URI '
-                                            'are not allowed in this group'))
+    if request.feature('filter_groups_by_scope') and data.get('target_uri', None):
+        _validate_group_scope(group, data['target_uri'])
 
     annotation.extra.update(data.pop('extra', {}))
 
@@ -270,3 +258,15 @@ def expand_uri(session, uri):
             return [uri]
 
     return [docuri.uri for docuri in docuris]
+
+
+def _validate_group_scope(group, target_uri):
+    if not group.scopes:
+        return
+    # The scope (origin) of the target URI must match at least one
+    # of a group's defined scopes, if the group has any
+    group_scopes = [scope.origin for scope in group.scopes]
+    if not group_scope_match(target_uri, group_scopes):
+        raise schemas.ValidationError('group scope: ' +
+                                      _('Annotations for this target URI '
+                                        'are not allowed in this group'))

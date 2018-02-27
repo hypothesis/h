@@ -478,6 +478,15 @@ class TestUpdateAnnotation(object):
 
         assert str(exc.value).startswith('group scope: ')
 
+    def test_it_allows_group_scope_when_no_target_uri(self, annotation_data, pyramid_request, group_service, scoped_open_group):
+        annotation_data.pop('target_uri')
+        group_service.find.return_value = scoped_open_group
+
+        # this should not raise
+        annotation = storage.update_annotation(pyramid_request, 'test_annotation_id', annotation_data, group_service)
+
+        assert annotation == pyramid_request.db.query.return_value.get.return_value
+
     @pytest.mark.usefixtures('scope_feature_off')
     def test_it_allows_scope_mismatch_when_feature_off(self, annotation_data, pyramid_request, group_service, scoped_open_group):
         annotation_data['target_uri'] = u'http://www.bar.com/baz/ding.html'
