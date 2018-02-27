@@ -453,6 +453,41 @@ class TestUpdateAnnotation(object):
         for key, value in annotation_data.items():
             assert getattr(annotation, key) == value
 
+    def test_it_raises_if_missing_group(self, annotation_data, pyramid_request, group_service):
+        group_service.find.return_value = None
+
+        with pytest.raises(ValidationError) as exc:
+            storage.update_annotation(pyramid_request, 'test_annotation_id', annotation_data, group_service)
+
+        assert str(exc.value).startswith('group: ')
+
+    def test_it_allows_when_group_scope_matches(self, annotation_data, pyramid_request, group_service, scoped_open_group, models):
+        annotation_data['target_uri'] = u'http://www.foo.com/baz/ding.html'
+
+        # this should not raise
+        annotation = storage.update_annotation(pyramid_request, 'test_annotation_id', annotation_data, group_service)
+
+        assert annotation == pyramid_request.db.query.return_value.get.return_value
+
+    def test_it_raises_when_group_scope_mismatch(self, annotation_data, pyramid_request, group_service, scoped_open_group):
+        annotation_data['target_uri'] = u'http://www.bar.com/baz/ding.html'
+        group_service.find.return_value = scoped_open_group
+
+        with pytest.raises(ValidationError) as exc:
+            storage.update_annotation(pyramid_request, 'test_annotation_id', annotation_data, group_service)
+
+        assert str(exc.value).startswith('group scope: ')
+
+    @pytest.mark.usefixtures('scope_feature_off')
+    def test_it_allows_scope_mismatch_when_feature_off(self, annotation_data, pyramid_request, group_service, scoped_open_group):
+        annotation_data['target_uri'] = u'http://www.bar.com/baz/ding.html'
+        group_service.find.return_value = scoped_open_group
+
+        # this should not raise
+        annotation = storage.update_annotation(pyramid_request, 'test_annotation_id', annotation_data, group_service)
+
+        assert annotation == pyramid_request.db.query.return_value.get.return_value
+
     def test_it_updates_the_document_metadata_from_the_annotation(
             self,
             annotation_data,
@@ -494,7 +529,7 @@ class TestUpdateAnnotation(object):
                                   group_service)
         assert annotation.document == document
 
-    def test_it_returns_the_annotation(self, annotation_data, pyramid_request):
+    def test_it_returns_the_annotation(self, annotation_data, pyramid_request, group_service):
         annotation = storage.update_annotation(pyramid_request,
                                                'test_annotation_id',
                                                annotation_data,
