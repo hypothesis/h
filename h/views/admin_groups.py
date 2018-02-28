@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.view import view_config, view_defaults
+from pyramid.httpexceptions import HTTPFound
 
 from h import form  # noqa F401
 from h import i18n
@@ -37,6 +38,16 @@ class GroupCreateController(object):
             'authority': self.request.authority,
         })
         return self._template_context()
+
+    @view_config(request_method='POST')
+    def post(self):
+        def on_success(appstruct):
+            read_url = self.request.route_url('admin_groups')
+            return HTTPFound(location=read_url)
+
+        return form.handle_form_submission(self.request, self.form,
+                                           on_success=on_success,
+                                           on_failure=self._template_context)
 
     def _template_context(self):
         return {'form': self.form.render()}

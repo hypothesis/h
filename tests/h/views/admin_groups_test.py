@@ -45,6 +45,27 @@ class TestGroupCreateController(object):
 
         assert 'form' in ctx
 
+    def test_it_handles_form_submission(self, pyramid_request, handle_form_submission, matchers):
+        ctrl = GroupCreateController(pyramid_request)
+
+        ctrl.post()
+
+        handle_form_submission.assert_called_once_with(
+            ctrl.request,
+            ctrl.form,
+            matchers.any_callable(),
+            ctrl._template_context
+        )
+
+    def test_post_redirects_to_list_view_on_success(self, pyramid_request, matchers, routes):
+        pyramid_request.POST = {'name': 'foobar'}
+        ctrl = GroupCreateController(pyramid_request)
+
+        response = ctrl.post()
+
+        expected_location = pyramid_request.route_url('admin_groups')
+        assert response == matchers.redirect_302_to(expected_location)
+
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
@@ -60,6 +81,11 @@ def authority():
 @pytest.fixture
 def paginate(patch):
     return patch('h.views.admin_groups.paginator.paginate')
+
+
+@pytest.fixture
+def handle_form_submission(patch):
+    return patch('h.views.admin_groups.form.handle_form_submission')
 
 
 @pytest.fixture
