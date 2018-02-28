@@ -13,3 +13,11 @@ from h import paginator
 @paginator.paginate_query
 def groups_index(context, request):
     return request.db.query(models.Group).order_by(models.Group.created.desc())
+
+
+@view_config(route_name='admin_groups_create',
+             request_method='GET',
+             renderer='h:templates/admin/groups_create.html.jinja2',
+             permission='admin_groups')
+def groups_create(context, request):
+    return []
