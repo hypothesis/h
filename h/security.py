@@ -31,6 +31,15 @@ password_context = CryptContext(schemes=['bcrypt'],
 
 
 def derive_key(key_material, salt, info):
+    """
+    Derive a fixed-size (64-byte) key for use in cryptographic operations.
+
+    See https://cryptography.io/en/latest/hazmat/primitives/key-derivation-functions/
+
+    :type key_material: str or bytes
+    :type salt: bytes
+    :type info: bytes
+    """
     if not isinstance(key_material, bytes):
         key_material = key_material.encode()
     algorithm = hashes.SHA512()
