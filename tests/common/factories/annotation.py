@@ -8,6 +8,7 @@ import factory
 from sqlalchemy import orm
 
 from h import models
+from h.models.document import create_or_update_document_uri
 from h.models.document import update_document_metadata
 
 from .base import FAKER, ModelFactory
@@ -64,9 +65,10 @@ class Annotation(ModelFactory):
 
             This doesn't add anything to the database session yet.
             """
-            document_uri = DocumentURI.build(document=self.document,
+            document_uri = DocumentURI.build(document=None,
                                              claimant=self.target_uri,
                                              uri=self.target_uri)
+
             return dict(
                 claimant=document_uri.claimant,
                 uri=document_uri.uri,
@@ -83,7 +85,6 @@ class Annotation(ModelFactory):
 
             This doesn't add anything to the database session yet.
             """
-            kwargs.setdefault('document', self.document)
             kwargs.setdefault('claimant', self.target_uri)
             document_meta = DocumentMeta.build(**kwargs)
             return dict(
