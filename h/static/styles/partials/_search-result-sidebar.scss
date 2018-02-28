@@ -102,6 +102,20 @@
   color: $grey-6;
 }
 
+.search-result-sidebar__logo-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 26px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.search-result-sidebar__org-logo {
+  height: 20px;
+  width: 20px; 
+  margin-right: 5px;
+}
+
 @media screen and (max-width: $tablet-width + 250px) {
   // On tablet-sized screens and below the "sidebar" is displayed in the center
   // of the screen instead of on the side (this is achieved by media queries
