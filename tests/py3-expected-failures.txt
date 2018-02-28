@@ -1,5 +1,2 @@
 /h/tests/h/auth/util_test.py:69:
 /h/tests/h/schemas/annotation_test.py:197:
-/h/tests/h/schemas/base_test.py:64:
-/h/tests/h/schemas/base_test.py:70:
-/h/tests/h/schemas/base_test.py:79:
