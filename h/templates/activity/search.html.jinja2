@@ -276,21 +276,23 @@
     {# if the group has a concept of members display members and join text #}
     {% if group.members %} 
       {{ group_users("Members", group.members, group.creator) }}
-      <h3 class="group-invite__title">
-        {% trans %}Invite new members{% endtrans %}
-      </h3>
-      <p class="search-result-sidebar__share-link">
-        {% trans %}Sharing the link lets people join this group:{% endtrans %}
-      </p>
+      <section class="search-result-sidebar__section">
+        <h3 class="search-result-sidebar__subtitle">
+          {% trans %}Invite new members{% endtrans %}
+        </h3>
+        <p class="search-result-sidebar__share-link">
+          {% trans %}Sharing the link lets people join this group:{% endtrans %}
+        </p>
     {# if the group has no concept of members display moderators and share text #}
     {% else %}
       {{ group_users("Moderators", group.moderators, group.creator) }}
-      <h3 class="group-invite__title">
-        {% trans %}Share group{% endtrans %}
-      </h3>
-      <p class="search-result-sidebar__share-link">
-        {% trans %}Sharing the link lets people view this group:{% endtrans %}
-      </p>
+      <section class="search-result-sidebar__section">
+        <h3 class="search-result-sidebar__subtitle">
+          {% trans %}Share group{% endtrans %}
+        </h3>
+        <p class="search-result-sidebar__share-link">
+          {% trans %}Sharing the link lets people view this group:{% endtrans %}
+        </p>
     {% endif %}
     <div class="group-invite__container js-copy-button">
       <input class="group-invite__input js-select-onfocus"
@@ -302,6 +304,7 @@
         {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
       </button>
     </div>
+  </section>
   {% endcall %}
 {% endmacro %}
 
