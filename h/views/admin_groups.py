@@ -2,8 +2,13 @@
 
 from pyramid.view import view_config, view_defaults
 
+from h import form  # noqa F401
+from h import i18n
 from h import models
 from h import paginator
+from h.schemas.admin_group import CreateAdminGroupSchema
+
+_ = i18n.TranslationString
 
 
 @view_config(route_name='admin_groups',
@@ -22,16 +27,16 @@ class GroupCreateController(object):
 
     def __init__(self, request):
         self.request = request
+        self.schema = CreateAdminGroupSchema().bind(request=request)
+        self.form = request.create_form(self.schema,
+                                        buttons=(_('Create New Group'),))
 
     @view_config(request_method='GET')
     def get(self):
-        # self.form.set_appstruct({
-        #     'authority': self.request.authority,
-        #     'grant_type': GrantType.authorization_code,
-        #     'response_type': ResponseType.code,
-        #     'trusted': False,
-        # })
+        self.form.set_appstruct({
+            'authority': self.request.authority,
+        })
         return self._template_context()
 
     def _template_context(self):
-        return {'foo': 'bar'}
+        return {'form': self.form.render()}

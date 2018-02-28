@@ -38,12 +38,12 @@ def test_index_paginates_results(pyramid_request, routes, paginate):
 
 class TestGroupCreateController(object):
 
-    def test_get_sets_foo(self, pyramid_request):
+    def test_get_sets_form(self, pyramid_request):
         ctrl = GroupCreateController(pyramid_request)
 
         ctx = ctrl.get()
 
-        assert 'foo' in ctx
+        assert 'form' in ctx
 
 
 @pytest.fixture
