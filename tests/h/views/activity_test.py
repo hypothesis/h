@@ -238,7 +238,7 @@ class TestGroupSearchController(object):
                                                                  pyramid_request):
         group_info = controller.search()['group']
 
-        assert group_info['created'] == test_group.created.strftime('%B, %Y')
+        assert group_info['created'] == "{d:%B} {d.day}, {d:%Y}".format(d=test_group.created)
         assert group_info['description'] == test_group.description
         assert group_info['name'] == test_group.name
         assert group_info['pubid'] == test_group.pubid
@@ -819,7 +819,7 @@ class TestUserSearchController(object):
         user_details = controller.search()['user']
 
         assert user_details['description'] == user.description
-        assert user_details['registered_date'] == 'August, 2016'
+        assert user_details['registered_date'] == 'August 1, 2016'
         assert user_details['location'] == user.location
         assert user_details['uri'] == user.uri
         assert user_details['domain'] == 'www.example.com'
