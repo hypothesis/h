@@ -43,18 +43,7 @@ test: node_modules/.uptodate
 
 .PHONY: test-py3
 test-py3: node_modules/.uptodate
-	@pip install -q tox
-	@mkdir -p .tox
-	@ # Ensure stdout is blocking. Travis appears to turn on O_NONBLOCK on stdout by default which
-	@ # can cause `tee` to fail if it receives `EAGAIN`. Requires Python >= 3.5.
-	@ # See https://github.com/travis-ci/travis-ci/issues/4704
-	@ python3 -c 'import os, sys; os.set_blocking(sys.stdout.fileno(), True);'
-	# 1. Run tox, configured to print just one line per error in the form `{path}:{line no}:{line}`.
-	# 2. Extract unique error locations and write to file.
-	tox -e py36 -- --tb=line --no-print-logs tests/h/ | tee .tox/py36-log
-	cat .tox/py36-log | egrep -o '/h/[^:]+:[0-9]+:' | sort | uniq > tests/py3-actual-failures.txt
-	# 3. Compare actual and expected failures, this command will fail if they differ.
-	diff -u tests/py3-expected-failures.txt tests/py3-actual-failures.txt
+	tox -e py36 -- tests/h/
 
 .PHONY: lint
 lint: .pydeps
