@@ -132,14 +132,8 @@ def create_annotation(request, data, group_service):
                                       _('You may not create annotations '
                                         'in the specified group!'))
 
-    if request.feature('filter_groups_by_scope') and group.scopes:
-        # The scope (origin) of the target URI must match at least one
-        # of a group's defined scopes, if the group has any
-        group_scopes = [scope.origin for scope in group.scopes]
-        if not group_scope_match(data['target_uri'], group_scopes):
-            raise schemas.ValidationError('group scope: ' +
-                                          _('Annotations for this target URI '
-                                            'are not allowed in this group'))
+    if request.feature('filter_groups_by_scope'):
+        _validate_group_scope(group, data['target_uri'])
 
     annotation = models.Annotation(**data)
     annotation.created = created
@@ -160,15 +154,14 @@ def create_annotation(request, data, group_service):
     return annotation
 
 
-def update_annotation(session, id_, data):
+def update_annotation(request, id_, data, group_service):
     """
     Update an existing annotation and its associated document metadata.
 
     Update the annotation identified by id_ with the given
     data. Create, delete and update document metadata as appropriate.
 
-    :param session: the database session
-    :type session: sqlalchemy.orm.session.Session
+    :param request: the request object
 
     :param id_: the ID of the annotation to be updated, this is assumed to be a
         validated ID of an annotation that does already exist in the database
@@ -176,6 +169,8 @@ def update_annotation(session, id_, data):
 
     :param data: the validated data with which to update the annotation
     :type data: dict
+
+    :type group_service: :py:class:`h.interfaces.IGroupService`
 
     :returns: the updated annotation
     :rtype: h.models.Annotation
@@ -187,8 +182,15 @@ def update_annotation(session, id_, data):
     # annotation object.
     document = data.pop('document', None)
 
-    annotation = session.query(models.Annotation).get(id_)
+    annotation = request.db.query(models.Annotation).get(id_)
     annotation.updated = updated
+
+    group = group_service.find(annotation.groupid)
+    if group is None:
+        raise schemas.ValidationError('group: ' +
+                                      _('Invalid group specified for annotation'))
+    if request.feature('filter_groups_by_scope') and data.get('target_uri', None):
+        _validate_group_scope(group, data['target_uri'])
 
     annotation.extra.update(data.pop('extra', {}))
 
@@ -198,7 +200,7 @@ def update_annotation(session, id_, data):
     if document:
         document_uri_dicts = document['document_uri_dicts']
         document_meta_dicts = document['document_meta_dicts']
-        document = update_document_metadata(session,
+        document = update_document_metadata(request.db,
                                             annotation.target_uri,
                                             document_meta_dicts,
                                             document_uri_dicts,
@@ -254,3 +256,15 @@ def expand_uri(session, uri):
             return [uri]
 
     return [docuri.uri for docuri in docuris]
+
+
+def _validate_group_scope(group, target_uri):
+    if not group.scopes:
+        return
+    # The scope (origin) of the target URI must match at least one
+    # of a group's defined scopes, if the group has any
+    group_scopes = [scope.origin for scope in group.scopes]
+    if not group_scope_match(target_uri, group_scopes):
+        raise schemas.ValidationError('group scope: ' +
+                                      _('Annotations for this target URI '
+                                        'are not allowed in this group'))
