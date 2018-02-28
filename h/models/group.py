@@ -126,6 +126,12 @@ class Group(Base, mixins.Timestamps):
     def is_public(self):
         return self.readable_by == ReadableBy.world
 
+    @property
+    def logo(self):
+        """Returns logo icon if one exists for this groups authority else
+        returns None."""
+        return {'BioPub': 'biopub-logo', 'hypothesis': 'logo'}.get(self.authority)
+
     def __acl__(self):
         terms = []
 
