@@ -91,6 +91,10 @@ class TestDeriveKey(object):
 
         assert len(derived) == 64
 
+    def test_it_encodes_str_key_material(self):
+        derived = derive_key('akey', b'somesalt', b'some-info')
+        assert len(derived) == 64
+
 
 def test_password_context():
     assert isinstance(password_context, CryptContext)

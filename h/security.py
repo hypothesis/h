@@ -31,6 +31,8 @@ password_context = CryptContext(schemes=['bcrypt'],
 
 
 def derive_key(key_material, salt, info):
+    if not isinstance(key_material, bytes):
+        key_material = key_material.encode()
     algorithm = hashes.SHA512()
     length = algorithm.digest_size
     hkdf = HKDF(algorithm, length, salt, info, backend)
