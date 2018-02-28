@@ -170,8 +170,6 @@ def update_annotation(request, id_, data, group_service):
     :param data: the validated data with which to update the annotation
     :type data: dict
 
-    :param group_service: a service object that implements
-        :py:class:`h.interfaces.IGroupService`
     :type group_service: :py:class:`h.interfaces.IGroupService`
 
     :returns: the updated annotation
