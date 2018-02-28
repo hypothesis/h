@@ -26,10 +26,12 @@ if not PY2:
     text_type = str
     string_types = (str,)
     xrange = range
+    unichr = chr
 else:
     text_type = unicode  # noqa
     string_types = (str, unicode)  # noqa
     xrange = xrange
+    unichr = unichr
 
 try:
     import ConfigParser as configparser
