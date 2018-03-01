@@ -31,9 +31,9 @@ celery = Celery('h')
 celery.conf.update(
     # Default to using database number 10 so we don't conflict with the session
     # store.
-    BROKER_URL=os.environ.get('CELERY_BROKER_URL',
+    broker_url=os.environ.get('CELERY_BROKER_URL',
                               os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
-    CELERYBEAT_SCHEDULE={
+    beat_schedule={
         'purge-deleted-annotations': {
             'task': 'h.tasks.cleanup.purge_deleted_annotations',
             'schedule': timedelta(hours=1)
@@ -55,26 +55,26 @@ celery.conf.update(
             'schedule': timedelta(hours=6)
         },
     },
-    CELERY_ACCEPT_CONTENT=['json'],
+    accept_content=['json'],
     # Enable at-least-once delivery mode. This probably isn't actually what we
     # want for all of our queues, but it makes the failure-mode behaviour of
     # Celery the same as our old NSQ worker:
-    CELERY_ACKS_LATE=True,
-    CELERY_DISABLE_RATE_LIMITS=True,
-    CELERY_IGNORE_RESULT=True,
-    CELERY_IMPORTS=(
+    task_acks_late=True,
+    worker_disable_rate_limits=True,
+    task_ignore_result=True,
+    imports=(
         'h.tasks.admin',
         'h.tasks.cleanup',
         'h.tasks.indexer',
         'h.tasks.mailer',
     ),
-    CELERY_ROUTES={
+    task_routes={
         'h.tasks.indexer.add_annotation': 'indexer',
         'h.tasks.indexer.delete_annotation': 'indexer',
         'h.tasks.indexer.reindex_user_annotations': 'indexer',
     },
-    CELERY_TASK_SERIALIZER='json',
-    CELERY_QUEUES=[
+    task_serializer='json',
+    task_queues=[
         Queue('celery',
               durable=True,
               routing_key='celery',
@@ -87,7 +87,7 @@ celery.conf.update(
     # Only accept one task at a time. This also probably isn't what we want
     # (especially not for, say, a search indexer task) but it makes the
     # behaviour consistent with the previous NSQ-based worker:
-    CELERYD_PREFETCH_MULTIPLIER=1,
+    worker_prefetch_multiplier=1,
 )
 
 
