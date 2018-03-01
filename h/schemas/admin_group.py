@@ -3,13 +3,14 @@
 from __future__ import unicode_literals
 
 import colander
-from deform.widget import SelectWidget
+from deform.widget import SelectWidget, TextAreaWidget
 
 from h import i18n
 from h import validators
 from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
+    GROUP_DESCRIPTION_MAX_LENGTH
 )
 from h.schemas.base import CSRFSchema
 
@@ -53,4 +54,13 @@ class CreateAdminGroupSchema(CSRFSchema):
         description=_("Username for this group's creator"),
         hint=_('This user will be set as the "creator" of the group. Note that'
                ' the user must be on the same authority as the group authority'),
+    )
+
+    description = colander.SchemaNode(
+        colander.String(),
+        title=_('Description'),
+        description=_('Optional group description'),
+        validator=colander.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
+        widget=TextAreaWidget(rows=3),
+        missing=None
     )

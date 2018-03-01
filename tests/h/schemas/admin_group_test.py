@@ -7,6 +7,7 @@ import pytest
 from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
+    GROUP_DESCRIPTION_MAX_LENGTH
 )
 from h.schemas.admin_group import CreateAdminGroupSchema
 
@@ -32,6 +33,15 @@ class TestCreateGroupSchema(object):
 
         assert str(exc.value).find('name') >= 0
 
+    def test_it_raises_if_description_too_long(self, group_data, bound_schema):
+        too_long_description = u'a' * (GROUP_DESCRIPTION_MAX_LENGTH + 1)
+        group_data['description'] = too_long_description
+
+        with pytest.raises(colander.Invalid) as exc:
+            bound_schema.deserialize(group_data)
+
+        assert str(exc.value).find('description') >= 0
+
     @pytest.mark.parametrize('required_field', (
         'name',
         'authority',
@@ -45,6 +55,11 @@ class TestCreateGroupSchema(object):
 
         assert str(exc.value).find(required_field) >= 0
 
+    def test_it_allows_when_optional_field_missing(self, group_data, bound_schema):
+        group_data.pop('description')
+
+        bound_schema.deserialize(group_data)
+
 
 @pytest.fixture
 def group_data(factories):
@@ -52,7 +67,8 @@ def group_data(factories):
         'name': u'My Group',
         'authority': u'example.com',
         'group_type': u'open',
-        'creator': factories.User().username
+        'creator': factories.User().username,
+        'description': u'Lorem ipsum dolor sit amet consectetuer',
     }
 
 
