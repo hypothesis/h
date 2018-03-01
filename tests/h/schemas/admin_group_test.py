@@ -32,35 +32,27 @@ class TestCreateGroupSchema(object):
 
         assert str(exc.value).find('name') >= 0
 
-    def test_it_raises_if_name_missing(self, group_data, bound_schema):
-        group_data.pop('name')
+    @pytest.mark.parametrize('required_field', (
+        'name',
+        'authority',
+        'group_type',
+        'creator'
+    ))
+    def test_it_raises_if_required_field_missing(self, group_data, bound_schema, required_field):
+        group_data.pop(required_field)
         with pytest.raises(colander.Invalid) as exc:
             bound_schema.deserialize(group_data)
 
-        assert str(exc.value).find('name') >= 0
-
-    def test_it_raises_if_authority_missing(self, group_data, bound_schema):
-        group_data.pop('authority')
-        with pytest.raises(colander.Invalid) as exc:
-            bound_schema.deserialize(group_data)
-
-        assert str(exc.value).find('authority') >= 0
-
-    def test_it_raises_if_group_type_missing(self, group_data, bound_schema):
-        group_data.pop('group_type')
-
-        with pytest.raises(colander.Invalid) as exc:
-            bound_schema.deserialize(group_data)
-
-        assert str(exc.value).find('group_type') >= 0
+        assert str(exc.value).find(required_field) >= 0
 
 
 @pytest.fixture
-def group_data():
+def group_data(factories):
     return {
         'name': u'My Group',
         'authority': u'example.com',
-        'group_type': u'open'
+        'group_type': u'open',
+        'creator': factories.User().username
     }
 
 

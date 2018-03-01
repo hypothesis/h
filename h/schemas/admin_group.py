@@ -32,7 +32,7 @@ class CreateAdminGroupSchema(CSRFSchema):
 
     name = colander.SchemaNode(
         colander.String(),
-        title=_('Name'),
+        title=_('Group Name'),
         validator=validators.Length(min=GROUP_NAME_MIN_LENGTH,
                                     max=GROUP_NAME_MAX_LENGTH),
     )
@@ -40,8 +40,17 @@ class CreateAdminGroupSchema(CSRFSchema):
     authority = colander.SchemaNode(
         colander.String(),
         title=_('Authority'),
+        description=_("The group's authority"),
         hint=_('The authority within which this group should be created.'
                ' Note that only users within the designated authority'
                ' will be able to be associated with this group (as'
                ' creator or member).')
+    )
+
+    creator = colander.SchemaNode(
+        colander.String(),
+        title=_('Creator'),
+        description=_("Username for this group's creator"),
+        hint=_('This user will be set as the "creator" of the group. Note that'
+               ' the user must be on the same authority as the group authority'),
     )

@@ -57,8 +57,15 @@ class TestGroupCreateController(object):
             ctrl._template_context
         )
 
-    def test_post_redirects_to_list_view_on_success(self, pyramid_request, matchers, routes):
-        pyramid_request.POST = {'name': 'foobar'}
+    def test_post_redirects_to_list_view_on_success(self, pyramid_request, matchers, routes, handle_form_submission):
+        def call_on_success(request, form, on_success, on_failure):
+            return on_success({
+                'name': 'My New Group',
+                'group_type': 'restricted',
+                'creator': pyramid_request.user.username,
+                'authority': pyramid_request.authority
+            })
+        handle_form_submission.side_effect = call_on_success
         ctrl = GroupCreateController(pyramid_request)
 
         response = ctrl.post()
@@ -68,14 +75,15 @@ class TestGroupCreateController(object):
 
 
 @pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.session = mock.Mock(spec_set=['flash', 'get_csrf_token'])
-    return pyramid_request
+def authority():
+    return 'foo.com'
 
 
 @pytest.fixture
-def authority():
-    return 'foo.com'
+def pyramid_request(pyramid_request, factories, authority):
+    pyramid_request.session = mock.Mock(spec_set=['flash', 'get_csrf_token'])
+    pyramid_request.user = factories.User(authority=authority)
+    return pyramid_request
 
 
 @pytest.fixture

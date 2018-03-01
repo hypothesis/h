@@ -36,6 +36,7 @@ class GroupCreateController(object):
     def get(self):
         self.form.set_appstruct({
             'authority': self.request.authority,
+            'creator': self.request.user.username,
         })
         return self._template_context()
 
@@ -43,7 +44,15 @@ class GroupCreateController(object):
     def post(self):
         def on_success(appstruct):
             read_url = self.request.route_url('admin_groups')
-            return HTTPFound(location=read_url)
+            self.request.session.flash('TODO: I will add a {gtype} group called "{name}"'
+                                       ' for authority {authority}, created by {creator}'.format(
+                                            gtype=appstruct['group_type'],
+                                            name=appstruct['name'],
+                                            authority=appstruct['authority'],
+                                            creator=appstruct['creator']
+                                       ), queue='success')
+            response = HTTPFound(location=read_url)
+            return response
 
         return form.handle_form_submission(self.request, self.form,
                                            on_success=on_success,
