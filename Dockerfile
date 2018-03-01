@@ -9,7 +9,7 @@ COPY package.json ./
 RUN npm ci --production
 
 # Build h js/css.
-COPY gulpfile.js ./ 
+COPY gulpfile.js ./
 COPY scripts/gulp ./scripts/gulp
 COPY h/static ./h/static
 RUN npm run build
@@ -27,8 +27,7 @@ RUN apk add --no-cache \
     libffi \
     libpq \
     nginx \
-    python2 \
-    py2-pip \
+    python3 \
     git
 
 # Create the hypothesis user, group, home directory and package directory.
@@ -54,9 +53,10 @@ RUN apk add --no-cache --virtual build-deps \
     build-base \
     libffi-dev \
     postgresql-dev \
-    python-dev \
-  && pip install --no-cache-dir -U pip \
-  && pip install --no-cache-dir -r requirements.txt \
+    python3-dev \
+  && python3 -m ensurepip \
+  && pip3 install --no-cache-dir -U pip \
+  && pip3 install --no-cache-dir -r requirements.txt \
   && apk del build-deps
 
 # Copy frontend assets.
@@ -75,6 +75,7 @@ EXPOSE 5000
 ENV PATH /var/lib/hypothesis/bin:$PATH
 ENV PYTHONIOENCODING utf_8
 ENV PYTHONPATH /var/lib/hypothesis:$PYTHONPATH
+RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 # Start the web server by default
 USER hypothesis

@@ -30,9 +30,9 @@ node {
                                          "-e SITE_PACKAGES=true"
                                          ) {
                 // Test dependencies
-                sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
-                sh 'apk add --no-cache python3 python3-dev'
-                sh 'pip install -q tox>=3.8.0'
+                sh 'apk add --no-cache build-base libffi-dev postgresql-dev python3-dev'
+                sh 'apk add --no-cache python-dev' // while we continue to run tests under Python 2.7
+                sh 'pip3 install -q tox>=3.8.0'
 
                 // Unit tests
                 sh 'cd /var/lib/hypothesis && tox'
