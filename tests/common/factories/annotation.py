@@ -83,7 +83,7 @@ class Annotation(ModelFactory):
 
             This doesn't add anything to the database session yet.
             """
-            kwargs.setdefault('document', self.document)
+            kwargs.setdefault('document', None)
             kwargs.setdefault('claimant', self.target_uri)
             document_meta = DocumentMeta.build(**kwargs)
             return dict(
