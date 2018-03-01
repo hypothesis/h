@@ -316,6 +316,8 @@ def create_or_update_document_uri(session,
     except sa.exc.IntegrityError:
         raise ConcurrentUpdateError('concurrent document uri updates')
 
+    return docuri
+
 
 def create_or_update_document_meta(session,
                                    claimant,
