@@ -28,7 +28,7 @@ node {
                                          "-e ELASTICSEARCH_HOST=${elasticsearchHost} " +
                                          "-e TEST_DATABASE_URL=${databaseUrl}") {
                 // Test dependencies
-                sh 'apk-install build-base libffi-dev postgresql-dev python-dev'
+                sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
                 sh 'pip install -q tox'
 
                 // Unit tests
