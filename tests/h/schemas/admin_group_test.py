@@ -13,6 +13,9 @@ from h.schemas.admin_group import CreateAdminGroupSchema
 
 class TestCreateGroupSchema(object):
 
+    def test_it_allows_with_valid_data(self, group_data, bound_schema):
+        bound_schema.deserialize(group_data)
+
     def test_it_raises_if_name_too_short(self, group_data, bound_schema):
         too_short_name = u'a' * (GROUP_NAME_MIN_LENGTH - 1)
         group_data['name'] = too_short_name
@@ -43,12 +46,21 @@ class TestCreateGroupSchema(object):
 
         assert str(exc.value).find('authority') >= 0
 
+    def test_it_raises_if_group_type_missing(self, group_data, bound_schema):
+        group_data.pop('group_type')
+
+        with pytest.raises(colander.Invalid) as exc:
+            bound_schema.deserialize(group_data)
+
+        assert str(exc.value).find('group_type') >= 0
+
 
 @pytest.fixture
 def group_data():
     return {
         'name': u'My Group',
-        'authority': u'example.com'
+        'authority': u'example.com',
+        'group_type': u'open'
     }
 
 

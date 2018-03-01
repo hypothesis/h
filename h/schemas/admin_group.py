@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import colander
+from deform.widget import SelectWidget
 
 from h import i18n
 from h import validators
@@ -14,8 +15,21 @@ from h.schemas.base import CSRFSchema
 
 _ = i18n.TranslationString
 
+VALID_GROUP_TYPES = (
+    (u'private', _('Private')),
+    (u'restricted', _('Restricted')),
+    (u'open', _('Open')),
+)
+
 
 class CreateAdminGroupSchema(CSRFSchema):
+
+    group_type = colander.SchemaNode(
+        colander.String(),
+        title=_('Group Type'),
+        widget=SelectWidget(values=((u'', _('Select')),) + VALID_GROUP_TYPES)
+    )
+
     name = colander.SchemaNode(
         colander.String(),
         title=_('Name'),
