@@ -8,7 +8,7 @@
   padding-left: 5px;
   padding-right: 22px;  /* Make space for the clipboard icon. */
   padding-top: 0;
-  margin-top: 12px;
+  margin-top: 5px;
   margin-bottom: 8px;
   border: 1px solid $grey-3;
   border-radius: 2px;
@@ -24,7 +24,7 @@
   border: none;
   position: absolute;
   right: 0;
-  top: 12px;
+  top: 5px;
 
   display: none;
   .env-js-capable & {

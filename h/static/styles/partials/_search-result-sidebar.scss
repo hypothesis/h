@@ -19,6 +19,7 @@
 }
 
 .search-result-sidebar__subtitle-count {
+  font-size: $normal-font-size;
   font-weight: normal;
 }
 
@@ -74,7 +75,7 @@
   background-color: $grey-2;
   border-radius: 2px;
   margin-bottom: 5px;
-  margin-right: 5px;
+  margin-right: 7px;
   padding-bottom: 1px;
   padding-top: 1px;
   padding-left: 3px;
