@@ -31,9 +31,9 @@ node {
                                          "-e ELASTICSEARCH_URL=${elasticsearchHost} " +
                                          "-e TEST_DATABASE_URL=${databaseUrl}") {
                 // Test dependencies
-                sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
-                sh 'apk add --no-cache python3 python3-dev'
-                sh 'pip install -q tox'
+                sh 'apk add --no-cache build-base libffi-dev postgresql-dev python3-dev'
+                sh 'apk add --no-cache python-dev' // while we continue to run tests under Python 2.7
+                sh 'pip3 install -q tox'
 
                 // Unit tests
                 sh 'cd /var/lib/hypothesis && tox'
