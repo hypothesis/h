@@ -57,7 +57,7 @@
 }
 
 .search-results__total {
-  font-size: 1.1em;
+  font-size: $search-results-subtitle-font-size;
   color: $brand;
   margin-bottom: 25px;
 }
