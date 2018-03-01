@@ -39,6 +39,12 @@ def test_human_timestamp(timestamp_in, string_out):
     assert result == string_out
 
 
+def test_format_number():
+    num = 134908
+    result = ext.format_number(num)
+    assert result == '134,908'
+
+
 def test_svg_icon_loads_icon():
     def read_icon(name):
         return '<svg id="{}"></svg>'.format(name)

@@ -164,7 +164,7 @@
         <span class="search-result-sidebar__tag-container">
           {{ tag.tag }}
           <span class="search-result-sidebar__tag-count">
-            {{ tag.count }}
+            {{ tag.count | format_number}}
           </span>
         </span>
       </button>
@@ -196,7 +196,7 @@
                 class="search-result-sidebar__username">
           {{ user.username }}
           <span class="search-result-sidebar__annotations-count">
-            {{ user.count }}
+            {{ user.count | format_number}}
           </span>
           {% if user.userid == creator %}
             <span class="search-result-sidebar__creator">
@@ -240,7 +240,7 @@
       <div class="search-result-sidebar__subsection">
         <p class="search-result-sidebar__subsection-p">
           <span class="search-result-sidebar__subsection-key">{% trans %}Annotations:{% endtrans %}</span>
-          <span class="search-result-sidebar__subsection-val">{{ stats.annotation_count }}</span>
+          <span class="search-result-sidebar__subsection-val">{{ stats.annotation_count | format_number}}</span>
         </p>
         <p class="search-result-sidebar__subsection-p">
           <span class="search-result-sidebar__subsection-key">{% trans %}Created:{% endtrans %}</span>
@@ -321,7 +321,7 @@
       {% if stats.annotation_count %}
         <p class="search-result-sidebar__subsection-p">
           <span class="search-result-sidebar__subsection-key">{% trans %}Annotations:{% endtrans %}</span>
-          <span class="search-result-sidebar__subsection-val">{{ stats.annotation_count }}</span>
+          <span class="search-result-sidebar__subsection-val">{{ stats.annotation_count | format_number}}</span>
         </p>
       {% endif %}
         <p class="search-result-sidebar__subsection-p">
@@ -389,7 +389,7 @@
       <div class="search-results {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
 
         {% if q or user or group %}
-        <div class="search-results__total"> {{search_results.total}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
+        <div class="search-results__total"> {{search_results.total | format_number}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
         {% endif %}
 
         <ol class="search-results__list"
