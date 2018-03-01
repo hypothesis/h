@@ -64,7 +64,7 @@ class Annotation(ModelFactory):
 
             This doesn't add anything to the database session yet.
             """
-            document_uri = DocumentURI.build(document=self.document,
+            document_uri = DocumentURI.build(document=None,
                                              claimant=self.target_uri,
                                              uri=self.target_uri)
             return dict(
