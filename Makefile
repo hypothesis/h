@@ -34,6 +34,23 @@ dev: build/manifest.json .pydeps
 docker:
 	git archive HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
 
+# Run docker image built with `docker` task
+.PHONY: run-docker
+run-docker:
+	$(eval RABBITMQ_CONTAINER ?= rabbitmq)
+	$(eval PG_CONTAINER ?= postgres)
+	$(eval ES_CONTAINER ?= elasticsearch)
+	docker run \
+		--link $(RABBITMQ_CONTAINER) \
+		--link $(PG_CONTAINER) \
+		--link $(ES_CONTAINER) \
+		-e "APP_URL=http://localhost:5000" \
+		-e "BROKER_URL=amqp://guest:guest@$(RABBITMQ_CONTAINER):5672//" \
+		-e "DATABASE_URL=postgresql://postgres@$(PG_CONTAINER)/postgres" \
+		-e "ELASTICSEARCH_HOST=http://$(ES_CONTAINER):9200" \
+		-p 5000:5000 \
+		hypothesis/hypothesis:$(DOCKER_TAG)
+
 ## Run test suite
 .PHONY: test
 test: node_modules/.uptodate
