@@ -77,15 +77,22 @@ class Annotation(ModelFactory):
         document_uri_dicts = [document_uri_dict()
                               for _ in range(random.randint(1, 3))]
 
-        def document_meta_dict(**kwargs):
+        def document_meta_dict(type_=None):
             """
             Return a randomly generated DocumentMeta dict for this annotation.
 
             This doesn't add anything to the database session yet.
             """
-            kwargs.setdefault('document', None)
-            kwargs.setdefault('claimant', self.target_uri)
+            kwargs = {
+                'document': None,
+                'claimant': self.target_uri,
+            }
+
+            if type_ is not None:
+                kwargs['type'] = type_
+
             document_meta = DocumentMeta.build(**kwargs)
+
             return dict(
                 claimant=document_meta.claimant,
                 type=document_meta.type,
@@ -98,7 +105,7 @@ class Annotation(ModelFactory):
         # Make sure that there's always at least one DocumentMeta with
         # type='title', so that we never get annotation.document.title is None:
         if 'title' not in [m['type'] for m in document_meta_dicts]:
-            document_meta_dicts.append(document_meta_dict(type='title'))
+            document_meta_dicts.append(document_meta_dict(type_='title'))
 
         self.document = update_document_metadata(
             orm.object_session(self),
