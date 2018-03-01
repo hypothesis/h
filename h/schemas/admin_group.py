@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import colander
-from deform.widget import SelectWidget, TextAreaWidget
+from deform.widget import SelectWidget, TextInputWidget
 
 from h import i18n
 from h import validators
@@ -61,6 +61,6 @@ class CreateAdminGroupSchema(CSRFSchema):
         title=_('Description'),
         description=_('Optional group description'),
         validator=colander.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
-        widget=TextAreaWidget(rows=3),
+        widget=TextInputWidget(rows=3),
         missing=None
     )

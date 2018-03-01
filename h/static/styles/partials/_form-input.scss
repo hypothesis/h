@@ -149,6 +149,11 @@
     border-radius: 3px;
   }
 
+  select.form-input__input {
+    margin-top: $top-padding;
+    height: $hint-height;
+  }
+
   .form-input__input.has-hint {
     .env-js-capable & {
       padding-top: $top-padding;
