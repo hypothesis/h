@@ -9,6 +9,7 @@ from pyramid import httpexceptions
 
 from h.activity.query import ActivityResults
 from h.views import activity
+from h.models import Organization
 
 
 GROUP_TYPE_OPTIONS = ('group', 'open_group', 'restricted_group')
@@ -230,18 +231,23 @@ class TestGroupSearchController(object):
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
                              indirect=['test_group', 'test_user'])
-    def test_search_returns_group_info_if_user_has_read_permissions(self,
-                                                                 controller,
-                                                                 factories,
-                                                                 test_group,
-                                                                 test_user,
-                                                                 pyramid_request):
+    def test_search_returns_group_info_if_user_has_read_permissions(
+            self,
+            controller,
+            factories,
+            test_group,
+            test_user,
+            default_org,
+            OrganizationResource,
+            pyramid_request):
         group_info = controller.search()['group']
 
         assert group_info['created'] == "{d:%B} {d.day}, {d:%Y}".format(d=test_group.created)
         assert group_info['description'] == test_group.description
         assert group_info['name'] == test_group.name
         assert group_info['pubid'] == test_group.pubid
+        assert group_info['organization']['logo'] == OrganizationResource(None, None).logo
+        assert group_info['organization']['name'] == default_org.name
 
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
@@ -763,11 +769,19 @@ class TestGroupSearchController(object):
                 "user": factories.User()}
 
     @pytest.fixture
-    def controller(self, request, group, pyramid_request):
+    def OrganizationResource(self, patch):
+        OrganizationResource = patch("h.views.activity.OrganizationResource")
+        organization_resource = OrganizationResource.return_value
+        organization_resource.logo = "http://example.com/organizations/pubid/logo"
+        return OrganizationResource
+
+    @pytest.fixture
+    def controller(self, request, group, pyramid_request, OrganizationResource):
         test_group = group
         if 'test_group' in request.fixturenames:
             test_group = request.getfixturevalue('test_group')
-        return activity.GroupSearchController(test_group, pyramid_request)
+        controller = activity.GroupSearchController(test_group, pyramid_request)
+        return controller
 
     @pytest.fixture
     def group_leave_request(self, request, group, pyramid_request):
@@ -1229,6 +1243,11 @@ def search(patch):
         'zero_message': 'No annotations matched your search.',
     }
     return search
+
+
+@pytest.fixture
+def default_org(db_session):
+    return Organization.default(db_session)
 
 
 @pytest.fixture
