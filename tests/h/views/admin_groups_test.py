@@ -23,7 +23,7 @@ def test_index_lists_groups_sorted_by_created_desc(pyramid_request, routes, fact
     # We can't avoid getting the Public group back, which is created outside of
     # these tests' sphere of influence. Remove it as it is not feasible to
     # assert where it will appear in creation order.
-    filtered_groups = list(filter(lambda group: group.pubid != u'__world__',
+    filtered_groups = list(filter(lambda group: group.pubid != '__world__',
                                   ctx['results']))
 
     expected_groups = [groups[2], groups[0], groups[1], groups[3]]
