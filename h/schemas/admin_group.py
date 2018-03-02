@@ -28,7 +28,8 @@ class CreateAdminGroupSchema(CSRFSchema):
     group_type = colander.SchemaNode(
         colander.String(),
         title=_('Group Type'),
-        widget=SelectWidget(values=(('', _('Select')),) + VALID_GROUP_TYPES)
+        widget=SelectWidget(values=(('', _('Select')),) + VALID_GROUP_TYPES),
+        validator=colander.OneOf([key for key, title in VALID_GROUP_TYPES])
     )
 
     name = colander.SchemaNode(

@@ -38,6 +38,12 @@ class TestCreateGroupSchema(object):
         with pytest.raises(colander.Invalid, match='.*description.*'):
             bound_schema.deserialize(group_data)
 
+    def test_it_raises_if_group_type_invalid(self, group_data, bound_schema):
+        group_data['group_type'] = 'foobarbazding'
+
+        with pytest.raises(colander.Invalid, match='.*group_type.*'):
+            bound_schema.deserialize(group_data)
+
     @pytest.mark.parametrize('required_field', (
         'name',
         'authority',
