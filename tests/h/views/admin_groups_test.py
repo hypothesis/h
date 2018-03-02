@@ -10,6 +10,7 @@ import mock
 # from h.models.auth_client import AuthClient, GrantType, ResponseType
 from h.views import admin_groups
 from h.views.admin_groups import GroupCreateController
+from h.services.user import UserService
 
 
 def test_index_lists_groups_sorted_by_created_desc(pyramid_request, routes, factories, authority):
@@ -36,6 +37,7 @@ def test_index_paginates_results(pyramid_request, routes, paginate):
     paginate.assert_called_once_with(pyramid_request, mock.ANY, mock.ANY)
 
 
+@pytest.mark.usefixtures('user_svc')
 class TestGroupCreateController(object):
 
     def test_get_sets_form(self, pyramid_request):
@@ -100,3 +102,10 @@ def handle_form_submission(patch):
 def routes(pyramid_config):
     pyramid_config.add_route('admin_groups', '/admin/groups')
     pyramid_config.add_route('admin_groups_create', '/admin/groups/new')
+
+
+@pytest.fixture
+def user_svc(pyramid_config):
+    svc = mock.create_autospec(UserService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='user')
+    return svc

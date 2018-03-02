@@ -3,13 +3,15 @@ from __future__ import unicode_literals
 
 import colander
 import pytest
+import mock
 
 from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH
 )
-from h.schemas.admin_group import CreateAdminGroupSchema
+from h.schemas.admin_group import CreateAdminGroupSchema, user_exists_validator_factory
+from h.services.user import UserService
 
 
 class TestCreateGroupSchema(object):
@@ -60,6 +62,48 @@ class TestCreateGroupSchema(object):
         group_data.pop('description')
 
         bound_schema.deserialize(group_data)
+
+
+class TestCreateSchemaWithValidator(object):
+
+    def test_it_passes_creator_and_authority_to_service(self,
+                                                        group_data,
+                                                        pyramid_csrf_request,
+                                                        user_svc,
+                                                        user_validator):
+        schema = CreateAdminGroupSchema(validator=user_validator).bind(request=pyramid_csrf_request)
+        schema.deserialize(group_data)
+
+        user_svc.fetch.assert_called_with(group_data['creator'], group_data['authority'])
+
+    def test_it_allows_when_user_exists_at_authority(self,
+                                                     group_data,
+                                                     pyramid_csrf_request,
+                                                     user_svc,
+                                                     user_validator):
+        schema = CreateAdminGroupSchema(validator=user_validator).bind(request=pyramid_csrf_request)
+        schema.deserialize(group_data)
+
+    def test_it_raises_when_user_not_found(self,
+                                           group_data,
+                                           pyramid_csrf_request,
+                                           user_svc,
+                                           user_validator):
+        user_svc.fetch.return_value = None
+        schema = CreateAdminGroupSchema(validator=user_validator).bind(request=pyramid_csrf_request)
+
+        with pytest.raises(colander.Invalid, match='.*creator.*'):
+            schema.deserialize(group_data)
+
+    @pytest.fixture
+    def user_svc(self):
+        svc = mock.create_autospec(UserService, spec_set=True, instance=True)
+        return svc
+
+    @pytest.fixture
+    def user_validator(self, user_svc):
+        validator = user_exists_validator_factory(user_svc)
+        return validator
 
 
 @pytest.fixture

@@ -23,6 +23,19 @@ VALID_GROUP_TYPES = (
 )
 
 
+def user_exists_validator_factory(user_svc):
+    def user_exists_validator(form, value):
+        user = user_svc.fetch(value['creator'], value['authority'])
+        if user is None:
+            exc = colander.Invalid(form, _('User not found'))
+            exc['creator'] = 'User {creator} not found at authority {authority}'.format(
+                creator=value['creator'],
+                authority=value['authority']
+            )
+            raise exc
+    return user_exists_validator
+
+
 class CreateAdminGroupSchema(CSRFSchema):
 
     group_type = colander.SchemaNode(

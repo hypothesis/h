@@ -8,7 +8,7 @@ from h import form  # noqa F401
 from h import i18n
 from h import models
 from h import paginator
-from h.schemas.admin_group import CreateAdminGroupSchema
+from h.schemas.admin_group import CreateAdminGroupSchema, user_exists_validator_factory
 
 _ = i18n.TranslationString
 
@@ -28,8 +28,9 @@ def groups_index(context, request):
 class GroupCreateController(object):
 
     def __init__(self, request):
+        user_validator = user_exists_validator_factory(request.find_service(name='user'))
+        self.schema = CreateAdminGroupSchema(validator=user_validator).bind(request=request)
         self.request = request
-        self.schema = CreateAdminGroupSchema().bind(request=request)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Create New Group'),))
 
