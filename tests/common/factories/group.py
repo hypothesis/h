@@ -26,6 +26,13 @@ class Group(ModelFactory):
     writeable_by = WriteableBy.members
     members = factory.LazyAttribute(lambda obj: [obj.creator])
 
+    @factory.post_generation
+    def scopes(self, create, scopes=0, **kwargs):
+        if isinstance(scopes, int):
+            scopes = [GroupScope(group=self) for _ in range(0, scopes)]
+
+        self.scopes = scopes or []
+
 
 class OpenGroup(Group):
 
@@ -36,9 +43,9 @@ class OpenGroup(Group):
     writeable_by = WriteableBy.authority
     members = []
 
-    @factory.post_generation
-    def scopes(self, create, scopes=0, **kwargs):
-        if isinstance(scopes, int):
-            scopes = [GroupScope(group=self) for _ in range(0, scopes)]
 
-        self.scopes = scopes or []
+class RestrictedGroup(Group):
+    name = factory.Sequence(lambda n: 'Test Restricted Group {n}'.format(n=str(n)))
+
+    joinable_by = None
+    readable_by = ReadableBy.world

@@ -113,8 +113,6 @@ class TestGroupService(object):
                                           origins=origins,
                                           description='test_description')
 
-        # It should reuse the GroupScopes already in the DB, not try to create
-        # new ones.
         for scope in scopes:
             assert scope not in group.scopes
 
@@ -123,6 +121,77 @@ class TestGroupService(object):
         group = service.create_open_group(name='test_group',
                                           userid='cazimir',
                                           origins=['https://biopub.org'])
+
+        assert group.description is None
+
+    def test_create_restricted_group_returns_group(self, service, users):
+        creator = users['cazimir']
+
+        group = service.create_restricted_group(name='test_group',
+                                                userid=creator.username,
+                                                origins=['https://biopub.org'],
+                                                description='test_description')
+
+        assert group.name == 'test_group'
+        assert group.authority == 'example.com'
+        assert group.creator == creator
+        assert group.description == 'test_description'
+        assert group.joinable_by is None
+        assert group.readable_by == ReadableBy.world
+        assert group.writeable_by == WriteableBy.members
+        assert creator in group.members
+
+    def test_create_restricted_group_adds_group_creator_to_members(self, service, users):
+        creator = users['cazimir']
+
+        group = service.create_restricted_group(name='test_group',
+                                                userid=creator.username,
+                                                origins=['https://biopub.org'],
+                                                description='test_description')
+
+        assert creator in group.members
+
+    def test_create_restricted_group_publishes_join_event(self, publish, service, users):
+        creator = users['cazimir']
+
+        group = service.create_restricted_group(name='test_group',
+                                                userid=creator.username,
+                                                origins=['https://biopub.org'],
+                                                description='test_description')
+
+        publish.assert_called_once_with('group-join', group.pubid, 'acct:cazimir@example.com')
+
+    def test_create_restricted_group_sets_scopes(self, service, matchers, users):
+        origins = ['https://biopub.org', 'http://example.com', 'https://wikipedia.com']
+
+        group = service.create_restricted_group(name='test_group',
+                                                userid=users['cazimir'].username,
+                                                origins=origins,
+                                                description='test_description')
+
+        assert group.scopes == matchers.unordered_list([
+            GroupScopeWithOrigin(h) for h in origins])
+
+    def test_create_restricted_group_always_creates_new_scopes(self, db_session, factories, service, users, matchers):
+        # It always creates a new scope, even if a scope with the given origin
+        # already exists (this is because a single scope can only belong to
+        # one group, so the existing scope can't be reused with the new group).
+        origins = ['https://biopub.org', 'http://example.com']
+        scopes = [factories.GroupScope(origin=h) for h in origins]
+
+        group = service.create_restricted_group(name='test_group',
+                                                userid=users['cazimir'].username,
+                                                origins=origins,
+                                                description='test_description')
+
+        for scope in scopes:
+            assert scope not in group.scopes
+
+    def test_create_restricted_group_description_defaults_to_None(self, service):
+        # Create a restricted group with no `description` argument.
+        group = service.create_restricted_group(name='test_group',
+                                                userid='cazimir',
+                                                origins=['https://biopub.org'])
 
         assert group.description is None
 

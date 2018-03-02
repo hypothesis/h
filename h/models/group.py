@@ -114,7 +114,7 @@ class Group(Base, mixins.Timestamps):
             readable_by=self.readable_by,
             writeable_by=self.writeable_by)
 
-        for type_, type_flags in (('open', OPEN_GROUP_TYPE_FLAGS), ('private', PRIVATE_GROUP_TYPE_FLAGS)):
+        for type_, type_flags in (('open', OPEN_GROUP_TYPE_FLAGS), ('private', PRIVATE_GROUP_TYPE_FLAGS), ('restricted', RESTRICTED_GROUP_TYPE_FLAGS)):
             if self_type_flags == type_flags:
                 return type_
 
@@ -188,6 +188,12 @@ OPEN_GROUP_TYPE_FLAGS = TypeFlags(
 PRIVATE_GROUP_TYPE_FLAGS = TypeFlags(
     joinable_by=JoinableBy.authority,
     readable_by=ReadableBy.members,
+    writeable_by=WriteableBy.members)
+
+
+RESTRICTED_GROUP_TYPE_FLAGS = TypeFlags(
+    joinable_by=None,
+    readable_by=ReadableBy.world,
     writeable_by=WriteableBy.members)
 
 

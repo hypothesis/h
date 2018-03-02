@@ -49,6 +49,10 @@ def test_type_returns_private_for_private_groups(factories):
     assert factories.Group().type == 'private'
 
 
+def test_type_returns_restricted_for_restricted_groups(factories):
+    assert factories.RestrictedGroup().type == 'restricted'
+
+
 def test_type_raises_for_unknown_type_of_group(factories):
     group = factories.Group()
     # Set the group's access flags to an invalid / unused combination.
