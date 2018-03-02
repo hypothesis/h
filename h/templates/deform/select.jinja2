@@ -1,0 +1,14 @@
+<select
+{% include "includes/common_attrs.jinja2" %}
+>
+{% for value, description in field.widget.values %}
+ <option
+        {% if value == cstruct %}
+        selected="selected"
+        {% endif %}
+        {% if field.widget.css_class %}
+        class="{{ field.widget.css_class }}"
+        {% endif %}
+        value="{{ value }}">{{ description }}</option>
+{% endfor %}
+</select>
