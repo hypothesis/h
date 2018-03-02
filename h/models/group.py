@@ -130,7 +130,8 @@ class Group(Base, mixins.Timestamps):
     def logo(self):
         """Returns logo icon if one exists for this groups authority else
         returns None."""
-        return {'biopub.hypothes.is': 'biopub-logo', 'hypothesis': 'logo'}.get(self.authority)
+        return {'biopub.hypothes.is': 'biopub-logo',
+                'hypothes.is': 'logo'}.get(self.authority)
 
     def __acl__(self):
         terms = []
