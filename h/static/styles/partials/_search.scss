@@ -166,7 +166,7 @@
 }
 
 .search-result-bucket__title {
-  color: black;
+  color: $grey-6;
   text-decoration: none;
   font-weight: bold;
   flex-grow: 1;
@@ -184,6 +184,7 @@
 
 .search-result-bucket__annotations-count-container {
   width: 30px;
+  color: $grey-6;
   background-color: $grey-2;
   text-align: center;
   border-radius: 2px;

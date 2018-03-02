@@ -45,6 +45,7 @@
 }
 
 .search-result-sidebar__subsection-key {
+  color: $grey-6;
   font-weight: bold;
 }
 
@@ -97,6 +98,7 @@
   font-weight: bold;
   margin-right: 3px;
   margin-bottom: 7px;
+  color: $grey-6;
 }
 
 @media screen and (max-width: $tablet-width + 250px) {
