@@ -257,7 +257,7 @@ class TestGroupSearchController(object):
         group_info = controller.search()['group']
 
         assert group_info['logo'] == "biopub-logo"
-        assert group_info['authority'] == "BioPub"
+        assert group_info['authority'] == "BIOPUB"
 
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
