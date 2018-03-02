@@ -87,7 +87,7 @@ def test_gets_logo_if_logo_is_known(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()
 
-    group = models.Group(name=name, authority='BioPub', creator=user)
+    group = models.Group(name=name, authority='biopub.hypothes.is', creator=user)
     db_session.add(group)
     db_session.flush()
 

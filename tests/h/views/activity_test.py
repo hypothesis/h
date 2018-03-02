@@ -257,7 +257,7 @@ class TestGroupSearchController(object):
         group_info = controller.search()['group']
 
         assert group_info['logo'] == "biopub-logo"
-        assert group_info['authority'] == "BIOPUB"
+        assert group_info['authority'] == "BIOPUB.HYPOTHES.IS"
 
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
@@ -1111,7 +1111,7 @@ class FakeAnnotationStatsService(object):
 def group(factories):
     group = factories.Group()
     group.members.extend([factories.User(), factories.User()])
-    group.authority = "BioPub"
+    group.authority = "biopub.hypothes.is"
     return group
 
 
