@@ -205,7 +205,7 @@
           {% endif %}
         </button>
       </li>
-      {% endfor %}
+    {% endfor %}
     </ul>
   </form>
 </section>
@@ -256,8 +256,8 @@
           </a>
         </p>
       {% endif %}
-      {# only show ability to leave group if group has concept of members #}
-      {% if group.members %}
+      {# only show ability to leave group if the logged in user is a member of that group #}
+      {% if show_leave_button %}
         <button class="link--btn js-confirm-submit"
                 type="submit"
                 form="search-bar"
@@ -273,38 +273,25 @@
 
     {{ tags_section() }}
 
-    {# if the group has a concept of members display members and join text #}
-    {% if group.members %} 
-      {{ group_users("Members", group.members, group.creator) }}
-      <section class="search-result-sidebar__section">
-        <h3 class="search-result-sidebar__subtitle">
-          {% trans %}Invite new members{% endtrans %}
-        </h3>
-        <p class="search-result-sidebar__share-link">
-          {% trans %}Sharing the link lets people join this group:{% endtrans %}
-        </p>
-    {# if the group has no concept of members display moderators and share text #}
-    {% else %}
-      {{ group_users("Moderators", group.moderators, group.creator) }}
-      <section class="search-result-sidebar__section">
-        <h3 class="search-result-sidebar__subtitle">
-          {% trans %}Share group{% endtrans %}
-        </h3>
-        <p class="search-result-sidebar__share-link">
-          {% trans %}Sharing the link lets people view this group:{% endtrans %}
-        </p>
-    {% endif %}
-    <div class="group-invite__container js-copy-button">
-      <input class="group-invite__input js-select-onfocus"
-             data-ref="input"
-             value="{{ group.url }}">
-      <button class="group-invite__clipboard-button"
-              data-ref="button"
-              title="Copy to clipboard">
-        {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
-      </button>
-    </div>
-  </section>
+    {{ group_users(*group_users_args) }}
+    <section class="search-result-sidebar__section">
+      <h3 class="search-result-sidebar__subtitle">
+        {{ group.share_subtitle }}
+      </h3>
+      <p class="search-result-sidebar__share-link">
+        {{ group.share_msg }}
+      </p>
+      <div class="group-invite__container js-copy-button">
+        <input class="group-invite__input js-select-onfocus"
+               data-ref="input"
+               value="{{ group.url }}">
+        <button class="group-invite__clipboard-button"
+                data-ref="button"
+                title="Copy to clipboard">
+          {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
+        </button>
+      </div>
+    </section>
   {% endcall %}
 {% endmacro %}
 
