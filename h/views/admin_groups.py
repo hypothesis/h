@@ -47,11 +47,13 @@ class GroupCreateController(object):
         def on_success(appstruct):
             read_url = self.request.route_url('admin_groups')
             self.request.session.flash('TODO: I will add a {gtype} group called "{name}"'
-                                       ' for authority {authority}, created by {creator}'.format(
+                                       ' for authority {authority}, created by {creator}'
+                                       ' and origins {origins}'.format(
                                             gtype=appstruct['group_type'],
                                             name=appstruct['name'],
                                             authority=appstruct['authority'],
-                                            creator=appstruct['creator']
+                                            creator=appstruct['creator'],
+                                            origins=', '.join(appstruct['origins'])
                                        ), queue='success')
             response = HTTPFound(location=read_url)
             return response

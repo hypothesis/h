@@ -65,7 +65,8 @@ class TestGroupCreateController(object):
                 'name': 'My New Group',
                 'group_type': 'restricted',
                 'creator': pyramid_request.user.username,
-                'authority': pyramid_request.authority
+                'authority': pyramid_request.authority,
+                'origins': []
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupCreateController(pyramid_request)

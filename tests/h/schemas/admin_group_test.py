@@ -58,10 +58,26 @@ class TestCreateGroupSchema(object):
         with pytest.raises(colander.Invalid, match='.*{field}.*'.format(field=required_field)):
             bound_schema.deserialize(group_data)
 
-    def test_it_allows_when_optional_field_missing(self, group_data, bound_schema):
-        group_data.pop('description')
+    @pytest.mark.parametrize('optional_field', (
+        'description',
+        'origins'
+    ))
+    def test_it_allows_when_optional_field_missing(self, group_data, bound_schema, optional_field):
+        group_data.pop(optional_field)
 
         bound_schema.deserialize(group_data)
+
+    @pytest.mark.parametrize('input_origins,expected_origins', (
+        ('http://www.foo.com', ['http://www.foo.com']),
+        ('http://www.foo.com\r\nhttps://www.foo.com', ['http://www.foo.com', 'https://www.foo.com']),
+        ('http://www.foo.com   ', ['http://www.foo.com']),
+        ('http://www.foo.com\nhttps://www.foo.com', ['http://www.foo.com', 'https://www.foo.com']),
+    ))
+    def test_it_splits_origins_by_line(self, group_data, bound_schema, input_origins, expected_origins):
+        group_data['origins'] = input_origins
+        appstruct = bound_schema.deserialize(group_data)
+
+        assert appstruct['origins'] == expected_origins
 
 
 class TestCreateSchemaWithValidator(object):
@@ -114,6 +130,7 @@ def group_data(factories):
         'group_type': 'open',
         'creator': factories.User().username,
         'description': 'Lorem ipsum dolor sit amet consectetuer',
+        'origins': 'http://www.foo.com\r\nhttps://www.foo.com'
     }
 
 
