@@ -12,7 +12,6 @@ from .auth_ticket import AuthTicket
 from .authz_code import AuthzCode
 from .document import Document, DocumentMeta, DocumentURI
 from .feature import Feature
-from .feature_cohort import FeatureCohort
 from .flag import Flag
 from .group import Group, OpenGroup, RestrictedGroup
 from .group_scope import GroupScope
@@ -33,7 +32,6 @@ __all__ = (
     'DocumentMeta',
     'DocumentURI',
     'Feature',
-    'FeatureCohort',
     'Flag',
     'Group',
     'GroupScope',
