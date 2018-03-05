@@ -11,6 +11,7 @@
 
 .search-result-sidebar__subtitle {
   margin-bottom: 9px;
+  font-size: $search-results-subtitle-font-size;
 }
 
 .search-result-sidebar__title,
@@ -44,16 +45,12 @@
 }
 
 .search-result-sidebar__subsection-key {
+  color: $grey-6;
   font-weight: bold;
 }
 
 .search-result-sidebar__subsection-val {
   color: $grey-6;
-}
-
-.search-result-sidebar-title__annotations-count {
-  font-size: $normal-font-size;
-  font-weight: normal;
 }
 
 .search-result-sidebar__annotations-count {
@@ -101,6 +98,7 @@
   font-weight: bold;
   margin-right: 3px;
   margin-bottom: 7px;
+  color: $grey-6;
 }
 
 @media screen and (max-width: $tablet-width + 250px) {
