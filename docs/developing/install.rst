@@ -13,16 +13,16 @@ environment the first thing you need to do is install h's system dependencies.
    see https://github.com/hypothesis/browser-extension.
 
 Follow either the
-`Installing the system dependencies on Ubuntu 14.04`_ or the
+`Installing the system dependencies on Ubuntu`_ or the
 `Installing the system dependencies on macOS`_ section below, depending on which
 operating system you're using, then move on to `Getting the h source code from GitHub`_ and
 the sections that follow it.
 
 
-Installing the system dependencies on Ubuntu 14.04
---------------------------------------------------
+Installing the system dependencies on Ubuntu
+--------------------------------------------
 
-This section describes how to install h's system dependencies on Ubuntu 14.04.
+This section describes how to install h's system dependencies on Ubuntu.
 These steps will also probably work with few or no changes on other versions
 of Ubuntu, Debian, or other Debian-based GNU/Linux distributions.
 
