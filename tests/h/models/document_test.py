@@ -356,7 +356,7 @@ class TestCreateOrUpdateDocumentURI(object):
             updated=now(),
         )
 
-        document_uri = db_session.query(document.DocumentURI).all()[-1]
+        document_uri = db_session.query(document.DocumentURI).order_by(document.DocumentURI.created.desc()).first()
         assert document_uri.claimant == claimant
         assert document_uri.uri == uri
         assert document_uri.type == type_
