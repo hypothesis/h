@@ -111,7 +111,7 @@ class TestBatchIndexer(object):
         indexer.index()
 
         streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, matchers.iterable_with([ann_1, ann_2]),
+            indexer.es_client.conn, matchers.iterable_with(matchers.unordered_list([ann_1, ann_2])),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
     def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
