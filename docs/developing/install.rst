@@ -14,7 +14,7 @@ environment the first thing you need to do is install h's system dependencies.
 
 Follow either the
 `Installing the system dependencies on Ubuntu 14.04`_ or the
-`Installing the system dependencies on OS X`_ section below, depending on which
+`Installing the system dependencies on macOS`_ section below, depending on which
 operating system you're using, then move on to `Getting the h source code from GitHub`_ and
 the sections that follow it.
 
@@ -55,10 +55,10 @@ Upgrade pip, virtualenv and npm:
     sudo npm install -g npm
 
 
-Installing the system dependencies on OS X
-------------------------------------------
+Installing the system dependencies on macOS
+-------------------------------------------
 
-This section describes how to install h's system dependencies on Mac OS X.
+This section describes how to install h's system dependencies on macOS.
 
 The instructions that follow assume you have previously installed Homebrew_.
 
