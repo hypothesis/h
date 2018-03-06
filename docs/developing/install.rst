@@ -78,6 +78,11 @@ Install the following packages:
 .. note:: Unfortunately you need to install the ``postgresql`` package, because
           Homebrew does not currently provide a standalone ``libpq`` package.
 
+Upgrade pip and virtualenv:
+
+.. code-block:: bash
+
+    pip install -U pip virtualenv
 
 Getting the h source code from GitHub
 -------------------------------------
