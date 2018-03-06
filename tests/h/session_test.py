@@ -12,20 +12,20 @@ class TestModel(object):
 
         session.model(authenticated_request)
 
-        svc.all_groups.assert_called_once_with(user=authenticated_request.user,
-                                               authority=authenticated_request.authority)
+        svc.session_groups.assert_called_once_with(user=authenticated_request.user,
+                                                   authority=authenticated_request.authority)
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
         svc = unauthenticated_request.find_service(name='list_groups')
 
         session.model(unauthenticated_request)
 
-        svc.all_groups.assert_called_once_with(authority=unauthenticated_request.authority,
-                                               user=None)
+        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+                                                   user=None)
 
     def test_open_group_is_public(self, unauthenticated_request, world_group):
         svc = unauthenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [world_group]
+        svc.session_groups.return_value = [world_group]
 
         model = session.model(unauthenticated_request)
 
@@ -34,7 +34,7 @@ class TestModel(object):
     def test_private_group_is_not_public(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         model = session.model(authenticated_request)
 
@@ -42,7 +42,7 @@ class TestModel(object):
 
     def test_open_group_has_no_url(self, unauthenticated_request, world_group):
         svc = unauthenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [world_group]
+        svc.session_groups.return_value = [world_group]
 
         model = session.model(unauthenticated_request)
 
@@ -51,7 +51,7 @@ class TestModel(object):
     def test_private_group_has_url(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         model = session.model(authenticated_request)
 
@@ -89,13 +89,13 @@ class TestModelWithScopedGroups(object):
 
         session.model(authenticated_request)
 
-        svc.request_groups.assert_called_once_with(user=authenticated_request.user,
+        svc.session_groups.assert_called_once_with(user=authenticated_request.user,
                                                    authority=authenticated_request.authority)
 
     def test_private_group_is_not_public(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.request_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         model = session.model(authenticated_request)
 
@@ -103,7 +103,7 @@ class TestModelWithScopedGroups(object):
 
     def test_open_group_has_no_url(self, unauthenticated_request, world_group):
         svc = unauthenticated_request.find_service(name='list_groups')
-        svc.request_groups.return_value = [world_group]
+        svc.session_groups.return_value = [world_group]
 
         model = session.model(unauthenticated_request)
 
@@ -112,14 +112,13 @@ class TestModelWithScopedGroups(object):
     def test_private_group_has_url(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.request_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         model = session.model(authenticated_request)
 
         assert model['groups'][0]['url']
 
 
-@pytest.mark.usefixtures('scope_feature_off')
 class TestProfile(object):
     def test_userid_unauthenticated(self, unauthenticated_request):
         assert session.profile(unauthenticated_request)['userid'] is None
@@ -133,20 +132,20 @@ class TestProfile(object):
 
         session.profile(authenticated_request)
 
-        svc.all_groups.assert_called_once_with(user=authenticated_request.user,
-                                               authority=authenticated_request.authority)
+        svc.session_groups.assert_called_once_with(user=authenticated_request.user,
+                                                   authority=authenticated_request.authority)
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
         svc = unauthenticated_request.find_service(name='list_groups')
 
         session.profile(unauthenticated_request)
 
-        svc.all_groups.assert_called_once_with(authority=unauthenticated_request.authority,
-                                               user=None)
+        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+                                                   user=None)
 
     def test_open_group_is_public(self, unauthenticated_request, world_group):
         svc = unauthenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [world_group]
+        svc.session_groups.return_value = [world_group]
 
         profile = session.profile(unauthenticated_request)
 
@@ -155,7 +154,7 @@ class TestProfile(object):
     def test_private_group_is_not_public(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
 
@@ -163,7 +162,7 @@ class TestProfile(object):
 
     def test_open_group_has_no_url(self, unauthenticated_request, world_group):
         svc = unauthenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [world_group]
+        svc.session_groups.return_value = [world_group]
 
         profile = session.profile(unauthenticated_request)
 
@@ -172,7 +171,7 @@ class TestProfile(object):
     def test_private_group_has_url(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.all_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
 
@@ -260,7 +259,7 @@ class TestProfileWithScopedGroups(object):
 
         session.profile(authenticated_request)
 
-        svc.request_groups.assert_called_once_with(user=authenticated_request.user,
+        svc.session_groups.assert_called_once_with(user=authenticated_request.user,
                                                    authority=authenticated_request.authority)
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
@@ -268,13 +267,13 @@ class TestProfileWithScopedGroups(object):
 
         session.profile(unauthenticated_request)
 
-        svc.request_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.authority,
                                                    user=None)
 
     def test_private_group_is_not_public(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.request_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
 
@@ -283,7 +282,7 @@ class TestProfileWithScopedGroups(object):
     def test_private_group_has_url(self, authenticated_request, factories):
         a_group = factories.Group()
         svc = authenticated_request.find_service(name='list_groups')
-        svc.request_groups.return_value = [a_group]
+        svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
 
