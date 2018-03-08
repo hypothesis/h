@@ -8,8 +8,9 @@ import pytest
 import mock
 
 # from h.models.auth_client import AuthClient, GrantType, ResponseType
+from h.services.groupfinder import GroupfinderService
 from h.views import admin_groups
-from h.views.admin_groups import GroupCreateController
+from h.views.admin_groups import GroupCreateController, GroupEditController
 
 
 def test_index_lists_groups_sorted_by_created_desc(pyramid_request, routes, factories, authority):
@@ -74,6 +75,30 @@ class TestGroupCreateController(object):
         assert response == matchers.redirect_302_to(expected_location)
 
 
+@pytest.mark.usefixtures('routes')
+class TestGroupEditController(object):
+
+    def test_delete_succeeds_if_group_found(self, pyramid_request, group_svc, factories):
+        group_svc.find.return_value = factories.Group()
+        pyramid_request.session.flash = mock.Mock()
+        pyramid_request.POST['groupid'] = 'foobar'
+        ctrl = GroupEditController(pyramid_request)
+
+        ctrl.delete()
+
+        pyramid_request.session.flash.called_once_with(mock.ANY, 'success')
+
+    def test_delete_raises_if_group_not_found(self, pyramid_request, group_svc):
+        group_svc.find.return_value = None
+        pyramid_request.POST['groupid'] = 'foobar'
+        pyramid_request.session.flash = mock.Mock()
+        ctrl = GroupEditController(pyramid_request)
+
+        with pytest.raises(admin_groups.GroupNotFoundError):
+            ctrl.delete()
+            pyramid_request.session.flash.assert_called_once_with(mock.ANY, 'error')
+
+
 @pytest.fixture
 def authority():
     return 'foo.com'
@@ -100,3 +125,11 @@ def handle_form_submission(patch):
 def routes(pyramid_config):
     pyramid_config.add_route('admin_groups', '/admin/groups')
     pyramid_config.add_route('admin_groups_create', '/admin/groups/new')
+    pyramid_config.add_route('admin_groups_delete', '/admin/groups/delete')
+
+
+@pytest.fixture
+def group_svc(pyramid_config):
+    service = mock.create_autospec(GroupfinderService, spec_set=True, instance=True)
+    pyramid_config.register_service(service, iface='h.interfaces.IGroupService')
+    return service

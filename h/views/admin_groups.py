@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import jinja2
+
 from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import HTTPFound
 
@@ -9,8 +11,13 @@ from h import i18n
 from h import models
 from h import paginator
 from h.schemas.admin_group import CreateAdminGroupSchema
+from h.interfaces import IGroupService
 
 _ = i18n.TranslationString
+
+
+class GroupNotFoundError(Exception):
+    pass
 
 
 @view_config(route_name='admin_groups',
@@ -61,3 +68,38 @@ class GroupCreateController(object):
 
     def _template_context(self):
         return {'form': self.form.render()}
+
+
+@view_defaults(route_name='admin_groups_edit',
+               permission='admin_groups')
+class GroupEditController(object):
+
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method='POST',
+                 request_param='delete')
+    def delete(self):
+        """Process submitted delete-group form"""
+        group = _form_request_group(self.request)
+
+        self.request.session.flash('Group "{name}" will be deleted'.format(name=group.name), 'success')
+        return HTTPFound(location=self.request.route_path('admin_groups'))
+
+
+@view_config(context=GroupNotFoundError)
+def group_not_found(exc, request):
+    request.session.flash(jinja2.Markup(_(exc.message)), 'error')
+    return HTTPFound(location=request.route_path('admin_groups'))
+
+
+def _form_request_group(request):
+    """Return the Group which a group admin form action relates to."""
+    groupid = request.params.get('groupid')
+    group_service = request.find_service(IGroupService)
+    group = group_service.find(groupid)
+
+    if group is None:
+        raise GroupNotFoundError(_('Could not find group with pubid {pubid}'.format(pubid=groupid)))
+
+    return group

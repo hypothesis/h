@@ -16,6 +16,8 @@
           <th>URL</th>
           <th>Created by</th>
           <th>Members</th>
+          <th>Type</th>
+          <th>Delete Group</th>
         </tr>
       </thead>
       <tbody>
@@ -36,6 +38,16 @@
               {% endif %}
             </td>
             <td>{{ group.members|length }}</td>
+            <td>{{ group.type|capitalize }}</td>
+            <td>
+            <form method="POST"
+                  action="{{request.route_path('admin_groups_edit', id='group.pubid')}}"
+                  class="form-inline js-groups-delete-form">
+              <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+              <input type="hidden" name="delete" value="yes">
+              <input type="hidden" name="groupid" value="{{group.pubid}}">
+              <button class="btn btn-danger" type="submit">Delete Group</button>
+            </form>
           </tr>
         {% endfor %}
       </tbody>
