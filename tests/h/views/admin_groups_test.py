@@ -91,10 +91,12 @@ class TestGroupEditController(object):
     def test_delete_raises_if_group_not_found(self, pyramid_request, group_svc):
         group_svc.find.return_value = None
         pyramid_request.POST['groupid'] = 'foobar'
+        pyramid_request.session.flash = mock.Mock()
         ctrl = GroupEditController(pyramid_request)
 
         with pytest.raises(admin_groups.GroupNotFoundError):
             ctrl.delete()
+            pyramid_request.session.flash.assert_called_once_with(mock.ANY, 'error')
 
 
 @pytest.fixture
