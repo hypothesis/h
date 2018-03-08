@@ -13,6 +13,7 @@ def includeme(config):
     config.register_service_factory('.auth_ticket.auth_ticket_service_factory',
                                     iface='pyramid_authsanity.interfaces.IAuthService')
     config.register_service_factory('.auth_token.auth_token_service_factory', name='auth_token')
+    config.register_service_factory('.delete_group.delete_group_service_factory', name='delete_group')
     config.register_service_factory('.delete_user.delete_user_service_factory', name='delete_user')
     config.register_service_factory('.developer_token.developer_token_service_factory', name='developer_token')
     config.register_service_factory('.feature.feature_service_factory', name='feature')
