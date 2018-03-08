@@ -17,6 +17,7 @@ const CreateGroupFormController = require('./controllers/create-group-form-contr
 const DropdownMenuController = require('./controllers/dropdown-menu-controller');
 const FormController = require('./controllers/form-controller');
 const FormCancelController = require('./controllers/form-cancel-controller');
+const FormInputController = require('./controllers/form-input-controller');
 const FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
 const InputAutofocusController = require('./controllers/input-autofocus-controller');
 const SearchBarController = require('./controllers/search-bar-controller');
@@ -35,6 +36,7 @@ const controllers = {
   '.js-dropdown-menu': DropdownMenuController,
   '.js-form': FormController,
   '.js-form-cancel': FormCancelController,
+  '.js-form-input': FormInputController,
   '.js-input-autofocus': InputAutofocusController,
   '.js-select-onfocus': FormSelectOnFocusController,
   '.js-search-bar': SearchBarController,
