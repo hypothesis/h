@@ -13,16 +13,16 @@ environment the first thing you need to do is install h's system dependencies.
    see https://github.com/hypothesis/browser-extension.
 
 Follow either the
-`Installing the system dependencies on Ubuntu 14.04`_ or the
-`Installing the system dependencies on OS X`_ section below, depending on which
+`Installing the system dependencies on Ubuntu`_ or the
+`Installing the system dependencies on macOS`_ section below, depending on which
 operating system you're using, then move on to `Getting the h source code from GitHub`_ and
 the sections that follow it.
 
 
-Installing the system dependencies on Ubuntu 14.04
---------------------------------------------------
+Installing the system dependencies on Ubuntu
+--------------------------------------------
 
-This section describes how to install h's system dependencies on Ubuntu 14.04.
+This section describes how to install h's system dependencies on Ubuntu.
 These steps will also probably work with few or no changes on other versions
 of Ubuntu, Debian, or other Debian-based GNU/Linux distributions.
 
@@ -55,10 +55,10 @@ Upgrade pip, virtualenv and npm:
     sudo npm install -g npm
 
 
-Installing the system dependencies on OS X
-------------------------------------------
+Installing the system dependencies on macOS
+-------------------------------------------
 
-This section describes how to install h's system dependencies on Mac OS X.
+This section describes how to install h's system dependencies on macOS.
 
 The instructions that follow assume you have previously installed Homebrew_.
 
@@ -78,6 +78,11 @@ Install the following packages:
 .. note:: Unfortunately you need to install the ``postgresql`` package, because
           Homebrew does not currently provide a standalone ``libpq`` package.
 
+Upgrade pip and virtualenv:
+
+.. code-block:: bash
+
+    pip install -U pip virtualenv
 
 Getting the h source code from GitHub
 -------------------------------------
@@ -105,7 +110,7 @@ Installing the services
 h requires the following external services:
 
 - PostgreSQL_ 9.4+
-- Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
+- Elasticsearch_ v1.5 or 1.6, with the `Elasticsearch ICU Analysis`_ plugin
 - RabbitMQ_ v3.5+
 
 .. _PostgreSQL: http://www.postgresql.org/
