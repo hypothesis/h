@@ -20,6 +20,7 @@ const FormCancelController = require('./controllers/form-cancel-controller');
 const FormInputController = require('./controllers/form-input-controller');
 const FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
 const InputAutofocusController = require('./controllers/input-autofocus-controller');
+const ListInputController = require('./controllers/list-input-controller');
 const SearchBarController = require('./controllers/search-bar-controller');
 const SearchBucketController = require('./controllers/search-bucket-controller');
 const ShareWidgetController = require('./controllers/share-widget-controller');
@@ -38,6 +39,7 @@ const controllers = {
   '.js-form-cancel': FormCancelController,
   '.js-form-input': FormInputController,
   '.js-input-autofocus': InputAutofocusController,
+  '.js-list-input': ListInputController,
   '.js-select-onfocus': FormSelectOnFocusController,
   '.js-search-bar': SearchBarController,
   '.js-search-bucket': SearchBucketController,

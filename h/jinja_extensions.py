@@ -12,6 +12,8 @@ except ImportError:
 from jinja2 import Markup
 from jinja2.ext import Extension
 
+from h._compat import url_unquote
+
 SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg'
 
 
@@ -27,6 +29,7 @@ class Filters(Extension):
         environment.filters['to_json'] = to_json
         environment.filters['human_timestamp'] = human_timestamp
         environment.filters['format_number'] = format_number
+        environment.filters['url_unquote'] = url_unquote
 
 
 def human_timestamp(timestamp, now=datetime.datetime.utcnow):

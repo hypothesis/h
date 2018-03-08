@@ -1,53 +1,19 @@
-<div tal:define="prototype field.widget.prototype(field)"
-     class="deformSeq"
-     id="{{ field.oid }}">
+<div class="list-input js-list-input" id="{{ field.oid }}">
+  <template data-ref="itemTemplate">
+  {# `field.widget.prototype(field)` returns the `sequence_item` template
+     rendered by deform as HTML and then URL-encoded. #}
+  {{ field.widget.prototype(field) | url_unquote | safe }}
+  </template>
 
-  <!-- sequence -->
+  <input type="hidden" name="__start__" value="{{ field.name }}:sequence">
 
-  <input type="hidden" name="__start__" value="{{ field.name }}:sequence"
-         class="deformProto"
-         tal:attributes="prototype prototype"/>
-
-  <ul id="{{ field.oid }}-orderable">
-
-    <!--! subfields is a tuple for bw compat with 3rdparty templates;
-          we ignore the first element (the cstruct) because it's already
-          attached to the field -->
-    {% for (_, subfield) in subfields %}
+  <ul class="list-input__list" data-ref="itemList">
+    {% for (cstruct, subfield) in subfields %}
     {{ subfield.render_template(field.widget.item_template, parent=field) | safe }}
     {% endfor %}
-
-    <li class="deformInsertBefore"
-          tal:attributes="min_len min_len;
-                          max_len max_len;
-                          now_len now_len;
-                          orderable orderable;"></li>
-
   </ul>
 
-  <a href="#"
-     class="deformSeqAdd"
-     id="{{ field.oid }}-seqAdd"
-     onclick="javascript: return deform.appendSequenceItem(this);">
-    <small id="{{ field.oid }}-addtext">{{ add_subitem_text }}</small>
-  </a>
-
-  <script type="text/javascript">
-     deform.addCallback(
-       '{{ field.oid }}',
-       function(oid) {
-         oid_node = $('#'+ oid);
-         deform.processSequenceButtons(oid_node, {{ field.widget.min_len }},
-                                       {{ field.widget.max_len }}, {{ subfields | length }}, {{ orderable }});
-       }
-     )
-     {% if field.widget.orderable %}
-     $( "#{{oid}}-orderable" ).sortable({handle: "span.deformOrderbutton"});
-     {% endif %}
-  </script>
+  <button class="btn" type="button" data-ref="addItemButton">{{ add_subitem_text }}</button>
 
   <input type="hidden" name="__end__" value="{{ field.name }}:sequence"/>
-
-  <!-- /sequence -->
-
 </div>

@@ -1,30 +1,15 @@
 {% if not field.widget.hidden %}
-<li class="{{ field.widget.item_css_class or ''}} {{ field.error and error_class or '' }}"
-    title="{{ field.description }}" i18n:domain="deform">
-
-  <!-- sequence_item -->
-
-  <span class="deformClosebutton"
-        id="{{ oid }}-close"
-        tal:condition="not hidden"
-        title="Remove"
-        i18n:attributes="title"
-        onclick="javascript:deform.removeSequenceItem(this);"></span>
-
-  <span class="deformOrderbutton"
-        id="{{ field.oid }}-order"
-        tal:condition="not hidden"
-        title="Reorder (via drag and drop)"
-        i18n:attributes="title"></span>
+<li class="list-input__item" title="{{ field.description }}">
 
   {{ field.serialize(cstruct=cstruct) | safe }}
+
+  <button class="btn btn--danger list-input__remove-btn" type="button"
+          data-ref="removeItemButton">Remove</button>
 
   {% if field.error %}
   {% for msg in field.error.messages() %}
   <p class="{{ field.widget.error_class }}">{{ msg }}</p>
   {% endfor %}
   {% endif %}
-
-  <!-- /sequence_item -->
 </li>
 {% endif %}
