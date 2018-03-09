@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
@@ -113,6 +112,33 @@ class TestListGroupsAllGroups(object):
 
         assert [group.pubid for group in results] == expected_sorted_pubids
 
+    def test_returns_associated_groups_if_user(self,
+                                               svc,
+                                               authority,
+                                               user,
+                                               unscoped_restricted_groups,
+                                               scoped_restricted_groups,
+                                               scoped_open_groups,
+                                               unscoped_open_groups,
+                                               private_groups):
+        user.groups = private_groups
+
+        all_groups = scoped_open_groups + unscoped_open_groups + \
+                     scoped_restricted_groups + unscoped_restricted_groups + \
+                     private_groups
+        expected = [group for group in all_groups if group.creator == user or user in group.members]
+        results = svc.associated_groups(user=user)
+
+        assert set(results) == set(expected)
+
+    def test_returns_no_associated_groups_if_no_user(self, svc, authority):
+        expected_ids = set({})
+
+        results = svc.associated_groups()
+        actual_ids = {group.id for group in results}
+
+        assert actual_ids == expected_ids
+
 
 class TestListGroupsSessionGroups(object):
 
@@ -138,9 +164,10 @@ class TestListGroupsSessionGroups(object):
             assert group.type == 'restricted'
 
     def test_it_excludes_scoped_restricted_groups_if_user_not_member(self, svc, user, scoped_restricted_groups, authority):
+        expected = [group for group in scoped_restricted_groups if user in group.members]
         results = svc.session_groups(user=user, authority=authority)
 
-        assert results == []
+        assert results == expected
 
     def test_it_returns_the_world_group(self, svc, user, default_authority):
         results = svc.session_groups(user=user, authority=default_authority)
@@ -312,9 +339,10 @@ def document_uri():
 
 
 @pytest.fixture
-def scoped_open_groups(factories, authority, origin):
+def scoped_open_groups(factories, authority, origin, user):
     return [
         factories.OpenGroup(authority=authority,
+                            creator=user,
                             scopes=[factories.GroupScope(origin=origin)]),
         factories.OpenGroup(authority=authority,
                             scopes=[factories.GroupScope(origin=origin)])
@@ -322,9 +350,10 @@ def scoped_open_groups(factories, authority, origin):
 
 
 @pytest.fixture
-def scoped_restricted_groups(factories, authority, origin):
+def scoped_restricted_groups(factories, authority, origin, user):
     return [
         factories.RestrictedGroup(authority=authority,
+                                  creator=user,
                                   scopes=[factories.GroupScope(origin=origin)]),
         factories.RestrictedGroup(authority=authority,
                                   scopes=[factories.GroupScope(origin=origin)])
@@ -332,9 +361,9 @@ def scoped_restricted_groups(factories, authority, origin):
 
 
 @pytest.fixture
-def unscoped_restricted_groups(factories, authority):
+def unscoped_restricted_groups(factories, authority, user):
     return [
-        factories.RestrictedGroup(authority=authority),
+        factories.RestrictedGroup(authority=authority, creator=user),
         factories.RestrictedGroup(authority=authority)
     ]
 
@@ -355,9 +384,9 @@ def scoped_restricted_user_groups(factories, authority, user, origin):
 
 
 @pytest.fixture
-def unscoped_open_groups(factories, authority):
+def unscoped_open_groups(factories, authority, user):
     return [
-        factories.OpenGroup(authority=authority),
+        factories.OpenGroup(authority=authority, creator=user),
         factories.OpenGroup(authority=authority)
     ]
 
