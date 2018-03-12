@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from h import models
 from h.models import group
-from h._compat import urlparse
+from h.util import group_scope as scope_util
 
 
 class ListGroupsService(object):
@@ -41,36 +41,74 @@ class ListGroupsService(object):
 
     def all_groups(self, user=None, authority=None, document_uri=None):
         """
+        TODO: Remove this method once the scoped-groups feature flag is removed.
         Return a list of groups relevant to this session/profile (i.e. user).
 
         Return a list of groups filtered on user and authority. All open
         groups matching the authority will be included.
         """
         all_open_groups = self._open_groups(user, authority)
-        private_groups = self._private_groups(user)
+        user_groups = self._user_groups(user)
 
-        return all_open_groups + private_groups
+        return all_open_groups + user_groups
+
+    def session_groups(self, authority, user=None):
+        """
+        Return a list of groups relevant to the user-session combination,
+        in this order:
+
+        - WORLD GROUP:
+          The special world group is returned if `authority` is the default
+          authority
+        - ALL USER GROUPS:
+          "User groups" here means any group that the user is a member of:
+          this can include both private and restricted groups.
+
+        This will return all groups that the session's user is a member of
+        regardless of group type or scope. No open groups are returned.
+
+        This should return the list of groups that is appropriate for
+        activity pages and/or other views on the h service.
+        """
+
+        world_group = self._world_group(authority)
+        world_group = [world_group] if world_group else []
+        user_groups = self._user_groups(user)
+
+        return world_group + user_groups
 
     def request_groups(self, authority, user=None, document_uri=None):
         """
-        Return a list of groups relevant to this request and user combination.
+        Return a list of groups relevant to this request context.
 
         Return a list of groups filtered on user, authority, document_uri.
-        Include all types of relevant groups (open and private).
+        Groups are returned in this order:
 
-        Open groups will be filtered by scope (via document_uri).
+        - OPEN AND RESTRICTED GROUPS:
+          Only those open or restricted group that match scope of document_uri
+          will be returned (if document_uri is missing, no open or restricted
+          groups will be returned)
+        - WORLD GROUP:
+          The special world group is returned if `authority` is the default
+          authority
+        - PRIVATE GROUPS:
+          All private groups for the user will be returned
+
+          This should return a list of groups appropriate to the client
+          via the API.
         """
-        scoped_open_groups = self._scoped_open_groups(authority, document_uri)
+        scoped_groups = self._scoped_groups(authority, document_uri)
 
         world_group = self._world_group(authority)
         world_group = [world_group] if world_group else []
 
         private_groups = self._private_groups(user)
 
-        return scoped_open_groups + world_group + private_groups
+        return scoped_groups + world_group + private_groups
 
     def _open_groups(self, user=None, authority=None):
         """
+        TODO: Remove this method when scoped-groups feature flag removed
         Return all open groups for the authority.
         """
 
@@ -81,34 +119,31 @@ class ListGroupsService(object):
                       .all())
         return self._sort(groups)
 
-    def _private_groups(self, user=None):
-        """Return this user's private groups per user.groups."""
+    def _user_groups(self, user=None):
+        """Return all groups that this user is a member of regardless of type"""
 
         if user is None:
             return []
         return self._sort(user.groups)
 
-    def _parse_origin(self, uri):
+    def _private_groups(self, user=None):
+        """Return all private groups that this user is a member of"""
+
+        user_groups = self._user_groups(user)
+        return [group for group in user_groups if group.type == 'private']
+
+    def _scoped_groups(self, authority, document_uri):
         """
-        Return the origin of a URI or None if empty or invalid.
+        Return scoped groups for the URI and authority
 
-        Per https://tools.ietf.org/html/rfc6454#section-7 :
-        Return ``<scheme> + '://' + <host> + <port>``
-        for a URI.
+        Only open and restricted groups are "supposed" to have scope, but
+        technically this query is agnostic to the group's type—it will return
+        any group who has a scope that matches the document_uri's scope.
 
-        :param uri: URI string
+        Note: If private groups are ever allowed to be scoped, this needs
+        attention.
         """
-
-        if uri is None:
-            return None
-        parsed = urlparse.urlsplit(uri)
-        # netloc contains both host and port
-        origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, '', '', '')
-        return origin.geturl() or None
-
-    def _scoped_open_groups(self, authority, document_uri):
-        """Return scoped groups for the URI and authority"""
-        origin = self._parse_origin(document_uri)
+        origin = scope_util.uri_scope(document_uri)
         if not origin:
             return []
 
