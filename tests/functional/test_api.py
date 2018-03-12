@@ -97,7 +97,9 @@ class TestAPI(object):
         assert res.json['userid'] == user.userid
 
         group_ids = [group['id'] for group in res.json['groups']]
-        assert group_ids == [open_group.pubid]
+        # The profile API returns no open groups for third-party accounts.
+        # (The client gets open groups from the groups API instead.)
+        assert group_ids == []
 
     def test_cors_preflight(self, app):
         # Simulate a CORS preflight request made by the browser from a client
