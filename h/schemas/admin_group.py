@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import colander
-from deform.widget import SelectWidget, TextAreaWidget
+from deform.widget import SelectWidget, SequenceWidget, TextAreaWidget
 
 from h import i18n
 from h import validators
@@ -86,11 +86,13 @@ class CreateAdminGroupSchema(CSRFSchema):
         missing=None
     )
 
-    origins = colander.SchemaNode(
-        colander.String(),
+    origins = colander.SequenceSchema(
+        colander.Sequence(),
+        colander.SchemaNode(colander.String(),
+                            name='origin',
+                            validator=colander.url),
         title=_('Scope Origins'),
-        widget=TextAreaWidget(rows=5),
-        hint=_('Enter scope origins (e.g. "http://www.foo.com"), one per line'),
-        preparer=_split_origins,
-        missing=None
+        hint=_('Origins where this group appears (e.g. "https://example.com")'),
+        missing=None,
+        widget=SequenceWidget(add_subitem_text_template=_('Add origin')),
     )
