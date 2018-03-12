@@ -13,6 +13,9 @@
     {% endfor %}
   </ul>
 
+  {# New item button. The label must be supplied by setting the `add_subitem_text_template`
+     argument to the `SequenceWidget` constructor when declaring the widget used
+     by the field. #}
   <button class="btn" type="button" data-ref="addItemButton">{{ add_subitem_text }}</button>
 
   <input type="hidden" name="__end__" value="{{ field.name }}:sequence"/>
