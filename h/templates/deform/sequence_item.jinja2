@@ -1,0 +1,15 @@
+{% if not field.widget.hidden %}
+<li class="list-input__item" title="{{ field.description }}">
+
+  {{ field.serialize(cstruct=cstruct) | safe }}
+
+  <button class="btn btn--danger list-input__remove-btn" type="button"
+          data-ref="removeItemButton">Remove</button>
+
+  {% if field.error %}
+  {% for msg in field.error.messages() %}
+  <p class="{{ field.widget.error_class }}">{{ msg }}</p>
+  {% endfor %}
+  {% endif %}
+</li>
+{% endif %}

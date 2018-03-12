@@ -1,0 +1,23 @@
+.list-input {
+  /**
+   * Add padding to position list items below the absolutely-positioned field
+   * label.
+   */
+  padding-top: 30px;
+}
+
+.list-input__list {
+  padding-left: 0;
+}
+
+.list-input__item {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.list-input__remove-btn {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  align-self: flex-end;
+}
