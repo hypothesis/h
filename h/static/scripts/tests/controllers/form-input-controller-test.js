@@ -8,7 +8,7 @@ describe('FormInputController', () => {
   const template = `
     <div class="js-form-input">
       <label>Some label</label>
-      <input type="text" data-ref="formInput">
+      <input type="text" name="some-text-input">
     </div>
   `.trim();
 
@@ -21,6 +21,16 @@ describe('FormInputController', () => {
     const errorTemplate = template.replace('js-form-input', 'js-form-input is-error');
     const ctrl = setupComponent(document, errorTemplate, FormInputController);
     assert.equal(ctrl.state.hasError, true);
+  });
+
+  it('resets `hasError` state when an input event occurs', () => {
+    const ctrl = setupComponent(document, template, FormInputController);
+    const input = ctrl.element.querySelector('input');
+    ctrl.setState({ hasError: true });
+
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+    assert.equal(ctrl.state.hasError, false);
   });
 
   it('toggles "is-error" class when setting `hasError` state', () => {

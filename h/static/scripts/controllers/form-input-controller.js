@@ -20,7 +20,7 @@ class FormInputController extends Controller {
     const hasError = element.classList.contains('is-error');
     this.setState({ hasError });
 
-    this.refs.formInput.addEventListener('input', () => {
+    element.addEventListener('input', () => {
       this.setState({ hasError: false });
     });
   }
