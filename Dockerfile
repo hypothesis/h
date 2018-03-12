@@ -1,16 +1,16 @@
-FROM gliderlabs/alpine:3.4
+FROM alpine:3.7
 MAINTAINER Hypothes.is Project and contributors
 
 # Install system build and runtime dependencies.
-RUN apk-install \
+RUN apk add --no-cache \
     ca-certificates \
     collectd \
     collectd-nginx \
     libffi \
     libpq \
     nginx \
-    python \
-    py-pip \
+    python2 \
+    py2-pip \
     nodejs \
     git
 
@@ -19,13 +19,13 @@ RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hy
 WORKDIR /var/lib/hypothesis
 
 # Ensure nginx state and log directories writeable by unprivileged user.
-RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx
+RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
 
 # Copy minimal data to allow installation of dependencies.
 COPY requirements.txt ./
 
 # Install build deps, build, and then clean up.
-RUN apk-install --virtual build-deps \
+RUN apk add --no-cache --virtual build-deps \
     build-base \
     libffi-dev \
     postgresql-dev \
@@ -50,8 +50,7 @@ RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
 
 # Build frontend assets
 RUN npm install --production \
-  && NODE_ENV=production node_modules/.bin/gulp build \
-  && npm cache clean
+  && NODE_ENV=production node_modules/.bin/gulp build
 
 # Expose the default port.
 EXPOSE 5000
