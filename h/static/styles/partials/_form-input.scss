@@ -8,8 +8,11 @@
   // Padding between top border of input and input text. This includes space
   // for the field label
   $top-padding: 35px;
+  $top-padding-no-label: 5px;
+
   // Padding between bottom border of input and input text.
   $bottom-padding: 15px;
+  $bottom-padding-no-label: 5px;
 
   // Extra vertical padding added above input content for form fields displaying
   // inline hints
@@ -135,10 +138,8 @@
 
   // The actual <input> element for the field
   .form-input__input {
-    padding-top: $top-padding;
     padding-left: $h-padding;
     padding-right: $h-padding;
-    padding-bottom: $bottom-padding;
     width: 100%;
 
     background: none;
@@ -147,6 +148,24 @@
     outline: none;
     border: 1px solid $grey-3;
     border-radius: 3px;
+  }
+
+  // Set the padding depending on whether or not this field has an associated
+  // label. The `<label>` lives outside the input in the DOM but is positioned
+  // _inside_ the `<input>`'s border visually.
+  //
+  // We do this rather than use a separate element for the field's border so
+  // that clicking anywhere inside the visual border focuses the input.
+  .form-input__input.has-label {
+    padding-top: $top-padding;
+    padding-bottom: $bottom-padding;
+    --bottom-padding: $bottom-padding;
+  }
+
+  .form-input__input:not(.has-label) {
+    padding-top: $top-padding-no-label;
+    padding-bottom: $bottom-padding-no-label;
+    --bottom-padding: $bottom-padding-no-label;
   }
 
   select.form-input__input {
@@ -173,7 +192,11 @@
     position: relative;
     left: -1px;
     top: -1px;
+
+    // Assume largest possible padding if CSS vars are not supported.
     padding-bottom: $bottom-padding - 2px;
+    padding-bottom: calc(var(--bottom-padding) - 2px);
+
     border-width: 2px;
   }
 
