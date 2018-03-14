@@ -165,6 +165,9 @@ class GroupSearchController(SearchController):
             'members': members,
             'moderators': moderators,
             'creator': self.group.creator.userid if self.group.creator else None,
+            # only show the logo and authority on the side bar if the authority is not the default
+            'authority': None if self.request.authority == self.group.authority else self.group.authority.upper(),
+            'logo': self.group.logo,
         }
         if self.request.has_permission('admin', self.group):
             result['group_edit_url'] = self.request.route_url(

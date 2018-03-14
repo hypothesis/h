@@ -242,6 +242,22 @@ class TestGroupSearchController(object):
         assert group_info['description'] == test_group.description
         assert group_info['name'] == test_group.name
         assert group_info['pubid'] == test_group.pubid
+        assert group_info['logo'] is None
+        assert group_info['authority'] is None
+
+    @pytest.mark.parametrize('test_group,test_user',
+                             [('group', 'member'), ],
+                             indirect=['test_group', 'test_user'])
+    def test_search_returns_authority_and_logo_when_not_default_authority_and_logo_defined(self,
+                                                     controller,
+                                                     factories,
+                                                     test_group,
+                                                     test_user,
+                                                     pyramid_request):
+        group_info = controller.search()['group']
+
+        assert group_info['logo'] == "biopub-logo"
+        assert group_info['authority'] == "BIOPUB.HYPOTHES.IS"
 
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
@@ -1095,6 +1111,7 @@ class FakeAnnotationStatsService(object):
 def group(factories):
     group = factories.Group()
     group.members.extend([factories.User(), factories.User()])
+    group.authority = "biopub.hypothes.is"
     return group
 
 

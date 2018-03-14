@@ -83,6 +83,28 @@ def test_repr(db_session, factories):
     assert repr(group) == "<Group: my-hypothesis-group>"
 
 
+def test_gets_logo_if_logo_is_known(db_session, factories):
+    name = "My Hypothesis Group"
+    user = factories.User()
+
+    group = models.Group(name=name, authority='biopub.hypothes.is', creator=user)
+    db_session.add(group)
+    db_session.flush()
+
+    assert group.logo == "biopub-logo"
+
+
+def test_returns_none_if_logo_is_unknown(db_session, factories):
+    name = "My Hypothesis Group"
+    user = factories.User()
+
+    group = models.Group(name=name, authority='foobar.com', creator=user)
+    db_session.add(group)
+    db_session.flush()
+
+    assert group.logo is None
+
+
 def test_created_by(db_session, factories):
     name_1 = "My first group"
     name_2 = "My second group"
