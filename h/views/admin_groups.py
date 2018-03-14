@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from jinja2 import Markup
 from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import HTTPFound
 
@@ -70,8 +71,8 @@ class GroupCreateController(object):
             self.request.db.flush(objects=[group])
 
             group_url = self.request.route_url('group_read', pubid=group.pubid, slug=group.slug)
-            self.request.session.flash('Created new group {name} at {url}'.format(
-                                        name=name, url=group_url), queue='success')
+            self.request.session.flash(Markup('Created new group <a href="{url}">{name}</a>'.format(
+                                        name=name, url=group_url)), queue='success')
 
             # Direct the user back to the admin page.
             return HTTPFound(location=self.request.route_url('admin_groups'))
