@@ -5,6 +5,7 @@ MAINTAINER Hypothes.is Project and contributors
 RUN apk add --no-cache \
     ca-certificates \
     collectd \
+    collectd-disk \
     collectd-nginx \
     libffi \
     libpq \
