@@ -56,7 +56,7 @@ class GroupCreateController(object):
             origins = appstruct['origins']
             type_ = appstruct['group_type']
 
-            userid = 'acct:{}@{}'.format(creator, authority)
+            userid = models.User(username=creator, authority=authority).userid
 
             if type_ == 'open':
                 group = svc.create_open_group(name=name, userid=userid,

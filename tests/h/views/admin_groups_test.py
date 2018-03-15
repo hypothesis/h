@@ -7,7 +7,7 @@ import datetime
 import pytest
 import mock
 
-# from h.models.auth_client import AuthClient, GrantType, ResponseType
+from h.models import User
 from h.views import admin_groups
 from h.views.admin_groups import GroupCreateController
 from h.services.user import UserService
@@ -106,7 +106,7 @@ class TestGroupCreateController(object):
             create_method = group_svc.create_open_group
         else:
             create_method = group_svc.create_restricted_group
-        expected_userid = 'acct:{}@{}'.format(creator, pyramid_request.authority)
+        expected_userid = User(username=creator, authority=pyramid_request.authority).userid
 
         create_method.assert_called_with(name=name, userid=expected_userid, description=description,
                                          origins=origins)
