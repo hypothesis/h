@@ -60,7 +60,6 @@ class TestCreateGroupSchema(object):
 
     @pytest.mark.parametrize('optional_field', (
         'description',
-        'origins'
     ))
     def test_it_allows_when_optional_field_missing(self, group_data, bound_schema, optional_field):
         group_data.pop(optional_field)
@@ -73,6 +72,11 @@ class TestCreateGroupSchema(object):
     def test_it_raises_if_origin_invalid(self, group_data, bound_schema, invalid_origin):
         group_data['origins'] = [invalid_origin]
         with pytest.raises(colander.Invalid, match='origins.*Must be a URL'):
+            bound_schema.deserialize(group_data)
+
+    def test_it_raises_if_no_origins(self, group_data, bound_schema):
+        group_data['origins'] = []
+        with pytest.raises(colander.Invalid, match='At least one origin'):
             bound_schema.deserialize(group_data)
 
 
