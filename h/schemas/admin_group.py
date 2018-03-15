@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import colander
-from deform.widget import SelectWidget, TextAreaWidget
+from deform.widget import SelectWidget, SequenceWidget, TextAreaWidget
 
 from h import i18n
 from h import validators
@@ -20,12 +20,6 @@ VALID_GROUP_TYPES = (
     ('restricted', _('Restricted')),
     ('open', _('Open')),
 )
-
-
-def _split_origins(value):
-    if value != colander.null:
-        return [origin.strip() for origin in value.splitlines()]
-    return value
 
 
 def user_exists_validator_factory(user_svc):
@@ -86,11 +80,13 @@ class CreateAdminGroupSchema(CSRFSchema):
         missing=None
     )
 
-    origins = colander.SchemaNode(
-        colander.String(),
+    origins = colander.SequenceSchema(
+        colander.Sequence(),
+        colander.SchemaNode(colander.String(),
+                            name='origin',
+                            validator=colander.url),
         title=_('Scope Origins'),
-        widget=TextAreaWidget(rows=5),
-        hint=_('Enter scope origins (e.g. "http://www.foo.com"), one per line'),
-        preparer=_split_origins,
-        missing=None
+        hint=_('Origins where this group appears (e.g. "https://example.com")'),
+        widget=SequenceWidget(add_subitem_text_template=_('Add origin')),
+        validator=colander.Length(min=1, min_err=_('At least one origin must be specified'))
     )
