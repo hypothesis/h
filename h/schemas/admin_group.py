@@ -87,6 +87,6 @@ class CreateAdminGroupSchema(CSRFSchema):
                             validator=colander.url),
         title=_('Scope Origins'),
         hint=_('Origins where this group appears (e.g. "https://example.com")'),
-        widget=SequenceWidget(add_subitem_text_template=_('Add origin')),
+        widget=SequenceWidget(add_subitem_text_template=_('Add origin'), min_len=1),
         validator=colander.Length(min=1, min_err=_('At least one origin must be specified'))
     )

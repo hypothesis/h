@@ -23,7 +23,8 @@ class ListInputController extends Controller {
 
     // Handle 'Remove' button.
     element.addEventListener('click', (event) => {
-      if (event.target.getAttribute('data-ref') === 'removeItemButton') {
+      const btn = event.target.closest('button');
+      if (btn.getAttribute('data-ref') === 'removeItemButton') {
         const parentItem = event.target.closest('li');
         parentItem.remove();
       }

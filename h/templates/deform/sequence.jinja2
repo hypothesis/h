@@ -9,7 +9,8 @@
 
   <ul class="list-input__list" data-ref="itemList">
     {% for (cstruct, subfield) in subfields %}
-    {{ subfield.render_template(field.widget.item_template, parent=field) | safe }}
+    {% set can_delete = (not field.widget.min_len) or loop.index > field.widget.min_len %}
+    {{ subfield.render_template(field.widget.item_template, parent=field, can_delete=can_delete) | safe }}
     {% endfor %}
   </ul>
 

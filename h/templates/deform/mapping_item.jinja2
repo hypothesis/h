@@ -1,5 +1,7 @@
 {% set show_char_counter = field.widget.template in ('textinput', 'textarea') and
                            field.widget.max_length %}
+{% set has_label = not (field.widget.hidden or field.widget.omit_label or
+                        field.widget.category == 'structural') %}
 {%- if not field.widget.hidden -%}
 <div class="form-input
             js-form-input
@@ -19,7 +21,7 @@
      id="item-{{ field.oid }}">
 {% endif -%}
 
-{%- if not (field.widget.hidden or field.widget.omit_label or field.widget.category == 'structural') -%}
+{%- if has_label -%}
   <label class="form-input__label {% if field.widget.label_css_class %} {{ field.widget.label_css_class }}{% endif %}
                 {%- if field.schema.hint -%}js-tooltip{% endif %}"
          {%- if field.schema.hint %}aria-label="{{ field.schema.hint }}"{% endif %}
@@ -40,7 +42,7 @@
   </label>
 {% endif -%}
 
-{{ field.serialize(cstruct) }}
+{{ field.serialize(cstruct, has_label=has_label) }}
 
 {%- if field.error and not field.widget.hidden -%}
   <ul class="form-input__error-list">
