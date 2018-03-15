@@ -47,10 +47,10 @@ class ListGroupsService(object):
         Return a list of groups filtered on user and authority. All open
         groups matching the authority will be included.
         """
-        all_open_groups = self._open_groups(user, authority)
+        world_readable_groups = self._readable_by_world_groups(user, authority)
         user_groups = self._user_groups(user)
 
-        return all_open_groups + user_groups
+        return world_readable_groups + user_groups
 
     def session_groups(self, authority, user=None):
         """
@@ -76,6 +76,24 @@ class ListGroupsService(object):
         user_groups = self._user_groups(user)
 
         return world_group + user_groups
+
+    def associated_groups(self, user=None):
+        """
+        Return a list of groups associated with a user.
+
+        Relevant groups include groups the user is a
+        creator/moderator/member of.
+
+        If the user is None it returns an empty list.
+        """
+        if user is None:
+            return []
+        world_readable_groups = [
+            group for group in self._readable_by_world_groups(user, None)
+            if group.creator == user or user in group.members]
+        private_groups = self._private_groups(user)
+
+        return world_readable_groups + private_groups
 
     def request_groups(self, authority, user=None, document_uri=None):
         """
@@ -106,10 +124,9 @@ class ListGroupsService(object):
 
         return scoped_groups + world_group + private_groups
 
-    def _open_groups(self, user=None, authority=None):
+    def _readable_by_world_groups(self, user=None, authority=None):
         """
-        TODO: Remove this method when scoped-groups feature flag removed
-        Return all open groups for the authority.
+        Return all groups readable by world for the authority.
         """
 
         authority = self._authority(user, authority)
