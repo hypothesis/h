@@ -22,12 +22,6 @@ VALID_GROUP_TYPES = (
 )
 
 
-def _split_origins(value):
-    if value != colander.null:
-        return [origin.strip() for origin in value.splitlines()]
-    return value
-
-
 def user_exists_validator_factory(user_svc):
     def user_exists_validator(form, value):
         user = user_svc.fetch(value['creator'], value['authority'])
