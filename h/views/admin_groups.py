@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from jinja2 import Markup
 from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import HTTPFound
 
@@ -45,18 +46,36 @@ class GroupCreateController(object):
     @view_config(request_method='POST')
     def post(self):
         def on_success(appstruct):
-            read_url = self.request.route_url('admin_groups')
-            self.request.session.flash('TODO: I will add a {gtype} group called "{name}"'
-                                       ' for authority {authority}, created by {creator}'
-                                       ' and origins {origins}'.format(
-                                            gtype=appstruct['group_type'],
-                                            name=appstruct['name'],
-                                            authority=appstruct['authority'],
-                                            creator=appstruct['creator'],
-                                            origins=', '.join(appstruct['origins'])
-                                       ), queue='success')
-            response = HTTPFound(location=read_url)
-            return response
+            svc = self.request.find_service(name='group')
+
+            # Create the new group.
+            creator = appstruct['creator']
+            authority = appstruct['authority']
+            description = appstruct['description']
+            name = appstruct['name']
+            origins = appstruct['origins']
+            type_ = appstruct['group_type']
+
+            userid = models.User(username=creator, authority=authority).userid
+
+            if type_ == 'open':
+                group = svc.create_open_group(name=name, userid=userid,
+                                              origins=origins, description=description)
+            elif type_ == 'restricted':
+                group = svc.create_restricted_group(name=name, userid=userid,
+                                                    origins=origins, description=description)
+            else:
+                raise Exception('Unsupported group type {}'.format(type_))
+
+            # Flush changes to allocate group a pubid
+            self.request.db.flush(objects=[group])
+
+            group_url = self.request.route_url('group_read', pubid=group.pubid, slug=group.slug)
+            self.request.session.flash(Markup('Created new group <a href="{url}">{name}</a>'.format(
+                                        name=name, url=group_url)), queue='success')
+
+            # Direct the user back to the admin page.
+            return HTTPFound(location=self.request.route_url('admin_groups'))
 
         return form.handle_form_submission(self.request, self.form,
                                            on_success=on_success,
