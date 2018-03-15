@@ -4,14 +4,24 @@ from __future__ import unicode_literals
 
 import datetime
 
+from pyramid.httpexceptions import HTTPNotFound
 import pytest
 import mock
 
 from h.models import User
+from h.models.group import OPEN_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
 from h.views import admin_groups
-from h.views.admin_groups import GroupCreateController
+from h.views.admin_groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
 from h.services.group import GroupService
+
+
+class FakeForm(object):
+    def set_appstruct(self, appstruct):
+        self.appstruct = appstruct
+
+    def render(self):
+        return self.appstruct
 
 
 def test_index_lists_groups_sorted_by_created_desc(pyramid_request, routes, factories, authority):
@@ -112,6 +122,116 @@ class TestGroupCreateController(object):
                                          origins=origins)
 
 
+@pytest.mark.usefixtures('routes', 'user_svc')
+class TestGroupEditController(object):
+
+    def test_raises_not_found_if_unknown_group(self, pyramid_request):
+        pyramid_request.matchdict = {'pubid': 'unknown'}
+        with pytest.raises(HTTPNotFound):
+            GroupEditController(pyramid_request)
+
+    def test_read_renders_form(self, pyramid_request, group):
+        pyramid_request.matchdict = {'pubid': group.pubid}
+        ctrl = GroupEditController(pyramid_request)
+
+        ctx = ctrl.read()
+
+        assert ctx['form'] == self._expected_form(group)
+
+    def test_update_updates_group_on_success(self, factories, pyramid_request, group, group_svc, user_svc, handle_form_submission):
+        pyramid_request.matchdict = {'pubid': group.pubid}
+
+        updated_name = 'Updated group'
+        updated_creator = factories.User()
+        user_svc.fetch.return_value = updated_creator
+        updated_description = 'New description'
+        updated_origins = ['https://a-new-site.com']
+
+        def call_on_success(request, form, on_success, on_failure):
+            return on_success({
+                'authority': pyramid_request.authority,
+                'creator': updated_creator.username,
+                'description': updated_description,
+                'group_type': 'open',
+                'name': updated_name,
+                'origins': updated_origins,
+            })
+        handle_form_submission.side_effect = call_on_success
+        ctrl = GroupEditController(pyramid_request)
+
+        ctx = ctrl.update()
+
+        assert group.creator.username == updated_creator.username
+        assert group.description == updated_description
+        assert group.name == updated_name
+        assert [s.origin for s in group.scopes] == updated_origins
+        assert ctx['form'] == self._expected_form(group)
+
+    def test_update_does_not_update_authority(self, pyramid_request, group, user_svc, handle_form_submission):
+        pyramid_request.matchdict = {'pubid': group.pubid}
+        user_svc.fetch.return_value = group.creator
+        group.authority = 'original.com'
+
+        def call_on_success(request, form, on_success, on_failure):
+            return on_success({
+                'authority': 'different.com',
+                'creator': group.creator.username,
+                'description': group.description,
+                'group_type': 'open',
+                'name': group.name,
+                'origins': [s.origin for s in group.scopes],
+            })
+        handle_form_submission.side_effect = call_on_success
+        ctrl = GroupEditController(pyramid_request)
+
+        ctx = ctrl.update()
+
+        assert group.authority == 'original.com'
+        assert ctx['form'] == self._expected_form(group)
+
+    @pytest.mark.parametrize('initial_type_flags,updated_type', [
+        (OPEN_GROUP_TYPE_FLAGS, 'restricted'),
+        (RESTRICTED_GROUP_TYPE_FLAGS, 'open'),
+    ])
+    def test_update_changes_group_type(self, pyramid_request, group, user_svc, handle_form_submission,
+                                       initial_type_flags, updated_type):
+        pyramid_request.matchdict = {'pubid': group.pubid}
+        user_svc.fetch.return_value = group.creator
+
+        group.joinable_by = initial_type_flags.joinable_by
+        group.readable_by = initial_type_flags.readable_by
+        group.writeable_by = initial_type_flags.writeable_by
+
+        def call_on_success(request, form, on_success, on_failure):
+            return on_success({
+                'authority': 'different.com',
+                'creator': group.creator.username,
+                'description': group.description,
+                'group_type': updated_type,
+                'name': group.name,
+                'origins': [s.origin for s in group.scopes],
+            })
+        handle_form_submission.side_effect = call_on_success
+        ctrl = GroupEditController(pyramid_request)
+
+        ctx = ctrl.update()
+
+        assert group.type == updated_type
+        assert ctx['form'] == self._expected_form(group)
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.OpenGroup(pubid='testgroup')
+
+    def _expected_form(self, group):
+        return {'authority': group.authority,
+                'creator': group.creator.username,
+                'description': group.description or '',
+                'group_type': group.type,
+                'name': group.name,
+                'origins': [s.origin for s in group.scopes]}
+
+
 @pytest.fixture
 def authority():
     return 'foo.com'
@@ -121,6 +241,7 @@ def authority():
 def pyramid_request(pyramid_request, factories, authority):
     pyramid_request.session = mock.Mock(spec_set=['flash', 'get_csrf_token'])
     pyramid_request.user = factories.User(authority=authority)
+    pyramid_request.create_form.return_value = FakeForm()
     return pyramid_request
 
 
