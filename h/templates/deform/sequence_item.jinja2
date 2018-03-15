@@ -4,12 +4,14 @@
   <div class="list-input__item-inner">
     {{ field.serialize(cstruct=cstruct) | safe }}
 
+    {% if (can_delete is not defined) or can_delete %}
     <button class="list-input__remove-btn"
             title="{% trans %}Remove item{% endtrans %}"
             type="button"
             data-ref="removeItemButton">
     {{ svg_icon('lozenge-close') }}
     </button>
+    {% endif %}
   </div>
 
   {%- if field.error and not field.widget.hidden -%}
