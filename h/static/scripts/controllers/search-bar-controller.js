@@ -110,6 +110,7 @@ class SearchBarController extends Controller {
           matchOn: normalizeStr(item.name),
           pubid: item.pubid,
           name: item.name,
+          relationship: item.relationship,
         });
       });
 
@@ -322,9 +323,11 @@ class SearchBarController extends Controller {
       },
 
       renderListItem: (listItem) => {
-
         let itemContents = `<span class="search-bar__dropdown-menu-title"> ${escapeHtml(listItem.title)} </span>`;
-
+        if (listItem.type === GROUP_TYPE && listItem.relationship) {
+          itemContents += `<span class="search-bar__dropdown-menu-relationship"> ${escapeHtml(listItem.relationship)} </span>`;
+        }
+        
         if (listItem.explanation) {
           itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${listItem.explanation} </span>`;
         }
@@ -441,7 +444,7 @@ class SearchBarController extends Controller {
       if (newState.suggestionsType === TAG_TYPE) {
         this._suggestionsHandler.setHeader('Popular tags:');
       } else if (newState.suggestionsType === GROUP_TYPE) {
-        this._suggestionsHandler.setHeader('Your groups:');
+        this._suggestionsHandler.setHeader('My groups:');
       } else {
         this._suggestionsHandler.setHeader('Narrow your search:');
       }

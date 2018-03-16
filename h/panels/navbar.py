@@ -35,7 +35,16 @@ def navbar(context, request, search=None, opts=None):
     # Make all groups associated with the user visible in the search auto complete.
     list_group_service = request.find_service(name='list_groups')
     groups = list_group_service.associated_groups(request.user)
-    groups_suggestions = [{'name': group.name, 'pubid': group.pubid} for group in groups]
+
+    def _relationship(group, username):
+        if group.creator == username:
+            return 'Creator'
+        return None
+
+    groups_suggestions = [{'name': group.name,
+                           'pubid': group.pubid,
+                           'relationship': _relationship(group, request.user)}
+                          for group in groups]
 
     route = request.matched_route
 
