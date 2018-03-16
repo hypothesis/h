@@ -15,6 +15,7 @@ from h import util
 from h.activity import query
 from h.i18n import TranslationString as _  # noqa: N813
 from h.links import pretty_link
+from h.models.group import ReadableBy
 from h.paginator import paginate
 from h.search import parser
 from h.util.user import split_user
@@ -107,9 +108,9 @@ class GroupSearchController(SearchController):
 
         result['opts'] = {'search_groupname': self.group.name}
 
-        # If the group has a concept of members (aka joinable_by is not None)
-        # and the user is not in the list of members, return without extra info.
-        if self.group.joinable_by and (self.request.user not in self.group.members):
+        # If the group has read access only for members  and the user is not in that list
+        # return without extra info.
+        if self.group.readable_by == ReadableBy.members and (self.request.user not in self.group.members):
             return result
 
         def user_annotation_count(aggregation, userid):
@@ -119,12 +120,12 @@ class GroupSearchController(SearchController):
             return 0
 
         q = query.extract(self.request)
-        members = None
-        moderators = None
+        members = []
+        moderators = []
         users_aggregation = result['search_results'].aggregations.get('users', [])
-        # If the group has a concept of members provide a list of member info,
+        # If the group has members provide a list of member info,
         # otherwise provide a list of moderator info instead.
-        if self.group.joinable_by:
+        if self.group.members:
             members = [{'username': u.username,
                         'userid': u.userid,
                         'count': user_annotation_count(users_aggregation,
@@ -154,6 +155,7 @@ class GroupSearchController(SearchController):
         result['stats'] = {
             'annotation_count': group_annotation_count,
         }
+
         result['group'] = {
             'created': utc_us_style_date(self.group.created),
             'description': self.group.description,
@@ -163,9 +165,21 @@ class GroupSearchController(SearchController):
                                           pubid=self.group.pubid,
                                           slug=self.group.slug),
             'members': members,
-            'moderators': moderators,
             'creator': self.group.creator.userid if self.group.creator else None,
+            'share_subtitle': _('Share group'),
+            'share_msg': _('Sharing the link lets people view this group:'),
         }
+
+        if self.group.type == 'private':
+            result['group']['share_subtitle'] = _('Invite new members')
+            result['group']['share_msg'] = _('Sharing the link lets people join this group:')
+
+        result['group_users_args'] = [
+            _('Members'),
+            moderators if self.group.type == 'open' else members,
+            result['group']['creator'],
+        ]
+
         if self.request.has_permission('admin', self.group):
             result['group_edit_url'] = self.request.route_url(
                 'group_edit', pubid=self.group.pubid)
@@ -176,6 +190,8 @@ class GroupSearchController(SearchController):
             result['zero_message'] = Markup(_(
                 'The group “{name}” has not made any annotations yet.').format(
                     name=Markup.escape(self.group.name)))
+
+        result['show_leave_button'] = self.request.user in self.group.members
 
         return result
 

@@ -11,7 +11,7 @@ from h.activity.query import ActivityResults
 from h.views import activity
 
 
-GROUP_TYPE_OPTIONS = ('group', 'open_group')
+GROUP_TYPE_OPTIONS = ('group', 'open_group', 'restricted_group')
 
 
 @pytest.mark.usefixtures('annotation_stats_service', 'paginate', 'query', 'routes')
@@ -400,7 +400,7 @@ class TestGroupSearchController(object):
                                                        test_group):
         result = controller.search()
 
-        actual = set([m['username'] for m in result['group']['moderators']])
+        actual = set([m['username'] for m in result['group_users_args'][1]])
         expected = set([test_group.creator.username])
         assert actual == expected
 
@@ -415,7 +415,7 @@ class TestGroupSearchController(object):
                                                     test_group):
         result = controller.search()
 
-        actual = set([m['userid'] for m in result['group']['moderators']])
+        actual = set([m['userid'] for m in result['group_users_args'][1]])
         expected = set([test_group.creator.userid])
         assert actual == expected
 
@@ -431,8 +431,8 @@ class TestGroupSearchController(object):
         pyramid_request.params = {'q': 'user:%s' % "does_not_matter"}
 
         result = controller.search()
-        assert result['group']['members'] is None, "Open group search should return members=None."
-        for moderator in result['group']['moderators']:
+        assert not result['group']['members'], "Open group search should return an empty list of members"
+        for moderator in result['group_users_args'][1]:
             assert not moderator['faceted_by']
 
     @pytest.mark.parametrize('test_group,test_user',
@@ -460,7 +460,7 @@ class TestGroupSearchController(object):
         }
 
         result = controller.search()
-        for moderator in result['group']['moderators']:
+        for moderator in result['group_users_args'][1]:
             assert moderator['count'] == counts[moderator['userid']]
 
     @pytest.mark.parametrize('test_group,test_user',
@@ -552,6 +552,65 @@ class TestGroupSearchController(object):
                                                                       pyramid_request):
         result = controller.search()['stats']
         assert result['annotation_count'] == 5
+
+    @pytest.mark.parametrize('test_group, test_user, test_heading, test_subtitle, test_share_msg',
+                             [('group', 'member', 'Members', 'Invite new members', 'Sharing the link lets people join this group:'),
+                              ('open_group', 'user', 'Members', 'Share group', 'Sharing the link lets people view this group:'),
+                              ('restricted_group', 'member', 'Members', 'Share group', 'Sharing the link lets people view this group:')],
+                             indirect=['test_group', 'test_user'])
+    def test_search_sets_display_strings_for_group(self,
+                                                   controller,
+                                                   test_group,
+                                                   test_user,
+                                                   test_heading,
+                                                   test_subtitle,
+                                                   test_share_msg,
+                                                   pyramid_request,
+                                                   search):
+
+        info = controller.search()
+
+        assert info['group_users_args'][0] == test_heading
+        assert info['group_users_args'][2] == test_group.creator.userid
+        assert info['group']['share_subtitle'] == test_subtitle
+        assert info['group']['share_msg'] == test_share_msg
+
+        search.reset_mock()
+
+    @pytest.mark.parametrize('test_group,test_user',
+                             [('group', 'member'),
+                              ('restricted_group', 'member')],
+                             indirect=['test_group', 'test_user'])
+    def test_search_sets_display_members_for_group(self,
+                                                   controller,
+                                                   test_group,
+                                                   test_user,
+                                                   pyramid_request,
+                                                   search):
+
+        info = controller.search()['group_users_args']
+        userids = list(map(lambda i: i['userid'], info[1]))
+        for member in test_group.members:
+            assert member.userid in userids
+
+        search.reset_mock()
+
+    @pytest.mark.parametrize('test_group',
+                             [('open_group')],
+                             indirect=['test_group'])
+    def test_search_sets_display_members_for_open_group(self,
+                                                       controller,
+                                                       test_group,
+                                                       pyramid_request,
+                                                       search):
+
+        info = controller.search()['group_users_args']
+        userids = list(map(lambda i: i['userid'], info[1]))
+
+        # At the moment, for an open group we return the group creator as the moderator
+        assert userids == [test_group.creator.userid]
+
+        search.reset_mock()
 
     @pytest.mark.parametrize('q,test_group', [('', 'open_group'), ('   ', 'group')], indirect=['test_group'])
     def test_leave_removes_empty_query_from_url(self,
@@ -1113,6 +1172,13 @@ def open_group(factories):
 
 
 @pytest.fixture
+def restricted_group(factories):
+    restricted_group = factories.RestrictedGroup()
+    restricted_group.members.extend([factories.User(), factories.User()])
+    return restricted_group
+
+
+@pytest.fixture
 def no_creator_open_group(factories):
     open_group = factories.OpenGroup()
     open_group.creator = None
@@ -1120,11 +1186,12 @@ def no_creator_open_group(factories):
 
 
 @pytest.fixture
-def groups(group, open_group, no_creator_group, no_creator_open_group):
+def groups(group, open_group, no_creator_group, no_creator_open_group, restricted_group):
     return {"open_group": open_group,
             "group": group,
             "no_creator_open_group": no_creator_open_group,
-            "no_creator_group": no_creator_group}
+            "no_creator_group": no_creator_group,
+            "restricted_group": restricted_group}
 
 
 @pytest.fixture
