@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from pyramid import httpexceptions
+import newrelic.agent
 
 from h import models, search
 from h.util.view import json_view
@@ -25,9 +26,11 @@ def badge(request):
         raise httpexceptions.HTTPBadRequest()
 
     if models.Blocklist.is_blocked(request.db, uri):
+        newrelic.agent.record_custom_metric('Custom/Badge/badgeCountIsZero', 1)
         return {'total': 0}
 
     query = {'uri': uri, 'limit': 0}
     result = search.Search(request, stats=request.stats).run(query)
 
+    newrelic.agent.record_custom_metric('Custom/Badge/badgeCountIsZero', int(result.total == 0))
     return {'total': result.total}
