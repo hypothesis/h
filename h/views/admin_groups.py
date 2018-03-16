@@ -143,7 +143,11 @@ class GroupEditController(object):
         group = self.group
         self.form.set_appstruct({
             'authority': group.authority,
-            'creator': group.creator.username,
+
+            # `group.creator` is nullable but "Creator" is currently a required
+            # field, so the user will have to pick one when editing the group.
+            'creator': group.creator.username if group.creator else '',
+
             'description': group.description or '',
             'group_type': group.type,
             'name': group.name,

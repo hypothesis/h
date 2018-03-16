@@ -138,6 +138,15 @@ class TestGroupEditController(object):
 
         assert ctx['form'] == self._expected_form(group)
 
+    def test_read_renders_form_if_group_has_no_creator(self, pyramid_request, group):
+        pyramid_request.matchdict = {'pubid': group.pubid}
+        group.creator = None
+        ctrl = GroupEditController(pyramid_request)
+
+        ctx = ctrl.read()
+
+        assert ctx['form'] == self._expected_form(group)
+
     def test_update_updates_group_on_success(self, factories, pyramid_request, group, group_svc, user_svc, handle_form_submission):
         pyramid_request.matchdict = {'pubid': group.pubid}
 
@@ -225,7 +234,7 @@ class TestGroupEditController(object):
 
     def _expected_form(self, group):
         return {'authority': group.authority,
-                'creator': group.creator.username,
+                'creator': group.creator.username if group.creator else '',
                 'description': group.description or '',
                 'group_type': group.type,
                 'name': group.name,
