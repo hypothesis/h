@@ -18,22 +18,14 @@ def groups(request):
     list_svc = request.find_service(name='list_groups')
     links_svc = request.find_service(name='group_links')
 
-    if request.feature('filter_groups_by_scope'):
-        # Filter open groups by scope against the ``document_uri`` param.
-        # The different handling of authority here is part of this
-        # feature — authority "babysitting" is going to be moving
-        # out of the service and back to the view's...purview.
-        if request.user is not None:
-            authority = request.user.authority
-        else:
-            authority = authority or request.authority
-        all_groups = list_svc.request_groups(user=request.user,
-                                             authority=authority,
-                                             document_uri=document_uri)
+    if request.user is not None:
+        authority = request.user.authority
     else:
-        all_groups = list_svc.all_groups(user=request.user,
+        authority = authority or request.authority
+    all_groups = list_svc.request_groups(user=request.user,
                                          authority=authority,
                                          document_uri=document_uri)
+
     all_groups = GroupsJSONPresenter(all_groups, links_svc).asdicts()
     return all_groups
 
