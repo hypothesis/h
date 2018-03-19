@@ -29,12 +29,14 @@ node {
                                          "-e TEST_DATABASE_URL=${databaseUrl}") {
                 // Test dependencies
                 sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
+                sh 'apk add --no-cache python3 python3-dev'
                 sh 'pip install -q tox'
 
                 // Unit tests
                 sh 'cd /var/lib/hypothesis && tox'
                 // Functional tests
                 sh 'cd /var/lib/hypothesis && tox -e functional'
+                sh 'cd /var/lib/hypothesis && tox -e functional-py3'
             }
         } finally {
             rabbit.stop()
