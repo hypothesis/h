@@ -5,7 +5,6 @@ from h import session
 from h.services.list_groups import ListGroupsService
 
 
-@pytest.mark.usefixtures('scope_feature_off')
 class TestModel(object):
     def test_proxies_group_lookup_to_service(self, authenticated_request):
         svc = authenticated_request.find_service(name='list_groups')
@@ -360,8 +359,3 @@ def authenticated_request(authority, fake_feature):
 @pytest.fixture
 def world_group(factories):
     return factories.OpenGroup(name=u'Public', pubid='__worldish__')
-
-
-@pytest.fixture
-def scope_feature_off(pyramid_request):
-    pyramid_request.feature.flags['filter_groups_by_scope'] = False
