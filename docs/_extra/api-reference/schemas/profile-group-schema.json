@@ -3,6 +3,7 @@
   "type": "object",
   "required": [
     "id",
+    "links",
     "name",
     "public",
     "scoped",
@@ -13,12 +14,22 @@
     "id": {
       "type": "string"
     },
+    "links": {
+      "type": "object",
+      "properties": {
+        "html": {
+          "description": "URL to the group's main (activity) page",
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
     "name": {
       "type": "string"
     },
     "public": {
       "type": "boolean",
-      "description": "indicates whether a group's annotations are world-readable"
+      "description": "**DEPRECATED: Use `type` instead**\n\nIndicates whether a group's annotations are world-readable"
     },
     "scoped": {
       "type": "boolean",
@@ -26,27 +37,23 @@
     },
     "type": {
       "type": "string",
-      "enum": ["private", "open"],
-      "description": "Derived group 'type' based on group access and scope settings"
+      "enum": ["private", "open", "restricted"],
+      "description": "Group type"
     },
     "url": {
       "type": "string",
       "format": "uri",
-      "description": "URL to group page (only applies to some group types)"
+      "description": "**DEPRECATED: use `links['html']` instead**\n\nURL to group (activity) page"
     },
     "urls": {
       "type": "object",
+      "description": "**DEPRECATED: Use `links` instead**\n\nObject with URLs pertaining to the group",
       "properties": {
         "group": {
           "description": "URL to the group's main page",
           "type": "string",
           "format": "uri"
         },
-        "leave": {
-          "description": "URL for leaving (ending membership for) this group. Present on groups the user is a member of",
-          "type": "string",
-          "format": "uri"
-        }
       }
     }
   }
