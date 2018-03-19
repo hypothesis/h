@@ -244,18 +244,6 @@ class TestCreateAnnotation(object):
 
         assert str(exc.value).startswith('group scope: ')
 
-    @pytest.mark.usefixtures('scope_feature_off')
-    def test_it_allows_mismatched_scope_when_feature_flag_off(self, pyramid_request, pyramid_config, group_service, scoped_open_group, models):
-        group_service.find.return_value = scoped_open_group
-
-        data = self.annotation_data()
-        data['target_uri'] = 'http://www.baz.com/boo/bah.html'
-
-        # this should not raise
-        result = storage.create_annotation(pyramid_request, data, group_service)
-
-        assert result == models.Annotation.return_value
-
     def test_it_raises_when_group_could_not_be_found(self, pyramid_request, pyramid_config, group_service):
         pyramid_config.testing_securitypolicy('userid', permissive=True)
         group_service.find.return_value = None
@@ -487,16 +475,6 @@ class TestUpdateAnnotation(object):
 
         assert annotation == pyramid_request.db.query.return_value.get.return_value
 
-    @pytest.mark.usefixtures('scope_feature_off')
-    def test_it_allows_scope_mismatch_when_feature_off(self, annotation_data, pyramid_request, group_service, scoped_open_group):
-        annotation_data['target_uri'] = u'http://www.bar.com/baz/ding.html'
-        group_service.find.return_value = scoped_open_group
-
-        # this should not raise
-        annotation = storage.update_annotation(pyramid_request, 'test_annotation_id', annotation_data, group_service)
-
-        assert annotation == pyramid_request.db.query.return_value.get.return_value
-
     def test_it_updates_the_document_metadata_from_the_annotation(
             self,
             annotation_data,
@@ -645,8 +623,3 @@ def group_service(pyramid_config, factories):
     group_service.find.return_value = open_group
     pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
     return group_service
-
-
-@pytest.fixture
-def scope_feature_off(pyramid_request):
-    pyramid_request.feature.flags['filter_groups_by_scope'] = False
