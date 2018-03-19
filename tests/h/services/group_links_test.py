@@ -15,13 +15,13 @@ class TestGroupLinks(object):
         group = factories.OpenGroup(authority=pyramid_request.authority)
         links = svc.get_all(group)
 
-        assert 'group' in links
+        assert 'html' in links
 
     def test_it_returns_no_activity_link_for_non_default_authority_group(self, pyramid_request, factories, svc):
         group = factories.OpenGroup(authority='foo.com')
         links = svc.get_all(group)
 
-        assert 'group' not in links
+        assert 'html' not in links
 
 
 class TestGroupLinksFactory(object):

@@ -17,7 +17,7 @@ class GroupJSONPresenter(object):
         model = {
           'name': group.name,
           'id': group.pubid,
-          'public': group.is_public,
+          'public': group.is_public,  # DEPRECATED: TODO: remove from client
           'scoped': True if group.scopes else False,
           'type': group.type
         }
@@ -25,13 +25,16 @@ class GroupJSONPresenter(object):
         return model
 
     def _inject_urls(self, group, model):
-        model['urls'] = {}
+        model['links'] = {}
+        model['urls'] = {}  # DEPRECATED TODO: remove from client
         if not self._links_svc:
             return model
 
-        model['urls'] = self._links_svc.get_all(group)
-        if 'group' in model['urls']:
-            model['url'] = model['urls']['group']
+        model['links'] = self._links_svc.get_all(group)
+        model['urls'] = model['links']  # DEPRECATED TODO: remove from client
+        if 'html' in model['links']:
+            # DEPRECATED TODO: remove from client
+            model['url'] = model['urls']['html']
         return model
 
 
