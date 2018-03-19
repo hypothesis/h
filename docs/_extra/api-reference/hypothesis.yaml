@@ -391,7 +391,7 @@ definitions:
     items:
       $ref: '#/definitions/Group'
   Group:
-    $ref: './schemas/profile-group-schema.json'
+    $ref: './schemas/group-schema.json'
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:

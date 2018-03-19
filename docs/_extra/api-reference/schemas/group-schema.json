@@ -3,49 +3,22 @@
   "type": "object",
   "required": [
     "id",
-    "access",
     "links",
     "name",
     "public",
     "scoped",
-    "type"
+    "type",
+    "urls"
   ],
   "properties": {
     "id": {
       "type": "string"
     },
-    "access": {
-      "type": "object",
-      "required": [
-        "write",
-        "leave"
-      ],
-      "properties": {
-        "write": {
-          "type": "boolean",
-          "description": "true if this user may post annotations to this group"
-        },
-        "leave": {
-          "type": "boolean",
-          "description": "true if this user is a member of this group"
-        }
-      }
-    },
-    "icon": {
-      "description": "present if this group has a custom icon",
-      "type": "string",
-      "format": "uri"
-    },
-    "urls": {
+    "links": {
       "type": "object",
       "properties": {
-        "group": {
-          "description": "URL to the group's main page",
-          "type": "string",
-          "format": "uri"
-        },
-        "leave": {
-          "description": "URL for leaving (ending membership for) this group. Present on groups the user is a member of",
+        "html": {
+          "description": "URL to the group's main (activity) page",
           "type": "string",
           "format": "uri"
         }
@@ -54,23 +27,34 @@
     "name": {
       "type": "string"
     },
+    "public": {
+      "type": "boolean",
+      "description": "**DEPRECATED: Use `type` instead**\n\nIndicates whether a group's annotations are world-readable"
+    },
     "scoped": {
       "type": "boolean",
       "description": "Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped (scope: false) groups allow annotation to documents at any URL."
     },
     "type": {
       "type": "string",
-      "enum": ["private", "open"],
-      "description": "Derived group 'type' based on group access and scope settings"
-    },
-    "public": {
-      "type": "boolean",
-      "description": "indicates whether a group's annotations are world-readable"
+      "enum": ["private", "open", "restricted"],
+      "description": "Group type"
     },
     "url": {
       "type": "string",
       "format": "uri",
-      "description": "URL to group page (only applies to some group types)"
+      "description": "**DEPRECATED: use `links['html']` instead**\n\nURL to group (activity) page"
+    },
+    "urls": {
+      "type": "object",
+      "description": "**DEPRECATED: Use `links` instead**\n\nObject with URLs pertaining to the group",
+      "properties": {
+        "group": {
+          "description": "URL to the group's main page",
+          "type": "string",
+          "format": "uri"
+        },
+      }
     }
   }
 }
