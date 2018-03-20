@@ -93,7 +93,7 @@ class TestNavbar(object):
     @pytest.fixture
     def user(self, factories):
         user = factories.User(username='vannevar')
-        user.groups = [factories.Group(), factories.Group()]
+        user.groups = [factories.Group(creator=user), factories.Group()]
         return user
 
     @pytest.fixture
