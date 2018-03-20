@@ -280,6 +280,7 @@ class TestReadJSONLD(object):
 
         assert pyramid_request.response.content_type == 'application/ld+json'
         assert pyramid_request.response.content_type_params == {
+            'charset': 'UTF-8',
             'profile': 'http://foo.com/context.jsonld'
         }
 
