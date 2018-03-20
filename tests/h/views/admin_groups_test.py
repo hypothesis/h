@@ -9,7 +9,6 @@ import pytest
 import mock
 
 from h.models import User
-from h.models.group import OPEN_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
 from h.views import admin_groups
 from h.views.admin_groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
@@ -125,6 +124,16 @@ class TestGroupCreateController(object):
 @pytest.mark.usefixtures('routes', 'user_svc')
 class TestGroupEditController(object):
 
+    def test_it_binds_schema(self, pyramid_request, group, patch):
+        schema = mock.Mock(spec_set=['bind'])
+        CreateAdminGroupSchema = patch('h.views.admin_groups.CreateAdminGroupSchema')  # noqa: N806
+        CreateAdminGroupSchema.return_value = schema
+        pyramid_request.matchdict = {'pubid': group.pubid}
+
+        GroupEditController(pyramid_request)
+
+        schema.bind.assert_called_with(request=pyramid_request, group=group)
+
     def test_raises_not_found_if_unknown_group(self, pyramid_request):
         pyramid_request.matchdict = {'pubid': 'unknown'}
         with pytest.raises(HTTPNotFound):
@@ -196,36 +205,6 @@ class TestGroupEditController(object):
         ctx = ctrl.update()
 
         assert group.authority == 'original.com'
-        assert ctx['form'] == self._expected_form(group)
-
-    @pytest.mark.parametrize('initial_type_flags,updated_type', [
-        (OPEN_GROUP_TYPE_FLAGS, 'restricted'),
-        (RESTRICTED_GROUP_TYPE_FLAGS, 'open'),
-    ])
-    def test_update_changes_group_type(self, pyramid_request, group, user_svc, handle_form_submission,
-                                       initial_type_flags, updated_type):
-        pyramid_request.matchdict = {'pubid': group.pubid}
-        user_svc.fetch.return_value = group.creator
-
-        group.joinable_by = initial_type_flags.joinable_by
-        group.readable_by = initial_type_flags.readable_by
-        group.writeable_by = initial_type_flags.writeable_by
-
-        def call_on_success(request, form, on_success, on_failure):
-            return on_success({
-                'authority': 'different.com',
-                'creator': group.creator.username,
-                'description': group.description,
-                'group_type': updated_type,
-                'name': group.name,
-                'origins': [s.origin for s in group.scopes],
-            })
-        handle_form_submission.side_effect = call_on_success
-        ctrl = GroupEditController(pyramid_request)
-
-        ctx = ctrl.update()
-
-        assert group.type == updated_type
         assert ctx['form'] == self._expected_form(group)
 
     @pytest.fixture

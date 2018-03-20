@@ -8,7 +8,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from h import form  # noqa F401
 from h import i18n
 from h import models
-from h.models.group import GroupFactory, OPEN_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
+from h.models.group import GroupFactory
 from h.models.group_scope import GroupScope
 from h import paginator
 from h.schemas.admin_group import CreateAdminGroupSchema, user_exists_validator_factory
@@ -103,7 +103,7 @@ class GroupEditController(object):
             raise HTTPNotFound()
 
         self.request = request
-        self.schema = CreateAdminGroupSchema().bind(request=request)
+        self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Save'),))
 
@@ -123,13 +123,6 @@ class GroupEditController(object):
             group.description = appstruct['description']
             group.name = appstruct['name']
             group.scopes = [GroupScope(origin=o) for o in appstruct['origins']]
-
-            type_flags = {'open': OPEN_GROUP_TYPE_FLAGS,
-                          'restricted': RESTRICTED_GROUP_TYPE_FLAGS}
-            permissions = type_flags[appstruct['group_type']]
-            group.joinable_by = permissions.joinable_by
-            group.readable_by = permissions.readable_by
-            group.writeable_by = permissions.writeable_by
 
             self._update_appstruct()
 
