@@ -4,7 +4,7 @@ alembic
 backports.functools_lru_cache
 bcrypt
 bleach >= 2.0
-celery == 3.1.25  # Pin to latest 3.1.x to ensure forwards-compat with 4.x
+celery >= 4.1
 certifi
 cffi
 click
@@ -19,7 +19,7 @@ gunicorn
 itsdangerous
 jsonpointer == 1.0
 jsonschema
-kombu <3.1 # Pinned because of celery pin
+kombu
 mistune
 newrelic
 oauthlib

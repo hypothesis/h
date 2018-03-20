@@ -80,7 +80,7 @@ def devserver(https, web, ws, worker, assets, beat):
         m.add_process('ws', 'gunicorn --name websocket --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
 
     if worker:
-        m.add_process('worker', 'hypothesis --dev celery worker --autoreload -l INFO')
+        m.add_process('worker', 'hypothesis --dev celery worker -l INFO')
 
     if beat:
         m.add_process('beat', 'hypothesis --dev celery beat')
