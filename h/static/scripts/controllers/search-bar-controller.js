@@ -64,7 +64,7 @@ class SearchBarController extends Controller {
         {
           matchOn: 'group',
           title: 'group:',
-          explanation: 'show annotations created in a group you are a member of',
+          explanation: 'show annotations associated with a group',
         },
       ].map((item) => { return Object.assign(item, { type: FACET_TYPE}); });
 
@@ -444,7 +444,7 @@ class SearchBarController extends Controller {
       if (newState.suggestionsType === TAG_TYPE) {
         this._suggestionsHandler.setHeader('Popular tags:');
       } else if (newState.suggestionsType === GROUP_TYPE) {
-        this._suggestionsHandler.setHeader('My groups:');
+        this._suggestionsHandler.setHeader('Your groups:');
       } else {
         this._suggestionsHandler.setHeader('Narrow your search:');
       }
