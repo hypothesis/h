@@ -16,7 +16,7 @@ pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
 
 
 @pytest.mark.usefixtures('list_groups_service', 'group_links_service')
-class TestGroupsWithScope(object):
+class TestGetGroups(object):
 
     def test_proxies_to_list_service(self, anonymous_request, list_groups_service):
         views.groups(anonymous_request)
@@ -49,58 +49,15 @@ class TestGroupsWithScope(object):
             document_uri=None
         )
 
-    @pytest.fixture
-    def anonymous_request(self, pyramid_request):
-        pyramid_request.user = None
-        return pyramid_request
-
-    @pytest.fixture
-    def authenticated_request(self, pyramid_request, factories):
-        pyramid_request.user = factories.User()
-        return pyramid_request
-
-
-@pytest.mark.usefixtures('scope_feature_off', 'list_groups_service', 'group_links_service')
-class TestGroups(object):
-
-    def test_proxies_to_service(self, anonymous_request, list_groups_service):
-        views.groups(anonymous_request)
-
-        list_groups_service.all_groups.assert_called_once_with(
-            user=None,
-            authority=None,
-            document_uri=None
-        )
-
-    def test_proxies_authority_param(self, anonymous_request, list_groups_service):
-        anonymous_request.params['authority'] = 'foo.com'
-        views.groups(anonymous_request)
-
-        list_groups_service.all_groups.assert_called_once_with(
-            user=None,
-            authority='foo.com',
-            document_uri=None
-        )
-
-    def test_proxies_document_uri_param(self, anonymous_request, list_groups_service):
-        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
-        views.groups(anonymous_request)
-
-        list_groups_service.all_groups.assert_called_once_with(
-            user=None,
-            authority=None,
-            document_uri='http://example.com/thisthing.html'
-        )
-
     def test_uses_presenter_for_formatting(self, group_links_service, open_groups, list_groups_service, GroupsJSONPresenter, anonymous_request):  # noqa: N803
-        list_groups_service.all_groups.return_value = open_groups
+        list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
         GroupsJSONPresenter.assert_called_once_with(open_groups, group_links_service)
 
     def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
-        list_groups_service.all_groups.return_value = open_groups
+        list_groups_service.request_groups.return_value = open_groups
 
         result = views.groups(anonymous_request)
 
@@ -113,6 +70,11 @@ class TestGroups(object):
     @pytest.fixture
     def anonymous_request(self, pyramid_request):
         pyramid_request.user = None
+        return pyramid_request
+
+    @pytest.fixture
+    def authenticated_request(self, pyramid_request, factories):
+        pyramid_request.user = factories.User()
         return pyramid_request
 
 
@@ -165,11 +127,6 @@ class TestRemoveMember(object):
 @pytest.fixture
 def GroupsJSONPresenter(patch):  # noqa: N802
     return patch('h.views.api_groups.GroupsJSONPresenter')
-
-
-@pytest.fixture
-def scope_feature_off(pyramid_request):
-    pyramid_request.feature.flags['filter_groups_by_scope'] = False
 
 
 @pytest.fixture

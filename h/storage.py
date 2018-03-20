@@ -132,8 +132,7 @@ def create_annotation(request, data, group_service):
                                       _('You may not create annotations '
                                         'in the specified group!'))
 
-    if request.feature('filter_groups_by_scope'):
-        _validate_group_scope(group, data['target_uri'])
+    _validate_group_scope(group, data['target_uri'])
 
     annotation = models.Annotation(**data)
     annotation.created = created
@@ -189,7 +188,7 @@ def update_annotation(request, id_, data, group_service):
     if group is None:
         raise schemas.ValidationError('group: ' +
                                       _('Invalid group specified for annotation'))
-    if request.feature('filter_groups_by_scope') and data.get('target_uri', None):
+    if data.get('target_uri', None):
         _validate_group_scope(group, data['target_uri'])
 
     annotation.extra.update(data.pop('extra', {}))

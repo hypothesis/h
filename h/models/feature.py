@@ -15,8 +15,6 @@ FEATURES = {
                           "using a cached version?"),
     'filter_highlights': ("Filter highlights in document based on visible"
                           " annotations in sidebar?"),
-    'filter_groups_by_scope': ("Only show open groups that match current authority and"
-                               " 'document_uri'? Non-scoped groups won't be returned"),
     'overlay_highlighter': "Use the new overlay highlighter?",
     'api_render_user_info': "Return users' extended info in API responses?",
     'client_display_names': "Render display names instead of user names in the client",
@@ -48,6 +46,8 @@ FEATURES_PENDING_REMOVAL = {
                                " updates to annotations in the client?"),
     'flag_action': ("Enable user to flag inappropriate annotations in the "
                     "client?"),
+    'filter_groups_by_scope': ("Only show open groups that match current authority and"
+                               " 'document_uri'? Non-scoped groups won't be returned"),
     'homepage_redirects': "Enable homepage redirects (for WordPress migration)?",
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
     'search_for_doi': "Use DOI metadata when searching for annotations on the current page?",
