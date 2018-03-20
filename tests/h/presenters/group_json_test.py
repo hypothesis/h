@@ -22,7 +22,8 @@ class TestGroupJSONPresenter(object):
             'type': 'private',
             'public': False,
             'scoped': False,
-            'urls': {}
+            'urls': {},
+            'links': {}
         }
 
     def test_open_group_asdict_no_links_svc(self, factories):
@@ -37,7 +38,8 @@ class TestGroupJSONPresenter(object):
             'type': 'open',
             'public': True,
             'scoped': False,
-            'urls': {}
+            'urls': {},
+            'links': {}
         }
 
     def test_open_scoped_group_asdict(self, factories):
@@ -53,19 +55,22 @@ class TestGroupJSONPresenter(object):
             'type': 'open',
             'public': True,
             'scoped': True,
-            'urls': {}
+            'urls': {},
+            'links': {},
         }
 
     def test_private_group_asdict_with_links_svc(self, factories, links_svc):
         group = factories.Group(name='My Group',
                                 pubid='mygroup')
         presenter = GroupJSONPresenter(group, links_svc=links_svc)
-        links_svc.get_all.return_value = {'foo': 'bar'}
+        links_svc.get_all.return_value = {'html': 'bar'}
 
         model = presenter.asdict()
 
         links_svc.get_all.assert_called_once_with(group)
         assert model['urls'] == links_svc.get_all.return_value
+        assert model['links'] == links_svc.get_all.return_value
+        assert model['url'] == links_svc.get_all.return_value['html']
 
     def test_open_group_asdict_with_links_svc(self, factories, links_svc):
         group = factories.OpenGroup(name='My Group',
@@ -104,6 +109,7 @@ class TestGroupsJSONPresenter(object):
 
         for group_model in result:
             assert 'urls' in group_model
+            assert 'links' in group_model
 
 
 @pytest.fixture

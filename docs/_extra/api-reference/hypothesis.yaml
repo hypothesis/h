@@ -172,7 +172,8 @@ paths:
     get:
       summary: Get list of groups
       description: >
-        Retrieve a list of accessible, applicable groups.
+        Retrieve a list of accessible, applicable groups for this user for the
+        provided target document (document_uri).
 
         Note: This API service is pre-release and currently under development.
         Be aware that parameters and response body will be changing.
@@ -190,7 +191,7 @@ paths:
           in: query
           description: >
             The URI of the document currently being annotated.
-            Used to filter in appropriate open groups
+            Used to filter appropriate groups
           required: false
           type: string
           format: uri
@@ -198,7 +199,7 @@ paths:
         '200':
           description: Success
           schema:
-            $ref: '#/definitions/ProfileGroupResults'
+            $ref: '#/definitions/GroupResults'
   /search:
     get:
       summary: Search for annotations
@@ -385,12 +386,12 @@ definitions:
       total:
         description: Total number of results matching query.
         type: integer
-  ProfileGroupResults:
+  GroupResults:
     type: array
     items:
-      $ref: '#/definitions/ProfileGroup'
-  ProfileGroup:
-    $ref: './schemas/profile-group-schema.json'
+      $ref: '#/definitions/Group'
+  Group:
+    $ref: './schemas/group-schema.json'
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:

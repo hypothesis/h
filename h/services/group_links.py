@@ -26,9 +26,9 @@ class GroupLinksService(object):
             # Only groups for the default authority should have an activity page
             # link. Note that the default authority may differ from the
             # user's authority.
-            links['group'] = self._route_url('group_read',
-                                             pubid=group.pubid,
-                                             slug=group.slug)
+            links['html'] = self._route_url('group_read',
+                                            pubid=group.pubid,
+                                            slug=group.slug)
         return links
 
 
