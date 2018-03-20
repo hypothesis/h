@@ -86,7 +86,7 @@ def test_repr(db_session, factories):
 def test_group_organization(db_session):
     name = "My Hypothesis Group"
 
-    org = models.Organization(name='My Organization')
+    org = models.Organization(name='My Organization', authority='foobar.com')
     db_session.add(org)
     db_session.flush()
 
