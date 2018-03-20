@@ -82,42 +82,6 @@ class TestModel(object):
             assert preferences['show_sidebar_tutorial'] is True
 
 
-class TestModelWithScopedGroups(object):
-    def test_proxies_group_lookup_to_service(self, authenticated_request):
-        svc = authenticated_request.find_service(name='list_groups')
-
-        session.model(authenticated_request)
-
-        svc.session_groups.assert_called_once_with(user=authenticated_request.user,
-                                                   authority=authenticated_request.authority)
-
-    def test_private_group_is_not_public(self, authenticated_request, factories):
-        a_group = factories.Group()
-        svc = authenticated_request.find_service(name='list_groups')
-        svc.session_groups.return_value = [a_group]
-
-        model = session.model(authenticated_request)
-
-        assert not model['groups'][0]['public']
-
-    def test_open_group_has_no_url(self, unauthenticated_request, world_group):
-        svc = unauthenticated_request.find_service(name='list_groups')
-        svc.session_groups.return_value = [world_group]
-
-        model = session.model(unauthenticated_request)
-
-        assert not model['groups'][0].get('url')
-
-    def test_private_group_has_url(self, authenticated_request, factories):
-        a_group = factories.Group()
-        svc = authenticated_request.find_service(name='list_groups')
-        svc.session_groups.return_value = [a_group]
-
-        model = session.model(authenticated_request)
-
-        assert model['groups'][0]['url']
-
-
 class TestProfile(object):
     def test_userid_unauthenticated(self, unauthenticated_request):
         assert session.profile(unauthenticated_request)['userid'] is None
