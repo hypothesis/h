@@ -34,7 +34,9 @@ class TestNavbar(object):
     def test_includes_groups_suggestions_when_logged_in(self, req, user, open_group):
         req.user = user
         result = navbar({}, req)
-        assert result['groups_suggestions'] == [{'name': g.name, 'pubid': g.pubid}
+        assert result['groups_suggestions'] == [{'name': g.name,
+                                                 'pubid': g.pubid,
+                                                 'relationship': 'Creator' if g.creator == user else None}
                                                 for g in user.groups]
 
     def test_username_url_when_logged_in(self, req, user):
@@ -91,7 +93,7 @@ class TestNavbar(object):
     @pytest.fixture
     def user(self, factories):
         user = factories.User(username='vannevar')
-        user.groups = [factories.Group(), factories.Group()]
+        user.groups = [factories.Group(creator=user), factories.Group()]
         return user
 
     @pytest.fixture
