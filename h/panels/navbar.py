@@ -24,11 +24,6 @@ def navbar(context, request, search=None, opts=None):
     username = None
 
     if request.user:
-        for group in request.user.groups:
-            groups_menu_items.append({
-                'title': group.name,
-                'link': request.route_url('group_read', pubid=group.pubid, slug=group.slug)
-            })
         user_activity_url = request.route_url('activity.user_search',
                                               username=request.user.username)
         username = request.user.username
@@ -41,6 +36,10 @@ def navbar(context, request, search=None, opts=None):
             return 'Creator'
         return None
 
+    groups_menu_items = [{
+        'title': group.name,
+        'link': request.route_url('group_read', pubid=group.pubid, slug=group.slug),
+        } for group in groups]
     groups_suggestions = [{'name': group.name,
                            'pubid': group.pubid,
                            'relationship': _relationship(group, request.user)}
