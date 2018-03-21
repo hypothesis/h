@@ -35,6 +35,18 @@ def user_exists_validator_factory(user_svc):
     return user_exists_validator
 
 
+@colander.deferred
+def group_type_validator(node, kw):
+    group = kw.get('group')
+    if not group:
+        return colander.OneOf([key for key, title in VALID_GROUP_TYPES])
+
+    def validate(node, value):
+        if group.type != value:
+            raise colander.Invalid(node, _('Changing group type is currently not supported'))
+    return validate
+
+
 class CreateAdminGroupSchema(CSRFSchema):
 
     group_type = colander.SchemaNode(
@@ -43,7 +55,7 @@ class CreateAdminGroupSchema(CSRFSchema):
         widget=SelectWidget(
           values=(('', _('Select')),) + VALID_GROUP_TYPES
         ),
-        validator=colander.OneOf([key for key, title in VALID_GROUP_TYPES])
+        validator=group_type_validator,
     )
 
     name = colander.SchemaNode(

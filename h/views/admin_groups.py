@@ -3,11 +3,13 @@ from __future__ import unicode_literals
 
 from jinja2 import Markup
 from pyramid.view import view_config, view_defaults
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 
 from h import form  # noqa F401
 from h import i18n
 from h import models
+from h.models.group import GroupFactory
+from h.models.group_scope import GroupScope
 from h import paginator
 from h.schemas.admin_group import CreateAdminGroupSchema, user_exists_validator_factory
 
@@ -80,6 +82,70 @@ class GroupCreateController(object):
         return form.handle_form_submission(self.request, self.form,
                                            on_success=on_success,
                                            on_failure=self._template_context)
+
+    def _template_context(self):
+        return {'form': self.form.render()}
+
+
+@view_defaults(route_name='admin_groups_edit',
+               permission='admin_groups',
+               renderer='h:templates/admin/groups_edit.html.jinja2')
+class GroupEditController(object):
+
+    def __init__(self, request):
+        # Look up the group here rather than using traversal in the route
+        # definition as that would apply `Group.__acl__` which will not match if
+        # the current (admin) user is not the creator of the group.
+        try:
+            pubid = request.matchdict.get('pubid')
+            self.group = GroupFactory(request)[pubid]
+        except KeyError:
+            raise HTTPNotFound()
+
+        self.request = request
+        self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group)
+        self.form = request.create_form(self.schema,
+                                        buttons=(_('Save'),))
+
+    @view_config(request_method='GET')
+    def read(self):
+        self._update_appstruct()
+        return self._template_context()
+
+    @view_config(request_method='POST')
+    def update(self):
+        group = self.group
+
+        def on_success(appstruct):
+            user_svc = self.request.find_service(name='user')
+
+            group.creator = user_svc.fetch(appstruct['creator'], group.authority)
+            group.description = appstruct['description']
+            group.name = appstruct['name']
+            group.scopes = [GroupScope(origin=o) for o in appstruct['origins']]
+
+            self._update_appstruct()
+
+            return self._template_context()
+
+        return form.handle_form_submission(self.request, self.form,
+                                           on_success=on_success,
+                                           on_failure=self._template_context)
+
+    def _update_appstruct(self):
+        group = self.group
+        self.form.set_appstruct({
+            'authority': group.authority,
+
+            # `group.creator` is nullable but "Creator" is currently a required
+            # field, so the user will have to pick one when editing the group.
+            'creator': group.creator.username if group.creator else '',
+
+            'description': group.description or '',
+            'group_type': group.type,
+            'name': group.name,
+            'origins': [s.origin for s in group.scopes],
+        })
 
     def _template_context(self):
         return {'form': self.form.render()}
