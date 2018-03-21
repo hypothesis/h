@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
+
 import enum
 import sqlalchemy as sa
 from pyramid import security
@@ -82,9 +83,6 @@ class Group(Base, mixins.Timestamps):
             'groups', order_by='Group.name'))
 
     scopes = sa.orm.relationship('GroupScope', backref='group', cascade='all, delete-orphan')
-
-    organization_id = sa.Column(sa.Integer, sa.ForeignKey('organization.id'))
-    organization = sa.orm.relationship('Organization')
 
     def __init__(self, **kwargs):
         super(Group, self).__init__(**kwargs)

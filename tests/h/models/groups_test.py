@@ -83,32 +83,6 @@ def test_repr(db_session, factories):
     assert repr(group) == "<Group: my-hypothesis-group>"
 
 
-def test_group_organization(db_session):
-    name = "My Hypothesis Group"
-
-    org = models.Organization(name='My Organization', authority='foobar.com')
-    db_session.add(org)
-    db_session.flush()
-
-    group = models.Group(name=name, authority='foobar.com', organization=org)
-    db_session.add(group)
-    db_session.flush()
-
-    assert group.organization == org
-    assert group.organization_id == org.id
-
-
-def test_group_organization_defaults_to_none(db_session):
-    name = "My Hypothesis Group"
-
-    group = models.Group(name=name, authority='foobar.com')
-    db_session.add(group)
-    db_session.flush()
-
-    assert group.organization is None
-    assert group.organization_id is None
-
-
 def test_created_by(db_session, factories):
     name_1 = "My first group"
     name_2 = "My second group"
