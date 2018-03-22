@@ -9,6 +9,7 @@ from h.models import Group, GroupScope
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 from h.services.group import GroupService
 from h.services.group import groups_factory
+from h.services.organization import OrganizationService
 
 from tests.common.matchers import Matcher
 
@@ -64,6 +65,17 @@ class TestGroupService(object):
 
         assert group.organization == default_organization
 
+    def test_create_private_group_creates_group_with_specified_organization(
+            self, db_session, service):
+        org = OrganizationService(db_session).create(
+            name='My organization',
+            authority='example.com',
+            )
+
+        group = service.create_private_group('Anteater fans', 'cazimir', organization=org)
+
+        assert group.organization == org
+
     def test_create_private_group_adds_group_to_session(self, db_session, service):
         group = service.create_private_group('Anteater fans', 'cazimir')
 
@@ -97,6 +109,22 @@ class TestGroupService(object):
         assert group.writeable_by == WriteableBy.authority
         assert group.organization == default_organization
 
+    def test_create_open_group_creates_group_with_specified_organization(
+            self, db_session, service, users):
+        creator = users['cazimir']
+        org = OrganizationService(db_session).create(
+            name='My organization',
+            authority='example.com',
+            )
+
+        group = service.create_open_group(name='test_group',
+                                          userid=creator.username,
+                                          origins=['https://biopub.org'],
+                                          description='test_description',
+                                          organization=org)
+
+        assert group.organization == org
+
     def test_create_open_group_sets_scopes(self, service, matchers, users):
         origins = ['https://biopub.org', 'http://example.com', 'https://wikipedia.com']
 
@@ -123,7 +151,7 @@ class TestGroupService(object):
         for scope in scopes:
             assert scope not in group.scopes
 
-    def test_create_open_group_description_defaults_to_None(self, service):
+    def test_create_open_group_description_defaults_to_None(self, service):  # noqa: N802
         # Create a group with no `description` argument.
         group = service.create_open_group(name='test_group',
                                           userid='cazimir',
@@ -148,6 +176,36 @@ class TestGroupService(object):
         assert group.writeable_by == WriteableBy.members
         assert group.organization == default_organization
         assert creator in group.members
+
+    def test_create_restricted_group_creates_group_with_specified_organization(
+            self, db_session, service, users):
+        creator = users['cazimir']
+        org = OrganizationService(db_session).create(
+            name='My organization',
+            authority='example.com',
+            )
+
+        group = service.create_restricted_group(name='test_group',
+                                                userid=creator.username,
+                                                origins=['https://biopub.org'],
+                                                description='test_description',
+                                                organization=org)
+
+        assert group.organization == org
+
+    def test_create_restricted_group_with_mismatched_authorities_raises_value_error(
+            self, db_session, service, users):
+        creator = users['cazimir']
+        org = OrganizationService(db_session).create(
+            name='My organization',
+            authority='bar.com',
+            )
+        with pytest.raises(ValueError):
+            service.create_restricted_group(name='test_group',
+                                            userid=creator.username,
+                                            origins=['https://biopub.org'],
+                                            description='test_description',
+                                            organization=org)
 
     def test_create_restricted_group_adds_group_creator_to_members(self, service, users):
         creator = users['cazimir']
@@ -195,7 +253,7 @@ class TestGroupService(object):
         for scope in scopes:
             assert scope not in group.scopes
 
-    def test_create_restricted_group_description_defaults_to_None(self, service):
+    def test_create_restricted_group_description_defaults_to_None(self, service):  # noqa: N802
         # Create a restricted group with no `description` argument.
         group = service.create_restricted_group(name='test_group',
                                                 userid='cazimir',
