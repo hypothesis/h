@@ -9,6 +9,19 @@ from h import models, search
 from h.util.view import json_view
 
 
+def record_metrics(count,
+                   request,
+                   record_metric=newrelic.agent.record_custom_metric,
+                   record_event=newrelic.agent.record_custom_event):
+    if count > 0:
+        record_event(
+            'BadgeNotZero',
+            {'user': "None" if request.user is None else request.user.username})
+    else:
+        record_metric('Custom/Badge/unAuthUserGotZero', int(request.user is None))
+    record_metric('Custom/Badge/badgeCountIsZero', int(count == 0))
+
+
 @json_view(route_name='badge')
 def badge(request):
     """Return the number of public annotations on a given page.
@@ -26,11 +39,12 @@ def badge(request):
         raise httpexceptions.HTTPBadRequest()
 
     if models.Blocklist.is_blocked(request.db, uri):
-        newrelic.agent.record_custom_metric('Custom/Badge/badgeCountIsZero', 1)
-        return {'total': 0}
+        count = 0
+    else:
+        query = {'uri': uri, 'limit': 0}
+        result = search.Search(request, stats=request.stats).run(query)
+        count = result.total
 
-    query = {'uri': uri, 'limit': 0}
-    result = search.Search(request, stats=request.stats).run(query)
+    record_metrics(count, request)
 
-    newrelic.agent.record_custom_metric('Custom/Badge/badgeCountIsZero', int(result.total == 0))
-    return {'total': result.total}
+    return {'total': count}
