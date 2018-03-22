@@ -118,6 +118,12 @@ def includeme(config):
     config.add_route('stream_atom', '/stream.atom')
     config.add_route('stream_rss', '/stream.rss')
 
+    # Organizations
+    config.add_route('organization_logo',
+                     '/organizations/{pubid}/logo',
+                     factory='h.resources.OrganizationLogoFactory',
+                     traverse='/{pubid}')
+
     # Groups
     config.add_route('api.groups', '/api/groups')
     config.add_route('group_create', '/groups/new')
