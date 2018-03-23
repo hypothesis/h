@@ -119,6 +119,21 @@ class OrganizationFactory(object):
             raise KeyError()
 
 
+class OrganizationLogoFactory(object):
+    def __init__(self, request):
+        self.request = request
+        self.organization_factory = OrganizationFactory(self.request)
+
+    def __getitem__(self, pubid):
+        # This will raise KeyError if the organization doesn't exist.
+        organization = self.organization_factory[pubid]
+
+        if not organization.logo:
+            raise KeyError()
+
+        return organization.logo
+
+
 def _group_principals(group):
     if group is None:
         return []
