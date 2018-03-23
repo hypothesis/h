@@ -5,4 +5,11 @@
 
 {% block content %}
   {{ form }}
+  {% if pubid != '__world__' %}
+    <form method="POST"
+          action="{{request.route_path('admin_groups_delete', pubid=pubid)}}">
+      <button class="btn btn--danger js-confirm-submit"
+              data-confirm-message="Group &quot;{{ group_name }}&quot; has {{ annotation_count }} annotation(s) and {{ member_count }} member(s). Are you sure you want to delete it?">Delete</button>
+    </form>
+  {% endif %}
 {% endblock %}

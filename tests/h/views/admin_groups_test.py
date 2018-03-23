@@ -13,6 +13,7 @@ from h.views import admin_groups
 from h.views.admin_groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
 from h.services.group import GroupService
+from h.services.delete_group import DeleteGroupService
 
 
 class FakeForm(object):
@@ -139,13 +140,20 @@ class TestGroupEditController(object):
         with pytest.raises(HTTPNotFound):
             GroupEditController(pyramid_request)
 
-    def test_read_renders_form(self, pyramid_request, group):
+    def test_read_renders_form(self, pyramid_request, factories, group):
         pyramid_request.matchdict = {'pubid': group.pubid}
+        factories.Annotation(groupid=group.pubid)
+        factories.Annotation(groupid=group.pubid)
+
         ctrl = GroupEditController(pyramid_request)
 
         ctx = ctrl.read()
 
         assert ctx['form'] == self._expected_form(group)
+        assert ctx['pubid'] == group.pubid
+        assert ctx['group_name'] == group.name
+        assert ctx['member_count'] == len(group.members)
+        assert ctx['annotation_count'] == 2
 
     def test_read_renders_form_if_group_has_no_creator(self, pyramid_request, group):
         pyramid_request.matchdict = {'pubid': group.pubid}
@@ -207,6 +215,15 @@ class TestGroupEditController(object):
         assert group.authority == 'original.com'
         assert ctx['form'] == self._expected_form(group)
 
+    def test_delete_deletes_group(self, group, delete_group_svc, pyramid_request, routes):
+        pyramid_request.matchdict = {"pubid": group.pubid}
+
+        ctrl = GroupEditController(pyramid_request)
+
+        ctrl.delete()
+
+        delete_group_svc.delete.assert_called_once_with(group)
+
     @pytest.fixture
     def group(self, factories):
         return factories.OpenGroup(pubid='testgroup')
@@ -262,3 +279,10 @@ def group_svc(pyramid_config):
     svc = mock.create_autospec(GroupService, spec_set=True, instance=True)
     pyramid_config.register_service(svc, name='group')
     return svc
+
+
+@pytest.fixture
+def delete_group_svc(pyramid_config, pyramid_request):
+    service = mock.Mock(spec_set=DeleteGroupService(request=pyramid_request))
+    pyramid_config.register_service(service, name='delete_group')
+    return service

@@ -7,6 +7,10 @@ from h.models import Annotation
 from h import storage
 
 
+class DeletePublicGroupError(Exception):
+    pass
+
+
 class DeleteGroupService(object):
     def __init__(self, request):
         self.request = request
@@ -21,6 +25,9 @@ class DeleteGroupService(object):
         self.request.db.delete(group)
 
     def _delete_annotations(self, group):
+        if group.pubid == '__world__':
+            raise DeletePublicGroupError('Public group can not be deleted')
+
         annotations = self.request.db.query(Annotation) \
                                      .filter_by(groupid=group.pubid)
         for annotation in annotations:

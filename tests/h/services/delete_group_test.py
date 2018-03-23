@@ -6,10 +6,17 @@ import mock
 import pytest
 
 from h.events import AnnotationEvent
-from h.services.delete_group import delete_group_service_factory, DeleteGroupService
+from h.services.delete_group import delete_group_service_factory, DeleteGroupService, DeletePublicGroupError
 
 
 class TestDeleteGroupService(object):
+
+    def test_delete_does_not_delete_public_group(self, svc, db_session, factories):
+        group = factories.Group()
+        group.pubid = '__world__'
+
+        with pytest.raises(DeletePublicGroupError):
+            svc.delete(group)
 
     def test_delete_deletes_group(self, svc, db_session, factories):
         group = factories.Group()
