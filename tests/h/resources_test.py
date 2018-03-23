@@ -12,6 +12,7 @@ from h.models import AuthClient
 from h.resources import AnnotationResource
 from h.resources import AnnotationResourceFactory
 from h.resources import AuthClientFactory
+from h.resources import OrganizationFactory
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -217,6 +218,28 @@ class TestAuthClientResourceFactory(object):
         factory = AuthClientFactory(pyramid_request)
         with pytest.raises(KeyError):
             factory['not-a-uuid']
+
+
+@pytest.mark.usefixtures('organizations')
+class TestOrganizationFactory(object):
+
+    def test_it_returns_the_requested_organization(self, organizations, organization_factory):
+        organization = organizations[1]
+
+        assert organization_factory[organization.pubid] == organization
+
+    def test_it_404s_if_the_organization_doesnt_exist(self, organization_factory):
+        with pytest.raises(KeyError):
+            organization_factory['does_not_exist']
+
+    @pytest.fixture
+    def organization_factory(self, pyramid_request):
+        return OrganizationFactory(pyramid_request)
+
+    @pytest.fixture
+    def organizations(self, factories):
+        # Add a handful of organizations to the DB to make the test realistic.
+        return [factories.Organization() for _ in range(3)]
 
 
 class FakeGroup(object):

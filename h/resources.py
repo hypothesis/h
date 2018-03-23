@@ -8,9 +8,11 @@ from pyramid.security import (
     Allow,
     principals_allowed_by_permission,
 )
+from sqlalchemy.orm import exc
 
 from h import storage
 from h.models import AuthClient
+from h.models import Organization
 from h.auth import role
 from h.interfaces import IGroupService
 
@@ -103,6 +105,17 @@ class AuthClientFactory(object):
             return client
         except:  # noqa: E722
             # No such client found or not a valid UUID.
+            raise KeyError()
+
+
+class OrganizationFactory(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, pubid):
+        try:
+            return self.request.db.query(Organization).filter_by(pubid=pubid).one()
+        except exc.NoResultFound:
             raise KeyError()
 
 
