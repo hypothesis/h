@@ -9,7 +9,9 @@ from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.models import AuthClient
-from h.resources import AnnotationResource, AnnotationResourceFactory, AuthClientFactory
+from h.resources import AnnotationResource
+from h.resources import AnnotationResourceFactory
+from h.resources import AuthClientFactory
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
