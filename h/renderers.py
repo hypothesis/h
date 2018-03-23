@@ -30,6 +30,16 @@ class SVGRenderer(object):
     def __call__(self, value, system):
         response = system['request'].response
         response.content_type = 'image/svg+xml'
+
+        # Add a Vary: Accept-Encoding header.
+        # This prevents caches from serving a cached, compressed version of the
+        # file to user agents that don't support compression, or vice-versa.
+        if response.vary:
+            if 'Accept-Encoding' not in response.vary:
+                response.vary = response.vary + ('Accept-Encoding',)
+        else:
+            response.vary = ('Accept-Encoding',)
+
         return value
 
 
