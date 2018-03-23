@@ -15,6 +15,7 @@ from .feature import Feature
 from .flag import Flag
 from .group import Group, OpenGroup, RestrictedGroup
 from .group_scope import GroupScope
+from .organization import Organization
 from .setting import Setting
 from .token import DeveloperToken, OAuth2Token
 from .user import User
@@ -37,6 +38,7 @@ __all__ = (
     'GroupScope',
     'OAuth2Token',
     'OpenGroup',
+    'Organization',
     'RestrictedGroup',
     'Setting',
     'User',
