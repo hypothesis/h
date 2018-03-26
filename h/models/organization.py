@@ -47,6 +47,9 @@ class Organization(Base, mixins.Timestamps):
 
     @sa.orm.validates('logo')
     def validate_logo(self, key, logo):
+        # If the logo is None return early.
+        if logo is None:
+            return logo
         if not (len(logo) <= ORGANIZATION_LOGO_MAX_CHARS):
             raise ValueError(
                 'logo must be less than {max} characters long'
