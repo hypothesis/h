@@ -93,6 +93,8 @@ def test_includeme():
         call('embed', '/embed.js'),
         call('stream_atom', '/stream.atom'),
         call('stream_rss', '/stream.rss'),
+        call('organization_logo', '/organizations/{pubid}/logo',
+             factory='h.resources.OrganizationLogoFactory', traverse='/{pubid}'),
         call('api.groups', '/api/groups'),
         call('group_create', '/groups/new'),
         call('group_edit', '/groups/{pubid}/edit', factory='h.models.group:GroupFactory', traverse='/{pubid}'),
