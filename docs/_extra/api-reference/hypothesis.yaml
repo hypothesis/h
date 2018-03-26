@@ -391,7 +391,53 @@ definitions:
     items:
       $ref: '#/definitions/Group'
   Group:
-    $ref: './schemas/group-schema.json'
+    type: object
+    required:
+      - id
+      - links
+      - name
+      - public
+      - scoped
+      - type
+      - urls
+    properties:
+      id:
+        type: string
+      links:
+        type: object
+        properties:
+          html:
+            type: string
+            format: uri
+            description: URL to the group's main (activity) page
+      name:
+        type: string
+      public:
+        type: boolean
+        deprecated: true
+        description: Indicates whether a group's annotations are world-readable
+      scoped:
+        type: boolean
+        description: Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped groups allow annotation to documents at any URL
+      type:
+        type: string
+        enum:
+          - private
+          - open
+          - restricted
+      url:
+        type: string
+        format: uri
+        deprecated: true
+      urls:
+        type: object
+        deprecated: true
+        properties:
+          group:
+            type: string
+            format: uri
+            description: URI to group activity page; use `links.html` instead
+            deprecated: true
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:
