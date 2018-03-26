@@ -44,21 +44,6 @@ def test_too_long_name_raises_value_error():
         models.Organization(name="abcdefghijklmnopqrstuvwxyz")
 
 
-def test_too_long_logo_raises_value_error():
-    with pytest.raises(ValueError):
-        models.Organization(logo='<svg>{}</svg>'.format("abcdefghijklmnopqrstuvwxyz" * 400))
-
-
-def test_malformed_logo_raises_value_error():
-    with pytest.raises(ValueError):
-        models.Organization(logo='<svg>/svg>')
-
-
-def test_non_svg_logo_raises_value_error():
-    with pytest.raises(ValueError):
-        models.Organization(logo='<h>This is not a svg</h>')
-
-
 def test_repr(db_session, factories):
     organization = models.Organization(name='My Organization', authority='example.com')
     db_session.add(organization)
