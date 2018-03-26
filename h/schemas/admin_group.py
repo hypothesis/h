@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import colander
-from deform.widget import SelectWidget, SequenceWidget, TextAreaWidget
+from deform.widget import SelectWidget, SequenceWidget, TextAreaWidget, TextInputWidget
 
 from h import i18n
 from h import validators
@@ -63,6 +63,7 @@ class CreateAdminGroupSchema(CSRFSchema):
         title=_('Group Name'),
         validator=validators.Length(min=GROUP_NAME_MIN_LENGTH,
                                     max=GROUP_NAME_MAX_LENGTH),
+        widget=TextInputWidget(max_length=GROUP_NAME_MAX_LENGTH),
     )
 
     authority = colander.SchemaNode(
@@ -88,7 +89,7 @@ class CreateAdminGroupSchema(CSRFSchema):
         title=_('Description'),
         description=_('Optional group description'),
         validator=colander.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
-        widget=TextAreaWidget(rows=3),
+        widget=TextAreaWidget(rows=3, max_length=GROUP_DESCRIPTION_MAX_LENGTH),
         missing=None
     )
 
