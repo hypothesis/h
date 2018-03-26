@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import sqlalchemy as sa
-import slugify
 from xml.etree import ElementTree
 
 from h.db import Base
@@ -31,11 +30,6 @@ class Organization(Base, mixins.Timestamps):
 
     authority = sa.Column(sa.UnicodeText(), nullable=False)
 
-    @property
-    def slug(self):
-        """A version of this organization's name suitable for use in a URL."""
-        return slugify.slugify(self.name)
-
     @sa.orm.validates('name')
     def validate_name(self, key, name):
         if not (ORGANIZATION_NAME_MIN_CHARS <= len(name) <= ORGANIZATION_NAME_MAX_CHARS):
@@ -60,4 +54,4 @@ class Organization(Base, mixins.Timestamps):
         return logo
 
     def __repr__(self):
-        return '<Organization: %s>' % self.slug
+        return '<Organization: %s>' % self.pubid
