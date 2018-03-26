@@ -28,12 +28,6 @@ def test_null_logo():
     assert organization.logo is None
 
 
-def test_slug():
-    organization = models.Organization(name="My Organization")
-
-    assert organization.slug == 'my-organization'
-
-
 def test_too_short_name_raises_value_error():
     with pytest.raises(ValueError):
         models.Organization(name="")
@@ -60,10 +54,7 @@ def test_non_svg_logo_raises_value_error():
 
 
 def test_repr(db_session, factories):
-    organization = models.Organization(name='My Organization', authority='example.com')
-    db_session.add(organization)
-    db_session.flush()
+    organization = models.Organization(
+        name='My Organization', authority='example.com', pubid='test_pubid')
 
-    assert organization.id is not None
-    assert organization.pubid is not None
-    assert repr(organization) == "<Organization: my-organization>"
+    assert repr(organization) == "<Organization: test_pubid>"
