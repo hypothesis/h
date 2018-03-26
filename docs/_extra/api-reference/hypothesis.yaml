@@ -171,6 +171,7 @@ paths:
     get:
       tags:
         - users
+      operationId: fetchProfile
       summary: Get the user's profile
       description: >
         This can either be accessed with an API key, in which case it will show
@@ -195,6 +196,7 @@ paths:
       tags:
         - groups
       summary: Get list of groups
+      operationId: listGroups
       description: >
         Retrieve a list of accessible, applicable groups for this user for the
         provided target document (document_uri).
