@@ -40,6 +40,7 @@ def includeme(config):
     config.add_route('admin_cohorts_edit', '/admin/features/cohorts/{id}')
     config.add_route('admin_groups', '/admin/groups')
     config.add_route('admin_groups_create', '/admin/groups/new')
+    config.add_route('admin_groups_delete', '/admin/groups/delete/{pubid}')
     config.add_route('admin_groups_edit', '/admin/groups/{pubid}')
     config.add_route('admin_mailer', '/admin/mailer')
     config.add_route('admin_mailer_test', '/admin/mailer/test')

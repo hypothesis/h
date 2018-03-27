@@ -8,6 +8,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from h import form  # noqa F401
 from h import i18n
 from h import models
+from h.models.annotation import Annotation
 from h.models.group import GroupFactory
 from h.models.group_scope import GroupScope
 from h import paginator
@@ -112,6 +113,19 @@ class GroupEditController(object):
         self._update_appstruct()
         return self._template_context()
 
+    @view_config(request_method='POST',
+                 route_name='admin_groups_delete')
+    def delete(self):
+        group = self.group
+        svc = self.request.find_service(name='delete_group')
+
+        svc.delete(group)
+        self.request.session.flash(
+            _('Successfully deleted group %s' % (group.name), 'success'))
+
+        return HTTPFound(
+            location=self.request.route_path('admin_groups'))
+
     @view_config(request_method='POST')
     def update(self):
         group = self.group
@@ -148,4 +162,11 @@ class GroupEditController(object):
         })
 
     def _template_context(self):
-        return {'form': self.form.render()}
+        num_annotations = self.request.db.query(Annotation).filter_by(groupid=self.group.pubid).count()
+        return {
+            'form': self.form.render(),
+            'pubid': self.group.pubid,
+            'group_name': self.group.name,
+            'annotation_count': num_annotations,
+            'member_count': len(self.group.members),
+        }

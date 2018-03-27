@@ -43,6 +43,7 @@ def test_includeme():
         call('admin_cohorts_edit', '/admin/features/cohorts/{id}'),
         call('admin_groups', '/admin/groups'),
         call('admin_groups_create', '/admin/groups/new'),
+        call('admin_groups_delete', '/admin/groups/delete/{pubid}'),
         call('admin_groups_edit', '/admin/groups/{pubid}'),
         call('admin_mailer', '/admin/mailer'),
         call('admin_mailer_test', '/admin/mailer/test'),
