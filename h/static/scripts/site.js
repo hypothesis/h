@@ -9,44 +9,25 @@ if (settings.raven) {
 
 require('./polyfills');
 
+const sharedControllers = require('./controllers');
+const upgradeElements = require('./base/upgrade-elements');
+
+// Additional controllers for user-facing site.
 const AuthorizeFormController = require('./controllers/authorize-form-controller');
-const CharacterLimitController = require('./controllers/character-limit-controller');
-const CopyButtonController = require('./controllers/copy-button-controller');
-const ConfirmSubmitController = require('./controllers/confirm-submit-controller');
 const CreateGroupFormController = require('./controllers/create-group-form-controller');
-const DropdownMenuController = require('./controllers/dropdown-menu-controller');
-const FormController = require('./controllers/form-controller');
-const FormCancelController = require('./controllers/form-cancel-controller');
-const FormInputController = require('./controllers/form-input-controller');
-const FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
-const InputAutofocusController = require('./controllers/input-autofocus-controller');
-const ListInputController = require('./controllers/list-input-controller');
 const SearchBarController = require('./controllers/search-bar-controller');
 const SearchBucketController = require('./controllers/search-bucket-controller');
 const ShareWidgetController = require('./controllers/share-widget-controller');
 const SignupFormController = require('./controllers/signup-form-controller');
-const TooltipController = require('./controllers/tooltip-controller');
-const upgradeElements = require('./base/upgrade-elements');
 
-const controllers = {
+const controllers = Object.assign({
   '.js-authorize-form': AuthorizeFormController,
-  '.js-character-limit': CharacterLimitController,
-  '.js-copy-button': CopyButtonController,
-  '.js-confirm-submit': ConfirmSubmitController,
   '.js-create-group-form': CreateGroupFormController,
-  '.js-dropdown-menu': DropdownMenuController,
-  '.js-form': FormController,
-  '.js-form-cancel': FormCancelController,
-  '.js-form-input': FormInputController,
-  '.js-input-autofocus': InputAutofocusController,
-  '.js-list-input': ListInputController,
-  '.js-select-onfocus': FormSelectOnFocusController,
   '.js-search-bar': SearchBarController,
   '.js-search-bucket': SearchBucketController,
   '.js-share-widget': ShareWidgetController,
   '.js-signup-form': SignupFormController,
-  '.js-tooltip': TooltipController,
-};
+}, sharedControllers);
 
 if (window.envFlags && window.envFlags.get('js-capable')) {
   upgradeElements(document.body, controllers);
