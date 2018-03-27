@@ -70,6 +70,29 @@ def csrf_tween_factory(handler, registry):
     return csrf_tween
 
 
+def invalid_path_tween_factory(handler, registry):
+
+    def invalid_path_tween(request):
+        # Due to a bug in WebOb accessing request.path (or request.path_info
+        # etc) will raise UnicodeDecodeError if the requested path doesn't
+        # decode with UTF-8, and this will result in a 500 Server Error from
+        # our app.
+        #
+        # Detect this situation and send a 400 Bad Request instead.
+        #
+        # See:
+        # https://github.com/Pylons/webob/issues/115
+        # https://github.com/hypothesis/h/issues/4915
+        try:
+            request.path
+        except UnicodeDecodeError:
+            return httpexceptions.HTTPBadRequest()
+
+        return handler(request)
+
+    return invalid_path_tween
+
+
 def redirect_tween_factory(handler, registry, redirects=None):
     if redirects is None:
         # N.B. If we fail to load or parse the redirects file, the application
