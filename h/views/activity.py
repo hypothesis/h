@@ -8,6 +8,7 @@ from h._compat import urlparse
 
 from jinja2 import Markup
 from pyramid import httpexceptions
+from pyramid import security
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
@@ -217,7 +218,8 @@ class GroupSearchController(SearchController):
         return httpexceptions.HTTPSeeOther(location=url)
 
     @view_config(request_method='POST',
-                 request_param='group_leave')
+                 request_param='group_leave',
+                 effective_principals=security.Authenticated)
     def leave(self):
         """
         Leave the given group.
