@@ -32,9 +32,21 @@ securityDefinitions:
     description: Authorize using OAuth client credentials with HTTP Basic Auth.
 security:
   - developerAPIKey: []
+tags:
+  - name: general
+    description: General and miscellaneous API services
+  - name: annotations
+    description: Annotation resource services
+  - name: groups
+    description: Group resource services
+  - name: users
+    description: User and profile resource services
+
 paths:
   /:
     get:
+      tags:
+        - general
       summary: Service root
       description: Provides a list of links to resources offered by the API.
       operationId: root
@@ -44,6 +56,8 @@ paths:
       security: []
   /annotations:
     post:
+      tags:
+        - annotations
       summary: Create a new annotation
       operationId: createAnnotation
       parameters:
@@ -64,6 +78,8 @@ paths:
             $ref: '#/definitions/Error'
   /annotations/{id}:
     get:
+      tags:
+        - annotations
       summary: Fetch an annotation
       operationId: fetchAnnotation
       parameters:
@@ -82,6 +98,8 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     patch:
+      tags:
+        - annotations
       summary: Update an annotation
       description: |
         This endpoint is available under both the `PATCH` and `PUT`
@@ -120,6 +138,8 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     delete:
+      tags:
+        - annotations
       summary: Delete an annotation
       operationId: deleteAnnotation
       parameters:
@@ -149,6 +169,9 @@ paths:
             $ref: '#/definitions/Error'
   /profile:
     get:
+      tags:
+        - users
+      operationId: fetchProfile
       summary: Get the user's profile
       description: >
         This can either be accessed with an API key, in which case it will show
@@ -170,7 +193,10 @@ paths:
             $ref: '#/definitions/Profile'
   /groups:
     get:
+      tags:
+        - groups
       summary: Get list of groups
+      operationId: listGroups
       description: >
         Retrieve a list of accessible, applicable groups for this user for the
         provided target document (document_uri).
@@ -202,6 +228,8 @@ paths:
             $ref: '#/definitions/GroupResults'
   /search:
     get:
+      tags:
+        - annotations
       summary: Search for annotations
       operationId: search
       parameters:
@@ -277,6 +305,8 @@ paths:
             $ref: '#/definitions/SearchResults'
   /users:
     post:
+      tags:
+        - users
       summary: Create a new user
       description: |
         Only for specific auth clients, this API call allows clients with a
@@ -302,6 +332,8 @@ paths:
         - authClientCredentials: []
   /users/{username}:
     patch:
+      tags:
+        - users
       summary: Update an existing user
       description: |
         Only for specific auth clients, this API call allows clients with a
@@ -327,6 +359,8 @@ paths:
         - authClientCredentials: []
   /groups/{id}/members/{user}:
     delete:
+      tags:
+        - groups
       summary: Remove a member from a group
       operationId: deleteGroupMember
       parameters:
@@ -391,7 +425,53 @@ definitions:
     items:
       $ref: '#/definitions/Group'
   Group:
-    $ref: './schemas/group-schema.json'
+    type: object
+    required:
+      - id
+      - links
+      - name
+      - public
+      - scoped
+      - type
+      - urls
+    properties:
+      id:
+        type: string
+      links:
+        type: object
+        properties:
+          html:
+            type: string
+            format: uri
+            description: URL to the group's main (activity) page
+      name:
+        type: string
+      public:
+        type: boolean
+        deprecated: true
+        description: Indicates whether a group's annotations are world-readable
+      scoped:
+        type: boolean
+        description: Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped groups allow annotation to documents at any URL
+      type:
+        type: string
+        enum:
+          - private
+          - open
+          - restricted
+      url:
+        type: string
+        format: uri
+        deprecated: true
+      urls:
+        type: object
+        deprecated: true
+        properties:
+          group:
+            type: string
+            format: uri
+            description: URI to group activity page; use `links.html` instead
+            deprecated: true
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:
