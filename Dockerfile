@@ -1,3 +1,11 @@
+FROM node:alpine as build
+
+ENV NODE_ENV production
+
+COPY . .
+
+RUN npm install --production && npm run build
+
 FROM alpine:3.7
 MAINTAINER Hypothes.is Project and contributors
 
@@ -12,7 +20,6 @@ RUN apk add --no-cache \
     nginx \
     python2 \
     py2-pip \
-    nodejs \
     git
 
 # Create the hypothesis user, group, home directory and package directory.
@@ -49,9 +56,8 @@ COPY . .
 # If we're building from a git clone, ensure that .git is writeable
 RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
 
-# Build frontend assets
-RUN npm install --production \
-  && NODE_ENV=production node_modules/.bin/gulp build
+# Copy frontend assets.
+COPY --from=build /build build
 
 # Expose the default port.
 EXPOSE 5000
