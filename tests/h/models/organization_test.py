@@ -38,6 +38,11 @@ def test_too_long_name_raises_value_error():
         models.Organization(name="abcdefghijklmnopqrstuvwxyz")
 
 
+def test_none_logo_is_valid():
+    org = models.Organization(name="My Organization", logo=None)
+    assert org.logo is None
+
+
 def test_too_long_logo_raises_value_error():
     with pytest.raises(ValueError):
         models.Organization(logo='<svg>{}</svg>'.format("abcdefghijklmnopqrstuvwxyz" * 400))
