@@ -57,7 +57,7 @@ COPY . .
 RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
 
 # Copy frontend assets.
-COPY --from=build /build .
+COPY --from=build /build build
 
 # Expose the default port.
 EXPOSE 5000
