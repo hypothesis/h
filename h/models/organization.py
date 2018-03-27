@@ -12,6 +12,12 @@ ORGANIZATION_NAME_MAX_CHARS = 25
 ORGANIZATION_LOGO_MAX_CHARS = 10000
 
 
+def _strip_xmlns(tag):
+    if '}' in tag:
+        return tag.split('}', 1)[1]
+    return tag
+
+
 class Organization(Base, mixins.Timestamps):
     __tablename__ = 'organization'
 
@@ -49,7 +55,8 @@ class Organization(Base, mixins.Timestamps):
             root = ElementTree.fromstring(logo)
         except ElementTree.ParseError:
             raise ValueError('logo is not a valid SVG (could not parse XML)')
-        if root.tag != 'svg':
+
+        if _strip_xmlns(root.tag) != 'svg':
             raise ValueError('logo is not a valid SVG (does not start with an <svg> tag')
         return logo
 
