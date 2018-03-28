@@ -33,7 +33,7 @@ def nipsa_filter(group_service, user=None):
     # If any one of these "should" clauses is true then the annotation will
     # get through the filter.
     should_clauses = [
-        {"not": {"term": {"nipsa": True}}},
+        {"bool": {"must_not": {"term": {"nipsa": True}}}},
         {"exists": {"field": "thread_ids"}},
     ]
 
