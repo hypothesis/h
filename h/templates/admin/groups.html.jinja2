@@ -1,5 +1,7 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
+{% from '../includes/search_form.html.jinja2' import search_form %}
+
 {% set page_id = 'groups' %}
 {% set page_title = 'Groups' %}
 
@@ -7,6 +9,8 @@
   <p>
     On this page you can see a list of all the groups and their details.
   </p>
+
+  {{ search_form('Search by name…', request.params.get('q')) }}
 
   <div class="table-responsive">
     <table class="table table-striped">

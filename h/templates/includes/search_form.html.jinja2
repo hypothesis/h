@@ -1,0 +1,10 @@
+{% macro search_form(placeholder, value='') -%}
+<form class="search-form">
+  <input type="search"
+         name="q"
+         class="form-input__input"
+         value="{{ value or '' }}"
+         placeholder="{{ placeholder }}">
+  <button class="btn search-form__submit-btn">{% trans %}Search{% endtrans %}</button>
+</form>
+{% endmacro %}
