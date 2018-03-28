@@ -17,6 +17,7 @@ class GroupJSONPresenter(object):
         model = {
           'name': group.name,
           'id': group.pubid,
+          'organization': '',  # unexexpanded org; no link available yet, so empty string by default
           'public': group.is_public,  # DEPRECATED: TODO: remove from client
           'scoped': True if group.scopes else False,
           'type': group.type

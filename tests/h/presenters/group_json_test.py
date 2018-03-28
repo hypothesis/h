@@ -19,6 +19,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'mygroup',
+            'organization': '',
             'type': 'private',
             'public': False,
             'scoped': False,
@@ -35,6 +36,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'mygroup',
+            'organization': '',
             'type': 'open',
             'public': True,
             'scoped': False,
@@ -53,6 +55,7 @@ class TestGroupJSONPresenter(object):
             'name': 'My Group',
             'id': 'groupy',
             'type': 'open',
+            'organization': '',
             'public': True,
             'scoped': True,
             'urls': {},
