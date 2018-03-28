@@ -12,7 +12,13 @@ class GroupJSONPresenter(object):
 
     def asdict(self, expand=[]):
         model = self._model()
+        self._expand(model, expand)
         self._inject_urls(model)
+        return model
+
+    def _expand(self, model, expand=[]):
+        if 'organizations' in expand:
+            model['organization'] = {}
         return model
 
     def _model(self):

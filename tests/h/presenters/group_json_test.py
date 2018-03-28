@@ -84,6 +84,33 @@ class TestGroupJSONPresenter(object):
 
         links_svc.get_all.assert_called_once_with(group)
 
+    def test_it_does_not_expand_by_default(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict()
+
+        assert model['organization'] == ''
+
+    def test_it_expands_organizations(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict(expand=['organizations'])
+
+        assert model['organization'] == {}
+
+    def test_it_ignores_unrecognized_expands(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict(expand=['foobars', 'dingdong'])
+
+        assert model['organization'] == ''
+
 
 class TestGroupsJSONPresenter(object):
 
