@@ -1,0 +1,56 @@
+Group:
+  type: object
+  required:
+    - id
+    - links
+    - name
+    - organization
+    - public
+    - scoped
+    - type
+    - urls
+  properties:
+    id:
+      type: string
+    links:
+      type: object
+      properties:
+        html:
+          type: string
+          format: uri
+          description: URL to the group's main (activity) page
+    name:
+      type: string
+    organization:
+      description: If expanded, an organization object, otherwise a link to the organization resource, if available
+      oneOf:
+        - type: object
+        - type: string
+          format: uri
+          description: Link to organization resource
+    public:
+      type: boolean
+      deprecated: true
+      description: Indicates whether a group's annotations are world-readable
+    scoped:
+      type: boolean
+      description: Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped groups allow annotation to documents at any URL
+    type:
+      type: string
+      enum:
+        - private
+        - open
+        - restricted
+    url:
+      type: string
+      format: uri
+      deprecated: true
+    urls:
+      type: object
+      deprecated: true
+      properties:
+        group:
+          type: string
+          format: uri
+          description: URI to group activity page; use `links.html` instead
+          deprecated: true
