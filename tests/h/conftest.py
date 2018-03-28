@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 """
-The `conftest` module is automatically loaded by py.test and serves as a place
+The `conftest` module is automatically loaded by pytest and serves as a place
 to put fixture functions that are useful application-wide.
 """
 
@@ -97,7 +97,7 @@ def autopatcher(request, target, **kwargs):
     return obj
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def cli():
     runner = click.testing.CliRunner()
     with runner.isolated_filesystem():
@@ -112,7 +112,7 @@ def db_engine():
     return engine
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def db_session(db_engine):
     """
     Prepare the SQLAlchemy session object.
@@ -144,7 +144,7 @@ def db_session(db_engine):
         conn.close()
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def factories(db_session):
     from ..common import factories
     factories.set_session(db_session)
@@ -212,7 +212,7 @@ def patch(request):
     return functools.partial(autopatcher, request)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def pyramid_config(pyramid_settings, pyramid_request):
     """Pyramid configurator object."""
     with testing.testConfig(request=pyramid_request,

@@ -32,7 +32,7 @@ def app(pyramid_app, db_engine):
     return TestApp(pyramid_app)
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def db_engine():
     from h import db
     engine = db.make_engine(TEST_SETTINGS)
@@ -40,7 +40,7 @@ def db_engine():
     engine.dispose()
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def db_session(db_engine):
     """Get a standalone database session for preparing database state."""
     from h import db
@@ -49,7 +49,7 @@ def db_session(db_engine):
     session.close()
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def factories(db_session):
     from ..common import factories
     factories.set_session(db_session)
