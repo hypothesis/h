@@ -18,7 +18,14 @@ class GroupJSONPresenter(object):
 
     def _expand(self, model, expand=[]):
         if 'organizations' in expand:
-            model['organization'] = {}
+            org_model = {}
+            org = self.group.organization
+            if org is not None:
+                org_model = {
+                    'id': org.pubid,
+                    'name': org.name,
+                }
+            model['organization'] = org_model
         return model
 
     def _model(self):

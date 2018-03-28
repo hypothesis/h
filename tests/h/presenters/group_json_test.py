@@ -100,7 +100,20 @@ class TestGroupJSONPresenter(object):
 
         model = presenter.asdict(expand=['organizations'])
 
-        assert model['organization'] == {}
+        assert model['organization'] == {}  # empty organization
+
+    def test_it_populates_expanded_organizations(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        group.organization = factories.Organization()
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict(expand=['organizations'])
+
+        assert model['organization'] == {
+            'name': group.organization.name,
+            'id': group.organization.pubid,
+        }
 
     def test_it_ignores_unrecognized_expands(self, factories):
         group = factories.OpenGroup(name='My Group',
