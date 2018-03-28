@@ -48,6 +48,29 @@ def test_index_paginates_results(pyramid_request, routes, paginate):
     paginate.assert_called_once_with(pyramid_request, mock.ANY, mock.ANY)
 
 
+@pytest.mark.parametrize('query,expected_groups', [
+    # All groups should be returned when there is no query.
+    (None, ['BioPub', 'ChemPub', 'Public']),
+
+    # Only matching groups should be returned if there is a query.
+    ('BioPub', ['BioPub']),
+    ('ChemPub', ['ChemPub']),
+
+    # Filtering should be case-insensitive.
+    ('chem', ['ChemPub']),
+])
+def test_index_filters_results(pyramid_request, factories, query, expected_groups):
+    factories.Group(name='BioPub')
+    factories.Group(name='ChemPub')
+
+    if query:
+        pyramid_request.GET['q'] = query
+    ctx = admin_groups.groups_index(None, pyramid_request)
+
+    filtered_group_names = sorted([g.name for g in ctx['results']])
+    assert filtered_group_names == expected_groups
+
+
 @pytest.mark.usefixtures('group_svc', 'routes', 'user_svc')
 class TestGroupCreateController(object):
 
