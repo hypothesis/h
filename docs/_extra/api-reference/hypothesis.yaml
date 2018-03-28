@@ -9,6 +9,12 @@ info:
     See [the API overview](../api/) for an introduction to the API and information
     on how authorization works.
 
+    ## Expanding Resources
+
+    Resources often contain links to related resources in their response bodies. Some endpoints support resource expansion, allowing those related resources to be expanded inline in the response.
+
+    To expand resources (where supported), use the `expand` request parameter. Individual endpoint documentation indicates which resources are expandable.
+
   termsOfService: https://hypothes.is/terms-of-service
   license:
     name: BSD (2-Clause)
@@ -216,11 +222,21 @@ paths:
         - name: document_uri
           in: query
           description: >
-            The URI of the document currently being annotated.
-            Used to filter appropriate groups
+            The URI of the resource targeted for annotation.
+            Used to filter valid groups
           required: false
           type: string
           format: uri
+        - name: expand
+          description: >
+            Array of related resource objects to expand within the response
+          in: query
+          type: array
+          items:
+            type: string
+            enum:
+              - organizations
+
       responses:
         '200':
           description: Success
@@ -430,6 +446,7 @@ definitions:
       - id
       - links
       - name
+      - organization
       - public
       - scoped
       - type
@@ -446,6 +463,13 @@ definitions:
             description: URL to the group's main (activity) page
       name:
         type: string
+      organization:
+        description: Representation of this group's owning organization. If request `expand` parameter value contains `organizations`, a full object representation is returned, otherwise the value is a URI to the organization resource.
+        oneOf:
+          - type: string
+            format: uri
+            description: Link to related organization resource
+          - $ref: '#/definitions/Organization'
       public:
         type: boolean
         deprecated: true
@@ -472,6 +496,24 @@ definitions:
             format: uri
             description: URI to group activity page; use `links.html` instead
             deprecated: true
+  Organization:
+    type: object
+    required:
+      - id
+      - links
+      - name
+    properties:
+      id:
+        type: string
+      links:
+        type: object
+      logo:
+        type: string
+        format: uri
+        description: URI to logo image for this organization
+      name:
+        type: string
+
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:
