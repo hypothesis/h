@@ -24,7 +24,7 @@ Group:
     organization:
       description: If expanded, an organization object, otherwise a link to the organization resource, if available
       oneOf:
-        - type: object
+        - $ref: './organization.yaml#/Organization'
         - type: string
           format: uri
           description: Link to organization resource

@@ -9,6 +9,15 @@ info:
     See [the API overview](../api/) for an introduction to the API and information
     on how authorization works.
 
+    ## Expanding Resources
+    Resources often contain links to related resources in their response bodies.
+    Some endpoints support resource expansion, allowing those related resources
+    to be expanded inline in the response.
+
+    To expand resources (where supported), use the `expand` request parameter.
+    Individual endpoint documentation indicates which resources are expandable.
+
+
   termsOfService: https://hypothes.is/terms-of-service
   license:
     name: BSD (2-Clause)
@@ -221,6 +230,15 @@ paths:
           required: false
           type: string
           format: uri
+        - name: expand
+          description: >
+            Array of related resource objects to expand within the response
+          in: query
+          type: array
+          items:
+            type: string
+            enum:
+              - organizations
       responses:
         '200':
           description: Success
