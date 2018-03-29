@@ -98,7 +98,7 @@ class TestGroupJSONPresenter(object):
                                     pubid='mygroup')
         presenter = GroupJSONPresenter(group)
 
-        model = presenter.asdict(expand=['organizations'])
+        model = presenter.asdict(expand=['organization'])
 
         assert model['organization'] == {}  # empty organization
 
@@ -108,7 +108,7 @@ class TestGroupJSONPresenter(object):
         group.organization = factories.Organization()
         presenter = GroupJSONPresenter(group)
 
-        model = presenter.asdict(expand=['organizations'])
+        model = presenter.asdict(expand=['organization'])
 
         assert model['organization'] == {
             'name': group.organization.name,
