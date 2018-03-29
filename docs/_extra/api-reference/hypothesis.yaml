@@ -17,6 +17,16 @@ info:
     To expand resources (where supported), use the `expand` request parameter.
     Individual endpoint documentation indicates which resources are expandable.
 
+    The `expand` parameter value is an Array:
+
+    ```
+    GET /api/things?expand=organizations&expand=foobars
+    ```
+
+    would expand `organization` and `foobar` relationships within the
+    (hypothetical) returned `thing` objects.
+
+    `expand` values should be the plural of the noun being expanded.
 
   termsOfService: https://hypothes.is/terms-of-service
   license:
