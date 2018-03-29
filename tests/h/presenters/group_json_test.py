@@ -19,6 +19,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'mygroup',
+            'organization': '',
             'type': 'private',
             'public': False,
             'scoped': False,
@@ -35,6 +36,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'mygroup',
+            'organization': '',
             'type': 'open',
             'public': True,
             'scoped': False,
@@ -53,6 +55,7 @@ class TestGroupJSONPresenter(object):
             'name': 'My Group',
             'id': 'groupy',
             'type': 'open',
+            'organization': '',
             'public': True,
             'scoped': True,
             'urls': {},
@@ -80,6 +83,46 @@ class TestGroupJSONPresenter(object):
         presenter.asdict()
 
         links_svc.get_all.assert_called_once_with(group)
+
+    def test_it_does_not_expand_by_default(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict()
+
+        assert model['organization'] == ''
+
+    def test_it_expands_organizations(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict(expand=['organization'])
+
+        assert model['organization'] == {}  # empty organization
+
+    def test_it_populates_expanded_organizations(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        group.organization = factories.Organization()
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict(expand=['organization'])
+
+        assert model['organization'] == {
+            'name': group.organization.name,
+            'id': group.organization.pubid,
+        }
+
+    def test_it_ignores_unrecognized_expands(self, factories):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        presenter = GroupJSONPresenter(group)
+
+        model = presenter.asdict(expand=['foobars', 'dingdong'])
+
+        assert model['organization'] == ''
 
 
 class TestGroupsJSONPresenter(object):

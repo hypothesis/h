@@ -63,6 +63,23 @@ class TestGetGroups(object):
 
         assert result == GroupsJSONPresenter(open_groups, anonymous_request).asdicts.return_value
 
+    def test_proxies_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+        anonymous_request.params['expand'] = 'organization'
+        list_groups_service.request_groups.return_value = open_groups
+
+        views.groups(anonymous_request)
+
+        GroupsJSONPresenter(open_groups, anonymous_request).asdicts.assert_called_once_with(expand=['organization'])
+
+    def test_passes_multiple_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+        anonymous_request.GET.add('expand', 'organization')
+        anonymous_request.GET.add('expand', 'foobars')
+        list_groups_service.request_groups.return_value = open_groups
+
+        views.groups(anonymous_request)
+
+        GroupsJSONPresenter(open_groups, anonymous_request).asdicts.assert_called_once_with(expand=['organization', 'foobars'])
+
     @pytest.fixture
     def open_groups(self, factories):
         return [factories.OpenGroup(), factories.OpenGroup()]

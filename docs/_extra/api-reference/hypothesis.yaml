@@ -9,6 +9,24 @@ info:
     See [the API overview](../api/) for an introduction to the API and information
     on how authorization works.
 
+    ## Expanding Resources
+
+    Resources often contain links to related resources in their response bodies.
+    Some endpoints support resource expansion, allowing those related resources
+    to be expanded inline within the response.
+
+    To expand resources (where supported), use the `expand` request parameter.
+    Documentation for endpoints identify which resources are expandable, if any.
+
+    ```
+    GET /api/things?expand=organization&expand=foobar
+    ```
+
+    Values for `expand` are the fields to expand. The above would expand
+    `organization` and `foobar` fields within the (hypothetical) returned `thing`
+    objects. You can expand multiple fields by providing multiple values in the
+    `expand` Array.
+
   termsOfService: https://hypothes.is/terms-of-service
   license:
     name: BSD (2-Clause)
@@ -221,6 +239,15 @@ paths:
           required: false
           type: string
           format: uri
+        - name: expand
+          description: >
+            Array of fields to expand in the response
+          in: query
+          type: array
+          items:
+            type: string
+            enum:
+              - organization
       responses:
         '200':
           description: Success
@@ -423,55 +450,7 @@ definitions:
   GroupResults:
     type: array
     items:
-      $ref: '#/definitions/Group'
-  Group:
-    type: object
-    required:
-      - id
-      - links
-      - name
-      - public
-      - scoped
-      - type
-      - urls
-    properties:
-      id:
-        type: string
-      links:
-        type: object
-        properties:
-          html:
-            type: string
-            format: uri
-            description: URL to the group's main (activity) page
-      name:
-        type: string
-      public:
-        type: boolean
-        deprecated: true
-        description: Indicates whether a group's annotations are world-readable
-      scoped:
-        type: boolean
-        description: Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped groups allow annotation to documents at any URL
-      type:
-        type: string
-        enum:
-          - private
-          - open
-          - restricted
-      url:
-        type: string
-        format: uri
-        deprecated: true
-      urls:
-        type: object
-        deprecated: true
-        properties:
-          group:
-            type: string
-            format: uri
-            description: URI to group activity page; use `links.html` instead
-            deprecated: true
+      $ref: './schemas/group.yaml#/Group'
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:
