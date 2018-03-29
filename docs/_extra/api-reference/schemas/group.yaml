@@ -22,7 +22,7 @@ Group:
     name:
       type: string
     organization:
-      description: If expanded, an organization object, otherwise a link to the organization resource, if available
+      description: "**EXPANDABLE** The organization to which this group belongs"
       oneOf:
         - $ref: './organization.yaml#/Organization'
         - type: string

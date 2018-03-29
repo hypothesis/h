@@ -10,23 +10,22 @@ info:
     on how authorization works.
 
     ## Expanding Resources
+
     Resources often contain links to related resources in their response bodies.
     Some endpoints support resource expansion, allowing those related resources
-    to be expanded inline in the response.
+    to be expanded inline within the response.
 
     To expand resources (where supported), use the `expand` request parameter.
-    Individual endpoint documentation indicates which resources are expandable.
-
-    The `expand` parameter value is an Array:
+    Documentation for endpoints identify which resources are expandable, if any.
 
     ```
-    GET /api/things?expand=organizations&expand=foobars
+    GET /api/things?expand=organization&expand=foobar
     ```
 
-    would expand `organization` and `foobar` relationships within the
-    (hypothetical) returned `thing` objects.
-
-    `expand` values should be the plural of the noun being expanded.
+    Values for `expand` are the fields to expand. The above would expand
+    `organization` and `foobar` fields within the (hypothetical) returned `thing`
+    objects. You can expand multiple fields by providing multiple values in the
+    `expand` Array.
 
   termsOfService: https://hypothes.is/terms-of-service
   license:
@@ -242,13 +241,13 @@ paths:
           format: uri
         - name: expand
           description: >
-            Array of related resource objects to expand within the response
+            Array of fields to expand in the response
           in: query
           type: array
           items:
             type: string
             enum:
-              - organizations
+              - organization
       responses:
         '200':
           description: Success
