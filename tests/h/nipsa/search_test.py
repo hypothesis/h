@@ -46,9 +46,9 @@ class TestFilter(object):
 def test_nipsa_filter_filters_out_nipsad_annotations(group_service):
     """nipsa_filter() filters out annotations with "nipsa": True."""
     assert search.nipsa_filter(group_service) == {
-        "bool": {
-            "should": [
-                {'not': {'term': {'nipsa': True}}},
+        'bool': {
+            'should': [
+                {'bool': {'must_not': {'term': {'nipsa': True}}}},
                 {'exists': {'field': 'thread_ids'}},
             ]
         }

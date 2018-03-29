@@ -91,13 +91,13 @@ class TestBuilder(object):
         assert len(sort) == 1
         assert list(sort[0].keys()) == ["updated"]
 
-    def test_sort_includes_ignore_unmapped(self):
-        """'ignore_unmapped': True is used in the sort clause."""
+    def test_sort_includes_unmapped_type(self):
+        """'unmapped_type': 'long' is used in the sort clause."""
         builder = query.Builder()
 
         q = builder.build({})
 
-        assert q["sort"][0]["updated"]["ignore_unmapped"] is True
+        assert q["sort"][0]["updated"]["unmapped_type"] == "long"
 
     def test_with_custom_sort(self):
         """Custom sorts are returned in the query dict."""
@@ -105,7 +105,7 @@ class TestBuilder(object):
 
         q = builder.build({"sort": "title"})
 
-        assert q["sort"] == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
+        assert q['sort'] == [{'title': {'unmapped_type': 'long', 'order': 'desc'}}]
 
     def test_order_defaults_to_desc(self):
         """'order': "desc" is returned in the q dict by default."""
@@ -199,11 +199,17 @@ class TestBuilder(object):
 
         q = builder.build({})
 
-        assert q["query"] == {
-            "filtered": {
-                "filter": {"and": [{"term": {"giraffe": "nose"}}]},
-                "query": {"match_all": {}},
-            },
+        assert q['query'] == {
+            'bool': {
+                'must': {'match_all': {}},
+                'filter': {
+                    'bool': {
+                        'must': [
+                            {'term': {'giraffe': 'nose'}},
+                        ]
+                    },
+                }
+            }
         }
 
     def test_passes_params_to_matchers(self):
@@ -267,10 +273,12 @@ class TestAuthFilter(object):
         authfilter = query.AuthFilter(request)
 
         assert authfilter({}) == {
-            'or': [
-                {'term': {'shared': True}},
-                {'term': {'user_raw': 'acct:doe@example.org'}},
-            ]
+            'bool': {
+                'should': [
+                    {'term': {'shared': True}},
+                    {'term': {'user_raw': 'acct:doe@example.org'}},
+                ]
+            }
         }
 
 
