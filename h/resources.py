@@ -134,6 +134,16 @@ class OrganizationLogoFactory(object):
         return organization.logo
 
 
+class GroupResource(object):
+    def __init__(self, group, links_service):
+        self.group = group
+        self.links_service = links_service
+
+    @property
+    def links(self):
+        return self.links_service.get_all(self.group)
+
+
 def _group_principals(group):
     if group is None:
         return []
