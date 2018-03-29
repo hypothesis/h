@@ -65,6 +65,7 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
         base.metadata.create_all(engine)
 
     _maybe_create_world_group(engine, authority)
+    _maybe_create_default_organization(engine, authority)
 
 
 def make_engine(settings):
@@ -131,6 +132,23 @@ def _maybe_create_world_group(engine, authority):
                                    writeable_by=WriteableBy.authority)
         world_group.pubid = '__world__'
         session.add(world_group)
+
+    session.commit()
+    session.close()
+
+
+def _maybe_create_default_organization(engine, authority):
+    from h import models
+    session = Session(bind=engine)
+    default_org = session.query(models.Organization).filter_by(pubid='__default__').one_or_none()
+    if default_org is None:
+        default_org = models.Organization(name=u'Hypothesis',
+                                          authority=authority,
+                                          pubid='__default__',
+                                          )
+        with open('h/static/images/icons/logo.svg', 'rb') as h_logo:
+            default_org.logo = h_logo.read().decode("utf-8")
+        session.add(default_org)
 
     session.commit()
     session.close()
