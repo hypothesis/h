@@ -58,6 +58,12 @@ class TestGroupService(object):
 
         assert getattr(group, flag) == expected_value
 
+    def test_create_private_group_creates_group_with_default_organization(
+            self, default_organization, service):
+        group = service.create_private_group('Anteater fans', 'cazimir')
+
+        assert group.organization == default_organization
+
     def test_create_private_group_adds_group_to_session(self, db_session, service):
         group = service.create_private_group('Anteater fans', 'cazimir')
 
@@ -74,7 +80,7 @@ class TestGroupService(object):
 
         publish.assert_called_once_with('group-join', group.pubid, 'acct:theresa@example.com')
 
-    def test_create_open_group_returns_group(self, service, users):
+    def test_create_open_group_returns_group(self, default_organization, service, users):
         creator = users['cazimir']
 
         group = service.create_open_group(name='test_group',
@@ -89,6 +95,7 @@ class TestGroupService(object):
         assert group.joinable_by is None
         assert group.readable_by == ReadableBy.world
         assert group.writeable_by == WriteableBy.authority
+        assert group.organization == default_organization
 
     def test_create_open_group_sets_scopes(self, service, matchers, users):
         origins = ['https://biopub.org', 'http://example.com', 'https://wikipedia.com']
@@ -124,7 +131,7 @@ class TestGroupService(object):
 
         assert group.description is None
 
-    def test_create_restricted_group_returns_group(self, service, users):
+    def test_create_restricted_group_returns_group(self, default_organization, service, users):
         creator = users['cazimir']
 
         group = service.create_restricted_group(name='test_group',
@@ -139,6 +146,7 @@ class TestGroupService(object):
         assert group.joinable_by is None
         assert group.readable_by == ReadableBy.world
         assert group.writeable_by == WriteableBy.members
+        assert group.organization == default_organization
         assert creator in group.members
 
     def test_create_restricted_group_adds_group_creator_to_members(self, service, users):
