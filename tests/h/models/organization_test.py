@@ -63,3 +63,7 @@ def test_repr(db_session, factories):
         name='My Organization', authority='example.com', pubid='test_pubid')
 
     assert repr(organization) == "<Organization: test_pubid>"
+
+
+def test_default_returns_the_default_organization(db_session):
+    assert models.Organization.default(db_session).pubid == '__default__'

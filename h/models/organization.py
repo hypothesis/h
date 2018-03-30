@@ -65,3 +65,7 @@ class Organization(Base, mixins.Timestamps):
 
     def __repr__(self):
         return '<Organization: %s>' % self.pubid
+
+    @classmethod
+    def default(cls, session):
+        return session.query(cls).filter_by(pubid='__default__').one()
