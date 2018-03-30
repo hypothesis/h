@@ -20,6 +20,7 @@ from sqlalchemy.orm import sessionmaker
 from webob.multidict import MultiDict
 
 from h import db
+from h import models
 from h.settings import database_url
 from h._compat import text_type
 
@@ -110,6 +111,11 @@ def db_engine():
     engine = sqlalchemy.create_engine(TEST_DATABASE_URL)
     db.init(engine, should_create=True, should_drop=True, authority=TEST_AUTHORITY)
     return engine
+
+
+@pytest.fixture
+def default_organization(db_session):
+    return models.Organization.default(db_session)
 
 
 @pytest.yield_fixture
