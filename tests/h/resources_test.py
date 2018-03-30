@@ -16,6 +16,7 @@ from h.resources import AuthClientFactory
 from h.resources import OrganizationFactory
 from h.resources import OrganizationLogoFactory
 from h.resources import GroupResource
+from h.resources import ExpandedGroupResource
 from h.resources import OrganizationResource
 
 
@@ -305,6 +306,31 @@ class TestOrganizationResource(object):
         assert organization_resource.logo == ''
 
 
+@pytest.mark.usefixtures('group_links_service')
+class TestExpandedGroupResource(object):
+
+    def test_it_creates_group_resource_properties(self, factories, pyramid_request):
+        group = factories.Group()
+
+        expanded = ExpandedGroupResource(group, pyramid_request)
+
+        assert expanded.group == group
+        assert expanded.links
+
+    def test_it_expands_organization(self, factories, pyramid_request, OrganizationResource_):  # noqa: N803
+        group = factories.Group()
+        group.organization = factories.Organization()
+
+        expanded = ExpandedGroupResource(group, pyramid_request)
+
+        OrganizationResource_.assert_called_once()
+        assert expanded.organization == OrganizationResource_.return_value
+
+    @pytest.fixture
+    def OrganizationResource_(self, patch):  # noqa: N802
+        return patch('h.resources.OrganizationResource')
+
+
 @pytest.fixture
 def organizations(factories):
     # Add a handful of organizations to the DB to make the test realistic.
@@ -314,6 +340,12 @@ def organizations(factories):
 @pytest.fixture
 def links_svc():
     return mock.create_autospec(GroupLinksService, spec_set=True, instance=True)
+
+
+@pytest.fixture
+def group_links_service(pyramid_config, links_svc):
+    pyramid_config.register_service(links_svc, name='group_links')
+    return links_svc
 
 
 class FakeGroup(object):

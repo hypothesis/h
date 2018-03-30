@@ -159,6 +159,13 @@ class OrganizationResource(object):
         return ''
 
 
+class ExpandedGroupResource(GroupResource):
+    def __init__(self, group, request):
+        super(ExpandedGroupResource, self).__init__(group, request.find_service(name='group_links'))
+        if group.organization is not None:
+            self.organization = OrganizationResource(group.organization)
+
+
 def _group_principals(group):
     if group is None:
         return []
