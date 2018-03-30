@@ -16,6 +16,7 @@ from h.resources import AuthClientFactory
 from h.resources import OrganizationFactory
 from h.resources import OrganizationLogoFactory
 from h.resources import GroupResource
+from h.resources import OrganizationResource
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -278,6 +279,30 @@ class TestGroupResource(object):
         group_resource = GroupResource(group, links_svc)
 
         assert group_resource.links == links_svc.get_all.return_value
+
+
+class TestOrganizationResource(object):
+
+    def test_it_returns_organization_model_as_property(self, factories):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization)
+
+        assert organization_resource.organization == organization
+
+    def test_it_returns_links_property(self, factories):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization)
+
+        assert organization_resource.links == {}
+
+    def test_it_returns_logo_property(self, factories):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization)
+
+        assert organization_resource.logo == ''
 
 
 @pytest.fixture
