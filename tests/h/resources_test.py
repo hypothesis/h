@@ -16,6 +16,7 @@ from h.resources import AuthClientFactory
 from h.resources import OrganizationFactory
 from h.resources import OrganizationLogoFactory
 from h.resources import GroupResource
+from h.resources import OrganizationResource
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -280,6 +281,47 @@ class TestGroupResource(object):
         assert group_resource.links == links_svc.get_all.return_value
 
 
+@pytest.mark.usefixtures('organization_routes')
+class TestOrganizationResource(object):
+
+    def test_it_returns_organization_model_as_property(self, factories, pyramid_request):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        assert organization_resource.organization == organization
+
+    def test_it_returns_links_property(self, factories, pyramid_request):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        assert organization_resource.links == {}
+
+    def test_it_returns_logo_property_as_route_url(self, factories, pyramid_request):
+        fake_logo = '<svg>H</svg>'
+        pyramid_request.route_url = mock.Mock()
+
+        organization = factories.Organization(logo=fake_logo)
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+        logo = organization_resource.logo
+
+        pyramid_request.route_url.assert_called_with('organization_logo', pubid=organization.pubid)
+        assert logo is not None
+
+    def test_it_returns_none_for_logo_if_no_logo(self, factories, pyramid_request):
+        pyramid_request.route_url = mock.Mock()
+
+        organization = factories.Organization(logo=None)
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+        logo = organization_resource.logo
+
+        pyramid_request.route_url.assert_not_called
+        assert logo is None
+
+
 @pytest.fixture
 def organizations(factories):
     # Add a handful of organizations to the DB to make the test realistic.
@@ -291,6 +333,11 @@ def links_svc(pyramid_config):
     svc = mock.create_autospec(GroupLinksService, spec_set=True, instance=True)
     pyramid_config.register_service(svc, name='group_links')
     return svc
+
+
+@pytest.fixture
+def organization_routes(pyramid_config):
+    pyramid_config.add_route('organization_logo', '/organization/{pubid}/logo')
 
 
 class FakeGroup(object):

@@ -151,6 +151,25 @@ class GroupResource(object):
         return self.links_service.get_all(self.group)
 
 
+class OrganizationResource(object):
+    def __init__(self, organization, request):
+        # TODO Links service
+        self.organization = organization
+        self.request = request
+
+    @property
+    def links(self):
+        # TODO
+        return {}
+
+    @property
+    def logo(self):
+        if self.organization.logo:
+            return self.request.route_url('organization_logo',
+                                          pubid=self.organization.pubid)
+        return None
+
+
 def _group_principals(group):
     if group is None:
         return []
