@@ -6,7 +6,7 @@ import pytest
 from mock import Mock, call
 
 from h.events import AnnotationEvent
-from h.models import Annotation, Document, Group
+from h.models import Annotation, Document
 from h.services.delete_user import (
     UserDeleteError,
     delete_user_service_factory,
@@ -102,9 +102,8 @@ def group_with_two_users(db_session, factories):
     creator = factories.User()
     member = factories.User()
 
-    group = Group(authority=creator.authority, creator=creator, members=[creator, member],
-                  name='test', pubid='group_with_two_users')
-    db_session.add(group)
+    group = factories.Group(authority=creator.authority, creator=creator,
+                            members=[creator, member])
 
     doc = Document(web_uri='https://example.org')
     creator_ann = Annotation(userid=creator.userid, groupid=group.pubid, document=doc)
