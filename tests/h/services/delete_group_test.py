@@ -48,17 +48,6 @@ class TestDeleteGroupService(object):
         assert (expected_event.request, expected_event.annotation_id, expected_event.action) == \
                (actual_event.request, actual_event.annotation_id, actual_event.action)
 
-    def test_delete_deletes_user_relationships(self, svc, db_session, factories):
-        user = factories.User()
-        group = factories.Group(creator=user)
-
-        svc.delete(group)
-
-        # note that user.groups retains deleted group through the request
-        # until db is committed/flushed but the group is marked as deleted
-        assert user.groups[0] in db_session.deleted
-        assert user not in db_session.deleted
-
     def test_delete_group_factory(self, pyramid_request):
         svc = delete_group_service_factory(None, pyramid_request)
 
