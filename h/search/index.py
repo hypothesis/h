@@ -26,13 +26,17 @@ class Window(namedtuple('Window', ['start', 'end'])):
     pass
 
 
-def index(es, annotation, request, target_index=None):
+def index(es, annotation, request, target_index=None, refresh=False):
     """
     Index an annotation into the search index.
 
     A new annotation document will be created in the search index or,
     if the index already contains an annotation document with the same ID as
     the given annotation then it will be updated.
+
+    If the `refresh` option is `True` the change will be immediately visible in
+    searches, otherwise there may be a short delay (eg. of a second or two)
+    before it becomes visible.
 
     :param es: the Elasticsearch client object to use
     :type es: h.search.Client
@@ -42,6 +46,9 @@ def index(es, annotation, request, target_index=None):
 
     :param target_index: the index name, uses default index if not given
     :type target_index: unicode
+
+    :param refresh: Whether to make this change immediately visible to searches
+    :type refresh: bool
     """
     presenter = presenters.AnnotationSearchIndexPresenter(annotation)
     annotation_dict = presenter.asdict()
@@ -57,6 +64,7 @@ def index(es, annotation, request, target_index=None):
         doc_type=es.t.annotation,
         body=annotation_dict,
         id=annotation_dict["id"],
+        refresh=refresh,
     )
 
 

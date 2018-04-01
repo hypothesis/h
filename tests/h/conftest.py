@@ -20,12 +20,16 @@ from sqlalchemy.orm import sessionmaker
 from webob.multidict import MultiDict
 
 from h import db
+from h import search
 from h.settings import database_url
 from h._compat import text_type
 
 TEST_AUTHORITY = u'example.com'
 TEST_DATABASE_URL = database_url(os.environ.get('TEST_DATABASE_URL',
                                                 'postgresql://postgres@localhost/htest'))
+TEST_ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST',
+                                         'http://localhost:9200')
+TEST_ELASTICSEARCH_INDEX = 'hypothesis-test'
 
 Session = sessionmaker()
 
@@ -252,3 +256,22 @@ def pyramid_settings():
     return {
         'sqlalchemy.url': TEST_DATABASE_URL
     }
+
+
+@pytest.fixture(scope='session')
+def search_client():
+    """
+    Prepare an empty ElasticSearch index and return a client for it.
+
+    :rtype h.search.client.Client:
+    """
+    index_name = TEST_ELASTICSEARCH_INDEX
+    settings = {'es.host': TEST_ELASTICSEARCH_HOST,
+                'es.index': index_name}
+
+    client = search.get_client(settings)
+    if client.conn.indices.exists(index=index_name):
+        client.conn.indices.delete(index=index_name)
+    search.init(client)
+
+    return client
