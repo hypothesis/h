@@ -258,7 +258,7 @@ def pyramid_settings():
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def search_client():
     """
     Prepare an empty ElasticSearch index and return a client for it.

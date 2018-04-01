@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import datetime
-
 import mock
 import pytest
 
 from h import presenters
-from h.search import client
 from h.search import index
+from h.search import query
+from h.search import client
 
 
 @pytest.mark.usefixtures('presenters')
@@ -81,36 +80,55 @@ class TestIndexAnnotation:
 
 class TestIndexAnnotationWithES:
     """
-    Annotation indexing tests that use a real ElasticSearch connection.
+    Annotation search tests that use a real ElasticSearch connection.
     """
 
-    def test_indexes_authority(self, ann, pyramid_request, search_client):
-        index.index(search_client, ann, pyramid_request, refresh=True)
-        query = {'term': {'authority': 'partner.org'}}
-        assert count_hits(search_client, query) == 1
+    def test_indexes_top_level(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(references=['OHFscuRvTmiwpOHWfrbzxw']), pyramid_request, refresh=True)
 
-    @pytest.fixture
-    def ann(self):
-        ann = mock.Mock(
-            created=datetime(2017, 1, 1),
-            document=mock.Mock(
-                title='Example website',
-                web_uri='https://example.org',
-                ),
-            groupid='abcd',
-            id='1234',
-            references=[],
-            shared=True,
-            target_selectors=[],
-            target_uri='https://example.org',
-            target_uri_normalized='https://example.org',
-            text='annotation content',
-            thread_ids=[],
-            updated=datetime(2017, 1, 1),
-            userid='acct:jim@partner.org',
-            tags=[],
-            )
-        return ann
+        builder = query.Builder()
+        builder.append_filter(query.TopLevelAnnotationsFilter())
+        assert count_hits(search_client, builder.build({})) == 1
+
+    def test_indexes_authority(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(userid='acct:jim@partner.org'), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(userid='acct:jim@decoy.org'), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.AuthorityFilter('partner.org'))
+        assert count_hits(search_client, builder.build({})) == 1
+
+    def test_indexes_auth(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(userid='acct:jim@partner.org'), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(userid='acct:jim@partner.org', shared=True), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.AuthFilter(mock.Mock(authenticated_userid=None)))
+        assert count_hits(search_client, builder.build({})) == 1
+
+        builder = query.Builder()
+        builder.append_filter(query.AuthFilter(mock.Mock(authenticated_userid='acct:jim@partner.org')))
+        assert count_hits(search_client, builder.build({})) == 2
+
+    def test_indexes_group(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(groupid='foo'), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(groupid='bar'), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.GroupFilter())
+        assert count_hits(search_client, builder.build({'group': 'foo'})) == 1
+
+    def test_indexes_deleted(self, factories, pyramid_request, search_client):
+        ann = factories.Annotation()
+        index.index(search_client, ann, pyramid_request, refresh=True)
+        index.delete(search_client, ann.id, refresh=True)
+
+        index.index(search_client, factories.Annotation(), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.DeletedFilter())
+        assert count_hits(search_client, builder.build({})) == 1
 
 
 class TestDeleteAnnotation:
@@ -123,6 +141,7 @@ class TestDeleteAnnotation:
             doc_type='annotation',
             body={'deleted': True},
             id='test_annotation_id',
+            refresh=False,
         )
 
     def test_it_allows_to_override_target_index(self, es):
@@ -341,10 +360,10 @@ class TestBatchIndexer(object):
         return patch('h.search.index.es_helpers.streaming_bulk')
 
 
-def count_hits(search_client, query):
-    result = search_client.conn.count(body={'query': query},
-                                      index=search_client.index)
-    return result['count']
+def count_hits(search_client, body):
+    result = search_client.conn.search(body=body,
+                                       index=search_client.index)
+    return result['hits']['total']
 
 
 @pytest.fixture
