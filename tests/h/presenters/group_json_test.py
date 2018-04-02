@@ -100,7 +100,7 @@ class TestGroupJSONPresenter(object):
 
         model = presenter.asdict(expand=['organization'])
 
-        assert model['organization'] == {}  # empty organization
+        assert model['organization'] == {'id': '__default__', 'name': 'Hypothesis'}
 
     def test_it_populates_expanded_organizations(self, factories):
         group = factories.OpenGroup(name='My Group',
