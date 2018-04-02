@@ -30,11 +30,12 @@ def test_with_long_name():
         models.Group(name="abcdefghijklmnopqrstuvwxyz")
 
 
-def test_slug(db_session, factories):
+def test_slug(db_session, factories, default_organization):
     name = "My Hypothesis Group"
     user = factories.User()
 
-    group = models.Group(name=name, authority="foobar.com", creator=user)
+    group = models.Group(name=name, authority="foobar.com", creator=user,
+                         organization=default_organization)
     db_session.add(group)
     db_session.flush()
 
@@ -72,11 +73,12 @@ def test_you_cannot_set_type(factories):
         group.type = 'open'
 
 
-def test_repr(db_session, factories):
+def test_repr(db_session, factories, default_organization):
     name = "My Hypothesis Group"
     user = factories.User()
 
-    group = models.Group(name=name, authority='foobar.com', creator=user)
+    group = models.Group(name=name, authority='foobar.com', creator=user,
+                         organization=default_organization)
     db_session.add(group)
     db_session.flush()
 
@@ -98,24 +100,15 @@ def test_group_organization(db_session):
     assert group.organization_id == org.id
 
 
-def test_group_organization_defaults_to_none(db_session):
-    name = "My Hypothesis Group"
-
-    group = models.Group(name=name, authority='foobar.com')
-    db_session.add(group)
-    db_session.flush()
-
-    assert group.organization is None
-    assert group.organization_id is None
-
-
-def test_created_by(db_session, factories):
+def test_created_by(db_session, factories, default_organization):
     name_1 = "My first group"
     name_2 = "My second group"
     user = factories.User()
 
-    group_1 = models.Group(name=name_1, authority='foobar.com', creator=user)
-    group_2 = models.Group(name=name_2, authority='foobar.com', creator=user)
+    group_1 = models.Group(name=name_1, authority='foobar.com', creator=user,
+                           organization=default_organization)
+    group_2 = models.Group(name=name_2, authority='foobar.com', creator=user,
+                           organization=default_organization)
 
     db_session.add_all([group_1, group_2])
     db_session.flush()
