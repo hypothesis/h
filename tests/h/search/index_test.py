@@ -5,12 +5,16 @@ import mock
 import pytest
 
 from h import presenters
-from h.search import client
 from h.search import index
+from h.search import query
+from h.search import client
 
 
 @pytest.mark.usefixtures('presenters')
 class TestIndexAnnotation:
+    """
+    Annotation indexing tests that use a mock ElasticSearch connection.
+    """
 
     def test_it_presents_the_annotation(self, es, presenters, pyramid_request):
         annotation = mock.Mock()
@@ -50,6 +54,7 @@ class TestIndexAnnotation:
             doc_type='annotation',
             body=presenters.AnnotationSearchIndexPresenter.return_value.asdict.return_value,
             id='test_annotation_id',
+            refresh=False,
         )
 
     def test_it_allows_to_override_target_index(self, es, presenters, pyramid_request):
@@ -73,6 +78,59 @@ class TestIndexAnnotation:
         return presenters
 
 
+class TestIndexAnnotationWithES:
+    """
+    Annotation search tests that use a real ElasticSearch connection.
+    """
+
+    def test_indexes_top_level(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(references=['OHFscuRvTmiwpOHWfrbzxw']), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.TopLevelAnnotationsFilter())
+        assert count_hits(search_client, builder.build({})) == 1
+
+    def test_indexes_authority(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(userid='acct:jim@partner.org'), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(userid='acct:jim@decoy.org'), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.AuthorityFilter('partner.org'))
+        assert count_hits(search_client, builder.build({})) == 1
+
+    def test_indexes_auth(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(userid='acct:jim@partner.org'), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(userid='acct:jim@partner.org', shared=True), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.AuthFilter(mock.Mock(authenticated_userid=None)))
+        assert count_hits(search_client, builder.build({})) == 1
+
+        builder = query.Builder()
+        builder.append_filter(query.AuthFilter(mock.Mock(authenticated_userid='acct:jim@partner.org')))
+        assert count_hits(search_client, builder.build({})) == 2
+
+    def test_indexes_group(self, factories, pyramid_request, search_client):
+        index.index(search_client, factories.Annotation(groupid='foo'), pyramid_request, refresh=True)
+        index.index(search_client, factories.Annotation(groupid='bar'), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.GroupFilter())
+        assert count_hits(search_client, builder.build({'group': 'foo'})) == 1
+
+    def test_indexes_deleted(self, factories, pyramid_request, search_client):
+        ann = factories.Annotation()
+        index.index(search_client, ann, pyramid_request, refresh=True)
+        index.delete(search_client, ann.id, refresh=True)
+
+        index.index(search_client, factories.Annotation(), pyramid_request, refresh=True)
+
+        builder = query.Builder()
+        builder.append_filter(query.DeletedFilter())
+        assert count_hits(search_client, builder.build({})) == 1
+
+
 class TestDeleteAnnotation:
 
     def test_it_marks_annotation_as_deleted(self, es):
@@ -82,7 +140,8 @@ class TestDeleteAnnotation:
             index='hypothesis',
             doc_type='annotation',
             body={'deleted': True},
-            id='test_annotation_id'
+            id='test_annotation_id',
+            refresh=False,
         )
 
     def test_it_allows_to_override_target_index(self, es):
@@ -299,6 +358,12 @@ class TestBatchIndexer(object):
     @pytest.fixture
     def streaming_bulk(self, patch):
         return patch('h.search.index.es_helpers.streaming_bulk')
+
+
+def count_hits(search_client, body):
+    result = search_client.conn.search(body=body,
+                                       index=search_client.index)
+    return result['hits']['total']
 
 
 @pytest.fixture

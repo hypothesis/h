@@ -93,7 +93,7 @@ def extract_limit(params):
 def extract_sort(params):
     return [{
         params.pop("sort", "updated"): {
-            "ignore_unmapped": True,
+            "unmapped_type": "long",
             "order": params.pop("order", "desc"),
         }
     }]

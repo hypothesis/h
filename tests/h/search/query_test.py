@@ -2,10 +2,13 @@
 
 import mock
 import pytest
+import datetime
+
 from hypothesis import strategies as st
 from hypothesis import given
 from webob import multidict
 
+from h.search import index
 from h.search import query
 
 MISSING = object()
@@ -91,13 +94,13 @@ class TestBuilder(object):
         assert len(sort) == 1
         assert list(sort[0].keys()) == ["updated"]
 
-    def test_sort_includes_ignore_unmapped(self):
-        """'ignore_unmapped': True is used in the sort clause."""
+    def test_sort_includes_unmapped_type(self):
+        """'unmapped_type': 'long' is used in the sort clause."""
         builder = query.Builder()
 
         q = builder.build({})
 
-        assert q["sort"][0]["updated"]["ignore_unmapped"] is True
+        assert q["sort"][0]["updated"]["unmapped_type"] == "long"
 
     def test_with_custom_sort(self):
         """Custom sorts are returned in the query dict."""
@@ -105,7 +108,7 @@ class TestBuilder(object):
 
         q = builder.build({"sort": "title"})
 
-        assert q["sort"] == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
+        assert q['sort'] == [{'title': {'unmapped_type': 'long', 'order': 'desc'}}]
 
     def test_order_defaults_to_desc(self):
         """'order': "desc" is returned in the q dict by default."""
@@ -574,3 +577,38 @@ class TestUsersAggregation(object):
     def test_parse_result_with_empty(self):
         agg = query.UsersAggregation()
         assert agg.parse_result({}) == {}
+
+
+class TestSortWithES:
+
+    @pytest.fixture
+    def annotations(self, factories, pyramid_request, search_client):
+        anns = [
+            factories.Annotation(created=datetime.datetime(2018, 1, 1), updated=datetime.datetime(2018, 6, 1)),
+            factories.Annotation(created=datetime.datetime(2018, 2, 1), updated=datetime.datetime(2018, 5, 1)),
+            factories.Annotation(created=datetime.datetime(2018, 3, 1), updated=datetime.datetime(2018, 4, 1)),
+        ]
+        for ann in anns:
+            index.index(search_client, ann, pyramid_request, refresh=True)
+
+    def test_sort_defaults(self, search_client, annotations):
+        builder = query.Builder()
+        result = search_client.conn.search(body=builder.build({}), index=search_client.index)
+        updated = [each['_source']['updated'] for each in result['hits']['hits']]
+        assert updated == list(sorted(updated, reverse=True))
+
+    def test_sort_order(self, search_client, annotations):
+        builder = query.Builder()
+        result = search_client.conn.search(body=builder.build({'order': 'asc'}), index=search_client.index)
+        updated = [each['_source']['updated'] for each in result['hits']['hits']]
+        assert updated == list(sorted(updated))
+
+    def test_sort_field(self, search_client, annotations):
+        builder = query.Builder()
+        result = search_client.conn.search(body=builder.build({'sort': 'created'}), index=search_client.index)
+        created = [each['_source']['created'] for each in result['hits']['hits']]
+        assert created == list(sorted(created, reverse=True))
+
+    def test_sort_unmapped(self, search_client, annotations):
+        builder = query.Builder()
+        search_client.conn.search(body=builder.build({'sort': 'notafield'}), index=search_client.index)

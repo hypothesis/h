@@ -8,6 +8,13 @@ matrix:
       python: '2.7'
       addons:
         postgresql: "9.4"
+      before_install: &install-elastic
+        # Install Elasticsearch v1.6.2 and the ICU plugin to match the
+        # production environment.
+        - curl -O https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.6.2.deb && sudo dpkg -i elasticsearch-1.6.2.deb && true
+        - 'echo ''index.number_of_shards: 1'' | sudo tee --append /etc/elasticsearch/elasticsearch.yml'
+        - sudo /usr/share/elasticsearch/bin/plugin install elasticsearch/elasticsearch-analysis-icu/2.6.0
+        - sudo service elasticsearch start
       install: pip install tox
       before_script: createdb htest
       script: tox
@@ -20,6 +27,7 @@ matrix:
       python: '3.6'
       addons:
         postgresql: '9.4'
+      before_install: *install-elastic
       install: pip install tox
       before_script: createdb htest
       script:
