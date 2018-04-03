@@ -10,7 +10,7 @@ from h.services.organization import organization_factory
 
 
 class TestOrganizationService(object):
-    def test_create_organization_returns_organization(self, service):
+    def test_create_returns_organization(self, service):
         organization = service.create(
             name='Organization',
             authority='publisher.com',
@@ -18,7 +18,7 @@ class TestOrganizationService(object):
 
         assert isinstance(organization, Organization)
 
-    def test_create_organization_default_logo_returns_organization(self, service):
+    def test_create_with_default_logo_returns_organization(self, service):
         organization = service.create(
             name='Organization',
             authority='publisher.com')
