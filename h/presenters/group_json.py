@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 class GroupJSONPresenter(object):
     """Present a group in the JSON format returned by API requests."""
 
-    def __init__(self, group, links_svc=None):
-        self.group = group
-        self._links_svc = links_svc
+    def __init__(self, group_resource):
+        self.resource = group_resource
+        self.group = group_resource.group
 
     def asdict(self, expand=[]):
         model = self._model()
@@ -40,12 +40,7 @@ class GroupJSONPresenter(object):
         return model
 
     def _inject_urls(self, model):
-        model['links'] = {}
-        model['urls'] = {}  # DEPRECATED TODO: remove from client
-        if not self._links_svc:
-            return model
-
-        model['links'] = self._links_svc.get_all(self.group)
+        model['links'] = self.resource.links or {}
         model['urls'] = model['links']  # DEPRECATED TODO: remove from client
         if 'html' in model['links']:
             # DEPRECATED TODO: remove from client
@@ -56,9 +51,8 @@ class GroupJSONPresenter(object):
 class GroupsJSONPresenter(object):
     """Present a list of groups as JSON"""
 
-    def __init__(self, groups, links_svc=None):
-        self.groups = groups
-        self._links_svc = links_svc
+    def __init__(self, group_resources):
+        self.resources = group_resources
 
     def asdicts(self, expand=[]):
-        return [GroupJSONPresenter(group, self._links_svc).asdict(expand=expand) for group in self.groups]
+        return [GroupJSONPresenter(group_resource).asdict(expand=expand) for group_resource in self.resources]
