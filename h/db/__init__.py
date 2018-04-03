@@ -19,6 +19,7 @@ import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import exc
 from sqlalchemy.orm import sessionmaker
 
 from h.util.session_tracker import Tracker
@@ -64,7 +65,8 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
         engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
 
-    _maybe_create_world_group(engine, authority)
+    default_org = _maybe_create_default_organization(engine, authority)
+    _maybe_create_world_group(engine, authority, default_org)
 
 
 def make_engine(settings):
@@ -118,7 +120,31 @@ def _session(request):
     return session
 
 
-def _maybe_create_world_group(engine, authority):
+def _maybe_create_default_organization(engine, authority):
+    from h import models
+    session = Session(bind=engine)
+
+    try:
+        default_org = models.Organization.default(session)
+    except exc.NoResultFound:
+        default_org = None
+
+    if default_org is None:
+        default_org = models.Organization(name=u'Hypothesis',
+                                          authority=authority,
+                                          pubid='__default__',
+                                          )
+        with open('h/static/images/icons/logo.svg', 'rb') as h_logo:
+            default_org.logo = h_logo.read().decode("utf-8")
+        session.add(default_org)
+
+    session.commit()
+    session.close()
+
+    return default_org
+
+
+def _maybe_create_world_group(engine, authority, default_org):
     from h import models
     from h.models.group import ReadableBy, WriteableBy
     session = Session(bind=engine)
@@ -128,7 +154,8 @@ def _maybe_create_world_group(engine, authority):
                                    authority=authority,
                                    joinable_by=None,
                                    readable_by=ReadableBy.world,
-                                   writeable_by=WriteableBy.authority)
+                                   writeable_by=WriteableBy.authority,
+                                   organization=default_org)
         world_group.pubid = '__world__'
         session.add(world_group)
 
