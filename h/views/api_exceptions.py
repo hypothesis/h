@@ -11,6 +11,7 @@ from __future__ import unicode_literals
 
 from pyramid.view import forbidden_view_config
 from pyramid.view import notfound_view_config
+from pyramid.httpexceptions import HTTPException
 
 from h.i18n import TranslationString as _  # noqa: N813
 from h.exceptions import APIError
@@ -27,6 +28,13 @@ def api_notfound(request):
     message = _("Either the resource you requested doesn't exist, or you are "
                 "not currently authorized to see it.")
     return {'status': 'failure', 'reason': message}
+
+
+@json_view(context=HTTPException)
+def http_error(context, request):
+    """Handle an expected/deliberately thrown API exception."""
+    request.response.status_code = context.code
+    return {'status': 'failure', 'reason': str(context)}
 
 
 @json_view(context=APIError)
