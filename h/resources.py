@@ -22,6 +22,7 @@ class Root(object):
         (Allow, role.Staff, 'admin_index'),
         (Allow, role.Staff, 'admin_groups'),
         (Allow, role.Staff, 'admin_mailer'),
+        (Allow, role.Staff, 'admin_organizations'),
         (Allow, role.Staff, 'admin_users'),
         (Allow, role.Admin, ALL_PERMISSIONS),
         DENY_ALL
@@ -114,7 +115,12 @@ class OrganizationFactory(object):
 
     def __getitem__(self, pubid):
         try:
-            return self.request.db.query(Organization).filter_by(pubid=pubid).one()
+            org = self.request.db.query(Organization).filter_by(pubid=pubid).one()
+
+            # Inherit global ACL. See comments in `AuthClientFactory`.
+            org.__parent__ = Root(self.request)
+
+            return org
         except exc.NoResultFound:
             raise KeyError()
 
