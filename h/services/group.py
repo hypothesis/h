@@ -5,7 +5,7 @@ from functools import partial
 import sqlalchemy as sa
 
 from h import session
-from h.models import Group, GroupScope, User
+from h.models import Group, GroupScope, Organization, User
 from h.models.group import ReadableBy, OPEN_GROUP_TYPE_FLAGS, PRIVATE_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
 
 
@@ -157,6 +157,7 @@ class GroupService(object):
                       readable_by=type_flags.readable_by,
                       writeable_by=type_flags.writeable_by,
                       scopes=scopes,
+                      organization=Organization.default(self.session),
                       )
         self.session.add(group)
 
