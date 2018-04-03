@@ -280,6 +280,13 @@ class TestGroupResource(object):
 
         assert group_resource.links == links_svc.get_all.return_value
 
+    def test_it_expands_organization(self, factories, pyramid_request):
+        group = factories.Group()
+
+        group_resource = GroupResource(group, pyramid_request)
+
+        assert isinstance(group_resource.organization, OrganizationResource)
+
 
 @pytest.mark.usefixtures('organization_routes')
 class TestOrganizationResource(object):

@@ -150,6 +150,12 @@ class GroupResource(object):
     def links(self):
         return self.links_service.get_all(self.group)
 
+    @property
+    def organization(self):
+        if self.group.organization:
+            return OrganizationResource(self.group.organization, self.request)
+        return None
+
 
 class OrganizationResource(object):
     def __init__(self, organization, request):
