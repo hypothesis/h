@@ -92,7 +92,7 @@ def window_query_results(session, windows, filter_=None):
     return results
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def cw_table(db_engine):
     test_cw.create(db_engine)
     yield
