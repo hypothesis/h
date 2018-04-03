@@ -2,6 +2,7 @@
 @import 'partials/util';
 
 // Components
+@import 'partials/admin-navbar';
 @import 'partials/btn';
 @import 'partials/form-actions';
 @import 'partials/form-checkbox';
@@ -12,10 +13,6 @@
 @import 'partials/search-form';
 @import 'partials/svg-icon';
 @import 'partials/tooltip';
-
-body {
-  padding-top: 50px;
-}
 
 .flashbar {
   margin-top: 20px;
