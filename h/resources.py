@@ -140,6 +140,38 @@ class OrganizationLogoFactory(object):
         return organization.logo
 
 
+class GroupResource(object):
+    def __init__(self, group, links_service):
+        self.group = group
+        self.links_service = links_service
+
+    @property
+    def links(self):
+        return self.links_service.get_all(self.group)
+
+
+class OrganizationResource(object):
+    def __init__(self, organization, links_service=None):
+        # TBD: Links service for org links
+        self.organization = organization
+        self.links_service = links_service
+
+    @property
+    def links(self):
+        return {}
+
+    @property
+    def logo(self):
+        return ''
+
+
+class ExpandedGroupResource(GroupResource):
+    def __init__(self, group, request):
+        super(ExpandedGroupResource, self).__init__(group, request.find_service(name='group_links'))
+        if group.organization is not None:
+            self.organization = OrganizationResource(group.organization)
+
+
 def _group_principals(group):
     if group is None:
         return []
