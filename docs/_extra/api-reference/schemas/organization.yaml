@@ -2,9 +2,16 @@ Organization:
   type: object
   required:
     - id
+    - logo
     - name
   properties:
     id:
       type: string
+    logo:
+      oneOf:
+        - type: string
+          format: uri
+          description: URI to logo image
+        - type: null
     name:
       type: string
