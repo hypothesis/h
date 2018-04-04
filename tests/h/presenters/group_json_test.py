@@ -20,7 +20,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'mygroup',
-            'organization': '',
+            'organization': group_resource.organization.id,
             'type': 'private',
             'public': False,
             'scoped': False,
@@ -36,8 +36,8 @@ class TestGroupJSONPresenter(object):
 
         assert presenter.asdict() == {
             'name': 'My Group',
-            'id': 'mygroup',
-            'organization': '',
+            'id': group_resource.id,
+            'organization': group_resource.organization.id,
             'type': 'open',
             'public': True,
             'scoped': False,
@@ -56,7 +56,7 @@ class TestGroupJSONPresenter(object):
             'name': 'My Group',
             'id': 'groupy',
             'type': 'open',
-            'organization': '',
+            'organization': group_resource.organization.id,
             'public': True,
             'scoped': True,
             'urls': links_svc.get_all.return_value,
@@ -81,9 +81,9 @@ class TestGroupJSONPresenter(object):
 
         model = presenter.asdict()
 
-        assert model['organization'] == ''
+        assert model['organization'] == group_resource.organization.id
 
-    def test_it_expands_organizations(self, factories, GroupResource_):  # noqa: N803
+    def test_it_expands_organizations(self, factories, GroupResource_, OrganizationJSONPresenter):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
         group_resource = GroupResource_(group)
@@ -91,21 +91,7 @@ class TestGroupJSONPresenter(object):
 
         model = presenter.asdict(expand=['organization'])
 
-        assert model['organization'] == {'id': '__default__', 'name': 'Hypothesis'}
-
-    def test_it_populates_expanded_organizations(self, factories, GroupResource_):  # noqa: N803
-        group = factories.OpenGroup(name='My Group',
-                                    pubid='mygroup')
-        group.organization = factories.Organization()
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
-
-        model = presenter.asdict(expand=['organization'])
-
-        assert model['organization'] == {
-            'name': group.organization.name,
-            'id': group.organization.pubid,
-        }
+        assert model['organization'] == OrganizationJSONPresenter(group_resource.organization).asdict.return_value
 
     def test_it_ignores_unrecognized_expands(self, factories, GroupResource_):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
@@ -115,7 +101,7 @@ class TestGroupJSONPresenter(object):
 
         model = presenter.asdict(expand=['foobars', 'dingdong'])
 
-        assert model['organization'] == ''
+        assert model['organization'] == group_resource.organization.id
 
 
 class TestGroupsJSONPresenter(object):
@@ -175,3 +161,8 @@ def GroupResources(pyramid_request, links_svc):  # noqa: N802
 @pytest.fixture
 def GroupJSONPresenter_(patch):  # noqa: N802
     return patch('h.presenters.group_json.GroupJSONPresenter')
+
+
+@pytest.fixture
+def OrganizationJSONPresenter(patch):  # noqa: N802
+    return patch('h.presenters.group_json.OrganizationJSONPresenter')
