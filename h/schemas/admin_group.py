@@ -22,17 +22,26 @@ VALID_GROUP_TYPES = (
 )
 
 
-def creator_exists_validator_factory(user_svc):
-    def creator_exists_validator(form, value):
-        user = user_svc.fetch(value['creator'], value['authority'])
+@colander.deferred
+def group_creator_validator(node, kw):
+    """
+    Validate that the creator username exists in the organization's authority.
+    """
+    user_svc = kw['user_svc']
+    orgs = kw['organizations']
+
+    def validate(form, value):
+        org = next(org for org in orgs if org.pubid == value['organization'])
+        user = user_svc.fetch(value['creator'], org.authority)
         if user is None:
             exc = colander.Invalid(form, _('User not found'))
-            exc['creator'] = 'User {creator} not found at authority {authority}'.format(
+            msg = _('User {creator} not found at authority {authority}').format(
                 creator=value['creator'],
-                authority=value['authority']
+                authority=org.authority
             )
+            exc['creator'] = msg
             raise exc
-    return creator_exists_validator
+    return validate
 
 
 def member_exists_validator(node, val):
@@ -54,7 +63,21 @@ def group_type_validator(node, kw):
     return validate
 
 
+@colander.deferred
+def group_organization_select_widget(node, kw):
+    orgs = kw['organizations']
+    org_names = ['{} ({})'.format(org.name, org.authority) for org in orgs]
+    org_pubids = [org.pubid for org in orgs]
+
+    # `zip` returns an iterator in Python 3. The `SelectWidget` constructor
+    # requires an actual list.
+    return SelectWidget(values=list(zip(org_pubids, org_names)))
+
+
 class CreateAdminGroupSchema(CSRFSchema):
+
+    def __init__(self, *args):
+        super(CreateAdminGroupSchema, self).__init__(validator=group_creator_validator, *args)
 
     group_type = colander.SchemaNode(
         colander.String(),
@@ -73,14 +96,11 @@ class CreateAdminGroupSchema(CSRFSchema):
         widget=TextInputWidget(max_length=GROUP_NAME_MAX_LENGTH),
     )
 
-    authority = colander.SchemaNode(
+    organization = colander.SchemaNode(
         colander.String(),
-        title=_('Authority'),
-        description=_("The group's authority"),
-        hint=_('The authority within which this group should be created.'
-               ' Note that only users within the designated authority'
-               ' will be able to be associated with this group (as'
-               ' creator or member).')
+        title=_('Organization'),
+        description=_('Organization which this group belongs to'),
+        widget=group_organization_select_widget,
     )
 
     creator = colander.SchemaNode(
