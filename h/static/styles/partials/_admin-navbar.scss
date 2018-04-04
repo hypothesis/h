@@ -1,0 +1,96 @@
+/**
+ * The dark navbar shown at the top of `/admin` pages.
+ */
+
+.admin-navbar {
+  background-color: $grey-7;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  font-size: $subtitle-font-size;
+  justify-content: center;
+  min-height: 50px;
+}
+
+.admin-navbar__container {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding-left: 15px;
+  padding-right: 15px;
+  flex-grow: 1;
+
+  // Width chosen to match Bootstrap's "container" class,
+  // which is used for the main content of the page.
+  max-width: 970px;
+}
+
+.admin-navbar__logo-link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.admin-navbar__logo {
+  color: $brand;
+}
+
+.admin-navbar__tab-list {
+  list-style-type: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding-left: 20px;
+
+  // Override bootstrap defaults.
+  margin: 0;
+}
+
+.admin-navbar__tab-item {
+  flex-shrink: 0;
+  color: white;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+
+  // Give tabs reasonable padding above and below text, even when wrapped onto
+  // multiple lines.
+  min-height: 2em;
+
+  // Color for the tab's link.
+  --link-color: $grey-3;
+
+  // The `open` class here is applied by Bootstrap's dropdown menu.
+  // `is-active` is applied statically when the page is rendered.
+  &.is-active, &.open {
+    background-color: $grey-5;
+    --link-color: white;
+  }
+
+  &:hover {
+    --link-color: white;
+  }
+}
+
+.admin-navbar__tab-link {
+  color: var(--link-color);
+
+  // Make link expand to fill the area of the tab.
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+
+  // Override Bootstrap's styling for the link that opens dropdown menus.
+  &:hover, &:focus {
+    color: var(--link-color);
+    text-decoration: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  // Width chosen to match Bootstrap's "container" class.
+  .admin-navbar__container {
+    max-width: 1170px;
+  }
+}
