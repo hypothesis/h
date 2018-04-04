@@ -6,5 +6,9 @@ Organization:
   properties:
     id:
       type: string
+    logo:
+      type: string
+      format: uri
+      description: URI to logo image
     name:
       type: string
