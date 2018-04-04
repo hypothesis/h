@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from h.presenters.organization_json import OrganizationJSONPresenter
+
 
 class GroupJSONPresenter(object):
     """Present a group in the JSON format returned by API requests."""
@@ -18,14 +20,11 @@ class GroupJSONPresenter(object):
 
     def _expand(self, model, expand=[]):
         if 'organization' in expand:
-            org_model = {}
-            org = self.group.organization
-            if org is not None:
-                org_model = {
-                    'id': org.pubid,
-                    'name': org.name,
-                }
-            model['organization'] = org_model
+            org_resource = self.resource.organization
+            if org_resource is not None:
+                model['organization'] = OrganizationJSONPresenter(org_resource).asdict()
+            else:
+                model['organization'] = {}
         return model
 
     def _model(self):

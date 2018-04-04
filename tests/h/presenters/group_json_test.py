@@ -83,7 +83,7 @@ class TestGroupJSONPresenter(object):
 
         assert model['organization'] == ''
 
-    def test_it_expands_organizations(self, factories, GroupResource_):  # noqa: N803
+    def test_it_expands_organizations(self, factories, GroupResource_, OrganizationJSONPresenter):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
         group_resource = GroupResource_(group)
@@ -91,21 +91,18 @@ class TestGroupJSONPresenter(object):
 
         model = presenter.asdict(expand=['organization'])
 
-        assert model['organization'] == {'id': '__default__', 'name': 'Hypothesis'}
+        assert model['organization'] == OrganizationJSONPresenter(group_resource.organization).asdict.return_value
 
-    def test_it_populates_expanded_organizations(self, factories, GroupResource_):  # noqa: N803
+    def test_it_returns_empty_object_when_organization_is_none(self, factories, GroupResource_):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
-        group.organization = factories.Organization()
+        group.organization = None
         group_resource = GroupResource_(group)
         presenter = GroupJSONPresenter(group_resource)
 
         model = presenter.asdict(expand=['organization'])
 
-        assert model['organization'] == {
-            'name': group.organization.name,
-            'id': group.organization.pubid,
-        }
+        assert model['organization'] == {}
 
     def test_it_ignores_unrecognized_expands(self, factories, GroupResource_):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
@@ -175,3 +172,8 @@ def GroupResources(pyramid_request, links_svc):  # noqa: N802
 @pytest.fixture
 def GroupJSONPresenter_(patch):  # noqa: N802
     return patch('h.presenters.group_json.GroupJSONPresenter')
+
+
+@pytest.fixture
+def OrganizationJSONPresenter(patch):  # noqa: N802
+    return patch('h.presenters.group_json.OrganizationJSONPresenter')
