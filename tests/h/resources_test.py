@@ -3,17 +3,20 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock
+import mock
 
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.models import AuthClient
+from h.services.group_links import GroupLinksService
 from h.resources import AnnotationResource
 from h.resources import AnnotationResourceFactory
 from h.resources import AuthClientFactory
 from h.resources import OrganizationFactory
 from h.resources import OrganizationLogoFactory
+from h.resources import GroupResource
+from h.resources import OrganizationResource
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -26,14 +29,14 @@ class TestAnnotationResourceFactory(object):
 
     def test_get_item_returns_annotation_resource(self, pyramid_request, storage):
         factory = AnnotationResourceFactory(pyramid_request)
-        storage.fetch_annotation.return_value = Mock()
+        storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert isinstance(resource, AnnotationResource)
 
     def test_get_item_resource_has_right_annotation(self, pyramid_request, storage):
         factory = AnnotationResourceFactory(pyramid_request)
-        storage.fetch_annotation.return_value = Mock()
+        storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert resource.annotation == storage.fetch_annotation.return_value
@@ -47,14 +50,14 @@ class TestAnnotationResourceFactory(object):
 
     def test_get_item_has_right_group_service(self, pyramid_request, storage, group_service):
         factory = AnnotationResourceFactory(pyramid_request)
-        storage.fetch_annotation.return_value = Mock()
+        storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert resource.group_service == group_service
 
     def test_get_item_has_right_links_service(self, pyramid_request, storage, links_service):
         factory = AnnotationResourceFactory(pyramid_request)
-        storage.fetch_annotation.return_value = Mock()
+        storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert resource.links_service == links_service
@@ -65,13 +68,13 @@ class TestAnnotationResourceFactory(object):
 
     @pytest.fixture
     def group_service(self, pyramid_config):
-        group_service = Mock(spec_set=['find'])
+        group_service = mock.Mock(spec_set=['find'])
         pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
         return group_service
 
     @pytest.fixture
     def links_service(self, pyramid_config):
-        service = Mock()
+        service = mock.Mock()
         pyramid_config.register_service(service, name='links')
         return service
 
@@ -79,7 +82,7 @@ class TestAnnotationResourceFactory(object):
 @pytest.mark.usefixtures('group_service', 'links_service')
 class TestAnnotationResource(object):
     def test_links(self, group_service, links_service):
-        ann = Mock()
+        ann = mock.Mock()
         res = AnnotationResource(ann, group_service, links_service)
 
         result = res.links
@@ -88,7 +91,7 @@ class TestAnnotationResource(object):
         assert result == links_service.get_all.return_value
 
     def test_link(self, group_service, links_service):
-        ann = Mock()
+        ann = mock.Mock()
         res = AnnotationResource(ann, group_service, links_service)
 
         result = res.link('json')
@@ -189,14 +192,14 @@ class TestAnnotationResource(object):
 
     @pytest.fixture
     def group_service(self, pyramid_config, groups):
-        group_service = Mock(spec_set=['find'])
+        group_service = mock.Mock(spec_set=['find'])
         group_service.find.side_effect = lambda groupid: groups.get(groupid)
         pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
         return group_service
 
     @pytest.fixture
     def links_service(self, pyramid_config):
-        service = Mock(spec_set=['get', 'get_all'])
+        service = mock.Mock(spec_set=['get', 'get_all'])
         pyramid_config.register_service(service, name='links')
         return service
 
@@ -260,10 +263,88 @@ class TestOrganizationLogoFactory(object):
         return OrganizationLogoFactory(pyramid_request)
 
 
+@pytest.mark.usefixtures('links_svc')
+class TestGroupResource(object):
+
+    def test_it_returns_group_model_as_property(self, factories, pyramid_request):
+        group = factories.Group()
+
+        group_resource = GroupResource(group, pyramid_request)
+
+        assert group_resource.group == group
+
+    def test_it_proxies_links_to_svc(self, factories, links_svc, pyramid_request):
+        group = factories.Group()
+
+        group_resource = GroupResource(group, pyramid_request)
+
+        assert group_resource.links == links_svc.get_all.return_value
+
+    def test_it_expands_organization(self, factories, pyramid_request):
+        group = factories.Group()
+
+        group_resource = GroupResource(group, pyramid_request)
+
+        assert isinstance(group_resource.organization, OrganizationResource)
+
+
+@pytest.mark.usefixtures('organization_routes')
+class TestOrganizationResource(object):
+
+    def test_it_returns_organization_model_as_property(self, factories, pyramid_request):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        assert organization_resource.organization == organization
+
+    def test_it_returns_links_property(self, factories, pyramid_request):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        assert organization_resource.links == {}
+
+    def test_it_returns_logo_property_as_route_url(self, factories, pyramid_request):
+        fake_logo = '<svg>H</svg>'
+        pyramid_request.route_url = mock.Mock()
+
+        organization = factories.Organization(logo=fake_logo)
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+        logo = organization_resource.logo
+
+        pyramid_request.route_url.assert_called_with('organization_logo', pubid=organization.pubid)
+        assert logo is not None
+
+    def test_it_returns_none_for_logo_if_no_logo(self, factories, pyramid_request):
+        pyramid_request.route_url = mock.Mock()
+
+        organization = factories.Organization(logo=None)
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+        logo = organization_resource.logo
+
+        pyramid_request.route_url.assert_not_called
+        assert logo is None
+
+
 @pytest.fixture
 def organizations(factories):
     # Add a handful of organizations to the DB to make the test realistic.
     return [factories.Organization() for _ in range(3)]
+
+
+@pytest.fixture
+def links_svc(pyramid_config):
+    svc = mock.create_autospec(GroupLinksService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='group_links')
+    return svc
+
+
+@pytest.fixture
+def organization_routes(pyramid_config):
+    pyramid_config.add_route('organization_logo', '/organization/{pubid}/logo')
 
 
 class FakeGroup(object):

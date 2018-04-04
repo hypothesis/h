@@ -49,19 +49,34 @@ class TestGetGroups(object):
             document_uri=None
         )
 
-    def test_uses_presenter_for_formatting(self, group_links_service, open_groups, list_groups_service, GroupsJSONPresenter, anonymous_request):  # noqa: N803
+    def test_converts_groups_to_resources(self, GroupResource, anonymous_request, open_groups, list_groups_service):  # noqa: N803
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
-        GroupsJSONPresenter.assert_called_once_with(open_groups, group_links_service)
+        GroupResource.assert_has_calls([
+            mock.call(open_groups[0], anonymous_request),
+            mock.call(open_groups[1], anonymous_request),
+        ])
+
+    def test_uses_presenter_for_formatting(self,  # noqa: N803
+                                           group_links_service,
+                                           open_groups,
+                                           list_groups_service,
+                                           GroupsJSONPresenter,
+                                           anonymous_request):
+        list_groups_service.request_groups.return_value = open_groups
+
+        views.groups(anonymous_request)
+
+        GroupsJSONPresenter.assert_called_once()
 
     def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
         list_groups_service.request_groups.return_value = open_groups
 
         result = views.groups(anonymous_request)
 
-        assert result == GroupsJSONPresenter(open_groups, anonymous_request).asdicts.return_value
+        assert result == GroupsJSONPresenter(open_groups).asdicts.return_value
 
     def test_proxies_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
         anonymous_request.params['expand'] = 'organization'
@@ -69,7 +84,7 @@ class TestGetGroups(object):
 
         views.groups(anonymous_request)
 
-        GroupsJSONPresenter(open_groups, anonymous_request).asdicts.assert_called_once_with(expand=['organization'])
+        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(expand=['organization'])
 
     def test_passes_multiple_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
         anonymous_request.GET.add('expand', 'organization')
@@ -78,7 +93,7 @@ class TestGetGroups(object):
 
         views.groups(anonymous_request)
 
-        GroupsJSONPresenter(open_groups, anonymous_request).asdicts.assert_called_once_with(expand=['organization', 'foobars'])
+        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(expand=['organization', 'foobars'])
 
     @pytest.fixture
     def open_groups(self, factories):
@@ -144,6 +159,11 @@ class TestRemoveMember(object):
 @pytest.fixture
 def GroupsJSONPresenter(patch):  # noqa: N802
     return patch('h.views.api_groups.GroupsJSONPresenter')
+
+
+@pytest.fixture
+def GroupResource(patch):  # noqa: N802
+    return patch('h.views.api_groups.GroupResource')
 
 
 @pytest.fixture

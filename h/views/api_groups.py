@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
+from h.resources import GroupResource
 from h.presenters import GroupsJSONPresenter
 from h.views.api import api_config
 
@@ -18,7 +19,6 @@ def groups(request):
     expand = request.GET.getall('expand') or []
 
     list_svc = request.find_service(name='list_groups')
-    links_svc = request.find_service(name='group_links')
 
     if request.user is not None:
         authority = request.user.authority
@@ -27,8 +27,8 @@ def groups(request):
     all_groups = list_svc.request_groups(user=request.user,
                                          authority=authority,
                                          document_uri=document_uri)
-
-    all_groups = GroupsJSONPresenter(all_groups, links_svc).asdicts(expand=expand)
+    all_groups = [GroupResource(group, request) for group in all_groups]
+    all_groups = GroupsJSONPresenter(all_groups).asdicts(expand=expand)
     return all_groups
 
 
