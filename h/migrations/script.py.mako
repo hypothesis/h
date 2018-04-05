@@ -1,9 +1,5 @@
 """
 ${message}
-
-Revision ID: ${up_revision}
-Revises: ${down_revision}
-Create Date: ${create_date}
 """
 
 from __future__ import unicode_literals
