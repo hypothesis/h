@@ -78,7 +78,8 @@ class TestGroupCreateController(object):
                 'creator': pyramid_request.user.username,
                 'description': None,
                 'authority': pyramid_request.authority,
-                'origins': []
+                'origins': [],
+                'members': [],
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupCreateController(pyramid_request)
@@ -92,7 +93,9 @@ class TestGroupCreateController(object):
         'open',
         'restricted',
     ])
-    def test_post_creates_group_on_success(self, pyramid_request, group_svc, handle_form_submission, type_):
+    def test_post_creates_group_on_success(self, factories, pyramid_request, group_svc, handle_form_submission, type_):
+        member_to_add = 'member_to_add'
+
         name = 'My new group'
         creator = pyramid_request.user.username
         description = 'Purpose of new group'
@@ -106,23 +109,27 @@ class TestGroupCreateController(object):
                 'group_type': type_,
                 'name': name,
                 'origins': origins,
+                'members': [member_to_add]
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupCreateController(pyramid_request)
-
-        ctrl.post()
 
         if type_ == 'open':
             create_method = group_svc.create_open_group
         else:
             create_method = group_svc.create_restricted_group
+
+        create_method.return_value = factories.RestrictedGroup(pubid='testgroup')
+        ctrl.post()
+
         expected_userid = User(username=creator, authority=pyramid_request.authority).userid
 
         create_method.assert_called_with(name=name, userid=expected_userid, description=description,
                                          origins=origins)
+        group_svc.update_membership.assert_called_once_with(create_method.return_value, [member_to_add])
 
 
-@pytest.mark.usefixtures('routes', 'user_svc')
+@pytest.mark.usefixtures('routes', 'user_svc', 'group_svc')
 class TestGroupEditController(object):
 
     def test_it_binds_schema(self, pyramid_request, group, patch):
@@ -164,7 +171,9 @@ class TestGroupEditController(object):
 
         assert ctx['form'] == self._expected_form(group)
 
-    def test_update_updates_group_on_success(self, factories, pyramid_request, group, group_svc, user_svc, handle_form_submission):
+    def test_update_updates_group_on_success(self, factories, pyramid_request, user_svc, handle_form_submission):
+        group = factories.RestrictedGroup(pubid='testgroup')
+
         pyramid_request.matchdict = {'pubid': group.pubid}
 
         updated_name = 'Updated group'
@@ -172,6 +181,7 @@ class TestGroupEditController(object):
         user_svc.fetch.return_value = updated_creator
         updated_description = 'New description'
         updated_origins = ['https://a-new-site.com']
+        updated_members = []
 
         def call_on_success(request, form, on_success, on_failure):
             return on_success({
@@ -181,6 +191,7 @@ class TestGroupEditController(object):
                 'group_type': 'open',
                 'name': updated_name,
                 'origins': updated_origins,
+                'members': updated_members,
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupEditController(pyramid_request)
@@ -192,6 +203,34 @@ class TestGroupEditController(object):
         assert group.name == updated_name
         assert [s.origin for s in group.scopes] == updated_origins
         assert ctx['form'] == self._expected_form(group)
+
+    def test_update_updates_group_membership_on_success(self, factories, pyramid_request, group_svc, user_svc, handle_form_submission):
+        group = factories.RestrictedGroup(pubid='testgroup')
+
+        pyramid_request.matchdict = {'pubid': group.pubid}
+
+        member_a = factories.User()
+        member_b = factories.User()
+
+        updated_creator = factories.User()
+        user_svc.fetch.return_value = updated_creator
+
+        def call_on_success(request, form, on_success, on_failure):
+            return on_success({
+                'authority': pyramid_request.authority,
+                'creator': updated_creator.username,
+                'description': 'a desc',
+                'group_type': 'restricted',
+                'name': 'a name',
+                'origins': ['http://www.example.com'],
+                'members': [member_a.username, member_b.username],
+            })
+        handle_form_submission.side_effect = call_on_success
+        ctrl = GroupEditController(pyramid_request)
+
+        ctrl.update()
+
+        group_svc.update_membership.assert_any_call(group, [member_a.username, member_b.username])
 
     def test_update_does_not_update_authority(self, pyramid_request, group, user_svc, handle_form_submission):
         pyramid_request.matchdict = {'pubid': group.pubid}
@@ -206,6 +245,7 @@ class TestGroupEditController(object):
                 'group_type': 'open',
                 'name': group.name,
                 'origins': [s.origin for s in group.scopes],
+                'members': group.members,
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupEditController(pyramid_request)
@@ -234,7 +274,8 @@ class TestGroupEditController(object):
                 'description': group.description or '',
                 'group_type': group.type,
                 'name': group.name,
-                'origins': [s.origin for s in group.scopes]}
+                'origins': [s.origin for s in group.scopes],
+                'members': [m.username for m in group.members]}
 
 
 @pytest.fixture

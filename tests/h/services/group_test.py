@@ -245,6 +245,27 @@ class TestGroupService(object):
 
         publish.assert_called_once_with('group-leave', 'abc123', 'cazimir')
 
+    def test_update_memberships_adds_and_remove_members(self, factories, publish, service, users):
+        group = Group(name='Donkey Trust',
+                      authority='example.com',
+                      creator=users['theresa'])
+        group.pubid = 'abc123'
+        service.member_join = mock.Mock()
+        service.member_leave = mock.Mock()
+
+        group.members.append(users['cazimir'])
+        group.members.append(users['theresa'])
+        group.members.append(users['ali'])
+
+        service.update_membership(group, [users['henry'].username, users['poppy'].username, users['theresa'].username])
+
+        assert len(service.member_leave.call_args_list) == 2
+        service.member_leave.assert_any_call(group, users['cazimir'].userid)
+        service.member_leave.assert_any_call(group, users['ali'].userid)
+        assert len(service.member_join.call_args_list) == 2
+        service.member_join.assert_any_call(group, users['henry'].userid)
+        service.member_join.assert_any_call(group, users['poppy'].userid)
+
     @pytest.mark.parametrize('with_user', [True, False])
     def test_groupids_readable_by_includes_world(self, with_user, service, db_session, factories):
         user = None
@@ -371,4 +392,7 @@ def users(factories):
     return {
         'cazimir': factories.User(username='cazimir'),
         'theresa': factories.User(username='theresa'),
+        'henry': factories.User(username='henry'),
+        'poppy': factories.User(username='poppy'),
+        'ali': factories.User(username='ali'),
     }

@@ -22,8 +22,8 @@ VALID_GROUP_TYPES = (
 )
 
 
-def user_exists_validator_factory(user_svc):
-    def user_exists_validator(form, value):
+def creator_exists_validator_factory(user_svc):
+    def creator_exists_validator(form, value):
         user = user_svc.fetch(value['creator'], value['authority'])
         if user is None:
             exc = colander.Invalid(form, _('User not found'))
@@ -32,7 +32,14 @@ def user_exists_validator_factory(user_svc):
                 authority=value['authority']
             )
             raise exc
-    return user_exists_validator
+    return creator_exists_validator
+
+
+def member_exists_validator(node, val):
+    user_svc = node.bindings["request"].find_service(name='user')
+    authority = node.bindings["request"].authority
+    if user_svc.fetch(val, authority) is None:
+        raise colander.Invalid(node, _("Username not found"))
 
 
 @colander.deferred
@@ -102,4 +109,15 @@ class CreateAdminGroupSchema(CSRFSchema):
         hint=_('Origins where this group appears (e.g. "https://example.com")'),
         widget=SequenceWidget(add_subitem_text_template=_('Add origin'), min_len=1),
         validator=colander.Length(min=1, min_err=_('At least one origin must be specified'))
+    )
+
+    members = colander.SequenceSchema(
+        colander.Sequence(),
+        colander.SchemaNode(colander.String(),
+                            name='member',
+                            validator=member_exists_validator),
+        title=_('Members'),
+        hint=_('Add more members by their username to this group'),
+        widget=SequenceWidget(add_subitem_text_template=_('Add member')),
+        missing=None
     )

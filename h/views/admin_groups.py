@@ -12,7 +12,7 @@ from h.models.annotation import Annotation
 from h.models.group import GroupFactory
 from h.models.group_scope import GroupScope
 from h import paginator
-from h.schemas.admin_group import CreateAdminGroupSchema, user_exists_validator_factory
+from h.schemas.admin_group import CreateAdminGroupSchema, creator_exists_validator_factory
 
 _ = i18n.TranslationString
 
@@ -32,11 +32,10 @@ def groups_index(context, request):
 class GroupCreateController(object):
 
     def __init__(self, request):
-        user_validator = user_exists_validator_factory(request.find_service(name='user'))
+        user_validator = creator_exists_validator_factory(request.find_service(name='user'))
         self.schema = CreateAdminGroupSchema(validator=user_validator).bind(request=request)
         self.request = request
-        self.form = request.create_form(self.schema,
-                                        buttons=(_('Create New Group'),))
+        self.form = _create_form(self.request, self.schema, (_('Create New Group'),))
 
     @view_config(request_method='GET')
     def get(self):
@@ -69,6 +68,9 @@ class GroupCreateController(object):
                                                     origins=origins, description=description)
             else:
                 raise Exception('Unsupported group type {}'.format(type_))
+
+            # Update group memberships
+            svc.update_membership(group, appstruct['members'])
 
             # Flush changes to allocate group a pubid
             self.request.db.flush(objects=[group])
@@ -103,10 +105,10 @@ class GroupEditController(object):
         except KeyError:
             raise HTTPNotFound()
 
+        user_validator = creator_exists_validator_factory(request.find_service(name='user'))
         self.request = request
-        self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group)
-        self.form = request.create_form(self.schema,
-                                        buttons=(_('Save'),))
+        self.schema = CreateAdminGroupSchema(validator=user_validator).bind(request=request, group=self.group)
+        self.form = _create_form(self.request, self.schema, (_('Save'),))
 
     @view_config(request_method='GET')
     def read(self):
@@ -132,12 +134,16 @@ class GroupEditController(object):
 
         def on_success(appstruct):
             user_svc = self.request.find_service(name='user')
+            group_svc = self.request.find_service(name='group')
 
             group.creator = user_svc.fetch(appstruct['creator'], group.authority)
             group.description = appstruct['description']
             group.name = appstruct['name']
             group.scopes = [GroupScope(origin=o) for o in appstruct['origins']]
 
+            group_svc.update_membership(group, appstruct['members'])
+
+            self.form = _create_form(self.request, self.schema, (_('Save'),))
             self._update_appstruct()
 
             return self._template_context()
@@ -159,6 +165,7 @@ class GroupEditController(object):
             'group_type': group.type,
             'name': group.name,
             'origins': [s.origin for s in group.scopes],
+            'members': [m.username for m in group.members],
         })
 
     def _template_context(self):
@@ -170,3 +177,12 @@ class GroupEditController(object):
             'annotation_count': num_annotations,
             'member_count': len(self.group.members),
         }
+
+
+def _create_form(request, schema, buttons):
+    # `deform.Form` throws an exception when rendering if `validate` was earlier called
+    # on the same `Form` and the number of items in a list field when validating does not
+    # match the number of items when rendering.
+    # This can happen here if a user enters the same username multiple times and clicks "Save".
+    # Re-creating the form before rendering after a _successful_ save resolves the problem.
+    return request.create_form(schema, buttons=buttons)
