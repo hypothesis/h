@@ -77,7 +77,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             read = 'group:{}'.format(self.annotation.groupid)
 
             principals = security.principals_allowed_by_permission(
-                    self.annotation_resource, 'read')
+                self.annotation_resource, 'read')
             if security.Everyone in principals:
                 read = 'group:__world__'
 
