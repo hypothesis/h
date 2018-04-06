@@ -147,14 +147,16 @@ class GroupResource(object):
         self.links_service = self.request.find_service(name='group_links')
 
     @property
+    def id(self):
+        return self.group.pubid  # Web-facing unique ID for this resource
+
+    @property
     def links(self):
         return self.links_service.get_all(self.group)
 
     @property
     def organization(self):
-        if self.group.organization:
-            return OrganizationResource(self.group.organization, self.request)
-        return None
+        return OrganizationResource(self.group.organization, self.request)
 
 
 class OrganizationResource(object):
@@ -162,6 +164,10 @@ class OrganizationResource(object):
         # TODO Links service
         self.organization = organization
         self.request = request
+
+    @property
+    def id(self):
+        return self.organization.pubid  # Web-facing unique ID for this resource
 
     @property
     def links(self):

@@ -280,6 +280,13 @@ class TestGroupResource(object):
 
         assert group_resource.links == links_svc.get_all.return_value
 
+    def test_it_returns_pubid_as_id(self, factories, pyramid_request):
+        group = factories.Group()
+
+        group_resource = GroupResource(group, pyramid_request)
+
+        assert group_resource.id == group.pubid  # NOT the group.id
+
     def test_it_expands_organization(self, factories, pyramid_request):
         group = factories.Group()
 
@@ -297,6 +304,14 @@ class TestOrganizationResource(object):
         organization_resource = OrganizationResource(organization, pyramid_request)
 
         assert organization_resource.organization == organization
+
+    def test_it_returns_pubid_as_id(self, factories, pyramid_request):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        assert organization_resource.id != organization.id
+        assert organization_resource.id == organization.pubid
 
     def test_it_returns_links_property(self, factories, pyramid_request):
         organization = factories.Organization()
