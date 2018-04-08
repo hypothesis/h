@@ -33,11 +33,11 @@ class TestOrganizationService(object):
 
 class TestOrganizationsFactory(object):
     def test_returns_organizations_service(self, pyramid_request):
-        svc = organization_factory(pyramid_request)
+        svc = organization_factory(None, pyramid_request)
 
         assert isinstance(svc, OrganizationService)
 
     def test_provides_request_db_as_session(self, pyramid_request):
-        svc = organization_factory(pyramid_request)
+        svc = organization_factory(None, pyramid_request)
 
         assert svc.session == pyramid_request.db

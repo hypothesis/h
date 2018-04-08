@@ -27,6 +27,7 @@ def includeme(config):
     config.register_service_factory('.nipsa.nipsa_factory', name='nipsa')
     config.register_service_factory('.oauth_provider.oauth_provider_service_factory', name='oauth_provider')
     config.register_service_factory('.oauth_validator.oauth_validator_service_factory', name='oauth_validator')
+    config.register_service_factory('.organization.organization_factory', name='organization')
     config.register_service_factory('.rename_user.rename_user_factory', name='rename_user')
     config.register_service_factory('.settings.settings_factory', name='settings')
     config.register_service_factory('.user.user_service_factory', name='user')
