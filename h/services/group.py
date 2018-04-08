@@ -87,6 +87,20 @@ class GroupService(object):
                             add_creator_as_member=True,
                             )
 
+    def update_membership(self, group, usernames):
+        group_member_usernames = [member.username for member in group.members]
+
+        usernames_to_add = list(set(usernames) - set(group_member_usernames))
+        usernames_to_remove = list(set(group_member_usernames) - set(usernames))
+
+        for ua in usernames_to_add:
+            uid = User(username=ua, authority=group.authority).userid
+            self.member_join(group, uid)
+
+        for ur in usernames_to_remove:
+            uid = User(username=ur, authority=group.authority).userid
+            self.member_leave(group, uid)
+
     def member_join(self, group, userid):
         """Add `userid` to the member list of `group`."""
         user = self.user_fetcher(userid)
