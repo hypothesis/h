@@ -8,17 +8,19 @@ from oauthlib.oauth2 import InvalidGrantError, InvalidRequestFatalError
 class MissingJWTGrantTokenClaimError(InvalidGrantError):
     def __init__(self, claim, claim_description=None):
         if claim_description:
-            self.description = "Missing claim '{}' ({}) from grant token.".format(claim, claim_description)
+            description = "Missing claim '{}' ({}) from grant token.".format(claim, claim_description)
         else:
-            self.description = "Missing claim '{}' from grant token.".format(claim)
+            description = "Missing claim '{}' from grant token.".format(claim)
+        super(MissingJWTGrantTokenClaimError, self).__init__(description=description)
 
 
 class InvalidJWTGrantTokenClaimError(InvalidGrantError):
     def __init__(self, claim, claim_description=None):
         if claim_description:
-            self.description = "Invalid claim '{}' ({}) in grant token.".format(claim, claim_description)
+            description = "Invalid claim '{}' ({}) in grant token.".format(claim, claim_description)
         else:
-            self.description = "Invalid claim '{}' in grant token.".format(claim)
+            description = "Invalid claim '{}' in grant token.".format(claim)
+        super(InvalidJWTGrantTokenClaimError, self).__init__(description=description)
 
 
 class InvalidRefreshTokenError(InvalidRequestFatalError):
