@@ -1113,7 +1113,7 @@ class TestGroupAndUserSearchController(object):
         UserSearchController instance as the controller argument, and once with
         a GroupSearchController.
         """
-        return request.getfuncargvalue(request.param)
+        return request.getfixturevalue(request.param)
 
     @pytest.fixture
     def group_search_controller(self, group, pyramid_request):
