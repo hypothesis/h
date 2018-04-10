@@ -170,5 +170,7 @@ class DevDataFactory(object):
 @click.command()
 @click.pass_context
 def devdata(ctx):
-    request = ctx.obj[u"bootstrap"]()
+    if not ctx.obj["dev"]:
+        raise click.ClickException("Dev data should only be created in dev mode (--dev)")
+    request = ctx.obj["bootstrap"]()
     create_all_dev_data(request)

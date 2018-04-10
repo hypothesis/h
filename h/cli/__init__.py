@@ -66,6 +66,7 @@ def bootstrap(app_url, dev=False):
 @click.pass_context
 def cli(ctx, app_url, dev):
     ctx.obj['bootstrap'] = functools.partial(bootstrap, app_url, dev)
+    ctx.obj['dev'] = dev
 
 
 def main():
