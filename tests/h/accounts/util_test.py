@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import pytest
 
 from h.accounts.util import validate_orcid, validate_url

@@ -9,6 +9,7 @@ integrates it with the Pyramid application by attaching a bootstrapped fake
 """
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
 from datetime import timedelta
 import logging

@@ -35,6 +35,7 @@ N.B. Portions of the ws4py code are used here under the terms of the MIT
 license distributed with the ws4py project. Such code remains copyright (c)
 2011-2015, Sylvain Hellegouarch.
 """
+from __future__ import unicode_literals
 
 import logging
 

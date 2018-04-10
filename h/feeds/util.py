@@ -1,4 +1,5 @@
 """Utility functions for feed-generating code."""
+from __future__ import unicode_literals
 from h._compat import urlparse
 
 # See RFC4151 for details of the use and format of the tag date:

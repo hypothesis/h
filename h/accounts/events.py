@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+
 class ActivationEvent(object):
     def __init__(self, request, user):
         self.request = request

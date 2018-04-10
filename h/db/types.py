@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Custom SQLAlchemy types for use with the Annotations API database."""
+from __future__ import unicode_literals
 
 from h._compat import string_types
 import binascii

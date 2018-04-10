@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helpers for the Python 2 to Python 3 transition."""
+from __future__ import unicode_literals
 
 import sys
 

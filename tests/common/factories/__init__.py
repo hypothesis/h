@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Factory classes for easily generating test objects."""
+from __future__ import unicode_literals
 
 from .base import set_session
 

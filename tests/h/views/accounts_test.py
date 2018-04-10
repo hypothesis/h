@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 
+from __future__ import unicode_literals
 import mock
 import pytest
 

@@ -4,6 +4,7 @@ A module for sending email.
 
 This module defines a Celery task for sending emails in a worker process.
 """
+from __future__ import unicode_literals
 
 import smtplib
 

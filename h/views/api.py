@@ -16,6 +16,7 @@ particular, requests to the CRUD API endpoints are protected by the Pyramid
 authorization system. You can find the mapping between annotation "permissions"
 objects and Pyramid ACLs in :mod:`h.resources`.
 """
+from __future__ import unicode_literals
 from pyramid import i18n
 from pyramid import security
 

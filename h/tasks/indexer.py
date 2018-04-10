@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from h import models, storage
 from h.celery import celery, get_task_logger
 from h.indexer.reindexer import SETTING_NEW_INDEX

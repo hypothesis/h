@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=protected-access
 """Unit tests for h/atom.py."""
+from __future__ import unicode_literals
 from datetime import datetime
 import mock
 

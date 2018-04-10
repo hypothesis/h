@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Shared utility functions for manipulating dates and times."""
+from __future__ import unicode_literals
 
 
 def utc_iso8601(datetime):

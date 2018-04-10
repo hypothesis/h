@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Classes for validating data passed to the annotations API."""
+from __future__ import unicode_literals
 
 import copy
 from pyramid import i18n

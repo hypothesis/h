@@ -12,6 +12,7 @@ application startup.
 Most application code should access the database session using the request
 property `request.db` which is provided by this module.
 """
+from __future__ import unicode_literals
 
 import logging
 

@@ -26,6 +26,7 @@ output if it fails, e.g.
     E       Actual call: set_value('a string')
 
 """
+from __future__ import unicode_literals
 
 import re
 
