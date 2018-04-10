@@ -111,7 +111,7 @@ class GEventWebSocketPool(Pool):
         log.info("terminating server and all connected websockets")
         for greenlet in list(self):
             try:
-                websocket = greenlet._run.im_self
+                websocket = greenlet._run.__self__
                 if websocket:
                     websocket.close(1001, 'Server is shutting down')
             except:  # noqa: E722
