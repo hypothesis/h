@@ -13,7 +13,7 @@ class TestListGroupsAllGroups(object):
     def test_returns_world_group_if_no_user(self, svc):
         results = svc.all_groups()
 
-        assert u'__world__' in [group.pubid for group in results]
+        assert '__world__' in [group.pubid for group in results]
 
     def test_returns_scoped_open_groups_if_no_user(self, svc, authority, scoped_open_groups):
         results = svc.all_groups(authority=authority)
@@ -42,7 +42,7 @@ class TestListGroupsAllGroups(object):
     def test_returns_world_group_if_user(self, svc, default_user):
         results = svc.all_groups(user=default_user)
 
-        assert u'__world__' in [group.pubid for group in results]
+        assert '__world__' in [group.pubid for group in results]
 
     def test_returns_scoped_open_groups_if_user(self, svc, user, scoped_open_groups):
         results = svc.all_groups(user=user)
@@ -209,7 +209,7 @@ class TestListGroupsRequestGroups(object):
     def test_it_returns_world_group(self, svc, default_authority):
         results = svc.request_groups(authority=default_authority)
 
-        assert results[0].pubid == u'__world__'
+        assert results[0].pubid == '__world__'
 
     def test_it_returns_matching_scoped_open_groups(self, svc, authority, document_uri, scoped_open_groups):
         results = svc.request_groups(authority=authority, document_uri=document_uri)

@@ -59,10 +59,10 @@ def to_json(value):
 
     # Adapted from Flask's htmlsafe_dumps() function / tojson filter.
     result = json.dumps(value) \
-                 .replace(u'<', u'\\u003c') \
-                 .replace(u'>', u'\\u003e') \
-                 .replace(u'&', u'\\u0026') \
-                 .replace(u"'", u'\\u0027')
+                 .replace('<', '\\u003c') \
+                 .replace('>', '\\u003e') \
+                 .replace('&', '\\u0026') \
+                 .replace("'", '\\u0027')
 
     return Markup(result)
 

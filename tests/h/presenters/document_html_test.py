@@ -46,12 +46,12 @@ class TestDocumentHTMLPresenter(object):
     def test_filename_with_no_uri(self):
         # self.uri should always be unicode, the worst it should ever be is an
         # empty string.
-        presenter = self.presenter(document_uris=[mock.Mock(uri=u"")])
+        presenter = self.presenter(document_uris=[mock.Mock(uri="")])
 
         assert presenter.filename == ""
 
     def test_filename_with_nonsense_uri(self):
-        presenter = self.presenter(document_uris=[mock.Mock(uri=u"foobar")])
+        presenter = self.presenter(document_uris=[mock.Mock(uri="foobar")])
 
         assert presenter.filename == ""
 
@@ -153,7 +153,7 @@ class TestDocumentHTMLPresenter(object):
                                                             uri,
                                                             filename):
         filename.return_value = ""
-        uri.return_value = u""
+        uri.return_value = ""
 
         assert isinstance(self.presenter().hostname_or_filename, text_type)
 
@@ -163,7 +163,7 @@ class TestDocumentHTMLPresenter(object):
 
         # urlparse.urlparse(u"foobar").hostname is None, make sure this doesn't
         # trip up .hostname_or_filename.
-        uri.return_value = u"foobar"
+        uri.return_value = "foobar"
 
         assert isinstance(self.presenter().hostname_or_filename, text_type)
 
@@ -234,7 +234,7 @@ class TestDocumentHTMLPresenter(object):
                                                        filename,
                                                        title):
         """If title is None it should use the uri instead."""
-        uri.return_value = u"http://example.com/example.html"
+        uri.return_value = "http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
 
         assert isinstance(self.presenter(title=title).title, text_type)

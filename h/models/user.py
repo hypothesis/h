@@ -204,8 +204,8 @@ class User(Base):
 
     @hybrid_property
     def userid(self):
-        return u'acct:{username}@{authority}'.format(username=self.username,
-                                                     authority=self.authority)
+        return 'acct:{username}@{authority}'.format(username=self.username,
+                                                    authority=self.authority)
 
     @userid.comparator
     def userid(cls):  # noqa: N805

@@ -176,7 +176,7 @@ class TestAuthDomain(object):
 
     def test_it_allows_overriding_request_domain(self, pyramid_request):
         pyramid_request.registry.settings['h.authority'] = 'foo.org'
-        assert util.authority(pyramid_request) == u'foo.org'
+        assert util.authority(pyramid_request) == 'foo.org'
 
     def test_it_returns_text_type(self, pyramid_request):
         pyramid_request.domain = str(pyramid_request.domain)

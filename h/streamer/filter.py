@@ -209,4 +209,4 @@ def uni_fold(text):
 
     text = text.lower()
     text = unicodedata.normalize('NFKD', text)
-    return u"".join([c for c in text if not unicodedata.combining(c)])
+    return "".join([c for c in text if not unicodedata.combining(c)])

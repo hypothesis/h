@@ -212,7 +212,7 @@ class TestGenerate(object):
 
     @pytest.fixture
     def document(self, db_session):
-        doc = Document(title=u'My fascinating page')
+        doc = Document(title='My fascinating page')
         db_session.add(doc)
         db_session.flush()
         return doc
@@ -245,7 +245,7 @@ class TestGenerate(object):
 
     @pytest.fixture
     def parent_user(self, factories):
-        return factories.User(username=u'patricia', email=u'pat@ric.ia',
+        return factories.User(username='patricia', email='pat@ric.ia',
                               display_name='Patricia Demylus')
 
     @pytest.fixture
@@ -260,7 +260,7 @@ class TestGenerate(object):
 
     @pytest.fixture
     def reply_user(self, factories):
-        return factories.User(username=u'ron', email=u'ron@thesmiths.com',
+        return factories.User(username='ron', email='ron@thesmiths.com',
                               display_name='Ron Burgundy')
 
     @pytest.fixture
