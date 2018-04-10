@@ -25,7 +25,7 @@ class GroupService(object):
         self.user_fetcher = user_fetcher
         self.publish = publish
 
-    def create_private_group(self, name, userid, description=None):
+    def create_private_group(self, name, userid, description=None, organization=None):
         """
         Create a new private group.
 
@@ -34,6 +34,8 @@ class GroupService(object):
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
         :param description: the description of the group
+        :param organization: the organization that this group belongs to
+        :type organization: h.models.Organization
 
         :returns: the created group
         """
@@ -42,9 +44,10 @@ class GroupService(object):
                             description=description,
                             type_flags=PRIVATE_GROUP_TYPE_FLAGS,
                             add_creator_as_member=True,
+                            organization=organization,
                             )
 
-    def create_open_group(self, name, userid, origins, description=None):
+    def create_open_group(self, name, userid, origins, description=None, organization=None):
         """
         Create a new open group.
 
@@ -54,6 +57,8 @@ class GroupService(object):
         :param userid: the userid of the group creator
         :param origins: the list of origins that the group will be scoped to
         :param description: the description of the group
+        :param organization: the organization that this group belongs to
+        :type organization: h.models.Organization
 
         :returns: the created group
         """
@@ -63,9 +68,10 @@ class GroupService(object):
                             type_flags=OPEN_GROUP_TYPE_FLAGS,
                             origins=origins,
                             add_creator_as_member=False,
+                            organization=organization,
                             )
 
-    def create_restricted_group(self, name, userid, origins, description=None):
+    def create_restricted_group(self, name, userid, origins, description=None, organization=None):
         """
         Create a new restricted group.
 
@@ -76,6 +82,8 @@ class GroupService(object):
         :param userid: the userid of the group creator
         :param origins: the list of origins that the group will be scoped to
         :param description: the description of the group
+        :param organization: the organization that this group belongs to
+        :type organization: h.models.Organization
 
         :returns: the created group
         """
@@ -85,6 +93,7 @@ class GroupService(object):
                             type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
                             origins=origins,
                             add_creator_as_member=True,
+                            organization=organization,
                             )
 
     def update_membership(self, group, usernames):
@@ -149,7 +158,8 @@ class GroupService(object):
 
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
-    def _create(self, name, userid, description, type_flags, origins=[], add_creator_as_member=False):
+    def _create(self, name, userid, description, type_flags,
+                origins=[], add_creator_as_member=False, organization=None):
         """
         Create a group and save it to the DB.
 
@@ -159,10 +169,14 @@ class GroupService(object):
         :param type_flags: the type of this group
         :param origins: the list of origins that the group will be scoped to
         :param add_creator_as_member: if the group creator should be added as a member
+        :param organization: the organization that this group belongs to
+        :type organization: h.models.Organization
         """
         creator = self.user_fetcher(userid)
         scopes = [GroupScope(origin=o) for o in origins]
-
+        if organization is None:
+            organization = Organization.default(self.session)
+        self._validate_authorities_match(creator.authority, organization.authority)
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
@@ -171,7 +185,7 @@ class GroupService(object):
                       readable_by=type_flags.readable_by,
                       writeable_by=type_flags.writeable_by,
                       scopes=scopes,
-                      organization=Organization.default(self.session),
+                      organization=organization,
                       )
         self.session.add(group)
 
@@ -184,6 +198,11 @@ class GroupService(object):
             self.publish('group-join', group.pubid, group.creator.userid)
 
         return group
+
+    def _validate_authorities_match(self, group_authority, org_authority):
+        if group_authority != org_authority:
+            raise ValueError("Organization's authority {} must match the group creator's authority {}."
+                             .format(org_authority, group_authority))
 
 
 def groups_factory(context, request):
