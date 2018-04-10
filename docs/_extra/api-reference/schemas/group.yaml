@@ -26,8 +26,7 @@ Group:
       oneOf:
         - $ref: './organization.yaml#/Organization'
         - type: string
-          format: uri
-          description: Link to organization resource
+          description: The unique ID for the organization (when not expanded)
     public:
       type: boolean
       deprecated: true

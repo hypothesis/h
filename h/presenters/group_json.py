@@ -2,12 +2,15 @@
 
 from __future__ import unicode_literals
 
+from h.presenters.organization_json import OrganizationJSONPresenter
+
 
 class GroupJSONPresenter(object):
     """Present a group in the JSON format returned by API requests."""
 
     def __init__(self, group_resource):
         self.resource = group_resource
+        self.organization_resource = self.resource.organization
         self.group = group_resource.group
 
     def asdict(self, expand=[]):
@@ -18,21 +21,16 @@ class GroupJSONPresenter(object):
 
     def _expand(self, model, expand=[]):
         if 'organization' in expand:
-            org_model = {}
-            org = self.group.organization
-            if org is not None:
-                org_model = {
-                    'id': org.pubid,
-                    'name': org.name,
-                }
-            model['organization'] = org_model
+            model['organization'] = OrganizationJSONPresenter(
+              self.organization_resource
+            ).asdict()
         return model
 
     def _model(self):
         model = {
+          'id': self.resource.id,
           'name': self.group.name,
-          'id': self.group.pubid,
-          'organization': '',  # unexpanded org; no link available yet, so empty string by default
+          'organization': self.organization_resource.id,
           'public': self.group.is_public,  # DEPRECATED: TODO: remove from client
           'scoped': True if self.group.scopes else False,
           'type': self.group.type
