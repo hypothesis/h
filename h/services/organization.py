@@ -35,7 +35,7 @@ class OrganizationService(object):
         return organization
 
 
-def organization_factory(request):
+def organization_factory(context, request):
     """Return a OrganizationService instance for the request."""
     return OrganizationService(session=request.db,
                                )
