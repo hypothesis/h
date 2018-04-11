@@ -14,6 +14,7 @@ from h.views.admin_groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
 from h.services.group import GroupService
 from h.services.delete_group import DeleteGroupService
+from h.services.list_organizations import ListOrganizationsService
 
 
 class FakeForm(object):
@@ -71,7 +72,7 @@ def test_index_filters_results(pyramid_request, factories, query, expected_group
     assert filtered_group_names == expected_groups
 
 
-@pytest.mark.usefixtures('group_svc', 'routes', 'user_svc')
+@pytest.mark.usefixtures('group_svc', 'list_orgs_svc', 'routes', 'user_svc')
 class TestGroupCreateController(object):
 
     def test_get_sets_form(self, pyramid_request):
@@ -81,16 +82,14 @@ class TestGroupCreateController(object):
 
         assert 'form' in ctx
 
-    def test_get_lists_all_organizations(self, pyramid_request, factories, default_org, CreateAdminGroupSchema):  # noqa: N803
-        chempub_org = factories.Organization(name='ChemPub')
-        biopub_org = factories.Organization(name='BioPub')
-        physpub_org = factories.Organization(authority='physpub.org', name='PhysPub')
-
+    def test_get_lists_all_organizations(self, pyramid_request, factories, default_org,  # noqa: N803
+                                         CreateAdminGroupSchema, list_orgs_svc):
         GroupCreateController(pyramid_request)
 
+        list_orgs_svc.organizations.assert_called_with()
         schema = CreateAdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
-        assert call_kwargs['organizations'] == [biopub_org, chempub_org, default_org, physpub_org]
+        assert call_kwargs['organizations'] == list_orgs_svc.organizations.return_value
 
     def test_it_handles_form_submission(self, pyramid_request, handle_form_submission, matchers):
         ctrl = GroupCreateController(pyramid_request)
@@ -164,7 +163,7 @@ class TestGroupCreateController(object):
         group_svc.update_membership.assert_called_once_with(create_method.return_value, [member_to_add])
 
 
-@pytest.mark.usefixtures('routes', 'user_svc', 'group_svc')
+@pytest.mark.usefixtures('routes', 'user_svc', 'group_svc', 'list_orgs_svc')
 class TestGroupEditController(object):
 
     def test_it_binds_schema(self, pyramid_request, group, user_svc,  # noqa: N803
@@ -207,21 +206,16 @@ class TestGroupEditController(object):
         assert ctx['form'] == self._expected_form(group)
 
     def test_read_lists_organizations_in_groups_authority(self, factories, pyramid_request, group,  # noqa: N803
-                                                          default_org, CreateAdminGroupSchema):
-        # Organizations in the same authority, which should be listed.
-        chempub_org = factories.Organization(authority=group.authority, name='ChemPub')
-        biopub_org = factories.Organization(authority=group.authority, name='BioPub')
-
-        # An organization in a different authority, which should not be listed.
-        factories.Organization(authority='physpub.org', name='PhysPub')
-
+                                                          default_org, CreateAdminGroupSchema,
+                                                          list_orgs_svc):
         pyramid_request.matchdict = {'pubid': group.pubid}
 
         GroupEditController(pyramid_request)
 
+        list_orgs_svc.organizations.assert_called_with(group.authority)
         schema = CreateAdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
-        assert call_kwargs['organizations'] == [biopub_org, chempub_org, default_org]
+        assert call_kwargs['organizations'] == list_orgs_svc.organizations.return_value
 
     def test_update_updates_group_on_success(self, factories, pyramid_request, group_svc, user_svc,
                                              handle_form_submission):
@@ -359,6 +353,14 @@ def delete_group_svc(pyramid_config, pyramid_request):
     service = mock.Mock(spec_set=DeleteGroupService(request=pyramid_request))
     pyramid_config.register_service(service, name='delete_group')
     return service
+
+
+@pytest.fixture
+def list_orgs_svc(pyramid_config, db_session):
+    svc = mock.Mock(spec_set=ListOrganizationsService(db_session))
+    svc.organizations.return_value = [Organization.default(db_session)]
+    pyramid_config.register_service(svc, name='list_organizations')
+    return svc
 
 
 @pytest.fixture

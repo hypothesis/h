@@ -25,16 +25,6 @@ def _find_organization(session, pubid):
                    .one())
 
 
-def _list_organizations(session, authority=None):
-    filter_args = {}
-    if authority:
-        filter_args['authority'] = authority
-    return (session.query(Organization)
-                   .filter_by(**filter_args)
-                   .order_by(Organization.name.asc())
-                   .all())
-
-
 @view_config(route_name='admin_groups',
              request_method='GET',
              renderer='h:templates/admin/groups.html.jinja2',
@@ -60,7 +50,8 @@ class GroupCreateController(object):
 
     def __init__(self, request):
         user_svc = request.find_service(name='user')
-        orgs = _list_organizations(request.db)
+        list_org_svc = request.find_service(name='list_organizations')
+        orgs = list_org_svc.organizations()
         self.schema = CreateAdminGroupSchema().bind(request=request,
                                                     organizations=orgs,
                                                     user_svc=user_svc)
@@ -137,7 +128,9 @@ class GroupEditController(object):
         except KeyError:
             raise HTTPNotFound()
 
-        orgs = _list_organizations(request.db, self.group.authority)
+        list_org_svc = request.find_service(name='list_organizations')
+        orgs = list_org_svc.organizations(self.group.authority)
+
         user_svc = request.find_service(name='user')
         self.request = request
         self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group,
