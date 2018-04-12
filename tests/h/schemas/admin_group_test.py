@@ -139,7 +139,7 @@ class TestCreateGroupSchema(object):
 
         """
         user_svc.fetch.return_value = None
-        with pytest.raises(colander.Invalid, match="^{'creator': u'User not found.* at authority"):
+        with pytest.raises(colander.Invalid, match="^{'creator':.*'User not found.* at authority"):
             bound_schema.deserialize(group_data)
 
     def test_it_lists_organizations(self, bound_schema, org):
