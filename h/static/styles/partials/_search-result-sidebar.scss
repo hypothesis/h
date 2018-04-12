@@ -102,19 +102,25 @@
   color: $grey-6;
 }
 
-.search-result-sidebar__logo-container {
+.search-result-sidebar__organization {
   display: flex;
   align-items: center;
   margin-bottom: 26px;
   font-weight: bold;
+}
+
+.search-result-sidebar__org-logo {
+  margin-right: 5px;
+}
+
+.search-result-sidebar__org-name {
   text-transform: uppercase;
   color: $group-organization-color;
 }
 
-.search-result-sidebar__org-logo {
+.search-result-sidebar__logo {
   height: 20px;
   width: 20px; 
-  margin-right: 5px;
 }
 
 @media screen and (max-width: $tablet-width + 250px) {

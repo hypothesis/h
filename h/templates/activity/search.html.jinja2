@@ -218,14 +218,17 @@
       doesn't support the `form` attribute. See commit message. #}
   <form method="GET" action="{{ request.path_url }}">
     <input type="hidden" name="q" value="{{ q }}">
-
     {% if organization %}
-      <span class="search-result-sidebar__logo-container"> 
-        {% if organization.logo %}
-          <img src="{{ organization.logo }}" class='search-result-sidebar__org-logo'></img> 
-        {% endif %}
-        {{ organization.name }}
-      </span>
+      <div class="search-result-sidebar__organization">
+        <span class="search-result-sidebar__org-logo"> 
+          {% if organization.logo %}
+            <img src="{{ organization.logo }}" alt="Org:" class='search-result-sidebar__logo'></img> 
+          {% endif %}
+        </span>
+        <span class="search-result-sidebar__org-name"> 
+          {{ organization.name }}
+        </span>
+      </div>
     {% endif %}
 
     <h1 class="search-result-sidebar__title">{{ title }}</h1>
