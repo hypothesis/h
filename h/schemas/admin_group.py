@@ -36,8 +36,8 @@ def group_creator_validator(node, kw):
         """
         user_svc = kw["user_svc"]
 
-        # The models.Organization objects for all the organizations available
-        # to choose from in the form.
+        # A {pubid: models.Organization} dict of all the organizations
+        # available to choose from in the form.
         organizations = kw["organizations"]
 
         # The pubid of the organization that the user has selected in the form.
