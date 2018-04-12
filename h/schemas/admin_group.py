@@ -24,23 +24,46 @@ VALID_GROUP_TYPES = (
 
 @colander.deferred
 def group_creator_validator(node, kw):
-    """
-    Validate that the creator username exists in the organization's authority.
-    """
-    user_svc = kw['user_svc']
-    orgs = kw['organizations']
-
     def validate(form, value):
-        org = next(org for org in orgs if org.pubid == value['organization'])
-        user = user_svc.fetch(value['creator'], org.authority)
-        if user is None:
-            exc = colander.Invalid(form, _('User not found'))
-            msg = _('User {creator} not found at authority {authority}').format(
-                creator=value['creator'],
-                authority=org.authority
-            )
-            exc['creator'] = msg
+        """
+        Validate that the creator username exists in the organization's authority.
+
+        The creator of a group must belong to the same authority as the group
+        and the group's organization.  Validate that there is a user matching
+        the given creator username with the same authority as the chosen
+        organization.
+
+        """
+        user_svc = kw["user_svc"]
+
+        # The models.Organization objects for all the organizations available
+        # to choose from in the form.
+        organizations = kw["organizations"]
+
+        # The pubid of the organization that the user has selected in the form.
+        selected_pubid = value["organization"]
+
+        # The models.Organization object for the selected organization.
+        selected_organization = [o for o in organizations if o.pubid == selected_pubid][0]
+
+        # The authority that the new group will belong to if it is created.
+        authority = selected_organization.authority
+
+        # The username string that was entered for the group creator.
+        creator_username = value["creator"]
+
+        # The models.User object for the group creator user, or None.
+        user = user_svc.fetch(creator_username, authority)
+
+        if not user:
+            # Either the username doesn't exist at all, or it has a different
+            # authority than the chosen organization.
+            exc = colander.Invalid(form, _("User not found"))
+            exc["creator"] = _(
+                "User {creator} not found at authority {authority}").format(
+                    creator=creator_username, authority=authority)
             raise exc
+
     return validate
 
 
