@@ -18,6 +18,7 @@
         <tr>
           <th>Name</th>
           <th>URL</th>
+          <th>Organization</th>
           <th>Created by</th>
           <th>Members</th>
         </tr>
@@ -39,6 +40,10 @@
               <a href="{{ group_url }}">
                 {{ group_url }}
               </a>
+            </td>
+            <td>
+              {% set org_url = request.route_url('admin_organizations_edit', pubid=group.organization.pubid) %}
+              <a href="{{ org_url }}">{{ group.organization.name }}</a>
             </td>
             <td>
               {% if group.creator %}

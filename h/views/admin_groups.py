@@ -9,11 +9,12 @@ from sqlalchemy import func
 from h import form  # noqa F401
 from h import i18n
 from h import models
+from h import paginator
 from h.models.annotation import Annotation
 from h.models.group import GroupFactory
 from h.models.group_scope import GroupScope
-from h import paginator
-from h.schemas.admin_group import CreateAdminGroupSchema, creator_exists_validator_factory
+from h.models.organization import Organization
+from h.schemas.admin_group import CreateAdminGroupSchema
 
 _ = i18n.TranslationString
 
@@ -42,16 +43,20 @@ def groups_index(context, request):
 class GroupCreateController(object):
 
     def __init__(self, request):
-        user_validator = creator_exists_validator_factory(request.find_service(name='user'))
-        self.schema = CreateAdminGroupSchema(validator=user_validator).bind(request=request)
+        user_svc = request.find_service(name='user')
+        list_org_svc = request.find_service(name='list_organizations')
+        self.organizations = {o.pubid: o for o in list_org_svc.organizations()}
+        self.schema = CreateAdminGroupSchema().bind(request=request,
+                                                    organizations=self.organizations,
+                                                    user_svc=user_svc)
         self.request = request
         self.form = _create_form(self.request, self.schema, (_('Create New Group'),))
 
     @view_config(request_method='GET')
     def get(self):
         self.form.set_appstruct({
-            'authority': self.request.authority,
             'creator': self.request.user.username,
+            'organization': Organization.default(self.request.db).pubid,
         })
         return self._template_context()
 
@@ -62,20 +67,22 @@ class GroupCreateController(object):
 
             # Create the new group.
             creator = appstruct['creator']
-            authority = appstruct['authority']
             description = appstruct['description']
             name = appstruct['name']
+            organization = self.organizations[appstruct["organization"]]
             origins = appstruct['origins']
             type_ = appstruct['group_type']
 
-            userid = models.User(username=creator, authority=authority).userid
+            userid = models.User(username=creator, authority=organization.authority).userid
 
             if type_ == 'open':
                 group = svc.create_open_group(name=name, userid=userid,
-                                              origins=origins, description=description)
+                                              origins=origins, description=description,
+                                              organization=organization)
             elif type_ == 'restricted':
                 group = svc.create_restricted_group(name=name, userid=userid,
-                                                    origins=origins, description=description)
+                                                    origins=origins, description=description,
+                                                    organization=organization)
             else:
                 raise Exception('Unsupported group type {}'.format(type_))
 
@@ -115,9 +122,14 @@ class GroupEditController(object):
         except KeyError:
             raise HTTPNotFound()
 
-        user_validator = creator_exists_validator_factory(request.find_service(name='user'))
+        list_org_svc = request.find_service(name='list_organizations')
+        self.organizations = {o.pubid: o for o in list_org_svc.organizations(self.group.authority)}
+
+        user_svc = request.find_service(name='user')
         self.request = request
-        self.schema = CreateAdminGroupSchema(validator=user_validator).bind(request=request, group=self.group)
+        self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group,
+                                                    organizations=self.organizations,
+                                                    user_svc=user_svc)
         self.form = _create_form(self.request, self.schema, (_('Save'),))
 
     @view_config(request_method='GET')
@@ -150,6 +162,7 @@ class GroupEditController(object):
             group.description = appstruct['description']
             group.name = appstruct['name']
             group.scopes = [GroupScope(origin=o) for o in appstruct['origins']]
+            group.organization = self.organizations[appstruct['organization']]
 
             group_svc.update_membership(group, appstruct['members'])
 
@@ -165,8 +178,6 @@ class GroupEditController(object):
     def _update_appstruct(self):
         group = self.group
         self.form.set_appstruct({
-            'authority': group.authority,
-
             # `group.creator` is nullable but "Creator" is currently a required
             # field, so the user will have to pick one when editing the group.
             'creator': group.creator.username if group.creator else '',
@@ -174,8 +185,9 @@ class GroupEditController(object):
             'description': group.description or '',
             'group_type': group.type,
             'name': group.name,
-            'origins': [s.origin for s in group.scopes],
             'members': [m.username for m in group.members],
+            'organization': group.organization.pubid,
+            'origins': [s.origin for s in group.scopes],
         })
 
     def _template_context(self):

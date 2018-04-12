@@ -10,7 +10,8 @@ from h.models.group import (
     GROUP_NAME_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH
 )
-from h.schemas.admin_group import CreateAdminGroupSchema, creator_exists_validator_factory
+from h.models.organization import Organization
+from h.schemas.admin_group import CreateAdminGroupSchema
 from h.services.user import UserService
 
 
@@ -48,7 +49,6 @@ class TestCreateGroupSchema(object):
 
     @pytest.mark.parametrize('required_field', (
         'name',
-        'authority',
         'group_type',
         'creator'
     ))
@@ -79,76 +79,74 @@ class TestCreateGroupSchema(object):
         with pytest.raises(colander.Invalid, match='At least one origin'):
             bound_schema.deserialize(group_data)
 
-    def test_it_raises_if_group_type_changed(self, group_data, pyramid_csrf_request):
+    def test_it_raises_if_group_type_changed(self, group_data,
+                                             pyramid_csrf_request, org, user_svc):
         group = mock.Mock(type='open')
         group_data['group_type'] = 'restricted'
-        schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request, group=group)
+        schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request,
+                                               group=group,
+                                               user_svc=user_svc,
+                                               organizations={org.pubid: org})
 
         with pytest.raises(colander.Invalid, match='Changing group type'):
             schema.deserialize(group_data)
 
-    def test_it_does_not_raise_if_group_type_is_same(self, group_data, pyramid_csrf_request):
+    def test_it_does_not_raise_if_group_type_is_same(self, group_data,
+                                                     pyramid_csrf_request, org, user_svc):
         group = mock.Mock(type='open')
         group_data['group_type'] = 'open'
-        schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request, group=group)
+        schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request,
+                                               group=group,
+                                               user_svc=user_svc,
+                                               organizations={org.pubid: org})
 
         schema.deserialize(group_data)
 
-    def test_it_raises_if_member_invalid(self, group_data, pyramid_csrf_request, user_svc):
+    def test_it_raises_if_member_invalid(self, group_data, bound_schema, user_svc):
         user_svc.fetch.return_value = None
-        bound_schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request, authority='some_authority')
-
         group_data['members'] = ["user_who_does_not_exist"]
         with pytest.raises(colander.Invalid, match='members.*Username not found'):
             bound_schema.deserialize(group_data)
 
-    @pytest.fixture
-    def user_svc(self, pyramid_config):
-        svc = mock.create_autospec(UserService, spec_set=True, instance=True)
-        pyramid_config.register_service(svc, name='user')
-        return svc
-
-
-class TestCreateSchemaWithValidator(object):
-
-    def test_it_passes_creator_and_authority_to_service(self,
-                                                        group_data,
-                                                        pyramid_csrf_request,
-                                                        user_svc,
-                                                        user_validator):
-        schema = CreateAdminGroupSchema(validator=user_validator).bind(request=pyramid_csrf_request)
-        schema.deserialize(group_data)
-
-        user_svc.fetch.assert_called_with(group_data['creator'], group_data['authority'])
-
     def test_it_allows_when_creator_exists_at_authority(self,
                                                         group_data,
-                                                        pyramid_csrf_request,
-                                                        user_svc,
-                                                        user_validator):
-        schema = CreateAdminGroupSchema(validator=user_validator).bind(request=pyramid_csrf_request)
-        schema.deserialize(group_data)
+                                                        bound_schema):
+        bound_schema.deserialize(group_data)
 
-    def test_it_raises_when_user_not_found(self,
-                                           group_data,
-                                           pyramid_csrf_request,
-                                           user_svc,
-                                           user_validator):
+    def test_it_passes_creator_and_authority_to_user_fetch(self,
+                                                           group_data,
+                                                           bound_schema,
+                                                           user_svc,
+                                                           org):
+        bound_schema.deserialize(group_data)
+        user_svc.fetch.assert_called_with(group_data['creator'], org.authority)
+
+    def test_it_allows_when_user_exists_at_authority(self,
+                                                     group_data,
+                                                     bound_schema):
+        bound_schema.deserialize(group_data)
+
+    def test_it_raises_when_the_creator_user_cannot_be_found(self,
+                                                             group_data,
+                                                             bound_schema,
+                                                             user_svc):
+        """
+        It raises if there's no user with the given username and authority.
+
+        It should raise if there's no user in the database with the same
+        username as entered into the form and the same authority as the
+        organization selected in the form.
+
+        """
         user_svc.fetch.return_value = None
-        schema = CreateAdminGroupSchema(validator=user_validator).bind(request=pyramid_csrf_request)
+        with pytest.raises(colander.Invalid, match="^{'creator':.*'User not found.* at authority"):
+            bound_schema.deserialize(group_data)
 
-        with pytest.raises(colander.Invalid, match='.*creator.*'):
-            schema.deserialize(group_data)
-
-    @pytest.fixture
-    def user_svc(self):
-        svc = mock.create_autospec(UserService, spec_set=True, instance=True)
-        return svc
-
-    @pytest.fixture
-    def user_validator(self, user_svc):
-        validator = creator_exists_validator_factory(user_svc)
-        return validator
+    def test_it_lists_organizations(self, bound_schema, org):
+        for child in bound_schema.children:
+            if child.name == 'organization':
+                org_node = child
+        assert org_node.widget.values == [(org.pubid, '{} ({})'.format(org.name, org.authority))]
 
 
 @pytest.fixture
@@ -162,15 +160,29 @@ def group_data(factories):
     """
     return {
         'name': 'My Group',
-        'authority': 'example.com',
         'group_type': 'open',
         'creator': factories.User().username,
         'description': 'Lorem ipsum dolor sit amet consectetuer',
+        'organization': '__default__',
         'origins': ['http://www.foo.com', 'https://www.foo.com'],
     }
 
 
 @pytest.fixture
-def bound_schema(pyramid_csrf_request):
-    schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request)
+def user_svc(pyramid_config):
+    svc = mock.create_autospec(UserService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='user')
+    return svc
+
+
+@pytest.fixture
+def org(db_session):
+    return Organization.default(db_session)
+
+
+@pytest.fixture
+def bound_schema(pyramid_csrf_request, org, user_svc):
+    schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request,
+                                           user_svc=user_svc,
+                                           organizations={org.pubid: org})
     return schema

@@ -22,17 +22,49 @@ VALID_GROUP_TYPES = (
 )
 
 
-def creator_exists_validator_factory(user_svc):
-    def creator_exists_validator(form, value):
-        user = user_svc.fetch(value['creator'], value['authority'])
-        if user is None:
-            exc = colander.Invalid(form, _('User not found'))
-            exc['creator'] = 'User {creator} not found at authority {authority}'.format(
-                creator=value['creator'],
-                authority=value['authority']
-            )
+@colander.deferred
+def group_creator_validator(node, kw):
+    def validate(form, value):
+        """
+        Validate that the creator username exists in the organization's authority.
+
+        The creator of a group must belong to the same authority as the group
+        and the group's organization.  Validate that there is a user matching
+        the given creator username with the same authority as the chosen
+        organization.
+
+        """
+        user_svc = kw["user_svc"]
+
+        # A {pubid: models.Organization} dict of all the organizations
+        # available to choose from in the form.
+        organizations = kw["organizations"]
+
+        # The pubid of the organization that the user has selected in the form.
+        selected_pubid = value["organization"]
+
+        # The models.Organization object for the selected organization.
+        selected_organization = organizations[selected_pubid]
+
+        # The authority that the new group will belong to if it is created.
+        authority = selected_organization.authority
+
+        # The username string that was entered for the group creator.
+        creator_username = value["creator"]
+
+        # The models.User object for the group creator user, or None.
+        user = user_svc.fetch(creator_username, authority)
+
+        if not user:
+            # Either the username doesn't exist at all, or it has a different
+            # authority than the chosen organization.
+            exc = colander.Invalid(form, _("User not found"))
+            exc["creator"] = _(
+                "User {creator} not found at authority {authority}").format(
+                    creator=creator_username, authority=authority)
             raise exc
-    return creator_exists_validator
+
+    return validate
 
 
 def member_exists_validator(node, val):
@@ -54,7 +86,24 @@ def group_type_validator(node, kw):
     return validate
 
 
+@colander.deferred
+def group_organization_select_widget(node, kw):
+    orgs = kw['organizations']
+    org_labels = []
+    org_pubids = []
+    for org in orgs.values():
+        org_labels.append('{} ({})'.format(org.name, org.authority))
+        org_pubids.append(org.pubid)
+
+    # `zip` returns an iterator in Python 3. The `SelectWidget` constructor
+    # requires an actual list.
+    return SelectWidget(values=list(zip(org_pubids, org_labels)))
+
+
 class CreateAdminGroupSchema(CSRFSchema):
+
+    def __init__(self, *args):
+        super(CreateAdminGroupSchema, self).__init__(validator=group_creator_validator, *args)
 
     group_type = colander.SchemaNode(
         colander.String(),
@@ -73,14 +122,11 @@ class CreateAdminGroupSchema(CSRFSchema):
         widget=TextInputWidget(max_length=GROUP_NAME_MAX_LENGTH),
     )
 
-    authority = colander.SchemaNode(
+    organization = colander.SchemaNode(
         colander.String(),
-        title=_('Authority'),
-        description=_("The group's authority"),
-        hint=_('The authority within which this group should be created.'
-               ' Note that only users within the designated authority'
-               ' will be able to be associated with this group (as'
-               ' creator or member).')
+        title=_('Organization'),
+        description=_('Organization which this group belongs to'),
+        widget=group_organization_select_widget,
     )
 
     creator = colander.SchemaNode(

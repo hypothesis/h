@@ -8,12 +8,13 @@ from pyramid.httpexceptions import HTTPNotFound
 import pytest
 import mock
 
-from h.models import User
+from h.models import Organization, User
 from h.views import admin_groups
 from h.views.admin_groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
 from h.services.group import GroupService
 from h.services.delete_group import DeleteGroupService
+from h.services.list_organizations import ListOrganizationsService
 
 
 class FakeForm(object):
@@ -71,7 +72,7 @@ def test_index_filters_results(pyramid_request, factories, query, expected_group
     assert filtered_group_names == expected_groups
 
 
-@pytest.mark.usefixtures('group_svc', 'routes', 'user_svc')
+@pytest.mark.usefixtures('group_svc', 'list_orgs_svc', 'routes', 'user_svc')
 class TestGroupCreateController(object):
 
     def test_get_sets_form(self, pyramid_request):
@@ -80,6 +81,15 @@ class TestGroupCreateController(object):
         ctx = ctrl.get()
 
         assert 'form' in ctx
+
+    def test_get_lists_all_organizations(self, pyramid_request, factories, default_org,  # noqa: N803
+                                         CreateAdminGroupSchema, list_orgs_svc):
+        GroupCreateController(pyramid_request)
+
+        list_orgs_svc.organizations.assert_called_with()
+        schema = CreateAdminGroupSchema.return_value
+        (_, call_kwargs) = schema.bind.call_args
+        assert call_kwargs['organizations'] == {default_org.pubid: default_org}
 
     def test_it_handles_form_submission(self, pyramid_request, handle_form_submission, matchers):
         ctrl = GroupCreateController(pyramid_request)
@@ -93,16 +103,17 @@ class TestGroupCreateController(object):
             ctrl._template_context
         )
 
-    def test_post_redirects_to_list_view_on_success(self, pyramid_request, matchers, routes, handle_form_submission):
+    def test_post_redirects_to_list_view_on_success(self, pyramid_request,
+                                                    matchers, routes, handle_form_submission, default_org):
         def call_on_success(request, form, on_success, on_failure):
             return on_success({
                 'name': 'My New Group',
                 'group_type': 'restricted',
                 'creator': pyramid_request.user.username,
                 'description': None,
-                'authority': pyramid_request.authority,
-                'origins': [],
                 'members': [],
+                'organization': default_org.pubid,
+                'origins': [],
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupCreateController(pyramid_request)
@@ -116,17 +127,17 @@ class TestGroupCreateController(object):
         'open',
         'restricted',
     ])
-    def test_post_creates_group_on_success(self, factories, pyramid_request, group_svc, handle_form_submission, type_):
-        member_to_add = 'member_to_add'
-
+    def test_post_creates_group_on_success(self, factories, pyramid_request, group_svc, handle_form_submission,
+                                           type_, default_org):
         name = 'My new group'
         creator = pyramid_request.user.username
+        member_to_add = 'member_to_add'
         description = 'Purpose of new group'
         origins = ['https://example.com']
 
         def call_on_success(request, form, on_success, on_failure):
             return on_success({
-                'authority': pyramid_request.authority,
+                'organization': default_org.pubid,
                 'creator': creator,
                 'description': description,
                 'group_type': type_,
@@ -148,22 +159,24 @@ class TestGroupCreateController(object):
         expected_userid = User(username=creator, authority=pyramid_request.authority).userid
 
         create_method.assert_called_with(name=name, userid=expected_userid, description=description,
-                                         origins=origins)
+                                         origins=origins, organization=default_org)
         group_svc.update_membership.assert_called_once_with(create_method.return_value, [member_to_add])
 
 
-@pytest.mark.usefixtures('routes', 'user_svc', 'group_svc')
+@pytest.mark.usefixtures('routes', 'user_svc', 'group_svc', 'list_orgs_svc')
 class TestGroupEditController(object):
 
-    def test_it_binds_schema(self, pyramid_request, group, patch):
-        schema = mock.Mock(spec_set=['bind'])
-        CreateAdminGroupSchema = patch('h.views.admin_groups.CreateAdminGroupSchema')  # noqa: N806
-        CreateAdminGroupSchema.return_value = schema
+    def test_it_binds_schema(self, pyramid_request, group, user_svc,  # noqa: N803
+                             default_org, CreateAdminGroupSchema):
         pyramid_request.matchdict = {'pubid': group.pubid}
 
         GroupEditController(pyramid_request)
 
-        schema.bind.assert_called_with(request=pyramid_request, group=group)
+        schema = CreateAdminGroupSchema.return_value
+        schema.bind.assert_called_with(request=pyramid_request,
+                                       group=group,
+                                       user_svc=user_svc,
+                                       organizations={default_org.pubid: default_org})
 
     def test_raises_not_found_if_unknown_group(self, pyramid_request):
         pyramid_request.matchdict = {'pubid': 'unknown'}
@@ -194,9 +207,21 @@ class TestGroupEditController(object):
 
         assert ctx['form'] == self._expected_form(group)
 
-    def test_update_updates_group_on_success(self, factories, pyramid_request, user_svc, handle_form_submission):
-        group = factories.RestrictedGroup(pubid='testgroup')
+    def test_read_lists_organizations_in_groups_authority(self, factories, pyramid_request, group,  # noqa: N803
+                                                          default_org, CreateAdminGroupSchema,
+                                                          list_orgs_svc):
+        pyramid_request.matchdict = {'pubid': group.pubid}
 
+        GroupEditController(pyramid_request)
+
+        list_orgs_svc.organizations.assert_called_with(group.authority)
+        schema = CreateAdminGroupSchema.return_value
+        (_, call_kwargs) = schema.bind.call_args
+        assert call_kwargs['organizations'] == {default_org.pubid: default_org}
+
+    def test_update_updates_group_on_success(self, factories, pyramid_request, group_svc, user_svc,
+                                             list_orgs_svc, handle_form_submission):
+        group = factories.RestrictedGroup(pubid='testgroup')
         pyramid_request.matchdict = {'pubid': group.pubid}
 
         updated_name = 'Updated group'
@@ -205,14 +230,17 @@ class TestGroupEditController(object):
         updated_description = 'New description'
         updated_origins = ['https://a-new-site.com']
         updated_members = []
+        updated_org = factories.Organization()
+
+        list_orgs_svc.organizations.return_value.append(updated_org)
 
         def call_on_success(request, form, on_success, on_failure):
             return on_success({
-                'authority': pyramid_request.authority,
                 'creator': updated_creator.username,
                 'description': updated_description,
                 'group_type': 'open',
                 'name': updated_name,
+                'organization': updated_org.pubid,
                 'origins': updated_origins,
                 'members': updated_members,
             })
@@ -224,6 +252,7 @@ class TestGroupEditController(object):
         assert group.creator.username == updated_creator.username
         assert group.description == updated_description
         assert group.name == updated_name
+        assert group.organization == updated_org
         assert [s.origin for s in group.scopes] == updated_origins
         assert ctx['form'] == self._expected_form(group)
 
@@ -245,8 +274,9 @@ class TestGroupEditController(object):
                 'description': 'a desc',
                 'group_type': 'restricted',
                 'name': 'a name',
-                'origins': ['http://www.example.com'],
                 'members': [member_a.username, member_b.username],
+                'organization': group.organization.pubid,
+                'origins': ['http://www.example.com'],
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupEditController(pyramid_request)
@@ -254,29 +284,6 @@ class TestGroupEditController(object):
         ctrl.update()
 
         group_svc.update_membership.assert_any_call(group, [member_a.username, member_b.username])
-
-    def test_update_does_not_update_authority(self, pyramid_request, group, user_svc, handle_form_submission):
-        pyramid_request.matchdict = {'pubid': group.pubid}
-        user_svc.fetch.return_value = group.creator
-        group.authority = 'original.com'
-
-        def call_on_success(request, form, on_success, on_failure):
-            return on_success({
-                'authority': 'different.com',
-                'creator': group.creator.username,
-                'description': group.description,
-                'group_type': 'open',
-                'name': group.name,
-                'origins': [s.origin for s in group.scopes],
-                'members': group.members,
-            })
-        handle_form_submission.side_effect = call_on_success
-        ctrl = GroupEditController(pyramid_request)
-
-        ctx = ctrl.update()
-
-        assert group.authority == 'original.com'
-        assert ctx['form'] == self._expected_form(group)
 
     def test_delete_deletes_group(self, group, delete_group_svc, pyramid_request, routes):
         pyramid_request.matchdict = {"pubid": group.pubid}
@@ -292,13 +299,13 @@ class TestGroupEditController(object):
         return factories.OpenGroup(pubid='testgroup')
 
     def _expected_form(self, group):
-        return {'authority': group.authority,
-                'creator': group.creator.username if group.creator else '',
+        return {'creator': group.creator.username if group.creator else '',
                 'description': group.description or '',
                 'group_type': group.type,
                 'name': group.name,
-                'origins': [s.origin for s in group.scopes],
-                'members': [m.username for m in group.members]}
+                'members': [m.username for m in group.members],
+                'organization': group.organization.pubid,
+                'origins': [s.origin for s in group.scopes]}
 
 
 @pytest.fixture
@@ -350,3 +357,24 @@ def delete_group_svc(pyramid_config, pyramid_request):
     service = mock.Mock(spec_set=DeleteGroupService(request=pyramid_request))
     pyramid_config.register_service(service, name='delete_group')
     return service
+
+
+@pytest.fixture
+def list_orgs_svc(pyramid_config, db_session):
+    svc = mock.Mock(spec_set=ListOrganizationsService(db_session))
+    svc.organizations.return_value = [Organization.default(db_session)]
+    pyramid_config.register_service(svc, name='list_organizations')
+    return svc
+
+
+@pytest.fixture
+def CreateAdminGroupSchema(patch):  # noqa: N802
+    schema = mock.Mock(spec_set=['bind'])
+    CreateAdminGroupSchema = patch('h.views.admin_groups.CreateAdminGroupSchema')  # noqa: N806
+    CreateAdminGroupSchema.return_value = schema
+    return CreateAdminGroupSchema
+
+
+@pytest.fixture
+def default_org(db_session):
+    return Organization.default(db_session)
