@@ -62,8 +62,6 @@ This package is responsible for defining URI normalization routines for use
 elsewhere in the Hypothesis application. URI expansion is handled by
 :py:function:`h.storage.expand_uri`.
 """
-from __future__ import unicode_literals
-
 import re
 
 from h._compat import (
