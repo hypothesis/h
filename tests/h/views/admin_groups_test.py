@@ -224,7 +224,6 @@ class TestGroupEditController(object):
         group = factories.RestrictedGroup(pubid='testgroup')
         pyramid_request.matchdict = {'pubid': group.pubid}
 
-
         updated_name = 'Updated group'
         updated_creator = factories.User()
         user_svc.fetch.return_value = updated_creator
