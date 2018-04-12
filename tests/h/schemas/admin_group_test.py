@@ -126,12 +126,20 @@ class TestCreateGroupSchema(object):
                                                      bound_schema):
         bound_schema.deserialize(group_data)
 
-    def test_it_raises_when_user_not_found(self,
-                                           group_data,
-                                           bound_schema,
-                                           user_svc):
+    def test_it_raises_when_the_creator_user_cannot_be_found(self,
+                                                             group_data,
+                                                             bound_schema,
+                                                             user_svc):
+        """
+        It raises if there's no user with the given username and authority.
+
+        It should raise if there's no user in the database with the same
+        username as entered into the form and the same authority as the
+        organization selected in the form.
+
+        """
         user_svc.fetch.return_value = None
-        with pytest.raises(colander.Invalid, match='.*creator.*'):
+        with pytest.raises(colander.Invalid, match="^{'creator': u'User not found.* at authority"):
             bound_schema.deserialize(group_data)
 
     def test_it_lists_organizations(self, bound_schema, org):
