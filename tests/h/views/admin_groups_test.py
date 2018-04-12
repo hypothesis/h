@@ -89,7 +89,7 @@ class TestGroupCreateController(object):
         list_orgs_svc.organizations.assert_called_with()
         schema = CreateAdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
-        assert call_kwargs['organizations'] == list_orgs_svc.organizations.return_value
+        assert call_kwargs['organizations'] == {default_org.pubid: default_org}
 
     def test_it_handles_form_submission(self, pyramid_request, handle_form_submission, matchers):
         ctrl = GroupCreateController(pyramid_request)
@@ -173,8 +173,10 @@ class TestGroupEditController(object):
         GroupEditController(pyramid_request)
 
         schema = CreateAdminGroupSchema.return_value
-        schema.bind.assert_called_with(request=pyramid_request, group=group,
-                                       user_svc=user_svc, organizations=[default_org])
+        schema.bind.assert_called_with(request=pyramid_request,
+                                       group=group,
+                                       user_svc=user_svc,
+                                       organizations={default_org.pubid: default_org})
 
     def test_raises_not_found_if_unknown_group(self, pyramid_request):
         pyramid_request.matchdict = {'pubid': 'unknown'}
@@ -215,7 +217,7 @@ class TestGroupEditController(object):
         list_orgs_svc.organizations.assert_called_with(group.authority)
         schema = CreateAdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
-        assert call_kwargs['organizations'] == list_orgs_svc.organizations.return_value
+        assert call_kwargs['organizations'] == {default_org.pubid: default_org}
 
     def test_update_updates_group_on_success(self, factories, pyramid_request, group_svc, user_svc,
                                              list_orgs_svc, handle_form_submission):

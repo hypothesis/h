@@ -44,7 +44,7 @@ def group_creator_validator(node, kw):
         selected_pubid = value["organization"]
 
         # The models.Organization object for the selected organization.
-        selected_organization = [o for o in organizations if o.pubid == selected_pubid][0]
+        selected_organization = organizations[selected_pubid]
 
         # The authority that the new group will belong to if it is created.
         authority = selected_organization.authority
@@ -89,8 +89,8 @@ def group_type_validator(node, kw):
 @colander.deferred
 def group_organization_select_widget(node, kw):
     orgs = kw['organizations']
-    org_names = ['{} ({})'.format(org.name, org.authority) for org in orgs]
-    org_pubids = [org.pubid for org in orgs]
+    org_names = ['{} ({})'.format(org.name, org.authority) for org in orgs.values()]
+    org_pubids = orgs.keys()
 
     # `zip` returns an iterator in Python 3. The `SelectWidget` constructor
     # requires an actual list.

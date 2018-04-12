@@ -47,7 +47,7 @@ class GroupCreateController(object):
         list_org_svc = request.find_service(name='list_organizations')
         self.organizations = {o.pubid: o for o in list_org_svc.organizations()}
         self.schema = CreateAdminGroupSchema().bind(request=request,
-                                                    organizations=self.organizations.values(),
+                                                    organizations=self.organizations,
                                                     user_svc=user_svc)
         self.request = request
         self.form = _create_form(self.request, self.schema, (_('Create New Group'),))
@@ -128,7 +128,7 @@ class GroupEditController(object):
         user_svc = request.find_service(name='user')
         self.request = request
         self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group,
-                                                    organizations=self.organizations.values(),
+                                                    organizations=self.organizations,
                                                     user_svc=user_svc)
         self.form = _create_form(self.request, self.schema, (_('Save'),))
 

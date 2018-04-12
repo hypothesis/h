@@ -86,7 +86,7 @@ class TestCreateGroupSchema(object):
         schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request,
                                                group=group,
                                                user_svc=user_svc,
-                                               organizations=[org])
+                                               organizations={org.pubid: org})
 
         with pytest.raises(colander.Invalid, match='Changing group type'):
             schema.deserialize(group_data)
@@ -98,7 +98,7 @@ class TestCreateGroupSchema(object):
         schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request,
                                                group=group,
                                                user_svc=user_svc,
-                                               organizations=[org])
+                                               organizations={org.pubid: org})
 
         schema.deserialize(group_data)
 
@@ -176,5 +176,5 @@ def org(db_session):
 def bound_schema(pyramid_csrf_request, org, user_svc):
     schema = CreateAdminGroupSchema().bind(request=pyramid_csrf_request,
                                            user_svc=user_svc,
-                                           organizations=[org])
+                                           organizations={org.pubid: org})
     return schema
