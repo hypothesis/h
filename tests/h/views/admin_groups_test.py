@@ -218,9 +218,10 @@ class TestGroupEditController(object):
         assert call_kwargs['organizations'] == list_orgs_svc.organizations.return_value
 
     def test_update_updates_group_on_success(self, factories, pyramid_request, group_svc, user_svc,
-                                             handle_form_submission):
+                                             list_orgs_svc, handle_form_submission):
         group = factories.RestrictedGroup(pubid='testgroup')
         pyramid_request.matchdict = {'pubid': group.pubid}
+
 
         updated_name = 'Updated group'
         updated_creator = factories.User()
@@ -229,6 +230,8 @@ class TestGroupEditController(object):
         updated_origins = ['https://a-new-site.com']
         updated_members = []
         updated_org = factories.Organization()
+
+        list_orgs_svc.organizations.return_value.append(updated_org)
 
         def call_on_success(request, form, on_success, on_failure):
             return on_success({

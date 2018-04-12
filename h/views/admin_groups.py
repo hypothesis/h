@@ -19,12 +19,6 @@ from h.schemas.admin_group import CreateAdminGroupSchema
 _ = i18n.TranslationString
 
 
-def _find_organization(session, pubid):
-    return (session.query(Organization)
-                   .filter_by(pubid=pubid)
-                   .one())
-
-
 @view_config(route_name='admin_groups',
              request_method='GET',
              renderer='h:templates/admin/groups.html.jinja2',
@@ -51,9 +45,9 @@ class GroupCreateController(object):
     def __init__(self, request):
         user_svc = request.find_service(name='user')
         list_org_svc = request.find_service(name='list_organizations')
-        orgs = list_org_svc.organizations()
+        self.organizations = {o.pubid: o for o in list_org_svc.organizations()}
         self.schema = CreateAdminGroupSchema().bind(request=request,
-                                                    organizations=orgs,
+                                                    organizations=self.organizations.values(),
                                                     user_svc=user_svc)
         self.request = request
         self.form = _create_form(self.request, self.schema, (_('Create New Group'),))
@@ -75,7 +69,7 @@ class GroupCreateController(object):
             creator = appstruct['creator']
             description = appstruct['description']
             name = appstruct['name']
-            organization = _find_organization(self.request.db, appstruct['organization'])
+            organization = self.organizations[appstruct["organization"]]
             origins = appstruct['origins']
             type_ = appstruct['group_type']
 
@@ -129,12 +123,12 @@ class GroupEditController(object):
             raise HTTPNotFound()
 
         list_org_svc = request.find_service(name='list_organizations')
-        orgs = list_org_svc.organizations(self.group.authority)
+        self.organizations = {o.pubid: o for o in list_org_svc.organizations(self.group.authority)}
 
         user_svc = request.find_service(name='user')
         self.request = request
         self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group,
-                                                    organizations=orgs,
+                                                    organizations=self.organizations.values(),
                                                     user_svc=user_svc)
         self.form = _create_form(self.request, self.schema, (_('Save'),))
 
@@ -168,7 +162,7 @@ class GroupEditController(object):
             group.description = appstruct['description']
             group.name = appstruct['name']
             group.scopes = [GroupScope(origin=o) for o in appstruct['origins']]
-            group.organization = _find_organization(self.request.db, appstruct['organization'])
+            group.organization = self.organizations[appstruct['organization']]
 
             group_svc.update_membership(group, appstruct['members'])
 
