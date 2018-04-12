@@ -89,12 +89,15 @@ def group_type_validator(node, kw):
 @colander.deferred
 def group_organization_select_widget(node, kw):
     orgs = kw['organizations']
-    org_names = ['{} ({})'.format(org.name, org.authority) for org in orgs.values()]
-    org_pubids = orgs.keys()
+    org_labels = []
+    org_pubids = []
+    for org in orgs.values():
+        org_labels.append('{} ({})'.format(org.name, org.authority))
+        org_pubids.append(org.pubid)
 
     # `zip` returns an iterator in Python 3. The `SelectWidget` constructor
     # requires an actual list.
-    return SelectWidget(values=list(zip(org_pubids, org_names)))
+    return SelectWidget(values=list(zip(org_pubids, org_labels)))
 
 
 class CreateAdminGroupSchema(CSRFSchema):
