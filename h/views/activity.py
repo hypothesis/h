@@ -296,17 +296,25 @@ class GroupSearchController(SearchController):
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
 
-    def _check_access_permissions(self):
-        if not self.request.has_permission('read', self.group):
-            show_join_page = self.request.has_permission('join', self.group)
-            if not self.request.user:
-                # Show a page which will prompt the user to login to join.
-                show_join_page = True
+    def _show_join_page(self):
+        """
+        Decide whether to show a page which will prompt the user to login to join.
+        Return True if the user has permission to join or they are not logged in
+        and False otherwise.
+        """
+        if not self.request.user:
+            return True
+        return self.request.has_permission('join', self.group)
 
-            if show_join_page:
+    def _check_access_permissions(self):
+        """
+        Check the read permission policy and if necessary redirect them to the join page.
+        Otherwise if there is no polciy to read or join, raise a not found error.
+        """
+        if not self.request.has_permission('read', self.group):
+            if self._show_join_page():
                 self.request.override_renderer = 'h:templates/groups/join.html.jinja2'
                 return {'group': self.group}
-
             raise httpexceptions.HTTPNotFound()
 
 
