@@ -22,6 +22,7 @@ from h.search import parser
 from h.util.user import split_user
 from h.views.groups import check_slug
 from h.util.datetime import utc_us_style_date
+from h.resources import OrganizationResource
 
 
 PAGE_SIZE = 200
@@ -96,6 +97,7 @@ class GroupSearchController(SearchController):
     def __init__(self, group, request):
         super(GroupSearchController, self).__init__(request)
         self.group = group
+        self._org_resource = OrganizationResource(group.organization, request)
 
     @view_config(request_method='GET')
     def search(self):
@@ -156,7 +158,6 @@ class GroupSearchController(SearchController):
         result['stats'] = {
             'annotation_count': group_annotation_count,
         }
-
         result['group'] = {
             'created': utc_us_style_date(self.group.created),
             'description': self.group.description,
@@ -169,6 +170,8 @@ class GroupSearchController(SearchController):
             'creator': self.group.creator.userid if self.group.creator else None,
             'share_subtitle': _('Share group'),
             'share_msg': _('Sharing the link lets people view this group:'),
+            'organization': {'name': self.group.organization.name,
+                             'logo': self._org_resource.logo}
         }
 
         if self.group.type == 'private':
