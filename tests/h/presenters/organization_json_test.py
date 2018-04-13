@@ -19,7 +19,7 @@ class TestOrganizationJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Org',
             'id': organization.pubid,
-            'isDefault': False,
+            'default': False,
             'logo': None,
         }
 
@@ -32,7 +32,7 @@ class TestOrganizationJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Org',
             'id': organization_resource.id,
-            'isDefault': False,
+            'default': False,
             'logo': pyramid_request.route_url('organization_logo', pubid=organization.pubid)
         }
 
@@ -43,7 +43,7 @@ class TestOrganizationJSONPresenter(object):
         presenter = OrganizationJSONPresenter(organization_resource)
         presented = presenter.asdict()
 
-        assert presented['isDefault'] is True
+        assert presented['default'] is True
 
 
 @pytest.fixture

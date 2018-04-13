@@ -16,7 +16,7 @@ class OrganizationJSONPresenter(object):
     def _model(self):
         model = {
           'id': self.resource.id,
-          'isDefault': self.resource.is_default,
+          'default': self.resource.default,
           'logo': self.resource.logo,
           'name': self.organization.name,
         }

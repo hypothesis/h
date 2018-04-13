@@ -2,13 +2,13 @@ Organization:
   type: object
   required:
     - id
-    - isDefault
+    - default
     - logo
     - name
   properties:
     id:
       type: string
-    isDefault:
+    default:
       type: boolean
       description: true if this organization is the default organization for the current authority
     logo:

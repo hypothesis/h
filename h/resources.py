@@ -170,7 +170,7 @@ class OrganizationResource(object):
         return self.organization.pubid  # Web-facing unique ID for this resource
 
     @property
-    def is_default(self):
+    def default(self):
         return self.organization == Organization.default(self.request.db)
 
     @property
