@@ -8,7 +8,7 @@ import mock
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from h.models import AuthClient
+from h.models import AuthClient, Organization
 from h.services.group_links import GroupLinksService
 from h.resources import AnnotationResource
 from h.resources import AnnotationResourceFactory
@@ -342,6 +342,20 @@ class TestOrganizationResource(object):
 
         pyramid_request.route_url.assert_not_called
         assert logo is None
+
+    def test_is_default_property_if_not_default_organization(self, factories, pyramid_request):
+        organization = factories.Organization()
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        assert organization_resource.is_default is False
+
+    def test_is_default_property_if_default_organization(self, factories, pyramid_request):
+        organization = Organization.default(pyramid_request.db)
+
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        assert organization_resource.is_default is True
 
 
 @pytest.fixture

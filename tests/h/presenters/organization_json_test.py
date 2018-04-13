@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 from h.presenters.organization_json import OrganizationJSONPresenter
+from h.models.organization import Organization
 from h.resources import OrganizationResource
 
 
@@ -18,6 +19,7 @@ class TestOrganizationJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Org',
             'id': organization.pubid,
+            'isDefault': False,
             'logo': None,
         }
 
@@ -30,8 +32,18 @@ class TestOrganizationJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Org',
             'id': organization_resource.id,
+            'isDefault': False,
             'logo': pyramid_request.route_url('organization_logo', pubid=organization.pubid)
         }
+
+    def test_default_organization(self, db_session, routes, pyramid_request):
+        organization = Organization.default(db_session)
+        organization_resource = OrganizationResource(organization, pyramid_request)
+
+        presenter = OrganizationJSONPresenter(organization_resource)
+        presented = presenter.asdict()
+
+        assert presented['isDefault'] is True
 
 
 @pytest.fixture
