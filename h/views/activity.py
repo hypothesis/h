@@ -113,34 +113,8 @@ class GroupSearchController(SearchController):
         if not self._user_has_read_permission():
             return result
 
-        def user_annotation_count(aggregation, userid):
-            for user in aggregation:
-                if user['user'] == userid:
-                    return user['count']
-            return 0
-
-        q = query.extract(self.request)
-        members = []
-        users_aggregation = result['search_results'].aggregations.get('users', [])
-        # If the group has members provide a list of member info,
-        # otherwise provide a list of moderator info instead.
-        if self.group.members:
-            users = self.group.members
-        else:
-            # Pass a list of moderators, anticipating that [self.group.creator]
-            # will change to an actual list of moderators at some point.
-            users = [self.group.creator] if self.group.creator else []
-        members = [{'username': u.username,
-                    'userid': u.userid,
-                    'count': user_annotation_count(users_aggregation,
-                                                   u.userid),
-                    'faceted_by': _faceted_by_user(self.request,
-                                                   u.username,
-                                                   q)}
-                    for u in users]
-        members = sorted(members, key=lambda k: k['username'].lower())
-
-        group_annotation_count = self.request.find_service(name='annotation_stats').group_annotation_count(self.group.pubid)
+        group_annotation_count = (self.request.find_service(name='annotation_stats')
+                                  .group_annotation_count(self.group.pubid))
 
         result['stats'] = {
             'annotation_count': group_annotation_count,
@@ -165,7 +139,9 @@ class GroupSearchController(SearchController):
 
         result['group_users_args'] = [
             _('Members'),
-            members,
+            self._members(
+                result['search_results'].aggregations.get('users', []),
+                ),
             self.group.creator.userid if self.group.creator else None,
         ]
 
@@ -280,6 +256,42 @@ class GroupSearchController(SearchController):
     @view_config(request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
+
+    def _members(self, users_aggregation):
+        """
+        Return a list of users associated with the group sorted by useranme.
+        If the group has members return a list of sorted members,
+        otherwise return a list of sorted moderators.
+
+        :param users_aggregation: the aggregation for users in search results
+
+        :returns: a list of members or moderators sorted by username
+        """
+        def user_annotation_count(aggregation, userid):
+            for user in aggregation:
+                if user['user'] == userid:
+                    return user['count']
+            return 0
+
+        q = query.extract(self.request)
+        members = []
+        # If the group has members provide a list of member info,
+        # otherwise provide a list of moderator info instead.
+        if self.group.members:
+            users = self.group.members
+        else:
+            # Pass a list of moderators, anticipating that [self.group.creator]
+            # will change to an actual list of moderators at some point.
+            users = [self.group.creator] if self.group.creator else []
+        members = [{'username': u.username,
+                    'userid': u.userid,
+                    'count': user_annotation_count(users_aggregation,
+                                                   u.userid),
+                    'faceted_by': _faceted_by_user(self.request,
+                                                   u.username,
+                                                   q)}
+                   for u in users]
+        return sorted(members, key=lambda k: k['username'].lower())
 
     def _user_has_read_permission(self):
         """If the user has read permission return True, otherwise return False"""
