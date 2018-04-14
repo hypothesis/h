@@ -166,8 +166,6 @@ class GroupSearchController(SearchController):
             'url': self.request.route_url('group_read',
                                           pubid=self.group.pubid,
                                           slug=self.group.slug),
-            'members': members,
-            'creator': self.group.creator.userid if self.group.creator else None,
             'share_subtitle': _('Share group'),
             'share_msg': _('Sharing the link lets people view this group:'),
             'organization': {'name': self.group.organization.name,
@@ -181,7 +179,7 @@ class GroupSearchController(SearchController):
         result['group_users_args'] = [
             _('Members'),
             moderators if self.group.type == 'open' else members,
-            result['group']['creator'],
+            self.group.creator.userid if self.group.creator else None,
         ]
 
         if self.request.has_permission('admin', self.group):
