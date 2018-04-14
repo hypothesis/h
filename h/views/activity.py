@@ -113,11 +113,8 @@ class GroupSearchController(SearchController):
         if not self._user_has_read_permission():
             return result
 
-        group_annotation_count = (self.request.find_service(name='annotation_stats')
-                                  .group_annotation_count(self.group.pubid))
-
         result['stats'] = {
-            'annotation_count': group_annotation_count,
+            'annotation_count': self._group_annotation_count(),
         }
         result['group'] = {
             'created': utc_us_style_date(self.group.created),
@@ -256,6 +253,11 @@ class GroupSearchController(SearchController):
     @view_config(request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
+
+    def _group_annotation_count(self):
+        """Returns the number of annotations in the group."""
+        return (self.request.find_service(name='annotation_stats')
+                .group_annotation_count(self.group.pubid))
 
     def _members(self, users_aggregation):
         """
