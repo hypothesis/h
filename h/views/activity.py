@@ -121,34 +121,24 @@ class GroupSearchController(SearchController):
 
         q = query.extract(self.request)
         members = []
-        moderators = []
         users_aggregation = result['search_results'].aggregations.get('users', [])
         # If the group has members provide a list of member info,
         # otherwise provide a list of moderator info instead.
         if self.group.members:
-            members = [{'username': u.username,
-                        'userid': u.userid,
-                        'count': user_annotation_count(users_aggregation,
-                                                       u.userid),
-                        'faceted_by': _faceted_by_user(self.request,
-                                                       u.username,
-                                                       q)}
-                       for u in self.group.members]
-            members = sorted(members, key=lambda k: k['username'].lower())
+            users = self.group.members
         else:
-            moderators = []
-            if self.group.creator:
-                # Pass a list of moderators, anticipating that [self.group.creator]
-                # will change to an actual list of moderators at some point.
-                moderators = [{'username': u.username,
-                               'userid': u.userid,
-                               'count': user_annotation_count(users_aggregation,
-                                                              u.userid),
-                               'faceted_by': _faceted_by_user(self.request,
-                                                              u.username,
-                                                              q)}
-                              for u in [self.group.creator]]
-                moderators = sorted(moderators, key=lambda k: k['username'].lower())
+            # Pass a list of moderators, anticipating that [self.group.creator]
+            # will change to an actual list of moderators at some point.
+            users = [self.group.creator] if self.group.creator else []
+        members = [{'username': u.username,
+                    'userid': u.userid,
+                    'count': user_annotation_count(users_aggregation,
+                                                   u.userid),
+                    'faceted_by': _faceted_by_user(self.request,
+                                                   u.username,
+                                                   q)}
+                    for u in users]
+        members = sorted(members, key=lambda k: k['username'].lower())
 
         group_annotation_count = self.request.find_service(name='annotation_stats').group_annotation_count(self.group.pubid)
 
@@ -175,7 +165,7 @@ class GroupSearchController(SearchController):
 
         result['group_users_args'] = [
             _('Members'),
-            moderators if self.group.type == 'open' else members,
+            members,
             self.group.creator.userid if self.group.creator else None,
         ]
 
