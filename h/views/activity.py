@@ -101,10 +101,11 @@ class GroupSearchController(SearchController):
 
     @view_config(request_method='GET')
     def search(self):
+        # Redirect/raise if there is no read permission policy.
         result = self._check_access_permissions()
         if result:
             return result
-        # Redirect if slug doesn't match the request.
+        # Redirect/raise if slug doesn't match the request.
         check_slug(self.group, self.request)
 
         result = super(GroupSearchController, self).search()
@@ -116,24 +117,7 @@ class GroupSearchController(SearchController):
         result['stats'] = {
             'annotation_count': self._group_annotation_count(),
         }
-        result['group'] = {
-            'created': utc_us_style_date(self.group.created),
-            'description': self.group.description,
-            'name': self.group.name,
-            'pubid': self.group.pubid,
-            'url': self.request.route_url('group_read',
-                                          pubid=self.group.pubid,
-                                          slug=self.group.slug),
-            'share_subtitle': _('Share group'),
-            'share_msg': _('Sharing the link lets people view this group:'),
-            'organization': {'name': self.group.organization.name,
-                             'logo': self._org_resource.logo}
-        }
-
-        if self.group.type == 'private':
-            result['group']['share_subtitle'] = _('Invite new members')
-            result['group']['share_msg'] = _('Sharing the link lets people join this group:')
-
+        result['group'] = self._group_info()
         result['group_users_args'] = [
             _('Members'),
             self._members(
@@ -253,6 +237,27 @@ class GroupSearchController(SearchController):
     @view_config(request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
+
+    def _group_info(self):
+        """Return group info to be passed to template."""
+        group = {
+            'created': utc_us_style_date(self.group.created),
+            'description': self.group.description,
+            'name': self.group.name,
+            'pubid': self.group.pubid,
+            'url': self.request.route_url('group_read',
+                                          pubid=self.group.pubid,
+                                          slug=self.group.slug),
+            'share_subtitle': _('Share group'),
+            'share_msg': _('Sharing the link lets people view this group:'),
+            'organization': {'name': self.group.organization.name,
+                             'logo': self._org_resource.logo}
+        }
+
+        if self.group.type == 'private':
+            group['share_subtitle'] = _('Invite new members')
+            group['share_msg'] = _('Sharing the link lets people join this group:')
+        return group
 
     def _group_annotation_count(self):
         """Returns the number of annotations in the group."""
