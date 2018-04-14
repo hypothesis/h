@@ -218,15 +218,15 @@ class TestGroupSearchController(object):
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
                              indirect=['test_group', 'test_user'])
-    def test_search_returns_group_info_if_group_creator_is_empty(self,
+    def test_search_returns_group_creator_is_none_if_group_creator_is_empty(self,
                                                                  controller,
                                                                  factories,
                                                                  test_group,
                                                                  test_user,
                                                                  pyramid_request):
-        group_info = controller.search()['group']
+        group_info = controller.search()['group_users_args']
 
-        assert group_info['creator'] is None
+        assert group_info[2] is None
 
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
@@ -327,7 +327,7 @@ class TestGroupSearchController(object):
                                           test_group):
         result = controller.search()
 
-        assert result['group']['creator'] == test_group.creator.userid
+        assert result['group_users_args'][2] == test_group.creator.userid
 
     @pytest.mark.parametrize('test_group,test_user', [('group', 'member')], indirect=['test_group', 'test_user'])
     def test_search_returns_group_members_usernames(self,
@@ -337,7 +337,7 @@ class TestGroupSearchController(object):
                                                     test_group):
         result = controller.search()
 
-        actual = set([m['username'] for m in result['group']['members']])
+        actual = set([m['username'] for m in result['group_users_args'][1]])
         expected = set([m.username for m in test_group.members])
         assert actual == expected
 
@@ -349,7 +349,7 @@ class TestGroupSearchController(object):
                                                  test_group):
         result = controller.search()
 
-        actual = set([m['userid'] for m in result['group']['members']])
+        actual = set([m['userid'] for m in result['group_users_args'][1]])
         expected = set([m.userid for m in test_group.members])
         assert actual == expected
 
@@ -364,7 +364,7 @@ class TestGroupSearchController(object):
 
         result = controller.search()
 
-        for member in result['group']['members']:
+        for member in result['group_users_args'][1]:
             assert member['faceted_by'] is (member['userid'] == faceted_user.userid)
 
     def test_search_returns_annotation_count_for_group_members(self,
@@ -392,7 +392,7 @@ class TestGroupSearchController(object):
 
         result = controller.search()
 
-        for member in result['group']['members']:
+        for member in result['group_users_args'][1]:
             assert member['count'] == counts[member['userid']]
 
     @pytest.mark.parametrize('test_group,test_user',
@@ -437,7 +437,6 @@ class TestGroupSearchController(object):
         pyramid_request.params = {'q': 'user:%s' % "does_not_matter"}
 
         result = controller.search()
-        assert not result['group']['members'], "Open group search should return an empty list of members"
         for moderator in result['group_users_args'][1]:
             assert not moderator['faceted_by']
 
