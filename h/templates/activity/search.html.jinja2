@@ -371,6 +371,71 @@
   {% endcall %}
 {% endmacro %}
 
+{% macro show_search_results() %}
+  {% if q or user or group %}
+    <div class="search-results__total"> {{search_results.total | format_number}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
+  {% endif %}
+
+  <ol class="search-results__list"
+      role="list"
+      aria-label="Search results grouped by date">
+  {% for timeframe in search_results.timeframes %}
+    <li class="search-result__timeframe">
+      {{ timeframe.label }}
+    </li>
+    {% for bucket in timeframe.document_buckets.values() %}
+      <li role="listitem">
+        {{ search_result_bucket(bucket) }}
+      </li>
+    {% endfor %}
+  {% endfor %}
+  </ol>
+
+  {% if page.max > 1 %}
+    {% include "h:templates/includes/paginator.html.jinja2" %}
+  {% endif %}
+{% endmacro %}
+
+{% macro show_getting_started() %}
+  <div>
+    <h2 class="search-result-zero__title">
+      {%- trans %}How to get started{% endtrans -%}
+    </h2>
+    <ol class="search-result-zero__list">
+      <li class="search-result-zero__list-item"><!--!-->
+        <a class="link"
+           href="{{ request.route_url('chrome-extension') }}">
+          {%- trans %}Install our Chrome extension{% endtrans -%}
+        </a>
+      </li>
+      <li class="search-result-zero__list-item">
+        {%- trans url=request.route_url('activity.search') -%}
+          Check out some of the
+          <a class="link" href="{{ url }}">
+            recently annotated documents
+          </a>
+        {%- endtrans -%}
+      </li>
+      <li class="search-result-zero__list-item">
+        {%- trans url=user.edit_url -%}
+          Let other users know more about you by
+          <a class="link" href="{{ url }}">
+            adding more information to your profile
+          </a>
+        {%- endtrans -%}
+      </li>
+      <li class="search-result-zero__list-item">
+        {%- trans -%}
+          Read more about
+          <a class="link" href="https://hypothes.is/annotating-with-groups/">
+            how to annotate with groups
+          </a>
+        {%- endtrans -%}
+      </li>
+    </ol>
+  </div>
+{% endmacro %}
+
 {% block header %}
   {{ panel('navbar', search_results, opts) }}
 {% endblock %}
@@ -384,72 +449,13 @@
     {% endif %}
 
     {% if search_results.timeframes %}
-
       <div class="search-results {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
-
-        {% if q or user or group %}
-        <div class="search-results__total"> {{search_results.total | format_number}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
-        {% endif %}
-
-        <ol class="search-results__list"
-            role="list"
-            aria-label="Search results grouped by date">
-          {% for timeframe in search_results.timeframes %}
-          <li class="search-result__timeframe">
-            {{ timeframe.label }}
-          </li>
-          {% for bucket in timeframe.document_buckets.values() %}
-          <li role="listitem">
-            {{ search_result_bucket(bucket) }}
-          </li>
-          {% endfor %}
-          {% endfor %}
-        </ol>
-
-        {% if page.max > 1 %}
-          {% include "h:templates/includes/paginator.html.jinja2" %}
-        {% endif %}
+        {{ show_search_results() }}
       </div>
     {% else %}
       <div class="search-result-zero {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
         {% if zero_message == '__SHOW_GETTING_STARTED__' %}
-          <div>
-            <h2 class="search-result-zero__title">
-              {%- trans %}How to get started{% endtrans -%}
-            </h2>
-            <ol class="search-result-zero__list">
-              <li class="search-result-zero__list-item"><!--
-                !--><a class="link"
-                       href="{{ request.route_url('chrome-extension') }}">
-                  {%- trans %}Install our Chrome extension{% endtrans -%}
-                </a>
-              </li>
-              <li class="search-result-zero__list-item">
-                {%- trans url=request.route_url('activity.search') -%}
-                  Check out some of the
-                  <a class="link" href="{{ url }}">
-                    recently annotated documents
-                  </a>
-                {%- endtrans -%}
-              </li>
-              <li class="search-result-zero__list-item">
-                {%- trans url=user.edit_url -%}
-                  Let other users know more about you by
-                  <a class="link" href="{{ url }}">
-                    adding more information to your profile
-                  </a>
-                {%- endtrans -%}
-              </li>
-              <li class="search-result-zero__list-item">
-                {%- trans -%}
-                  Read more about
-                  <a class="link" href="https://hypothes.is/annotating-with-groups/">
-                    how to annotate with groups
-                  </a>
-                {%- endtrans -%}
-              </li>
-            </ol>
-          </div>
+          {{ show_getting_started() }}
         {% else %}
           <strong>{{ zero_message }}</strong>
         {% endif %}
