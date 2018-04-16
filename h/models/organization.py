@@ -10,6 +10,7 @@ from h import pubid
 ORGANIZATION_NAME_MIN_CHARS = 1
 ORGANIZATION_NAME_MAX_CHARS = 25
 ORGANIZATION_LOGO_MAX_CHARS = 10000
+ORGANIZATION_DEFAULT_PUBID = '__default__'
 
 
 def _strip_xmlns(tag):
@@ -68,4 +69,4 @@ class Organization(Base, mixins.Timestamps):
 
     @classmethod
     def default(cls, session):
-        return session.query(cls).filter_by(pubid='__default__').one()
+        return session.query(cls).filter_by(pubid=ORGANIZATION_DEFAULT_PUBID).one()

@@ -13,6 +13,7 @@ from sqlalchemy.orm import exc
 from h import storage
 from h.models import AuthClient
 from h.models import Organization
+from h.models.organization import ORGANIZATION_DEFAULT_PUBID
 from h.auth import role
 from h.interfaces import IGroupService
 
@@ -171,7 +172,7 @@ class OrganizationResource(object):
 
     @property
     def default(self):
-        return self.organization == Organization.default(self.request.db)
+        return self.id == ORGANIZATION_DEFAULT_PUBID
 
     @property
     def links(self):
