@@ -8,6 +8,7 @@ Group:
     - public
     - scoped
     - type
+    - urls
   properties:
     id:
       type: string
@@ -39,3 +40,16 @@ Group:
         - private
         - open
         - restricted
+    url:
+      type: string
+      format: uri
+      deprecated: true
+    urls:
+      type: object
+      deprecated: true
+      properties:
+        group:
+          type: string
+          format: uri
+          description: URI to group activity page; use `links.html` instead
+          deprecated: true
