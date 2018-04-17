@@ -16,7 +16,7 @@ class GroupJSONPresenter(object):
     def asdict(self, expand=[]):
         model = self._model()
         self._expand(model, expand)
-        self._inject_urls(model)
+        model['links'] = self.resource.links or {}
         return model
 
     def _expand(self, model, expand=[]):
@@ -35,14 +35,6 @@ class GroupJSONPresenter(object):
           'scoped': True if self.group.scopes else False,
           'type': self.group.type
         }
-        return model
-
-    def _inject_urls(self, model):
-        model['links'] = self.resource.links or {}
-        model['urls'] = model['links']  # DEPRECATED TODO: remove from client
-        if 'html' in model['links']:
-            # DEPRECATED TODO: remove from client
-            model['url'] = model['urls']['html']
         return model
 
 
