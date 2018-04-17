@@ -110,8 +110,8 @@
 /for-publishers/using-wordpress/                       exact https://web.hypothes.is/publishing/
 /four-ways-to-annotate                                 exact https://web.hypothes.is/four-ways-to-annotate/
 /four-ways-to-annotate/                                exact https://web.hypothes.is/four-ways-to-annotate/
-/help                                                  exact https://hypothesis.zendesk.com/
-/help/                                                 exact https://hypothesis.zendesk.com/
+/help                                                  exact https://web.hypothes.is/help/
+/help/                                                 exact https://web.hypothes.is/help/
 /imagine-old-homepage                                  exact https://web.hypothes.is/imagine-old-homepage/
 /imagine-old-homepage/                                 exact https://web.hypothes.is/imagine-old-homepage/
 /installing-the-bookmarklet                            exact https://web.hypothes.is/installing-the-bookmarklet/
