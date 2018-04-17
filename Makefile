@@ -72,7 +72,7 @@ lint: .pydeps
 # Fake targets to aid with deps installation
 .pydeps: requirements.txt
 	@echo installing python dependencies
-	@pip install --use-wheel -r requirements-dev.in tox
+	@pip install -r requirements-dev.in tox
 	@touch $@
 
 node_modules/.uptodate: package.json
