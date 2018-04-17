@@ -24,6 +24,7 @@ class TestGroupJSONPresenter(object):
             'type': 'private',
             'public': False,
             'scoped': False,
+            'urls': links_svc.get_all.return_value,
             'links': links_svc.get_all.return_value,
         }
 
@@ -40,6 +41,7 @@ class TestGroupJSONPresenter(object):
             'type': 'open',
             'public': True,
             'scoped': False,
+            'urls': links_svc.get_all.return_value,
             'links': links_svc.get_all.return_value,
         }
 
@@ -57,10 +59,11 @@ class TestGroupJSONPresenter(object):
             'organization': group_resource.organization.id,
             'public': True,
             'scoped': True,
+            'urls': links_svc.get_all.return_value,
             'links': links_svc.get_all.return_value,
         }
 
-    def test_it_doesn_not_contain_deprecated_url(self, factories, GroupResource_, links_svc):  # noqa: N803
+    def test_it_contains_deprecated_url_if_html_link_present(self, factories, GroupResource_, links_svc):  # noqa: N803
         links_svc.get_all.return_value = {
             'html': 'foobar'
         }
@@ -68,7 +71,7 @@ class TestGroupJSONPresenter(object):
         group_resource = GroupResource_(group)
         presenter = GroupJSONPresenter(group_resource)
 
-        assert 'url' not in presenter.asdict()
+        assert presenter.asdict()['url'] == 'foobar'
 
     def test_it_does_not_expand_by_default(self, factories, GroupResource_):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
@@ -122,7 +125,7 @@ class TestGroupsJSONPresenter(object):
 
         assert [group['name'] for group in result] == [u'filbert', u'delbert']
 
-    def test_asdicts_injects_links(self, factories, links_svc, GroupResources):  # noqa: N803
+    def test_asdicts_injects_urls(self, factories, links_svc, GroupResources):  # noqa: N803
         groups = [factories.Group(), factories.OpenGroup()]
         group_resources = GroupResources(groups)
         presenter = GroupsJSONPresenter(group_resources)
@@ -130,6 +133,7 @@ class TestGroupsJSONPresenter(object):
         result = presenter.asdicts()
 
         for group_model in result:
+            assert 'urls' in group_model
             assert 'links' in group_model
 
 
