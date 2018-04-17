@@ -91,3 +91,49 @@ class TestCacheHeaderTween(object):
         response = tween(pyramid_request)
 
         assert response.headers.get('Cache-Control') == expected_cc_header
+
+
+class TestEncodeHeadersTween(object):
+
+    def test_it_converts_unicode_header_names_to_native_strings(self,
+                                                                pyramid_request,
+                                                                matchers,
+                                                                encode_headers_tween):
+        pyramid_request.response.headers[u"Access-Control-Allow-Origin"] = str("*")
+
+        response = encode_headers_tween(pyramid_request)
+
+        expected_header = matchers.native_string("Access-Control-Allow-Origin")
+        assert response.headers.getone(expected_header) == str("*")
+
+    def test_it_converts_unicode_header_values_to_native_strings(self,
+                                                                 pyramid_request,
+                                                                 matchers,
+                                                                 encode_headers_tween):
+        pyramid_request.response.headers[str("Access-Control-Allow-Origin")] = u"*"
+
+        response = encode_headers_tween(pyramid_request)
+
+        expected_value = matchers.native_string("*")
+        assert response.headers.getone(str("Access-Control-Allow-Origin")) == expected_value
+
+    def test_multiple_values_for_a_single_header(self,
+                                                 pyramid_request,
+                                                 matchers,
+                                                 encode_headers_tween):
+        pyramid_request.response.headers.add(u"foo", u"bar")
+        pyramid_request.response.headers.add(u"foo", str("gar"))  # Already bytes in Python 2.
+        pyramid_request.response.headers.add(u"foo", u"zar")
+
+        response = encode_headers_tween(pyramid_request)
+
+        assert response.headers.getall(matchers.native_string("foo")) == matchers.unordered_list([
+            matchers.native_string("bar"),
+            matchers.native_string("gar"),
+            matchers.native_string("zar"),
+        ])
+
+    @pytest.fixture
+    def encode_headers_tween(self, pyramid_request):
+        return tweens.encode_headers_tween_factory(lambda req: req.response,
+                                                   pyramid_request.registry)

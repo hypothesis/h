@@ -8,6 +8,7 @@ from codecs import open
 from pyramid import httpexceptions
 from pyramid.util import DottedNameResolver
 
+from h._compat import native
 from h.util.redirects import parse as parse_redirects
 from h.util.redirects import lookup as lookup_redirects
 
@@ -143,3 +144,40 @@ def cache_header_tween_factory(handler, registry):
         return resp
 
     return cache_header_tween
+
+
+def encode_headers_tween_factory(handler, registry):
+    """
+    Convert HTTP response headers to native strings.
+
+    The WSGI spec (https://www.python.org/dev/peps/pep-3333/) requires all
+    HTTP response header names and values to be "native" strings:
+
+    * Byte strings in Python 2
+    * Unicode strings in Python 3
+
+    Since string literals are byte strings in Python 2 and are unicode strings
+    in Python 3, using string literals for header values (as in
+    ``response.headers["Access-Control-Allow-Origin"] = "*"``) works fine in
+    either Python 2 or 3.
+
+    But once you add ``from __future__ import unicode_literals`` to a source
+    code file the string literals become unicode strings in Python 2, and
+    violate PEP-3333. This violation causes ``AssertionError``s from WebTest,
+    and may cause problems with WSGI servers.
+
+    This tween fixes that by converting all header names and values to native
+    strings.
+
+    TODO: Remove this tween once we no longer support Python 2.
+
+    """
+    def encode_headers_tween(request):
+        resp = handler(request)
+        for key in list(resp.headers.keys()):
+            values = resp.headers.getall(key)
+            del resp.headers[key]
+            for value in values:
+                resp.headers.add(native(key), native(value))
+        return resp
+    return encode_headers_tween
