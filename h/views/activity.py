@@ -101,87 +101,29 @@ class GroupSearchController(SearchController):
 
     @view_config(request_method='GET')
     def search(self):
+        # Redirect/raise if there is no read permission policy.
         result = self._check_access_permissions()
-        if result is not None:
+        if result:
             return result
-
+        # Redirect/raise if slug doesn't match the request.
         check_slug(self.group, self.request)
 
         result = super(GroupSearchController, self).search()
-
         result['opts'] = {'search_groupname': self.group.name}
 
-        # If the group has read access only for members  and the user is not in that list
-        # return without extra info.
-        if self.group.readable_by == ReadableBy.members and (self.request.user not in self.group.members):
+        if not self._user_has_read_permission():
             return result
 
-        def user_annotation_count(aggregation, userid):
-            for user in aggregation:
-                if user['user'] == userid:
-                    return user['count']
-            return 0
-
-        q = query.extract(self.request)
-        members = []
-        moderators = []
-        users_aggregation = result['search_results'].aggregations.get('users', [])
-        # If the group has members provide a list of member info,
-        # otherwise provide a list of moderator info instead.
-        if self.group.members:
-            members = [{'username': u.username,
-                        'userid': u.userid,
-                        'count': user_annotation_count(users_aggregation,
-                                                       u.userid),
-                        'faceted_by': _faceted_by_user(self.request,
-                                                       u.username,
-                                                       q)}
-                       for u in self.group.members]
-            members = sorted(members, key=lambda k: k['username'].lower())
-        else:
-            moderators = []
-            if self.group.creator:
-                # Pass a list of moderators, anticipating that [self.group.creator]
-                # will change to an actual list of moderators at some point.
-                moderators = [{'username': u.username,
-                               'userid': u.userid,
-                               'count': user_annotation_count(users_aggregation,
-                                                              u.userid),
-                               'faceted_by': _faceted_by_user(self.request,
-                                                              u.username,
-                                                              q)}
-                              for u in [self.group.creator]]
-                moderators = sorted(moderators, key=lambda k: k['username'].lower())
-
-        group_annotation_count = self.request.find_service(name='annotation_stats').group_annotation_count(self.group.pubid)
-
         result['stats'] = {
-            'annotation_count': group_annotation_count,
+            'annotation_count': self._group_annotation_count(),
         }
-        result['group'] = {
-            'created': utc_us_style_date(self.group.created),
-            'description': self.group.description,
-            'name': self.group.name,
-            'pubid': self.group.pubid,
-            'url': self.request.route_url('group_read',
-                                          pubid=self.group.pubid,
-                                          slug=self.group.slug),
-            'members': members,
-            'creator': self.group.creator.userid if self.group.creator else None,
-            'share_subtitle': _('Share group'),
-            'share_msg': _('Sharing the link lets people view this group:'),
-            'organization': {'name': self.group.organization.name,
-                             'logo': self._org_resource.logo}
-        }
-
-        if self.group.type == 'private':
-            result['group']['share_subtitle'] = _('Invite new members')
-            result['group']['share_msg'] = _('Sharing the link lets people join this group:')
-
+        result['group'] = self._group_info()
         result['group_users_args'] = [
             _('Members'),
-            moderators if self.group.type == 'open' else members,
-            result['group']['creator'],
+            self._members(
+                result['search_results'].aggregations.get('users', []),
+                ),
+            self.group.creator.userid if self.group.creator else None,
         ]
 
         if self.request.has_permission('admin', self.group):
@@ -296,17 +238,96 @@ class GroupSearchController(SearchController):
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
 
-    def _check_access_permissions(self):
-        if not self.request.has_permission('read', self.group):
-            show_join_page = self.request.has_permission('join', self.group)
-            if not self.request.user:
-                # Show a page which will prompt the user to login to join.
-                show_join_page = True
+    def _group_info(self):
+        """Return group info to be passed to template."""
+        group = {
+            'created': utc_us_style_date(self.group.created),
+            'description': self.group.description,
+            'name': self.group.name,
+            'pubid': self.group.pubid,
+            'url': self.request.route_url('group_read',
+                                          pubid=self.group.pubid,
+                                          slug=self.group.slug),
+            'share_subtitle': _('Share group'),
+            'share_msg': _('Sharing the link lets people view this group:'),
+            'organization': {'name': self.group.organization.name,
+                             'logo': self._org_resource.logo}
+        }
 
-            if show_join_page:
+        if self.group.type == 'private':
+            group['share_subtitle'] = _('Invite new members')
+            group['share_msg'] = _('Sharing the link lets people join this group:')
+        return group
+
+    def _group_annotation_count(self):
+        """Returns the number of annotations in the group."""
+        return (self.request.find_service(name='annotation_stats')
+                .group_annotation_count(self.group.pubid))
+
+    def _members(self, users_aggregation):
+        """
+        Return a list of users associated with the group sorted by useranme.
+        If the group has members return a list of sorted members,
+        otherwise return a list of sorted moderators.
+
+        :param users_aggregation: the aggregation for users in search results
+
+        :returns: a list of members or moderators sorted by username
+        """
+        def user_annotation_count(aggregation, userid):
+            for user in aggregation:
+                if user['user'] == userid:
+                    return user['count']
+            return 0
+
+        q = query.extract(self.request)
+        members = []
+        # If the group has members provide a list of member info,
+        # otherwise provide a list of moderator info instead.
+        if self.group.members:
+            users = self.group.members
+        else:
+            # Pass a list of moderators, anticipating that [self.group.creator]
+            # will change to an actual list of moderators at some point.
+            users = [self.group.creator] if self.group.creator else []
+        members = [{'username': u.username,
+                    'userid': u.userid,
+                    'count': user_annotation_count(users_aggregation,
+                                                   u.userid),
+                    'faceted_by': _faceted_by_user(self.request,
+                                                   u.username,
+                                                   q)}
+                   for u in users]
+        return sorted(members, key=lambda k: k['username'].lower())
+
+    def _user_has_read_permission(self):
+        """If the user has read permission return True, otherwise return False"""
+        # If the group has read access only for members and the user is not in that list
+        # return False
+        if (self.group.readable_by == ReadableBy.members
+                and (self.request.user not in self.group.members)):
+            return False
+        return True
+
+    def _show_join_page(self):
+        """
+        Decide whether to show a page which will prompt the user to login to join.
+        Return True if the user has permission to join or they are not logged in
+        and False otherwise.
+        """
+        if not self.request.user:
+            return True
+        return self.request.has_permission('join', self.group)
+
+    def _check_access_permissions(self):
+        """
+        Check the read permission policy and if necessary redirect them to the join page.
+        Otherwise if there is no polciy to read or join, raise a not found error.
+        """
+        if not self.request.has_permission('read', self.group):
+            if self._show_join_page():
                 self.request.override_renderer = 'h:templates/groups/join.html.jinja2'
                 return {'group': self.group}
-
             raise httpexceptions.HTTPNotFound()
 
 
