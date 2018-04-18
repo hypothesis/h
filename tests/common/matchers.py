@@ -181,3 +181,6 @@ class unordered_list(Matcher):  # noqa: N801
             if item not in other:
                 return False
         return True
+
+    def __repr__(self):
+        return "<unordered list containing {items}".format(items=self.items)
