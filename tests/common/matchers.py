@@ -171,7 +171,6 @@ class unordered_list(Matcher):  # noqa: N801
     (and no more), regardless of order.
 
     """
-
     def __init__(self, items):
         self.items = items
 
