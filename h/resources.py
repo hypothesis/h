@@ -73,7 +73,7 @@ class AnnotationResource(object):
 
         acl = []
         if self.annotation.shared:
-            for principal in _group_principals(self.group):
+            for principal in self._group_principals(self.group):
                 acl.append((Allow, principal, 'read'))
         else:
             acl.append((Allow, self.annotation.userid, 'read'))
@@ -85,6 +85,12 @@ class AnnotationResource(object):
         acl.append(DENY_ALL)
 
         return acl
+
+    @staticmethod
+    def _group_principals(group):
+        if group is None:
+            return []
+        return principals_allowed_by_permission(group, 'read')
 
 
 class AuthClientFactory(object):
@@ -201,9 +207,3 @@ class UserFactory(object):
             raise KeyError()
 
         return user
-
-
-def _group_principals(group):
-    if group is None:
-        return []
-    return principals_allowed_by_permission(group, 'read')
