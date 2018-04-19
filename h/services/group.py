@@ -96,6 +96,15 @@ class GroupService(object):
                             organization=organization,
                             )
 
+    def add_members(self, group, userids):
+        """
+        Add the users indicated by userids to this group's members.
+
+        Any pre-existing members will not be affected.
+        """
+        for userid in userids:
+            self.member_join(group, userid)
+
     def update_members(self, group, userids):
         """
         Update this group's membership to be the list of users indicated by

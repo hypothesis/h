@@ -335,6 +335,30 @@ class TestGroupServiceMemberLeave(object):
         publish.assert_called_once_with('group-leave', group.pubid, new_member.userid)
 
 
+class TestGroupServiceAddMembers(object):
+    """Unit tests for :py:meth:`GroupService.add_members`"""
+
+    def test_it_adds_users_in_userids(self, factories, svc):
+        group = factories.OpenGroup()
+        users = [factories.User(), factories.User()]
+        userids = [user.userid for user in users]
+
+        svc.add_members(group, userids)
+
+        assert group.members == users
+
+    def test_it_does_not_remove_existing_members(self, factories, svc):
+        creator = factories.User()
+        group = factories.Group(creator=creator)
+        users = [factories.User(), factories.User()]
+        userids = [user.userid for user in users]
+
+        svc.add_members(group, userids)
+
+        assert len(group.members) == len(users) + 1  # account for creator user
+        assert creator in group.members
+
+
 class TestGroupServiceUpdateMembers(object):
     """Unit tests for :py:meth:`GroupService.update_members`"""
 
