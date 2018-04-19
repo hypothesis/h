@@ -192,10 +192,10 @@ class UserFactory(object):
 
     def __init__(self, request):
         self.request = request
+        self.user_svc = self.request.find_service(name='user')
 
     def __getitem__(self, username):
-        user = self.request.find_service(name='user').fetch(
-            username, self.request.authority)
+        user = self.user_svc.fetch(username, self.request.authority)
 
         if not user:
             raise KeyError()
