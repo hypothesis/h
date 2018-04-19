@@ -85,10 +85,10 @@ class GroupEditController(object):
     @view_config(request_method='POST')
     def post(self):
         return form.handle_form_submission(
-                self.request,
-                self.form,
-                on_success=self._update_group,
-                on_failure=self._template_data)
+            self.request,
+            self.form,
+            on_success=self._update_group,
+            on_failure=self._template_data)
 
     def _template_data(self):
         return {

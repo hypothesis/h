@@ -1,27 +1,39 @@
 output-format: grouped
 strictness: veryhigh
 doc-warnings: true
+test-warnings: false
+member-warnings: false
 max-line-length: 160
-
-# We run flake8 first and then prospector as a second-pass linter.
-# Since flake8 already runs pyflakes, pep8 and mccabe, don't run them again
-# with prospector.
+dodgy:
+  run: true
 mccabe:
-  run: false
+  run: true
 pep8:
-  run: false
+  run: true
+  full: true
+pyflakes:
+  run: true
+profile-validator:
+  run: true
 pep257:
+  run: false
   disable:
+    - D100 # Missing docstring in public module
+    - D101 # Missing docstring in public class
+    - D102 # Missing docstring in public method
+    - D103 # Missing docstring in public function
+    - D104 # Missing docstring in public package
+    - D105 # Missing docstring in magic method
+    - D106 # Missing docstring in nested class
+    - D107 # Missing docstring in __init__
     - D203 # "1 blank line required before class docstring" conflicts with
            # another pep257 rule D211 "No blank lines allowed before class
            # docstring"!
     - D212 # "Multi-line docstring summary should start at the first line"
            # conflicts with another pep257 rule D213 "Multi-line docstring 
            # summary should start at the second line"
-pyflakes:
-  run: false
-
 pylint:
+  run: true
   enable:
     - relative-import
   disable:
@@ -30,6 +42,10 @@ pylint:
     - missing-docstring  # The pep257 tool reports missing docstrings to us
                          # so we don't need pylint to do so.
     - too-few-public-methods
+    - invalid-name
+    - cyclic-import
+    - global-statement
+    - no-self-use
   options:
     # Some good names that pylint would otherwise reject:
     #
@@ -49,15 +65,133 @@ pylint:
     #       you're shadowing the builtin.
     #
     good-names: _,i,j,k,v,e,db,fn,fp,log,parser,id,es
-pyroma:
-  run: true
+ignore-patterns:
+  - '.*\.egg'
+  - '.*conftest\.py'
 ignore-paths:
   - gunicorn.conf.py
   - h/_version.py
   - h/migrations/
   - h/static/
   - node_modules/
-  - versioneer.py
-ignore-patterns:
-  - '.*\.egg'
-  - '.*conftest\.py'
+  - docs
+  - h/accounts/schemas.py
+  - h/accounts/util.py
+  - h/activity/bucketing.py
+  - h/app.py
+  - h/assets.py
+  - h/auth/__init__.py
+  - h/auth/interfaces.py
+  - h/auth/policy.py
+  - h/celery.py
+  - h/cli/__init__.py
+  - h/cli/commands/annotation_id.py
+  - h/cli/commands/authclient.py
+  - h/cli/commands/devserver.py
+  - h/cli/commands/migrate.py
+  - h/cli/commands/normalize_uris.py
+  - h/cli/commands/shell.py
+  - h/cli/commands/user.py
+  - h/config.py
+  - h/db/__init__.py
+  - h/db/types.py
+  - h/emails/reply_notification.py
+  - h/emails/signup.py
+  - h/eventqueue.py
+  - h/feeds/atom.py
+  - h/feeds/render.py
+  - h/feeds/rss.py
+  - h/form.py
+  - h/formatters/annotation_flag.py
+  - h/formatters/annotation_hidden.py
+  - h/formatters/annotation_moderation.py
+  - h/formatters/interfaces.py
+  - h/groups/schemas.py
+  - h/indexer/reindexer.py
+  - h/interfaces.py
+  - h/jinja_extensions.py
+  - h/models/annotation.py
+  - h/models/document.py
+  - h/models/group.py
+  - h/models/organization.py
+  - h/models/subscriptions.py
+  - h/models/user.py
+  - h/notification/reply.py
+  - h/oauth/errors.py
+  - h/oauth/jwt_grant.py
+  - h/oauth/jwt_grant_token.py
+  - h/oauth/tokens.py
+  - h/paginator.py
+  - h/panels/back_link.py
+  - h/panels/navbar.py
+  - h/presenters/annotation_base.py
+  - h/presenters/annotation_html.py
+  - h/presenters/annotation_searchindex.py
+  - h/presenters/document_html.py
+  - h/presenters/group_json.py
+  - h/pubid.py
+  - h/realtime.py
+  - h/resources.py
+  - h/routes.py
+  - h/schemas/admin_group.py
+  - h/schemas/annotation.py
+  - h/schemas/base.py
+  - h/search/core.py
+  - h/search/index.py
+  - h/search/parser.py
+  - h/search/query.py
+  - h/services/annotation_json_presentation.py
+  - h/services/annotation_moderation.py
+  - h/services/annotation_stats.py
+  - h/services/auth_ticket.py
+  - h/services/auth_token.py
+  - h/services/delete_group.py
+  - h/services/delete_user.py
+  - h/services/developer_token.py
+  - h/services/feature.py
+  - h/services/flag.py
+  - h/services/flag_count.py
+  - h/services/group.py
+  - h/services/group_links.py
+  - h/services/groupfinder.py
+  - h/services/links.py
+  - h/services/list_groups.py
+  - h/services/nipsa.py
+  - h/services/oauth_provider.py
+  - h/services/oauth_validator.py
+  - h/services/rename_user.py
+  - h/services/settings.py
+  - h/services/user.py
+  - h/services/user_password.py
+  - h/services/user_signup.py
+  - h/session.py
+  - h/settings.py
+  - h/streamer/filter.py
+  - h/streamer/messages.py
+  - h/streamer/views.py
+  - h/streamer/websocket.py
+  - h/tasks/indexer.py
+  - h/tweens.py
+  - h/util/cors.py
+  - h/util/document_claims.py
+  - h/util/markdown.py
+  - h/util/query.py
+  - h/util/redirects.py
+  - h/util/session_tracker.py
+  - h/util/uri.py
+  - h/util/view.py
+  - h/viewpredicates.py
+  - h/views/accounts.py
+  - h/views/activity.py
+  - h/views/admin_features.py
+  - h/views/admin_groups.py
+  - h/views/admin_oauthclients.py
+  - h/views/admin_organizations.py
+  - h/views/api.py
+  - h/views/api_auth.py
+  - h/views/api_config.py
+  - h/views/help.py
+  - h/views/home.py
+  - h/views/main.py
+  - h/views/organizations.py
+  - h/websocket.py

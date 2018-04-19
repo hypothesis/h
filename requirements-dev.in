@@ -3,7 +3,7 @@
 flake8
 honcho
 pep257
-prospector[with_pyroma]
+prospector
 pyramid_debugtoolbar
 sphinx
 sphinx_rtd_theme

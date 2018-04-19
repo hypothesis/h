@@ -2,7 +2,6 @@
 
 import argparse
 import os
-from base64 import b64encode
 from zipfile import ZipFile
 
 
