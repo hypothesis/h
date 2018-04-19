@@ -332,7 +332,7 @@ class TestGroupServiceMemberLeave(object):
 
         svc.member_leave(group, new_member.userid)
 
-        assert publish.called_once_with('group-leave', group.pubid, new_member.userid)
+        publish.assert_called_once_with('group-leave', group.pubid, new_member.userid)
 
 
 class TestGroupServiceUpdateMembership(object):
@@ -511,7 +511,7 @@ def origins():
 
 @pytest.fixture
 def publish():
-    return mock.Mock()
+    return mock.Mock(spec_set=[])
 
 
 @pytest.fixture
