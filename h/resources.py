@@ -132,6 +132,33 @@ class OrganizationFactory(object):
             raise KeyError()
 
 
+class OrganizationResource(object):
+    def __init__(self, organization, request):
+        # TODO Links service
+        self.organization = organization
+        self.request = request
+
+    @property
+    def id(self):
+        return self.organization.pubid  # Web-facing unique ID for this resource
+
+    @property
+    def default(self):
+        return self.id == ORGANIZATION_DEFAULT_PUBID
+
+    @property
+    def links(self):
+        # TODO
+        return {}
+
+    @property
+    def logo(self):
+        if self.organization.logo:
+            return self.request.route_url('organization_logo',
+                                          pubid=self.organization.pubid)
+        return None
+
+
 class OrganizationLogoFactory(object):
     def __init__(self, request):
         self.request = request
@@ -164,33 +191,6 @@ class GroupResource(object):
     @property
     def organization(self):
         return OrganizationResource(self.group.organization, self.request)
-
-
-class OrganizationResource(object):
-    def __init__(self, organization, request):
-        # TODO Links service
-        self.organization = organization
-        self.request = request
-
-    @property
-    def id(self):
-        return self.organization.pubid  # Web-facing unique ID for this resource
-
-    @property
-    def default(self):
-        return self.id == ORGANIZATION_DEFAULT_PUBID
-
-    @property
-    def links(self):
-        # TODO
-        return {}
-
-    @property
-    def logo(self):
-        if self.organization.logo:
-            return self.request.route_url('organization_logo',
-                                          pubid=self.organization.pubid)
-        return None
 
 
 class UserFactory(object):
