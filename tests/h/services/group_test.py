@@ -14,37 +14,37 @@ from tests.common.matchers import Matcher
 
 
 class TestGroupServiceCreatePrivateGroup(object):
-    def test_create_private_group_returns_group_model(self, creator, svc):
+    def test_it_returns_group_model(self, creator, svc):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert isinstance(group, Group)
 
-    def test_create_private_group_sets_group_name(self, creator, svc):
+    def test_it_sets_group_name(self, creator, svc):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.name == 'Anteater fans'
 
-    def test_create_private_group_sets_group_authority(self, svc, creator, pyramid_request):
+    def test_it_sets_group_authority(self, svc, creator, pyramid_request):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.authority == pyramid_request.authority
 
-    def test_create_private_group_sets_group_creator(self, svc, creator):
+    def test_it_sets_group_creator(self, svc, creator):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.creator == creator
 
-    def test_create_private_group_sets_description_when_present(self, svc, creator):
+    def test_it_sets_description_when_present(self, svc, creator):
         group = svc.create_private_group('Anteater fans', creator.userid, 'all about ant eaters')
 
         assert group.description == 'all about ant eaters'
 
-    def test_create_private_group_skips_setting_description_when_missing(self, svc, creator):
+    def test_it_skips_setting_description_when_missing(self, svc, creator):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.description is None
 
-    def test_create_private_group_adds_group_creator_to_members(self, svc, creator):
+    def test_it_adds_group_creator_to_members(self, svc, creator):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert creator in group.members
@@ -53,36 +53,36 @@ class TestGroupServiceCreatePrivateGroup(object):
         ('joinable_by', JoinableBy.authority),
         ('readable_by', ReadableBy.members),
         ('writeable_by', WriteableBy.members)])
-    def test_create_private_group_sets_access_flags(self, svc, creator, flag, expected_value):
+    def test_it_sets_access_flags(self, svc, creator, flag, expected_value):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert getattr(group, flag) == expected_value
 
-    def test_create_private_group_creates_group_with_default_organization(
+    def test_it_creates_group_with_default_organization(
             self, default_organization, creator, svc):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.organization == default_organization
 
-    def test_create_private_group_creates_group_with_specified_organization(self, factories, creator, svc):
+    def test_it_creates_group_with_specified_organization(self, factories, creator, svc):
         org = factories.Organization()
 
         group = svc.create_private_group('Anteater fans', creator.userid, organization=org)
 
         assert group.organization == org
 
-    def test_create_private_group_adds_group_to_session(self, db_session, creator, svc):
+    def test_it_adds_group_to_session(self, db_session, creator, svc):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group in db_session
 
-    def test_create_private_group_sets_group_ids(self, creator, svc):
+    def test_it_sets_group_ids(self, creator, svc):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.id
         assert group.pubid
 
-    def test_create_private_group_publishes_join_event(self, svc, creator, publish):
+    def test_it_publishes_join_event(self, svc, creator, publish):
         group = svc.create_private_group('Dishwasher disassemblers', creator.userid)
 
         publish.assert_called_once_with('group-join', group.pubid, creator.userid)
@@ -90,7 +90,7 @@ class TestGroupServiceCreatePrivateGroup(object):
 
 class TestGroupServiceCreateOpenGroup(object):
 
-    def test_create_open_group_returns_group_model(self, creator, svc, origins):
+    def test_it_returns_group_model(self, creator, svc, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
 
         assert isinstance(group, Group)
@@ -100,22 +100,22 @@ class TestGroupServiceCreateOpenGroup(object):
         ('description', 'test description'),
         ('authority', 'example.com')
     ])
-    def test_create_open_group_creates_group_attrs(self, creator, svc, origins, group_attr, expected_value):
+    def test_it_creates_group_attrs(self, creator, svc, origins, group_attr, expected_value):
         group = svc.create_open_group('test group', creator.userid, origins=origins, description='test description')
 
         assert getattr(group, group_attr) == expected_value
 
-    def test_create_open_group_skips_setting_description_when_missing(self, svc, creator, origins):
+    def test_it_skips_setting_description_when_missing(self, svc, creator, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
 
         assert group.description is None
 
-    def test_create_open_group_sets_group_creator(self, svc, creator, origins):
+    def test_it_sets_group_creator(self, svc, creator, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
 
         assert group.creator == creator
 
-    def test_create_open_group_does_not_add_group_creator_to_members(self, svc, creator, origins):
+    def test_it_does_not_add_group_creator_to_members(self, svc, creator, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
 
         assert creator not in group.members
@@ -124,35 +124,35 @@ class TestGroupServiceCreateOpenGroup(object):
         ('joinable_by', None),
         ('readable_by', ReadableBy.world),
         ('writeable_by', WriteableBy.authority)])
-    def test_create_open_group_sets_access_flags(self, svc, creator, origins, flag, expected_value):
+    def test_it_sets_access_flags(self, svc, creator, origins, flag, expected_value):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
 
         assert getattr(group, flag) == expected_value
 
-    def test_create_open_group_creates_group_with_default_organization(
+    def test_it_creates_group_with_default_organization(
             self, default_organization, creator, svc, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
 
         assert group.organization == default_organization
 
-    def test_create_open_group_creates_group_with_specified_organization(self, factories, creator, svc, origins):
+    def test_it_creates_group_with_specified_organization(self, factories, creator, svc, origins):
         org = factories.Organization()
 
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins, organization=org)
 
         assert group.organization == org
 
-    def test_create_open_group_adds_group_to_session(self, db_session, creator, svc, origins):
+    def test_it_adds_group_to_session(self, db_session, creator, svc, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
 
         assert group in db_session
 
-    def test_create_open_group_does_not_publish_join_event(self, svc, creator, publish, origins):
+    def test_it_does_not_publish_join_event(self, svc, creator, publish, origins):
         svc.create_open_group('Dishwasher disassemblers', creator.userid, origins=origins)
 
         publish.assert_not_called()
 
-    def test_create_open_group_sets_scopes(self, svc, matchers, creator):
+    def test_it_sets_scopes(self, svc, matchers, creator):
         origins = ['https://biopub.org', 'http://example.com', 'https://wikipedia.com']
 
         group = svc.create_open_group(name='test_group', userid=creator.userid, origins=origins)
@@ -160,7 +160,7 @@ class TestGroupServiceCreateOpenGroup(object):
         assert group.scopes == matchers.unordered_list([
             GroupScopeWithOrigin(h) for h in origins])
 
-    def test_create_open_group_always_creates_new_scopes(self, db_session, factories, svc, creator, matchers):
+    def test_it_always_creates_new_scopes(self, db_session, factories, svc, creator, matchers):
         # It always creates a new scope, even if a scope with the given origin
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
@@ -174,7 +174,7 @@ class TestGroupServiceCreateOpenGroup(object):
 
 class TestGroupServiceCreateRestrictedGroup(object):
 
-    def test_create_restricted_group_returns_group_model(self, creator, svc, origins):
+    def test_it_returns_group_model(self, creator, svc, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
 
         assert isinstance(group, Group)
@@ -184,22 +184,22 @@ class TestGroupServiceCreateRestrictedGroup(object):
         ('description', 'test description'),
         ('authority', 'example.com')
     ])
-    def test_create_restricted_group_creates_group_attrs(self, creator, svc, origins, group_attr, expected_value):
+    def test_it_creates_group_attrs(self, creator, svc, origins, group_attr, expected_value):
         group = svc.create_restricted_group('test group', creator.userid, origins=origins, description='test description')
 
         assert getattr(group, group_attr) == expected_value
 
-    def test_create_restricted_group_skips_setting_description_when_missing(self, svc, creator, origins):
+    def test_it_skips_setting_description_when_missing(self, svc, creator, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
 
         assert group.description is None
 
-    def test_create_restricted_group_sets_group_creator(self, svc, creator, origins):
+    def test_it_sets_group_creator(self, svc, creator, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
 
         assert group.creator == creator
 
-    def test_create_restricted_group_adds_group_creator_to_members(self, svc, creator, origins):
+    def test_it_adds_group_creator_to_members(self, svc, creator, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
 
         assert creator in group.members
@@ -208,35 +208,35 @@ class TestGroupServiceCreateRestrictedGroup(object):
         ('joinable_by', None),
         ('readable_by', ReadableBy.world),
         ('writeable_by', WriteableBy.members)])
-    def test_create_restricted_group_sets_access_flags(self, svc, creator, origins, flag, expected_value):
+    def test_it_sets_access_flags(self, svc, creator, origins, flag, expected_value):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
 
         assert getattr(group, flag) == expected_value
 
-    def test_create_restricted_group_creates_group_with_default_organization(
+    def test_it_creates_group_with_default_organization(
             self, default_organization, creator, svc, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
 
         assert group.organization == default_organization
 
-    def test_create_restricted_group_creates_group_with_specified_organization(self, factories, creator, svc, origins):
+    def test_it_creates_group_with_specified_organization(self, factories, creator, svc, origins):
         org = factories.Organization()
 
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins, organization=org)
 
         assert group.organization == org
 
-    def test_create_restricted_group_adds_group_to_session(self, db_session, creator, svc, origins):
+    def test_it_adds_group_to_session(self, db_session, creator, svc, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
 
         assert group in db_session
 
-    def test_create_restricted_group_publishes_join_event(self, svc, creator, publish, origins):
+    def test_it_publishes_join_event(self, svc, creator, publish, origins):
         group = svc.create_restricted_group('Dishwasher disassemblers', creator.userid, origins=origins)
 
         publish.assert_called_once_with('group-join', group.pubid, creator.userid)
 
-    def test_create_restricted_group_sets_scopes(self, svc, matchers, creator):
+    def test_it_sets_scopes(self, svc, matchers, creator):
         origins = ['https://biopub.org', 'http://example.com', 'https://wikipedia.com']
 
         group = svc.create_restricted_group(name='test_group', userid=creator.userid, origins=origins)
@@ -244,7 +244,7 @@ class TestGroupServiceCreateRestrictedGroup(object):
         assert group.scopes == matchers.unordered_list([
             GroupScopeWithOrigin(h) for h in origins])
 
-    def test_create_restricted_group_with_mismatched_authorities_raises_value_error(
+    def test_it_with_mismatched_authorities_raises_value_error(
             self, db_session, svc, origins, creator, factories):
         org = factories.Organization(
             name='My organization',
@@ -257,7 +257,7 @@ class TestGroupServiceCreateRestrictedGroup(object):
                                         description='test_description',
                                         organization=org)
 
-    def test_create_restricted_group_always_creates_new_scopes(self, db_session, factories, svc, creator, matchers):
+    def test_it_always_creates_new_scopes(self, db_session, factories, svc, creator, matchers):
         # It always creates a new scope, even if a scope with the given origin
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
@@ -274,14 +274,14 @@ class TestGroupServiceCreateRestrictedGroup(object):
 
 class TestGroupServiceMemberJoin(object):
 
-    def test_member_join_adds_user_to_group(self, svc, factories):
+    def test_it_adds_user_to_group(self, svc, factories):
         user = factories.User()
         group = factories.Group()
         svc.member_join(group, user.userid)
 
         assert user in group.members
 
-    def test_member_join_is_idempotent(self, svc, factories):
+    def test_it_is_idempotent(self, svc, factories):
         user = factories.User()
         group = factories.Group()
         svc.member_join(group, user.userid)
@@ -289,7 +289,7 @@ class TestGroupServiceMemberJoin(object):
 
         assert group.members.count(user) == 1
 
-    def test_member_join_publishes_join_event(self, svc, factories, publish):
+    def test_it_publishes_join_event(self, svc, factories, publish):
         group = factories.Group()
         user = factories.User()
 
@@ -300,7 +300,7 @@ class TestGroupServiceMemberJoin(object):
 
 class TestGroupServiceMemberLeave(object):
 
-    def test_member_leave_removes_user_from_group(self, svc, factories, creator):
+    def test_it_removes_user_from_group(self, svc, factories, creator):
         group = factories.Group(creator=creator)
         new_member = factories.User()
         group.members.append(new_member)
@@ -309,7 +309,7 @@ class TestGroupServiceMemberLeave(object):
 
         assert new_member not in group.members
 
-    def test_member_leave_is_idempotent(self, svc, factories, creator):
+    def test_it_is_idempotent(self, svc, factories, creator):
         group = factories.Group(creator=creator)
         new_member = factories.User()
         group.members.append(new_member)
@@ -319,7 +319,7 @@ class TestGroupServiceMemberLeave(object):
 
         assert new_member not in group.members
 
-    def test_member_leave_publishes_leave_event(self, svc, factories, publish):
+    def test_it_publishes_leave_event(self, svc, factories, publish):
         group = factories.Group()
         new_member = factories.User()
         group.members.append(new_member)
@@ -331,7 +331,7 @@ class TestGroupServiceMemberLeave(object):
 
 class TestGroupServiceUpdateMembership(object):
 
-    def test_update_membership_adds_users_in_usernames(self, factories, svc):
+    def test_it_adds_users_in_usernames(self, factories, svc):
         group = factories.OpenGroup()  # no members at outset
         new_members = [
             factories.User(),
@@ -349,7 +349,7 @@ class TestGroupServiceUpdateMembership(object):
         for member in new_members:
             assert member in group.members
 
-    def test_update_membership_removes_members_not_present_in_usernames(self, factories, svc, creator):
+    def test_it_removes_members_not_present_in_usernames(self, factories, svc, creator):
         group = factories.Group(creator=creator)  # creator will be a member
         new_members = [
             factories.User(),
@@ -362,7 +362,7 @@ class TestGroupServiceUpdateMembership(object):
 
         assert not group.members  # including the creator
 
-    def test_update_membership_does_not_remove_members_present_in_usernames(self, factories, svc, publish):
+    def test_it_does_not_remove_members_present_in_usernames(self, factories, svc, publish):
         group = factories.OpenGroup()  # no members at outset
         new_members = [
             factories.User(),
@@ -377,7 +377,7 @@ class TestGroupServiceUpdateMembership(object):
         assert new_members[1] in group.members
         publish.assert_not_called()
 
-    def test_update_membership_proxies_to_member_join_and_leave(self, factories, svc):
+    def test_it_proxies_to_member_join_and_leave(self, factories, svc):
         svc.member_join = mock.Mock()
         svc.member_leave = mock.Mock()
 
@@ -397,7 +397,7 @@ class TestGroupServiceUpdateMembership(object):
 class TestGroupServiceGroupIds(object):
 
     @pytest.mark.parametrize('with_user', [True, False])
-    def test_groupids_readable_by_includes_world(self, with_user, svc, db_session, factories):
+    def test_readable_by_includes_world(self, with_user, svc, db_session, factories):
         user = None
         if with_user:
             user = factories.User()
@@ -406,7 +406,7 @@ class TestGroupServiceGroupIds(object):
         assert '__world__' in svc.groupids_readable_by(user)
 
     @pytest.mark.parametrize('with_user', [True, False])
-    def test_groupids_readable_by_includes_world_readable_groups(self, with_user, svc, db_session, factories):
+    def test_readable_by_includes_world_readable_groups(self, with_user, svc, db_session, factories):
         # group readable by members
         factories.Group(readable_by=ReadableBy.members)
         # group readable by everyone
@@ -419,7 +419,7 @@ class TestGroupServiceGroupIds(object):
 
         assert group.pubid in svc.groupids_readable_by(user)
 
-    def test_groupids_readable_by_includes_memberships(self, svc, db_session, factories):
+    def test_readable_by_includes_memberships(self, svc, db_session, factories):
         user = factories.User()
 
         group = factories.Group(readable_by=ReadableBy.members)
@@ -429,13 +429,13 @@ class TestGroupServiceGroupIds(object):
 
         assert group.pubid in svc.groupids_readable_by(user)
 
-    def test_groupids_created_by_includes_created_groups(self, svc, factories):
+    def test_created_by_includes_created_groups(self, svc, factories):
         user = factories.User()
         group = factories.Group(creator=user)
 
         assert group.pubid in svc.groupids_created_by(user)
 
-    def test_groupids_created_by_excludes_other_groups(self, svc, db_session, factories):
+    def test_created_by_excludes_other_groups(self, svc, db_session, factories):
         user = factories.User()
         private_group = factories.Group()
         private_group.members.append(user)
@@ -444,7 +444,7 @@ class TestGroupServiceGroupIds(object):
 
         assert svc.groupids_created_by(user) == []
 
-    def test_groupids_created_by_returns_empty_list_for_missing_user(self, svc):
+    def test_created_by_returns_empty_list_for_missing_user(self, svc):
         assert svc.groupids_created_by(None) == []
 
 
