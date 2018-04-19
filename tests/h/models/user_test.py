@@ -1,41 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import mock
 import pytest
 from sqlalchemy import exc
 
 from h import models
-from h.services.user import user_service_factory
-from h.models.user import UserFactory
-
-
-@pytest.mark.usefixtures('user_service')
-class TestUserFactory(object):
-
-    def test_it_raises_KeyError_if_the_user_does_not_exist(self,
-                                                           user_factory,
-                                                           user_service):
-        user_service.fetch.return_value = None
-
-        with pytest.raises(KeyError):
-            user_factory["does_not_exist"]
-
-    def test_it_returns_users(self, factories, user_factory, user_service):
-        user_service.fetch.return_value = user = factories.User.build()
-
-        assert user_factory[user.username] == user
-
-    @pytest.fixture
-    def user_factory(self, pyramid_request):
-        return UserFactory(pyramid_request)
-
-    @pytest.fixture
-    def user_service(self, pyramid_config, pyramid_request):
-        user_service = mock.Mock(spec_set=user_service_factory(
-            None, pyramid_request))
-        pyramid_config.register_service(user_service, name='user')
-        return user_service
 
 
 def test_cannot_create_dot_variant_of_user(db_session):

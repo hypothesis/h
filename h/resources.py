@@ -187,6 +187,22 @@ class OrganizationResource(object):
         return None
 
 
+class UserFactory(object):
+    """Root resource for routes that look up User objects by traversal."""
+
+    def __init__(self, request):
+        self.request = request
+        self.user_svc = self.request.find_service(name='user')
+
+    def __getitem__(self, username):
+        user = self.user_svc.fetch(username, self.request.authority)
+
+        if not user:
+            raise KeyError()
+
+        return user
+
+
 def _group_principals(group):
     if group is None:
         return []

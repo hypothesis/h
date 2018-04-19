@@ -34,7 +34,7 @@ def test_includeme():
         call('claim_account_legacy', '/claim_account/{token}'),
         call('dismiss_sidebar_tutorial', '/app/dismiss_sidebar_tutorial'),
         call('activity.search', '/search'),
-        call('activity.user_search', '/users/{username}', factory=u'h.models.user:UserFactory', traverse=u'/{username}'),
+        call('activity.user_search', '/users/{username}', factory=u'h.resources:UserFactory', traverse=u'/{username}'),
         call('admin_index', '/admin/'),
         call('admin_admins', '/admin/admins'),
         call('admin_badge', '/admin/badge'),

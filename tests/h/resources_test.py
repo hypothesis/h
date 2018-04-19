@@ -17,6 +17,8 @@ from h.resources import OrganizationFactory
 from h.resources import OrganizationLogoFactory
 from h.resources import GroupResource
 from h.resources import OrganizationResource
+from h.resources import UserFactory
+from h.services.user import UserService
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -356,6 +358,38 @@ class TestOrganizationResource(object):
         organization_resource = OrganizationResource(organization, pyramid_request)
 
         assert organization_resource.default is True
+
+
+@pytest.mark.usefixtures('user_service')
+class TestUserFactory(object):
+
+    def test_it_fetches_the_requested_user(self, pyramid_request, user_factory, user_service):
+        user_factory["bob"]
+
+        user_service.fetch.assert_called_once_with("bob", pyramid_request.authority)
+
+    def test_it_raises_KeyError_if_the_user_does_not_exist(self,
+                                                           user_factory,
+                                                           user_service):
+        user_service.fetch.return_value = None
+
+        with pytest.raises(KeyError):
+            user_factory["does_not_exist"]
+
+    def test_it_returns_users(self, factories, user_factory, user_service):
+        user_service.fetch.return_value = user = factories.User.build()
+
+        assert user_factory[user.username] == user
+
+    @pytest.fixture
+    def user_factory(self, pyramid_request):
+        return UserFactory(pyramid_request)
+
+    @pytest.fixture
+    def user_service(self, pyramid_config):
+        user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
+        pyramid_config.register_service(user_service, name='user')
+        return user_service
 
 
 @pytest.fixture
