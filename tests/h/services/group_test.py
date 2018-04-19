@@ -14,6 +14,8 @@ from tests.common.matchers import Matcher
 
 
 class TestGroupServiceCreatePrivateGroup(object):
+    """Unit tests for :py:meth:`GroupService.create_private_group`"""
+
     def test_it_returns_group_model(self, creator, svc):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
@@ -89,6 +91,7 @@ class TestGroupServiceCreatePrivateGroup(object):
 
 
 class TestGroupServiceCreateOpenGroup(object):
+    """Unit tests for :py:meth:`GroupService.create_open_group`"""
 
     def test_it_returns_group_model(self, creator, svc, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
@@ -173,6 +176,7 @@ class TestGroupServiceCreateOpenGroup(object):
 
 
 class TestGroupServiceCreateRestrictedGroup(object):
+    """Unit tests for :py:meth:`GroupService.create_restricted_group`"""
 
     def test_it_returns_group_model(self, creator, svc, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
@@ -273,6 +277,7 @@ class TestGroupServiceCreateRestrictedGroup(object):
 
 
 class TestGroupServiceMemberJoin(object):
+    """Unit tests for :py:meth:`GroupService.member_join`"""
 
     def test_it_adds_user_to_group(self, svc, factories):
         user = factories.User()
@@ -299,6 +304,7 @@ class TestGroupServiceMemberJoin(object):
 
 
 class TestGroupServiceMemberLeave(object):
+    """Unit tests for :py:meth:`GroupService.member_leave`"""
 
     def test_it_removes_user_from_group(self, svc, factories, creator):
         group = factories.Group(creator=creator)
@@ -330,6 +336,7 @@ class TestGroupServiceMemberLeave(object):
 
 
 class TestGroupServiceUpdateMembership(object):
+    """Unit tests for :py:meth:`GroupService.update_membership`"""
 
     def test_it_adds_users_in_usernames(self, factories, svc):
         group = factories.OpenGroup()  # no members at outset
@@ -395,6 +402,10 @@ class TestGroupServiceUpdateMembership(object):
 
 
 class TestGroupServiceGroupIds(object):
+    """Unit tests for methods related to group IDs:
+        - :py:meth:`GroupService.groupids_readable_by`
+        - :py:meth:`GroupService.groupids_created_by`
+    """
 
     @pytest.mark.parametrize('with_user', [True, False])
     def test_readable_by_includes_world(self, with_user, svc, db_session, factories):
