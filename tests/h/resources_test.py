@@ -18,7 +18,7 @@ from h.resources import OrganizationLogoFactory
 from h.resources import GroupResource
 from h.resources import OrganizationResource
 from h.resources import UserFactory
-from h.services.user import user_service_factory
+from h.services.user import UserService
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
@@ -381,9 +381,8 @@ class TestUserFactory(object):
         return UserFactory(pyramid_request)
 
     @pytest.fixture
-    def user_service(self, pyramid_config, pyramid_request):
-        user_service = mock.Mock(spec_set=user_service_factory(
-            None, pyramid_request))
+    def user_service(self, pyramid_config):
+        user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
         pyramid_config.register_service(user_service, name='user')
         return user_service
 
