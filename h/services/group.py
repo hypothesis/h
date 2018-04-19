@@ -96,19 +96,29 @@ class GroupService(object):
                             organization=organization,
                             )
 
-    def update_membership(self, group, usernames):
-        group_member_usernames = [member.username for member in group.members]
+    def update_members(self, group, userids):
+        """
+        Update this group's membership to be the list of users indicated by
+        userids.
 
-        usernames_to_add = list(set(usernames) - set(group_member_usernames))
-        usernames_to_remove = list(set(group_member_usernames) - set(usernames))
+        The users indicated by userids will *replace* the members of this group.
+        Any pre-existing member whose userid is not present in userids will
+        be removed as a member.
 
-        for ua in usernames_to_add:
-            uid = User(username=ua, authority=group.authority).userid
-            self.member_join(group, uid)
+        :param group:   group model
+        :param userids: the list of userids corresponding to users who should
+                        be the members of this group
+        """
+        current_member_userids = [member.userid for member in group.members]
+        userids_for_removal = list(
+            filter(lambda mem_id: mem_id not in userids, current_member_userids)
+        )
 
-        for ur in usernames_to_remove:
-            uid = User(username=ur, authority=group.authority).userid
-            self.member_leave(group, uid)
+        for userid in userids:
+            self.member_join(group, userid)
+
+        for userid in userids_for_removal:
+            self.member_leave(group, userid)
 
     def member_join(self, group, userid):
         """Add `userid` to the member list of `group`."""

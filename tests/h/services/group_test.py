@@ -335,28 +335,21 @@ class TestGroupServiceMemberLeave(object):
         publish.assert_called_once_with('group-leave', group.pubid, new_member.userid)
 
 
-class TestGroupServiceUpdateMembership(object):
-    """Unit tests for :py:meth:`GroupService.update_membership`"""
+class TestGroupServiceUpdateMembers(object):
+    """Unit tests for :py:meth:`GroupService.update_members`"""
 
-    def test_it_adds_users_in_usernames(self, factories, svc):
+    def test_it_adds_users_in_userids(self, factories, svc):
         group = factories.OpenGroup()  # no members at outset
         new_members = [
             factories.User(),
             factories.User()
         ]
 
-        svc.update_membership(group, [user.username for user in new_members])
+        svc.update_members(group, [user.userid for user in new_members])
 
-        # The following is the desired end state but the ordering is currently non-deterministic
-        # TODO refactor method such that ordering is deterministic
-        # assert group.members == new_members
+        assert group.members == new_members
 
-        for member in group.members:
-            assert member in new_members
-        for member in new_members:
-            assert member in group.members
-
-    def test_it_removes_members_not_present_in_usernames(self, factories, svc, creator):
+    def test_it_removes_members_not_present_in_userids(self, factories, svc, creator):
         group = factories.Group(creator=creator)  # creator will be a member
         new_members = [
             factories.User(),
@@ -365,11 +358,11 @@ class TestGroupServiceUpdateMembership(object):
         group.members.append(new_members[0])
         group.members.append(new_members[1])
 
-        svc.update_membership(group, [])
+        svc.update_members(group, [])
 
         assert not group.members  # including the creator
 
-    def test_it_does_not_remove_members_present_in_usernames(self, factories, svc, publish):
+    def test_it_does_not_remove_members_present_in_userids(self, factories, svc, publish):
         group = factories.OpenGroup()  # no members at outset
         new_members = [
             factories.User(),
@@ -378,7 +371,7 @@ class TestGroupServiceUpdateMembership(object):
         group.members.append(new_members[0])
         group.members.append(new_members[1])
 
-        svc.update_membership(group, [user.username for user in group.members])
+        svc.update_members(group, [user.userid for user in group.members])
 
         assert new_members[0] in group.members
         assert new_members[1] in group.members
@@ -395,10 +388,20 @@ class TestGroupServiceUpdateMembership(object):
         ]
         group.members.append(new_members[0])
 
-        svc.update_membership(group, [new_members[1].username])
+        svc.update_members(group, [new_members[1].userid])
 
         svc.member_join.assert_called_once_with(group, new_members[1].userid)
         svc.member_leave.assert_called_once_with(group, new_members[0].userid)
+
+    def test_it_does_not_add_duplicate_members(self, factories, svc):
+        # test for idempotency
+        group = factories.OpenGroup()
+        new_member = factories.User()
+
+        svc.update_members(group, [new_member.userid, new_member.userid])
+
+        assert group.members == [new_member]
+        assert len(group.members) == 1
 
 
 class TestGroupServiceGroupIds(object):
