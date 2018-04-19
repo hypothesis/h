@@ -387,7 +387,6 @@ class TestGroupServiceUpdateMembership(object):
             factories.User()
         ]
         group.members.append(new_members[0])
-        print group.members
 
         svc.update_membership(group, [new_members[1].username])
 
