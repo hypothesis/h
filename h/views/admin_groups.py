@@ -86,9 +86,9 @@ class GroupCreateController(object):
             else:
                 raise Exception('Unsupported group type {}'.format(type_))
 
-            # Update group memberships
+            # Add members to the group
             member_userids = [_userid(username, organization.authority) for username in appstruct['members']]
-            svc.update_members(group, member_userids)
+            svc.add_members(group, member_userids)
 
             # Flush changes to allocate group a pubid
             self.request.db.flush(objects=[group])

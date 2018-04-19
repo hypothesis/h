@@ -160,7 +160,7 @@ class TestGroupCreateController(object):
 
         create_method.assert_called_with(name=name, userid=expected_userid, description=description,
                                          origins=origins, organization=default_org)
-        group_svc.update_members.assert_called_once_with(create_method.return_value, [member_to_add.userid])
+        group_svc.add_members.assert_called_once_with(create_method.return_value, [member_to_add.userid])
 
 
 @pytest.mark.usefixtures('routes', 'user_svc', 'group_svc', 'list_orgs_svc')
