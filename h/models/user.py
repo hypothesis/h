@@ -122,22 +122,6 @@ class UserIDComparator(Comparator):
         return self.__clause_element__().in_(others)
 
 
-class UserFactory(object):
-    """Root resource for routes that look up User objects by traversal."""
-
-    def __init__(self, request):
-        self.request = request
-
-    def __getitem__(self, username):
-        user = self.request.find_service(name='user').fetch(
-            username, self.request.authority)
-
-        if not user:
-            raise KeyError()
-
-        return user
-
-
 class User(Base):
     __tablename__ = 'user'
 
