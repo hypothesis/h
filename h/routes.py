@@ -70,7 +70,7 @@ def includeme(config):
     # Annotations & stream
     config.add_route('annotation',
                      '/a/{id}',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('stream', '/stream')
     config.add_route('stream.user_query', '/u/{user}')
@@ -93,19 +93,19 @@ def includeme(config):
     config.add_route('api.annotations', '/api/annotations')
     config.add_route('api.annotation',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation_flag',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/flag',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation_hide',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/hide',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation.jsonld',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')

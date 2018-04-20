@@ -34,7 +34,7 @@ class Root(object):
         self.request = request
 
 
-class AnnotationResourceFactory(object):
+class AnnotationRoot(object):
     def __init__(self, request):
         self.request = request
 

@@ -11,7 +11,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from h.models import AuthClient, Organization
 from h.services.group_links import GroupLinksService
 from h.resources import AnnotationResource
-from h.resources import AnnotationResourceFactory
+from h.resources import AnnotationRoot
 from h.resources import AuthClientFactory
 from h.resources import OrganizationFactory
 from h.resources import OrganizationLogoFactory
@@ -23,43 +23,43 @@ from h.services.user import UserService
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
-class TestAnnotationResourceFactory(object):
+class TestAnnotationRoot(object):
     def test_get_item_fetches_annotation(self, pyramid_request, storage):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
 
         factory['123']
         storage.fetch_annotation.assert_called_once_with(pyramid_request.db, '123')
 
     def test_get_item_returns_annotation_resource(self, pyramid_request, storage):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert isinstance(resource, AnnotationResource)
 
     def test_get_item_resource_has_right_annotation(self, pyramid_request, storage):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert resource.annotation == storage.fetch_annotation.return_value
 
     def test_get_item_raises_when_annotation_is_not_found(self, storage, pyramid_request):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = None
 
         with pytest.raises(KeyError):
             factory['123']
 
     def test_get_item_has_right_group_service(self, pyramid_request, storage, group_service):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert resource.group_service == group_service
 
     def test_get_item_has_right_links_service(self, pyramid_request, storage, links_service):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
