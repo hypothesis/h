@@ -131,7 +131,7 @@ class TestGroupCreateController(object):
                                            type_, default_org):
         name = 'My new group'
         creator = pyramid_request.user.username
-        member_to_add = 'member_to_add'
+        member_to_add = factories.User()
         description = 'Purpose of new group'
         origins = ['https://example.com']
 
@@ -143,7 +143,7 @@ class TestGroupCreateController(object):
                 'group_type': type_,
                 'name': name,
                 'origins': origins,
-                'members': [member_to_add]
+                'members': [member_to_add.username]
             })
         handle_form_submission.side_effect = call_on_success
         ctrl = GroupCreateController(pyramid_request)
@@ -160,7 +160,7 @@ class TestGroupCreateController(object):
 
         create_method.assert_called_with(name=name, userid=expected_userid, description=description,
                                          origins=origins, organization=default_org)
-        group_svc.update_membership.assert_called_once_with(create_method.return_value, [member_to_add])
+        group_svc.add_members.assert_called_once_with(create_method.return_value, [member_to_add.userid])
 
 
 @pytest.mark.usefixtures('routes', 'user_svc', 'group_svc', 'list_orgs_svc')
@@ -256,7 +256,7 @@ class TestGroupEditController(object):
         assert [s.origin for s in group.scopes] == updated_origins
         assert ctx['form'] == self._expected_form(group)
 
-    def test_update_updates_group_membership_on_success(self, factories, pyramid_request, group_svc, user_svc, handle_form_submission):
+    def test_update_updates_group_members_on_success(self, factories, pyramid_request, group_svc, user_svc, handle_form_submission):
         group = factories.RestrictedGroup(pubid='testgroup')
 
         pyramid_request.matchdict = {'pubid': group.pubid}
@@ -283,7 +283,7 @@ class TestGroupEditController(object):
 
         ctrl.update()
 
-        group_svc.update_membership.assert_any_call(group, [member_a.username, member_b.username])
+        group_svc.update_members.assert_any_call(group, [member_a.userid, member_b.userid])
 
     def test_delete_deletes_group(self, group, delete_group_svc, pyramid_request, routes):
         pyramid_request.matchdict = {"pubid": group.pubid}

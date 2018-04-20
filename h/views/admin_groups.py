@@ -73,7 +73,7 @@ class GroupCreateController(object):
             origins = appstruct['origins']
             type_ = appstruct['group_type']
 
-            userid = models.User(username=creator, authority=organization.authority).userid
+            userid = _userid(creator, organization.authority)
 
             if type_ == 'open':
                 group = svc.create_open_group(name=name, userid=userid,
@@ -86,8 +86,9 @@ class GroupCreateController(object):
             else:
                 raise Exception('Unsupported group type {}'.format(type_))
 
-            # Update group memberships
-            svc.update_membership(group, appstruct['members'])
+            # Add members to the group
+            member_userids = [_userid(username, organization.authority) for username in appstruct['members']]
+            svc.add_members(group, member_userids)
 
             # Flush changes to allocate group a pubid
             self.request.db.flush(objects=[group])
@@ -164,7 +165,8 @@ class GroupEditController(object):
             group.scopes = [GroupScope(origin=o) for o in appstruct['origins']]
             group.organization = self.organizations[appstruct['organization']]
 
-            group_svc.update_membership(group, appstruct['members'])
+            memberids = [_userid(username, group.authority) for username in appstruct['members']]
+            group_svc.update_members(group, memberids)
 
             self.form = _create_form(self.request, self.schema, (_('Save'),))
             self._update_appstruct()
@@ -199,6 +201,10 @@ class GroupEditController(object):
             'annotation_count': num_annotations,
             'member_count': len(self.group.members),
         }
+
+
+def _userid(username, authority):
+    return models.User(username=username, authority=authority).userid
 
 
 def _create_form(request, schema, buttons):
