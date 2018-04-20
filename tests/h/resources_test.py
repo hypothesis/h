@@ -13,7 +13,7 @@ from h.services.group_links import GroupLinksService
 from h.resources import AnnotationResource
 from h.resources import AnnotationRoot
 from h.resources import AuthClientRoot
-from h.resources import OrganizationFactory
+from h.resources import OrganizationRoot
 from h.resources import OrganizationLogoFactory
 from h.resources import GroupFactory
 from h.resources import GroupResource
@@ -228,7 +228,7 @@ class TestAuthClientResourceFactory(object):
 
 
 @pytest.mark.usefixtures('organizations')
-class TestOrganizationFactory(object):
+class TestOrganizationRoot(object):
 
     def test_it_returns_the_requested_organization(self, organizations, organization_factory):
         organization = organizations[1]
@@ -241,7 +241,7 @@ class TestOrganizationFactory(object):
 
     @pytest.fixture
     def organization_factory(self, pyramid_request):
-        return OrganizationFactory(pyramid_request)
+        return OrganizationRoot(pyramid_request)
 
 
 @pytest.mark.usefixtures('organizations')

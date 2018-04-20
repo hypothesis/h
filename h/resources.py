@@ -117,7 +117,7 @@ class AuthClientRoot(object):
             raise KeyError()
 
 
-class OrganizationFactory(object):
+class OrganizationRoot(object):
     def __init__(self, request):
         self.request = request
 
@@ -163,7 +163,7 @@ class OrganizationResource(object):
 class OrganizationLogoFactory(object):
     def __init__(self, request):
         self.request = request
-        self.organization_factory = OrganizationFactory(self.request)
+        self.organization_factory = OrganizationRoot(self.request)
 
     def __getitem__(self, pubid):
         # This will raise KeyError if the organization doesn't exist.

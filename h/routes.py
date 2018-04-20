@@ -55,11 +55,11 @@ def includeme(config):
     config.add_route('admin_organizations_create', '/admin/organizations/new')
     config.add_route('admin_organizations_delete',
                      '/admin/organizations/delete/{pubid}',
-                     factory='h.resources.OrganizationFactory',
+                     factory='h.resources.OrganizationRoot',
                      traverse='/{pubid}')
     config.add_route('admin_organizations_edit',
                      '/admin/organizations/{pubid}',
-                     factory='h.resources.OrganizationFactory',
+                     factory='h.resources.OrganizationRoot',
                      traverse='/{pubid}')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
