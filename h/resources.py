@@ -175,7 +175,7 @@ class OrganizationLogoRoot(object):
         return organization.logo
 
 
-class GroupFactory(object):
+class GroupRoot(object):
     def __init__(self, request):
         self.request = request
 

@@ -111,7 +111,7 @@ def includeme(config):
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.group_member',
                      '/api/groups/{pubid}/members/{user}',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
     config.add_route('api.search', '/api/search')
     config.add_route('api.users', '/api/users')
@@ -140,16 +140,16 @@ def includeme(config):
     config.add_route('group_create', '/groups/new')
     config.add_route('group_edit',
                      '/groups/{pubid}/edit',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route('group_read',
                      '/groups/{pubid}/{slug:[^/]*}',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
     config.add_route('group_read_noslug',
                      '/groups/{pubid}',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
 
     # Help

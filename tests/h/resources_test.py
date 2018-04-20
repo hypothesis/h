@@ -15,7 +15,7 @@ from h.resources import AnnotationRoot
 from h.resources import AuthClientRoot
 from h.resources import OrganizationRoot
 from h.resources import OrganizationLogoRoot
-from h.resources import GroupFactory
+from h.resources import GroupRoot
 from h.resources import GroupResource
 from h.resources import OrganizationResource
 from h.resources import UserFactory
@@ -267,7 +267,7 @@ class TestOrganizationLogoRoot(object):
 
 
 @pytest.mark.usefixtures("groups")
-class TestGroupFactory(object):
+class TestGroupRoot(object):
 
     def test_it_returns_the_group_if_it_exists(self, factories, group_factory):
         group = factories.Group()
@@ -281,13 +281,13 @@ class TestGroupFactory(object):
     @pytest.fixture
     def groups(self, factories):
         # Add some "noise" groups to the DB.
-        # These are groups that we _don't_ expect GroupFactory to return in
+        # These are groups that we _don't_ expect GroupRoot to return in
         # the tests.
         return [factories.Group(), factories.Group(), factories.Group()]
 
     @pytest.fixture
     def group_factory(self, pyramid_request):
-        return GroupFactory(pyramid_request)
+        return GroupRoot(pyramid_request)
 
 
 @pytest.mark.usefixtures('links_svc')
