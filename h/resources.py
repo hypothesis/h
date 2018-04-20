@@ -160,7 +160,7 @@ class OrganizationResource(object):
         return None
 
 
-class OrganizationLogoFactory(object):
+class OrganizationLogoRoot(object):
     def __init__(self, request):
         self.request = request
         self.organization_factory = OrganizationRoot(self.request)

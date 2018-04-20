@@ -132,7 +132,7 @@ def includeme(config):
     # Organizations
     config.add_route('organization_logo',
                      '/organizations/{pubid}/logo',
-                     factory='h.resources.OrganizationLogoFactory',
+                     factory='h.resources.OrganizationLogoRoot',
                      traverse='/{pubid}')
 
     # Groups
