@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from pyramid.session import SignedCookieSessionFactory
 
 from h.security import derive_key

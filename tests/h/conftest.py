@@ -4,6 +4,7 @@
 The `conftest` module is automatically loaded by pytest and serves as a place
 to put fixture functions that are useful application-wide.
 """
+from __future__ import unicode_literals
 
 import functools
 import os
@@ -24,7 +25,7 @@ from h import models
 from h.settings import database_url
 from h._compat import text_type
 
-TEST_AUTHORITY = u'example.com'
+TEST_AUTHORITY = 'example.com'
 TEST_DATABASE_URL = database_url(os.environ.get('TEST_DATABASE_URL',
                                                 'postgresql://postgres@localhost/htest'))
 

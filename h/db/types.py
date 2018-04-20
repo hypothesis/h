@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Custom SQLAlchemy types for use with the Annotations API database."""
+from __future__ import unicode_literals
 
 from h._compat import string_types
 import binascii
@@ -194,11 +195,11 @@ def _escape_null_byte(s):
     if s is None:
         return s
 
-    return s.replace(u"\u0000", u"\\u0000")
+    return s.replace("\u0000", "\\u0000")
 
 
 def _unescape_null_byte(s):
     if s is None:
         return s
 
-    return s.replace(u"\\u0000", u"\u0000")
+    return s.replace("\\u0000", "\u0000")

@@ -265,7 +265,7 @@ def document_uri_self_claim(claimant):
     return {
         'claimant': claimant,
         'uri': claimant,
-        'type': u'self-claim',
+        'type': 'self-claim',
         'content_type': '',
     }
 

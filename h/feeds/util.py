@@ -1,4 +1,5 @@
 """Utility functions for feed-generating code."""
+from __future__ import unicode_literals
 from h._compat import urlparse
 
 # See RFC4151 for details of the use and format of the tag date:
@@ -18,6 +19,6 @@ def tag_uri_for_annotation(annotation, annotation_url):
 
     """
     domain = urlparse.urlparse(annotation_url(annotation)).hostname
-    return u"tag:{domain},{date}:{id_}".format(domain=domain,
-                                               date=FEED_TAG_DATE,
-                                               id_=annotation.id)
+    return "tag:{domain},{date}:{id_}".format(domain=domain,
+                                              date=FEED_TAG_DATE,
+                                              id_=annotation.id)

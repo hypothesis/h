@@ -1,6 +1,7 @@
 """
 Helpers for account forms
 """
+from __future__ import unicode_literals
 
 import re
 

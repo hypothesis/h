@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from pyramid import interfaces
 from pyramid.authentication import CallbackAuthenticationPolicy
 from zope import interface

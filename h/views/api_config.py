@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import venusian
 
 from h.util import cors

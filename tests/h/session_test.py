@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import pytest
 import mock
 
@@ -88,7 +89,7 @@ class TestProfile(object):
 
     def test_userid_authenticated(self, authenticated_request):
         profile = session.profile(authenticated_request)
-        assert profile['userid'] == u'acct:user@example.com'
+        assert profile['userid'] == 'acct:user@example.com'
 
     def test_proxies_group_lookup_to_service(self, authenticated_request):
         svc = authenticated_request.find_service(name='list_groups')
@@ -205,12 +206,12 @@ class TestProfile(object):
 
     @pytest.fixture
     def third_party_domain(self):
-        return u'thirdparty.example.org'
+        return 'thirdparty.example.org'
 
     @pytest.fixture
     def third_party_request(self, authority, third_party_domain, fake_feature):
         return FakeRequest(authority,
-                           u'acct:user@{}'.format(third_party_domain),
+                           'acct:user@{}'.format(third_party_domain),
                            third_party_domain,
                            fake_feature)
 
@@ -303,7 +304,7 @@ class FakeRequest(object):
 
 @pytest.fixture
 def authority():
-    return u'example.com'
+    return 'example.com'
 
 
 @pytest.fixture
@@ -315,11 +316,11 @@ def unauthenticated_request(authority, fake_feature):
 @pytest.fixture
 def authenticated_request(authority, fake_feature):
     return FakeRequest(authority,
-                       u'acct:user@{}'.format(authority),
+                       'acct:user@{}'.format(authority),
                        authority,
                        fake_feature)
 
 
 @pytest.fixture
 def world_group(factories):
-    return factories.OpenGroup(name=u'Public', pubid='__worldish__')
+    return factories.OpenGroup(name='Public', pubid='__worldish__')

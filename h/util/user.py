@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Some shared utility functions for manipulating user data."""
+from __future__ import unicode_literals
 import re
 
 

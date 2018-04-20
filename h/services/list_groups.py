@@ -191,7 +191,7 @@ class ListGroupsService(object):
         return (self._session.query(models.Group)
                     .filter_by(authority=authority,
                                readable_by=group.ReadableBy.world,
-                               pubid=u'__world__')
+                               pubid='__world__')
                     .one_or_none())
 
 

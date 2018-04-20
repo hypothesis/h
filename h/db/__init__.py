@@ -12,6 +12,7 @@ application startup.
 Most application code should access the database session using the request
 property `request.db` which is provided by this module.
 """
+from __future__ import unicode_literals
 
 import logging
 
@@ -130,7 +131,7 @@ def _maybe_create_default_organization(engine, authority):
         default_org = None
 
     if default_org is None:
-        default_org = models.Organization(name=u'Hypothesis',
+        default_org = models.Organization(name='Hypothesis',
                                           authority=authority,
                                           pubid='__default__',
                                           )
@@ -150,7 +151,7 @@ def _maybe_create_world_group(engine, authority, default_org):
     session = Session(bind=engine)
     world_group = session.query(models.Group).filter_by(pubid='__world__').one_or_none()
     if world_group is None:
-        world_group = models.Group(name=u'Public',
+        world_group = models.Group(name='Public',
                                    authority=authority,
                                    joinable_by=None,
                                    readable_by=ReadableBy.world,

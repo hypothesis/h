@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import mock
 import pytest
 from webob.multidict import NestedMultiDict
@@ -262,6 +264,17 @@ class TestPaginateQuery(object):
             spec_set=['__call__', '__name__'],
         )
         view_callable.__name__ = 'mock_view_callable'
+
+        # functools.wraps(wrapped) expects wrapped.__name__ to be a unicode
+        # string in Python 3, but to be a byte string in Python 2, otherwise
+        # it raises TypeError: __name__ must be set to a string object.
+        #
+        # str is the unicode type in Python 3 but is the byte string type in
+        # Python 2, so it does what we need either way.
+        #
+        # TODO: Remove this once we no longer need to support Python 2.
+        view_callable.__name__ = str(view_callable.__name__)
+
         return view_callable
 
     @pytest.fixture

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from pyramid import renderers
 
 from h.feeds import atom

@@ -117,13 +117,13 @@ class TestGroupsJSONPresenter(object):
         assert GroupJSONPresenter_.call_args_list == expected_call_args
 
     def test_asdicts_returns_list_of_dicts(self, factories, GroupResources):  # noqa: N803
-        groups = [factories.Group(name=u'filbert'), factories.OpenGroup(name=u'delbert')]
+        groups = [factories.Group(name='filbert'), factories.OpenGroup(name='delbert')]
         group_resources = GroupResources(groups)
         presenter = GroupsJSONPresenter(group_resources)
 
         result = presenter.asdicts()
 
-        assert [group['name'] for group in result] == [u'filbert', u'delbert']
+        assert [group['name'] for group in result] == ['filbert', 'delbert']
 
     def test_asdicts_injects_urls(self, factories, links_svc, GroupResources):  # noqa: N803
         groups = [factories.Group(), factories.OpenGroup()]

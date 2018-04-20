@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=protected-access
 """Unit tests for h/atom.py."""
+from __future__ import unicode_literals
 from datetime import datetime
 import mock
 
@@ -101,7 +102,7 @@ def test_entry_id(util, factories):
 
 def test_entry_author(factories):
     """The authors of entries should come from the annotation usernames."""
-    annotation = factories.Annotation(userid=u'acct:nobu@hypothes.is')
+    annotation = factories.Annotation(userid='acct:nobu@hypothes.is')
 
     feed = atom.feed_from_annotations(
         [annotation], "atom_url", lambda annotation: "annotation url")

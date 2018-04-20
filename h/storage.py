@@ -6,6 +6,7 @@ This module provides the core API with access to basic persistence functions
 for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
+from __future__ import unicode_literals
 
 # FIXME: This module was originally written to be a single point of
 #        indirection through which the storage backend could be swapped out on

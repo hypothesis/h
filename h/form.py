@@ -7,6 +7,7 @@ form templates in preference to the defaults. Uses `deform_jinja2` to provide
 the fallback templates in Jinja2 format, which we can then extend and modify as
 necessary.
 """
+from __future__ import unicode_literals
 import deform
 import jinja2
 from pyramid import httpexceptions

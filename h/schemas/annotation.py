@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Classes for validating data passed to the annotations API."""
+from __future__ import unicode_literals
 
 import copy
 from pyramid import i18n
@@ -144,14 +145,14 @@ class CreateAnnotationSchema(object):
 
         new_appstruct['userid'] = self.request.authenticated_userid
 
-        uri = appstruct.pop('uri', u'').strip()
+        uri = appstruct.pop('uri', '').strip()
         if not uri:
             raise ValidationError('uri: ' + _("'uri' is a required property"))
         new_appstruct['target_uri'] = uri
 
-        new_appstruct['text'] = appstruct.pop('text', u'')
+        new_appstruct['text'] = appstruct.pop('text', '')
         new_appstruct['tags'] = appstruct.pop('tags', [])
-        new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
+        new_appstruct['groupid'] = appstruct.pop('group', '__world__')
         new_appstruct['references'] = appstruct.pop('references', [])
 
         if 'permissions' in appstruct:

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import logging
 
 from h.search.config import (
@@ -11,7 +12,7 @@ from h.search.index import BatchIndexer
 
 log = logging.getLogger(__name__)
 
-SETTING_NEW_INDEX = u'reindex.new_index'
+SETTING_NEW_INDEX = 'reindex.new_index'
 
 
 def reindex(session, es, request):

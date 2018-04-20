@@ -450,7 +450,7 @@ class TestUpdateAnnotation(object):
         assert str(exc.value).startswith('group: ')
 
     def test_it_allows_when_group_scope_matches(self, annotation_data, pyramid_request, group_service, scoped_open_group, models):
-        annotation_data['target_uri'] = u'http://www.foo.com/baz/ding.html'
+        annotation_data['target_uri'] = 'http://www.foo.com/baz/ding.html'
 
         # this should not raise
         annotation = storage.update_annotation(pyramid_request, 'test_annotation_id', annotation_data, group_service)
@@ -458,7 +458,7 @@ class TestUpdateAnnotation(object):
         assert annotation == pyramid_request.db.query.return_value.get.return_value
 
     def test_it_raises_when_group_scope_mismatch(self, annotation_data, pyramid_request, group_service, scoped_open_group):
-        annotation_data['target_uri'] = u'http://www.bar.com/baz/ding.html'
+        annotation_data['target_uri'] = 'http://www.bar.com/baz/ding.html'
         group_service.find.return_value = scoped_open_group
 
         with pytest.raises(ValidationError) as exc:

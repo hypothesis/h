@@ -26,6 +26,7 @@ output if it fails, e.g.
     E       Actual call: set_value('a string')
 
 """
+from __future__ import unicode_literals
 
 import re
 
@@ -47,6 +48,38 @@ class any_callable(Matcher):  # noqa: N801
     def __eq__(self, other):
         """Return ``True`` if ``other`` is callable, ``False`` otherwise."""
         return callable(other)
+
+
+class native_string(Matcher):  # noqa: N801
+    """
+    Matches any native string with the given characters.
+
+    "Native string" means the ``str`` type which is a byte string in Python 2
+    and a unicode string in Python 3. Does not match unicode strings (type
+    ``unicode``) in Python 2, or byte strings (type ``bytes``) in Python 3,
+    even if they contain the same characters.
+
+    In Python 3 a ``bytes`` is never ``==`` to a ``str`` anyway, even if they
+    contain the same characters. But in Python 2 a ``str`` is equal to a
+    ``unicode`` if they contain the same characters, and that's why this
+    matcher is needed.
+
+    TODO: Delete this matcher once we no longer support Python 2.
+
+    """
+    def __init__(self, string):
+        self.string = str(string)
+
+    def __eq__(self, other):
+        if not isinstance(other, str):
+            return False
+        return other == self.string
+
+    def __repr__(self):
+        return '<native string matching "{string}">'.format(string=self.string)
+
+    def lower(self):
+        return native_string(self.string.lower())
 
 
 class instance_of(Matcher):  # noqa: N801
@@ -138,7 +171,6 @@ class unordered_list(Matcher):  # noqa: N801
     (and no more), regardless of order.
 
     """
-
     def __init__(self, items):
         self.items = items
 
@@ -149,3 +181,6 @@ class unordered_list(Matcher):  # noqa: N801
             if item not in other:
                 return False
         return True
+
+    def __repr__(self):
+        return "<unordered list containing {items}".format(items=self.items)

@@ -17,6 +17,7 @@ key to. So for convenience the test module can instead just do
 ``from h import models`` and have all ORM classes be defined.
 
 """
+from __future__ import unicode_literals
 
 from h.models.activation import Activation
 from h.models.annotation import Annotation
