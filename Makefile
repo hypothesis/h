@@ -71,7 +71,7 @@ lint: .pydeps
 ################################################################################
 
 # Fake targets to aid with deps installation
-.pydeps: requirements.txt
+.pydeps: requirements.txt requirements-dev.in
 	@echo installing python dependencies
 	@pip install -r requirements-dev.in tox
 	@touch $@
