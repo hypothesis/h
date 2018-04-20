@@ -50,7 +50,7 @@ def test_includeme():
         call('admin_nipsa', '/admin/nipsa'),
         call('admin_oauthclients', '/admin/oauthclients'),
         call('admin_oauthclients_create', '/admin/oauthclients/new'),
-        call('admin_oauthclients_edit', '/admin/oauthclients/{id}', factory='h.resources.AuthClientFactory', traverse='/{id}'),
+        call('admin_oauthclients_edit', '/admin/oauthclients/{id}', factory='h.resources.AuthClientRoot', traverse='/{id}'),
         call('admin_organizations', '/admin/organizations'),
         call('admin_organizations_create', '/admin/organizations/new'),
         call('admin_organizations_delete',

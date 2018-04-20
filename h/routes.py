@@ -49,7 +49,7 @@ def includeme(config):
     config.add_route('admin_oauthclients_create', '/admin/oauthclients/new')
     config.add_route('admin_oauthclients_edit',
                      '/admin/oauthclients/{id}',
-                     factory='h.resources.AuthClientFactory',
+                     factory='h.resources.AuthClientRoot',
                      traverse='/{id}')
     config.add_route('admin_organizations', '/admin/organizations')
     config.add_route('admin_organizations_create', '/admin/organizations/new')

@@ -94,7 +94,7 @@ class AnnotationResource(object):
         return principals_allowed_by_permission(group, 'read')
 
 
-class AuthClientFactory(object):
+class AuthClientRoot(object):
 
     def __init__(self, request):
         self.request = request
@@ -125,7 +125,7 @@ class OrganizationFactory(object):
         try:
             org = self.request.db.query(Organization).filter_by(pubid=pubid).one()
 
-            # Inherit global ACL. See comments in `AuthClientFactory`.
+            # Inherit global ACL. See comments in :py:class`h.resources.AuthClientRoot`.
             org.__parent__ = Root(self.request)
 
             return org
