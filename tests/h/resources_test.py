@@ -18,7 +18,7 @@ from h.resources import OrganizationLogoRoot
 from h.resources import GroupRoot
 from h.resources import GroupResource
 from h.resources import OrganizationResource
-from h.resources import UserFactory
+from h.resources import UserRoot
 from h.services.user import UserService
 
 
@@ -386,7 +386,7 @@ class TestOrganizationResource(object):
 
 
 @pytest.mark.usefixtures('user_service')
-class TestUserFactory(object):
+class TestUserRoot(object):
 
     def test_it_fetches_the_requested_user(self, pyramid_request, user_factory, user_service):
         user_factory["bob"]
@@ -408,7 +408,7 @@ class TestUserFactory(object):
 
     @pytest.fixture
     def user_factory(self, pyramid_request):
-        return UserFactory(pyramid_request)
+        return UserRoot(pyramid_request)
 
     @pytest.fixture
     def user_service(self, pyramid_config):

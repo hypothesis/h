@@ -28,7 +28,7 @@ def includeme(config):
     config.add_route('activity.search', '/search')
     config.add_route('activity.user_search',
                      '/users/{username}',
-                     factory='h.resources:UserFactory',
+                     factory='h.resources:UserRoot',
                      traverse='/{username}')
 
     # Admin

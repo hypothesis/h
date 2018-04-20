@@ -205,7 +205,7 @@ class GroupResource(object):
         return OrganizationResource(self.group.organization, self.request)
 
 
-class UserFactory(object):
+class UserRoot(object):
     """Root resource for routes that look up User objects by traversal."""
 
     def __init__(self, request):
