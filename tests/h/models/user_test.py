@@ -172,6 +172,12 @@ class TestUserModel(object):
 
         assert user.is_activated
 
+    def test_instance_has_privacy_accepted_proptery(self, db_session):
+        user = models.User()
+
+        assert hasattr(user, 'privacy_accepted')
+        assert user.privacy_accepted is None  # nullable
+
 
 class TestUserGetByEmail(object):
     def test_it_returns_a_user(self, db_session, users):

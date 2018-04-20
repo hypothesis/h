@@ -190,6 +190,10 @@ class User(Base):
                                            server_default=(
                                                 sa.sql.expression.false()))
 
+    #: A timestamp representing the last time the user accepted the privacy policy.
+    #: A NULL value in this column indicates the user has never accepted a privacy policy.
+    privacy_accepted = sa.Column(sa.DateTime, nullable=True)
+
     @hybrid_property
     def username(self):
         return self._username
