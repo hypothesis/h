@@ -11,7 +11,7 @@ from h import i18n
 from h import models
 from h import paginator
 from h.models.annotation import Annotation
-from h.models.group import GroupFactory
+from h.resources import GroupFactory
 from h.models.group_scope import GroupScope
 from h.models.organization import Organization
 from h.schemas.admin_group import CreateAdminGroupSchema

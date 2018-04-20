@@ -6,7 +6,6 @@ from collections import namedtuple
 import enum
 import sqlalchemy as sa
 from pyramid import security
-from sqlalchemy.orm import exc
 import slugify
 
 from h.db import Base
@@ -17,17 +16,6 @@ from h import pubid
 GROUP_NAME_MIN_LENGTH = 4
 GROUP_NAME_MAX_LENGTH = 25
 GROUP_DESCRIPTION_MAX_LENGTH = 250
-
-
-class GroupFactory(object):
-    def __init__(self, request):
-        self.request = request
-
-    def __getitem__(self, pubid):
-        try:
-            return self.request.db.query(Group).filter_by(pubid=pubid).one()
-        except exc.NoResultFound:
-            raise KeyError()
 
 
 class JoinableBy(enum.Enum):
