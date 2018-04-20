@@ -118,10 +118,8 @@ class GroupService(object):
         :param userids: the list of userids corresponding to users who should
                         be the members of this group
         """
-        current_member_userids = [member.userid for member in group.members]
-        userids_for_removal = list(
-            filter(lambda mem_id: mem_id not in userids, current_member_userids)
-        )
+        current_mem_ids = [member.userid for member in group.members]
+        userids_for_removal = [mem_id for mem_id in current_mem_ids if mem_id not in userids]
 
         for userid in userids:
             self.member_join(group, userid)
