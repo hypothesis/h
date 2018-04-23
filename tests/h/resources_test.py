@@ -15,6 +15,7 @@ from h.resources import AnnotationResourceFactory
 from h.resources import AuthClientFactory
 from h.resources import OrganizationFactory
 from h.resources import OrganizationLogoFactory
+from h.resources import GroupFactory
 from h.resources import GroupResource
 from h.resources import OrganizationResource
 from h.resources import UserFactory
@@ -263,6 +264,30 @@ class TestOrganizationLogoFactory(object):
     @pytest.fixture
     def organization_logo_factory(self, pyramid_request):
         return OrganizationLogoFactory(pyramid_request)
+
+
+@pytest.mark.usefixtures("groups")
+class TestGroupFactory(object):
+
+    def test_it_returns_the_group_if_it_exists(self, factories, group_factory):
+        group = factories.Group()
+
+        assert group_factory[group.pubid] == group
+
+    def test_it_raises_KeyError_if_the_group_doesnt_exist(self, group_factory):
+        with pytest.raises(KeyError):
+            group_factory["does_not_exist"]
+
+    @pytest.fixture
+    def groups(self, factories):
+        # Add some "noise" groups to the DB.
+        # These are groups that we _don't_ expect GroupFactory to return in
+        # the tests.
+        return [factories.Group(), factories.Group(), factories.Group()]
+
+    @pytest.fixture
+    def group_factory(self, pyramid_request):
+        return GroupFactory(pyramid_request)
 
 
 @pytest.mark.usefixtures('links_svc')

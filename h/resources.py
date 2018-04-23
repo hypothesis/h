@@ -12,6 +12,7 @@ from sqlalchemy.orm import exc
 
 from h import storage
 from h.models import AuthClient
+from h.models import Group
 from h.models import Organization
 from h.models.organization import ORGANIZATION_DEFAULT_PUBID
 from h.auth import role
@@ -172,6 +173,17 @@ class OrganizationLogoFactory(object):
             raise KeyError()
 
         return organization.logo
+
+
+class GroupFactory(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, pubid):
+        try:
+            return self.request.db.query(Group).filter_by(pubid=pubid).one()
+        except exc.NoResultFound:
+            raise KeyError()
 
 
 class GroupResource(object):
