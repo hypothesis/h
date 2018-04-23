@@ -70,6 +70,12 @@ class TestSignupController(object):
 
         assert isinstance(result, httpexceptions.HTTPRedirection)
 
+    def test_get_renders_form_when_not_logged_in(self, pyramid_request):
+        controller = views.SignupController(pyramid_request)
+        controller.form.render = mock.Mock()
+
+        assert controller.get() == {'form': controller.form.render.return_value}
+
     def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
         pyramid_request.user = mock.Mock(username='janedoe')
