@@ -125,7 +125,7 @@ def test_includeme():
         call('education', '/education/', static=True),
         call('for-publishers', '/for-publishers/', static=True),
         call('fund', '/fund/', static=True),
-        call('help-center', '/help/'),
+        call('help-center', '/help/', static=True),
         call('hypothesis-github', 'https://github.com/hypothesis', static=True),
         call('hypothesis-twitter', 'https://twitter.com/hypothes_is', static=True),
         call('jobs', '/jobs/', static=True),
