@@ -7,7 +7,7 @@ from pyramid import httpexceptions
 import pytest
 
 from h.models import Annotation
-from h.resources import AnnotationResource
+from h.resources import AnnotationContext
 from h.views import main
 
 
@@ -18,7 +18,7 @@ def _fake_sidebar_app(request, extra):
 @pytest.mark.usefixtures('routes')
 def test_og_document(factories, pyramid_request, group_service, links_service, sidebar_app):
     annotation = factories.Annotation(userid='acct:foo@example.com')
-    context = AnnotationResource(annotation, group_service, links_service)
+    context = AnnotationContext(annotation, group_service, links_service)
     sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)
@@ -31,7 +31,7 @@ def test_og_document(factories, pyramid_request, group_service, links_service, s
 @pytest.mark.usefixtures('routes')
 def test_og_no_document(pyramid_request, group_service, links_service, sidebar_app):
     annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
-    context = AnnotationResource(annotation, group_service, links_service)
+    context = AnnotationContext(annotation, group_service, links_service)
     sidebar_app.side_effect = _fake_sidebar_app
 
     ctx = main.annotation_page(context, pyramid_request)

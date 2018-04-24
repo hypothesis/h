@@ -86,11 +86,11 @@ class TestAnnotationJSONPresentationService(object):
 
         svc.present_all(['ann-1'])
 
-        resources.AnnotationResource.assert_called_once_with(ann, svc.group_svc, svc.links_svc)
+        resources.AnnotationContext.assert_called_once_with(ann, svc.group_svc, svc.links_svc)
 
     def test_present_all_presents_annotation_resources(self, svc, storage, resources, present):
         storage.fetch_ordered_annotations.return_value = [mock.Mock()]
-        resource = resources.AnnotationResource.return_value
+        resource = resources.AnnotationContext.return_value
 
         svc.present_all(['ann-1'])
         present.assert_called_once_with(svc, resource)

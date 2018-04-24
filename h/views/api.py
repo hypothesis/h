@@ -26,7 +26,7 @@ from h.exceptions import PayloadError
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
-from h.resources import AnnotationResource
+from h.resources import AnnotationContext
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.views.api_config import api_config, AngularRouteTemplater
 
@@ -249,4 +249,4 @@ def _set_at_path(dict_, path, value):
 def _annotation_resource(request, annotation):
     group_service = request.find_service(IGroupService)
     links_service = request.find_service(name='links')
-    return AnnotationResource(annotation, group_service, links_service)
+    return AnnotationContext(annotation, group_service, links_service)

@@ -10,7 +10,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 
 from h.models import AuthClient, Organization
 from h.services.group_links import GroupLinksService
-from h.resources import AnnotationResource
+from h.resources import AnnotationContext
 from h.resources import AnnotationRoot
 from h.resources import AuthClientRoot
 from h.resources import OrganizationRoot
@@ -35,7 +35,7 @@ class TestAnnotationRoot(object):
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
-        assert isinstance(resource, AnnotationResource)
+        assert isinstance(resource, AnnotationContext)
 
     def test_get_item_resource_has_right_annotation(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
@@ -83,10 +83,10 @@ class TestAnnotationRoot(object):
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
-class TestAnnotationResource(object):
+class TestAnnotationContext(object):
     def test_links(self, group_service, links_service):
         ann = mock.Mock()
-        res = AnnotationResource(ann, group_service, links_service)
+        res = AnnotationContext(ann, group_service, links_service)
 
         result = res.links
 
@@ -95,7 +95,7 @@ class TestAnnotationResource(object):
 
     def test_link(self, group_service, links_service):
         ann = mock.Mock()
-        res = AnnotationResource(ann, group_service, links_service)
+        res = AnnotationContext(ann, group_service, links_service)
 
         result = res.link('json')
 
@@ -104,7 +104,7 @@ class TestAnnotationResource(object):
 
     def test_acl_private(self, factories, group_service, links_service):
         ann = factories.Annotation(shared=False, userid='saoirse')
-        res = AnnotationResource(ann, group_service, links_service)
+        res = AnnotationContext(ann, group_service, links_service)
         actual = res.__acl__()
         expect = [(security.Allow, 'saoirse', 'read'),
                   (security.Allow, 'saoirse', 'admin'),
@@ -121,7 +121,7 @@ class TestAnnotationResource(object):
         policy = ACLAuthorizationPolicy()
 
         ann = factories.Annotation(shared=False, userid='saoirse')
-        res = AnnotationResource(ann, group_service, links_service)
+        res = AnnotationContext(ann, group_service, links_service)
 
         for perm in ['admin', 'update', 'delete']:
             assert policy.permits(res, ['saoirse'], perm)
@@ -135,7 +135,7 @@ class TestAnnotationResource(object):
         policy = ACLAuthorizationPolicy()
 
         ann = factories.Annotation(userid='saoirse', deleted=True)
-        res = AnnotationResource(ann, group_service, links_service)
+        res = AnnotationContext(ann, group_service, links_service)
 
         for perm in ['read', 'admin', 'update', 'delete']:
             assert not policy.permits(res, ['saiorse'], perm)
@@ -178,7 +178,7 @@ class TestAnnotationResource(object):
         ann = factories.Annotation(shared=True,
                                    userid='mioara',
                                    groupid=groupid)
-        res = AnnotationResource(ann, group_service, links_service)
+        res = AnnotationContext(ann, group_service, links_service)
 
         if permitted:
             assert pyramid_request.has_permission('read', res)
