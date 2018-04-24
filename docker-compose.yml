@@ -5,6 +5,12 @@ services:
     ports:
       - '127.0.0.1:5432:5432'
   elasticsearch:
+    image: hypothesis/elasticsearch:latest
+    ports:
+      - '127.0.0.1:9201:9200'
+    environment:
+      - discovery.type=single-node
+  elasticsearchold:
     image: nickstenning/elasticsearch-icu
     ports:
       - '127.0.0.1:9200:9200'
