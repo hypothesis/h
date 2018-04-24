@@ -126,6 +126,36 @@ class TestRegisterSchema(object):
                                                   "numbers, periods, and "
                                                   "underscores.")
 
+    def test_it_is_invalid_with_false_privacy_accepted(self,
+                                                            pyramid_request):
+        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({"privacy_accepted": False})
+
+        assert exc.value.asdict()['privacy_accepted'] == "Acceptance of the privacy policy is required"
+
+    def test_it_is_invalid_when_privacy_accepted_missing(self,
+                                                         pyramid_request):
+        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({})
+
+        assert exc.value.asdict()['privacy_accepted'] == "Required"
+
+    def test_it_validates_with_valid_payload(self, pyramid_csrf_request, user_model):
+        user_model.get_by_username.return_value = None
+        user_model.get_by_email.return_value = None
+
+        schema = schemas.RegisterSchema().bind(request=pyramid_csrf_request)
+        schema.deserialize({
+            "username": "filbert",
+            "email": "foo@bar.com",
+            "password": "sdlkfjlk3j3iuei",
+            "privacy_accepted": "true",
+        })
+
 
 @pytest.mark.usefixtures('user_service', 'user_password_service')
 class TestLoginSchema(object):

@@ -30,7 +30,8 @@ class TestSignupController(object):
     def test_post_creates_user_from_form_data(self,
                                               form_validating_to,
                                               pyramid_request,
-                                              user_signup_service):
+                                              user_signup_service,
+                                              datetime):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -43,7 +44,8 @@ class TestSignupController(object):
 
         user_signup_service.signup.assert_called_with(username="bob",
                                                       email="bob@example.com",
-                                                      password="s3crets")
+                                                      password="s3crets",
+                                                      privacy_accepted=datetime.datetime.utcnow.return_value)
 
     def test_post_does_not_create_user_when_validation_fails(self,
                                                              invalid_form,
@@ -96,3 +98,8 @@ def user_signup_service(pyramid_config):
     service = mock.create_autospec(UserSignupService, spec_set=True, instance=True)
     pyramid_config.register_service(service, name='user_signup')
     return service
+
+
+@pytest.fixture
+def datetime(patch):
+    return patch('h.views.account_signup.datetime')
