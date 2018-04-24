@@ -477,7 +477,7 @@ def AnnotationEvent(patch):
 
 @pytest.fixture
 def annotation_resource(patch):
-    return patch('h.views.api.AnnotationResource')
+    return patch('h.views.api.AnnotationContext')
 
 
 @pytest.fixture

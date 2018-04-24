@@ -48,7 +48,7 @@ class AnnotationJSONPresentationService(object):
             formatter.preload(annotation_ids)
 
         return [self.present(
-                    resources.AnnotationResource(ann, self.group_svc, self.links_svc))
+                    resources.AnnotationContext(ann, self.group_svc, self.links_svc))
                 for ann in annotations]
 
     def _get_presenter(self, annotation_resource):

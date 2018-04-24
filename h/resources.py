@@ -45,10 +45,10 @@ class AnnotationRoot(object):
 
         group_service = self.request.find_service(IGroupService)
         links_service = self.request.find_service(name='links')
-        return AnnotationResource(annotation, group_service, links_service)
+        return AnnotationContext(annotation, group_service, links_service)
 
 
-class AnnotationResource(object):
+class AnnotationContext(object):
     def __init__(self, annotation, group_service, links_service):
         self.group_service = group_service
         self.links_service = links_service

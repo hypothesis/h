@@ -424,7 +424,7 @@ class TestHandleAnnotationEvent(object):
 
     @pytest.fixture
     def annotation_resource(self, patch):
-        return patch('h.streamer.messages.AnnotationResource')
+        return patch('h.streamer.messages.AnnotationContext')
 
 
 class TestHandleUserEvent(object):

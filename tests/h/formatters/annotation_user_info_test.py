@@ -9,7 +9,7 @@ import pytest
 
 from h.formatters.annotation_user_info import AnnotationUserInfoFormatter
 
-FakeAnnotationResource = namedtuple('FakeAnnotationResource', ['annotation'])
+FakeAnnotationContext = namedtuple('FakeAnnotationContext', ['annotation'])
 
 
 class TestAnnotationUserInfoFormatter(object):
@@ -28,7 +28,7 @@ class TestAnnotationUserInfoFormatter(object):
 
     def test_format_fetches_user_by_id(self, formatter, factories, user_svc):
         annotation = factories.Annotation.build()
-        resource = FakeAnnotationResource(annotation)
+        resource = FakeAnnotationContext(annotation)
 
         formatter.format(resource)
 
@@ -38,12 +38,12 @@ class TestAnnotationUserInfoFormatter(object):
         user = mock.Mock(display_name='Jane Doe')
         user_svc.fetch.return_value = user
 
-        formatter.format(FakeAnnotationResource(mock.Mock()))
+        formatter.format(FakeAnnotationContext(mock.Mock()))
 
         user_info.assert_called_once_with(user)
 
     def test_format_returns_formatted_user_info(self, formatter, user_info):
-        result = formatter.format(FakeAnnotationResource(mock.Mock()))
+        result = formatter.format(FakeAnnotationContext(mock.Mock()))
 
         assert result == user_info.return_value
 

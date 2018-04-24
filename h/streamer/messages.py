@@ -10,7 +10,7 @@ from h import presenters
 from h import realtime
 from h import storage
 from h.realtime import Consumer
-from h.resources import AnnotationResource
+from h.resources import AnnotationContext
 from h.auth.util import translate_annotation_principals
 from h.services.links import LinksService
 from h.services.nipsa import NipsaService
@@ -148,7 +148,7 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad, group_s
     base_url = socket.registry.settings.get('h.app_url',
                                             'http://localhost:5000')
     links_service = LinksService(base_url, socket.registry)
-    resource = AnnotationResource(annotation, group_service, links_service)
+    resource = AnnotationContext(annotation, group_service, links_service)
     serialized = presenters.AnnotationJSONPresenter(resource).asdict()
 
     permissions = serialized.get('permissions')

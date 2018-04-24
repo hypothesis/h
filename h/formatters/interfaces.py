@@ -39,7 +39,7 @@ class IAnnotationFormatter(Interface):
         Presents additional annotation data that will be served to API clients.
 
         :param annotation_resource: The annotation that needs presenting.
-        :type annotation_resource: h.resources.AnnotationResource
+        :type annotation_resource: :py:class`h.resources.AnnotationContext`
 
         :returns: A formatted dictionary.
         :rtype: dict
