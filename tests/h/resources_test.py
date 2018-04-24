@@ -11,55 +11,55 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from h.models import AuthClient, Organization
 from h.services.group_links import GroupLinksService
 from h.resources import AnnotationResource
-from h.resources import AnnotationResourceFactory
-from h.resources import AuthClientFactory
-from h.resources import OrganizationFactory
-from h.resources import OrganizationLogoFactory
-from h.resources import GroupFactory
+from h.resources import AnnotationRoot
+from h.resources import AuthClientRoot
+from h.resources import OrganizationRoot
+from h.resources import OrganizationLogoRoot
+from h.resources import GroupRoot
 from h.resources import GroupResource
 from h.resources import OrganizationResource
-from h.resources import UserFactory
+from h.resources import UserRoot
 from h.services.user import UserService
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
-class TestAnnotationResourceFactory(object):
+class TestAnnotationRoot(object):
     def test_get_item_fetches_annotation(self, pyramid_request, storage):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
 
         factory['123']
         storage.fetch_annotation.assert_called_once_with(pyramid_request.db, '123')
 
     def test_get_item_returns_annotation_resource(self, pyramid_request, storage):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert isinstance(resource, AnnotationResource)
 
     def test_get_item_resource_has_right_annotation(self, pyramid_request, storage):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert resource.annotation == storage.fetch_annotation.return_value
 
     def test_get_item_raises_when_annotation_is_not_found(self, storage, pyramid_request):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = None
 
         with pytest.raises(KeyError):
             factory['123']
 
     def test_get_item_has_right_group_service(self, pyramid_request, storage, group_service):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
         assert resource.group_service == group_service
 
     def test_get_item_has_right_links_service(self, pyramid_request, storage, links_service):
-        factory = AnnotationResourceFactory(pyramid_request)
+        factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
         resource = factory['123']
@@ -213,22 +213,22 @@ class TestAuthClientResourceFactory(object):
         pyramid_request.db.add(authclient)
         pyramid_request.db.flush()
 
-        factory = AuthClientFactory(pyramid_request)
+        factory = AuthClientRoot(pyramid_request)
         assert factory[authclient.id] == authclient
 
     def test_get_item_returns_keyerror_if_not_found(self, pyramid_request):
-        factory = AuthClientFactory(pyramid_request)
+        factory = AuthClientRoot(pyramid_request)
         with pytest.raises(KeyError):
             factory['E19D247D-1F07-4E91-B40D-00DF22E693E4']
 
     def test_get_item_returns_keyerror_if_invalid(self, pyramid_request):
-        factory = AuthClientFactory(pyramid_request)
+        factory = AuthClientRoot(pyramid_request)
         with pytest.raises(KeyError):
             factory['not-a-uuid']
 
 
 @pytest.mark.usefixtures('organizations')
-class TestOrganizationFactory(object):
+class TestOrganizationRoot(object):
 
     def test_it_returns_the_requested_organization(self, organizations, organization_factory):
         organization = organizations[1]
@@ -241,11 +241,11 @@ class TestOrganizationFactory(object):
 
     @pytest.fixture
     def organization_factory(self, pyramid_request):
-        return OrganizationFactory(pyramid_request)
+        return OrganizationRoot(pyramid_request)
 
 
 @pytest.mark.usefixtures('organizations')
-class TestOrganizationLogoFactory(object):
+class TestOrganizationLogoRoot(object):
 
     def test_it_returns_the_requested_organizations_logo(self, organizations, organization_logo_factory):
         organization = organizations[1]
@@ -263,11 +263,11 @@ class TestOrganizationLogoFactory(object):
 
     @pytest.fixture
     def organization_logo_factory(self, pyramid_request):
-        return OrganizationLogoFactory(pyramid_request)
+        return OrganizationLogoRoot(pyramid_request)
 
 
 @pytest.mark.usefixtures("groups")
-class TestGroupFactory(object):
+class TestGroupRoot(object):
 
     def test_it_returns_the_group_if_it_exists(self, factories, group_factory):
         group = factories.Group()
@@ -281,13 +281,13 @@ class TestGroupFactory(object):
     @pytest.fixture
     def groups(self, factories):
         # Add some "noise" groups to the DB.
-        # These are groups that we _don't_ expect GroupFactory to return in
+        # These are groups that we _don't_ expect GroupRoot to return in
         # the tests.
         return [factories.Group(), factories.Group(), factories.Group()]
 
     @pytest.fixture
     def group_factory(self, pyramid_request):
-        return GroupFactory(pyramid_request)
+        return GroupRoot(pyramid_request)
 
 
 @pytest.mark.usefixtures('links_svc')
@@ -386,7 +386,7 @@ class TestOrganizationResource(object):
 
 
 @pytest.mark.usefixtures('user_service')
-class TestUserFactory(object):
+class TestUserRoot(object):
 
     def test_it_fetches_the_requested_user(self, pyramid_request, user_factory, user_service):
         user_factory["bob"]
@@ -408,7 +408,7 @@ class TestUserFactory(object):
 
     @pytest.fixture
     def user_factory(self, pyramid_request):
-        return UserFactory(pyramid_request)
+        return UserRoot(pyramid_request)
 
     @pytest.fixture
     def user_service(self, pyramid_config):

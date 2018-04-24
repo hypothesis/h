@@ -28,7 +28,7 @@ def includeme(config):
     config.add_route('activity.search', '/search')
     config.add_route('activity.user_search',
                      '/users/{username}',
-                     factory='h.resources:UserFactory',
+                     factory='h.resources:UserRoot',
                      traverse='/{username}')
 
     # Admin
@@ -49,17 +49,17 @@ def includeme(config):
     config.add_route('admin_oauthclients_create', '/admin/oauthclients/new')
     config.add_route('admin_oauthclients_edit',
                      '/admin/oauthclients/{id}',
-                     factory='h.resources.AuthClientFactory',
+                     factory='h.resources.AuthClientRoot',
                      traverse='/{id}')
     config.add_route('admin_organizations', '/admin/organizations')
     config.add_route('admin_organizations_create', '/admin/organizations/new')
     config.add_route('admin_organizations_delete',
                      '/admin/organizations/delete/{pubid}',
-                     factory='h.resources.OrganizationFactory',
+                     factory='h.resources.OrganizationRoot',
                      traverse='/{pubid}')
     config.add_route('admin_organizations_edit',
                      '/admin/organizations/{pubid}',
-                     factory='h.resources.OrganizationFactory',
+                     factory='h.resources.OrganizationRoot',
                      traverse='/{pubid}')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
@@ -70,7 +70,7 @@ def includeme(config):
     # Annotations & stream
     config.add_route('annotation',
                      '/a/{id}',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('stream', '/stream')
     config.add_route('stream.user_query', '/u/{user}')
@@ -93,25 +93,25 @@ def includeme(config):
     config.add_route('api.annotations', '/api/annotations')
     config.add_route('api.annotation',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation_flag',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/flag',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation_hide',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/hide',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation.jsonld',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.resources:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.group_member',
                      '/api/groups/{pubid}/members/{user}',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
     config.add_route('api.search', '/api/search')
     config.add_route('api.users', '/api/users')
@@ -132,7 +132,7 @@ def includeme(config):
     # Organizations
     config.add_route('organization_logo',
                      '/organizations/{pubid}/logo',
-                     factory='h.resources.OrganizationLogoFactory',
+                     factory='h.resources.OrganizationLogoRoot',
                      traverse='/{pubid}')
 
     # Groups
@@ -140,16 +140,16 @@ def includeme(config):
     config.add_route('group_create', '/groups/new')
     config.add_route('group_edit',
                      '/groups/{pubid}/edit',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route('group_read',
                      '/groups/{pubid}/{slug:[^/]*}',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
     config.add_route('group_read_noslug',
                      '/groups/{pubid}',
-                     factory='h.resources.GroupFactory',
+                     factory='h.resources.GroupRoot',
                      traverse='/{pubid}')
 
     # Help

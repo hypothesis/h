@@ -34,7 +34,7 @@ class Root(object):
         self.request = request
 
 
-class AnnotationResourceFactory(object):
+class AnnotationRoot(object):
     def __init__(self, request):
         self.request = request
 
@@ -94,7 +94,7 @@ class AnnotationResource(object):
         return principals_allowed_by_permission(group, 'read')
 
 
-class AuthClientFactory(object):
+class AuthClientRoot(object):
 
     def __init__(self, request):
         self.request = request
@@ -117,7 +117,7 @@ class AuthClientFactory(object):
             raise KeyError()
 
 
-class OrganizationFactory(object):
+class OrganizationRoot(object):
     def __init__(self, request):
         self.request = request
 
@@ -125,7 +125,7 @@ class OrganizationFactory(object):
         try:
             org = self.request.db.query(Organization).filter_by(pubid=pubid).one()
 
-            # Inherit global ACL. See comments in `AuthClientFactory`.
+            # Inherit global ACL. See comments in :py:class`h.resources.AuthClientRoot`.
             org.__parent__ = Root(self.request)
 
             return org
@@ -160,10 +160,10 @@ class OrganizationResource(object):
         return None
 
 
-class OrganizationLogoFactory(object):
+class OrganizationLogoRoot(object):
     def __init__(self, request):
         self.request = request
-        self.organization_factory = OrganizationFactory(self.request)
+        self.organization_factory = OrganizationRoot(self.request)
 
     def __getitem__(self, pubid):
         # This will raise KeyError if the organization doesn't exist.
@@ -175,7 +175,7 @@ class OrganizationLogoFactory(object):
         return organization.logo
 
 
-class GroupFactory(object):
+class GroupRoot(object):
     def __init__(self, request):
         self.request = request
 
@@ -205,7 +205,7 @@ class GroupResource(object):
         return OrganizationResource(self.group.organization, self.request)
 
 
-class UserFactory(object):
+class UserRoot(object):
     """Root resource for routes that look up User objects by traversal."""
 
     def __init__(self, request):
