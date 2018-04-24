@@ -8,7 +8,7 @@ from h import models
 
 
 class TestUserModelDataConstraints(object):
-    """Unit tests for :py:module:`User` data integrity constraints"""
+    """Unit tests for :py:module:`h.models.User` data integrity constraints"""
 
     def test_cannot_create_dot_variant_of_user(self, db_session):
         fred = models.User(authority='example.com',
@@ -172,11 +172,9 @@ class TestUserModel(object):
 
         assert user.is_activated
 
-    def test_instance_has_privacy_accepted_proptery(self, db_session):
-        user = models.User()
-
-        assert hasattr(user, 'privacy_accepted')
-        assert user.privacy_accepted is None  # nullable
+    def test_privacy_accepted_defaults_to_None(self, db_session):  # noqa: N802
+        # nullable
+        assert getattr(models.User(), "privacy_accepted") is None
 
 
 class TestUserGetByEmail(object):
