@@ -7,175 +7,174 @@ from sqlalchemy import exc
 from h import models
 
 
-def test_cannot_create_dot_variant_of_user(db_session):
-    fred = models.User(authority='example.com',
-                       username='fredbloggs',
-                       email='fred@example.com')
-    fred2 = models.User(authority='example.com',
-                        username='fred.bloggs',
-                        email='fred@example.org')
+class TestUserModelDataConstraints(object):
+    """Unit tests for :py:module:`h.models.User` data integrity constraints"""
 
-    db_session.add(fred)
-    db_session.add(fred2)
-    with pytest.raises(exc.IntegrityError):
+    def test_cannot_create_dot_variant_of_user(self, db_session):
+        fred = models.User(authority='example.com',
+                           username='fredbloggs',
+                           email='fred@example.com')
+        fred2 = models.User(authority='example.com',
+                            username='fred.bloggs',
+                            email='fred@example.org')
+
+        db_session.add(fred)
+        db_session.add(fred2)
+        with pytest.raises(exc.IntegrityError):
+            db_session.flush()
+
+    def test_cannot_create_case_variant_of_user(self, db_session):
+        bob = models.User(authority='example.com',
+                          username='BobJones',
+                          email='bob@example.com')
+        bob2 = models.User(authority='example.com',
+                           username='bobjones',
+                           email='bob@example.org')
+
+        db_session.add(bob)
+        db_session.add(bob2)
+        with pytest.raises(exc.IntegrityError):
+            db_session.flush()
+
+    def test_filtering_by_username_matches_dot_variant_of_user(self, db_session):
+        fred = models.User(authority='example.com',
+                           username='fredbloggs',
+                           email='fred@example.com')
+        db_session.add(fred)
         db_session.flush()
 
+        result = db_session.query(models.User).filter_by(username='fred.bloggs').one()
 
-def test_cannot_create_case_variant_of_user(db_session):
-    bob = models.User(authority='example.com',
-                      username='BobJones',
-                      email='bob@example.com')
-    bob2 = models.User(authority='example.com',
-                       username='bobjones',
-                       email='bob@example.org')
+        assert result == fred
 
-    db_session.add(bob)
-    db_session.add(bob2)
-    with pytest.raises(exc.IntegrityError):
+    def test_filtering_by_username_matches_case_variant_of_user(self, db_session):
+        fred = models.User(authority='example.com',
+                           username='fredbloggs',
+                           email='fred@example.com')
+        db_session.add(fred)
         db_session.flush()
 
+        result = db_session.query(models.User).filter_by(username='FredBloggs').one()
 
-def test_filtering_by_username_matches_dot_variant_of_user(db_session):
-    fred = models.User(authority='example.com',
-                       username='fredbloggs',
-                       email='fred@example.com')
-    db_session.add(fred)
-    db_session.flush()
+        assert result == fred
 
-    result = db_session.query(models.User).filter_by(username='fred.bloggs').one()
+    def test_userid_derived_from_username_and_authority(self):
+        fred = models.User(authority='example.net',
+                           username='fredbloggs',
+                           email='fred@example.com')
 
-    assert result == fred
+        assert fred.userid == 'acct:fredbloggs@example.net'
 
+    def test_cannot_create_user_with_too_short_username(self):
+        with pytest.raises(ValueError):
+            models.User(username='aa')
 
-def test_filtering_by_username_matches_case_variant_of_user(db_session):
-    fred = models.User(authority='example.com',
-                       username='fredbloggs',
-                       email='fred@example.com')
-    db_session.add(fred)
-    db_session.flush()
+    def test_cannot_create_user_with_too_long_username(self):
+        with pytest.raises(ValueError):
+            models.User(username='1234567890123456789012345678901')
 
-    result = db_session.query(models.User).filter_by(username='FredBloggs').one()
+    def test_cannot_create_user_with_invalid_chars(self):
+        with pytest.raises(ValueError):
+            models.User(username='foo-bar')
 
-    assert result == fred
-
-
-def test_userid_derived_from_username_and_authority():
-    fred = models.User(authority='example.net',
-                       username='fredbloggs',
-                       email='fred@example.com')
-
-    assert fred.userid == 'acct:fredbloggs@example.net'
+    def test_cannot_create_user_with_too_long_email(self):
+        with pytest.raises(ValueError):
+            models.User(email='bob@b' + 'o' * 100 + 'b.com')
 
 
-def test_userid_equals_query(db_session):
-    fred = models.User(authority='example.net',
-                       username='fredbloggs',
-                       email='fred@example.com')
-    db_session.add(fred)
-    db_session.flush()
+class TestUserModelUserId(object):
 
-    result = (db_session.query(models.User)
-              .filter_by(userid='acct:fredbloggs@example.net')
-              .one())
+    def test_userid_equals_query(self, db_session):
+        fred = models.User(authority='example.net',
+                           username='fredbloggs',
+                           email='fred@example.com')
+        db_session.add(fred)
+        db_session.flush()
 
-    assert result == fred
+        result = (db_session.query(models.User)
+                  .filter_by(userid='acct:fredbloggs@example.net')
+                  .one())
 
+        assert result == fred
 
-def test_userid_equals_query_with_invalid_userid(db_session):
-    # This is to ensure that we don't expose the ValueError that could
-    # potentially be thrown by split_user.
+    def test_userid_equals_query_with_invalid_userid(self, db_session):
+        # This is to ensure that we don't expose the ValueError that could
+        # potentially be thrown by split_user.
 
-    result = (db_session.query(models.User)
-              .filter_by(userid='fredbloggsexample.net')
-              .all())
+        result = (db_session.query(models.User)
+                  .filter_by(userid='fredbloggsexample.net')
+                  .all())
 
-    assert result == []
+        assert result == []
 
+    def test_userid_in_query(self, db_session):
+        fred = models.User(authority='example.net',
+                           username='fredbloggs',
+                           email='fred@example.net')
+        alice = models.User(authority='foobar.com',
+                            username='alicewrites',
+                            email='alice@foobar.com')
+        db_session.add_all([fred, alice])
+        db_session.flush()
 
-def test_userid_in_query(db_session):
-    fred = models.User(authority='example.net',
-                       username='fredbloggs',
-                       email='fred@example.net')
-    alice = models.User(authority='foobar.com',
-                        username='alicewrites',
-                        email='alice@foobar.com')
-    db_session.add_all([fred, alice])
-    db_session.flush()
+        result = (db_session.query(models.User)
+                  .filter(models.User.userid.in_(['acct:fredbloggs@example.net',
+                                                  'acct:alicewrites@foobar.com',
+                                                  'acct:missing@bla.org']))
+                  .all())
 
-    result = (db_session.query(models.User)
-              .filter(models.User.userid.in_(['acct:fredbloggs@example.net',
-                                              'acct:alicewrites@foobar.com',
-                                              'acct:missing@bla.org']))
-              .all())
+        assert len(result) == 2
+        assert fred in result
+        assert alice in result
 
-    assert len(result) == 2
-    assert fred in result
-    assert alice in result
+    def test_userid_in_query_with_invalid_userid_mixed_in(self, db_session):
+        # This is to ensure that we don't expose the ValueError that could
+        # potentially be thrown by split_user.
 
+        fred = models.User(authority='example.net',
+                           username='fredbloggs',
+                           email='fred@example.com')
+        db_session.add(fred)
+        db_session.flush()
 
-def test_userid_in_query_with_invalid_userid_mixed_in(db_session):
-    # This is to ensure that we don't expose the ValueError that could
-    # potentially be thrown by split_user.
+        result = (db_session.query(models.User)
+                  .filter(models.User.userid.in_(['acct:fredbloggs@example.net',
+                                                  'invalid']))
+                  .all())
 
-    fred = models.User(authority='example.net',
-                       username='fredbloggs',
-                       email='fred@example.com')
-    db_session.add(fred)
-    db_session.flush()
+        assert len(result) == 1
+        assert fred in result
 
-    result = (db_session.query(models.User)
-              .filter(models.User.userid.in_(['acct:fredbloggs@example.net',
-                                              'invalid']))
-              .all())
+    def test_userid_in_query_with_only_invalid_userid(self, db_session):
+        # This is to ensure that we don't expose the ValueError that could
+        # potentially be thrown by split_user.
 
-    assert len(result) == 1
-    assert fred in result
+        result = (db_session.query(models.User)
+                  .filter(models.User.userid.in_(['fredbloggsexample.net']))
+                  .all())
 
-
-def test_userid_in_query_with_only_invalid_userid(db_session):
-    # This is to ensure that we don't expose the ValueError that could
-    # potentially be thrown by split_user.
-
-    result = (db_session.query(models.User)
-              .filter(models.User.userid.in_(['fredbloggsexample.net']))
-              .all())
-
-    assert result == []
+        assert result == []
 
 
-def test_cannot_create_user_with_too_short_username():
-    with pytest.raises(ValueError):
-        models.User(username='aa')
+class TestUserModel(object):
 
+    def test_User_activate_activates_user(self, db_session):  # noqa: N802
+        user = models.User(authority='example.com',
+                           username='kiki',
+                           email='kiki@kiki.com')
+        activation = models.Activation()
+        user.activation = activation
+        db_session.add(user)
+        db_session.flush()
 
-def test_cannot_create_user_with_too_long_username():
-    with pytest.raises(ValueError):
-        models.User(username='1234567890123456789012345678901')
+        user.activate()
+        db_session.commit()
 
+        assert user.is_activated
 
-def test_cannot_create_user_with_invalid_chars():
-    with pytest.raises(ValueError):
-        models.User(username='foo-bar')
-
-
-def test_cannot_create_user_with_too_long_email():
-    with pytest.raises(ValueError):
-        models.User(email='bob@b' + 'o' * 100 + 'b.com')
-
-
-def test_User_activate_activates_user(db_session):
-    user = models.User(authority='example.com',
-                       username='kiki',
-                       email='kiki@kiki.com')
-    activation = models.Activation()
-    user.activation = activation
-    db_session.add(user)
-    db_session.flush()
-
-    user.activate()
-    db_session.commit()
-
-    assert user.is_activated
+    def test_privacy_accepted_defaults_to_None(self, db_session):  # noqa: N802
+        # nullable
+        assert getattr(models.User(), "privacy_accepted") is None
 
 
 class TestUserGetByEmail(object):
