@@ -9,7 +9,6 @@ from elasticsearch.exceptions import ConnectionTimeout
 from h.search import query
 
 FILTERS_KEY = 'h.search.filters'
-MATCHERS_KEY = 'h.search.matchers'
 
 log = logging.getLogger(__name__)
 
@@ -157,6 +156,4 @@ def default_querybuilder(request):
     builder.append_matcher(query.TagsMatcher())
     for factory in request.registry.get(FILTERS_KEY, []):
         builder.append_filter(factory(request))
-    for factory in request.registry.get(MATCHERS_KEY, []):
-        builder.append_matcher(factory(request))
     return builder
