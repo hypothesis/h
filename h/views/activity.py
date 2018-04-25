@@ -22,7 +22,7 @@ from h.search import parser
 from h.util.user import split_user
 from h.views.groups import check_slug
 from h.util.datetime import utc_us_style_date
-from h.resources import OrganizationResource
+from h.resources import OrganizationContext
 
 
 PAGE_SIZE = 200
@@ -97,7 +97,7 @@ class GroupSearchController(SearchController):
     def __init__(self, group, request):
         super(GroupSearchController, self).__init__(request)
         self.group = group
-        self._org_resource = OrganizationResource(group.organization, request)
+        self._organization_context = OrganizationContext(group.organization, request)
 
     @view_config(request_method='GET')
     def search(self):
@@ -169,7 +169,7 @@ class GroupSearchController(SearchController):
             'share_subtitle': _('Share group'),
             'share_msg': _('Sharing the link lets people view this group:'),
             'organization': {'name': self.group.organization.name,
-                             'logo': self._org_resource.logo}
+                             'logo': self._organization_context.logo}
         }
 
         if self.group.type == 'private':

@@ -238,7 +238,7 @@ class TestGroupSearchController(object):
             test_group,
             test_user,
             default_org,
-            OrganizationResource,
+            OrganizationContext,
             pyramid_request):
         group_info = controller.search()['group']
 
@@ -246,7 +246,7 @@ class TestGroupSearchController(object):
         assert group_info['description'] == test_group.description
         assert group_info['name'] == test_group.name
         assert group_info['pubid'] == test_group.pubid
-        assert group_info['organization']['logo'] == OrganizationResource(None, None).logo
+        assert group_info['organization']['logo'] == OrganizationContext(None, None).logo
         assert group_info['organization']['name'] == default_org.name
 
     @pytest.mark.parametrize('test_group,test_user',
@@ -768,14 +768,14 @@ class TestGroupSearchController(object):
                 "user": factories.User()}
 
     @pytest.fixture
-    def OrganizationResource(self, patch):
-        OrganizationResource = patch("h.views.activity.OrganizationResource")
-        organization_resource = OrganizationResource.return_value
-        organization_resource.logo = "http://example.com/organizations/pubid/logo"
-        return OrganizationResource
+    def OrganizationContext(self, patch):
+        OrganizationContext = patch("h.views.activity.OrganizationContext")
+        organization_context = OrganizationContext.return_value
+        organization_context.logo = "http://example.com/organizations/pubid/logo"
+        return OrganizationContext
 
     @pytest.fixture
-    def controller(self, request, group, pyramid_request, OrganizationResource):
+    def controller(self, request, group, pyramid_request, OrganizationContext):
         test_group = group
         if 'test_group' in request.fixturenames:
             test_group = request.getfixturevalue('test_group')

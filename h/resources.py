@@ -133,7 +133,7 @@ class OrganizationRoot(object):
             raise KeyError()
 
 
-class OrganizationResource(object):
+class OrganizationContext(object):
     def __init__(self, organization, request):
         # TODO Links service
         self.organization = organization
@@ -202,7 +202,7 @@ class GroupResource(object):
 
     @property
     def organization(self):
-        return OrganizationResource(self.group.organization, self.request)
+        return OrganizationContext(self.group.organization, self.request)
 
 
 class UserRoot(object):

@@ -17,7 +17,7 @@ from h.resources import OrganizationRoot
 from h.resources import OrganizationLogoRoot
 from h.resources import GroupRoot
 from h.resources import GroupResource
-from h.resources import OrganizationResource
+from h.resources import OrganizationContext
 from h.resources import UserRoot
 from h.services.user import UserService
 
@@ -319,33 +319,33 @@ class TestGroupResource(object):
 
         group_resource = GroupResource(group, pyramid_request)
 
-        assert isinstance(group_resource.organization, OrganizationResource)
+        assert isinstance(group_resource.organization, OrganizationContext)
 
 
 @pytest.mark.usefixtures('organization_routes')
-class TestOrganizationResource(object):
+class TestOrganizationContext(object):
 
     def test_it_returns_organization_model_as_property(self, factories, pyramid_request):
         organization = factories.Organization()
 
-        organization_resource = OrganizationResource(organization, pyramid_request)
+        organization_context = OrganizationContext(organization, pyramid_request)
 
-        assert organization_resource.organization == organization
+        assert organization_context.organization == organization
 
     def test_it_returns_pubid_as_id(self, factories, pyramid_request):
         organization = factories.Organization()
 
-        organization_resource = OrganizationResource(organization, pyramid_request)
+        organization_context = OrganizationContext(organization, pyramid_request)
 
-        assert organization_resource.id != organization.id
-        assert organization_resource.id == organization.pubid
+        assert organization_context.id != organization.id
+        assert organization_context.id == organization.pubid
 
     def test_it_returns_links_property(self, factories, pyramid_request):
         organization = factories.Organization()
 
-        organization_resource = OrganizationResource(organization, pyramid_request)
+        organization_context = OrganizationContext(organization, pyramid_request)
 
-        assert organization_resource.links == {}
+        assert organization_context.links == {}
 
     def test_it_returns_logo_property_as_route_url(self, factories, pyramid_request):
         fake_logo = '<svg>H</svg>'
@@ -353,8 +353,8 @@ class TestOrganizationResource(object):
 
         organization = factories.Organization(logo=fake_logo)
 
-        organization_resource = OrganizationResource(organization, pyramid_request)
-        logo = organization_resource.logo
+        organization_context = OrganizationContext(organization, pyramid_request)
+        logo = organization_context.logo
 
         pyramid_request.route_url.assert_called_with('organization_logo', pubid=organization.pubid)
         assert logo is not None
@@ -364,8 +364,8 @@ class TestOrganizationResource(object):
 
         organization = factories.Organization(logo=None)
 
-        organization_resource = OrganizationResource(organization, pyramid_request)
-        logo = organization_resource.logo
+        organization_context = OrganizationContext(organization, pyramid_request)
+        logo = organization_context.logo
 
         pyramid_request.route_url.assert_not_called
         assert logo is None
@@ -373,16 +373,16 @@ class TestOrganizationResource(object):
     def test_default_property_if_not_default_organization(self, factories, pyramid_request):
         organization = factories.Organization()
 
-        organization_resource = OrganizationResource(organization, pyramid_request)
+        organization_context = OrganizationContext(organization, pyramid_request)
 
-        assert organization_resource.default is False
+        assert organization_context.default is False
 
     def test_default_property_if_default_organization(self, factories, pyramid_request):
         organization = Organization.default(pyramid_request.db)
 
-        organization_resource = OrganizationResource(organization, pyramid_request)
+        organization_context = OrganizationContext(organization, pyramid_request)
 
-        assert organization_resource.default is True
+        assert organization_context.default is True
 
 
 @pytest.mark.usefixtures('user_service')

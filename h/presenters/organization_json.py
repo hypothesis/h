@@ -6,18 +6,18 @@ from __future__ import unicode_literals
 class OrganizationJSONPresenter(object):
     """Present an organization in the JSON format returned by API requests."""
 
-    def __init__(self, organization_resource):
-        self.resource = organization_resource
-        self.organization = organization_resource.organization
+    def __init__(self, organization_context):
+        self.context = organization_context
+        self.organization = organization_context.organization
 
     def asdict(self):
         return self._model()
 
     def _model(self):
         model = {
-          'id': self.resource.id,
-          'default': self.resource.default,
-          'logo': self.resource.logo,
+          'id': self.context.id,
+          'default': self.context.default,
+          'logo': self.context.logo,
           'name': self.organization.name,
         }
         return model
