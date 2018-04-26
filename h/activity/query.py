@@ -89,6 +89,9 @@ def check_url(request, query, unparse=parser.unparse):
                                           pubid=group.pubid,
                                           slug=group.slug,
                                           _query={'q': unparse(query)})
+        else:
+            redirect = request.route_path('activity.entity_not_found',
+                                          entityid=pubid)
 
     elif _single_entry(query, 'user'):
         username = query.pop('user')
@@ -98,6 +101,9 @@ def check_url(request, query, unparse=parser.unparse):
             redirect = request.route_path('activity.user_search',
                                           username=username,
                                           _query={'q': unparse(query)})
+        else:
+            redirect = request.route_path('activity.entity_not_found',
+                                          entityid=username)
 
     if redirect is not None:
         raise HTTPFound(location=redirect)

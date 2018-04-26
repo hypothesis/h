@@ -1,0 +1,15 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block title %}{{ entityid }} Not Found{% endblock %}
+
+{% block content %}
+  {% include 'h:templates/includes/logo-header.html.jinja2' %}
+  <div class="form-container">
+    <h1 class="form-header">Entity "{{ entityid }}" not found</h1>
+    <p>This entity does not exist, please try a different search.</p>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {% include "h:templates/includes/footer.html.jinja2" %}
+{% endblock %}

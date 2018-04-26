@@ -90,12 +90,15 @@ class TestCheckURL(object):
             '/act/groups/{pubid}/{slug}?q=UNPARSED_QUERY'.format(
                 pubid=group.pubid, slug=group.slug))
 
-    def test_does_not_redirect_to_group_page_if_group_does_not_exist(self,
-                                                                     pyramid_request,
-                                                                     unparse):
+    def test_redirects_to_entity_not_found_page_if_group_does_not_exist(self,
+                                                                        pyramid_request,
+                                                                        unparse):
         query = MultiDict({'group': 'does_not_exist'})
 
-        assert check_url(pyramid_request, query, unparse=unparse) is None
+        with pytest.raises(HTTPFound) as e:
+            check_url(pyramid_request, query, unparse=unparse)
+
+        assert e.value.location == '/act/entity_not_found/does_not_exist'
 
     def test_removes_group_term_from_query(self, group, pyramid_request, unparse):
         query = MultiDict({'group': group.pubid})
@@ -135,13 +138,17 @@ class TestCheckURL(object):
 
         assert e.value.location == '/act/users/jose?q=UNPARSED_QUERY'
 
-    def test_does_not_redirect_to_user_page_if_user_does_not_exist(self,
-                                                                   pyramid_request,
-                                                                   user_service):
+    def test_redirects_to_entity_not_found_page_if_user_does_not_exist(self,
+                                                                       pyramid_request,
+                                                                       unparse,
+                                                                       user_service):
         query = MultiDict({'user': 'jose'})
         user_service.fetch.return_value = None
 
-        assert check_url(pyramid_request, query) is None
+        with pytest.raises(HTTPFound) as e:
+            check_url(pyramid_request, query, unparse=unparse)
+
+        assert e.value.location == '/act/entity_not_found/jose'
 
     def test_removes_user_term_from_query(self, pyramid_request, unparse):
         query = MultiDict({'user': 'jose'})
@@ -638,3 +645,4 @@ def pyramid_request(pyramid_request):
 def routes(pyramid_config):
     pyramid_config.add_route('group_read', '/act/groups/{pubid}/{slug}')
     pyramid_config.add_route('activity.user_search', '/act/users/{username}')
+    pyramid_config.add_route('activity.entity_not_found', '/act/entity_not_found/{entityid}')

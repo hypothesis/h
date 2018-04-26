@@ -26,6 +26,8 @@ def includeme(config):
 
     # Activity
     config.add_route('activity.search', '/search')
+    config.add_route('activity.entity_not_found',
+                     '/entity_not_found/{entityid}')
     config.add_route('activity.user_search',
                      '/users/{username}',
                      factory='h.resources:UserRoot',

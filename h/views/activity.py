@@ -308,6 +308,17 @@ class GroupSearchController(SearchController):
             raise httpexceptions.HTTPNotFound()
 
 
+@view_defaults(route_name='activity.entity_not_found',
+               renderer='h:templates/activity/entity_not_found.html.jinja2')
+class EntityNotFoundController(SearchController):
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method='GET')
+    def get(self):
+        return {'entityid': self.request.matchdict.get('entityid')}
+
+
 @view_defaults(route_name='activity.user_search',
                renderer='h:templates/activity/search.html.jinja2')
 class UserSearchController(SearchController):
