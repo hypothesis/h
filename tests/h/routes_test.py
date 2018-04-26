@@ -34,6 +34,7 @@ def test_includeme():
         call('claim_account_legacy', '/claim_account/{token}'),
         call('dismiss_sidebar_tutorial', '/app/dismiss_sidebar_tutorial'),
         call('activity.search', '/search'),
+        call('activity.entity_not_found', '/entity_not_found/{entityid}'),
         call('activity.user_search', '/users/{username}', factory='h.resources:UserRoot', traverse='/{username}'),
         call('admin_index', '/admin/'),
         call('admin_admins', '/admin/admins'),
