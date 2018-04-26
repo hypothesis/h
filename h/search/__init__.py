@@ -5,7 +5,6 @@ from h.search.client import get_client
 from h.search.config import init
 from h.search.core import Search
 from h.search.core import FILTERS_KEY
-from h.search.core import MATCHERS_KEY
 
 __all__ = (
     'Search',
@@ -22,15 +21,10 @@ def includeme(config):
     # Allow users of this module to register additional search filter and
     # search matcher factories.
     config.registry[FILTERS_KEY] = []
-    config.registry[MATCHERS_KEY] = []
     config.add_directive('add_search_filter',
                          lambda c, f: c.registry[FILTERS_KEY].append(config.maybe_dotted(f)))
     config.add_directive('get_search_filters',
                          lambda c: c.registry[FILTERS_KEY])
-    config.add_directive('add_search_matcher',
-                         lambda c, m: c.registry[MATCHERS_KEY].append(config.maybe_dotted(m)))
-    config.add_directive('get_search_matchers',
-                         lambda c: c.registry[MATCHERS_KEY])
 
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to

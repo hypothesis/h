@@ -297,17 +297,6 @@ def test_default_querybuilder_includes_default_matchers(matchers, matcher_type, 
     assert matchers.instance_of(type_) in builder.matchers
 
 
-def test_default_querybuilder_includes_registered_matchers(pyramid_request):
-    matcher_factory = mock.Mock(return_value=mock.sentinel.MY_MATCHER,
-                                spec_set=[])
-    pyramid_request.registry[core.MATCHERS_KEY] = [matcher_factory]
-
-    builder = core.default_querybuilder(pyramid_request)
-
-    matcher_factory.assert_called_once_with(pyramid_request)
-    assert mock.sentinel.MY_MATCHER in builder.matchers
-
-
 def dummy_search_results(start=1, count=0, name='annotation'):
     """Generate some dummy search results."""
     out = {'hits': {'total': 0, 'hits': []}}
