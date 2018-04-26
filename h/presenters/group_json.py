@@ -10,7 +10,7 @@ class GroupJSONPresenter(object):
 
     def __init__(self, group_resource):
         self.resource = group_resource
-        self.organization_resource = self.resource.organization
+        self.organization_context = self.resource.organization
         self.group = group_resource.group
 
     def asdict(self, expand=[]):
@@ -22,7 +22,7 @@ class GroupJSONPresenter(object):
     def _expand(self, model, expand=[]):
         if 'organization' in expand:
             model['organization'] = OrganizationJSONPresenter(
-              self.organization_resource
+              self.organization_context
             ).asdict()
         return model
 
@@ -30,7 +30,7 @@ class GroupJSONPresenter(object):
         model = {
           'id': self.resource.id,
           'name': self.group.name,
-          'organization': self.organization_resource.id,
+          'organization': self.organization_context.id,
           'public': self.group.is_public,  # DEPRECATED: TODO: remove from client
           'scoped': True if self.group.scopes else False,
           'type': self.group.type
