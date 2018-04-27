@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
-from h.resources import GroupResource
+from h.resources import GroupContext
 from h.presenters import GroupsJSONPresenter
 from h.views.api import api_config
 
@@ -27,7 +27,7 @@ def groups(request):
     all_groups = list_svc.request_groups(user=request.user,
                                          authority=authority,
                                          document_uri=document_uri)
-    all_groups = [GroupResource(group, request) for group in all_groups]
+    all_groups = [GroupContext(group, request) for group in all_groups]
     all_groups = GroupsJSONPresenter(all_groups).asdicts(expand=expand)
     return all_groups
 

@@ -7,125 +7,125 @@ import mock
 
 from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
 from h.services.group_links import GroupLinksService
-from h.resources import GroupResource
+from h import resources
 
 
 class TestGroupJSONPresenter(object):
-    def test_private_group_asdict(self, factories, GroupResource_, links_svc):  # noqa: N803
+    def test_private_group_asdict(self, factories, GroupContext, links_svc):  # noqa: N803
         group = factories.Group(name='My Group',
                                 pubid='mygroup')
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
 
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'mygroup',
-            'organization': group_resource.organization.id,
+            'organization': group_context.organization.id,
             'type': 'private',
             'public': False,
             'scoped': False,
             'links': links_svc.get_all.return_value,
         }
 
-    def test_open_group_asdict(self, factories, GroupResource_, links_svc):  # noqa: N803
+    def test_open_group_asdict(self, factories, GroupContext, links_svc):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
 
         assert presenter.asdict() == {
             'name': 'My Group',
-            'id': group_resource.id,
-            'organization': group_resource.organization.id,
+            'id': group_context.id,
+            'organization': group_context.organization.id,
             'type': 'open',
             'public': True,
             'scoped': False,
             'links': links_svc.get_all.return_value,
         }
 
-    def test_open_scoped_group_asdict(self, factories, GroupResource_, links_svc):  # noqa: N803
+    def test_open_scoped_group_asdict(self, factories, GroupContext, links_svc):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='groupy',
                                     scopes=[factories.GroupScope(origin='http://foo.com')])
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
 
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'groupy',
             'type': 'open',
-            'organization': group_resource.organization.id,
+            'organization': group_context.organization.id,
             'public': True,
             'scoped': True,
             'links': links_svc.get_all.return_value,
         }
 
-    def test_it_does_not_contain_deprecated_url(self, factories, GroupResource_, links_svc):  # noqa: N803
+    def test_it_does_not_contain_deprecated_url(self, factories, GroupContext, links_svc):  # noqa: N803
         links_svc.get_all.return_value = {
             'html': 'foobar'
         }
         group = factories.Group()
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
 
         assert 'url' not in presenter.asdict()
 
-    def test_it_does_not_expand_by_default(self, factories, GroupResource_):  # noqa: N803
+    def test_it_does_not_expand_by_default(self, factories, GroupContext):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
 
         model = presenter.asdict()
 
-        assert model['organization'] == group_resource.organization.id
+        assert model['organization'] == group_context.organization.id
 
-    def test_it_expands_organizations(self, factories, GroupResource_, OrganizationJSONPresenter):  # noqa: N803
+    def test_it_expands_organizations(self, factories, GroupContext, OrganizationJSONPresenter):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
 
         model = presenter.asdict(expand=['organization'])
 
-        assert model['organization'] == OrganizationJSONPresenter(group_resource.organization).asdict.return_value
+        assert model['organization'] == OrganizationJSONPresenter(group_context.organization).asdict.return_value
 
-    def test_it_ignores_unrecognized_expands(self, factories, GroupResource_):  # noqa: N803
+    def test_it_ignores_unrecognized_expands(self, factories, GroupContext):  # noqa: N803
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
-        group_resource = GroupResource_(group)
-        presenter = GroupJSONPresenter(group_resource)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
 
         model = presenter.asdict(expand=['foobars', 'dingdong'])
 
-        assert model['organization'] == group_resource.organization.id
+        assert model['organization'] == group_context.organization.id
 
 
 class TestGroupsJSONPresenter(object):
 
-    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_, GroupResources):  # noqa: [N802, N803]
+    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_, GroupContexts):  # noqa: [N802, N803]
         groups = [factories.Group(), factories.OpenGroup()]
-        group_resources = GroupResources(groups)
-        presenter = GroupsJSONPresenter(group_resources)
-        expected_call_args = [mock.call(group_resource) for group_resource in group_resources]
+        group_contexts = GroupContexts(groups)
+        presenter = GroupsJSONPresenter(group_contexts)
+        expected_call_args = [mock.call(group_context) for group_context in group_contexts]
 
         presenter.asdicts()
 
         assert GroupJSONPresenter_.call_args_list == expected_call_args
 
-    def test_asdicts_returns_list_of_dicts(self, factories, GroupResources):  # noqa: N803
+    def test_asdicts_returns_list_of_dicts(self, factories, GroupContexts):  # noqa: N803
         groups = [factories.Group(name='filbert'), factories.OpenGroup(name='delbert')]
-        group_resources = GroupResources(groups)
-        presenter = GroupsJSONPresenter(group_resources)
+        group_contexts = GroupContexts(groups)
+        presenter = GroupsJSONPresenter(group_contexts)
 
         result = presenter.asdicts()
 
         assert [group['name'] for group in result] == ['filbert', 'delbert']
 
-    def test_asdicts_injects_links(self, factories, links_svc, GroupResources):  # noqa: N803
+    def test_asdicts_injects_links(self, factories, links_svc, GroupContexts):  # noqa: N803
         groups = [factories.Group(), factories.OpenGroup()]
-        group_resources = GroupResources(groups)
-        presenter = GroupsJSONPresenter(group_resources)
+        group_contexts = GroupContexts(groups)
+        presenter = GroupsJSONPresenter(group_contexts)
 
         result = presenter.asdicts()
 
@@ -141,16 +141,16 @@ def links_svc(pyramid_config):
 
 
 @pytest.fixture
-def GroupResource_(pyramid_request, links_svc):  # noqa: N802
+def GroupContext(pyramid_request, links_svc):  # noqa: N802
     def resource_factory(group):
-        return GroupResource(group, pyramid_request)
+        return resources.GroupContext(group, pyramid_request)
     return resource_factory
 
 
 @pytest.fixture
-def GroupResources(pyramid_request, links_svc):  # noqa: N802
+def GroupContexts(pyramid_request, links_svc):  # noqa: N802
     def resource_factory(groups):
-        return [GroupResource(group, pyramid_request) for group in groups]
+        return [resources.GroupContext(group, pyramid_request) for group in groups]
     return resource_factory
 
 

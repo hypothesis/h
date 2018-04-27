@@ -8,15 +8,15 @@ from h.presenters.organization_json import OrganizationJSONPresenter
 class GroupJSONPresenter(object):
     """Present a group in the JSON format returned by API requests."""
 
-    def __init__(self, group_resource):
-        self.resource = group_resource
-        self.organization_context = self.resource.organization
-        self.group = group_resource.group
+    def __init__(self, group_context):
+        self.context = group_context
+        self.organization_context = self.context.organization
+        self.group = group_context.group
 
     def asdict(self, expand=[]):
         model = self._model()
         self._expand(model, expand)
-        model['links'] = self.resource.links or {}
+        model['links'] = self.context.links or {}
         return model
 
     def _expand(self, model, expand=[]):
@@ -28,7 +28,7 @@ class GroupJSONPresenter(object):
 
     def _model(self):
         model = {
-          'id': self.resource.id,
+          'id': self.context.id,
           'name': self.group.name,
           'organization': self.organization_context.id,
           'public': self.group.is_public,  # DEPRECATED: TODO: remove from client
@@ -41,8 +41,8 @@ class GroupJSONPresenter(object):
 class GroupsJSONPresenter(object):
     """Present a list of groups as JSON"""
 
-    def __init__(self, group_resources):
-        self.resources = group_resources
+    def __init__(self, group_contexts):
+        self.contexts = group_contexts
 
     def asdicts(self, expand=[]):
-        return [GroupJSONPresenter(group_resource).asdict(expand=expand) for group_resource in self.resources]
+        return [GroupJSONPresenter(group_context).asdict(expand=expand) for group_context in self.contexts]
