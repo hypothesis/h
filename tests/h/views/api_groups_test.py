@@ -49,12 +49,12 @@ class TestGetGroups(object):
             document_uri=None
         )
 
-    def test_converts_groups_to_resources(self, GroupResource, anonymous_request, open_groups, list_groups_service):  # noqa: N803
+    def test_converts_groups_to_resources(self, GroupContext, anonymous_request, open_groups, list_groups_service):  # noqa: N803
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
-        GroupResource.assert_has_calls([
+        GroupContext.assert_has_calls([
             mock.call(open_groups[0], anonymous_request),
             mock.call(open_groups[1], anonymous_request),
         ])
@@ -162,8 +162,8 @@ def GroupsJSONPresenter(patch):  # noqa: N802
 
 
 @pytest.fixture
-def GroupResource(patch):  # noqa: N802
-    return patch('h.views.api_groups.GroupResource')
+def GroupContext(patch):  # noqa: N802
+    return patch('h.views.api_groups.GroupContext')
 
 
 @pytest.fixture

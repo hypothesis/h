@@ -16,7 +16,7 @@ from h.resources import AuthClientRoot
 from h.resources import OrganizationRoot
 from h.resources import OrganizationLogoRoot
 from h.resources import GroupRoot
-from h.resources import GroupResource
+from h.resources import GroupContext
 from h.resources import OrganizationContext
 from h.resources import UserRoot
 from h.services.user import UserService
@@ -291,35 +291,35 @@ class TestGroupRoot(object):
 
 
 @pytest.mark.usefixtures('links_svc')
-class TestGroupResource(object):
+class TestGroupContext(object):
 
     def test_it_returns_group_model_as_property(self, factories, pyramid_request):
         group = factories.Group()
 
-        group_resource = GroupResource(group, pyramid_request)
+        group_context = GroupContext(group, pyramid_request)
 
-        assert group_resource.group == group
+        assert group_context.group == group
 
     def test_it_proxies_links_to_svc(self, factories, links_svc, pyramid_request):
         group = factories.Group()
 
-        group_resource = GroupResource(group, pyramid_request)
+        group_context = GroupContext(group, pyramid_request)
 
-        assert group_resource.links == links_svc.get_all.return_value
+        assert group_context.links == links_svc.get_all.return_value
 
     def test_it_returns_pubid_as_id(self, factories, pyramid_request):
         group = factories.Group()
 
-        group_resource = GroupResource(group, pyramid_request)
+        group_context = GroupContext(group, pyramid_request)
 
-        assert group_resource.id == group.pubid  # NOT the group.id
+        assert group_context.id == group.pubid  # NOT the group.id
 
     def test_it_expands_organization(self, factories, pyramid_request):
         group = factories.Group()
 
-        group_resource = GroupResource(group, pyramid_request)
+        group_context = GroupContext(group, pyramid_request)
 
-        assert isinstance(group_resource.organization, OrganizationContext)
+        assert isinstance(group_context.organization, OrganizationContext)
 
 
 @pytest.mark.usefixtures('organization_routes')

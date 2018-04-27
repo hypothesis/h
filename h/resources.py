@@ -186,7 +186,7 @@ class GroupRoot(object):
             raise KeyError()
 
 
-class GroupResource(object):
+class GroupContext(object):
     def __init__(self, group, request):
         self.request = request
         self.group = group
