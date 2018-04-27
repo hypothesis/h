@@ -25,13 +25,21 @@ class Client(object):
         annotation = 'annotation'
 
     def __init__(self, host, index, **kwargs):
-        self.index = index
-        self.conn = Elasticsearch([host],
-                                  verify_certs=True,
-                                  # N.B. this won't be necessary if we upgrade
-                                  # to elasticsearch>=5.0.0.
-                                  ca_certs=certifi.where(),
-                                  **kwargs)
+        self._index = index
+        self._conn = Elasticsearch([host],
+                                   verify_certs=True,
+                                   # N.B. this won't be necessary if we upgrade
+                                   # to elasticsearch>=5.0.0.
+                                   ca_certs=certifi.where(),
+                                   **kwargs)
+
+    @property
+    def index(self):
+        return self._index
+
+    @property
+    def conn(self):
+        return self._conn
 
 
 def get_client(settings):

@@ -7,10 +7,28 @@ import pytest
 from elasticsearch import RequestsHttpConnection
 
 from h.search.client import get_client
+from h.search.client import Client
 
 
 class TestClient(object):
-    pass
+
+    def test_it_sets_the_index_and_conn_properties(self):
+        client = Client(host="http://localhost:9200", index="hypothesis")
+
+        assert client.index == "hypothesis"
+        assert client.conn
+
+    def test_index_is_read_only(self):
+        client = Client(host="http://localhost:9200", index="hypothesis")
+
+        with pytest.raises(AttributeError, match="can't set attribute"):
+            client.index = "changed"
+
+    def test_conn_is_read_only(self):
+        client = Client(host="http://localhost:9200", index="hypothesis")
+
+        with pytest.raises(AttributeError, match="can't set attribute"):
+            client.conn = "changed"
 
 
 class TestGetClient(object):

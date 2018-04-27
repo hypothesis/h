@@ -123,8 +123,8 @@ class TestReindex(object):
 
     @pytest.fixture
     def es(self):
-        mock_es = mock.Mock(spec=client.Client('localhost', 'hypothesis'))
-        mock_es.index = 'hypothesis'
+        mock_es = mock.create_autospec(client.Client, instance=True,
+                                       spec_set=True, index="hypothesis")
         mock_es.t.annotation = 'annotation'
         return mock_es
 
