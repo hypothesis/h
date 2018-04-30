@@ -9,7 +9,7 @@ from h._compat import urlparse
 from jinja2 import Markup
 from pyramid import httpexceptions
 from pyramid import security
-from pyramid.view import view_config
+from pyramid.view import view_config, notfound_view_config
 from pyramid.view import view_defaults
 
 from h import util
@@ -97,7 +97,15 @@ class GroupSearchController(SearchController):
     def __init__(self, group, request):
         super(GroupSearchController, self).__init__(request)
         self.group = group
-        self._organization_context = OrganizationContext(group.organization, request)
+
+        if type(group) is not httpexceptions.HTTPNotFound:
+            self._organization_context = OrganizationContext(group.organization, request)
+
+    @notfound_view_config(renderer='h:templates/activity/groupnotfound.html.jinja2')
+    def notfound(self):
+        return {
+            'pubid': self.request.matchdict.get('pubid')
+        }
 
     @view_config(request_method='GET')
     def search(self):
@@ -316,6 +324,12 @@ class UserSearchController(SearchController):
     def __init__(self, user, request):
         super(UserSearchController, self).__init__(request)
         self.user = user
+
+    @notfound_view_config(renderer='h:templates/activity/usernotfound.html.jinja2')
+    def notfound(self):
+        return {
+            'username': self.request.matchdict.get('username')
+        }
 
     @view_config(request_method='GET')
     def search(self):

@@ -89,15 +89,19 @@ def check_url(request, query, unparse=parser.unparse):
                                           pubid=group.pubid,
                                           slug=group.slug,
                                           _query={'q': unparse(query)})
+        else:
+            redirect = request.route_path('group_read',
+                                          pubid=pubid,
+                                          slug=None,
+                                          _query={'q': unparse(query)})
 
     elif _single_entry(query, 'user'):
         username = query.pop('user')
         user = request.find_service(name='user').fetch(username,
                                                        request.authority)
-        if user:
-            redirect = request.route_path('activity.user_search',
-                                          username=username,
-                                          _query={'q': unparse(query)})
+        redirect = request.route_path('activity.user_search',
+                                      username=username,
+                                      _query={'q': unparse(query)})
 
     if redirect is not None:
         raise HTTPFound(location=redirect)
