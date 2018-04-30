@@ -1,0 +1,15 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block title %}User not Found{% endblock %}
+
+{% block content %}
+  {% include 'h:templates/includes/logo-header.html.jinja2' %}
+  <div class="form-container">
+    <h1 class="form-header">User "{{ username }}" not found</h1>
+    <p>This user does not exist.Please try a different search.</p>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {% include "h:templates/includes/footer.html.jinja2" %}
+{% endblock %}
