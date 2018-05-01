@@ -131,7 +131,7 @@ can be installed on:
 
       docker-compose up
 
-   You'll now have three Docker containers running the PostgreSQL, RabbitMQ, and
+   You'll now have some Docker containers running the PostgreSQL, RabbitMQ, and
    Elasticsearch services. You should be able to see them by running ``docker
    ps``. You should also be able to visit your Elasticsearch service by opening
    http://localhost:9200/ in a browser, and connect to your PostgreSQL by
