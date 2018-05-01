@@ -19,70 +19,63 @@ from elasticsearch.exceptions import NotFoundError, RequestError
 log = logging.getLogger(__name__)
 
 ANNOTATION_MAPPING = {
-    '_id': {'path': 'id'},
-    '_source': {'excludes': ['id']},
-    'analyzer': 'keyword',
+    '_source': {'excludes': ['_id']},
     'properties': {
-        'annotator_schema_version': {'type': 'string'},
-        'authority': {'type': 'string', 'index': 'not_analyzed'},
+        'annotator_schema_version': {'type': 'text'},
+        'authority': {'type': 'keyword'},
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
-        'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
-        'tags': {'type': 'string', 'analyzer': 'uni_normalizer'},
-        'tags_raw': {'type': 'string', 'index': 'not_analyzed'},
-        'text': {'type': 'string', 'analyzer': 'uni_normalizer'},
+        'quote': {'type': 'text', 'analyzer': 'uni_normalizer'},
+        'tags': {'type': 'text', 'analyzer': 'uni_normalizer'},
+        'tags_raw': {'type': 'keyword'},
+        'text': {'type': 'text', 'analyzer': 'uni_normalizer'},
         'deleted': {'type': 'boolean'},
         'uri': {
-            'type': 'string',
-            'index_analyzer': 'uri',
-            'search_analyzer': 'uri',
+            'type': 'text',
+            'analyzer': 'uri',
             'fields': {
                 'parts': {
-                    'type': 'string',
-                    'index_analyzer': 'uri_parts',
-                    'search_analyzer': 'uri_parts',
+                    'type': 'text',
+                    'analyzer': 'uri_parts',
                 },
             },
         },
-        'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
-        'user_raw': {'type': 'string', 'index': 'not_analyzed'},
+        'user': {'type': 'text', 'analyzer': 'user'},
+        'user_raw': {'type': 'keyword'},
         'target': {
             'properties': {
                 'source': {
-                    'type': 'string',
-                    'index_analyzer': 'uri',
-                    'search_analyzer': 'uri',
+                    'type': 'text',
+                    'analyzer': 'uri',
                     'copy_to': ['uri'],
                 },
                 # We store the 'scope' unanalyzed and only do term filters
                 # against this field.
                 'scope': {
-                    'type': 'string',
-                    'index': 'not_analyzed',
+                    'type': 'keyword',
                 },
                 'selector': {
                     'properties': {
-                        'type': {'type': 'string', 'index': 'no'},
+                        'type': {'type': 'keyword', 'index': False},
 
                         # Annotator XPath+offset selector
-                        'startContainer': {'type': 'string', 'index': 'no'},
-                        'startOffset': {'type': 'long', 'index': 'no'},
-                        'endContainer': {'type': 'string', 'index': 'no'},
-                        'endOffset': {'type': 'long', 'index': 'no'},
+                        'startContainer': {'type': 'keyword', 'index': False},
+                        'startOffset': {'type': 'long', 'index': False},
+                        'endContainer': {'type': 'keyword', 'index': False},
+                        'endOffset': {'type': 'long', 'index': False},
 
                         # Open Annotation TextQuoteSelector
                         'exact': {
-                            'path': 'just_name',
-                            'type': 'string',
+                            'type': 'text',
                             'fields': {
                                 'quote': {
-                                    'type': 'string',
+                                    'type': 'text',
                                     'analyzer': 'uni_normalizer',
                                 },
                             },
                         },
-                        'prefix': {'type': 'string'},
-                        'suffix': {'type': 'string'},
+                        'prefix': {'type': 'text'},
+                        'suffix': {'type': 'text'},
 
                         # Open Annotation (Data|Text)PositionSelector
                         'start': {'type': 'long'},
@@ -93,24 +86,23 @@ ANNOTATION_MAPPING = {
         },
         # FIXME: Remove once we've stopped indexing this field.
         'permissions': {
-            'index_name': 'permission',
             'properties': {
-                'read': {'type': 'string'},
-                'update': {'type': 'string'},
-                'delete': {'type': 'string'},
-                'admin': {'type': 'string'}
+                'read': {'type': 'text'},
+                'update': {'type': 'text'},
+                'delete': {'type': 'text'},
+                'admin': {'type': 'text'}
             }
         },
         'shared': {'type': 'boolean'},
-        'references': {'type': 'string'},
+        'references': {'type': 'text'},
         'document': {
             'enabled': False,  # not indexed
         },
         'group': {
-            'type': 'string',
+            'type': 'text',
         },
         'thread_ids': {
-            'type': 'string', 'index': 'not_analyzed'
+            'type': 'keyword',
         }
     }
 }

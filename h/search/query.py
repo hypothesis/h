@@ -53,9 +53,13 @@ class Builder(object):
 
         if filters:
             query = {
-                "filtered": {
-                    "filter": {"and": filters},
-                    "query": query,
+                "bool": {
+                    "must": matchers if matchers else {"match_all": {}},
+                    "filter": {
+                        "bool": {
+                            "must": filters,
+                        }
+                    }
                 }
             }
 
@@ -94,7 +98,7 @@ def extract_limit(params):
 def extract_sort(params):
     return [{
         params.pop("sort", "updated"): {
-            "ignore_unmapped": True,
+            "unmapped_type": "long",
             "order": params.pop("order", "desc"),
         }
     }]
@@ -105,7 +109,7 @@ class TopLevelAnnotationsFilter(object):
     """Matches top-level annotations only, filters out replies."""
 
     def __call__(self, _):
-        return {'missing': {'field': 'references'}}
+        return {"bool": {"must_not": {"exists": {"field": "references"}}}}
 
 
 class AuthorityFilter(object):
@@ -145,10 +149,14 @@ class AuthFilter(object):
         if userid is None:
             return public_filter
 
-        return {'or': [
-            public_filter,
-            {'term': {'user_raw': userid}},
-        ]}
+        return {
+            "bool": {
+                "should": [
+                    public_filter,
+                    {'term': {'user_raw': userid}},
+                ]
+            }
+        }
 
 
 class GroupFilter(object):

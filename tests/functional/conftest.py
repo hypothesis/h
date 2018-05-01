@@ -101,7 +101,11 @@ def _drop_indices(settings):
     import elasticsearch
 
     conn = elasticsearch.Elasticsearch([settings['es.host']])
-
     name = settings['es.index']
-    if conn.indices.exists(index=name):
-        conn.indices.delete(index=name)
+
+    try:
+        indices = conn.indices.get(index=name)
+        for index in indices.keys():
+            conn.indices.delete(index=index)
+    except elasticsearch.exceptions.NotFoundError:
+        pass
