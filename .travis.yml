@@ -9,7 +9,9 @@ matrix:
       addons:
         postgresql: "9.4"
       install: pip install tox
-      before_script: createdb htest
+      before_script:
+        - createdb htest
+        - docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.2.4
       script: tox
       after_success:
         tox -e coverage
@@ -21,7 +23,9 @@ matrix:
       addons:
         postgresql: '9.4'
       install: pip install tox
-      before_script: createdb htest
+      before_script:
+        - createdb htest
+        - docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.2.4
       script:
         make test-py3
 
