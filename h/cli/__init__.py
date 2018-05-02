@@ -17,6 +17,7 @@ SUBCOMMANDS = (
     'h.cli.commands.annotation_id.annotation_id',
     'h.cli.commands.authclient.authclient',
     'h.cli.commands.celery.celery',
+    'h.cli.commands.devdata.devdata',
     'h.cli.commands.devserver.devserver',
     'h.cli.commands.init.init',
     'h.cli.commands.initdb.initdb',
@@ -65,6 +66,7 @@ def bootstrap(app_url, dev=False):
 @click.pass_context
 def cli(ctx, app_url, dev):
     ctx.obj['bootstrap'] = functools.partial(bootstrap, app_url, dev)
+    ctx.obj['dev'] = dev
 
 
 def main():
