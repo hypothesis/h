@@ -11,7 +11,7 @@ click
 cryptography
 deform < 1.0
 deform-jinja2
-elasticsearch < 2.0.0
+elasticsearch1==1.10.0
 enum34
 functools32; python_version < "3.0" # Required by jsonschema, listed here to add environment marker
 gevent
