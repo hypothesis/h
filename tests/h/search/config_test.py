@@ -8,7 +8,7 @@ import re
 
 import mock
 import pytest
-from elasticsearch.exceptions import NotFoundError
+from elasticsearch1.exceptions import NotFoundError
 
 from h.search.config import (
     ANNOTATION_MAPPING,

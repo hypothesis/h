@@ -14,7 +14,7 @@ import binascii
 import logging
 import os
 
-from elasticsearch.exceptions import NotFoundError, RequestError
+from elasticsearch1.exceptions import NotFoundError, RequestError
 
 log = logging.getLogger(__name__)
 

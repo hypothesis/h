@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from elasticsearch import RequestsHttpConnection
+from elasticsearch1 import RequestsHttpConnection
 
 from h.search.client import get_client
 from h.search.client import Client

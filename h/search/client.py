@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 import certifi
-from elasticsearch import Elasticsearch, RequestsHttpConnection
+from elasticsearch1 import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
 __all__ = ('Client',)
