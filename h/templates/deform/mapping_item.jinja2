@@ -46,7 +46,9 @@
 
 {%- if field.error and not field.widget.hidden -%}
   <ul class="form-input__error-list">
-  {% for msg in field.error.messages() -%}
+  {# Only show the first error message for each field. #}
+  {# https://github.com/hypothesis/product-backlog/issues/581 #}
+  {% for msg in field.error.messages()[0:1] -%}
     {%- set errstr = 'error-%s' % field.oid -%}
     {%- set pid = (loop.index0==0 and errstr) or ('%s-%s' % (errstr, loop.index0)) -%}
     <li class="form-input__error-item" id="{{ pid }}">{{ _(msg) }}</li>
