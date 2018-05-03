@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
+
 import contextlib
 import os
-
 
 import pytest
 from webtest import TestApp
 
 from h._compat import text_type
+from tests.common.fixtures import es_client  # noqa: F401
+from tests.common.fixtures import init_elasticsearch  # noqa: F401
+from tests.common.fixtures import delete_all_elasticsearch_documents  # noqa: F401
 
 
 TEST_SETTINGS = {
-    'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
-    'es.index': 'hypothesis-test',
     'h.app_url': 'http://example.com',
     'h.authority': 'example.com',
     'pyramid.debug_all': True,
@@ -27,7 +27,6 @@ def app(pyramid_app, db_engine):
     from h import db
 
     _clean_database(db_engine)
-    _clean_elasticsearch(TEST_SETTINGS)
     db.init(db_engine, authority=text_type(TEST_SETTINGS['h.authority']))
 
     return TestApp(pyramid_app)
@@ -65,14 +64,6 @@ def init_db(db_engine):
     db.init(db_engine, should_drop=True, should_create=True, authority=authority)
 
 
-@pytest.fixture(scope='session', autouse=True)
-def init_elasticsearch():
-    from h.search import init, get_client
-    client = get_client(TEST_SETTINGS)
-    _drop_indices(TEST_SETTINGS)
-    init(client)
-
-
 @pytest.fixture(scope='session')
 def pyramid_app():
     from h.app import create_app
@@ -87,21 +78,3 @@ def _clean_database(engine):
         tnames = ', '.join('"' + t.name + '"' for t in tables)
         conn.execute('TRUNCATE {};'.format(tnames))
         tx.commit()
-
-
-def _clean_elasticsearch(settings):
-    import elasticsearch1
-
-    conn = elasticsearch1.Elasticsearch([settings['es.host']])
-    conn.delete_by_query(index=settings['es.index'],
-                         body={"query": {"match_all": {}}})
-
-
-def _drop_indices(settings):
-    import elasticsearch1
-
-    conn = elasticsearch1.Elasticsearch([settings['es.host']])
-
-    name = settings['es.index']
-    if conn.indices.exists(index=name):
-        conn.indices.delete(index=name)
