@@ -159,13 +159,13 @@
   .form-input__input.has-label {
     padding-top: $top-padding;
     padding-bottom: $bottom-padding;
-    --bottom-padding: $bottom-padding;
+    --bottom-padding: #{$bottom-padding};
   }
 
   .form-input__input:not(.has-label) {
     padding-top: $top-padding-no-label;
     padding-bottom: $bottom-padding-no-label;
-    --bottom-padding: $bottom-padding-no-label;
+    --bottom-padding: #{$bottom-padding-no-label};
   }
 
   select.form-input__input {
