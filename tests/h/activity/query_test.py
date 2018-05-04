@@ -97,6 +97,16 @@ class TestCheckURL(object):
 
         assert check_url(pyramid_request, query, unparse=unparse) is None
 
+    def test_does_not_remove_group_term_from_query_if_group_does_not_exist(self,
+                                                                           pyramid_request,
+                                                                           unparse):
+        query = MultiDict({'group': 'does_not_exist'})
+
+        check_url(pyramid_request, query, unparse=unparse)
+
+        assert query.get('group') == 'does_not_exist'
+        assert not unparse.called
+
     def test_removes_group_term_from_query(self, group, pyramid_request, unparse):
         query = MultiDict({'group': group.pubid})
 
@@ -142,6 +152,18 @@ class TestCheckURL(object):
         user_service.fetch.return_value = None
 
         assert check_url(pyramid_request, query) is None
+
+    def test_does_not_remove_user_term_from_query_if_user_does_not_exist(self,
+                                                                         pyramid_request,
+                                                                         unparse,
+                                                                         user_service):
+        query = MultiDict({'user': 'jose'})
+        user_service.fetch.return_value = None
+
+        check_url(pyramid_request, query, unparse=unparse)
+
+        assert query.get('user') == 'jose'
+        assert not unparse.called
 
     def test_removes_user_term_from_query(self, pyramid_request, unparse):
         query = MultiDict({'user': 'jose'})
