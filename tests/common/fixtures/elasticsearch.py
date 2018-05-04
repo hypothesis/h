@@ -38,7 +38,7 @@ def init_elasticsearch(request):
     search.init(client)
 
 
-@pytest.fixture()
+@pytest.fixture
 def delete_all_elasticsearch_documents(request):
     """Delete everything from the test search index after each test."""
     client = _es_client()
