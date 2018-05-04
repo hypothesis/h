@@ -16,7 +16,10 @@ node {
         postgres = docker.image('postgres:9.4').run('-P -e POSTGRES_DB=htest')
         databaseUrl = "postgresql://postgres@${hostIp}:${containerPort(postgres, 5432)}/htest"
 
-        elasticsearch = docker.image('nickstenning/elasticsearch-icu').run('-P', "-Des.cluster.name=${currentBuild.displayName}")
+        elasticsearch_old = docker.image('nickstenning/elasticsearch-icu').run('-P', "-Des.cluster.name=${currentBuild.displayName}")
+        elasticsearchHost_old = "http://${hostIp}:${containerPort(elasticsearch_old, 9200)}"
+
+        elasticsearch = docker.image('hypothesis/elasticsearch').run('-P -e "discovery.type=single-node"')
         elasticsearchHost = "http://${hostIp}:${containerPort(elasticsearch, 9200)}"
 
         rabbit = docker.image('rabbitmq').run('-P')
@@ -25,7 +28,8 @@ node {
         try {
             testApp(image: img, runArgs: "-u root " +
                                          "-e BROKER_URL=${brokerUrl} " +
-                                         "-e ELASTICSEARCH_HOST=${elasticsearchHost} " +
+                                         "-e ELASTICSEARCH_HOST=${elasticsearchHost_old} " +
+                                         "-e ELASTICSEARCH_URL=${elasticsearchHost} " +
                                          "-e TEST_DATABASE_URL=${databaseUrl}") {
                 // Test dependencies
                 sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
@@ -41,6 +45,7 @@ node {
         } finally {
             rabbit.stop()
             elasticsearch.stop()
+            elasticsearch_old.stop()
             postgres.stop()
         }
     }
