@@ -12,7 +12,7 @@ ELASTICSEARCH_INDEX = "hypothesis-test"
 
 
 @pytest.fixture
-def es_client():
+def es_client(delete_all_elasticsearch_documents):
     """A :py:class:`h.search.client.Client` for the test search index."""
     return _es_client()
 
@@ -38,7 +38,7 @@ def init_elasticsearch(request):
     search.init(client)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def delete_all_elasticsearch_documents(request):
     """Delete everything from the test search index after each test."""
     client = _es_client()
