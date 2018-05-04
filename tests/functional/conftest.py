@@ -74,6 +74,13 @@ def pyramid_app():
     return create_app(None, **TEST_SETTINGS)
 
 
+# Always unconditionally wipe the Elasticsearch index after every functional
+# test.
+@pytest.fixture(autouse=True)
+def always_delete_all_elasticsearch_documents(delete_all_elasticsearch_documents):
+    pass
+
+
 def _clean_database(engine):
     from h import db
     tables = reversed(db.Base.metadata.sorted_tables)
