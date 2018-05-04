@@ -4,7 +4,7 @@ import logging
 from collections import namedtuple
 from contextlib import contextmanager
 
-from elasticsearch.exceptions import ConnectionTimeout
+from elasticsearch1.exceptions import ConnectionTimeout
 
 from h.search import query
 

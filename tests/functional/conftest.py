@@ -90,17 +90,17 @@ def _clean_database(engine):
 
 
 def _clean_elasticsearch(settings):
-    import elasticsearch
+    import elasticsearch1
 
-    conn = elasticsearch.Elasticsearch([settings['es.host']])
+    conn = elasticsearch1.Elasticsearch([settings['es.host']])
     conn.delete_by_query(index=settings['es.index'],
                          body={"query": {"match_all": {}}})
 
 
 def _drop_indices(settings):
-    import elasticsearch
+    import elasticsearch1
 
-    conn = elasticsearch.Elasticsearch([settings['es.host']])
+    conn = elasticsearch1.Elasticsearch([settings['es.host']])
 
     name = settings['es.index']
     if conn.indices.exists(index=name):

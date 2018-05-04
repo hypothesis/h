@@ -8,7 +8,7 @@ import time
 from collections import namedtuple
 
 import sqlalchemy as sa
-from elasticsearch import helpers as es_helpers
+from elasticsearch1 import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
 from h import models
