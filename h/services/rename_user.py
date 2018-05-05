@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from h import models
-from h.search import index
+from h.search_old import index
 
 
 class UserRenameError(Exception):

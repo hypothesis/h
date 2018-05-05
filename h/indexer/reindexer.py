@@ -3,12 +3,12 @@
 from __future__ import unicode_literals
 import logging
 
-from h.search.config import (
+from h.search_old.config import (
     configure_index,
     get_aliased_index,
     update_aliased_index,
 )
-from h.search.index import BatchIndexer
+from h.search_old.index import BatchIndexer
 
 log = logging.getLogger(__name__)
 

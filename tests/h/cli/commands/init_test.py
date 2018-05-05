@@ -70,4 +70,4 @@ def db(patch):
 
 @pytest.fixture
 def search(patch):
-    return patch('h.cli.commands.init.search')
+    return patch('h.cli.commands.init.search_old')

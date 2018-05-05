@@ -96,12 +96,12 @@ def routes(pyramid_config):
 
 @pytest.fixture
 def search(patch):
-    return patch('h.views.feeds.search')
+    return patch('h.views.feeds.search_old')
 
 
 @pytest.fixture
 def search_run(search):
-    from h.search.core import SearchResult
+    from h.search_old.core import SearchResult
     result = SearchResult(total=123,
                           annotation_ids=['foo', 'bar'],
                           reply_ids=[],

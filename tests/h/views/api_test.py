@@ -8,7 +8,7 @@ from pyramid import testing
 from pyramid.config import Configurator
 
 from h.schemas import ValidationError
-from h.search.core import SearchResult
+from h.search_old.core import SearchResult
 from h.views import api as views
 
 
@@ -129,7 +129,7 @@ class TestSearch(object):
 
     @pytest.fixture
     def search_lib(self, patch):
-        return patch('h.views.api.search_lib')
+        return patch('h.views.api.search_old')
 
     @pytest.fixture
     def search_run(self, search_lib):
@@ -509,7 +509,7 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def search_lib(patch):
-    return patch('h.views.api.search_lib')
+    return patch('h.views.api.search_old')
 
 
 @pytest.fixture

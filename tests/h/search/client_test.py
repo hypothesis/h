@@ -6,8 +6,8 @@ import pytest
 
 from elasticsearch1 import RequestsHttpConnection
 
-from h.search.client import get_client
-from h.search.client import Client
+from h.search_old.client import get_client
+from h.search_old.client import Client
 
 
 class TestClient(object):
@@ -35,7 +35,7 @@ class TestGetClient(object):
     def test_initializes_client_with_host(self, settings, patched_client):
         get_client(settings)
         args, _ = patched_client.call_args
-        assert args[0] == 'search.svc'
+        assert args[0] == 'search_old.svc'
 
     def test_initializes_client_with_index(self, settings, patched_client):
         get_client(settings)
@@ -93,14 +93,14 @@ class TestGetClient(object):
     @pytest.fixture
     def settings(self):
         return {
-            'es.host': 'search.svc',
+            'es.host': 'search_old.svc',
             'es.index': 'my-index',
         }
 
     @pytest.fixture
     def patched_client(self, patch):
-        return patch('h.search.client.Client')
+        return patch('h.search_old.client.Client')
 
     @pytest.fixture
     def patched_aws_auth(self, patch):
-        return patch('h.search.client.AWS4Auth')
+        return patch('h.search_old.client.AWS4Auth')

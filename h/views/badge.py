@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from pyramid import httpexceptions
 import newrelic.agent
 
-from h import models, search
+from h import models, search_old
 from h.util.view import json_view
 
 
@@ -42,7 +42,7 @@ def badge(request):
         count = 0
     else:
         query = {'uri': uri, 'limit': 0}
-        result = search.Search(request, stats=request.stats).run(query)
+        result = search_old.Search(request, stats=request.stats).run(query)
         count = result.total
 
     record_metrics(count, request)

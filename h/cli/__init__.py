@@ -23,7 +23,7 @@ SUBCOMMANDS = (
     'h.cli.commands.migrate.migrate',
     'h.cli.commands.move_uri.move_uri',
     'h.cli.commands.normalize_uris.normalize_uris',
-    'h.cli.commands.search.search',
+    'h.cli.commands.search_old.search',
     'h.cli.commands.shell.shell',
     'h.cli.commands.user.user',
 )

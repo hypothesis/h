@@ -5,7 +5,7 @@ import os
 import click
 
 from h import indexer
-from h.search import config
+from h.search_old import config
 
 
 @click.group()
