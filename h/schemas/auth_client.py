@@ -35,6 +35,7 @@ class CreateAuthClientSchema(CSRFSchema):
 
     trusted = colander.SchemaNode(
                 colander.Boolean(),
+                missing=False,
                 widget=deform.widget.CheckboxWidget(
                     omit_label=False,
                     css_class='form-checkbox--inline'
