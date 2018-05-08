@@ -6,7 +6,7 @@ import pytest
 
 from h.presenters.organization_json import OrganizationJSONPresenter
 from h.models.organization import Organization
-from h.resources import OrganizationContext
+from h.traversal import OrganizationContext
 
 
 class TestOrganizationJSONPresenter(object):

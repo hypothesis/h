@@ -14,7 +14,7 @@ It is worth noting up front that in general, authorization for requests made to
 each endpoint is handled outside of the body of the view functions. In
 particular, requests to the CRUD API endpoints are protected by the Pyramid
 authorization system. You can find the mapping between annotation "permissions"
-objects and Pyramid ACLs in :mod:`h.resources`.
+objects and Pyramid ACLs in :mod:`h.traversal`.
 """
 from __future__ import unicode_literals
 from pyramid import i18n
@@ -26,7 +26,7 @@ from h.exceptions import PayloadError
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
-from h.resources import AnnotationContext
+from h.traversal import AnnotationContext
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.views.api_config import api_config, AngularRouteTemplater
 

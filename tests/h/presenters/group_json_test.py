@@ -7,7 +7,7 @@ import mock
 
 from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
 from h.services.group_links import GroupLinksService
-from h import resources
+from h import traversal
 
 
 class TestGroupJSONPresenter(object):
@@ -143,14 +143,14 @@ def links_svc(pyramid_config):
 @pytest.fixture
 def GroupContext(pyramid_request, links_svc):  # noqa: N802
     def resource_factory(group):
-        return resources.GroupContext(group, pyramid_request)
+        return traversal.GroupContext(group, pyramid_request)
     return resource_factory
 
 
 @pytest.fixture
 def GroupContexts(pyramid_request, links_svc):  # noqa: N802
     def resource_factory(groups):
-        return [resources.GroupContext(group, pyramid_request) for group in groups]
+        return [traversal.GroupContext(group, pyramid_request) for group in groups]
     return resource_factory
 
 
