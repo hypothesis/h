@@ -16,9 +16,9 @@ log = logging.getLogger(__name__)
 @click.pass_context
 def init(ctx):
     request = ctx.obj['bootstrap']()
-
-    _init_db(request.registry.settings)
-    _init_search(request.registry.settings)
+    settings = request.registry.settings
+    _init_db(settings)
+    _init_search(settings)
 
 
 def _init_db(settings):
