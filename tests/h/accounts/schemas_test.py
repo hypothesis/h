@@ -126,12 +126,11 @@ class TestRegisterSchema(object):
                                                   "numbers, periods, and "
                                                   "underscores.")
 
-    def test_it_is_invalid_with_false_privacy_accepted(self,
-                                                            pyramid_request):
+    def test_it_is_invalid_with_false_privacy_accepted(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({"privacy_accepted": False})
+            schema.deserialize({"privacy_accepted": 'false'})
 
         assert exc.value.asdict()['privacy_accepted'] == "Acceptance of the privacy policy is required"
 
@@ -415,7 +414,7 @@ class TestEmailChangeSchema(object):
 
         """
         models.User.get_by_email.return_value = Mock(spec_set=['userid'],
-                                                      userid=user.userid)
+                                                     userid=user.userid)
         pyramid_config.testing_securitypolicy(user.userid)
 
         schema.deserialize({'email': user.email, 'password': 'flibble'})
