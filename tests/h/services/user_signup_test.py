@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+import datetime
 
 import mock
 import pytest
@@ -52,6 +53,14 @@ class TestUserSignupService(object):
                           authority='bar-client.com')
 
         assert user.authority == 'bar-client.com'
+
+    def test_signup_passes_through_privacy_acceptance(self, svc):
+        now = datetime.datetime.utcnow()
+        user = svc.signup(username='foo',
+                          email='foo@bar.com',
+                          privacy_accepted=now)
+
+        assert user.privacy_accepted == now
 
     def test_signup_sets_password_using_password_service(self, svc, user_password_service):
         user = svc.signup(username='foo',

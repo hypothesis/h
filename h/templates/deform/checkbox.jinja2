@@ -1,9 +1,19 @@
-<div class="form-checkbox">
+<div class="form-checkbox {% if field.widget.css_class %}{{ field.widget.css_class }}{% endif %}">
   <input type="checkbox"
+         class="form-checkbox__input"
          name="{{ field.name }}"
          id="{{ field.oid }}"
          value="{{ field.widget.true_val }}"
          {%- if cstruct == field.widget.true_val %}
          checked=""
-         {% endif -%}>
+         {% endif -%}
+         {% if field.required %}
+         required
+         {% endif %}
+  >
+  {% if field.description %}
+    <label for="{{ field.oid }}">
+      {{ field.description }}
+    </label>
+  {% endif %}
 </div>

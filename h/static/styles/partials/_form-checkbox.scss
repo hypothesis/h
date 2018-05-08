@@ -9,6 +9,12 @@
   margin-right: auto;
 }
 
+.form-checkbox--inline {
+  color: $grey-4;
+  border: none;
+  display: flex;
+}
+
 .form-checkbox__input {
   margin-right: 15px;
 }

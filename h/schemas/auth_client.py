@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import colander
+import deform
 
 from h import i18n
 from h.models.auth_client import GrantType
@@ -34,6 +35,11 @@ class CreateAuthClientSchema(CSRFSchema):
 
     trusted = colander.SchemaNode(
                 colander.Boolean(),
+                missing=False,
+                widget=deform.widget.CheckboxWidget(
+                    omit_label=False,
+                    css_class='form-checkbox--inline'
+                ),
                 title=_('Trusted ⚠️'),
                 hint=_('Trusted clients do not require user approval. '
                        '⚠️ Only enable this for official Hypothesis clients.'))

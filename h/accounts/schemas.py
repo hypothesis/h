@@ -6,6 +6,7 @@ import logging
 import colander
 import deform
 from itsdangerous import BadData, SignatureExpired
+from jinja2 import Markup
 
 from h import i18n, models, validators
 from h.accounts import util
@@ -85,6 +86,13 @@ def unblacklisted_username(node, value, blacklist=None):
         raise colander.Invalid(node, msg)
 
 
+def privacy_acceptance_validator(node, value):
+    '''Colander validator that ensures privacy acceptance checkbox checked'''
+    if value is False:
+        msg = _("Acceptance of the privacy policy is required")
+        raise colander.Invalid(node, msg)
+
+
 def password_node(**kwargs):
     """Return a Colander schema node for an existing user password."""
     kwargs.setdefault('widget', deform.widget.PasswordWidget())
@@ -100,6 +108,31 @@ def new_password_node(**kwargs):
         colander.String(),
         validator=validators.Length(min=PASSWORD_MIN_LENGTH),
         **kwargs)
+
+
+def _privacy_accepted_message():
+    terms_links = {
+        'privacy_policy': '<a class="link" href="{href}">{text}</a>'.format(
+            href='https://web.hypothes.is/privacy/',
+            text=_('privacy policy'),
+        ),
+        'terms_of_service': '<a class="link" href="{href}">{text}</a>'.format(
+            href='https://web.hypothes.is/terms-of-service/',
+            text=_('terms of service'),
+        ),
+        'community_guidelines': '<a class="link" href="{href}">{text}</a>'.format(
+            href='https://web.hypothes.is/community-guidelines/',
+            text=_('community guidelines'),
+        ),
+    }
+
+    privacy_msg = _('I have read and agree to the {privacy}, {tos}, and {community}.').format(
+        privacy=terms_links['privacy_policy'],
+        tos=terms_links['terms_of_service'],
+        community=terms_links['community_guidelines']
+    )
+
+    return privacy_msg
 
 
 class LoginSchema(CSRFSchema):
@@ -192,6 +225,16 @@ class RegisterSchema(CSRFSchema):
     )
     email = email_node(title=_('Email address'))
     password = new_password_node(title=_('Password'))
+
+    privacy_accepted = colander.SchemaNode(
+        colander.Boolean(),
+        description=Markup(_privacy_accepted_message()),
+        validator=privacy_acceptance_validator,
+        widget=deform.widget.CheckboxWidget(
+            omit_label=True,
+            css_class='form-checkbox--inline'
+        ),
+    )
 
 
 class ResetCode(colander.SchemaType):

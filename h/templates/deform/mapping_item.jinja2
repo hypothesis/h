@@ -8,8 +8,8 @@
             {% if field.error %}is-error{% endif %}
             {% if show_char_counter %} js-character-limit {%- endif %}
             {% if field.schema.hide_until_form_active %} is-hidden-when-loading {%- endif %}"
-     {%- if field.description -%}
-     title="{{ _(field.description) }}"
+     {%- if field.description-%}
+     title="{{ _(field.description) | striptags }}"
      {% endif %}
      {%- if field.schema.hide_until_form_active -%}
      data-hide-until-active="true"
