@@ -10,7 +10,7 @@ from h import presenters
 from h import realtime
 from h import storage
 from h.realtime import Consumer
-from h.resources import AnnotationContext
+from h.traversal import AnnotationContext
 from h.auth.util import translate_annotation_principals
 from h.services.links import LinksService
 from h.services.nipsa import NipsaService

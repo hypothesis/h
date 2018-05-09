@@ -41,7 +41,7 @@ def create_app(global_config, **settings):
 def includeme(config):
     settings = config.registry.settings
 
-    config.set_root_factory('h.resources:Root')
+    config.set_root_factory('h.traversal:Root')
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')

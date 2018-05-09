@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
-from h.resources import GroupContext
+from h.traversal import GroupContext
 from h.presenters import GroupsJSONPresenter
 from h.views.api import api_config
 

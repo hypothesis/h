@@ -22,7 +22,7 @@ from h.search import parser
 from h.util.user import split_user
 from h.views.groups import check_slug
 from h.util.datetime import utc_us_style_date
-from h.resources import OrganizationContext
+from h.traversal import OrganizationContext
 
 
 PAGE_SIZE = 200

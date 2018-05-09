@@ -7,7 +7,7 @@ import datetime
 import mock
 
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
-from h.resources import AnnotationContext
+from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONLDPresenter(object):

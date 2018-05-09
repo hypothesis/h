@@ -80,17 +80,17 @@ class TestAnnotationJSONPresentationService(object):
         storage.fetch_ordered_annotations.assert_called_once_with(
             svc.session, ['id-1', 'id-2'], query_processor=mock.ANY)
 
-    def test_present_all_initialises_annotation_resources(self, svc, storage, resources):
+    def test_present_all_initialises_annotation_resources(self, svc, storage, traversal):
         ann = mock.Mock()
         storage.fetch_ordered_annotations.return_value = [ann]
 
         svc.present_all(['ann-1'])
 
-        resources.AnnotationContext.assert_called_once_with(ann, svc.group_svc, svc.links_svc)
+        traversal.AnnotationContext.assert_called_once_with(ann, svc.group_svc, svc.links_svc)
 
-    def test_present_all_presents_annotation_resources(self, svc, storage, resources, present):
+    def test_present_all_presents_annotation_resources(self, svc, storage, traversal, present):
         storage.fetch_ordered_annotations.return_value = [mock.Mock()]
-        resource = resources.AnnotationContext.return_value
+        resource = traversal.AnnotationContext.return_value
 
         svc.present_all(['ann-1'])
         present.assert_called_once_with(svc, resource)
@@ -135,8 +135,8 @@ class TestAnnotationJSONPresentationService(object):
         return patch('h.services.annotation_json_presentation.storage')
 
     @pytest.fixture
-    def resources(self, patch):
-        return patch('h.services.annotation_json_presentation.resources')
+    def traversal(self, patch):
+        return patch('h.services.annotation_json_presentation.traversal')
 
     @pytest.fixture
     def present(self, patch):

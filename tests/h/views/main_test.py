@@ -7,7 +7,7 @@ from pyramid import httpexceptions
 import pytest
 
 from h.models import Annotation
-from h.resources import AnnotationContext
+from h.traversal import AnnotationContext
 from h.views import main
 
 

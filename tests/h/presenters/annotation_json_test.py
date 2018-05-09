@@ -13,7 +13,7 @@ from zope.interface import implementer
 
 from h.formatters.interfaces import IAnnotationFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
-from h.resources import AnnotationContext
+from h.traversal import AnnotationContext
 
 
 @implementer(IAnnotationFormatter)
