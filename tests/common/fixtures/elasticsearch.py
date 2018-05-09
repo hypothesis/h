@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from h import search
+from h import search_old
 
 ELASTICSEARCH_HOST = os.environ.get("ELASTICSEARCH_HOST", "http://localhost:9200")
 ELASTICSEARCH_INDEX = "hypothesis-test"
@@ -13,7 +13,7 @@ ELASTICSEARCH_INDEX = "hypothesis-test"
 
 @pytest.fixture
 def es_client(delete_all_elasticsearch_documents):
-    """A :py:class:`h.search.client.Client` for the test search index."""
+    """A :py:class:`h.search_old.client.Client` for the test search index."""
     return _es_client()
 
 
@@ -35,7 +35,7 @@ def init_elasticsearch(request):
     maybe_delete_index()
 
     # Initialize the test search index.
-    search.init(client)
+    search_old.init(client)
 
 
 @pytest.fixture
@@ -50,5 +50,5 @@ def delete_all_elasticsearch_documents(request):
 
 
 def _es_client():
-    """Return a :py:class:`h.search.client.Client` for the test search index."""
-    return search.get_client({"es.host": ELASTICSEARCH_HOST, "es.index": ELASTICSEARCH_INDEX})
+    """Return a :py:class:`h.search_old.client.Client` for the test search index."""
+    return search_old.get_client({"es.host": ELASTICSEARCH_HOST, "es.index": ELASTICSEARCH_INDEX})

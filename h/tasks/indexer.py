@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from h import models, storage
 from h.celery import celery, get_task_logger
 from h.indexer.reindexer import SETTING_NEW_INDEX
-from h.search.index import BatchIndexer, delete, index
+from h.search_old.index import BatchIndexer, delete, index
 
 log = get_task_logger(__name__)
 

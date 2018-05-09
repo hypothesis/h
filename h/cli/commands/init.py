@@ -6,7 +6,7 @@ import click
 import sqlalchemy
 
 from h import db
-from h import search
+from h import search_old
 from h._compat import text_type
 
 log = logging.getLogger(__name__)
@@ -16,9 +16,9 @@ log = logging.getLogger(__name__)
 @click.pass_context
 def init(ctx):
     request = ctx.obj['bootstrap']()
-
-    _init_db(request.registry.settings)
-    _init_search(request.registry.settings)
+    settings = request.registry.settings
+    _init_db(settings)
+    _init_search(settings)
 
 
 def _init_db(settings):
@@ -36,7 +36,7 @@ def _init_db(settings):
 
 
 def _init_search(settings):
-    client = search.get_client(settings)
+    client = search_old.get_client(settings)
 
     log.info("initializing search index")
-    search.init(client)
+    search_old.init(client)

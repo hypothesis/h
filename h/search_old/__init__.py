@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from h.search.client import get_client
-from h.search.config import init
-from h.search.core import Search
-from h.search.core import FILTERS_KEY
+from h.search_old.client import get_client
+from h.search_old.config import init
+from h.search_old.core import Search
+from h.search_old.core import FILTERS_KEY
 
 __all__ = (
     'Search',

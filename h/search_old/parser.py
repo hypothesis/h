@@ -80,7 +80,7 @@ def unparse(q):
     """
     Turn a dict-like object into a Lucene-like query string.
 
-    This can be considered the reverse of the :py:func:`h.search.parser.parse`
+    This can be considered the reverse of the :py:func:`h.search_old.parser.parse`
     function, as it can be used to transform the MultiDict returned from that
     function back into a string query.
     """

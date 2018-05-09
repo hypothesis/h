@@ -13,9 +13,9 @@ from h import presenters
 from h import storage
 from h.activity import bucketing
 from h.models import Annotation, Group
-from h.search import Search
-from h.search import parser
-from h.search.query import (
+from h.search_old import Search
+from h.search_old import parser
+from h.search_old.query import (
     AuthorityFilter,
     TagsAggregation,
     TopLevelAnnotationsFilter,
@@ -37,7 +37,7 @@ def extract(request, parse=parser.parse):
     Extract and process the query present in the passed request.
 
     Assumes that the 'q' query parameter contains a string query in a format
-    which can be parsed by :py:func:`h.search.parser.parse`. Extracts and
+    which can be parsed by :py:func:`h.search_old.parser.parse`. Extracts and
     parses the query, adds terms implied by the current matched route, if
     necessary, and returns it.
 

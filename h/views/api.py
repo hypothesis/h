@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 from pyramid import i18n
 from pyramid import security
 
-from h import search as search_lib
+from h import search_old
 from h import storage
 from h.exceptions import PayloadError
 from h.events import AnnotationEvent
@@ -99,7 +99,7 @@ def search(request):
 
     separate_replies = params.pop('_separate_replies', False)
     stats = getattr(request, 'stats', None)
-    result = search_lib.Search(request,
+    result = search_old.Search(request,
                                separate_replies=separate_replies,
                                stats=stats).run(params)
 

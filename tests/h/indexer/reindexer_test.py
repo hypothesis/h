@@ -5,7 +5,7 @@ import mock
 import pytest
 
 from h.indexer.reindexer import reindex, SETTING_NEW_INDEX
-from h.search import client
+from h.search_old import client
 
 
 @pytest.mark.usefixtures('BatchIndexer',

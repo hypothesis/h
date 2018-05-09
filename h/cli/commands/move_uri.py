@@ -4,7 +4,7 @@ import click
 
 from h import models
 from h.models.document import merge_documents
-from h.search.index import BatchIndexer
+from h.search_old.index import BatchIndexer
 from h.util import uri
 
 

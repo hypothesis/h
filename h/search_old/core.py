@@ -6,9 +6,9 @@ from contextlib import contextmanager
 
 from elasticsearch1.exceptions import ConnectionTimeout
 
-from h.search import query
+from h.search_old import query
 
-FILTERS_KEY = 'h.search.filters'
+FILTERS_KEY = 'h.search_old.filters'
 
 log = logging.getLogger(__name__)
 

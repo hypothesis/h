@@ -18,7 +18,7 @@ from h.i18n import TranslationString as _  # noqa: N813
 from h.links import pretty_link
 from h.models.group import ReadableBy
 from h.paginator import paginate
-from h.search import parser
+from h.search_old import parser
 from h.util.user import split_user
 from h.views.groups import check_slug
 from h.util.datetime import utc_us_style_date

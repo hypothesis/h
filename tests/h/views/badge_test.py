@@ -105,7 +105,7 @@ def models(patch):
 
 @pytest.fixture
 def search_lib(patch):
-    return patch('h.views.badge.search')
+    return patch('h.views.badge.search_old')
 
 
 @pytest.fixture

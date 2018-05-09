@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.search import core
+from h.search_old import core
 
 
 class FakeStatsdClient(object):
@@ -216,19 +216,19 @@ class TestSearch(object):
 
     @pytest.fixture
     def search_annotations(self, patch):
-        return patch('h.search.core.Search.search_annotations')
+        return patch('h.search_old.core.Search.search_annotations')
 
     @pytest.fixture
     def search_replies(self, patch):
-        return patch('h.search.core.Search.search_replies')
+        return patch('h.search_old.core.Search.search_replies')
 
     @pytest.fixture
     def query(self, patch):
-        return patch('h.search.core.query')
+        return patch('h.search_old.core.query')
 
     @pytest.fixture
     def log(self, patch):
-        return patch('h.search.core.log')
+        return patch('h.search_old.core.log')
 
 
 # @search_fixtures
@@ -267,7 +267,7 @@ class TestSearch(object):
     'GroupFilter',
 ])
 def test_default_querybuilder_includes_default_filters(filter_type, matchers, pyramid_request):
-    from h.search import query
+    from h.search_old import query
     builder = core.default_querybuilder(pyramid_request)
     type_ = getattr(query, filter_type)
 
@@ -290,7 +290,7 @@ def test_default_querybuilder_includes_registered_filters(pyramid_request):
     'TagsMatcher',
 ])
 def test_default_querybuilder_includes_default_matchers(matchers, matcher_type, pyramid_request):
-    from h.search import query
+    from h.search_old import query
     builder = core.default_querybuilder(pyramid_request)
     type_ = getattr(query, matcher_type)
 
@@ -321,4 +321,4 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def log(patch):
-    return patch('h.search.core.log')
+    return patch('h.search_old.core.log')
