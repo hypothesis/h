@@ -3,6 +3,7 @@
 import logging
 
 import click
+from elasticsearch_dsl import connections
 import sqlalchemy
 
 from h import db
@@ -18,6 +19,7 @@ def init(ctx):
     request = ctx.obj['bootstrap']()
     settings = request.registry.settings
     _init_db(settings)
+    _init_search_old(settings)
     _init_search(settings)
 
 
@@ -35,8 +37,13 @@ def _init_db(settings):
         log.info("detected alembic_version table, skipping db initialization")
 
 
-def _init_search(settings):
-    client = search.get_client(settings)
+def _init_search_old(settings):
+    client = search.get_client_old(settings)
 
     log.info("initializing search index")
     search.init(client)
+
+
+def _init_search(settings):
+    # Set the elasticsearch client connection as the default connection.
+    connections.add_connection('default', search.get_client(settings))
