@@ -42,7 +42,7 @@ class TestSearch(object):
 
     def test_run_searches_replies(self,
                                   pyramid_request,
-                                  search_replies,
+                                  _search_replies,
                                   search_annotations):
         annotation_ids = [mock.Mock(), mock.Mock()]
         search_annotations.return_value = (2, annotation_ids, {})
@@ -50,18 +50,18 @@ class TestSearch(object):
         search = core.Search(pyramid_request)
         search.run({})
 
-        search_replies.assert_called_once_with(search, annotation_ids)
+        _search_replies.assert_called_once_with(search, annotation_ids)
 
     def test_run_returns_search_results(self,
                                         pyramid_request,
                                         search_annotations,
-                                        search_replies):
+                                        _search_replies):
         total = 4
         annotation_ids = ['id-1', 'id-3', 'id-6', 'id-5']
         reply_ids = ['reply-8', 'reply-5']
         aggregations = {'foo': 'bar'}
         search_annotations.return_value = (total, annotation_ids, aggregations)
-        search_replies.return_value = reply_ids
+        _search_replies.return_value = reply_ids
 
         search = core.Search(pyramid_request)
         result = search.run({})
@@ -117,7 +117,7 @@ class TestSearch(object):
 
     def test_search_replies_skips_search_by_default(self, pyramid_request):
         search = core.Search(pyramid_request)
-        search.search_replies(['id-1', 'id-2'])
+        search._search_replies(['id-1', 'id-2'])
 
         assert not search.es.conn.search.called
 
@@ -132,7 +132,7 @@ class TestSearch(object):
     def test_search_replies_adds_a_replies_matcher(self, pyramid_request, query):
         search = core.Search(pyramid_request, separate_replies=True)
 
-        search.search_replies(['id-1', 'id-2'])
+        search._search_replies(['id-1', 'id-2'])
 
         assert mock.call(query.RepliesMatcher(['id-1', 'id-2'])) in \
             search.reply_builder.append_matcher.call_args_list
@@ -147,7 +147,7 @@ class TestSearch(object):
             }
         }
 
-        assert search.search_replies(['id-1']) == ['reply-1', 'reply-2']
+        assert search._search_replies(['id-1']) == ['reply-1', 'reply-2']
 
     def test_search_replies_logs_warning_if_there_are_too_many_replies(self, pyramid_request, log):
         search = core.Search(pyramid_request, separate_replies=True)
@@ -159,7 +159,7 @@ class TestSearch(object):
             }
         }
 
-        search.search_replies(['id-1'])
+        search._search_replies(['id-1'])
         assert log.warn.call_count == 1
 
     def test_search_replies_works_with_stats_client(self, pyramid_request):
@@ -167,7 +167,7 @@ class TestSearch(object):
                              stats=FakeStatsdClient(),
                              separate_replies=True)
         # This should not raise
-        search.search_replies(['id-1'])
+        search._search_replies(['id-1'])
 
     def test_append_filter_appends_to_annotation_builder(self, pyramid_request):
         filter_ = mock.Mock()
@@ -219,8 +219,8 @@ class TestSearch(object):
         return patch('h.search.core.Search.search_annotations')
 
     @pytest.fixture
-    def search_replies(self, patch):
-        return patch('h.search.core.Search.search_replies')
+    def _search_replies(self, patch):
+        return patch('h.search.core.Search._search_replies')
 
     @pytest.fixture
     def query(self, patch):

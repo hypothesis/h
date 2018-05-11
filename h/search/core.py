@@ -55,7 +55,7 @@ class Search(object):
         :rtype: SearchResult
         """
         total, annotation_ids, aggregations = self.search_annotations(params)
-        reply_ids = self.search_replies(annotation_ids)
+        reply_ids = self._search_replies(annotation_ids)
 
         return SearchResult(total, annotation_ids, reply_ids, aggregations)
 
@@ -87,7 +87,7 @@ class Search(object):
         aggregations = self._parse_aggregation_results(response.get('aggregations', None))
         return (total, annotation_ids, aggregations)
 
-    def search_replies(self, annotation_ids):
+    def _search_replies(self, annotation_ids):
         if not self.separate_replies:
             return []
 
