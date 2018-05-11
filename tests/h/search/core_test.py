@@ -268,7 +268,7 @@ class TestSearch(object):
 ])
 def test_default_querybuilder_includes_default_filters(filter_type, matchers, pyramid_request):
     from h.search import query
-    builder = core.default_querybuilder(pyramid_request)
+    builder = core.Search._default_querybuilder(pyramid_request)
     type_ = getattr(query, filter_type)
 
     assert matchers.instance_of(type_) in builder.filters
@@ -279,7 +279,7 @@ def test_default_querybuilder_includes_registered_filters(pyramid_request):
                                spec_set=[])
     pyramid_request.registry[core.FILTERS_KEY] = [filter_factory]
 
-    builder = core.default_querybuilder(pyramid_request)
+    builder = core.Search._default_querybuilder(pyramid_request)
 
     filter_factory.assert_called_once_with(pyramid_request)
     assert mock.sentinel.MY_FILTER in builder.filters
@@ -291,7 +291,7 @@ def test_default_querybuilder_includes_registered_filters(pyramid_request):
 ])
 def test_default_querybuilder_includes_default_matchers(matchers, matcher_type, pyramid_request):
     from h.search import query
-    builder = core.default_querybuilder(pyramid_request)
+    builder = core.Search._default_querybuilder(pyramid_request)
     type_ = getattr(query, matcher_type)
 
     assert matchers.instance_of(type_) in builder.matchers

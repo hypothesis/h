@@ -41,8 +41,8 @@ class Search(object):
         self.separate_replies = separate_replies
         self.stats = stats
 
-        self.builder = default_querybuilder(request)
-        self.reply_builder = default_querybuilder(request)
+        self.builder = self._default_querybuilder(request)
+        self.reply_builder = self._default_querybuilder(request)
 
     def run(self, params):
         """
@@ -144,16 +144,16 @@ class Search(object):
             timer.stop()
             s.send()
 
-
-def default_querybuilder(request):
-    builder = query.Builder()
-    builder.append_filter(query.DeletedFilter())
-    builder.append_filter(query.AuthFilter(request))
-    builder.append_filter(query.UriFilter(request))
-    builder.append_filter(query.GroupFilter())
-    builder.append_filter(query.UserFilter())
-    builder.append_matcher(query.AnyMatcher())
-    builder.append_matcher(query.TagsMatcher())
-    for factory in request.registry.get(FILTERS_KEY, []):
-        builder.append_filter(factory(request))
-    return builder
+    @staticmethod
+    def _default_querybuilder(request):
+        builder = query.Builder()
+        builder.append_filter(query.DeletedFilter())
+        builder.append_filter(query.AuthFilter(request))
+        builder.append_filter(query.UriFilter(request))
+        builder.append_filter(query.GroupFilter())
+        builder.append_filter(query.UserFilter())
+        builder.append_matcher(query.AnyMatcher())
+        builder.append_matcher(query.TagsMatcher())
+        for factory in request.registry.get(FILTERS_KEY, []):
+            builder.append_filter(factory(request))
+        return builder
