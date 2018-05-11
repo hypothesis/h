@@ -30,22 +30,22 @@ class FakeStatsdTimer(object):
 
 
 class TestSearch(object):
-    def test_run_searches_annotations(self, pyramid_request, search_annotations):
+    def test_run_searches_annotations(self, pyramid_request, _search_annotations):
         params = mock.Mock()
 
-        search_annotations.return_value = (0, [], {})
+        _search_annotations.return_value = (0, [], {})
 
         search = core.Search(pyramid_request)
         search.run(params)
 
-        search_annotations.assert_called_once_with(search, params)
+        _search_annotations.assert_called_once_with(search, params)
 
     def test_run_searches_replies(self,
                                   pyramid_request,
                                   _search_replies,
-                                  search_annotations):
+                                  _search_annotations):
         annotation_ids = [mock.Mock(), mock.Mock()]
-        search_annotations.return_value = (2, annotation_ids, {})
+        _search_annotations.return_value = (2, annotation_ids, {})
 
         search = core.Search(pyramid_request)
         search.run({})
@@ -54,13 +54,13 @@ class TestSearch(object):
 
     def test_run_returns_search_results(self,
                                         pyramid_request,
-                                        search_annotations,
+                                        _search_annotations,
                                         _search_replies):
         total = 4
         annotation_ids = ['id-1', 'id-3', 'id-6', 'id-5']
         reply_ids = ['reply-8', 'reply-5']
         aggregations = {'foo': 'bar'}
-        search_annotations.return_value = (total, annotation_ids, aggregations)
+        _search_annotations.return_value = (total, annotation_ids, aggregations)
         _search_replies.return_value = reply_ids
 
         search = core.Search(pyramid_request)
@@ -70,7 +70,7 @@ class TestSearch(object):
 
     def test_search_annotations_includes_replies_by_default(self, pyramid_request, query):
         search = core.Search(pyramid_request)
-        search.search_annotations({})
+        search._search_annotations({})
 
         assert not query.TopLevelAnnotationsFilter.called, (
                 "Replies should not be filtered out of the 'rows' list if "
@@ -93,7 +93,7 @@ class TestSearch(object):
         search.append_aggregation(foobaragg)
         search.append_aggregation(bazquxagg)
 
-        search.search_annotations({})
+        search._search_annotations({})
 
         foobaragg.parse_result.assert_called_with({'foo': 'bar'})
         bazquxagg.parse_result.assert_called_with({'baz': 'qux'})
@@ -107,13 +107,13 @@ class TestSearch(object):
         foobaragg = mock.Mock(key='foobar')
         search.append_aggregation(foobaragg)
 
-        _, _, aggregations = search.search_annotations({})
+        _, _, aggregations = search._search_annotations({})
         assert aggregations == {'foobar': foobaragg.parse_result.return_value}
 
     def test_search_annotations_works_with_stats_client(self, pyramid_request):
         search = core.Search(pyramid_request, stats=FakeStatsdClient())
         # This should not raise
-        search.search_annotations({})
+        search._search_annotations({})
 
     def test_search_replies_skips_search_by_default(self, pyramid_request):
         search = core.Search(pyramid_request)
@@ -124,7 +124,7 @@ class TestSearch(object):
     def test_search_annotations_excludes_replies_when_asked(self, pyramid_request, query):
         search = core.Search(pyramid_request, separate_replies=True)
 
-        search.search_annotations({})
+        search._search_annotations({})
 
         assert mock.call(query.TopLevelAnnotationsFilter()) in \
             search.builder.append_filter.call_args_list
@@ -215,8 +215,8 @@ class TestSearch(object):
         search.builder.append_aggregation.assert_called_once_with(aggregation)
 
     @pytest.fixture
-    def search_annotations(self, patch):
-        return patch('h.search.core.Search.search_annotations')
+    def _search_annotations(self, patch):
+        return patch('h.search.core.Search._search_annotations')
 
     @pytest.fixture
     def _search_replies(self, patch):

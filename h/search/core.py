@@ -54,7 +54,7 @@ class Search(object):
         :returns: The search results
         :rtype: SearchResult
         """
-        total, annotation_ids, aggregations = self.search_annotations(params)
+        total, annotation_ids, aggregations = self._search_annotations(params)
         reply_ids = self._search_replies(annotation_ids)
 
         return SearchResult(total, annotation_ids, reply_ids, aggregations)
@@ -72,7 +72,7 @@ class Search(object):
     def append_aggregation(self, aggregation):
         self.builder.append_aggregation(aggregation)
 
-    def search_annotations(self, params):
+    def _search_annotations(self, params):
         if self.separate_replies:
             self.builder.append_filter(query.TopLevelAnnotationsFilter())
 
