@@ -30,8 +30,6 @@ log = logging.getLogger(__name__)
 
 celery = Celery('h')
 celery.conf.update(
-    # Default to using database number 10 so we don't conflict with the session
-    # store.
     broker_url=os.environ.get('CELERY_BROKER_URL',
                               os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
     beat_schedule={
