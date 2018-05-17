@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 from mock import Mock
 import pytest
 
-from tests.common.matchers import Redirect302To, Regex
-
 from h.models import Organization
 from h.views.admin_organizations import index, OrganizationCreateController, OrganizationEditController
 
@@ -66,7 +64,7 @@ class TestOrganizationCreateController(object):
         assert org.authority == 'example.org'
         assert org.logo == '<svg>a logo</svg>'
 
-    def test_post_redirects_to_list_view(self, pyramid_request, handle_form_submission):
+    def test_post_redirects_to_list_view(self, pyramid_request, handle_form_submission, matchers):
         def call_on_success(request, form, on_success, on_failure):
             return on_success({'name': 'New org',
                                'authority': 'example.org',
@@ -77,7 +75,7 @@ class TestOrganizationCreateController(object):
         response = ctrl.post()
 
         list_url = pyramid_request.route_url('admin_organizations')
-        assert response == Redirect302To(list_url)
+        assert response == matchers.Redirect302To(list_url)
 
 
 @pytest.mark.usefixtures('routes')
@@ -127,15 +125,15 @@ class TestOrganizationEditController(object):
         ctrl.delete()
         assert org in db_session.deleted
 
-    def test_delete_redirects_to_org_list(self, org, pyramid_request):
+    def test_delete_redirects_to_org_list(self, matchers, org, pyramid_request):
         ctrl = OrganizationEditController(org, pyramid_request)
 
         response = ctrl.delete()
 
         list_url = pyramid_request.route_path('admin_organizations')
-        assert response == Redirect302To(list_url)
+        assert response == matchers.Redirect302To(list_url)
 
-    def test_delete_fails_if_org_has_groups(self, factories, org, pyramid_request):
+    def test_delete_fails_if_org_has_groups(self, factories, matchers, org, pyramid_request):
         factories.Group(name='Test', organization=org)
         ctrl = OrganizationEditController(org, pyramid_request)
 
@@ -144,7 +142,7 @@ class TestOrganizationEditController(object):
         assert org not in pyramid_request.db.deleted
         assert pyramid_request.response.status_int == 400
         pyramid_request.session.flash.assert_called_with(
-            Regex('.*Cannot delete.*1 groups'), 'error')
+            matchers.Regex('.*Cannot delete.*1 groups'), 'error')
         assert ctx['form'] == self._expected_form(org)
 
     def _expected_form(self, org):
