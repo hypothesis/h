@@ -401,7 +401,7 @@ class TestExecute(object):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         _fetch_groups.assert_called_once_with(
-            pyramid_request.db, matchers.unordered_list(group_pubids))
+            pyramid_request.db, matchers.UnorderedList(group_pubids))
 
     def test_it_returns_each_annotation_presented(self,
                                                   annotations,

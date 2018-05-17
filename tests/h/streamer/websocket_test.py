@@ -264,7 +264,7 @@ class TestHandleClientIDMessage(object):
         with mock.patch.object(websocket.Message, 'reply') as mock_reply:
             websocket.handle_client_id_message(message)
 
-        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
                                            ok=False)
 
     @pytest.fixture
@@ -347,7 +347,7 @@ class TestHandleFilterMessage(object):
         with mock.patch.object(websocket.Message, 'reply') as mock_reply:
             websocket.handle_filter_message(message)
 
-        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
                                            ok=False)
 
     @mock.patch('h.streamer.websocket.jsonschema.validate')
@@ -361,7 +361,7 @@ class TestHandleFilterMessage(object):
         with mock.patch.object(websocket.Message, 'reply') as mock_reply:
             websocket.handle_filter_message(message)
 
-        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
                                            ok=False)
 
     @pytest.fixture
@@ -417,5 +417,5 @@ class TestUnknownMessage(object):
         with mock.patch.object(websocket.Message, 'reply') as mock_reply:
             websocket.handle_unknown_message(message)
 
-        mock_reply.assert_called_once_with(matchers.mapping_containing('error'),
+        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
                                            ok=False)

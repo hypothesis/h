@@ -103,7 +103,7 @@ class TestEncodeHeadersTween(object):
 
         response = encode_headers_tween(pyramid_request)
 
-        expected_header = matchers.native_string("Access-Control-Allow-Origin")
+        expected_header = matchers.NativeString("Access-Control-Allow-Origin")
         assert response.headers.getone(expected_header) == str("*")
 
     def test_it_converts_unicode_header_values_to_native_strings(self,
@@ -114,7 +114,7 @@ class TestEncodeHeadersTween(object):
 
         response = encode_headers_tween(pyramid_request)
 
-        expected_value = matchers.native_string("*")
+        expected_value = matchers.NativeString("*")
         assert response.headers.getone(str("Access-Control-Allow-Origin")) == expected_value
 
     def test_multiple_values_for_a_single_header(self,
@@ -127,10 +127,10 @@ class TestEncodeHeadersTween(object):
 
         response = encode_headers_tween(pyramid_request)
 
-        assert response.headers.getall(matchers.native_string("foo")) == matchers.unordered_list([
-            matchers.native_string("bar"),
-            matchers.native_string("gar"),
-            matchers.native_string("zar"),
+        assert response.headers.getall(matchers.NativeString("foo")) == matchers.UnorderedList([
+            matchers.NativeString("bar"),
+            matchers.NativeString("gar"),
+            matchers.NativeString("zar"),
         ])
 
     @pytest.fixture

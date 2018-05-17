@@ -44,7 +44,7 @@ class TestGroupScope(object):
             factories.GroupScope(group=group),
         ]
 
-        assert group.scopes == matchers.unordered_list(scopes)
+        assert group.scopes == matchers.UnorderedList(scopes)
 
     def test_deleting_a_group_deletes_its_groupscopes(self, db_session,
                                                       factories):

@@ -271,7 +271,7 @@ def test_default_querybuilder_includes_default_filters(filter_type, matchers, py
     builder = core.Search._default_querybuilder(pyramid_request)
     type_ = getattr(query, filter_type)
 
-    assert matchers.instance_of(type_) in builder.filters
+    assert matchers.InstanceOf(type_) in builder.filters
 
 
 def test_default_querybuilder_includes_registered_filters(pyramid_request):
@@ -294,7 +294,7 @@ def test_default_querybuilder_includes_default_matchers(matchers, matcher_type, 
     builder = core.Search._default_querybuilder(pyramid_request)
     type_ = getattr(query, matcher_type)
 
-    assert matchers.instance_of(type_) in builder.matchers
+    assert matchers.InstanceOf(type_) in builder.matchers
 
 
 def dummy_search_results(start=1, count=0, name='annotation'):

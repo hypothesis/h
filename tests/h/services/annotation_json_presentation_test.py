@@ -24,7 +24,7 @@ class TestAnnotationJSONPresentationService(object):
     def test_initializes_hidden_formatter(self, matchers, services, formatters):
         self.svc(services)
         formatters.AnnotationHiddenFormatter.assert_called_once_with(services['annotation_moderation'],
-                                                                     matchers.any_callable(),
+                                                                     matchers.AnyCallable(),
                                                                      mock.sentinel.user)
 
     def test_it_configures_hidden_formatter(self, services, formatters):

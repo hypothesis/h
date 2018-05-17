@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from mock import Mock
 import pytest
 
-from tests.common.matchers import redirect_302_to, regex
+from tests.common.matchers import Redirect302To, Regex
 
 from h.models import Organization
 from h.views.admin_organizations import index, OrganizationCreateController, OrganizationEditController
@@ -77,7 +77,7 @@ class TestOrganizationCreateController(object):
         response = ctrl.post()
 
         list_url = pyramid_request.route_url('admin_organizations')
-        assert response == redirect_302_to(list_url)
+        assert response == Redirect302To(list_url)
 
 
 @pytest.mark.usefixtures('routes')
@@ -133,7 +133,7 @@ class TestOrganizationEditController(object):
         response = ctrl.delete()
 
         list_url = pyramid_request.route_path('admin_organizations')
-        assert response == redirect_302_to(list_url)
+        assert response == Redirect302To(list_url)
 
     def test_delete_fails_if_org_has_groups(self, factories, org, pyramid_request):
         factories.Group(name='Test', organization=org)
@@ -144,7 +144,7 @@ class TestOrganizationEditController(object):
         assert org not in pyramid_request.db.deleted
         assert pyramid_request.response.status_int == 400
         pyramid_request.session.flash.assert_called_with(
-            regex('.*Cannot delete.*1 groups'), 'error')
+            Regex('.*Cannot delete.*1 groups'), 'error')
         assert ctx['form'] == self._expected_form(org)
 
     def _expected_form(self, org):

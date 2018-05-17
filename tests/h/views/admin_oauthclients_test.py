@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from mock import create_autospec, Mock
 import pytest
 
-from tests.common.matchers import redirect_302_to
+from tests.common.matchers import Redirect302To
 
 from h.models.auth_client import AuthClient, GrantType, ResponseType
 from h.views.admin_oauthclients import index, AuthClientCreateController, AuthClientEditController
@@ -124,7 +124,7 @@ class TestAuthClientCreateController(object):
         client = pyramid_request.db.query(AuthClient).one()
         expected_location = pyramid_request.route_url('admin_oauthclients_edit',
                                                       id=client.id)
-        assert response == redirect_302_to(expected_location)
+        assert response == Redirect302To(expected_location)
 
 
 @pytest.mark.usefixtures('routes')
@@ -192,7 +192,7 @@ class TestAuthClientEditController(object):
         response = ctrl.delete()
 
         expected_location = pyramid_request.route_url('admin_oauthclients')
-        assert response == redirect_302_to(expected_location)
+        assert response == Redirect302To(expected_location)
 
     def _expected_form(self, authclient):
         return {'authority': authclient.authority,

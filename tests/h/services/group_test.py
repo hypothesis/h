@@ -160,7 +160,7 @@ class TestGroupServiceCreateOpenGroup(object):
 
         group = svc.create_open_group(name='test_group', userid=creator.userid, origins=origins)
 
-        assert group.scopes == matchers.unordered_list([
+        assert group.scopes == matchers.UnorderedList([
             GroupScopeWithOrigin(h) for h in origins])
 
     def test_it_always_creates_new_scopes(self, db_session, factories, svc, creator, matchers):
@@ -245,7 +245,7 @@ class TestGroupServiceCreateRestrictedGroup(object):
 
         group = svc.create_restricted_group(name='test_group', userid=creator.userid, origins=origins)
 
-        assert group.scopes == matchers.unordered_list([
+        assert group.scopes == matchers.UnorderedList([
             GroupScopeWithOrigin(h) for h in origins])
 
     def test_it_with_mismatched_authorities_raises_value_error(

@@ -31,8 +31,8 @@ class TestGroupCreateController(object):
         handle_form_submission.assert_called_once_with(
             controller.request,
             controller.form,
-            matchers.any_callable(),
-            matchers.any_callable(),
+            matchers.AnyCallable(),
+            matchers.AnyCallable(),
         )
 
     def test_post_returns_handle_form_submission(self,
@@ -69,7 +69,7 @@ class TestGroupCreateController(object):
             return on_success({'name': 'my_new_group'})
         handle_form_submission.side_effect = return_on_success
 
-        assert controller.post() == matchers.redirect_303_to(
+        assert controller.post() == matchers.Redirect303To(
             '/g/abc123/fake-group')
 
     def test_post_does_not_create_group_if_form_invalid(self,
