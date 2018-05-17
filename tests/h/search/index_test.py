@@ -6,7 +6,6 @@ import datetime
 import elasticsearch1_dsl
 import pytest
 
-import h.search.index
 from tests.common.matchers import Matcher
 
 
@@ -119,15 +118,6 @@ class TestIndex(object):
                 index=es_client.index, doc_type="annotation",
                 id=annotation_id)["_source"]
         return _get
-
-    @pytest.fixture
-    def index(self, es_client, pyramid_request):
-        def _index(*annotations):
-            """Index the given annotation(s) into Elasticsearch."""
-            for annotation in annotations:
-                h.search.index.index(es_client, annotation, pyramid_request)
-            es_client.conn.indices.refresh(index=es_client.index)
-        return _index
 
     @pytest.fixture
     def search(self, es_client):
