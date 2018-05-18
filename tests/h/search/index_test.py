@@ -13,9 +13,9 @@ from tests.common.matchers import Matcher
 @pytest.mark.usefixtures("annotations")
 class TestIndex(object):
     def test_annotation_ids_are_used_as_elasticsearch_ids(self, es_client,
-                                                          make_annotation,
+                                                          factories,
                                                           index):
-        annotation = make_annotation()
+        annotation = factories.Annotation.build()
 
         index(annotation)
 
@@ -25,18 +25,16 @@ class TestIndex(object):
         assert result["_id"] == annotation.id
 
     def test_it_can_index_an_annotation_with_no_document(self, factories,
-                                                         make_annotation,
                                                          index, get):
-        annotation = make_annotation(document=None)
+        annotation = factories.Annotation.build(document=None)
 
         index(annotation)
 
         assert get(annotation.id)["document"] == {}
 
     def test_it_indexes_the_annotations_document_web_uri(self, factories,
-                                                         make_annotation,
                                                          index, get):
-        annotation = make_annotation(
+        annotation = factories.Annotation.build(
             document=factories.Document.build(web_uri="https://example.com/example_article"),
         )
 
@@ -50,9 +48,8 @@ class TestIndex(object):
         # index directly and uses this ``document`` field.
         assert get(annotation.id)["document"]["web_uri"] == "https://example.com/example_article"
 
-    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, make_annotation,
-                                                                        factories, index, get):
-        annotation = make_annotation(
+    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, factories, index, get):
+        annotation = factories.Annotation.build(
             document=factories.Document.build(web_uri=None),
         )
 
@@ -61,9 +58,8 @@ class TestIndex(object):
         assert "web_uri" not in get(annotation.id)["document"]
 
     def test_it_indexes_the_annotations_document_title(self, factories,
-                                                       make_annotation,
                                                        index, get):
-        annotation = make_annotation(
+        annotation = factories.Annotation.build(
             document=factories.Document.build(title="test_document_title"),
         )
 
@@ -72,9 +68,8 @@ class TestIndex(object):
         assert get(annotation.id)["document"]["title"] == ["test_document_title"]
 
     def test_it_can_index_an_annotation_with_a_document_with_no_title(self, factories,
-                                                                      make_annotation,
                                                                       index, get):
-        annotation = make_annotation(
+        annotation = factories.Annotation.build(
             document=factories.Document.build(title=None),
         )
 
@@ -82,8 +77,8 @@ class TestIndex(object):
 
         assert "title" not in get(annotation.id)["document"]
 
-    def test_you_can_filter_annotations_by_authority(self, make_annotation, index, search):
-        annotation = make_annotation(userid="acct:someone@example.com")
+    def test_you_can_filter_annotations_by_authority(self, factories, index, search):
+        annotation = factories.Annotation.build(userid="acct:someone@example.com")
 
         index(annotation)
 
@@ -92,28 +87,12 @@ class TestIndex(object):
 
     def test_you_can_filter_annotations_by_creation_time(self, factories, index, search):
         before = datetime.datetime.now()
-        annotation = factories.Annotation.build(created=datetime.datetime.now())
+        annotation = factories.Annotation.build()
 
         index(annotation)
 
         response = search.filter("range", created={"gte": before}).execute()
         assert SearchResponseWithIDs([annotation.id]) == response
-
-    @pytest.fixture
-    def make_annotation(self, factories):
-        """A helper function for making test annotations."""
-        def _make_annotation(**kwargs):
-            now = datetime.datetime.now()
-            # We call .build() so that the annotation doesn't get added to the
-            # DB (so the tests run faster) but then we have to pass in our own
-            # created and updated etc because our tests need these and they
-            # wouldn't normally be created until the annotation actually gets
-            # added to the DB.
-            return factories.Annotation.build(
-                created=now,
-                updated=now,
-                **kwargs)
-        return _make_annotation
 
     @pytest.fixture
     def annotations(self, factories, index):
