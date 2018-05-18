@@ -92,7 +92,7 @@ class TestIndex(object):
 
     def test_you_can_filter_annotations_by_creation_time(self, factories, index, search):
         before = datetime.datetime.now()
-        annotation = factories.Annotation.build(id="test_annotation_id", created=datetime.datetime.now())
+        annotation = factories.Annotation.build(created=datetime.datetime.now())
 
         index(annotation)
 
@@ -102,15 +102,14 @@ class TestIndex(object):
     @pytest.fixture
     def make_annotation(self, factories):
         """A helper function for making test annotations."""
-        def _make_annotation(id_=None, **kwargs):
+        def _make_annotation(**kwargs):
             now = datetime.datetime.now()
             # We call .build() so that the annotation doesn't get added to the
             # DB (so the tests run faster) but then we have to pass in our own
-            # id, created, updated etc because our tests need these and they
+            # created and updated etc because our tests need these and they
             # wouldn't normally be created until the annotation actually gets
             # added to the DB.
             return factories.Annotation.build(
-                id=id_ or "test_annotation_id",
                 created=now,
                 updated=now,
                 **kwargs)
@@ -128,9 +127,9 @@ class TestIndex(object):
 
         """
         index(
-            factories.Annotation.build(id="noise_annotation_1"),
-            factories.Annotation.build(id="noise_annotation_2"),
-            factories.Annotation.build(id="noise_annotation_3"),
+            factories.Annotation.build(),
+            factories.Annotation.build(),
+            factories.Annotation.build(),
         )
 
     @pytest.fixture
