@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import datetime
 import random
 import uuid
 
@@ -131,3 +132,20 @@ class Annotation(ModelFactory):
             return
 
         self.id = uuid.uuid1().hex
+
+    @factory.post_generation
+    def timestamps(self, create, extracted, **kwargs):
+        # If using the create strategy let sqlalchemy set the created and
+        # updated times when saving to the DB.
+        if create:
+            return
+
+        # When using the build or stub strategy sqlalchemy won't set created or updated
+        # times for us, so do it ourselves instead.
+        #
+        # We're generating created and updated separately (calling now() twice
+        # instead of just once) so created and updated won't be exactly the
+        # same. This is consistent with how models.Annotation does it when
+        # saving to the DB.
+        self.created = datetime.datetime.now()
+        self.updated = datetime.datetime.now()
