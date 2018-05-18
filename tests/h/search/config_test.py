@@ -114,13 +114,13 @@ class TestConfigureIndex(object):
         configure_index(client)
 
         client.conn.indices.create.assert_called_once_with(
-            matchers.regex('foo-[0-9a-f]{8}'),
+            matchers.Regex('foo-[0-9a-f]{8}'),
             body=mock.ANY)
 
     def test_returns_index_name(self, client, matchers):
         name = configure_index(client)
 
-        assert name == matchers.regex('foo-[0-9a-f]{8}')
+        assert name == matchers.Regex('foo-[0-9a-f]{8}')
 
     def test_sets_correct_mappings_and_settings(self, client):
         configure_index(client)

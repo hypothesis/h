@@ -99,7 +99,7 @@ class TestGroupCreateController(object):
         handle_form_submission.assert_called_once_with(
             ctrl.request,
             ctrl.form,
-            matchers.any_callable(),
+            matchers.AnyCallable(),
             ctrl._template_context
         )
 
@@ -121,7 +121,7 @@ class TestGroupCreateController(object):
         response = ctrl.post()
 
         expected_location = pyramid_request.route_url('admin_groups')
-        assert response == matchers.redirect_302_to(expected_location)
+        assert response == matchers.Redirect302To(expected_location)
 
     @pytest.mark.parametrize('type_', [
         'open',

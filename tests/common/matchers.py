@@ -15,9 +15,9 @@ would have to do something like:
     assert foo.set_value.call_count == 1
     assert isinstance(foo.set_value.call_args[0][0], int)
 
-By using the `instance_of` matcher you can simply write:
+By using the `InstanceOf` matcher you can simply write:
 
-    foo.set_value.assert_called_once_with(matchers.instance_of(int))
+    foo.set_value.assert_called_once_with(matchers.InstanceOf(int))
 
 As a bonus, the second test will print substantially more useful debugging
 output if it fails, e.g.
@@ -42,7 +42,7 @@ class Matcher(object):
         return not self.__eq__(other)
 
 
-class any_callable(Matcher):  # noqa: N801
+class AnyCallable(Matcher):
     """An object __eq__ to any callable object."""
 
     def __eq__(self, other):
@@ -50,7 +50,7 @@ class any_callable(Matcher):  # noqa: N801
         return callable(other)
 
 
-class native_string(Matcher):  # noqa: N801
+class NativeString(Matcher):
     """
     Matches any native string with the given characters.
 
@@ -79,10 +79,10 @@ class native_string(Matcher):  # noqa: N801
         return '<native string matching "{string}">'.format(string=self.string)
 
     def lower(self):
-        return native_string(self.string.lower())
+        return NativeString(self.string.lower())
 
 
-class instance_of(Matcher):  # noqa: N801
+class InstanceOf(Matcher):
     """An object __eq__ to any object which is an instance of `type_`."""
 
     def __init__(self, type_):
@@ -95,7 +95,7 @@ class instance_of(Matcher):  # noqa: N801
         return '<instance of {!r}>'.format(self.type)
 
 
-class iterable_with(Matcher):  # noqa: N801
+class IterableWith(Matcher):
     """An object __eq__ to any iterable which yields `items`."""
 
     def __init__(self, items):
@@ -108,7 +108,7 @@ class iterable_with(Matcher):  # noqa: N801
         return '<iterable with {!r}>'.format(self.items)
 
 
-class mapping_containing(Matcher):  # noqa: N801
+class MappingContaining(Matcher):
     """An object __eq__ to any mapping with the passed `key`."""
 
     def __init__(self, key):
@@ -126,7 +126,7 @@ class mapping_containing(Matcher):  # noqa: N801
         return '<mapping containing {!r}>'.format(self.key)
 
 
-class redirect_302_to(Matcher):  # noqa: N801
+class Redirect302To(Matcher):
     """Matches any HTTPFound redirect to the given URL."""
 
     def __init__(self, location):
@@ -138,7 +138,7 @@ class redirect_302_to(Matcher):  # noqa: N801
         return other.location == self.location
 
 
-class redirect_303_to(Matcher):  # noqa: N801
+class Redirect303To(Matcher):
     """Matches any HTTPSeeOther redirect to the given URL."""
 
     def __init__(self, location):
@@ -150,7 +150,7 @@ class redirect_303_to(Matcher):  # noqa: N801
         return other.location == self.location
 
 
-class regex(Matcher):  # noqa: N801
+class Regex(Matcher):
     """Matches any string matching the passed regex."""
 
     def __init__(self, patt):
@@ -163,7 +163,7 @@ class regex(Matcher):  # noqa: N801
         return '<string matching re {!r}>'.format(self.patt.pattern)
 
 
-class unordered_list(Matcher):  # noqa: N801
+class UnorderedList(Matcher):
     """
     Matches a list with the same items in any order.
 

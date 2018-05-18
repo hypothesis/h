@@ -106,7 +106,7 @@ class TestBatchIndexer(object):
         indexer.index()
 
         streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, matchers.iterable_with(matchers.unordered_list([ann_1, ann_2])),
+            indexer.es_client.conn, matchers.IterableWith(matchers.UnorderedList([ann_1, ann_2])),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
     def test_index_skips_deleted_annotations_when_indexing_all(self, db_session, indexer, matchers, streaming_bulk, factories):
@@ -118,7 +118,7 @@ class TestBatchIndexer(object):
         indexer.index()
 
         streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, matchers.iterable_with(matchers.unordered_list([ann_1, ann_2])),
+            indexer.es_client.conn, matchers.IterableWith(matchers.UnorderedList([ann_1, ann_2])),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
     def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
@@ -127,7 +127,7 @@ class TestBatchIndexer(object):
         indexer.index([ann_2.id])
 
         streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, matchers.iterable_with([ann_2]),
+            indexer.es_client.conn, matchers.IterableWith([ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
     def test_index_skips_deleted_annotations_when_indexing_filtered(self, db_session, indexer, matchers, streaming_bulk, factories):
@@ -140,7 +140,7 @@ class TestBatchIndexer(object):
         indexer.index([ann_2.id])
 
         streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, matchers.iterable_with([ann_2]),
+            indexer.es_client.conn, matchers.IterableWith([ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
     def test_index_correctly_presents_bulk_actions(self,

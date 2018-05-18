@@ -798,7 +798,7 @@ class TestDocumentURIsFromData(object):
         document_uris = document_claims.document_uris_from_data(
             {}, 'http://example.com/claimant')
 
-        assert document_uris == matchers.unordered_list([
+        assert document_uris == matchers.UnorderedList([
             {'uri': 'from_link_1'},
             {'uri': 'from_link_2'},
             {'uri': 'from_link_3'},
