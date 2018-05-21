@@ -28,7 +28,7 @@ class Search(object):
 
     :param separate_replies: Wheter or not to return all replies to the
         annotations returned by this search. If this is True then the
-        resulting annotations will only include top-leve annotations, not replies.
+        resulting annotations will only include top-level annotations, not replies.
     :type separate_replies: bool
 
     :param stats: An optional statsd client to which some metrics will be
