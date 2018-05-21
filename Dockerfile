@@ -35,6 +35,7 @@ COPY requirements.txt ./
 # Install build deps, build, and then clean up.
 RUN apk add --no-cache --virtual build-deps \
     build-base \
+    curl-dev \
     libffi-dev \
     postgresql-dev \
     python-dev \

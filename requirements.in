@@ -4,6 +4,7 @@ alembic
 backports.functools_lru_cache
 bcrypt
 bleach >= 2.0
+boto3
 celery >= 4.1
 certifi
 cffi
@@ -28,6 +29,7 @@ oauthlib
 passlib
 psycogreen
 psycopg2
+pycurl
 pyparsing >= 2.1.5
 pyramid
 pyramid_authsanity >= 1.0.0  # 1.0.0 fixes an IE bug: https://git.io/vH3mi
