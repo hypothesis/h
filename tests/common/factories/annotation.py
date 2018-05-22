@@ -131,7 +131,7 @@ class Annotation(ModelFactory):
         if getattr(self, "id", None):
             return
 
-        self.id = uuid.uuid1().hex
+        self.id = uuid.uuid4().hex
 
     @factory.post_generation
     def timestamps(self, create, extracted, **kwargs):
