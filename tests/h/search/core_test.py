@@ -215,7 +215,7 @@ class TestSearchWithSeparateReplies(object):
         # Create three more replies so that the oldest reply will be pushed out
         # of reply_ids. (We only need 3, not 200, because we're going to use
         # the _replies_limit test seam to limit it to 3 replies instead of 200.
-        # This is just to make the test faster.
+        # This is just to make the test faster.)
         for _ in range(3):
             Annotation(references=[annotation.id], shared=True)
 
