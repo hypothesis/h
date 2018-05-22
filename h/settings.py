@@ -137,6 +137,9 @@ class EnvSetting(object):
                                        value=environ[self.varname]))
             return {self.setting: value}
 
+    def __str__(self):
+        return 'environment variable {name}'.format(name=self.varname)
+
 
 def database_url(url):
     """Parse a string as a Heroku-style database URL."""
