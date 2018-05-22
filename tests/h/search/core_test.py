@@ -75,27 +75,27 @@ class TestWithoutSeparateReplies(object):
         Things are returned in updated order so normally a reply would appear
         before the annotation that it is a reply to in the search results.
         """
-        annotation = Annotation(shared=True)
-        reply = Annotation(references=[annotation.id], shared=True)
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        annotation = Annotation(updated=now, shared=True)
+        reply = Annotation(updated=now + five_mins, references=[annotation.id], shared=True)
 
         result = search.Search(pyramid_request).run({})
 
         # The reply appears _before_ the annotation in the search results.
         assert result.annotation_ids == [reply.id, annotation.id]
 
-    def test_replies_can_come_after_annotations(self, index, pyramid_request, Annotation):
+    def test_replies_can_come_after_annotations(self, pyramid_request, Annotation):
         """A reply may appear after its annotation in the search results.
 
         Things are returned in updated order so if the original author has
         updated the top-level annotation since the reply was created, then the
         annotation would come before the reply in the search results.
         """
-        annotation = Annotation(shared=True)
-        reply = Annotation(references=[annotation.id], shared=True)
-
-        # Simulate updating the original annotation.
-        annotation.updated = datetime.datetime.now()
-        index(annotation)
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        annotation = Annotation(updated=now + five_mins, shared=True)
+        reply = Annotation(updated=now, references=[annotation.id], shared=True)
 
         result = search.Search(pyramid_request).run({})
 
@@ -132,16 +132,13 @@ class TestWithSeparateReplies(object):
         assert result.annotation_ids == [annotation.id]
         assert result.reply_ids == matchers.UnorderedList([reply_1.id, reply_2.id])
 
-    def test_replies_are_ordered_most_recently_updated_first(self, Annotation, index,
-                                                             pyramid_request):
+    def test_replies_are_ordered_most_recently_updated_first(self, Annotation, pyramid_request):
         annotation = Annotation(shared=True)
-        reply_1 = Annotation(references=[annotation.id], shared=True)
-        reply_2 = Annotation(references=[annotation.id], shared=True)
-        reply_3 = Annotation(references=[annotation.id], shared=True)
-
-        # Simulate updating one of the replies.
-        reply_1.updated = datetime.datetime.now()
-        index(reply_1)
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        reply_1 = Annotation(updated=now + (five_mins * 2), references=[annotation.id], shared=True)
+        reply_2 = Annotation(updated=now, references=[annotation.id], shared=True)
+        reply_3 = Annotation(updated=now + five_mins, references=[annotation.id], shared=True)
 
         result = search.Search(pyramid_request, separate_replies=True).run({})
 
@@ -149,9 +146,13 @@ class TestWithSeparateReplies(object):
 
     def test_replies_ignore_the_sort_param(self, Annotation, pyramid_request):
         annotation = Annotation(shared=True)
-        reply_1 = Annotation(id="3", references=[annotation.id], shared=True)
-        reply_2 = Annotation(id="1", references=[annotation.id], shared=True)
-        reply_3 = Annotation(id="2", references=[annotation.id], shared=True)
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        reply_1 = Annotation(id="3", updated=now, references=[annotation.id], shared=True)
+        reply_2 = Annotation(id="1", updated=now + five_mins, references=[annotation.id],
+                             shared=True)
+        reply_3 = Annotation(id="2", updated=now + (five_mins * 2), references=[annotation.id],
+                             shared=True)
 
         result = search.Search(pyramid_request, separate_replies=True).run({
             "sort": "id", "order": "asc",
