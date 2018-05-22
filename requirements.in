@@ -11,6 +11,7 @@ cffi
 click
 deform < 1.0
 deform-jinja2
+ec2-metadata
 elasticsearch==6.2.0
 elasticsearch1==1.10.0
 elasticsearch-dsl==6.1.0

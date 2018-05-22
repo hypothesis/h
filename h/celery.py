@@ -18,8 +18,25 @@ import os
 from celery import Celery
 from celery import signals
 from celery.utils.log import get_task_logger
+
+# This package can be imported on any system but properties and methods will
+# only work in an actual EC2 instance.
+from ec2_metadata import ec2_metadata
+
 from kombu import Exchange, Queue
 from raven.contrib.celery import register_signal, register_logger_signal
+
+
+def _broker_transport_options(broker_url):
+    """
+    Return backend-specific configuration options for the message broker.
+    """
+    if not broker_url.startswith('sqs://'):
+        return {}
+
+    # Use SQS in the same region as the EC2 instance on which 'h' is running.
+    return {'region': ec2_metadata.region}
+
 
 __all__ = (
     'celery',
@@ -27,11 +44,13 @@ __all__ = (
 )
 
 log = logging.getLogger(__name__)
+broker_url = os.environ.get('CELERY_BROKER_URL',
+                            os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//'))
 
 celery = Celery('h')
 celery.conf.update(
-    broker_url=os.environ.get('CELERY_BROKER_URL',
-                              os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
+    broker_url=broker_url,
+    broker_transport_options=_broker_transport_options(broker_url),
     beat_schedule={
         'purge-deleted-annotations': {
             'task': 'h.tasks.cleanup.purge_deleted_annotations',
