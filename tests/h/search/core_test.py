@@ -8,8 +8,8 @@ import pytest
 from h import search
 
 
-class TestWithoutSeparateReplies(object):
-    """Tests for what happens when no separate_replies argument is given."""
+class TestSearch(object):
+    """Unit tests for search.Search when no separate_replies argument is given."""
 
     def test_it_returns_replies_in_annotations_ids(self, matchers, pyramid_request, Annotation):
         """Without separate_replies it returns replies in annotation_ids.
@@ -117,8 +117,8 @@ class TestWithoutSeparateReplies(object):
         assert result.reply_ids == []
 
 
-class TestWithSeparateReplies(object):
-    """Tests for what happens when separate_replies=True is given."""
+class TestSearchWithSeparateReplies(object):
+    """Unit tests for search.Search when separate_replies=True is given."""
 
     def test_it_returns_replies_separately_from_annotations(self, matchers, pyramid_request,
                                                             Annotation):
