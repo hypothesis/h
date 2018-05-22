@@ -59,7 +59,7 @@ class TestWithoutSeparateReplies(object):
         for _ in range(19):
             Annotation(shared=True)
 
-        # The reply is one the first page of search results, but the original annotation isn't.
+        # The reply is on the first page of search results, but the original annotation isn't.
         result = search.Search(pyramid_request).run(params={"offset": 0, "limit": 20})
         assert reply.id in result.annotation_ids
         assert annotation.id not in result.annotation_ids
