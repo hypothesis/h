@@ -127,6 +127,20 @@ class Publisher(object):
                              headers=headers)
 
 
+class DummyPublisher(object):
+    """
+    A dummy implementation of `Publisher` used when realtime support is disabled.
+    """
+    def __init__(self, request):
+        pass
+
+    def publish_annotation(self, payload):
+        pass
+
+    def publish_user(self, payload):
+        pass
+
+
 def get_exchange():
     """Returns a configures `kombu.Exchange` to use for realtime messages."""
 
@@ -144,4 +158,12 @@ def get_connection(settings):
 
 
 def includeme(config):
-    config.add_request_method(Publisher, name='realtime', reify=True)
+    broker_url = config.registry.get('broker_url', '')
+    if broker_url.startswith('sqs://'):
+        # The realtime API relies on multicast delivery of each message from
+        # a web process to all running websocket server processes.
+        #
+        # This is not supported when using Amazon SQS as the messaging backend.
+        config.add_request_method(DummyPublisher, name='realtime', reify=True)
+    else:
+        config.add_request_method(Publisher, name='realtime', reify=True)
