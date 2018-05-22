@@ -182,16 +182,13 @@ class TestSearchWithSeparateReplies(object):
 
         assert result.reply_ids == [reply.id]
 
-    def test_replies_from_different_pages_are_included(self, index, pyramid_request, Annotation):
+    def test_replies_from_different_pages_are_included(self, pyramid_request, Annotation):
         """Replies that would not be on the same page are included."""
         # First create an annotation and a reply.
-        annotation = Annotation(shared=True)
-        reply = Annotation(references=[annotation.id], shared=True)
-
-        # Update the annotation so that it would appear before the reply in the
-        # search results (if no separate_replies was given).
-        annotation.updated = datetime.datetime.now()
-        index(annotation)
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        annotation = Annotation(updated=now + five_mins, shared=True)
+        reply = Annotation(updated=now, references=[annotation.id], shared=True)
 
         # Now create 19 more annotations. Without separate_replies the
         # annotation would be the 20th item in the search results (last item on
