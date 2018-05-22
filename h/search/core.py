@@ -35,11 +35,12 @@ class Search(object):
         published.
     :type stats: statsd.client.StatsClient
     """
-    def __init__(self, request, separate_replies=False, stats=None):
+    def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
         self.request = request
         self.es = request.es
         self.separate_replies = separate_replies
         self.stats = stats
+        self._replies_limit = _replies_limit
 
         self.builder = self._default_querybuilder(request)
         self.reply_builder = self._default_querybuilder(request)
@@ -95,10 +96,11 @@ class Search(object):
 
         response = None
         with self._instrument():
-            response = self.es.conn.search(index=self.es.index,
-                                           doc_type=self.es.t.annotation,
-                                           _source=False,
-                                           body=self.reply_builder.build({'limit': 200}))
+            response = self.es.conn.search(
+                index=self.es.index,
+                doc_type=self.es.t.annotation,
+                _source=False,
+                body=self.reply_builder.build({'limit': self._replies_limit}))
 
         if len(response['hits']['hits']) < response['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "

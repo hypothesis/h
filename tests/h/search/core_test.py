@@ -213,14 +213,19 @@ class TestWithSeparateReplies(object):
         annotation_ids) that can be included in reply_ids.
         """
         annotation = Annotation(shared=True)
-        first_reply = Annotation(references=[annotation.id], shared=True)
-        for _ in range(200):
+        oldest_reply = Annotation(references=[annotation.id], shared=True)
+
+        # Create three more replies so that the oldest reply will be pushed out
+        # of reply_ids. (We only need 3, not 200, because we're going to use
+        # the _replies_limit test seam to limit it to 3 replies instead of 200.
+        # This is just to make the test faster.
+        for _ in range(3):
             Annotation(references=[annotation.id], shared=True)
 
-        result = search.Search(pyramid_request, separate_replies=True).run({})
+        result = search.Search(pyramid_request, separate_replies=True, _replies_limit=3).run({})
 
-        assert len(result.reply_ids) == 200
-        assert first_reply.id not in result.reply_ids
+        assert len(result.reply_ids) == 3
+        assert oldest_reply.id not in result.reply_ids
 
 
 @pytest.fixture
