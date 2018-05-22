@@ -34,8 +34,13 @@ def _broker_transport_options(broker_url):
     if not broker_url.startswith('sqs://'):
         return {}
 
-    # Use SQS in the same region as the EC2 instance on which 'h' is running.
-    return {'region': ec2_metadata.region}
+    return {
+        # Prefix SQS queue names to make it clearer which service the queues
+        # are associated with.
+        'queue_name_prefix': 'hypothesis-h-',
+        # Use SQS in the same region as the EC2 instance on which 'h' is running.
+        'region': ec2_metadata.region,
+    }
 
 
 __all__ = (
