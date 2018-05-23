@@ -98,7 +98,6 @@ class TestNavbar(object):
 
     @pytest.fixture
     def req(self, pyramid_request):
-        pyramid_request.user = None
         return pyramid_request
 
     @pytest.fixture
