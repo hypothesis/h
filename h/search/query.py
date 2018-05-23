@@ -165,6 +165,18 @@ class GroupFilter(object):
             return {"term": {"group": group}}
 
 
+class GroupAuthFilter(object):
+    """Filter out groups that the request isn't authorized to read."""
+
+    def __init__(self, request):
+        self.user = request.user
+        self.group_service = request.find_service(name="group")
+
+    def __call__(self, _):
+        groups = self.group_service.groupids_readable_by(self.user)
+        return {"terms": {"group": groups}}
+
+
 class UriFilter(object):
 
     """
