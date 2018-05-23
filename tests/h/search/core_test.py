@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import datetime
 
-import pytest
-
 from h import search
 
 
@@ -223,24 +221,3 @@ class TestSearchWithSeparateReplies(object):
 
         assert len(result.reply_ids) == 3
         assert oldest_reply.id not in result.reply_ids
-
-
-@pytest.fixture
-def Annotation(factories, index):
-    """Create and index an annotation.
-
-    Looks like factories.Annotation() but automatically uses the build()
-    strategy and automatically indexes the annotation into the test
-    Elasticsearch index.
-    """
-    def _Annotation(**kwargs):
-        annotation = factories.Annotation.build(**kwargs)
-        index(annotation)
-        return annotation
-    return _Annotation
-
-
-@pytest.fixture
-def pyramid_request(es_client, pyramid_request):
-    pyramid_request.es = es_client
-    return pyramid_request

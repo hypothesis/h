@@ -17,6 +17,21 @@ def group_service(pyramid_config):
 
 
 @pytest.fixture
+def Annotation(factories, index):
+    """Create and index an annotation.
+
+    Looks like factories.Annotation() but automatically uses the build()
+    strategy and automatically indexes the annotation into the test
+    Elasticsearch index.
+    """
+    def _Annotation(**kwargs):
+        annotation = factories.Annotation.build(**kwargs)
+        index(annotation)
+        return annotation
+    return _Annotation
+
+
+@pytest.fixture
 def index(es_client, pyramid_request):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
@@ -24,3 +39,9 @@ def index(es_client, pyramid_request):
             h.search.index.index(es_client, annotation, pyramid_request)
         es_client.conn.indices.refresh(index=es_client.index)
     return _index
+
+
+@pytest.fixture
+def pyramid_request(es_client, pyramid_request):
+    pyramid_request.es = es_client
+    return pyramid_request
