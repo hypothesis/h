@@ -18,9 +18,9 @@ from h.search import parser
 from h.search.query import (
     AuthorityFilter,
     TagsAggregation,
-    TopLevelAnnotationsFilter,
     UsersAggregation,
 )
+from h.search import TopLevelAnnotationsFilter
 
 
 class ActivityResults(namedtuple('ActivityResults', [
