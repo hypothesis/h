@@ -3,6 +3,7 @@ import mock
 import pytest
 
 from h.search import core
+from h.services.group import GroupService
 
 
 class FakeStatsdClient(object):
@@ -29,6 +30,7 @@ class FakeStatsdTimer(object):
         pass
 
 
+@pytest.mark.usefixtures("group_service")
 class TestSearch(object):
     def test_run_searches_annotations(self, pyramid_request, _search_annotations):
         params = mock.Mock()
@@ -259,6 +261,7 @@ class TestSearch(object):
 #     assert not log.warn.called
 
 
+@pytest.mark.usefixtures("group_service")
 @pytest.mark.parametrize('filter_type', [
     'DeletedFilter',
     'AuthFilter',
@@ -274,6 +277,7 @@ def test_default_querybuilder_includes_default_filters(filter_type, matchers, py
     assert matchers.InstanceOf(type_) in builder.filters
 
 
+@pytest.mark.usefixtures("group_service")
 def test_default_querybuilder_includes_registered_filters(pyramid_request):
     filter_factory = mock.Mock(return_value=mock.sentinel.MY_FILTER,
                                spec_set=[])
@@ -285,6 +289,7 @@ def test_default_querybuilder_includes_registered_filters(pyramid_request):
     assert mock.sentinel.MY_FILTER in builder.filters
 
 
+@pytest.mark.usefixtures("group_service")
 @pytest.mark.parametrize('matcher_type', [
     'AnyMatcher',
     'TagsMatcher',
@@ -322,3 +327,11 @@ def pyramid_request(pyramid_request):
 @pytest.fixture
 def log(patch):
     return patch('h.search.core.log')
+
+
+@pytest.fixture
+def group_service(pyramid_config):
+    group_service = mock.create_autospec(GroupService, instance=True, spec_set=True)
+    group_service.groupids_readable_by.return_value = ["__world__"]
+    pyramid_config.register_service(group_service, name="group")
+    return group_service
