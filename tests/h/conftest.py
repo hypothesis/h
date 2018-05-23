@@ -246,6 +246,7 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
     request.params = MultiDict()
     request.GET = request.params
     request.POST = request.params
+    request.user = None
     return request
 
 

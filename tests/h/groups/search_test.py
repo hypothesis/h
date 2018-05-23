@@ -34,5 +34,4 @@ class TestGroupAuthFilter(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.user = None
         return pyramid_request
