@@ -91,16 +91,6 @@ ANNOTATION_MAPPING = {
                 }
             }
         },
-        # FIXME: Remove once we've stopped indexing this field.
-        'permissions': {
-            'index_name': 'permission',
-            'properties': {
-                'read': {'type': 'string'},
-                'update': {'type': 'string'},
-                'delete': {'type': 'string'},
-                'admin': {'type': 'string'}
-            }
-        },
         'shared': {'type': 'boolean'},
         'references': {'type': 'string'},
         'document': {
