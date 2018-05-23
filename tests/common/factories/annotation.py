@@ -28,6 +28,7 @@ class Annotation(ModelFactory):
     userid = factory.LazyFunction(lambda: "acct:{username}@{authority}".format(
         username=FAKER.user_name(), authority=FAKER.domain_name(levels=1)))
     document = factory.SubFactory(Document)
+    groupid = "__world__"
 
     @factory.lazy_attribute
     def target_selectors(self):
