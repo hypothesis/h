@@ -66,7 +66,7 @@ def configure(environ=None, settings=None):
 
     # Configuration for Pyramid
     settings_manager.set('secret_key', 'SECRET_KEY', type_=bytes)
-    settings_manager.set('secret_salt', 'SECRET_SALT', type_=bytes)
+    settings_manager.set('secret_salt', 'SECRET_SALT', type_=bytes, default=DEFAULT_SALT)
 
     # Configuration for h
     settings_manager.set('csp.enabled', 'CSP_ENABLED', type_=asbool)
@@ -126,10 +126,6 @@ def configure(environ=None, settings=None):
                  'configure the secret_key setting or the SECRET_KEY '
                  'environment variable!')
         settings['secret_key'] = os.urandom(64)
-
-    # Use a fixed default salt if none provided
-    if 'secret_salt' not in settings:
-        settings['secret_salt'] = DEFAULT_SALT
 
     # Set up SQLAlchemy debug logging
     if 'debug_query' in settings:
