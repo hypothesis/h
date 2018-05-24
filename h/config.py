@@ -11,11 +11,10 @@ from pyramid.config import Configurator
 from pyramid.settings import asbool, aslist
 
 from h.settings import (
-    DeprecatedSetting,
-    EnvSetting,
     SettingError,
     database_url,
     mandrill_settings,
+    SettingsManager
 )
 from h.util.logging_filters import ExceptionFilter
 
@@ -35,73 +34,6 @@ DEFAULT_SALT = (b"\xbc\x9ck!k\x81(\xb6I\xaa\x90\x0f'}\x07\xa1P\xd9\xb7\xcb"
 SETTINGS = [
     # Mailer configuration for Mandrill
     mandrill_settings,
-
-    # Configuration for external components
-    EnvSetting('broker_url', 'BROKER_URL'),
-    EnvSetting('es.client_poolsize', 'ELASTICSEARCH_CLIENT_POOLSIZE',
-               type=int),
-    EnvSetting('es.client.max_retries', 'ELASTICSEARCH_CLIENT_MAX_RETRIES', type=int),
-    EnvSetting('es.client.retry_on_timeout', 'ELASTICSEARCH_CLIENT_RETRY_ON_TIMEOUT', type=asbool),
-    EnvSetting('es.client.timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=float),
-    EnvSetting('es.host', 'ELASTICSEARCH_HOST'),
-    EnvSetting('es.url', 'ELASTICSEARCH_URL'),
-    EnvSetting('es.index', 'ELASTICSEARCH_INDEX'),
-    EnvSetting('es.aws.access_key_id', 'ELASTICSEARCH_AWS_ACCESS_KEY_ID'),
-    EnvSetting('es.aws.region', 'ELASTICSEARCH_AWS_REGION'),
-    EnvSetting('es.aws.secret_access_key', 'ELASTICSEARCH_AWS_SECRET_ACCESS_KEY'),
-    EnvSetting('mail.default_sender', 'MAIL_DEFAULT_SENDER'),
-    EnvSetting('mail.host', 'MAIL_HOST'),
-    EnvSetting('mail.port', 'MAIL_PORT', type=int),
-    EnvSetting('sqlalchemy.url', 'DATABASE_URL', type=database_url),
-    EnvSetting('statsd.host', 'STATSD_HOST'),
-    EnvSetting('statsd.port', 'STATSD_PORT', type=int),
-    EnvSetting('statsd.prefix', 'STATSD_PREFIX'),
-
-    # Configuration for Pyramid
-    EnvSetting('secret_key', 'SECRET_KEY', type=bytes),
-    EnvSetting('secret_salt', 'SECRET_SALT', type=bytes),
-
-    # Configuration for h
-    EnvSetting('csp.enabled', 'CSP_ENABLED', type=asbool),
-    EnvSetting('csp.report_uri', 'CSP_REPORT_URI'),
-    EnvSetting('csp.report_only', 'CSP_REPORT_ONLY'),
-    EnvSetting('ga_tracking_id', 'GOOGLE_ANALYTICS_TRACKING_ID'),
-    EnvSetting('ga_client_tracking_id', 'GOOGLE_ANALYTICS_CLIENT_TRACKING_ID'),
-    EnvSetting('h.app_url', 'APP_URL'),
-    DeprecatedSetting(EnvSetting('h.authority', 'AUTH_DOMAIN'),
-                      message='use the AUTHORITY environment variable instead'),
-    EnvSetting('h.authority', 'AUTHORITY'),
-    EnvSetting('h.bouncer_url', 'BOUNCER_URL'),
-
-    EnvSetting('h.client_url', 'CLIENT_URL'),
-
-    # ID for the OAuth authclient that the embedded client should use when
-    # making requests to OAuth endpoints. As a public client, it does not have a
-    # secret.
-    EnvSetting('h.client_oauth_id', 'CLIENT_OAUTH_ID'),
-
-    # The list of origins that the client will respond to cross-origin RPC
-    # requests from.
-    EnvSetting('h.client_rpc_allowed_origins',
-               'CLIENT_RPC_ALLOWED_ORIGINS', type=aslist),
-
-    EnvSetting('h.db_session_checks', 'DB_SESSION_CHECKS', type=asbool),
-
-    # Environment name, provided by the deployment environment. Please do
-    # *not* toggle functionality based on this value. It is intended as a
-    # label only.
-    EnvSetting('h.env', 'ENV'),
-    # Where should logged-out users visiting the homepage be redirected?
-    EnvSetting('h.homepage_redirect_url', 'HOMEPAGE_REDIRECT_URL'),
-    EnvSetting('h.proxy_auth', 'PROXY_AUTH', type=asbool),
-    # Sentry DSNs for frontend code should be of the public kind, lacking the
-    # password component in the DSN URI.
-    EnvSetting('h.sentry_dsn_client', 'SENTRY_DSN_CLIENT'),
-    EnvSetting('h.sentry_dsn_frontend', 'SENTRY_DSN_FRONTEND'),
-    EnvSetting('h.websocket_url', 'WEBSOCKET_URL'),
-
-    # Debug/development settings
-    EnvSetting('debug_query', 'DEBUG_QUERY'),
 ]
 
 
@@ -110,6 +42,75 @@ def configure(environ=None, settings=None):
         environ = os.environ
     if settings is None:
         settings = {}
+    settings_manager = SettingsManager(settings, environ)
+    # Configuration for external components
+    settings_manager.set('broker_url', 'BROKER_URL')
+    settings_manager.set('es.client_poolsize', 'ELASTICSEARCH_CLIENT_POOLSIZE',
+                         type_=int)
+    settings_manager.set('es.client.max_retries', 'ELASTICSEARCH_CLIENT_MAX_RETRIES', type_=int)
+    settings_manager.set('es.client.retry_on_timeout', 'ELASTICSEARCH_CLIENT_RETRY_ON_TIMEOUT', type_=asbool)
+    settings_manager.set('es.client.timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type_=float)
+    settings_manager.set('es.host', 'ELASTICSEARCH_HOST')
+    settings_manager.set('es.url', 'ELASTICSEARCH_URL'),
+    settings_manager.set('es.index', 'ELASTICSEARCH_INDEX')
+    settings_manager.set('es.aws.access_key_id', 'ELASTICSEARCH_AWS_ACCESS_KEY_ID')
+    settings_manager.set('es.aws.region', 'ELASTICSEARCH_AWS_REGION')
+    settings_manager.set('es.aws.secret_access_key', 'ELASTICSEARCH_AWS_SECRET_ACCESS_KEY')
+    settings_manager.set('mail.default_sender', 'MAIL_DEFAULT_SENDER')
+    settings_manager.set('mail.host', 'MAIL_HOST')
+    settings_manager.set('mail.port', 'MAIL_PORT', type_=int)
+    settings_manager.set('sqlalchemy.url', 'DATABASE_URL', type_=database_url)
+    settings_manager.set('statsd.host', 'STATSD_HOST')
+    settings_manager.set('statsd.port', 'STATSD_PORT', type_=int)
+    settings_manager.set('statsd.prefix', 'STATSD_PREFIX')
+
+    # Configuration for Pyramid
+    settings_manager.set('secret_key', 'SECRET_KEY', type_=bytes)
+    settings_manager.set('secret_salt', 'SECRET_SALT', type_=bytes)
+
+    # Configuration for h
+    settings_manager.set('csp.enabled', 'CSP_ENABLED', type_=asbool)
+    settings_manager.set('csp.report_uri', 'CSP_REPORT_URI')
+    settings_manager.set('csp.report_only', 'CSP_REPORT_ONLY')
+    settings_manager.set('ga_tracking_id', 'GOOGLE_ANALYTICS_TRACKING_ID')
+    settings_manager.set('ga_client_tracking_id', 'GOOGLE_ANALYTICS_CLIENT_TRACKING_ID')
+    settings_manager.set('h.app_url', 'APP_URL')
+    settings_manager.set('h.authority', 'AUTH_DOMAIN',
+                         deprecated_msg='use the AUTHORITY environment variable instead')
+    settings_manager.set('h.authority', 'AUTHORITY')
+    settings_manager.set('h.bouncer_url', 'BOUNCER_URL')
+
+    settings_manager.set('h.client_url', 'CLIENT_URL')
+
+    # ID for the OAuth authclient that the embedded client should use when
+    # making requests to OAuth endpoints. As a public client, it does not have a
+    # secret.
+    settings_manager.set('h.client_oauth_id', 'CLIENT_OAUTH_ID')
+
+    # The list of origins that the client will respond to cross-origin RPC
+    # requests from.
+    settings_manager.set('h.client_rpc_allowed_origins',
+                         'CLIENT_RPC_ALLOWED_ORIGINS', type_=aslist)
+
+    settings_manager.set('h.db_session_checks', 'DB_SESSION_CHECKS', type_=asbool)
+
+    # Environment name, provided by the deployment environment. Please do
+    # *not* toggle functionality based on this value. It is intended as a
+    # label only.
+    settings_manager.set('h.env', 'ENV')
+    # Where should logged-out users visiting the homepage be redirected?
+    settings_manager.set('h.homepage_redirect_url', 'HOMEPAGE_REDIRECT_URL')
+    settings_manager.set('h.proxy_auth', 'PROXY_AUTH', type_=asbool)
+    # Sentry DSNs for frontend code should be of the public kind, lacking the
+    # password component in the DSN URI.
+    settings_manager.set('h.sentry_dsn_client', 'SENTRY_DSN_CLIENT')
+    settings_manager.set('h.sentry_dsn_frontend', 'SENTRY_DSN_FRONTEND')
+    settings_manager.set('h.websocket_url', 'WEBSOCKET_URL')
+
+    # Debug/development settings
+    settings_manager.set('debug_query', 'DEBUG_QUERY')
+
+    settings = settings_manager.settings
 
     for s in SETTINGS:
         try:
