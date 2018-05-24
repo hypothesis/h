@@ -34,10 +34,16 @@ def _broker_transport_options(broker_url):
     if not broker_url.startswith('sqs://'):
         return {}
 
+    # Prefix for SQS queue names to make it clearer which service the queues
+    # are associated with.
+    #
+    # This is configurable to support different h instances in the same AWS
+    # account.
+    queue_name_prefix = os.getenv('SQS_QUEUE_NAME_PREFIX', 'hypothesis-h-')
+
     return {
-        # Prefix SQS queue names to make it clearer which service the queues
-        # are associated with.
-        'queue_name_prefix': 'hypothesis-h-',
+        'queue_name_prefix': queue_name_prefix,
+
         # Use SQS in the same region as the EC2 instance on which 'h' is running.
         'region': ec2_metadata.region,
     }
