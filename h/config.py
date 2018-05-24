@@ -11,9 +11,7 @@ from pyramid.config import Configurator
 from pyramid.settings import asbool, aslist
 
 from h.settings import (
-    SettingError,
     database_url,
-    mandrill_settings,
     SettingsManager
 )
 from h.util.logging_filters import ExceptionFilter
@@ -28,13 +26,6 @@ DEFAULT_SALT = (b"\xbc\x9ck!k\x81(\xb6I\xaa\x90\x0f'}\x07\xa1P\xd9\xb7\xcb"
                 b"\xcb\xe8\x8b\t\xcf\xeb *\xa7\xa6\xe1i\xc7\x81\xe8\xd8\x18"
                 b"\x9f\x1b\x96\xc1\xfa\x8b\x19\x82\xa3[\x19\xcb\xa4\x1a\x0f"
                 b"\xe4\xcb\r\x17\x7f\xfbh\xd5^W\xdb\xe6")
-
-# The list of all settings read from the system environment. These are in
-# reverse-priority order, meaning that later settings trump earlier settings.
-SETTINGS = [
-    # Mailer configuration for Mandrill
-    mandrill_settings,
-]
 
 
 def configure(environ=None, settings=None):
@@ -110,16 +101,13 @@ def configure(environ=None, settings=None):
     # Debug/development settings
     settings_manager.set('debug_query', 'DEBUG_QUERY')
 
+    if 'MANDRILL_USERNAME' in environ and 'MANDRILL_APIKEY' in environ:
+        settings_manager.set('mail.username', 'MANDRILL_USERNAME')
+        settings_manager.set('mail.password', 'MANDRILL_APIKEY')
+        settings_manager.set('mail.host', 'MANDRILL_HOST', default='smtp.mandrillapp.com')
+        settings_manager.set('mail.port', 'MANDRILL_PORT', default=587)
+        settings_manager.set('mail.tls', 'MANDRILL_TLS', default=True)
     settings = settings_manager.settings
-
-    for s in SETTINGS:
-        try:
-            result = s(environ)
-        except SettingError as e:
-            log.warn(e)
-
-        if result is not None:
-            settings.update(result)
 
     if 'secret_key' not in settings:
         log.warn('No secret key provided: using transient key. Please '
