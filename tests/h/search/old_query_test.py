@@ -295,7 +295,6 @@ class TestGroupFilter(object):
         assert groupfilter({}) is None
 
 
-@pytest.mark.usefixtures('group_service')
 class TestGroupAuthFilter(object):
     def test_fetches_readable_groups(self, pyramid_request, group_service):
         pyramid_request.user = mock.sentinel.user
@@ -312,12 +311,6 @@ class TestGroupAuthFilter(object):
         result = filter_({})
 
         assert result == {'terms': {'group': ['group-a', 'group-b']}}
-
-    @pytest.fixture
-    def group_service(self, patch, pyramid_config):
-        svc = patch('h.services.group.GroupService')
-        pyramid_config.register_service(svc, name='group')
-        return svc
 
 
 class TestUriFilter(object):

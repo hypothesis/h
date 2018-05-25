@@ -3,14 +3,11 @@ from __future__ import unicode_literals
 
 import datetime
 
-import mock
 import pytest
 
 from h import search
-from h.services.group import GroupService
 
 
-@pytest.mark.usefixtures("group_service")
 class TestSearch(object):
     """Unit tests for search.Search when no separate_replies argument is given."""
 
@@ -120,7 +117,6 @@ class TestSearch(object):
         assert result.reply_ids == []
 
 
-@pytest.mark.usefixtures("group_service")
 class TestSearchWithSeparateReplies(object):
     """Unit tests for search.Search when separate_replies=True is given."""
 
@@ -248,11 +244,3 @@ def Annotation(factories, index):
 def pyramid_request(es_client, pyramid_request):
     pyramid_request.es = es_client
     return pyramid_request
-
-
-@pytest.fixture
-def group_service(pyramid_config):
-    group_service = mock.create_autospec(GroupService, instance=True, spec_set=True)
-    group_service.groupids_readable_by.return_value = ["__world__"]
-    pyramid_config.register_service(group_service, name="group")
-    return group_service
