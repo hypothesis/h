@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from elasticsearch_dsl.connections import connections
+from elasticsearch_dsl import Index
+
 from h import search
 from h.search.connection import connect
 
@@ -27,3 +31,19 @@ class TestConnection(object):
         connections.create_connection(alias='foobar')
 
         assert connections.get_connection('foobar')
+
+    def test_connect_does_not_raise_on_invalid_host(self, request):
+        request.addfinalizer(remove_connection)
+
+        connections.create_connection(alias='foobar', hosts=['localhost:2323'])
+
+        assert connections.get_connection('foobar')
+
+    def test_it_does_raise_if_bad_connection_is_queried(self, request):
+        request.addfinalizer(remove_connection)
+
+        connections.create_connection(alias='foobar', hosts=['localhost:2323'])
+        with pytest.raises(Exception) as e:
+            Index('whatever', using='foobar').exists()
+
+        assert e.typename == 'ConnectionError'
