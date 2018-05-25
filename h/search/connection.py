@@ -10,7 +10,7 @@ ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
 
 
 # TODO: Make `hosts` a required argument
-def connect(hosts=[ELASTICSEARCH_URL], **kwargs):
+def connect(alias='default', hosts=[ELASTICSEARCH_URL], **kwargs):
     """
     Establish a 'default` connection to Elasticsearch
 
@@ -19,4 +19,4 @@ def connect(hosts=[ELASTICSEARCH_URL], **kwargs):
 
     e.g. `elasticsearch_dsl.get_connection()`
     """
-    connections.create_connection(hosts=hosts, **kwargs)
+    connections.create_connection(alias, hosts=hosts, **kwargs)
