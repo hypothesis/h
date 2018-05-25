@@ -11,6 +11,7 @@ from h.search.connection import connect
 
 
 def remove_connection():
+    """Remove elasticsearch connection made in test"""
     connections.remove_connection('foobar')
 
 
