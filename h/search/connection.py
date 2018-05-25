@@ -17,6 +17,10 @@ def connect(alias='default', hosts=[ELASTICSEARCH_URL], **kwargs):
     This establishes a connection to newer (v6.x) Elasticsearch which is
     available as the 'default' connection henceforth via `elasticsearch_dsl`
 
-    e.g. `elasticsearch_dsl.get_connection()`
+    e.g. `elasticsearch_dsl.connections.get_connection()`
     """
+    # TODO invoke this during request bootstrapping
+    # TODO settings munging if/as needed
+    # TODO AWS auth
+    # TODO certs
     connections.create_connection(alias, hosts=hosts, **kwargs)
