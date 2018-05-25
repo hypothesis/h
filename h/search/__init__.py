@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 from h.search.client import get_client
 from h.search.config import init
 from h.search.core import Search
+from h.search.query import TopLevelAnnotationsFilter
 
 __all__ = (
     'Search',
+    'TopLevelAnnotationsFilter',
     'get_client',
     'init',
 )
