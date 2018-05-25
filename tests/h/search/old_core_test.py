@@ -274,17 +274,6 @@ def test_default_querybuilder_includes_default_filters(filter_type, matchers, py
     assert matchers.InstanceOf(type_) in builder.filters
 
 
-def test_default_querybuilder_includes_registered_filters(pyramid_request):
-    filter_factory = mock.Mock(return_value=mock.sentinel.MY_FILTER,
-                               spec_set=[])
-    pyramid_request.registry[core.FILTERS_KEY] = [filter_factory]
-
-    builder = core.Search._default_querybuilder(pyramid_request)
-
-    filter_factory.assert_called_once_with(pyramid_request)
-    assert mock.sentinel.MY_FILTER in builder.filters
-
-
 @pytest.mark.parametrize('matcher_type', [
     'AnyMatcher',
     'TagsMatcher',

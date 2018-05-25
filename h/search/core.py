@@ -8,8 +8,6 @@ from elasticsearch1.exceptions import ConnectionTimeout
 
 from h.search import query
 
-FILTERS_KEY = 'h.search.filters'
-
 log = logging.getLogger(__name__)
 
 SearchResult = namedtuple('SearchResult', [
@@ -155,8 +153,7 @@ class Search(object):
         builder.append_filter(query.GroupFilter())
         builder.append_filter(query.GroupAuthFilter(request))
         builder.append_filter(query.UserFilter())
+        builder.append_filter(query.NipsaFilter(request))
         builder.append_matcher(query.AnyMatcher())
         builder.append_matcher(query.TagsMatcher())
-        for factory in request.registry.get(FILTERS_KEY, []):
-            builder.append_filter(factory(request))
         return builder
