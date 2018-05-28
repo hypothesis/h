@@ -15,12 +15,10 @@ from h.activity import bucketing
 from h.models import Annotation, Group
 from h.search import Search
 from h.search import parser
-from h.search.query import (
-    AuthorityFilter,
-    TagsAggregation,
-    UsersAggregation,
-)
 from h.search import TopLevelAnnotationsFilter
+from h.search import AuthorityFilter
+from h.search import TagsAggregation
+from h.search import UsersAggregation
 
 
 class ActivityResults(namedtuple('ActivityResults', [

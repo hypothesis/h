@@ -5,10 +5,16 @@ from h.search.client import get_client
 from h.search.config import init
 from h.search.core import Search
 from h.search.query import TopLevelAnnotationsFilter
+from h.search.query import AuthorityFilter
+from h.search.query import TagsAggregation
+from h.search.query import UsersAggregation
 
 __all__ = (
     'Search',
     'TopLevelAnnotationsFilter',
+    'AuthorityFilter',
+    'TagsAggregation',
+    'UsersAggregation',
     'get_client',
     'init',
 )
