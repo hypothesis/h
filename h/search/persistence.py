@@ -15,6 +15,6 @@ class Annotation(elasticsearch_dsl.DocType):
     authority = elasticsearch_dsl.Keyword(index=False)
 
     @staticmethod
-    def create(index, models_annotation):
+    def create(models_annotation):
         """Return a new search.Annotation from the given models.Annotation."""
-        return Annotation(meta={"id": models_annotation.id, "index": index})
+        return Annotation(meta={"id": models_annotation.id})
