@@ -26,7 +26,7 @@ class Window(namedtuple('Window', ['start', 'end'])):
     pass
 
 
-def index(es, annotation, request, target_index=None):
+def index_old(es, annotation, request, target_index=None):
     """
     Index an annotation into the search index.
 
