@@ -15,6 +15,7 @@ from h import models
 from h import presenters
 from h.events import AnnotationTransformEvent
 from h.util.query import column_windows
+from h.search import persistence
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,16 @@ PG_WINDOW_SIZE = 2000
 
 class Window(namedtuple('Window', ['start', 'end'])):
     pass
+
+
+def index(models_annotation, request, index="hypothesis"):
+    search_annotation = persistence.Annotation.create(index, models_annotation)
+
+    request.registry.notify(AnnotationTransformEvent(
+        request, models_annotation, search_annotation.to_dict(),
+    ))
+
+    search_annotation.save()
 
 
 def index_old(es, annotation, request, target_index=None):

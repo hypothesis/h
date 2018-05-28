@@ -32,6 +32,10 @@ def init_elasticsearch(request):
     """Connect to the newer v6.x instance of Elasticsearch once per test session"""
     es_connect()
 
+    from h.search.persistence import Annotation
+    Annotation._doc_type.index = "hypothesis-test"
+    Annotation.init()
+
     def maybe_delete_index():
         """Delete the test index if it exists."""
         if client.conn.indices.exists(index=ELASTICSEARCH_INDEX):
