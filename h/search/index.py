@@ -27,8 +27,8 @@ class Window(namedtuple('Window', ['start', 'end'])):
     pass
 
 
-def index(models_annotation, request, index="hypothesis"):
-    search_annotation = persistence.Annotation.create(index, models_annotation)
+def index(models_annotation, request):
+    search_annotation = persistence.Annotation.create(models_annotation)
 
     request.registry.notify(AnnotationTransformEvent(
         request, models_annotation, search_annotation.to_dict(),

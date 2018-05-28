@@ -47,7 +47,7 @@ def index_new(pyramid_request):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:
-            h.search.index.index(annotation, pyramid_request, "hypothesis-test")
+            h.search.index.index(annotation, pyramid_request)
         elasticsearch_dsl.connections.get_connection().indices.refresh(index="hypothesis-test")
     return _index
 
