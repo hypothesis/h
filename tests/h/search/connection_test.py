@@ -5,6 +5,7 @@ import pytest
 
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import Index
+from elasticsearch.exceptions import ConnectionError
 
 from h import search
 from h.search.connection import connect
@@ -44,7 +45,6 @@ class TestConnection(object):
         request.addfinalizer(remove_connection)
 
         connections.create_connection(alias='foobar', hosts=['localhost:2323'])
-        with pytest.raises(Exception) as e:
-            Index('whatever', using='foobar').exists()
 
-        assert e.typename == 'ConnectionError'
+        with pytest.raises(ConnectionError):
+            Index('whatever', using='foobar').exists()
