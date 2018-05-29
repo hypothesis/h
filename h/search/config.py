@@ -15,6 +15,7 @@ import logging
 import os
 
 from elasticsearch1.exceptions import NotFoundError, RequestError
+from h.search.annotation import Annotation
 
 log = logging.getLogger(__name__)
 
@@ -289,3 +290,10 @@ def _update_index_mappings(conn, name, mappings):
 def _random_id():
     """Generate a short random hex string."""
     return binascii.hexlify(os.urandom(4)).decode()
+
+
+def create_mappings():
+    """
+    Create the mappings in elasticsearch
+    """
+    Annotation.init()
