@@ -13,9 +13,14 @@ ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
 
 
 @pytest.fixture
-def es_client(delete_all_elasticsearch_documents):
+def es_client():
     """A :py:class:`h.search.client.Client` for the test search index."""
-    return _es_client()
+    client = _es_client()
+
+    yield client
+
+    # Delete everything from the test search index after each test.
+    client.conn.delete_by_query(index=client.index, body={"query": {"match_all": {}}})
 
 
 @pytest.fixture
