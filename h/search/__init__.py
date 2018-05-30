@@ -50,5 +50,3 @@ def includeme(config):
         lambda r: r.registry['es.client'],
         name='es',
         reify=True)
-
-    connect()
