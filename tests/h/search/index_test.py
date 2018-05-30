@@ -14,12 +14,13 @@ from tests.common.matchers import Matcher
 class TestIndex(object):
     def test_annotation_ids_are_used_as_elasticsearch_ids(self, es_client,
                                                           factories,
-                                                          index_new):
+                                                          index_new,
+                                                          es_index):
         annotation = factories.Annotation.build()
 
         index_new(annotation)
 
-        result = persistence.Annotation.get(id=annotation.id)
+        result = persistence.Annotation.get(id=annotation.id, index=es_index)
         assert result.meta.id == annotation.id
 
     def test_it_can_index_an_annotation_with_no_document(self, factories,

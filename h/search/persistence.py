@@ -9,9 +9,6 @@ import elasticsearch_dsl
 class Annotation(elasticsearch_dsl.DocType):
     """An elasticsearch_dsl annotation document."""
 
-    class Meta:
-        index = "hypothesis"
-
     authority = elasticsearch_dsl.Keyword(index=False)
 
     @staticmethod

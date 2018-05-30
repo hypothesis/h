@@ -8,8 +8,13 @@ import pytest
 from h import search
 
 ELASTICSEARCH_HOST = os.environ.get("ELASTICSEARCH_HOST", "http://localhost:9200")
-ELASTICSEARCH_INDEX = "hypothesis-test"
+ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "hypothesis-test")
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
+
+
+@pytest.fixture
+def es_index():
+    return ELASTICSEARCH_INDEX
 
 
 @pytest.fixture
@@ -33,8 +38,7 @@ def init_elasticsearch(request):
     es_connect()
 
     from h.search.persistence import Annotation
-    Annotation._doc_type.index = "hypothesis-test"
-    Annotation.init()
+    Annotation.init(index=ELASTICSEARCH_INDEX)
 
     def maybe_delete_index():
         """Delete the test index if it exists."""

@@ -43,12 +43,12 @@ def index(es_client, pyramid_request):
 
 
 @pytest.fixture
-def index_new(pyramid_request):
+def index_new(pyramid_request, es_index):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:
-            h.search.index.index(annotation, pyramid_request)
-        elasticsearch_dsl.connections.get_connection().indices.refresh(index="hypothesis-test")
+            h.search.index.index(annotation, pyramid_request, index=es_index)
+        elasticsearch_dsl.connections.get_connection().indices.refresh(index=es_index)
     return _index
 
 
