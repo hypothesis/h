@@ -37,10 +37,10 @@ node {
                 sh 'pip install -q tox'
 
                 // Unit tests
-                sh 'cd /var/lib/hypothesis && tox'
+                sh 'cd /var/lib/hypothesis && tox --sitepackages'
                 // Functional tests
-                sh 'cd /var/lib/hypothesis && tox -e functional'
-                sh 'cd /var/lib/hypothesis && tox -e functional-py3'
+                sh 'cd /var/lib/hypothesis && tox --sitepackages -e functional'
+                sh 'cd /var/lib/hypothesis && tox --sitepackages -e functional-py3'
             }
         } finally {
             rabbit.stop()
