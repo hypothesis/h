@@ -52,7 +52,8 @@ class TestIndex(object):
         # index directly and uses this ``document`` field.
         assert get(annotation.id)["document"]["web_uri"] == "https://example.com/example_article"
 
-    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, factories, index, get):
+    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, factories,
+                                                                        index, get):
         annotation = factories.Annotation.build(
             document=factories.Document.build(web_uri=None),
         )
@@ -81,7 +82,8 @@ class TestIndex(object):
 
         assert "title" not in get(annotation.id)["document"]
 
-    def test_it_notifies(self, AnnotationTransformEvent, factories, pyramid_request, notify, index, search):
+    def test_it_notifies(self, AnnotationTransformEvent, factories, pyramid_request,
+                         notify, index, search):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
 
         index(annotation)
@@ -152,9 +154,9 @@ class TestIndex(object):
         response = search.execute()
 
         user_bucket_1 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets
-                             if bucket["key"] == "acct:someone@example.com")
+            if bucket["key"] == "acct:someone@example.com")
         user_bucket_2 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets
-                             if bucket["key"] == "acct:Someone@example.com")
+            if bucket["key"] == "acct:Someone@example.com")
 
         assert user_bucket_1["doc_count"] == 1
         assert user_bucket_2["doc_count"] == 1
@@ -181,8 +183,10 @@ class TestIndex(object):
 
         response = search.execute()
 
-        tag_bucket_1 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if bucket["key"] == "Hello")
-        tag_bucket_2 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if bucket["key"] == "hello")
+        tag_bucket_1 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if
+            bucket["key"] == "Hello")
+        tag_bucket_2 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if
+            bucket["key"] == "hello")
 
         assert tag_bucket_1["doc_count"] == 1
         assert tag_bucket_2["doc_count"] == 1
