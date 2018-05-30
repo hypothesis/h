@@ -9,7 +9,7 @@ import elasticsearch_dsl
 class Annotation(elasticsearch_dsl.DocType):
     """An elasticsearch_dsl annotation document."""
 
-    authority = elasticsearch_dsl.Keyword(index=False)
+    authority = elasticsearch_dsl.Keyword()
 
     @staticmethod
     def create(models_annotation):
