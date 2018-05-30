@@ -2,9 +2,11 @@
 
 from __future__ import unicode_literals
 
+from binascii import hexlify, unhexlify
 import string
 
 from passlib.context import CryptContext
+import pytest
 from hypothesis import assume
 from hypothesis import strategies as st
 from hypothesis import given
@@ -94,6 +96,38 @@ class TestDeriveKey(object):
     def test_it_encodes_str_key_material(self):
         derived = derive_key('akey', b'somesalt', b'some-info')
         assert len(derived) == 64
+
+    # Test vectors adapted from the HKDF RFC by https://www.kullo.net/blog/hkdf-sha-512-test-vectors/
+    @pytest.mark.parametrize('info,key,salt,expected', [
+        ('f0f1f2f3f4f5f6f7f8f9', '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b',
+         '000102030405060708090a0b0c', '832390086cda71fb47625bb5ceb168e4c8e26a1a16ed34d9fc7fe92c1481579338da362cb8d9f925d7cb'),
+
+        ('b0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d'
+         '2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff',
+
+         '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20212'
+         '2232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f',
+
+         '606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f80818'
+         '2838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf',
+
+         'ce6c97192805b346e6161e821ed165673b84f400a2b514b2fe23d84cd189ddf1b695b'
+         '48cbd1c8388441137b3ce28f16aa64ba33ba466b24df6cfcb021ecff235f6a2056ce3af1de44d572097a8505d9e7a93'),
+
+        ('f0f1f2f3f4f5f6f7f8f9', '0b0b0b0b0b0b0b0b0b0b0b',
+         '000102030405060708090a0b0c', '7413e8997e020610fbf6823f2ce14bff01875db1ca55f68cfcf3954dc8aff53559bd5e3028b080f7c068'),
+    ])
+    def test_it_produces_correct_result(self, info, key, salt, expected):
+        info_bytes = unhexlify(info)
+        salt_bytes = unhexlify(salt)
+        key_bytes = unhexlify(key)
+
+        derived = derive_key(key_bytes, salt_bytes, info_bytes)
+
+        # The test vectors have key lengths above and below the fixed-sized
+        # output of `derive_key`. Only compare the corresponding prefixes.
+        compare_len = min(len(expected), 64 * 2)
+        assert hexlify(derived)[:compare_len] == expected[:compare_len].encode()
 
 
 def test_password_context():
