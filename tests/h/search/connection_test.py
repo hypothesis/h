@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import pytest
+import mock
 
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import Index
@@ -34,6 +35,24 @@ class TestConnection(object):
 
         assert connections.get_connection('foobar')
 
+    def test_connect_defaults_to_default_alias(self, connections_):
+        connect()
+
+        connections_.create_connection.assert_called_once_with('default',
+                                                               hosts=mock.ANY,
+                                                               verify_certs=True)
+
+    def test_connect_passes_kwargs_to_create_connection(self, connections_):
+        kwargs = {
+            'foo': 'bar'
+        }
+        connect(**kwargs)
+
+        connections_.create_connection.assert_called_once_with('default',
+                                                               hosts=mock.ANY,
+                                                               verify_certs=True,
+                                                               **kwargs)
+
     def test_connect_does_not_raise_on_invalid_host(self, request):
         request.addfinalizer(remove_connection)
 
@@ -48,3 +67,8 @@ class TestConnection(object):
 
         with pytest.raises(ConnectionError):
             Index('whatever', using='foobar').exists()
+
+
+@pytest.fixture
+def connections_(patch):
+    return patch('h.search.connection.connections')
