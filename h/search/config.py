@@ -15,7 +15,7 @@ import logging
 import os
 
 from elasticsearch1.exceptions import NotFoundError, RequestError
-from h.search.annotation import Annotation
+from h.search.docs.annotation import Annotation
 
 log = logging.getLogger(__name__)
 
