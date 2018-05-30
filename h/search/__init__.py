@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 from h.search.client import get_client
 from h.search.config import init
+from h.search.connection import connect
 from h.search.core import Search
 from h.search.query import TopLevelAnnotationsFilter
 from h.search.query import AuthorityFilter
@@ -17,6 +18,7 @@ __all__ = (
     'UsersAggregation',
     'get_client',
     'init',
+    'connect'
 )
 
 

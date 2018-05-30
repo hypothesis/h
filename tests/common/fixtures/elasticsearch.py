@@ -9,6 +9,7 @@ from h import search
 
 ELASTICSEARCH_HOST = os.environ.get("ELASTICSEARCH_HOST", "http://localhost:9200")
 ELASTICSEARCH_INDEX = "hypothesis-test"
+ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
 
 
 @pytest.fixture
@@ -17,10 +18,19 @@ def es_client(delete_all_elasticsearch_documents):
     return _es_client()
 
 
+@pytest.fixture
+def es_connect():
+    # TODO handle deleting things out of this connection's index as
+    # the `es_client` fixture does
+    search.connect(hosts=[ELASTICSEARCH_URL])
+
+
 @pytest.fixture(scope="session", autouse=True)
 def init_elasticsearch(request):
-    """Initialize the test Elasticsearch index once per test session."""
+    """Initialize the test (old) Elasticsearch index once per test session."""
     client = _es_client()
+    """Connect to the newer v6.x instance of Elasticsearch once per test session"""
+    es_connect()
 
     def maybe_delete_index():
         """Delete the test index if it exists."""
