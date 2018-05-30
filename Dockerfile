@@ -32,6 +32,30 @@ RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
 # Copy minimal data to allow installation of dependencies.
 COPY requirements.txt ./
 
+# BEGIN WORKAROUND
+#
+# TODO: Remove this workaround once https://github.com/pyca/cryptography/issues/4264 is resolved.
+#
+# crypotography (one of the dependencies that would be installed from our
+# requirements.txt file below) currently has a problem building against
+# LibreSSL (LibreSSL is going to be installed as a dependency of some of the
+# apk packages installed below):
+#
+# https://github.com/pyca/cryptography/issues/4264
+#
+# So as a workaround install cryptography separately now, before LibreSSL gets
+# installed.
+RUN apk update                                  # Needed or `apk add openssl-dev` won't work.
+RUN apk add openssl-dev                         # Build cryptography against OpenSSL, which works,
+                                                # instead of against LibreSSL.
+RUN apk add gcc python-dev musl-dev libffi-dev  # Other dependencies needed to build cryptography.
+RUN pip install --no-cache-dir -U pip
+RUN pip install cryptography==2.1.4
+# Remove OpenSSL again because it conflicts with LibreSSL which is going to be installed as a
+# dependency of some of the apk packages below.
+RUN apk del openssl-dev
+# END WORKAROUND
+
 # Install build deps, build, and then clean up.
 RUN apk add --no-cache --virtual build-deps \
     build-base \
