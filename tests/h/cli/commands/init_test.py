@@ -44,17 +44,50 @@ class TestInitCommand(object):
         assert not db.init.called
         assert result.exit_code == 0
 
+    def test_initialises_old_search(self,
+                                cli,
+                                cliconfig,
+                                search,
+                                pyramid_settings):
+        client = search.get_client_old.return_value
+
+        result = cli.invoke(init_cli.init, obj=cliconfig)
+
+        search.get_client_old.assert_called_once_with(pyramid_settings)
+        search.init.assert_called_once_with(client)
+        assert result.exit_code == 0
+
     def test_initialises_search(self,
                                 cli,
                                 cliconfig,
                                 search,
                                 pyramid_settings):
-        client = search.get_client.return_value
+        client = search.get_client.return_value  # noqa: F841
+        pyramid_settings['es.url'] = 'http://localhost:9200'
 
         result = cli.invoke(init_cli.init, obj=cliconfig)
 
         search.get_client.assert_called_once_with(pyramid_settings)
-        search.init.assert_called_once_with(client)
+        # todo: Uncomment this when the index cluster logic gets added.
+        # search.init.assert_called_once_with(client)
+        assert result.exit_code == 0
+
+    def test_initialises_both_search(self,
+                                cli,
+                                cliconfig,
+                                search,
+                                pyramid_settings):
+        client_old = search.get_client_old.return_value
+        pyramid_settings['es.host'] = 'http://localhost:9201'
+        client = search.get_client.return_value  # noqa: F841
+        pyramid_settings['es.url'] = 'http://localhost:9200'
+        result = cli.invoke(init_cli.init, obj=cliconfig)
+
+        search.get_client_old.assert_called_once_with(pyramid_settings)
+        search.init.assert_called_once_with(client_old)
+        search.get_client.assert_called_once_with(pyramid_settings)
+        # todo: Uncomment this when the index cluster logic gets added.
+        # search.init.assert_called_once_with(client)
         assert result.exit_code == 0
 
 

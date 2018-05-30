@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from h.search.client import get_client
+from elasticsearch_dsl import connections
+from h.search.client import get_client, get_client_old
 from h.search.config import init
 from h.search.connection import connect
 from h.search.core import Search
@@ -40,13 +41,16 @@ def includeme(config):
 
     # Connection to old (ES1.5) follows
     settings.setdefault('es.host', 'http://localhost:9200')
+    settings.setdefault('es.url', 'http://localhost:9201')
     settings.setdefault('es.index', 'hypothesis')
 
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
-    config.registry['es.client'] = get_client(settings)
+    config.registry['es.client'] = get_client_old(settings)
     config.add_request_method(
         lambda r: r.registry['es.client'],
         name='es',
         reify=True)
+    # Set the elasticsearch client connection as the default connection.
+    connections.add_connection('default', get_client(settings))
