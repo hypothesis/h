@@ -308,4 +308,5 @@ class SearchResponseWithIDs(Matcher):
 
 @pytest.fixture
 def search(es_client):
-    return elasticsearch1_dsl.Search(using=es_client.conn).fields([])
+    return elasticsearch1_dsl.Search(using=es_client.conn,
+                                     index=es_client.index).fields([])
