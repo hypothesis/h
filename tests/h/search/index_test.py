@@ -142,16 +142,17 @@ class TestIndex(object):
         annotation_1 = factories.Annotation.build(userid="acct:someone@example.com")
         annotation_2 = factories.Annotation.build(userid="acct:Someone@example.com")
 
-        index(annotation_1)
-        index(annotation_2)
+        index(annotation_1, annotation_2)
 
-        a = elasticsearch1_dsl.A('terms', field='user_raw')
-        search.aggs.bucket('user_raw_terms', a)
+        user_aggregation = elasticsearch1_dsl.A('terms', field='user_raw')
+        search.aggs.bucket('user_raw_terms', user_aggregation)
 
         response = search.execute()
 
-        user_bucket_1 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets if bucket["key"] == "acct:someone@example.com")
-        user_bucket_2 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets if bucket["key"] == "acct:Someone@example.com")
+        user_bucket_1 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets
+                             if bucket["key"] == "acct:someone@example.com")
+        user_bucket_2 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets
+                             if bucket["key"] == "acct:Someone@example.com")
 
         assert user_bucket_1["doc_count"] == 1
         assert user_bucket_2["doc_count"] == 1
@@ -171,11 +172,10 @@ class TestIndex(object):
         annotation_1 = factories.Annotation.build(id="test_annotation_id_1", tags=["Hello"])
         annotation_2 = factories.Annotation.build(id="test_annotation_id_2", tags=["hello"])
 
-        index(annotation_1)
-        index(annotation_2)
+        index(annotation_1, annotation_2)
 
-        a = elasticsearch1_dsl.A('terms', field='tags_raw')
-        search.aggs.bucket('tags_raw_terms', a)
+        tags_aggregation = elasticsearch1_dsl.A('terms', field='tags_raw')
+        search.aggs.bucket('tags_raw_terms', tags_aggregation)
 
         response = search.execute()
 
@@ -237,9 +237,9 @@ class TestIndex(object):
 
         index(annotation1, annotation2)
 
-        response1 = search.filter("term", thread_ids=[annotation1.id]).execute()
+        response = search.filter("term", thread_ids=[annotation1.id]).execute()
 
-        assert SearchResponseWithIDs([annotation2.id]) == response1
+        assert SearchResponseWithIDs([annotation2.id]) == response
 
     @pytest.fixture
     def annotations(self, factories, index):
