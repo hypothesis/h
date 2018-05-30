@@ -241,6 +241,27 @@ class TestIndex(object):
 
         assert SearchResponseWithIDs([annotation2.id]) == response1
 
+    @pytest.mark.parametrize("quote,query", [
+        ("It is a truth universally acknowledged", "truth"),
+        ("यह एक सत्य सार्वभौमिक रूप से स्वीकार किया जाता है", "सत्य"),
+        ("quick brown fox", "QUICK"),
+    ])
+    def test_you_can_search_within_the_quote(self, factories, index, search, quote, query):
+        """Verify that the "TextQuoteSelector" selector is indexed as the "quote" field."""
+        quote_selector = {
+            "type": "TextQuoteSelector",
+            "exact": quote,
+            "prefix": "something before ",
+            "suffix": " something after",
+        }
+        selectors = [quote_selector]
+        annotation = factories.Annotation.build(target_selectors=selectors)
+
+        index(annotation)
+
+        response = search.query("match", quote=query)
+        assert SearchResponseWithIDs([annotation.id]) == response
+
     @pytest.fixture
     def annotations(self, factories, index):
         """
