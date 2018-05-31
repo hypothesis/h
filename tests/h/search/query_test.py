@@ -25,11 +25,21 @@ class TestTopLevelAnnotationsFilter(object):
 
 
 class TestAuthorityFilter(object):
+    def test_it_filters_out_non_matching_authorities(self, Annotation, search):
+        annotations_auth1 = [Annotation(userid="acct:foo@auth1", shared=True).id,
+                             Annotation(userid="acct:bar@auth1", shared=True).id]
+        # Make some other annotations that are of different authority.
+        Annotation(userid="acct:bat@auth2", shared=True)
+        Annotation(userid="acct:bar@auth3", shared=True)
+
+        result = search.run({})
+
+        assert set(result.annotation_ids) == set(annotations_auth1)
 
     @pytest.fixture
     def search(self, pyramid_request):
         search_ = search.Search(pyramid_request)
-        search_.append_filter(search.AuthorityFilter())
+        search_.append_filter(search.AuthorityFilter("auth1"))
         return search_
 
 
