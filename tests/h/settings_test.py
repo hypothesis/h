@@ -112,6 +112,10 @@ class TestSettingsManager(object):
         result = settings_manager.settings['foo']
         assert result == 'foo'
 
+    def test_it_preserves_extra_config_settings(self):
+        settings_manager = SettingsManager({'pyramid.setting': True})
+        assert settings_manager.settings['pyramid.setting'] is True
+
     @pytest.fixture
     def environ(self, patch):
         patched_os = patch('h.settings.os')

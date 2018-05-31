@@ -107,6 +107,8 @@ def configure(environ=None, settings=None):
         settings_manager.set('mail.host', 'MANDRILL_HOST', default='smtp.mandrillapp.com')
         settings_manager.set('mail.port', 'MANDRILL_PORT', default=587)
         settings_manager.set('mail.tls', 'MANDRILL_TLS', default=True)
+
+    # Get resolved settings.
     settings = settings_manager.settings
 
     if 'secret_key' not in settings:

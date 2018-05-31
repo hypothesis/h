@@ -25,7 +25,7 @@ class SettingsManager(object):
     The resolved settings are available via the `settings` attribute.
     """
 
-    def __init__(self, settings=None, environ=None):
+    def __init__(self, settings={}, environ=None):
         """
         Initialize SettingsManager with initial setting values from config files
         and the environment.
@@ -36,11 +36,12 @@ class SettingsManager(object):
         :type environ: Dict[str, str]
         """
 
-        if settings is None:
-            settings = {}
         if environ is None:
             environ = os.environ
-        self.settings = settings
+
+        self.settings = {}
+        self.settings.update(settings)
+
         self._environ = environ
 
     def set(self,  # pylint: disable=too-many-arguments
