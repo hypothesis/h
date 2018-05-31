@@ -25,6 +25,7 @@ from h import models
 from h.settings import database_url
 from h._compat import text_type
 from tests.common.fixtures import es_client  # noqa: F401
+from tests.common.fixtures import es_index  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
 from tests.common.fixtures import delete_all_elasticsearch_documents  # noqa: F401
 

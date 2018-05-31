@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import elasticsearch_dsl
 import mock
 import pytest
 
@@ -36,8 +37,18 @@ def index(es_client, pyramid_request):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:
-            h.search.index.index(es_client, annotation, pyramid_request)
+            h.search.index.index_old(es_client, annotation, pyramid_request)
         es_client.conn.indices.refresh(index=es_client.index)
+    return _index
+
+
+@pytest.fixture
+def index_new(pyramid_request, es_index):
+    def _index(*annotations):
+        """Index the given annotation(s) into Elasticsearch."""
+        for annotation in annotations:
+            h.search.index.index(annotation, pyramid_request, index=es_index)
+        elasticsearch_dsl.connections.get_connection().indices.refresh(index=es_index)
     return _index
 
 
