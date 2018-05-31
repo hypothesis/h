@@ -15,7 +15,27 @@ class SettingError(Exception):
 
 
 class SettingsManager(object):
+    """
+    Configuration setting resolver.
+
+    SettingsManager resolves settings from various sources into the final typed
+    values used when the app runs. It also provides a way to check for missing
+    required settings or use of deprecated settings.
+
+    The resolved settings are available via the `settings` attribute.
+    """
+
     def __init__(self, settings=None, environ=None):
+        """
+        Initialize SettingsManager with initial setting values from config files
+        and the environment.
+
+        :param settings: Initial configuration settings read from config files
+        :type settings: Dict[str,str]
+        :param environ: Environment variable mappings
+        :type environ: Dict[str, str]
+        """
+
         if settings is None:
             settings = {}
         if environ is None:
