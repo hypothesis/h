@@ -51,33 +51,21 @@ class SettingsManager(object):
             default=None,
             deprecated_msg=None):
         """
-        Set settings[name] to envvar or default.
+        Resolve a typed value for a setting.
 
-        Environment variables override config file settings and
-        defaults: if the named envvar is in the environment then set
-        settings[name] to the value of the envvar.
+        Sets the setting `name` to the value from the highest priority source
+        and coerces the result to a typed value using `type_`. The sources
+        in priority order are: 1) Environment variables (`envvar`), 2)
+        Configuration files (passed to the constructor), 3) Defaults (`default`).
 
-        Config file settings override defauits: if the envvar isn't
-        in the environment, and the named setting is already present
-        in settings, then leave settings[name] unchanged.
-
-        Defaults are used if the setting isn't in the environment or
-        the config file: if envvar isn't in the environment and name
-        isn't in settings then set settings[name] to the given default
-        value.
-
-        If envvar isn't in the environment and name isn't in settings
-        and no default is given then leave settings[name] unset. If
-        this happens and required=True then raise SettingError.
-
-        If deprecation_msg is not None and the envvar is in the
-        environment then log a warning envvar deprecation message.
+        If `required` is `True` then an error is raised if no source specifies
+        a value for this setting.
 
         :param name: the name of the pyramid config setting
         :type name: str
         :param envvar: the environment variable name
         :type envvar: str
-        :param type_: the type to type cast the envvar or default value
+        :param type_: callable that casts a string to the desired type
         :param required: True if the the pyramid config setting is required
         :type required: bool
         :param default: a default value to use if the envvar isn't set
