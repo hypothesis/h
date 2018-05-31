@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 
-import pytest
 import logging
+import pytest
 
 from h.settings import (SettingsManager,
                         SettingError,
@@ -22,13 +22,13 @@ def test_database_url():
 
 
 class TestSettingsManager(object):
-    def test_does_not_warn_when_deprecated_setting_is_not_used(self, caplog):
+    def test_set_does_not_warn_when_deprecated_setting_is_not_used(self, caplog):
         with caplog.at_level(logging.WARN):
             settings_manager = SettingsManager({}, {})
             settings_manager.set('foo', 'FOO', deprecated_msg='what to do instead')
         assert not caplog.records
 
-    def test_sets_value_when_deprecated_setting_is_used(self):
+    def test_set_sets_value_when_deprecated_setting_is_used(self):
         settings_manager = SettingsManager(environ={'FOO': 'bar'})
         settings_manager.set('foo', 'FOO', deprecated_msg='what to do instead')
 
@@ -36,44 +36,55 @@ class TestSettingsManager(object):
 
         assert result == 'bar'
 
-    def test_warns_when_deprecated_setting_is_used(self, caplog):
+    def test_set_warns_when_deprecated_setting_is_used(self, caplog):
         with caplog.at_level(logging.WARN):
             settings_manager = SettingsManager({}, {'FOO': 'bar'})
             settings_manager.set('foo', 'FOO', deprecated_msg='what to do instead')
         assert 'what to do instead' in caplog.text
 
-    @pytest.mark.parametrize('settings,name,envvar,type_,environ,required,default,expected', (
-        # Should leave value at None when the env var in question isn't set
-        ({'foo': None}, 'foo', 'FOO', str, {}, False, None, None),
+    def test_set_uses_config_var_if_env_var_not_set(self):
+        settings_manager = SettingsManager(settings={'foo': None}, environ={})
+        settings_manager.set('foo', 'FOO')
+        assert settings_manager.settings['foo'] is None
 
-        # Should return the setting as a string when the env var is set
-        ({}, 'foo', 'FOO', str, {'FOO': 'bar'}, False, None, 'bar'),
-        ({'foo.bar': 'foo.bar'}, 'foo.bar', 'FOO', str, {'FOO': 'baz'}, False, None, 'baz'),
+    def test_set_coerces_value_to_specified_type(self):
+        environ = {'PORT': '123'}
+        settings_manager = SettingsManager(settings={'port': None}, environ=environ)
 
-        # Should coerce the result using the passed type
-        ({}, 'foo', 'FOO', asutf8, {'FOO': 'bar'}, False, None, asutf8('bar')),
-        ({}, 'app_port', 'PORT', int, {'PORT': '123'}, False, None, 123),
+        settings_manager.set('port', 'PORT', type_=int)
 
-        # Should overide the value when a default is provided
-        ({}, 'bar', 'BAR', str, {}, True, 'bar', 'bar'),
+        assert settings_manager.settings['port'] == 123
 
-        # Should not overide the value when a default is provided and the envvar is set
-        ({}, 'foo', 'FOO', str, {'FOO': 'bar'}, True, 'boo', 'bar'),
+    def test_set_uses_default(self):
+        settings_manager = SettingsManager(settings={}, environ={})
+        settings_manager.set('port', 'PORT', default=123, type_=int)
+        assert settings_manager.settings['port'] == 123
 
-        # Should not error when required and a default is already set
-        ({'foo': 'foo'}, 'foo', 'FOO', str, {}, True, None, 'foo'),
+    def test_set_prefers_env_var_to_default(self):
+        environ = {'PORT': '123'}
+        settings_manager = SettingsManager(settings={'port': None}, environ=environ)
 
-        # Should not overide default if default is already set
-        ({'boo': 'boo'}, 'boo', 'BOO', str, {}, True, 'foo', 'boo'),
+        settings_manager.set('port', 'PORT', default=456, type_=int)
 
-    ))
-    def test_env_setting(self, settings, name, envvar, type_, environ, required, default, expected):
-        settings_manager = SettingsManager(settings, environ)
-        settings_manager.set(name, envvar, type_, required, default)
+        assert settings_manager.settings['port'] == 123
 
-        result = settings[name]
+    def test_set_prefers_env_var_to_config(self):
+        environ = {'PORT': '123'}
+        settings_manager = SettingsManager(settings={'port': '456'}, environ=environ)
 
-        assert result == expected
+        settings_manager.set('port', 'PORT', type_=int)
+
+        assert settings_manager.settings['port'] == 123
+
+    def test_set_prefers_config_var_to_default(self):
+        settings_manager = SettingsManager(settings={'port': 123}, environ={})
+        settings_manager.set('port', 'PORT', default=456, type_=int)
+        assert settings_manager.settings['port'] == 123
+
+    def test_set_does_not_error_if_required_but_default_provided(self):
+        settings_manager = SettingsManager(settings={}, environ={})
+        settings_manager.set('port', 'PORT', default=123, required=True, type_=int)
+        assert settings_manager.settings['port'] == 123
 
     @pytest.mark.parametrize('name,envvar,type_,environ,default', (
         # Should raise because default isn't an int
@@ -86,7 +97,7 @@ class TestSettingsManager(object):
         with pytest.raises(SettingError):
             settings_manager.set(name, envvar, type_=type_, default=default)
 
-    def test_raises_when_not_in_env_no_default_and_required(self):
+    def test_raises_when_required_and_missing_from_all_sources(self):
         settings_manager = SettingsManager({'bar': 'val'}, {'BAR': 'bar'})
         with pytest.raises(SettingError):
             settings_manager.set('foo', 'FOO', required=True)
