@@ -35,7 +35,7 @@ def includeme(config):
     if 'es.client_poolsize' in settings:
         kwargs['maxsize'] = settings['es.client_poolsize']
 
-    connect(hosts=settings['es.url'], **kwargs)
+    connect(hosts=[settings['es.url']], **kwargs)
 
     # Connection to old (ES1.5) follows
     settings.setdefault('es.host', 'http://localhost:9200')
