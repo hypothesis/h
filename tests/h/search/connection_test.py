@@ -36,20 +36,21 @@ class TestConnection(object):
         assert connections.get_connection('foobar')
 
     def test_connect_defaults_to_default_alias(self, connections_):
-        connect()
+        connect(['http://localhost:9200'])
 
         connections_.create_connection.assert_called_once_with('default',
                                                                hosts=mock.ANY,
                                                                verify_certs=True)
 
-    def test_connect_passes_kwargs_to_create_connection(self, connections_):
+    def test_connect_passes_hosts_and_kwargs_to_create_connection(self, connections_):
+        hosts = ['http://localhost:9200']
         kwargs = {
             'foo': 'bar'
         }
-        connect(**kwargs)
+        connect(hosts, **kwargs)
 
         connections_.create_connection.assert_called_once_with('default',
-                                                               hosts=mock.ANY,
+                                                               hosts=hosts,
                                                                verify_certs=True,
                                                                **kwargs)
 

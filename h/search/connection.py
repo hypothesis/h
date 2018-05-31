@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-
 from elasticsearch_dsl import connections
 
-# TODO: Temporary hard-coding of ELASTICSEARCH_URL: this should come from settings
-ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
 
-
-# TODO: Make `hosts` a required argument
-def connect(alias='default', hosts=[ELASTICSEARCH_URL], **kwargs):
+def connect(hosts, alias='default', **kwargs):
     """
     Establish a connection to Elasticsearch through elasticsearch_dsl
 

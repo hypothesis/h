@@ -44,6 +44,7 @@ SETTINGS = [
     EnvSetting('es.client.retry_on_timeout', 'ELASTICSEARCH_CLIENT_RETRY_ON_TIMEOUT', type=asbool),
     EnvSetting('es.client.timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=float),
     EnvSetting('es.host', 'ELASTICSEARCH_HOST'),
+    EnvSetting('es.url', 'ELASTICSEARCH_URL'),
     EnvSetting('es.index', 'ELASTICSEARCH_INDEX'),
     EnvSetting('es.aws.access_key_id', 'ELASTICSEARCH_AWS_ACCESS_KEY_ID'),
     EnvSetting('es.aws.region', 'ELASTICSEARCH_AWS_REGION'),
