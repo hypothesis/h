@@ -157,7 +157,6 @@ def create_app(global_config, **settings):
     config.include('h.authz')
     config.include('h.db')
     config.include('h.session')
-    config.include('h.search')
     config.include('h.sentry')
     config.include('h.services')
     config.include('h.stats')
