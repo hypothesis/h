@@ -21,6 +21,7 @@ TEST_SETTINGS = {
     'h.app_url': 'http://example.com',
     'h.authority': 'example.com',
     'pyramid.debug_all': True,
+    'secret_key': 'notasecret',
     'sqlalchemy.url': os.environ.get('TEST_DATABASE_URL',
                                      'postgresql://postgres@localhost/htest')
 }
