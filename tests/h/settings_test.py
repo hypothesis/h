@@ -106,7 +106,8 @@ class TestSettingsManager(object):
         settings_manager = SettingsManager()
         assert settings_manager.settings == {}
 
-    def test_defaults_environ_to_osenviron(self, environ):
+    @pytest.mark.usefixtures('environ')
+    def test_defaults_environ_to_osenviron(self):
         settings_manager = SettingsManager()
         settings_manager.set('foo', 'FOO', default='bar')
         result = settings_manager.settings['foo']
