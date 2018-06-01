@@ -44,6 +44,43 @@ class TestAuthorityFilter(object):
 
 
 class TestAuthFilter(object):
+    def test_logged_out_user_can_not_see_private_annotations(self, search, Annotation):
+        Annotation()
+        Annotation()
+
+        result = search.run({})
+
+        assert not result.annotation_ids
+
+    def test_logged_out_user_can_see_shared_annotations(self, search, Annotation):
+        shared_ids = [Annotation(shared=True).id,
+                      Annotation(shared=True).id]
+
+        result = search.run({})
+
+        assert set(result.annotation_ids) == set(shared_ids)
+
+    def test_logged_in_user_can_only_see_their_private_annotations(self, search, pyramid_config, Annotation):
+        userid = "acct:bar@auth2"
+        pyramid_config.testing_securitypolicy(userid)
+        # Make a private annotation from a different user.
+        Annotation(userid="acct:foo@auth2").id
+        users_private_ids = [Annotation(userid=userid).id,
+                             Annotation(userid=userid).id]
+
+        result = search.run({})
+
+        assert set(result.annotation_ids) == set(users_private_ids)
+
+    def test_logged_in_user_can_see_shared_annotations(self, search, pyramid_config, Annotation):
+        userid = "acct:bar@auth2"
+        pyramid_config.testing_securitypolicy(userid)
+        shared_ids = [Annotation(userid="acct:foo@auth2", shared=True).id,
+                      Annotation(userid=userid, shared=True).id]
+
+        result = search.run({})
+
+        assert set(result.annotation_ids) == set(shared_ids)
 
     @pytest.fixture
     def search(self, pyramid_request):
