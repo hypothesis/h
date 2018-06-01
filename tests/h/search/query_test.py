@@ -89,11 +89,24 @@ class TestAuthFilter(object):
 
 
 class TestGroupFilter(object):
+    def test_matches_only_annotations_from_specified_group(self, search, Annotation, group):
+        Annotation(groupid='group2')
+        Annotation(groupid='group3')
+        group1_annotations = [Annotation(groupid=group.pubid).id,
+                              Annotation(groupid=group.pubid).id]
+
+        result = search.run({'group': group.pubid})
+
+        assert sorted(result.annotation_ids) == sorted(group1_annotations)
 
     @pytest.fixture
     def search(self, search):
         search.append_filter(query.GroupFilter())
         return search
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.OpenGroup(name="group1", pubid="group1id")
 
 
 class TestGroupAuthFilter(object):
