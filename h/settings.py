@@ -52,21 +52,20 @@ class SettingsManager(object):
             default=None,
             deprecated_msg=None):
         """
-        Resolve a typed value for a setting.
+        Update `setting[name]`.
 
-        Sets the setting `name` to the value from the highest priority source
-        and coerces the result to a typed value using `type_`. The sources
-        in priority order are: 1) Environment variables (`envvar`), 2)
-        Configuration files (passed to the constructor), 3) Defaults (`default`).
+        Update `setting[name]` using the value from the environment variable
+        `envvar`. If there is no such environment variable and `setting[name]`
+        is not already set, `setting[name]` is set to `default`.
 
-        If `required` is `True` then an error is raised if no source specifies
-        a value for this setting.
+        Raises `SettingsError` if a required setting is missing and has no default,
+        or coercing the setting using `type_` fails.
 
         :param name: the name of the pyramid config setting
         :type name: str
         :param envvar: the environment variable name
         :type envvar: str
-        :param type_: callable that casts a string to the desired type
+        :param type_: callable that casts the setting value to the desired type
         :param required: True if the the pyramid config setting is required
         :type required: bool
         :param default: a default value to use if the envvar isn't set
