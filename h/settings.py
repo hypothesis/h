@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 
 
 class SettingError(Exception):
+    """Exception thrown when a setting cannot be resolved."""
+
     pass
 
 
@@ -25,22 +27,20 @@ class SettingsManager(object):
     The resolved settings are available via the `settings` attribute.
     """
 
-    def __init__(self, settings={}, environ=None):
+    def __init__(self, settings=None, environ=None):
         """
-        Initialize SettingsManager with initial setting values from config files
-        and the environment.
+        Initialize with initial setting values from config files and environment.
 
         :param settings: Initial configuration settings read from config files
         :type settings: Dict[str,str]
         :param environ: Environment variable mappings
         :type environ: Dict[str, str]
         """
-
         if environ is None:
             environ = os.environ
 
         self.settings = {}
-        self.settings.update(settings)
+        self.settings.update(settings or {})
 
         self._environ = environ
 
