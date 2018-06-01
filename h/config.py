@@ -56,7 +56,7 @@ def configure(environ=None, settings=None):
     settings_manager.set('statsd.prefix', 'STATSD_PREFIX')
 
     # Configuration for Pyramid
-    settings_manager.set('secret_key', 'SECRET_KEY', type_=bytes)
+    settings_manager.set('secret_key', 'SECRET_KEY', type_=bytes, required=True)
     settings_manager.set('secret_salt', 'SECRET_SALT', type_=bytes, default=DEFAULT_SALT)
 
     # Configuration for h
@@ -110,12 +110,6 @@ def configure(environ=None, settings=None):
 
     # Get resolved settings.
     settings = settings_manager.settings
-
-    if 'secret_key' not in settings:
-        log.warn('No secret key provided: using transient key. Please '
-                 'configure the secret_key setting or the SECRET_KEY '
-                 'environment variable!')
-        settings['secret_key'] = os.urandom(64)
 
     # Set up SQLAlchemy debug logging
     if 'debug_query' in settings:
