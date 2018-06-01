@@ -9,8 +9,8 @@ from h.search import Search, query
 class TestTopLevelAnnotationsFilter(object):
 
     def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, filtered_search):
-        annotation = Annotation(shared=True)
-        reply = Annotation(references=[annotation.id], shared=True)
+        annotation = Annotation()
+        reply = Annotation(references=[annotation.id])
 
         result = filtered_search.run({})
 
@@ -25,11 +25,11 @@ class TestTopLevelAnnotationsFilter(object):
 
 class TestAuthorityFilter(object):
     def test_it_filters_out_non_matching_authorities(self, Annotation, filtered_search):
-        annotations_auth1 = [Annotation(userid="acct:foo@auth1", shared=True).id,
-                             Annotation(userid="acct:bar@auth1", shared=True).id]
+        annotations_auth1 = [Annotation(userid="acct:foo@auth1").id,
+                             Annotation(userid="acct:bar@auth1").id]
         # Make some other annotations that are of different authority.
-        Annotation(userid="acct:bat@auth2", shared=True)
-        Annotation(userid="acct:bar@auth3", shared=True)
+        Annotation(userid="acct:bat@auth2")
+        Annotation(userid="acct:bar@auth3")
 
         result = filtered_search.run({})
 
@@ -140,7 +140,7 @@ class TestAnyMatcher(object):
 
     @pytest.fixture
     def filtered_search(self, search):
-        search.append_filter(query.AnyMatcher())
+        search.append_matcher(query.AnyMatcher())
         return search
 
 
@@ -148,7 +148,7 @@ class TestTagsMatcher(object):
 
     @pytest.fixture
     def filtered_search(self, search):
-        search.append_filter(query.TagsMatcher())
+        search.append_matcher(query.TagsMatcher())
         return search
 
 
