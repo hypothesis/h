@@ -52,8 +52,7 @@ class TestIndex(object):
         # index directly and uses this ``document`` field.
         assert get(annotation.id)["document"]["web_uri"] == "https://example.com/example_article"
 
-    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, factories,
-                                                                        index, get):
+    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, factories, index, get):
         annotation = factories.Annotation.build(
             document=factories.Document.build(web_uri=None),
         )
@@ -82,8 +81,7 @@ class TestIndex(object):
 
         assert "title" not in get(annotation.id)["document"]
 
-    def test_it_notifies(self, AnnotationTransformEvent, factories, pyramid_request,
-                         notify, index, search):
+    def test_it_notifies(self, AnnotationTransformEvent, factories, pyramid_request, notify, index, search):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
 
         index(annotation)
@@ -154,9 +152,9 @@ class TestIndex(object):
         response = search.execute()
 
         user_bucket_1 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets
-            if bucket["key"] == "acct:someone@example.com")
+                             if bucket["key"] == "acct:someone@example.com")
         user_bucket_2 = next(bucket for bucket in response.aggregations.user_raw_terms.buckets
-            if bucket["key"] == "acct:Someone@example.com")
+                             if bucket["key"] == "acct:Someone@example.com")
 
         assert user_bucket_1["doc_count"] == 1
         assert user_bucket_2["doc_count"] == 1
@@ -183,10 +181,8 @@ class TestIndex(object):
 
         response = search.execute()
 
-        tag_bucket_1 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if
-            bucket["key"] == "Hello")
-        tag_bucket_2 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if
-            bucket["key"] == "hello")
+        tag_bucket_1 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if bucket["key"] == "Hello")
+        tag_bucket_2 = next(bucket for bucket in response.aggregations.tags_raw_terms.buckets if bucket["key"] == "hello")
 
         assert tag_bucket_1["doc_count"] == 1
         assert tag_bucket_2["doc_count"] == 1
@@ -348,6 +344,23 @@ class TestBatchIndexer(object):
                 es_client.conn.get(index=es_client.index,
                                    doc_type="annotation",
                                    id=id)
+
+    def test_it_does_not_index_deleted_annotations(self, batch_indexer, es_client, factories):
+        ann = factories.Annotation()
+        # create deleted annotations
+        ann_del = factories.Annotation(deleted=True)
+
+        batch_indexer.index()
+
+        result_indexed = es_client.conn.get(index=es_client.index,
+                                            doc_type="annotation",
+                                            id=ann.id)
+        assert result_indexed["_id"] == ann.id
+
+        with pytest.raises(elasticsearch1.exceptions.NotFoundError):
+            es_client.conn.get(index=es_client.index,
+                               doc_type="annotation",
+                               id=ann_del.id)
 
     def test_it_logs_indexing_status(self, caplog, batch_indexer, factories):
         num_annotations = 10
