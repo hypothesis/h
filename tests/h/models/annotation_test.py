@@ -107,6 +107,12 @@ def test_default_motivations_is_empty(factories):
     assert annotation.motivations == []
 
 
+def test_allows_empty_motivations_list(db_session, factories):
+    annotation = factories.Annotation(motivations=[])
+
+    assert annotation.motivations == []
+
+
 def test_raises_when_invalid_motivation(db_session, factories):
     with pytest.raises(ValueError):
         factories.Annotation(motivations=["invalid"])
