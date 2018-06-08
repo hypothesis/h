@@ -3,8 +3,15 @@
 from __future__ import unicode_literals
 
 import pytest
+import sqlalchemy
 
 from h.models.annotation import Annotation
+
+
+def test_motivations_can_be_set():
+    ann = Annotation(motivations=set(["tagging"]))
+
+    assert ann.motivations == set(['tagging'])
 
 
 def test_parent_id_of_direct_reply():
@@ -87,6 +94,17 @@ def test_authority(factories, userid, authority):
 
 def test_authority_when_annotation_has_no_userid():
     assert Annotation().authority is None
+
+
+def test_default_motivations_is_empty_set(factories):
+    annotation = factories.Annotation()
+
+    assert annotation.motivations == set([])
+
+
+def test_raises_when_invalid_motivation(db_session, factories):
+    with pytest.raises(sqlalchemy.exc.ProgrammingError):
+        factories.Annotation(motivations=set(["invalid"]))
 
 
 def test_setting_extras_inline_is_persisted(db_session, factories):
