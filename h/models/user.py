@@ -14,7 +14,7 @@ from h.util.user import split_user
 
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
-USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
+USERNAME_PATTERN = "(?i)^[A-Z0-9._]+$"
 EMAIL_MAX_LENGTH = 100
 DISPLAY_NAME_MAX_LENGTH = 30
 
@@ -22,9 +22,7 @@ DISPLAY_NAME_MAX_LENGTH = 30
 def _normalise_username(username):
     # We normalize usernames by dots and case in order to discourage attempts
     # at impersonation.
-    return sa.func.lower(sa.func.replace(username,
-                                         sa.text("'.'"),
-                                         sa.text("''")))
+    return sa.func.lower(sa.func.replace(username, sa.text("'.'"), sa.text("''")))
 
 
 class UsernameComparator(Comparator):
@@ -39,10 +37,13 @@ class UsernameComparator(Comparator):
     RHS of the query. This means that a query like the one above will
     correctly find a user with a username of "Juan.Wood", for example.
     """
+
     def operate(self, op, other, **kwargs):
-        return op(_normalise_username(self.__clause_element__()),
-                  _normalise_username(other),
-                  **kwargs)
+        return op(
+            _normalise_username(self.__clause_element__()),
+            _normalise_username(other),
+            **kwargs
+        )
 
 
 class UserIDComparator(Comparator):
@@ -70,6 +71,7 @@ class UserIDComparator(Comparator):
             (lower(replace(username,     '.', '')), authority    ) =
             (lower(replace('luis.silva', '.', '')), 'example.com')
     """
+
     def __init__(self, username, authority):
         self.username = username
         self.authority = authority
@@ -101,8 +103,7 @@ class UserIDComparator(Comparator):
                 # The value being compared isn't a valid userid
                 return False
             else:
-                other = sa.tuple_(_normalise_username(val['username']),
-                                  val['domain'])
+                other = sa.tuple_(_normalise_username(val["username"]), val["domain"])
         return self.__clause_element__() == other
 
     def in_(self, userids):
@@ -113,8 +114,7 @@ class UserIDComparator(Comparator):
             except ValueError:
                 continue
 
-            other = sa.tuple_(_normalise_username(val['username']),
-                              val['domain'])
+            other = sa.tuple_(_normalise_username(val["username"]), val["domain"])
             others.append(other)
 
         if not others:
@@ -124,31 +124,33 @@ class UserIDComparator(Comparator):
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     @declared_attr
     def __table_args__(cls):  # noqa: N805
         return (
             # (email, authority) must be unique
-            sa.UniqueConstraint('email', 'authority'),
+            sa.UniqueConstraint("email", "authority"),
             # (normalised username, authority) must be unique. This index is
             # also critical for making user lookups fast.
-            sa.Index('ix__user__userid',
-                     _normalise_username(cls.username),
-                     cls.authority,
-                     unique=True),
+            sa.Index(
+                "ix__user__userid",
+                _normalise_username(cls.username),
+                cls.authority,
+                unique=True,
+            ),
         )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
     #: Username as chosen by the user on registration
-    _username = sa.Column('username', sa.UnicodeText(), nullable=False)
+    _username = sa.Column("username", sa.UnicodeText(), nullable=False)
 
     #: The "authority" for this user. This represents the "namespace" in which
     #: this user lives. By default, all users are created in the namespace
     #: corresponding to `request.domain`, but this can be overridden with the
     #: `h.authority` setting.
-    authority = sa.Column('authority', sa.UnicodeText(), nullable=False)
+    authority = sa.Column("authority", sa.UnicodeText(), nullable=False)
 
     #: The display name which will be used when rendering an annotation.
     display_name = sa.Column(sa.UnicodeText())
@@ -166,29 +168,34 @@ class User(Base):
     orcid = sa.Column(sa.UnicodeText())
 
     #: Is this user an admin member?
-    admin = sa.Column(sa.Boolean,
-                      default=False,
-                      nullable=False,
-                      server_default=sa.sql.expression.false())
+    admin = sa.Column(
+        sa.Boolean,
+        default=False,
+        nullable=False,
+        server_default=sa.sql.expression.false(),
+    )
 
     #: Is this user a staff member?
-    staff = sa.Column(sa.Boolean,
-                      nullable=False,
-                      default=False,
-                      server_default=sa.sql.expression.false())
+    staff = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
 
     #: Is this user flagged as "Not (Suitable) In Public Site Areas" (AKA
     #: NIPSA). This flag is used to shadow-ban a user so their annotations
     #: don't appear to anyone but themselves.
-    nipsa = sa.Column(sa.Boolean,
-                      nullable=False,
-                      default=False,
-                      server_default=sa.sql.expression.false())
+    nipsa = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
 
-    sidebar_tutorial_dismissed = sa.Column(sa.Boolean,
-                                           default=False,
-                                           server_default=(
-                                                sa.sql.expression.false()))
+    sidebar_tutorial_dismissed = sa.Column(
+        sa.Boolean, default=False, server_default=(sa.sql.expression.false())
+    )
 
     #: A timestamp representing the last time the user accepted the privacy policy.
     #: A NULL value in this column indicates the user has never accepted a privacy policy.
@@ -208,8 +215,9 @@ class User(Base):
 
     @hybrid_property
     def userid(self):
-        return 'acct:{username}@{authority}'.format(username=self.username,
-                                                    authority=self.authority)
+        return "acct:{username}@{authority}".format(
+            username=self.username, authority=self.authority
+        )
 
     @userid.comparator
     def userid(cls):  # noqa: N805
@@ -217,18 +225,22 @@ class User(Base):
 
     email = sa.Column(sa.UnicodeText(), nullable=False)
 
-    last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
-                                default=datetime.datetime.utcnow,
-                                server_default=sa.func.now(),
-                                nullable=False)
-    registered_date = sa.Column(sa.TIMESTAMP(timezone=False),
-                                default=datetime.datetime.utcnow,
-                                server_default=sa.func.now(),
-                                nullable=False)
+    last_login_date = sa.Column(
+        sa.TIMESTAMP(timezone=False),
+        default=datetime.datetime.utcnow,
+        server_default=sa.func.now(),
+        nullable=False,
+    )
+    registered_date = sa.Column(
+        sa.TIMESTAMP(timezone=False),
+        default=datetime.datetime.utcnow,
+        server_default=sa.func.now(),
+        nullable=False,
+    )
 
     # Activation foreign key
-    activation_id = sa.Column(sa.Integer, sa.ForeignKey('activation.id'))
-    activation = sa.orm.relationship('Activation', backref='user')
+    activation_id = sa.Column(sa.Integer, sa.ForeignKey("activation.id"))
+    activation = sa.orm.relationship("Activation", backref="user")
 
     @property
     def is_activated(self):
@@ -256,51 +268,58 @@ class User(Base):
     #: upgrading their passwords and setting this column to None.
     salt = sa.Column(sa.UnicodeText(), nullable=True)
 
-    @sa.orm.validates('email')
+    @sa.orm.validates("email")
     def validate_email(self, key, email):
         if len(email) > EMAIL_MAX_LENGTH:
-            raise ValueError('email must be less than {max} characters '
-                             'long'.format(max=EMAIL_MAX_LENGTH))
+            raise ValueError(
+                "email must be less than {max} characters "
+                "long".format(max=EMAIL_MAX_LENGTH)
+            )
         return email
 
-    @sa.orm.validates('_username')
+    @sa.orm.validates("_username")
     def validate_username(self, key, username):
         if not USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH:
-            raise ValueError('username must be between {min} and {max} '
-                             'characters long'.format(
-                                 min=USERNAME_MIN_LENGTH,
-                                 max=USERNAME_MAX_LENGTH))
+            raise ValueError(
+                "username must be between {min} and {max} "
+                "characters long".format(
+                    min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH
+                )
+            )
 
         if not re.match(USERNAME_PATTERN, username):
-            raise ValueError('username must have only letters, numbers, '
-                             'periods, and underscores.')
+            raise ValueError(
+                "username must have only letters, numbers, " "periods, and underscores."
+            )
 
         return username
 
     @classmethod
     def get_by_email(cls, session, email, authority):
         """Fetch a user by email address."""
-        return session.query(cls).filter(
-            sa.func.lower(cls.email) == email.lower(),
-            cls.authority == authority,
-        ).first()
+        return (
+            session.query(cls)
+            .filter(
+                sa.func.lower(cls.email) == email.lower(), cls.authority == authority
+            )
+            .first()
+        )
 
     @classmethod
     def get_by_activation(cls, session, activation):
         """Fetch a user by activation instance."""
-        user = session.query(cls).filter(
-            cls.activation_id == activation.id
-        ).first()
+        user = session.query(cls).filter(cls.activation_id == activation.id).first()
 
         return user
 
     @classmethod
     def get_by_username(cls, session, username, authority):
         """Fetch a user by username."""
-        return session.query(cls).filter(
-            cls.username == username,
-            cls.authority == authority,
-        ).first()
+        return (
+            session.query(cls)
+            .filter(cls.username == username, cls.authority == authority)
+            .first()
+        )
 
     def __repr__(self):
-        return '<User: %s>' % self.username
+        return "<User: %s>" % self.username

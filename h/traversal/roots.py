@@ -63,11 +63,7 @@ shouldn't return model objects directly).
 from __future__ import unicode_literals
 
 
-from pyramid.security import (
-    ALL_PERMISSIONS,
-    DENY_ALL,
-    Allow,
-)
+from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow
 from sqlalchemy.orm import exc
 
 from h import storage
@@ -81,14 +77,15 @@ from h.traversal.contexts import AnnotationContext
 
 class Root(object):
     """This app's default root factory."""
+
     __acl__ = [
-        (Allow, role.Staff, 'admin_index'),
-        (Allow, role.Staff, 'admin_groups'),
-        (Allow, role.Staff, 'admin_mailer'),
-        (Allow, role.Staff, 'admin_organizations'),
-        (Allow, role.Staff, 'admin_users'),
+        (Allow, role.Staff, "admin_index"),
+        (Allow, role.Staff, "admin_groups"),
+        (Allow, role.Staff, "admin_mailer"),
+        (Allow, role.Staff, "admin_organizations"),
+        (Allow, role.Staff, "admin_users"),
         (Allow, role.Admin, ALL_PERMISSIONS),
-        DENY_ALL
+        DENY_ALL,
     ]
 
     def __init__(self, request):
@@ -97,6 +94,7 @@ class Root(object):
 
 class AnnotationRoot(object):
     """Root factory for routes whose context is an :py:class:`h.traversal.AnnotationContext`."""
+
     def __init__(self, request):
         self.request = request
 
@@ -106,7 +104,7 @@ class AnnotationRoot(object):
             raise KeyError()
 
         group_service = self.request.find_service(IGroupService)
-        links_service = self.request.find_service(name='links')
+        links_service = self.request.find_service(name="links")
         return AnnotationContext(annotation, group_service, links_service)
 
 
@@ -118,13 +116,13 @@ class AuthClientRoot(object):
     objects.
 
     """
+
     def __init__(self, request):
         self.request = request
 
     def __getitem__(self, client_id):
         try:
-            client = self.request.db.query(AuthClient) \
-                                    .filter_by(id=client_id).one()
+            client = self.request.db.query(AuthClient).filter_by(id=client_id).one()
 
             # Inherit global ACL.
             # See `pyramid.authorization.ACLAuthorizationPolicy` docs.
@@ -147,6 +145,7 @@ class OrganizationRoot(object):
     objects.
 
     """
+
     def __init__(self, request):
         self.request = request
 
@@ -170,6 +169,7 @@ class OrganizationLogoRoot(object):
     organization logos.
 
     """
+
     def __init__(self, request):
         self.request = request
         self.organization_factory = OrganizationRoot(self.request)
@@ -191,6 +191,7 @@ class GroupRoot(object):
     FIXME: This class should return GroupContext objects, not Group objects.
 
     """
+
     def __init__(self, request):
         self.request = request
 
@@ -208,9 +209,10 @@ class UserRoot(object):
     FIXME: This class should return UserContext objects, not User objects.
 
     """
+
     def __init__(self, request):
         self.request = request
-        self.user_svc = self.request.find_service(name='user')
+        self.user_svc = self.request.find_service(name="user")
 
     def __getitem__(self, username):
         user = self.user_svc.fetch(username, self.request.authority)

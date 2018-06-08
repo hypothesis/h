@@ -48,10 +48,19 @@ matrix:
       script:
         gulp lint
 
+    # Check code formatting
+    - env: ACTION=check-formatting
+      language: python
+      python: '3.6'
+      install: pip install tox
+      script:
+        make check-formatting
+
     # Lint backend code
     - env: ACTION=backend-lint
       language: python
       python: '2.7'
+      install: pip install tox
       script:
         make lint
 

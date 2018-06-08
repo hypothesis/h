@@ -17,22 +17,25 @@ LIMIT_MAX = 200
 
 
 class TestBuilder(object):
-    @pytest.mark.parametrize('offset,from_', [
-        # defaults to OFFSET_DEFAULT
-        (MISSING, OFFSET_DEFAULT),
-        # straightforward pass-through
-        (7, 7),
-        (42, 42),
-        # string values should be converted
-        ("23", 23),
-        ("82", 82),
-        # invalid values should be ignored and the default should be returned
-        ("foo",  OFFSET_DEFAULT),
-        ("",     OFFSET_DEFAULT),
-        ("   ",  OFFSET_DEFAULT),
-        ("-23",  OFFSET_DEFAULT),
-        ("32.7", OFFSET_DEFAULT),
-    ])
+    @pytest.mark.parametrize(
+        "offset,from_",
+        [
+            # defaults to OFFSET_DEFAULT
+            (MISSING, OFFSET_DEFAULT),
+            # straightforward pass-through
+            (7, 7),
+            (42, 42),
+            # string values should be converted
+            ("23", 23),
+            ("82", 82),
+            # invalid values should be ignored and the default should be returned
+            ("foo", OFFSET_DEFAULT),
+            ("", OFFSET_DEFAULT),
+            ("   ", OFFSET_DEFAULT),
+            ("-23", OFFSET_DEFAULT),
+            ("32.7", OFFSET_DEFAULT),
+        ],
+    )
     def test_offset(self, offset, from_):
         builder = query.Builder()
 
@@ -106,7 +109,7 @@ class TestBuilder(object):
 
         q = builder.build({"sort": "title"})
 
-        assert q["sort"] == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
+        assert q["sort"] == [{"title": {"ignore_unmapped": True, "order": "desc"}}]
 
     def test_order_defaults_to_desc(self):
         """'order': "desc" is returned in the q dict by default."""
@@ -152,26 +155,18 @@ class TestBuilder(object):
         q = builder.build(params)
 
         assert q["query"] == {
-            "bool": {
-                "must": [
-                    {"match": {"user": "fred"}},
-                    {"match": {"user": "bob"}}
-                ]
-            }
+            "bool": {"must": [{"match": {"user": "fred"}}, {"match": {"user": "bob"}}]}
         }
 
     def test_with_evil_arguments(self):
         builder = query.Builder()
-        params = {
-            "offset": "3foo",
-            "limit": '\' drop table annotations'
-        }
+        params = {"offset": "3foo", "limit": "' drop table annotations"}
 
         q = builder.build(params)
 
         assert q["from"] == 0
         assert q["size"] == 20
-        assert q["query"] == {'match_all': {}}
+        assert q["query"] == {"match_all": {}}
 
     def test_passes_params_to_filters(self):
         testfilter = mock.Mock()
@@ -204,7 +199,7 @@ class TestBuilder(object):
             "filtered": {
                 "filter": {"and": [{"term": {"giraffe": "nose"}}]},
                 "query": {"match_all": {}},
-            },
+            }
         }
 
     def test_passes_params_to_matchers(self):
@@ -224,9 +219,7 @@ class TestBuilder(object):
 
         q = builder.build({})
 
-        assert q["query"] == {
-            "bool": {"must": [{"match": {"giraffe": "nose"}}]},
-        }
+        assert q["query"] == {"bool": {"must": [{"match": {"giraffe": "nose"}}]}}
 
     def test_passes_params_to_aggregations(self):
         testaggregation = mock.Mock()
@@ -246,14 +239,12 @@ class TestBuilder(object):
 
         q = builder.build({})
 
-        assert q["aggs"] == {
-            "foobar": {"terms": {"field": "foo"}}
-        }
+        assert q["aggs"] == {"foobar": {"terms": {"field": "foo"}}}
 
 
 def test_authority_filter_adds_authority_term():
-    filter_ = query.AuthorityFilter(authority='partner.org')
-    assert filter_({}) == {'term': {'authority': 'partner.org'}}
+    filter_ = query.AuthorityFilter(authority="partner.org")
+    assert filter_({}) == {"term": {"authority": "partner.org"}}
 
 
 class TestAuthFilter(object):
@@ -261,16 +252,16 @@ class TestAuthFilter(object):
         request = mock.Mock(authenticated_userid=None)
         authfilter = query.AuthFilter(request)
 
-        assert authfilter({}) == {'term': {'shared': True}}
+        assert authfilter({}) == {"term": {"shared": True}}
 
     def test_authenticated(self):
-        request = mock.Mock(authenticated_userid='acct:doe@example.org')
+        request = mock.Mock(authenticated_userid="acct:doe@example.org")
         authfilter = query.AuthFilter(request)
 
         assert authfilter({}) == {
-            'or': [
-                {'term': {'shared': True}},
-                {'term': {'user_raw': 'acct:doe@example.org'}},
+            "or": [
+                {"term": {"shared": True}},
+                {"term": {"user_raw": "acct:doe@example.org"}},
             ]
         }
 
@@ -305,16 +296,16 @@ class TestGroupAuthFilter(object):
         group_service.groupids_readable_by.assert_called_once_with(mock.sentinel.user)
 
     def test_returns_terms_filter(self, pyramid_request, group_service):
-        group_service.groupids_readable_by.return_value = ['group-a', 'group-b']
+        group_service.groupids_readable_by.return_value = ["group-a", "group-b"]
 
         filter_ = query.GroupAuthFilter(pyramid_request)
         result = filter_({})
 
-        assert result == {'terms': {'group': ['group-a', 'group-b']}}
+        assert result == {"terms": {"group": ["group-a", "group-b"]}}
 
 
 class TestUriFilter(object):
-    @pytest.mark.usefixtures('uri')
+    @pytest.mark.usefixtures("uri")
     def test_inactive_when_no_uri_param(self):
         """
         When there's no `uri` parameter, return None.
@@ -346,8 +337,9 @@ class TestUriFilter(object):
         query_uris = result["terms"]["target.scope"]
 
         storage.expand_uri.assert_called_with(request.db, "http://example.com/")
-        assert sorted(query_uris) == sorted(["httpx://giraffes.com",
-                                             "httpx://elephants.com"])
+        assert sorted(query_uris) == sorted(
+            ["httpx://giraffes.com", "httpx://elephants.com"]
+        )
 
     def test_queries_multiple_uris(self, storage):
         """
@@ -372,9 +364,9 @@ class TestUriFilter(object):
 
         storage.expand_uri.assert_any_call(request.db, "http://example.com")
         storage.expand_uri.assert_any_call(request.db, "http://example.net")
-        assert sorted(query_uris) == sorted(["httpx://giraffes.com",
-                                             "httpx://elephants.com",
-                                             "httpx://tigers.com"])
+        assert sorted(query_uris) == sorted(
+            ["httpx://giraffes.com", "httpx://elephants.com", "httpx://tigers.com"]
+        )
 
     def test_accepts_url_aliases(self, storage):
         request = mock.Mock()
@@ -393,19 +385,19 @@ class TestUriFilter(object):
 
         storage.expand_uri.assert_any_call(request.db, "http://example.com")
         storage.expand_uri.assert_any_call(request.db, "http://example.net")
-        assert sorted(query_uris) == sorted(["httpx://giraffes.com",
-                                             "httpx://elephants.com",
-                                             "httpx://tigers.com"])
+        assert sorted(query_uris) == sorted(
+            ["httpx://giraffes.com", "httpx://elephants.com", "httpx://tigers.com"]
+        )
 
     @pytest.fixture
     def storage(self, patch):
-        storage = patch('h.search.query.storage')
+        storage = patch("h.search.query.storage")
         storage.expand_uri.side_effect = lambda x: [x]
         return storage
 
     @pytest.fixture
     def uri(self, patch):
-        uri = patch('h.search.query.uri')
+        uri = patch("h.search.query.uri")
         uri.normalize.side_effect = lambda x: x
         return uri
 
@@ -423,11 +415,7 @@ class TestUserFilter(object):
         params.add("user", "alice")
         params.add("user", "luke")
 
-        assert userfilter(params) == {
-            "terms": {
-                "user": ["alice", "luke"]
-            }
-        }
+        assert userfilter(params) == {"terms": {"user": ["alice", "luke"]}}
 
     def test_lowercases_value(self):
         userfilter = query.UserFilter()
@@ -457,7 +445,7 @@ class TestDeletedFilter(object):
         }
 
 
-class TestAnyMatcher():
+class TestAnyMatcher:
     def test_any_query(self):
         anymatcher = query.AnyMatcher()
 
@@ -493,58 +481,62 @@ class TestAnyMatcher():
 
         """
         params = multidict.MultiDict()
-        params.add('tag', 'foo')
-        params.add('tag', 'bar')
+        params.add("tag", "foo")
+        params.add("tag", "bar")
 
         result = query.TagsMatcher()(params)
 
-        assert list(result.keys()) == ['bool']
-        assert list(result['bool'].keys()) == ['must']
-        assert len(result['bool']['must']) == 2
-        assert {'match': {'tags': {'query': 'foo', 'operator': 'and'}}} in result['bool']['must']
-        assert {'match': {'tags': {'query': 'bar', 'operator': 'and'}}} in result['bool']['must']
+        assert list(result.keys()) == ["bool"]
+        assert list(result["bool"].keys()) == ["must"]
+        assert len(result["bool"]["must"]) == 2
+        assert {"match": {"tags": {"query": "foo", "operator": "and"}}} in result[
+            "bool"
+        ]["must"]
+        assert {"match": {"tags": {"query": "bar", "operator": "and"}}} in result[
+            "bool"
+        ]["must"]
 
     def test_with_both_tag_and_tags(self):
         """If both 'tag' and 'tags' params are used they should all become tags."""
-        params = {'tag': 'foo', 'tags': 'bar'}
+        params = {"tag": "foo", "tags": "bar"}
 
         result = query.TagsMatcher()(params)
 
-        assert list(result.keys()) == ['bool']
-        assert list(result['bool'].keys()) == ['must']
-        assert len(result['bool']['must']) == 2
-        assert {'match': {'tags': {'query': 'foo', 'operator': 'and'}}} in result['bool']['must']
-        assert {'match': {'tags': {'query': 'bar', 'operator': 'and'}}} in result['bool']['must']
+        assert list(result.keys()) == ["bool"]
+        assert list(result["bool"].keys()) == ["must"]
+        assert len(result["bool"]["must"]) == 2
+        assert {"match": {"tags": {"query": "foo", "operator": "and"}}} in result[
+            "bool"
+        ]["must"]
+        assert {"match": {"tags": {"query": "bar", "operator": "and"}}} in result[
+            "bool"
+        ]["must"]
 
 
 class TestTagsAggregations(object):
     def test_key_is_tags(self):
-        assert query.TagsAggregation().key == 'tags'
+        assert query.TagsAggregation().key == "tags"
 
     def test_elasticsearch_aggregation(self):
         agg = query.TagsAggregation()
-        assert agg({}) == {
-            'terms': {'field': 'tags_raw', 'size': 0}
-        }
+        assert agg({}) == {"terms": {"field": "tags_raw", "size": 0}}
 
     def test_it_allows_to_set_a_limit(self):
         agg = query.TagsAggregation(limit=14)
-        assert agg({}) == {
-            'terms': {'field': 'tags_raw', 'size': 14}
-        }
+        assert agg({}) == {"terms": {"field": "tags_raw", "size": 14}}
 
     def test_parse_result(self):
         agg = query.TagsAggregation()
         elasticsearch_result = {
-            'buckets': [
-                {'key': 'tag-4', 'doc_count': 42},
-                {'key': 'tag-2', 'doc_count': 28},
+            "buckets": [
+                {"key": "tag-4", "doc_count": 42},
+                {"key": "tag-2", "doc_count": 28},
             ]
         }
 
         assert agg.parse_result(elasticsearch_result) == [
-            {'tag': 'tag-4', 'count': 42},
-            {'tag': 'tag-2', 'count': 28},
+            {"tag": "tag-4", "count": 42},
+            {"tag": "tag-2", "count": 28},
         ]
 
     def test_parse_result_with_none(self):
@@ -558,32 +550,28 @@ class TestTagsAggregations(object):
 
 class TestUsersAggregation(object):
     def test_key_is_users(self):
-        assert query.UsersAggregation().key == 'users'
+        assert query.UsersAggregation().key == "users"
 
     def test_elasticsearch_aggregation(self):
         agg = query.UsersAggregation()
-        assert agg({}) == {
-            'terms': {'field': 'user_raw', 'size': 0}
-        }
+        assert agg({}) == {"terms": {"field": "user_raw", "size": 0}}
 
     def test_it_allows_to_set_a_limit(self):
         agg = query.UsersAggregation(limit=14)
-        assert agg({}) == {
-            'terms': {'field': 'user_raw', 'size': 14}
-        }
+        assert agg({}) == {"terms": {"field": "user_raw", "size": 14}}
 
     def test_parse_result(self):
         agg = query.UsersAggregation()
         elasticsearch_result = {
-            'buckets': [
-                {'key': 'alice', 'doc_count': 42},
-                {'key': 'luke', 'doc_count': 28},
+            "buckets": [
+                {"key": "alice", "doc_count": 42},
+                {"key": "luke", "doc_count": 28},
             ]
         }
 
         assert agg.parse_result(elasticsearch_result) == [
-            {'user': 'alice', 'count': 42},
-            {'user': 'luke', 'count': 28},
+            {"user": "alice", "count": 42},
+            {"user": "luke", "count": 28},
         ]
 
     def test_parse_result_with_none(self):
@@ -601,7 +589,9 @@ class TestNipsaFilter(object):
 
         assert f({}) == nipsa_filter.return_value
 
-    def test_call_passes_group_service(self, pyramid_request, nipsa_filter, group_service):
+    def test_call_passes_group_service(
+        self, pyramid_request, nipsa_filter, group_service
+    ):
         f = query.NipsaFilter(pyramid_request)
 
         f({})
@@ -617,7 +607,7 @@ class TestNipsaFilter(object):
 
     @pytest.fixture
     def nipsa_filter(self, patch):
-        return patch('h.search.query.nipsa_filter')
+        return patch("h.search.query.nipsa_filter")
 
 
 def test_nipsa_filter_filters_out_nipsad_annotations(group_service):
@@ -625,8 +615,8 @@ def test_nipsa_filter_filters_out_nipsad_annotations(group_service):
     assert query.nipsa_filter(group_service) == {
         "bool": {
             "should": [
-                {'not': {'term': {'nipsa': True}}},
-                {'exists': {'field': 'thread_ids'}},
+                {"not": {"term": {"nipsa": True}}},
+                {"exists": {"field": "thread_ids"}},
             ]
         }
     }
@@ -635,28 +625,27 @@ def test_nipsa_filter_filters_out_nipsad_annotations(group_service):
 def test_nipsa_filter_users_own_annotations_are_not_filtered(group_service, user):
     filter_ = query.nipsa_filter(group_service, user)
 
-    assert {'term': {'user': 'fred'}} in (
-        filter_["bool"]["should"])
+    assert {"term": {"user": "fred"}} in (filter_["bool"]["should"])
 
 
 def test_nipsa_filter_coerces_userid_to_lowercase(group_service, user):
-    user.userid = 'DonkeyNose'
+    user.userid = "DonkeyNose"
 
     filter_ = query.nipsa_filter(group_service, user)
 
-    assert {'term': {'user': 'donkeynose'}} in (
-        filter_["bool"]["should"])
+    assert {"term": {"user": "donkeynose"}} in (filter_["bool"]["should"])
 
 
 def test_nipsa_filter_group_annotations_not_filtered_for_creator(group_service, user):
-    group_service.groupids_created_by.return_value = ['pubid-1', 'pubid-4', 'pubid-3']
+    group_service.groupids_created_by.return_value = ["pubid-1", "pubid-4", "pubid-3"]
 
     filter_ = query.nipsa_filter(group_service, user)
 
-    assert {'terms': {'group': ['pubid-1', 'pubid-4', 'pubid-3']}} in (
-        filter_['bool']['should'])
+    assert {"terms": {"group": ["pubid-1", "pubid-4", "pubid-3"]}} in (
+        filter_["bool"]["should"]
+    )
 
 
 @pytest.fixture
 def user():
-    return mock.Mock(userid='fred')
+    return mock.Mock(userid="fred")

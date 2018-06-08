@@ -14,11 +14,12 @@ from h.services.oauth_provider import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
 from h.util.db import lru_cache_in_transaction
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
-DEFAULT_SCOPES = ['annotation:read', 'annotation:write']
+DEFAULT_SCOPES = ["annotation:read", "annotation:write"]
 
 
 class Client(object):
     """A wrapper which responds to `client_id` which oauthlib expects in `request.client`."""
+
     def __init__(self, authclient):
         self.authclient = authclient
         self.client_id = authclient.id
@@ -35,9 +36,15 @@ class OAuthValidatorService(RequestValidator):
         self.session = session
         self.user_svc = user_svc
 
-        self._cached_find_authz_code = lru_cache_in_transaction(self.session)(self._find_authz_code)
-        self._cached_find_client = lru_cache_in_transaction(self.session)(self._find_client)
-        self._cached_find_refresh_token = lru_cache_in_transaction(self.session)(self._find_refresh_token)
+        self._cached_find_authz_code = lru_cache_in_transaction(self.session)(
+            self._find_authz_code
+        )
+        self._cached_find_client = lru_cache_in_transaction(self.session)(
+            self._find_client
+        )
+        self._cached_find_refresh_token = lru_cache_in_transaction(self.session)(
+            self._find_refresh_token
+        )
 
     def authenticate_client(self, request, *args, **kwargs):
         """Authenticates a client, returns True if the client exists and its secret matches the request."""
@@ -49,7 +56,7 @@ class OAuthValidatorService(RequestValidator):
         provided_secret = request.client_secret
         if request.client_secret is None:
             # hmac.compare_digest raises when one value is `None`
-            provided_secret = ''
+            provided_secret = ""
 
         if not hmac.compare_digest(client.secret, provided_secret):
             return False
@@ -82,13 +89,17 @@ class OAuthValidatorService(RequestValidator):
             # `authenticate_client_id` will not authenticate a missing client.
             return False
 
-        if (request.grant_type == 'refresh_token' and
-                client.grant_type == AuthClientGrantType.jwt_bearer):
+        if (
+            request.grant_type == "refresh_token"
+            and client.grant_type == AuthClientGrantType.jwt_bearer
+        ):
             return False
 
-        return (client.secret is not None)
+        return client.secret is not None
 
-    def confirm_redirect_uri(self, client_id, code, redirect_uri, client, *args, **kwargs):
+    def confirm_redirect_uri(
+        self, client_id, code, redirect_uri, client, *args, **kwargs
+    ):
         """
         Validate that the redirect_uri didn't get tampered with.
 
@@ -105,7 +116,7 @@ class OAuthValidatorService(RequestValidator):
         if not redirect_uri:
             return True
 
-        return (redirect_uri == client.authclient.redirect_uri)
+        return redirect_uri == client.authclient.redirect_uri
 
     def find_authz_code(self, code):
         return self._cached_find_authz_code(code)
@@ -165,7 +176,11 @@ class OAuthValidatorService(RequestValidator):
         if token.startswith(ACCESS_TOKEN_PREFIX):
             tok = self.session.query(models.Token).filter_by(value=token).one_or_none()
         elif token.startswith(REFRESH_TOKEN_PREFIX):
-            tok = self.session.query(models.Token).filter_by(refresh_token=token).one_or_none()
+            tok = (
+                self.session.query(models.Token)
+                .filter_by(refresh_token=token)
+                .one_or_none()
+            )
 
         if tok:
             self.session.delete(tok)
@@ -175,32 +190,37 @@ class OAuthValidatorService(RequestValidator):
         if client is None:
             raise InvalidClientIdError()
 
-        codestr = code.get('code')
+        codestr = code.get("code")
         expires = utcnow() + AUTHZ_CODE_TTL
-        authzcode = models.AuthzCode(user=request.user,
-                                     authclient=client,
-                                     expires=expires,
-                                     code=codestr)
+        authzcode = models.AuthzCode(
+            user=request.user, authclient=client, expires=expires, code=codestr
+        )
         self.session.add(authzcode)
         return authzcode
 
     def save_bearer_token(self, token, request, *args, **kwargs):
         """Saves a generated bearer token for the authenticated user to the database."""
-        expires = utcnow() + datetime.timedelta(seconds=token['expires_in'])
+        expires = utcnow() + datetime.timedelta(seconds=token["expires_in"])
 
-        refresh_token_expires = utcnow() + datetime.timedelta(seconds=token['refresh_token_expires_in'])
-        del token['refresh_token_expires_in']  # We don't want to render this in the response.
+        refresh_token_expires = utcnow() + datetime.timedelta(
+            seconds=token["refresh_token_expires_in"]
+        )
+        del token[
+            "refresh_token_expires_in"
+        ]  # We don't want to render this in the response.
 
-        oauth_token = models.Token(userid=request.user.userid,
-                                   value=token['access_token'],
-                                   refresh_token=token['refresh_token'],
-                                   expires=expires,
-                                   refresh_token_expires=refresh_token_expires,
-                                   authclient=request.client.authclient)
+        oauth_token = models.Token(
+            userid=request.user.userid,
+            value=token["access_token"],
+            refresh_token=token["refresh_token"],
+            expires=expires,
+            refresh_token_expires=refresh_token_expires,
+            authclient=request.client.authclient,
+        )
         self.session.add(oauth_token)
 
         # oauthlib does not provide a proper hook for this, so we need to call it ourselves here.
-        if request.grant_type == 'refresh_token':
+        if request.grant_type == "refresh_token":
             self.invalidate_refresh_token(request.refresh_token, request)
 
         return oauth_token
@@ -209,7 +229,7 @@ class OAuthValidatorService(RequestValidator):
         """Checks if the provided client_id belongs to a valid AuthClient."""
 
         client = self.find_client(client_id)
-        return (client is not None)
+        return client is not None
 
     def validate_code(self, client_id, code, client, request, *args, **kwargs):
         """
@@ -240,22 +260,24 @@ class OAuthValidatorService(RequestValidator):
 
         return True
 
-    def validate_grant_type(self, client_id, grant_type, client, request, *args, **kwargs):
+    def validate_grant_type(
+        self, client_id, grant_type, client, request, *args, **kwargs
+    ):
         """Validates that the given client is allowed to use the give grant type."""
         if client.authclient.grant_type is None:
             return False
 
-        if grant_type == 'refresh_token':
+        if grant_type == "refresh_token":
             return True
 
-        return (grant_type == client.authclient.grant_type.value)
+        return grant_type == client.authclient.grant_type.value
 
     def validate_redirect_uri(self, client_id, redirect_uri, request, *args, **kwargs):
         """Validate that the provided ``redirect_uri`` matches the one stored on the client."""
 
         client = self.find_client(client_id)
         if client is not None:
-            return (client.redirect_uri == redirect_uri)
+            return client.redirect_uri == redirect_uri
         return False
 
     def validate_refresh_token(self, refresh_token, client, request, *args, **kwargs):
@@ -272,19 +294,27 @@ class OAuthValidatorService(RequestValidator):
         """
         token = self.find_refresh_token(refresh_token)
 
-        if not token or token.refresh_token_expired or token.authclient.id != client.client_id:
+        if (
+            not token
+            or token.refresh_token_expired
+            or token.authclient.id != client.client_id
+        ):
             return False
 
         request.user = self.user_svc.fetch(token.userid)
         return True
 
-    def validate_response_type(self, client_id, response_type, request, *args, **kwargs):
+    def validate_response_type(
+        self, client_id, response_type, request, *args, **kwargs
+    ):
         """Validate that the provided ``response_type`` matches the one stored on the client."""
 
         client = self.find_client(client_id)
         if client is not None:
-            return (client.response_type is not None and
-                    client.response_type.value == response_type)
+            return (
+                client.response_type is not None
+                and client.response_type.value == response_type
+            )
         return False
 
     def validate_scopes(self, client_id, scopes, request, *args, **kwargs):
@@ -292,15 +322,13 @@ class OAuthValidatorService(RequestValidator):
 
         # We only allow the (dummy) default scopes for now.
         default_scopes = self.get_default_scopes(client_id, request, *args, **kwargs)
-        return (scopes == default_scopes)
+        return scopes == default_scopes
 
     def _find_authz_code(self, code):
         if code is None:
             return None
 
-        return (self.session.query(models.AuthzCode)
-                            .filter_by(code=code)
-                            .one_or_none())
+        return self.session.query(models.AuthzCode).filter_by(code=code).one_or_none()
 
     def _find_client(self, id_):
         if id_ is None:
@@ -315,15 +343,17 @@ class OAuthValidatorService(RequestValidator):
         if value is None:
             return None
 
-        return (self.session.query(models.Token)
-                    .filter_by(refresh_token=value)
-                    .order_by(models.Token.created.desc())
-                    .first())
+        return (
+            self.session.query(models.Token)
+            .filter_by(refresh_token=value)
+            .order_by(models.Token.created.desc())
+            .first()
+        )
 
 
 def oauth_validator_service_factory(context, request):
     """Return a OAuthValidator instance for the passed context and request."""
-    user_svc = request.find_service(name='user')
+    user_svc = request.find_service(name="user")
     return OAuthValidatorService(request.db, user_svc)
 
 

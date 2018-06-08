@@ -27,10 +27,10 @@ class DocumentHTMLPresenter(object):
         Markup object so it won't be double-escaped.
 
         """
-        if self.uri.lower().startswith('file:///'):
-            return jinja2.escape(self.uri.split('/')[-1])
+        if self.uri.lower().startswith("file:///"):
+            return jinja2.escape(self.uri.split("/")[-1])
         else:
-            return ''
+            return ""
 
     @property
     def href(self):
@@ -51,7 +51,7 @@ class DocumentHTMLPresenter(object):
         if self.document.web_uri:
             return jinja2.escape(self.document.web_uri)
         else:
-            return ''
+            return ""
 
     @property
     def hostname_or_filename(self):
@@ -76,7 +76,7 @@ class DocumentHTMLPresenter(object):
             hostname = urlparse.urlparse(self.uri).hostname
 
             # urlparse()'s .hostname is sometimes None.
-            hostname = hostname or ''
+            hostname = hostname or ""
 
             return jinja2.escape(hostname)
 
@@ -118,7 +118,8 @@ class DocumentHTMLPresenter(object):
 
         """
         return _format_document_link(
-            self.href, self.title, self.link_text, self.hostname_or_filename)
+            self.href, self.title, self.link_text, self.hostname_or_filename
+        )
 
     @property
     def link_text(self):
@@ -143,7 +144,7 @@ class DocumentHTMLPresenter(object):
         # has no title). In those cases we want to remove the http(s):// from
         # the front and unquote it for link text.
         lower = title.lower()
-        if lower.startswith('http://') or lower.startswith('https://'):
+        if lower.startswith("http://") or lower.startswith("https://"):
             parts = urlparse.urlparse(title)
             return url_unquote(parts.netloc + parts.path)
 
@@ -180,15 +181,15 @@ class DocumentHTMLPresenter(object):
     def uri(self):
         if self.document.document_uris:
             return jinja2.escape(self.document.document_uris[0].uri)
-        return ''
+        return ""
 
     @property
     def web_uri(self):
-        via_prefix = 'https://via.hypothes.is/'
+        via_prefix = "https://via.hypothes.is/"
         web_uri = self.document.web_uri
 
         if web_uri and web_uri != via_prefix and web_uri.startswith(via_prefix):
-            web_uri = web_uri[len(via_prefix):]
+            web_uri = web_uri[len(via_prefix) :]
 
         return web_uri
 
@@ -204,16 +205,16 @@ def _format_document_link(href, title, link_text, host_or_filename):
 
     """
     if href and host_or_filename and host_or_filename in link_text:
-        host_or_filename = ''
+        host_or_filename = ""
     elif not href and title == host_or_filename:
-        title = ''
+        title = ""
 
     def truncate(content, length=55):
         """Truncate the given string to at most length chars."""
         if len(content) <= length:
             return content
         else:
-            return content[:length] + jinja2.Markup('&hellip;')
+            return content[:length] + jinja2.Markup("&hellip;")
 
     host_or_filename = truncate(host_or_filename)
     link_text = truncate(link_text)
@@ -223,14 +224,15 @@ def _format_document_link(href, title, link_text, host_or_filename):
     elif href:
         link = '<a href="{href}" title="{title}">{link_text}</a>'
     else:
-        link = '<em>Local file:</em> {title}'
+        link = "<em>Local file:</em> {title}"
         if host_or_filename:
-            link += '<br>{host_or_filename}'
+            link += "<br>{host_or_filename}"
 
     link = link.format(
         href=jinja2.escape(href),
         title=jinja2.escape(title),
         link_text=jinja2.escape(link_text),
-        host_or_filename=jinja2.escape(host_or_filename))
+        host_or_filename=jinja2.escape(host_or_filename),
+    )
 
     return jinja2.Markup(link)

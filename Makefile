@@ -63,10 +63,16 @@ test-py3: node_modules/.uptodate
 	tox -e py36 -- tests/h/
 
 .PHONY: lint
-lint: .pydeps
-	flake8 h
-	flake8 tests
-	flake8 --select FI14 --exclude 'h/cli/*,tests/h/cli/*,h/util/uri.py,h/migrations/versions/*' h tests
+lint:
+	tox -e lint
+
+.PHONY: check-formatting
+check-formatting:
+	tox -e check-formatting
+
+.PHONY: reformat
+reformat:
+	tox -e reformat
 
 ################################################################################
 

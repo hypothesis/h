@@ -8,11 +8,11 @@ from h.security import derive_key
 
 def model(request):
     session = {}
-    session['csrf'] = request.session.get_csrf_token()
-    session['userid'] = request.authenticated_userid
-    session['groups'] = _current_groups(request, request.authority)
-    session['features'] = request.feature.all()
-    session['preferences'] = _user_preferences(request.user)
+    session["csrf"] = request.session.get_csrf_token()
+    session["userid"] = request.authenticated_userid
+    session["groups"] = _current_groups(request, request.authority)
+    session["features"] = request.feature.all()
+    session["preferences"] = _user_preferences(request.user)
     return session
 
 
@@ -34,13 +34,13 @@ def profile(request, authority=None):
         authority = authority or request.authority
 
     profile = {}
-    profile['userid'] = request.authenticated_userid
-    profile['authority'] = authority
-    profile['groups'] = _current_groups(request, authority)
-    profile['features'] = request.feature.all()
-    profile['preferences'] = _user_preferences(user)
+    profile["userid"] = request.authenticated_userid
+    profile["authority"] = authority
+    profile["groups"] = _current_groups(request, authority)
+    profile["features"] = request.feature.all()
+    profile["preferences"] = _user_preferences(user)
 
-    if request.feature('api_render_user_info'):
+    if request.feature("api_render_user_info"):
         profile.update(user_info(user))
 
     return profile
@@ -56,16 +56,13 @@ def user_info(user):
     if user is None:
         return {}
 
-    return {
-        'user_info': {
-            'display_name': user.display_name,
-        }
-    }
+    return {"user_info": {"display_name": user.display_name}}
 
 
 def pop_flash(request):
-    return {k: request.session.pop_flash(k)
-            for k in ['error', 'info', 'warning', 'success']}
+    return {
+        k: request.session.pop_flash(k) for k in ["error", "info", "warning", "success"]
+    }
 
 
 def _current_groups(request, authority):
@@ -76,30 +73,28 @@ def _current_groups(request, authority):
     """
 
     user = request.user
-    svc = request.find_service(name='list_groups')
+    svc = request.find_service(name="list_groups")
     groups = svc.session_groups(user=user, authority=authority)
 
     return [_group_model(request.route_url, group) for group in groups]
 
 
 def _group_model(route_url, group):
-    model = {'name': group.name, 'id': group.pubid, 'public': group.is_public}
+    model = {"name": group.name, "id": group.pubid, "public": group.is_public}
 
     # We currently want to show URLs for secret groups, but not for open
     # groups, and not for the `__world__` group (where it doesn't make sense).
     # This is currently all non-public groups, which saves us needing to do a
     # check in here on the group's authority.
     if not group.is_public:
-        model['url'] = route_url('group_read',
-                                 pubid=group.pubid,
-                                 slug=group.slug)
+        model["url"] = route_url("group_read", pubid=group.pubid, slug=group.slug)
     return model
 
 
 def _user_preferences(user):
     preferences = {}
     if user and not user.sidebar_tutorial_dismissed:
-        preferences['show_sidebar_tutorial'] = True
+        preferences["show_sidebar_tutorial"] = True
     return preferences
 
 
@@ -109,10 +104,10 @@ def includeme(config):
     # By default, derive_key generates a 64-byte (512 bit) secret, which is the
     # correct length for SHA512-based HMAC as specified by the `hashalg`.
     factory = SignedCookieSessionFactory(
-        secret=derive_key(settings['secret_key'],
-                          settings['secret_salt'],
-                          b'h.session.cookie_secret'),
-        hashalg='sha512',
+        secret=derive_key(
+            settings["secret_key"], settings["secret_salt"], b"h.session.cookie_secret"
+        ),
+        hashalg="sha512",
         httponly=True,
         timeout=3600,
     )

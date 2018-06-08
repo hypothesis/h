@@ -33,7 +33,7 @@ class DocumentBucket(object):
             self.uri = parsed.geturl()
             self.domain = parsed.netloc
         else:
-            self.domain = _('Local file')
+            self.domain = _("Local file")
 
         if annotations:
             self.update(annotations)
@@ -66,12 +66,13 @@ class DocumentBucket(object):
 
     def __eq__(self, other):
         return (
-            self.annotations == other.annotations and
-            self.tags == other.tags and
-            self.users == other.users and
-            self.uri == other.uri and
-            self.domain == other.domain and
-            self.title == other.title)
+            self.annotations == other.annotations
+            and self.tags == other.tags
+            and self.users == other.users
+            and self.uri == other.uri
+            and self.domain == other.domain
+            and self.title == other.title
+        )
 
 
 class Timeframe(object):
@@ -127,15 +128,14 @@ class Timeframe(object):
 
     def __repr__(self):
         return '{class_} "{label}" with {n} document buckets'.format(
-            class_=self.__class__, label=self.label,
-            n=len(self.document_buckets))
+            class_=self.__class__, label=self.label, n=len(self.document_buckets)
+        )
 
 
 class TimeframeGenerator(object):
-
     def __init__(self):
         self.timeframes = [
-            Timeframe(_("Last 7 days"), utcnow() - datetime.timedelta(days=7)),
+            Timeframe(_("Last 7 days"), utcnow() - datetime.timedelta(days=7))
         ]
 
     @newrelic.agent.function_trace()
@@ -153,11 +153,10 @@ class TimeframeGenerator(object):
             if timeframe.within_cutoff(annotation):
                 return timeframe
 
-        cutoff_time = datetime.datetime(year=annotation.updated.year,
-                                        month=annotation.updated.month,
-                                        day=1)
-        timeframe = Timeframe(annotation.updated.strftime('%b %Y'),
-                              cutoff_time)
+        cutoff_time = datetime.datetime(
+            year=annotation.updated.year, month=annotation.updated.month, day=1
+        )
+        timeframe = Timeframe(annotation.updated.strftime("%b %Y"), cutoff_time)
         return timeframe
 
 

@@ -7,14 +7,10 @@ from mock import Mock, call
 
 from h.events import AnnotationEvent
 from h.models import Annotation, Document
-from h.services.delete_user import (
-    UserDeleteError,
-    delete_user_service_factory,
-)
+from h.services.delete_user import UserDeleteError, delete_user_service_factory
 
 
 class TestDeleteUserService(object):
-
     def test_delete_disassociate_group_memberships(self, factories, svc):
         user = factories.User()
 
@@ -22,29 +18,40 @@ class TestDeleteUserService(object):
 
         assert user.groups == []
 
-    def test_delete_deletes_annotations(self, api_storage, factories, pyramid_request, svc):
-        user = factories.User(username='bob')
-        anns = [factories.Annotation(userid=user.userid),
-                factories.Annotation(userid=user.userid)]
+    def test_delete_deletes_annotations(
+        self, api_storage, factories, pyramid_request, svc
+    ):
+        user = factories.User(username="bob")
+        anns = [
+            factories.Annotation(userid=user.userid),
+            factories.Annotation(userid=user.userid),
+        ]
 
         svc.delete(user)
 
-        api_storage.delete_annotation.assert_has_calls([
-            call(pyramid_request.db, anns[0].id),
-            call(pyramid_request.db, anns[1].id),
-        ], any_order=True)
+        api_storage.delete_annotation.assert_has_calls(
+            [
+                call(pyramid_request.db, anns[0].id),
+                call(pyramid_request.db, anns[1].id),
+            ],
+            any_order=True,
+        )
 
-    def test_delete_publishes_event(self, api_storage, db_session, factories,
-                                    matchers, pyramid_request, svc):
+    def test_delete_publishes_event(
+        self, api_storage, db_session, factories, matchers, pyramid_request, svc
+    ):
         user = factories.User()
         ann = factories.Annotation(userid=user.userid)
 
         svc.delete(user)
 
-        expected_event = AnnotationEvent(pyramid_request, ann.id, 'delete')
+        expected_event = AnnotationEvent(pyramid_request, ann.id, "delete")
         actual_event = pyramid_request.notify_after_commit.call_args[0][0]
-        assert (expected_event.request, expected_event.annotation_id, expected_event.action) == \
-               (actual_event.request, actual_event.annotation_id, actual_event.action)
+        assert (
+            expected_event.request,
+            expected_event.annotation_id,
+            expected_event.action,
+        ) == (actual_event.request, actual_event.annotation_id, actual_event.action)
 
     def test_delete_deletes_user(self, db_session, factories, pyramid_request, svc):
         user = factories.User()
@@ -53,7 +60,9 @@ class TestDeleteUserService(object):
 
         assert user in db_session.deleted
 
-    def test_delete_user_removes_groups_if_no_collaborators(self, db_session, group_with_two_users, pyramid_request, svc):
+    def test_delete_user_removes_groups_if_no_collaborators(
+        self, db_session, group_with_two_users, pyramid_request, svc
+    ):
         pyramid_request.db = db_session
         (group, creator, member, creator_ann, member_ann) = group_with_two_users
         db_session.delete(member_ann)
@@ -62,14 +71,18 @@ class TestDeleteUserService(object):
 
         assert group in db_session.deleted
 
-    def test_delete_user_fails_if_groups_have_collaborators(self, db_session, group_with_two_users, pyramid_request, svc):
+    def test_delete_user_fails_if_groups_have_collaborators(
+        self, db_session, group_with_two_users, pyramid_request, svc
+    ):
         pyramid_request.db = db_session
         (group, creator, member, creator_ann, member_ann) = group_with_two_users
 
         with pytest.raises(UserDeleteError):
             svc.delete(creator)
 
-    def test_delete_user_removes_only_groups_created_by_user(self, db_session, group_with_two_users, pyramid_request, svc):
+    def test_delete_user_removes_only_groups_created_by_user(
+        self, db_session, group_with_two_users, pyramid_request, svc
+    ):
         pyramid_request.db = db_session
         (group, creator, member, creator_ann, member_ann) = group_with_two_users
 
@@ -91,7 +104,7 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def api_storage(patch):
-    return patch('h.services.delete_user.storage')
+    return patch("h.services.delete_user.storage")
 
 
 @pytest.fixture
@@ -102,10 +115,11 @@ def group_with_two_users(db_session, factories):
     creator = factories.User()
     member = factories.User()
 
-    group = factories.Group(authority=creator.authority, creator=creator,
-                            members=[creator, member])
+    group = factories.Group(
+        authority=creator.authority, creator=creator, members=[creator, member]
+    )
 
-    doc = Document(web_uri='https://example.org')
+    doc = Document(web_uri="https://example.org")
     creator_ann = Annotation(userid=creator.userid, groupid=group.pubid, document=doc)
     member_ann = Annotation(userid=member.userid, groupid=group.pubid, document=doc)
 

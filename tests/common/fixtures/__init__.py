@@ -6,8 +6,4 @@ from tests.common.fixtures.elasticsearch import init_elasticsearch
 from tests.common.fixtures.elasticsearch import delete_all_elasticsearch_documents
 
 
-__all__ = (
-    "es_client",
-    "init_elasticsearch",
-    "delete_all_elasticsearch_documents",
-)
+__all__ = ("es_client", "init_elasticsearch", "delete_all_elasticsearch_documents")

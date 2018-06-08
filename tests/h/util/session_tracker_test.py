@@ -17,8 +17,9 @@ def generate_ann_id():
 
 
 class TestTracker(object):
-
-    def test_uncommitted_changes_returns_unflushed_changes(self, tracker, session, expected_changes):
+    def test_uncommitted_changes_returns_unflushed_changes(
+        self, tracker, session, expected_changes
+    ):
         added_entry, changed_entry, deleted_entry = expected_changes
 
         changes = tracker.uncommitted_changes()
@@ -27,7 +28,9 @@ class TestTracker(object):
         assert changed_entry in changes
         assert deleted_entry in changes
 
-    def test_uncommitted_changes_returns_flushed_changes(self, tracker, session, expected_changes):
+    def test_uncommitted_changes_returns_flushed_changes(
+        self, tracker, session, expected_changes
+    ):
         added_entry, changed_entry, deleted_entry = expected_changes
 
         session.flush()
@@ -37,19 +40,29 @@ class TestTracker(object):
         assert changed_entry in changes
         assert deleted_entry in changes
 
-    def test_uncommitted_changes_does_not_return_committed_changes(self, tracker, session):
+    def test_uncommitted_changes_does_not_return_committed_changes(
+        self, tracker, session
+    ):
         session.commit()
         assert tracker.uncommitted_changes() == []
 
-    def test_uncommitted_changes_does_not_return_rolled_back_changes(self, tracker, session):
+    def test_uncommitted_changes_does_not_return_rolled_back_changes(
+        self, tracker, session
+    ):
         session.rollback()
         assert tracker.uncommitted_changes() == []
 
     @pytest.fixture
     def expected_changes(self, added_ann_id, changed_ann_id, deleted_ann_id):
         added_entry = (identity_key(Annotation, (added_ann_id,)), ObjectState.ADDED)
-        changed_entry = (identity_key(Annotation, (changed_ann_id,)), ObjectState.CHANGED)
-        deleted_entry = (identity_key(Annotation, (deleted_ann_id,)), ObjectState.DELETED)
+        changed_entry = (
+            identity_key(Annotation, (changed_ann_id,)),
+            ObjectState.CHANGED,
+        )
+        deleted_entry = (
+            identity_key(Annotation, (deleted_ann_id,)),
+            ObjectState.DELETED,
+        )
 
         return (added_entry, changed_entry, deleted_entry)
 
@@ -71,17 +84,23 @@ class TestTracker(object):
         # last-committed state. We could use any model object for this purpose
         # but annotations are the primary object in the system.
 
-        doc = Document(web_uri='https://example.org')
-        changed = Annotation(id=changed_ann_id, userid='foo', groupid='wibble', document=doc)
-        deleted = Annotation(id=deleted_ann_id, userid='foo', groupid='wibble', document=doc)
+        doc = Document(web_uri="https://example.org")
+        changed = Annotation(
+            id=changed_ann_id, userid="foo", groupid="wibble", document=doc
+        )
+        deleted = Annotation(
+            id=deleted_ann_id, userid="foo", groupid="wibble", document=doc
+        )
         db_session.add(changed)
         db_session.add(deleted)
         db_session.commit()
 
-        changed.text = 'changed text'
+        changed.text = "changed text"
         db_session.delete(deleted)
 
-        added = Annotation(id=added_ann_id, userid='foo', groupid='wibble', document=doc)
+        added = Annotation(
+            id=added_ann_id, userid="foo", groupid="wibble", document=doc
+        )
         db_session.add(added)
 
         return db_session

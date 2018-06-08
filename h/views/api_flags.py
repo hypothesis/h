@@ -12,14 +12,16 @@ from h.interfaces import IGroupService
 from h.tasks import mailer
 
 
-@api_config(route_name='api.annotation_flag',
-            request_method='PUT',
-            link_name='annotation.flag',
-            description='Flag an annotation for review.',
-            effective_principals=security.Authenticated,
-            permission='read')
+@api_config(
+    route_name="api.annotation_flag",
+    request_method="PUT",
+    link_name="annotation.flag",
+    description="Flag an annotation for review.",
+    effective_principals=security.Authenticated,
+    permission="read",
+)
 def create(context, request):
-    svc = request.find_service(name='flag')
+    svc = request.find_service(name="flag")
     svc.create(request.user, context.annotation)
 
     _email_group_admin(request, context.annotation)
@@ -36,5 +38,7 @@ def _email_group_admin(request, annotation):
         incontext_link = annotation.target_uri
 
     if group.creator is not None:
-        send_params = flag_notification.generate(request, group.creator.email, incontext_link)
+        send_params = flag_notification.generate(
+            request, group.creator.email, incontext_link
+        )
         mailer.send.delay(*send_params)

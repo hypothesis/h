@@ -10,11 +10,9 @@ from h.search import query
 
 log = logging.getLogger(__name__)
 
-SearchResult = namedtuple('SearchResult', [
-    'total',
-    'annotation_ids',
-    'reply_ids',
-    'aggregations'])
+SearchResult = namedtuple(
+    "SearchResult", ["total", "annotation_ids", "reply_ids", "aggregations"]
+)
 
 
 class Search(object):
@@ -33,6 +31,7 @@ class Search(object):
         published.
     :type stats: statsd.client.StatsClient
     """
+
     def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
         self.request = request
         self.es = request.es
@@ -77,13 +76,17 @@ class Search(object):
 
         response = None
         with self._instrument():
-            response = self.es.conn.search(index=self.es.index,
-                                           doc_type=self.es.t.annotation,
-                                           _source=False,
-                                           body=self.builder.build(params))
-        total = response['hits']['total']
-        annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
-        aggregations = self._parse_aggregation_results(response.get('aggregations', None))
+            response = self.es.conn.search(
+                index=self.es.index,
+                doc_type=self.es.t.annotation,
+                _source=False,
+                body=self.builder.build(params),
+            )
+        total = response["hits"]["total"]
+        annotation_ids = [hit["_id"] for hit in response["hits"]["hits"]]
+        aggregations = self._parse_aggregation_results(
+            response.get("aggregations", None)
+        )
         return (total, annotation_ids, aggregations)
 
     def _search_replies(self, annotation_ids):
@@ -98,15 +101,18 @@ class Search(object):
                 index=self.es.index,
                 doc_type=self.es.t.annotation,
                 _source=False,
-                body=self.reply_builder.build({'limit': self._replies_limit}))
+                body=self.reply_builder.build({"limit": self._replies_limit}),
+            )
 
-        if len(response['hits']['hits']) < response['hits']['total']:
-            log.warn("The number of reply annotations exceeded the page size "
-                     "of the Elasticsearch query. We currently don't handle "
-                     "this, our search API doesn't support pagination of the "
-                     "reply set.")
+        if len(response["hits"]["hits"]) < response["hits"]["total"]:
+            log.warn(
+                "The number of reply annotations exceeded the page size "
+                "of the Elasticsearch query. We currently don't handle "
+                "this, our search API doesn't support pagination of the "
+                "reply set."
+            )
 
-        return [hit['_id'] for hit in response['hits']['hits']]
+        return [hit["_id"] for hit in response["hits"]["hits"]]
 
     def _parse_aggregation_results(self, aggregations):
         if not aggregations:
@@ -130,15 +136,15 @@ class Search(object):
             return
 
         s = self.stats.pipeline()
-        timer = s.timer('search.query').start()
+        timer = s.timer("search.query").start()
         try:
             yield
-            s.incr('search.query.success')
+            s.incr("search.query.success")
         except ConnectionTimeout:
-            s.incr('search.query.timeout')
+            s.incr("search.query.timeout")
             raise
         except:  # noqa: E722
-            s.incr('search.query.error')
+            s.incr("search.query.error")
             raise
         finally:
             timer.stop()

@@ -11,7 +11,7 @@ class FeaturePredicate(object):
         self.feature = feature
 
     def text(self):
-        return 'feature = {feature}'.format(feature=self.feature)
+        return "feature = {feature}".format(feature=self.feature)
 
     phash = text
 
@@ -20,4 +20,4 @@ class FeaturePredicate(object):
 
 
 def includeme(config):
-    config.add_view_predicate('feature', FeaturePredicate)
+    config.add_view_predicate("feature", FeaturePredicate)

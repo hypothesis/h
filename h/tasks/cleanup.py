@@ -23,33 +23,31 @@ def purge_deleted_annotations():
     streamer.
     """
     cutoff = datetime.utcnow() - timedelta(minutes=10)
-    celery.request.db.query(models.Annotation) \
-        .filter_by(deleted=True) \
-        .filter(models.Annotation.updated < cutoff) \
-        .delete()
+    celery.request.db.query(models.Annotation).filter_by(deleted=True).filter(
+        models.Annotation.updated < cutoff
+    ).delete()
 
 
 @celery.task
 def purge_expired_auth_tickets():
-    celery.request.db.query(models.AuthTicket) \
-        .filter(models.AuthTicket.expires < datetime.utcnow()) \
-        .delete()
+    celery.request.db.query(models.AuthTicket).filter(
+        models.AuthTicket.expires < datetime.utcnow()
+    ).delete()
 
 
 @celery.task
 def purge_expired_authz_codes():
-    celery.request.db.query(models.AuthzCode) \
-        .filter(models.AuthzCode.expires < datetime.utcnow()) \
-        .delete()
+    celery.request.db.query(models.AuthzCode).filter(
+        models.AuthzCode.expires < datetime.utcnow()
+    ).delete()
 
 
 @celery.task
 def purge_expired_tokens():
     now = datetime.utcnow()
-    celery.request.db.query(models.Token) \
-        .filter(models.Token.expires < now,
-                models.Token.refresh_token_expires < now) \
-        .delete()
+    celery.request.db.query(models.Token).filter(
+        models.Token.expires < now, models.Token.refresh_token_expires < now
+    ).delete()
 
 
 @celery.task

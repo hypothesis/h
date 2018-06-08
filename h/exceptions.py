@@ -24,7 +24,7 @@ class ClientUnauthorized(APIError):
     """
 
     def __init__(self):
-        message = _('Client credentials are invalid.')
+        message = _("Client credentials are invalid.")
         super(ClientUnauthorized, self).__init__(message, status_code=403)
 
 
@@ -50,5 +50,5 @@ class PayloadError(APIError):
     """
 
     def __init__(self):
-        message = _('Expected a valid JSON payload, but none was found!')
+        message = _("Expected a valid JSON payload, but none was found!")
         super(PayloadError, self).__init__(message, status_code=400)

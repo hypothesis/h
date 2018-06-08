@@ -17,7 +17,7 @@ from h.schemas import ValidationError
 from h.util.view import json_view
 
 
-@json_view(route_name='api.users', request_method='POST')
+@json_view(route_name="api.users", request_method="POST")
 def create(request):
     """
     Create a user.
@@ -33,17 +33,17 @@ def create(request):
     appstruct = schema.validate(_json_payload(request))
 
     _check_authority(client, appstruct)
-    appstruct['authority'] = client.authority
+    appstruct["authority"] = client.authority
 
     _check_existing_user(request.db, appstruct)
 
-    user_signup_service = request.find_service(name='user_signup')
+    user_signup_service = request.find_service(name="user_signup")
     user = user_signup_service.signup(require_activation=False, **appstruct)
     presenter = UserJSONPresenter(user)
     return presenter.asdict()
 
 
-@json_view(route_name='api.user', request_method='PATCH')
+@json_view(route_name="api.user", request_method="PATCH")
 def update(request):
     """
     Update a user.
@@ -53,9 +53,8 @@ def update(request):
     """
     client = _request_client(request)
 
-    user_svc = request.find_service(name='user')
-    user = user_svc.fetch(request.matchdict['username'],
-                          client.authority)
+    user_svc = request.find_service(name="user")
+    user = user_svc.fetch(request.matchdict["username"], client.authority)
     if user is None:
         raise HTTPNotFound()
 
@@ -69,7 +68,7 @@ def update(request):
 
 
 def _check_authority(client, data):
-    authority = data.get('authority')
+    authority = data.get("authority")
     if client.authority != authority:
         msg = "'authority' does not match authenticated client"
         raise ValidationError(msg)
@@ -78,20 +77,18 @@ def _check_authority(client, data):
 def _check_existing_user(session, data):
     errors = []
 
-    existing_user = models.User.get_by_email(session,
-                                             data['email'],
-                                             data['authority'])
+    existing_user = models.User.get_by_email(session, data["email"], data["authority"])
     if existing_user:
-        errors.append("user with email address %s already exists" % data['email'])
+        errors.append("user with email address %s already exists" % data["email"])
 
-    existing_user = models.User.get_by_username(session,
-                                                data['username'],
-                                                data['authority'])
+    existing_user = models.User.get_by_username(
+        session, data["username"], data["authority"]
+    )
     if existing_user:
-        errors.append("user with username %s already exists" % data['username'])
+        errors.append("user with username %s already exists" % data["username"])
 
     if errors:
-        raise ValidationError(', '.join(errors))
+        raise ValidationError(", ".join(errors))
 
 
 def _request_client(request):
@@ -113,7 +110,9 @@ def _request_client(request):
         raise ClientUnauthorized()
     if client.secret is None:  # client is not confidential
         raise ClientUnauthorized()
-    if client.grant_type != GrantType.client_credentials:  # client not allowed to create users
+    if (
+        client.grant_type != GrantType.client_credentials
+    ):  # client not allowed to create users
         raise ClientUnauthorized()
 
     if not hmac.compare_digest(client.secret, client_secret):
@@ -123,10 +122,10 @@ def _request_client(request):
 
 
 def _update_user(user, appstruct):
-    if 'email' in appstruct:
-        user.email = appstruct['email']
-    if 'display_name' in appstruct:
-        user.display_name = appstruct['display_name']
+    if "email" in appstruct:
+        user.email = appstruct["email"]
+    if "display_name" in appstruct:
+        user.display_name = appstruct["display_name"]
 
 
 def _json_payload(request):

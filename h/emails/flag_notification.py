@@ -20,17 +20,15 @@ def generate(request, email, incontext_link):
 
     :returns: a 4-element tuple containing: recipients, subject, text, html
     """
-    context = {
-        'incontext_link': incontext_link,
-    }
+    context = {"incontext_link": incontext_link}
 
-    subject = _('An annotation has been flagged')
+    subject = _("An annotation has been flagged")
 
-    text = render('h:templates/emails/flag_notification.txt.jinja2',
-                  context,
-                  request=request)
-    html = render('h:templates/emails/flag_notification.html.jinja2',
-                  context,
-                  request=request)
+    text = render(
+        "h:templates/emails/flag_notification.txt.jinja2", context, request=request
+    )
+    html = render(
+        "h:templates/emails/flag_notification.html.jinja2", context, request=request
+    )
 
     return [email], subject, text, html

@@ -10,13 +10,11 @@ from .base import FAKER, ModelFactory
 
 
 class Document(ModelFactory):
-
     class Meta:
         model = models.Document
 
 
 class DocumentMeta(ModelFactory):
-
     class Meta:
         model = models.DocumentMeta
 
@@ -24,24 +22,24 @@ class DocumentMeta(ModelFactory):
     # db will crash. We use a sequence instead of something like FAKER.url()
     # for claimant here so that never happens (unless you pass in your own
     # claimant).
-    claimant = factory.Sequence(lambda n: 'http://example.com/document_' + str(n) + '/')
+    claimant = factory.Sequence(lambda n: "http://example.com/document_" + str(n) + "/")
 
-    type = factory.Iterator([
-        'title', 'twitter.url.main_url', 'twitter.title', 'favicon'])
+    type = factory.Iterator(
+        ["title", "twitter.url.main_url", "twitter.title", "favicon"]
+    )
     document = factory.SubFactory(Document)
 
     @factory.lazy_attribute
     def value(self):
-        if self.type == 'twitter.url.main_url':
+        if self.type == "twitter.url.main_url":
             return [FAKER.url()]
-        elif self.type == 'favicon':
+        elif self.type == "favicon":
             return [FAKER.image_url()]
         else:
             return [FAKER.bs()]
 
 
 class DocumentURI(ModelFactory):
-
     class Meta:
         model = models.DocumentURI
 
@@ -49,9 +47,11 @@ class DocumentURI(ModelFactory):
     # content_type to the db will crash. We use a sequence instead of something
     # like FAKER.url() for claimant here so that never happens (unless you pass
     # in your own claimant).
-    claimant = factory.Sequence(lambda n: 'http://example.com/document_' + str(n) + '/')
+    claimant = factory.Sequence(lambda n: "http://example.com/document_" + str(n) + "/")
 
     uri = factory.LazyAttribute(lambda obj: obj.claimant)
-    type = factory.Iterator(['rel-alternate', 'rel-canonical', 'highwire-pdf', 'dc-doi'])
-    content_type = factory.Iterator(['text/html', 'application/pdf', 'text/plain'])
+    type = factory.Iterator(
+        ["rel-alternate", "rel-canonical", "highwire-pdf", "dc-doi"]
+    )
+    content_type = factory.Iterator(["text/html", "application/pdf", "text/plain"])
     document = factory.SubFactory(Document)

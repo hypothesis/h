@@ -26,21 +26,28 @@ def render_atom(request, annotations, atom_url, html_url, title, subtitle):
     :rtype: pyramid.response.Response
 
     """
+
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
-        return request.route_url('annotation', id=annotation.id)
+        return request.route_url("annotation", id=annotation.id)
 
     def annotation_api_url(annotation):
         """Return the JSON API URL for the given annotation."""
-        return request.route_url('api.annotation', id=annotation.id)
+        return request.route_url("api.annotation", id=annotation.id)
 
     feed = atom.feed_from_annotations(
-        annotations=annotations, atom_url=atom_url,
-        annotation_url=annotation_url, annotation_api_url=annotation_api_url,
-        html_url=html_url, title=title, subtitle=subtitle)
+        annotations=annotations,
+        atom_url=atom_url,
+        annotation_url=annotation_url,
+        annotation_api_url=annotation_api_url,
+        html_url=html_url,
+        title=title,
+        subtitle=subtitle,
+    )
 
     response = renderers.render_to_response(
-        'h:templates/atom.xml.jinja2', {"feed": feed}, request=request)
+        "h:templates/atom.xml.jinja2", {"feed": feed}, request=request
+    )
     response.content_type = "application/atom+xml"
     return response
 
@@ -66,16 +73,22 @@ def render_rss(request, annotations, rss_url, html_url, title, description):
     :rtype: pyramid.response.Response
 
     """
+
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
-        return request.route_url('annotation', id=annotation.id)
+        return request.route_url("annotation", id=annotation.id)
 
     feed = rss.feed_from_annotations(
-        annotations=annotations, annotation_url=annotation_url,
-        rss_url=rss_url, html_url=html_url, title=title,
-        description=description)
+        annotations=annotations,
+        annotation_url=annotation_url,
+        rss_url=rss_url,
+        html_url=html_url,
+        title=title,
+        description=description,
+    )
 
     response = renderers.render_to_response(
-        'h:templates/rss.xml.jinja2', {"feed": feed}, request=request)
-    response.content_type = 'application/rss+xml'
+        "h:templates/rss.xml.jinja2", {"feed": feed}, request=request
+    )
+    response.content_type = "application/rss+xml"
     return response

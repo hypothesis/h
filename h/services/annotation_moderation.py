@@ -34,8 +34,9 @@ class AnnotationModerationService(object):
         if not annotation_ids:
             return set()
 
-        query = self.session.query(models.AnnotationModeration.annotation_id) \
-                            .filter(models.AnnotationModeration.annotation_id.in_(annotation_ids))
+        query = self.session.query(models.AnnotationModeration.annotation_id).filter(
+            models.AnnotationModeration.annotation_id.in_(annotation_ids)
+        )
 
         return set([m.annotation_id for m in query])
 

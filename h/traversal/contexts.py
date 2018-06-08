@@ -57,11 +57,11 @@ class AnnotationContext(object):
         acl = []
         if self.annotation.shared:
             for principal in self._group_principals(self.group):
-                acl.append((Allow, principal, 'read'))
+                acl.append((Allow, principal, "read"))
         else:
-            acl.append((Allow, self.annotation.userid, 'read'))
+            acl.append((Allow, self.annotation.userid, "read"))
 
-        for action in ['admin', 'update', 'delete']:
+        for action in ["admin", "update", "delete"]:
             acl.append((Allow, self.annotation.userid, action))
 
         # If we haven't explicitly authorized it, it's not allowed.
@@ -73,7 +73,7 @@ class AnnotationContext(object):
     def _group_principals(group):
         if group is None:
             return []
-        return principals_allowed_by_permission(group, 'read')
+        return principals_allowed_by_permission(group, "read")
 
 
 class OrganizationContext(object):
@@ -100,8 +100,9 @@ class OrganizationContext(object):
     @property
     def logo(self):
         if self.organization.logo:
-            return self.request.route_url('organization_logo',
-                                          pubid=self.organization.pubid)
+            return self.request.route_url(
+                "organization_logo", pubid=self.organization.pubid
+            )
         return None
 
 
@@ -111,7 +112,7 @@ class GroupContext(object):
     def __init__(self, group, request):
         self.request = request
         self.group = group
-        self.links_service = self.request.find_service(name='group_links')
+        self.links_service = self.request.find_service(name="group_links")
 
     @property
     def id(self):

@@ -46,14 +46,14 @@ def auth_token(request):
     :rtype: h.models.Token or None
     """
     try:
-        header = request.headers['Authorization']
+        header = request.headers["Authorization"]
     except KeyError:
         return None
 
-    if not header.startswith('Bearer '):
+    if not header.startswith("Bearer "):
         return None
 
-    token = text_type(header[len('Bearer '):]).strip()
+    token = text_type(header[len("Bearer ") :]).strip()
     # If the token is empty at this point, it is clearly invalid and we
     # should reject it.
     if not token:

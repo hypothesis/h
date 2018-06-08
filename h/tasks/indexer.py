@@ -19,8 +19,9 @@ def add_annotation(id_):
         # as well.
         future_index = _current_reindex_new_name(celery.request)
         if future_index is not None:
-            index(celery.request.es, annotation, celery.request,
-                  target_index=future_index)
+            index(
+                celery.request.es, annotation, celery.request, target_index=future_index
+            )
 
         if annotation.is_reply:
             add_annotation.delay(annotation.thread_root_id)
@@ -39,16 +40,19 @@ def delete_annotation(id_):
 
 @celery.task
 def reindex_user_annotations(userid):
-    ids = [a.id for a in celery.request.db.query(models.Annotation.id).filter_by(userid=userid)]
+    ids = [
+        a.id
+        for a in celery.request.db.query(models.Annotation.id).filter_by(userid=userid)
+    ]
 
     indexer = BatchIndexer(celery.request.db, celery.request.es, celery.request)
     errored = indexer.index(ids)
     if errored:
-        log.warning('Failed to re-index annotations %s', errored)
+        log.warning("Failed to re-index annotations %s", errored)
 
 
 def _current_reindex_new_name(request):
-    settings = celery.request.find_service(name='settings')
+    settings = celery.request.find_service(name="settings")
     new_index = settings.get(SETTING_NEW_INDEX)
 
     return new_index

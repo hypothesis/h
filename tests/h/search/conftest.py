@@ -24,10 +24,12 @@ def Annotation(factories, index):
     strategy and automatically indexes the annotation into the test
     Elasticsearch index.
     """
+
     def _Annotation(**kwargs):
         annotation = factories.Annotation.build(**kwargs)
         index(annotation)
         return annotation
+
     return _Annotation
 
 
@@ -38,6 +40,7 @@ def index(es_client, pyramid_request):
         for annotation in annotations:
             h.search.index.index(es_client, annotation, pyramid_request)
         es_client.conn.indices.refresh(index=es_client.index)
+
     return _index
 
 

@@ -11,18 +11,18 @@ from h.search import index
 from h.util import uri
 
 
-class Window(namedtuple('Window', ['start', 'end'])):
+class Window(namedtuple("Window", ["start", "end"])):
     pass
 
 
-@click.command('normalize-uris')
+@click.command("normalize-uris")
 @click.pass_context
 def normalize_uris(ctx):
     """
     Normalize all URIs in the database and reindex the changed annotations.
     """
 
-    request = ctx.obj['bootstrap']()
+    request = ctx.obj["bootstrap"]()
 
     normalize_document_uris(request)
     normalize_document_meta(request)
@@ -64,9 +64,11 @@ def normalize_annotations(request):
 
 
 def _normalize_document_uris_window(session, window):
-    query = session.query(models.DocumentURI) \
-        .filter(models.DocumentURI.updated.between(window.start, window.end)) \
+    query = (
+        session.query(models.DocumentURI)
+        .filter(models.DocumentURI.updated.between(window.start, window.end))
         .order_by(models.DocumentURI.updated.asc())
+    )
 
     for docuri in query:
         documents = models.Document.find_by_uris(session, [docuri.uri])
@@ -79,7 +81,8 @@ def _normalize_document_uris_window(session, window):
             models.DocumentURI.claimant_normalized == uri.normalize(docuri.claimant),
             models.DocumentURI.uri_normalized == uri.normalize(docuri.uri),
             models.DocumentURI.type == docuri.type,
-            models.DocumentURI.content_type == docuri.content_type)
+            models.DocumentURI.content_type == docuri.content_type,
+        )
 
         if existing.count() > 0:
             session.delete(docuri)
@@ -91,15 +94,18 @@ def _normalize_document_uris_window(session, window):
 
 
 def _normalize_document_meta_window(session, window):
-    query = session.query(models.DocumentMeta) \
-        .filter(models.DocumentMeta.updated.between(window.start, window.end)) \
+    query = (
+        session.query(models.DocumentMeta)
+        .filter(models.DocumentMeta.updated.between(window.start, window.end))
         .order_by(models.DocumentMeta.updated.asc())
+    )
 
     for docmeta in query:
         existing = session.query(models.DocumentMeta).filter(
             models.DocumentMeta.id != docmeta.id,
             models.DocumentMeta.claimant_normalized == uri.normalize(docmeta.claimant),
-            models.DocumentMeta.type == docmeta.type)
+            models.DocumentMeta.type == docmeta.type,
+        )
 
         if existing.count() > 0:
             session.delete(docmeta)
@@ -110,9 +116,11 @@ def _normalize_document_meta_window(session, window):
 
 
 def _normalize_annotations_window(session, window):
-    query = session.query(models.Annotation) \
-        .filter(models.Annotation.updated.between(window.start, window.end)) \
+    query = (
+        session.query(models.Annotation)
+        .filter(models.Annotation.updated.between(window.start, window.end))
         .order_by(models.Annotation.updated.asc())
+    )
 
     ids = set()
     for a in query:
@@ -134,13 +142,19 @@ def _reindex_annotations(request, ids):
 
 
 def _fetch_windows(session, column, chunksize=100):
-    updated = session.query(column). \
-        execution_options(stream_results=True). \
-        order_by(column.desc()).all()
+    updated = (
+        session.query(column)
+        .execution_options(stream_results=True)
+        .order_by(column.desc())
+        .all()
+    )
 
     count = len(updated)
-    windows = [Window(start=updated[min(x+chunksize, count)-1].updated,
-                      end=updated[x].updated)
-               for x in xrange(0, count, chunksize)]
+    windows = [
+        Window(
+            start=updated[min(x + chunksize, count) - 1].updated, end=updated[x].updated
+        )
+        for x in xrange(0, count, chunksize)
+    ]
 
     return windows

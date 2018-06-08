@@ -20,7 +20,7 @@ def unique_username(obj):
     way would result in intermittent database errors when running the tests.
 
     """
-    return obj.non_unique_username + '__' + obj.count
+    return obj.non_unique_username + "__" + obj.count
 
 
 def unique_email(obj):
@@ -33,24 +33,23 @@ def unique_email(obj):
     way would result in intermittent database errors when running the tests.
 
     """
-    return obj.username + '@' + obj.email_domain
+    return obj.username + "@" + obj.email_domain
 
 
 class User(ModelFactory):
-
     class Meta:
         model = models.User
 
     class Params:
         inactive = factory.Trait(activation=factory.SubFactory(Activation))
         # A count that's appended to non-unique usernames to make them unique.
-        count = factory.Sequence(lambda n: '%d' % n)
+        count = factory.Sequence(lambda n: "%d" % n)
         # The non-unique part of the generated username.
-        non_unique_username = factory.Faker('user_name')
+        non_unique_username = factory.Faker("user_name")
         # The domain (following ``@``) part of the generated email address.
-        email_domain = factory.Faker('free_email_domain')
+        email_domain = factory.Faker("free_email_domain")
 
-    authority = 'example.com'
+    authority = "example.com"
     username = factory.LazyAttribute(unique_username)
     email = factory.LazyAttribute(unique_email)
-    registered_date = factory.Faker('date_time_this_decade')
+    registered_date = factory.Faker("date_time_this_decade")

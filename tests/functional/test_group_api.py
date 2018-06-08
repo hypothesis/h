@@ -7,15 +7,13 @@ import pytest
 
 @pytest.mark.functional
 class TestGroupAPI(object):
-
     def test_leave_group(self, app, group, group_member_with_token):
         """Test a request to leave a group through the API."""
 
         group_member, token = group_member_with_token
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
 
-        app.delete('/api/groups/{}/members/me'.format(group.pubid),
-                   headers=headers)
+        app.delete("/api/groups/{}/members/me".format(group.pubid), headers=headers)
 
         # We currently have no elegant way to check this via the API, but in a
         # future version we should be able to make a GET request here for the

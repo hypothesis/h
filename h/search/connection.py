@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from elasticsearch_dsl import connections
 
 
-def connect(hosts, alias='default', **kwargs):
+def connect(hosts, alias="default", **kwargs):
     """
     Establish a connection to Elasticsearch through elasticsearch_dsl
 
@@ -24,7 +24,4 @@ def connect(hosts, alias='default', **kwargs):
                   other than `default`
     :param hosts: List of host(s) (e.g. 'http://foo.com:9200') to connect to
     """
-    connections.create_connection(alias,
-                                  hosts=hosts,
-                                  verify_certs=True,
-                                  **kwargs)
+    connections.create_connection(alias, hosts=hosts, verify_certs=True, **kwargs)

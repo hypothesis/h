@@ -45,12 +45,13 @@ def _feed_item_from_annotation(annotation, annotation_url):
         "description": annotation.description,
         "pubDate": _pubdate_string(annotation.created),
         "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
-        "link": annotation_url(annotation)
+        "link": annotation_url(annotation),
     }
 
 
-def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
-                          title, description):
+def feed_from_annotations(
+    annotations, annotation_url, rss_url, html_url, title, description
+):
     """Return an RSS feed for the given list of annotations.
 
     :returns: A logical representation of an RSS feed as a Python dict
@@ -62,18 +63,19 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
     annotations = [presenters.AnnotationHTMLPresenter(a) for a in annotations]
 
     feed = {
-        'title': title,
-        'rss_url': rss_url,
-        'html_url': html_url,
-        'description': description,
+        "title": title,
+        "rss_url": rss_url,
+        "html_url": html_url,
+        "description": description,
         # This is called entries not items so as not to clash with the dict's
         # standard .items() method.
-        'entries': [
+        "entries": [
             _feed_item_from_annotation(annotation, annotation_url)
-            for annotation in annotations]
+            for annotation in annotations
+        ],
     }
 
     if annotations:
-        feed['pubDate'] = _pubdate_string(annotations[0].updated)
+        feed["pubDate"] = _pubdate_string(annotations[0].updated)
 
     return feed

@@ -11,35 +11,35 @@ def test_api_notfound_view(pyramid_request):
     result = views.api_notfound(pyramid_request)
 
     assert pyramid_request.response.status_int == 404
-    assert result['status'] == 'failure'
-    assert result['reason']
+    assert result["status"] == "failure"
+    assert result["reason"]
 
 
 def test_api_error_view(pyramid_request):
-    context = APIError(message='asplosions!', status_code=418)
+    context = APIError(message="asplosions!", status_code=418)
 
     result = views.api_error(context, pyramid_request)
 
     assert pyramid_request.response.status_code == 418
-    assert result['status'] == 'failure'
-    assert result['reason'] == 'asplosions!'
+    assert result["status"] == "failure"
+    assert result["reason"] == "asplosions!"
 
 
 def test_api_validation_error(pyramid_request):
-    context = ValidationError('missing required userid')
+    context = ValidationError("missing required userid")
 
     result = views.api_validation_error(context, pyramid_request)
 
     assert pyramid_request.response.status_code == 400
-    assert result['status'] == 'failure'
-    assert result['reason'] == 'missing required userid'
+    assert result["status"] == "failure"
+    assert result["reason"] == "missing required userid"
 
 
 def test_json_error_view(patch, pyramid_request):
-    handle_exception = patch('h.views.api_exceptions.handle_exception')
+    handle_exception = patch("h.views.api_exceptions.handle_exception")
 
     result = views.json_error(pyramid_request)
 
     handle_exception.assert_called_once_with(pyramid_request)
-    assert result['status'] == 'failure'
-    assert result['reason']
+    assert result["status"] == "failure"
+    assert result["reason"]

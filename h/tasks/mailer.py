@@ -13,7 +13,7 @@ import pyramid_mailer.message
 
 from h.celery import celery, get_task_logger
 
-__all__ = ('send',)
+__all__ = ("send",)
 
 log = get_task_logger(__name__)
 
@@ -32,10 +32,9 @@ def send(self, recipients, subject, body, html=None):
     :param body: the body of the email
     :type body: unicode
     """
-    email = pyramid_mailer.message.Message(subject=subject,
-                                           recipients=recipients,
-                                           body=body,
-                                           html=html)
+    email = pyramid_mailer.message.Message(
+        subject=subject, recipients=recipients, body=body, html=html
+    )
     mailer = pyramid_mailer.get_mailer(celery.request)
     try:
         if celery.request.debug:

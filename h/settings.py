@@ -44,13 +44,15 @@ class SettingsManager(object):
 
         self._environ = environ
 
-    def set(self,  # pylint: disable=too-many-arguments
-            name,
-            envvar,
-            type_=str,
-            required=False,
-            default=None,
-            deprecated_msg=None):
+    def set(
+        self,  # pylint: disable=too-many-arguments
+        name,
+        envvar,
+        type_=str,
+        required=False,
+        default=None,
+        deprecated_msg=None,
+    ):
         """
         Update `setting[name]`.
 
@@ -78,9 +80,7 @@ class SettingsManager(object):
         cast_message = None
         if envvar in self._environ:
             if deprecated_msg:
-                log.warn('use of envvar %s is deprecated: %s',
-                         envvar,
-                         deprecated_msg)
+                log.warn("use of envvar %s is deprecated: %s", envvar, deprecated_msg)
             val = self._environ[envvar]
             cast_message = "environment variable {}={!r}".format(envvar, val)
         elif default and name not in self.settings:
@@ -88,15 +88,16 @@ class SettingsManager(object):
             cast_message = "{}'s default {!r}".format(name, val)
         elif required and name not in self.settings:
             raise SettingError(
-                'error parsing environment variable '
-                '{varname} not found'.format(varname=envvar))
+                "error parsing environment variable "
+                "{varname} not found".format(varname=envvar)
+            )
         if val:
             try:
                 self.settings[name] = type_(val)
             except ValueError:
-                raise SettingError('error casting {} as {}'.format(
-                                       cast_message,
-                                       type_.__name__))
+                raise SettingError(
+                    "error casting {} as {}".format(cast_message, type_.__name__)
+                )
 
 
 def database_url(url):
@@ -104,6 +105,6 @@ def database_url(url):
     # Heroku database URLs start with postgres://, which is an old and
     # deprecated dialect as far as sqlalchemy is concerned. We upgrade this
     # to postgresql+psycopg2 by default.
-    if url.startswith('postgres://'):
-        url = 'postgresql+psycopg2://' + url[len('postgres://'):]
+    if url.startswith("postgres://"):
+        url = "postgresql+psycopg2://" + url[len("postgres://") :]
     return url

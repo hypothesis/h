@@ -13,5 +13,5 @@ class GroupScope(ModelFactory):
     class Meta:
         model = models.GroupScope
 
-    origin = factory.Faker('url')
-    group = factory.SubFactory('tests.common.factories.OpenGroup')
+    origin = factory.Faker("url")
+    group = factory.SubFactory("tests.common.factories.OpenGroup")

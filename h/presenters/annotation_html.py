@@ -22,8 +22,8 @@ class AnnotationHTMLPresenter(object):
     def _get_selection(self):
         selectors = self.annotation.target_selectors
         for selector in selectors:
-            if 'exact' in selector:
-                return selector['exact']
+            if "exact" in selector:
+                return selector["exact"]
 
     @property
     def uri(self):
@@ -40,7 +40,7 @@ class AnnotationHTMLPresenter(object):
         """
         if self.annotation.text_rendered:
             return jinja2.Markup(self.annotation.text_rendered)
-        return jinja2.Markup('')
+        return jinja2.Markup("")
 
     @property
     def quote(self):
@@ -49,7 +49,7 @@ class AnnotationHTMLPresenter(object):
         if selection:
             return jinja2.escape(selection)
 
-        return ''
+        return ""
 
     @property
     def description(self):
@@ -61,18 +61,19 @@ class AnnotationHTMLPresenter(object):
 
         """
 
-        description = ''
+        description = ""
 
         selection = self._get_selection()
         if selection:
             selection = jinja2.escape(selection)
-            description += '&lt;blockquote&gt;{selection}&lt;/blockquote&gt;'.format(
-                selection=selection)
+            description += "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
+                selection=selection
+            )
 
         text = self.annotation.text
         if text:
             text = jinja2.escape(text)
-            description += '{text}'.format(text=text)
+            description += "{text}".format(text=text)
 
         return description
 
@@ -85,7 +86,7 @@ class AnnotationHTMLPresenter(object):
 
         """
         created_string = jinja2.escape(self.annotation.created)
-        return parser.parse(created_string).strftime('%Y-%m-%d')
+        return parser.parse(created_string).strftime("%Y-%m-%d")
 
     @property
     def document_link(self):
@@ -93,7 +94,7 @@ class AnnotationHTMLPresenter(object):
         if self.document:
             return self.document.link
         else:
-            return ''
+            return ""
 
     @property
     def filename(self):
@@ -101,7 +102,7 @@ class AnnotationHTMLPresenter(object):
         if self.document:
             return self.document.filename
         else:
-            return ''
+            return ""
 
     @property
     def hostname_or_filename(self):
@@ -109,7 +110,7 @@ class AnnotationHTMLPresenter(object):
         if self.document:
             return self.document.hostname_or_filename
         else:
-            return ''
+            return ""
 
     @property
     def href(self):
@@ -117,7 +118,7 @@ class AnnotationHTMLPresenter(object):
         if self.document:
             return self.document.href
         else:
-            return ''
+            return ""
 
     @property
     def link_text(self):
@@ -125,7 +126,7 @@ class AnnotationHTMLPresenter(object):
         if self.document:
             return self.document.link_text
         else:
-            return ''
+            return ""
 
     @property
     def title(self):
@@ -133,7 +134,7 @@ class AnnotationHTMLPresenter(object):
         if self.document:
             return self.document.title
         else:
-            return ''
+            return ""
 
     # Explicitly forward some annotation properties for convenient access.
     @property
@@ -154,7 +155,7 @@ class AnnotationHTMLPresenter(object):
 
     @property
     def username(self):
-        return self.annotation.userid.split(':')[1].split('@')[0]
+        return self.annotation.userid.split(":")[1].split("@")[0]
 
     @property
     def shared(self):

@@ -9,7 +9,7 @@ import pytest
 
 from h.formatters.annotation_user_info import AnnotationUserInfoFormatter
 
-FakeAnnotationContext = namedtuple('FakeAnnotationContext', ['annotation'])
+FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation"])
 
 
 class TestAnnotationUserInfoFormatter(object):
@@ -20,7 +20,8 @@ class TestAnnotationUserInfoFormatter(object):
         formatter.preload([annotation_1.id, annotation_2.id])
 
         user_svc.fetch_all.assert_called_once_with(
-                set([annotation_1.userid, annotation_2.userid]))
+            set([annotation_1.userid, annotation_2.userid])
+        )
 
     def test_preload_skips_fetching_for_empty_ids(self, formatter, user_svc):
         formatter.preload([])
@@ -35,7 +36,7 @@ class TestAnnotationUserInfoFormatter(object):
         user_svc.fetch.assert_called_once_with(annotation.userid)
 
     def test_format_uses_user_info(self, formatter, user_svc, user_info):
-        user = mock.Mock(display_name='Jane Doe')
+        user = mock.Mock(display_name="Jane Doe")
         user_svc.fetch.return_value = user
 
         formatter.format(FakeAnnotationContext(mock.Mock()))
@@ -53,8 +54,8 @@ class TestAnnotationUserInfoFormatter(object):
 
     @pytest.fixture
     def user_info(self, patch):
-        return patch('h.formatters.annotation_user_info.user_info')
+        return patch("h.formatters.annotation_user_info.user_info")
 
     @pytest.fixture
     def user_svc(self):
-        return mock.Mock(spec_set=['fetch_all', 'fetch'])
+        return mock.Mock(spec_set=["fetch_all", "fetch"])
