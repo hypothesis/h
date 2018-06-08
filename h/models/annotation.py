@@ -3,32 +3,33 @@
 from __future__ import unicode_literals
 
 import datetime
-import enum
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.mutable import MutableDict, MutableList, MutableSet
+from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 from h.db import Base, types
 from h.util import markdown, uri
 from h.util.user import split_user
+from h import i18n
+_ = i18n.TranslationString
 
 
-class Motivation(enum.Enum):
-    assessing = "assessing"
-    bookmarking = "bookmarking"
-    classifying = "classifying"
-    commenting = "commenting"
-    describing = "describing"
-    editing = "editing"
-    highlighting = "highlighting"
-    identifying = "identifying"
-    linking = "linking"
-    moderating = "moderating"
-    questioning = "questioning"
-    replying = "replying"
-    tagging = "tagging"
+MOTIVATIONS = ["assessing",
+               "bookmarking",
+               "classifying",
+               "commenting",
+               "describing",
+               "editing",
+               "highlighting",
+               "identifying",
+               "linking",
+               "moderating",
+               "questioning",
+               "replying",
+               "tagging",
+               ]
 
 
 class Annotation(Base):
@@ -131,11 +132,9 @@ class Annotation(Base):
                             sa.ForeignKey('document.id'),
                             nullable=False)
 
-    # motivations are a Set of enumerated motivation_types (Motivation)
-    motivation_type = sa.Enum(Motivation, name="annotation_motivation")
-    motivations = sa.Column(MutableSet.as_mutable(pg.ARRAY(motivation_type)),
-                            default=set,
-                            server_default=sa.text('ARRAY[]::annotation_motivation[]'))
+    motivations = sa.Column(MutableList.as_mutable(
+        pg.ARRAY(sa.UnicodeText, zero_indexes=True)
+     ), default=list)
 
     document = sa.orm.relationship('Document', backref='annotations')
 
@@ -144,6 +143,14 @@ class Annotation(Base):
                                               sa.orm.remote(references[0])),
                                  viewonly=True,
                                  uselist=True)
+
+    @sa.orm.validates('motivations')
+    def validate_motivations(self, key, motivations):
+        # We can't use enum in an array field because SQLAlchemy doesn't
+        # support it, so we have to do validation here
+        if len(set(motivations) - set(MOTIVATIONS)) != 0:
+            raise ValueError(_('motivation must be valid motivation'))
+        return motivations
 
     @hybrid_property
     def target_uri(self):
