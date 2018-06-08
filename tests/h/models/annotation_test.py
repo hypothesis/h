@@ -113,6 +113,11 @@ def test_allows_empty_motivations_list(db_session, factories):
     assert annotation.motivations == []
 
 
+def test_raises_when_motivations_contains_duplicates(db_session, factories):
+    with pytest.raises(ValueError):
+        factories.Annotation(motivations=["tagging", "highlighting", "tagging"])
+
+
 def test_raises_when_invalid_motivation(db_session, factories):
     with pytest.raises(ValueError):
         factories.Annotation(motivations=["invalid"])

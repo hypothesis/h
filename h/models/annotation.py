@@ -148,8 +148,10 @@ class Annotation(Base):
     def validate_motivations(self, key, motivations):
         # We can't use enum in an array field because SQLAlchemy doesn't
         # support it, so we have to do validation here
+        if len(set(motivations)) != len(motivations):
+            raise ValueError(_('motivations must not contain duplicates'))
         if len(set(motivations) - set(MOTIVATIONS)) != 0:
-            raise ValueError(_('motivation must be valid motivation'))
+            raise ValueError(_('motivations must contain valid motivations {}'.format(MOTIVATIONS)))
         return motivations
 
     @hybrid_property
