@@ -3,15 +3,32 @@
 from __future__ import unicode_literals
 
 import datetime
+import enum
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.mutable import MutableDict, MutableList
+from sqlalchemy.ext.mutable import MutableDict, MutableList, MutableSet
 
 from h.db import Base, types
 from h.util import markdown, uri
 from h.util.user import split_user
+
+
+class Motivation(enum.Enum):
+    assessing = "assessing"
+    bookmarking = "bookmarking"
+    classifying = "classifying"
+    commenting = "commenting"
+    describing = "describing"
+    editing = "editing"
+    highlighting = "highlighting"
+    identifying = "identifying"
+    linking = "linking"
+    moderating = "moderating"
+    questioning = "questioning"
+    replying = "replying"
+    tagging = "tagging"
 
 
 class Annotation(Base):
@@ -113,6 +130,12 @@ class Annotation(Base):
     document_id = sa.Column(sa.Integer,
                             sa.ForeignKey('document.id'),
                             nullable=False)
+
+    # motivations are a Set of enumerated motivation_types (Motivation)
+    motivation_type = sa.Enum(Motivation, name="annotation_motivation")
+    motivations = sa.Column(MutableSet.as_mutable(pg.ARRAY(motivation_type)),
+                            default=set,
+                            server_default=sa.text('ARRAY[]::annotation_motivation[]'))
 
     document = sa.orm.relationship('Document', backref='annotations')
 
