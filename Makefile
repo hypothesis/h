@@ -66,6 +66,14 @@ test-py3: node_modules/.uptodate
 lint:
 	tox -e lint
 
+.PHONY: check-formatting
+check-formatting:
+	tox -e check-formatting
+
+.PHONY: reformat
+reformat:
+	tox -e reformat
+
 ################################################################################
 
 # Fake targets to aid with deps installation
