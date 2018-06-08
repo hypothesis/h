@@ -7,7 +7,12 @@ import sqlalchemy as sa
 
 from h import session
 from h.models import Group, GroupScope, Organization, User
-from h.models.group import ReadableBy, OPEN_GROUP_TYPE_FLAGS, PRIVATE_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
+from h.models.group import (
+    ReadableBy,
+    OPEN_GROUP_TYPE_FLAGS,
+    PRIVATE_GROUP_TYPE_FLAGS,
+    RESTRICTED_GROUP_TYPE_FLAGS,
+)
 
 
 class GroupService(object):
@@ -40,15 +45,18 @@ class GroupService(object):
 
         :returns: the created group
         """
-        return self._create(name=name,
-                            userid=userid,
-                            description=description,
-                            type_flags=PRIVATE_GROUP_TYPE_FLAGS,
-                            add_creator_as_member=True,
-                            organization=organization,
-                            )
+        return self._create(
+            name=name,
+            userid=userid,
+            description=description,
+            type_flags=PRIVATE_GROUP_TYPE_FLAGS,
+            add_creator_as_member=True,
+            organization=organization,
+        )
 
-    def create_open_group(self, name, userid, origins, description=None, organization=None):
+    def create_open_group(
+        self, name, userid, origins, description=None, organization=None
+    ):
         """
         Create a new open group.
 
@@ -63,16 +71,19 @@ class GroupService(object):
 
         :returns: the created group
         """
-        return self._create(name=name,
-                            userid=userid,
-                            description=description,
-                            type_flags=OPEN_GROUP_TYPE_FLAGS,
-                            origins=origins,
-                            add_creator_as_member=False,
-                            organization=organization,
-                            )
+        return self._create(
+            name=name,
+            userid=userid,
+            description=description,
+            type_flags=OPEN_GROUP_TYPE_FLAGS,
+            origins=origins,
+            add_creator_as_member=False,
+            organization=organization,
+        )
 
-    def create_restricted_group(self, name, userid, origins, description=None, organization=None):
+    def create_restricted_group(
+        self, name, userid, origins, description=None, organization=None
+    ):
         """
         Create a new restricted group.
 
@@ -88,14 +99,15 @@ class GroupService(object):
 
         :returns: the created group
         """
-        return self._create(name=name,
-                            userid=userid,
-                            description=description,
-                            type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
-                            origins=origins,
-                            add_creator_as_member=True,
-                            organization=organization,
-                            )
+        return self._create(
+            name=name,
+            userid=userid,
+            description=description,
+            type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
+            origins=origins,
+            add_creator_as_member=True,
+            organization=organization,
+        )
 
     def add_members(self, group, userids):
         """
@@ -120,7 +132,9 @@ class GroupService(object):
                         be the members of this group
         """
         current_mem_ids = [member.userid for member in group.members]
-        userids_for_removal = [mem_id for mem_id in current_mem_ids if mem_id not in userids]
+        userids_for_removal = [
+            mem_id for mem_id in current_mem_ids if mem_id not in userids
+        ]
 
         for userid in userids:
             self.member_join(group, userid)
@@ -137,7 +151,7 @@ class GroupService(object):
 
         group.members.append(user)
 
-        self.publish('group-join', group.pubid, userid)
+        self.publish("group-join", group.pubid, userid)
 
     def member_leave(self, group, userid):
         """Remove `userid` from the member list of `group`."""
@@ -148,7 +162,7 @@ class GroupService(object):
 
         group.members.remove(user)
 
-        self.publish('group-leave', group.pubid, userid)
+        self.publish("group-leave", group.pubid, userid)
 
     def groupids_readable_by(self, user):
         """
@@ -157,13 +171,18 @@ class GroupService(object):
         If the passed-in user is ``None``, this returns the list of
         world-readable groups.
         """
-        readable = (Group.readable_by == ReadableBy.world)
+        readable = Group.readable_by == ReadableBy.world
 
         if user is not None:
-            readable_member = sa.and_(Group.readable_by == ReadableBy.members, Group.members.any(User.id == user.id))
+            readable_member = sa.and_(
+                Group.readable_by == ReadableBy.members,
+                Group.members.any(User.id == user.id),
+            )
             readable = sa.or_(readable, readable_member)
 
-        return [record.pubid for record in self.session.query(Group.pubid).filter(readable)]
+        return [
+            record.pubid for record in self.session.query(Group.pubid).filter(readable)
+        ]
 
     def groupids_created_by(self, user):
         """
@@ -174,10 +193,20 @@ class GroupService(object):
         if user is None:
             return []
 
-        return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
+        return [
+            g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)
+        ]
 
-    def _create(self, name, userid, description, type_flags,
-                origins=[], add_creator_as_member=False, organization=None):
+    def _create(
+        self,
+        name,
+        userid,
+        description,
+        type_flags,
+        origins=[],
+        add_creator_as_member=False,
+        organization=None,
+    ):
         """
         Create a group and save it to the DB.
 
@@ -195,16 +224,17 @@ class GroupService(object):
         if organization is None:
             organization = Organization.default(self.session)
         self._validate_authorities_match(creator.authority, organization.authority)
-        group = Group(name=name,
-                      authority=creator.authority,
-                      creator=creator,
-                      description=description,
-                      joinable_by=type_flags.joinable_by,
-                      readable_by=type_flags.readable_by,
-                      writeable_by=type_flags.writeable_by,
-                      scopes=scopes,
-                      organization=organization,
-                      )
+        group = Group(
+            name=name,
+            authority=creator.authority,
+            creator=creator,
+            description=description,
+            joinable_by=type_flags.joinable_by,
+            readable_by=type_flags.readable_by,
+            writeable_by=type_flags.writeable_by,
+            scopes=scopes,
+            organization=organization,
+        )
         self.session.add(group)
 
         if add_creator_as_member:
@@ -213,28 +243,35 @@ class GroupService(object):
             # Flush the DB to generate group.pubid before publish()ing it.
             self.session.flush()
 
-            self.publish('group-join', group.pubid, group.creator.userid)
+            self.publish("group-join", group.pubid, group.creator.userid)
 
         return group
 
     def _validate_authorities_match(self, group_authority, org_authority):
         if group_authority != org_authority:
-            raise ValueError("Organization's authority {} must match the group creator's authority {}."
-                             .format(org_authority, group_authority))
+            raise ValueError(
+                "Organization's authority {} must match the group creator's authority {}.".format(
+                    org_authority, group_authority
+                )
+            )
 
 
 def groups_factory(context, request):
     """Return a GroupService instance for the passed context and request."""
-    user_service = request.find_service(name='user')
-    return GroupService(session=request.db,
-                        user_fetcher=user_service.fetch,
-                        publish=partial(_publish, request))
+    user_service = request.find_service(name="user")
+    return GroupService(
+        session=request.db,
+        user_fetcher=user_service.fetch,
+        publish=partial(_publish, request),
+    )
 
 
 def _publish(request, event_type, groupid, userid):
-    request.realtime.publish_user({
-        'type': event_type,
-        'session_model': session.model(request),
-        'userid': userid,
-        'group': groupid,
-    })
+    request.realtime.publish_user(
+        {
+            "type": event_type,
+            "session_model": session.model(request),
+            "userid": userid,
+            "group": groupid,
+        }
+    )

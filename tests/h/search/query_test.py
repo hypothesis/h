@@ -7,7 +7,6 @@ from h import search
 
 
 class TestTopLevelAnnotationsFilter(object):
-
     def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, search):
         annotation = Annotation(shared=True)
         reply = Annotation(references=[annotation.id], shared=True)
@@ -26,8 +25,10 @@ class TestTopLevelAnnotationsFilter(object):
 
 class TestAuthorityFilter(object):
     def test_it_filters_out_non_matching_authorities(self, Annotation, search):
-        annotations_auth1 = [Annotation(userid="acct:foo@auth1", shared=True).id,
-                             Annotation(userid="acct:bar@auth1", shared=True).id]
+        annotations_auth1 = [
+            Annotation(userid="acct:foo@auth1", shared=True).id,
+            Annotation(userid="acct:bar@auth1", shared=True).id,
+        ]
         # Make some other annotations that are of different authority.
         Annotation(userid="acct:bat@auth2", shared=True)
         Annotation(userid="acct:bar@auth3", shared=True)
@@ -53,30 +54,34 @@ class TestAuthFilter(object):
         assert not result.annotation_ids
 
     def test_logged_out_user_can_see_shared_annotations(self, search, Annotation):
-        shared_ids = [Annotation(shared=True).id,
-                      Annotation(shared=True).id]
+        shared_ids = [Annotation(shared=True).id, Annotation(shared=True).id]
 
         result = search.run({})
 
         assert set(result.annotation_ids) == set(shared_ids)
 
-    def test_logged_in_user_can_only_see_their_private_annotations(self, search, pyramid_config, Annotation):
+    def test_logged_in_user_can_only_see_their_private_annotations(
+        self, search, pyramid_config, Annotation
+    ):
         userid = "acct:bar@auth2"
         pyramid_config.testing_securitypolicy(userid)
         # Make a private annotation from a different user.
         Annotation(userid="acct:foo@auth2").id
-        users_private_ids = [Annotation(userid=userid).id,
-                             Annotation(userid=userid).id]
+        users_private_ids = [Annotation(userid=userid).id, Annotation(userid=userid).id]
 
         result = search.run({})
 
         assert set(result.annotation_ids) == set(users_private_ids)
 
-    def test_logged_in_user_can_see_shared_annotations(self, search, pyramid_config, Annotation):
+    def test_logged_in_user_can_see_shared_annotations(
+        self, search, pyramid_config, Annotation
+    ):
         userid = "acct:bar@auth2"
         pyramid_config.testing_securitypolicy(userid)
-        shared_ids = [Annotation(userid="acct:foo@auth2", shared=True).id,
-                      Annotation(userid=userid, shared=True).id]
+        shared_ids = [
+            Annotation(userid="acct:foo@auth2", shared=True).id,
+            Annotation(userid=userid, shared=True).id,
+        ]
 
         result = search.run({})
 
@@ -90,7 +95,6 @@ class TestAuthFilter(object):
 
 
 class TestGroupFilter(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append GroupFilter to Search because it's one of the filters that
@@ -99,7 +103,6 @@ class TestGroupFilter(object):
 
 
 class TestGroupAuthFilter(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append GroupAuthFilter to Search because it's one of the filters that
@@ -108,7 +111,6 @@ class TestGroupAuthFilter(object):
 
 
 class TestUserFilter(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append UserFilter to Search because it's one of the filters that
@@ -117,7 +119,6 @@ class TestUserFilter(object):
 
 
 class TestUriFilter(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append UriFilter to Search because it's one of the filters that
@@ -126,7 +127,6 @@ class TestUriFilter(object):
 
 
 class TestDeletedFilter(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append DeletedFilter to Search because it's one of the filters that
@@ -135,7 +135,6 @@ class TestDeletedFilter(object):
 
 
 class TestNipsaFilter(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append NipsaFilter to Search because it's one of the filters that
@@ -144,7 +143,6 @@ class TestNipsaFilter(object):
 
 
 class TestAnyMatcher(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append AnyMatcher to Search because it's one of the matchers that
@@ -153,7 +151,6 @@ class TestAnyMatcher(object):
 
 
 class TestTagsMatcher(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         # We don't need to append TagsMatcher to Search because it's one of the matchers that
@@ -173,7 +170,6 @@ class TestRepliesMatcher(object):
 
 
 class TestTagsAggregation(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         search_ = search.Search(pyramid_request)
@@ -182,7 +178,6 @@ class TestTagsAggregation(object):
 
 
 class TestUsersAggregation(object):
-
     @pytest.fixture
     def search(self, pyramid_request):
         search_ = search.Search(pyramid_request)

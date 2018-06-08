@@ -22,24 +22,28 @@ class TestAPI(object):
         This view is tested more thoroughly in the view tests, but this test
         checks the view doesn't error out and returns appropriate-looking JSON.
         """
-        res = app.get('/api/')
-        assert 'links' in res.json
+        res = app.get("/api/")
+        assert "links" in res.json
 
     def test_annotation_read(self, app, annotation):
         """Fetch an annotation by ID."""
-        res = app.get('/api/annotations/' + annotation.id,
-                      headers={native_str('accept'): native_str('application/json')})
+        res = app.get(
+            "/api/annotations/" + annotation.id,
+            headers={native_str("accept"): native_str("application/json")},
+        )
         data = res.json
-        assert data['id'] == annotation.id
+        assert data["id"] == annotation.id
 
     def test_annotation_read_jsonld(self, app, annotation):
         """Fetch an annotation by ID in jsonld format."""
-        res = app.get('/api/annotations/' + annotation.id + '.jsonld')
+        res = app.get("/api/annotations/" + annotation.id + ".jsonld")
         data = res.json
-        assert data['@context'] == 'http://www.w3.org/ns/anno.jsonld'
-        assert data['id'] == 'http://example.com/a/' + annotation.id
+        assert data["@context"] == "http://www.w3.org/ns/anno.jsonld"
+        assert data["id"] == "http://example.com/a/" + annotation.id
 
-    def test_annotation_write_unauthorized_group(self, app, user_with_token, non_writeable_group):
+    def test_annotation_write_unauthorized_group(
+        self, app, user_with_token, non_writeable_group
+    ):
         """
         Write an annotation to a group that doesn't allow writes.
 
@@ -49,23 +53,25 @@ class TestAPI(object):
 
         user, token = user_with_token
 
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
         annotation = {
-            'group': non_writeable_group.pubid,
-            'permissions': {
-                'read': ['group:{}'.format(non_writeable_group.pubid)],
-                'admin': [user.userid],
-                'update': [user.userid],
-                'delete': [user.userid],
+            "group": non_writeable_group.pubid,
+            "permissions": {
+                "read": ["group:{}".format(non_writeable_group.pubid)],
+                "admin": [user.userid],
+                "update": [user.userid],
+                "delete": [user.userid],
             },
-            'text': 'My annotation',
-            'uri': 'http://example.com',
+            "text": "My annotation",
+            "uri": "http://example.com",
         }
 
-        res = app.post_json('/api/annotations', annotation, headers=headers, expect_errors=True)
+        res = app.post_json(
+            "/api/annotations", annotation, headers=headers, expect_errors=True
+        )
 
         assert res.status_code == 400
-        assert res.json['reason'].startswith('group:')
+        assert res.json["reason"].startswith("group:")
 
     def test_anonymous_profile_api(self, app):
         """
@@ -75,36 +81,38 @@ class TestAPI(object):
         to the site's `authority` and show only the global group.
         """
 
-        res = app.get('/api/profile')
+        res = app.get("/api/profile")
 
-        assert res.json['userid'] is None
-        assert res.json['authority'] == 'example.com'
-        assert [group['id'] for group in res.json['groups']] == ['__world__']
+        assert res.json["userid"] is None
+        assert res.json["authority"] == "example.com"
+        assert [group["id"] for group in res.json["groups"]] == ["__world__"]
 
     def test_profile_api(self, app, user_with_token):
         """Fetch a profile through the API for an authenticated user."""
 
         user, token = user_with_token
 
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
 
-        res = app.get('/api/profile', headers=headers)
+        res = app.get("/api/profile", headers=headers)
 
-        assert res.json['userid'] == user.userid
-        assert [group['id'] for group in res.json['groups']] == ['__world__']
+        assert res.json["userid"] == user.userid
+        assert [group["id"] for group in res.json["groups"]] == ["__world__"]
 
-    def test_third_party_profile_api(self, app, open_group, third_party_user_with_token):
+    def test_third_party_profile_api(
+        self, app, open_group, third_party_user_with_token
+    ):
         """Fetch a profile for a third-party account."""
 
         user, token = third_party_user_with_token
 
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
 
-        res = app.get('/api/profile', headers=headers)
+        res = app.get("/api/profile", headers=headers)
 
-        assert res.json['userid'] == user.userid
+        assert res.json["userid"] == user.userid
 
-        group_ids = [group['id'] for group in res.json['groups']]
+        group_ids = [group["id"] for group in res.json["groups"]]
         # The profile API returns no open groups for third-party accounts.
         # (The client gets open groups from the groups API instead.)
         assert group_ids == []
@@ -114,25 +122,27 @@ class TestAPI(object):
         # hosted on a domain other than the one the service is running on.
         #
         # Note that no `Authorization` header is set.
-        origin = 'https://custom-client.herokuapp.com'
-        headers = {'Access-Control-Request-Headers': str('authorization,content-type'),
-                   'Access-Control-Request-Method': str('POST'),
-                   'Origin': str(origin)}
+        origin = "https://custom-client.herokuapp.com"
+        headers = {
+            "Access-Control-Request-Headers": str("authorization,content-type"),
+            "Access-Control-Request-Method": str("POST"),
+            "Origin": str(origin),
+        }
 
-        res = app.options('/api/annotations', headers=headers)
+        res = app.options("/api/annotations", headers=headers)
 
         assert res.status_code == 200
-        assert res.headers['Access-Control-Allow-Origin'] == str(origin)
-        assert 'POST' in res.headers['Access-Control-Allow-Methods']
-        for header in ['Authorization', 'Content-Type', 'X-Client-Id']:
-            assert header in res.headers['Access-Control-Allow-Headers']
+        assert res.headers["Access-Control-Allow-Origin"] == str(origin)
+        assert "POST" in res.headers["Access-Control-Allow-Methods"]
+        for header in ["Authorization", "Content-Type", "X-Client-Id"]:
+            assert header in res.headers["Access-Control-Allow-Headers"]
 
 
 @pytest.fixture
 def annotation(db_session, factories):
-    ann = factories.Annotation(userid='acct:testuser@example.com',
-                               groupid='__world__',
-                               shared=True)
+    ann = factories.Annotation(
+        userid="acct:testuser@example.com", groupid="__world__", shared=True
+    )
     db_session.commit()
     return ann
 
@@ -154,7 +164,7 @@ def user_with_token(user, db_session, factories):
 
 @pytest.fixture
 def auth_client(db_session, factories):
-    auth_client = factories.AuthClient(authority='thirdparty.example.org')
+    auth_client = factories.AuthClient(authority="thirdparty.example.org")
     db_session.commit()
     return auth_client
 

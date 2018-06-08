@@ -13,7 +13,7 @@ from h.traversal.contexts import GroupContext
 from h.traversal.contexts import OrganizationContext
 
 
-@pytest.mark.usefixtures('group_service', 'links_service')
+@pytest.mark.usefixtures("group_service", "links_service")
 class TestAnnotationContext(object):
     def test_links(self, group_service, links_service):
         ann = mock.Mock()
@@ -28,20 +28,22 @@ class TestAnnotationContext(object):
         ann = mock.Mock()
         res = AnnotationContext(ann, group_service, links_service)
 
-        result = res.link('json')
+        result = res.link("json")
 
-        links_service.get.assert_called_once_with(ann, 'json')
+        links_service.get.assert_called_once_with(ann, "json")
         assert result == links_service.get.return_value
 
     def test_acl_private(self, factories, group_service, links_service):
-        ann = factories.Annotation(shared=False, userid='saoirse')
+        ann = factories.Annotation(shared=False, userid="saoirse")
         res = AnnotationContext(ann, group_service, links_service)
         actual = res.__acl__()
-        expect = [(security.Allow, 'saoirse', 'read'),
-                  (security.Allow, 'saoirse', 'admin'),
-                  (security.Allow, 'saoirse', 'update'),
-                  (security.Allow, 'saoirse', 'delete'),
-                  security.DENY_ALL]
+        expect = [
+            (security.Allow, "saoirse", "read"),
+            (security.Allow, "saoirse", "admin"),
+            (security.Allow, "saoirse", "update"),
+            (security.Allow, "saoirse", "delete"),
+            security.DENY_ALL,
+        ]
         assert actual == expect
 
     def test_acl_shared_admin_perms(self, factories, group_service, links_service):
@@ -51,12 +53,12 @@ class TestAnnotationContext(object):
         """
         policy = ACLAuthorizationPolicy()
 
-        ann = factories.Annotation(shared=False, userid='saoirse')
+        ann = factories.Annotation(shared=False, userid="saoirse")
         res = AnnotationContext(ann, group_service, links_service)
 
-        for perm in ['admin', 'update', 'delete']:
-            assert policy.permits(res, ['saoirse'], perm)
-            assert not policy.permits(res, ['someoneelse'], perm)
+        for perm in ["admin", "update", "delete"]:
+            assert policy.permits(res, ["saoirse"], perm)
+            assert not policy.permits(res, ["someoneelse"], perm)
 
     def test_acl_deleted(self, factories, group_service, links_service):
         """
@@ -65,37 +67,42 @@ class TestAnnotationContext(object):
         """
         policy = ACLAuthorizationPolicy()
 
-        ann = factories.Annotation(userid='saoirse', deleted=True)
+        ann = factories.Annotation(userid="saoirse", deleted=True)
         res = AnnotationContext(ann, group_service, links_service)
 
-        for perm in ['read', 'admin', 'update', 'delete']:
-            assert not policy.permits(res, ['saiorse'], perm)
+        for perm in ["read", "admin", "update", "delete"]:
+            assert not policy.permits(res, ["saiorse"], perm)
 
-    @pytest.mark.parametrize('groupid,userid,permitted', [
-        ('freeforall', 'jim', True),
-        ('freeforall', 'saoirse', True),
-        ('freeforall', None, True),
-        ('only-saoirse', 'jim', False),
-        ('only-saoirse', 'saoirse', True),
-        ('only-saoirse', None, False),
-        ('pals', 'jim', True),
-        ('pals', 'saoirse', True),
-        ('pals', 'francis', False),
-        ('pals', None, False),
-        ('unknown-group', 'jim', False),
-        ('unknown-group', 'saoirse', False),
-        ('unknown-group', 'francis', False),
-        ('unknown-group', None, False),
-    ])
-    def test_acl_shared(self,
-                        factories,
-                        pyramid_config,
-                        pyramid_request,
-                        groupid,
-                        userid,
-                        permitted,
-                        group_service,
-                        links_service):
+    @pytest.mark.parametrize(
+        "groupid,userid,permitted",
+        [
+            ("freeforall", "jim", True),
+            ("freeforall", "saoirse", True),
+            ("freeforall", None, True),
+            ("only-saoirse", "jim", False),
+            ("only-saoirse", "saoirse", True),
+            ("only-saoirse", None, False),
+            ("pals", "jim", True),
+            ("pals", "saoirse", True),
+            ("pals", "francis", False),
+            ("pals", None, False),
+            ("unknown-group", "jim", False),
+            ("unknown-group", "saoirse", False),
+            ("unknown-group", "francis", False),
+            ("unknown-group", None, False),
+        ],
+    )
+    def test_acl_shared(
+        self,
+        factories,
+        pyramid_config,
+        pyramid_request,
+        groupid,
+        userid,
+        permitted,
+        group_service,
+        links_service,
+    ):
         """
         Shared annotation contexts should delegate their 'read' permission to
         their containing group.
@@ -106,41 +113,40 @@ class TestAnnotationContext(object):
         pyramid_config.testing_securitypolicy(userid)
         pyramid_config.set_authorization_policy(policy)
 
-        ann = factories.Annotation(shared=True,
-                                   userid='mioara',
-                                   groupid=groupid)
+        ann = factories.Annotation(shared=True, userid="mioara", groupid=groupid)
         res = AnnotationContext(ann, group_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission('read', res)
+            assert pyramid_request.has_permission("read", res)
         else:
-            assert not pyramid_request.has_permission('read', res)
+            assert not pyramid_request.has_permission("read", res)
 
     @pytest.fixture
     def groups(self):
         return {
-            'freeforall': FakeGroup([security.Everyone]),
-            'only-saoirse': FakeGroup(['saoirse']),
-            'pals': FakeGroup(['saoirse', 'jim']),
+            "freeforall": FakeGroup([security.Everyone]),
+            "only-saoirse": FakeGroup(["saoirse"]),
+            "pals": FakeGroup(["saoirse", "jim"]),
         }
 
     @pytest.fixture
     def group_service(self, pyramid_config, groups):
-        group_service = mock.Mock(spec_set=['find'])
+        group_service = mock.Mock(spec_set=["find"])
         group_service.find.side_effect = lambda groupid: groups.get(groupid)
-        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
+        pyramid_config.register_service(
+            group_service, iface="h.interfaces.IGroupService"
+        )
         return group_service
 
     @pytest.fixture
     def links_service(self, pyramid_config):
-        service = mock.Mock(spec_set=['get', 'get_all'])
-        pyramid_config.register_service(service, name='links')
+        service = mock.Mock(spec_set=["get", "get_all"])
+        pyramid_config.register_service(service, name="links")
         return service
 
 
-@pytest.mark.usefixtures('links_svc')
+@pytest.mark.usefixtures("links_svc")
 class TestGroupContext(object):
-
     def test_it_returns_group_model_as_property(self, factories, pyramid_request):
         group = factories.Group()
 
@@ -170,10 +176,11 @@ class TestGroupContext(object):
         assert isinstance(group_context.organization, OrganizationContext)
 
 
-@pytest.mark.usefixtures('organization_routes')
+@pytest.mark.usefixtures("organization_routes")
 class TestOrganizationContext(object):
-
-    def test_it_returns_organization_model_as_property(self, factories, pyramid_request):
+    def test_it_returns_organization_model_as_property(
+        self, factories, pyramid_request
+    ):
         organization = factories.Organization()
 
         organization_context = OrganizationContext(organization, pyramid_request)
@@ -196,7 +203,7 @@ class TestOrganizationContext(object):
         assert organization_context.links == {}
 
     def test_it_returns_logo_property_as_route_url(self, factories, pyramid_request):
-        fake_logo = '<svg>H</svg>'
+        fake_logo = "<svg>H</svg>"
         pyramid_request.route_url = mock.Mock()
 
         organization = factories.Organization(logo=fake_logo)
@@ -204,7 +211,9 @@ class TestOrganizationContext(object):
         organization_context = OrganizationContext(organization, pyramid_request)
         logo = organization_context.logo
 
-        pyramid_request.route_url.assert_called_with('organization_logo', pubid=organization.pubid)
+        pyramid_request.route_url.assert_called_with(
+            "organization_logo", pubid=organization.pubid
+        )
         assert logo is not None
 
     def test_it_returns_none_for_logo_if_no_logo(self, factories, pyramid_request):
@@ -218,7 +227,9 @@ class TestOrganizationContext(object):
         pyramid_request.route_url.assert_not_called
         assert logo is None
 
-    def test_default_property_if_not_default_organization(self, factories, pyramid_request):
+    def test_default_property_if_not_default_organization(
+        self, factories, pyramid_request
+    ):
         organization = factories.Organization()
 
         organization_context = OrganizationContext(organization, pyramid_request)
@@ -235,16 +246,16 @@ class TestOrganizationContext(object):
 
 class FakeGroup(object):
     def __init__(self, principals):
-        self.__acl__ = [(security.Allow, p, 'read') for p in principals]
+        self.__acl__ = [(security.Allow, p, "read") for p in principals]
 
 
 @pytest.fixture
 def links_svc(pyramid_config):
     svc = mock.create_autospec(GroupLinksService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name='group_links')
+    pyramid_config.register_service(svc, name="group_links")
     return svc
 
 
 @pytest.fixture
 def organization_routes(pyramid_config):
-    pyramid_config.add_route('organization_logo', '/organization/{pubid}/logo')
+    pyramid_config.add_route("organization_logo", "/organization/{pubid}/logo")

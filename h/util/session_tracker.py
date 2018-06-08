@@ -7,9 +7,9 @@ from sqlalchemy.orm.util import identity_key
 
 
 class ObjectState(Enum):
-    ADDED = 'added'
-    DELETED = 'deleted'
-    CHANGED = 'changed'
+    ADDED = "added"
+    DELETED = "deleted"
+    CHANGED = "changed"
 
 
 class Tracker(object):
@@ -25,9 +25,9 @@ class Tracker(object):
         # yet been _committed_.
         self._flushed_changes = {}
 
-        listen(session, 'after_flush', self._after_flush)
-        listen(session, 'after_commit', self._after_commit)
-        listen(session, 'after_rollback', self._after_rollback)
+        listen(session, "after_flush", self._after_flush)
+        listen(session, "after_commit", self._after_commit)
+        listen(session, "after_rollback", self._after_rollback)
 
     def uncommitted_changes(self):
         """

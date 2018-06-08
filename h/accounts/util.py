@@ -24,13 +24,13 @@ def validate_url(url):
     parsed_url = urlparse.urlparse(url)
 
     if not parsed_url.scheme:
-        parsed_url = urlparse.urlparse('http://' + url)
+        parsed_url = urlparse.urlparse("http://" + url)
 
-    if not re.match('https?', parsed_url.scheme):
+    if not re.match("https?", parsed_url.scheme):
         raise ValueError('Links must have an "http" or "https" prefix')
 
     if not parsed_url.netloc:
-        raise ValueError('Links must include a domain name')
+        raise ValueError("Links must include a domain name")
 
     return parsed_url.geturl()
 
@@ -45,13 +45,13 @@ def validate_orcid(orcid):
     Returns the normalized ORCID if successfully parsed or raises a ValueError
     otherwise.
     """
-    orcid_regex = '\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z'
+    orcid_regex = "\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z"
 
     if not re.match(orcid_regex, orcid):
-        raise ValueError('The format of this ORCID is incorrect'.format(orcid))
+        raise ValueError("The format of this ORCID is incorrect".format(orcid))
 
     if _orcid_checksum_digit(orcid[:-1]) != orcid[-1:]:
-        raise ValueError('{} is not a valid ORCID'.format(orcid))
+        raise ValueError("{} is not a valid ORCID".format(orcid))
 
     return True
 
@@ -67,13 +67,13 @@ def _orcid_checksum_digit(orcid):
                   the correct format.
     """
     total = 0
-    digits = [int(ch) for ch in orcid.replace('-', '')]
+    digits = [int(ch) for ch in orcid.replace("-", "")]
     for digit in digits:
         total = (total + digit) * 2
     remainder = total % 11
     result = (12 - remainder) % 11
 
     if result == 10:
-        return 'X'
+        return "X"
     else:
         return str(result)

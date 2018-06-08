@@ -15,7 +15,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
     page_max = max(1, page_max)  # There's always at least one page.
 
     try:
-        current_page = int(request.params['page'])
+        current_page = int(request.params["page"])
     except (KeyError, ValueError):
         current_page = 1
     current_page = max(1, current_page)
@@ -42,7 +42,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
     max_left = current_page - buffer
 
     if (max_left - first) > 1:
-        page_numbers.append('...')
+        page_numbers.append("...")
 
     # If there are 1-3 pages to the left of current, add the pages.
     i = current_page - buffer
@@ -65,7 +65,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
     # If there are more than 3 pages to the right of current, add the
     # ellipsis.
     if (page_max - max_right) > 1:
-        page_numbers.append('...')
+        page_numbers.append("...")
 
     # Add the last page.
     if page_max > current_page:
@@ -73,16 +73,16 @@ def paginate(request, total, page_size=PAGE_SIZE):
 
     def url_for(page):
         query = request.params.dict_of_lists()
-        query['page'] = page
+        query["page"] = page
         return request.current_route_path(_query=query)
 
     return {
-        'cur': current_page,
-        'max': page_max,
-        'next': next_,
-        'numbers': page_numbers,
-        'prev': prev,
-        'url_for': url_for,
+        "cur": current_page,
+        "max": page_max,
+        "next": next_,
+        "numbers": page_numbers,
+        "prev": prev,
+        "url_for": url_for,
     }
 
 
@@ -126,8 +126,10 @@ def paginate_query(wrapped=None, page_size=PAGE_SIZE):
     functions which accept only a single argument.
     """
     if wrapped is None:
+
         def decorator(wrap):
             return paginate_query(wrap, page_size=page_size)
+
         return decorator
 
     @functools.wraps(wrapped)
@@ -135,10 +137,11 @@ def paginate_query(wrapped=None, page_size=PAGE_SIZE):
         result = wrapped(context, request)
         total = result.count()
         page = paginate(request, total, page_size)
-        offset = (page['cur'] - 1) * page_size
+        offset = (page["cur"] - 1) * page_size
         return {
-            'results': result.offset(offset).limit(page_size).all(),
-            'total': total,
-            'page': page,
+            "results": result.offset(offset).limit(page_size).all(),
+            "total": total,
+            "page": page,
         }
+
     return wrapper

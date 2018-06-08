@@ -8,11 +8,14 @@ from h.search.index import BatchIndexer
 from h.util import uri
 
 
-@click.command('move-uri')
-@click.option('--old', required=True,
-              help='Old URI with annotations and documents.')
-@click.option('--new', required=True, confirmation_prompt=True,
-              help='New URI for matching annotations and documents.')
+@click.command("move-uri")
+@click.option("--old", required=True, help="Old URI with annotations and documents.")
+@click.option(
+    "--new",
+    required=True,
+    confirmation_prompt=True,
+    help="New URI for matching annotations and documents.",
+)
 @click.pass_context
 def move_uri(ctx, old, new):
     """
@@ -23,25 +26,30 @@ def move_uri(ctx, old, new):
     canonical uris.
     """
 
-    request = ctx.obj['bootstrap']()
+    request = ctx.obj["bootstrap"]()
 
     annotations = _fetch_annotations(request.db, old)
     docuris_claimant = _fetch_document_uri_claimants(request.db, old)
     docuris_uri = _fetch_document_uri_canonical_self_claim(request.db, old)
 
-    prompt = ('Changing all annotations and document data matching:\n' +
-              '"{old}"\nto:\n"{new}"\n' +
-              'This will affect {ann_count} annotations, {doc_claimant} ' +
-              'document uri claimants, and {doc_uri} document uri self-claims ' +
-              'or canonical uris.\n' +
-              'Are you sure? [y/N]').format(old=old, new=new,
-                                            ann_count=len(annotations),
-                                            doc_claimant=len(docuris_claimant),
-                                            doc_uri=len(docuris_uri))
-    c = click.prompt(prompt, default='n', show_default=False)
+    prompt = (
+        "Changing all annotations and document data matching:\n"
+        + '"{old}"\nto:\n"{new}"\n'
+        + "This will affect {ann_count} annotations, {doc_claimant} "
+        + "document uri claimants, and {doc_uri} document uri self-claims "
+        + "or canonical uris.\n"
+        + "Are you sure? [y/N]"
+    ).format(
+        old=old,
+        new=new,
+        ann_count=len(annotations),
+        doc_claimant=len(docuris_claimant),
+        doc_uri=len(docuris_uri),
+    )
+    c = click.prompt(prompt, default="n", show_default=False)
 
-    if c != 'y':
-        print('Aborted')
+    if c != "y":
+        print("Aborted")
         return
 
     for annotation in annotations:
@@ -68,19 +76,30 @@ def move_uri(ctx, old, new):
 
 
 def _fetch_annotations(session, uri_):
-    return session.query(models.Annotation).filter(
-        models.Annotation.target_uri_normalized == uri.normalize(uri_)).all()
+    return (
+        session.query(models.Annotation)
+        .filter(models.Annotation.target_uri_normalized == uri.normalize(uri_))
+        .all()
+    )
 
 
 def _fetch_document_uri_claimants(session, uri_):
-    return session.query(models.DocumentURI).filter(
-        models.DocumentURI.claimant_normalized == uri.normalize(uri_)).all()
+    return (
+        session.query(models.DocumentURI)
+        .filter(models.DocumentURI.claimant_normalized == uri.normalize(uri_))
+        .all()
+    )
 
 
 def _fetch_document_uri_canonical_self_claim(session, uri_):
-    return session.query(models.DocumentURI).filter(
-        models.DocumentURI.uri_normalized == uri.normalize(uri_),
-        models.DocumentURI.type.in_([u'self-claim', u'rel-canonical'])).all()
+    return (
+        session.query(models.DocumentURI)
+        .filter(
+            models.DocumentURI.uri_normalized == uri.normalize(uri_),
+            models.DocumentURI.type.in_([u"self-claim", u"rel-canonical"]),
+        )
+        .all()
+    )
 
 
 def _fetch_documents(session, uri_):

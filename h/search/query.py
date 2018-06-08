@@ -52,12 +52,7 @@ class Builder(object):
             query = {"bool": {"must": matchers}}
 
         if filters:
-            query = {
-                "filtered": {
-                    "filter": {"and": filters},
-                    "query": query,
-                }
-            }
+            query = {"filtered": {"filter": {"and": filters}, "query": query}}
 
         return {
             "from": p_from,
@@ -92,12 +87,14 @@ def extract_limit(params):
 
 
 def extract_sort(params):
-    return [{
-        params.pop("sort", "updated"): {
-            "ignore_unmapped": True,
-            "order": params.pop("order", "desc"),
+    return [
+        {
+            params.pop("sort", "updated"): {
+                "ignore_unmapped": True,
+                "order": params.pop("order", "desc"),
+            }
         }
-    }]
+    ]
 
 
 class TopLevelAnnotationsFilter(object):
@@ -105,7 +102,7 @@ class TopLevelAnnotationsFilter(object):
     """Matches top-level annotations only, filters out replies."""
 
     def __call__(self, _):
-        return {'missing': {'field': 'references'}}
+        return {"missing": {"field": "references"}}
 
 
 class AuthorityFilter(object):
@@ -118,7 +115,7 @@ class AuthorityFilter(object):
         self.authority = authority
 
     def __call__(self, params):
-        return {'term': {'authority': self.authority}}
+        return {"term": {"authority": self.authority}}
 
 
 class AuthFilter(object):
@@ -139,16 +136,13 @@ class AuthFilter(object):
         self.request = request
 
     def __call__(self, params):
-        public_filter = {'term': {'shared': True}}
+        public_filter = {"term": {"shared": True}}
 
         userid = self.request.authenticated_userid
         if userid is None:
             return public_filter
 
-        return {'or': [
-            public_filter,
-            {'term': {'user_raw': userid}},
-        ]}
+        return {"or": [public_filter, {"term": {"user_raw": userid}}]}
 
 
 class GroupFilter(object):
@@ -192,13 +186,13 @@ class UriFilter(object):
         self.request = request
 
     def __call__(self, params):
-        if 'uri' not in params and 'url' not in params:
+        if "uri" not in params and "url" not in params:
             return None
-        query_uris = [v for k, v in params.items() if k in ['uri', 'url']]
-        if 'uri' in params:
-            del params['uri']
-        if 'url' in params:
-            del params['url']
+        query_uris = [v for k, v in params.items() if k in ["uri", "url"]]
+        if "uri" in params:
+            del params["uri"]
+        if "url" in params:
+            del params["url"]
 
         uris = set()
         for query_uri in query_uris:
@@ -217,13 +211,13 @@ class UserFilter(object):
     """
 
     def __call__(self, params):
-        if 'user' not in params:
+        if "user" not in params:
             return None
 
-        users = [v.lower() for k, v in params.items() if k == 'user']
-        del params['user']
+        users = [v.lower() for k, v in params.items() if k == "user"]
+        del params["user"]
 
-        return {'terms': {'user': users}}
+        return {"terms": {"user": users}}
 
 
 class DeletedFilter(object):
@@ -241,7 +235,7 @@ class DeletedFilter(object):
 
 class NipsaFilter(object):
     def __init__(self, request):
-        self.group_service = request.find_service(name='group')
+        self.group_service = request.find_service(name="group")
         self.user = request.user
 
     def __call__(self, _):
@@ -296,7 +290,7 @@ class AnyMatcher(object):
     def __call__(self, params):
         if "any" not in params:
             return None
-        qs = ' '.join([v for k, v in params.items() if k == "any"])
+        qs = " ".join([v for k, v in params.items() if k == "any"])
         result = {
             "simple_query_string": {
                 "fields": ["quote", "tags", "text", "uri.parts"],
@@ -312,15 +306,14 @@ class TagsMatcher(object):
     """Matches the tags field against 'tag' or 'tags' parameters."""
 
     def __call__(self, params):
-        tags = set(v for k, v in params.items() if k in ['tag', 'tags'])
+        tags = set(v for k, v in params.items() if k in ["tag", "tags"])
         try:
-            del params['tag']
-            del params['tags']
+            del params["tag"]
+            del params["tags"]
         except KeyError:
             pass
-        matchers = [{'match': {'tags': {'query': t, 'operator': 'and'}}}
-                    for t in tags]
-        return {'bool': {'must': matchers}} if matchers else None
+        matchers = [{"match": {"tags": {"query": t, "operator": "and"}}} for t in tags]
+        return {"bool": {"must": matchers}} if matchers else None
 
 
 class RepliesMatcher(object):
@@ -331,52 +324,34 @@ class RepliesMatcher(object):
         self.annotation_ids = ids
 
     def __call__(self, _):
-        return {
-            'terms': {'references': self.annotation_ids}
-        }
+        return {"terms": {"references": self.annotation_ids}}
 
 
 class TagsAggregation(object):
     def __init__(self, limit=0):
-        self.key = 'tags'
+        self.key = "tags"
         self.limit = limit
 
     def __call__(self, _):
-        return {
-            "terms": {
-                "field": "tags_raw",
-                "size": self.limit
-            }
-        }
+        return {"terms": {"field": "tags_raw", "size": self.limit}}
 
     def parse_result(self, result):
         if not result:
             return {}
 
-        return [
-            {'tag': b['key'], 'count': b['doc_count']}
-            for b in result['buckets']
-        ]
+        return [{"tag": b["key"], "count": b["doc_count"]} for b in result["buckets"]]
 
 
 class UsersAggregation(object):
     def __init__(self, limit=0):
-        self.key = 'users'
+        self.key = "users"
         self.limit = limit
 
     def __call__(self, _):
-        return {
-            "terms": {
-                "field": "user_raw",
-                "size": self.limit
-            }
-        }
+        return {"terms": {"field": "user_raw", "size": self.limit}}
 
     def parse_result(self, result):
         if not result:
             return {}
 
-        return [
-            {'user': b['key'], 'count': b['doc_count']}
-            for b in result['buckets']
-        ]
+        return [{"user": b["key"], "count": b["doc_count"]} for b in result["buckets"]]

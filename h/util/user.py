@@ -13,10 +13,7 @@ def split_user(userid):
     :raises ValueError: if the given userid isn't a valid userid
 
     """
-    match = re.match(r'^acct:([^@]+)@(.*)$', userid)
+    match = re.match(r"^acct:([^@]+)@(.*)$", userid)
     if match:
-        return {
-            'username': match.groups()[0],
-            'domain': match.groups()[1]
-        }
+        return {"username": match.groups()[0], "domain": match.groups()[1]}
     raise ValueError("{userid} isn't a valid userid".format(userid=userid))

@@ -16,21 +16,29 @@ class AnnotationStatsService(object):
     def user_annotation_counts(self, userid):
         """Return the count of annotations for this user."""
 
-        annotations = self.session.query(Annotation). \
-            filter_by(userid=userid, deleted=False). \
-            options(sa.orm.load_only('groupid', 'shared')).subquery()
-        grouping = sa.case([
-            (sa.not_(annotations.c.shared), 'private'),
-            (annotations.c.groupid == '__world__', 'public'),
-        ], else_='group')
+        annotations = (
+            self.session.query(Annotation)
+            .filter_by(userid=userid, deleted=False)
+            .options(sa.orm.load_only("groupid", "shared"))
+            .subquery()
+        )
+        grouping = sa.case(
+            [
+                (sa.not_(annotations.c.shared), "private"),
+                (annotations.c.groupid == "__world__", "public"),
+            ],
+            else_="group",
+        )
 
-        result = dict(self.session.query(grouping, sa.func.count(annotations.c.id)).group_by(grouping).all())
-        for key in ['public', 'group', 'private']:
+        result = dict(
+            self.session.query(grouping, sa.func.count(annotations.c.id))
+            .group_by(grouping)
+            .all()
+        )
+        for key in ["public", "group", "private"]:
             result.setdefault(key, 0)
 
-        result['total'] = result['public'] + \
-            result['group'] + \
-            result['private']
+        result["total"] = result["public"] + result["group"] + result["private"]
 
         return result
 
@@ -42,7 +50,8 @@ class AnnotationStatsService(object):
         return (
             self.session.query(Annotation)
             .filter_by(groupid=pubid, shared=True, deleted=False)
-            .count())
+            .count()
+        )
 
 
 def annotation_stats_factory(context, request):

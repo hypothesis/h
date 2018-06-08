@@ -11,35 +11,38 @@ from h.presenters.document_html import DocumentHTMLPresenter
 
 
 class TestDocumentHTMLPresenter(object):
-
     def test_filename_with_http_uri(self):
         presenter = self.presenter(
-            document_uris=[mock.Mock(uri="http://example.com/example.html")])
+            document_uris=[mock.Mock(uri="http://example.com/example.html")]
+        )
 
-        assert presenter.filename == ''
+        assert presenter.filename == ""
 
     def test_filename_with_file_uri(self):
         presenter = self.presenter(
-            document_uris=[mock.Mock(uri="file:///home/seanh/MyFile.pdf")])
+            document_uris=[mock.Mock(uri="file:///home/seanh/MyFile.pdf")]
+        )
 
         assert presenter.filename == "MyFile.pdf"
 
     def test_filename_returns_Markup(self):
         presenter = self.presenter(
-            document_uris=[mock.Mock(uri="file:///home/seanh/MyFile.pdf")])
+            document_uris=[mock.Mock(uri="file:///home/seanh/MyFile.pdf")]
+        )
 
         assert isinstance(presenter.filename, jinja2.Markup)
 
     def test_filename_with_FILE_uri(self):
         presenter = self.presenter(
-            document_uris=[mock.Mock(uri="FILE:///home/seanh/MyFile.pdf")])
+            document_uris=[mock.Mock(uri="FILE:///home/seanh/MyFile.pdf")]
+        )
 
         assert presenter.filename == "MyFile.pdf"
 
     def test_filename_with_folder(self):
-        presenter = self.presenter(document_uris=[
-            mock.Mock(uri="file:///home/seanh/My%20Documents/")
-        ])
+        presenter = self.presenter(
+            document_uris=[mock.Mock(uri="file:///home/seanh/My%20Documents/")]
+        )
 
         assert presenter.filename == ""
 
@@ -68,7 +71,7 @@ class TestDocumentHTMLPresenter(object):
 
         assert isinstance(self.presenter(web_uri=web_uri).href, jinja2.Markup)
 
-    link_text_fixtures = pytest.mark.usefixtures('title')
+    link_text_fixtures = pytest.mark.usefixtures("title")
 
     @link_text_fixtures
     def test_link_text_with_non_http_title(self, title):
@@ -103,13 +106,15 @@ class TestDocumentHTMLPresenter(object):
 
     @link_text_fixtures
     def test_link_text_returns_Markup_if_title_returns_Markup(self, title):
-        for title_ in (jinja2.Markup("Example Document"),
-                       jinja2.Markup("http://www.example.com/example.html"),
-                       jinja2.Markup("https://www.example.com/example.html")):
+        for title_ in (
+            jinja2.Markup("Example Document"),
+            jinja2.Markup("http://www.example.com/example.html"),
+            jinja2.Markup("https://www.example.com/example.html"),
+        ):
             title.return_value = title_
             assert isinstance(self.presenter().link_text, jinja2.Markup)
 
-    hostname_or_filename_fixtures = pytest.mark.usefixtures('uri', 'filename')
+    hostname_or_filename_fixtures = pytest.mark.usefixtures("uri", "filename")
 
     @hostname_or_filename_fixtures
     def test_hostname_or_filename_returns_filename_for_files(self, filename):
@@ -118,8 +123,7 @@ class TestDocumentHTMLPresenter(object):
         assert self.presenter().hostname_or_filename == "MyFile.pdf"
 
     @hostname_or_filename_fixtures
-    def test_hostname_or_filename_returns_Markup_if_filename_does(self,
-                                                                  filename):
+    def test_hostname_or_filename_returns_Markup_if_filename_does(self, filename):
         filename.return_value = jinja2.Markup("MyFile.pdf")
 
         assert isinstance(self.presenter().hostname_or_filename, jinja2.Markup)
@@ -131,27 +135,21 @@ class TestDocumentHTMLPresenter(object):
         assert self.presenter().hostname_or_filename == "My File.pdf"
 
     @hostname_or_filename_fixtures
-    def test_hostname_or_filename_returns_hostname_for_non_files(self,
-                                                                 uri,
-                                                                 filename):
+    def test_hostname_or_filename_returns_hostname_for_non_files(self, uri, filename):
         filename.return_value = ""
         uri.return_value = "http://www.example.com/example.html"
 
         assert self.presenter().hostname_or_filename == "www.example.com"
 
     @hostname_or_filename_fixtures
-    def test_hostname_or_filename_returns_Markup_when_uri_does(self,
-                                                               uri,
-                                                               filename):
+    def test_hostname_or_filename_returns_Markup_when_uri_does(self, uri, filename):
         filename.return_value = ""
         uri.return_value = jinja2.Markup("http://www.example.com/example.html")
 
         assert isinstance(self.presenter().hostname_or_filename, jinja2.Markup)
 
     @hostname_or_filename_fixtures
-    def test_hostname_or_filename_with_empty_string_for_uri(self,
-                                                            uri,
-                                                            filename):
+    def test_hostname_or_filename_with_empty_string_for_uri(self, uri, filename):
         filename.return_value = ""
         uri.return_value = ""
 
@@ -167,12 +165,12 @@ class TestDocumentHTMLPresenter(object):
 
         assert isinstance(self.presenter().hostname_or_filename, text_type)
 
-    title_fixtures = pytest.mark.usefixtures('uri', 'filename')
+    title_fixtures = pytest.mark.usefixtures("uri", "filename")
 
     @title_fixtures
     def test_title_with_a_document_that_has_a_title(self):
         """If the document has a title it should use it."""
-        title = 'document title'
+        title = "document title"
 
         assert self.presenter(title=title).title == title
 
@@ -183,7 +181,7 @@ class TestDocumentHTMLPresenter(object):
         title = self.presenter(title=spam_link).title
 
         assert jinja2.escape(spam_link) in title
-        for char in ['<', '>', '"', "'"]:
+        for char in ["<", ">", '"', "'"]:
             assert char not in title
         assert isinstance(title, jinja2.Markup)
 
@@ -206,8 +204,7 @@ class TestDocumentHTMLPresenter(object):
         filename.return_value = ""  # This is not a file:// URI.
         uri.return_value = "http://example.com/example%201.html"
 
-        assert self.presenter(title=None).title == (
-            "http://example.com/example 1.html")
+        assert self.presenter(title=None).title == ("http://example.com/example 1.html")
 
     @title_fixtures
     def test_title_returns_Markup_when_uri_returns_Markup(self, uri, filename):
@@ -222,17 +219,11 @@ class TestDocumentHTMLPresenter(object):
         uri.return_value = "http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
 
-        assert self.presenter(title=None).title == (
-            "http://example.com/example.html")
+        assert self.presenter(title=None).title == ("http://example.com/example.html")
 
     @title_fixtures
-    @pytest.mark.parametrize('title', [
-        23, 23.7, False, {'foo': 'bar'}, [1, 2, 3]
-    ])
-    def test_title_when_document_title_is_not_a_string(self,
-                                                       uri,
-                                                       filename,
-                                                       title):
+    @pytest.mark.parametrize("title", [23, 23.7, False, {"foo": "bar"}, [1, 2, 3]])
+    def test_title_when_document_title_is_not_a_string(self, uri, filename, title):
         """If title is None it should use the uri instead."""
         uri.return_value = "http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
@@ -240,20 +231,15 @@ class TestDocumentHTMLPresenter(object):
         assert isinstance(self.presenter(title=title).title, text_type)
 
     @title_fixtures
-    def test_title_when_document_has_empty_string_for_title(self,
-                                                            uri,
-                                                            filename):
+    def test_title_when_document_has_empty_string_for_title(self, uri, filename):
         """If title is "" it should use the uri instead."""
         uri.return_value = "http://example.com/example.html"
         filename.return_value = ""  # This is not a file:// URI.
 
-        assert self.presenter(title="").title == (
-            "http://example.com/example.html")
+        assert self.presenter(title="").title == ("http://example.com/example.html")
 
     @title_fixtures
-    def test_title_when_no_document_title_no_filename_and_no_uri(self,
-                                                                 uri,
-                                                                 filename):
+    def test_title_when_no_document_title_no_filename_and_no_uri(self, uri, filename):
         uri.return_value = ""
         filename.return_value = ""
 
@@ -268,16 +254,16 @@ class TestDocumentHTMLPresenter(object):
         just return Document.web_uri.
 
         """
-        non_via_uri = 'http://example.com/page'
+        non_via_uri = "http://example.com/page"
 
         assert self.presenter(web_uri=non_via_uri).web_uri == non_via_uri
 
     def test_web_uri_returns_None_if_document_web_uri_is_None(self):
         assert self.presenter(web_uri=None).web_uri is None
 
-    @pytest.mark.parametrize('via_url', (
-                             'https://via.hypothes.is',
-                             'https://via.hypothes.is/'))
+    @pytest.mark.parametrize(
+        "via_url", ("https://via.hypothes.is", "https://via.hypothes.is/")
+    )
     def test_web_uri_returns_via_front_page(self, via_url):
         """It doesn't strip https://via.hypothes.is if that's the entire URL."""
         assert self.presenter(web_uri=via_url).web_uri == via_url
@@ -291,11 +277,11 @@ class TestDocumentHTMLPresenter(object):
         URIs in our production DB, DocumentHTMLPresenter.web_uri only strips
         https://via.hypothes.is/ and ignores http://via.hypothes.is/.
         """
-        uri = 'http://via.hypothes.is/http://example.com/page'
+        uri = "http://via.hypothes.is/http://example.com/page"
 
         assert self.presenter(web_uri=uri).web_uri == uri
 
-    @pytest.mark.parametrize('path', ('foo', 'http://example.com'))
+    @pytest.mark.parametrize("path", ("foo", "http://example.com"))
     def test_web_uri_strips_via(self, path):
         """
         It strips any https://via.hypothes.is/ prefix from Document.web_uri.
@@ -305,7 +291,7 @@ class TestDocumentHTMLPresenter(object):
         returns <path> with the https://via.hypothes.is/ prefix removed.
 
         """
-        uri = 'https://via.hypothes.is/' + path
+        uri = "https://via.hypothes.is/" + path
 
         assert self.presenter(web_uri=uri).web_uri == path
 
@@ -314,18 +300,24 @@ class TestDocumentHTMLPresenter(object):
 
     @pytest.fixture
     def filename(self, patch):
-        return patch('h.presenters.document_html.DocumentHTMLPresenter.filename',
-                     autospec=None,
-                     new_callable=mock.PropertyMock)
+        return patch(
+            "h.presenters.document_html.DocumentHTMLPresenter.filename",
+            autospec=None,
+            new_callable=mock.PropertyMock,
+        )
 
     @pytest.fixture
     def title(self, patch):
-        return patch('h.presenters.document_html.DocumentHTMLPresenter.title',
-                     autospec=None,
-                     new_callable=mock.PropertyMock)
+        return patch(
+            "h.presenters.document_html.DocumentHTMLPresenter.title",
+            autospec=None,
+            new_callable=mock.PropertyMock,
+        )
 
     @pytest.fixture
     def uri(self, patch):
-        return patch('h.presenters.document_html.DocumentHTMLPresenter.uri',
-                     autospec=None,
-                     new_callable=mock.PropertyMock)
+        return patch(
+            "h.presenters.document_html.DocumentHTMLPresenter.uri",
+            autospec=None,
+            new_callable=mock.PropertyMock,
+        )

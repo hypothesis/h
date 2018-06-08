@@ -15,18 +15,18 @@ class TestGroupfinderService(object):
         assert svc.find(group.pubid) == group
 
     def test_sets_authority_on_world_group(self, svc):
-        group = svc.find('__world__')
+        group = svc.find("__world__")
 
-        assert group.authority == 'example.com'
+        assert group.authority == "example.com"
 
     def test_returns_none_when_not_found(self, svc, factories):
         factories.Group()
 
-        assert svc.find('bogus') is None
+        assert svc.find("bogus") is None
 
     @pytest.fixture
     def svc(self, db_session):
-        return GroupfinderService(db_session, 'example.com')
+        return GroupfinderService(db_session, "example.com")
 
 
 class TestGroupfinderServiceFactory(object):

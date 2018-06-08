@@ -34,9 +34,8 @@ from pyramid import httpexceptions
 
 
 class Matcher(object):
-
     def __eq__(self, other):
-        raise NotImplementedError('subclasses should provide an __eq__ method')
+        raise NotImplementedError("subclasses should provide an __eq__ method")
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -67,6 +66,7 @@ class NativeString(Matcher):
     TODO: Delete this matcher once we no longer support Python 2.
 
     """
+
     def __init__(self, string):
         self.string = str(string)
 
@@ -92,7 +92,7 @@ class InstanceOf(Matcher):
         return isinstance(other, self.type)
 
     def __repr__(self):
-        return '<instance of {!r}>'.format(self.type)
+        return "<instance of {!r}>".format(self.type)
 
 
 class IterableWith(Matcher):
@@ -105,7 +105,7 @@ class IterableWith(Matcher):
         return list(other) == self.items
 
     def __repr__(self):
-        return '<iterable with {!r}>'.format(self.items)
+        return "<iterable with {!r}>".format(self.items)
 
 
 class MappingContaining(Matcher):
@@ -123,7 +123,7 @@ class MappingContaining(Matcher):
             return True
 
     def __repr__(self):
-        return '<mapping containing {!r}>'.format(self.key)
+        return "<mapping containing {!r}>".format(self.key)
 
 
 class Redirect302To(Matcher):
@@ -160,7 +160,7 @@ class Regex(Matcher):
         return bool(self.patt.match(other))
 
     def __repr__(self):
-        return '<string matching re {!r}>'.format(self.patt.pattern)
+        return "<string matching re {!r}>".format(self.patt.pattern)
 
 
 class UnorderedList(Matcher):
@@ -171,6 +171,7 @@ class UnorderedList(Matcher):
     (and no more), regardless of order.
 
     """
+
     def __init__(self, items):
         self.items = items
 

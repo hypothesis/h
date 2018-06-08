@@ -6,12 +6,14 @@ import logging
 
 
 # logging levels from https://docs.python.org/2/library/logging.html#logging-levels
-LEVELS = {"CRITICAL": 50,
-          "ERROR": 40,
-          "WARNING": 30,
-          "INFO": 20,
-          "DEBUG": 10,
-          "NOTSET": 0}
+LEVELS = {
+    "CRITICAL": 50,
+    "ERROR": 40,
+    "WARNING": 30,
+    "INFO": 20,
+    "DEBUG": 10,
+    "NOTSET": 0,
+}
 
 
 class ExceptionFilter(logging.Filter):
@@ -37,14 +39,20 @@ class ExceptionFilter(logging.Filter):
             try:
                 self._ignore_exceptions.append((logging_levels[exc_level], exc_name))
             except KeyError:
-                raise ValueError("""The logging level provided ({})
-                                 is invalid. Valid options: {}"""
-                                 .format(exc_level, logging_levels.keys()))
+                raise ValueError(
+                    """The logging level provided ({})
+                                 is invalid. Valid options: {}""".format(
+                        exc_level, logging_levels.keys()
+                    )
+                )
 
     def filter(self, record):
         """Filter out the specified exceptions with specified logging level."""
         if record.exc_info:
             for filter_level, filter_exc in self._ignore_exceptions:
-                if record.exc_info[0].__name__ == filter_exc and record.levelno == filter_level:
+                if (
+                    record.exc_info[0].__name__ == filter_exc
+                    and record.levelno == filter_level
+                ):
                     return False
         return True

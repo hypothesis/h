@@ -11,13 +11,16 @@ from h.db import Base
 log = logging.getLogger(__name__)
 
 FEATURES = {
-    'embed_cachebuster': ("Cache-bust client entry point URL to prevent browser/CDN from "
-                          "using a cached version?"),
-    'filter_highlights': ("Filter highlights in document based on visible"
-                          " annotations in sidebar?"),
-    'overlay_highlighter': "Use the new overlay highlighter?",
-    'api_render_user_info': "Return users' extended info in API responses?",
-    'client_display_names': "Render display names instead of user names in the client",
+    "embed_cachebuster": (
+        "Cache-bust client entry point URL to prevent browser/CDN from "
+        "using a cached version?"
+    ),
+    "filter_highlights": (
+        "Filter highlights in document based on visible" " annotations in sidebar?"
+    ),
+    "overlay_highlighter": "Use the new overlay highlighter?",
+    "api_render_user_info": "Return users' extended info in API responses?",
+    "client_display_names": "Render display names instead of user names in the client",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -38,36 +41,41 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
 
     """A feature flag for the application."""
 
-    __tablename__ = 'feature'
+    __tablename__ = "feature"
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     name = sa.Column(sa.Text(), nullable=False, unique=True)
 
     # Is the feature enabled for everyone?
-    everyone = sa.Column(sa.Boolean,
-                         nullable=False,
-                         default=False,
-                         server_default=sa.sql.expression.false())
+    everyone = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
 
     # Is the feature enabled for admins?
-    admins = sa.Column(sa.Boolean,
-                       nullable=False,
-                       default=False,
-                       server_default=sa.sql.expression.false())
+    admins = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
 
     # Is the feature enabled for all staff?
-    staff = sa.Column(sa.Boolean,
-                      nullable=False,
-                      default=False,
-                      server_default=sa.sql.expression.false())
+    staff = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
 
     @property
     def description(self):
@@ -76,14 +84,10 @@ class Feature(Base):
     @classmethod
     def all(cls, session):
         """Fetch (or, if necessary, create) rows for all defined features."""
-        features = {f.name: f
-                    for f in session.query(cls)
-                    if f.name in FEATURES}
+        features = {f.name: f for f in session.query(cls) if f.name in FEATURES}
 
         # Add missing features
-        missing = [cls(name=n)
-                   for n in FEATURES
-                   if n not in features]
+        missing = [cls(name=n) for n in FEATURES if n not in features]
         session.add_all(missing)
 
         return list(features.values()) + missing
@@ -106,7 +110,7 @@ class Feature(Base):
         unknown_flags = session.query(cls).filter(sa.not_(cls.name.in_(known)))
         count = unknown_flags.delete(synchronize_session=False)
         if count > 0:
-            log.info('removed %d old/unknown feature flags from database', count)
+            log.info("removed %d old/unknown feature flags from database", count)
 
     def __repr__(self):
-        return '<Feature {f.name} everyone={f.everyone}>'.format(f=self)
+        return "<Feature {f.name} everyone={f.everyone}>".format(f=self)

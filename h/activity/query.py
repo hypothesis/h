@@ -21,11 +21,9 @@ from h.search import TagsAggregation
 from h.search import UsersAggregation
 
 
-class ActivityResults(namedtuple('ActivityResults', [
-    'total',
-    'aggregations',
-    'timeframes',
-])):
+class ActivityResults(
+    namedtuple("ActivityResults", ["total", "aggregations", "timeframes"])
+):
     pass
 
 
@@ -42,7 +40,7 @@ def extract(request, parse=parser.parse):
     If no query is present in the passed request, returns ``None``.
     """
 
-    q = parse(request.params.get('q', ''))
+    q = parse(request.params.get("q", ""))
 
     # If the query sent to a {group, user} search page includes a {group,
     # user}, we override it, because otherwise we'll display the union of the
@@ -50,10 +48,10 @@ def extract(request, parse=parser.parse):
     #
     # (Note that a query for the *intersection* of >1 users or groups is by
     # definition empty)
-    if request.matched_route.name == 'group_read':
-        q['group'] = request.matchdict['pubid']
-    elif request.matched_route.name == 'activity.user_search':
-        q['user'] = request.matchdict['username']
+    if request.matched_route.name == "group_read":
+        q["group"] = request.matchdict["pubid"]
+    elif request.matched_route.name == "activity.user_search":
+        q["user"] = request.matchdict["username"]
 
     return q
 
@@ -74,30 +72,31 @@ def check_url(request, query, unparse=parser.unparse):
 
     Queries containing more than one group or user term are unaffected.
     """
-    if request.matched_route.name != 'activity.search':
+    if request.matched_route.name != "activity.search":
         return
 
     redirect = None
 
-    if _single_entry(query, 'group'):
-        pubid = query.get('group')
+    if _single_entry(query, "group"):
+        pubid = query.get("group")
         group = request.db.query(Group).filter_by(pubid=pubid).one_or_none()
         if group:
-            query.pop('group')
-            redirect = request.route_path('group_read',
-                                          pubid=group.pubid,
-                                          slug=group.slug,
-                                          _query={'q': unparse(query)})
+            query.pop("group")
+            redirect = request.route_path(
+                "group_read",
+                pubid=group.pubid,
+                slug=group.slug,
+                _query={"q": unparse(query)},
+            )
 
-    elif _single_entry(query, 'user'):
-        username = query.get('user')
-        user = request.find_service(name='user').fetch(username,
-                                                       request.authority)
+    elif _single_entry(query, "user"):
+        username = query.get("user")
+        user = request.find_service(name="user").fetch(username, request.authority)
         if user:
-            query.pop('user')
-            redirect = request.route_path('activity.user_search',
-                                          username=username,
-                                          _query={'q': unparse(query)})
+            query.pop("user")
+            redirect = request.route_path(
+                "activity.user_search", username=username, _query={"q": unparse(query)}
+            )
 
     if redirect is not None:
         raise HTTPFound(location=redirect)
@@ -107,9 +106,11 @@ def check_url(request, query, unparse=parser.unparse):
 def execute(request, query, page_size):
     search_result = _execute_search(request, query, page_size)
 
-    result = ActivityResults(total=search_result.total,
-                             aggregations=search_result.aggregations,
-                             timeframes=[])
+    result = ActivityResults(
+        total=search_result.total,
+        aggregations=search_result.aggregations,
+        timeframes=[],
+    )
 
     if result.total == 0:
         return result
@@ -120,10 +121,14 @@ def execute(request, query, page_size):
     result.timeframes.extend(bucketing.bucket(anns))
 
     # Fetch all groups
-    group_pubids = set([a.groupid
-                        for t in result.timeframes
-                        for b in t.document_buckets.values()
-                        for a in b.annotations])
+    group_pubids = set(
+        [
+            a.groupid
+            for t in result.timeframes
+            for b in t.document_buckets.values()
+            for a in b.annotations
+        ]
+    )
     groups = {g.pubid: g for g in _fetch_groups(request.db, group_pubids)}
 
     # Add group information to buckets and present annotations
@@ -131,12 +136,14 @@ def execute(request, query, page_size):
         for bucket in timeframe.document_buckets.values():
             bucket.presented_annotations = []
             for annotation in bucket.annotations:
-                bucket.presented_annotations.append({
-                    'annotation': presenters.AnnotationHTMLPresenter(annotation),
-                    'group': groups.get(annotation.groupid),
-                    'html_link': links.html_link(request, annotation),
-                    'incontext_link': links.incontext_link(request, annotation)
-                })
+                bucket.presented_annotations.append(
+                    {
+                        "annotation": presenters.AnnotationHTMLPresenter(annotation),
+                        "group": groups.get(annotation.groupid),
+                        "html_link": links.html_link(request, annotation),
+                        "incontext_link": links.incontext_link(request, annotation),
+                    }
+                )
 
     return result
 
@@ -145,7 +152,7 @@ def aggregations_for(query):
     aggregations = [TagsAggregation(limit=50)]
 
     # Should we aggregate by user?
-    if _single_entry(query, 'group'):
+    if _single_entry(query, "group"):
         aggregations.append(UsersAggregation(limit=50))
 
     return aggregations
@@ -157,7 +164,8 @@ def fetch_annotations(session, ids):
         return query.options(subqueryload(Annotation.document))
 
     annotations = storage.fetch_ordered_annotations(
-        session, ids, query_processor=load_documents)
+        session, ids, query_processor=load_documents
+    )
 
     return annotations
 
@@ -171,7 +179,7 @@ def _execute_search(request, query, page_size):
         search.append_aggregation(agg)
 
     query = query.copy()
-    page = request.params.get('page', 1)
+    page = request.params.get("page", 1)
 
     try:
         page = int(page)
@@ -182,8 +190,8 @@ def _execute_search(request, query, page_size):
     if page < 1:
         page = 1
 
-    query['limit'] = page_size
-    query['offset'] = (page - 1) * page_size
+    query["limit"] = page_size
+    query["offset"] = (page - 1) * page_size
 
     search_result = search.run(query)
     return search_result

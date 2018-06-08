@@ -11,11 +11,11 @@ from h.util.view import json_view
 log = logging.getLogger(__name__)
 
 
-@json_view(route_name='status')
+@json_view(route_name="status")
 def status(request):
     try:
-        request.db.execute('SELECT 1')
+        request.db.execute("SELECT 1")
     except Exception as exc:
         log.exception(exc)
-        raise APIError('Database connection failed')
-    return {'status': 'okay'}
+        raise APIError("Database connection failed")
+    return {"status": "okay"}

@@ -34,11 +34,11 @@ class EventQueue(object):
                 # [1] See https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/events.html
                 self.request.registry.notify(event)
             except Exception:
-                sentry = getattr(event.request, 'sentry', None)
+                sentry = getattr(event.request, "sentry", None)
                 if sentry is not None:
                     sentry.captureException()
                 else:
-                    log.exception('Queued event subscriber failed')
+                    log.exception("Queued event subscriber failed")
 
                 if event.request.debug:
                     raise
@@ -51,6 +51,4 @@ class EventQueue(object):
 
 
 def includeme(config):
-    config.add_request_method(EventQueue,
-                              name='notify_after_commit',
-                              reify=True)
+    config.add_request_method(EventQueue, name="notify_after_commit", reify=True)

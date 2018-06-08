@@ -45,15 +45,15 @@ class AnnotationHiddenFormatter(object):
         group = annotation_resource.group
 
         if self._current_user_is_moderator(group):
-            return {'hidden': self._is_hidden(annotation)}
+            return {"hidden": self._is_hidden(annotation)}
 
         if self._current_user_is_author(annotation):
-            return {'hidden': False}
+            return {"hidden": False}
 
         if self._is_hidden(annotation):
-            return {'hidden': True, 'text': '', 'tags': []}
+            return {"hidden": True, "text": "", "tags": []}
         else:
-            return {'hidden': False}
+            return {"hidden": False}
 
     def _current_user_is_moderator(self, group):
         return self._moderator_check(group)

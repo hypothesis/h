@@ -12,54 +12,61 @@ class UserNotFoundError(Exception):
     pass
 
 
-@view_config(route_name='admin_nipsa',
-             request_method='GET',
-             renderer='h:templates/admin/nipsa.html.jinja2',
-             permission='admin_nipsa')
+@view_config(
+    route_name="admin_nipsa",
+    request_method="GET",
+    renderer="h:templates/admin/nipsa.html.jinja2",
+    permission="admin_nipsa",
+)
 def nipsa_index(request):
-    nipsa_service = request.find_service(name='nipsa')
+    nipsa_service = request.find_service(name="nipsa")
     return {
         "userids": sorted(nipsa_service.flagged_userids),
         "default_authority": request.authority,
     }
 
 
-@view_config(route_name='admin_nipsa',
-             request_method='POST',
-             request_param='add',
-             permission='admin_nipsa',
-             require_csrf=True)
+@view_config(
+    route_name="admin_nipsa",
+    request_method="POST",
+    request_param="add",
+    permission="admin_nipsa",
+    require_csrf=True,
+)
 def nipsa_add(request):
-    username = request.params['add'].strip()
-    authority = request.params['authority'].strip()
+    username = request.params["add"].strip()
+    authority = request.params["authority"].strip()
     user = models.User.get_by_username(request.db, username, authority)
 
     if user is None:
         raise UserNotFoundError(
-            _("Could not find user with username %s and authority %s" % (username, authority))
+            _(
+                "Could not find user with username %s and authority %s"
+                % (username, authority)
+            )
         )
 
-    nipsa_service = request.find_service(name='nipsa')
+    nipsa_service = request.find_service(name="nipsa")
     nipsa_service.flag(user)
 
     index = request.route_path("admin_nipsa")
     return httpexceptions.HTTPSeeOther(index)
 
 
-@view_config(route_name='admin_nipsa',
-             request_method='POST',
-             request_param='remove',
-             permission='admin_nipsa',
-             require_csrf=True)
+@view_config(
+    route_name="admin_nipsa",
+    request_method="POST",
+    request_param="remove",
+    permission="admin_nipsa",
+    require_csrf=True,
+)
 def nipsa_remove(request):
-    userid = request.params['remove']
+    userid = request.params["remove"]
     user = request.db.query(models.User).filter_by(userid=userid).first()
     if user is None:
-        raise UserNotFoundError(
-            _("Could not find user with userid %s" % userid)
-        )
+        raise UserNotFoundError(_("Could not find user with userid %s" % userid))
 
-    nipsa_service = request.find_service(name='nipsa')
+    nipsa_service = request.find_service(name="nipsa")
     nipsa_service.unflag(user)
 
     index = request.route_path("admin_nipsa")
@@ -68,5 +75,5 @@ def nipsa_remove(request):
 
 @view_config(context=UserNotFoundError)
 def user_not_found(exc, request):
-    request.session.flash(str(exc), 'error')
-    return httpexceptions.HTTPFound(location=request.route_path('admin_nipsa'))
+    request.session.flash(str(exc), "error")
+    return httpexceptions.HTTPFound(location=request.route_path("admin_nipsa"))

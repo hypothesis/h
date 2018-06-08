@@ -26,7 +26,7 @@ def reindex(ctx):
     _reindex_old(ctx)
 
 
-@search.command('update-settings')
+@search.command("update-settings")
 @click.pass_context
 def update_settings(ctx):
     """
@@ -48,9 +48,9 @@ def _reindex_old(ctx):
     and will raise an error if it is not.
     """
 
-    os.environ['ELASTICSEARCH_CLIENT_TIMEOUT'] = '30'
+    os.environ["ELASTICSEARCH_CLIENT_TIMEOUT"] = "30"
 
-    request = ctx.obj['bootstrap']()
+    request = ctx.obj["bootstrap"]()
 
     indexer.reindex(request.db, request.es, request)
 
@@ -64,7 +64,7 @@ def _update_settings_old(ctx):
     this case you will likely need to reindex.
     """
 
-    request = ctx.obj['bootstrap']()
+    request = ctx.obj["bootstrap"]()
 
     try:
         config.update_index_settings(request.es)

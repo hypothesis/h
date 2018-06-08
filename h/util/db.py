@@ -67,13 +67,14 @@ def on_transaction_end(session):
            self._cache = {}
 
     """
+
     def decorate(func):
         def _handler(_, transaction):
             # We only clear the cache when the top-level transaction finishes.
             if transaction.parent is None:
                 func()
 
-        sqlalchemy.event.listen(session, 'after_transaction_end', _handler)
+        sqlalchemy.event.listen(session, "after_transaction_end", _handler)
         return func
 
     return decorate

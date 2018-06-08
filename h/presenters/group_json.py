@@ -16,24 +16,24 @@ class GroupJSONPresenter(object):
     def asdict(self, expand=[]):
         model = self._model()
         self._expand(model, expand)
-        model['links'] = self.context.links or {}
+        model["links"] = self.context.links or {}
         return model
 
     def _expand(self, model, expand=[]):
-        if 'organization' in expand:
-            model['organization'] = OrganizationJSONPresenter(
-              self.organization_context
+        if "organization" in expand:
+            model["organization"] = OrganizationJSONPresenter(
+                self.organization_context
             ).asdict()
         return model
 
     def _model(self):
         model = {
-          'id': self.context.id,
-          'name': self.group.name,
-          'organization': self.organization_context.id,
-          'public': self.group.is_public,  # DEPRECATED: TODO: remove from client
-          'scoped': True if self.group.scopes else False,
-          'type': self.group.type
+            "id": self.context.id,
+            "name": self.group.name,
+            "organization": self.organization_context.id,
+            "public": self.group.is_public,  # DEPRECATED: TODO: remove from client
+            "scoped": True if self.group.scopes else False,
+            "type": self.group.type,
         }
         return model
 
@@ -45,4 +45,7 @@ class GroupsJSONPresenter(object):
         self.contexts = group_contexts
 
     def asdicts(self, expand=[]):
-        return [GroupJSONPresenter(group_context).asdict(expand=expand) for group_context in self.contexts]
+        return [
+            GroupJSONPresenter(group_context).asdict(expand=expand)
+            for group_context in self.contexts
+        ]

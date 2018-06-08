@@ -12,65 +12,62 @@ from pyramid import security
 from h.streamer import websocket
 
 
-FakeMessage = namedtuple('FakeMessage', ['data'])
+FakeMessage = namedtuple("FakeMessage", ["data"])
 
 
 class TestMessage(object):
     def test_reply_adds_reply_to(self, socket):
         """Adds an appropriate `reply_to` field to the sent message."""
-        message = websocket.Message(socket=socket, payload={'id': 123})
+        message = websocket.Message(socket=socket, payload={"id": 123})
 
-        message.reply({'foo': 'bar'})
+        message.reply({"foo": "bar"})
 
-        socket.send_json.assert_called_once_with({'ok': True,
-                                                  'reply_to': 123,
-                                                  'foo': 'bar'})
+        socket.send_json.assert_called_once_with(
+            {"ok": True, "reply_to": 123, "foo": "bar"}
+        )
 
-    @pytest.mark.parametrize('ok', [True, False])
+    @pytest.mark.parametrize("ok", [True, False])
     def test_reply_adds_ok(self, ok, socket):
         """Adds an appropriate `ok` field to the sent message."""
-        message = websocket.Message(socket=socket, payload={'id': 123})
+        message = websocket.Message(socket=socket, payload={"id": 123})
 
-        message.reply({'foo': 'bar'}, ok=ok)
+        message.reply({"foo": "bar"}, ok=ok)
 
-        socket.send_json.assert_called_once_with({'ok': ok,
-                                                  'reply_to': 123,
-                                                  'foo': 'bar'})
+        socket.send_json.assert_called_once_with(
+            {"ok": ok, "reply_to": 123, "foo": "bar"}
+        )
 
     def test_reply_overrides_ok_and_reply_to_fields_in_payload(self, socket):
         """Payload `ok` and `reply_to` fields should be ignored."""
-        message = websocket.Message(socket=socket, payload={'id': 123})
+        message = websocket.Message(socket=socket, payload={"id": 123})
 
-        message.reply({'foo': 'bar', 'ok': False, 'reply_to': 'wibble'})
+        message.reply({"foo": "bar", "ok": False, "reply_to": "wibble"})
 
-        socket.send_json.assert_called_once_with({'ok': True,
-                                                  'reply_to': 123,
-                                                  'foo': 'bar'})
+        socket.send_json.assert_called_once_with(
+            {"ok": True, "reply_to": 123, "foo": "bar"}
+        )
 
-    @pytest.mark.parametrize('payload', [
-        {},
-        {'id': 'a string'},
-        {'id': [1, 2, 3]},
-        {'id': None},
-    ])
+    @pytest.mark.parametrize(
+        "payload", [{}, {"id": "a string"}, {"id": [1, 2, 3]}, {"id": None}]
+    )
     def test_reply_does_not_send_if_id_missing_or_invalid(self, payload, socket):
         """Do not send a reply at all if we don't have an incoming message ID."""
         message = websocket.Message(socket=socket, payload=payload)
 
-        message.reply({'foo': 'bar'})
+        message.reply({"foo": "bar"})
 
         assert not socket.send_json.called
 
     @pytest.fixture
     def socket(self):
-        return mock.Mock(spec_set=['send_json'])
+        return mock.Mock(spec_set=["send_json"])
 
 
 class TestWebSocket(object):
     def test_stores_instance_list(self, fake_environ):
         clients = [
             websocket.WebSocket(mock.sentinel.sock1, environ=fake_environ),
-            websocket.WebSocket(mock.sentinel.sock2, environ=fake_environ)
+            websocket.WebSocket(mock.sentinel.sock2, environ=fake_environ),
         ]
 
         for c in clients:
@@ -114,7 +111,7 @@ class TestWebSocket(object):
         client.received_message(message)
         result = queue.get_nowait()
 
-        assert result.payload == {'foo': 'bar'}
+        assert result.payload == {"foo": "bar"}
 
     def test_invalid_incoming_message_not_queued(self, client, queue):
         """Invalid messages should not end up on the queue."""
@@ -124,45 +121,48 @@ class TestWebSocket(object):
 
         assert queue.empty()
 
-    def test_invalid_incoming_message_closes_connection(self, client, queue, fake_socket_close):
+    def test_invalid_incoming_message_closes_connection(
+        self, client, queue, fake_socket_close
+    ):
         """Invalid messages should cause termination of the connection."""
         message = FakeMessage('{"foo":missingquotes}')
 
         client.received_message(message)
 
-        fake_socket_close.assert_called_once_with(client, reason='invalid message format')
+        fake_socket_close.assert_called_once_with(
+            client, reason="invalid message format"
+        )
 
     def test_socket_sets_auth_data_from_environ(self, client):
-        assert client.authenticated_userid == 'janet'
+        assert client.authenticated_userid == "janet"
         assert client.effective_principals == [
             security.Everyone,
             security.Authenticated,
-            'group:__world__',
+            "group:__world__",
         ]
 
     def test_socket_sets_registry_from_environ(self, client):
         assert client.registry == mock.sentinel.registry
 
     def test_socket_send_json(self, client, fake_socket_send):
-        payload = {'foo': 'bar'}
+        payload = {"foo": "bar"}
 
         client.send_json(payload)
 
         fake_socket_send.assert_called_once_with(client, '{"foo": "bar"}')
 
-    def test_socket_send_json_skips_when_terminated(self,
-                                                    client,
-                                                    fake_socket_send,
-                                                    fake_socket_terminated):
+    def test_socket_send_json_skips_when_terminated(
+        self, client, fake_socket_send, fake_socket_terminated
+    ):
         fake_socket_terminated.return_value = True
 
-        client.send_json({'foo': 'bar'})
+        client.send_json({"foo": "bar"})
 
         assert not fake_socket_send.called
 
     @pytest.fixture
     def client(self, fake_environ):
-        sock = mock.Mock(spec_set=['sendall'])
+        sock = mock.Mock(spec_set=["sendall"])
         return websocket.WebSocket(sock, environ=fake_environ)
 
     @pytest.fixture
@@ -172,33 +172,34 @@ class TestWebSocket(object):
     @pytest.fixture
     def fake_environ(self, queue):
         return {
-            'h.ws.authenticated_userid': 'janet',
-            'h.ws.effective_principals': [security.Everyone,
-                                          security.Authenticated,
-                                          'group:__world__'],
-            'h.ws.registry': mock.sentinel.registry,
-            'h.ws.streamer_work_queue': queue,
+            "h.ws.authenticated_userid": "janet",
+            "h.ws.effective_principals": [
+                security.Everyone,
+                security.Authenticated,
+                "group:__world__",
+            ],
+            "h.ws.registry": mock.sentinel.registry,
+            "h.ws.streamer_work_queue": queue,
         }
 
     @pytest.fixture
     def fake_socket_close(self, patch):
-        return patch('h.streamer.websocket.WebSocket.close')
+        return patch("h.streamer.websocket.WebSocket.close")
 
     @pytest.fixture
     def fake_socket_send(self, patch):
-        return patch('h.streamer.websocket.WebSocket.send')
+        return patch("h.streamer.websocket.WebSocket.send")
 
     @pytest.fixture
     def fake_socket_terminated(self, patch):
-        return patch('h.streamer.websocket.WebSocket.terminated')
+        return patch("h.streamer.websocket.WebSocket.terminated")
 
 
-@pytest.mark.usefixtures('handlers')
+@pytest.mark.usefixtures("handlers")
 class TestHandleMessage(object):
-
     def test_uses_unknown_handler_for_missing_type(self, unknown_handler):
         """If the type is missing, call the `None` handler."""
-        socket = mock.Mock(spec_set=['close'])
+        socket = mock.Mock(spec_set=["close"])
         message = websocket.Message(socket, payload={"foo": "bar"})
 
         websocket.handle_message(message)
@@ -207,9 +208,8 @@ class TestHandleMessage(object):
 
     def test_uses_unknown_handler_for_unknown_type(self, unknown_handler):
         """If the type is unknown, call the `None` handler."""
-        socket = mock.Mock(spec_set=['close'])
-        message = websocket.Message(socket, payload={"type": "donkeys",
-                                                     "foo": "bar"})
+        socket = mock.Mock(spec_set=["close"])
+        message = websocket.Message(socket, payload={"type": "donkeys", "foo": "bar"})
 
         websocket.handle_message(message)
 
@@ -217,9 +217,8 @@ class TestHandleMessage(object):
 
     def test_uses_appropriate_handler_for_known_type(self, foo_handler):
         """If the type is recognised, call the relevant handler."""
-        socket = mock.Mock(spec_set=['close'])
-        message = websocket.Message(socket, payload={"type": "foo",
-                                                     "foo": "bar"})
+        socket = mock.Mock(spec_set=["close"])
+        message = websocket.Message(socket, payload={"type": "foo", "foo": "bar"})
 
         websocket.handle_message(message)
 
@@ -235,10 +234,11 @@ class TestHandleMessage(object):
 
     @pytest.fixture
     def handlers(self, request, foo_handler, unknown_handler):
-        patcher = mock.patch.dict('h.streamer.websocket.MESSAGE_HANDLERS', {
-            'foo': foo_handler,
-            None: unknown_handler,
-        }, clear=True)
+        patcher = mock.patch.dict(
+            "h.streamer.websocket.MESSAGE_HANDLERS",
+            {"foo": foo_handler, None: unknown_handler},
+            clear=True,
+        )
         handlers = patcher.start()
         request.addfinalizer(patcher.stop)
         return handlers
@@ -247,25 +247,23 @@ class TestHandleMessage(object):
 class TestHandleClientIDMessage(object):
     def test_sets_client_id(self, socket):
         """Updates the socket client_id if valid."""
-        message = websocket.Message(socket=socket, payload={
-            'messageType': 'client_id',
-            'value': 'abcd1234',
-        })
+        message = websocket.Message(
+            socket=socket, payload={"messageType": "client_id", "value": "abcd1234"}
+        )
 
         websocket.handle_client_id_message(message)
 
-        assert socket.client_id == 'abcd1234'
+        assert socket.client_id == "abcd1234"
 
     def test_missing_value_error(self, matchers, socket):
-        message = websocket.Message(socket=socket, payload={
-            'messageType': 'client_id',
-        })
+        message = websocket.Message(socket=socket, payload={"messageType": "client_id"})
 
-        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+        with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_client_id_message(message)
 
-        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
-                                           ok=False)
+        mock_reply.assert_called_once_with(
+            matchers.MappingContaining("error"), ok=False
+        )
 
     @pytest.fixture
     def socket(self):
@@ -276,93 +274,109 @@ class TestHandleClientIDMessage(object):
 
 class TestHandleFilterMessage(object):
     def test_sets_socket_filter(self, socket):
-        message = websocket.Message(socket=socket, payload={
-            'filter': {
-                'actions': {},
-                'match_policy': 'include_all',
-                'clauses': [{
-                    'field': '/uri',
-                    'operator': 'equals',
-                    'value': 'http://example.com',
-                }],
-            }
-        })
+        message = websocket.Message(
+            socket=socket,
+            payload={
+                "filter": {
+                    "actions": {},
+                    "match_policy": "include_all",
+                    "clauses": [
+                        {
+                            "field": "/uri",
+                            "operator": "equals",
+                            "value": "http://example.com",
+                        }
+                    ],
+                }
+            },
+        )
 
         websocket.handle_filter_message(message)
 
         assert socket.filter is not None
 
-    @mock.patch('h.streamer.websocket.storage.expand_uri')
+    @mock.patch("h.streamer.websocket.storage.expand_uri")
     def test_expands_uris_in_uri_filter_with_session(self, expand_uri, socket):
-        expand_uri.return_value = ['http://example.com',
-                                   'http://example.com/alter',
-                                   'http://example.com/print']
+        expand_uri.return_value = [
+            "http://example.com",
+            "http://example.com/alter",
+            "http://example.com/print",
+        ]
         session = mock.sentinel.db_session
-        message = websocket.Message(socket=socket, payload={
-            'filter': {
-                'actions': {},
-                'match_policy': 'include_all',
-                'clauses': [{
-                    'field': '/uri',
-                    'operator': 'equals',
-                    'value': 'http://example.com',
-                }],
-            }
-        })
+        message = websocket.Message(
+            socket=socket,
+            payload={
+                "filter": {
+                    "actions": {},
+                    "match_policy": "include_all",
+                    "clauses": [
+                        {
+                            "field": "/uri",
+                            "operator": "equals",
+                            "value": "http://example.com",
+                        }
+                    ],
+                }
+            },
+        )
 
         websocket.handle_filter_message(message, session=session)
 
-        uri_filter = socket.filter.filter['clauses'][0]
-        uri_values = uri_filter['value']
+        uri_filter = socket.filter.filter["clauses"][0]
+        uri_values = uri_filter["value"]
         assert len(uri_values) == 3
-        assert 'http://example.com' in uri_values
-        assert 'http://example.com/alter' in uri_values
-        assert 'http://example.com/print' in uri_values
+        assert "http://example.com" in uri_values
+        assert "http://example.com/alter" in uri_values
+        assert "http://example.com/print" in uri_values
 
-    @mock.patch('h.streamer.websocket.storage.expand_uri')
+    @mock.patch("h.streamer.websocket.storage.expand_uri")
     def test_expands_uris_using_passed_session(self, expand_uri, socket):
-        expand_uri.return_value = ['http://example.com', 'http://example.org/']
+        expand_uri.return_value = ["http://example.com", "http://example.org/"]
         session = mock.sentinel.db_session
-        message = websocket.Message(socket=socket, payload={
-            'filter': {
-                'actions': {},
-                'match_policy': 'include_all',
-                'clauses': [{
-                    'field': '/uri',
-                    'operator': 'equals',
-                    'value': 'http://example.com',
-                }],
-            }
-        })
+        message = websocket.Message(
+            socket=socket,
+            payload={
+                "filter": {
+                    "actions": {},
+                    "match_policy": "include_all",
+                    "clauses": [
+                        {
+                            "field": "/uri",
+                            "operator": "equals",
+                            "value": "http://example.com",
+                        }
+                    ],
+                }
+            },
+        )
 
         websocket.handle_filter_message(message, session=session)
 
-        expand_uri.assert_called_once_with(session, 'http://example.com')
+        expand_uri.assert_called_once_with(session, "http://example.com")
 
     def test_missing_filter_error(self, matchers, socket):
-        message = websocket.Message(socket=socket, payload={
-            'type': 'filter',
-        })
+        message = websocket.Message(socket=socket, payload={"type": "filter"})
 
-        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+        with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_filter_message(message)
 
-        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
-                                           ok=False)
+        mock_reply.assert_called_once_with(
+            matchers.MappingContaining("error"), ok=False
+        )
 
-    @mock.patch('h.streamer.websocket.jsonschema.validate')
+    @mock.patch("h.streamer.websocket.jsonschema.validate")
     def test_invalid_filter_error(self, validate, matchers, socket):
-        message = websocket.Message(socket=socket, payload={
-            'type': 'filter',
-            'filter': {'wibble': 'giraffe'},
-        })
-        validate.side_effect = ValidationError('kaboom!')
+        message = websocket.Message(
+            socket=socket, payload={"type": "filter", "filter": {"wibble": "giraffe"}}
+        )
+        validate.side_effect = ValidationError("kaboom!")
 
-        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+        with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_filter_message(message)
 
-        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
-                                           ok=False)
+        mock_reply.assert_called_once_with(
+            matchers.MappingContaining("error"), ok=False
+        )
 
     @pytest.fixture
     def socket(self):
@@ -373,33 +387,27 @@ class TestHandleFilterMessage(object):
 
 class TestHandlePingMessage(object):
     def test_pong(self):
-        message = websocket.Message(socket=mock.sentinel.socket, payload={
-            'type': 'ping',
-        })
+        message = websocket.Message(
+            socket=mock.sentinel.socket, payload={"type": "ping"}
+        )
 
-        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+        with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_ping_message(message)
 
-        mock_reply.assert_called_once_with({'type': 'pong'})
+        mock_reply.assert_called_once_with({"type": "pong"})
 
 
 class TestHandleWhoamiMessage(object):
-    @pytest.mark.parametrize('userid', [
-        None,
-        'acct:foo@example.com',
-    ])
+    @pytest.mark.parametrize("userid", [None, "acct:foo@example.com"])
     def test_replies_with_whoyouare_message(self, socket, userid):
         """Send back a `whoyouare` message with a userid (which may be null)."""
         socket.authenticated_userid = userid
-        message = websocket.Message(socket=socket, payload={
-            'type': 'whoami',
-        })
+        message = websocket.Message(socket=socket, payload={"type": "whoami"})
 
-        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+        with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_whoami_message(message)
 
-        mock_reply.assert_called_once_with({'type': 'whoyouare',
-                                            'userid': userid})
+        mock_reply.assert_called_once_with({"type": "whoyouare", "userid": userid})
 
     @pytest.fixture
     def socket(self):
@@ -410,12 +418,13 @@ class TestHandleWhoamiMessage(object):
 
 class TestUnknownMessage(object):
     def test_error(self, matchers):
-        message = websocket.Message(socket=mock.sentinel.socket, payload={
-            'type': 'wibble',
-        })
+        message = websocket.Message(
+            socket=mock.sentinel.socket, payload={"type": "wibble"}
+        )
 
-        with mock.patch.object(websocket.Message, 'reply') as mock_reply:
+        with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_unknown_message(message)
 
-        mock_reply.assert_called_once_with(matchers.MappingContaining('error'),
-                                           ok=False)
+        mock_reply.assert_called_once_with(
+            matchers.MappingContaining("error"), ok=False
+        )

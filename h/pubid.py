@@ -32,7 +32,7 @@ Reference: http://preshing.com/20110504/hash-collision-probabilities/
 
 import random
 
-ALPHABET = '123456789ABDEGJKLMNPQRVWXYZabdegijkmnopqrvwxyz'
+ALPHABET = "123456789ABDEGJKLMNPQRVWXYZabdegijkmnopqrvwxyz"
 DEFAULT_LENGTH = 8
 
 
@@ -44,5 +44,4 @@ def generate(length=DEFAULT_LENGTH):
     characters that are easily mistakeable for one another (I, 1, O, 0), and
     hopefully won't accidentally contain any English-language curse words.
     """
-    return ''.join(random.SystemRandom().choice(ALPHABET)
-                   for _ in range(length))
+    return "".join(random.SystemRandom().choice(ALPHABET) for _ in range(length))

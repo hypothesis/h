@@ -89,8 +89,10 @@ class ListGroupsService(object):
         if user is None:
             return []
         world_readable_groups = [
-            group for group in self._readable_by_world_groups(user, None)
-            if group.creator == user or user in group.members]
+            group
+            for group in self._readable_by_world_groups(user, None)
+            if group.creator == user or user in group.members
+        ]
         private_groups = self._private_groups(user)
 
         return world_readable_groups + private_groups
@@ -130,10 +132,11 @@ class ListGroupsService(object):
         """
 
         authority = self._authority(user, authority)
-        groups = (self._session.query(models.Group)
-                      .filter_by(authority=authority,
-                                 readable_by=group.ReadableBy.world)
-                      .all())
+        groups = (
+            self._session.query(models.Group)
+            .filter_by(authority=authority, readable_by=group.ReadableBy.world)
+            .all()
+        )
         return self._sort(groups)
 
     def _user_groups(self, user=None):
@@ -147,7 +150,7 @@ class ListGroupsService(object):
         """Return all private groups that this user is a member of"""
 
         user_groups = self._user_groups(user)
-        return [group for group in user_groups if group.type == 'private']
+        return [group for group in user_groups if group.type == "private"]
 
     def _scoped_groups(self, authority, document_uri):
         """
@@ -164,11 +167,13 @@ class ListGroupsService(object):
         if not origin:
             return []
 
-        groups = (self._session.query(models.GroupScope, models.Group)
-                      .filter(models.Group.id == models.GroupScope.group_id)
-                      .filter(models.GroupScope.origin == origin)
-                      .filter(models.Group.authority == authority)
-                      .all())
+        groups = (
+            self._session.query(models.GroupScope, models.Group)
+            .filter(models.Group.id == models.GroupScope.group_id)
+            .filter(models.GroupScope.origin == origin)
+            .filter(models.Group.authority == authority)
+            .all()
+        )
 
         scoped_groups = [group for groupscope, group in groups]
         return self._sort(scoped_groups)
@@ -188,14 +193,17 @@ class ListGroupsService(object):
         identical to any non-scoped open group. Its only distinguishing
         characteristic is its unique and predictable ``pubid``
         """
-        return (self._session.query(models.Group)
-                    .filter_by(authority=authority,
-                               readable_by=group.ReadableBy.world,
-                               pubid='__world__')
-                    .one_or_none())
+        return (
+            self._session.query(models.Group)
+            .filter_by(
+                authority=authority,
+                readable_by=group.ReadableBy.world,
+                pubid="__world__",
+            )
+            .one_or_none()
+        )
 
 
 def list_groups_factory(context, request):
     """Return a ListGroupsService instance for the passed context and request."""
-    return ListGroupsService(session=request.db,
-                             request_authority=request.authority)
+    return ListGroupsService(session=request.db, request_authority=request.authority)

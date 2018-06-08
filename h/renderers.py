@@ -24,25 +24,26 @@ class SVGRenderer(object):
     Content-Type etc so that browsers will render the image.
 
     """
+
     def __init__(self, info):
         pass
 
     def __call__(self, value, system):
-        response = system['request'].response
-        response.content_type = 'image/svg+xml'
+        response = system["request"].response
+        response.content_type = "image/svg+xml"
 
         # Add a Vary: Accept-Encoding header.
         # This prevents caches from serving a cached, compressed version of the
         # file to user agents that don't support compression, or vice-versa.
         if response.vary:
-            if 'Accept-Encoding' not in response.vary:
-                response.vary = response.vary + ('Accept-Encoding',)
+            if "Accept-Encoding" not in response.vary:
+                response.vary = response.vary + ("Accept-Encoding",)
         else:
-            response.vary = ('Accept-Encoding',)
+            response.vary = ("Accept-Encoding",)
 
         return value
 
 
 def includeme(config):
-    config.add_renderer(name='json_sorted', factory=json_sorted_factory)
-    config.add_renderer(name='svg', factory=SVGRenderer)
+    config.add_renderer(name="json_sorted", factory=json_sorted_factory)
+    config.add_renderer(name="svg", factory=SVGRenderer)

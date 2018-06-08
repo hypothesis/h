@@ -12,88 +12,103 @@ from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
 from h.services.group_links import GroupLinksService
 
-pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
+pytestmark = pytest.mark.usefixtures("GroupsJSONPresenter")
 
 
-@pytest.mark.usefixtures('list_groups_service', 'group_links_service')
+@pytest.mark.usefixtures("list_groups_service", "group_links_service")
 class TestGetGroups(object):
-
     def test_proxies_to_list_service(self, anonymous_request, list_groups_service):
         views.groups(anonymous_request)
 
         list_groups_service.request_groups.assert_called_once_with(
-            user=None,
-            authority=anonymous_request.authority,
-            document_uri=None
+            user=None, authority=anonymous_request.authority, document_uri=None
         )
 
     def test_proxies_request_params(self, anonymous_request, list_groups_service):
-        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
-        anonymous_request.params['authority'] = 'foo.com'
+        anonymous_request.params["document_uri"] = "http://example.com/thisthing.html"
+        anonymous_request.params["authority"] = "foo.com"
         views.groups(anonymous_request)
 
         list_groups_service.request_groups.assert_called_once_with(
             user=None,
-            authority='foo.com',
-            document_uri='http://example.com/thisthing.html'
+            authority="foo.com",
+            document_uri="http://example.com/thisthing.html",
         )
 
-    def test_overrides_authority_with_user_authority(self, authenticated_request, list_groups_service):
-        authenticated_request.params['authority'] = 'foo.com'
+    def test_overrides_authority_with_user_authority(
+        self, authenticated_request, list_groups_service
+    ):
+        authenticated_request.params["authority"] = "foo.com"
 
         views.groups(authenticated_request)
 
         list_groups_service.request_groups.assert_called_once_with(
             user=authenticated_request.user,
             authority=authenticated_request.user.authority,
-            document_uri=None
+            document_uri=None,
         )
 
-    def test_converts_groups_to_resources(self, GroupContext, anonymous_request, open_groups, list_groups_service):  # noqa: N803
+    def test_converts_groups_to_resources(
+        self, GroupContext, anonymous_request, open_groups, list_groups_service
+    ):  # noqa: N803
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
-        GroupContext.assert_has_calls([
-            mock.call(open_groups[0], anonymous_request),
-            mock.call(open_groups[1], anonymous_request),
-        ])
+        GroupContext.assert_has_calls(
+            [
+                mock.call(open_groups[0], anonymous_request),
+                mock.call(open_groups[1], anonymous_request),
+            ]
+        )
 
-    def test_uses_presenter_for_formatting(self,  # noqa: N803
-                                           group_links_service,
-                                           open_groups,
-                                           list_groups_service,
-                                           GroupsJSONPresenter,
-                                           anonymous_request):
+    def test_uses_presenter_for_formatting(
+        self,  # noqa: N803
+        group_links_service,
+        open_groups,
+        list_groups_service,
+        GroupsJSONPresenter,
+        anonymous_request,
+    ):
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
         GroupsJSONPresenter.assert_called_once()
 
-    def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+    def test_returns_dicts_from_presenter(
+        self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter
+    ):  # noqa: N803
         list_groups_service.request_groups.return_value = open_groups
 
         result = views.groups(anonymous_request)
 
         assert result == GroupsJSONPresenter(open_groups).asdicts.return_value
 
-    def test_proxies_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
-        anonymous_request.params['expand'] = 'organization'
+    def test_proxies_expand_to_presenter(
+        self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter
+    ):  # noqa: N803
+        anonymous_request.params["expand"] = "organization"
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
-        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(expand=['organization'])
+        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(
+            expand=["organization"]
+        )
 
-    def test_passes_multiple_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
-        anonymous_request.GET.add('expand', 'organization')
-        anonymous_request.GET.add('expand', 'foobars')
+    def test_passes_multiple_expand_to_presenter(
+        self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter
+    ):  # noqa: N803
+        anonymous_request.GET.add("expand", "organization")
+        anonymous_request.GET.add("expand", "foobars")
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
-        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(expand=['organization', 'foobars'])
+        GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(
+            expand=["organization", "foobars"]
+        )
 
     @pytest.fixture
     def open_groups(self, factories):
@@ -110,10 +125,11 @@ class TestGetGroups(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('authenticated_userid', 'group_service')
+@pytest.mark.usefixtures("authenticated_userid", "group_service")
 class TestRemoveMember(object):
-
-    def test_it_removes_current_user(self, shorthand_request, authenticated_userid, group_service):
+    def test_it_removes_current_user(
+        self, shorthand_request, authenticated_userid, group_service
+    ):
         group = mock.sentinel.group
 
         views.remove_member(group, shorthand_request)
@@ -135,46 +151,46 @@ class TestRemoveMember(object):
 
     @pytest.fixture
     def shorthand_request(self, pyramid_request):
-        pyramid_request.matchdict['user'] = 'me'
+        pyramid_request.matchdict["user"] = "me"
         return pyramid_request
 
     @pytest.fixture
     def username_request(self, pyramid_request):
-        pyramid_request.matchdict['user'] = 'bob'
+        pyramid_request.matchdict["user"] = "bob"
         return pyramid_request
 
     @pytest.fixture
     def group_service(self, pyramid_config):
         service = mock.create_autospec(GroupService, spec_set=True, instance=True)
-        pyramid_config.register_service(service, name='group')
+        pyramid_config.register_service(service, name="group")
         return service
 
     @pytest.fixture
     def authenticated_userid(self, pyramid_config):
-        userid = 'acct:bob@example.org'
+        userid = "acct:bob@example.org"
         pyramid_config.testing_securitypolicy(userid)
         return userid
 
 
 @pytest.fixture
 def GroupsJSONPresenter(patch):  # noqa: N802
-    return patch('h.views.api_groups.GroupsJSONPresenter')
+    return patch("h.views.api_groups.GroupsJSONPresenter")
 
 
 @pytest.fixture
 def GroupContext(patch):  # noqa: N802
-    return patch('h.views.api_groups.GroupContext')
+    return patch("h.views.api_groups.GroupContext")
 
 
 @pytest.fixture
 def group_links_service(pyramid_config):
     svc = mock.create_autospec(GroupLinksService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name='group_links')
+    pyramid_config.register_service(svc, name="group_links")
     return svc
 
 
 @pytest.fixture
 def list_groups_service(pyramid_config):
     svc = mock.create_autospec(ListGroupsService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name='list_groups')
+    pyramid_config.register_service(svc, name="list_groups")
     return svc

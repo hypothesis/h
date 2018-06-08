@@ -9,7 +9,7 @@ from h.models import GroupScope
 
 class TestGroupScope(object):
     def test_save_and_retrieve_origin(self, db_session, factories):
-        origin = 'http://example.com'
+        origin = "http://example.com"
         factories.GroupScope(origin=origin)
 
         group_scope = db_session.query(GroupScope).one()
@@ -17,26 +17,26 @@ class TestGroupScope(object):
         assert group_scope.origin == origin
 
     def test_subdomains_are_allowed_in_origin(self, db_session, factories):
-        factories.GroupScope(origin='http://www.example.com')
+        factories.GroupScope(origin="http://www.example.com")
         db_session.flush()
 
     def test_port_is_allowed_in_origin(self, db_session, factories):
-        factories.GroupScope(origin='http://localhost:5000')
+        factories.GroupScope(origin="http://localhost:5000")
         db_session.flush()
 
     def test_there_is_no_validation_of_origin(self, db_session, factories):
-        factories.GroupScope(origin='diplodocus : 123')
+        factories.GroupScope(origin="diplodocus : 123")
         db_session.flush()
 
-    def test_you_can_get_a_groupscopes_group_by_the_group_property(
-            self, factories):
+    def test_you_can_get_a_groupscopes_group_by_the_group_property(self, factories):
         group = factories.OpenGroup()
         group_scope = factories.GroupScope(group=group)
 
         assert group_scope.group == group
 
     def test_you_can_get_a_groups_scopes_by_the_scopes_property(
-            self, factories, matchers):
+        self, factories, matchers
+    ):
         group = factories.OpenGroup()
         scopes = [
             factories.GroupScope(group=group),
@@ -46,8 +46,7 @@ class TestGroupScope(object):
 
         assert group.scopes == matchers.UnorderedList(scopes)
 
-    def test_deleting_a_group_deletes_its_groupscopes(self, db_session,
-                                                      factories):
+    def test_deleting_a_group_deletes_its_groupscopes(self, db_session, factories):
         group = factories.OpenGroup()
         factories.GroupScope(group=group)
         factories.GroupScope(group=group)
@@ -57,8 +56,7 @@ class TestGroupScope(object):
 
         assert db_session.query(GroupScope).all() == []
 
-    def test_removing_the_scopes_from_a_group_deletes_them(
-            self, db_session, factories):
+    def test_removing_the_scopes_from_a_group_deletes_them(self, db_session, factories):
         group = factories.OpenGroup()
         factories.GroupScope(group=group)
         factories.GroupScope(group=group)
@@ -68,9 +66,8 @@ class TestGroupScope(object):
 
         assert db_session.query(GroupScope).all() == []
 
-    def test_multiple_groupscopes_can_have_the_same_origin(
-            self, db_session, factories):
-        origin = 'http://example.com'
+    def test_multiple_groupscopes_can_have_the_same_origin(self, db_session, factories):
+        origin = "http://example.com"
         group_1 = factories.OpenGroup()
         group_2 = factories.OpenGroup()
         group_3 = factories.OpenGroup()
@@ -82,9 +79,8 @@ class TestGroupScope(object):
         factories.GroupScope(origin=origin, group=group_3)
         db_session.flush()
 
-    def test_editing_a_groups_scopes_doesnt_affect_other_groups(
-            self, factories):
-        origin = 'http://example.com'
+    def test_editing_a_groups_scopes_doesnt_affect_other_groups(self, factories):
+        origin = "http://example.com"
         group_1 = factories.OpenGroup()
         group_2 = factories.OpenGroup()
         group_3 = factories.OpenGroup()
@@ -92,23 +88,26 @@ class TestGroupScope(object):
         factories.GroupScope(origin=origin, group=group_2)
         factories.GroupScope(origin=origin, group=group_3)
 
-        group_1.scopes[0].origin = 'http://neworigin.com'
+        group_1.scopes[0].origin = "http://neworigin.com"
 
-        assert group_1.scopes[0].origin == 'http://neworigin.com'
+        assert group_1.scopes[0].origin == "http://neworigin.com"
         assert group_2.scopes[0].origin == origin
         assert group_3.scopes[0].origin == origin
 
     def test_deleting_a_groups_scopes_doesnt_affect_other_groups(
-            self, db_session, factories):
-        origin = 'http://example.com'
+        self, db_session, factories
+    ):
+        origin = "http://example.com"
         group_1 = factories.OpenGroup()
         group_2 = factories.OpenGroup()
         group_3 = factories.OpenGroup()
-        db_session.add_all((
-            factories.GroupScope(origin=origin, group=group_1),
-            factories.GroupScope(origin=origin, group=group_2),
-            factories.GroupScope(origin=origin, group=group_3),
-        ))
+        db_session.add_all(
+            (
+                factories.GroupScope(origin=origin, group=group_1),
+                factories.GroupScope(origin=origin, group=group_2),
+                factories.GroupScope(origin=origin, group=group_3),
+            )
+        )
         db_session.flush()
 
         db_session.delete(group_1.scopes[0])

@@ -18,7 +18,7 @@ class Annotation(Base):
 
     """Model class representing a single annotation."""
 
-    __tablename__ = 'annotation'
+    __tablename__ = "annotation"
     __table_args__ = (
         # Tags are stored in an array-type column, and indexed using a
         # generalised inverted index. For more information on the use of GIN
@@ -27,100 +27,111 @@ class Annotation(Base):
         #   http://www.databasesoup.com/2015/01/tag-all-things.html
         #   http://www.postgresql.org/docs/9.5/static/gin-intro.html
         #
-        sa.Index('ix__annotation_tags', 'tags', postgresql_using='gin'),
-        sa.Index('ix__annotation_updated', 'updated'),
-
+        sa.Index("ix__annotation_tags", "tags", postgresql_using="gin"),
+        sa.Index("ix__annotation_updated", "updated"),
         # This is a functional index on the *first* of the annotation's
         # references, pointing to the top-level annotation it refers to. We're
         # using 1 here because Postgres uses 1-based array indexing.
-        sa.Index('ix__annotation_thread_root', sa.text('("references"[1])')),
+        sa.Index("ix__annotation_thread_root", sa.text('("references"[1])')),
     )
 
     #: Annotation ID: these are stored as UUIDs in the database, and mapped
     #: transparently to a URL-safe Base64-encoded string.
-    id = sa.Column(types.URLSafeUUID,
-                   server_default=sa.func.uuid_generate_v1mc(),
-                   primary_key=True)
+    id = sa.Column(
+        types.URLSafeUUID, server_default=sa.func.uuid_generate_v1mc(), primary_key=True
+    )
 
     #: The timestamp when the annotation was created.
-    created = sa.Column(sa.DateTime,
-                        default=datetime.datetime.utcnow,
-                        server_default=sa.func.now(),
-                        nullable=False)
+    created = sa.Column(
+        sa.DateTime,
+        default=datetime.datetime.utcnow,
+        server_default=sa.func.now(),
+        nullable=False,
+    )
 
     #: The timestamp when the user edited the annotation last.
-    updated = sa.Column(sa.DateTime,
-                        server_default=sa.func.now(),
-                        default=datetime.datetime.utcnow,
-                        nullable=False)
+    updated = sa.Column(
+        sa.DateTime,
+        server_default=sa.func.now(),
+        default=datetime.datetime.utcnow,
+        nullable=False,
+    )
 
     #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
     #: annotation.
-    userid = sa.Column(sa.UnicodeText,
-                       nullable=False,
-                       index=True)
+    userid = sa.Column(sa.UnicodeText, nullable=False, index=True)
     #: The string id of the group in which this annotation is published.
     #: Defaults to the global public group, "__world__".
-    groupid = sa.Column(sa.UnicodeText,
-                        default='__world__',
-                        server_default='__world__',
-                        nullable=False,
-                        index=True)
+    groupid = sa.Column(
+        sa.UnicodeText,
+        default="__world__",
+        server_default="__world__",
+        nullable=False,
+        index=True,
+    )
 
     #: The textual body of the annotation.
-    _text = sa.Column('text', sa.UnicodeText)
+    _text = sa.Column("text", sa.UnicodeText)
     #: The Markdown-rendered and HTML-sanitized textual body of the annotation.
-    _text_rendered = sa.Column('text_rendered', sa.UnicodeText)
+    _text_rendered = sa.Column("text_rendered", sa.UnicodeText)
 
     #: The tags associated with the annotation.
-    tags = sa.Column(MutableList.as_mutable(pg.ARRAY(sa.UnicodeText,
-                                                     zero_indexes=True)))
+    tags = sa.Column(
+        MutableList.as_mutable(pg.ARRAY(sa.UnicodeText, zero_indexes=True))
+    )
 
     #: A boolean indicating whether this annotation is shared with members of
     #: the group it is published in. "Private"/"Only me" annotations have
     #: shared=False.
-    shared = sa.Column(sa.Boolean,
-                       nullable=False,
-                       default=False,
-                       server_default=sa.sql.expression.false())
+    shared = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
 
     #: The URI of the annotated page, as provided by the client.
-    _target_uri = sa.Column('target_uri', sa.UnicodeText)
+    _target_uri = sa.Column("target_uri", sa.UnicodeText)
     #: The URI of the annotated page in normalized form.
-    _target_uri_normalized = sa.Column('target_uri_normalized', sa.UnicodeText)
+    _target_uri_normalized = sa.Column("target_uri_normalized", sa.UnicodeText)
     #: The serialized selectors for the annotation on the annotated page.
-    target_selectors = sa.Column(types.AnnotationSelectorJSONB,
-                                 default=list,
-                                 server_default=sa.func.jsonb('[]'))
+    target_selectors = sa.Column(
+        types.AnnotationSelectorJSONB, default=list, server_default=sa.func.jsonb("[]")
+    )
 
     #: An array of annotation IDs which are ancestors of this annotation.
-    references = sa.Column(pg.ARRAY(types.URLSafeUUID, zero_indexes=True),
-                           default=list,
-                           server_default=sa.text('ARRAY[]::uuid[]'))
+    references = sa.Column(
+        pg.ARRAY(types.URLSafeUUID, zero_indexes=True),
+        default=list,
+        server_default=sa.text("ARRAY[]::uuid[]"),
+    )
 
     #: Any additional serialisable data provided by the client.
-    extra = sa.Column(MutableDict.as_mutable(pg.JSONB),
-                      default=dict,
-                      server_default=sa.func.jsonb('{}'),
-                      nullable=False)
+    extra = sa.Column(
+        MutableDict.as_mutable(pg.JSONB),
+        default=dict,
+        server_default=sa.func.jsonb("{}"),
+        nullable=False,
+    )
 
     #: Has the annotation been deleted?
-    deleted = sa.Column(sa.Boolean,
-                        nullable=False,
-                        default=False,
-                        server_default=sa.sql.expression.false())
+    deleted = sa.Column(
+        sa.Boolean,
+        nullable=False,
+        default=False,
+        server_default=sa.sql.expression.false(),
+    )
 
-    document_id = sa.Column(sa.Integer,
-                            sa.ForeignKey('document.id'),
-                            nullable=False)
+    document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
 
-    document = sa.orm.relationship('Document', backref='annotations')
+    document = sa.orm.relationship("Document", backref="annotations")
 
-    thread = sa.orm.relationship('Annotation',
-                                 primaryjoin=(sa.orm.foreign(id) ==
-                                              sa.orm.remote(references[0])),
-                                 viewonly=True,
-                                 uselist=True)
+    thread = sa.orm.relationship(
+        "Annotation",
+        primaryjoin=(sa.orm.foreign(id) == sa.orm.remote(references[0])),
+        viewonly=True,
+        uselist=True,
+    )
 
     @hybrid_property
     def target_uri(self):
@@ -203,7 +214,7 @@ class Annotation(Base):
         """
         if self.userid is None:
             return None
-        return split_user(self.userid)['domain']
+        return split_user(self.userid)["domain"]
 
     def __repr__(self):
-        return '<Annotation %s>' % self.id
+        return "<Annotation %s>" % self.id

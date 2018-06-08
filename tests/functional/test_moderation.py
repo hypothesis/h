@@ -7,16 +7,17 @@ import pytest
 
 @pytest.mark.functional
 class TestModeration(object):
-
-    def test_moderator_flag_listing(self, app, group, flagged_annotation, moderator_with_token):
+    def test_moderator_flag_listing(
+        self, app, group, flagged_annotation, moderator_with_token
+    ):
         moderator, token = moderator_with_token
 
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
-        annotation_url = '/api/annotations/{}'.format(flagged_annotation.id)
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        annotation_url = "/api/annotations/{}".format(flagged_annotation.id)
         res = app.get(annotation_url, headers=headers)
 
-        assert 'moderation' in res.json
-        assert res.json['moderation']['flagCount'] > 0
+        assert "moderation" in res.json
+        assert res.json["moderation"]["flagCount"] > 0
 
 
 @pytest.fixture

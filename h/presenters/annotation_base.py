@@ -34,7 +34,7 @@ class AnnotationBasePresenter(object):
         if self.annotation.text:
             return self.annotation.text
         else:
-            return ''
+            return ""
 
     @property
     def tags(self):
@@ -45,8 +45,8 @@ class AnnotationBasePresenter(object):
 
     @property
     def target(self):
-        target = {'source': self.annotation.target_uri}
+        target = {"source": self.annotation.target_uri}
         if self.annotation.target_selectors:
-            target['selector'] = self.annotation.target_selectors
+            target["selector"] = self.annotation.target_selectors
 
         return [target]

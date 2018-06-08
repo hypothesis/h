@@ -21,18 +21,18 @@ def generate(request, user):
     serializer = request.registry.password_reset_serializer
     code = serializer.dumps(user.username)
     context = {
-        'username': user.username,
-        'reset_code': code,
-        'reset_link': request.route_url('account_reset_with_code', code=code)
+        "username": user.username,
+        "reset_code": code,
+        "reset_link": request.route_url("account_reset_with_code", code=code),
     }
 
-    subject = _('Reset your password')
+    subject = _("Reset your password")
 
-    text = render('h:templates/emails/reset_password.txt.jinja2',
-                  context,
-                  request=request)
-    html = render('h:templates/emails/reset_password.html.jinja2',
-                  context,
-                  request=request)
+    text = render(
+        "h:templates/emails/reset_password.txt.jinja2", context, request=request
+    )
+    html = render(
+        "h:templates/emails/reset_password.html.jinja2", context, request=request
+    )
 
     return [user.email], subject, text, html

@@ -13,7 +13,7 @@ def test_notfound_view(pyramid_request):
 
 
 def test_error_view(patch, pyramid_request):
-    handle_exception = patch('h.views.exceptions.handle_exception')
+    handle_exception = patch("h.views.exceptions.handle_exception")
 
     result = error(pyramid_request)
 

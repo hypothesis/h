@@ -73,27 +73,32 @@ from h._compat import (
     urlparse,
 )
 
-URL_SCHEMES = set(['http', 'https'])
+URL_SCHEMES = set(["http", "https"])
 
 # List of regular expressions matching the names of query parameters that we
 # strip from URLs as part of normalization.
-BLACKLISTED_QUERY_PARAMS = [re.compile(regex) for regex in set([
-    # Google AdWords tracking identifier. Reference:
-    #
-    #    https://support.google.com/analytics/answer/2938246?hl=en
-    #
-    r'^gclid$',
-    # Google Analytics campaigns. Reference:
-    #
-    #     https://support.google.com/analytics/answer/1033867?hl=en
-    #
-    r'^utm_(campaign|content|medium|source|term)$',
-    # WebTrends Analytics query params. Reference:
-    #
-    #     http://help.webtrends.com/en/analytics10/#qpr_about.html
-    #
-    r'^WT\..+$',
-])]
+BLACKLISTED_QUERY_PARAMS = [
+    re.compile(regex)
+    for regex in set(
+        [
+            # Google AdWords tracking identifier. Reference:
+            #
+            #    https://support.google.com/analytics/answer/2938246?hl=en
+            #
+            r"^gclid$",
+            # Google Analytics campaigns. Reference:
+            #
+            #     https://support.google.com/analytics/answer/1033867?hl=en
+            #
+            r"^utm_(campaign|content|medium|source|term)$",
+            # WebTrends Analytics query params. Reference:
+            #
+            #     http://help.webtrends.com/en/analytics10/#qpr_about.html
+            #
+            r"^WT\..+$",
+        ]
+    )
+]
 
 # From RFC3986. The ABNF for path segments is
 #
@@ -145,18 +150,18 @@ def normalize(uristr):
     # Hence we work with byte strings internally in Py 2 and unicode internally
     # in Python 3. In both we always return unicode.
     if PY2:
-        uristr = uristr.encode('utf-8')
+        uristr = uristr.encode("utf-8")
 
     def decode_result(result):
         if PY2:
-            return result.decode('utf-8')
+            return result.decode("utf-8")
         else:
             return result
 
     # Strip proxy prefix for proxied URLs
     for scheme in URL_SCHEMES:
-        if uristr.startswith(VIA_PREFIX + scheme + ':'):
-            uristr = uristr[len(VIA_PREFIX):]
+        if uristr.startswith(VIA_PREFIX + scheme + ":"):
+            uristr = uristr[len(VIA_PREFIX) :]
             break
 
     # Try to extract the scheme
@@ -185,14 +190,14 @@ def _normalize_scheme(uri):
     scheme = uri.scheme
 
     if scheme in URL_SCHEMES:
-        scheme = 'httpx'
+        scheme = "httpx"
 
     return scheme
 
 
 def _normalize_netloc(uri):
     netloc = uri.netloc
-    ipv6_hostname = '[' in netloc and ']' in netloc
+    ipv6_hostname = "[" in netloc and "]" in netloc
 
     username = uri.username
     password = uri.password
@@ -203,9 +208,9 @@ def _normalize_netloc(uri):
     hostname = hostname.lower()
 
     # Remove port if default for the scheme
-    if uri.scheme == 'http' and port == 80:
+    if uri.scheme == "http" and port == 80:
         port = None
-    elif uri.scheme == 'https' and port == 443:
+    elif uri.scheme == "https" and port == 443:
         port = None
 
     # Put it all back together again...
@@ -213,17 +218,17 @@ def _normalize_netloc(uri):
     if username is not None:
         userinfo = username
     if password is not None:
-        userinfo += ':' + password
+        userinfo += ":" + password
 
     if ipv6_hostname:
-        hostname = '[' + hostname + ']'
+        hostname = "[" + hostname + "]"
 
     hostinfo = hostname
     if port is not None:
-        hostinfo += ':' + str(port)
+        hostinfo += ":" + str(port)
 
     if userinfo is not None:
-        netloc = '@'.join([userinfo, hostinfo])
+        netloc = "@".join([userinfo, hostinfo])
     else:
         netloc = hostinfo
 
@@ -233,12 +238,12 @@ def _normalize_netloc(uri):
 def _normalize_path(uri):
     path = uri.path
 
-    while path.endswith('/'):
+    while path.endswith("/"):
         path = path[:-1]
 
-    segments = path.split('/')
+    segments = path.split("/")
     segments = [_normalize_pathsegment(s) for s in segments]
-    path = '/'.join(segments)
+    path = "/".join(segments)
 
     return path
 
@@ -270,9 +275,11 @@ def _normalize_query(uri):
 
 
 def _normalize_queryitems(items):
-    segments = ['='.join([_normalize_queryname(i[0]),
-                          _normalize_queryvalue(i[1])]) for i in items]
-    return '&'.join(segments)
+    segments = [
+        "=".join([_normalize_queryname(i[0]), _normalize_queryvalue(i[1])])
+        for i in items
+    ]
+    return "&".join(segments)
 
 
 def _normalize_queryname(name):

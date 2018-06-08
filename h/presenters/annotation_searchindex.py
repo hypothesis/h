@@ -10,6 +10,7 @@ from h.util.user import split_user
 class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
 
     """Present an annotation in the JSON format used in the search index."""
+
     def __init__(self, annotation):
         self.annotation = annotation
 
@@ -18,27 +19,27 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         userid_parts = split_user(self.annotation.userid)
 
         result = {
-            'authority': userid_parts['domain'],
-            'id': self.annotation.id,
-            'created': self.created,
-            'updated': self.updated,
-            'user': self.annotation.userid,
-            'user_raw': self.annotation.userid,
-            'uri': self.annotation.target_uri,
-            'text': self.text,
-            'tags': self.tags,
-            'tags_raw': self.tags,
-            'group': self.annotation.groupid,
-            'shared': self.annotation.shared,
-            'target': self.target,
-            'document': docpresenter.asdict(),
-            'thread_ids': self.annotation.thread_ids
+            "authority": userid_parts["domain"],
+            "id": self.annotation.id,
+            "created": self.created,
+            "updated": self.updated,
+            "user": self.annotation.userid,
+            "user_raw": self.annotation.userid,
+            "uri": self.annotation.target_uri,
+            "text": self.text,
+            "tags": self.tags,
+            "tags_raw": self.tags,
+            "group": self.annotation.groupid,
+            "shared": self.annotation.shared,
+            "target": self.target,
+            "document": docpresenter.asdict(),
+            "thread_ids": self.annotation.thread_ids,
         }
 
-        result['target'][0]['scope'] = [self.annotation.target_uri_normalized]
+        result["target"][0]["scope"] = [self.annotation.target_uri_normalized]
 
         if self.annotation.references:
-            result['references'] = self.annotation.references
+            result["references"] = self.annotation.references
 
         return result
 

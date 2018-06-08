@@ -28,8 +28,7 @@ class AnnotationFlagFormatter(object):
         if self.user is None:
             return
 
-        flagged_ids = self.flag_service.all_flagged(user=self.user,
-                                                    annotation_ids=ids)
+        flagged_ids = self.flag_service.all_flagged(user=self.user, annotation_ids=ids)
 
         flags = {id_: (id_ in flagged_ids) for id_ in ids}
         self._cache.update(flags)
@@ -37,7 +36,7 @@ class AnnotationFlagFormatter(object):
 
     def format(self, annotation_resource):
         flagged = self._load(annotation_resource.annotation)
-        return {'flagged': flagged}
+        return {"flagged": flagged}
 
     def _load(self, annotation):
         if self.user is None:
