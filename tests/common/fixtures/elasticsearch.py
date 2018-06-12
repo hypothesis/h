@@ -32,10 +32,25 @@ def init_elasticsearch(request):
     """Connect to the newer v6.x instance of Elasticsearch once per test session"""
     es_connect()
 
+    # Initialize the test ES index with an Annotation Document Type
+    from h.search.persistence import Annotation
+    # Override the default index name defined in persistence.Annotation.Meta
+    # This is a tad ugly, but is more convenient than the alternatives
+    # which would require passing the index name around in every interaction
+    # with elasticsearch_dsl classes/objects
+    # See https://elasticsearch-dsl.readthedocs.io/en/6.1.0/persistence.html
+    Annotation._doc_type.index = ELASTICSEARCH_INDEX
+    Annotation.init()
+
     def maybe_delete_index():
-        """Delete the test index if it exists."""
+        """Delete the test index if it exists (ES 1.x)."""
         if client.conn.indices.exists(index=ELASTICSEARCH_INDEX):
             client.conn.indices.delete(index=ELASTICSEARCH_INDEX)
+
+        """Delete the test index (ES 6.x)"""
+        from elasticsearch_dsl import Index
+        test_index = Index(ELASTICSEARCH_INDEX)
+        test_index.delete(ignore=404)
 
     # Delete the test search index at the end of the test run.
     request.addfinalizer(maybe_delete_index)
