@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
+import elasticsearch_dsl
+
 import h.search.index
 from h.services.group import GroupService
 
@@ -34,10 +36,20 @@ def Annotation(factories, index):
 @pytest.fixture
 def index(es_client, pyramid_request):
     def _index(*annotations):
-        """Index the given annotation(s) into Elasticsearch."""
+        """Index the given annotation(s) into Elasticsearch (v1.x)."""
         for annotation in annotations:
             h.search.index.index_old(es_client, annotation, pyramid_request)
         es_client.conn.indices.refresh(index=es_client.index)
+    return _index
+
+
+@pytest.fixture
+def index_new(pyramid_request):
+    def _index(*annotations):
+        """Index the given annotation(s) into Elasticsearch (v6.x)."""
+        for annotation in annotations:
+            h.search.index.index(annotation, pyramid_request)
+        elasticsearch_dsl.connections.get_connection().indices.refresh()
     return _index
 
 

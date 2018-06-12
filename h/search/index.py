@@ -15,6 +15,7 @@ from h import models
 from h import presenters
 from h.events import AnnotationTransformEvent
 from h.util.query import column_windows
+from h.search import persistence
 
 log = logging.getLogger(__name__)
 
@@ -26,9 +27,34 @@ class Window(namedtuple('Window', ['start', 'end'])):
     pass
 
 
+def index(annotation_model, request):
+    """
+    Index an annotation to the search index.
+
+    Create a new annotation Document (for ElasticSearch) and save it to the index.
+
+    Trigger an AnnotationTransformEvent so any listeners may alter the annotation
+    before it is indexed.
+
+    Save the annotation to the ES index.
+
+    :param annotation_model: Populated h.models.Annotation instance
+    :type annotation_model: h.models.Annotation
+
+    :param request: Pyramid request
+    """
+    search_annotation = persistence.Annotation.create(annotation_model)
+    annotation_event = AnnotationTransformEvent(request,
+                                                annotation_model,
+                                                search_annotation.to_dict())
+    request.registry.notify(annotation_event)
+
+    search_annotation.save()
+
+
 def index_old(es, annotation, request, target_index=None):
     """
-    Index an annotation into the search index.
+    Index an annotation into the search index (deprecated, ES v1.x).
 
     A new annotation document will be created in the search index or,
     if the index already contains an annotation document with the same ID as
