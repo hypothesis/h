@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from h import models, storage
 from h.celery import celery, get_task_logger
 from h.indexer.reindexer import SETTING_NEW_INDEX
-from h.search.index import BatchIndexer, delete, index
+from h.search.index import BatchIndexer, delete, index_old
 
 log = get_task_logger(__name__)
 
@@ -13,14 +13,14 @@ log = get_task_logger(__name__)
 def add_annotation(id_):
     annotation = storage.fetch_annotation(celery.request.db, id_)
     if annotation:
-        index(celery.request.es, annotation, celery.request)
+        index_old(celery.request.es, annotation, celery.request)
 
         # If a reindex is running at the moment, add annotation to the new index
         # as well.
         future_index = _current_reindex_new_name(celery.request)
         if future_index is not None:
-            index(celery.request.es, annotation, celery.request,
-                  target_index=future_index)
+            index_old(celery.request.es, annotation, celery.request,
+                      target_index=future_index)
 
         if annotation.is_reply:
             add_annotation.delay(annotation.thread_root_id)
