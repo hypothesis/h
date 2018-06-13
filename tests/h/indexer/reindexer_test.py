@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.indexer.reindexer import reindex, SETTING_NEW_INDEX
+from h.indexer.reindexer import reindex, SETTING_NEW_INDEX, SETTING_NEW_ES6_INDEX
 from h.search import client
 
 
@@ -77,25 +77,28 @@ class TestReindex(object):
         with pytest.raises(RuntimeError):
             reindex(mock.sentinel.session, es, mock.sentinel.request)
 
-    def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service, configure_index):
+    def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service,
+                                               configure_index, new_index_setting_name):
         configure_index.return_value = 'hypothesis-abcd1234'
 
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.put.assert_called_once_with(SETTING_NEW_INDEX, 'hypothesis-abcd1234')
+        settings_service.put.assert_called_once_with(new_index_setting_name, 'hypothesis-abcd1234')
 
-    def test_deletes_index_name_setting(self, pyramid_request, es, settings_service):
+    def test_deletes_index_name_setting(self, pyramid_request, es, settings_service, new_index_setting_name):
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with(new_index_setting_name)
 
-    def test_deletes_index_name_setting_when_exception_raised(self, pyramid_request, es, settings_service, batchindexer):
+    def test_deletes_index_name_setting_when_exception_raised(self, pyramid_request, es,
+                                                              settings_service, batchindexer,
+                                                              new_index_setting_name):
         batchindexer.index.side_effect = RuntimeError('boom!')
 
         with pytest.raises(RuntimeError):
             reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with(new_index_setting_name)
 
     @pytest.fixture
     def BatchIndexer(self, patch):
@@ -121,12 +124,20 @@ class TestReindex(object):
         indexer.index.return_value = []
         return indexer
 
-    @pytest.fixture
-    def es(self):
+    @pytest.fixture(params=['es1', 'es6'])
+    def es(self, request):
         mock_es = mock.create_autospec(client.Client, instance=True,
                                        spec_set=True, index="hypothesis")
         mock_es.t.annotation = 'annotation'
+        mock_es.using_es6 = request.param == 'es6'
         return mock_es
+
+    @pytest.fixture
+    def new_index_setting_name(self, es):
+        if es.using_es6:
+            return SETTING_NEW_ES6_INDEX
+        else:
+            return SETTING_NEW_INDEX
 
     @pytest.fixture
     def settings_service(self, pyramid_config):

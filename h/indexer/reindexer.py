@@ -13,6 +13,7 @@ from h.search.index import BatchIndexer
 log = logging.getLogger(__name__)
 
 SETTING_NEW_INDEX = 'reindex.new_index'
+SETTING_NEW_ES6_INDEX = 'reindex.new_es6_index'
 
 
 def reindex(session, es, request):
@@ -24,9 +25,13 @@ def reindex(session, es, request):
     settings = request.find_service(name='settings')
 
     new_index = configure_index(es)
+    if es.using_es6:
+        setting_name = SETTING_NEW_ES6_INDEX
+    else:
+        setting_name = SETTING_NEW_INDEX
 
     try:
-        settings.put(SETTING_NEW_INDEX, new_index)
+        settings.put(setting_name, new_index)
         request.tm.commit()
 
         indexer = BatchIndexer(session, es, request, target_index=new_index, op_type='create')
@@ -44,5 +49,5 @@ def reindex(session, es, request):
         update_aliased_index(es, new_index)
 
     finally:
-        settings.delete(SETTING_NEW_INDEX)
+        settings.delete(setting_name)
         request.tm.commit()

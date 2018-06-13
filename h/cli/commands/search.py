@@ -17,13 +17,22 @@ def search():
 @click.pass_context
 def reindex(ctx):
     """
-    Reindex all annotations in all clusters.
+    Reindex all annotations in the old search cluster.
 
     Creates a new search index from the data in PostgreSQL and atomically
     updates the index alias. This requires that the index is aliased already,
     and will raise an error if it is not.
     """
     _reindex_old(ctx)
+
+
+@search.command()
+@click.pass_context
+def reindex_es6(ctx):
+    """
+    Reindex all annotations in the new search cluster.
+    """
+    _reindex_es6(ctx)
 
 
 @search.command('update-settings')
@@ -53,6 +62,17 @@ def _reindex_old(ctx):
     request = ctx.obj['bootstrap']()
 
     indexer.reindex(request.db, request.es, request)
+
+
+def _reindex_es6(ctx):
+    """
+    Reindex all annotations in the new cluster.
+    """
+    os.environ['ELASTICSEARCH_CLIENT_TIMEOUT'] = '30'
+
+    request = ctx.obj['bootstrap']()
+
+    indexer.reindex(request.db, request.es6, request)
 
 
 def _update_settings_old(ctx):

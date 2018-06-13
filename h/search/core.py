@@ -35,7 +35,12 @@ class Search(object):
     """
     def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
         self.request = request
-        self.es = request.es
+
+        if request.feature('search_es6'):
+            self.es = request.es6
+        else:
+            self.es = request.es
+
         self.separate_replies = separate_replies
         self.stats = stats
         self._replies_limit = _replies_limit
@@ -146,7 +151,7 @@ class Search(object):
 
     @staticmethod
     def _default_querybuilder(request):
-        builder = query.Builder()
+        builder = query.Builder(using_es6=request.feature('search_es6'))
         builder.append_filter(query.DeletedFilter())
         builder.append_filter(query.AuthFilter(request))
         builder.append_filter(query.UriFilter(request))

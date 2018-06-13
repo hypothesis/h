@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.indexer.reindexer import SETTING_NEW_INDEX
+from h.indexer.reindexer import SETTING_NEW_INDEX, SETTING_NEW_ES6_INDEX
 from h.tasks import indexer
 
 
@@ -37,7 +37,8 @@ class TestAddAnnotation(object):
 
         indexer.add_annotation(id_)
 
-        index.assert_called_once_with(celery.request.es, annotation, celery.request)
+        index.assert_any_call(celery.request.es, annotation, celery.request)
+        index.assert_any_call(celery.request.es6, annotation, celery.request)
 
     def test_it_skips_indexing_when_annotation_cannot_be_loaded(self, fetch_annotation, index, celery):
         fetch_annotation.return_value = None
@@ -48,16 +49,7 @@ class TestAddAnnotation(object):
 
     def test_during_reindex_adds_to_current_index(self, fetch_annotation, annotation, index, celery, settings_service):
         settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
-        fetch_annotation.return_value = annotation
-
-        indexer.add_annotation('test-annotation-id')
-
-        index.assert_any_call(celery.request.es,
-                              annotation,
-                              celery.request)
-
-    def test_during_reindex_adds_to_new_index(self, fetch_annotation, annotation, index, celery, settings_service):
-        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put(SETTING_NEW_ES6_INDEX, 'hypothesis-xyz123')
         fetch_annotation.return_value = annotation
 
         indexer.add_annotation('test-annotation-id')
@@ -66,6 +58,26 @@ class TestAddAnnotation(object):
                               annotation,
                               celery.request,
                               target_index='hypothesis-abcdef123')
+        index.assert_any_call(celery.request.es6,
+                              annotation,
+                              celery.request,
+                              target_index='hypothesis-xyz123')
+
+    def test_during_reindex_adds_to_new_index(self, fetch_annotation, annotation, index, celery, settings_service):
+        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put(SETTING_NEW_ES6_INDEX, 'hypothesis-xyz123')
+        fetch_annotation.return_value = annotation
+
+        indexer.add_annotation('test-annotation-id')
+
+        index.assert_any_call(celery.request.es,
+                              annotation,
+                              celery.request,
+                              target_index='hypothesis-abcdef123')
+        index.assert_any_call(celery.request.es6,
+                              annotation,
+                              celery.request,
+                              target_index='hypothesis-xyz123')
 
     def test_it_indexes_thread_root(self, fetch_annotation, reply, delay):
         fetch_annotation.return_value = reply
@@ -104,24 +116,33 @@ class TestDeleteAnnotation(object):
         id_ = 'test-annotation-id'
         indexer.delete_annotation(id_)
 
-        delete.assert_called_once_with(celery.request.es, id_)
+        delete.assert_any_call(celery.request.es, id_)
+        delete.assert_any_call(celery.request.es6, id_)
 
     def test_during_reindex_deletes_from_current_index(self, delete, celery, settings_service):
         settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
-
-        indexer.delete_annotation('test-annotation-id')
-
-        delete.assert_any_call(celery.request.es,
-                               'test-annotation-id')
-
-    def test_during_reindex_deletes_from_new_index(self, delete, celery, settings_service):
-        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put(SETTING_NEW_ES6_INDEX, 'hypothesis-xyz123')
 
         indexer.delete_annotation('test-annotation-id')
 
         delete.assert_any_call(celery.request.es,
                                'test-annotation-id',
                                target_index='hypothesis-abcdef123')
+        delete.assert_any_call(celery.request.es6, 'test-annotation-id',
+                               target_index='hypothesis-xyz123')
+
+    def test_during_reindex_deletes_from_new_index(self, delete, celery, settings_service):
+        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put(SETTING_NEW_ES6_INDEX, 'hypothesis-xyz123')
+
+        indexer.delete_annotation('test-annotation-id')
+
+        delete.assert_any_call(celery.request.es,
+                               'test-annotation-id',
+                               target_index='hypothesis-abcdef123')
+        delete.assert_any_call(celery.request.es6,
+                               'test-annotation-id',
+                               target_index='hypothesis-xyz123')
 
     @pytest.fixture
     def delete(self, patch):
@@ -130,6 +151,14 @@ class TestDeleteAnnotation(object):
 
 @pytest.mark.usefixtures('celery')
 class TestReindexUserAnnotations(object):
+    def test_it_creates_batch_indexer(self, batch_indexer, annotation_ids, celery):
+        userid = list(annotation_ids.keys())[0]
+
+        indexer.reindex_user_annotations(userid)
+
+        batch_indexer.assert_any_call(celery.request.db, celery.request.es, celery.request)
+        batch_indexer.assert_any_call(celery.request.db, celery.request.es6, celery.request)
+
     def test_it_reindexes_users_annotations(self, batch_indexer, annotation_ids):
         userid = list(annotation_ids.keys())[0]
 
@@ -165,6 +194,7 @@ def celery(patch, pyramid_request):
 @pytest.fixture
 def pyramid_request(pyramid_request):
     pyramid_request.es = mock.Mock()
+    pyramid_request.es6 = mock.Mock()
     return pyramid_request
 
 

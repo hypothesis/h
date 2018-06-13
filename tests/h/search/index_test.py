@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import datetime
 
 import elasticsearch1_dsl
+import elasticsearch_dsl
 import mock
 import pytest
 
@@ -14,15 +15,16 @@ from tests.common.matchers import Matcher
 
 @pytest.mark.usefixtures("annotations")
 class TestIndex(object):
-    def test_annotation_ids_are_used_as_elasticsearch_ids(self, es_client,
+    def test_annotation_ids_are_used_as_elasticsearch_ids(self, each_es_client,
                                                           factories,
                                                           index):
         annotation = factories.Annotation.build()
+        es_client = each_es_client
 
         index(annotation)
 
         result = es_client.conn.get(index=es_client.index,
-                                    doc_type="annotation",
+                                    doc_type=es_client.t.annotation,
                                     id=annotation.id)
         assert result["_id"] == annotation.id
 
@@ -87,7 +89,10 @@ class TestIndex(object):
         event = AnnotationTransformEvent.return_value
 
         AnnotationTransformEvent.assert_called_with(pyramid_request, annotation, mock.ANY)
-        notify.assert_called_once_with(event)
+
+        # `notify` will be called twice. Once when indexing with ES1, once when
+        # indexing with ES6.
+        notify.assert_called_with(event)
 
     def test_you_can_filter_annotations_by_authority(self, factories, index, search):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
@@ -144,7 +149,8 @@ class TestIndex(object):
 
         index(annotation_1, annotation_2)
 
-        user_aggregation = elasticsearch1_dsl.A('terms', field='user_raw')
+        A = _aggregation_class(search)
+        user_aggregation = A('terms', field='user_raw')
         search.aggs.bucket('user_raw_terms', user_aggregation)
 
         response = search.execute()
@@ -162,19 +168,20 @@ class TestIndex(object):
 
         index(annotation)
 
-        response1 = search.filter("term", tags=["ญหฬ"]).execute()
-        response2 = search.filter("term", tags=["tag"]).execute()
+        response1 = search.filter("terms", tags=["ญหฬ"]).execute()
+        response2 = search.filter("terms", tags=["tag"]).execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response1
         assert SearchResponseWithIDs([annotation.id]) == response2
 
-    def test_you_can_make_aggregations_on_tags_raw(self, es_client, factories, index, search):
+    def test_you_can_make_aggregations_on_tags_raw(self, factories, index, search):
         annotation_1 = factories.Annotation.build(id="test_annotation_id_1", tags=["Hello"])
         annotation_2 = factories.Annotation.build(id="test_annotation_id_2", tags=["hello"])
 
         index(annotation_1, annotation_2)
 
-        tags_aggregation = elasticsearch1_dsl.A('terms', field='tags_raw')
+        A = _aggregation_class(search)
+        tags_aggregation = A('terms', field='tags_raw')
         search.aggs.bucket('tags_raw_terms', tags_aggregation)
 
         response = search.execute()
@@ -185,7 +192,7 @@ class TestIndex(object):
         assert tag_bucket_1["doc_count"] == 1
         assert tag_bucket_2["doc_count"] == 1
 
-    def test_you_can_filter_annotations_by_uri(self, es_client, factories, index, search):
+    def test_you_can_filter_annotations_by_uri(self, factories, index, search):
         my_uri = 'http://example.com/anything/i/like?ex=something'
         annotation = factories.Annotation.build(id="test_annotation_id", target_uri=my_uri)
 
@@ -231,13 +238,13 @@ class TestIndex(object):
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_thread_ids(self, es_client, factories, index, search):
+    def test_you_can_filter_annotations_by_thread_ids(self, factories, index, search):
         annotation1 = factories.Annotation.build(id="test_annotation_id1")
         annotation2 = factories.Annotation.build(id="test_annotation_id2", thread=[annotation1])
 
         index(annotation1, annotation2)
 
-        response = search.filter("term", thread_ids=[annotation1.id]).execute()
+        response = search.filter("terms", thread_ids=[annotation1.id]).execute()
 
         assert SearchResponseWithIDs([annotation2.id]) == response
 
@@ -280,11 +287,11 @@ class TestIndex(object):
         )
 
     @pytest.fixture
-    def get(self, es_client):
+    def get(self, each_es_client):
         def _get(annotation_id):
             """Return the annotation with the given ID from Elasticsearch."""
-            return es_client.conn.get(
-                index=es_client.index, doc_type="annotation",
+            return each_es_client.conn.get(
+                index=each_es_client.index, doc_type=each_es_client.t.annotation,
                 id=annotation_id)["_source"]
         return _get
 
@@ -294,18 +301,19 @@ class TestIndex(object):
 
 
 class TestDelete(object):
-    def test_annotation_is_marked_deleted(self, es_client, factories, index, search):
+    def test_annotation_is_marked_deleted(self, each_es_client, factories, index):
         annotation = factories.Annotation.build(id="test_annotation_id")
+        es_client = each_es_client
 
         index(annotation)
         result = es_client.conn.get(index=es_client.index,
-                                    doc_type="annotation",
+                                    doc_type=es_client.t.annotation,
                                     id=annotation.id)
         assert 'deleted' not in result.get('_source')
 
         h.search.index.delete(es_client, annotation.id)
         result = es_client.conn.get(index=es_client.index,
-                                    doc_type="annotation",
+                                    doc_type=es_client.t.annotation,
                                     id=annotation.id)
         assert result.get('_source').get('deleted') is True
 
@@ -327,7 +335,36 @@ class SearchResponseWithIDs(Matcher):
         return ids == self.annotation_ids
 
 
-@pytest.fixture
-def search(es_client):
-    return elasticsearch1_dsl.Search(using=es_client.conn,
-                                     index=es_client.index).fields([])
+@pytest.fixture(params=['es1', 'es6'])
+def search(es_client, es6_client, request):
+    """
+    Fixture to query against both ES 1 and ES 6 clusters.
+
+    Tests should use only one ES-version paramterized fixture.
+    """
+    if request.param == 'es1':
+        return elasticsearch1_dsl.Search(using=es_client.conn,
+                                         index=es_client.index).fields([])
+    else:
+        return elasticsearch_dsl.Search(using=es6_client.conn,
+                                        index=es6_client.index)
+
+
+@pytest.fixture(params=['es1', 'es6'])
+def each_es_client(es_client, es6_client, request):
+    """
+    Fixture to run a test against both ES 1 and ES 6 clusters.
+
+    Tests should use only one ES-version parametrized fixture.
+    """
+    if request.param == 'es1':
+        return es_client
+    else:
+        return es6_client
+
+
+def _aggregation_class(search):
+    if isinstance(search, elasticsearch_dsl.Search):
+        return elasticsearch_dsl.A  # Using ES 6.x
+    else:
+        return elasticsearch1_dsl.A  # Using ES 1.x

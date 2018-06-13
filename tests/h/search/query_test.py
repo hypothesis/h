@@ -18,7 +18,7 @@ class TestTopLevelAnnotationsFilter(object):
         assert reply.id not in result.annotation_ids
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         search_ = search.Search(pyramid_request)
         search_.append_filter(search.TopLevelAnnotationsFilter())
         return search_
@@ -37,7 +37,7 @@ class TestAuthorityFilter(object):
         assert set(result.annotation_ids) == set(annotations_auth1)
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         search_ = search.Search(pyramid_request)
         search_.append_filter(search.AuthorityFilter("auth1"))
         return search_
@@ -83,7 +83,7 @@ class TestAuthFilter(object):
         assert set(result.annotation_ids) == set(shared_ids)
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append AuthFilter to Search because it's one of the filters that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -92,7 +92,7 @@ class TestAuthFilter(object):
 class TestGroupFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append GroupFilter to Search because it's one of the filters that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -101,7 +101,7 @@ class TestGroupFilter(object):
 class TestGroupAuthFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append GroupAuthFilter to Search because it's one of the filters that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -110,7 +110,7 @@ class TestGroupAuthFilter(object):
 class TestUserFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append UserFilter to Search because it's one of the filters that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -119,7 +119,7 @@ class TestUserFilter(object):
 class TestUriFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append UriFilter to Search because it's one of the filters that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -128,7 +128,7 @@ class TestUriFilter(object):
 class TestDeletedFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append DeletedFilter to Search because it's one of the filters that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -137,7 +137,7 @@ class TestDeletedFilter(object):
 class TestNipsaFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append NipsaFilter to Search because it's one of the filters that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -146,7 +146,7 @@ class TestNipsaFilter(object):
 class TestAnyMatcher(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append AnyMatcher to Search because it's one of the matchers that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -155,7 +155,7 @@ class TestAnyMatcher(object):
 class TestTagsMatcher(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         # We don't need to append TagsMatcher to Search because it's one of the matchers that
         # Search appends by default.
         return search.Search(pyramid_request)
@@ -168,14 +168,14 @@ class TestRepliesMatcher(object):
     # annotation_ids of the annotations that the test wants to search for replies to.
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         return search.Search(pyramid_request)
 
 
 class TestTagsAggregation(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         search_ = search.Search(pyramid_request)
         search_.append_aggregation(search.TagsAggregation())
         return search_
@@ -184,7 +184,12 @@ class TestTagsAggregation(object):
 class TestUsersAggregation(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
+    def search(self, pyramid_request, use_both_es_versions):
         search_ = search.Search(pyramid_request)
         search_.append_aggregation(search.UsersAggregation())
         return search_
+
+
+@pytest.fixture(params=['es1', 'es6'])
+def use_both_es_versions(pyramid_request, request):
+    pyramid_request.feature.flags['search_es6'] = request.param == 'es6'

@@ -92,21 +92,13 @@ class TestBuilder(object):
         assert len(sort) == 1
         assert list(sort[0].keys()) == ["updated"]
 
-    def test_sort_includes_ignore_unmapped(self):
-        """'ignore_unmapped': True is used in the sort clause."""
-        builder = query.Builder()
-
-        q = builder.build({})
-
-        assert q["sort"][0]["updated"]["ignore_unmapped"] is True
-
     def test_with_custom_sort(self):
         """Custom sorts are returned in the query dict."""
         builder = query.Builder()
 
         q = builder.build({"sort": "title"})
 
-        assert q["sort"] == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
+        assert q["sort"] == [{'title': {'order': 'desc', 'unmapped_type': 'boolean'}}]
 
     def test_order_defaults_to_desc(self):
         """'order': "desc" is returned in the q dict by default."""
@@ -268,10 +260,12 @@ class TestAuthFilter(object):
         authfilter = query.AuthFilter(request)
 
         assert authfilter({}) == {
-            'or': [
-                {'term': {'shared': True}},
-                {'term': {'user_raw': 'acct:doe@example.org'}},
-            ]
+            'bool': {
+                'should': [
+                    {'term': {'shared': True}},
+                    {'term': {'user_raw': 'acct:doe@example.org'}},
+                ],
+            },
         }
 
 
@@ -625,7 +619,7 @@ def test_nipsa_filter_filters_out_nipsad_annotations(group_service):
     assert query.nipsa_filter(group_service) == {
         "bool": {
             "should": [
-                {'not': {'term': {'nipsa': True}}},
+                {'bool': {'must_not': {'term': {'nipsa': True}}}},
                 {'exists': {'field': 'thread_ids'}},
             ]
         }
