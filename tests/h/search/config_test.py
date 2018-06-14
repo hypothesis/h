@@ -13,6 +13,7 @@ from elasticsearch1.exceptions import NotFoundError
 from h.search.config import (
     ANNOTATION_MAPPING,
     ANALYSIS_SETTINGS,
+    ES6_ANNOTATION_MAPPING,
     init,
     configure_index,
     get_aliased_index,
@@ -64,29 +65,33 @@ def test_uri_part_tokenizer():
     ])
 
 
-@pytest.mark.usefixtures('client', 'configure_index')
+@pytest.mark.usefixtures('client2', 'configure_index')
 class TestInit(object):
-    def test_configures_index_when_index_missing(self, client, configure_index):
+    def test_configures_index_when_index_missing(self, client2, configure_index):
         """Calls configure_index when one doesn't exist."""
+        client = client2
         init(client)
 
         configure_index.assert_called_once_with(client)
 
-    def test_configures_alias(self, client):
+    def test_configures_alias(self, client2):
         """Adds an alias to the newly-created index."""
+        client = client2
         init(client)
 
         client.conn.indices.put_alias.assert_called_once_with(index='foo-abcd1234', name='foo')
 
-    def test_does_not_recreate_extant_index(self, client, configure_index):
+    def test_does_not_recreate_extant_index(self, client2, configure_index):
         """Exits early if the index (or an alias) already exists."""
+        client = client2
         client.conn.indices.exists.return_value = True
 
         init(client)
 
         assert not configure_index.called
 
-    def test_raises_if_icu_analysis_plugin_unavailable(self, client):
+    def test_raises_if_icu_analysis_plugin_unavailable(self, client2):
+        client = client2
         client.conn.cat.plugins.return_value = ''
 
         with pytest.raises(RuntimeError) as e:
@@ -94,8 +99,11 @@ class TestInit(object):
 
         assert 'plugin is not installed' in str(e.value)
 
+    # This test fixture has to have a different name than `client` because
+    # pytest does not support overriding a parametrized fixture with an
+    # unparametrized one.
     @pytest.fixture
-    def client(self, client):
+    def client2(self, client):
         # By default, pretend that no index exists already...
         client.conn.indices.exists.return_value = False
         # Simulate the ICU Analysis plugin
@@ -125,10 +133,15 @@ class TestConfigureIndex(object):
     def test_sets_correct_mappings_and_settings(self, client):
         configure_index(client)
 
+        if client.using_es6:
+            expected_ann_mapping = ES6_ANNOTATION_MAPPING
+        else:
+            expected_ann_mapping = ANNOTATION_MAPPING
+
         client.conn.indices.create.assert_called_once_with(
             mock.ANY,
             body={
-                'mappings': {'annotation': ANNOTATION_MAPPING},
+                'mappings': {'annotation': expected_ann_mapping},
                 'settings': {'analysis': ANALYSIS_SETTINGS},
             })
 
@@ -191,9 +204,10 @@ def groups(pattern, text):
     return re.search(pattern, text).groups() or []
 
 
-@pytest.fixture
-def client():
-    client = mock.Mock(spec_set=['conn', 'index', 't'])
+@pytest.fixture(params=['es1', 'es6'])
+def client(request):
+    client = mock.Mock(spec_set=['conn', 'index', 't', 'using_es6'])
     client.index = 'foo'
     client.t.annotation = 'annotation'
+    client.using_es6 = request.param == 'es6'
     return client

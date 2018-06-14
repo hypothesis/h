@@ -14,10 +14,11 @@ class Builder(object):
     Build a query for execution in Elasticsearch.
     """
 
-    def __init__(self):
+    def __init__(self, using_es6=False):
         self.filters = []
         self.matchers = []
         self.aggregations = []
+        self.using_es6 = using_es6
 
     def append_filter(self, f):
         self.filters.append(f)
@@ -48,16 +49,24 @@ class Builder(object):
 
         query = {"match_all": {}}
 
-        if matchers:
-            query = {"bool": {"must": matchers}}
+        if self.using_es6:
+            bool_query = {}
+            if matchers:
+                bool_query["must"] = matchers
+            if filters:
+                bool_query["filter"] = filters
+            query = {"bool": bool_query}
+        else:
+            if matchers:
+                query = {"bool": {"must": matchers}}
 
-        if filters:
-            query = {
-                "filtered": {
-                    "filter": {"and": filters},
-                    "query": query,
+            if filters:
+                query = {
+                    "filtered": {
+                        "filter": {"and": filters},
+                        "query": query,
+                    }
                 }
-            }
 
         return {
             "from": p_from,
@@ -94,8 +103,16 @@ def extract_limit(params):
 def extract_sort(params):
     return [{
         params.pop("sort", "updated"): {
-            "ignore_unmapped": True,
             "order": params.pop("order", "desc"),
+
+            # `unmapped_type` causes unknown fields specified as arguments to
+            # `sort` behave as if all documents contained empty values of the
+            # given type. Without this, specifying eg. `sort=foobar` throws
+            # an exception.
+            #
+            # We use the field type `boolean` to assist with migration because
+            # that exists in both ES 1 and ES 6.
+            "unmapped_type": "boolean",
         }
     }]
 
@@ -105,7 +122,7 @@ class TopLevelAnnotationsFilter(object):
     """Matches top-level annotations only, filters out replies."""
 
     def __call__(self, _):
-        return {'missing': {'field': 'references'}}
+        return {'bool': {'must_not': {'exists': {'field': 'references'}}}}
 
 
 class AuthorityFilter(object):
@@ -145,10 +162,9 @@ class AuthFilter(object):
         if userid is None:
             return public_filter
 
-        return {'or': [
-            public_filter,
-            {'term': {'user_raw': userid}},
-        ]}
+        userid_filter = {'term': {'user_raw': userid}}
+
+        return {'bool': {'should': [public_filter, userid_filter]}}
 
 
 class GroupFilter(object):
@@ -271,7 +287,7 @@ def nipsa_filter(group_service, user=None):
     # If any one of these "should" clauses is true then the annotation will
     # get through the filter.
     should_clauses = [
-        {"not": {"term": {"nipsa": True}}},
+        {"bool": {"must_not": {"term": {"nipsa": True}}}},
         {"exists": {"field": "thread_ids"}},
     ]
 

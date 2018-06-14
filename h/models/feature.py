@@ -18,6 +18,9 @@ FEATURES = {
     'overlay_highlighter': "Use the new overlay highlighter?",
     'api_render_user_info': "Return users' extended info in API responses?",
     'client_display_names': "Render display names instead of user names in the client",
+
+    'index_es6': 'Index annotations into Elasticsearch 6 (only takes effect if enabled for everyone)?',
+    'search_es6': 'Search annotations in Elasticsearch 6?',
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
