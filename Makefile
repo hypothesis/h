@@ -39,15 +39,19 @@ docker:
 run-docker:
 	$(eval RABBITMQ_CONTAINER ?= rabbitmq)
 	$(eval PG_CONTAINER ?= postgres)
+	$(eval ES1_CONTAINER ?= elasticsearch1)
 	$(eval ES_CONTAINER ?= elasticsearch)
 	docker run \
 		--link $(RABBITMQ_CONTAINER) \
 		--link $(PG_CONTAINER) \
 		--link $(ES_CONTAINER) \
+		--link $(ES1_CONTAINER) \
 		-e "APP_URL=http://localhost:5000" \
 		-e "BROKER_URL=amqp://guest:guest@$(RABBITMQ_CONTAINER):5672//" \
 		-e "DATABASE_URL=postgresql://postgres@$(PG_CONTAINER)/postgres" \
-		-e "ELASTICSEARCH_HOST=http://$(ES_CONTAINER):9200" \
+		-e "ELASTICSEARCH_HOST=http://$(ES1_CONTAINER):9200" \
+		-e "ELASTICSEARCH_URL=http://$(ES_CONTAINER):9201" \
+		-e "SECRET_KEY=notasecret" \
 		-p 5000:5000 \
 		hypothesis/hypothesis:$(DOCKER_TAG)
 
