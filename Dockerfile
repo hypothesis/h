@@ -19,7 +19,6 @@ RUN apk add --no-cache \
     libpq \
     nginx \
     python3 \
-    py2-pip \
     git
 
 # Create the hypothesis user, group, home directory and package directory.
@@ -32,6 +31,9 @@ RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
 # Copy minimal data to allow installation of dependencies.
 COPY requirements.txt ./
 
+# Install Golang implementation of supervisord
+COPY --from=ochinchina/supervisord:latest /usr/local/bin/supervisord /usr/local/bin/supervisord
+
 # Install build deps, build, and then clean up.
 RUN apk add --no-cache --virtual build-deps \
     build-base \
@@ -40,7 +42,6 @@ RUN apk add --no-cache --virtual build-deps \
     python3-dev \
   && python3 -m ensurepip \
   && pip3 install --no-cache-dir -U pip \
-  && pip2.7 install --no-cache-dir -U supervisor \
   && pip3 install --no-cache-dir -r requirements.txt \
   && apk del build-deps
 
