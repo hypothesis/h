@@ -9,6 +9,8 @@ from h.config import configure
 @pytest.mark.parametrize('env_var,env_val,setting_name,setting_val', [
     (None, None, 'h.db_session_checks', True),
     ('DB_SESSION_CHECKS', "False", 'h.db_session_checks', False),
+    ('SECRET_KEY', 'dont_tell_anyone', 'secret_key', b'dont_tell_anyone'),
+    ('SECRET_SALT', 'best_with_pepper', 'secret_salt', b'best_with_pepper'),
 
     # There are many other settings that can be updated from env vars.
     # These are not currently tested.
