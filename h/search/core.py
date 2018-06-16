@@ -58,6 +58,11 @@ class Search(object):
 
         return SearchResult(total, annotation_ids, reply_ids, aggregations)
 
+    def clear(self):
+        """Clear search filters, aggregators, and matchers."""
+        self.builder = query.Builder()
+        self.reply_builder = query.Builder()
+
     def append_filter(self, filter_):
         """Append a search filter to the annotation and reply query."""
         self.builder.append_filter(filter_)

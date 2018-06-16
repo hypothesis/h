@@ -3,14 +3,14 @@ from __future__ import unicode_literals
 
 import pytest
 
-from h import search
+from h.search import Search, query
 
 
 class TestTopLevelAnnotationsFilter(object):
 
     def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, search):
-        annotation = Annotation(shared=True)
-        reply = Annotation(references=[annotation.id], shared=True)
+        annotation = Annotation()
+        reply = Annotation(references=[annotation.id])
 
         result = search.run({})
 
@@ -18,29 +18,27 @@ class TestTopLevelAnnotationsFilter(object):
         assert reply.id not in result.annotation_ids
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        search_ = search.Search(pyramid_request)
-        search_.append_filter(search.TopLevelAnnotationsFilter())
-        return search_
+    def search(self, search):
+        search.append_filter(query.TopLevelAnnotationsFilter())
+        return search
 
 
 class TestAuthorityFilter(object):
     def test_it_filters_out_non_matching_authorities(self, Annotation, search):
-        annotations_auth1 = [Annotation(userid="acct:foo@auth1", shared=True).id,
-                             Annotation(userid="acct:bar@auth1", shared=True).id]
+        annotations_auth1 = [Annotation(userid="acct:foo@auth1").id,
+                             Annotation(userid="acct:bar@auth1").id]
         # Make some other annotations that are of different authority.
-        Annotation(userid="acct:bat@auth2", shared=True)
-        Annotation(userid="acct:bar@auth3", shared=True)
+        Annotation(userid="acct:bat@auth2")
+        Annotation(userid="acct:bar@auth3")
 
         result = search.run({})
 
         assert set(result.annotation_ids) == set(annotations_auth1)
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        search_ = search.Search(pyramid_request)
-        search_.append_filter(search.AuthorityFilter("auth1"))
-        return search_
+    def search(self, search):
+        search.append_filter(query.AuthorityFilter("auth1"))
+        return search
 
 
 class TestAuthFilter(object):
@@ -60,7 +58,8 @@ class TestAuthFilter(object):
 
         assert set(result.annotation_ids) == set(shared_ids)
 
-    def test_logged_in_user_can_only_see_their_private_annotations(self, search, pyramid_config, Annotation):
+    def test_logged_in_user_can_only_see_their_private_annotations(self,
+            search, pyramid_config, Annotation):
         userid = "acct:bar@auth2"
         pyramid_config.testing_securitypolicy(userid)
         # Make a private annotation from a different user.
@@ -72,7 +71,8 @@ class TestAuthFilter(object):
 
         assert set(result.annotation_ids) == set(users_private_ids)
 
-    def test_logged_in_user_can_see_shared_annotations(self, search, pyramid_config, Annotation):
+    def test_logged_in_user_can_see_shared_annotations(self,
+            search, pyramid_config, Annotation):
         userid = "acct:bar@auth2"
         pyramid_config.testing_securitypolicy(userid)
         shared_ids = [Annotation(userid="acct:foo@auth2", shared=True).id,
@@ -83,82 +83,73 @@ class TestAuthFilter(object):
         assert set(result.annotation_ids) == set(shared_ids)
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append AuthFilter to Search because it's one of the filters that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search, pyramid_request):
+        search.append_filter(query.AuthFilter(pyramid_request))
+        return search
 
 
 class TestGroupFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append GroupFilter to Search because it's one of the filters that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search):
+        search.append_filter(query.GroupFilter())
+        return search
 
 
 class TestGroupAuthFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append GroupAuthFilter to Search because it's one of the filters that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search, pyramid_request):
+        search.append_filter(query.GroupAuthFilter(pyramid_request))
+        return search
 
 
 class TestUserFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append UserFilter to Search because it's one of the filters that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search):
+        search.append_filter(query.UserFilter())
+        return search
 
 
 class TestUriFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append UriFilter to Search because it's one of the filters that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search, pyramid_request):
+        search.append_filter(query.UriFilter(pyramid_request))
+        return search
 
 
 class TestDeletedFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append DeletedFilter to Search because it's one of the filters that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search):
+        search.append_filter(query.DeletedFilter())
+        return search
 
 
 class TestNipsaFilter(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append NipsaFilter to Search because it's one of the filters that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search, pyramid_request):
+        search.append_filter(query.NipsaFilter(pyramid_request))
+        return search
 
 
 class TestAnyMatcher(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append AnyMatcher to Search because it's one of the matchers that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search):
+        search.append_matcher(query.AnyMatcher())
+        return search
 
 
 class TestTagsMatcher(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        # We don't need to append TagsMatcher to Search because it's one of the matchers that
-        # Search appends by default.
-        return search.Search(pyramid_request)
+    def search(self, search):
+        search.append_matcher(query.TagsMatcher())
+        return search
 
 
 class TestRepliesMatcher(object):
@@ -166,25 +157,28 @@ class TestRepliesMatcher(object):
     # Note: tests will have to append a RepliesMatcher object to the search
     # (search.append_matcher(RepliesMatcher(annotation_ids))) passing to RepliesMatcher the
     # annotation_ids of the annotations that the test wants to search for replies to.
-
-    @pytest.fixture
-    def search(self, pyramid_request):
-        return search.Search(pyramid_request)
+    pass
 
 
 class TestTagsAggregation(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        search_ = search.Search(pyramid_request)
-        search_.append_aggregation(search.TagsAggregation())
-        return search_
+    def search(self, search):
+        search.append_aggregation(query.TagsAggregation())
+        return search
 
 
 class TestUsersAggregation(object):
 
     @pytest.fixture
-    def search(self, pyramid_request):
-        search_ = search.Search(pyramid_request)
-        search_.append_aggregation(search.UsersAggregation())
-        return search_
+    def search(self, search):
+        search.append_aggregation(query.UsersAggregation())
+        return search
+
+
+@pytest.fixture
+def search(pyramid_request):
+    search = Search(pyramid_request)
+    # Remove all default filters, aggregators, and matchers.
+    search.clear()
+    return search
