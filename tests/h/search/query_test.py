@@ -106,6 +106,33 @@ class TestGroupAuthFilter(object):
 
 
 class TestUserFilter(object):
+    def test_filters_annotations_by_user(self, search, Annotation):
+        Annotation(userid="acct:foo@auth2", shared=True)
+        expected_ids = [Annotation(userid="acct:bar@auth2", shared=True).id]
+
+        result = search.run({'user': "bar"})
+
+        assert set(result.annotation_ids) == set(expected_ids)
+
+    def test_filters_annotations_by_multiple_users(self, search, Annotation):
+        Annotation(userid="acct:foo@auth2", shared=True)
+        expected_ids = [Annotation(userid="acct:bar@auth2", shared=True).id,
+                        Annotation(userid="acct:baz@auth2", shared=True).id]
+
+        params = webob.multidict.MultiDict()
+        params.add("user", "bar")
+        params.add("user", "baz")
+        result = search.run(params)
+
+        assert set(result.annotation_ids) == set(expected_ids)
+
+    def test_filters_annotations_by_user_and_authority(self, search, Annotation):
+        Annotation(userid="acct:foo@auth2", shared=True)
+        expected_ids = [Annotation(userid="acct:foo@auth3", shared=True).id]
+
+        result = search.run({"user": "foo@auth3"})
+
+        assert set(result.annotation_ids) == set(expected_ids)
 
     @pytest.fixture
     def search(self, search):
