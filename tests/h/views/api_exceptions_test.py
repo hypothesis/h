@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-from pyramid.httpexceptions import HTTPException, HTTPConflict
-
 from h.exceptions import APIError
 from h.schemas import ValidationError
 from h.views import api_exceptions as views
@@ -15,26 +13,6 @@ def test_api_notfound_view(pyramid_request):
     assert pyramid_request.response.status_int == 404
     assert result['status'] == 'failure'
     assert result['reason']
-
-
-def test_http_error_view_handles_generic_HTTPException(pyramid_request):  # noqa: N802
-    context = HTTPException()
-
-    result = views.http_error(context, pyramid_request)
-
-    # HTTPException (base class) response code is 520
-    assert pyramid_request.response.status_code == 520
-    assert result['status'] == 'failure'
-
-
-def test_http_error_view_handles_HTTPConflict(pyramid_request):  # noqa: N802
-    context = HTTPConflict()
-
-    result = views.http_error(context, pyramid_request)
-
-    # HTTP Conflict response status code is 409
-    assert pyramid_request.response.status_code == 409
-    assert result['status'] == 'failure'
 
 
 def test_api_error_view(pyramid_request):
