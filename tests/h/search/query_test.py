@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import pytest
+import webob
 
 from h.search import Search, query
 
@@ -145,6 +146,42 @@ class TestAnyMatcher(object):
 
 
 class TestTagsMatcher(object):
+    def test_matches_tag_key(self, search, Annotation):
+        Annotation(shared=True)
+        Annotation(shared=True, tags=["bar"])
+        matched_ids = [Annotation(shared=True, tags=["foo"]).id,
+                       Annotation(shared=True, tags=["foo", "bar"]).id]
+
+        result = search.run({"tag": "foo"})
+
+        assert set(result.annotation_ids) == set(matched_ids)
+
+    def test_matches_tags_key(self, search, Annotation):
+        Annotation(shared=True)
+        Annotation(shared=True, tags=["bar"])
+        matched_ids = [Annotation(shared=True, tags=["foo"]).id,
+                       Annotation(shared=True, tags=["foo", "bar"]).id]
+
+        result = search.run({"tags": "foo"})
+
+        assert set(result.annotation_ids) == set(matched_ids)
+
+    def test_ands_multiple_tag_keys(self, search, Annotation):
+        Annotation(shared=True)
+        Annotation(shared=True, tags=["bar"])
+        Annotation(shared=True, tags=["baz"])
+        Annotation(shared=True, tags=["boo"])
+        matched_ids = [Annotation(shared=True, tags=["foo", "baz", "fie", "boo"]).id,
+                       Annotation(shared=True, tags=["foo", "baz", "fie", "boo", "bar"]).id]
+
+        params = webob.multidict.MultiDict()
+        params.add("tags", "foo")
+        params.add("tags", "boo")
+        params.add("tag", "fie")
+        params.add("tag", "baz")
+        result = search.run(params)
+
+        assert set(result.annotation_ids) == set(matched_ids)
 
     @pytest.fixture
     def search(self, search):
