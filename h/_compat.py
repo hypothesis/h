@@ -76,7 +76,7 @@ if PY2:
         for "native" strings in PEP-3333 (the WSGI spec).
 
         """
-        if isinstance(s, unicode):
+        if isinstance(s, unicode):  # noqa
             return s.encode(encoding, errors)
         return s
 else:
