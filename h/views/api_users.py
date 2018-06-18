@@ -6,7 +6,6 @@ import hmac
 
 import sqlalchemy as sa
 from pyramid.exceptions import HTTPNotFound
-from pyramid.httpexceptions import HTTPConflict
 
 from h import models
 from h.accounts import schemas
@@ -64,10 +63,6 @@ def update(request):
     appstruct = schema.validate(_json_payload(request))
 
     _update_user(user, appstruct)
-    try:
-        request.db.flush()
-    except sa.exc.IntegrityError:
-        raise HTTPConflict()
 
     presenter = UserJSONPresenter(user)
     return presenter.asdict()

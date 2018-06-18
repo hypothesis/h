@@ -6,7 +6,6 @@ import pytest
 from mock import Mock, PropertyMock
 
 from pyramid.exceptions import HTTPNotFound
-from pyramid.httpexceptions import HTTPConflict
 
 from h.exceptions import ClientUnauthorized, PayloadError
 from h.models.auth_client import GrantType
@@ -281,15 +280,6 @@ class TestUpdate(object):
         pyramid_request.matchdict['username'] = 'missing'
 
         with pytest.raises(HTTPNotFound):
-            update(pyramid_request)
-
-    @pytest.mark.usefixtures('valid_auth')
-    def test_raises_409_when_email_exists(self, user, pyramid_request, auth_client, db_session, factories):
-        existing = factories.User(authority=auth_client.authority)
-        db_session.flush()
-
-        pyramid_request.json_body = {'email': existing.email}
-        with pytest.raises(HTTPConflict):
             update(pyramid_request)
 
     @pytest.mark.usefixtures('valid_auth')

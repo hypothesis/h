@@ -38,7 +38,7 @@ def add(ctx, username, email, password, authority):
         request.tm.commit()
     except sqlalchemy.exc.IntegrityError as err:
         upstream_error = '\n'.join('    ' + line
-                                   for line in str(err).split('\n'))
+                                   for line in err.message.split('\n'))
         message = ('could not create user due to integrity constraint.\n\n{}'
                    .format(upstream_error))
         raise click.ClickException(message)
