@@ -291,7 +291,6 @@ class TestUpdate(object):
         pyramid_request.json_body = {'email': existing.email}
         with pytest.raises(HTTPConflict):
             update(pyramid_request)
-            assert pyramid_request.response.status_code == 409
 
     @pytest.mark.usefixtures('valid_auth')
     def test_it_validates_the_input(self, pyramid_request, valid_payload, schemas):
