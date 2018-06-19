@@ -83,6 +83,12 @@ class AuthClientContext(object):
         self.auth_client = auth_client
 
 
+class AuthClientIndexContext(object):
+    """Context for views based on a list of AuthClients."""
+    def __init__(self, auth_clients):
+        self.auth_clients = auth_clients
+
+
 class OrganizationContext(object):
     """Context for organization-based views."""
 

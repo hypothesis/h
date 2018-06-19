@@ -138,6 +138,18 @@ class AuthClientRoot(object):
         return context
 
 
+class AuthClientIndexRoot(object):
+    """Root factory for :py:class:`h.traversal.AuthClientContext`-based index routes."""
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self):
+        auth_clients = self.request.db.query(AuthClient).order_by(AuthClient.name.asc()).all()
+        context = contexts.AuthClientIndexContext(auth_clients)
+        context.__parent__ = Root(self.request)
+        return context
+
+
 class OrganizationRoot(object):
     """
     Root factory for routes whose context is an :py:class:`h.traversal.OrganizationContext`.

@@ -6,7 +6,7 @@ from mock import create_autospec, Mock
 import pytest
 
 from h.models.auth_client import AuthClient, GrantType, ResponseType
-from h.traversal import AuthClientContext
+from h import traversal
 from h.views.admin_oauthclients import index, AuthClientCreateController, AuthClientEditController
 
 
@@ -32,15 +32,16 @@ class FakeForm(object):
 
 
 def test_index_lists_authclients_sorted_by_name(pyramid_request, routes):
-    clients = [AuthClient(authority='foo.org', name='foo'),
-               AuthClient(authority='foo.org', name='bar')]
-    for client in clients:
-        pyramid_request.db.add(client)
+    auth_clients = [
+        AuthClient(authority='foo.org', name='foo'),
+        AuthClient(authority='foo.org', name='bar'),
+    ]
+    auth_client_context = create_autospec(
+        traversal.AuthClientIndexContext, instance=True, auth_clients=auth_clients)
 
-    ctx = index(pyramid_request)
+    template_context = index(auth_client_context, pyramid_request)
 
-    expected_clients = [clients[1], clients[0]]
-    assert ctx == {'clients': expected_clients}
+    assert template_context == {"clients": auth_clients}
 
 
 @pytest.mark.usefixtures('routes')
@@ -219,7 +220,7 @@ class TestAuthClientEditController(object):
 
     @pytest.fixture
     def auth_client_context(self, authclient):
-        return AuthClientContext(authclient)
+        return traversal.AuthClientContext(authclient)
 
 
 @pytest.fixture
