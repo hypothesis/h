@@ -32,7 +32,7 @@ node {
                                          "-e ELASTICSEARCH_URL=${elasticsearchHost} " +
                                          "-e TEST_DATABASE_URL=${databaseUrl}") {
                 // Test dependencies
-                sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
+                sh 'apk add --no-cache build-base curl-dev libffi-dev postgresql-dev python-dev'
                 sh 'apk add --no-cache python3 python3-dev'
                 sh 'pip install -q tox'
 

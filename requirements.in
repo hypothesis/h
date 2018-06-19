@@ -4,12 +4,14 @@ alembic
 backports.functools_lru_cache
 bcrypt
 bleach >= 2.0
+boto3
 celery >= 4.1
 certifi
 cffi
 click
 deform < 1.0
 deform-jinja2
+ec2-metadata
 elasticsearch==6.2.0
 elasticsearch1==1.10.0
 elasticsearch-dsl==6.1.0
@@ -28,6 +30,7 @@ oauthlib
 passlib
 psycogreen
 psycopg2
+pycurl
 pyparsing >= 2.1.5
 pyramid
 pyramid_authsanity >= 1.0.0  # 1.0.0 fixes an IE bug: https://git.io/vH3mi

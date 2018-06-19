@@ -10,6 +10,9 @@ backports.functools-lru-cache==1.2.1
 bcrypt==3.1.3
 billiard==3.5.0.3         # via celery
 bleach==2.1.3
+boto3==1.7.30
+botocore==1.10.30         # via boto3, s3transfer
+cached-property==1.4.2    # via ec2-metadata
 celery==4.1.0
 certifi==2016.2.28
 cffi==1.7.0
@@ -19,6 +22,8 @@ colander==1.3.1           # via deform
 contextlib2==0.5.4        # via raven
 deform-jinja2==0.5
 deform==0.9.9
+docutils==0.14            # via botocore
+ec2-metadata==1.6.0
 elasticsearch-dsl==6.1.0
 elasticsearch1==1.10.0
 elasticsearch==6.2.0
@@ -33,6 +38,7 @@ ipaddress==1.0.18         # via elasticsearch-dsl
 iso8601==0.1.11           # via colander
 itsdangerous==0.24
 jinja2==2.8               # via deform-jinja2, pyramid-jinja2
+jmespath==0.9.3           # via boto3, botocore
 jsonpointer==1.0
 jsonschema==2.5.1
 kombu==4.1.0
@@ -47,6 +53,7 @@ peppercorn==0.5           # via deform
 psycogreen==1.0
 psycopg2==2.7.3.2
 pycparser==2.14           # via cffi
+pycurl==7.43.0.1
 pyjwt==1.5.3
 pyparsing==2.1.10
 pyramid-authsanity==1.0.0
@@ -64,7 +71,8 @@ raven==6.0.0
 repoze.lru==0.6           # via pyramid
 repoze.sendmail==4.3      # via pyramid-mailer
 requests-aws4auth==0.9
-requests==2.13.0          # via requests-aws4auth
+requests==2.13.0          # via ec2-metadata, requests-aws4auth
+s3transfer==0.1.13        # via boto3
 six==1.10.0               # via bcrypt, bleach, elasticsearch-dsl, html5lib, python-dateutil
 sqlalchemy==1.1.4
 statsd==3.2.1

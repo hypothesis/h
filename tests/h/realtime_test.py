@@ -171,3 +171,41 @@ class TestGetConnection(object):
     @pytest.fixture
     def Connection(self, patch):
         return patch('h.realtime.kombu.Connection')
+
+
+class TestDummyPublisher(object):
+
+    def test_publish_annotation_does_nothing(self, pyramid_request):
+        publisher = realtime.DummyPublisher(pyramid_request)
+        publisher.publish_annotation({})
+
+    def test_publish_user_does_nothing(self, pyramid_request):
+        publisher = realtime.DummyPublisher(pyramid_request)
+        publisher.publish_user({})
+
+
+class TestConfiguration(object):
+
+    def test_it_uses_dummy_publisher_when_using_sqs(self, pyramid_config):
+        pyramid_config.add_request_method = mock.Mock(spec=pyramid_config.add_request_method)
+        pyramid_config.registry = {'broker_url': 'sqs://'}
+
+        realtime.includeme(pyramid_config)
+
+        pyramid_config.add_request_method.assert_called_with(
+            realtime.DummyPublisher,
+            name='realtime',
+            reify=True,
+        )
+
+    def test_it_uses_real_publisher_when_using_amqp(self, pyramid_config):
+        pyramid_config.add_request_method = mock.Mock(spec=pyramid_config.add_request_method)
+        pyramid_config.registry = {'broker_url': 'amqp://guest:guest@localhost:5672//'}
+
+        realtime.includeme(pyramid_config)
+
+        pyramid_config.add_request_method.assert_called_with(
+            realtime.Publisher,
+            name='realtime',
+            reify=True,
+        )
