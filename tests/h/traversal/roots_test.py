@@ -77,7 +77,7 @@ class TestAnnotationRoot(object):
 
 
 class TestAuthClientRoot(object):
-    def test_get_item_returns_an_authclient(self, pyramid_request):
+    def test_getitem_returns_an_authclient(self, pyramid_request):
         authclient = AuthClient(name='test', authority='example.com')
         pyramid_request.db.add(authclient)
         pyramid_request.db.flush()
@@ -85,12 +85,12 @@ class TestAuthClientRoot(object):
         factory = AuthClientRoot(pyramid_request)
         assert factory[authclient.id] == authclient
 
-    def test_get_item_returns_keyerror_if_not_found(self, pyramid_request):
+    def test_getitem_returns_keyerror_if_not_found(self, pyramid_request):
         factory = AuthClientRoot(pyramid_request)
         with pytest.raises(KeyError):
             factory['E19D247D-1F07-4E91-B40D-00DF22E693E4']
 
-    def test_get_item_returns_keyerror_if_invalid(self, pyramid_request):
+    def test_getitem_returns_keyerror_if_invalid(self, pyramid_request):
         factory = AuthClientRoot(pyramid_request)
         with pytest.raises(KeyError):
             factory['not-a-uuid']
