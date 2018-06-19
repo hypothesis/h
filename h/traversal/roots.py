@@ -126,11 +126,14 @@ class AuthClientRoot(object):
             client = self.request.db.query(AuthClient) \
                                     .filter_by(id=client_id).one()
 
-            # Inherit global ACL.
-            # See `pyramid.authorization.ACLAuthorizationPolicy` docs.
+            # Add the default root factory to this resource's lineage so that the
+            # default ACL is applied. This is needed so that permissions required by
+            # auth client admin views (e.g. the "admin_oauthclients" permission) are
+            # granted to admin users.
             #
-            # Other roots do not currently do this, but we rely on it for
-            # this root because it is used within the /admin pages.
+            # For details on how ACLs work see the docs for Pyramid's
+            # ACLAuthorizationPolicy:
+            # https://docs.pylonsproject.org/projects/pyramid/en/latest/api/authorization.html
             client.__parent__ = Root(self.request)
 
             return client
