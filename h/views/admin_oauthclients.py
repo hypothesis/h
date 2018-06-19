@@ -91,9 +91,9 @@ class AuthClientCreateController(object):
                renderer='h:templates/admin/oauthclients_edit.html.jinja2')
 class AuthClientEditController(object):
 
-    def __init__(self, client, request):
+    def __init__(self, auth_client_context, request):
         self.request = request
-        self.client = client
+        self.client = auth_client_context.auth_client
         self.schema = EditAuthClientSchema().bind(request=request)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Save'),))
