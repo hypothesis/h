@@ -112,13 +112,7 @@ class AnnotationRoot(object):
 
 
 class AuthClientRoot(object):
-    """
-    Root factory for routes whose context is an :py:class:`h.traversal.AuthClientContext`.
-
-    FIXME: This class should return AuthClientContext objects, not AuthClient
-    objects.
-
-    """
+    """Root factory for :py:class:`h.traversal.AuthClientContext`-based routes."""
     def __init__(self, request):
         self.request = request
 
