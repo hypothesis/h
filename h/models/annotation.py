@@ -12,6 +12,24 @@ from sqlalchemy.ext.mutable import MutableDict, MutableList
 from h.db import Base, types
 from h.util import markdown, uri
 from h.util.user import split_user
+from h import i18n
+_ = i18n.TranslationString
+
+
+MOTIVATIONS = ["assessing",
+               "bookmarking",
+               "classifying",
+               "commenting",
+               "describing",
+               "editing",
+               "highlighting",
+               "identifying",
+               "linking",
+               "moderating",
+               "questioning",
+               "replying",
+               "tagging",
+               ]
 
 
 class Annotation(Base):
@@ -114,6 +132,10 @@ class Annotation(Base):
                             sa.ForeignKey('document.id'),
                             nullable=False)
 
+    motivations = sa.Column(MutableList.as_mutable(
+        pg.ARRAY(sa.UnicodeText, zero_indexes=True)
+     ), default=list)
+
     document = sa.orm.relationship('Document', backref='annotations')
 
     thread = sa.orm.relationship('Annotation',
@@ -121,6 +143,16 @@ class Annotation(Base):
                                               sa.orm.remote(references[0])),
                                  viewonly=True,
                                  uselist=True)
+
+    @sa.orm.validates('motivations')
+    def validate_motivations(self, key, motivations):
+        # We can't use enum in an array field because SQLAlchemy doesn't
+        # support it, so we have to do validation here
+        if len(set(motivations)) != len(motivations):
+            raise ValueError(_('motivations must not contain duplicates'))
+        if len(set(motivations) - set(MOTIVATIONS)) != 0:
+            raise ValueError(_('motivations must contain valid motivations {}'.format(MOTIVATIONS)))
+        return motivations
 
     @hybrid_property
     def target_uri(self):

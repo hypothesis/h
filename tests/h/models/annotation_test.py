@@ -7,6 +7,18 @@ import pytest
 from h.models.annotation import Annotation
 
 
+def test_motivations_can_be_set():
+    ann = Annotation(motivations=["tagging"])
+
+    assert ann.motivations == ["tagging"]
+
+
+def test_multiple_motivations_can_be_set():
+    ann = Annotation(motivations=["tagging", "linking"])
+
+    assert ann.motivations == ["tagging", "linking"]
+
+
 def test_parent_id_of_direct_reply():
     ann = Annotation(references=['parent_id'])
 
@@ -87,6 +99,38 @@ def test_authority(factories, userid, authority):
 
 def test_authority_when_annotation_has_no_userid():
     assert Annotation().authority is None
+
+
+def test_default_motivations_is_empty(factories):
+    annotation = factories.Annotation()
+
+    assert annotation.motivations == []
+
+
+def test_allows_empty_motivations_list(db_session, factories):
+    annotation = factories.Annotation(motivations=[])
+
+    assert annotation.motivations == []
+
+
+def test_raises_when_motivations_contains_duplicates(db_session, factories):
+    with pytest.raises(ValueError):
+        factories.Annotation(motivations=["tagging", "highlighting", "tagging"])
+
+
+def test_raises_when_invalid_motivation(db_session, factories):
+    with pytest.raises(ValueError):
+        factories.Annotation(motivations=["invalid"])
+
+
+def test_raises_when_any_invalid_motivation(db_session, factories):
+    with pytest.raises(ValueError):
+        factories.Annotation(motivations=["highlighting", "invalid"])
+
+
+def test_raises_when_wrong_motivation_type(db_session, factories):
+    with pytest.raises(ValueError):
+        factories.Annotation(motivations="tagging")
 
 
 def test_setting_extras_inline_is_persisted(db_session, factories):
