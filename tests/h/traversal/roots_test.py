@@ -76,7 +76,7 @@ class TestAnnotationRoot(object):
         return service
 
 
-class TestAuthClientResourceFactory(object):
+class TestAuthClientRoot(object):
     def test_get_item_returns_an_authclient(self, pyramid_request):
         authclient = AuthClient(name='test', authority='example.com')
         pyramid_request.db.add(authclient)
