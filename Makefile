@@ -37,15 +37,16 @@ docker:
 # Run docker image built with `docker` task
 .PHONY: run-docker
 run-docker:
-	$(eval RABBITMQ_CONTAINER ?= rabbitmq)
-	$(eval PG_CONTAINER ?= postgres)
-	$(eval ES1_CONTAINER ?= elasticsearch1)
-	$(eval ES_CONTAINER ?= elasticsearch)
+	$(eval RABBITMQ_CONTAINER ?= h_rabbit_1)
+	$(eval PG_CONTAINER ?= h_postgres_1)
+	$(eval ES1_CONTAINER ?= h_elasticsearchold_1)
+	$(eval ES_CONTAINER ?= h_elasticsearch_1)
 	docker run \
 		--link $(RABBITMQ_CONTAINER) \
 		--link $(PG_CONTAINER) \
 		--link $(ES_CONTAINER) \
 		--link $(ES1_CONTAINER) \
+		--net h_default \
 		-e "APP_URL=http://localhost:5000" \
 		-e "BROKER_URL=amqp://guest:guest@$(RABBITMQ_CONTAINER):5672//" \
 		-e "DATABASE_URL=postgresql://postgres@$(PG_CONTAINER)/postgres" \
