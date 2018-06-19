@@ -68,7 +68,7 @@ from pyramid.security import (
     DENY_ALL,
     Allow,
 )
-from sqlalchemy.orm import exc
+import sqlalchemy.orm.exc
 
 from h import storage
 from h.models import AuthClient
@@ -159,7 +159,7 @@ class OrganizationRoot(object):
             org.__parent__ = Root(self.request)
 
             return org
-        except exc.NoResultFound:
+        except sqlalchemy.orm.exc.NoResultFound:
             raise KeyError()
 
 
@@ -198,7 +198,7 @@ class GroupRoot(object):
     def __getitem__(self, pubid):
         try:
             return self.request.db.query(Group).filter_by(pubid=pubid).one()
-        except exc.NoResultFound:
+        except sqlalchemy.orm.exc.NoResultFound:
             raise KeyError()
 
 
