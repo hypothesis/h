@@ -77,7 +77,7 @@ from h.models import Group
 from h.models import Organization
 from h.auth import role
 from h.interfaces import IGroupService
-from h.traversal.contexts import AnnotationContext
+from h.traversal import contexts
 
 
 class Root(object):
@@ -108,7 +108,7 @@ class AnnotationRoot(object):
 
         group_service = self.request.find_service(IGroupService)
         links_service = self.request.find_service(name='links')
-        return AnnotationContext(annotation, group_service, links_service)
+        return contexts.AnnotationContext(annotation, group_service, links_service)
 
 
 class AuthClientRoot(object):
