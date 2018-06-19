@@ -123,8 +123,7 @@ class AuthClientRoot(object):
 
     def __getitem__(self, client_id):
         try:
-            client = self.request.db.query(AuthClient) \
-                                    .filter_by(id=client_id).one()
+            client = self.request.db.query(AuthClient).filter_by(id=client_id).one()
 
             # Add the default root factory to this resource's lineage so that the
             # default ACL is applied. This is needed so that permissions required by
