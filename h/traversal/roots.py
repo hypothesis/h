@@ -68,6 +68,7 @@ from pyramid.security import (
     DENY_ALL,
     Allow,
 )
+import sqlalchemy.exc
 import sqlalchemy.orm.exc
 
 from h import storage
@@ -124,8 +125,9 @@ class AuthClientRoot(object):
     def __getitem__(self, client_id):
         try:
             client = self.request.db.query(AuthClient).filter_by(id=client_id).one()
-        except:  # noqa: E722
-            # No such client found or not a valid UUID.
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise KeyError()
+        except sqlalchemy.exc.DataError:  # Happens when client_id is not a valid UUID.
             raise KeyError()
 
         # Add the default root factory to this resource's lineage so that the default
