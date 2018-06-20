@@ -100,12 +100,74 @@ class TestGetGroups(object):
         return [factories.OpenGroup(), factories.OpenGroup()]
 
     @pytest.fixture
-    def anonymous_request(self, pyramid_request):
-        pyramid_request.user = None
+    def authenticated_request(self, pyramid_request, factories):
+        pyramid_request.user = factories.User()
         return pyramid_request
 
+
+@pytest.mark.usefixtures('CreateGroupAPISchema',
+                         'group_service',
+                         'GroupContext',
+                         'GroupJSONPresenter')
+class TestCreateGroup(object):
+
+    def test_it_inits_group_create_schema(self, pyramid_request, CreateGroupAPISchema):  # noqa: N803
+        views.create(pyramid_request)
+
+        CreateGroupAPISchema.assert_called_once()
+
+    # @TODO Move this test once _json_payload() has been moved to a reusable util module
+    def test_it_raises_if_json_parsing_fails(self, pyramid_request):
+        """It raises PayloadError if parsing of the request body fails."""
+        # Make accessing the request.json_body property raise ValueError.
+        type(pyramid_request).json_body = {}
+        with mock.patch.object(type(pyramid_request),
+                               'json_body',
+                               new_callable=mock.PropertyMock) as json_body:
+            json_body.side_effect = ValueError()
+            with pytest.raises(views.PayloadError):
+                views.create(pyramid_request)
+
+    def test_it_proxies_to_group_create_service(self, pyramid_request, group_service):
+        views.create(pyramid_request)
+
+        group_service.create_private_group.assert_called_once()
+
+    def test_it_passes_request_params_to_group_create_service(self,  # noqa: N803
+                                                              pyramid_request,
+                                                              CreateGroupAPISchema,
+                                                              group_service):
+        CreateGroupAPISchema.return_value.validate.return_value = {'name': 'My Group'}
+        views.create(pyramid_request)
+
+        group_service.create_private_group.assert_called_once_with('My Group', pyramid_request.user.userid)
+
+    def test_it_creates_group_context_from_created_group(self,   # noqa: N803
+                                                         pyramid_request,
+                                                         GroupContext,
+                                                         group_service,
+                                                         factories):
+        my_group = factories.Group()
+        group_service.create_private_group.return_value = my_group
+
+        views.create(pyramid_request)
+
+        GroupContext.assert_called_with(my_group, pyramid_request)
+
+    def test_it_returns_new_group_formatted_with_presenter(self,   # noqa: N803
+                                                           pyramid_request,
+                                                           GroupContext,
+                                                           GroupJSONPresenter):
+        views.create(pyramid_request)
+
+        GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
+        GroupJSONPresenter.return_value.asdict.assert_called_once()
+
     @pytest.fixture
-    def authenticated_request(self, pyramid_request, factories):
+    def pyramid_request(self, pyramid_request, factories):
+        # Add a nominal json_body so that _json_payload() parsing of
+        # it doesn't raise
+        pyramid_request.json_body = {}
         pyramid_request.user = factories.User()
         return pyramid_request
 
@@ -144,16 +206,21 @@ class TestRemoveMember(object):
         return pyramid_request
 
     @pytest.fixture
-    def group_service(self, pyramid_config):
-        service = mock.create_autospec(GroupService, spec_set=True, instance=True)
-        pyramid_config.register_service(service, name='group')
-        return service
-
-    @pytest.fixture
     def authenticated_userid(self, pyramid_config):
         userid = 'acct:bob@example.org'
         pyramid_config.testing_securitypolicy(userid)
         return userid
+
+
+@pytest.fixture
+def anonymous_request(pyramid_request):
+    pyramid_request.user = None
+    return pyramid_request
+
+
+@pytest.fixture
+def GroupJSONPresenter(patch):  # noqa: N802
+    return patch('h.views.api_groups.GroupJSONPresenter')
 
 
 @pytest.fixture
@@ -164,6 +231,18 @@ def GroupsJSONPresenter(patch):  # noqa: N802
 @pytest.fixture
 def GroupContext(patch):  # noqa: N802
     return patch('h.views.api_groups.GroupContext')
+
+
+@pytest.fixture
+def CreateGroupAPISchema(patch):  # noqa: N802
+    return patch('h.views.api_groups.CreateGroupAPISchema')
+
+
+@pytest.fixture
+def group_service(pyramid_config):
+    service = mock.create_autospec(GroupService, spec_set=True, instance=True)
+    pyramid_config.register_service(service, name='group')
+    return service
 
 
 @pytest.fixture
