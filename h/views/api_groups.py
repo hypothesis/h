@@ -56,7 +56,7 @@ def create(request):
         request.user.userid
     )
     group_context = GroupContext(group, request)
-    return GroupJSONPresenter(group_context).asdict()
+    return GroupJSONPresenter(group_context).asdict(expand=['organization'])
 
 
 @api_config(route_name='api.group_member',

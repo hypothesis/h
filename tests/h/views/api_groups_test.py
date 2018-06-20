@@ -161,7 +161,7 @@ class TestCreateGroup(object):
         views.create(pyramid_request)
 
         GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
-        GroupJSONPresenter.return_value.asdict.assert_called_once_with()
+        GroupJSONPresenter.return_value.asdict.assert_called_once_with(expand=['organization'])
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
