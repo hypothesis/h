@@ -6,6 +6,7 @@ import pytest
 from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
+    GROUP_DESCRIPTION_MAX_LENGTH,
 )
 
 from h.schemas.group import CreateGroupAPISchema
@@ -45,3 +46,23 @@ class TestCreateGroupSchema(object):
         })
 
         assert 'name' in appstruct
+
+    def test_it_validates_with_valid_description(self):
+        schema = CreateGroupAPISchema()
+
+        appstruct = schema.validate({
+            'name': 'This Seems Fine',
+            'description': 'This description seems adequate'
+        })
+
+        assert 'description' in appstruct
+
+    def test_it_raises_if_description_too_long(self):
+        schema = CreateGroupAPISchema()
+        with pytest.raises(ValidationError) as exc:
+            schema.validate({
+                'name': 'Name not the Problem',
+                'description': 'o' * (GROUP_DESCRIPTION_MAX_LENGTH + 1)
+            })
+        assert "description:" in str(exc.value)
+        assert "is too long" in str(exc.value)
