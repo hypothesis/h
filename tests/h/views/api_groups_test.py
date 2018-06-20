@@ -114,7 +114,7 @@ class TestCreateGroup(object):
     def test_it_inits_group_create_schema(self, pyramid_request, CreateGroupAPISchema):  # noqa: N803
         views.create(pyramid_request)
 
-        CreateGroupAPISchema.assert_called_once()
+        CreateGroupAPISchema.assert_called_once_with()
 
     # @TODO Move this test once _json_payload() has been moved to a reusable util module
     def test_it_raises_if_json_parsing_fails(self, pyramid_request):
@@ -134,11 +134,6 @@ class TestCreateGroup(object):
         with pytest.raises(HTTPBadRequest):
             views.create(pyramid_request)
 
-    def test_it_proxies_to_group_create_service(self, pyramid_request, group_service):
-        views.create(pyramid_request)
-
-        group_service.create_private_group.assert_called_once()
-
     def test_it_passes_request_params_to_group_create_service(self,  # noqa: N803
                                                               pyramid_request,
                                                               CreateGroupAPISchema,
@@ -151,9 +146,8 @@ class TestCreateGroup(object):
     def test_it_creates_group_context_from_created_group(self,   # noqa: N803
                                                          pyramid_request,
                                                          GroupContext,
-                                                         group_service,
-                                                         factories):
-        my_group = factories.Group()
+                                                         group_service):
+        my_group = mock.Mock()
         group_service.create_private_group.return_value = my_group
 
         views.create(pyramid_request)
@@ -167,7 +161,7 @@ class TestCreateGroup(object):
         views.create(pyramid_request)
 
         GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
-        GroupJSONPresenter.return_value.asdict.assert_called_once()
+        GroupJSONPresenter.return_value.asdict.assert_called_once_with()
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
