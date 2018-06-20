@@ -107,6 +107,7 @@ def includeme(config):
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
                      factory='h.traversal:AnnotationRoot',
                      traverse='/{id}')
+    config.add_route('api.groups', '/api/groups')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.group_member',
@@ -136,7 +137,6 @@ def includeme(config):
                      traverse='/{pubid}')
 
     # Groups
-    config.add_route('api.groups', '/api/groups')
     config.add_route('group_create', '/groups/new')
     config.add_route('group_edit',
                      '/groups/{pubid}/edit',
