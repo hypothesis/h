@@ -217,11 +217,40 @@ class TestTagsMatcher(object):
 
 
 class TestRepliesMatcher(object):
+    def test_matches_unnested_replies_to_annotations(self, Annotation, search):
+        ann1 = Annotation()
+        ann2 = Annotation()
+        ann3 = Annotation()
+        Annotation()
+        # Create two replies on ann1.
+        reply1 = Annotation(references=[ann1.id])
+        reply2 = Annotation(references=[ann1.id])
+        # Create a reply on ann2
+        reply3 = Annotation(references=[ann2.id])
+        # Create a reply on ann3
+        Annotation(references=[ann3.id])
 
-    # Note: tests will have to append a RepliesMatcher object to the search
-    # (search.append_matcher(RepliesMatcher(annotation_ids))) passing to RepliesMatcher the
-    # annotation_ids of the annotations that the test wants to search for replies to.
-    pass
+        expected_reply_ids = [reply1.id, reply2.id, reply3.id]
+
+        ann_ids = [ann1.id, ann2.id]
+        search.append_matcher(query.RepliesMatcher(ann_ids))
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
+
+    def test_matches_replies_of_replies_to_an_annotation(self, Annotation, search):
+        ann1 = Annotation()
+        # Create a reply on ann1 and a reply to the reply.
+        reply1 = Annotation(references=[ann1.id])
+        reply2 = Annotation(references=[ann1.id, reply1.id])
+
+        expected_reply_ids = [reply1.id, reply2.id]
+
+        ann_ids = [ann1.id]
+        search.append_matcher(query.RepliesMatcher(ann_ids))
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
 
 
 class TestTagsAggregation(object):
