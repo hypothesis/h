@@ -128,6 +128,12 @@ class TestCreateGroup(object):
             with pytest.raises(views.PayloadError):
                 views.create(pyramid_request)
 
+    def test_it_returns_400_if_user_has_non_default_authority(self, pyramid_request, factories):
+        pyramid_request.user = factories.User(authority='other.com')
+
+        with pytest.raises(HTTPBadRequest):
+            views.create(pyramid_request)
+
     def test_it_proxies_to_group_create_service(self, pyramid_request, group_service):
         views.create(pyramid_request)
 
