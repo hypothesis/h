@@ -68,7 +68,8 @@ from pyramid.security import (
     DENY_ALL,
     Allow,
 )
-from sqlalchemy.orm import exc
+import sqlalchemy.exc
+import sqlalchemy.orm.exc
 
 from h import storage
 from h.models import AuthClient
@@ -76,7 +77,7 @@ from h.models import Group
 from h.models import Organization
 from h.auth import role
 from h.interfaces import IGroupService
-from h.traversal.contexts import AnnotationContext
+from h.traversal import contexts
 
 
 class Root(object):
@@ -107,7 +108,7 @@ class AnnotationRoot(object):
 
         group_service = self.request.find_service(IGroupService)
         links_service = self.request.find_service(name='links')
-        return AnnotationContext(annotation, group_service, links_service)
+        return contexts.AnnotationContext(annotation, group_service, links_service)
 
 
 class AuthClientRoot(object):
@@ -123,20 +124,22 @@ class AuthClientRoot(object):
 
     def __getitem__(self, client_id):
         try:
-            client = self.request.db.query(AuthClient) \
-                                    .filter_by(id=client_id).one()
-
-            # Inherit global ACL.
-            # See `pyramid.authorization.ACLAuthorizationPolicy` docs.
-            #
-            # Other roots do not currently do this, but we rely on it for
-            # this root because it is used within the /admin pages.
-            client.__parent__ = Root(self.request)
-
-            return client
-        except:  # noqa: E722
-            # No such client found or not a valid UUID.
+            client = self.request.db.query(AuthClient).filter_by(id=client_id).one()
+        except sqlalchemy.orm.exc.NoResultFound:
             raise KeyError()
+        except sqlalchemy.exc.DataError:  # Happens when client_id is not a valid UUID.
+            raise KeyError()
+
+        # Add the default root factory to this resource's lineage so that the default
+        # ACL is applied. This is needed so that permissions required by auth client
+        # admin views (e.g. the "admin_oauthclients" permission) are granted to admin
+        # users.
+        #
+        # For details on how ACLs work see the docs for Pyramid's ACLAuthorizationPolicy:
+        # https://docs.pylonsproject.org/projects/pyramid/en/latest/api/authorization.html
+        client.__parent__ = Root(self.request)
+
+        return client
 
 
 class OrganizationRoot(object):
@@ -158,7 +161,7 @@ class OrganizationRoot(object):
             org.__parent__ = Root(self.request)
 
             return org
-        except exc.NoResultFound:
+        except sqlalchemy.orm.exc.NoResultFound:
             raise KeyError()
 
 
@@ -197,7 +200,7 @@ class GroupRoot(object):
     def __getitem__(self, pubid):
         try:
             return self.request.db.query(Group).filter_by(pubid=pubid).one()
-        except exc.NoResultFound:
+        except sqlalchemy.orm.exc.NoResultFound:
             raise KeyError()
 
 

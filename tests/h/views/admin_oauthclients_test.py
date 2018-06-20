@@ -202,19 +202,18 @@ class TestAuthClientEditController(object):
                 'grant_type': authclient.grant_type,
                 'response_type': authclient.response_type}
 
+    @pytest.fixture
+    def authclient(self, pyramid_request):
+        client = AuthClient(name='testclient',
+                            authority='annotator.org',
+                            secret='not_a_secret',
+                            trusted=False,
+                            grant_type=GrantType.authorization_code,
+                            response_type=ResponseType.code)
 
-@pytest.fixture
-def authclient(pyramid_request):
-    client = AuthClient(name='testclient',
-                        authority='annotator.org',
-                        secret='not_a_secret',
-                        trusted=False,
-                        grant_type=GrantType.authorization_code,
-                        response_type=ResponseType.code)
+        pyramid_request.db.add(client)
 
-    pyramid_request.db.add(client)
-
-    return client
+        return client
 
 
 @pytest.fixture
