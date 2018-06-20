@@ -11,12 +11,11 @@ class TestTopLevelAnnotationsFilter(object):
 
     def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, search):
         annotation = Annotation()
-        reply = Annotation(references=[annotation.id])
+        Annotation(references=[annotation.id])
 
         result = search.run({})
 
-        assert annotation.id in result.annotation_ids
-        assert reply.id not in result.annotation_ids
+        assert [annotation.id] == result.annotation_ids
 
     @pytest.fixture
     def search(self, search):
@@ -34,7 +33,7 @@ class TestAuthorityFilter(object):
 
         result = search.run({})
 
-        assert set(result.annotation_ids) == set(annotations_auth1)
+        assert sorted(result.annotation_ids) == sorted(annotations_auth1)
 
     @pytest.fixture
     def search(self, search):
@@ -57,7 +56,7 @@ class TestAuthFilter(object):
 
         result = search.run({})
 
-        assert set(result.annotation_ids) == set(shared_ids)
+        assert sorted(result.annotation_ids) == sorted(shared_ids)
 
     def test_logged_in_user_can_only_see_their_private_annotations(self,
             search, pyramid_config, Annotation):
@@ -70,7 +69,7 @@ class TestAuthFilter(object):
 
         result = search.run({})
 
-        assert set(result.annotation_ids) == set(users_private_ids)
+        assert sorted(result.annotation_ids) == sorted(users_private_ids)
 
     def test_logged_in_user_can_see_shared_annotations(self,
             search, pyramid_config, Annotation):
@@ -81,7 +80,7 @@ class TestAuthFilter(object):
 
         result = search.run({})
 
-        assert set(result.annotation_ids) == set(shared_ids)
+        assert sorted(result.annotation_ids) == sorted(shared_ids)
 
     @pytest.fixture
     def search(self, search, pyramid_request):
@@ -112,7 +111,7 @@ class TestUserFilter(object):
 
         result = search.run({'user': "bar"})
 
-        assert set(result.annotation_ids) == set(expected_ids)
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     def test_filters_annotations_by_multiple_users(self, search, Annotation):
         Annotation(userid="acct:foo@auth2", shared=True)
@@ -124,7 +123,7 @@ class TestUserFilter(object):
         params.add("user", "baz")
         result = search.run(params)
 
-        assert set(result.annotation_ids) == set(expected_ids)
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     def test_filters_annotations_by_user_and_authority(self, search, Annotation):
         Annotation(userid="acct:foo@auth2", shared=True)
@@ -132,7 +131,7 @@ class TestUserFilter(object):
 
         result = search.run({"user": "foo@auth3"})
 
-        assert set(result.annotation_ids) == set(expected_ids)
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     @pytest.fixture
     def search(self, search):
@@ -181,7 +180,7 @@ class TestTagsMatcher(object):
 
         result = search.run({"tag": "foo"})
 
-        assert set(result.annotation_ids) == set(matched_ids)
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
 
     def test_matches_tags_key(self, search, Annotation):
         Annotation(shared=True)
@@ -191,7 +190,7 @@ class TestTagsMatcher(object):
 
         result = search.run({"tags": "foo"})
 
-        assert set(result.annotation_ids) == set(matched_ids)
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
 
     def test_ands_multiple_tag_keys(self, search, Annotation):
         Annotation(shared=True)
@@ -208,7 +207,7 @@ class TestTagsMatcher(object):
         params.add("tag", "baz")
         result = search.run(params)
 
-        assert set(result.annotation_ids) == set(matched_ids)
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
 
     @pytest.fixture
     def search(self, search):
