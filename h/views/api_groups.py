@@ -49,11 +49,17 @@ def create(request):
     schema = CreateGroupAPISchema()
 
     appstruct = schema.validate(_json_payload(request))
+    group_properties = {
+        'name': appstruct['name'],
+        'description': appstruct.get('description', None),
+    }
 
     group_service = request.find_service(name='group')
+
     group = group_service.create_private_group(
-        appstruct['name'],
-        request.user.userid
+        group_properties['name'],
+        request.user.userid,
+        description=group_properties['description'],
     )
     group_context = GroupContext(group, request)
     return GroupJSONPresenter(group_context).asdict(expand=['organization'])

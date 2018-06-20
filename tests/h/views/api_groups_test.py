@@ -138,10 +138,28 @@ class TestCreateGroup(object):
                                                               pyramid_request,
                                                               CreateGroupAPISchema,
                                                               group_service):
-        CreateGroupAPISchema.return_value.validate.return_value = {'name': 'My Group'}
+        CreateGroupAPISchema.return_value.validate.return_value = {
+          'name': 'My Group',
+          'description': 'How about that?',
+         }
         views.create(pyramid_request)
 
-        group_service.create_private_group.assert_called_once_with('My Group', pyramid_request.user.userid)
+        group_service.create_private_group.assert_called_once_with('My Group',
+                                                                   pyramid_request.user.userid,
+                                                                   description='How about that?')
+
+    def test_it_sets_description_to_none_if_not_present(self,  # noqa: N803
+                                                           pyramid_request,
+                                                           CreateGroupAPISchema,
+                                                           group_service):
+        CreateGroupAPISchema.return_value.validate.return_value = {
+          'name': 'My Group',
+         }
+        views.create(pyramid_request)
+
+        group_service.create_private_group.assert_called_once_with('My Group',
+                                                                   pyramid_request.user.userid,
+                                                                   description=None)
 
     def test_it_creates_group_context_from_created_group(self,   # noqa: N803
                                                          pyramid_request,
