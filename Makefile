@@ -34,24 +34,21 @@ dev: build/manifest.json .pydeps
 docker:
 	git archive HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
 
-# Run docker image built with `docker` task
+# Run docker container.
+#
+# This command exists for conveniently testing the Docker image locally in
+# production mode. It assumes the services are being run using docker-compose
+# in the `h_default` network.
 .PHONY: run-docker
 run-docker:
-	$(eval RABBITMQ_CONTAINER ?= h_rabbit_1)
-	$(eval PG_CONTAINER ?= h_postgres_1)
-	$(eval ES1_CONTAINER ?= h_elasticsearchold_1)
-	$(eval ES_CONTAINER ?= h_elasticsearch_1)
 	docker run \
-		--link $(RABBITMQ_CONTAINER) \
-		--link $(PG_CONTAINER) \
-		--link $(ES_CONTAINER) \
-		--link $(ES1_CONTAINER) \
 		--net h_default \
 		-e "APP_URL=http://localhost:5000" \
-		-e "BROKER_URL=amqp://guest:guest@$(RABBITMQ_CONTAINER):5672//" \
-		-e "DATABASE_URL=postgresql://postgres@$(PG_CONTAINER)/postgres" \
-		-e "ELASTICSEARCH_HOST=http://$(ES1_CONTAINER):9200" \
-		-e "ELASTICSEARCH_URL=http://$(ES_CONTAINER):9201" \
+		-e "AUTHORITY=localhost" \
+		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
+		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
+		-e "ELASTICSEARCH_HOST=http://elasticsearchold:9200" \
+		-e "ELASTICSEARCH_URL=http://elasticsearch:9201" \
 		-e "SECRET_KEY=notasecret" \
 		-p 5000:5000 \
 		hypothesis/hypothesis:$(DOCKER_TAG)
