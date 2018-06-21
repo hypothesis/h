@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 
 import datetime
 
+import elasticsearch1
 import elasticsearch1_dsl
+import logging
 import mock
 import pytest
 
@@ -310,6 +312,86 @@ class TestDelete(object):
         assert result.get('_source').get('deleted') is True
 
 
+class TestBatchIndexer(object):
+    def test_it_indexes_all_annotations(self, batch_indexer, es_client, factories):
+        annotations = factories.Annotation.create_batch(3)
+        ids = [a.id for a in annotations]
+
+        batch_indexer.index()
+
+        for id in ids:
+            result = es_client.conn.get(index=es_client.index,
+                                        doc_type="annotation",
+                                        id=id)
+            assert result["_id"] == id
+
+    def test_it_indexes_specific_annotations(self, batch_indexer, es_client, factories):
+        annotations = factories.Annotation.create_batch(5)
+        ids = [a.id for a in annotations]
+        ids_to_index = ids[:3]
+        ids_not_to_index = ids[3:]
+
+        batch_indexer.index(ids_to_index)
+
+        for id in ids_to_index:
+            result = es_client.conn.get(index=es_client.index,
+                                        doc_type="annotation",
+                                        id=id)
+            assert result["_id"] == id
+
+        for id in ids_not_to_index:
+            with pytest.raises(elasticsearch1.exceptions.NotFoundError):
+                es_client.conn.get(index=es_client.index,
+                                   doc_type="annotation",
+                                   id=id)
+
+    def test_it_logs_indexing_status(self, caplog, batch_indexer, factories):
+        num_annotations = 10
+        window_size = 3
+        num_index_records = 0
+        annotations = factories.Annotation.create_batch(num_annotations)
+        ids = [a.id for a in annotations]
+
+        with caplog.at_level(logging.INFO):
+            batch_indexer.index(ids, window_size)
+
+        for record in caplog.records:
+            if record.filename == 'index.py':
+                num_index_records = num_index_records + 1
+                assert 'indexed 0k annotations, rate=' in record.msg
+        assert num_index_records == num_annotations // window_size
+
+    def test_it_returns_errored_annotation_ids(self, batch_indexer, factories):
+        annotations = factories.Annotation.create_batch(3)
+        expected_errored_ids = set([annotations[0].id, annotations[2].id])
+
+        elasticsearch1.helpers.streaming_bulk = mock.Mock()
+        elasticsearch1.helpers.streaming_bulk.return_value = [
+            (False, {'index': {'error': 'some error', '_id': annotations[0].id}}),
+            (True, {}),
+            (False, {'index': {'error': 'some error', '_id': annotations[2].id}})]
+
+        errored = batch_indexer.index()
+
+        assert errored == expected_errored_ids
+
+    def test_it_does_not_error_annotations_if_already_indexed(self, db_session, es_client,
+                                                              factories, pyramid_request):
+        annotations = factories.Annotation.create_batch(3)
+        expected_errored_ids = set([annotations[1].id])
+
+        elasticsearch1.helpers.streaming_bulk = mock.Mock()
+        elasticsearch1.helpers.streaming_bulk.return_value = [
+            (True, {}),
+            (False, {'create': {'error': 'some error', '_id': annotations[1].id}}),
+            (False, {'create': {'error': 'document already exists', '_id': annotations[2].id}})]
+
+        errored = h.search.index.BatchIndexer(db_session, es_client,
+                                              pyramid_request, es_client.index, 'create').index()
+
+        assert errored == expected_errored_ids
+
+
 class SearchResponseWithIDs(Matcher):
     """
     Matches an elasticsearch1_dsl response with the given annotation ids.
@@ -331,3 +413,9 @@ class SearchResponseWithIDs(Matcher):
 def search(es_client):
     return elasticsearch1_dsl.Search(using=es_client.conn,
                                      index=es_client.index).fields([])
+
+
+@pytest.fixture
+def batch_indexer(db_session, es_client, pyramid_request):
+    return h.search.index.BatchIndexer(db_session, es_client,
+                                       pyramid_request, es_client.index)

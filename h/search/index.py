@@ -107,28 +107,31 @@ class BatchIndexer(object):
         else:
             self._target_index = target_index
 
-    def index(self, annotation_ids=None):
+    def index(self, annotation_ids=None, windowsize=PG_WINDOW_SIZE, chunk_size=ES_CHUNK_SIZE):
         """
         Reindex annotations.
 
         :param annotation_ids: a list of ids to reindex, reindexes all when `None`.
         :type annotation_ids: collection
+        :param windowsize: the number of annotations to index in between progress log statements
+        :type windowsize: integer
+        :param chunk_size: the number of docs in one chunk sent to ES
+        :type chunk_size: integer
 
         :returns: a set of errored ids
         :rtype: set
         """
         if not annotation_ids:
-            annotations = _all_annotations(session=self.session,
-                                           windowsize=PG_WINDOW_SIZE)
+            annotations = _all_annotations(session=self.session, windowsize=windowsize)
         else:
             annotations = _filtered_annotations(session=self.session,
                                                 ids=annotation_ids)
 
         # Report indexing status as we go
-        annotations = _log_status(annotations, log_every=PG_WINDOW_SIZE)
+        annotations = _log_status(annotations, log_every=windowsize)
 
         indexing = es_helpers.streaming_bulk(self.es_client.conn, annotations,
-                                             chunk_size=ES_CHUNK_SIZE,
+                                             chunk_size=chunk_size,
                                              raise_on_error=False,
                                              expand_action_callback=self._prepare)
         errored = set()
