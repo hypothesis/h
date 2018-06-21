@@ -6,6 +6,7 @@ from mock import create_autospec, Mock
 import pytest
 
 from h.models.auth_client import AuthClient, GrantType, ResponseType
+from h import traversal
 from h.views.admin_oauthclients import index, AuthClientCreateController, AuthClientEditController
 
 
@@ -31,15 +32,16 @@ class FakeForm(object):
 
 
 def test_index_lists_authclients_sorted_by_name(pyramid_request, routes):
-    clients = [AuthClient(authority='foo.org', name='foo'),
-               AuthClient(authority='foo.org', name='bar')]
-    for client in clients:
-        pyramid_request.db.add(client)
+    auth_clients = [
+        AuthClient(authority='foo.org', name='foo'),
+        AuthClient(authority='foo.org', name='bar'),
+    ]
+    auth_client_context = create_autospec(
+        traversal.AuthClientIndexContext, instance=True, auth_clients=auth_clients)
 
-    ctx = index(pyramid_request)
+    template_context = index(auth_client_context, pyramid_request)
 
-    expected_clients = [clients[1], clients[0]]
-    assert ctx == {'clients': expected_clients}
+    assert template_context == {"clients": auth_clients}
 
 
 @pytest.mark.usefixtures('routes')
@@ -128,18 +130,18 @@ class TestAuthClientCreateController(object):
 @pytest.mark.usefixtures('routes')
 class TestAuthClientEditController(object):
 
-    def test_read_renders_form(self, authclient, pyramid_request):
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+    def test_read_renders_form(self, authclient, auth_client_context, pyramid_request):
+        ctrl = AuthClientEditController(auth_client_context, pyramid_request)
 
         ctx = ctrl.read()
 
         assert ctx['form'] == self._expected_form(authclient)
 
-    def test_update_updates_authclient(self, authclient, form_post, pyramid_request):
+    def test_update_updates_authclient(self, authclient, auth_client_context, form_post, pyramid_request):
         form_post['client_id'] = authclient.id
         form_post['client_secret'] = authclient.secret
         pyramid_request.POST = form_post
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        ctrl = AuthClientEditController(auth_client_context, pyramid_request)
 
         ctx = ctrl.update()
 
@@ -150,24 +152,25 @@ class TestAuthClientEditController(object):
         ('authorization_code', ResponseType.code),
         ('jwt_bearer', None),
     ])
-    def test_update_sets_response_type(self, authclient, form_post, pyramid_request,
-                                       grant_type, expected_response_type):
+    def test_update_sets_response_type(self, authclient, auth_client_context, form_post,
+                                       pyramid_request, grant_type,
+                                       expected_response_type):
         pyramid_request.POST = form_post
         pyramid_request.POST['grant_type'] = grant_type
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        ctrl = AuthClientEditController(auth_client_context, pyramid_request)
 
         ctrl.update()
 
         assert authclient.response_type == expected_response_type
 
-    def test_update_does_not_update_read_only_fields(self, authclient, form_post, pyramid_request):
+    def test_update_does_not_update_read_only_fields(self, authclient, auth_client_context, form_post, pyramid_request):
         # Attempt to modify read-only ID and secret fields.
         old_id = authclient.id
         old_secret = authclient.secret
         form_post['client_id'] = 'new-id'
         form_post['client_secret'] = 'new-secret'
         pyramid_request.POST = form_post
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        ctrl = AuthClientEditController(auth_client_context, pyramid_request)
 
         ctx = ctrl.update()
 
@@ -175,17 +178,17 @@ class TestAuthClientEditController(object):
         assert authclient.secret == old_secret
         assert ctx['form'] == self._expected_form(authclient)
 
-    def test_delete_removes_authclient(self, authclient, matchers, pyramid_request):
+    def test_delete_removes_authclient(self, authclient, auth_client_context, matchers, pyramid_request):
         pyramid_request.db.delete = create_autospec(pyramid_request.db.delete, return_value=None)
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        ctrl = AuthClientEditController(auth_client_context, pyramid_request)
 
         ctrl.delete()
 
         pyramid_request.db.delete.assert_called_with(authclient)
 
-    def test_delete_redirects_to_index(self, authclient, matchers, pyramid_request):
+    def test_delete_redirects_to_index(self, authclient, auth_client_context, matchers, pyramid_request):
         pyramid_request.db.delete = create_autospec(pyramid_request.db.delete, return_value=None)
-        ctrl = AuthClientEditController(authclient, pyramid_request)
+        ctrl = AuthClientEditController(auth_client_context, pyramid_request)
 
         response = ctrl.delete()
 
@@ -214,6 +217,10 @@ class TestAuthClientEditController(object):
         pyramid_request.db.add(client)
 
         return client
+
+    @pytest.fixture
+    def auth_client_context(self, authclient):
+        return traversal.AuthClientContext(authclient)
 
 
 @pytest.fixture

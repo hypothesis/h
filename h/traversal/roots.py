@@ -112,13 +112,7 @@ class AnnotationRoot(object):
 
 
 class AuthClientRoot(object):
-    """
-    Root factory for routes whose context is an :py:class:`h.traversal.AuthClientContext`.
-
-    FIXME: This class should return AuthClientContext objects, not AuthClient
-    objects.
-
-    """
+    """Root factory for :py:class:`h.traversal.AuthClientContext`-based routes."""
     def __init__(self, request):
         self.request = request
 
@@ -130,6 +124,8 @@ class AuthClientRoot(object):
         except sqlalchemy.exc.DataError:  # Happens when client_id is not a valid UUID.
             raise KeyError()
 
+        context = contexts.AuthClientContext(client)
+
         # Add the default root factory to this resource's lineage so that the default
         # ACL is applied. This is needed so that permissions required by auth client
         # admin views (e.g. the "admin_oauthclients" permission) are granted to admin
@@ -137,9 +133,21 @@ class AuthClientRoot(object):
         #
         # For details on how ACLs work see the docs for Pyramid's ACLAuthorizationPolicy:
         # https://docs.pylonsproject.org/projects/pyramid/en/latest/api/authorization.html
-        client.__parent__ = Root(self.request)
+        context.__parent__ = Root(self.request)
 
-        return client
+        return context
+
+
+class AuthClientIndexRoot(object):
+    """Root factory for :py:class:`h.traversal.AuthClientContext`-based index routes."""
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self):
+        auth_clients = self.request.db.query(AuthClient).order_by(AuthClient.name.asc()).all()
+        context = contexts.AuthClientIndexContext(auth_clients)
+        context.__parent__ = Root(self.request)
+        return context
 
 
 class OrganizationRoot(object):

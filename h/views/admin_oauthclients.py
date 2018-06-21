@@ -24,11 +24,8 @@ def _response_type_for_grant_type(grant_type):
 @view_config(route_name='admin_oauthclients',
              renderer='h:templates/admin/oauthclients.html.jinja2',
              permission='admin_oauthclients')
-def index(request):
-    clients = request.db.query(AuthClient) \
-                        .order_by(AuthClient.name.asc()) \
-                        .all()
-    return {'clients': clients}
+def index(auth_client_context, request):
+    return {"clients": auth_client_context.auth_clients}
 
 
 @view_defaults(route_name='admin_oauthclients_create',
@@ -91,9 +88,9 @@ class AuthClientCreateController(object):
                renderer='h:templates/admin/oauthclients_edit.html.jinja2')
 class AuthClientEditController(object):
 
-    def __init__(self, client, request):
+    def __init__(self, auth_client_context, request):
         self.request = request
-        self.client = client
+        self.client = auth_client_context.auth_client
         self.schema = EditAuthClientSchema().bind(request=request)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Save'),))

@@ -91,9 +91,9 @@ class TestAuthClientRoot(object):
 
         db_session.flush()
 
-        auth_client = AuthClientRoot(pyramid_request)[expected_auth_client.id]
+        auth_client_context = AuthClientRoot(pyramid_request)[expected_auth_client.id]
 
-        assert auth_client == expected_auth_client
+        assert auth_client_context.auth_client == expected_auth_client
 
     def test_getitem_returns_KeyError_if_no_AuthClients_in_DB(self, pyramid_request):
         auth_client_root = AuthClientRoot(pyramid_request)

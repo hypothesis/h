@@ -76,6 +76,19 @@ class AnnotationContext(object):
         return principals_allowed_by_permission(group, 'read')
 
 
+class AuthClientContext(object):
+    """Context for AuthClient-based views."""
+
+    def __init__(self, auth_client):
+        self.auth_client = auth_client
+
+
+class AuthClientIndexContext(object):
+    """Context for views based on a list of AuthClients."""
+    def __init__(self, auth_clients):
+        self.auth_clients = auth_clients
+
+
 class OrganizationContext(object):
     """Context for organization-based views."""
 
