@@ -141,6 +141,74 @@ class TestUserFilter(object):
 
 
 class TestUriFilter(object):
+    def test_filters_by_uri(self, search, Annotation):
+        Annotation(target_uri="http://bar.com")
+        Annotation(target_uri="https://bar.com")
+        Annotation(target_uri="https://foo/bar.com")
+        expected_ids = [Annotation(target_uri="bar.com").id]
+
+        result = search.run({"uri": "bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filters_by_url(self, search, Annotation):
+        Annotation(target_uri="http://bar.com")
+        Annotation(target_uri="https://bar.com")
+        Annotation(target_uri="https://foo/bar.com")
+        expected_ids = [Annotation(target_uri="bar.com").id]
+
+        result = search.run({"url": "bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filters_on_whole_url(self, search, Annotation):
+        Annotation(target_uri="http://bar.com")
+        Annotation(target_uri="foo/bar.com")
+        Annotation(target_uri="http://foo.com")
+        expected_ids = [Annotation(target_uri="http://foo/bar.com").id]
+
+        result = search.run({"url": "http://foo/bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filters_aliases_http_and_https(self, search, Annotation):
+        Annotation(target_uri="bar.com")
+        Annotation(target_uri="www.bar.com")
+        expected_ids = [Annotation(target_uri="http://bar.com").id,
+                        Annotation(target_uri="https://bar.com").id]
+
+        result = search.run({"url": "http://bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filter_distinguishes_net_com_url(self, search, Annotation):
+        Annotation(target_uri="example.com")
+        Annotation(target_uri="https://example.net")
+        expected_ids = [Annotation(target_uri="http://example.com").id]
+
+        params = webob.multidict.MultiDict()
+        params.add("url", "http://example.com")
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_ors_multiple_url_uris(self, search, Annotation):
+        Annotation(target_uri="baz.com")
+        Annotation(target_uri="www.foo.com")
+        expected_ids = [Annotation(target_uri="bar.com").id,
+                        Annotation(target_uri="bat.com").id,
+                        Annotation(target_uri="https://foo.com").id,
+                        Annotation(target_uri="http://foo.com").id,
+                        Annotation(target_uri="http://foo/bar.com").id]
+
+        params = webob.multidict.MultiDict()
+        params.add("uri", "bat.com")
+        params.add("uri", "bar.com")
+        params.add("url", "http://foo.com")
+        params.add("url", "https://foo/bar.com")
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     @pytest.fixture
     def search(self, search, pyramid_request):
