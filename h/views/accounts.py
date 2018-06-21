@@ -70,15 +70,6 @@ def bad_csrf_token_json(context, request):
     }
 
 
-@json_view(context=accounts.JSONError)
-def error_json(error, request):
-    request.response.status_code = 400
-    return {
-        'status': 'failure',
-        'reason': str(error),
-    }
-
-
 @json_view(context=deform.ValidationFailure)
 def error_validation(error, request):
     request.response.status_code = 400
