@@ -263,7 +263,7 @@ paths:
       parameters:
         - name: group
           in: body
-          description: Group to be create
+          description: Group to be created
           required: true
           schema:
             $ref: '#/definitions/NewGroup'

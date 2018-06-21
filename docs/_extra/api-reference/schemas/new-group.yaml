@@ -4,11 +4,11 @@ Group:
     name:
       type: string
       description: The name of the new group
-      minLength: 3
-      maxLength: 250
+      minLength: 4
+      maxLength: 25
     description:
       type: string
-      description: An optional description for the new group
+      description: group description
       maxLength: 250
   required:
     - name
