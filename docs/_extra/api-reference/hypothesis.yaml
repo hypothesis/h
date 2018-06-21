@@ -253,6 +253,29 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/GroupResults'
+    post:
+      tags:
+        - groups
+      summary: Create a new group
+      operationId: createGroup
+      description: >
+        Create a new, private group for the currently-authenticated user.
+      parameters:
+        - name: group
+          in: body
+          description: Group to be created
+          required: true
+          schema:
+            $ref: '#/definitions/NewGroup'
+      responses:
+        '200':
+          description: Group successfully created
+          schema:
+            $ref: '#/definitions/GroupResult'
+        '400':
+          description: Could not create group from your request
+          schema:
+            $ref: '#/definitions/Error'
   /search:
     get:
       tags:
@@ -447,6 +470,10 @@ definitions:
       total:
         description: Total number of results matching query.
         type: integer
+  NewGroup:
+    $ref: './schemas/new-group.yaml#/Group'
+  GroupResult:
+    $ref: './schemas/group.yaml#/Group'
   GroupResults:
     type: array
     items:

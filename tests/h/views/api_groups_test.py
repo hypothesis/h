@@ -49,7 +49,7 @@ class TestGetGroups(object):
             document_uri=None
         )
 
-    def test_converts_groups_to_resources(self, GroupContext, anonymous_request, open_groups, list_groups_service):  # noqa: N803
+    def test_converts_groups_to_resources(self, GroupContext, anonymous_request, open_groups, list_groups_service):
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
@@ -59,7 +59,7 @@ class TestGetGroups(object):
             mock.call(open_groups[1], anonymous_request),
         ])
 
-    def test_uses_presenter_for_formatting(self,  # noqa: N803
+    def test_uses_presenter_for_formatting(self,
                                            group_links_service,
                                            open_groups,
                                            list_groups_service,
@@ -71,14 +71,14 @@ class TestGetGroups(object):
 
         GroupsJSONPresenter.assert_called_once()
 
-    def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+    def test_returns_dicts_from_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):
         list_groups_service.request_groups.return_value = open_groups
 
         result = views.groups(anonymous_request)
 
         assert result == GroupsJSONPresenter(open_groups).asdicts.return_value
 
-    def test_proxies_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+    def test_proxies_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):
         anonymous_request.params['expand'] = 'organization'
         list_groups_service.request_groups.return_value = open_groups
 
@@ -86,7 +86,7 @@ class TestGetGroups(object):
 
         GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(expand=['organization'])
 
-    def test_passes_multiple_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):  # noqa: N803
+    def test_passes_multiple_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):
         anonymous_request.GET.add('expand', 'organization')
         anonymous_request.GET.add('expand', 'foobars')
         list_groups_service.request_groups.return_value = open_groups
@@ -111,7 +111,7 @@ class TestGetGroups(object):
                          'GroupJSONPresenter')
 class TestCreateGroup(object):
 
-    def test_it_inits_group_create_schema(self, pyramid_request, CreateGroupAPISchema):  # noqa: N803
+    def test_it_inits_group_create_schema(self, pyramid_request, CreateGroupAPISchema):
         views.create(pyramid_request)
 
         CreateGroupAPISchema.assert_called_once_with()
@@ -134,16 +134,34 @@ class TestCreateGroup(object):
         with pytest.raises(HTTPBadRequest):
             views.create(pyramid_request)
 
-    def test_it_passes_request_params_to_group_create_service(self,  # noqa: N803
+    def test_it_passes_request_params_to_group_create_service(self,
                                                               pyramid_request,
                                                               CreateGroupAPISchema,
                                                               group_service):
-        CreateGroupAPISchema.return_value.validate.return_value = {'name': 'My Group'}
+        CreateGroupAPISchema.return_value.validate.return_value = {
+          'name': 'My Group',
+          'description': 'How about that?',
+         }
         views.create(pyramid_request)
 
-        group_service.create_private_group.assert_called_once_with('My Group', pyramid_request.user.userid)
+        group_service.create_private_group.assert_called_once_with('My Group',
+                                                                   pyramid_request.user.userid,
+                                                                   description='How about that?')
 
-    def test_it_creates_group_context_from_created_group(self,   # noqa: N803
+    def test_it_sets_description_to_none_if_not_present(self,
+                                                        pyramid_request,
+                                                        CreateGroupAPISchema,
+                                                        group_service):
+        CreateGroupAPISchema.return_value.validate.return_value = {
+          'name': 'My Group',
+         }
+        views.create(pyramid_request)
+
+        group_service.create_private_group.assert_called_once_with('My Group',
+                                                                   pyramid_request.user.userid,
+                                                                   description=None)
+
+    def test_it_creates_group_context_from_created_group(self,
                                                          pyramid_request,
                                                          GroupContext,
                                                          group_service):
@@ -154,14 +172,14 @@ class TestCreateGroup(object):
 
         GroupContext.assert_called_with(my_group, pyramid_request)
 
-    def test_it_returns_new_group_formatted_with_presenter(self,   # noqa: N803
+    def test_it_returns_new_group_formatted_with_presenter(self,
                                                            pyramid_request,
                                                            GroupContext,
                                                            GroupJSONPresenter):
         views.create(pyramid_request)
 
         GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
-        GroupJSONPresenter.return_value.asdict.assert_called_once_with()
+        GroupJSONPresenter.return_value.asdict.assert_called_once_with(expand=['organization'])
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
@@ -219,22 +237,22 @@ def anonymous_request(pyramid_request):
 
 
 @pytest.fixture
-def GroupJSONPresenter(patch):  # noqa: N802
+def GroupJSONPresenter(patch):
     return patch('h.views.api_groups.GroupJSONPresenter')
 
 
 @pytest.fixture
-def GroupsJSONPresenter(patch):  # noqa: N802
+def GroupsJSONPresenter(patch):
     return patch('h.views.api_groups.GroupsJSONPresenter')
 
 
 @pytest.fixture
-def GroupContext(patch):  # noqa: N802
+def GroupContext(patch):
     return patch('h.views.api_groups.GroupContext')
 
 
 @pytest.fixture
-def CreateGroupAPISchema(patch):  # noqa: N802
+def CreateGroupAPISchema(patch):
     return patch('h.views.api_groups.CreateGroupAPISchema')
 
 
