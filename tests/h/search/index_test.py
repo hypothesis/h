@@ -319,11 +319,11 @@ class TestBatchIndexer(object):
 
         batch_indexer.index()
 
-        for id in ids:
+        for _id in ids:
             result = es_client.conn.get(index=es_client.index,
                                         doc_type="annotation",
-                                        id=id)
-            assert result["_id"] == id
+                                        id=_id)
+            assert result["_id"] == _id
 
     def test_it_indexes_specific_annotations(self, batch_indexer, es_client, factories):
         annotations = factories.Annotation.create_batch(5)
@@ -333,17 +333,17 @@ class TestBatchIndexer(object):
 
         batch_indexer.index(ids_to_index)
 
-        for id in ids_to_index:
+        for _id in ids_to_index:
             result = es_client.conn.get(index=es_client.index,
                                         doc_type="annotation",
-                                        id=id)
-            assert result["_id"] == id
+                                        id=_id)
+            assert result["_id"] == _id
 
-        for id in ids_not_to_index:
+        for _id in ids_not_to_index:
             with pytest.raises(elasticsearch1.exceptions.NotFoundError):
                 es_client.conn.get(index=es_client.index,
                                    doc_type="annotation",
-                                   id=id)
+                                   id=_id)
 
     def test_it_logs_indexing_status(self, caplog, batch_indexer, factories):
         num_annotations = 10
