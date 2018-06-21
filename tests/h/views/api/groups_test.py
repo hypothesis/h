@@ -7,7 +7,7 @@ import pytest
 
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 
-from h.views import api_groups as views
+from h.views.api import groups as views
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
 from h.services.group_links import GroupLinksService
@@ -238,22 +238,22 @@ def anonymous_request(pyramid_request):
 
 @pytest.fixture
 def GroupJSONPresenter(patch):
-    return patch('h.views.api_groups.GroupJSONPresenter')
+    return patch('h.views.api.groups.GroupJSONPresenter')
 
 
 @pytest.fixture
 def GroupsJSONPresenter(patch):
-    return patch('h.views.api_groups.GroupsJSONPresenter')
+    return patch('h.views.api.groups.GroupsJSONPresenter')
 
 
 @pytest.fixture
 def GroupContext(patch):
-    return patch('h.views.api_groups.GroupContext')
+    return patch('h.views.api.groups.GroupContext')
 
 
 @pytest.fixture
 def CreateGroupAPISchema(patch):
-    return patch('h.views.api_groups.CreateGroupAPISchema')
+    return patch('h.views.api.groups.CreateGroupAPISchema')
 
 
 @pytest.fixture
