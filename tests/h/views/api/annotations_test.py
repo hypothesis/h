@@ -9,7 +9,7 @@ from pyramid.config import Configurator
 
 from h.schemas import ValidationError
 from h.search.core import SearchResult
-from h.views import api_annotations as views
+from h.views.api import annotations as views
 
 
 class TestIndex(object):
@@ -19,7 +19,7 @@ class TestIndex(object):
         # Scan `h.views.api_annotations` for API link metadata specified in @api_config
         # declarations.
         config = Configurator()
-        config.scan('h.views.api_annotations')
+        config.scan('h.views.api.annotations')
         pyramid_request.registry.api_links = config.registry.api_links
 
         pyramid_config.add_route('api.search', '/dummy/search')
@@ -129,7 +129,7 @@ class TestSearch(object):
 
     @pytest.fixture
     def search_lib(self, patch):
-        return patch('h.views.api_annotations.search_lib')
+        return patch('h.views.api.annotations.search_lib')
 
     @pytest.fixture
     def search_run(self, search_lib):
@@ -137,7 +137,7 @@ class TestSearch(object):
 
     @pytest.fixture
     def storage(self, patch):
-        return patch('h.views.api_annotations.storage')
+        return patch('h.views.api.annotations.storage')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -251,7 +251,7 @@ class TestCreate(object):
 
     @pytest.fixture
     def create_schema(self, patch):
-        return patch('h.views.api_annotations.CreateAnnotationSchema')
+        return patch('h.views.api.annotations.CreateAnnotationSchema')
 
 
 @pytest.mark.usefixtures('presentation_service')
@@ -300,7 +300,7 @@ class TestReadJSONLD(object):
 
     @pytest.fixture
     def AnnotationJSONLDPresenter(self, patch):
-        return patch('h.views.api_annotations.AnnotationJSONLDPresenter')
+        return patch('h.views.api.annotations.AnnotationJSONLDPresenter')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -433,7 +433,7 @@ class TestUpdate(object):
 
     @pytest.fixture
     def update_schema(self, patch):
-        return patch('h.views.api_annotations.UpdateAnnotationSchema')
+        return patch('h.views.api.annotations.UpdateAnnotationSchema')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -472,12 +472,12 @@ class TestDelete(object):
 
 @pytest.fixture
 def AnnotationEvent(patch):
-    return patch('h.views.api_annotations.AnnotationEvent')
+    return patch('h.views.api.annotations.AnnotationEvent')
 
 
 @pytest.fixture
 def annotation_resource(patch):
-    return patch('h.views.api_annotations.AnnotationContext')
+    return patch('h.views.api.annotations.AnnotationContext')
 
 
 @pytest.fixture
@@ -509,9 +509,9 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def search_lib(patch):
-    return patch('h.views.api_annotations.search_lib')
+    return patch('h.views.api.annotations.search_lib')
 
 
 @pytest.fixture
 def storage(patch):
-    return patch('h.views.api_annotations.storage')
+    return patch('h.views.api.annotations.storage')
