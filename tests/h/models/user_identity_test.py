@@ -5,6 +5,7 @@ import pytest
 import sqlalchemy.exc
 
 from h import models
+from h._compat import PY2
 
 
 class TestUserIdentity(object):
@@ -86,3 +87,17 @@ class TestUserIdentity(object):
         )
 
         db_session.flush()
+
+    def test_repr(self):
+        user_identity = models.UserIdentity(
+            provider="provider_1", provider_unique_id="1"
+        )
+
+        expected_repr = "UserIdentity(provider='provider_1', provider_unique_id='1')"
+
+        if PY2:
+            expected_repr = (
+                "UserIdentity(provider=u'provider_1', " "provider_unique_id=u'1')"
+            )
+
+        assert repr(user_identity) == expected_repr
