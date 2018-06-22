@@ -20,7 +20,7 @@ from h.services.oauth_provider import OAuthProviderService
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.services.user import user_service_factory
 from h.util.datetime import utc_iso8601
-from h.views import api_auth as views
+from h.views.api import auth as views
 
 
 @pytest.mark.usefixtures('routes', 'oauth_provider', 'user_svc')
