@@ -7,7 +7,7 @@ import pytest
 
 from pyramid.httpexceptions import HTTPNoContent, HTTPNotFound
 
-from h.views import api_moderation as views
+from h.views.api import moderation as views
 
 
 @pytest.mark.usefixtures('moderation_service', 'has_permission')
@@ -91,7 +91,7 @@ def has_permission(pyramid_request):
 
 @pytest.fixture
 def events(patch):
-    return patch('h.views.api_moderation.events')
+    return patch('h.views.api.moderation.events')
 
 
 @pytest.fixture
