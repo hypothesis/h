@@ -10,7 +10,7 @@ from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.group import CreateGroupAPISchema
 from h.traversal import GroupContext
-from h.views.api_config import api_config
+from h.views.api.config import api_config
 
 
 @api_config(route_name='api.groups',
