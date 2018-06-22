@@ -11,7 +11,7 @@ from h.exceptions import ClientUnauthorized, PayloadError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
-from h.views.api_users import create, update
+from h.views.api.users import create, update
 
 
 @pytest.mark.parametrize('type_,view', [
@@ -343,7 +343,7 @@ def auth_client(factories):
 
 @pytest.fixture
 def basic_auth_creds(patch):
-    basic_auth_creds = patch('h.views.api_users.basic_auth_creds')
+    basic_auth_creds = patch('h.views.api.users.basic_auth_creds')
     basic_auth_creds.return_value = None
     return basic_auth_creds
 
@@ -368,12 +368,12 @@ def user_signup_service(db_session, pyramid_config, user):
 
 @pytest.fixture
 def schemas(patch):
-    return patch('h.views.api_users.schemas')
+    return patch('h.views.api.users.schemas')
 
 
 @pytest.fixture
 def presenter(patch):
-    return patch('h.views.api_users.UserJSONPresenter')
+    return patch('h.views.api.users.UserJSONPresenter')
 
 
 @pytest.fixture
