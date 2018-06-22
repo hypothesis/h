@@ -6,12 +6,12 @@ import mock
 import pytest
 
 from h.exceptions import APIError
-from h.views import api_profile
+from h.views.api import profile as views
 
 
 class TestProfile(object):
     def test_profile_view_proxies_to_session(self, session_profile, pyramid_request):
-        result = api_profile.profile(pyramid_request)
+        result = views.profile(pyramid_request)
 
         session_profile.assert_called_once_with(pyramid_request, None)
         assert result == session_profile.return_value
@@ -19,7 +19,7 @@ class TestProfile(object):
     def test_profile_passes_authority_parameter(self, session_profile, pyramid_request):
         pyramid_request.params = {'authority': 'foo.com'}
 
-        result = api_profile.profile(pyramid_request)
+        result = views.profile(pyramid_request)
 
         session_profile.assert_called_once_with(pyramid_request, 'foo.com')
         assert result == session_profile.return_value
@@ -30,7 +30,7 @@ class TestUpdatePreferences(object):
     def test_updates_preferences(self, pyramid_request, user, user_service):
         pyramid_request.json_body = {'preferences': {'show_sidebar_tutorial': True}}
 
-        api_profile.update_preferences(pyramid_request)
+        views.update_preferences(pyramid_request)
 
         user_service.update_preferences.assert_called_once_with(
                 user, show_sidebar_tutorial=True)
@@ -39,7 +39,7 @@ class TestUpdatePreferences(object):
         user_service.update_preferences.side_effect = TypeError('uh oh, wrong prefs')
 
         with pytest.raises(APIError) as exc:
-            api_profile.update_preferences(pyramid_request)
+            views.update_preferences(pyramid_request)
 
         assert str(exc.value) == 'uh oh, wrong prefs'
 
@@ -47,10 +47,10 @@ class TestUpdatePreferences(object):
         pyramid_request.json_body = {'foo': 'bar'}
 
         # should not raise
-        api_profile.update_preferences(pyramid_request)
+        views.update_preferences(pyramid_request)
 
     def test_returns_session_profile(self, pyramid_request, session_profile):
-        result = api_profile.update_preferences(pyramid_request)
+        result = views.update_preferences(pyramid_request)
 
         assert result == session_profile.return_value
 
