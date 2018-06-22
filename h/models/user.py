@@ -194,6 +194,8 @@ class User(Base):
     #: A NULL value in this column indicates the user has never accepted a privacy policy.
     privacy_accepted = sa.Column(sa.DateTime, nullable=True)
 
+    identities = sa.orm.relationship("UserIdentity", backref="user", cascade="all, delete-orphan")
+
     @hybrid_property
     def username(self):
         return self._username
