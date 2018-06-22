@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import pytest
 from mock import Mock, call
+import sqlalchemy
 
 from h.events import AnnotationEvent
 from h.models import Annotation, Document
@@ -60,7 +61,8 @@ class TestDeleteUserService(object):
 
         svc.delete(creator)
 
-        assert group in db_session.deleted
+        db_session.flush()
+        assert sqlalchemy.inspect(group).was_deleted
 
     def test_delete_user_fails_if_groups_have_collaborators(self, db_session, group_with_two_users, pyramid_request, svc):
         pyramid_request.db = db_session
