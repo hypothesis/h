@@ -28,7 +28,7 @@ from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
 from h.traversal import AnnotationContext
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
-from h.views.api_config import api_config, AngularRouteTemplater
+from h.views.api.config import api_config, AngularRouteTemplater
 
 _ = i18n.TranslationStringFactory(__package__)
 

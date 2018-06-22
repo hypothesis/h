@@ -6,7 +6,7 @@ from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPNotFound
 
 from h import events
-from h.views.api_config import api_config
+from h.views.api.config import api_config
 
 
 @api_config(route_name='api.annotation_hide',
