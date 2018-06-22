@@ -9,7 +9,7 @@ from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
 )
 
-from h.schemas.group import CreateGroupAPISchema
+from h.schemas.api.group import CreateGroupAPISchema
 from h.schemas import ValidationError
 
 
