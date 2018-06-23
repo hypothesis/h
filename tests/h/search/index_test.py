@@ -367,7 +367,10 @@ class TestBatchIndexer(object):
         event = AnnotationTransformEvent.return_value
 
         for annotation in annotations:
-            AnnotationTransformEvent.assert_has_calls([mock.call(pyramid_request, annotation, {'test': 'val'})])
+            AnnotationTransformEvent.assert_has_calls([mock.call(
+                pyramid_request,
+                annotation,
+                AnnotationSearchIndexPresenter.return_value.asdict.return_value)])
             notify.assert_has_calls([mock.call(event)])
 
     def test_it_logs_indexing_status(self, caplog, batch_indexer, factories):
