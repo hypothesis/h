@@ -290,10 +290,6 @@ class TestIndex(object):
                 id=annotation_id)["_source"]
         return _get
 
-    @pytest.fixture
-    def AnnotationTransformEvent(self, patch):
-        return patch('h.search.index.AnnotationTransformEvent')
-
 
 class TestDelete(object):
     def test_annotation_is_marked_deleted(self, es_client, factories, index, search):
@@ -361,6 +357,21 @@ class TestBatchIndexer(object):
             es_client.conn.get(index=es_client.index,
                                doc_type="annotation",
                                id=ann_del.id)
+
+    def test_it_notifies(self, AnnotationSearchIndexPresenter, AnnotationTransformEvent, batch_indexer, factories, pyramid_request,
+                         notify):
+        annotations = factories.Annotation.create_batch(3)
+
+        batch_indexer.index()
+
+        event = AnnotationTransformEvent.return_value
+
+        for annotation in annotations:
+            AnnotationTransformEvent.assert_has_calls([mock.call(
+                pyramid_request,
+                annotation,
+                AnnotationSearchIndexPresenter.return_value.asdict.return_value)])
+            notify.assert_has_calls([mock.call(event)])
 
     def test_it_logs_indexing_status(self, caplog, batch_indexer, factories):
         num_annotations = 10
@@ -436,3 +447,15 @@ def search(es_client):
 def batch_indexer(db_session, es_client, pyramid_request):
     return h.search.index.BatchIndexer(db_session, es_client,
                                        pyramid_request, es_client.index)
+
+
+@pytest.fixture
+def AnnotationTransformEvent(patch):
+    return patch('h.search.index.AnnotationTransformEvent')
+
+
+@pytest.fixture
+def AnnotationSearchIndexPresenter(patch):
+    class_ = patch('h.search.index.presenters.AnnotationSearchIndexPresenter')
+    class_.return_value.asdict.return_value = {'test': 'val'}
+    return class_
