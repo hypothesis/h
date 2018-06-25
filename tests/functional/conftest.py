@@ -10,7 +10,6 @@ from webtest import TestApp
 from h._compat import text_type
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
-from tests.common.fixtures import delete_all_elasticsearch_documents  # noqa: F401
 from tests.common.fixtures.elasticsearch import ELASTICSEARCH_HOST
 from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX
 
@@ -78,7 +77,7 @@ def pyramid_app():
 # Always unconditionally wipe the Elasticsearch index after every functional
 # test.
 @pytest.fixture(autouse=True)  # noqa: F811
-def always_delete_all_elasticsearch_documents(delete_all_elasticsearch_documents):
+def always_delete_all_elasticsearch_documents(es_client):
     pass
 
 

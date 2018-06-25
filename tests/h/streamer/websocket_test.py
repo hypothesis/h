@@ -240,8 +240,8 @@ class TestHandleMessage(object):
             None: unknown_handler,
         }, clear=True)
         handlers = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return handlers
+        yield handlers
+        patcher.stop()
 
 
 class TestHandleClientIDMessage(object):

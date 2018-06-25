@@ -13,9 +13,14 @@ ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
 
 
 @pytest.fixture
-def es_client(delete_all_elasticsearch_documents):
+def es_client():
     """A :py:class:`h.search.client.Client` for the test search index."""
-    return _es_client()
+    client = _es_client()
+
+    yield client
+
+    # Delete everything from the test search index after each test.
+    client.conn.delete_by_query(index=client.index, body={"query": {"match_all": {}}})
 
 
 @pytest.fixture
@@ -29,34 +34,18 @@ def es_connect():
 def init_elasticsearch(request):
     """Initialize the test (old) Elasticsearch index once per test session."""
     client = _es_client()
+    # Initialize the test search index.
+    search.init(es_client)
     """Connect to the newer v6.x instance of Elasticsearch once per test session"""
     es_connect()
 
-    def maybe_delete_index():
-        """Delete the test index if it exists."""
-        if client.conn.indices.exists(index=ELASTICSEARCH_INDEX):
-            client.conn.indices.delete(index=ELASTICSEARCH_INDEX)
+
+    yield es_client
 
     # Delete the test search index at the end of the test run.
-    request.addfinalizer(maybe_delete_index)
-
-    # Delete the test search index at the start of the run, just in case it
-    # was somehow left behind by a previous test run.
-    maybe_delete_index()
-
-    # Initialize the test search index.
-    search.init(client)
-
-
-@pytest.fixture
-def delete_all_elasticsearch_documents(request):
-    """Delete everything from the test search index after each test."""
-    client = _es_client()
-
-    def delete_everything():
-        client.conn.delete_by_query(index=client.index, body={"query": {"match_all": {}}})
-
-    request.addfinalizer(delete_everything)
+    if es_client.conn.indices.exists(index=ELASTICSEARCH_INDEX):
+        es_client.conn.indices.delete(index=ELASTICSEARCH_INDEX)
+    # Todo: call es_disconnect to disconnect from v6.x es.
 
 
 def _es_client():
