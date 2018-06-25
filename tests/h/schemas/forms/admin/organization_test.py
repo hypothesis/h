@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import colander
 import pytest
 
-from h.schemas.admin_organization import OrganizationSchema
+from h.schemas.forms.admin.organization import OrganizationSchema
 
 
 class TestOrganizationSchema(object):
