@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from h.exceptions import APIError
 from h.schemas import ValidationError
-from h.views import api_exceptions as views
+from h.views.api import exceptions as views
 
 
 def test_api_notfound_view(pyramid_request):
@@ -36,7 +36,7 @@ def test_api_validation_error(pyramid_request):
 
 
 def test_json_error_view(patch, pyramid_request):
-    handle_exception = patch('h.views.api_exceptions.handle_exception')
+    handle_exception = patch('h.views.api.exceptions.handle_exception')
 
     result = views.json_error(pyramid_request)
 

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent
 
-from h.views.api_config import api_config
+from h.views.api.config import api_config
 from h.emails import flag_notification
 from h import links
 from h.interfaces import IGroupService

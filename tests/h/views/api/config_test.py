@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.views import api_config as api_config
+from h.views.api import config as api_config
 
 
 @pytest.mark.usefixtures('cors')
@@ -84,7 +84,7 @@ class TestAddApiView(object):
 
     @pytest.fixture
     def cors(self, patch):
-        return patch('h.views.api_config.cors')
+        return patch('h.views.api.config.cors')
 
     @pytest.fixture
     def view(self):

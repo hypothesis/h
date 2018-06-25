@@ -15,7 +15,7 @@ from h._compat import urlparse
 from h.exceptions import OAuthTokenError
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
-from h.views.api_config import api_config
+from h.views.api.config import api_config
 
 log = logging.getLogger(__name__)
 

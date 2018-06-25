@@ -7,7 +7,7 @@ import pytest
 
 from pyramid.httpexceptions import HTTPNoContent
 
-from h.views import api_flags as views
+from h.views.api import flags as views
 
 
 @pytest.mark.usefixtures('flag_service', 'group_service', 'mailer', 'flag_notification_email', 'incontext_link')
@@ -89,8 +89,8 @@ class TestCreate(object):
 
     @pytest.fixture
     def mailer(self, patch):
-        return patch('h.views.api_flags.mailer')
+        return patch('h.views.api.flags.mailer')
 
     @pytest.fixture
     def incontext_link(self, patch):
-        return patch('h.views.api_flags.links.incontext_link')
+        return patch('h.views.api.flags.links.incontext_link')
