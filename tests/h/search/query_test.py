@@ -141,39 +141,33 @@ class TestUserFilter(object):
 
 
 class TestUriFilter(object):
-    def test_filters_by_uri(self, search, Annotation):
-        Annotation(target_uri="http://bar.com")
-        Annotation(target_uri="https://bar.com")
-        Annotation(target_uri="https://foo/bar.com")
-        expected_ids = [Annotation(target_uri="bar.com").id]
+    @pytest.mark.parametrize("field", ("uri", "url"))
+    def test_filters_by_field(self, search, Annotation, field):
+        Annotation(target_uri="https://foo.com")
+        expected_ids = [Annotation(target_uri="https://bar.com").id]
 
-        result = search.run({"uri": "bar.com"})
-
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
-
-    def test_filters_by_url(self, search, Annotation):
-        Annotation(target_uri="http://bar.com")
-        Annotation(target_uri="https://bar.com")
-        Annotation(target_uri="https://foo/bar.com")
-        expected_ids = [Annotation(target_uri="bar.com").id]
-
-        result = search.run({"url": "bar.com"})
+        result = search.run({field: "https://bar.com"})
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     def test_filters_on_whole_url(self, search, Annotation):
-        Annotation(target_uri="http://bar.com")
-        Annotation(target_uri="foo/bar.com")
-        Annotation(target_uri="http://foo.com")
-        expected_ids = [Annotation(target_uri="http://foo/bar.com").id]
+        Annotation(target_uri="http://bar.com/foo")
+        expected_ids = [Annotation(target_uri="http://bar.com").id,
+                        Annotation(target_uri="http://bar.com/").id]
 
-        result = search.run({"url": "http://foo/bar.com"})
+        result = search.run({"url": "http://bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filter_matches_invalid_uri(self, search, Annotation):
+        Annotation(target_uri="https://bar.com")
+        expected_ids = [Annotation(target_uri="invalid-uri").id]
+
+        result = search.run({"uri": "invalid-uri"})
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     def test_filters_aliases_http_and_https(self, search, Annotation):
-        Annotation(target_uri="bar.com")
-        Annotation(target_uri="www.bar.com")
         expected_ids = [Annotation(target_uri="http://bar.com").id,
                         Annotation(target_uri="https://bar.com").id]
 
@@ -181,31 +175,40 @@ class TestUriFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-    def test_filter_distinguishes_net_com_url(self, search, Annotation):
-        Annotation(target_uri="example.com")
-        Annotation(target_uri="https://example.net")
-        expected_ids = [Annotation(target_uri="http://example.com").id]
+    def test_returns_all_annotations_with_equivalent_uris(self, search, Annotation, storage):
+        # Mark all these uri's as equivalent uri's.
+        storage.expand_uri.side_effect = lambda _, x: [
+            "urn:x-pdf:1234",
+            "file:///Users/june/article.pdf",
+            "doi:10.1.1/1234",
+            "http://reading.com/x-pdf",
+        ]
+        Annotation(target_uri="urn:x-pdf:1235")
+        Annotation(target_uri="file:///Users/jane/article.pdf").id
+        expected_ids = [Annotation(target_uri="urn:x-pdf:1234").id,
+                        Annotation(target_uri="doi:10.1.1/1234").id,
+                        Annotation(target_uri="http://reading.com/x-pdf").id,
+                        Annotation(target_uri="file:///Users/june/article.pdf").id]
 
         params = webob.multidict.MultiDict()
-        params.add("url", "http://example.com")
+        params.add("url", "urn:x-pdf:1234")
         result = search.run(params)
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     def test_ors_multiple_url_uris(self, search, Annotation):
-        Annotation(target_uri="baz.com")
-        Annotation(target_uri="www.foo.com")
-        expected_ids = [Annotation(target_uri="bar.com").id,
-                        Annotation(target_uri="bat.com").id,
-                        Annotation(target_uri="https://foo.com").id,
+        Annotation(target_uri="http://baz.com")
+        Annotation(target_uri="https://www.foo.com")
+        expected_ids = [Annotation(target_uri="https://bar.com").id,
+                        Annotation(target_uri="http://bat.com").id,
                         Annotation(target_uri="http://foo.com").id,
-                        Annotation(target_uri="http://foo/bar.com").id]
+                        Annotation(target_uri="https://foo.com/bar").id]
 
         params = webob.multidict.MultiDict()
-        params.add("uri", "bat.com")
-        params.add("uri", "bar.com")
+        params.add("uri", "http://bat.com")
+        params.add("uri", "https://bar.com")
         params.add("url", "http://foo.com")
-        params.add("url", "https://foo/bar.com")
+        params.add("url", "https://foo.com/bar")
         result = search.run(params)
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
@@ -214,6 +217,10 @@ class TestUriFilter(object):
     def search(self, search, pyramid_request):
         search.append_filter(query.UriFilter(pyramid_request))
         return search
+
+    @pytest.fixture
+    def storage(self, patch):
+        return patch('h.search.query.storage')
 
 
 class TestDeletedFilter(object):
