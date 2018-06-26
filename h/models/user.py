@@ -217,7 +217,7 @@ class User(Base):
     def userid(cls):  # noqa: N805
         return UserIDComparator(cls.username, cls.authority)
 
-    email = sa.Column(sa.UnicodeText(), nullable=False)
+    email = sa.Column(sa.UnicodeText())
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
                                 default=datetime.datetime.utcnow,

@@ -81,6 +81,27 @@ class TestUserModelDataConstraints(object):
         with pytest.raises(ValueError):
             models.User(email='bob@b' + 'o' * 100 + 'b.com')
 
+    def test_can_create_user_with_null_email(self):
+        models.User(email=None)
+
+    def test_can_change_email_to_null(self):
+        user = models.User(email="bob@bob.com")
+
+        user.email = None
+
+    def test_cannot_create_two_users_with_same_non_null_email_and_authority(self, db_session, factories):
+        factories.User(email="bob@bob.com", authority="hypothes.is")
+        factories.User(email="bob@bob.com", authority="hypothes.is")
+
+        with pytest.raises(exc.IntegrityError, match='duplicate key value violates unique constraint "uq__user__email"'):
+            db_session.flush()
+
+    def test_can_create_two_users_with_same_null_email_and_authority(self, db_session, factories):
+        factories.User(email=None, authority="hypothes.is")
+        factories.User(email=None, authority="hypothes.is")
+
+        db_session.flush()
+
 
 class TestUserModelUserId(object):
 
