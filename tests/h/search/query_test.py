@@ -97,6 +97,29 @@ class TestGroupFilter(object):
 
 
 class TestGroupAuthFilter(object):
+    def test_does_not_return_annotations_if_group_not_readable_by_user(
+        self, search, Annotation, group_service
+    ):
+        group_service.groupids_readable_by.return_value = []
+        Annotation(groupid="group2").id
+        Annotation(groupid="group1").id
+        Annotation(groupid="group1").id
+
+        result = search.run({})
+
+        assert not result.annotation_ids
+
+    def test_returns_annotations_if_group_readable_by_user(
+        self, search, Annotation, group_service
+    ):
+        group_service.groupids_readable_by.return_value = ["group1"]
+        Annotation(groupid="group2", shared=True).id
+        expected_ids = [Annotation(groupid="group1").id,
+                        Annotation(groupid="group1").id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
     @pytest.fixture
     def search(self, search, pyramid_request):
