@@ -224,12 +224,16 @@ class TestUserGetByEmail(object):
         actual = models.User.get_by_email(db_session, user.email, 'example.com')
         assert actual is None
 
+    def test_you_cannot_get_users_with_no_emails(self, db_session):
+        assert not models.User.get_by_email(db_session, None, "example.com")
+
     @pytest.fixture
     def users(self, db_session, factories):
         users = {
             'emily': factories.User(username='emily', email='emily@msn.com', authority='example.com'),
             'norma': factories.User(username='norma', email='norma@foo.org', authority='foo.org'),
             'meredith': factories.User(username='meredith', email='meredith@gmail.com', authority='example.com'),
+            'bob': factories.User(username='bob', email=None, authority='example.com'),
         }
         db_session.flush()
         return users

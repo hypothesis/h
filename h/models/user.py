@@ -285,6 +285,9 @@ class User(Base):
     @classmethod
     def get_by_email(cls, session, email, authority):
         """Fetch a user by email address."""
+        if email is None:
+            return None
+
         return session.query(cls).filter(
             sa.func.lower(cls.email) == email.lower(),
             cls.authority == authority,
