@@ -260,6 +260,9 @@ class User(Base):
 
     @sa.orm.validates('email')
     def validate_email(self, key, email):
+        if email is None:
+            return email
+
         if len(email) > EMAIL_MAX_LENGTH:
             raise ValueError('email must be less than {max} characters '
                              'long'.format(max=EMAIL_MAX_LENGTH))
