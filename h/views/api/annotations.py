@@ -22,13 +22,13 @@ from pyramid import security
 
 from h import search as search_lib
 from h import storage
-from h.exceptions import PayloadError
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
 from h.traversal import AnnotationContext
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
 from h.views.api.config import api_config, AngularRouteTemplater
+from h.util.view import json_body
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -124,7 +124,7 @@ def search(request):
 def create(request):
     """Create an annotation from the POST payload."""
     schema = CreateAnnotationSchema(request)
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(json_body(request))
     group_service = request.find_service(IGroupService)
     annotation = storage.create_annotation(request, appstruct, group_service)
 
@@ -171,7 +171,7 @@ def update(context, request):
     schema = UpdateAnnotationSchema(request,
                                     context.annotation.target_uri,
                                     context.annotation.groupid)
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(json_body(request))
     group_service = request.find_service(IGroupService)
 
     annotation = storage.update_annotation(request,
@@ -206,18 +206,6 @@ def delete(context, request):
         'delete')
 
     return {'id': context.annotation.id, 'deleted': True}
-
-
-def _json_payload(request):
-    """
-    Return a parsed JSON payload for the request.
-
-    :raises PayloadError: if the body has no valid JSON body
-    """
-    try:
-        return request.json_body
-    except ValueError:
-        raise PayloadError()
 
 
 def _publish_annotation_event(request,

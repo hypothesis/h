@@ -11,6 +11,7 @@ from h.views.api import groups as views
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
 from h.services.group_links import GroupLinksService
+from h.exceptions import PayloadError
 
 pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
 
@@ -116,7 +117,6 @@ class TestCreateGroup(object):
 
         CreateGroupAPISchema.assert_called_once_with()
 
-    # @TODO Move this test once _json_payload() has been moved to a reusable util module
     def test_it_raises_if_json_parsing_fails(self, pyramid_request):
         """It raises PayloadError if parsing of the request body fails."""
         # Make accessing the request.json_body property raise ValueError.
@@ -125,7 +125,7 @@ class TestCreateGroup(object):
                                'json_body',
                                new_callable=mock.PropertyMock) as json_body:
             json_body.side_effect = ValueError()
-            with pytest.raises(views.PayloadError):
+            with pytest.raises(PayloadError):
                 views.create(pyramid_request)
 
     def test_it_returns_400_if_user_has_non_default_authority(self, pyramid_request, factories):
@@ -183,7 +183,7 @@ class TestCreateGroup(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
-        # Add a nominal json_body so that _json_payload() parsing of
+        # Add a nominal json_body so that parsing of
         # it doesn't raise
         pyramid_request.json_body = {}
         pyramid_request.user = factories.User()

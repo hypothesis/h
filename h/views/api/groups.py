@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 
-from h.exceptions import PayloadError
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.group import CreateGroupAPISchema
 from h.traversal import GroupContext
 from h.views.api.config import api_config
+from h.util.view import json_body
 
 
 @api_config(route_name='api.groups',
@@ -48,7 +48,7 @@ def create(request):
 
     schema = CreateGroupAPISchema()
 
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(json_body(request))
     group_properties = {
         'name': appstruct['name'],
         'description': appstruct.get('description', None),
@@ -83,16 +83,3 @@ def remove_member(group, request):
     group_service.member_leave(group, userid)
 
     return HTTPNoContent()
-
-
-# @TODO This is a duplication of code in h.views.api — move to a util module
-def _json_payload(request):
-    """
-    Return a parsed JSON payload for the request.
-
-    :raises PayloadError: if the body has no valid JSON body
-    """
-    try:
-        return request.json_body
-    except ValueError:
-        raise PayloadError()

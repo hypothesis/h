@@ -3,9 +3,10 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock
+import mock
 
-from h.util.view import handle_exception, json_view
+from h.util.view import handle_exception, json_view, json_body
+from h.exceptions import PayloadError
 
 
 class TestHandleException(object):
@@ -32,7 +33,7 @@ class TestHandleException(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        sentry = Mock(spec_set=['captureException'])
+        sentry = mock.Mock(spec_set=['captureException'])
         pyramid_request.sentry = sentry
         pyramid_request.debug = False
         return pyramid_request
@@ -73,3 +74,25 @@ class TestJsonView(object):
         view_config = patch('h.util.view.view_config')
         view_config.side_effect = _return_kwargs
         return view_config
+
+
+class TestJsonBody(object):
+
+    def test_it_returns_json_body_if_present(self, pyramid_request):
+        fake_json = {'foo': 'bar'}
+        pyramid_request.json_body = fake_json
+
+        json_payload = json_body(pyramid_request)
+
+        assert json_payload == fake_json
+
+    def test_it_raises_if_json_parsing_fails(self, pyramid_request):
+        """It raises PayloadError if parsing of the request body fails."""
+        # Make accessing the request.json_body property raise ValueError.
+        type(pyramid_request).json_body = {}
+        with mock.patch.object(type(pyramid_request),
+                               'json_body',
+                               new_callable=mock.PropertyMock) as json_content:
+            json_content.side_effect = ValueError()
+            with pytest.raises(PayloadError):
+                json_body(pyramid_request)
