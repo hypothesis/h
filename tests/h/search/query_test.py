@@ -164,6 +164,63 @@ class TestNipsaFilter(object):
 
 
 class TestAnyMatcher(object):
+    def test_matches_uriparts(self, search, Annotation):
+        Annotation(target_uri="http://bar.com")
+        matched_ids = [Annotation(target_uri="http://foo.com").id,
+                       Annotation(target_uri="http://foo.com/bar").id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_matches_quote(self, search, Annotation):
+        Annotation(target_selectors=[{'exact': 'selected bar text'}])
+        matched_ids = [Annotation(target_selectors=[{'exact': 'selected foo text'}]).id,
+                       Annotation(target_selectors=[{'exact': 'selected foo bar text'}]).id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_matches_text(self, search, Annotation):
+        Annotation(text="bar is best")
+        matched_ids = [Annotation(text="foo is fun").id,
+                       Annotation(text="foo is bar's friend").id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_matches_tags(self, search, Annotation):
+        Annotation(tags=["bar"])
+        matched_ids = [Annotation(tags=["foo"]).id,
+                       Annotation(tags=["foo", "bar"]).id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_ors_any_matches(self, search, Annotation):
+        """
+        Any is expected to match any of the following fields;
+        quote, text, uri.parts, and tags
+        that contain any of the passed keywords.
+        """
+        Annotation(target_selectors=[{'exact': 'selected baz text'}])
+        Annotation(tags=["baz"])
+        Annotation(target_uri="baz.com")
+        Annotation(text="baz is best")
+        matched_ids = [Annotation(target_uri="foo/bar/baz.com").id,
+                       Annotation(target_selectors=[{'exact': 'selected foo text'}]).id,
+                       Annotation(text="bar is best").id,
+                       Annotation(tags=["foo"]).id]
+
+        params = webob.multidict.MultiDict()
+        params.add("any", "foo")
+        params.add("any", "bar")
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
 
     @pytest.fixture
     def search(self, search):
