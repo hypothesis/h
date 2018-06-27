@@ -97,8 +97,8 @@ class TestAuthFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(shared_ids)
 
-    def test_logged_in_user_can_only_see_their_private_annotations(self,
-            search, pyramid_config, Annotation):
+    def test_logged_in_user_can_only_see_their_private_annotations(self, search, pyramid_config,
+                                                                   Annotation):
         userid = "acct:bar@auth2"
         pyramid_config.testing_securitypolicy(userid)
         # Make a private annotation from a different user.
@@ -110,8 +110,7 @@ class TestAuthFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(users_private_ids)
 
-    def test_logged_in_user_can_see_shared_annotations(self,
-            search, pyramid_config, Annotation):
+    def test_logged_in_user_can_see_shared_annotations(self, search, pyramid_config, Annotation):
         userid = "acct:bar@auth2"
         pyramid_config.testing_securitypolicy(userid)
         shared_ids = [Annotation(userid="acct:foo@auth2", shared=True).id,
