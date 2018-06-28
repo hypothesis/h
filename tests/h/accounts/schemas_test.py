@@ -54,9 +54,9 @@ class TestUniqueEmail(object):
                       dummy_node,
                       "foo@bar.com")
 
-    def test_it_is_invalid_when_user_does_not_exist(self,
-                                                    dummy_node,
-                                                    user_model):
+    def test_it_is_valid_when_user_does_not_exist(self,
+                                                  dummy_node,
+                                                  user_model):
         user_model.get_by_email.return_value = None
 
         assert schemas.unique_email(dummy_node, "foo@bar.com") is None
