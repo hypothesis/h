@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 from h import models, storage
 from h.celery import celery, get_task_logger
-from h.indexer.reindexer import SETTING_NEW_INDEX
 from h.search.index import BatchIndexer, delete, index
 
 log = get_task_logger(__name__)
@@ -49,6 +48,6 @@ def reindex_user_annotations(userid):
 
 def _current_reindex_new_name(request):
     settings = celery.request.find_service(name='settings')
-    new_index = settings.get(SETTING_NEW_INDEX)
+    new_index = settings.get('reindex.new_index')
 
     return new_index

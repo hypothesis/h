@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.indexer.reindexer import reindex, SETTING_NEW_INDEX
+from h.indexer.reindexer import reindex
 from h.search import client
 
 
@@ -83,12 +83,12 @@ class TestReindex(object):
 
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.put.assert_called_once_with(SETTING_NEW_INDEX, 'hypothesis-abcd1234')
+        settings_service.put.assert_called_once_with('reindex.new_index', 'hypothesis-abcd1234')
 
     def test_deletes_index_name_setting(self, pyramid_request, es, settings_service):
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with('reindex.new_index')
 
     def test_deletes_index_name_setting_when_exception_raised(self, pyramid_request, es, settings_service, batchindexer):
         batchindexer.index.side_effect = RuntimeError('boom!')
@@ -96,7 +96,7 @@ class TestReindex(object):
         with pytest.raises(RuntimeError):
             reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with('reindex.new_index')
 
     def test_deletes_old_index(self, pyramid_request, es, delete_index, get_aliased_index):
         get_aliased_index.return_value = 'original_index'

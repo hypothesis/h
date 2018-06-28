@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.indexer.reindexer import SETTING_NEW_INDEX
 from h.tasks import indexer
 
 
@@ -47,7 +46,7 @@ class TestAddAnnotation(object):
         assert index.called is False
 
     def test_during_reindex_adds_to_current_index(self, fetch_annotation, annotation, index, celery, settings_service):
-        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put('reindex.new_index', 'hypothesis-abcdef123')
         fetch_annotation.return_value = annotation
 
         indexer.add_annotation('test-annotation-id')
@@ -57,7 +56,7 @@ class TestAddAnnotation(object):
                               celery.request)
 
     def test_during_reindex_adds_to_new_index(self, fetch_annotation, annotation, index, celery, settings_service):
-        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put('reindex.new_index', 'hypothesis-abcdef123')
         fetch_annotation.return_value = annotation
 
         indexer.add_annotation('test-annotation-id')
@@ -107,7 +106,7 @@ class TestDeleteAnnotation(object):
         delete.assert_called_once_with(celery.request.es, id_)
 
     def test_during_reindex_deletes_from_current_index(self, delete, celery, settings_service):
-        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put('reindex.new_index', 'hypothesis-abcdef123')
 
         indexer.delete_annotation('test-annotation-id')
 
@@ -115,7 +114,7 @@ class TestDeleteAnnotation(object):
                                'test-annotation-id')
 
     def test_during_reindex_deletes_from_new_index(self, delete, celery, settings_service):
-        settings_service.put(SETTING_NEW_INDEX, 'hypothesis-abcdef123')
+        settings_service.put('reindex.new_index', 'hypothesis-abcdef123')
 
         indexer.delete_annotation('test-annotation-id')
 

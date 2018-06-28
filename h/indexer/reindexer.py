@@ -13,8 +13,6 @@ from h.search.index import BatchIndexer
 
 log = logging.getLogger(__name__)
 
-SETTING_NEW_INDEX = 'reindex.new_index'
-
 
 def reindex(session, es, request):
     """Reindex all annotations into a new index, and update the alias."""
@@ -29,7 +27,7 @@ def reindex(session, es, request):
     log.info('configured new index {}'.format(new_index))
 
     try:
-        settings.put(SETTING_NEW_INDEX, new_index)
+        settings.put('reindex.new_index', new_index)
         request.tm.commit()
 
         log.info('reindexing annotations into new index {}'.format(new_index))
@@ -52,5 +50,5 @@ def reindex(session, es, request):
         delete_index(es, current_index)
 
     finally:
-        settings.delete(SETTING_NEW_INDEX)
+        settings.delete('reindex.new_index')
         request.tm.commit()
