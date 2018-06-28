@@ -170,7 +170,7 @@ class TestIndex(object):
         assert SearchResponseWithIDs([annotation.id]) == response1
         assert SearchResponseWithIDs([annotation.id]) == response2
 
-    def test_you_can_make_aggregations_on_tags_raw(self, es_client, factories, index, search):
+    def test_you_can_make_aggregations_on_tags_raw(self, factories, index, search):
         annotation_1 = factories.Annotation.build(id="test_annotation_id_1", tags=["Hello"])
         annotation_2 = factories.Annotation.build(id="test_annotation_id_2", tags=["hello"])
 
@@ -187,7 +187,7 @@ class TestIndex(object):
         assert tag_bucket_1["doc_count"] == 1
         assert tag_bucket_2["doc_count"] == 1
 
-    def test_you_can_filter_annotations_by_uri(self, es_client, factories, index, search):
+    def test_you_can_filter_annotations_by_uri(self, factories, index, search):
         my_uri = 'http://example.com/anything/i/like?ex=something'
         annotation = factories.Annotation.build(id="test_annotation_id", target_uri=my_uri)
 
@@ -233,7 +233,7 @@ class TestIndex(object):
 
         assert SearchResponseWithIDs([annotation.id]) == response
 
-    def test_you_can_filter_annotations_by_thread_ids(self, es_client, factories, index, search):
+    def test_you_can_filter_annotations_by_thread_ids(self, factories, index, search):
         annotation1 = factories.Annotation.build(id="test_annotation_id1")
         annotation2 = factories.Annotation.build(id="test_annotation_id2", thread=[annotation1])
 
