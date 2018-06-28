@@ -11,7 +11,7 @@ from h import i18n
 from h import models
 from h.models.organization import Organization
 from h import paginator
-from h.schemas.admin_organization import OrganizationSchema
+from h.schemas.forms.admin.organization import OrganizationSchema
 
 _ = i18n.TranslationString
 

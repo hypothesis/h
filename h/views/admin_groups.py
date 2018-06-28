@@ -14,7 +14,7 @@ from h.models.annotation import Annotation
 from h.traversal import GroupRoot
 from h.models.group_scope import GroupScope
 from h.models.organization import Organization
-from h.schemas.admin_group import CreateAdminGroupSchema
+from h.schemas.forms.admin.group import CreateAdminGroupSchema
 
 _ = i18n.TranslationString
 

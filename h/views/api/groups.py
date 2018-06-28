@@ -8,7 +8,7 @@ from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 from h.exceptions import PayloadError
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
-from h.schemas.group import CreateGroupAPISchema
+from h.schemas.api.group import CreateGroupAPISchema
 from h.traversal import GroupContext
 from h.views.api.config import api_config
 

@@ -11,7 +11,7 @@ from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH
 )
 from h.models.organization import Organization
-from h.schemas.admin_group import CreateAdminGroupSchema
+from h.schemas.forms.admin.group import CreateAdminGroupSchema
 from h.services.user import UserService
 
 
