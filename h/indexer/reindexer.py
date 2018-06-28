@@ -25,9 +25,12 @@ def reindex(session, es, request):
 
     new_index = configure_index(es)
     log.info('configured new index {}'.format(new_index))
+    setting_name = 'reindex.new_es6_index'
+    if es.version < (2,):
+        setting_name = 'reindex.new_index'
 
     try:
-        settings.put('reindex.new_index', new_index)
+        settings.put(setting_name, new_index)
         request.tm.commit()
 
         log.info('reindexing annotations into new index {}'.format(new_index))
@@ -50,5 +53,5 @@ def reindex(session, es, request):
         delete_index(es, current_index)
 
     finally:
-        settings.delete('reindex.new_index')
+        settings.delete(setting_name)
         request.tm.commit()
