@@ -5,6 +5,7 @@ import os
 import pytest
 
 from h.cli.commands import search
+from h.search.client import Client
 
 
 class TestReindexCommand(object):
@@ -19,6 +20,14 @@ class TestReindexCommand(object):
         assert result.exit_code == 0
         reindex.assert_called_once_with(pyramid_request.db,
                                         pyramid_request.es,
+                                        pyramid_request)
+
+    def test_calls_reindex_with_es6_client(self, cli, cliconfig, pyramid_request, reindex):
+        result = cli.invoke(search.reindex, ['--es6'], obj=cliconfig)
+
+        assert result.exit_code == 0
+        reindex.assert_called_once_with(pyramid_request.db,
+                                        pyramid_request.es6,
                                         pyramid_request)
 
     @pytest.fixture
@@ -49,5 +58,6 @@ class TestUpdateSettingsCommand(object):
 
 @pytest.fixture
 def cliconfig(pyramid_request):
-    pyramid_request.es = mock.sentinel.es
+    pyramid_request.es = mock.create_autospec(Client, spec_set=True, instance=True)
+    pyramid_request.es6 = mock.create_autospec(Client, spec_set=True, instance=True)
     return {'bootstrap': mock.Mock(return_value=pyramid_request)}
