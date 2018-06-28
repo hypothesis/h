@@ -21,8 +21,8 @@ class TestConnection(object):
     def test_connect_is_available_in_search_api(self):
         assert connect == search.connect
 
-    def test_connect_creates_default_connection(self):
-        # search.connect is invoked as part of test bootstrapping
+    def test_connect_creates_default_connection(self, es_connect):
+        # search.connect is invoked by the `es_connect` fixture
         # so the connection should already be established
         assert connections.get_connection()
         assert connections.get_connection('default')
