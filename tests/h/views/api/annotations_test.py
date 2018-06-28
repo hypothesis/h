@@ -10,6 +10,7 @@ from pyramid.config import Configurator
 from h.schemas import ValidationError
 from h.search.core import SearchResult
 from h.views.api import annotations as views
+from h.exceptions import PayloadError
 
 
 class TestIndex(object):
@@ -156,7 +157,7 @@ class TestCreate(object):
                                'json_body',
                                new_callable=mock.PropertyMock) as json_body:
             json_body.side_effect = ValueError()
-            with pytest.raises(views.PayloadError):
+            with pytest.raises(PayloadError):
                 views.create(pyramid_request)
 
     def test_it_inits_CreateAnnotationSchema(self, pyramid_request, create_schema):
@@ -328,7 +329,7 @@ class TestUpdate(object):
                                'json_body',
                                new_callable=mock.PropertyMock) as json_body:
             json_body.side_effect = ValueError()
-            with pytest.raises(views.PayloadError):
+            with pytest.raises(PayloadError):
                 views.update(mock.Mock(), pyramid_request)
 
     def test_it_validates_the_posted_data(self, pyramid_request, update_schema):

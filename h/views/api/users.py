@@ -10,11 +10,11 @@ from pyramid.exceptions import HTTPNotFound
 from h import models
 from h.accounts import schemas
 from h.auth.util import basic_auth_creds
-from h.exceptions import ClientUnauthorized, PayloadError
+from h.exceptions import ClientUnauthorized
 from h.models.auth_client import GrantType
 from h.presenters import UserJSONPresenter
 from h.schemas import ValidationError
-from h.util.view import json_view
+from h.util.view import json_view, json_body
 
 
 @json_view(route_name='api.users', request_method='POST')
@@ -30,7 +30,7 @@ def create(request):
     client = _request_client(request)
 
     schema = schemas.CreateUserAPISchema()
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(json_body(request))
 
     _check_authority(client, appstruct)
     appstruct['authority'] = client.authority
@@ -60,7 +60,7 @@ def update(request):
         raise HTTPNotFound()
 
     schema = schemas.UpdateUserAPISchema()
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(json_body(request))
 
     _update_user(user, appstruct)
 
@@ -127,10 +127,3 @@ def _update_user(user, appstruct):
         user.email = appstruct['email']
     if 'display_name' in appstruct:
         user.display_name = appstruct['display_name']
-
-
-def _json_payload(request):
-    try:
-        return request.json_body
-    except ValueError:
-        raise PayloadError()
