@@ -5,6 +5,7 @@ import os
 import pytest
 
 from h.cli.commands import search
+from h.search.config import ANNOTATION_MAPPING
 
 
 class TestReindexCommand(object):
@@ -32,7 +33,7 @@ class TestUpdateSettingsCommand(object):
         result = cli.invoke(search.update_settings, [], obj=cliconfig)
 
         assert result.exit_code == 0
-        update_index_settings.assert_called_once_with(pyramid_request.es)
+        update_index_settings.assert_called_once_with(pyramid_request.es, ANNOTATION_MAPPING)
 
     def test_handles_runtimeerror(self, cli, cliconfig, update_index_settings):
         update_index_settings.side_effect = RuntimeError("asplode!")
@@ -44,8 +45,7 @@ class TestUpdateSettingsCommand(object):
 
     @pytest.fixture
     def update_index_settings(self, patch):
-        config = patch('h.cli.commands.search.config')
-        return config.update_index_settings
+        return patch('h.cli.commands.search.config.update_index_settings')
 
 
 @pytest.fixture
