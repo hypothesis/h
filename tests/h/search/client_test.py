@@ -4,10 +4,14 @@ from __future__ import unicode_literals
 
 import pytest
 
-from elasticsearch1 import RequestsHttpConnection
+import elasticsearch1
+import elasticsearch
 
-from h.search.client import get_client
+from h.search.client import get_client, get_es6_client
 from h.search.client import Client
+
+
+GET_CLIENTS = (get_client, get_es6_client)
 
 
 class TestClient(object):
@@ -30,25 +34,44 @@ class TestClient(object):
         with pytest.raises(AttributeError, match="can't set attribute"):
             client.conn = "changed"
 
+    def test_defaults_to_es1(self):
+        client = Client(host="http://localhost:9200", index="hypothesis")
+
+        assert isinstance(client.conn, elasticsearch1.Elasticsearch)
+
+    def test_uses_es6_when_specified(self):
+        client = Client(
+            host="http://localhost:9200",
+            index="hypothesis",
+            elasticsearch=elasticsearch)
+
+        assert isinstance(client.conn, elasticsearch.Elasticsearch)
+
 
 class TestGetClient(object):
-    def test_initializes_client_with_host(self, settings, patched_client):
+    @pytest.mark.parametrize('get_client', GET_CLIENTS)
+    def test_initializes_client_with_host(self, settings, get_client, patched_client):
         get_client(settings)
         args, _ = patched_client.call_args
         assert args[0] == 'search.svc'
 
-    def test_initializes_client_with_index(self, settings, patched_client):
+    @pytest.mark.parametrize('get_client', GET_CLIENTS)
+    def test_initializes_client_with_index(self, settings, get_client, patched_client):
         get_client(settings)
         args, _ = patched_client.call_args
         assert args[1] == 'my-index'
 
-    @pytest.mark.parametrize('key,value,settingkey', [
-        ('max_retries', 7, 'es.client.max_retries'),
-        ('retry_on_timeout', True, 'es.client.retry_on_timeout'),
-        ('timeout', 15, 'es.client.timeout'),
-        ('maxsize', 4, 'es.client_poolsize'),
+    @pytest.mark.parametrize('key,value,settingkey,get_client', [
+        ('max_retries', 7, 'es.client.max_retries', get_client),
+        ('retry_on_timeout', True, 'es.client.retry_on_timeout', get_client),
+        ('timeout', 15, 'es.client.timeout', get_client),
+        ('maxsize', 4, 'es.client_poolsize', get_client),
+        ('max_retries', 7, 'es.client.max_retries', get_es6_client),
+        ('retry_on_timeout', True, 'es.client.retry_on_timeout', get_es6_client),
+        ('timeout', 15, 'es.client.timeout', get_es6_client),
+        ('maxsize', 4, 'es.client_poolsize', get_es6_client),
     ])
-    def test_client_configuration(self, settings, patched_client, key, value, settingkey):
+    def test_client_configuration(self, settings, get_client, patched_client, key, value, settingkey):
         settings[settingkey] = value
         get_client(settings)
 
@@ -73,7 +96,7 @@ class TestGetClient(object):
         get_client(settings)
 
         _, kwargs = patched_client.call_args
-        assert kwargs['connection_class'] == RequestsHttpConnection
+        assert kwargs['connection_class'] == elasticsearch1.RequestsHttpConnection
 
     @pytest.mark.parametrize('aws_settings', [
         {'es.aws.access_key_id': 'foo'},
@@ -94,6 +117,7 @@ class TestGetClient(object):
     def settings(self):
         return {
             'es.host': 'search.svc',
+            'es.url': 'search.svc',
             'es.index': 'my-index',
         }
 
