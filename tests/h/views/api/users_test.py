@@ -136,8 +136,8 @@ class TestCreate(object):
         assert result == presenter.return_value.asdict()
 
     @pytest.mark.usefixtures('valid_auth')
-    def test_it_validates_the_input(self, pyramid_request, valid_payload, schemas):
-        create_schema = schemas.CreateUserAPISchema.return_value
+    def test_it_validates_the_input(self, pyramid_request, valid_payload, CreateUserAPISchema):
+        create_schema = CreateUserAPISchema.return_value
         create_schema.validate.return_value = valid_payload
         pyramid_request.json_body = valid_payload
 
@@ -146,8 +146,8 @@ class TestCreate(object):
         create_schema.validate.assert_called_once_with(valid_payload)
 
     @pytest.mark.usefixtures('valid_auth')
-    def test_raises_when_schema_validation_fails(self, pyramid_request, valid_payload, schemas):
-        create_schema = schemas.CreateUserAPISchema.return_value
+    def test_raises_when_schema_validation_fails(self, pyramid_request, valid_payload, CreateUserAPISchema):
+        create_schema = CreateUserAPISchema.return_value
         create_schema.validate.side_effect = ValidationError('validation failed')
 
         pyramid_request.json_body = valid_payload
@@ -283,8 +283,8 @@ class TestUpdate(object):
             update(pyramid_request)
 
     @pytest.mark.usefixtures('valid_auth')
-    def test_it_validates_the_input(self, pyramid_request, valid_payload, schemas):
-        update_schema = schemas.UpdateUserAPISchema.return_value
+    def test_it_validates_the_input(self, pyramid_request, valid_payload, UpdateUserAPISchema):
+        update_schema = UpdateUserAPISchema.return_value
         update_schema.validate.return_value = valid_payload
         pyramid_request.json_body = valid_payload
 
@@ -293,8 +293,8 @@ class TestUpdate(object):
         update_schema.validate.assert_called_once_with(valid_payload)
 
     @pytest.mark.usefixtures('valid_auth')
-    def test_raises_when_schema_validation_fails(self, pyramid_request, valid_payload, schemas):
-        update_schema = schemas.UpdateUserAPISchema.return_value
+    def test_raises_when_schema_validation_fails(self, pyramid_request, valid_payload, UpdateUserAPISchema):
+        update_schema = UpdateUserAPISchema.return_value
         update_schema.validate.side_effect = ValidationError('validation failed')
 
         pyramid_request.json_body = valid_payload
@@ -367,8 +367,13 @@ def user_signup_service(db_session, pyramid_config, user):
 
 
 @pytest.fixture
-def schemas(patch):
-    return patch('h.views.api.users.schemas')
+def CreateUserAPISchema(patch):
+    return patch('h.views.api.users.CreateUserAPISchema')
+
+
+@pytest.fixture
+def UpdateUserAPISchema(patch):
+    return patch('h.views.api.users.UpdateUserAPISchema')
 
 
 @pytest.fixture

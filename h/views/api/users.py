@@ -8,12 +8,12 @@ import sqlalchemy as sa
 from pyramid.exceptions import HTTPNotFound
 
 from h import models
-from h.accounts import schemas
 from h.auth.util import basic_auth_creds
 from h.exceptions import ClientUnauthorized, PayloadError
 from h.models.auth_client import GrantType
 from h.presenters import UserJSONPresenter
 from h.schemas import ValidationError
+from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.util.view import json_view
 
 
@@ -29,7 +29,7 @@ def create(request):
     """
     client = _request_client(request)
 
-    schema = schemas.CreateUserAPISchema()
+    schema = CreateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 
     _check_authority(client, appstruct)
@@ -59,7 +59,7 @@ def update(request):
     if user is None:
         raise HTTPNotFound()
 
-    schema = schemas.UpdateUserAPISchema()
+    schema = UpdateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 
     _update_user(user, appstruct)
