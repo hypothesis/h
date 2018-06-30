@@ -321,6 +321,7 @@ class TestAnyMatcher(object):
         Annotation(tags=["baz"])
         Annotation(target_uri="baz.com")
         Annotation(text="baz is best")
+
         matched_ids = [Annotation(target_uri="foo/bar/baz.com").id,
                        Annotation(target_selectors=[{'exact': 'selected foo text'}]).id,
                        Annotation(text="bar is best").id,
@@ -337,6 +338,20 @@ class TestAnyMatcher(object):
     def search(self, search):
         search.append_matcher(query.AnyMatcher())
         return search
+
+    @pytest.fixture
+    def Annotation(self, Annotation):
+        # Override the default randomly-generated values for fields which
+        # "any" matches against to ensure that we do not get unexpected
+        # matches in tests. This will need to be modified if new fields are
+        # added to the set which "any" matches against.
+        def AnnotationWithDefaults(*args, **kwargs):
+            kwargs.setdefault('tags', [])
+            kwargs.setdefault('target_selectors', [{'exact': 'quotedoesnotmatch'}])
+            kwargs.setdefault('target_uri', 'http://uridoesnotmatch.com')
+            kwargs.setdefault('text', '')
+            return Annotation(*args, **kwargs)
+        return AnnotationWithDefaults
 
 
 class TestTagsMatcher(object):
