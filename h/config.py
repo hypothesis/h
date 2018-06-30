@@ -56,8 +56,8 @@ def configure(environ=None, settings=None):
     settings_manager.set('statsd.prefix', 'STATSD_PREFIX')
 
     # Configuration for Pyramid
-    settings_manager.set('secret_key', 'SECRET_KEY', type_=bytes, required=True)
-    settings_manager.set('secret_salt', 'SECRET_SALT', type_=bytes, default=DEFAULT_SALT)
+    settings_manager.set('secret_key', 'SECRET_KEY', type_=_to_utf8, required=True)
+    settings_manager.set('secret_salt', 'SECRET_SALT', type_=_to_utf8, default=DEFAULT_SALT)
 
     # Configuration for h
     settings_manager.set('csp.enabled', 'CSP_ENABLED', type_=asbool)
@@ -123,3 +123,9 @@ def configure(environ=None, settings=None):
     es_logger.addFilter(ExceptionFilter((("ReadTimeout", "WARNING"),)))
 
     return Configurator(settings=settings)
+
+
+def _to_utf8(str_or_bytes):
+    if isinstance(str_or_bytes, bytes):
+        return str_or_bytes
+    return str_or_bytes.encode('utf-8')
