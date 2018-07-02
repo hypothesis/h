@@ -3,24 +3,10 @@
 from __future__ import unicode_literals
 
 from pyramid import httpexceptions
-import newrelic.agent
 
 from h import models, search
 from h.util.view import json_view
 from h.util.uri import normalize
-
-
-def record_metrics(count,
-                   request,
-                   record_metric=newrelic.agent.record_custom_metric,
-                   record_event=newrelic.agent.record_custom_event):
-    if count > 0:
-        record_event(
-            'BadgeNotZero',
-            {'user': "None" if request.user is None else request.user.username})
-    else:
-        record_metric('Custom/Badge/unAuthUserGotZero', int(request.user is None))
-    record_metric('Custom/Badge/badgeCountIsZero', int(count == 0))
 
 
 def _has_uri_ever_been_annotated(db, uri):
@@ -64,7 +50,5 @@ def badge(request):
         query = {'uri': uri, 'limit': 0}
         result = search.Search(request, stats=request.stats).run(query)
         count = result.total
-
-    record_metrics(count, request)
 
     return {'total': count}
