@@ -262,6 +262,35 @@ class TestUpdate(object):
         assert user.email == 'jeremy@weylandtech.com'
 
     @pytest.mark.usefixtures('valid_auth')
+    def test_you_can_update_the_displayname_of_a_user_who_has_no_email(
+            self, factories, pyramid_request, user_svc, valid_payload):
+        user = factories.User(display_name='old_display_name', email=None)
+        user_svc.fetch.return_value = user
+        user_svc.fetch.side_effect = None
+        del valid_payload['email']
+        valid_payload['display_name'] = 'new_display_name'
+        pyramid_request.json_body = valid_payload
+
+        update(pyramid_request)
+
+        assert user.display_name == 'new_display_name'
+        assert user.email is None
+
+    @pytest.mark.usefixtures('valid_auth')
+    def test_you_can_add_an_email_to_a_user_who_has_no_email(
+            self, factories, pyramid_request, user_svc, valid_payload):
+        user = factories.User(email=None)
+        user_svc.fetch.return_value = user
+        user_svc.fetch.side_effect = None
+        del valid_payload['display_name']
+        valid_payload['email'] = 'new@new.com'
+        pyramid_request.json_body = valid_payload
+
+        update(pyramid_request)
+
+        assert user.email == 'new@new.com'
+
+    @pytest.mark.usefixtures('valid_auth')
     def test_it_presents_user(self, pyramid_request, valid_payload, user, presenter):
         pyramid_request.json_body = valid_payload
         update(pyramid_request)
