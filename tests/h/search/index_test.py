@@ -10,12 +10,25 @@ import mock
 import pytest
 
 import h.search.index
+from h.search import persistence
 
 from tests.common.matchers import Matcher
 
 
-@pytest.mark.usefixtures("annotations")
 class TestIndex(object):
+    """Test indexing of ES v6.x+"""
+    def test_annotation_ids_are_used_as_elasticsearch_ids(self, factories, index_new):
+        annotation = factories.Annotation.build()
+
+        index_new(annotation)
+
+        result = persistence.Annotation.get(id=annotation.id)
+        assert result.meta.id == annotation.id
+
+
+@pytest.mark.usefixtures("annotations")
+class TestIndexOld(object):
+    """Test indexing of ES v1.x (deprecated)"""
     def test_annotation_ids_are_used_as_elasticsearch_ids(self, es_client,
                                                           factories,
                                                           index):

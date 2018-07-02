@@ -22,7 +22,7 @@ class TestIndexAnnotation:
     def test_it_presents_the_annotation(self, es, presenters, pyramid_request):
         annotation = mock.Mock()
 
-        index.index(es, annotation, pyramid_request)
+        index.index_old(es, annotation, pyramid_request)
 
         presenters.AnnotationSearchIndexPresenter.assert_called_once_with(annotation)
 
@@ -34,7 +34,7 @@ class TestIndexAnnotation:
         annotation = mock.Mock()
         presented = presenters.AnnotationSearchIndexPresenter.return_value.asdict()
 
-        index.index(es, annotation, pyramid_request)
+        index.index_old(es, annotation, pyramid_request)
 
         AnnotationTransformEvent.assert_called_once_with(pyramid_request, annotation, presented)
 
@@ -44,13 +44,13 @@ class TestIndexAnnotation:
                                            notify,
                                            presenters,
                                            pyramid_request):
-        index.index(es, mock.Mock(), pyramid_request)
+        index.index_old(es, mock.Mock(), pyramid_request)
 
         event = AnnotationTransformEvent.return_value
         notify.assert_called_once_with(event)
 
     def test_it_indexes_the_annotation(self, es, presenters, pyramid_request):
-        index.index(es, mock.Mock(), pyramid_request)
+        index.index_old(es, mock.Mock(), pyramid_request)
 
         es.conn.index.assert_called_once_with(
             index='hypothesis',
@@ -60,7 +60,7 @@ class TestIndexAnnotation:
         )
 
     def test_it_allows_to_override_target_index(self, es, presenters, pyramid_request):
-        index.index(es, mock.Mock(), pyramid_request, target_index='custom-index')
+        index.index_old(es, mock.Mock(), pyramid_request, target_index='custom-index')
 
         _, kwargs = es.conn.index.call_args
         assert kwargs['index'] == 'custom-index'
