@@ -266,12 +266,69 @@ class TestDeletedFilter(object):
         return search
 
 
+@pytest.mark.usefixtures('pyramid_config')
 class TestNipsaFilter(object):
 
-    @pytest.fixture
-    def search(self, search, pyramid_request):
+    def test_hides_banned_users_annotations_from_other_users(
+        self, pyramid_request, search, banned_user, user, Annotation
+    ):
+        pyramid_request.user = user
         search.append_filter(query.NipsaFilter(pyramid_request))
-        return search
+        Annotation(userid=banned_user.userid)
+        expected_ids = [Annotation(userid=user.userid).id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_shows_banned_users_annotations_to_banned_user(
+        self, pyramid_request, search, banned_user, user, Annotation
+    ):
+        pyramid_request.user = banned_user
+        search.append_filter(query.NipsaFilter(pyramid_request))
+        expected_ids = [Annotation(userid=banned_user.userid).id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_shows_banned_users_annotations_in_groups_they_created(
+        self, pyramid_request, search, banned_user, user, Annotation,
+        group_service,
+    ):
+        pyramid_request.user = user
+        group_service.groupids_created_by.return_value = ["created_by_banneduser"]
+        search.append_filter(query.NipsaFilter(pyramid_request))
+        expected_ids = [Annotation(groupid="created_by_banneduser",
+                                   userid=banned_user.userid).id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    @pytest.fixture
+    def banned_user(self, factories):
+        return factories.User(username="banned", nipsa=True)
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User(username="notbanned", nipsa=False)
+
+    @pytest.fixture
+    def pyramid_config(self, pyramid_config, banned_user):
+        # Fake implementation of the `AnnotationTransformEvent` subscriber
+        # which adds the "nipsa" flag to annotations during indexing.
+        def add_nipsa_flag(event):
+            if event.annotation.userid == banned_user.userid:
+                event.annotation_dict['nipsa'] = True
+        pyramid_config.add_subscriber(add_nipsa_flag, 'h.events.AnnotationTransformEvent')
+
+        return pyramid_config
+
+    @pytest.fixture
+    def group_service(self, group_service):
+        group_service.groupids_created_by.return_value = []
+        return group_service
 
 
 class TestAnyMatcher(object):
