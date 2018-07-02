@@ -18,7 +18,7 @@ from h.models.user import (
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
 )
-from h.schemas.base import CSRFSchema, JSONSchema
+from h.schemas.base import CSRFSchema
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
@@ -400,59 +400,6 @@ class NotificationsSchema(CSRFSchema):
             omit_label=True,
             values=types),
     )
-
-
-class CreateUserAPISchema(JSONSchema):
-    """Validate a user JSON object."""
-
-    schema = {
-        'type': 'object',
-        'properties': {
-            'authority': {
-                'type': 'string',
-                'format': 'hostname',
-            },
-            'username': {
-                'type': 'string',
-                'minLength': USERNAME_MIN_LENGTH,
-                'maxLength': USERNAME_MAX_LENGTH,
-                'pattern': '^[A-Za-z0-9._]+$',
-            },
-            'email': {
-                'type': 'string',
-                'format': 'email',
-                'maxLength': EMAIL_MAX_LENGTH,
-            },
-            'display_name': {
-                'type': 'string',
-                'maxLength': DISPLAY_NAME_MAX_LENGTH,
-            },
-        },
-        'required': [
-            'authority',
-            'username',
-            'email',
-        ],
-    }
-
-
-class UpdateUserAPISchema(JSONSchema):
-    """Validate a user JSON object."""
-
-    schema = {
-        'type': 'object',
-        'properties': {
-            'email': {
-                'type': 'string',
-                'format': 'email',
-                'maxLength': EMAIL_MAX_LENGTH,
-            },
-            'display_name': {
-                'type': 'string',
-                'maxLength': DISPLAY_NAME_MAX_LENGTH,
-            },
-        },
-    }
 
 
 def includeme(config):
