@@ -35,6 +35,6 @@ def _email_group_admin(request, annotation):
     if incontext_link is None:
         incontext_link = annotation.target_uri
 
-    if group.creator is not None:
+    if group.creator and group.creator.email:
         send_params = flag_notification.generate(request, group.creator.email, incontext_link)
         mailer.send.delay(*send_params)
