@@ -177,8 +177,8 @@ class TestGetNotification(object):
     @pytest.fixture
     def user_service(self, pyramid_config):
         users = {
-            'acct:giraffe@safari.net': User(username='giraffe'),
-            'acct:elephant@safari.net': User(username='elephant'),
+            'acct:giraffe@safari.net': User(username='giraffe', email='giraffe@giraffe.com'),
+            'acct:elephant@safari.net': User(username='elephant', email='elephant@elephant.com'),
         }
         service = mock.Mock(spec_set=['fetch'])
         service.fetch.side_effect = users.get
