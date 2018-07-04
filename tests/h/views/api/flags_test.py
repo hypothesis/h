@@ -23,6 +23,7 @@ class TestCreate(object):
 
     def test_it_returns_no_content(self, annotation_context, pyramid_request):
         response = views.create(annotation_context, pyramid_request)
+
         assert isinstance(response, HTTPNoContent)
 
     def test_passes_info_to_flag_notification_email(self,
@@ -62,6 +63,7 @@ class TestCreate(object):
         pyramid_request.json_body = {'annotation': annotation_context.annotation.id}
 
         views.create(annotation_context, pyramid_request)
+
         mailer.send.delay.assert_called_once_with(*flag_notification_email.return_value)
 
     def test_doesnt_send_email_if_group_has_no_creator(self,
