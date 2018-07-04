@@ -26,11 +26,13 @@ def reindex(session, es, request):
     settings = request.find_service(name='settings')
 
     new_index = configure_index(es)
+    log.info('configured new index {}'.format(new_index))
 
     try:
         settings.put(SETTING_NEW_INDEX, new_index)
         request.tm.commit()
 
+        log.info('reindexing annotations into new index {}'.format(new_index))
         indexer = BatchIndexer(session, es, request, target_index=new_index, op_type='create')
 
         errored = indexer.index()
@@ -43,8 +45,10 @@ def reindex(session, es, request):
                     len(errored),
                     errored))
 
+        log.info('making new index {} current'.format(new_index))
         update_aliased_index(es, new_index)
 
+        log.info('removing previous index {}'.format(current_index))
         delete_index(es, current_index)
 
     finally:
