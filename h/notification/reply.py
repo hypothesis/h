@@ -75,6 +75,10 @@ def get_notification(request, annotation, action):
     if parent_user is None:
         return
 
+    # If the parent user doesn't have an email address we can't email them.
+    if not parent_user.email:
+        return
+
     # If the reply user doesn't exist (anymore), we can't send an email, but
     # this would be super weird, so log a warning.
     reply_user = user_service.fetch(reply.userid)
