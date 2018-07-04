@@ -93,8 +93,8 @@ class TestCreate(object):
         assert not mailer.send.delay.called
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.user = mock.Mock()
+    def pyramid_request(self, factories, pyramid_request):
+        pyramid_request.user = factories.User()
         pyramid_request.json_body = {}
         return pyramid_request
 
