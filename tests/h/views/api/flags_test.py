@@ -8,6 +8,7 @@ import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.views.api import flags as views
+from h.traversal import AnnotationContext
 
 
 @pytest.mark.usefixtures('flag_service', 'group_service', 'mailer', 'flag_notification_email', 'incontext_link')
@@ -64,6 +65,30 @@ class TestCreate(object):
 
         views.create(context, pyramid_request)
         mailer.send.delay.assert_called_once_with(*flag_notification_email.return_value)
+
+    def test_doesnt_send_email_if_group_has_no_creator(self,
+                                                       factories,
+                                                       group_service,
+                                                       pyramid_request,
+                                                       mailer):
+        annotation_context = mock.create_autospec(AnnotationContext, instance=True, annotation=factories.Annotation())
+        group_service.find.return_value = factories.Group(creator=None, members=[])
+
+        views.create(annotation_context, pyramid_request)
+
+        assert not mailer.send.delay.called
+
+    def test_doesnt_send_email_if_group_creator_has_no_email_address(self,
+                                                                     factories,
+                                                                     group_service,
+                                                                     pyramid_request,
+                                                                     mailer):
+        annotation_context = mock.create_autospec(AnnotationContext, instance=True, annotation=factories.Annotation())
+        group_service.find.return_value = factories.Group(creator=factories.User(email=None), members=[])
+
+        views.create(annotation_context, pyramid_request)
+
+        assert not mailer.send.delay.called
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
