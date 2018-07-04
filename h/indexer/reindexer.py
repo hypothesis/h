@@ -5,6 +5,7 @@ import logging
 
 from h.search.config import (
     configure_index,
+    delete_index,
     get_aliased_index,
     update_aliased_index,
 )
@@ -18,7 +19,8 @@ SETTING_NEW_INDEX = 'reindex.new_index'
 def reindex(session, es, request):
     """Reindex all annotations into a new index, and update the alias."""
 
-    if get_aliased_index(es) is None:
+    current_index = get_aliased_index(es)
+    if current_index is None:
         raise RuntimeError('cannot reindex if current index is not aliased')
 
     settings = request.find_service(name='settings')
@@ -42,6 +44,8 @@ def reindex(session, es, request):
                     errored))
 
         update_aliased_index(es, new_index)
+
+        delete_index(es, current_index)
 
     finally:
         settings.delete(SETTING_NEW_INDEX)

@@ -15,6 +15,7 @@ from h.search.config import (
     ANALYSIS_SETTINGS,
     init,
     configure_index,
+    delete_index,
     get_aliased_index,
     update_aliased_index,
 )
@@ -181,6 +182,18 @@ class TestUpdateAliasedIndex(object):
 
         with pytest.raises(RuntimeError):
             update_aliased_index(client, 'new-target')
+
+
+class TestDeleteIndex(object):
+    def test_deletes_index(self, client):
+        delete_index(client, 'unused-index')
+
+        client.conn.indices.delete.assert_called_once_with(index='unused-index')
+
+    def test_ignores_NotFound_error(self, client):
+        client.conn.indices.delete.side_effect = NotFoundError('IndexMissingException', '')
+
+        delete_index(client, 'unused-index')
 
 
 def captures(patterns, text):
