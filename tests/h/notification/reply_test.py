@@ -75,6 +75,15 @@ class TestGetNotification(object):
 
         assert result is None
 
+    def test_returns_none_when_parent_user_has_no_email_address(self, factories, pyramid_request, reply, user_service):
+        users = {
+            "acct:giraffe@safari.net": factories.User(email=None),
+            "acct:elephant@safari.net": factories.User(),
+        }
+        user_service.fetch.side_effect = users.get
+
+        assert get_notification(pyramid_request, reply, "create") is None
+
     def test_returns_none_when_reply_user_does_not_exist(self, factories, pyramid_request, reply, user_service):
         """
         Don't send a reply if somehow the replying user ceased to exist.
