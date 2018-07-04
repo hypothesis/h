@@ -72,7 +72,8 @@ class TestCreate(object):
                                                        groupfinder_service,
                                                        pyramid_request,
                                                        mailer):
-        groupfinder_service.find.return_value = factories.Group(creator=None, members=[])
+        groupfinder_service.find.return_value = factories.Group()
+        groupfinder_service.find.return_value.creator = None
 
         views.create(annotation_context, pyramid_request)
 
@@ -84,7 +85,7 @@ class TestCreate(object):
                                                                      groupfinder_service,
                                                                      pyramid_request,
                                                                      mailer):
-        groupfinder_service.find.return_value = factories.Group(creator=factories.User(email=None), members=[])
+        groupfinder_service.find.return_value = factories.Group(creator=factories.User(email=None))
 
         views.create(annotation_context, pyramid_request)
 
