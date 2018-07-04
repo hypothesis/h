@@ -81,6 +81,27 @@ class TestUserModelDataConstraints(object):
         with pytest.raises(ValueError):
             models.User(email='bob@b' + 'o' * 100 + 'b.com')
 
+    def test_can_create_user_with_null_email(self):
+        models.User(email=None)
+
+    def test_can_change_email_to_null(self):
+        user = models.User(email="bob@bob.com")
+
+        user.email = None
+
+    def test_cannot_create_two_users_with_same_non_null_email_and_authority(self, db_session, factories):
+        factories.User(email="bob@bob.com", authority="hypothes.is")
+        factories.User(email="bob@bob.com", authority="hypothes.is")
+
+        with pytest.raises(exc.IntegrityError, match='duplicate key value violates unique constraint "uq__user__email"'):
+            db_session.flush()
+
+    def test_can_create_two_users_with_same_null_email_and_authority(self, db_session, factories):
+        factories.User(email=None, authority="hypothes.is")
+        factories.User(email=None, authority="hypothes.is")
+
+        db_session.flush()
+
 
 class TestUserModelUserId(object):
 
@@ -203,12 +224,16 @@ class TestUserGetByEmail(object):
         actual = models.User.get_by_email(db_session, user.email, 'example.com')
         assert actual is None
 
+    def test_you_cannot_get_users_with_no_emails(self, db_session):
+        assert not models.User.get_by_email(db_session, None, "example.com")
+
     @pytest.fixture
     def users(self, db_session, factories):
         users = {
             'emily': factories.User(username='emily', email='emily@msn.com', authority='example.com'),
             'norma': factories.User(username='norma', email='norma@foo.org', authority='foo.org'),
             'meredith': factories.User(username='meredith', email='meredith@gmail.com', authority='example.com'),
+            'bob': factories.User(username='bob', email=None, authority='example.com'),
         }
         db_session.flush()
         return users
