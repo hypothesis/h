@@ -8,10 +8,11 @@ import pytest
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.views.api import flags as views
+from h.services.groupfinder import GroupfinderService
 from h.traversal import AnnotationContext
 
 
-@pytest.mark.usefixtures('flag_service', 'group_service', 'mailer', 'flag_notification_email', 'incontext_link')
+@pytest.mark.usefixtures('flag_service', 'groupfinder_service', 'mailer', 'flag_notification_email', 'incontext_link')
 class TestCreate(object):
     def test_it_flags_annotation(self, pyramid_request, flag_service):
         context = mock.Mock()
@@ -29,7 +30,7 @@ class TestCreate(object):
 
     def test_passes_info_to_flag_notification_email(self,
                                                     pyramid_request,
-                                                    group_service,
+                                                    groupfinder_service,
                                                     flag_notification_email,
                                                     incontext_link):
         context = mock.Mock()
@@ -38,12 +39,12 @@ class TestCreate(object):
         views.create(context, pyramid_request)
 
         flag_notification_email.assert_called_once_with(request=pyramid_request,
-                                                        email=group_service.find.return_value.creator.email,
+                                                        email=groupfinder_service.find.return_value.creator.email,
                                                         incontext_link=incontext_link.return_value)
 
     def test_passes_annotation_target_uri_to_flag_notification_email(self,
                                                                      pyramid_request,
-                                                                     group_service,
+                                                                     groupfinder_service,
                                                                      flag_notification_email,
                                                                      incontext_link):
         context = mock.Mock()
@@ -53,7 +54,7 @@ class TestCreate(object):
         views.create(context, pyramid_request)
 
         flag_notification_email.assert_called_once_with(request=pyramid_request,
-                                                        email=group_service.find.return_value.creator.email,
+                                                        email=groupfinder_service.find.return_value.creator.email,
                                                         incontext_link=context.annotation.target_uri)
 
     def test_sends_notification_email(self,
@@ -68,11 +69,11 @@ class TestCreate(object):
 
     def test_doesnt_send_email_if_group_has_no_creator(self,
                                                        factories,
-                                                       group_service,
+                                                       groupfinder_service,
                                                        pyramid_request,
                                                        mailer):
         annotation_context = mock.create_autospec(AnnotationContext, instance=True, annotation=factories.Annotation())
-        group_service.find.return_value = factories.Group(creator=None, members=[])
+        groupfinder_service.find.return_value = factories.Group(creator=None, members=[])
 
         views.create(annotation_context, pyramid_request)
 
@@ -80,11 +81,11 @@ class TestCreate(object):
 
     def test_doesnt_send_email_if_group_creator_has_no_email_address(self,
                                                                      factories,
-                                                                     group_service,
+                                                                     groupfinder_service,
                                                                      pyramid_request,
                                                                      mailer):
         annotation_context = mock.create_autospec(AnnotationContext, instance=True, annotation=factories.Annotation())
-        group_service.find.return_value = factories.Group(creator=factories.User(email=None), members=[])
+        groupfinder_service.find.return_value = factories.Group(creator=factories.User(email=None), members=[])
 
         views.create(annotation_context, pyramid_request)
 
@@ -103,10 +104,10 @@ class TestCreate(object):
         return flag_service
 
     @pytest.fixture
-    def group_service(self, pyramid_config):
-        group_service = mock.Mock(spec_set=['find'])
-        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
-        return group_service
+    def groupfinder_service(self, pyramid_config):
+        groupfinder_service = mock.create_autospec(GroupfinderService, instance=True, spec_set=True)
+        pyramid_config.register_service(groupfinder_service, iface='h.interfaces.IGroupService')
+        return groupfinder_service
 
     @pytest.fixture
     def flag_notification_email(self, patch):
