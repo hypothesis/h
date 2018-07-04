@@ -11,6 +11,7 @@ from h.models import Subscriptions
 from h.models import User
 from h.notification.reply import Notification
 from h.notification.reply import get_notification
+from h.services.user import UserService
 
 FIXTURE_DATA = {
     'reply': {
@@ -176,11 +177,13 @@ class TestGetNotification(object):
 
     @pytest.fixture
     def user_service(self, pyramid_config):
+        user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
+
         users = {
             'acct:giraffe@safari.net': User(username='giraffe', email='giraffe@giraffe.com'),
             'acct:elephant@safari.net': User(username='elephant', email='elephant@elephant.com'),
         }
-        service = mock.Mock(spec_set=['fetch'])
-        service.fetch.side_effect = users.get
-        pyramid_config.register_service(service, name='user')
-        return service
+        user_service.fetch.side_effect = users.get
+
+        pyramid_config.register_service(user_service, name='user')
+        return user_service
