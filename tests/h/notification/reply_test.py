@@ -8,7 +8,6 @@ import mock
 from h.models import Annotation
 from h.models import Document, DocumentMeta
 from h.models import Subscriptions
-from h.models import User
 from h.notification.reply import Notification
 from h.notification.reply import get_notification
 from h.services.user import UserService
@@ -68,17 +67,15 @@ class TestGetNotification(object):
 
         assert result is None
 
-    def test_returns_none_when_parent_user_does_not_exist(self, pyramid_request, reply, user_service):
-        users = {
-            'acct:elephant@safari.net': User(username='elephant')
-        }
+    def test_returns_none_when_parent_user_does_not_exist(self, factories, pyramid_request, reply, user_service):
+        users = {'acct:elephant@safari.net': factories.User()}
         user_service.fetch.side_effect = users.get
 
         result = get_notification(pyramid_request, reply, 'create')
 
         assert result is None
 
-    def test_returns_none_when_reply_user_does_not_exist(self, pyramid_request, reply, user_service):
+    def test_returns_none_when_reply_user_does_not_exist(self, factories, pyramid_request, reply, user_service):
         """
         Don't send a reply if somehow the replying user ceased to exist.
 
@@ -86,9 +83,7 @@ class TestGetNotification(object):
         construct the reply email without the user who replied existing. We log
         a warning if this happens.
         """
-        users = {
-            'acct:giraffe@safari.net': User(username='giraffe')
-        }
+        users = {'acct:giraffe@safari.net': factories.User()}
         user_service.fetch.side_effect = users.get
 
         result = get_notification(pyramid_request, reply, 'create')
@@ -176,12 +171,12 @@ class TestGetNotification(object):
         return sub
 
     @pytest.fixture
-    def user_service(self, pyramid_config):
+    def user_service(self, factories, pyramid_config):
         user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
 
         users = {
-            'acct:giraffe@safari.net': User(username='giraffe', email='giraffe@giraffe.com'),
-            'acct:elephant@safari.net': User(username='elephant', email='elephant@elephant.com'),
+            'acct:giraffe@safari.net': factories.User(),
+            'acct:elephant@safari.net': factories.User(),
         }
         user_service.fetch.side_effect = users.get
 
