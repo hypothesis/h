@@ -89,7 +89,8 @@ class TestDeleteAnnotation:
             index='hypothesis',
             doc_type='annotation',
             body={'deleted': True},
-            id='test_annotation_id'
+            id='test_annotation_id',
+            refresh=False,
         )
 
     def test_it_allows_to_override_target_index(self, es):

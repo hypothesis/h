@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import pytest
 import webob
 
-from h.search import Search, query
+from h.search import Search, index, query
 
 
 class TestTopLevelAnnotationsFilter(object):
@@ -259,6 +259,18 @@ class TestUriFilter(object):
 
 
 class TestDeletedFilter(object):
+
+    def test_excludes_deleted_annotations(self, search, Annotation):
+        deleted_ids = [Annotation(deleted=True).id]
+        not_deleted_ids = [Annotation(deleted=False).id]
+
+        # Deleted annotations need to be marked in the index using `h.search.index.delete`.
+        for id_ in deleted_ids:
+            index.delete(search.es, id_, refresh=True)
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(not_deleted_ids)
 
     @pytest.fixture
     def search(self, search):
