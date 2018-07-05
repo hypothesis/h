@@ -60,7 +60,7 @@ def index(es, annotation, request, target_index=None):
     )
 
 
-def delete(es, annotation_id, target_index=None):
+def delete(es, annotation_id, target_index=None, refresh=False):
     """
     Mark an annotation as deleted in the search index.
 
@@ -77,6 +77,10 @@ def delete(es, annotation_id, target_index=None):
 
     :param target_index: the index name, uses default index if not given
     :type target_index: unicode
+
+    :param refresh: Force this deletion to be immediately visible to search operations
+    :type refresh: bool
+
     """
 
     if target_index is None:
@@ -86,7 +90,8 @@ def delete(es, annotation_id, target_index=None):
         index=target_index,
         doc_type=es.t.annotation,
         body={'deleted': True},
-        id=annotation_id)
+        id=annotation_id,
+        refresh=refresh)
 
 
 class BatchIndexer(object):
