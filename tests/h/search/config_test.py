@@ -10,6 +10,7 @@ import mock
 import pytest
 from elasticsearch1.exceptions import NotFoundError
 
+from h.search.client import Client
 from h.search.config import (
     ANNOTATION_MAPPING,
     ANALYSIS_SETTINGS,
@@ -193,7 +194,7 @@ def groups(pattern, text):
 
 @pytest.fixture
 def client():
-    client = mock.Mock(spec_set=['conn', 'index', 't'])
+    client = mock.create_autospec(Client, spec_set=True, instance=True)
     client.index = 'foo'
-    client.t.annotation = 'annotation'
+    client.mapping_type = 'annotation'
     return client

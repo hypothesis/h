@@ -125,7 +125,7 @@ class TestReindex(object):
     def es(self):
         mock_es = mock.create_autospec(client.Client, instance=True,
                                        spec_set=True, index="hypothesis")
-        mock_es.t.annotation = 'annotation'
+        mock_es.mapping_type = 'annotation'
         return mock_es
 
     @pytest.fixture

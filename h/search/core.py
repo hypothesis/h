@@ -83,7 +83,7 @@ class Search(object):
         response = None
         with self._instrument():
             response = self.es.conn.search(index=self.es.index,
-                                           doc_type=self.es.t.annotation,
+                                           doc_type=self.es.mapping_type,
                                            _source=False,
                                            body=self.builder.build(params))
         total = response['hits']['total']
@@ -101,7 +101,7 @@ class Search(object):
         with self._instrument():
             response = self.es.conn.search(
                 index=self.es.index,
-                doc_type=self.es.t.annotation,
+                doc_type=self.es.mapping_type,
                 _source=False,
                 body=self.reply_builder.build({'limit': self._replies_limit}))
 
