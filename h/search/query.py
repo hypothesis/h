@@ -350,9 +350,6 @@ class TagsAggregation(object):
         }
 
     def parse_result(self, result):
-        if not result:
-            return {}
-
         return [
             {'tag': b['key'], 'count': b['doc_count']}
             for b in result['buckets']
@@ -373,9 +370,6 @@ class UsersAggregation(object):
         }
 
     def parse_result(self, result):
-        if not result:
-            return {}
-
         return [
             {'user': b['key'], 'count': b['doc_count']}
             for b in result['buckets']

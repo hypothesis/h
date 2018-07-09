@@ -547,14 +547,6 @@ class TestTagsAggregations(object):
             {'tag': 'tag-2', 'count': 28},
         ]
 
-    def test_parse_result_with_none(self):
-        agg = query.TagsAggregation()
-        assert agg.parse_result(None) == {}
-
-    def test_parse_result_with_empty(self):
-        agg = query.TagsAggregation()
-        assert agg.parse_result({}) == {}
-
 
 class TestUsersAggregation(object):
     def test_key_is_users(self):
@@ -585,14 +577,6 @@ class TestUsersAggregation(object):
             {'user': 'alice', 'count': 42},
             {'user': 'luke', 'count': 28},
         ]
-
-    def test_parse_result_with_none(self):
-        agg = query.UsersAggregation()
-        assert agg.parse_result(None) == {}
-
-    def test_parse_result_with_empty(self):
-        agg = query.UsersAggregation()
-        assert agg.parse_result({}) == {}
 
 
 class TestNipsaFilter(object):
