@@ -524,7 +524,7 @@ class TestTagsAggregations(object):
     def test_elasticsearch_aggregation(self):
         agg = query.TagsAggregation()
         assert agg({}) == {
-            'terms': {'field': 'tags_raw', 'size': 0}
+            'terms': {'field': 'tags_raw', 'size': 10}
         }
 
     def test_it_allows_to_set_a_limit(self):
@@ -563,7 +563,7 @@ class TestUsersAggregation(object):
     def test_elasticsearch_aggregation(self):
         agg = query.UsersAggregation()
         assert agg({}) == {
-            'terms': {'field': 'user_raw', 'size': 0}
+            'terms': {'field': 'user_raw', 'size': 10}
         }
 
     def test_it_allows_to_set_a_limit(self):

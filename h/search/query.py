@@ -337,7 +337,7 @@ class RepliesMatcher(object):
 
 
 class TagsAggregation(object):
-    def __init__(self, limit=0):
+    def __init__(self, limit=10):
         self.key = 'tags'
         self.limit = limit
 
@@ -360,7 +360,7 @@ class TagsAggregation(object):
 
 
 class UsersAggregation(object):
-    def __init__(self, limit=0):
+    def __init__(self, limit=10):
         self.key = 'users'
         self.limit = limit
 
