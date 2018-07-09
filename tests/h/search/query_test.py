@@ -513,11 +513,41 @@ class TestTagsAggregation(object):
 
 
 class TestUsersAggregation(object):
+    def test_it_returns_annotation_counts_by_user(self, Annotation, search):
+        for i in range(2):
+            Annotation(userid="acct:pa@example.com")
+        Annotation(userid="acct:pb@example.com")
 
-    @pytest.fixture
-    def search(self, search):
         search.append_aggregation(query.UsersAggregation())
-        return search
+        result = search.run({})
+
+        users_results = result.aggregations["users"]
+        count_pa = next(r for r in users_results if r["user"] == "acct:pa@example.com")["count"]
+        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")["count"]
+
+        assert len(users_results) == 2
+        assert count_pa == 2
+        assert count_pb == 1
+
+    def test_it_limits_number_of_annotation_counts_by_user_returned(self, Annotation, search):
+        bucket_limit = 2
+
+        Annotation(userid="acct:pa@example.com")
+        for i in range(3):
+            Annotation(userid="acct:pb@example.com")
+        for i in range(2):
+            Annotation(userid="acct:pc@example.com")
+
+        search.append_aggregation(query.UsersAggregation(limit=bucket_limit))
+        result = search.run({})
+
+        users_results = result.aggregations["users"]
+        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")["count"]
+        count_pc = next(r for r in users_results if r["user"] == "acct:pc@example.com")["count"]
+
+        assert len(users_results) == bucket_limit
+        assert count_pb == 3
+        assert count_pc == 2
 
 
 @pytest.fixture
