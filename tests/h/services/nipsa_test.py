@@ -26,7 +26,11 @@ class TestNipsaService(object):
         svc = NipsaService(db_session)
 
         assert not svc.is_flagged('acct:dominic@example.com')
-        assert not svc.is_flagged('acct:romeo@example.com')
+
+    def test_is_flagged_returns_false_for_unknown_users(self, db_session):
+        svc = NipsaService(db_session)
+
+        assert not svc.is_flagged('acct:not_in_the_db@example.com')
 
     def test_flag_sets_nipsa_true(self, db_session, users):
         svc = NipsaService(db_session)
@@ -55,19 +59,6 @@ class TestNipsaService(object):
         svc.unflag(users['renata'])
 
         reindex_user_annotations.delay.assert_called_once_with('acct:renata@example.com')
-
-    def test_clear_resets_cache(self, db_session, users):
-        svc = NipsaService(db_session)
-
-        assert svc.flagged_userids == set(['acct:renata@example.com',
-                                           'acct:cecilia@example.com'])
-
-        users['dominic'].nipsa = True
-        svc.clear()
-
-        assert svc.flagged_userids == set(['acct:renata@example.com',
-                                           'acct:cecilia@example.com',
-                                           'acct:dominic@example.com'])
 
 
 def test_nipsa_factory(pyramid_request):
