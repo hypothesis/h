@@ -13,16 +13,11 @@ class Client(object):
     """
     A convenience wrapper around a connection to Elasticsearch.
 
-    Holds a connection object, an index name, and an enumeration of document
-    types stored in the index.
+    Holds a connection object, an index name, and the name of the mapping type.
 
     :param host: Elasticsearch host URL
     :param index: index name
     """
-
-    class t(object):  # noqa
-        """Document types"""
-        annotation = 'annotation'
 
     def __init__(self, host, index, **kwargs):
         self._index = index
@@ -33,6 +28,12 @@ class Client(object):
                                    ca_certs=certifi.where(),
                                    **kwargs)
 
+        # Our existing Elasticsearch 1.x indexes have a single mapping type
+        # "annotation". For ES 6 we should change this to the preferred name
+        # of "_doc".
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
+        self._mapping_type = "annotation"
+
     @property
     def index(self):
         return self._index
@@ -40,6 +41,18 @@ class Client(object):
     @property
     def conn(self):
         return self._conn
+
+    @property
+    def mapping_type(self):
+        """
+        Return the name of the index's mapping type (aka. document type).
+
+        The concept of mapping types is being removed from Elasticsearch and in
+        ES >= 6 an index only has a single mapping type.
+
+        See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
+        """
+        return self._mapping_type
 
 
 def get_client(settings):

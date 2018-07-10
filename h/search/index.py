@@ -54,7 +54,7 @@ def index(es, annotation, request, target_index=None):
 
     es.conn.index(
         index=target_index,
-        doc_type=es.t.annotation,
+        doc_type=es.mapping_type,
         body=annotation_dict,
         id=annotation_dict["id"],
     )
@@ -88,7 +88,7 @@ def delete(es, annotation_id, target_index=None, refresh=False):
 
     es.conn.index(
         index=target_index,
-        doc_type=es.t.annotation,
+        doc_type=es.mapping_type,
         body={'deleted': True},
         id=annotation_id,
         refresh=refresh)
@@ -153,7 +153,7 @@ class BatchIndexer(object):
 
     def _prepare(self, annotation):
         action = {self.op_type: {'_index': self._target_index,
-                                 '_type': self.es_client.t.annotation,
+                                 '_type': self.es_client.mapping_type,
                                  '_id': annotation.id}}
         data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
 

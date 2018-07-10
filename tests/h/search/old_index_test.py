@@ -168,7 +168,7 @@ class TestBatchIndexer(object):
         rendered = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
         assert results[0] == (
-            {'index': {'_type': indexer.es_client.t.annotation,
+            {'index': {'_type': indexer.es_client.mapping_type,
                        '_index': 'hypothesis',
                        '_id': annotation.id}},
             rendered
@@ -195,7 +195,7 @@ class TestBatchIndexer(object):
         rendered = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
         assert results[0] == (
-            {'create': {'_type': indexer.es_client.t.annotation,
+            {'create': {'_type': indexer.es_client.mapping_type,
                         '_index': 'hypothesis',
                         '_id': annotation.id}},
             rendered
@@ -234,7 +234,7 @@ class TestBatchIndexer(object):
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
 
         assert results[0] == (
-            {'index': {'_type': indexer.es_client.t.annotation,
+            {'index': {'_type': indexer.es_client.mapping_type,
                        '_index': 'hypothesis',
                        '_id': annotation.id}},
             rendered
@@ -313,7 +313,7 @@ class TestBatchIndexer(object):
 def es():
     mock_es = mock.create_autospec(client.Client, instance=True, spec_set=True,
                                    index="hypothesis")
-    mock_es.t.annotation = 'annotation'
+    mock_es.mapping_type = "annotation"
     return mock_es
 
 

@@ -3,6 +3,7 @@ import mock
 import pytest
 
 from h.search import core
+from h.search.client import Client
 
 
 class FakeStatsdClient(object):
@@ -303,7 +304,8 @@ def dummy_search_results(start=1, count=0, name='annotation'):
 @pytest.fixture
 def pyramid_request(pyramid_request):
     """Return a mock request with a faked out Elasticsearch connection."""
-    pyramid_request.es = mock.Mock(spec_set=['conn', 'index', 't'])
+    pyramid_request.es = mock.create_autospec(Client, spec_set=True, instance=True)
+    pyramid_request.es.mapping_type = "annotation"
     pyramid_request.es.conn.search.return_value = dummy_search_results(0)
     return pyramid_request
 

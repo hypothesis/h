@@ -181,7 +181,7 @@ def configure_index(client):
 
     client.conn.indices.create(index_name, body={
         'mappings': {
-            client.t.annotation: ANNOTATION_MAPPING,
+            client.mapping_type: ANNOTATION_MAPPING,
         },
         'settings': {
             'analysis': ANALYSIS_SETTINGS,
@@ -237,7 +237,7 @@ def update_index_settings(client):
     index = get_aliased_index(client)
     _update_index_analysis(client.conn, index, ANALYSIS_SETTINGS)
     _update_index_mappings(client.conn, index,
-                           {client.t.annotation: ANNOTATION_MAPPING})
+                           {client.mapping_type: ANNOTATION_MAPPING})
 
 
 def _ensure_icu_plugin(conn):
