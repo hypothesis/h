@@ -505,11 +505,41 @@ class TestRepliesMatcher(object):
 
 
 class TestTagsAggregation(object):
+    def test_it_returns_annotation_counts_by_tag(self, Annotation, search):
+        for i in range(2):
+            Annotation(tags=["tag_a"])
+        Annotation(tags=["tag_b"])
 
-    @pytest.fixture
-    def search(self, search):
         search.append_aggregation(query.TagsAggregation())
-        return search
+        result = search.run({})
+
+        tag_results = result.aggregations["tags"]
+        count_for_tag_a = next(r for r in tag_results if r["tag"] == "tag_a")["count"]
+        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
+
+        assert len(tag_results) == 2
+        assert count_for_tag_a == 2
+        assert count_for_tag_b == 1
+
+    def test_it_limits_number_of_annotation_counts_by_tag_returned(self, Annotation, search):
+        bucket_limit = 2
+
+        Annotation(tags=["tag_a"])
+        for i in range(3):
+            Annotation(tags=["tag_b"])
+        for i in range(2):
+            Annotation(tags=["tag_c"])
+
+        search.append_aggregation(query.TagsAggregation(bucket_limit))
+        result = search.run({})
+
+        tag_results = result.aggregations["tags"]
+        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
+        count_for_tag_c = next(r for r in tag_results if r["tag"] == "tag_c")["count"]
+
+        assert len(tag_results) == bucket_limit
+        assert count_for_tag_b == 3
+        assert count_for_tag_c == 2
 
 
 class TestUsersAggregation(object):
