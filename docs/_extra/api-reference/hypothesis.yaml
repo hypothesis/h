@@ -360,7 +360,9 @@ paths:
       summary: Create a new user
       description: |
         Only for specific auth clients, this API call allows clients with a
-        designated authority to create users within their authority.
+        designated authority to create users within their authority. Optional
+        identity information may be provided to maintain provider-specific
+        metadata about users.
       operationId: createUser
       parameters:
         - name: user
