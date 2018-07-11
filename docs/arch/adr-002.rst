@@ -41,7 +41,7 @@ application business logic and hide persistence concerns from the views.
 `This blog post`_ by Nando Farestan may help provide additional background
 on the motivation for a "services layer."
 
-.. _This blog post: https://web.archive.org/web/20161225225915/http://nando.oui.com.br/2014/04/01/large_apps_with_sqlalchemy__architecture.html
+.. _This blog post: http://dev.nando.audio/2014/04/01/large_apps_with_sqlalchemy__architecture.html
 
 Decision
 --------
