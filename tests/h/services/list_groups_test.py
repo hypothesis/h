@@ -123,9 +123,9 @@ class TestListGroupsAllGroups(object):
                                                private_groups):
         user.groups = private_groups
 
-        all_groups = scoped_open_groups + unscoped_open_groups + \
-                     scoped_restricted_groups + unscoped_restricted_groups + \
-                     private_groups
+        all_groups = (scoped_open_groups + unscoped_open_groups +
+                      scoped_restricted_groups + unscoped_restricted_groups +
+                      private_groups)
         expected = [group for group in all_groups if group.creator == user or user in group.members]
         results = svc.associated_groups(user=user)
 
