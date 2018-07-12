@@ -37,6 +37,7 @@ class TestClient(object):
     def test_defaults_to_es1(self):
         client = Client(host="http://localhost:9200", index="hypothesis")
 
+        assert client.version == (1, 10, 0)
         assert isinstance(client.conn, elasticsearch1.Elasticsearch)
 
     def test_uses_es6_when_specified(self):
@@ -45,6 +46,7 @@ class TestClient(object):
             index="hypothesis",
             elasticsearch=elasticsearch)
 
+        assert client.version == (6, 2, 0)
         assert isinstance(client.conn, elasticsearch.Elasticsearch)
 
 
