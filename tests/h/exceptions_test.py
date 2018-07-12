@@ -43,12 +43,12 @@ class TestConflictError(object):
     def test_it_sets_default_message_if_none_provided(self):
         exc = exceptions.ConflictError()
 
-        assert exc.message == "Conflict"
+        assert str(exc) == "Conflict"
 
     def test_it_sets_provided_message(self):
         exc = exceptions.ConflictError("nah, that's no good")
 
-        assert exc.message == "nah, that's no good"
+        assert str(exc) == "nah, that's no good"
 
 
 class TestOAuthTokenError(object):
@@ -56,7 +56,7 @@ class TestOAuthTokenError(object):
         exc = exceptions.OAuthTokenError('boom', 'mytype')
 
         assert exc.type == 'mytype'
-        assert exc.message == 'boom'
+        assert str(exc) == 'boom'
 
     def test_it_sets_default_response_code(self):
         exc = exceptions.OAuthTokenError('boom', 'mytype')
@@ -74,4 +74,4 @@ class TestPayloadError(object):
         exc = exceptions.PayloadError()
 
         assert exc.status_code == 400
-        assert exc.message == 'Expected a valid JSON payload, but none was found!'
+        assert str(exc) == 'Expected a valid JSON payload, but none was found!'
