@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h.exceptions import APIError, ClientUnauthorized
+from h.exceptions import APIError, ClientUnauthorized, ConflictError
 
 
 class TestAPIError(object):
@@ -32,3 +32,20 @@ class TestClientUnauthorized(object):
         exc = ClientUnauthorized()
 
         assert exc.status_code == 403
+
+
+class TestConflictError(object):
+    def test_it_returns_the_correct_http_status(self):
+        exc = ConflictError()
+
+        assert exc.status_code == 409
+
+    def test_it_sets_default_message_if_none_provided(self):
+        exc = ConflictError()
+
+        assert exc.message == "Conflict"
+
+    def test_it_sets_provided_message(self):
+        exc = ConflictError("nah, that's no good")
+
+        assert exc.message == "nah, that's no good"
