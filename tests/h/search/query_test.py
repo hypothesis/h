@@ -149,6 +149,13 @@ class TestUserFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
+    def test_filter_is_case_insensitive(self, search, Annotation):
+        ann_id = Annotation(userid="acct:bob@example", shared=True).id
+
+        result = search.run({"user": "BOB"})
+
+        assert result.annotation_ids == [ann_id]
+
     def test_filters_annotations_by_multiple_users(self, search, Annotation):
         Annotation(userid="acct:foo@auth2", shared=True)
         expected_ids = [Annotation(userid="acct:bar@auth2", shared=True).id,
