@@ -21,7 +21,7 @@ class TestUserService(object):
         assert isinstance(result, User)
 
     def test_fetch_caches_fetched_users(self, db_session, svc, users):
-        jacqui, _, _ = users
+        jacqui, _, _, _ = users
 
         svc.fetch('acct:jacqui@foo.com')
         db_session.delete(jacqui)
@@ -39,7 +39,7 @@ class TestUserService(object):
         assert isinstance(result[1], User)
 
     def test_fetch_all_caches_fetched_users(self, db_session, svc, users):
-        jacqui, _, _ = users
+        jacqui, _, _, _ = users
 
         svc.fetch_all(['acct:jacqui@foo.com'])
         db_session.delete(jacqui)
@@ -49,12 +49,21 @@ class TestUserService(object):
         assert len(result) == 1
         assert result[0].username == 'jacqui'
 
+    def test_fetch_by_identity_finds_by_provider_info(self, svc, users):
+        _, _, _, freddo = users
+
+        assert svc.fetch_by_identity('provider_a', '123') is freddo
+        assert svc.fetch_by_identity('provider_b', '456') is freddo
+
+    def test_fetch_by_identity_returns_none_if_no_match(self, svc, users):
+        assert svc.fetch_by_identity('nonsense', 'abc') is None
+
     def test_fetch_for_login_by_username(self, svc, users):
-        _, steve, _ = users
+        _, steve, _, _ = users
         assert svc.fetch_for_login('steve') is steve
 
     def test_fetch_for_login_by_email(self, svc, users):
-        _, steve, _ = users
+        _, steve, _, _ = users
         assert svc.fetch_for_login('steve@steveo.com') is steve
         assert svc.fetch_for_login('StEvE@steveo.COM') is steve
 
@@ -114,7 +123,7 @@ class TestUserService(object):
         decorator = patch('h.services.user.on_transaction_end')
         decorator.side_effect = on_transaction_end_decorator
 
-        jacqui, _, _ = users
+        jacqui, _, _, _ = users
         svc = UserService(default_authority='example.com', session=db_session)
         svc.fetch('acct:jacqui@foo.com')
         db_session.delete(jacqui)
@@ -130,6 +139,13 @@ class TestUserService(object):
 
     @pytest.fixture
     def users(self, db_session, factories):
+        user_with_identities = factories.User(username='frederick',
+                       email='freddo@example.com',
+                       authority='example.com')
+        user_with_identities.identities = [
+            factories.UserIdentity(provider='provider_a', provider_unique_id='123', user=user_with_identities),
+            factories.UserIdentity(provider='provider_b', provider_unique_id='456', user=user_with_identities)
+        ]
         users = [factories.User(username='jacqui',
                                 email='jacqui@jj.com',
                                 authority='foo.com'),
@@ -139,7 +155,8 @@ class TestUserService(object):
                  factories.User(username='mirthe',
                                 email='mirthe@deboer.com',
                                 authority='example.com',
-                                inactive=True)]
+                                inactive=True),
+                 user_with_identities]
         db_session.flush()
         return users
 
