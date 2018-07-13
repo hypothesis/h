@@ -28,6 +28,15 @@ class ClientUnauthorized(APIError):
         super(ClientUnauthorized, self).__init__(message, status_code=403)
 
 
+class ConflictError(APIError):
+    """
+    Exception raised if client request represents a duplicate of an
+    existing resource.
+    """
+    def __init__(self, message=_('Conflict')):
+        super(ConflictError, self).__init__(message, status_code=409)
+
+
 class OAuthTokenError(APIError):
 
     """
