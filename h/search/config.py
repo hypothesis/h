@@ -137,6 +137,7 @@ ES6_ANNOTATION_MAPPING = {
         },
         'group': {'type': 'keyword'},
         'id': {'type': 'keyword'},
+        'nipsa': {'type': 'boolean'},
         'quote': {'type': 'text', 'analyzer': 'uni_normalizer'},
         'references': {'type': 'keyword'},
         'shared': {'type': 'boolean'},
