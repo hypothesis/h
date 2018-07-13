@@ -335,7 +335,7 @@ def update_index_settings(client):
 
     _update_index_analysis(client.conn, index, ANALYSIS_SETTINGS)
     _update_index_mappings(client.conn, index,
-                           {client.mapping_type: mapping})
+                           client.mapping_type, mapping)
 
 
 def _ensure_icu_plugin(conn):
@@ -366,13 +366,12 @@ def _update_index_analysis(conn, name, analysis):
             conn.indices.open(index=name)
 
 
-def _update_index_mappings(conn, name, mappings):
+def _update_index_mappings(conn, name, doc_type, mapping):
     """Attempt to update the index mappings."""
     try:
-        for doc_type, body in mappings.items():
-            conn.indices.put_mapping(index=name,
-                                     doc_type=doc_type,
-                                     body=body)
+        conn.indices.put_mapping(index=name,
+                                 doc_type=doc_type,
+                                 body=mapping)
     except ES_REQUEST_ERRORS as e:
         if not e.error.startswith('MergeMappingException'):
             raise
