@@ -12,7 +12,8 @@ class Client(object):
     """
     A convenience wrapper around a connection to Elasticsearch.
 
-    Holds a connection object, an index name, and the name of the mapping type.
+    Holds a connection object, an index name, the elasticsearch library version,
+    and the name of the mapping type.
 
     :param host: Elasticsearch host URL
     :param index: index name
