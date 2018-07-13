@@ -88,7 +88,7 @@ class TestUserSignupService(object):
 
     def test_signup_raises_with_invalid_identities(self, svc, db_session):
         dupe_identity = {'provider': 'a', 'provider_unique_id': 1}
-        with pytest.raises(IntegrityError):
+        with pytest.raises(IntegrityError, match="violates unique constraint.*identity"):
             svc.signup(username='foo',
                        email='foo@bar.com',
                        identities=[dupe_identity, dupe_identity])
