@@ -1,10 +1,49 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
+
 import pytest
 import webob
 
 from h.search import Search, index, query
+
+
+class TestBuilder(object):
+    @pytest.mark.parametrize("sort_key,order,expected_order", [
+        # Sort supports "updated" and "created" fields.
+        ("updated", "desc", [1, 0, 2]),
+        ("updated", "asc", [2, 0, 1]),
+        ("created", "desc", [2, 0, 1]),
+        ("created", "asc", [1, 0, 2]),
+
+        # Default sort order should be descending.
+        ("updated", None, [1, 0, 2]),
+
+        # Default sort field should be "updated".
+        (None, "asc", [2, 0, 1]),
+    ])
+    def test_it_sorts_annotations(self, Annotation, search, sort_key, order, expected_order):
+        dt = datetime.datetime
+
+        # nb. Test annotations have a different ordering for updated vs created
+        # and creation order is different than updated/created asc/desc.
+        ann_ids = [Annotation(updated=dt(2017, 1, 1), created=dt(2017, 1, 1)).id,
+                   Annotation(updated=dt(2018, 1, 1), created=dt(2016, 1, 1)).id,
+                   Annotation(updated=dt(2016, 1, 1), created=dt(2018, 1, 1)).id]
+
+        params = {}
+        if sort_key:
+            params["sort"] = sort_key
+        if order:
+            params["order"] = order
+        result = search.run(params)
+
+        actual_order = [ann_ids.index(id_) for id_ in result.annotation_ids]
+        assert actual_order == expected_order
+
+    def test_it_ignores_unknown_sort_fields(self, search):
+        search.run({"sort": "no_such_field"})
 
 
 class TestTopLevelAnnotationsFilter(object):
