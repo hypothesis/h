@@ -6,6 +6,8 @@ import datetime
 import mock
 import pytest
 
+from sqlalchemy.exc import IntegrityError
+
 from h.models import Activation, Subscriptions, User
 from h.services.user_password import UserPasswordService
 from h.services.user_signup import (
@@ -54,6 +56,13 @@ class TestUserSignupService(object):
 
         assert user.authority == 'bar-client.com'
 
+    def test_signup_allows_user_with_empty_identities(self, svc):
+        user = svc.signup(require_activation=False,
+                          username='foo',
+                          identities=[])
+
+        assert user.identities == []
+
     def test_signup_passes_through_privacy_acceptance(self, svc):
         now = datetime.datetime.utcnow()
         user = svc.signup(username='foo',
@@ -61,6 +70,28 @@ class TestUserSignupService(object):
                           privacy_accepted=now)
 
         assert user.privacy_accepted == now
+
+    def test_signup_sets_provided_user_identities(self, svc):
+        identity_data = [{
+            'provider': 'someprovider',
+            'provider_unique_id': 1
+        }, {
+            'provider': 'someotherprovider',
+            'provider_unique_id': '394ffa3'
+        }]
+
+        user = svc.signup(username='foo',
+                          email='foo@bar.com',
+                          identities=identity_data)
+
+        assert len(user.identities) == 2
+
+    def test_signup_raises_with_invalid_identities(self, svc, db_session):
+        dupe_identity = {'provider': 'a', 'provider_unique_id': 1}
+        with pytest.raises(IntegrityError, match="violates unique constraint.*identity"):
+            svc.signup(username='foo',
+                       email='foo@bar.com',
+                       identities=[dupe_identity, dupe_identity])
 
     def test_signup_sets_password_using_password_service(self, svc, user_password_service):
         user = svc.signup(username='foo',
