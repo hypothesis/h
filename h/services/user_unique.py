@@ -20,13 +20,15 @@ class UserUniqueService(object):
     not constitute a duplicate user.
     """
 
-    def __init__(self, session, request_authority):
+    def __init__(self, session, user_service, request_authority):
         """
         Create a new user_unique service.
 
         :param _session: the SQLAlchemy session object
+        :param request_authority: the applicable authority
         """
         self._session = session
+        self.user_service = user_service
         self.request_authority = request_authority
 
     def ensure_unique(self, data, authority=None):
@@ -41,20 +43,33 @@ class UserUniqueService(object):
         authority = authority or self.request_authority
         errors = []
 
+        # check for duplicate email address
         if data.get('email', None) and (
-            models.User.get_by_email(self._session, data['email'], authority)
+            models.User.get_by_email(self._session, data['email'], authority) is not None
         ):
-            errors.append(_('user with email address %s already exists' % data['email']))
+            errors.append(_("user with email address '{}' already exists".format(data['email'])))
 
+        # check for duplicate username
         if data.get('username', None) and (
-            models.User.get_by_username(self._session, data['username'], authority)
+            models.User.get_by_username(self._session, data['username'], authority) is not None
         ):
-            errors.append(_('user with username %s already exists' % data['username']))
+            errors.append(_("user with username '{}' already exists".format(data['username'])))
+
+        # check for duplicate identities
+        # (provider, provider_unique_id) combinations
+        identities = data.get('identities', [])
+        for identity in identities:
+            if self.user_service.fetch_by_identity(identity['provider'], identity['provider_unique_id']):
+                errors.append(_("user with provider '{}' and unique id '{}' already exists".format(
+                  identity['provider'], identity['provider_unique_id']
+                 )))
 
         if errors:
             raise DuplicateUserError(', '.join(errors))
 
 
 def user_unique_factory(context, request):
+    user_service = request.find_service(name='user')
     return UserUniqueService(session=request.db,
+                             user_service=user_service,
                              request_authority=request.authority)
