@@ -227,6 +227,22 @@ def update_aliased_index(client, new_target):
     })
 
 
+def delete_index(client, index_name):
+    """
+    Delete an unused index.
+
+    This must be an actual index and not an alias.
+    """
+
+    try:
+        client.conn.indices.delete(index=index_name)
+    except NotFoundError:
+        # In production using AWS Elasticsearch 1.5, `IndexMissingException`
+        # responses have been seen in response to index deletion requests which
+        # did actually succeed. We are just ignoring them here.
+        log.warn("NotFoundError reported when deleting index {}".format(index_name))
+
+
 def update_index_settings(client):
     """
     Update the index settings (analysis and mappings) to their current state.

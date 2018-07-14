@@ -10,6 +10,7 @@ from h.search import client
 
 @pytest.mark.usefixtures('BatchIndexer',
                          'configure_index',
+                         'delete_index',
                          'get_aliased_index',
                          'update_aliased_index',
                          'settings_service')
@@ -97,6 +98,13 @@ class TestReindex(object):
 
         settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
 
+    def test_deletes_old_index(self, pyramid_request, es, delete_index, get_aliased_index):
+        get_aliased_index.return_value = 'original_index'
+
+        reindex(mock.sentinel.session, es, pyramid_request)
+
+        delete_index.assert_called_once_with(es, 'original_index')
+
     @pytest.fixture
     def BatchIndexer(self, patch):
         return patch('h.indexer.reindexer.BatchIndexer')
@@ -110,6 +118,10 @@ class TestReindex(object):
         func = patch('h.indexer.reindexer.get_aliased_index')
         func.return_value = 'foobar'
         return func
+
+    @pytest.fixture
+    def delete_index(self, patch):
+        return patch('h.indexer.reindexer.delete_index')
 
     @pytest.fixture
     def update_aliased_index(self, patch):
