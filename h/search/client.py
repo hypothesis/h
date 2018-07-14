@@ -12,7 +12,8 @@ class Client(object):
     """
     A convenience wrapper around a connection to Elasticsearch.
 
-    Holds a connection object, an index name, and the name of the mapping type.
+    Holds a connection object, an index name, the elasticsearch library version,
+    and the name of the mapping type.
 
     :param host: Elasticsearch host URL
     :param index: index name
@@ -20,6 +21,7 @@ class Client(object):
     """
 
     def __init__(self, host, index, elasticsearch=elasticsearch1, **kwargs):
+        self._version = elasticsearch.__version__
         self._index = index
         self._conn = elasticsearch.Elasticsearch([host],
                                                  **kwargs)
@@ -49,6 +51,11 @@ class Client(object):
         See https://www.elastic.co/guide/en/elasticsearch/reference/6.x/removal-of-types.html
         """
         return self._mapping_type
+
+    @property
+    def version(self):
+        """The version of the elasticsearch library."""
+        return self._version
 
 
 def _get_client_settings(settings):
