@@ -9,6 +9,7 @@ from webob import multidict
 
 from h.search import query
 
+ES_VERSION = (1, 7, 0)
 MISSING = object()
 
 OFFSET_DEFAULT = 0
@@ -34,7 +35,7 @@ class TestBuilder(object):
         ("32.7", OFFSET_DEFAULT),
     ])
     def test_offset(self, offset, from_):
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         if offset is MISSING:
             q = builder.build({})
@@ -47,7 +48,7 @@ class TestBuilder(object):
     @pytest.mark.fuzz
     def test_limit_output_within_bounds(self, text):
         """Given any string input, output should be in the allowed range."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({"limit": text})
 
@@ -58,7 +59,7 @@ class TestBuilder(object):
     @pytest.mark.fuzz
     def test_limit_output_within_bounds_int_input(self, lim):
         """Given any integer input, output should be in the allowed range."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({"limit": str(lim)})
 
@@ -69,14 +70,14 @@ class TestBuilder(object):
     @pytest.mark.fuzz
     def test_limit_matches_input(self, lim):
         """Given an integer in the allowed range, it should be passed through."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({"limit": str(lim)})
 
         assert q["size"] == lim
 
     def test_limit_missing(self):
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({})
 
@@ -84,7 +85,7 @@ class TestBuilder(object):
 
     def test_sort_is_by_updated(self):
         """Sort defaults to "updated"."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({})
 
@@ -94,7 +95,7 @@ class TestBuilder(object):
 
     def test_with_custom_sort(self):
         """Custom sorts are returned in the query dict."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({"sort": "title"})
 
@@ -102,7 +103,7 @@ class TestBuilder(object):
 
     def test_order_defaults_to_desc(self):
         """'order': "desc" is returned in the q dict by default."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({})
 
@@ -111,7 +112,7 @@ class TestBuilder(object):
 
     def test_with_custom_order(self):
         """'order' params are returned in the query dict if given."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({"order": "asc"})
 
@@ -120,7 +121,7 @@ class TestBuilder(object):
 
     def test_defaults_to_match_all(self):
         """If no query params are given a "match_all": {} query is returned."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({})
 
@@ -128,7 +129,7 @@ class TestBuilder(object):
 
     def test_default_param_action(self):
         """Other params are added as "match" clauses."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
 
         q = builder.build({"foo": "bar"})
 
@@ -136,7 +137,7 @@ class TestBuilder(object):
 
     def test_default_params_multidict(self):
         """Multiple params go into multiple "match" dicts."""
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         params = multidict.MultiDict()
         params.add("user", "fred")
         params.add("user", "bob")
@@ -153,7 +154,7 @@ class TestBuilder(object):
         }
 
     def test_with_evil_arguments(self):
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         params = {
             "offset": "3foo",
             "limit": '\' drop table annotations'
@@ -167,7 +168,7 @@ class TestBuilder(object):
 
     def test_passes_params_to_filters(self):
         testfilter = mock.Mock()
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         builder.append_filter(testfilter)
 
         builder.build({"foo": "bar"})
@@ -177,7 +178,7 @@ class TestBuilder(object):
     def test_ignores_filters_returning_none(self):
         testfilter = mock.Mock()
         testfilter.return_value = None
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         builder.append_filter(testfilter)
 
         q = builder.build({})
@@ -187,7 +188,7 @@ class TestBuilder(object):
     def test_filters_query_by_filter_results(self):
         testfilter = mock.Mock()
         testfilter.return_value = {"term": {"giraffe": "nose"}}
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         builder.append_filter(testfilter)
 
         q = builder.build({})
@@ -201,7 +202,7 @@ class TestBuilder(object):
 
     def test_passes_params_to_matchers(self):
         testmatcher = mock.Mock()
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         builder.append_matcher(testmatcher)
 
         builder.build({"foo": "bar"})
@@ -211,7 +212,7 @@ class TestBuilder(object):
     def test_adds_matchers_to_query(self):
         testmatcher = mock.Mock()
         testmatcher.return_value = {"match": {"giraffe": "nose"}}
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         builder.append_matcher(testmatcher)
 
         q = builder.build({})
@@ -222,7 +223,7 @@ class TestBuilder(object):
 
     def test_passes_params_to_aggregations(self):
         testaggregation = mock.Mock()
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         builder.append_aggregation(testaggregation)
 
         builder.build({"foo": "bar"})
@@ -233,7 +234,7 @@ class TestBuilder(object):
         testaggregation = mock.Mock(key="foobar")
         # testaggregation.key.return_value = "foobar"
         testaggregation.return_value = {"terms": {"field": "foo"}}
-        builder = query.Builder()
+        builder = query.Builder(ES_VERSION)
         builder.append_aggregation(testaggregation)
 
         q = builder.build({})
