@@ -55,7 +55,7 @@ class Organization(Base, mixins.Timestamps):
         if not (len(logo) <= ORGANIZATION_LOGO_MAX_CHARS):
             raise ValueError(
                 'logo must be less than {max} characters long'
-                .format(max=ORGANIZATION_NAME_MAX_CHARS))
+                .format(max=ORGANIZATION_LOGO_MAX_CHARS))
         try:
             root = ElementTree.fromstring(logo)
         except ElementTree.ParseError:
