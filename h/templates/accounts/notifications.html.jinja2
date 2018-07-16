@@ -4,5 +4,10 @@
 {% set page_title = 'Notifications' %}
 
 {% block page_content %}
-  {{ form }}
+  {% if user_has_email_address %}
+    {{ form }}
+  {% else %}
+    Want notifications? We'll need your email address for that. You can add an email address in your
+    <a href="{{ request.route_path('account') }}">Account Settings</a>.
+  {% endif %}
 {% endblock page_content %}
