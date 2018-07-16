@@ -363,6 +363,9 @@ paths:
         designated authority to create users within their authority. Optional
         identity information may be provided to maintain provider-specific
         metadata about users.
+
+        This endpoint will return an HTTP 409 (Conflict) if the request represents
+        a duplicate of an existing user—email, username or identity collision.
       operationId: createUser
       parameters:
         - name: user
@@ -380,6 +383,10 @@ paths:
           description: Could not create user from your request
           schema:
             $ref: '#/definitions/Error'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ConflictError'
       security:
         - authClientCredentials: []
   /users/{username}:
@@ -459,6 +466,19 @@ definitions:
       reason:
         type: string
         description: A human-readable description of the reason(s) for failure.
+  ConflictError:
+    description: An error indicating a resource conflict, typically because a duplicate resource already exists.
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum:
+          - failure
+      reason:
+        type: string
+        description: One or more human-readable errors describing the conflict.
   SearchResults:
     type: object
     required:
