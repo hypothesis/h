@@ -6,7 +6,6 @@ from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
 
 from h.exceptions import PayloadError
-from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema
 from h.traversal import GroupContext
@@ -42,10 +41,6 @@ def groups(request):
             description='Create a new group')
 def create(request):
     """Create a group from the POST payload."""
-    # @TODO Temporary: Remove this check once private groups supported at other authorities
-    if request.authority != request.user.authority:
-        raise HTTPBadRequest(_('Group creation currently only supported for default authority'))
-
     schema = CreateGroupAPISchema()
 
     appstruct = schema.validate(_json_payload(request))
@@ -61,6 +56,7 @@ def create(request):
         request.user.userid,
         description=group_properties['description'],
     )
+
     group_context = GroupContext(group, request)
     return GroupJSONPresenter(group_context).asdict(expand=['organization'])
 
