@@ -90,8 +90,7 @@ class FakeNipsaService(object):
     def __init__(self, users):
         self.flagged = set([u for u in users if u.nipsa])
 
-    @property
-    def flagged_userids(self):
+    def fetch_all_flagged_userids(self):
         return set([u.userid for u in self.flagged])
 
     def flag(self, user):

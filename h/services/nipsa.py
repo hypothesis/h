@@ -15,10 +15,9 @@ class NipsaService(object):
     def __init__(self, session):
         self.session = session
 
-    @property
-    def flagged_userids(self):
+    def fetch_all_flagged_userids(self):
         """
-        A list of all the NIPSA'd userids.
+        Fetch the userids of all shadowbanned / NIPSA'd users.
 
         :rtype: set of unicode strings
         """
