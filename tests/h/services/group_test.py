@@ -31,6 +31,12 @@ class TestGroupServiceCreatePrivateGroup(object):
 
         assert group.authority == pyramid_request.authority
 
+    def test_it_sets_group_authority_as_creator_authority(self, svc, creator, pyramid_request):
+        pyramid_request.authority = 'some_other_authority'
+        group = svc.create_private_group('Anteater fans', creator.userid)
+
+        assert group.authority == creator.authority
+
     def test_it_sets_group_creator(self, svc, creator):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
@@ -100,13 +106,18 @@ class TestGroupServiceCreateOpenGroup(object):
 
     @pytest.mark.parametrize('group_attr,expected_value', [
         ('name', 'test group'),
-        ('description', 'test description'),
-        ('authority', 'example.com')
+        ('description', 'test description')
     ])
     def test_it_creates_group_attrs(self, creator, svc, origins, group_attr, expected_value):
         group = svc.create_open_group('test group', creator.userid, origins=origins, description='test description')
 
         assert getattr(group, group_attr) == expected_value
+
+    def test_it_sets_group_authority_as_creator_authority(self, svc, creator, pyramid_request):
+        pyramid_request.authority = 'some_other_authority'
+        group = svc.create_private_group('Anteater fans', creator.userid)
+
+        assert group.authority == creator.authority
 
     def test_it_skips_setting_description_when_missing(self, svc, creator, origins):
         group = svc.create_open_group('Anteater fans', creator.userid, origins=origins)
@@ -185,13 +196,18 @@ class TestGroupServiceCreateRestrictedGroup(object):
 
     @pytest.mark.parametrize('group_attr,expected_value', [
         ('name', 'test group'),
-        ('description', 'test description'),
-        ('authority', 'example.com')
+        ('description', 'test description')
     ])
     def test_it_creates_group_attrs(self, creator, svc, origins, group_attr, expected_value):
         group = svc.create_restricted_group('test group', creator.userid, origins=origins, description='test description')
 
         assert getattr(group, group_attr) == expected_value
+
+    def test_it_sets_group_authority_as_creator_authority(self, svc, creator, pyramid_request):
+        pyramid_request.authority = 'some_other_authority'
+        group = svc.create_private_group('Anteater fans', creator.userid)
+
+        assert group.authority == creator.authority
 
     def test_it_skips_setting_description_when_missing(self, svc, creator, origins):
         group = svc.create_restricted_group('Anteater fans', creator.userid, origins=origins)
