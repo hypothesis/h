@@ -25,6 +25,10 @@ def reindex(session, es, request):
 
     settings = request.find_service(name='settings')
 
+    # Preload flagged userids.
+    nipsa_svc = request.find_service(name='nipsa')
+    nipsa_svc.flagged_userids
+
     new_index = configure_index(es)
     log.info('configured new index {}'.format(new_index))
 

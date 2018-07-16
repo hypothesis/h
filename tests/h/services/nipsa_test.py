@@ -37,6 +37,7 @@ class TestNipsaService(object):
 
         svc.flag(users['dominic'])
 
+        assert svc.is_flagged('acct:dominic@example.com')
         assert users['dominic'].nipsa is True
 
     def test_flag_triggers_reindex_job(self, db_session, users, reindex_user_annotations):
@@ -51,6 +52,7 @@ class TestNipsaService(object):
 
         svc.unflag(users['renata'])
 
+        assert not svc.is_flagged('acct:renata@example.com')
         assert users['renata'].nipsa is False
 
     def test_unflag_triggers_reindex_job(self, db_session, users, reindex_user_annotations):
@@ -59,6 +61,42 @@ class TestNipsaService(object):
         svc.unflag(users['renata'])
 
         reindex_user_annotations.delay.assert_called_once_with('acct:renata@example.com')
+
+    def test_fetch_all_flagged_userids_caches_lookup(self, db_session, users):
+        svc = NipsaService(db_session)
+
+        svc.fetch_all_flagged_userids()
+        users['renata'].nipsa = False
+
+        # Returns `True` because status is cached.
+        assert svc.is_flagged('acct:renata@example.com')
+        assert svc.fetch_all_flagged_userids() == set(['acct:renata@example.com',
+                                                       'acct:cecilia@example.com'])
+
+    def test_flag_updates_cache(self, db_session, users):
+        svc = NipsaService(db_session)
+
+        svc.fetch_all_flagged_userids()
+        svc.flag(users['dominic'])
+
+        assert svc.is_flagged(users['dominic'].userid)
+
+    def test_unflag_updates_cache(self, db_session, users):
+        svc = NipsaService(db_session)
+
+        svc.fetch_all_flagged_userids()
+        svc.unflag(users['renata'])
+
+        assert not svc.is_flagged(users['renata'].userid)
+
+    def test_clear_resets_cache(self, db_session, users):
+        svc = NipsaService(db_session)
+
+        svc.fetch_all_flagged_userids()
+        users['renata'].nipsa = False
+        svc.clear()
+
+        assert not svc.is_flagged('acct:renata@example.com')
 
 
 def test_nipsa_factory(pyramid_request):
