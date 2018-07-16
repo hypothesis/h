@@ -435,7 +435,7 @@ class AccountController(object):
 
     def _template_data(self):
         """Return the data needed to render accounts.html.jinja2."""
-        email = self.request.user.email
+        email = self.request.user.email or ''
         password_form = self.forms['password'].render()
         email_form = self.forms['email'].render({'email': email})
 
