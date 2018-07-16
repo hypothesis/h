@@ -20,6 +20,7 @@ from .organization import Organization
 from .setting import Setting
 from .token import DeveloperToken, OAuth2Token
 from .user import User
+from .user_identity import UserIdentity
 
 __all__ = (
     'Activation',
@@ -43,5 +44,6 @@ __all__ = (
     'RestrictedGroup',
     'Setting',
     'User',
+    'UserIdentity',
     'set_session',
 )
