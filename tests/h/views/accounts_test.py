@@ -558,6 +558,26 @@ class TestActivateController(object):
 @pytest.mark.usefixtures('routes', 'user_password_service')
 class TestAccountController(object):
 
+    def test_get_returns_email_if_set(self,
+                                      pyramid_request):
+        pyramid_request.user = mock.Mock()
+        pyramid_request.create_form.return_value = mock.Mock()
+        user = pyramid_request.user
+        user.email = 'jims@example.com'
+
+        result = views.AccountController(pyramid_request).get()
+        assert result['email'] == 'jims@example.com'
+
+    def test_get_returns_empty_string_if_email_not_set(self,
+                                                       pyramid_request):
+        pyramid_request.user = mock.Mock()
+        pyramid_request.create_form.return_value = mock.Mock()
+        user = pyramid_request.user
+        user.email = None
+
+        result = views.AccountController(pyramid_request).get()
+        assert result['email'] == ''
+
     def test_post_email_form_with_valid_data_changes_email(self,
                                                            form_validating_to,
                                                            pyramid_request):
