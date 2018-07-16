@@ -8,17 +8,20 @@ import re
 
 import mock
 import pytest
-from elasticsearch1.exceptions import NotFoundError
+import elasticsearch1
+import elasticsearch
 
 from h.search.client import Client
 from h.search.config import (
     ANNOTATION_MAPPING,
     ANALYSIS_SETTINGS,
+    ES6_ANNOTATION_MAPPING,
     init,
     configure_index,
     delete_index,
     get_aliased_index,
     update_aliased_index,
+    update_index_settings,
 )
 
 
@@ -124,13 +127,19 @@ class TestConfigureIndex(object):
 
         assert name == matchers.Regex('foo-[0-9a-f]{8}')
 
-    def test_sets_correct_mappings_and_settings(self, client):
+    @pytest.mark.parametrize(
+        'esversion,mapping',
+        (((1, 5, 0), ANNOTATION_MAPPING),
+         ((6, 2, 0), ES6_ANNOTATION_MAPPING))
+    )
+    def test_sets_correct_mappings_and_settings(self, client, esversion, mapping):
+        client.version = esversion
         configure_index(client)
 
         client.conn.indices.create.assert_called_once_with(
             mock.ANY,
             body={
-                'mappings': {'annotation': ANNOTATION_MAPPING},
+                'mappings': {'annotation': mapping},
                 'settings': {'analysis': ANALYSIS_SETTINGS},
             })
 
@@ -144,9 +153,14 @@ class TestGetAliasedIndex(object):
 
         assert get_aliased_index(client) == 'target-index'
 
-    def test_returns_none_when_no_alias(self, client):
+    @pytest.mark.parametrize(
+        'error',
+        ((elasticsearch1.exceptions.NotFoundError),
+         (elasticsearch.exceptions.NotFoundError))
+    )
+    def test_returns_none_when_no_alias(self, client, error):
         """If ``index`` is a concrete index, return None."""
-        client.conn.indices.get_alias.side_effect = NotFoundError('test', 'test desc')
+        client.conn.indices.get_alias.side_effect = error('test', 'test desc')
 
         assert get_aliased_index(client) is None
 
@@ -169,7 +183,6 @@ class TestUpdateAliasedIndex(object):
         }
 
         update_aliased_index(client, 'new-target')
-
         client.conn.indices.update_aliases.assert_called_once_with(body={
             'actions': [
                 {'add': {'index': 'new-target', 'alias': 'foo'}},
@@ -179,7 +192,8 @@ class TestUpdateAliasedIndex(object):
 
     def test_raises_if_called_for_concrete_index(self, client):
         """Raise if called for a concrete index."""
-        client.conn.indices.get_alias.side_effect = NotFoundError('test', 'test desc')
+        client.conn.indices.get_alias.side_effect = (
+            elasticsearch1.exceptions.NotFoundError('test', 'test desc'))
 
         with pytest.raises(RuntimeError):
             update_aliased_index(client, 'new-target')
@@ -192,9 +206,75 @@ class TestDeleteIndex(object):
         client.conn.indices.delete.assert_called_once_with(index='unused-index')
 
     def test_ignores_NotFound_error(self, client):
-        client.conn.indices.delete.side_effect = NotFoundError('IndexMissingException', '')
+        client.conn.indices.delete.side_effect = elasticsearch1.exceptions.NotFoundError('IndexMissingException', '')
 
         delete_index(client, 'unused-index')
+
+
+class TestUpdateIndexSettings(object):
+    @pytest.mark.parametrize(
+        'esversion,mapping',
+        (((1, 5, 0), ANNOTATION_MAPPING),
+         ((6, 2, 0), ES6_ANNOTATION_MAPPING))
+    )
+    def test_succesfully_updates_the_index_settings(self, client, esversion, mapping):
+        client.version = esversion
+        client.conn.indices.get_alias.return_value = {
+            'old-target': {'aliases': {'foo': {}}},
+        }
+        client.conn.indices.get_settings.return_value = {
+            "old-target": {
+                "settings": {
+                    "index": {
+                        "analysis": {
+                            "old_setting": "val",
+                        }
+                    }
+                }
+            }
+        }
+
+        update_index_settings(client)
+
+        client.conn.indices.put_settings.assert_called_once_with(
+            index="old-target",
+            body={
+                "analysis": ANALYSIS_SETTINGS,
+            },
+        )
+        client.conn.indices.put_mapping.assert_called_once_with(
+            index="old-target",
+            doc_type=client.mapping_type,
+            body=mapping,
+        )
+
+    @pytest.mark.parametrize(
+        'error',
+        ((elasticsearch1.exceptions.RequestError),
+         (elasticsearch.exceptions.RequestError))
+    )
+    def test_raises_original_exception_if_not_merge_mapping_exception(self, client, error):
+        client.conn.indices.get_alias.return_value = {
+            'old-target': {'aliases': {'foo': {}}},
+        }
+        client.conn.indices.put_mapping.side_effect = error('test', 'test desc')
+
+        with pytest.raises(error):
+            update_index_settings(client)
+
+    @pytest.mark.parametrize(
+        'error',
+        ((elasticsearch1.exceptions.RequestError),
+         (elasticsearch.exceptions.RequestError))
+    )
+    def test_raises_runtime_exception_if_merge_mapping_exception(self, client, error):
+        client.conn.indices.get_alias.return_value = {
+            'old-target': {'aliases': {'foo': {}}},
+        }
+        client.conn.indices.put_mapping.side_effect = error('test', 'MergeMappingException')
+
+        with pytest.raises(RuntimeError):
+            update_index_settings(client)
 
 
 def captures(patterns, text):
@@ -207,7 +287,7 @@ def groups(pattern, text):
 
 @pytest.fixture
 def client():
-    client = mock.create_autospec(Client, spec_set=True, instance=True)
+    client = mock.create_autospec(Client, spec_set=True, instance=True, version=elasticsearch1.__version__)
     client.index = 'foo'
     client.mapping_type = 'annotation'
     return client

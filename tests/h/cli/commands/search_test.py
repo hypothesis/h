@@ -44,8 +44,7 @@ class TestUpdateSettingsCommand(object):
 
     @pytest.fixture
     def update_index_settings(self, patch):
-        config = patch('h.cli.commands.search.config')
-        return config.update_index_settings
+        return patch('h.cli.commands.search.config.update_index_settings')
 
 
 @pytest.fixture
