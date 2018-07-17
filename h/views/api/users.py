@@ -9,11 +9,12 @@ from pyramid.exceptions import HTTPNotFound
 
 from h import models
 from h.auth.util import basic_auth_creds
-from h.exceptions import ClientUnauthorized, PayloadError
+from h.exceptions import ClientUnauthorized, PayloadError, ConflictError
 from h.models.auth_client import GrantType
 from h.presenters import UserJSONPresenter
 from h.schemas import ValidationError
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
+from h.services.user_unique import DuplicateUserError
 from h.util.view import json_view
 
 
@@ -35,7 +36,12 @@ def create(request):
     _check_authority(client, appstruct)
     appstruct['authority'] = client.authority
 
-    _check_existing_user(request.db, appstruct)
+    user_unique_service = request.find_service(name='user_unique')
+
+    try:
+        user_unique_service.ensure_unique(appstruct)
+    except DuplicateUserError as err:
+        raise ConflictError(err)
 
     user_signup_service = request.find_service(name='user_signup')
     user = user_signup_service.signup(require_activation=False, **appstruct)
@@ -73,25 +79,6 @@ def _check_authority(client, data):
     if client.authority != authority:
         msg = "'authority' does not match authenticated client"
         raise ValidationError(msg)
-
-
-def _check_existing_user(session, data):
-    errors = []
-
-    existing_user = models.User.get_by_email(session,
-                                             data['email'],
-                                             data['authority'])
-    if existing_user:
-        errors.append("user with email address %s already exists" % data['email'])
-
-    existing_user = models.User.get_by_username(session,
-                                                data['username'],
-                                                data['authority'])
-    if existing_user:
-        errors.append("user with username %s already exists" % data['username'])
-
-    if errors:
-        raise ValidationError(', '.join(errors))
 
 
 def _request_client(request):
