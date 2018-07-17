@@ -78,6 +78,7 @@ class TestNipsaService(object):
 
         svc.fetch_all_flagged_userids()
         svc.flag(users['dominic'])
+        users['dominic'].nipsa = False  # Make sure result below comes from cache.
 
         assert svc.is_flagged(users['dominic'].userid)
 
@@ -86,6 +87,7 @@ class TestNipsaService(object):
 
         svc.fetch_all_flagged_userids()
         svc.unflag(users['renata'])
+        users['renata'].nipsa = True  # Make sure result below comes from cache.
 
         assert not svc.is_flagged(users['renata'].userid)
 
