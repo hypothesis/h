@@ -10,11 +10,11 @@ from h.services.nipsa import nipsa_factory
 
 @pytest.mark.usefixtures('users', 'reindex_user_annotations')
 class TestNipsaService(object):
-    def test_flagged_userids_returns_set_of_userids(self, db_session):
+    def test_fetch_all_flagged_userids_returns_set_of_userids(self, db_session):
         svc = NipsaService(db_session)
 
-        assert svc.flagged_userids == set(['acct:renata@example.com',
-                                           'acct:cecilia@example.com'])
+        assert svc.fetch_all_flagged_userids() == set(['acct:renata@example.com',
+                                                       'acct:cecilia@example.com'])
 
     def test_is_flagged_returns_true_for_flagged_users(self, db_session, users):
         svc = NipsaService(db_session)
