@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import pytest
 from h import models
+from h.models.organization import ORGANIZATION_LOGO_MAX_CHARS
 
 
 def test_init_sets_given_attributes():
@@ -45,7 +46,7 @@ def test_none_logo_is_valid():
 
 def test_too_long_logo_raises_value_error():
     with pytest.raises(ValueError):
-        models.Organization(logo='<svg>{}</svg>'.format("abcdefghijklmnopqrstuvwxyz" * 400))
+        models.Organization(logo='<svg>{}</svg>'.format("a" * ORGANIZATION_LOGO_MAX_CHARS + "b"))
 
 
 def test_malformed_logo_raises_value_error():
