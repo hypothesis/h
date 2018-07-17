@@ -169,13 +169,13 @@ class TestCreate(object):
         assert "'authority' does not match authenticated client" in str(exc.value)
 
     @pytest.mark.usefixtures('valid_auth')
-    def test_it_proxies_uniqueness_check_to_service(self, valid_payload, pyramid_request, user_unique_svc, CreateUserAPISchema):
+    def test_it_proxies_uniqueness_check_to_service(self, valid_payload, pyramid_request, user_unique_svc, CreateUserAPISchema, auth_client):
         pyramid_request.json_body = valid_payload
         CreateUserAPISchema().validate.return_value = valid_payload
 
         create(pyramid_request)
 
-        user_unique_svc.ensure_unique.assert_called_with(valid_payload)
+        user_unique_svc.ensure_unique.assert_called_with(valid_payload, authority=auth_client.authority)
 
     @pytest.mark.usefixtures('valid_auth')
     def test_raises_conflict_error_from_duplicate_user_error(self, valid_payload, pyramid_request, user_unique_svc):

@@ -55,12 +55,12 @@ class TestUserUniqueEnsureUnique(object):
 
         user_model.get_by_username.assert_called_once_with(db_session, 'fernando', pyramid_request.authority)
 
-    def test_it_proxies_identity_fetching_to_user_service(self, svc, user_service):
+    def test_it_proxies_identity_fetching_to_user_service(self, svc, user_service, pyramid_request):
         identity_data = [{'provider': 'provider_a', 'provider_unique_id': '123'},
                          {'provider': 'provider_a', 'provider_unique_id': '123'}]
         user_service.fetch_by_identity.return_value = None
 
-        svc.ensure_unique({'identities': identity_data})
+        svc.ensure_unique({'identities': identity_data}, authority=pyramid_request.authority)
 
         user_service.fetch_by_identity.assert_has_calls([
             mock.call(identity_data[0]['provider'], identity_data[0]['provider_unique_id']),
@@ -78,7 +78,7 @@ class TestUserUniqueEnsureUnique(object):
         user_model.get_by_email.assert_not_called()
 
     def test_it_allows_empty_data(self, svc, pyramid_request):
-        svc.ensure_unique({})
+        svc.ensure_unique({}, authority=pyramid_request.authority)
         # does not raise
 
     def test_it_combines_error_messages(self, svc, user, pyramid_request):
@@ -87,16 +87,12 @@ class TestUserUniqueEnsureUnique(object):
         with pytest.raises(DuplicateUserError, match=".*email.*username.*provider"):
             svc.ensure_unique({'email': user.email,
                                'username': user.username,
-                               'identities': [dupe_identity]})
+                               'identities': [dupe_identity]},
+                              authority=pyramid_request.authority)
 
-    def test_it_defaults_to_request_authority(self, svc, pyramid_request, db_session, user_model):
-        svc.ensure_unique({'email': 'somebody@example.com'})
-
-        user_model.get_by_email.assert_called_once_with(
-            db_session,
-            'somebody@example.com',
-            pyramid_request.authority
-        )
+    def test_it_raises_if_authority_missing(self, svc):
+        with pytest.raises(TypeError):
+            svc.ensure_unique({})
 
 
 @pytest.mark.usefixtures('user_service')
@@ -106,13 +102,6 @@ class TestUserUniqueFactory(object):
         svc = user_unique_factory(None, pyramid_request)
 
         assert isinstance(svc, UserUniqueService)
-
-    def test_uses_request_authority(self, pyramid_request):
-        pyramid_request.authority = 'bar.com'
-
-        svc = user_unique_factory(None, pyramid_request)
-
-        assert svc.request_authority == 'bar.com'
 
 
 @pytest.fixture
@@ -138,11 +127,10 @@ def user_model(patch):
 
 
 @pytest.fixture
-def svc(pyramid_request, db_session, user_service):
+def svc(db_session, user_service):
     return UserUniqueService(
         session=db_session,
-        user_service=user_service,
-        request_authority=pyramid_request.authority
+        user_service=user_service
     )
 
 

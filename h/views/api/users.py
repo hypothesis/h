@@ -39,7 +39,7 @@ def create(request):
     user_unique_service = request.find_service(name='user_unique')
 
     try:
-        user_unique_service.ensure_unique(appstruct)
+        user_unique_service.ensure_unique(appstruct, authority=client.authority)
     except DuplicateUserError as err:
         raise ConflictError(err)
 
