@@ -6,11 +6,13 @@ import pytest
 
 from h.indexer.reindexer import reindex, SETTING_NEW_INDEX
 from h.search import client
+from h.services.nipsa import NipsaService
 
 
 @pytest.mark.usefixtures('BatchIndexer',
                          'configure_index',
                          'delete_index',
+                         'nipsa_service',
                          'get_aliased_index',
                          'update_aliased_index',
                          'settings_service')
@@ -105,6 +107,10 @@ class TestReindex(object):
 
         delete_index.assert_called_once_with(es, 'original_index')
 
+    def test_populates_nipsa_cache(self, pyramid_request, es, nipsa_service):
+        reindex(mock.sentinel.session, es, pyramid_request)
+        nipsa_service.fetch_all_flagged_userids.assert_called_once_with()
+
     @pytest.fixture
     def BatchIndexer(self, patch):
         return patch('h.indexer.reindexer.BatchIndexer')
@@ -144,6 +150,12 @@ class TestReindex(object):
     def settings_service(self, pyramid_config):
         service = mock.Mock()
         pyramid_config.register_service(service, name='settings')
+        return service
+
+    @pytest.fixture
+    def nipsa_service(self, pyramid_config):
+        service = mock.create_autospec(NipsaService, spec_set=True, instance=True)
+        pyramid_config.register_service(service, name='nipsa')
         return service
 
     @pytest.fixture
