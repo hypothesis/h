@@ -36,24 +36,6 @@ class CreateUserAPISchema(JSONSchema):
                 'type': 'string',
                 'maxLength': DISPLAY_NAME_MAX_LENGTH,
             },
-            'identities': {
-                'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'provider': {
-                            'type': 'string',
-                        },
-                        'provider_unique_id': {
-                            'type': 'string',
-                        },
-                    },
-                    'required': [
-                        'provider',
-                        'provider_unique_id',
-                    ]
-                }
-            },
         },
         'required': [
             'authority',

@@ -102,49 +102,6 @@ class TestCreateUserAPISchema(object):
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
-    def test_it_allows_valid_identities(self, schema, payload):
-        payload['identities'] = [{'provider': 'foo', 'provider_unique_id': 'bar'}]
-
-        appstruct = schema.validate(payload)
-
-        assert 'identities' in appstruct
-
-    def test_it_raises_when_identities_not_an_array(self, schema, payload):
-        payload['identities'] = 'dragnabit'
-
-        with pytest.raises(ValidationError, match=".*identities.*is not of type.*"):
-            schema.validate(payload)
-
-    def test_it_raises_when_identities_items_not_objects(self, schema, payload):
-        payload['identities'] = ['flerp', 'flop']
-
-        with pytest.raises(ValidationError, match=".*identities.*is not of type.*"):
-            schema.validate(payload)
-
-    def test_it_raises_when_provider_missing_in_identity(self, schema, payload):
-        payload['identities'] = [{'foo': 'bar', 'provider_unique_id': 'flop'}]
-
-        with pytest.raises(ValidationError, match=".*provider'.*is a required property.*"):
-            schema.validate(payload)
-
-    def test_it_raises_when_provider_unique_id_missing_in_identity(self, schema, payload):
-        payload['identities'] = [{'foo': 'bar', 'provider': 'flop'}]
-
-        with pytest.raises(ValidationError, match=".*provider_unique_id'.*is a required property.*"):
-            schema.validate(payload)
-
-    def test_it_raises_if_identity_provider_is_not_a_string(self, schema, payload):
-        payload['identities'] = [{'provider_unique_id': 'bar', 'provider': 75}]
-
-        with pytest.raises(ValidationError, match=".*provider:.*is not of type.*string.*"):
-            schema.validate(payload)
-
-    def test_it_raises_if_identity_provider_unique_id_is_not_a_string(self, schema, payload):
-        payload['identities'] = [{'provider_unique_id': [], 'provider': 'hithere'}]
-
-        with pytest.raises(ValidationError, match=".*provider_unique_id:.*is not of type.*string.*"):
-            schema.validate(payload)
-
     @pytest.fixture
     def payload(self):
         return {
