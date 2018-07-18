@@ -20,18 +20,16 @@ class UserUniqueService(object):
     not constitute a duplicate user.
     """
 
-    def __init__(self, session, user_service, request_authority):
+    def __init__(self, session, user_service):
         """
         Create a new user_unique service.
 
         :param _session: the SQLAlchemy session object
-        :param request_authority: the applicable authority
         """
         self._session = session
         self.user_service = user_service
-        self.request_authority = request_authority
 
-    def ensure_unique(self, data, authority=None):
+    def ensure_unique(self, data, authority):
         """
         Ensure the provided `data` would constitute a new, non-duplicate
         user. Check for conflicts in email, username, identity.
@@ -39,8 +37,9 @@ class UserUniqueService(object):
         :param data: dictionary of new-user data. Will check `email`, `username`
                      and any `identities` dictionaries provided
         :raises ConflictError: if the data violate any uniqueness constraints
+
+        :param authority: Authority against which to do a duplicate check
         """
-        authority = authority or self.request_authority
         errors = []
 
         # check for duplicate email address
@@ -71,5 +70,4 @@ class UserUniqueService(object):
 def user_unique_factory(context, request):
     user_service = request.find_service(name='user')
     return UserUniqueService(session=request.db,
-                             user_service=user_service,
-                             request_authority=request.authority)
+                             user_service=user_service)

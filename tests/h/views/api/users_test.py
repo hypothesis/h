@@ -3,14 +3,15 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock, PropertyMock
+import mock
 
 from pyramid.exceptions import HTTPNotFound
 
-from h.exceptions import ClientUnauthorized, PayloadError
+from h.exceptions import ClientUnauthorized, PayloadError, ConflictError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
+from h.services.user_unique import UserUniqueService, DuplicateUserError
 from h.views.api.users import create, update
 
 
@@ -101,7 +102,8 @@ class TestCreateAndUpdateAuth(object):
 
 @pytest.mark.usefixtures('auth_client',
                          'basic_auth_creds',
-                         'user_signup_service')
+                         'user_signup_service',
+                         'user_unique_svc')
 class TestCreate(object):
     @pytest.mark.usefixtures('valid_auth')
     def test_signs_up_user(self,
@@ -110,7 +112,6 @@ class TestCreate(object):
                            user_signup_service,
                            valid_payload):
         pyramid_request.json_body = valid_payload
-        user_signup_service.signup.return_value = factories.User.build(**valid_payload)
 
         create(pyramid_request)
 
@@ -119,7 +120,8 @@ class TestCreate(object):
             authority='weylandindustries.com',
             username='jeremy',
             email='jeremy@weylandtech.com',
-            display_name='Jeremy Weyland')
+            display_name='Jeremy Weyland',
+            identities=[{'provider': 'provider_a', 'provider_unique_id': 'abc123'}])
 
     @pytest.mark.usefixtures('valid_auth')
     def test_it_presents_user(self, pyramid_request, valid_payload, user, presenter):
@@ -167,67 +169,27 @@ class TestCreate(object):
         assert "'authority' does not match authenticated client" in str(exc.value)
 
     @pytest.mark.usefixtures('valid_auth')
-    def test_raises_when_username_taken(self,
-                                        pyramid_request,
-                                        valid_payload,
-                                        db_session,
-                                        factories,
-                                        auth_client):
-        existing_user = factories.User(authority=auth_client.authority)
-        db_session.flush()
+    def test_it_proxies_uniqueness_check_to_service(self, valid_payload, pyramid_request, user_unique_svc, CreateUserAPISchema, auth_client):
+        pyramid_request.json_body = valid_payload
+        CreateUserAPISchema().validate.return_value = valid_payload
 
-        payload = valid_payload
-        payload['username'] = existing_user.username
-        pyramid_request.json_body = payload
+        create(pyramid_request)
 
-        with pytest.raises(ValidationError) as exc:
-            create(pyramid_request)
-
-        assert ('username %s already exists' % existing_user.username) in str(exc.value)
+        user_unique_svc.ensure_unique.assert_called_with(valid_payload, authority=auth_client.authority)
 
     @pytest.mark.usefixtures('valid_auth')
-    def test_raises_when_email_taken(self,
-                                     pyramid_request,
-                                     valid_payload,
-                                     db_session,
-                                     factories,
-                                     auth_client):
-        existing_user = factories.User(authority=auth_client.authority)
-        db_session.flush()
+    def test_raises_conflict_error_from_duplicate_user_error(self, valid_payload, pyramid_request, user_unique_svc):
+        pyramid_request.json_body = valid_payload
+        user_unique_svc.ensure_unique.side_effect = DuplicateUserError('nope')
 
-        payload = valid_payload
-        payload['email'] = existing_user.email
-        pyramid_request.json_body = payload
-
-        with pytest.raises(ValidationError) as exc:
+        with pytest.raises(ConflictError) as exc:
             create(pyramid_request)
 
-        assert ('email address %s already exists' % existing_user.email) in str(exc.value)
-
-    @pytest.mark.usefixtures('valid_auth')
-    def test_combines_unique_username_email_errors(self,
-                                                   pyramid_request,
-                                                   valid_payload,
-                                                   db_session,
-                                                   factories,
-                                                   auth_client):
-        existing_user = factories.User(authority=auth_client.authority)
-        db_session.flush()
-
-        payload = valid_payload
-        payload['email'] = existing_user.email
-        payload['username'] = existing_user.username
-        pyramid_request.json_body = payload
-
-        with pytest.raises(ValidationError) as exc:
-            create(pyramid_request)
-
-        assert ('email address %s already exists' % existing_user.email) in str(exc.value)
-        assert ('username %s already exists' % existing_user.username) in str(exc.value)
+        assert 'nope' in str(exc.value)
 
     @pytest.mark.usefixtures('valid_auth')
     def test_raises_for_invalid_json_body(self, pyramid_request, patch):
-        type(pyramid_request).json_body = PropertyMock(side_effect=ValueError())
+        type(pyramid_request).json_body = mock.PropertyMock(side_effect=ValueError())
 
         with pytest.raises(PayloadError):
             create(pyramid_request)
@@ -239,6 +201,10 @@ class TestCreate(object):
             'email': 'jeremy@weylandtech.com',
             'username': 'jeremy',
             'display_name': 'Jeremy Weyland',
+            'identities': [{
+                'provider': 'provider_a',
+                'provider_unique_id': 'abc123'
+            }],
         }
 
 
@@ -333,7 +299,7 @@ class TestUpdate(object):
 
     @pytest.mark.usefixtures('valid_auth')
     def test_raises_for_invalid_json_body(self, pyramid_request, patch):
-        type(pyramid_request).json_body = PropertyMock(side_effect=ValueError())
+        type(pyramid_request).json_body = mock.PropertyMock(side_effect=ValueError())
 
         with pytest.raises(PayloadError):
             update(pyramid_request)
@@ -352,7 +318,7 @@ class TestUpdate(object):
 
     @pytest.fixture
     def user_svc(self, pyramid_config, user):
-        svc = Mock(spec_set=['fetch'])
+        svc = mock.Mock(spec_set=['fetch'])
 
         def fake_fetch(username, authority):
             if (username == user.username and
@@ -384,7 +350,7 @@ def valid_auth(basic_auth_creds, auth_client):
 
 @pytest.fixture
 def user_signup_service(db_session, pyramid_config, user):
-    service = Mock(spec_set=UserSignupService(default_authority='example.com',
+    service = mock.Mock(spec_set=UserSignupService(default_authority='example.com',
                                               mailer=None,
                                               session=None,
                                               password_service=None,
@@ -393,6 +359,13 @@ def user_signup_service(db_session, pyramid_config, user):
     service.signup.return_value = user
     pyramid_config.register_service(service, name='user_signup')
     return service
+
+
+@pytest.fixture
+def user_unique_svc(pyramid_config):
+    svc = mock.create_autospec(UserUniqueService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='user_unique')
+    return svc
 
 
 @pytest.fixture
