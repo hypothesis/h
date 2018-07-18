@@ -56,13 +56,13 @@ class TestCreateUserAPISchema(object):
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
-    def test_it_raises_when_email_missing(self, schema, payload):
+    def test_it_raises_when_email_and_identities_missing(self, schema, payload):
         del payload['email']
 
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
-    def test_it_raises_when_email_empty(self, schema, payload):
+    def test_it_raises_when_email_empty_and_identities_missing(self, schema, payload):
         payload['email'] = ''
 
         with pytest.raises(ValidationError):
@@ -102,12 +102,25 @@ class TestCreateUserAPISchema(object):
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
+    def test_it_allows_missing_email_if_identities_present(self, schema, payload):
+        payload['identities'] = [{'provider': 'foo', 'provider_unique_id': 'bar'}]
+        del payload['email']
+
+        schema.validate(payload)
+
     def test_it_allows_valid_identities(self, schema, payload):
         payload['identities'] = [{'provider': 'foo', 'provider_unique_id': 'bar'}]
 
         appstruct = schema.validate(payload)
 
         assert 'identities' in appstruct
+
+    def test_it_raises_when_email_missing_and_identities_empty(self, schema, payload):
+        del payload['email']
+        payload['identities'] = []
+
+        with pytest.raises(ValidationError, match=".*identities.*too short.*"):
+            schema.validate(payload)
 
     def test_it_raises_when_identities_not_an_array(self, schema, payload):
         payload['identities'] = 'dragnabit'
