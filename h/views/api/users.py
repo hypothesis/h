@@ -79,7 +79,7 @@ def _check_existing_user(session, data):
     errors = []
 
     existing_user = models.User.get_by_email(session,
-                                             data['email'],
+                                             data.get('email'),
                                              data['authority'])
     if existing_user:
         errors.append("user with email address %s already exists" % data['email'])

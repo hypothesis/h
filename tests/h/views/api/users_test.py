@@ -135,6 +135,15 @@ class TestCreate(object):
 
         assert result == presenter.return_value.asdict()
 
+    @pytest.mark.usefixtures("valid_auth")
+    def test_you_can_create_a_user_with_no_email_address(self, pyramid_request, valid_payload, user_signup_service):
+        del valid_payload["email"]
+        pyramid_request.json_body = valid_payload
+
+        create(pyramid_request)
+
+        assert "email" not in user_signup_service.signup.call_args[1]
+
     @pytest.mark.usefixtures('valid_auth')
     def test_it_validates_the_input(self, pyramid_request, valid_payload, CreateUserAPISchema):
         create_schema = CreateUserAPISchema.return_value

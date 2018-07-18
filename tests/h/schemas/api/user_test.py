@@ -56,17 +56,18 @@ class TestCreateUserAPISchema(object):
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
-    def test_it_raises_when_email_missing(self, schema, payload):
-        del payload['email']
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
     def test_it_raises_when_email_empty(self, schema, payload):
         payload['email'] = ''
 
         with pytest.raises(ValidationError):
             schema.validate(payload)
+
+    def test_email_is_allowed_to_be_missing(self, schema, payload):
+        del payload['email']
+
+        validated = schema.validate(payload)
+
+        assert 'email' not in validated
 
     def test_it_raises_when_email_not_a_string(self, schema, payload):
         payload['email'] = {'foo': 'bar'}
