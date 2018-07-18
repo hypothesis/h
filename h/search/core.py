@@ -40,8 +40,8 @@ class Search(object):
         self.stats = stats
         self._replies_limit = _replies_limit
 
-        self.builder = self._default_querybuilder(request)
-        self.reply_builder = self._default_querybuilder(request)
+        self.builder = self._default_querybuilder(request, self.es)
+        self.reply_builder = self._default_querybuilder(request, self.es)
 
     def run(self, params):
         """
@@ -60,8 +60,8 @@ class Search(object):
 
     def clear(self):
         """Clear search filters, aggregators, and matchers."""
-        self.builder = query.Builder()
-        self.reply_builder = query.Builder()
+        self.builder = query.Builder(es_version=self.es.version)
+        self.reply_builder = query.Builder(es_version=self.es.version)
 
     def append_filter(self, filter_):
         """Append a search filter to the annotation and reply query."""
@@ -150,8 +150,8 @@ class Search(object):
             s.send()
 
     @staticmethod
-    def _default_querybuilder(request):
-        builder = query.Builder()
+    def _default_querybuilder(request, es):
+        builder = query.Builder(es_version=es.version)
         builder.append_filter(query.DeletedFilter())
         builder.append_filter(query.AuthFilter(request))
         builder.append_filter(query.UriFilter(request))

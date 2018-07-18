@@ -14,10 +14,18 @@ class Builder(object):
     Build a query for execution in Elasticsearch.
     """
 
-    def __init__(self):
+    def __init__(self, es_version):
+        """
+        Initialize query builder.
+
+        :param es_version: Elasticsearch library version.
+        :type es_version: Tuple[int,int,int]
+        """
+
         self.filters = []
         self.matchers = []
         self.aggregations = []
+        self._es_version = es_version
 
     def append_filter(self, f):
         self.filters.append(f)
@@ -46,18 +54,28 @@ class Builder(object):
         for key, value in params.items():
             matchers.append({"match": {key: value}})
 
-        query = {"match_all": {}}
-
-        if matchers:
-            query = {"bool": {"must": matchers}}
-
-        if filters:
+        # Use appropriate filter syntax depending on ES version.
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/query-dsl-filtered-query.html
+        if self._es_version >= (2,):
             query = {
-                "filtered": {
-                    "filter": {"and": filters},
-                    "query": query,
-                }
+                "bool": {
+                    "filter": filters,
+                    "must": matchers,
+                },
             }
+        else:
+            query = {"match_all": {}}
+
+            if matchers:
+                query = {"bool": {"must": matchers}}
+
+            if filters:
+                query = {
+                    "filtered": {
+                        "filter": {"and": filters},
+                        "query": query,
+                    }
+                }
 
         return {
             "from": p_from,

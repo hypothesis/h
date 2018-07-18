@@ -11,6 +11,8 @@ from __future__ import unicode_literals
 
 import datetime
 
+import pytest
+
 from h import search
 
 
@@ -121,6 +123,18 @@ class TestSearch(object):
         result = search.Search(pyramid_request).run({})
 
         assert result.reply_ids == []
+
+    def test_it_passes_es_version_to_builder(self, pyramid_request, Builder):
+        client = pyramid_request.es
+
+        search.Search(pyramid_request)
+
+        assert Builder.call_count == 2
+        Builder.assert_any_call(es_version=client.version)
+
+    @pytest.fixture
+    def Builder(self, patch):
+        return patch('h.search.core.query.Builder', autospec=True)
 
 
 class TestSearchWithSeparateReplies(object):
