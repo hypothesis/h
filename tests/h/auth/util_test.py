@@ -16,7 +16,9 @@ from pyramid import security
 from h.auth import role
 from h.auth import util
 from h._compat import text_type
-
+from h.exceptions import ClientUnauthorized
+from h.models.auth_client import GrantType
+from h.schemas import ValidationError
 
 FakeUser = namedtuple('FakeUser', ['authority', 'admin', 'staff', 'groups'])
 FakeGroup = namedtuple('FakeGroup', ['pubid'])
@@ -183,6 +185,84 @@ class TestAuthDomain(object):
         assert type(util.authority(pyramid_request)) == text_type
 
 
+class TestValidateAuthClientAuthority(object):
+
+    def test_raises_when_authority_doesnt_match(self, pyramid_request, auth_client):
+        data = {
+            'authority': 'mismatched_authority'
+        }
+
+        with pytest.raises(ValidationError,
+                           match=".*authority.*does not match authenticated client"):
+            util.validate_auth_client_authority(auth_client, data)
+
+    def test_does_not_raise_when_authority_matches(self, pyramid_request, auth_client):
+        data = {
+            'authority': 'weylandindustries.com'
+        }
+
+        util.validate_auth_client_authority(auth_client, data)
+
+
+class TestRequestAuthClient(object):
+
+    def test_raises_when_no_creds(self, pyramid_request, basic_auth_creds):
+        with pytest.raises(ClientUnauthorized):
+            util.request_auth_client(pyramid_request)
+
+    def test_raises_when_malformed_client_id(self,
+                                             basic_auth_creds,
+                                             pyramid_request):
+        basic_auth_creds.return_value = ('foobar', 'somerandomsecret')
+
+        with pytest.raises(ClientUnauthorized):
+            util.request_auth_client(pyramid_request)
+
+    def test_raises_when_no_client(self,
+                                   basic_auth_creds,
+                                   pyramid_request):
+        basic_auth_creds.return_value = ('C69BA868-5089-4EE4-ABB6-63A1C38C395B',
+                                         'somerandomsecret')
+
+        with pytest.raises(ClientUnauthorized):
+            util.request_auth_client(pyramid_request)
+
+    def test_raises_when_client_secret_invalid(self,
+                                               auth_client,
+                                               basic_auth_creds,
+                                               pyramid_request):
+        basic_auth_creds.return_value = (auth_client.id, 'incorrectsecret')
+
+        with pytest.raises(ClientUnauthorized):
+            util.request_auth_client(pyramid_request)
+
+    def test_raises_for_public_client(self,
+                                      factories,
+                                      basic_auth_creds,
+                                      pyramid_request):
+        auth_client = factories.AuthClient(authority='weylandindustries.com')
+        basic_auth_creds.return_value = (auth_client.id, '')
+
+        with pytest.raises(ClientUnauthorized):
+            util.request_auth_client(pyramid_request)
+
+    def test_raises_for_invalid_client_grant_type(self,
+                                                  factories,
+                                                  basic_auth_creds,
+                                                  pyramid_request):
+        auth_client = factories.ConfidentialAuthClient(authority='weylandindustries.com',
+                                                       grant_type=GrantType.authorization_code)
+        basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
+
+        with pytest.raises(ClientUnauthorized):
+            util.request_auth_client(pyramid_request)
+
+    def test_returns_client_when_valid_creds(self, pyramid_request, auth_client, valid_auth):
+        client = util.request_auth_client(pyramid_request)
+
+        assert client == auth_client
+
+
 @pytest.fixture
 def user_service(pyramid_config):
     service = mock.Mock(spec_set=['fetch'])
@@ -194,3 +274,21 @@ def user_service(pyramid_config):
 @pytest.fixture
 def principals_for_user(patch):
     return patch('h.auth.util.principals_for_user')
+
+
+@pytest.fixture
+def auth_client(factories):
+    return factories.ConfidentialAuthClient(authority='weylandindustries.com',
+                                            grant_type=GrantType.client_credentials)
+
+
+@pytest.fixture
+def basic_auth_creds(patch):
+    basic_auth_creds = patch('h.auth.util.basic_auth_creds')
+    basic_auth_creds.return_value = None
+    return basic_auth_creds
+
+
+@pytest.fixture
+def valid_auth(basic_auth_creds, auth_client):
+    basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
