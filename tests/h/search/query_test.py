@@ -70,7 +70,8 @@ class TestBuilder(object):
 
         query = builder.build(params)["query"]
 
-        assert query == {"bool": {"filter": [filter(params)]}}
+        assert query == {"bool": {"filter": [filter(params)],
+                                  "must": []}}
 
 
 class TestTopLevelAnnotationsFilter(object):

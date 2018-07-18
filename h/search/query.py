@@ -54,31 +54,28 @@ class Builder(object):
         for key, value in params.items():
             matchers.append({"match": {key: value}})
 
-        bool_query = {}
-
-        # Add clauses executing in a query (scoring) context.
-        if matchers:
-            bool_query["must"] = matchers
-
-        # Add clauses executing in a filter (non-scoring) context.
-        #
-        # The syntax for this changed from ES 1.x to ES 2.x. See
-        # https://www.elastic.co/guide/en/elasticsearch/reference/6.2/query-dsl-filtered-query.html
-        if filters and self._es_version >= (2,):
-            bool_query["filter"] = filters
-
-        if bool_query:
-            query = {"bool": bool_query}
+        # Use appropriate filter syntax depending on ES version.
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/query-dsl-filtered-query.html
+        if self._es_version >= (2,):
+            query = {
+                "bool": {
+                    "filter": filters,
+                    "must": matchers,
+                },
+            }
         else:
             query = {"match_all": {}}
 
-        if filters and self._es_version < (2,):
-            query = {
-                "filtered": {
-                    "filter": {"and": filters},
-                    "query": query,
+            if matchers:
+                query = {"bool": {"must": matchers}}
+
+            if filters:
+                query = {
+                    "filtered": {
+                        "filter": {"and": filters},
+                        "query": query,
+                    }
                 }
-            }
 
         return {
             "from": p_from,
