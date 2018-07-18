@@ -148,6 +148,8 @@ class TestDeleteAnnotation(object):
         return patch('h.tasks.indexer.delete')
 
 
+# TODO - Add test for reindexing of a batch of annotations and modify test for
+# `ReindexUserAnnotations` to work in terms of this one.
 @pytest.mark.usefixtures('celery')
 class TestReindexUserAnnotations(object):
     def test_it_creates_batch_indexer(self, batch_indexer, annotation_ids, celery):
