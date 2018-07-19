@@ -38,6 +38,7 @@ class CreateUserAPISchema(JSONSchema):
             },
             'identities': {
                 'type': 'array',
+                'minItems': 1,
                 'items': {
                     'type': 'object',
                     'properties': {
@@ -55,12 +56,27 @@ class CreateUserAPISchema(JSONSchema):
                 }
             },
         },
-        'required': [
-            'authority',
-            'username',
-            'email',
-        ],
+        'anyOf': [  # email may be empty if identities are present
+            {
+                'required': [
+                    'authority',
+                    'username',
+                    'email',
+                ],
+            },
+            {
+                'required': [
+                    'authority',
+                    'username',
+                    'identities',
+                ],
+            }
+        ]
     }
+
+    def validate(self, data):
+        appstruct = super(CreateUserAPISchema, self).validate(data)
+        return appstruct
 
 
 class UpdateUserAPISchema(JSONSchema):

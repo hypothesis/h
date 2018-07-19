@@ -22,6 +22,7 @@
     },
     "identities": {
       "type": "array",
+      "minItems": 1,
       "items": {
           "type": "object",
           "properties": {
@@ -39,9 +40,20 @@
       },
   },
   },
-  "required": [
-    "authority",
-    "username",
-    "email"
+  "anyOf": [
+    {
+      "required": [
+        "authority",
+        "username",
+        "email"
+      ]
+    },
+    {
+      "required": [
+        "authority",
+        "username",
+        "identities"
+      ]
+    },
   ]
 }
