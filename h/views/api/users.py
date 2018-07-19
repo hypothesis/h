@@ -2,17 +2,11 @@
 
 from __future__ import unicode_literals
 
-import hmac
-
-import sqlalchemy as sa
 from pyramid.exceptions import HTTPNotFound
 
-from h import models
-from h.auth.util import basic_auth_creds
-from h.exceptions import ClientUnauthorized, PayloadError, ConflictError
-from h.models.auth_client import GrantType
+from h.auth.util import request_auth_client, validate_auth_client_authority
+from h.exceptions import PayloadError, ConflictError
 from h.presenters import UserJSONPresenter
-from h.schemas import ValidationError
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.services.user_unique import DuplicateUserError
 from h.util.view import json_view
@@ -28,12 +22,12 @@ def create(request):
     users are created pre-activated, and are unable to log in to the web
     service directly.
     """
-    client = _request_client(request)
+    client = request_auth_client(request)
 
     schema = CreateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 
-    _check_authority(client, appstruct)
+    validate_auth_client_authority(client, appstruct)
     appstruct['authority'] = client.authority
 
     user_unique_service = request.find_service(name='user_unique')
@@ -57,7 +51,7 @@ def update(request):
     This API endpoint allows authorised clients (those able to provide a valid
     Client ID and Client Secret) to update users in their authority.
     """
-    client = _request_client(request)
+    client = request_auth_client(request)
 
     user_svc = request.find_service(name='user')
     user = user_svc.fetch(request.matchdict['username'],
@@ -72,41 +66,6 @@ def update(request):
 
     presenter = UserJSONPresenter(user)
     return presenter.asdict()
-
-
-def _check_authority(client, data):
-    authority = data.get('authority')
-    if client.authority != authority:
-        msg = "'authority' does not match authenticated client"
-        raise ValidationError(msg)
-
-
-def _request_client(request):
-    creds = basic_auth_creds(request)
-    if creds is None:
-        raise ClientUnauthorized()
-
-    # We fetch the client by its ID and then do a constant-time comparison of
-    # the secret with that provided in the request.
-    #
-    # It is important not to include the secret as part of the SQL query
-    # because the resulting code may be subject to a timing attack.
-    client_id, client_secret = creds
-    try:
-        client = request.db.query(models.AuthClient).get(client_id)
-    except sa.exc.StatementError:  # client_id is malformed
-        raise ClientUnauthorized()
-    if client is None:
-        raise ClientUnauthorized()
-    if client.secret is None:  # client is not confidential
-        raise ClientUnauthorized()
-    if client.grant_type != GrantType.client_credentials:  # client not allowed to create users
-        raise ClientUnauthorized()
-
-    if not hmac.compare_digest(client.secret, client_secret):
-        raise ClientUnauthorized()
-
-    return client
 
 
 def _update_user(user, appstruct):
