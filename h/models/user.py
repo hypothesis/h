@@ -137,6 +137,10 @@ class User(Base):
                      _normalise_username(cls.username),
                      cls.authority,
                      unique=True),
+            # Optimize lookup of shadowbanned users.
+            sa.Index('ix__user__nipsa',
+                     cls.nipsa,
+                     postgresql_where=cls.nipsa.is_(True)),
         )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)

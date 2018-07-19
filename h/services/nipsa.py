@@ -30,9 +30,8 @@ class NipsaService(object):
         if self._flagged_userids is not None:
             return self._flagged_userids
 
-        # TODO: The `nipsa` field is currently not indexed so this requires a
-        # full table scan.
-        query = self.session.query(User).filter_by(nipsa=True)
+        # Filter using `is_` to match the index predicate for `User.nipsa`.
+        query = self.session.query(User).filter(User.nipsa.is_(True))
         self._flagged_userids = set([u.userid for u in query])
 
         return self._flagged_userids
