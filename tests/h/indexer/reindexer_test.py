@@ -83,7 +83,7 @@ class TestReindex(object):
     @pytest.mark.parametrize(
         'esversion,new_index_setting_name',
         (((1, 5, 0), 'reindex.new_index'),
-        ((6, 2, 0), 'reindex.new_es6_index'))
+         ((6, 2, 0), 'reindex.new_es6_index'))
     )
     def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service,
                                                configure_index, esversion, new_index_setting_name):
@@ -97,7 +97,7 @@ class TestReindex(object):
     @pytest.mark.parametrize(
         'esversion,new_index_setting_name',
         (((1, 5, 0), 'reindex.new_index'),
-        ((6, 2, 0), 'reindex.new_es6_index'))
+         ((6, 2, 0), 'reindex.new_es6_index'))
     )
     def test_deletes_index_name_setting(self, pyramid_request, es, settings_service, esversion, new_index_setting_name):
         es.version = esversion
