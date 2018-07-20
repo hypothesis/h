@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import datetime
 
+import elasticsearch_dsl
 import elasticsearch1
 import elasticsearch1_dsl
 import logging
@@ -16,10 +17,11 @@ from tests.common.matchers import Matcher
 
 @pytest.mark.usefixtures("annotations")
 class TestIndex(object):
-    def test_annotation_ids_are_used_as_elasticsearch_ids(self, es_client,
+    def test_annotation_ids_are_used_as_elasticsearch_ids(self, each_es_client,
                                                           factories,
                                                           index):
         annotation = factories.Annotation.build()
+        es_client = each_es_client
 
         index(annotation)
 
@@ -89,7 +91,10 @@ class TestIndex(object):
         event = AnnotationTransformEvent.return_value
 
         AnnotationTransformEvent.assert_called_with(pyramid_request, annotation, mock.ANY)
-        notify.assert_called_once_with(event)
+
+        # `notify` will be called twice. Once when indexing with ES1, once when
+        # indexing with ES6.
+        notify.assert_called_with(event)
 
     def test_you_can_filter_annotations_by_authority(self, factories, index, search):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
@@ -146,7 +151,8 @@ class TestIndex(object):
 
         index(annotation_1, annotation_2)
 
-        user_aggregation = elasticsearch1_dsl.A('terms', field='user_raw')
+        agg = aggregate(search)
+        user_aggregation = agg('terms', field='user_raw')
         search.aggs.bucket('user_raw_terms', user_aggregation)
 
         response = search.execute()
@@ -164,8 +170,8 @@ class TestIndex(object):
 
         index(annotation)
 
-        response1 = search.filter("term", tags=["ญหฬ"]).execute()
-        response2 = search.filter("term", tags=["tag"]).execute()
+        response1 = search.filter("terms", tags=["ญหฬ"]).execute()
+        response2 = search.filter("terms", tags=["tag"]).execute()
 
         assert SearchResponseWithIDs([annotation.id]) == response1
         assert SearchResponseWithIDs([annotation.id]) == response2
@@ -176,7 +182,8 @@ class TestIndex(object):
 
         index(annotation_1, annotation_2)
 
-        tags_aggregation = elasticsearch1_dsl.A('terms', field='tags_raw')
+        agg = aggregate(search)
+        tags_aggregation = agg('terms', field='tags_raw')
         search.aggs.bucket('tags_raw_terms', tags_aggregation)
 
         response = search.execute()
@@ -239,7 +246,7 @@ class TestIndex(object):
 
         index(annotation1, annotation2)
 
-        response = search.filter("term", thread_ids=[annotation1.id]).execute()
+        response = search.filter("terms", thread_ids=[annotation1.id]).execute()
 
         assert SearchResponseWithIDs([annotation2.id]) == response
 
@@ -282,9 +289,10 @@ class TestIndex(object):
         )
 
     @pytest.fixture
-    def get(self, es_client):
+    def get(self, each_es_client):
         def _get(annotation_id):
             """Return the annotation with the given ID from Elasticsearch."""
+            es_client = each_es_client
             return es_client.conn.get(
                 index=es_client.index, doc_type=es_client.mapping_type,
                 id=annotation_id)["_source"]
@@ -292,8 +300,9 @@ class TestIndex(object):
 
 
 class TestDelete(object):
-    def test_annotation_is_marked_deleted(self, es_client, factories, index, search):
+    def test_annotation_is_marked_deleted(self, each_es_client, factories, index):
         annotation = factories.Annotation.build(id="test_annotation_id")
+        es_client = each_es_client
 
         index(annotation)
         result = es_client.conn.get(index=es_client.index,
@@ -452,12 +461,6 @@ class SearchResponseWithIDs(Matcher):
 
 
 @pytest.fixture
-def search(es_client):
-    return elasticsearch1_dsl.Search(using=es_client.conn,
-                                     index=es_client.index).fields([])
-
-
-@pytest.fixture
 def batch_indexer(db_session, es_client, pyramid_request):
     return h.search.index.BatchIndexer(db_session, es_client,
                                        pyramid_request, es_client.index)
@@ -473,3 +476,35 @@ def AnnotationSearchIndexPresenter(patch):
     class_ = patch('h.search.index.presenters.AnnotationSearchIndexPresenter')
     class_.return_value.asdict.return_value = {'test': 'val'}
     return class_
+
+
+@pytest.fixture(params=['es1', 'es6'])
+def search(es_client, es6_client, request):
+    """
+    Fixture to query against both ES 1 and ES 6 clusters.
+
+    Tests should use only one ES-version paramterized fixture.
+    """
+    if request.param == 'es1':
+        return elasticsearch1_dsl.Search(using=es_client.conn,
+                                         index=es_client.index).fields([])
+    return elasticsearch_dsl.Search(using=es6_client.conn,
+                                    index=es6_client.index)
+
+
+@pytest.fixture(params=['es1', 'es6'])
+def each_es_client(es_client, es6_client, request):
+    """
+    Fixture to run a test against both ES 1 and ES 6 clusters.
+
+    Tests should use only one ES-version parametrized fixture.
+    """
+    if request.param == 'es1':
+        return es_client
+    return es6_client
+
+
+def aggregate(search):
+    if isinstance(search, elasticsearch_dsl.Search):
+        return elasticsearch_dsl.A  # Using ES 6.x
+    return elasticsearch1_dsl.A  # Using ES 1.x

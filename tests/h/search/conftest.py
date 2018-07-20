@@ -32,16 +32,29 @@ def Annotation(factories, index):
 
 
 @pytest.fixture
-def index(es_client, pyramid_request):
+def index(es_client, es6_client, pyramid_request):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
+
+        # Here we index the document into both clusters. Most tests will only
+        # check the result in a single cluster. This is inefficient, but we
+        # don't intend the dual cluster usage to live long.
+
+        # Index annotations into old Elasticsearch cluster.
         for annotation in annotations:
             h.search.index.index(es_client, annotation, pyramid_request)
         es_client.conn.indices.refresh(index=es_client.index)
+
+        # Index annotations into new Elasticsearch cluster.
+        for annotation in annotations:
+            h.search.index.index(es6_client, annotation, pyramid_request)
+        es6_client.conn.indices.refresh(index=es_client.index)
+
     return _index
 
 
 @pytest.fixture
-def pyramid_request(es_client, pyramid_request):
+def pyramid_request(es_client, es6_client, pyramid_request):
     pyramid_request.es = es_client
+    pyramid_request.es6 = es6_client
     return pyramid_request
