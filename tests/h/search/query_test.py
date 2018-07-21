@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import datetime
-
 import pytest
 import webob
 
@@ -50,13 +49,13 @@ class TestBuilder(object):
         # TODO - Remove this test once ES 1 support is dropped.
 
         builder = Builder(es_version=(1, 7, 0))
-        filter = AuthorityFilter("default")
+        filter_ = AuthorityFilter("default")
         params = {}
-        builder.append_filter(filter)
+        builder.append_filter(filter_)
 
         query = builder.build(params)["query"]
 
-        assert query == {"filtered": {"filter": {"and": [filter(params)]},
+        assert query == {"filtered": {"filter": {"and": [filter_(params)]},
                                       "query": {"match_all": {}}}}
 
     def test_it_uses_new_filter_syntax_for_es6(self):
@@ -64,13 +63,13 @@ class TestBuilder(object):
         # searches against Elasticsearch are running against ES 6.
 
         builder = Builder(es_version=(6, 2, 0))
-        filter = AuthorityFilter("default")
+        filter_ = AuthorityFilter("default")
         params = {}
-        builder.append_filter(filter)
+        builder.append_filter(filter_)
 
         query = builder.build(params)["query"]
 
-        assert query == {"bool": {"filter": [filter(params)],
+        assert query == {"bool": {"filter": [filter_(params)],
                                   "must": []}}
 
 
@@ -177,7 +176,7 @@ class TestGroupFilter(object):
 
 class TestGroupAuthFilter(object):
     def test_does_not_return_annotations_if_group_not_readable_by_user(
-        self, search, Annotation, group_service
+        self, search, Annotation, group_service,
     ):
         group_service.groupids_readable_by.return_value = []
         Annotation(groupid="group2").id
@@ -189,7 +188,7 @@ class TestGroupAuthFilter(object):
         assert not result.annotation_ids
 
     def test_returns_annotations_if_group_readable_by_user(
-        self, search, Annotation, group_service
+        self, search, Annotation, group_service,
     ):
         group_service.groupids_readable_by.return_value = ["group1"]
         Annotation(groupid="group2", shared=True).id
@@ -651,6 +650,14 @@ class TestUsersAggregation(object):
         assert len(users_results) == bucket_limit
         assert count_pb == 3
         assert count_pc == 2
+
+
+@pytest.fixture(params=['es1', 'es6'])
+def pyramid_request(request, pyramid_request, es_client, es6_client):
+    pyramid_request.es = es_client
+    pyramid_request.es6 = es6_client
+    pyramid_request.feature.flags['search_es6'] = request.param == 'es6'
+    return pyramid_request
 
 
 @pytest.fixture
