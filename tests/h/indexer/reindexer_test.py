@@ -110,8 +110,10 @@ class TestReindex(object):
 
         with pytest.raises(RuntimeError):
             reindex(mock.sentinel.session, es, pyramid_request)
-
-        settings_service.delete.assert_called_once_with('reindex.new_index')
+        if es.version < (2,):
+            settings_service.delete.assert_called_once_with('reindex.new_index')
+        else:
+            settings_service.delete.assert_called_once_with('reindex.new_es6_index')
 
     def test_deletes_old_index(self, pyramid_request, es, delete_index, get_aliased_index):
         get_aliased_index.return_value = 'original_index'
@@ -152,11 +154,16 @@ class TestReindex(object):
         indexer.index.return_value = []
         return indexer
 
-    @pytest.fixture
-    def es(self):
-        mock_es = mock.create_autospec(client.Client, instance=True,
-                                       spec_set=True, index="hypothesis",
-                                       version=(1, 5, 0))
+    @pytest.fixture(params=['es6', 'es1'])
+    def es(self, request):
+        if request.param == 'es1':
+            mock_es = mock.create_autospec(client.Client, instance=True,
+                                           spec_set=True, index="hypothesis",
+                                           version=(1, 5, 0))
+        else:
+            mock_es = mock.create_autospec(client.Client, instance=True,
+                                           spec_set=True, index="hypothesis",
+                                           version=(6, 2, 0))
         mock_es.mapping_type = 'annotation'
         return mock_es
 
