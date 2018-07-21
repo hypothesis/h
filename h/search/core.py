@@ -24,7 +24,7 @@ class Search(object):
     :param request: the request object
     :type request: pyramid.request.Request
 
-    :param separate_replies: Wheter or not to return all replies to the
+    :param separate_replies: Whether or not to return all replies to the
         annotations returned by this search. If this is True then the
         resulting annotations will only include top-level annotations, not replies.
     :type separate_replies: bool
@@ -35,7 +35,10 @@ class Search(object):
     """
     def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
         self.request = request
-        self.es = request.es
+        if self.request.feature('search_es6'):
+            self.es = request.es6
+        else:
+            self.es = request.es
         self.separate_replies = separate_replies
         self.stats = stats
         self._replies_limit = _replies_limit
