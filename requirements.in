@@ -22,7 +22,7 @@ hkdf
 itsdangerous
 jsonpointer == 1.0
 jsonschema
-kombu
+kombu >= 4.2.1
 mistune
 newrelic
 oauthlib
