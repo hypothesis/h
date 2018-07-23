@@ -62,7 +62,7 @@ test: node_modules/.uptodate
 
 .PHONY: test-py3
 test-py3: node_modules/.uptodate
-	tox -e py36 -- tests/h/
+	tox -e py3 -- tests/h/
 
 .PHONY: lint
 lint: .pydeps
