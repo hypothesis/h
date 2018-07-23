@@ -24,8 +24,8 @@ elasticsearch1==1.10.0
 elasticsearch==6.2.0
 enum34==1.1.6
 functools32==3.2.3.post2 ; python_version < "3.0"
-gevent==1.2.1
-greenlet==0.4.10          # via gevent
+gevent==1.3.5
+greenlet==0.4.13
 gunicorn==19.6.0
 hkdf==0.0.3
 html5lib==0.999999999     # via bleach
