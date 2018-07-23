@@ -15,7 +15,8 @@ elasticsearch1==1.10.0
 elasticsearch-dsl==6.1.0
 enum34
 functools32; python_version < "3.0" # Required by jsonschema, listed here to add environment marker
-gevent
+gevent >= 1.3.5  # TODO: Update to gevent 1.3.6 when released, then remove `greenlet`.
+greenlet==0.4.13  # Pinned dependency of gevent. See https://git.io/fN8Wf
 gunicorn
 hkdf
 itsdangerous
