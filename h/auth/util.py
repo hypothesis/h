@@ -157,9 +157,9 @@ def request_auth_client(request):
     return client
 
 
-def validate_auth_client_authority(client, data):
+def validate_auth_client_authority(client, authority):
     """
     Validate that the auth client authority matches the request authority.
     """
-    if client.authority != data.get('authority'):
+    if client.authority != authority:
         raise ValidationError("'authority' does not match authenticated client")

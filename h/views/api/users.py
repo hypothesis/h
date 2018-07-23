@@ -27,7 +27,7 @@ def create(request):
     schema = CreateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 
-    validate_auth_client_authority(client, appstruct)
+    validate_auth_client_authority(client, appstruct['authority'])
     appstruct['authority'] = client.authority
 
     user_unique_service = request.find_service(name='user_unique')
