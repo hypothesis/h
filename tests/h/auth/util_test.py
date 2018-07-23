@@ -188,20 +188,16 @@ class TestAuthDomain(object):
 class TestValidateAuthClientAuthority(object):
 
     def test_raises_when_authority_doesnt_match(self, pyramid_request, auth_client):
-        data = {
-            'authority': 'mismatched_authority'
-        }
+        authority = 'mismatched_authority'
 
         with pytest.raises(ValidationError,
                            match=".*authority.*does not match authenticated client"):
-            util.validate_auth_client_authority(auth_client, data)
+            util.validate_auth_client_authority(auth_client, authority)
 
     def test_does_not_raise_when_authority_matches(self, pyramid_request, auth_client):
-        data = {
-            'authority': 'weylandindustries.com'
-        }
+        authority = 'weylandindustries.com'
 
-        util.validate_auth_client_authority(auth_client, data)
+        util.validate_auth_client_authority(auth_client, authority)
 
 
 class TestRequestAuthClient(object):
