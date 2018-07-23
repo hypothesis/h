@@ -17,7 +17,7 @@ enum34
 functools32; python_version < "3.0" # Required by jsonschema, listed here to add environment marker
 gevent >= 1.3.5  # TODO: Update to gevent 1.3.6 when released, then remove `greenlet`.
 greenlet==0.4.13  # Pinned dependency of gevent. See https://git.io/fN8Wf
-gunicorn
+gunicorn >= 19.9.0
 hkdf
 itsdangerous
 jsonpointer == 1.0
