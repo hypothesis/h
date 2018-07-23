@@ -428,10 +428,10 @@ paths:
           description: Public ID of the group
           required: true
           type: string
-        - name: user
+        - name: userid
           in: path
           description: |
-            The user to remove from the group. For now, only the value `me` is
+            The userid of the user to remove from the group. For now, only the value `me` is
             supported, representing the currently-authenticated user.
           required: true
           type: string
@@ -441,6 +441,31 @@ paths:
           description: Success
         '404':
           description: Group not found
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - groups
+      summary: Add a member to a group
+      operationId: addGroupMember
+      parameters:
+        - name: id
+          in: path
+          description: Public ID of the group
+          required: true
+          type: string
+        - name: userid
+          in: path
+          description: |
+            User ID of the user to add to the group.
+            The userID should be of the format `acct:<username>@<authority>`
+          required: true
+          type: string
+      responses:
+        '204':
+          description: Success
+        '404':
+          description: User or Group not found
           schema:
             $ref: '#/definitions/Error'
 definitions:

@@ -47,7 +47,7 @@ def index(context, request):
     # parameter names are added, we'll need to add them here, or this view will
     # break (and get caught by the `test_api_index` functional test).
     templater = AngularRouteTemplater(request.route_url,
-                                      params=['id', 'pubid', 'user'])
+                                      params=['id', 'pubid', 'user', 'userid'])
 
     links = {}
     for link in api_links:

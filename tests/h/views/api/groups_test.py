@@ -5,11 +5,15 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest
+from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 
+from h.exceptions import ClientUnauthorized
 from h.views.api import groups as views
+from h.models.auth_client import GrantType
+from h.schemas import ValidationError
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
+from h.services.user import UserService
 from h.services.group_links import GroupLinksService
 
 pytestmark = pytest.mark.usefixtures('GroupsJSONPresenter')
@@ -184,6 +188,140 @@ class TestCreateGroup(object):
         return pyramid_request
 
 
+@pytest.mark.usefixtures('group_service',
+                         'user_service',
+                         'request_auth_client',
+                         'validate_auth_client_authority')
+class TestAddMember(object):
+
+    def test_it_adds_user_from_request_params_to_group(self,
+                                                       group,
+                                                       user,
+                                                       pyramid_request,
+                                                       group_service,):
+        views.add_member(group, pyramid_request)
+
+        group_service.member_join.assert_called_once_with(group, user.userid)
+
+    def test_it_returns_HTTPNoContent_when_add_member_is_successful(self,
+                                                                    group,
+                                                                    pyramid_request,):
+        resp = views.add_member(group, pyramid_request)
+
+        assert isinstance(resp, HTTPNoContent)
+
+    def test_it_raises_HTTPNotFound_with_mismatched_user_and_group_authorities(self,
+                                                                               factories,
+                                                                               pyramid_request):
+        group = factories.Group(authority="different_authority.com")
+
+        with pytest.raises(HTTPNotFound):
+            views.add_member(group, pyramid_request)
+
+    def test_it_raises_HTTPNotFound_with_non_existent_user(self,
+                                                           group,
+                                                           pyramid_request,
+                                                           user_service,):
+
+        user_service.fetch.return_value = None
+
+        pyramid_request.matchdict['userid'] = "some_user"
+
+        with pytest.raises(HTTPNotFound):
+            views.add_member(group, pyramid_request)
+
+    def test_it_fetches_user_from_the_request_params(self,
+                                                     group,
+                                                     user,
+                                                     pyramid_request,
+                                                     user_service):
+        views.add_member(group, pyramid_request)
+
+        user_service.fetch.assert_called_once_with(user.userid)
+
+    def test_it_gets_the_auth_client_from_the_request(self,
+                                                      group,
+                                                      pyramid_request,
+                                                      request_auth_client):
+        views.add_member(group, pyramid_request)
+
+        request_auth_client.assert_called_once_with(pyramid_request)
+
+    def test_it_validates_auth_client_and_user_authorities(self,
+                                                           group,
+                                                           user,
+                                                           pyramid_request,
+                                                           validate_auth_client_authority,
+                                                           auth_client):
+        views.add_member(group, pyramid_request)
+
+        validate_auth_client_authority.assert_called_once_with(auth_client, user.authority)
+
+    def test_it_raises_ClientUnauthorized_with_bad_client_credentials(self,
+                                                                      group,
+                                                                      pyramid_request,
+                                                                      request_auth_client):
+        request_auth_client.side_effect = ClientUnauthorized()
+
+        with pytest.raises(ClientUnauthorized):
+            views.add_member(group, pyramid_request)
+
+    def test_it_raises_ClientUnauthorized_with_bad_auth_client(self,
+                                                               group,
+                                                               pyramid_request,
+                                                               request_auth_client):
+        request_auth_client.side_effect = ClientUnauthorized()
+
+        with pytest.raises(ClientUnauthorized):
+            views.add_member(group, pyramid_request)
+
+    def test_it_raises_ValidationError_with_mismatched_authorities(self,
+                                                                   group,
+                                                                   pyramid_request,
+                                                                   validate_auth_client_authority):
+        msg = "'authority' does not match authenticated client"
+        validate_auth_client_authority.side_effect = ValidationError()
+
+        with pytest.raises(ValidationError, message=msg):
+            views.add_member(group, pyramid_request)
+
+    @pytest.fixture
+    def group(self, factories):
+        return factories.Group(authority='example.com')
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User(authority='example.com')
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, group, user):
+        pyramid_request.matchdict['userid'] = user.userid
+        pyramid_request.matchdict['pubid'] = group.pubid
+        return pyramid_request
+
+    @pytest.fixture
+    def user_service(self, pyramid_config, user):
+        service = mock.create_autospec(UserService, spec_set=True, instance=True)
+        service.fetch.return_value = user
+        pyramid_config.register_service(service, name='user')
+        return service
+
+    @pytest.fixture
+    def auth_client(self, factories):
+        return factories.ConfidentialAuthClient(authority='example.com',
+                                                grant_type=GrantType.client_credentials)
+
+    @pytest.fixture
+    def request_auth_client(self, patch, auth_client):
+        request_auth_client = patch('h.views.api.groups.request_auth_client')
+        request_auth_client.return_value = auth_client
+        return request_auth_client
+
+    @pytest.fixture
+    def validate_auth_client_authority(self, patch):
+        return patch('h.views.api.groups.validate_auth_client_authority')
+
+
 @pytest.mark.usefixtures('authenticated_userid', 'group_service')
 class TestRemoveMember(object):
 
@@ -209,12 +347,12 @@ class TestRemoveMember(object):
 
     @pytest.fixture
     def shorthand_request(self, pyramid_request):
-        pyramid_request.matchdict['user'] = 'me'
+        pyramid_request.matchdict['userid'] = 'me'
         return pyramid_request
 
     @pytest.fixture
     def username_request(self, pyramid_request):
-        pyramid_request.matchdict['user'] = 'bob'
+        pyramid_request.matchdict['userid'] = 'bob'
         return pyramid_request
 
     @pytest.fixture
