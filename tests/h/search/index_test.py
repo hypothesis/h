@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import datetime
 
+import elasticsearch
 import elasticsearch_dsl
 import elasticsearch1
 import elasticsearch1_dsl
@@ -13,6 +14,9 @@ import pytest
 import h.search.index
 
 from tests.common.matchers import Matcher
+
+
+NOT_FOUND_ERROR = (elasticsearch1.exceptions.NotFoundError, elasticsearch.exceptions.NotFoundError)
 
 
 @pytest.mark.usefixtures("annotations")
@@ -318,7 +322,8 @@ class TestDelete(object):
 
 
 class TestBatchIndexer(object):
-    def test_it_indexes_all_annotations(self, batch_indexer, es_client, factories):
+    def test_it_indexes_all_annotations(self, batch_indexer, each_es_client, factories):
+        es_client = each_es_client
         annotations = factories.Annotation.create_batch(3)
         ids = [a.id for a in annotations]
 
@@ -330,7 +335,8 @@ class TestBatchIndexer(object):
                                         id=_id)
             assert result["_id"] == _id
 
-    def test_it_indexes_specific_annotations(self, batch_indexer, es_client, factories):
+    def test_it_indexes_specific_annotations(self, batch_indexer, each_es_client, factories):
+        es_client = each_es_client
         annotations = factories.Annotation.create_batch(5)
         ids = [a.id for a in annotations]
         ids_to_index = ids[:3]
@@ -345,12 +351,13 @@ class TestBatchIndexer(object):
             assert result["_id"] == _id
 
         for _id in ids_not_to_index:
-            with pytest.raises(elasticsearch1.exceptions.NotFoundError):
+            with pytest.raises(NOT_FOUND_ERROR):
                 es_client.conn.get(index=es_client.index,
                                    doc_type=es_client.mapping_type,
                                    id=_id)
 
-    def test_it_does_not_index_deleted_annotations(self, batch_indexer, es_client, factories):
+    def test_it_does_not_index_deleted_annotations(self, batch_indexer, each_es_client, factories):
+        es_client = each_es_client
         ann = factories.Annotation()
         # create deleted annotations
         ann_del = factories.Annotation(deleted=True)
@@ -362,13 +369,15 @@ class TestBatchIndexer(object):
                                             id=ann.id)
         assert result_indexed["_id"] == ann.id
 
-        with pytest.raises(elasticsearch1.exceptions.NotFoundError):
+        with pytest.raises(NOT_FOUND_ERROR):
             es_client.conn.get(index=es_client.index,
                                doc_type=es_client.mapping_type,
                                id=ann_del.id)
 
-    def test_it_notifies(self, AnnotationSearchIndexPresenter, AnnotationTransformEvent, batch_indexer, factories, pyramid_request,
-                         notify):
+    def test_it_notifies(
+        self, AnnotationSearchIndexPresenter, AnnotationTransformEvent,
+        batch_indexer, factories, pyramid_request, notify,
+    ):
         annotations = factories.Annotation.create_batch(3)
 
         batch_indexer.index()
@@ -398,7 +407,8 @@ class TestBatchIndexer(object):
                 assert 'indexed 0k annotations, rate=' in record.msg
         assert num_index_records == num_annotations // window_size
 
-    def test_it_correctly_indexes_fields_for_bulk_actions(self, batch_indexer, es_client, factories):
+    def test_it_correctly_indexes_fields_for_bulk_actions(self, batch_indexer, each_es_client, factories):
+        es_client = each_es_client
         annotations = factories.Annotation.create_batch(2, groupid="group_a")
 
         batch_indexer.index()
@@ -426,8 +436,9 @@ class TestBatchIndexer(object):
 
         assert errored == expected_errored_ids
 
-    def test_it_does_not_error_annotations_if_already_indexed(self, db_session, es_client,
+    def test_it_does_not_error_annotations_if_already_indexed(self, db_session, each_es_client,
                                                               factories, pyramid_request):
+        es_client = each_es_client
         annotations = factories.Annotation.create_batch(3)
         expected_errored_ids = set([annotations[1].id])
 
@@ -461,9 +472,9 @@ class SearchResponseWithIDs(Matcher):
 
 
 @pytest.fixture
-def batch_indexer(db_session, es_client, pyramid_request):
-    return h.search.index.BatchIndexer(db_session, es_client,
-                                       pyramid_request, es_client.index)
+def batch_indexer(db_session, each_es_client, pyramid_request):
+    return h.search.index.BatchIndexer(db_session, each_es_client,
+                                       pyramid_request, each_es_client.index)
 
 
 @pytest.fixture
