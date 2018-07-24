@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 
 import click
 import sqlalchemy
@@ -15,6 +16,11 @@ log = logging.getLogger(__name__)
 @click.command()
 @click.pass_context
 def init(ctx):
+    # In production environments a short ES request timeout is typically set.
+    # Commands to initialize the index may take longer than this, so override
+    # any custom timeout with a high value.
+    os.environ['ELASTICSEARCH_CLIENT_TIMEOUT'] = '30'
+
     request = ctx.obj['bootstrap']()
 
     _init_db(request.registry.settings)
