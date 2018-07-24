@@ -48,7 +48,7 @@ def index(es_client, es6_client, pyramid_request):
         # Index annotations into new Elasticsearch cluster.
         for annotation in annotations:
             h.search.index.index(es6_client, annotation, pyramid_request)
-        es6_client.conn.indices.refresh(index=es_client.index)
+        es6_client.conn.indices.refresh(index=es6_client.index)
 
     return _index
 
