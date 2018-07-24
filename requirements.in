@@ -4,7 +4,7 @@ alembic
 backports.functools_lru_cache
 bcrypt
 bleach >= 2.0
-celery >= 4.1
+celery >= 4.2.1
 certifi
 cffi
 click
@@ -15,13 +15,14 @@ elasticsearch1==1.10.0
 elasticsearch-dsl==6.1.0
 enum34
 functools32; python_version < "3.0" # Required by jsonschema, listed here to add environment marker
-gevent
-gunicorn
+gevent >= 1.3.5  # TODO: Update to gevent 1.3.6 when released, then remove `greenlet`.
+greenlet==0.4.13  # Pinned dependency of gevent. See https://git.io/fN8Wf
+gunicorn >= 19.9.0
 hkdf
 itsdangerous
 jsonpointer == 1.0
 jsonschema
-kombu
+kombu >= 4.2.1
 mistune
 newrelic
 oauthlib
