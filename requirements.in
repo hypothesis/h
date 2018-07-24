@@ -4,7 +4,7 @@ alembic
 backports.functools_lru_cache
 bcrypt
 bleach >= 2.0
-celery >= 4.1
+celery >= 4.2.1
 certifi
 cffi
 click
@@ -21,7 +21,7 @@ hkdf
 itsdangerous
 jsonpointer == 1.0
 jsonschema
-kombu
+kombu >= 4.2.1
 mistune
 newrelic
 oauthlib
