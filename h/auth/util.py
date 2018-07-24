@@ -117,8 +117,63 @@ def authority(request):
     return text_type(request.registry.settings.get('h.authority', request.domain))
 
 
+def check_auth_client(username, password, request):
+    """
+    Return list of principals for the auth_client matching the username and
+    password or None if no matching auth_client
+
+    Validate the basic auth credentials from the request by matching them to
+    an auth_client record in the DB.
+
+    :param username: username parsed out of Authorization header (Basic)
+    :param password: password parsed out of Authorization header (Basic)
+    :returns: additional principals for the auth_client or None
+    :rtype: list or None
+    """
+    # We fetch the client by its ID and then do a constant-time comparison of
+    # the secret with that provided in the request.
+    #
+    # It is important not to include the secret as part of the SQL query
+    # because the resulting code may be subject to a timing attack.
+    client_id = username
+    client_secret = password
+
+    try:
+        client = request.db.query(AuthClient).get(client_id)
+    except sa.exc.StatementError:  # client_id is malformed
+        return None
+    if client is None:
+        return None
+    if client.secret is None:  # client is not confidential
+        return None
+    if client.grant_type != GrantType.client_credentials:  # client not allowed to create users
+        return None
+
+    if not hmac.compare_digest(client.secret, client_secret):
+        return None
+
+    return principals_for_auth_client(client)
+
+
+def principals_for_auth_client(client):
+    """
+    Return the list of additional principles for an auth client
+
+    :type client: h.models.AuthClient
+    :rtype: list
+    """
+
+    principals = set()
+
+    principals.add('auth_client:{authority}'.format(authority=client.authority))
+    principals.add('authority:{authority}'.format(authority=client.authority))
+
+    return list(principals)
+
+
 def request_auth_client(request):
     """
+    DEPRECATED
     Locate a matching AuthClient record in the database.
 
     :param request: the request object
