@@ -150,7 +150,7 @@
     content: "\e60d";
 }
 .h-icon-border-color:before {
-    content: "\e60e";
+    content: "\e904";
 }
 .h-icon-format-bold:before {
     content: "\e60f";
@@ -171,7 +171,7 @@
     content: "\e614";
 }
 .h-icon-insert-comment:before {
-    content: "\e617";
+    content: "\e903";
 }
 .h-icon-insert-link:before {
     content: "\e615";
@@ -203,4 +203,3 @@
 .h-icon-mail:before {
     content: "\e62a";
 }
-
