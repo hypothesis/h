@@ -12,6 +12,7 @@ application startup.
 Most application code should access the database session using the request
 property `request.db` which is provided by this module.
 """
+from __future__ import unicode_literals
 
 import logging
 
@@ -19,6 +20,7 @@ import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import exc
 from sqlalchemy.orm import sessionmaker
 
 from h.util.session_tracker import Tracker
@@ -64,7 +66,8 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
         engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
 
-    _maybe_create_world_group(engine, authority)
+    default_org = _maybe_create_default_organization(engine, authority)
+    _maybe_create_world_group(engine, authority, default_org)
 
 
 def make_engine(settings):
@@ -115,36 +118,45 @@ def _session(request):
             })
         session.close()
 
-        # zope.sqlalchemy maintains an internal `id(session) => state` map with
-        # an entry for each active DB session which is registered with it.
-        #
-        # Entries are normally cleared at the end of a request when the
-        # transaction manager (`request.tm`) commits. DB writes after this can
-        # leave stale entries in the map which can cause problems in future
-        # requests if another session gets the same ID as the current one.
-        dm = zope.sqlalchemy.datamanager
-        if len(dm._SESSION_STATE) > 0:
-            log.warn('request ended with non-empty zope.sqlalchemy state', extra={
-                'data': {
-                    'zope.sqlalchemy.datamanager._SESSION_STATE': dm._SESSION_STATE,
-                },
-            })
-            dm._SESSION_STATE = {}
-
     return session
 
 
-def _maybe_create_world_group(engine, authority):
+def _maybe_create_default_organization(engine, authority):
+    from h import models
+    session = Session(bind=engine)
+
+    try:
+        default_org = models.Organization.default(session)
+    except exc.NoResultFound:
+        default_org = None
+
+    if default_org is None:
+        default_org = models.Organization(name='Hypothesis',
+                                          authority=authority,
+                                          pubid='__default__',
+                                          )
+        with open('h/static/images/icons/logo.svg', 'rb') as h_logo:
+            default_org.logo = h_logo.read().decode("utf-8")
+        session.add(default_org)
+
+    session.commit()
+    session.close()
+
+    return default_org
+
+
+def _maybe_create_world_group(engine, authority, default_org):
     from h import models
     from h.models.group import ReadableBy, WriteableBy
     session = Session(bind=engine)
     world_group = session.query(models.Group).filter_by(pubid='__world__').one_or_none()
     if world_group is None:
-        world_group = models.Group(name=u'Public',
+        world_group = models.Group(name='Public',
                                    authority=authority,
                                    joinable_by=None,
                                    readable_by=ReadableBy.world,
-                                   writeable_by=WriteableBy.authority)
+                                   writeable_by=WriteableBy.authority,
+                                   organization=default_org)
         world_group.pubid = '__world__'
         session.add(world_group)
 

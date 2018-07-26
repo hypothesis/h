@@ -1,576 +1,668 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-import mock
+import datetime
 import pytest
-from hypothesis import strategies as st
-from hypothesis import given
-from webob import multidict
+import webob
 
-from h.search import query
-
-MISSING = object()
-
-OFFSET_DEFAULT = 0
-LIMIT_DEFAULT = 20
-LIMIT_MAX = 200
+from h.search import Search, index, query
+from h.search.query import AuthorityFilter, Builder
 
 
 class TestBuilder(object):
-    @pytest.mark.parametrize('offset,from_', [
-        # defaults to OFFSET_DEFAULT
-        (MISSING, OFFSET_DEFAULT),
-        # straightforward pass-through
-        (7, 7),
-        (42, 42),
-        # string values should be converted
-        ("23", 23),
-        ("82", 82),
-        # invalid values should be ignored and the default should be returned
-        ("foo",  OFFSET_DEFAULT),
-        ("",     OFFSET_DEFAULT),
-        ("   ",  OFFSET_DEFAULT),
-        ("-23",  OFFSET_DEFAULT),
-        ("32.7", OFFSET_DEFAULT),
+    @pytest.mark.parametrize("sort_key,order,expected_order", [
+        # Sort supports "updated" and "created" fields.
+        ("updated", "desc", [1, 0, 2]),
+        ("updated", "asc", [2, 0, 1]),
+        ("created", "desc", [2, 0, 1]),
+        ("created", "asc", [1, 0, 2]),
+
+        # Default sort order should be descending.
+        ("updated", None, [1, 0, 2]),
+
+        # Default sort field should be "updated".
+        (None, "asc", [2, 0, 1]),
     ])
-    def test_offset(self, offset, from_):
-        builder = query.Builder()
+    def test_it_sorts_annotations(self, Annotation, search, sort_key, order, expected_order):
+        dt = datetime.datetime
 
-        if offset is MISSING:
-            q = builder.build({})
-        else:
-            q = builder.build({"offset": offset})
+        # nb. Test annotations have a different ordering for updated vs created
+        # and creation order is different than updated/created asc/desc.
+        ann_ids = [Annotation(updated=dt(2017, 1, 1), created=dt(2017, 1, 1)).id,
+                   Annotation(updated=dt(2018, 1, 1), created=dt(2016, 1, 1)).id,
+                   Annotation(updated=dt(2016, 1, 1), created=dt(2018, 1, 1)).id]
 
-        assert q["from"] == from_
+        params = {}
+        if sort_key:
+            params["sort"] = sort_key
+        if order:
+            params["order"] = order
+        result = search.run(params)
 
-    @given(st.text())
-    @pytest.mark.fuzz
-    def test_limit_output_within_bounds(self, text):
-        """Given any string input, output should be in the allowed range."""
-        builder = query.Builder()
+        actual_order = [ann_ids.index(id_) for id_ in result.annotation_ids]
+        assert actual_order == expected_order
 
-        q = builder.build({"limit": text})
+    def test_it_ignores_unknown_sort_fields(self, search):
+        search.run({"sort": "no_such_field"})
 
-        assert isinstance(q["size"], int)
-        assert 0 <= q["size"] <= LIMIT_MAX
+    def test_it_uses_old_filter_syntax_for_es1(self):
+        # TODO - Remove this test once ES 1 support is dropped.
 
-    @given(st.integers())
-    @pytest.mark.fuzz
-    def test_limit_output_within_bounds_int_input(self, lim):
-        """Given any integer input, output should be in the allowed range."""
-        builder = query.Builder()
+        builder = Builder(es_version=(1, 7, 0))
+        filter_ = AuthorityFilter("default")
+        params = {}
+        builder.append_filter(filter_)
 
-        q = builder.build({"limit": str(lim)})
+        query = builder.build(params)["query"]
 
-        assert isinstance(q["size"], int)
-        assert 0 <= q["size"] <= LIMIT_MAX
+        assert query == {"filtered": {"filter": {"and": [filter_(params)]},
+                                      "query": {"match_all": {}}}}
 
-    @given(st.integers(min_value=0, max_value=LIMIT_MAX))
-    @pytest.mark.fuzz
-    def test_limit_matches_input(self, lim):
-        """Given an integer in the allowed range, it should be passed through."""
-        builder = query.Builder()
+    def test_it_uses_new_filter_syntax_for_es6(self):
+        # TODO - This test will be obsolete once the tests which execute
+        # searches against Elasticsearch are running against ES 6.
 
-        q = builder.build({"limit": str(lim)})
+        builder = Builder(es_version=(6, 2, 0))
+        filter_ = AuthorityFilter("default")
+        params = {}
+        builder.append_filter(filter_)
 
-        assert q["size"] == lim
+        query = builder.build(params)["query"]
 
-    def test_limit_missing(self):
-        builder = query.Builder()
+        assert query == {"bool": {"filter": [filter_(params)],
+                                  "must": []}}
 
-        q = builder.build({})
 
-        assert q["size"] == LIMIT_DEFAULT
+class TestTopLevelAnnotationsFilter(object):
 
-    def test_sort_is_by_updated(self):
-        """Sort defaults to "updated"."""
-        builder = query.Builder()
+    def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, search):
+        annotation = Annotation()
+        Annotation(references=[annotation.id])
 
-        q = builder.build({})
+        result = search.run({})
 
-        sort = q["sort"]
-        assert len(sort) == 1
-        assert sort[0].keys() == ["updated"]
+        assert [annotation.id] == result.annotation_ids
 
-    def test_sort_includes_ignore_unmapped(self):
-        """'ignore_unmapped': True is used in the sort clause."""
-        builder = query.Builder()
+    @pytest.fixture
+    def search(self, search):
+        search.append_filter(query.TopLevelAnnotationsFilter())
+        return search
 
-        q = builder.build({})
 
-        assert q["sort"][0]["updated"]["ignore_unmapped"] == True
+class TestAuthorityFilter(object):
+    def test_it_filters_out_non_matching_authorities(self, Annotation, search):
+        annotations_auth1 = [Annotation(userid="acct:foo@auth1").id,
+                             Annotation(userid="acct:bar@auth1").id]
+        # Make some other annotations that are of different authority.
+        Annotation(userid="acct:bat@auth2")
+        Annotation(userid="acct:bar@auth3")
 
-    def test_with_custom_sort(self):
-        """Custom sorts are returned in the query dict."""
-        builder = query.Builder()
+        result = search.run({})
 
-        q = builder.build({"sort": "title"})
+        assert sorted(result.annotation_ids) == sorted(annotations_auth1)
 
-        assert q["sort"] == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
-
-    def test_order_defaults_to_desc(self):
-        """'order': "desc" is returned in the q dict by default."""
-        builder = query.Builder()
-
-        q = builder.build({})
-
-        sort = q["sort"]
-        assert sort[0]["updated"]["order"] == "desc"
-
-    def test_with_custom_order(self):
-        """'order' params are returned in the query dict if given."""
-        builder = query.Builder()
-
-        q = builder.build({"order": "asc"})
-
-        sort = q["sort"]
-        assert sort[0]["updated"]["order"] == "asc"
-
-    def test_defaults_to_match_all(self):
-        """If no query params are given a "match_all": {} query is returned."""
-        builder = query.Builder()
-
-        q = builder.build({})
-
-        assert q["query"] == {"match_all": {}}
-
-    def test_default_param_action(self):
-        """Other params are added as "match" clauses."""
-        builder = query.Builder()
-
-        q = builder.build({"foo": "bar"})
-
-        assert q["query"] == {"bool": {"must": [{"match": {"foo": "bar"}}]}}
-
-    def test_default_params_multidict(self):
-        """Multiple params go into multiple "match" dicts."""
-        builder = query.Builder()
-        params = multidict.MultiDict()
-        params.add("user", "fred")
-        params.add("user", "bob")
-
-        q = builder.build(params)
-
-        assert q["query"] == {
-            "bool": {
-                "must": [
-                    {"match": {"user": "fred"}},
-                    {"match": {"user": "bob"}}
-                ]
-            }
-        }
-
-    def test_with_evil_arguments(self):
-        builder = query.Builder()
-        params = {
-            "offset": "3foo",
-            "limit": '\' drop table annotations'
-        }
-
-        q = builder.build(params)
-
-        assert q["from"] == 0
-        assert q["size"] == 20
-        assert q["query"] == {'match_all': {}}
-
-    def test_passes_params_to_filters(self):
-        testfilter = mock.Mock()
-        builder = query.Builder()
-        builder.append_filter(testfilter)
-
-        builder.build({"foo": "bar"})
-
-        testfilter.assert_called_with({"foo": "bar"})
-
-    def test_ignores_filters_returning_none(self):
-        testfilter = mock.Mock()
-        testfilter.return_value = None
-        builder = query.Builder()
-        builder.append_filter(testfilter)
-
-        q = builder.build({})
-
-        assert q["query"] == {"match_all": {}}
-
-    def test_filters_query_by_filter_results(self):
-        testfilter = mock.Mock()
-        testfilter.return_value = {"term": {"giraffe": "nose"}}
-        builder = query.Builder()
-        builder.append_filter(testfilter)
-
-        q = builder.build({})
-
-        assert q["query"] == {
-            "filtered": {
-                "filter": {"and": [{"term": {"giraffe": "nose"}}]},
-                "query": {"match_all": {}},
-            },
-        }
-
-    def test_passes_params_to_matchers(self):
-        testmatcher = mock.Mock()
-        builder = query.Builder()
-        builder.append_matcher(testmatcher)
-
-        builder.build({"foo": "bar"})
-
-        testmatcher.assert_called_with({"foo": "bar"})
-
-    def test_adds_matchers_to_query(self):
-        testmatcher = mock.Mock()
-        testmatcher.return_value = {"match": {"giraffe": "nose"}}
-        builder = query.Builder()
-        builder.append_matcher(testmatcher)
-
-        q = builder.build({})
-
-        assert q["query"] == {
-            "bool": {"must": [{"match": {"giraffe": "nose"}}]},
-        }
-
-    def test_passes_params_to_aggregations(self):
-        testaggregation = mock.Mock()
-        builder = query.Builder()
-        builder.append_aggregation(testaggregation)
-
-        builder.build({"foo": "bar"})
-
-        testaggregation.assert_called_with({"foo": "bar"})
-
-    def test_adds_aggregations_to_query(self):
-        testaggregation = mock.Mock(key="foobar")
-        # testaggregation.key.return_value = "foobar"
-        testaggregation.return_value = {"terms": {"field": "foo"}}
-        builder = query.Builder()
-        builder.append_aggregation(testaggregation)
-
-        q = builder.build({})
-
-        assert q["aggs"] == {
-            "foobar": {"terms": {"field": "foo"}}
-        }
-
-
-def test_authority_filter_adds_authority_term():
-    filter_ = query.AuthorityFilter(authority='partner.org')
-    assert filter_({}) == {'term': {'authority': 'partner.org'}}
+    @pytest.fixture
+    def search(self, search):
+        search.append_filter(query.AuthorityFilter("auth1"))
+        return search
 
 
 class TestAuthFilter(object):
-    def test_unauthenticated(self):
-        request = mock.Mock(authenticated_userid=None)
-        authfilter = query.AuthFilter(request)
+    def test_logged_out_user_can_not_see_private_annotations(self, search, Annotation):
+        Annotation()
+        Annotation()
 
-        assert authfilter({}) == {'term': {'shared': True}}
+        result = search.run({})
 
-    def test_authenticated(self):
-        request = mock.Mock(authenticated_userid='acct:doe@example.org')
-        authfilter = query.AuthFilter(request)
+        assert not result.annotation_ids
 
-        assert authfilter({}) == {
-            'or': [
-                {'term': {'shared': True}},
-                {'term': {'user_raw': 'acct:doe@example.org'}},
-            ]
-        }
+    def test_logged_out_user_can_see_shared_annotations(self, search, Annotation):
+        shared_ids = [Annotation(shared=True).id,
+                      Annotation(shared=True).id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(shared_ids)
+
+    def test_logged_in_user_can_only_see_their_private_annotations(self, search, pyramid_config,
+                                                                   Annotation):
+        userid = "acct:bar@auth2"
+        pyramid_config.testing_securitypolicy(userid)
+        # Make a private annotation from a different user.
+        Annotation(userid="acct:foo@auth2").id
+        users_private_ids = [Annotation(userid=userid).id,
+                             Annotation(userid=userid).id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(users_private_ids)
+
+    def test_logged_in_user_can_see_shared_annotations(self, search, pyramid_config, Annotation):
+        userid = "acct:bar@auth2"
+        pyramid_config.testing_securitypolicy(userid)
+        shared_ids = [Annotation(userid="acct:foo@auth2", shared=True).id,
+                      Annotation(userid=userid, shared=True).id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(shared_ids)
+
+    @pytest.fixture
+    def search(self, search, pyramid_request):
+        search.append_filter(query.AuthFilter(pyramid_request))
+        return search
 
 
 class TestGroupFilter(object):
-    def test_term_filters_for_group(self):
-        groupfilter = query.GroupFilter()
+    def test_matches_only_annotations_from_specified_group(self, search, Annotation, group):
+        Annotation(groupid='group2')
+        Annotation(groupid='group3')
+        group1_annotations = [Annotation(groupid=group.pubid).id,
+                              Annotation(groupid=group.pubid).id]
 
-        assert groupfilter({"group": "wibble"}) == {"term": {"group": "wibble"}}
+        result = search.run({'group': group.pubid})
 
-    def test_strips_param(self):
-        groupfilter = query.GroupFilter()
-        params = {"group": "wibble"}
-
-        groupfilter(params)
-
-        assert params == {}
-
-    def test_returns_none_when_no_param(self):
-        groupfilter = query.GroupFilter()
-
-        assert groupfilter({}) is None
-
-
-class TestUriFilter(object):
-    @pytest.mark.usefixtures('uri')
-    def test_inactive_when_no_uri_param(self):
-        """
-        When there's no `uri` parameter, return None.
-        """
-        request = mock.Mock()
-        urifilter = query.UriFilter(request)
-
-        assert urifilter({"foo": "bar"}) is None
-
-    def test_expands_and_normalizes_into_terms_filter(self, storage):
-        """
-        Uses a `terms` filter against target.scope to filter for URI.
-
-        UriFilter should use a `terms` filter against the normalized version of the
-        target source field, which we store in `target.scope`.
-
-        It should expand the input URI before searching, and normalize the results
-        of the expansion.
-        """
-        request = mock.Mock()
-        storage.expand_uri.side_effect = lambda _, x: [
-            "http://giraffes.com/",
-            "https://elephants.com/",
-        ]
-
-        urifilter = query.UriFilter(request)
-
-        result = urifilter({"uri": "http://example.com/"})
-        query_uris = result["terms"]["target.scope"]
-
-        storage.expand_uri.assert_called_with(request.db, "http://example.com/")
-        assert sorted(query_uris) == sorted(["httpx://giraffes.com",
-                                             "httpx://elephants.com"])
-
-    def test_queries_multiple_uris(self, storage):
-        """
-        Uses a `terms` filter against target.scope to filter for URI.
-
-        When multiple "uri" fields are supplied, the normalized URIs of all of
-        them should be collected into a set and sent in the query.
-        """
-        request = mock.Mock()
-        params = multidict.MultiDict()
-        params.add("uri", "http://example.com")
-        params.add("uri", "http://example.net")
-        storage.expand_uri.side_effect = [
-            ["http://giraffes.com/", "https://elephants.com/"],
-            ["http://tigers.com/", "https://elephants.com/"],
-        ]
-
-        urifilter = query.UriFilter(request)
-
-        result = urifilter(params)
-        query_uris = result["terms"]["target.scope"]
-
-        storage.expand_uri.assert_any_call(request.db, "http://example.com")
-        storage.expand_uri.assert_any_call(request.db, "http://example.net")
-        assert sorted(query_uris) == sorted(["httpx://giraffes.com",
-                                             "httpx://elephants.com",
-                                             "httpx://tigers.com"])
-
-    def test_accepts_url_aliases(self, storage):
-        request = mock.Mock()
-        params = multidict.MultiDict()
-        params.add("uri", "http://example.com")
-        params.add("url", "http://example.net")
-        storage.expand_uri.side_effect = [
-            ["http://giraffes.com/", "https://elephants.com/"],
-            ["http://tigers.com/", "https://elephants.com/"],
-        ]
-
-        urifilter = query.UriFilter(request)
-
-        result = urifilter(params)
-        query_uris = result["terms"]["target.scope"]
-
-        storage.expand_uri.assert_any_call(request.db, "http://example.com")
-        storage.expand_uri.assert_any_call(request.db, "http://example.net")
-        assert sorted(query_uris) == sorted(["httpx://giraffes.com",
-                                             "httpx://elephants.com",
-                                             "httpx://tigers.com"])
+        assert sorted(result.annotation_ids) == sorted(group1_annotations)
 
     @pytest.fixture
-    def storage(self, patch):
-        storage = patch('h.search.query.storage')
-        storage.expand_uri.side_effect = lambda x: [x]
-        return storage
+    def search(self, search):
+        search.append_filter(query.GroupFilter())
+        return search
 
     @pytest.fixture
-    def uri(self, patch):
-        uri = patch('h.search.query.uri')
-        uri.normalize.side_effect = lambda x: x
-        return uri
+    def group(self, factories):
+        return factories.OpenGroup(name="group1", pubid="group1id")
+
+
+class TestGroupAuthFilter(object):
+    def test_does_not_return_annotations_if_group_not_readable_by_user(
+        self, search, Annotation, group_service,
+    ):
+        group_service.groupids_readable_by.return_value = []
+        Annotation(groupid="group2").id
+        Annotation(groupid="group1").id
+        Annotation(groupid="group1").id
+
+        result = search.run({})
+
+        assert not result.annotation_ids
+
+    def test_returns_annotations_if_group_readable_by_user(
+        self, search, Annotation, group_service,
+    ):
+        group_service.groupids_readable_by.return_value = ["group1"]
+        Annotation(groupid="group2", shared=True).id
+        expected_ids = [Annotation(groupid="group1").id,
+                        Annotation(groupid="group1").id]
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    @pytest.fixture
+    def search(self, search, pyramid_request):
+        search.append_filter(query.GroupAuthFilter(pyramid_request))
+        return search
 
 
 class TestUserFilter(object):
-    def test_term_filters_for_user(self):
-        userfilter = query.UserFilter()
+    def test_filters_annotations_by_user(self, search, Annotation):
+        Annotation(userid="acct:foo@auth2", shared=True)
+        expected_ids = [Annotation(userid="acct:bar@auth2", shared=True).id]
 
-        assert userfilter({"user": "luke"}) == {"terms": {"user": ["luke"]}}
+        result = search.run({'user': "bar"})
 
-    def test_supports_filtering_for_multiple_users(self):
-        userfilter = query.UserFilter()
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-        params = multidict.MultiDict()
-        params.add("user", "alice")
-        params.add("user", "luke")
+    def test_filter_is_case_insensitive(self, search, Annotation):
+        ann_id = Annotation(userid="acct:bob@example", shared=True).id
 
-        assert userfilter(params) == {
-            "terms": {
-                "user": ["alice", "luke"]
-            }
-        }
+        result = search.run({"user": "BOB"})
 
-    def test_lowercases_value(self):
-        userfilter = query.UserFilter()
+        assert result.annotation_ids == [ann_id]
 
-        assert userfilter({"user": "LUkE"}) == {"terms": {"user": ["luke"]}}
+    def test_filters_annotations_by_multiple_users(self, search, Annotation):
+        Annotation(userid="acct:foo@auth2", shared=True)
+        expected_ids = [Annotation(userid="acct:bar@auth2", shared=True).id,
+                        Annotation(userid="acct:baz@auth2", shared=True).id]
 
-    def test_strips_param(self):
-        userfilter = query.UserFilter()
-        params = {"user": "luke"}
+        params = webob.multidict.MultiDict()
+        params.add("user", "bar")
+        params.add("user", "baz")
+        result = search.run(params)
 
-        userfilter(params)
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-        assert params == {}
+    def test_filters_annotations_by_user_and_authority(self, search, Annotation):
+        Annotation(userid="acct:foo@auth2", shared=True)
+        expected_ids = [Annotation(userid="acct:foo@auth3", shared=True).id]
 
-    def test_returns_none_when_no_param(self):
-        userfilter = query.UserFilter()
+        result = search.run({"user": "foo@auth3"})
 
-        assert userfilter({}) is None
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    @pytest.fixture
+    def search(self, search):
+        search.append_filter(query.UserFilter())
+        return search
+
+
+class TestUriFilter(object):
+    @pytest.mark.parametrize("field", ("uri", "url"))
+    def test_filters_by_field(self, search, Annotation, field):
+        Annotation(target_uri="https://foo.com")
+        expected_ids = [Annotation(target_uri="https://bar.com").id]
+
+        result = search.run({field: "https://bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filters_on_whole_url(self, search, Annotation):
+        Annotation(target_uri="http://bar.com/foo")
+        expected_ids = [Annotation(target_uri="http://bar.com").id,
+                        Annotation(target_uri="http://bar.com/").id]
+
+        result = search.run({"url": "http://bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filter_matches_invalid_uri(self, search, Annotation):
+        Annotation(target_uri="https://bar.com")
+        expected_ids = [Annotation(target_uri="invalid-uri").id]
+
+        result = search.run({"uri": "invalid-uri"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_filters_aliases_http_and_https(self, search, Annotation):
+        expected_ids = [Annotation(target_uri="http://bar.com").id,
+                        Annotation(target_uri="https://bar.com").id]
+
+        result = search.run({"url": "http://bar.com"})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_returns_all_annotations_with_equivalent_uris(self, search, Annotation, storage):
+        # Mark all these uri's as equivalent uri's.
+        storage.expand_uri.side_effect = lambda _, x: [
+            "urn:x-pdf:1234",
+            "file:///Users/june/article.pdf",
+            "doi:10.1.1/1234",
+            "http://reading.com/x-pdf",
+        ]
+        Annotation(target_uri="urn:x-pdf:1235")
+        Annotation(target_uri="file:///Users/jane/article.pdf").id
+        expected_ids = [Annotation(target_uri="urn:x-pdf:1234").id,
+                        Annotation(target_uri="doi:10.1.1/1234").id,
+                        Annotation(target_uri="http://reading.com/x-pdf").id,
+                        Annotation(target_uri="file:///Users/june/article.pdf").id]
+
+        params = webob.multidict.MultiDict()
+        params.add("url", "urn:x-pdf:1234")
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_ors_multiple_url_uris(self, search, Annotation):
+        Annotation(target_uri="http://baz.com")
+        Annotation(target_uri="https://www.foo.com")
+        expected_ids = [Annotation(target_uri="https://bar.com").id,
+                        Annotation(target_uri="http://bat.com").id,
+                        Annotation(target_uri="http://foo.com").id,
+                        Annotation(target_uri="https://foo.com/bar").id]
+
+        params = webob.multidict.MultiDict()
+        params.add("uri", "http://bat.com")
+        params.add("uri", "https://bar.com")
+        params.add("url", "http://foo.com")
+        params.add("url", "https://foo.com/bar")
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    @pytest.fixture
+    def search(self, search, pyramid_request):
+        search.append_filter(query.UriFilter(pyramid_request))
+        return search
+
+    @pytest.fixture
+    def storage(self, patch):
+        return patch('h.search.query.storage')
 
 
 class TestDeletedFilter(object):
-    def test_filter(self):
-        deletedfilter = query.DeletedFilter()
 
-        assert deletedfilter({}) == {
-            "bool": {"must_not": {"exists": {"field": "deleted"}}}
-        }
+    def test_excludes_deleted_annotations(self, search, Annotation):
+        deleted_ids = [Annotation(deleted=True).id]
+        not_deleted_ids = [Annotation(deleted=False).id]
+
+        # Deleted annotations need to be marked in the index using `h.search.index.delete`.
+        for id_ in deleted_ids:
+            index.delete(search.es, id_, refresh=True)
+
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(not_deleted_ids)
+
+    @pytest.fixture
+    def search(self, search):
+        search.append_filter(query.DeletedFilter())
+        return search
 
 
-class TestAnyMatcher():
-    def test_any_query(self):
-        anymatcher = query.AnyMatcher()
+@pytest.mark.usefixtures('pyramid_config')
+class TestNipsaFilter(object):
 
-        result = anymatcher({"any": "foo"})
+    def test_hides_banned_users_annotations_from_other_users(
+        self, pyramid_request, search, banned_user, user, Annotation
+    ):
+        pyramid_request.user = user
+        search.append_filter(query.NipsaFilter(pyramid_request))
+        Annotation(userid=banned_user.userid)
+        expected_ids = [Annotation(userid=user.userid).id]
 
-        assert result == {
-            "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts"],
-                "query": "foo",
-            }
-        }
+        result = search.run({})
 
-    def test_multiple_params(self):
-        """Multiple keywords at once are handled correctly."""
-        anymatcher = query.AnyMatcher()
-        params = multidict.MultiDict()
-        params.add("any", "howdy")
-        params.add("any", "there")
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-        result = anymatcher(params)
+    def test_shows_banned_users_annotations_to_banned_user(
+        self, pyramid_request, search, banned_user, user, Annotation
+    ):
+        pyramid_request.user = banned_user
+        search.append_filter(query.NipsaFilter(pyramid_request))
+        expected_ids = [Annotation(userid=banned_user.userid).id]
 
-        assert result == {
-            "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts"],
-                "query": "howdy there",
-            }
-        }
+        result = search.run({})
 
-    def test_aliases_tag_to_tags(self):
-        """'tag' params should be transformed into 'tags' queries.
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-        'tag' is aliased to 'tags' because users often type tag instead of tags.
+    def test_shows_banned_users_annotations_in_groups_they_created(
+        self, pyramid_request, search, banned_user, user, Annotation,
+        group_service,
+    ):
+        pyramid_request.user = user
+        group_service.groupids_created_by.return_value = ["created_by_banneduser"]
+        search.append_filter(query.NipsaFilter(pyramid_request))
+        expected_ids = [Annotation(groupid="created_by_banneduser",
+                                   userid=banned_user.userid).id]
 
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    @pytest.fixture
+    def banned_user(self, factories):
+        return factories.User(username="banned", nipsa=True)
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User(username="notbanned", nipsa=False)
+
+    @pytest.fixture
+    def pyramid_config(self, pyramid_config, banned_user):
+        # Fake implementation of the `AnnotationTransformEvent` subscriber
+        # which adds the "nipsa" flag to annotations during indexing.
+        def add_nipsa_flag(event):
+            if event.annotation.userid == banned_user.userid:
+                event.annotation_dict['nipsa'] = True
+        pyramid_config.add_subscriber(add_nipsa_flag, 'h.events.AnnotationTransformEvent')
+
+        return pyramid_config
+
+    @pytest.fixture
+    def group_service(self, group_service):
+        group_service.groupids_created_by.return_value = []
+        return group_service
+
+
+class TestAnyMatcher(object):
+    def test_matches_uriparts(self, search, Annotation):
+        Annotation(target_uri="http://bar.com")
+        matched_ids = [Annotation(target_uri="http://foo.com").id,
+                       Annotation(target_uri="http://foo.com/bar").id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_matches_quote(self, search, Annotation):
+        Annotation(target_selectors=[{'exact': 'selected bar text'}])
+        matched_ids = [Annotation(target_selectors=[{'exact': 'selected foo text'}]).id,
+                       Annotation(target_selectors=[{'exact': 'selected foo bar text'}]).id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_matches_text(self, search, Annotation):
+        Annotation(text="bar is best")
+        matched_ids = [Annotation(text="foo is fun").id,
+                       Annotation(text="foo is bar's friend").id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_matches_tags(self, search, Annotation):
+        Annotation(tags=["bar"])
+        matched_ids = [Annotation(tags=["foo"]).id,
+                       Annotation(tags=["foo", "bar"]).id]
+
+        result = search.run({"any": "foo"})
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    def test_ors_any_matches(self, search, Annotation):
         """
-        params = multidict.MultiDict()
-        params.add('tag', 'foo')
-        params.add('tag', 'bar')
+        Any is expected to match any of the following fields;
+        quote, text, uri.parts, and tags
+        that contain any of the passed keywords.
+        """
+        Annotation(target_selectors=[{'exact': 'selected baz text'}])
+        Annotation(tags=["baz"])
+        Annotation(target_uri="baz.com")
+        Annotation(text="baz is best")
 
-        result = query.TagsMatcher()(params)
+        matched_ids = [Annotation(target_uri="foo/bar/baz.com").id,
+                       Annotation(target_selectors=[{'exact': 'selected foo text'}]).id,
+                       Annotation(text="bar is best").id,
+                       Annotation(tags=["foo"]).id]
 
-        assert list(result.keys()) == ['bool']
-        assert list(result['bool'].keys()) == ['must']
-        assert len(result['bool']['must']) == 2
-        assert {'match': {'tags': {'query': 'foo', 'operator': 'and'}}} in result['bool']['must']
-        assert {'match': {'tags': {'query': 'bar', 'operator': 'and'}}} in result['bool']['must']
+        params = webob.multidict.MultiDict()
+        params.add("any", "foo")
+        params.add("any", "bar")
+        result = search.run(params)
 
-    def test_with_both_tag_and_tags(self):
-        """If both 'tag' and 'tags' params are used they should all become tags."""
-        params = {'tag': 'foo', 'tags': 'bar'}
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
 
-        result = query.TagsMatcher()(params)
+    @pytest.fixture
+    def search(self, search):
+        search.append_matcher(query.AnyMatcher())
+        return search
 
-        assert list(result.keys()) == ['bool']
-        assert list(result['bool'].keys()) == ['must']
-        assert len(result['bool']['must']) == 2
-        assert {'match': {'tags': {'query': 'foo', 'operator': 'and'}}} in result['bool']['must']
-        assert {'match': {'tags': {'query': 'bar', 'operator': 'and'}}} in result['bool']['must']
+    @pytest.fixture
+    def Annotation(self, Annotation):
+        # Override the default randomly-generated values for fields which
+        # "any" matches against to ensure that we do not get unexpected
+        # matches in tests. This will need to be modified if new fields are
+        # added to the set which "any" matches against.
+        def AnnotationWithDefaults(*args, **kwargs):
+            kwargs.setdefault('tags', [])
+            kwargs.setdefault('target_selectors', [{'exact': 'quotedoesnotmatch'}])
+            kwargs.setdefault('target_uri', 'http://uridoesnotmatch.com')
+            kwargs.setdefault('text', '')
+            return Annotation(*args, **kwargs)
+        return AnnotationWithDefaults
 
 
-class TestTagsAggregations(object):
-    def test_key_is_tags(self):
-        assert query.TagsAggregation().key == 'tags'
+class TestTagsMatcher(object):
+    def test_matches_tag_key(self, search, Annotation):
+        Annotation(shared=True)
+        Annotation(shared=True, tags=["bar"])
+        matched_ids = [Annotation(shared=True, tags=["foo"]).id,
+                       Annotation(shared=True, tags=["foo", "bar"]).id]
 
-    def test_elasticsearch_aggregation(self):
-        agg = query.TagsAggregation()
-        assert agg({}) == {
-            'terms': {'field': 'tags_raw', 'size': 0}
-        }
+        result = search.run({"tag": "foo"})
 
-    def test_it_allows_to_set_a_limit(self):
-        agg = query.TagsAggregation(limit=14)
-        assert agg({}) == {
-            'terms': {'field': 'tags_raw', 'size': 14}
-        }
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
 
-    def test_parse_result(self):
-        agg = query.TagsAggregation()
-        elasticsearch_result = {
-            'buckets': [
-                {'key': 'tag-4', 'doc_count': 42},
-                {'key': 'tag-2', 'doc_count': 28},
-            ]
-        }
+    def test_matches_tags_key(self, search, Annotation):
+        Annotation(shared=True)
+        Annotation(shared=True, tags=["bar"])
+        matched_ids = [Annotation(shared=True, tags=["foo"]).id,
+                       Annotation(shared=True, tags=["foo", "bar"]).id]
 
-        assert agg.parse_result(elasticsearch_result) == [
-            {'tag': 'tag-4', 'count': 42},
-            {'tag': 'tag-2', 'count': 28},
-        ]
+        result = search.run({"tags": "foo"})
 
-    def test_parse_result_with_none(self):
-        agg = query.TagsAggregation()
-        assert agg.parse_result(None) == {}
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
 
-    def test_parse_result_with_empty(self):
-        agg = query.TagsAggregation()
-        assert agg.parse_result({}) == {}
+    def test_ands_multiple_tag_keys(self, search, Annotation):
+        Annotation(shared=True)
+        Annotation(shared=True, tags=["bar"])
+        Annotation(shared=True, tags=["baz"])
+        Annotation(shared=True, tags=["boo"])
+        matched_ids = [Annotation(shared=True, tags=["foo", "baz", "fie", "boo"]).id,
+                       Annotation(shared=True, tags=["foo", "baz", "fie", "boo", "bar"]).id]
+
+        params = webob.multidict.MultiDict()
+        params.add("tags", "foo")
+        params.add("tags", "boo")
+        params.add("tag", "fie")
+        params.add("tag", "baz")
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(matched_ids)
+
+    @pytest.fixture
+    def search(self, search):
+        search.append_matcher(query.TagsMatcher())
+        return search
+
+
+class TestRepliesMatcher(object):
+    def test_matches_unnested_replies_to_annotations(self, Annotation, search):
+        ann1 = Annotation()
+        ann2 = Annotation()
+        ann3 = Annotation()
+        Annotation()
+        # Create two replies on ann1.
+        reply1 = Annotation(references=[ann1.id])
+        reply2 = Annotation(references=[ann1.id])
+        # Create a reply on ann2
+        reply3 = Annotation(references=[ann2.id])
+        # Create a reply on ann3
+        Annotation(references=[ann3.id])
+
+        expected_reply_ids = [reply1.id, reply2.id, reply3.id]
+
+        ann_ids = [ann1.id, ann2.id]
+        search.append_matcher(query.RepliesMatcher(ann_ids))
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
+
+    def test_matches_replies_of_replies_to_an_annotation(self, Annotation, search):
+        ann1 = Annotation()
+        # Create a reply on ann1 and a reply to the reply.
+        reply1 = Annotation(references=[ann1.id])
+        reply2 = Annotation(references=[ann1.id, reply1.id])
+
+        expected_reply_ids = [reply1.id, reply2.id]
+
+        ann_ids = [ann1.id]
+        search.append_matcher(query.RepliesMatcher(ann_ids))
+        result = search.run({})
+
+        assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
+
+
+class TestTagsAggregation(object):
+    def test_it_returns_annotation_counts_by_tag(self, Annotation, search):
+        for i in range(2):
+            Annotation(tags=["tag_a"])
+        Annotation(tags=["tag_b"])
+
+        search.append_aggregation(query.TagsAggregation())
+        result = search.run({})
+
+        tag_results = result.aggregations["tags"]
+        count_for_tag_a = next(r for r in tag_results if r["tag"] == "tag_a")["count"]
+        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
+
+        assert len(tag_results) == 2
+        assert count_for_tag_a == 2
+        assert count_for_tag_b == 1
+
+    def test_it_limits_number_of_annotation_counts_by_tag_returned(self, Annotation, search):
+        bucket_limit = 2
+
+        Annotation(tags=["tag_a"])
+        for i in range(3):
+            Annotation(tags=["tag_b"])
+        for i in range(2):
+            Annotation(tags=["tag_c"])
+
+        search.append_aggregation(query.TagsAggregation(bucket_limit))
+        result = search.run({})
+
+        tag_results = result.aggregations["tags"]
+        count_for_tag_b = next(r for r in tag_results if r["tag"] == "tag_b")["count"]
+        count_for_tag_c = next(r for r in tag_results if r["tag"] == "tag_c")["count"]
+
+        assert len(tag_results) == bucket_limit
+        assert count_for_tag_b == 3
+        assert count_for_tag_c == 2
 
 
 class TestUsersAggregation(object):
-    def test_key_is_users(self):
-        assert query.UsersAggregation().key == 'users'
+    def test_it_returns_annotation_counts_by_user(self, Annotation, search):
+        for i in range(2):
+            Annotation(userid="acct:pa@example.com")
+        Annotation(userid="acct:pb@example.com")
 
-    def test_elasticsearch_aggregation(self):
-        agg = query.UsersAggregation()
-        assert agg({}) == {
-            'terms': {'field': 'user_raw', 'size': 0}
-        }
+        search.append_aggregation(query.UsersAggregation())
+        result = search.run({})
 
-    def test_it_allows_to_set_a_limit(self):
-        agg = query.UsersAggregation(limit=14)
-        assert agg({}) == {
-            'terms': {'field': 'user_raw', 'size': 14}
-        }
+        users_results = result.aggregations["users"]
+        count_pa = next(r for r in users_results if r["user"] == "acct:pa@example.com")["count"]
+        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")["count"]
 
-    def test_parse_result(self):
-        agg = query.UsersAggregation()
-        elasticsearch_result = {
-            'buckets': [
-                {'key': 'alice', 'doc_count': 42},
-                {'key': 'luke', 'doc_count': 28},
-            ]
-        }
+        assert len(users_results) == 2
+        assert count_pa == 2
+        assert count_pb == 1
 
-        assert agg.parse_result(elasticsearch_result) == [
-            {'user': 'alice', 'count': 42},
-            {'user': 'luke', 'count': 28},
-        ]
+    def test_it_limits_number_of_annotation_counts_by_user_returned(self, Annotation, search):
+        bucket_limit = 2
 
-    def test_parse_result_with_none(self):
-        agg = query.UsersAggregation()
-        assert agg.parse_result(None) == {}
+        Annotation(userid="acct:pa@example.com")
+        for i in range(3):
+            Annotation(userid="acct:pb@example.com")
+        for i in range(2):
+            Annotation(userid="acct:pc@example.com")
 
-    def test_parse_result_with_empty(self):
-        agg = query.UsersAggregation()
-        assert agg.parse_result({}) == {}
+        search.append_aggregation(query.UsersAggregation(limit=bucket_limit))
+        result = search.run({})
+
+        users_results = result.aggregations["users"]
+        count_pb = next(r for r in users_results if r["user"] == "acct:pb@example.com")["count"]
+        count_pc = next(r for r in users_results if r["user"] == "acct:pc@example.com")["count"]
+
+        assert len(users_results) == bucket_limit
+        assert count_pb == 3
+        assert count_pc == 2
+
+
+@pytest.fixture(params=['es1', 'es6'])
+def pyramid_request(request, pyramid_request, es_client, es6_client):
+    pyramid_request.es = es_client
+    pyramid_request.es6 = es6_client
+    pyramid_request.feature.flags['search_es6'] = request.param == 'es6'
+    return pyramid_request
+
+
+@pytest.fixture
+def search(pyramid_request):
+    search = Search(pyramid_request)
+    # Remove all default filters, aggregators, and matchers.
+    search.clear()
+    return search

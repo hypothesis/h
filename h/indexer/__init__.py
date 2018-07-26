@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from h.indexer.reindexer import reindex
 
 __all__ = (

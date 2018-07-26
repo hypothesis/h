@@ -2,7 +2,9 @@
 
 from __future__ import unicode_literals
 
+import datetime
 import random
+import uuid
 
 import factory
 from sqlalchemy import orm
@@ -26,6 +28,7 @@ class Annotation(ModelFactory):
     userid = factory.LazyFunction(lambda: "acct:{username}@{authority}".format(
         username=FAKER.user_name(), authority=FAKER.domain_name(levels=1)))
     document = factory.SubFactory(Document)
+    groupid = "__world__"
 
     @factory.lazy_attribute
     def target_selectors(self):
@@ -64,7 +67,7 @@ class Annotation(ModelFactory):
 
             This doesn't add anything to the database session yet.
             """
-            document_uri = DocumentURI.build(document=self.document,
+            document_uri = DocumentURI.build(document=None,
                                              claimant=self.target_uri,
                                              uri=self.target_uri)
             return dict(
@@ -77,15 +80,22 @@ class Annotation(ModelFactory):
         document_uri_dicts = [document_uri_dict()
                               for _ in range(random.randint(1, 3))]
 
-        def document_meta_dict(**kwargs):
+        def document_meta_dict(type_=None):
             """
             Return a randomly generated DocumentMeta dict for this annotation.
 
             This doesn't add anything to the database session yet.
             """
-            kwargs.setdefault('document', self.document)
-            kwargs.setdefault('claimant', self.target_uri)
+            kwargs = {
+                'document': None,
+                'claimant': self.target_uri,
+            }
+
+            if type_ is not None:
+                kwargs['type'] = type_
+
             document_meta = DocumentMeta.build(**kwargs)
+
             return dict(
                 claimant=document_meta.claimant,
                 type=document_meta.type,
@@ -98,7 +108,7 @@ class Annotation(ModelFactory):
         # Make sure that there's always at least one DocumentMeta with
         # type='title', so that we never get annotation.document.title is None:
         if 'title' not in [m['type'] for m in document_meta_dicts]:
-            document_meta_dicts.append(document_meta_dict(type='title'))
+            document_meta_dicts.append(document_meta_dict(type_='title'))
 
         self.document = update_document_metadata(
             orm.object_session(self),
@@ -108,3 +118,35 @@ class Annotation(ModelFactory):
             created=self.created,
             updated=self.updated,
         )
+
+    @factory.post_generation
+    def make_id(self, create, extracted, **kwargs):
+        """Add a randomly ID if the annotation doesn't have one yet."""
+        # If using the create strategy don't generate an id.
+        # models.Annotation.id's server_default function will generate one
+        # when the annotation is saved to the DB.
+        if create:
+            return
+
+        # Don't generate an id if the user passed in one of their own.
+        if getattr(self, "id", None):
+            return
+
+        self.id = uuid.uuid4().hex
+
+    @factory.post_generation
+    def timestamps(self, create, extracted, **kwargs):
+        # If using the create strategy let sqlalchemy set the created and
+        # updated times when saving to the DB.
+        if create:
+            return
+
+        # When using the build or stub strategy sqlalchemy won't set created or updated
+        # times for us, so do it ourselves instead.
+        #
+        # We're generating created and updated separately (calling now() twice
+        # instead of just once) so created and updated won't be exactly the
+        # same. This is consistent with how models.Annotation does it when
+        # saving to the DB.
+        self.created = self.created or datetime.datetime.now()
+        self.updated = self.updated or datetime.datetime.now()

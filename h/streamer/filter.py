@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import copy
 import operator
 import unicodedata
@@ -161,7 +162,7 @@ class FilterHandler(object):
 
 def first_of(a, b):
     return a[0] == b
-setattr(operator, 'first_of', first_of)
+setattr(operator, 'first_of', first_of)  # noqa:E305
 
 
 def match_of(a, b):
@@ -169,32 +170,32 @@ def match_of(a, b):
         if subb in a:
             return True
     return False
-setattr(operator, 'match_of', match_of)
+setattr(operator, 'match_of', match_of)  # noqa:E305
 
 
 def lene(a, b):
     return len(a) == b
-setattr(operator, 'lene', lene)
+setattr(operator, 'lene', lene)  # noqa:E305
 
 
 def leng(a, b):
     return len(a) > b
-setattr(operator, 'leng', leng)
+setattr(operator, 'leng', leng)  # noqa:E305
 
 
 def lenge(a, b):
     return len(a) >= b
-setattr(operator, 'lenge', lenge)
+setattr(operator, 'lenge', lenge)  # noqa:E305
 
 
 def lenl(a, b):
     return len(a) < b
-setattr(operator, 'lenl', lenl)
+setattr(operator, 'lenl', lenl)  # noqa:E305
 
 
 def lenle(a, b):
     return len(a) <= b
-setattr(operator, 'lenle', lenle)
+setattr(operator, 'lenle', lenle)  # noqa:E305
 
 
 def uni_fold(text):
@@ -208,4 +209,4 @@ def uni_fold(text):
 
     text = text.lower()
     text = unicodedata.normalize('NFKD', text)
-    return u"".join([c for c in text if not unicodedata.combining(c)])
+    return "".join([c for c in text if not unicodedata.combining(c)])

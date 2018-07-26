@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 
-import urlparse
+from h._compat import urlparse
 
 from jinja2 import Markup
 from pyramid import httpexceptions
@@ -14,12 +14,15 @@ from pyramid.view import view_defaults
 
 from h import util
 from h.activity import query
-from h.i18n import TranslationString as _
+from h.i18n import TranslationString as _  # noqa: N813
 from h.links import pretty_link
+from h.models.group import ReadableBy
 from h.paginator import paginate
 from h.search import parser
 from h.util.user import split_user
 from h.views.groups import check_slug
+from h.util.datetime import utc_us_style_date
+from h.traversal import OrganizationContext
 
 
 PAGE_SIZE = 200
@@ -87,7 +90,6 @@ class SearchController(object):
 
 @view_defaults(route_name='group_read',
                renderer='h:templates/activity/search.html.jinja2',
-               effective_principals=security.Authenticated,
                request_method='GET')
 class GroupSearchController(SearchController):
     """View callables unique to the "group_read" route."""
@@ -95,6 +97,7 @@ class GroupSearchController(SearchController):
     def __init__(self, group, request):
         super(GroupSearchController, self).__init__(request)
         self.group = group
+        self._organization_context = OrganizationContext(group.organization, request)
 
     @view_config(request_method='GET')
     def search(self):
@@ -108,7 +111,9 @@ class GroupSearchController(SearchController):
 
         result['opts'] = {'search_groupname': self.group.name}
 
-        if self.request.user not in self.group.members:
+        # If the group has read access only for members  and the user is not in that list
+        # return without extra info.
+        if self.group.readable_by == ReadableBy.members and (self.request.user not in self.group.members):
             return result
 
         def user_annotation_count(aggregation, userid):
@@ -118,33 +123,64 @@ class GroupSearchController(SearchController):
             return 0
 
         q = query.extract(self.request)
+        members = []
+        moderators = []
         users_aggregation = result['search_results'].aggregations.get('users', [])
-        members = [{'username': u.username,
-                    'userid': u.userid,
-                    'count': user_annotation_count(users_aggregation,
-                                                   u.userid),
-                    'faceted_by': _faceted_by_user(self.request,
-                                                   u.username,
-                                                   q)}
-                   for u in self.group.members]
-        members = sorted(members, key=lambda k: k['username'].lower())
+        # If the group has members provide a list of member info,
+        # otherwise provide a list of moderator info instead.
+        if self.group.members:
+            members = [{'username': u.username,
+                        'userid': u.userid,
+                        'count': user_annotation_count(users_aggregation,
+                                                       u.userid),
+                        'faceted_by': _faceted_by_user(self.request,
+                                                       u.username,
+                                                       q)}
+                       for u in self.group.members]
+            members = sorted(members, key=lambda k: k['username'].lower())
+        else:
+            moderators = []
+            if self.group.creator:
+                # Pass a list of moderators, anticipating that [self.group.creator]
+                # will change to an actual list of moderators at some point.
+                moderators = [{'username': u.username,
+                               'userid': u.userid,
+                               'count': user_annotation_count(users_aggregation,
+                                                              u.userid),
+                               'faceted_by': _faceted_by_user(self.request,
+                                                              u.username,
+                                                              q)}
+                              for u in [self.group.creator]]
+                moderators = sorted(moderators, key=lambda k: k['username'].lower())
 
         group_annotation_count = self.request.find_service(name='annotation_stats').group_annotation_count(self.group.pubid)
 
         result['stats'] = {
             'annotation_count': group_annotation_count,
         }
-
         result['group'] = {
-            'created': self.group.created.strftime('%B, %Y'),
+            'created': utc_us_style_date(self.group.created),
             'description': self.group.description,
             'name': self.group.name,
             'pubid': self.group.pubid,
             'url': self.request.route_url('group_read',
                                           pubid=self.group.pubid,
                                           slug=self.group.slug),
-            'members': members,
+            'share_subtitle': _('Share group'),
+            'share_msg': _('Sharing the link lets people view this group:'),
+            'organization': {'name': self.group.organization.name,
+                             'logo': self._organization_context.logo}
         }
+
+        if self.group.type == 'private':
+            result['group']['share_subtitle'] = _('Invite new members')
+            result['group']['share_msg'] = _('Sharing the link lets people join this group:')
+
+        result['group_users_args'] = [
+            _('Members'),
+            moderators if self.group.type == 'open' else members,
+            self.group.creator.userid if self.group.creator else None,
+        ]
 
         if self.request.has_permission('admin', self.group):
             result['group_edit_url'] = self.request.route_url(
@@ -156,6 +192,8 @@ class GroupSearchController(SearchController):
             result['zero_message'] = Markup(_(
                 'The group “{name}” has not made any annotations yet.').format(
                     name=Markup.escape(self.group.name)))
+
+        result['show_leave_button'] = self.request.user in self.group.members
 
         return result
 
@@ -181,7 +219,8 @@ class GroupSearchController(SearchController):
         return httpexceptions.HTTPSeeOther(location=url)
 
     @view_config(request_method='POST',
-                 request_param='group_leave')
+                 request_param='group_leave',
+                 effective_principals=security.Authenticated)
     def leave(self):
         """
         Leave the given group.
@@ -257,9 +296,15 @@ class GroupSearchController(SearchController):
 
     def _check_access_permissions(self):
         if not self.request.has_permission('read', self.group):
-            if self.request.has_permission('join', self.group):
+            show_join_page = self.request.has_permission('join', self.group)
+            if not self.request.user:
+                # Show a page which will prompt the user to login to join.
+                show_join_page = True
+
+            if show_join_page:
                 self.request.override_renderer = 'h:templates/groups/join.html.jinja2'
                 return {'group': self.group}
+
             raise httpexceptions.HTTPNotFound()
 
 
@@ -296,7 +341,7 @@ class UserSearchController(SearchController):
         result['user'] = {
             'name': self.user.display_name or self.user.username,
             'description': self.user.description,
-            'registered_date': self.user.registered_date.strftime('%B, %Y'),
+            'registered_date': utc_us_style_date(self.user.registered_date),
             'location': self.user.location,
             'uri': self.user.uri,
             'domain': domain(self.user),

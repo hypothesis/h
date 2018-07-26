@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from h.models import User
 from h.tasks.indexer import reindex_user_annotations
 
@@ -13,23 +14,40 @@ class NipsaService(object):
 
     def __init__(self, session):
         self.session = session
+
+        # Cache of all userids which have been flagged.
         self._flagged_userids = None
 
-    @property
-    def flagged_userids(self):
+    def fetch_all_flagged_userids(self):
         """
-        A list of all the NIPSA'd userids.
+        Fetch the userids of all shadowbanned / NIPSA'd users.
+
+        The set of userids is cached to speed up subsequent `flagged_userids`
+        and `is_flagged` calls in the same request.
 
         :rtype: set of unicode strings
         """
-        if self._flagged_userids is None:
-            query = self.session.query(User).filter_by(nipsa=True)
-            self._flagged_userids = set([u.userid for u in query])
+        if self._flagged_userids is not None:
+            return self._flagged_userids
+
+        # Filter using `is_` to match the index predicate for `User.nipsa`.
+        query = self.session.query(User).filter(User.nipsa.is_(True))
+        self._flagged_userids = set([u.userid for u in query])
+
         return self._flagged_userids
 
     def is_flagged(self, userid):
         """Return whether the given userid is flagged as "NIPSA"."""
-        return userid in self.flagged_userids
+
+        # Use the cache if populated.
+        if self._flagged_userids is not None:
+            return userid in self._flagged_userids
+
+        # Otherwise lookup the status for a single user, which is more efficient
+        # than populating the cache if we are only looking up the NIPSA status
+        # for a small number of users in a given task/request.
+        user = self.session.query(User).filter_by(userid=userid).one_or_none()
+        return user and user.nipsa
 
     def flag(self, user):
         """
@@ -40,6 +58,8 @@ class NipsaService(object):
         message for the user will still be published to the queue).
         """
         user.nipsa = True
+        if self._flagged_userids is not None:
+            self._flagged_userids.add(user.userid)
         reindex_user_annotations.delay(user.userid)
 
     def unflag(self, user):
@@ -51,9 +71,12 @@ class NipsaService(object):
         queue).
         """
         user.nipsa = False
+        if self._flagged_userids is not None:
+            self._flagged_userids.remove(user.userid)
         reindex_user_annotations.delay(user.userid)
 
     def clear(self):
+        """Unload the cache of flagged userids, if populated."""
         self._flagged_userids = None
 
 

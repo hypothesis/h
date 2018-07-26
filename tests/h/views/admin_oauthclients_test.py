@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 from mock import create_autospec, Mock
 import pytest
 
-from tests.common.matchers import redirect_302_to
-
 from h.models.auth_client import AuthClient, GrantType, ResponseType
 from h.views.admin_oauthclients import index, AuthClientCreateController, AuthClientEditController
 
@@ -115,7 +113,7 @@ class TestAuthClientCreateController(object):
         client = pyramid_request.db.query(AuthClient).one()
         assert client.secret is None
 
-    def test_post_redirects_to_edit_view(self, form_post, pyramid_request):
+    def test_post_redirects_to_edit_view(self, form_post, matchers, pyramid_request):
         pyramid_request.POST = form_post
         ctrl = AuthClientCreateController(pyramid_request)
 
@@ -124,7 +122,7 @@ class TestAuthClientCreateController(object):
         client = pyramid_request.db.query(AuthClient).one()
         expected_location = pyramid_request.route_url('admin_oauthclients_edit',
                                                       id=client.id)
-        assert response == redirect_302_to(expected_location)
+        assert response == matchers.Redirect302To(expected_location)
 
 
 @pytest.mark.usefixtures('routes')
@@ -177,7 +175,7 @@ class TestAuthClientEditController(object):
         assert authclient.secret == old_secret
         assert ctx['form'] == self._expected_form(authclient)
 
-    def test_delete_removes_authclient(self, authclient, pyramid_request):
+    def test_delete_removes_authclient(self, authclient, matchers, pyramid_request):
         pyramid_request.db.delete = create_autospec(pyramid_request.db.delete, return_value=None)
         ctrl = AuthClientEditController(authclient, pyramid_request)
 
@@ -185,14 +183,14 @@ class TestAuthClientEditController(object):
 
         pyramid_request.db.delete.assert_called_with(authclient)
 
-    def test_delete_redirects_to_index(self, authclient, pyramid_request):
+    def test_delete_redirects_to_index(self, authclient, matchers, pyramid_request):
         pyramid_request.db.delete = create_autospec(pyramid_request.db.delete, return_value=None)
         ctrl = AuthClientEditController(authclient, pyramid_request)
 
         response = ctrl.delete()
 
         expected_location = pyramid_request.route_url('admin_oauthclients')
-        assert response == redirect_302_to(expected_location)
+        assert response == matchers.Redirect302To(expected_location)
 
     def _expected_form(self, authclient):
         return {'authority': authclient.authority,
@@ -204,19 +202,18 @@ class TestAuthClientEditController(object):
                 'grant_type': authclient.grant_type,
                 'response_type': authclient.response_type}
 
+    @pytest.fixture
+    def authclient(self, pyramid_request):
+        client = AuthClient(name='testclient',
+                            authority='annotator.org',
+                            secret='not_a_secret',
+                            trusted=False,
+                            grant_type=GrantType.authorization_code,
+                            response_type=ResponseType.code)
 
-@pytest.fixture
-def authclient(pyramid_request):
-    client = AuthClient(name='testclient',
-                        authority='annotator.org',
-                        secret='not_a_secret',
-                        trusted=False,
-                        grant_type=GrantType.authorization_code,
-                        response_type=ResponseType.code)
+        pyramid_request.db.add(client)
 
-    pyramid_request.db.add(client)
-
-    return client
+        return client
 
 
 @pytest.fixture

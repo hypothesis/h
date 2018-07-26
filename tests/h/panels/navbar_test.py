@@ -2,13 +2,15 @@
 
 from __future__ import unicode_literals
 
+import mock
 from mock import PropertyMock
 import pytest
 
 from h.panels.navbar import navbar
+from h.services.list_groups import ListGroupsService
 
 
-@pytest.mark.usefixtures('routes')
+@pytest.mark.usefixtures('routes', 'list_groups_svc')
 class TestNavbar(object):
     def test_it_sets_null_username_when_logged_out(self, req):
         result = navbar({}, req)
@@ -29,11 +31,12 @@ class TestNavbar(object):
             for g in user.groups
         ]
 
-    def test_includes_groups_suggestions_when_logged_in(self, req, user):
+    def test_includes_groups_suggestions_when_logged_in(self, req, user, open_group):
         req.user = user
         result = navbar({}, req)
-
-        assert result['groups_suggestions'] == [{'name': g.name, 'pubid': g.pubid}
+        assert result['groups_suggestions'] == [{'name': g.name,
+                                                 'pubid': g.pubid,
+                                                 'relationship': 'Creator' if g.creator == user else None}
                                                 for g in user.groups]
 
     def test_username_url_when_logged_in(self, req, user):
@@ -84,12 +87,22 @@ class TestNavbar(object):
         pyramid_config.add_route('logout', '/logout')
 
     @pytest.fixture
+    def open_group(self, factories):
+        return factories.OpenGroup()
+
+    @pytest.fixture
     def user(self, factories):
         user = factories.User(username='vannevar')
-        user.groups = [factories.Group(), factories.Group()]
+        user.groups = [factories.Group(creator=user), factories.Group()]
         return user
 
     @pytest.fixture
     def req(self, pyramid_request):
-        pyramid_request.user = None
         return pyramid_request
+
+    @pytest.fixture
+    def list_groups_svc(self, pyramid_config, user):
+        svc = mock.create_autospec(ListGroupsService, spec_set=True, instance=True)
+        svc.associated_groups.return_value = user.groups
+        pyramid_config.register_service(svc, name='list_groups')
+        return svc

@@ -1,18 +1,14 @@
-"""
-${message}
-
-Revision ID: ${up_revision}
-Revises: ${down_revision}
-Create Date: ${create_date}
-"""
-
+<%text># -*- coding: utf-8 -*-</%text>
+"""${message}"""
 from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 
 from alembic import op
 ${imports if imports else ""}
 
-revision = ${repr(str(up_revision))}
-down_revision = ${repr(str(down_revision))}
+revision = "${str(up_revision)}"
+down_revision = "${str(down_revision)}"
 
 
 def upgrade():

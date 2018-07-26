@@ -112,7 +112,7 @@ def document_metas_from_data(document_data, claimant):
         if path_prefix is None:
             path_prefix = []
 
-        for key, value in items.iteritems():
+        for key, value in items.items():
             keypath = path_prefix[:]
             keypath.append(key)
 
@@ -140,7 +140,7 @@ def document_metas_from_data(document_data, claimant):
                     'claimant': claimant,
                 })
 
-    items = {k: v for k, v in document_data.iteritems() if k != 'link'}
+    items = {k: v for k, v in document_data.items() if k != 'link'}
     document_meta_dicts = []
     transform_meta_(document_meta_dicts, items)
     return document_meta_dicts
@@ -158,18 +158,22 @@ def document_uris_from_links(link_dicts, claimant):
     document_uris = []
     for link in link_dicts:
 
+        # In Py 3, `dict.keys()` does not return a list and cannot be compared
+        # with a list, so explicitly convert the result.
+        link_keys = list(link.keys())
+
         # Disregard self-claim URLs as they're added separately later.
-        if link.keys() == ['href'] and link['href'] == claimant:
+        if link_keys == ['href'] and link['href'] == claimant:
             continue
 
         # Disregard doi links as these are being added separately from the
         # highwire and dc metadata later on.
-        if link.keys() == ['href'] and link['href'].startswith('doi:'):
+        if link_keys == ['href'] and link['href'].startswith('doi:'):
             continue
 
         # Disregard Highwire PDF links as these are being added separately from
         # the highwire metadata later on.
-        if set(link.keys()) == set(['href', 'type']):
+        if set(link_keys) == set(['href', 'type']):
             if link['type'] == 'application/pdf':
                 continue
 
@@ -261,7 +265,7 @@ def document_uri_self_claim(claimant):
     return {
         'claimant': claimant,
         'uri': claimant,
-        'type': u'self-claim',
+        'type': 'self-claim',
         'content_type': '',
     }
 

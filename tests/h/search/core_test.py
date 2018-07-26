@@ -1,334 +1,254 @@
-import mock
+# -*- coding: utf-8 -*-
+
+"""
+Tests for basic functionality of the `Search` class.
+
+Tests for filtering/matching/aggregating on specific annotation fields are in
+`query_test.py`.
+"""
+
+from __future__ import unicode_literals
+
+import datetime
 import pytest
 
-from h.search import core
-
-
-class FakeStatsdClient(object):
-    def pipeline(self):
-        return FakeStatsdPipeline()
-
-
-class FakeStatsdPipeline(object):
-    def timer(self, name):
-        return FakeStatsdTimer()
-
-    def incr(self, name):
-        pass
-
-    def send(self):
-        pass
-
-
-class FakeStatsdTimer(object):
-    def start(self):
-        return self
-
-    def stop(self):
-        pass
+from h import search
 
 
 class TestSearch(object):
-    def test_run_searches_annotations(self, pyramid_request, search_annotations):
-        params = mock.Mock()
+    """Unit tests for search.Search when no separate_replies argument is given."""
 
-        search_annotations.return_value = (0, [], {})
+    def test_it_returns_replies_in_annotations_ids(self, matchers, pyramid_request, Annotation):
+        """Without separate_replies it returns replies in annotation_ids.
 
-        search = core.Search(pyramid_request)
-        search.run(params)
+        Test that if no separate_replies argument is given then it returns the
+        ids of replies mixed in with the top-level annotations in
+        annotation_ids.
+        """
+        annotation = Annotation(shared=True)
+        reply_1 = Annotation(shared=True, references=[annotation.id])
+        reply_2 = Annotation(shared=True, references=[annotation.id])
 
-        search_annotations.assert_called_once_with(search, params)
+        result = search.Search(pyramid_request).run({})
 
-    def test_run_searches_replies(self,
-                                  pyramid_request,
-                                  search_replies,
-                                  search_annotations):
-        annotation_ids = [mock.Mock(), mock.Mock()]
-        search_annotations.return_value = (2, annotation_ids, {})
+        assert result.annotation_ids == matchers.UnorderedList([annotation.id, reply_1.id,
+                                                                reply_2.id])
 
-        search = core.Search(pyramid_request)
-        search.run({})
+    def test_replies_that_dont_match_the_search_arent_included(self, factories, pyramid_request,
+                                                               Annotation):
+        """Replies that don't match the search query aren't included.
 
-        search_replies.assert_called_once_with(search, annotation_ids)
+        Not even if the top-level annotations that they're replies to _are_
+        included.
+        """
+        user = factories.User()
+        reply_user = factories.User()
+        annotation = Annotation(userid=user.userid, shared=True)
+        reply = Annotation(userid=reply_user.userid, references=[annotation.id], shared=True)
 
-    def test_run_returns_search_results(self,
-                                        pyramid_request,
-                                        search_annotations,
-                                        search_replies):
-        total = 4
-        annotation_ids = ['id-1', 'id-3', 'id-6', 'id-5']
-        reply_ids = ['reply-8', 'reply-5']
-        aggregations = {'foo': 'bar'}
-        search_annotations.return_value = (total, annotation_ids, aggregations)
-        search_replies.return_value = reply_ids
+        result = search.Search(pyramid_request).run(
+            # Search for annotations from ``user``, so that ``reply_user``'s
+            # reply doesn't match.
+            params={"user": user.userid},
+        )
 
-        search = core.Search(pyramid_request)
-        result = search.run({})
+        assert reply.id not in result.annotation_ids
 
-        assert result == core.SearchResult(total, annotation_ids, reply_ids, aggregations)
+    def test_replies_from_different_pages_arent_included(self, pyramid_request, Annotation):
+        """Replies may not be on the same page of results as their annotations."""
+        # First create an annotation and a reply.
+        annotation = Annotation(shared=True)
+        reply = Annotation(references=[annotation.id], shared=True)
 
-    def test_search_annotations_includes_replies_by_default(self, pyramid_request, query):
-        search = core.Search(pyramid_request)
-        search.search_annotations({})
+        # Now create 19 more annotations so that the original annotation is
+        # pushed onto the second page of the search results, but the reply is
+        # still on the first page.
+        for _ in range(19):
+            Annotation(shared=True)
 
-        assert not query.TopLevelAnnotationsFilter.called, (
-                "Replies should not be filtered out of the 'rows' list if "
-                "separate_replies=True is not given")
+        # The reply is on the first page of search results, but the original annotation isn't.
+        result = search.Search(pyramid_request).run(params={"offset": 0, "limit": 20})
+        assert reply.id in result.annotation_ids
+        assert annotation.id not in result.annotation_ids
 
-    def test_search_annotations_parses_aggregation_results(self, pyramid_request):
-        search = core.Search(pyramid_request)
-        search.es.conn.search.return_value = {
-            'hits': {
-                'total': 0,
-                'hits': [],
-            },
-            'aggregations': {
-                'foobar': {'foo': 'bar'},
-                'bazqux': {'baz': 'qux'},
-            }
-        }
-        foobaragg = mock.Mock(key='foobar')
-        bazquxagg = mock.Mock(key='bazqux')
-        search.append_aggregation(foobaragg)
-        search.append_aggregation(bazquxagg)
+        # The original annotation is on the second page of search results, but the reply isn't.
+        result = search.Search(pyramid_request).run(params={"offset": 20})
+        assert reply.id not in result.annotation_ids
+        assert annotation.id in result.annotation_ids
 
-        search.search_annotations({})
+    def test_replies_can_come_before_annotations(self, pyramid_request, Annotation):
+        """A reply may appear before its annotation in the search results.
 
-        foobaragg.parse_result.assert_called_with({'foo': 'bar'})
-        bazquxagg.parse_result.assert_called_with({'baz': 'qux'})
+        Things are returned in updated order so normally a reply would appear
+        before the annotation that it is a reply to in the search results.
+        """
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        annotation = Annotation(updated=now, shared=True)
+        reply = Annotation(updated=now + five_mins, references=[annotation.id], shared=True)
 
-    def test_search_annotations_returns_parsed_aggregations(self, pyramid_request):
-        search = core.Search(pyramid_request)
-        search.es.conn.search.return_value = {
-            'hits': {'total': 0, 'hits': []},
-            'aggregations': {'foobar': {'foo': 'bar'}}
-        }
-        foobaragg = mock.Mock(key='foobar')
-        search.append_aggregation(foobaragg)
+        result = search.Search(pyramid_request).run({})
 
-        _, _, aggregations = search.search_annotations({})
-        assert aggregations == {'foobar': foobaragg.parse_result.return_value}
+        # The reply appears _before_ the annotation in the search results.
+        assert result.annotation_ids == [reply.id, annotation.id]
 
-    def test_search_annotations_works_with_stats_client(self, pyramid_request):
-        search = core.Search(pyramid_request, stats=FakeStatsdClient())
-        # This should not raise
-        search.search_annotations({})
+    def test_replies_can_come_after_annotations(self, pyramid_request, Annotation):
+        """A reply may appear after its annotation in the search results.
 
-    def test_search_replies_skips_search_by_default(self, pyramid_request):
-        search = core.Search(pyramid_request)
-        search.search_replies(['id-1', 'id-2'])
+        Things are returned in updated order so if the original author has
+        updated the top-level annotation since the reply was created, then the
+        annotation would come before the reply in the search results.
+        """
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        annotation = Annotation(updated=now + five_mins, shared=True)
+        reply = Annotation(updated=now, references=[annotation.id], shared=True)
 
-        assert not search.es.conn.search.called
+        result = search.Search(pyramid_request).run({})
 
-    def test_search_annotations_excludes_replies_when_asked(self, pyramid_request, query):
-        search = core.Search(pyramid_request, separate_replies=True)
+        # The reply appears _after_ the annotation in the search results.
+        assert result.annotation_ids == [annotation.id, reply.id]
 
-        search.search_annotations({})
+    def test_it_returns_an_empty_replies_list(self, pyramid_request, Annotation):
+        """Test that without separate_replies it returns an empty reply_ids.
 
-        assert mock.call(query.TopLevelAnnotationsFilter()) in \
-            search.builder.append_filter.call_args_list
+        If no separate_replies argument is given then it still returns a
+        reply_ids list but the list is always empty.
+        """
+        annotation = Annotation(shared=True)
+        Annotation(references=[annotation.id], shared=True)
+        Annotation(references=[annotation.id], shared=True)
 
-    def test_search_replies_adds_a_replies_matcher(self, pyramid_request, query):
-        search = core.Search(pyramid_request, separate_replies=True)
+        result = search.Search(pyramid_request).run({})
 
-        search.search_replies(['id-1', 'id-2'])
+        assert result.reply_ids == []
 
-        assert mock.call(query.RepliesMatcher(['id-1', 'id-2'])) in \
-            search.reply_builder.append_matcher.call_args_list
+    def test_it_passes_es_version_to_builder(self, pyramid_request, Builder):
+        client = pyramid_request.es
+        if pyramid_request.feature('search_es6'):
+            client = pyramid_request.es6
 
-    def test_search_replies_searches_replies_when_asked(self, pyramid_request):
-        search = core.Search(pyramid_request, separate_replies=True)
+        search.Search(pyramid_request)
 
-        search.es.conn.search.return_value = {
-            'hits': {
-                'total': 2,
-                'hits': [{'_id': 'reply-1'}, {'_id': 'reply-2'}],
-            }
-        }
-
-        assert search.search_replies(['id-1']) == ['reply-1', 'reply-2']
-
-    def test_search_replies_logs_warning_if_there_are_too_many_replies(self, pyramid_request, log):
-        search = core.Search(pyramid_request, separate_replies=True)
-
-        search.es.conn.search.return_value = {
-            'hits': {
-                'total': 1100,
-                'hits': [{'_id': 'reply-1'}],
-            }
-        }
-
-        search.search_replies(['id-1'])
-        assert log.warn.call_count == 1
-
-    def test_search_replies_works_with_stats_client(self, pyramid_request):
-        search = core.Search(pyramid_request,
-                             stats=FakeStatsdClient(),
-                             separate_replies=True)
-        # This should not raise
-        search.search_replies(['id-1'])
-
-    def test_append_filter_appends_to_annotation_builder(self, pyramid_request):
-        filter_ = mock.Mock()
-        search = core.Search(pyramid_request)
-        search.builder = mock.Mock()
-
-        search.append_filter(filter_)
-
-        search.builder.append_filter.assert_called_once_with(filter_)
-
-    def test_append_filter_appends_to_reply_builder(self, pyramid_request):
-        filter_ = mock.Mock()
-        search = core.Search(pyramid_request)
-        search.reply_builder = mock.Mock()
-
-        search.append_filter(filter_)
-
-        search.reply_builder.append_filter.assert_called_once_with(filter_)
-
-    def test_append_matcher_appends_to_annotation_builder(self, pyramid_request):
-        matcher = mock.Mock()
-
-        search = core.Search(pyramid_request)
-        search.builder = mock.Mock()
-        search.append_matcher(matcher)
-
-        search.builder.append_matcher.assert_called_once_with(matcher)
-
-    def test_append_matcher_appends_to_reply_builder(self, pyramid_request):
-        matcher = mock.Mock()
-        search = core.Search(pyramid_request)
-        search.reply_builder = mock.Mock()
-
-        search.append_matcher(matcher)
-
-        search.reply_builder.append_matcher.assert_called_once_with(matcher)
-
-    def test_append_aggregation_appends_to_annotation_builder(self, pyramid_request):
-        aggregation = mock.Mock()
-        search = core.Search(pyramid_request)
-        search.builder = mock.Mock()
-
-        search.append_aggregation(aggregation)
-
-        search.builder.append_aggregation.assert_called_once_with(aggregation)
+        assert Builder.call_count == 2
+        Builder.assert_any_call(es_version=client.version)
 
     @pytest.fixture
-    def search_annotations(self, patch):
-        return patch('h.search.core.Search.search_annotations')
-
-    @pytest.fixture
-    def search_replies(self, patch):
-        return patch('h.search.core.Search.search_replies')
-
-    @pytest.fixture
-    def query(self, patch):
-        return patch('h.search.core.query')
-
-    @pytest.fixture
-    def log(self, patch):
-        return patch('h.search.core.log')
+    def Builder(self, patch):
+        return patch('h.search.core.query.Builder', autospec=True)
 
 
-# @search_fixtures
-# def test_search_logs_a_warning_if_there_are_too_many_replies(log, pyramid_request):
-#     """It should log a warning if there's more than one page of replies."""
-#     parent_results = dummy_search_results(count=3)
-#     replies_results = dummy_search_results(count=100, name='reply')
-#     # The second call to search() returns 'total': 11000 but only returns
-#     # the first 100 of 11000 hits.
-#     replies_results['hits']['total'] = 11000
-#     pyramid_request.es.conn.search.side_effect = [parent_results, replies_results]
-#
-#     core.search(pyramid_request, {}, separate_replies=True)
-#
-#     assert log.warn.call_count == 1
+class TestSearchWithSeparateReplies(object):
+    """Unit tests for search.Search when separate_replies=True is given."""
 
+    def test_it_returns_replies_separately_from_annotations(self, matchers, pyramid_request,
+                                                            Annotation):
+        """If separate_replies=True replies and annotations are returned separately."""
+        annotation = Annotation(shared=True)
+        reply_1 = Annotation(references=[annotation.id], shared=True)
+        reply_2 = Annotation(references=[annotation.id], shared=True)
 
-# @search_fixtures
-# def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(log, pyramid_request):
-#     """It should not log a warning if there's less than one page of replies."""
-#     pyramid_request.es.conn.search.side_effect = [
-#         dummy_search_results(count=3),
-#         dummy_search_results(count=100, start=4, name='reply'),
-#     ]
-#
-#     core.search(pyramid_request, {}, separate_replies=True)
-#
-#     assert not log.warn.called
+        result = search.Search(pyramid_request, separate_replies=True).run({})
 
+        assert result.annotation_ids == [annotation.id]
+        assert result.reply_ids == matchers.UnorderedList([reply_1.id, reply_2.id])
 
-@pytest.mark.parametrize('filter_type', [
-    'DeletedFilter',
-    'AuthFilter',
-    'UriFilter',
-    'UserFilter',
-    'GroupFilter',
-])
-def test_default_querybuilder_includes_default_filters(filter_type, matchers, pyramid_request):
-    from h.search import query
-    builder = core.default_querybuilder(pyramid_request)
-    type_ = getattr(query, filter_type)
+    def test_replies_are_ordered_most_recently_updated_first(self, Annotation, pyramid_request):
+        annotation = Annotation(shared=True)
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        reply_1 = Annotation(updated=now + (five_mins * 2), references=[annotation.id], shared=True)
+        reply_2 = Annotation(updated=now, references=[annotation.id], shared=True)
+        reply_3 = Annotation(updated=now + five_mins, references=[annotation.id], shared=True)
 
-    assert matchers.instance_of(type_) in builder.filters
+        result = search.Search(pyramid_request, separate_replies=True).run({})
 
+        assert result.reply_ids == [reply_1.id, reply_3.id, reply_2.id]
 
-def test_default_querybuilder_includes_registered_filters(pyramid_request):
-    filter_factory = mock.Mock(return_value=mock.sentinel.MY_FILTER,
-                               spec_set=[])
-    pyramid_request.registry[core.FILTERS_KEY] = [filter_factory]
+    def test_replies_ignore_the_sort_param(self, Annotation, pyramid_request):
+        annotation = Annotation(shared=True)
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        reply_1 = Annotation(id="3", updated=now, references=[annotation.id], shared=True)
+        reply_2 = Annotation(id="1", updated=now + five_mins, references=[annotation.id],
+                             shared=True)
+        reply_3 = Annotation(id="2", updated=now + (five_mins * 2), references=[annotation.id],
+                             shared=True)
 
-    builder = core.default_querybuilder(pyramid_request)
-
-    filter_factory.assert_called_once_with(pyramid_request)
-    assert mock.sentinel.MY_FILTER in builder.filters
-
-
-@pytest.mark.parametrize('matcher_type', [
-    'AnyMatcher',
-    'TagsMatcher',
-])
-def test_default_querybuilder_includes_default_matchers(matchers, matcher_type, pyramid_request):
-    from h.search import query
-    builder = core.default_querybuilder(pyramid_request)
-    type_ = getattr(query, matcher_type)
-
-    assert matchers.instance_of(type_) in builder.matchers
-
-
-def test_default_querybuilder_includes_registered_matchers(pyramid_request):
-    matcher_factory = mock.Mock(return_value=mock.sentinel.MY_MATCHER,
-                                spec_set=[])
-    pyramid_request.registry[core.MATCHERS_KEY] = [matcher_factory]
-
-    builder = core.default_querybuilder(pyramid_request)
-
-    matcher_factory.assert_called_once_with(pyramid_request)
-    assert mock.sentinel.MY_MATCHER in builder.matchers
-
-
-def dummy_search_results(start=1, count=0, name='annotation'):
-    """Generate some dummy search results."""
-    out = {'hits': {'total': 0, 'hits': []}}
-
-    for i in range(start, start + count):
-        out['hits']['total'] += 1
-        out['hits']['hits'].append({
-            '_id': 'id_{}'.format(i),
-            '_source': {'name': '{}_{}'.format(name, i)},
+        result = search.Search(pyramid_request, separate_replies=True).run({
+            "sort": "id", "order": "asc",
         })
 
-    return out
+        assert result.reply_ids == [reply_3.id, reply_2.id, reply_1.id]
+
+    def test_separate_replies_that_dont_match_the_search_are_still_included(self, factories,
+                                                                            pyramid_request,
+                                                                            Annotation):
+        """All replies to the matching annotations are included.
+
+        Even if the replies don't match the search query. As long as the
+        top-level annotation matches the search query, its replies will be
+        included in reply_ids.
+        """
+        user = factories.User()
+        reply_user = factories.User()
+        annotation = Annotation(userid=user.userid, shared=True)
+        reply = Annotation(userid=reply_user.userid, references=[annotation.id], shared=True)
+
+        result = search.Search(pyramid_request, separate_replies=True).run(
+            # The reply would not match this search query because it's from
+            # ``reply_user`` not ``user``.
+            params={"user": user.userid},
+        )
+
+        assert result.reply_ids == [reply.id]
+
+    def test_replies_from_different_pages_are_included(self, pyramid_request, Annotation):
+        """Replies that would not be on the same page are included."""
+        # First create an annotation and a reply.
+        now = datetime.datetime.now()
+        five_mins = datetime.timedelta(minutes=5)
+        annotation = Annotation(updated=now + five_mins, shared=True)
+        reply = Annotation(updated=now, references=[annotation.id], shared=True)
+
+        # Now create 19 more annotations. Without separate_replies the
+        # annotation would be the 20th item in the search results (last item on
+        # the first page) and the reply would be pushed onto the second page.
+        for _ in range(19):
+            Annotation(shared=True)
+
+        result = search.Search(pyramid_request, separate_replies=True).run(params={"limit": 20})
+
+        # Even though the reply would have been on the second page of the
+        # search results, it is still included in reply_ids if
+        # separate_replies=True.
+        assert result.reply_ids == [reply.id]
+
+    def test_only_200_replies_are_included(self, pyramid_request, Annotation):
+        """No more than 200 replies can be included in reply_ids.
+
+        200 is the total maximum number of replies (to all annotations in
+        annotation_ids) that can be included in reply_ids.
+        """
+        annotation = Annotation(shared=True)
+        oldest_reply = Annotation(references=[annotation.id], shared=True)
+
+        # Create three more replies so that the oldest reply will be pushed out
+        # of reply_ids. (We only need 3, not 200, because we're going to use
+        # the _replies_limit test seam to limit it to 3 replies instead of 200.
+        # This is just to make the test faster.)
+        for _ in range(3):
+            Annotation(references=[annotation.id], shared=True)
+
+        result = search.Search(pyramid_request, separate_replies=True, _replies_limit=3).run({})
+
+        assert len(result.reply_ids) == 3
+        assert oldest_reply.id not in result.reply_ids
 
 
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    """Return a mock request with a faked out Elasticsearch connection."""
-    pyramid_request.es = mock.Mock(spec_set=['conn', 'index', 't'])
-    pyramid_request.es.conn.search.return_value = dummy_search_results(0)
+@pytest.fixture(params=['es1', 'es6'])
+def pyramid_request(request, pyramid_request, es_client, es6_client):
+    pyramid_request.es = es_client
+    pyramid_request.es6 = es6_client
+    pyramid_request.feature.flags["search_es6"] = request.param == 'es6'
     return pyramid_request
-
-
-@pytest.fixture
-def log(patch):
-    return patch('h.search.core.log')

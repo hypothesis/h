@@ -7,6 +7,7 @@ context, as a request property, `request.sentry`. This allows us to more easily
 log exceptions from within the application with a useful complement of
 diagnostic data.
 """
+from __future__ import unicode_literals
 
 import raven
 from raven.transport import GeventedHTTPTransport

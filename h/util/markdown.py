@@ -30,11 +30,14 @@ def _filter_link_attributes(tag, name, value):
 
     return False
 
+
 MARKDOWN_ATTRIBUTES = {
     'a': _filter_link_attributes,
     'img': ['alt', 'src', 'title'],
 }
-ALLOWED_ATTRIBUTES = dict(bleach.ALLOWED_ATTRIBUTES.items() + MARKDOWN_ATTRIBUTES.items())
+
+ALLOWED_ATTRIBUTES = bleach.ALLOWED_ATTRIBUTES.copy()
+ALLOWED_ATTRIBUTES.update(MARKDOWN_ATTRIBUTES)
 
 # Singleton instance of the bleach cleaner
 cleaner = None

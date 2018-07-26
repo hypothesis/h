@@ -1,12 +1,13 @@
 The Hypothesis community
 ========================
 
-Please be courteous and respectful in your communication on Slack_, IRC
+Please be courteous and respectful in your communication on Slack (`request an invite`_ or `log in once you've created an account`_), IRC
 (`#hypothes.is`_ on `freenode.net`_), the mailing list (`subscribe`_,
 `archive`_), and `GitHub`_. Humor is appreciated, but remember that some nuance
 may be lost in the medium and plan accordingly.
 
-.. _Slack: https://slack.hypothes.is
+.. _`request an invite`: https://slack.hypothes.is
+.. _`log in once you've created an account`: https://hypothesis-open.slack.com/
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
 .. _freenode.net: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is

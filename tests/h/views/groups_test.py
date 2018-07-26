@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import deform
 import mock
 import pytest
-from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPNotFound)
+from pyramid.httpexceptions import HTTPMovedPermanently
 
 from h.views import groups as views
 from h.models import (Group, User)
 from h.models.group import JoinableBy
+from h.services.group import GroupService
 
 
 @pytest.mark.usefixtures('group_service', 'handle_form_submission', 'routes')
@@ -30,8 +31,8 @@ class TestGroupCreateController(object):
         handle_form_submission.assert_called_once_with(
             controller.request,
             controller.form,
-            matchers.any_callable(),
-            matchers.any_callable(),
+            matchers.AnyCallable(),
+            matchers.AnyCallable(),
         )
 
     def test_post_returns_handle_form_submission(self,
@@ -54,7 +55,9 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert group_service.created == [('my_new_group', 'example.com', 'ariadna', 'foobar')]
+        assert group_service.create_private_group.call_args_list == [
+            mock.call(name='my_new_group', userid='ariadna', description='foobar'),
+        ]
 
     def test_post_redirects_if_form_valid(self,
                                           controller,
@@ -66,7 +69,7 @@ class TestGroupCreateController(object):
             return on_success({'name': 'my_new_group'})
         handle_form_submission.side_effect = return_on_success
 
-        assert controller.post() == matchers.redirect_303_to(
+        assert controller.post() == matchers.Redirect303To(
             '/g/abc123/fake-group')
 
     def test_post_does_not_create_group_if_form_invalid(self,
@@ -81,7 +84,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert group_service.created == []
+        assert not group_service.create_private_group.called
 
     def test_post_returns_template_data_if_form_invalid(self,
                                                         controller,
@@ -146,33 +149,6 @@ class TestGroupEditController(object):
 
 
 @pytest.mark.usefixtures('routes')
-class TestGroupReadUnauthenticated(object):
-    def test_redirects_if_slug_incorrect(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_request.matchdict['slug'] = 'another-slug'
-
-        with pytest.raises(HTTPMovedPermanently) as exc:
-            views.read_unauthenticated(group, pyramid_request)
-
-        assert exc.value.location == '/g/abc123/some-slug'
-
-    def test_returns_template_context(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug')
-        pyramid_request.matchdict['slug'] = 'some-slug'
-
-        result = views.read_unauthenticated(group, pyramid_request)
-
-        assert result == {'group': group}
-
-    def test_raises_not_found_when_not_joinable(self, pyramid_request):
-        group = FakeGroup('abc123', 'some-slug', joinable_by=None)
-        pyramid_request.matchdict['slug'] = 'some-slug'
-
-        with pytest.raises(HTTPNotFound):
-            views.read_unauthenticated(group, pyramid_request)
-
-
-@pytest.mark.usefixtures('routes')
 def test_read_noslug_redirects(pyramid_request):
     group = FakeGroup('abc123', 'some-slug')
 
@@ -187,23 +163,6 @@ class FakeGroup(object):
         self.pubid = pubid
         self.slug = slug
         self.joinable_by = joinable_by
-
-
-class FakeGroupService(object):
-    def __init__(self):
-        self.created = []
-        self.joined = []
-        self.left = []
-
-    def create(self, name, authority, userid, description):
-        self.created.append((name, authority, userid, description))
-        return FakeGroup('abc123', 'fake-group')
-
-    def member_join(self, group, userid):
-        self.joined.append((group, userid))
-
-    def member_leave(self, group, userid):
-        self.left.append((group, userid))
 
 
 class FakeForm(object):
@@ -230,7 +189,8 @@ def invalid_form():
 
 @pytest.fixture
 def group_service(pyramid_config):
-    service = FakeGroupService()
+    service = mock.create_autospec(GroupService, spec_set=True, instance=True)
+    service.create_private_group.return_value = FakeGroup('abc123', 'fake-group')
     pyramid_config.register_service(service, name='group')
     return service
 

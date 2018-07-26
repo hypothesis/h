@@ -28,7 +28,7 @@ def includeme(config):
     config.add_route('activity.search', '/search')
     config.add_route('activity.user_search',
                      '/users/{username}',
-                     factory='h.models.user:UserFactory',
+                     factory='h.traversal:UserRoot',
                      traverse='/{username}')
 
     # Admin
@@ -39,6 +39,9 @@ def includeme(config):
     config.add_route('admin_cohorts', '/admin/features/cohorts')
     config.add_route('admin_cohorts_edit', '/admin/features/cohorts/{id}')
     config.add_route('admin_groups', '/admin/groups')
+    config.add_route('admin_groups_create', '/admin/groups/new')
+    config.add_route('admin_groups_delete', '/admin/groups/delete/{pubid}')
+    config.add_route('admin_groups_edit', '/admin/groups/{pubid}')
     config.add_route('admin_mailer', '/admin/mailer')
     config.add_route('admin_mailer_test', '/admin/mailer/test')
     config.add_route('admin_nipsa', '/admin/nipsa')
@@ -46,8 +49,18 @@ def includeme(config):
     config.add_route('admin_oauthclients_create', '/admin/oauthclients/new')
     config.add_route('admin_oauthclients_edit',
                      '/admin/oauthclients/{id}',
-                     factory='h.resources.AuthClientFactory',
+                     factory='h.traversal.AuthClientRoot',
                      traverse='/{id}')
+    config.add_route('admin_organizations', '/admin/organizations')
+    config.add_route('admin_organizations_create', '/admin/organizations/new')
+    config.add_route('admin_organizations_delete',
+                     '/admin/organizations/delete/{pubid}',
+                     factory='h.traversal.OrganizationRoot',
+                     traverse='/{pubid}')
+    config.add_route('admin_organizations_edit',
+                     '/admin/organizations/{pubid}',
+                     factory='h.traversal.OrganizationRoot',
+                     traverse='/{pubid}')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
     config.add_route('admin_users_activate', '/admin/users/activate')
@@ -57,7 +70,7 @@ def includeme(config):
     # Annotations & stream
     config.add_route('annotation',
                      '/a/{id}',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.traversal:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('stream', '/stream')
     config.add_route('stream.user_query', '/u/{user}')
@@ -80,25 +93,26 @@ def includeme(config):
     config.add_route('api.annotations', '/api/annotations')
     config.add_route('api.annotation',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.traversal:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation_flag',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/flag',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.traversal:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation_hide',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}/hide',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.traversal:AnnotationRoot',
                      traverse='/{id}')
     config.add_route('api.annotation.jsonld',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
-                     factory='h.resources:AnnotationResourceFactory',
+                     factory='h.traversal:AnnotationRoot',
                      traverse='/{id}')
+    config.add_route('api.groups', '/api/groups')
     config.add_route('api.profile', '/api/profile')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.group_member',
                      '/api/groups/{pubid}/members/{user}',
-                     factory='h.models.group:GroupFactory',
+                     factory='h.traversal.GroupRoot',
                      traverse='/{pubid}')
     config.add_route('api.search', '/api/search')
     config.add_route('api.users', '/api/users')
@@ -116,20 +130,26 @@ def includeme(config):
     config.add_route('stream_atom', '/stream.atom')
     config.add_route('stream_rss', '/stream.rss')
 
+    # Organizations
+    config.add_route('organization_logo',
+                     '/organizations/{pubid}/logo',
+                     factory='h.traversal.OrganizationLogoRoot',
+                     traverse='/{pubid}')
+
     # Groups
     config.add_route('group_create', '/groups/new')
     config.add_route('group_edit',
                      '/groups/{pubid}/edit',
-                     factory='h.models.group:GroupFactory',
+                     factory='h.traversal.GroupRoot',
                      traverse='/{pubid}')
     # Match "/<pubid>/": we redirect to the version with the slug.
     config.add_route('group_read',
                      '/groups/{pubid}/{slug:[^/]*}',
-                     factory='h.models.group:GroupFactory',
+                     factory='h.traversal.GroupRoot',
                      traverse='/{pubid}')
     config.add_route('group_read_noslug',
                      '/groups/{pubid}',
-                     factory='h.models.group:GroupFactory',
+                     factory='h.traversal.GroupRoot',
                      traverse='/{pubid}')
 
     # Help
@@ -156,8 +176,7 @@ def includeme(config):
     config.add_route('education', '/education/', static=True)
     config.add_route('for-publishers', '/for-publishers/', static=True)
     config.add_route('fund', '/fund/', static=True)
-    config.add_route(
-        'help-center', 'https://hypothesis.zendesk.com/hc/en-us', static=True)
+    config.add_route('help-center', '/help/', static=True)
     config.add_route(
         'hypothesis-github', 'https://github.com/hypothesis', static=True)
     config.add_route(

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import collections
 import logging
 
@@ -25,6 +26,12 @@ class EventQueue(object):
                 break
 
             try:
+                # Notify all subscribers to this particular event. Note that the
+                # order in which subcribers run is not guaranteed [1] and if one
+                # fails, remaining subscribers to the same event which have not
+                # yet run will be skipped.
+                #
+                # [1] See https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/events.html
                 self.request.registry.notify(event)
             except Exception:
                 sentry = getattr(event.request, 'sentry', None)

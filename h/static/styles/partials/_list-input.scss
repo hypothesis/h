@@ -1,0 +1,47 @@
+.list-input {
+  /**
+   * Add padding to position list items below the absolutely-positioned field
+   * label.
+   */
+  padding-top: 30px;
+}
+
+.list-input__list {
+  padding-left: 0;
+}
+
+.list-input__item {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.list-input__item-inner {
+  display: flex;
+  flex-direction: row;
+}
+
+.list-input__remove-btn {
+  background: none;
+  border: none;
+  color: $grey-4;
+  margin-left: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  align-self: flex-end;
+}
+
+.list-input__remove-btn:hover {
+  color: $grey-6;
+}
+
+.list-input__error-list {
+  list-style-type: none;
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
+.list-input__error-item {
+  color: $brand;
+}

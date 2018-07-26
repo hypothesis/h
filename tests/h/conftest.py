@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 """
-The `conftest` module is automatically loaded by py.test and serves as a place
+The `conftest` module is automatically loaded by pytest and serves as a place
 to put fixture functions that are useful application-wide.
 """
+from __future__ import unicode_literals
 
 import functools
 import os
@@ -20,11 +21,14 @@ from sqlalchemy.orm import sessionmaker
 from webob.multidict import MultiDict
 
 from h import db
-from h import form
+from h import models
 from h.settings import database_url
 from h._compat import text_type
+from tests.common.fixtures import es_client, es6_client, es_connect  # noqa: F401
+from tests.common.fixtures import init_elasticsearch  # noqa: F401
+from tests.common.fixtures import delete_all_elasticsearch_documents  # noqa: F401
 
-TEST_AUTHORITY = u'example.com'
+TEST_AUTHORITY = 'example.com'
 TEST_DATABASE_URL = database_url(os.environ.get('TEST_DATABASE_URL',
                                                 'postgresql://postgres@localhost/htest'))
 
@@ -56,6 +60,7 @@ class DummyFeature(object):
 
     def clear(self):
         self.flags = {}
+
 
 class DummySession(object):
 
@@ -97,7 +102,7 @@ def autopatcher(request, target, **kwargs):
     return obj
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def cli():
     runner = click.testing.CliRunner()
     with runner.isolated_filesystem():
@@ -112,7 +117,12 @@ def db_engine():
     return engine
 
 
-@pytest.yield_fixture
+@pytest.fixture
+def default_organization(db_session):
+    return models.Organization.default(db_session)
+
+
+@pytest.fixture
 def db_session(db_engine):
     """
     Prepare the SQLAlchemy session object.
@@ -144,7 +154,7 @@ def db_session(db_engine):
         conn.close()
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def factories(db_session):
     from ..common import factories
     factories.set_session(db_session)
@@ -212,7 +222,7 @@ def patch(request):
     return functools.partial(autopatcher, request)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def pyramid_config(pyramid_settings, pyramid_request):
     """Pyramid configurator object."""
     with testing.testConfig(request=pyramid_request,
@@ -236,6 +246,7 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
     request.params = MultiDict()
     request.GET = request.params
     request.POST = request.params
+    request.user = None
     return request
 
 

@@ -1,41 +1,60 @@
 # -*- coding: utf-8 -*-
 
-from h.search.client import get_client
+from __future__ import unicode_literals
+from h.search.client import get_client, get_es6_client
 from h.search.config import init
+from h.search.connection import connect
 from h.search.core import Search
-from h.search.core import FILTERS_KEY
-from h.search.core import MATCHERS_KEY
+from h.search.query import TopLevelAnnotationsFilter
+from h.search.query import AuthorityFilter
+from h.search.query import TagsAggregation
+from h.search.query import UsersAggregation
 
 __all__ = (
     'Search',
+    'TopLevelAnnotationsFilter',
+    'AuthorityFilter',
+    'TagsAggregation',
+    'UsersAggregation',
     'get_client',
     'init',
+    'connect'
 )
 
 
 def includeme(config):
     settings = config.registry.settings
+
+    # Connection to version 6.x of ES follows
+    # TODO The munging of these settings may change when settings refactoring complete
+    kwargs = {}
+    kwargs['max_retries'] = settings.get('es.client.max_retries', 3)
+    kwargs['retry_on_timeout'] = settings.get('es.client.retry_on_timeout', False)
+    kwargs['timeout'] = settings.get('es.client.timeout', 10)
+
+    if 'es.client_poolsize' in settings:
+        kwargs['maxsize'] = settings['es.client_poolsize']
+
+    connect(hosts=[settings['es.url']], **kwargs)
+
+    # Connection to old (ES1.5) follows
     settings.setdefault('es.host', 'http://localhost:9200')
     settings.setdefault('es.index', 'hypothesis')
 
-    # Allow users of this module to register additional search filter and
-    # search matcher factories.
-    config.registry[FILTERS_KEY] = []
-    config.registry[MATCHERS_KEY] = []
-    config.add_directive('add_search_filter',
-                         lambda c, f: c.registry[FILTERS_KEY].append(config.maybe_dotted(f)))
-    config.add_directive('get_search_filters',
-                         lambda c: c.registry[FILTERS_KEY])
-    config.add_directive('add_search_matcher',
-                         lambda c, m: c.registry[MATCHERS_KEY].append(config.maybe_dotted(m)))
-    config.add_directive('get_search_matchers',
-                         lambda c: c.registry[MATCHERS_KEY])
-
-    # Add a property to all requests for easy access to the elasticsearch
+    # Add a property to all requests for easy access to the elasticsearch 1.x
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
     config.registry['es.client'] = get_client(settings)
     config.add_request_method(
         lambda r: r.registry['es.client'],
         name='es',
+        reify=True)
+
+    # Add a property to all requests for easy access to the elasticsearch 6.x
+    # client. This can be used for direct or bulk access without having to
+    # reread the settings.
+    config.registry['es6.client'] = get_es6_client(settings)
+    config.add_request_method(
+        lambda r: r.registry['es6.client'],
+        name='es6',
         reify=True)

@@ -7,7 +7,7 @@ import datetime
 import mock
 
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
-from h.resources import AnnotationResource
+from h.traversal import AnnotationContext
 
 
 class TestAnnotationJSONLDPresenter(object):
@@ -40,14 +40,14 @@ class TestAnnotationJSONLDPresenter(object):
                                       'test': 'foobar'}]}]
         }
 
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
         result = AnnotationJSONLDPresenter(resource).asdict()
 
         assert result == expected
 
     def test_id_returns_jsonld_id_link(self, group_service, fake_links_service):
         annotation = mock.Mock(id='foobar')
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         presenter = AnnotationJSONLDPresenter(resource)
 
@@ -55,16 +55,16 @@ class TestAnnotationJSONLDPresenter(object):
 
     def test_id_passes_annotation_to_link_service(self, group_service, fake_links_service):
         annotation = mock.Mock(id='foobar')
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         presenter = AnnotationJSONLDPresenter(resource)
-        _ = presenter.id
+        presenter.id
 
         assert fake_links_service.last_annotation == annotation
 
     def test_bodies_returns_textual_body(self, group_service, fake_links_service):
         annotation = mock.Mock(text='Flib flob flab', tags=None)
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         bodies = AnnotationJSONLDPresenter(resource).bodies
 
@@ -76,7 +76,7 @@ class TestAnnotationJSONLDPresenter(object):
 
     def test_bodies_appends_tag_bodies(self, group_service, fake_links_service):
         annotation = mock.Mock(text='Flib flob flab', tags=['giraffe', 'lion'])
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         bodies = AnnotationJSONLDPresenter(resource).bodies
 
@@ -97,7 +97,7 @@ class TestAnnotationJSONLDPresenter(object):
             {'type': 'TestSelector', 'test': 'foobar'},
             {'something': 'else'},
         ]
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         selectors = AnnotationJSONLDPresenter(resource).target[0]['selector']
 
@@ -122,7 +122,7 @@ class TestAnnotationJSONLDPresenter(object):
                 'endOffset': 43,
             }
         ]
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         selectors = AnnotationJSONLDPresenter(resource).target[0]['selector']
 
@@ -152,7 +152,7 @@ class TestAnnotationJSONLDPresenter(object):
                 'endOffset': 72,
             }
         ]
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         selectors = AnnotationJSONLDPresenter(resource).target[0]['selector']
 
@@ -188,7 +188,7 @@ class TestAnnotationJSONLDPresenter(object):
                 'endContainer': '/div[1]/main[1]/article[1]/div[2]/p[339]',
             }
         ]
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         target = AnnotationJSONLDPresenter(resource).target[0]
 

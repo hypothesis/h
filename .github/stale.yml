@@ -1,0 +1,4 @@
+# Label to use when marking as stale
+staleLabel: stale
+# Limit to only `issues` or `pulls`
+only: pulls

@@ -1,13 +1,15 @@
 {% set show_char_counter = field.widget.template in ('textinput', 'textarea') and
                            field.widget.max_length %}
+{% set has_label = not (field.widget.hidden or field.widget.omit_label or
+                        field.widget.category == 'structural') %}
 {%- if not field.widget.hidden -%}
 <div class="form-input
             js-form-input
             {% if field.error %}is-error{% endif %}
             {% if show_char_counter %} js-character-limit {%- endif %}
             {% if field.schema.hide_until_form_active %} is-hidden-when-loading {%- endif %}"
-     {%- if field.description -%}
-     title="{{ _(field.description) }}"
+     {%- if field.description-%}
+     title="{{ _(field.description) | striptags }}"
      {% endif %}
      {%- if field.schema.hide_until_form_active -%}
      data-hide-until-active="true"
@@ -19,7 +21,7 @@
      id="item-{{ field.oid }}">
 {% endif -%}
 
-{%- if not (field.widget.hidden or field.widget.omit_label or field.widget.category == 'structural') -%}
+{%- if has_label -%}
   <label class="form-input__label {% if field.widget.label_css_class %} {{ field.widget.label_css_class }}{% endif %}
                 {%- if field.schema.hint -%}js-tooltip{% endif %}"
          {%- if field.schema.hint %}aria-label="{{ field.schema.hint }}"{% endif %}
@@ -40,11 +42,13 @@
   </label>
 {% endif -%}
 
-{{ field.serialize(cstruct) }}
+{{ field.serialize(cstruct, has_label=has_label) }}
 
 {%- if field.error and not field.widget.hidden -%}
   <ul class="form-input__error-list">
-  {% for msg in field.error.messages() -%}
+  {# Only show the first error message for each field. #}
+  {# https://github.com/hypothesis/product-backlog/issues/581 #}
+  {% for msg in field.error.messages()[0:1] -%}
     {%- set errstr = 'error-%s' % field.oid -%}
     {%- set pid = (loop.index0==0 and errstr) or ('%s-%s' % (errstr, loop.index0)) -%}
     <li class="form-input__error-item" id="{{ pid }}">{{ _(msg) }}</li>

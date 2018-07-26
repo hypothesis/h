@@ -57,9 +57,9 @@
 }
 
 .search-results__total {
+  font-size: 17px;
   color: $brand;
   margin-bottom: 25px;
-  word-spacing: 4px;
 }
 
 .search-results__list {
@@ -95,6 +95,7 @@
 }
 
 .search-result__timeframe {
+  color: $grey-4;
   font-weight: bold;
   padding-bottom: 10px;
   border-bottom: 1px solid $grey-2;
@@ -165,7 +166,7 @@
 }
 
 .search-result-bucket__title {
-  color: black;
+  color: $grey-6;
   text-decoration: none;
   font-weight: bold;
   flex-grow: 1;
@@ -183,6 +184,7 @@
 
 .search-result-bucket__annotations-count-container {
   width: 30px;
+  color: $grey-6;
   background-color: $grey-2;
   text-align: center;
   border-radius: 2px;

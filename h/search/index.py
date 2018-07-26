@@ -8,7 +8,7 @@ import time
 from collections import namedtuple
 
 import sqlalchemy as sa
-from elasticsearch import helpers as es_helpers
+from elasticsearch1 import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
 from h import models
@@ -54,13 +54,13 @@ def index(es, annotation, request, target_index=None):
 
     es.conn.index(
         index=target_index,
-        doc_type=es.t.annotation,
+        doc_type=es.mapping_type,
         body=annotation_dict,
         id=annotation_dict["id"],
     )
 
 
-def delete(es, annotation_id, target_index=None):
+def delete(es, annotation_id, target_index=None, refresh=False):
     """
     Mark an annotation as deleted in the search index.
 
@@ -77,6 +77,10 @@ def delete(es, annotation_id, target_index=None):
 
     :param target_index: the index name, uses default index if not given
     :type target_index: unicode
+
+    :param refresh: Force this deletion to be immediately visible to search operations
+    :type refresh: bool
+
     """
 
     if target_index is None:
@@ -84,9 +88,10 @@ def delete(es, annotation_id, target_index=None):
 
     es.conn.index(
         index=target_index,
-        doc_type=es.t.annotation,
+        doc_type=es.mapping_type,
         body={'deleted': True},
-        id=annotation_id)
+        id=annotation_id,
+        refresh=refresh)
 
 
 class BatchIndexer(object):
@@ -107,28 +112,31 @@ class BatchIndexer(object):
         else:
             self._target_index = target_index
 
-    def index(self, annotation_ids=None):
+    def index(self, annotation_ids=None, windowsize=PG_WINDOW_SIZE, chunk_size=ES_CHUNK_SIZE):
         """
         Reindex annotations.
 
         :param annotation_ids: a list of ids to reindex, reindexes all when `None`.
         :type annotation_ids: collection
+        :param windowsize: the number of annotations to index in between progress log statements
+        :type windowsize: integer
+        :param chunk_size: the number of docs in one chunk sent to ES
+        :type chunk_size: integer
 
         :returns: a set of errored ids
         :rtype: set
         """
         if not annotation_ids:
-            annotations = _all_annotations(session=self.session,
-                                           windowsize=PG_WINDOW_SIZE)
+            annotations = _all_annotations(session=self.session, windowsize=windowsize)
         else:
             annotations = _filtered_annotations(session=self.session,
                                                 ids=annotation_ids)
 
         # Report indexing status as we go
-        annotations = _log_status(annotations, log_every=PG_WINDOW_SIZE)
+        annotations = _log_status(annotations, log_every=windowsize)
 
         indexing = es_helpers.streaming_bulk(self.es_client.conn, annotations,
-                                             chunk_size=ES_CHUNK_SIZE,
+                                             chunk_size=chunk_size,
                                              raise_on_error=False,
                                              expand_action_callback=self._prepare)
         errored = set()
@@ -145,7 +153,7 @@ class BatchIndexer(object):
 
     def _prepare(self, annotation):
         action = {self.op_type: {'_index': self._target_index,
-                                 '_type': self.es_client.t.annotation,
+                                 '_type': self.es_client.mapping_type,
                                  '_id': annotation.id}}
         data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
 

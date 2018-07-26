@@ -1,5 +1,7 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
+{% from '../includes/search_form.html.jinja2' import search_form %}
+
 {% set page_id = 'groups' %}
 {% set page_title = 'Groups' %}
 
@@ -8,12 +10,15 @@
     On this page you can see a list of all the groups and their details.
   </p>
 
+  {{ search_form('Search by name…', request.params.get('q')) }}
+
   <div class="table-responsive">
     <table class="table table-striped">
       <thead>
         <tr>
           <th>Name</th>
           <th>URL</th>
+          <th>Organization</th>
           <th>Created by</th>
           <th>Members</th>
         </tr>
@@ -21,12 +26,24 @@
       <tbody>
         {% for group in results %}
           <tr>
-            <td>{{ group.name }}</td>
+            <td>
+              {% if group.type in ('open', 'restricted') %}
+              {% set edit_url = request.route_url('admin_groups_edit', pubid=group.pubid) %}
+              <a href="{{ edit_url }}">{{ group.name }}</a>
+              {% else %}
+              {# The group edit view does not currently support editing private groups. #}
+              {{ group.name }}
+              {% endif %}
+            </td>
             <td>
               {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
               <a href="{{ group_url }}">
                 {{ group_url }}
               </a>
+            </td>
+            <td>
+              {% set org_url = request.route_url('admin_organizations_edit', pubid=group.organization.pubid) %}
+              <a href="{{ org_url }}">{{ group.organization.name }}</a>
             </td>
             <td>
               {% if group.creator %}

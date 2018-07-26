@@ -48,7 +48,7 @@ def test_submit_create_group_form_with_xhr_returns_partial_html_snippet(app):
 
     res = group_form.submit(xhr=True)
 
-    assert res.body.strip('\n').startswith('<form')
+    assert res.body.strip(b'\n').startswith(b'<form')
 
 
 @pytest.mark.functional

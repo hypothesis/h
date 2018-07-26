@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import pytest
 
 from sqlalchemy.dialects.postgresql import dialect
@@ -61,13 +62,13 @@ def test_annotation_selector_serialize():
     t = types.AnnotationSelectorJSONB()
     selectors = [{
         'type': 'TextQuoteSelector',
-        'prefix': u'\u0000Lorem ipsum ',
-        'exact': u'dolor sit amet,\u0000 ',
-        'suffix': u'consectetur\u0000 adipiscing elit.'
+        'prefix': '\u0000Lorem ipsum ',
+        'exact': 'dolor sit amet,\u0000 ',
+        'suffix': 'consectetur\u0000 adipiscing elit.'
     }]
 
     value = t.process_bind_param(selectors, dialect)
-    assert value[0]['prefix'] == u'\\u0000Lorem ipsum '
+    assert value[0]['prefix'] == '\\u0000Lorem ipsum '
     assert value[0]['exact'] == 'dolor sit amet,\\u0000 '
     assert value[0]['suffix'] == 'consectetur\\u0000 adipiscing elit.'
 
@@ -88,15 +89,15 @@ def test_annotation_selector_deserialize():
     t = types.AnnotationSelectorJSONB()
     selectors = [{
         'type': 'TextQuoteSelector',
-        'prefix': u'\\u0000Lorem ipsum ',
-        'exact': u'dolor sit amet,\\u0000 ',
-        'suffix': u'consectetur\\u0000 adipiscing elit.'
+        'prefix': '\\u0000Lorem ipsum ',
+        'exact': 'dolor sit amet,\\u0000 ',
+        'suffix': 'consectetur\\u0000 adipiscing elit.'
     }]
 
     value = t.process_result_value(selectors, dialect)
-    assert value[0]['prefix'] == u'\u0000Lorem ipsum '
-    assert value[0]['exact'] == u'dolor sit amet,\u0000 '
-    assert value[0]['suffix'] == u'consectetur\u0000 adipiscing elit.'
+    assert value[0]['prefix'] == '\u0000Lorem ipsum '
+    assert value[0]['exact'] == 'dolor sit amet,\u0000 '
+    assert value[0]['suffix'] == 'consectetur\u0000 adipiscing elit.'
 
 
 def test_annotation_selector_deserialize_missing_text_quote_selector():

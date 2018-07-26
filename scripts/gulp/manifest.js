@@ -29,7 +29,7 @@ module.exports = function (opts) {
   }, function (callback) {
     var manifestFile = new VinylFile({
       path: opts.name,
-      contents: new Buffer(JSON.stringify(manifest, null, 2), 'utf-8'),
+      contents: Buffer.from(JSON.stringify(manifest, null, 2), 'utf-8'),
     });
     this.push(manifestFile);
     callback();

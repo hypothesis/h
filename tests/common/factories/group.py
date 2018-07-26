@@ -8,7 +8,13 @@ from h import models
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 from .base import ModelFactory
+from .group_scope import GroupScope
 from .user import User
+
+
+def default_organization():
+    from tests.common.factories.base import SESSION
+    return models.Organization.default(SESSION)
 
 
 class Group(ModelFactory):
@@ -24,12 +30,28 @@ class Group(ModelFactory):
     readable_by = ReadableBy.members
     writeable_by = WriteableBy.members
     members = factory.LazyAttribute(lambda obj: [obj.creator])
+    organization = factory.LazyFunction(default_organization)
+
+    @factory.post_generation
+    def scopes(self, create, scopes=0, **kwargs):
+        if isinstance(scopes, int):
+            scopes = [GroupScope(group=self) for _ in range(0, scopes)]
+
+        self.scopes = scopes or []
 
 
-class PublisherGroup(Group):
+class OpenGroup(Group):
 
-    name = factory.Sequence(lambda n: 'Test Publisher Group {n}'.format(n=str(n)))
+    name = factory.Sequence(lambda n: 'Test Open Group {n}'.format(n=str(n)))
 
     joinable_by = None
     readable_by = ReadableBy.world
     writeable_by = WriteableBy.authority
+    members = []
+
+
+class RestrictedGroup(Group):
+    name = factory.Sequence(lambda n: 'Test Restricted Group {n}'.format(n=str(n)))
+
+    joinable_by = None
+    readable_by = ReadableBy.world

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 """
 Generate random strings for use as identifiers in URLs (and other places).
 

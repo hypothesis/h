@@ -1,0 +1,23 @@
+<div class="list-input js-list-input" id="{{ field.oid }}">
+  <template data-ref="itemTemplate">
+  {# `field.widget.prototype(field)` returns the `sequence_item` template
+     rendered by deform as HTML and then URL-encoded. #}
+  {{ field.widget.prototype(field) | url_unquote | safe }}
+  </template>
+
+  <input type="hidden" name="__start__" value="{{ field.name }}:sequence">
+
+  <ul class="list-input__list" data-ref="itemList">
+    {% for (cstruct, subfield) in subfields %}
+    {% set can_delete = (not field.widget.min_len) or loop.index > field.widget.min_len %}
+    {{ subfield.render_template(field.widget.item_template, parent=field, can_delete=can_delete) | safe }}
+    {% endfor %}
+  </ul>
+
+  {# New item button. The label must be supplied by setting the `add_subitem_text_template`
+     argument to the `SequenceWidget` constructor when declaring the widget used
+     by the field. #}
+  <button class="btn" type="button" data-ref="addItemButton">{{ add_subitem_text }}</button>
+
+  <input type="hidden" name="__end__" value="{{ field.name }}:sequence"/>
+</div>

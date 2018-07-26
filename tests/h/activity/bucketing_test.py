@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from h._compat import xrange
+
 import datetime
 import pytest
 from mock import Mock
@@ -190,11 +192,11 @@ class TestDocumentBucket(object):
         assert bucket.incontext_link(request) == incontext_link.return_value
 
     def test_incontext_link_returns_none_if_bucket_empty(self, document, patch):
-        incontext_link = patch('h.links.incontext_link')
+        patch('h.links.incontext_link')
         bucket = bucketing.DocumentBucket(document)
         request = Mock()
 
-        assert bucket.incontext_link(request) == None
+        assert bucket.incontext_link(request) is None
 
     @pytest.fixture
     def document(self, db_session):
@@ -215,15 +217,14 @@ class TestBucket(object):
         (THIRD_MARCH_1968, 'Mar 1968'),
     ])
     def test_one_annotation(self, annotation_datetime, timeframe_label):
-        document = factories.Document()
-        results = [factories.Annotation(document=document,
-                                        updated=annotation_datetime)]
+        annotation = factories.Annotation(document=factories.Document(),
+                                          updated=annotation_datetime)
 
-        timeframes = bucketing.bucket(results)
+        timeframes = bucketing.bucket([annotation])
 
         assert timeframes == [
             timeframe_with(timeframe_label, {
-                document: bucketing.DocumentBucket(document, results)
+                annotation.document: bucketing.DocumentBucket(annotation.document, [annotation])
             })
         ]
 
@@ -233,14 +234,14 @@ class TestBucket(object):
     ])
     def test_multiple_annotations_of_one_document_in_one_timeframe(
             self, annotation_datetime, timeframe_label):
-        document = factories.Document()
         results = [
-            factories.Annotation(document=document,
+            factories.Annotation(target_uri='https://example.com',
                                  updated=annotation_datetime)
             for _ in range(3)]
 
         timeframes = bucketing.bucket(results)
 
+        document = results[0].document
         assert timeframes == [
             timeframe_with(timeframe_label, {
                 document: bucketing.DocumentBucket(document, results)
@@ -253,36 +254,29 @@ class TestBucket(object):
     ])
     def test_annotations_of_multiple_documents_in_one_timeframe(
             self, annotation_datetime, timeframe_label):
-        document_1 = factories.Document()
-        document_2 = factories.Document()
-        document_3 = factories.Document()
-        results = [
-            factories.Annotation(document=document_1,
-                                 updated=annotation_datetime),
-            factories.Annotation(document=document_2,
-                                 updated=annotation_datetime),
-            factories.Annotation(document=document_3,
-                                 updated=annotation_datetime),
-        ]
+        annotation_1 = factories.Annotation(target_uri='http://example1.com', updated=annotation_datetime)
+        annotation_2 = factories.Annotation(target_uri='http://example2.com', updated=annotation_datetime)
+        annotation_3 = factories.Annotation(target_uri='http://example3.com', updated=annotation_datetime)
 
-        timeframes = bucketing.bucket(results)
+        timeframes = bucketing.bucket([annotation_1, annotation_2, annotation_3])
 
         assert timeframes == [
             timeframe_with(timeframe_label, {
-                document_1: bucketing.DocumentBucket(document_1, [results[0]]),
-                document_2: bucketing.DocumentBucket(document_2, [results[1]]),
-                document_3: bucketing.DocumentBucket(document_3, [results[2]]),
+                annotation_1.document: bucketing.DocumentBucket(annotation_1.document, [annotation_1]),
+                annotation_2.document: bucketing.DocumentBucket(annotation_2.document, [annotation_2]),
+                annotation_3.document: bucketing.DocumentBucket(annotation_3.document, [annotation_3]),
             }),
         ]
 
     def test_annotations_of_the_same_document_in_different_timeframes(self):
-        document = factories.Document()
         results = [
-            factories.Annotation(document=document),
-            factories.Annotation(document=document,
-                                 updated=FIFTH_NOVEMBER_1969),
-            factories.Annotation(document=document, updated=THIRD_MARCH_1968),
+            factories.Annotation(),
+            factories.Annotation(updated=FIFTH_NOVEMBER_1969),
+            factories.Annotation(updated=THIRD_MARCH_1968),
         ]
+        document = factories.Document()
+        for annotation in results:
+            annotation.document = document
 
         timeframes = bucketing.bucket(results)
 
@@ -297,43 +291,34 @@ class TestBucket(object):
         ]
 
     def test_recent_and_older_annotations_together(self):
-        document_1 = factories.Document()
-        document_2 = factories.Document()
-        document_3 = factories.Document()
-        document_4 = factories.Document()
-        document_5 = factories.Document()
-        document_6 = factories.Document()
         results = [
-            factories.Annotation(document=document_1),
-            factories.Annotation(document=document_2),
-            factories.Annotation(document=document_3),
-            factories.Annotation(document=document_4,
-                                 updated=THIRD_MARCH_1968),
-            factories.Annotation(document=document_5,
-                                 updated=THIRD_MARCH_1968),
-            factories.Annotation(document=document_6,
-                                 updated=THIRD_MARCH_1968),
+            factories.Annotation(target_uri='http://example1.com'),
+            factories.Annotation(target_uri='http://example2.com'),
+            factories.Annotation(target_uri='http://example3.com'),
+            factories.Annotation(target_uri='http://example4.com', updated=THIRD_MARCH_1968),
+            factories.Annotation(target_uri='http://example5.com', updated=THIRD_MARCH_1968),
+            factories.Annotation(target_uri='http://example6.com', updated=THIRD_MARCH_1968),
         ]
 
         timeframes = bucketing.bucket(results)
 
-        expected_bucket_1 = bucketing.DocumentBucket(document_1, [results[0]])
-        expected_bucket_2 = bucketing.DocumentBucket(document_2, [results[1]])
-        expected_bucket_3 = bucketing.DocumentBucket(document_3, [results[2]])
-        expected_bucket_4 = bucketing.DocumentBucket(document_4, [results[3]])
-        expected_bucket_5 = bucketing.DocumentBucket(document_5, [results[4]])
-        expected_bucket_6 = bucketing.DocumentBucket(document_6, [results[5]])
+        expected_bucket_1 = bucketing.DocumentBucket(results[0].document, [results[0]])
+        expected_bucket_2 = bucketing.DocumentBucket(results[1].document, [results[1]])
+        expected_bucket_3 = bucketing.DocumentBucket(results[2].document, [results[2]])
+        expected_bucket_4 = bucketing.DocumentBucket(results[3].document, [results[3]])
+        expected_bucket_5 = bucketing.DocumentBucket(results[4].document, [results[4]])
+        expected_bucket_6 = bucketing.DocumentBucket(results[5].document, [results[5]])
 
         assert timeframes == [
             timeframe_with('Last 7 days', {
-                document_1: expected_bucket_1,
-                document_2: expected_bucket_2,
-                document_3: expected_bucket_3,
+                results[0].document: expected_bucket_1,
+                results[1].document: expected_bucket_2,
+                results[2].document: expected_bucket_3,
             }),
             timeframe_with('Mar 1968', {
-                document_4: expected_bucket_4,
-                document_5: expected_bucket_5,
-                document_6: expected_bucket_6,
+                results[3].document: expected_bucket_4,
+                results[4].document: expected_bucket_5,
+                results[5].document: expected_bucket_6,
             }),
         ]
 
@@ -345,23 +330,22 @@ class TestBucket(object):
         bucket.
 
         """
-        document = factories.Document()
         one_month_ago = UTCNOW - datetime.timedelta(days=30)
         annotations = [
-            factories.Annotation(document=document, updated=one_month_ago),
-            factories.Annotation(document=document,
+            factories.Annotation(target_uri='http://example.com', updated=one_month_ago),
+            factories.Annotation(target_uri='http://example.com',
                                  updated=one_month_ago - datetime.timedelta(days=1)),
-            factories.Annotation(document=document,
+            factories.Annotation(target_uri='http://example.com',
                                  updated=one_month_ago - datetime.timedelta(days=2)),
         ]
 
         timeframes = bucketing.bucket(annotations)
 
-        expected_bucket = bucketing.DocumentBucket(document)
+        expected_bucket = bucketing.DocumentBucket(annotations[0].document)
         expected_bucket.update(annotations)
 
         assert timeframes == [
-            timeframe_with('Jan 1970', {document: expected_bucket})]
+            timeframe_with('Jan 1970', {annotations[0].document: expected_bucket})]
 
     @pytest.fixture
     def utcnow(self, patch):

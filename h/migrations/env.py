@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from __future__ import unicode_literals
 
 import logging
 import os
@@ -81,6 +82,7 @@ def run_migrations_online():
         context.run_migrations()
     finally:
         connection.close()
+
 
 configure_logging()
 

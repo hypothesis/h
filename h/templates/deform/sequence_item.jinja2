@@ -1,0 +1,27 @@
+{% if not field.widget.hidden %}
+<li class="list-input__item" title="{{ field.description }}">
+
+  <div class="list-input__item-inner">
+    {{ field.serialize(cstruct=cstruct) | safe }}
+
+    {% if (can_delete is not defined) or can_delete %}
+    <button class="list-input__remove-btn"
+            title="{% trans %}Remove item{% endtrans %}"
+            type="button"
+            data-ref="removeItemButton">
+    {{ svg_icon('lozenge-close') }}
+    </button>
+    {% endif %}
+  </div>
+
+  {%- if field.error and not field.widget.hidden -%}
+  <ul class="list-input__error-list">
+    {% for msg in field.error.messages() -%}
+      {%- set errstr = 'error-%s' % field.oid -%}
+      {%- set pid = (loop.index0==0 and errstr) or ('%s-%s' % (errstr, loop.index0)) -%}
+      <li class="list-input__error-item" id="{{ pid }}">{{ _(msg) }}</li>
+    {% endfor -%}
+  </ul>
+  {% endif -%}
+</li>
+{% endif %}

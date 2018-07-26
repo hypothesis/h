@@ -1,0 +1,14 @@
+Group:
+  type: object
+  properties:
+    name:
+      type: string
+      description: The name of the new group
+      minLength: 4
+      maxLength: 25
+    description:
+      type: string
+      description: group description
+      maxLength: 250
+  required:
+    - name

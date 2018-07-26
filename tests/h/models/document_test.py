@@ -356,7 +356,7 @@ class TestCreateOrUpdateDocumentURI(object):
             updated=now(),
         )
 
-        document_uri = db_session.query(document.DocumentURI).all()[-1]
+        document_uri = db_session.query(document.DocumentURI).order_by(document.DocumentURI.created.desc()).first()
         assert document_uri.claimant == claimant
         assert document_uri.uri == uri
         assert document_uri.type == type_
@@ -961,7 +961,9 @@ class TestUpdateDocumentMetadata(object):
 
     @pytest.fixture
     def Document(self, patch):
-        return patch('h.models.document.Document')
+        Document = patch('h.models.document.Document')
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
+        return Document
 
     @pytest.fixture
     def merge_documents(self, patch):
@@ -985,8 +987,10 @@ def mock_db_session():
     class DB(object):
         def add(self, obj):
             pass
+
         def query(self, cls):
             pass
+
         def flush(self):
             pass
     return mock.Mock(spec=DB())

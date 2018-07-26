@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import datetime
 
 from jinja2 import Markup
@@ -37,6 +38,12 @@ def test_human_timestamp(timestamp_in, string_out):
         timestamp_in, now=lambda: datetime.datetime(2016, 4, 14))
 
     assert result == string_out
+
+
+def test_format_number():
+    num = 134908
+    result = ext.format_number(num)
+    assert result == '134,908'
 
 
 def test_svg_icon_loads_icon():

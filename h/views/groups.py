@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import deform
 from pyramid import httpexceptions
 from pyramid import security
-from pyramid.config import not_
 from pyramid.view import view_config, view_defaults
 
 from h import form
@@ -41,9 +41,8 @@ class GroupCreateController(object):
         """Respond to a submission of the create group form."""
         def on_success(appstruct):
             groups_service = self.request.find_service(name='group')
-            group = groups_service.create(
+            group = groups_service.create_private_group(
                 name=appstruct['name'],
-                authority=self.request.authority,
                 description=appstruct.get('description'),
                 userid=self.request.authenticated_userid)
 
@@ -103,20 +102,6 @@ class GroupEditController(object):
     def _update_group(self, appstruct):
         self.group.name = appstruct['name']
         self.group.description = appstruct['description']
-
-
-@view_config(route_name='group_read',
-             request_method='GET',
-             renderer='h:templates/groups/join.html.jinja2',
-             effective_principals=not_(security.Authenticated))
-def read_unauthenticated(group, request):
-    """Group view for logged-out users, allowing them to join the group."""
-    check_slug(group, request)
-
-    if group.joinable_by is None:
-        raise httpexceptions.HTTPNotFound()
-
-    return {'group': group}
 
 
 @view_config(route_name='group_read_noslug', request_method='GET')
