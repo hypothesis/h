@@ -9,7 +9,11 @@ data-ref="{{ ref }} formInput"
 class="form-input__input
       {% if field.widget.css_class %} {{ field.widget.css_class }} {% endif %}
       {% if field.widget.autofocus %} js-select-onfocus{% endif %}
-      {% if field.schema.hint %} has-hint {% endif %}"
+      {% if field.schema.hint %} has-hint {% endif %}
+
+      {# `has_label` is a flag provided by the containing widget's template (eg.
+         `mapping_item`) which is rendering this field. #}
+      {% if has_label %} has-label {% endif %}"
 {%- if field.widget.size -%}
 size="{{ field.widget.size }}"
 {% endif -%}

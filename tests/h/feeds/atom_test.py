@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=protected-access
 """Unit tests for h/atom.py."""
+from __future__ import unicode_literals
 from datetime import datetime
 import mock
 
@@ -52,6 +53,7 @@ def test_feed_contains_entries(_feed_entry_from_annotation, factories):
         "feed entry for annotation 2",
         "feed entry for annotation 3"
     ]
+
     def pop(*args, **kwargs):
         return entries.pop(0)
     _feed_entry_from_annotation.side_effect = pop
@@ -87,19 +89,20 @@ def test_html_url_link():
 def test_entry_id(util, factories):
     """The ids of feed entries should come from tag_uri_for_annotation()."""
     annotation = factories.Annotation()
-    annotations_url_function = lambda annotation: "annotation url"
 
-    feed = atom.feed_from_annotations(
-        [annotation], "atom_url", annotations_url_function)
+    def annotation_url(ann):
+        return 'annotation url'
+
+    feed = atom.feed_from_annotations([annotation], "atom_url", annotation_url)
 
     util.tag_uri_for_annotation.assert_called_once_with(
-        annotation, annotations_url_function)
+        annotation, annotation_url)
     assert feed['entries'][0]['id'] == util.tag_uri_for_annotation.return_value
 
 
 def test_entry_author(factories):
     """The authors of entries should come from the annotation usernames."""
-    annotation = factories.Annotation(userid=u'acct:nobu@hypothes.is')
+    annotation = factories.Annotation(userid='acct:nobu@hypothes.is')
 
     feed = atom.feed_from_annotations(
         [annotation], "atom_url", lambda annotation: "annotation url")

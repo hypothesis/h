@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h import models
-from h.i18n import TranslationString as _
+from h.i18n import TranslationString as _  # noqa: N813
 
 
 class UserNotFoundError(Exception):
@@ -18,7 +19,7 @@ class UserNotFoundError(Exception):
 def nipsa_index(request):
     nipsa_service = request.find_service(name='nipsa')
     return {
-        "userids": sorted(nipsa_service.flagged_userids),
+        "userids": sorted(nipsa_service.fetch_all_flagged_userids()),
         "default_authority": request.authority,
     }
 
@@ -67,5 +68,5 @@ def nipsa_remove(request):
 
 @view_config(context=UserNotFoundError)
 def user_not_found(exc, request):
-    request.session.flash(exc.message, 'error')
+    request.session.flash(str(exc), 'error')
     return httpexceptions.HTTPFound(location=request.route_path('admin_nipsa'))

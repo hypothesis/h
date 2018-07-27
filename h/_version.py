@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import datetime
 import subprocess
 
@@ -19,6 +20,7 @@ VERSION_GIT_DATE = '$Format:%ct$'
 
 # Fallback version in case we cannot derive the version.
 VERSION_UNKNOWN = '0+unknown'
+
 
 def fetch_git_ref():
     return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'],

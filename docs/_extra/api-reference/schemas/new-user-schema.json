@@ -19,11 +19,41 @@
     "display_name": {
       "type": "string",
       "maxLength": 30
-    }
+    },
+    "identities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+          "type": "object",
+          "properties": {
+              "provider": {
+                  "type": "string",
+              },
+              "provider_unique_id": {
+                  "type": "string",
+              },
+          },
+          "required": [
+              "provider",
+              "provider_unique_id",
+          ]
+      },
   },
-  "required": [
-    "authority",
-    "username",
-    "email"
+  },
+  "anyOf": [
+    {
+      "required": [
+        "authority",
+        "username",
+        "email"
+      ]
+    },
+    {
+      "required": [
+        "authority",
+        "username",
+        "identities"
+      ]
+    },
   ]
 }

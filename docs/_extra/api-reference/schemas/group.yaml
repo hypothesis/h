@@ -1,0 +1,41 @@
+Group:
+  type: object
+  required:
+    - id
+    - links
+    - name
+    - organization
+    - public
+    - scoped
+    - type
+  properties:
+    id:
+      type: string
+    links:
+      type: object
+      properties:
+        html:
+          type: string
+          format: uri
+          description: URL to the group's main (activity) page
+    name:
+      type: string
+    organization:
+      description: "**EXPANDABLE** The organization to which this group belongs"
+      oneOf:
+        - $ref: './organization.yaml#/Organization'
+        - type: string
+          description: The unique ID for the organization (when not expanded)
+    public:
+      type: boolean
+      deprecated: true
+      description: Indicates whether a group's annotations are world-readable
+    scoped:
+      type: boolean
+      description: Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped groups allow annotation to documents at any URL
+    type:
+      type: string
+      enum:
+        - private
+        - open
+        - restricted

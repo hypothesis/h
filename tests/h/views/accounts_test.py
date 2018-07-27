@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 
+from __future__ import unicode_literals
 import mock
 import pytest
 
@@ -373,79 +374,6 @@ class TestResetController(object):
         pyramid_config.add_route('account_reset_with_code', '/reset-with-code')
 
 
-@pytest.mark.usefixtures('pyramid_config',
-                         'routes',
-                         'user_signup_service')
-class TestSignupController(object):
-
-    def test_post_returns_errors_when_validation_fails(self,
-                                                       invalid_form,
-                                                       pyramid_request):
-        controller = views.SignupController(pyramid_request)
-        controller.form = invalid_form()
-
-        result = controller.post()
-
-        assert result == {"form": "invalid form"}
-
-    def test_post_creates_user_from_form_data(self,
-                                              form_validating_to,
-                                              pyramid_request,
-                                              user_signup_service):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to({
-            "username": "bob",
-            "email": "bob@example.com",
-            "password": "s3crets",
-            "random_other_field": "something else",
-        })
-
-        controller.post()
-
-        user_signup_service.signup.assert_called_with(username="bob",
-                                                      email="bob@example.com",
-                                                      password="s3crets")
-
-    def test_post_does_not_create_user_when_validation_fails(self,
-                                                             invalid_form,
-                                                             pyramid_request,
-                                                             user_signup_service):
-        controller = views.SignupController(pyramid_request)
-        controller.form = invalid_form()
-
-        controller.post()
-
-        assert not user_signup_service.signup.called
-
-    def test_post_redirects_on_success(self,
-                                       form_validating_to,
-                                       pyramid_request):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to({
-            "username": "bob",
-            "email": "bob@example.com",
-            "password": "s3crets",
-        })
-
-        result = controller.post()
-
-        assert isinstance(result, httpexceptions.HTTPRedirection)
-
-    def test_get_redirects_when_logged_in(self, pyramid_config, pyramid_request):
-        pyramid_config.testing_securitypolicy("acct:jane@doe.org")
-        pyramid_request.user = mock.Mock(username='janedoe')
-        controller = views.SignupController(pyramid_request)
-
-        with pytest.raises(httpexceptions.HTTPRedirection):
-            controller.get()
-
-    @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('activity.user_search', '/users/{username}')
-        pyramid_config.add_route('index', '/index')
-        pyramid_config.add_route('stream', '/stream')
-
-
 @pytest.mark.usefixtures('ActivationEvent',
                          'activation_model',
                          'notify',
@@ -630,6 +558,26 @@ class TestActivateController(object):
 @pytest.mark.usefixtures('routes', 'user_password_service')
 class TestAccountController(object):
 
+    def test_get_returns_email_if_set(self,
+                                      pyramid_request):
+        pyramid_request.user = mock.Mock()
+        pyramid_request.create_form.return_value = mock.Mock()
+        user = pyramid_request.user
+        user.email = 'jims@example.com'
+
+        result = views.AccountController(pyramid_request).get()
+        assert result['email'] == 'jims@example.com'
+
+    def test_get_returns_empty_string_if_email_not_set(self,
+                                                       pyramid_request):
+        pyramid_request.user = mock.Mock()
+        pyramid_request.create_form.return_value = mock.Mock()
+        user = pyramid_request.user
+        user.email = None
+
+        result = views.AccountController(pyramid_request).get()
+        assert result['email'] == ''
+
     def test_post_email_form_with_valid_data_changes_email(self,
                                                            form_validating_to,
                                                            pyramid_request):
@@ -732,18 +680,49 @@ class TestNotificationsController(object):
             'notifications': set(['reply']),
         })
 
+    def test_it_does_not_render_form_if_user_has_no_email_address(self,
+                                                                  factories,
+                                                                  form_validating_to,
+                                                                  pyramid_request):
+        controller = views.NotificationsController(pyramid_request)
+        controller.form = form_validating_to({})
+        pyramid_request.user = factories.User(username='cara')
+        pyramid_request.user.email = None
+
+        result = controller.get()
+
+        assert 'form' not in result
+        assert result['user_has_email_address'] is None
+
+    def test_it_renders_form_if_user_has_email_address(self,
+                                                       factories,
+                                                       form_validating_to,
+                                                       pyramid_request):
+        controller = views.NotificationsController(pyramid_request)
+        controller.form = form_validating_to({})
+        pyramid_request.user = factories.User(username='janedoe')
+
+        result = controller.get()
+
+        assert 'form' in result
+        assert result['user_has_email_address'] == pyramid_request.user.email
+
     def test_post_with_invalid_data_returns_form(self,
+                                                 factories,
                                                  invalid_form,
                                                  pyramid_config,
                                                  pyramid_request):
         pyramid_request.POST = {}
+        pyramid_request.user = factories.User(username='cara')
+        pyramid_request.user.email = None
         pyramid_config.testing_securitypolicy('jerry')
         controller = views.NotificationsController(pyramid_request)
         controller.form = invalid_form()
 
         result = controller.post()
 
-        assert 'form' in result
+        assert 'form' not in result
+        assert result['user_has_email_address'] is None
 
     def test_post_with_valid_data_updates_subscriptions(self,
                                                         form_validating_to,

@@ -23,6 +23,7 @@ The redirect type can be one of the following:
 Lines that contain only whitespace, or which start with a '#' character, will
 be ignored.
 """
+from __future__ import unicode_literals
 
 from collections import namedtuple
 
@@ -47,11 +48,16 @@ def lookup(redirects, request):
     Returns None if the request does not match, and the URL to redirect to
     otherwise.
     """
+
+    # Compute and cache `request.path` once, rather than recomputing for each
+    # redirect rule that the path is matched against.
+    path = request.path
+
     for r in redirects:
-        if r.prefix and request.path.startswith(r.src):
-            suffix = request.path.replace(r.src, '', 1)
+        if r.prefix and path.startswith(r.src):
+            suffix = path.replace(r.src, '', 1)
             return _dst_root(request, r) + suffix
-        elif not r.prefix and request.path == r.src:
+        elif not r.prefix and path == r.src:
             return _dst_root(request, r)
     return None
 

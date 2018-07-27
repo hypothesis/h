@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from collections import namedtuple
 import copy
 import json
@@ -65,7 +66,7 @@ class WebSocket(_WebSocket):
         self._work_queue = environ['h.ws.streamer_work_queue']
 
     def __new__(cls, *args, **kwargs):
-        instance = super(WebSocket, cls).__new__(cls, *args, **kwargs)
+        instance = super(WebSocket, cls).__new__(cls)
         cls.instances.add(instance)
         return instance
 
@@ -132,7 +133,7 @@ def handle_client_id_message(message, session=None):
                       ok=False)
         return
     message.socket.client_id = message.payload['value']
-MESSAGE_HANDLERS['client_id'] = handle_client_id_message
+MESSAGE_HANDLERS['client_id'] = handle_client_id_message  # noqa: E305
 
 
 def handle_filter_message(message, session=None):
@@ -156,20 +157,20 @@ def handle_filter_message(message, session=None):
         # Add backend expands for clauses
         _expand_clauses(session, filter_)
     message.socket.filter = filter.FilterHandler(filter_)
-MESSAGE_HANDLERS['filter'] = handle_filter_message
+MESSAGE_HANDLERS['filter'] = handle_filter_message  # noqa: E305
 
 
 def handle_ping_message(message, session=None):
     """A client requesting a pong."""
     message.reply({'type': 'pong'})
-MESSAGE_HANDLERS['ping'] = handle_ping_message
+MESSAGE_HANDLERS['ping'] = handle_ping_message  # noqa: E305
 
 
 def handle_whoami_message(message, session=None):
     """A client requesting information on its auth state."""
     message.reply({'type': 'whoyouare',
                    'userid': message.socket.authenticated_userid})
-MESSAGE_HANDLERS['whoami'] = handle_whoami_message
+MESSAGE_HANDLERS['whoami'] = handle_whoami_message  # noqa: E305
 
 
 def handle_unknown_message(message, session=None):
@@ -180,7 +181,7 @@ def handle_unknown_message(message, session=None):
                              'description': 'invalid message type: '
                                             '{:s}'.format(type_)}},
                   ok=False)
-MESSAGE_HANDLERS[None] = handle_unknown_message
+MESSAGE_HANDLERS[None] = handle_unknown_message  # noqa: E305
 
 
 def _expand_clauses(session, filter_):

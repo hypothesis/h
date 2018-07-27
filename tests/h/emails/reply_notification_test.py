@@ -98,6 +98,20 @@ class TestGenerate(object):
         html_renderer.assert_(**expected_context)
         text_renderer.assert_(**expected_context)
 
+    def test_supports_non_ascii_display_names(self,
+                                              notification,
+                                              pyramid_request,
+                                              html_renderer,
+                                              text_renderer,
+                                              parent_user,
+                                              reply_user):
+        parent_user.display_name = 'Parent 👩'
+        reply_user.display_name = 'Child 👧'
+
+        (_, subject, _, _) = generate(pyramid_request, notification)
+
+        assert subject == 'Child 👧 has replied to your annotation'
+
     def test_returns_usernames_if_no_display_names(self,
                                                    notification,
                                                    pyramid_request,
@@ -196,10 +210,9 @@ class TestGenerate(object):
         html_renderer.assert_(**expected_context)
         text_renderer.assert_(**expected_context)
 
-
     @pytest.fixture
     def document(self, db_session):
-        doc = Document(title=u'My fascinating page')
+        doc = Document(title='My fascinating page')
         db_session.add(doc)
         db_session.flush()
         return doc
@@ -232,7 +245,7 @@ class TestGenerate(object):
 
     @pytest.fixture
     def parent_user(self, factories):
-        return factories.User(username=u'patricia', email=u'pat@ric.ia',
+        return factories.User(username='patricia', email='pat@ric.ia',
                               display_name='Patricia Demylus')
 
     @pytest.fixture
@@ -247,7 +260,7 @@ class TestGenerate(object):
 
     @pytest.fixture
     def reply_user(self, factories):
-        return factories.User(username=u'ron', email=u'ron@thesmiths.com',
+        return factories.User(username='ron', email='ron@thesmiths.com',
                               display_name='Ron Burgundy')
 
     @pytest.fixture

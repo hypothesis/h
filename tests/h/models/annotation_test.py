@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-from pyramid import security
 import pytest
 
 from h.models.annotation import Annotation

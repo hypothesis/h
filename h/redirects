@@ -76,10 +76,10 @@
 /contact/                                              exact https://web.hypothes.is/contact/
 /contribute                                            exact https://web.hypothes.is/developers/
 /contribute/                                           exact https://web.hypothes.is/developers/
-/contribute/entity-cla                                 exact https://web.hypothes.is/developers/
-/contribute/entity-cla/                                exact https://web.hypothes.is/developers/
-/contribute/individual-cla                             exact https://web.hypothes.is/developers/
-/contribute/individual-cla/                            exact https://web.hypothes.is/developers/
+/contribute/entity-cla                                 exact https://web.hypothes.is/developers/entity-cla/
+/contribute/entity-cla/                                exact https://web.hypothes.is/developers/entity-cla/
+/contribute/individual-cla                             exact https://web.hypothes.is/developers/individual-cla/
+/contribute/individual-cla/                            exact https://web.hypothes.is/developers/individual-cla/
 /creating-groups                                       exact https://web.hypothes.is/creating-groups/
 /creating-groups/                                      exact https://web.hypothes.is/creating-groups/
 /curate-a-novel-chapter                                exact https://web.hypothes.is/curate-a-novel-chapter/
@@ -110,8 +110,8 @@
 /for-publishers/using-wordpress/                       exact https://web.hypothes.is/publishing/
 /four-ways-to-annotate                                 exact https://web.hypothes.is/four-ways-to-annotate/
 /four-ways-to-annotate/                                exact https://web.hypothes.is/four-ways-to-annotate/
-/help                                                  exact https://hypothesis.zendesk.com/
-/help/                                                 exact https://hypothesis.zendesk.com/
+/help                                                  exact https://web.hypothes.is/help/
+/help/                                                 exact https://web.hypothes.is/help/
 /imagine-old-homepage                                  exact https://web.hypothes.is/imagine-old-homepage/
 /imagine-old-homepage/                                 exact https://web.hypothes.is/imagine-old-homepage/
 /installing-the-bookmarklet                            exact https://web.hypothes.is/installing-the-bookmarklet/

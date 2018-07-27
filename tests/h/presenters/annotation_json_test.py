@@ -13,7 +13,7 @@ from zope.interface import implementer
 
 from h.formatters.interfaces import IAnnotationFormatter
 from h.presenters.annotation_json import AnnotationJSONPresenter
-from h.resources import AnnotationResource
+from h.traversal import AnnotationContext
 
 
 @implementer(IAnnotationFormatter)
@@ -33,7 +33,7 @@ class IDDuplicatingFormatter(object):
     """This formatter take the annotation's ID and adds it in another key.
 
     The main purpose of it is to confirm that the presenter is passing in the
-    AnnotationResource object.
+    AnnotationContext object.
     """
 
     def preload(self, ids):
@@ -57,7 +57,7 @@ class TestAnnotationJSONPresenter(object):
                         target_selectors=[{'TestSelector': 'foobar'}],
                         references=['referenced-id-1', 'referenced-id-2'],
                         extra={'extra-1': 'foo', 'extra-2': 'bar'})
-        resource = AnnotationResource(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, fake_links_service)
 
         document_asdict.return_value = {'foo': 'bar'}
 
@@ -88,7 +88,7 @@ class TestAnnotationJSONPresenter(object):
 
     def test_asdict_extra_cannot_override_other_data(self, document_asdict, group_service, fake_links_service):
         ann = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
-        resource = AnnotationResource(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, fake_links_service)
         document_asdict.return_value = {}
 
         presented = AnnotationJSONPresenter(resource).asdict()
@@ -97,7 +97,7 @@ class TestAnnotationJSONPresenter(object):
     def test_asdict_extra_uses_copy_of_extra(self, document_asdict, group_service, fake_links_service):
         extra = {'foo': 'bar'}
         ann = mock.Mock(id='my-id', extra=extra)
-        resource = AnnotationResource(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, fake_links_service)
         document_asdict.return_value = {}
 
         AnnotationJSONPresenter(resource).asdict()
@@ -107,7 +107,7 @@ class TestAnnotationJSONPresenter(object):
 
     def test_asdict_merges_formatters(self, group_service, fake_links_service):
         ann = mock.Mock(id='the-real-id', extra={})
-        resource = AnnotationResource(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, fake_links_service)
 
         formatters = [
             FakeFormatter({'flagged': 'nope'}),
@@ -128,7 +128,7 @@ class TestAnnotationJSONPresenter(object):
 
         """
         ann = mock.Mock(id='the-real-id', extra={})
-        resource = AnnotationResource(ann, group_service, fake_links_service)
+        resource = AnnotationContext(ann, group_service, fake_links_service)
 
         formatters = [FakeFormatter({'flagged': 'nope'})]
         presenter = AnnotationJSONPresenter(resource, formatters)
@@ -139,7 +139,7 @@ class TestAnnotationJSONPresenter(object):
 
     def test_formatter_uses_annotation_resource(self, group_service, fake_links_service):
         annotation = mock.Mock(id='the-id', extra={})
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
 
         formatters = [IDDuplicatingFormatter()]
         presenter = AnnotationJSONPresenter(resource, formatters)
@@ -154,7 +154,7 @@ class TestAnnotationJSONPresenter(object):
         (mock.Mock(userid='acct:luke', groupid='abcde', shared=False), 'members', 'read', ['acct:luke']),
         (mock.Mock(groupid='__world__', shared=True), 'world', 'read', ['group:__world__']),
         (mock.Mock(groupid='lulapalooza', shared=True), 'members', 'read', ['group:lulapalooza']),
-        (mock.Mock(groupid='publisher', shared=True), 'world', 'read', ['group:__world__']),
+        (mock.Mock(groupid='open', shared=True), 'world', 'read', ['group:__world__']),
         (mock.Mock(userid='acct:luke'), None, 'admin', ['acct:luke']),
         (mock.Mock(userid='acct:luke'), None, 'update', ['acct:luke']),
         (mock.Mock(userid='acct:luke'), None, 'delete', ['acct:luke']),
@@ -171,7 +171,7 @@ class TestAnnotationJSONPresenter(object):
         group.__acl__.return_value = [group_principals[group_readable]]
         group_service.find.return_value = group
 
-        resource = AnnotationResource(annotation, group_service, fake_links_service)
+        resource = AnnotationContext(annotation, group_service, fake_links_service)
         presenter = AnnotationJSONPresenter(resource)
         assert expected == presenter.permissions[action]
 
@@ -179,7 +179,7 @@ class TestAnnotationJSONPresenter(object):
         with pytest.raises(ValueError) as exc:
             AnnotationJSONPresenter(mock.Mock(), formatters=[mock.Mock()])
 
-        assert 'not implementing IAnnotationFormatter interface' in exc.value.message
+        assert 'not implementing IAnnotationFormatter interface' in str(exc.value)
 
     @pytest.fixture
     def document_asdict(self, patch):

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from collections import namedtuple
 import logging
 
@@ -72,6 +73,10 @@ def get_notification(request, annotation, action):
     # If the parent user doesn't exist (anymore), we can't send an email.
     parent_user = user_service.fetch(parent.userid)
     if parent_user is None:
+        return
+
+    # If the parent user doesn't have an email address we can't email them.
+    if not parent_user.email:
         return
 
     # If the reply user doesn't exist (anymore), we can't send an email, but

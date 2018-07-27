@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import datetime
 from functools import partial
 import json
-import re
 
 try:
     from xml.etree import cElementTree as ElementTree
@@ -12,6 +12,8 @@ except ImportError:
 
 from jinja2 import Markup
 from jinja2.ext import Extension
+
+from h._compat import url_unquote
 
 SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg'
 
@@ -27,6 +29,8 @@ class Filters(Extension):
 
         environment.filters['to_json'] = to_json
         environment.filters['human_timestamp'] = human_timestamp
+        environment.filters['format_number'] = format_number
+        environment.filters['url_unquote'] = url_unquote
 
 
 def human_timestamp(timestamp, now=datetime.datetime.utcnow):
@@ -35,6 +39,10 @@ def human_timestamp(timestamp, now=datetime.datetime.utcnow):
     if timestamp.year < now().year:
         fmt = '%d %B %Y at %H:%M'
     return timestamp.strftime(fmt)
+
+
+def format_number(num):
+    return "{:,}".format(num)
 
 
 def to_json(value):
@@ -51,10 +59,10 @@ def to_json(value):
 
     # Adapted from Flask's htmlsafe_dumps() function / tojson filter.
     result = json.dumps(value) \
-                 .replace(u'<', u'\\u003c') \
-                 .replace(u'>', u'\\u003e') \
-                 .replace(u'&', u'\\u0026') \
-                 .replace(u"'", u'\\u0027')
+                 .replace('<', '\\u003c') \
+                 .replace('>', '\\u003e') \
+                 .replace('&', '\\u0026') \
+                 .replace("'", '\\u0027')
 
     return Markup(result)
 
@@ -114,4 +122,4 @@ def svg_icon(loader, name, css_class=''):
     if title_el is not None:
         root.remove(title_el)
 
-    return Markup(ElementTree.tostring(root))
+    return Markup(ElementTree.tostring(root).decode())

@@ -62,11 +62,10 @@ This package is responsible for defining URI normalization routines for use
 elsewhere in the Hypothesis application. URI expansion is handled by
 :py:function:`h.storage.expand_uri`.
 """
-
 import re
 
 from h._compat import (
-    text_type,
+    PY2,
     url_quote,
     url_quote_plus,
     url_unquote,
@@ -132,8 +131,27 @@ VIA_PREFIX = "https://via.hypothes.is/"
 
 
 def normalize(uristr):
-    """Translate the given URI into a normalized form."""
-    uristr = uristr.encode('utf-8')
+    """
+    Translate the given URI into a normalized form.
+
+    :type uristr: unicode
+    :rtype: unicode
+    """
+
+    # In Python 2 functions in urllib expect a byte string whereas in Python 3
+    # some functions in urllib work with a byte string or unicode but
+    # others (eg. `unquote`) require unicode.
+    #
+    # Hence we work with byte strings internally in Py 2 and unicode internally
+    # in Python 3. In both we always return unicode.
+    if PY2:
+        uristr = uristr.encode('utf-8')
+
+    def decode_result(result):
+        if PY2:
+            return result.decode('utf-8')
+        else:
+            return result
 
     # Strip proxy prefix for proxied URLs
     for scheme in URL_SCHEMES:
@@ -146,11 +164,11 @@ def normalize(uristr):
 
     # If this isn't a URL, we don't perform any normalization
     if uri.scheme.lower() not in URL_SCHEMES:
-        return text_type(uristr, 'utf-8')
+        return decode_result(uristr)
 
     # Don't perform normalization on URLs with no hostname.
     if uri.hostname is None:
-        return text_type(uristr, 'utf-8')
+        return decode_result(uristr)
 
     scheme = _normalize_scheme(uri)
     netloc = _normalize_netloc(uri)
@@ -160,7 +178,7 @@ def normalize(uristr):
 
     uri = urlparse.SplitResult(scheme, netloc, path, query, fragment)
 
-    return text_type(uri.geturl(), 'utf-8')
+    return decode_result(uri.geturl())
 
 
 def _normalize_scheme(uri):

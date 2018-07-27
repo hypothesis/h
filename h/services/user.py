@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import sqlalchemy as sa
 
-from h.models import User
+from h.models import User, UserIdentity
 from h.util.user import split_user
 from h.util.db import on_transaction_end
 
@@ -105,7 +105,7 @@ class UserService(object):
 
         userid_tuples = set(cache_keys.keys())
         missing_tuples = userid_tuples - set(self._cache.keys())
-        missing_ids = [v for k, v in cache_keys.iteritems() if k in missing_tuples]
+        missing_ids = [v for k, v in cache_keys.items() if k in missing_tuples]
 
         if missing_ids:
             users = self.session.query(User).filter(User.userid.in_(missing_ids))
@@ -113,7 +113,23 @@ class UserService(object):
                 cache_key = (user.username, user.authority)
                 self._cache[cache_key] = user
 
-        return [v for k, v in self._cache.iteritems() if k in cache_keys.keys()]
+        return [v for k, v in self._cache.items() if k in cache_keys.keys()]
+
+    def fetch_by_identity(self, provider, provider_unique_id):
+        """
+        Fetch a user by associated identity.
+
+        :returns: a user instance, if found
+        :rtype: h.models.User or None
+        """
+
+        identity = (self.session.query(UserIdentity)
+                                .filter_by(provider=provider,
+                                           provider_unique_id=provider_unique_id)
+                                .one_or_none())
+        if identity:
+            return identity.user
+        return None
 
     def fetch_for_login(self, username_or_email):
         """

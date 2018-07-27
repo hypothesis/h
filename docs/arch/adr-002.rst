@@ -38,11 +38,10 @@ One way to resolve this problem is to introduce a "services layer" between views
 and the rest of the application, which is intended to encapsulate the bulk of
 application business logic and hide persistence concerns from the views.
 
-`This blog post`_ by `Nando Farestan`_ may help provide additional background
+`This blog post`_ by Nando Farestan may help provide additional background
 on the motivation for a "services layer."
 
-.. _This blog post: http://nando.oui.com.br/2014/04/01/large_apps_with_sqlalchemy__architecture.html
-.. _Nando Farestan: http://nando.oui.com.br/index.html
+.. _This blog post: http://dev.nando.audio/2014/04/01/large_apps_with_sqlalchemy__architecture.html
 
 Decision
 --------

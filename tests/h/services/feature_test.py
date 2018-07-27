@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
+from h import models
 from h.services.feature import (
     FeatureRequestProperty,
     FeatureService,
@@ -166,8 +167,8 @@ class TestFeatureService(object):
         ]
 
     @pytest.fixture
-    def cohort(self, factories):
-        return factories.FeatureCohort(name='cohort')
+    def cohort(self):
+        return models.FeatureCohort(name='cohort')
 
 
 class TestFeatureServiceFactory(object):

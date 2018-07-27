@@ -12,15 +12,13 @@ from h import links
 from h import presenters
 from h import storage
 from h.activity import bucketing
-from h.models import Annotation, Document, Group
+from h.models import Annotation, Group
 from h.search import Search
 from h.search import parser
-from h.search.query import (
-    AuthorityFilter,
-    TagsAggregation,
-    TopLevelAnnotationsFilter,
-    UsersAggregation,
-)
+from h.search import TopLevelAnnotationsFilter
+from h.search import AuthorityFilter
+from h.search import TagsAggregation
+from h.search import UsersAggregation
 
 
 class ActivityResults(namedtuple('ActivityResults', [
@@ -82,19 +80,21 @@ def check_url(request, query, unparse=parser.unparse):
     redirect = None
 
     if _single_entry(query, 'group'):
-        pubid = query.pop('group')
+        pubid = query.get('group')
         group = request.db.query(Group).filter_by(pubid=pubid).one_or_none()
         if group:
+            query.pop('group')
             redirect = request.route_path('group_read',
                                           pubid=group.pubid,
                                           slug=group.slug,
                                           _query={'q': unparse(query)})
 
     elif _single_entry(query, 'user'):
-        username = query.pop('user')
+        username = query.get('user')
         user = request.find_service(name='user').fetch(username,
                                                        request.authority)
         if user:
+            query.pop('user')
             redirect = request.route_path('activity.user_search',
                                           username=username,
                                           _query={'q': unparse(query)})

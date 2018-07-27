@@ -7,10 +7,17 @@
       ('features', 'admin_features', 'Manage feature flags'),
       ('cohorts', 'admin_cohorts', 'Manage feature cohorts'),
     ]),
-    ('groups', 'admin_groups', 'Groups', []),
+    ('groups', 'admin_groups', 'Groups', [
+      ('groups', 'admin_groups', 'List Groups'),
+      ('groups_create', 'admin_groups_create', 'Create a Group'),
+    ]),
     ('mailer', 'admin_mailer', 'Mailer', []),
     ('nipsa', 'admin_nipsa', 'NIPSA', []),
     ('oauth', 'admin_oauthclients', 'OAuth clients', []),
+    ('organizations', 'admin_organizations', 'Organizations', [
+      ('organizations', 'admin_organizations', 'List organizations'),
+      ('organizations_create', 'admin_organizations_create', 'Create an organization'),
+    ]),
     ('staff', 'admin_staff', 'Staff', []),
     ('users', 'admin_users', 'Users', []),
 ] -%}
@@ -40,44 +47,34 @@
     {% include 'h:templates/includes/settings.html.jinja2' %}
   </head>
   <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{{ request.route_url('admin_index') }}">
-            Hypothesis Admin
-          </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            {% for id, permission, title, children in nav_pages %}
-              {% if request.has_permission(permission) %}
-                {% if not children %}
-                  <li{% if id == page_id %} class="active"{% endif %}>
-                    <a href="{{ request.route_url(permission) }}">{{ title }}</a>
-                  </li>
-                {% else %}
-                  <li class="dropdown{% if id in page_id %} active{% endif %}">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                      {{ title }}
-                      <span class="caret"></span>
-                      </a>
-                      <ul class="dropdown-menu">
-                        {% for id, url, title in children %}
-                          <li><a href="{{ request.route_url(url) }}">{{ title }}</a></li>
-                        {% endfor %}
-                      </ul>
-                  </li>
-                {% endif %}
+    <nav class="admin-navbar">
+      <div class="admin-navbar__container">
+        <a class="admin-navbar__logo-link" href="{{ request.route_url('admin_index') }}">
+          {{ svg_icon('logo', 'admin-navbar__logo') }}
+        </a>
+        <ul class="admin-navbar__tab-list">
+          {% for id, permission, title, children in nav_pages %}
+            {% if request.has_permission(permission) %}
+              {% if not children %}
+                <li class="admin-navbar__tab-item{% if id == page_id %} is-active{% endif %}">
+                  <a class="admin-navbar__tab-link" href="{{ request.route_url(permission) }}">{{ title }}</a>
+                </li>
+              {% else %}
+                <li class="admin-navbar__tab-item dropdown{% if id in page_id %} active{% endif %}">
+                    <a href="#" class="admin-navbar__tab-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    {{ title }}
+                    <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                      {% for id, url, title in children %}
+                        <li><a href="{{ request.route_url(url) }}">{{ title }}</a></li>
+                      {% endfor %}
+                    </ul>
+                </li>
               {% endif %}
-            {% endfor %}
-          </ul>
-        </div>
+            {% endif %}
+          {% endfor %}
+        </ul>
       </div>
     </nav>
 

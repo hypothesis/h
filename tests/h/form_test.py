@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import mock
 import pytest
 
@@ -88,7 +89,7 @@ class TestCreateForm(object):
 
         Form.assert_called_once_with(mock.sentinel.schema,
                                      foo='bar',
-                                     renderer=matchers.instance_of(form.Jinja2Renderer))
+                                     renderer=matchers.InstanceOf(form.Jinja2Renderer))
 
     def test_adds_feature_client_to_system_context(self,
                                                    Form,
@@ -164,7 +165,7 @@ class TestToXHRResponse(object):
 @pytest.mark.usefixtures('to_xhr_response')
 class TestHandleFormSubmission(object):
 
-    def test_it_calls_validate(self, pyramid_request):
+    def test_it_calls_validate(self, pyramid_request, matchers):
         form_ = mock.Mock(spec_set=['validate'])
 
         form.handle_form_submission(pyramid_request,
@@ -172,7 +173,8 @@ class TestHandleFormSubmission(object):
                                     mock_callable(),
                                     mock.sentinel.on_failure)
 
-        form_.validate.assert_called_once_with(pyramid_request.POST.items())
+        post_items = matchers.IterableWith(list(pyramid_request.POST.items()))
+        form_.validate.assert_called_once_with(post_items)
 
     def test_if_validation_fails_it_calls_on_failure(self,
                                                      pyramid_request,
@@ -260,7 +262,7 @@ class TestHandleFormSubmission(object):
 
         to_xhr_response.assert_called_once_with(
             pyramid_request,
-            matchers.redirect_302_to(pyramid_request.url),
+            matchers.Redirect302To(pyramid_request.url),
             form_)
 
     def test_if_validation_succeeds_it_passes_on_success_result_to_to_xhr_response(

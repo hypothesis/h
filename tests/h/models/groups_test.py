@@ -30,35 +30,85 @@ def test_with_long_name():
         models.Group(name="abcdefghijklmnopqrstuvwxyz")
 
 
-def test_slug(db_session, factories):
+def test_slug(db_session, factories, default_organization):
     name = "My Hypothesis Group"
     user = factories.User()
 
-    group = models.Group(name=name, authority="foobar.com", creator=user)
+    group = models.Group(name=name, authority="foobar.com", creator=user,
+                         organization=default_organization)
     db_session.add(group)
     db_session.flush()
 
     assert group.slug == "my-hypothesis-group"
 
 
-def test_repr(db_session, factories):
+def test_type_returns_open_for_open_groups(factories):
+    assert factories.OpenGroup().type == 'open'
+
+
+def test_type_returns_private_for_private_groups(factories):
+    assert factories.Group().type == 'private'
+
+
+def test_type_returns_restricted_for_restricted_groups(factories):
+    assert factories.RestrictedGroup().type == 'restricted'
+
+
+def test_type_raises_for_unknown_type_of_group(factories):
+    group = factories.Group()
+    # Set the group's access flags to an invalid / unused combination.
+    group.joinable_by = None
+    group.readable_by = ReadableBy.members
+    group.writeable_by = WriteableBy.authority
+
+    expected_err = "^This group doesn't seem to match any known type"
+    with pytest.raises(ValueError, match=expected_err):
+        group.type
+
+
+def test_you_cannot_set_type(factories):
+    group = factories.Group()
+
+    with pytest.raises(AttributeError, match="can't set attribute"):
+        group.type = 'open'
+
+
+def test_repr(db_session, factories, default_organization):
     name = "My Hypothesis Group"
     user = factories.User()
 
-    group = models.Group(name=name, authority='foobar.com', creator=user)
+    group = models.Group(name=name, authority='foobar.com', creator=user,
+                         organization=default_organization)
     db_session.add(group)
     db_session.flush()
 
     assert repr(group) == "<Group: my-hypothesis-group>"
 
 
-def test_created_by(db_session, factories):
+def test_group_organization(db_session):
+    name = "My Hypothesis Group"
+
+    org = models.Organization(name='My Organization', authority='foobar.com')
+    db_session.add(org)
+    db_session.flush()
+
+    group = models.Group(name=name, authority='foobar.com', organization=org)
+    db_session.add(group)
+    db_session.flush()
+
+    assert group.organization == org
+    assert group.organization_id == org.id
+
+
+def test_created_by(db_session, factories, default_organization):
     name_1 = "My first group"
     name_2 = "My second group"
     user = factories.User()
 
-    group_1 = models.Group(name=name_1, authority='foobar.com', creator=user)
-    group_2 = models.Group(name=name_2, authority='foobar.com', creator=user)
+    group_1 = models.Group(name=name_1, authority='foobar.com', creator=user,
+                           organization=default_organization)
+    group_2 = models.Group(name=name_2, authority='foobar.com', creator=user,
+                           organization=default_organization)
 
     db_session.add_all([group_1, group_2])
     db_session.flush()

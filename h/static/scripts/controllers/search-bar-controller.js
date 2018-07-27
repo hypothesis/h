@@ -64,7 +64,7 @@ class SearchBarController extends Controller {
         {
           matchOn: 'group',
           title: 'group:',
-          explanation: 'show annotations created in a group you are a member of',
+          explanation: 'show annotations associated with a group',
         },
       ].map((item) => { return Object.assign(item, { type: FACET_TYPE}); });
 
@@ -110,6 +110,7 @@ class SearchBarController extends Controller {
           matchOn: normalizeStr(item.name),
           pubid: item.pubid,
           name: item.name,
+          relationship: item.relationship,
         });
       });
 
@@ -322,9 +323,11 @@ class SearchBarController extends Controller {
       },
 
       renderListItem: (listItem) => {
-
         let itemContents = `<span class="search-bar__dropdown-menu-title"> ${escapeHtml(listItem.title)} </span>`;
-
+        if (listItem.type === GROUP_TYPE && listItem.relationship) {
+          itemContents += `<span class="search-bar__dropdown-menu-relationship"> ${escapeHtml(listItem.relationship)} </span>`;
+        }
+        
         if (listItem.explanation) {
           itemContents += `<span class="search-bar__dropdown-menu-explanation"> ${listItem.explanation} </span>`;
         }

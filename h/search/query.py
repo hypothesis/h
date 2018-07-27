@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from h import storage
 from h.util import uri
 
@@ -13,10 +14,18 @@ class Builder(object):
     Build a query for execution in Elasticsearch.
     """
 
-    def __init__(self):
+    def __init__(self, es_version):
+        """
+        Initialize query builder.
+
+        :param es_version: Elasticsearch library version.
+        :type es_version: Tuple[int,int,int]
+        """
+
         self.filters = []
         self.matchers = []
         self.aggregations = []
+        self._es_version = es_version
 
     def append_filter(self, f):
         self.filters.append(f)
@@ -45,18 +54,28 @@ class Builder(object):
         for key, value in params.items():
             matchers.append({"match": {key: value}})
 
-        query = {"match_all": {}}
-
-        if matchers:
-            query = {"bool": {"must": matchers}}
-
-        if filters:
+        # Use appropriate filter syntax depending on ES version.
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/query-dsl-filtered-query.html
+        if self._es_version >= (2,):
             query = {
-                "filtered": {
-                    "filter": {"and": filters},
-                    "query": query,
-                }
+                "bool": {
+                    "filter": filters,
+                    "must": matchers,
+                },
             }
+        else:
+            query = {"match_all": {}}
+
+            if matchers:
+                query = {"bool": {"must": matchers}}
+
+            if filters:
+                query = {
+                    "filtered": {
+                        "filter": {"and": filters},
+                        "query": query,
+                    }
+                }
 
         return {
             "from": p_from,
@@ -93,8 +112,16 @@ def extract_limit(params):
 def extract_sort(params):
     return [{
         params.pop("sort", "updated"): {
-            "ignore_unmapped": True,
             "order": params.pop("order", "desc"),
+
+            # `unmapped_type` causes unknown fields specified as arguments to
+            # `sort` behave as if all documents contained empty values of the
+            # given type. Without this, specifying eg. `sort=foobar` throws
+            # an exception.
+            #
+            # We use the field type `boolean` to assist with migration because
+            # that exists in both ES 1 and ES 6.
+            "unmapped_type": "boolean",
         }
     }]
 
@@ -104,7 +131,7 @@ class TopLevelAnnotationsFilter(object):
     """Matches top-level annotations only, filters out replies."""
 
     def __call__(self, _):
-        return {'missing': {'field': 'references'}}
+        return {'bool': {'must_not': {'exists': {'field': 'references'}}}}
 
 
 class AuthorityFilter(object):
@@ -144,10 +171,8 @@ class AuthFilter(object):
         if userid is None:
             return public_filter
 
-        return {'or': [
-            public_filter,
-            {'term': {'user_raw': userid}},
-        ]}
+        userid_filter = {'term': {'user_raw': userid}}
+        return {'bool': {'should': [public_filter, userid_filter]}}
 
 
 class GroupFilter(object):
@@ -162,6 +187,18 @@ class GroupFilter(object):
 
         if group is not None:
             return {"term": {"group": group}}
+
+
+class GroupAuthFilter(object):
+    """Filter out groups that the request isn't authorized to read."""
+
+    def __init__(self, request):
+        self.user = request.user
+        self.group_service = request.find_service(name="group")
+
+    def __call__(self, _):
+        groups = self.group_service.groupids_readable_by(self.user)
+        return {"terms": {"group": groups}}
 
 
 class UriFilter(object):
@@ -226,6 +263,54 @@ class DeletedFilter(object):
         return {"bool": {"must_not": {"exists": {"field": "deleted"}}}}
 
 
+class NipsaFilter(object):
+    def __init__(self, request):
+        self.group_service = request.find_service(name='group')
+        self.user = request.user
+
+    def __call__(self, _):
+        return nipsa_filter(self.group_service, self.user)
+
+
+def nipsa_filter(group_service, user=None):
+    """Return an Elasticsearch filter for filtering out NIPSA'd annotations.
+
+    The returned filter is suitable for inserting into an Es query dict.
+    For example:
+
+        query = {
+            "query": {
+                "filtered": {
+                    "filter": nipsa_filter(),
+                    "query": {...}
+                }
+            }
+        }
+
+    :param user: The user whose annotations should not be filtered.
+        The returned filtered query won't filter out this user's annotations,
+        even if the annotations have the NIPSA flag.
+    :type user: h.models.User
+    """
+    # If any one of these "should" clauses is true then the annotation will
+    # get through the filter.
+    should_clauses = [
+        {"bool": {"must_not": {"term": {"nipsa": True}}}},
+        {"exists": {"field": "thread_ids"}},
+    ]
+
+    if user is not None:
+        # Always show the logged-in user's annotations even if they have nipsa.
+        should_clauses.append({"term": {"user": user.userid.lower()}})
+
+        # Also include nipsa'd annotations for groups that the user created.
+        created_groups = group_service.groupids_created_by(user)
+        if created_groups:
+            should_clauses.append({"terms": {"group": created_groups}})
+
+    return {"bool": {"should": should_clauses}}
+
+
 class AnyMatcher(object):
 
     """
@@ -276,7 +361,7 @@ class RepliesMatcher(object):
 
 
 class TagsAggregation(object):
-    def __init__(self, limit=0):
+    def __init__(self, limit=10):
         self.key = 'tags'
         self.limit = limit
 
@@ -289,9 +374,6 @@ class TagsAggregation(object):
         }
 
     def parse_result(self, result):
-        if not result:
-            return {}
-
         return [
             {'tag': b['key'], 'count': b['doc_count']}
             for b in result['buckets']
@@ -299,7 +381,7 @@ class TagsAggregation(object):
 
 
 class UsersAggregation(object):
-    def __init__(self, limit=0):
+    def __init__(self, limit=10):
         self.key = 'users'
         self.limit = limit
 
@@ -312,9 +394,6 @@ class UsersAggregation(object):
         }
 
     def parse_result(self, result):
-        if not result:
-            return {}
-
         return [
             {'user': b['key'], 'count': b['doc_count']}
             for b in result['buckets']

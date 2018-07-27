@@ -3,16 +3,13 @@
 from __future__ import unicode_literals
 
 import base64
+import hashlib
 import os
 
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.backends import default_backend
+from hkdf import hkdf_expand, hkdf_extract
 from passlib.context import CryptContext
 
 DEFAULT_ENTROPY = 32
-
-backend = default_backend()
 
 # We use a passlib CryptContext to define acceptable hashing algorithms for
 # passwords. This allows us to easily
@@ -31,10 +28,21 @@ password_context = CryptContext(schemes=['bcrypt'],
 
 
 def derive_key(key_material, salt, info):
-    algorithm = hashes.SHA512()
-    length = algorithm.digest_size
-    hkdf = HKDF(algorithm, length, salt, info, backend)
-    return hkdf.derive(key_material)
+    """
+    Derive a fixed-size (64-byte) key for use in cryptographic operations.
+
+    The key is derived using HKDF with the SHA-512 hash function. See
+    https://tools.ietf.org/html/rfc5869.
+
+    :type key_material: str or bytes
+    :type salt: bytes
+    :type info: bytes
+    """
+    if not isinstance(key_material, bytes):
+        key_material = key_material.encode()
+
+    pseudorandom_key = hkdf_extract(salt, key_material, hash=hashlib.sha512)
+    return hkdf_expand(pseudorandom_key, info, length=64, hash=hashlib.sha512)
 
 
 # Implementation modeled on `secrets.token_urlsafe`, new in Python 3.6.

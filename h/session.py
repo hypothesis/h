@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from pyramid.session import SignedCookieSessionFactory
 
 from h.security import derive_key
@@ -67,15 +68,6 @@ def pop_flash(request):
             for k in ['error', 'info', 'warning', 'success']}
 
 
-def _group_sort_key(group):
-    """Sort private groups for the session model list"""
-
-    # groups are sorted first by name but also by ID
-    # so that multiple groups with the same name are displayed
-    # in a consistent order in clients
-    return (group.name.lower(), group.pubid)
-
-
 def _current_groups(request, authority):
     """Return a list of the groups the current user is a member of.
 
@@ -84,25 +76,16 @@ def _current_groups(request, authority):
     """
 
     user = request.user
-    authority_groups = (request.find_service(name='authority_group')
-                        .public_groups(authority=authority))
-
-    groups = authority_groups + _user_groups(user)
+    svc = request.find_service(name='list_groups')
+    groups = svc.session_groups(user=user, authority=authority)
 
     return [_group_model(request.route_url, group) for group in groups]
-
-
-def _user_groups(user):
-    if user is None:
-        return []
-    else:
-        return sorted(user.groups, key=_group_sort_key)
 
 
 def _group_model(route_url, group):
     model = {'name': group.name, 'id': group.pubid, 'public': group.is_public}
 
-    # We currently want to show URLs for secret groups, but not for publisher
+    # We currently want to show URLs for secret groups, but not for open
     # groups, and not for the `__world__` group (where it doesn't make sense).
     # This is currently all non-public groups, which saves us needing to do a
     # check in here on the group's authority.

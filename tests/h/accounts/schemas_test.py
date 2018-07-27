@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import colander
 import pytest
 from mock import Mock
@@ -8,7 +9,6 @@ from itsdangerous import BadData, SignatureExpired
 from h.accounts import schemas
 from h.services.user import UserNotActivated, UserService
 from h.services.user_password import UserPasswordService
-from h.schemas import ValidationError
 
 
 class TestUnblacklistedUsername(object):
@@ -53,9 +53,9 @@ class TestUniqueEmail(object):
                       dummy_node,
                       "foo@bar.com")
 
-    def test_it_is_invalid_when_user_does_not_exist(self,
-                                                    dummy_node,
-                                                    user_model):
+    def test_it_is_valid_when_user_does_not_exist(self,
+                                                  dummy_node,
+                                                  user_model):
         user_model.get_by_email.return_value = None
 
         assert schemas.unique_email(dummy_node, "foo@bar.com") is None
@@ -124,6 +124,35 @@ class TestRegisterSchema(object):
         assert exc.value.asdict()['username'] == ("Must have only letters, "
                                                   "numbers, periods, and "
                                                   "underscores.")
+
+    def test_it_is_invalid_with_false_privacy_accepted(self, pyramid_request):
+        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({"privacy_accepted": 'false'})
+
+        assert exc.value.asdict()['privacy_accepted'] == "Acceptance of the privacy policy is required"
+
+    def test_it_is_invalid_when_privacy_accepted_missing(self,
+                                                         pyramid_request):
+        schema = schemas.RegisterSchema().bind(request=pyramid_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({})
+
+        assert exc.value.asdict()['privacy_accepted'] == "Required"
+
+    def test_it_validates_with_valid_payload(self, pyramid_csrf_request, user_model):
+        user_model.get_by_username.return_value = None
+        user_model.get_by_email.return_value = None
+
+        schema = schemas.RegisterSchema().bind(request=pyramid_csrf_request)
+        schema.deserialize({
+            "username": "filbert",
+            "email": "foo@bar.com",
+            "password": "sdlkfjlk3j3iuei",
+            "privacy_accepted": "true",
+        })
 
 
 @pytest.mark.usefixtures('user_service', 'user_password_service')
@@ -384,7 +413,7 @@ class TestEmailChangeSchema(object):
 
         """
         models.User.get_by_email.return_value = Mock(spec_set=['userid'],
-                                                      userid=user.userid)
+                                                     userid=user.userid)
         pyramid_config.testing_securitypolicy(user.userid)
 
         schema.deserialize({'email': user.email, 'password': 'flibble'})
@@ -533,7 +562,7 @@ class TestPasswordChangeSchema(object):
 class TestEditProfileSchema(object):
     def test_accepts_valid_input(self, pyramid_csrf_request):
         schema = schemas.EditProfileSchema().bind(request=pyramid_csrf_request)
-        appstruct = schema.deserialize({
+        schema.deserialize({
             'display_name': 'Michael Granitzer',
             'description': 'Professor at University of Passau',
             'link': 'http://mgrani.github.io/',
@@ -554,168 +583,6 @@ class TestEditProfileSchema(object):
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({'link': '"invalid URL"'})
         assert exc.value.asdict()['link'] == 'Invalid URL'
-
-
-class TestCreateUserAPISchema(object):
-    def test_it_raises_when_authority_missing(self, schema, payload):
-        del payload['authority']
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_authority_not_a_string(self, schema, payload):
-        payload['authority'] = 34
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_username_missing(self, schema, payload):
-        del payload['username']
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_username_not_a_string(self, schema, payload):
-        payload['username'] = ['hello']
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_username_empty(self, schema, payload):
-        payload['username'] = ''
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_username_too_short(self, schema, payload):
-        payload['username'] = 'da'
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_username_too_long(self, schema, payload):
-        payload['username'] = 'dagrun-lets-make-this-username-really-long'
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_username_format_invalid(self, schema, payload):
-        payload['username'] = 'dagr!un'
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_missing(self, schema, payload):
-        del payload['email']
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_empty(self, schema, payload):
-        payload['email'] = ''
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_not_a_string(self, schema, payload):
-        payload['email'] = {'foo': 'bar'}
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_format_invalid(self, schema, payload):
-        payload['email'] = 'not-an-email'
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_too_long(self, schema, payload):
-        payload['email'] = ('dagrun.bibianne.selen.asya.'
-                            'dagrun.bibianne.selen.asya.'
-                            'dagrun.bibianne.selen.asya.'
-                            'dagrun.bibianne.selen.asya'
-                            '@foobar.com')
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_display_name_not_a_string(self, schema, payload):
-        payload['display_name'] = 42
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_display_name_too_long(self, schema, payload):
-        payload['display_name'] = 'Dagrun Bibianne Selen Asya Foobar'
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    @pytest.fixture
-    def payload(self):
-        return {
-            'authority': 'foobar.org',
-            'username': 'dagrun',
-            'email': 'dagrun@foobar.org',
-            'display_name': 'Dagrun Foobar',
-        }
-
-    @pytest.fixture
-    def schema(self):
-        return schemas.CreateUserAPISchema()
-
-
-class TestUpdateUserAPISchema(object):
-    def test_it_raises_when_email_empty(self, schema, payload):
-        payload['email'] = ''
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_not_a_string(self, schema, payload):
-        payload['email'] = {'foo': 'bar'}
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_format_invalid(self, schema, payload):
-        payload['email'] = 'not-an-email'
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_email_too_long(self, schema, payload):
-        payload['email'] = ('dagrun.bibianne.selen.asya.'
-                            'dagrun.bibianne.selen.asya.'
-                            'dagrun.bibianne.selen.asya.'
-                            'dagrun.bibianne.selen.asya'
-                            '@foobar.com')
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_display_name_not_a_string(self, schema, payload):
-        payload['display_name'] = 42
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    def test_it_raises_when_display_name_too_long(self, schema, payload):
-        payload['display_name'] = 'Dagrun Bibianne Selen Asya Foobar'
-
-        with pytest.raises(ValidationError):
-            schema.validate(payload)
-
-    @pytest.fixture
-    def payload(self):
-        return {
-            'email': 'dagrun@foobar.org',
-            'display_name': 'Dagrun Foobar',
-        }
-
-    @pytest.fixture
-    def schema(self):
-        return schemas.UpdateUserAPISchema()
 
 
 @pytest.fixture

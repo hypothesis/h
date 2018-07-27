@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import logging
 from collections import namedtuple
 from contextlib import contextmanager
 
-from elasticsearch.exceptions import ConnectionTimeout
+from elasticsearch1.exceptions import ConnectionTimeout
 
 from h.search import query
-
-FILTERS_KEY = 'h.search.filters'
-MATCHERS_KEY = 'h.search.matchers'
 
 log = logging.getLogger(__name__)
 
@@ -26,23 +24,27 @@ class Search(object):
     :param request: the request object
     :type request: pyramid.request.Request
 
-    :param separate_replies: Wheter or not to return all replies to the
+    :param separate_replies: Whether or not to return all replies to the
         annotations returned by this search. If this is True then the
-        resulting annotations will only include top-leve annotations, not replies.
+        resulting annotations will only include top-level annotations, not replies.
     :type separate_replies: bool
 
     :param stats: An optional statsd client to which some metrics will be
         published.
     :type stats: statsd.client.StatsClient
     """
-    def __init__(self, request, separate_replies=False, stats=None):
+    def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
         self.request = request
-        self.es = request.es
+        if self.request.feature('search_es6'):
+            self.es = request.es6
+        else:
+            self.es = request.es
         self.separate_replies = separate_replies
         self.stats = stats
+        self._replies_limit = _replies_limit
 
-        self.builder = default_querybuilder(request)
-        self.reply_builder = default_querybuilder(request)
+        self.builder = self._default_querybuilder(request, self.es)
+        self.reply_builder = self._default_querybuilder(request, self.es)
 
     def run(self, params):
         """
@@ -54,10 +56,15 @@ class Search(object):
         :returns: The search results
         :rtype: SearchResult
         """
-        total, annotation_ids, aggregations = self.search_annotations(params)
-        reply_ids = self.search_replies(annotation_ids)
+        total, annotation_ids, aggregations = self._search_annotations(params)
+        reply_ids = self._search_replies(annotation_ids)
 
         return SearchResult(total, annotation_ids, reply_ids, aggregations)
+
+    def clear(self):
+        """Clear search filters, aggregators, and matchers."""
+        self.builder = query.Builder(es_version=self.es.version)
+        self.reply_builder = query.Builder(es_version=self.es.version)
 
     def append_filter(self, filter_):
         """Append a search filter to the annotation and reply query."""
@@ -72,14 +79,14 @@ class Search(object):
     def append_aggregation(self, aggregation):
         self.builder.append_aggregation(aggregation)
 
-    def search_annotations(self, params):
+    def _search_annotations(self, params):
         if self.separate_replies:
             self.builder.append_filter(query.TopLevelAnnotationsFilter())
 
         response = None
         with self._instrument():
             response = self.es.conn.search(index=self.es.index,
-                                           doc_type=self.es.t.annotation,
+                                           doc_type=self.es.mapping_type,
                                            _source=False,
                                            body=self.builder.build(params))
         total = response['hits']['total']
@@ -87,7 +94,7 @@ class Search(object):
         aggregations = self._parse_aggregation_results(response.get('aggregations', None))
         return (total, annotation_ids, aggregations)
 
-    def search_replies(self, annotation_ids):
+    def _search_replies(self, annotation_ids):
         if not self.separate_replies:
             return []
 
@@ -95,10 +102,11 @@ class Search(object):
 
         response = None
         with self._instrument():
-            response = self.es.conn.search(index=self.es.index,
-                                           doc_type=self.es.t.annotation,
-                                           _source=False,
-                                           body=self.reply_builder.build({'limit': 200}))
+            response = self.es.conn.search(
+                index=self.es.index,
+                doc_type=self.es.mapping_type,
+                _source=False,
+                body=self.reply_builder.build({'limit': self._replies_limit}))
 
         if len(response['hits']['hits']) < response['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "
@@ -113,7 +121,7 @@ class Search(object):
             return {}
 
         results = {}
-        for key, result in aggregations.iteritems():
+        for key, result in aggregations.items():
             for agg in self.builder.aggregations:
                 if key != agg.key:
                     continue
@@ -137,25 +145,23 @@ class Search(object):
         except ConnectionTimeout:
             s.incr('search.query.timeout')
             raise
-        except:
+        except:  # noqa: E722
             s.incr('search.query.error')
             raise
         finally:
             timer.stop()
             s.send()
 
-
-def default_querybuilder(request):
-    builder = query.Builder()
-    builder.append_filter(query.DeletedFilter())
-    builder.append_filter(query.AuthFilter(request))
-    builder.append_filter(query.UriFilter(request))
-    builder.append_filter(query.GroupFilter())
-    builder.append_filter(query.UserFilter())
-    builder.append_matcher(query.AnyMatcher())
-    builder.append_matcher(query.TagsMatcher())
-    for factory in request.registry.get(FILTERS_KEY, []):
-        builder.append_filter(factory(request))
-    for factory in request.registry.get(MATCHERS_KEY, []):
-        builder.append_matcher(factory(request))
-    return builder
+    @staticmethod
+    def _default_querybuilder(request, es):
+        builder = query.Builder(es_version=es.version)
+        builder.append_filter(query.DeletedFilter())
+        builder.append_filter(query.AuthFilter(request))
+        builder.append_filter(query.UriFilter(request))
+        builder.append_filter(query.GroupFilter())
+        builder.append_filter(query.GroupAuthFilter(request))
+        builder.append_filter(query.UserFilter())
+        builder.append_filter(query.NipsaFilter(request))
+        builder.append_matcher(query.AnyMatcher())
+        builder.append_matcher(query.TagsMatcher())
+        return builder

@@ -1,10 +1,12 @@
 """
 Helpers for account forms
 """
+from __future__ import unicode_literals
 
 import re
 
 from h._compat import urlparse
+
 
 def validate_url(url):
     """
@@ -43,9 +45,9 @@ def validate_orcid(orcid):
     Returns the normalized ORCID if successfully parsed or raises a ValueError
     otherwise.
     """
-    ORCID_REGEX = '\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z'
+    orcid_regex = '\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z'
 
-    if not re.match(ORCID_REGEX, orcid):
+    if not re.match(orcid_regex, orcid):
         raise ValueError('The format of this ORCID is incorrect'.format(orcid))
 
     if _orcid_checksum_digit(orcid[:-1]) != orcid[-1:]:

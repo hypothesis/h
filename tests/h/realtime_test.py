@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from datetime import datetime
 
 import pytest
@@ -64,7 +65,7 @@ class TestConsumer(object):
         consumer.handle_message({}, message)
 
         statsd_client.timing.assert_called_once_with('streamer.msg.queueing',
-                                                     matchers.instance_of(int))
+                                                     matchers.InstanceOf(int))
 
     def test_handle_message_doesnt_explode_if_timestamp_missing(self, handler, statsd_client):
         consumer = realtime.Consumer(mock.sentinel.connection,
@@ -106,7 +107,7 @@ class TestPublisher(object):
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_annotation(payload)
 
-        expected_headers = matchers.mapping_containing('timestamp')
+        expected_headers = matchers.MappingContaining('timestamp')
         producer.publish.assert_called_once_with(payload,
                                                  exchange=exchange,
                                                  declare=[exchange],
@@ -121,7 +122,7 @@ class TestPublisher(object):
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_user(payload)
 
-        expected_headers = matchers.mapping_containing('timestamp')
+        expected_headers = matchers.MappingContaining('timestamp')
         producer.publish.assert_called_once_with(payload,
                                                  exchange=exchange,
                                                  declare=[exchange],

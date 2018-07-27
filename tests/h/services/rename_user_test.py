@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from h._compat import xrange
+
 import mock
 import pytest
 
@@ -18,12 +20,12 @@ class TestRenameUserService(object):
         assert service.check(user, 'panda') is True
 
     def test_check_raises_when_new_userid_is_already_taken(self, service, user, db_session, factories):
-        user_taken = factories.User(username='panda')
+        factories.User(username='panda')
         db_session.flush()
 
         with pytest.raises(UserRenameError) as err:
             service.check(user, 'panda')
-        assert err.value.message == 'Another user already has the username "panda"'
+        assert str(err.value) == 'Another user already has the username "panda"'
 
     @mock.patch('h.models.user.User.get_by_username')
     def test_check_returns_True_if_new_username_equivalent_to_old(self, get_by_username, service, user):

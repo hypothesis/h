@@ -34,12 +34,12 @@ class IAnnotationFormatter(Interface):
         :type ids: list of unicode
         """
 
-    def format(annotation_resource):  # noqa: N805
+    def format(annotation_context):  # noqa: N805
         """
         Presents additional annotation data that will be served to API clients.
 
-        :param annotation_resource: The annotation that needs presenting.
-        :type annotation_resource: h.resources.AnnotationResource
+        :param annotation_context: The annotation that needs presenting.
+        :type annotation_context: :py:class`h.traversal.AnnotationContext`
 
         :returns: A formatted dictionary.
         :rtype: dict

@@ -7,7 +7,7 @@ from sqlalchemy.orm import subqueryload
 from h import formatters
 from h import models
 from h import presenters
-from h import resources
+from h import traversal
 from h import storage
 from h.interfaces import IGroupService
 
@@ -48,7 +48,7 @@ class AnnotationJSONPresentationService(object):
             formatter.preload(annotation_ids)
 
         return [self.present(
-                    resources.AnnotationResource(ann, self.group_svc, self.links_svc))
+                    traversal.AnnotationContext(ann, self.group_svc, self.links_svc))
                 for ann in annotations]
 
     def _get_presenter(self, annotation_resource):

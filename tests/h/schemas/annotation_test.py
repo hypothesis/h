@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import mock
 import pytest
+import re
 
 from h.schemas import ValidationError
 from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
@@ -148,7 +149,7 @@ class TestCreateUpdateAnnotationSchema(object):
          "permissions.read.0: False is not of type 'string'"),
 
         ({'permissions': {'read': ["foo"]}},
-         "permissions.read.0: u'foo' does not match '^(acct:|group:).+$'"),
+         "permissions.read.0: 'foo' does not match '^(acct:|group:).+$'"),
 
         ({'references': False}, "references: False is not of type 'array'"),
 
@@ -167,7 +168,7 @@ class TestCreateUpdateAnnotationSchema(object):
          "target.0.selector: False is not of type 'array'"),
 
         ({'target': [{'selector': {'type': 'foo'}}]},
-         "target.0.selector: {u'type': u'foo'} is not of type 'array'"),
+         "target.0.selector: {'type': 'foo'} is not of type 'array'"),
 
         ({'target': [{'selector': [False]}]},
          "target.0.selector.0: False is not of type 'object'"),
@@ -194,7 +195,11 @@ class TestCreateUpdateAnnotationSchema(object):
         with pytest.raises(ValidationError) as exc:
             validate(pyramid_request, input_data)
 
-        assert str(exc.value) == error_message
+        # Strip "u" literal prefixes that get added in front of property names in
+        # certain error messages in Python 2.
+        actual_msg = str(exc.value)
+        actual_msg = re.sub(r"u'([^']+)'", "'\\1'", actual_msg)
+        assert actual_msg == error_message
 
     @pytest.mark.parametrize('field', [
         'created',
@@ -405,7 +410,7 @@ class TestCreateAnnotationSchema(object):
         with pytest.raises(ValidationError) as exc:
             schema.validate(data)
 
-        assert exc.value.message == "uri: 'uri' is a required property"
+        assert str(exc.value) == "uri: 'uri' is a required property"
 
     def test_it_sets_userid(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy('acct:harriet@example.com')
@@ -512,7 +517,6 @@ class TestUpdateAnnotationSchema(object):
             'groupid': 'new-group',
             'group': 'new-group'
         })
-
 
         assert 'groupid' not in appstruct
         assert 'groupid' not in appstruct.get('extra', {})

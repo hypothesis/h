@@ -1,0 +1,14 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'organizations_edit' %}
+{% set page_title = 'Edit organization' %}
+
+{% block content %}
+  {{ form }}
+  {% if delete_url %}
+    <form method="POST" action="{{ delete_url }}">
+      <button class="btn btn--danger js-confirm-submit"
+              data-confirm-message="Are you sure you want to delete this organization?">Delete</button>
+    </form>
+  {% endif %}
+{% endblock %}

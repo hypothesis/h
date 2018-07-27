@@ -7,7 +7,6 @@ import datetime
 import sqlalchemy
 from sqlalchemy.dialects import postgresql
 
-from h import security
 from h.db import Base
 from h.db import mixins
 

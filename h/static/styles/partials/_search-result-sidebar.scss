@@ -2,11 +2,17 @@
   width: $search-result-sidebar-width;
   flex-shrink: 0;
   margin-bottom: 40px;
+  margin-left: 20px;
 }
 
 .search-result-sidebar__title {
   margin-top: 0;
-  margin-bottom: 26px;
+  margin-bottom: 20px;
+}
+
+.search-result-sidebar__subtitle {
+  margin-bottom: 9px;
+  font-size: $subtitle-font-size;
 }
 
 .search-result-sidebar__title,
@@ -15,6 +21,7 @@
 }
 
 .search-result-sidebar__subtitle-count {
+  font-size: $normal-font-size;
   font-weight: normal;
 }
 
@@ -23,36 +30,35 @@
   @include pie-clearfix;
 }
 
-.search-result-sidebar__section:last-child {
+.search-result-sidebar__share-link {
+  margin-top: auto;
   margin-bottom: 0;
+  padding-top: 2px;
 }
 
-.search-result-sidebar__section p:first-of-type {
-  margin-top: 0;
+.search-result-sidebar__subsection {
+  margin-top: 17px;
 }
 
-.search-result-sidebar__section p:last-of-type {
-  margin-bottom: 0;
+.search-result-sidebar__subsection-p {
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
-.search-result-sidebar__dt {
+.search-result-sidebar__subsection-key {
+  color: $grey-6;
   font-weight: bold;
-  float: left;
-  clear: left;
-  margin-right: 3px;
 }
 
-.search-result-sidebar__dd {
-  float: left;
-  margin-left: 0;
-}
-
-.search-result-sidebar-title__annotations-count {
-  font-size: $normal-font-size;
-  font-weight: normal;
+.search-result-sidebar__subsection-val {
+  color: $grey-6;
 }
 
 .search-result-sidebar__annotations-count {
+  color: $grey-4;
+}
+
+.search-result-sidebar__creator {
   color: $grey-5;
 }
 
@@ -60,7 +66,6 @@
   display: flex;
   flex-wrap: wrap;
   max-width: 350px;
-  margin-top: 30px;
 }
 
 .search-result-sidebar__tag {
@@ -68,18 +73,24 @@
   background-color: $grey-2;
   border-radius: 2px;
   margin-bottom: 5px;
-  margin-right: 5px;
-  padding: 5px;
+  margin-right: 7px;
+  padding-bottom: 1px;
+  padding-top: 1px;
+  padding-left: 3px;
+  padding-right: 3px;
+  border-radius: 3px 3px;
   font-weight: bold;
 }
 
 .search-result-sidebar__tag-container {
   display: flex;
+  color: $grey-6;
+  align-items: center;
 }
 
 .search-result-sidebar__tag-count {
   color: $grey-4;
-  margin-left: 10px;
+  margin-left: 5px;
   font-weight: normal;
 }
 
@@ -88,6 +99,28 @@
   font-weight: bold;
   margin-right: 3px;
   margin-bottom: 7px;
+  color: $grey-6;
+}
+
+.search-result-sidebar__organization {
+  display: flex;
+  align-items: center;
+  margin-bottom: 26px;
+  font-weight: bold;
+}
+
+.search-result-sidebar__org-logo {
+  margin-right: 5px;
+}
+
+.search-result-sidebar__org-name {
+  text-transform: uppercase;
+  color: $group-organization-color;
+}
+
+.search-result-sidebar__logo {
+  height: 20px;
+  width: 20px; 
 }
 
 @media screen and (max-width: $tablet-width + 250px) {

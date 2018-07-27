@@ -34,6 +34,25 @@ dev: build/manifest.json .pydeps
 docker:
 	git archive HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
 
+# Run docker container.
+#
+# This command exists for conveniently testing the Docker image locally in
+# production mode. It assumes the services are being run using docker-compose
+# in the `h_default` network.
+.PHONY: run-docker
+run-docker:
+	docker run \
+		--net h_default \
+		-e "APP_URL=http://localhost:5000" \
+		-e "AUTHORITY=localhost" \
+		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
+		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
+		-e "ELASTICSEARCH_HOST=http://elasticsearchold:9200" \
+		-e "ELASTICSEARCH_URL=http://elasticsearch:9201" \
+		-e "SECRET_KEY=notasecret" \
+		-p 5000:5000 \
+		hypothesis/hypothesis:$(DOCKER_TAG)
+
 ## Run test suite
 .PHONY: test
 test: node_modules/.uptodate
@@ -41,12 +60,22 @@ test: node_modules/.uptodate
 	tox
 	$(GULP) test
 
+.PHONY: test-py3
+test-py3: node_modules/.uptodate
+	tox -e py36 -- tests/h/
+
+.PHONY: lint
+lint: .pydeps
+	flake8 h
+	flake8 tests
+	flake8 --select FI14 --exclude 'h/cli/*,tests/h/cli/*,h/util/uri.py,h/migrations/versions/*' h tests
+
 ################################################################################
 
 # Fake targets to aid with deps installation
-.pydeps: requirements.txt
+.pydeps: requirements.txt requirements-dev.in
 	@echo installing python dependencies
-	@pip install --use-wheel -r requirements-dev.in tox
+	@pip install -r requirements-dev.in tox
 	@touch $@
 
 node_modules/.uptodate: package.json

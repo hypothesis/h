@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from h._compat import xrange
 from collections import namedtuple
+
 import click
 
 from h import models

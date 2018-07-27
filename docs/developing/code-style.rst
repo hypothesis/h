@@ -43,12 +43,10 @@ are no longer correct:
 Linting
 ```````
 
-We recommend running `Flake8 <https://pypi.python.org/pypi/flake8>`_
-and `Prospector <https://pypi.python.org/pypi/prospector>`_ over your code to
-find bugs and style problems, using the configurations provided in this git
-repo. With our configurations Flake8 is faster and less noisy so is nicer to
-run more frequently, Prospector is more thorough so it can be run less
-frequently and may find some problems that Flake8 missed.
+We use `Flake8 <https://pypi.python.org/pypi/flake8>`_ for linting Python code.
+Lint checks are run as part of our continuous integration builds and can be run
+locally using ``make lint``. You may find it helpful to use a flake8 plugin for
+your editor to get live feedback as you make changes.
 
 Automated code formatting
 `````````````````````````
@@ -71,6 +69,10 @@ Front-end Development
 
 See the `Hypothesis Front-end Toolkit`_ repository for documentation on code
 style and tooling for JavaScript, CSS and HTML.
+
+We use `ESLint <https://eslint.org>`_ for linting front-end code. Use ``gulp
+lint`` to run ESlint locally. You may find it helpful to install an ESLint
+plugin for your editor to get live feedback as you make changes.
 
 .. _Hypothesis Front-end Toolkit: https://github.com/hypothesis/frontend-toolkit
 

@@ -35,6 +35,7 @@ N.B. Portions of the ws4py code are used here under the terms of the MIT
 license distributed with the ws4py project. Such code remains copyright (c)
 2011-2015, Sylvain Hellegouarch.
 """
+from __future__ import unicode_literals
 
 import logging
 
@@ -111,10 +112,10 @@ class GEventWebSocketPool(Pool):
         log.info("terminating server and all connected websockets")
         for greenlet in list(self):
             try:
-                websocket = greenlet._run.im_self
+                websocket = greenlet._run.__self__
                 if websocket:
                     websocket.close(1001, 'Server is shutting down')
-            except:
+            except:  # noqa: E722
                 pass
             finally:
                 self.discard(greenlet)
@@ -156,7 +157,6 @@ def create_app(global_config, **settings):
     config.include('h.authz')
     config.include('h.db')
     config.include('h.session')
-    config.include('h.search')
     config.include('h.sentry')
     config.include('h.services')
     config.include('h.stats')

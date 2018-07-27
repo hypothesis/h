@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import mock
 import pytest
 from gevent.queue import Queue
@@ -423,7 +424,7 @@ class TestHandleAnnotationEvent(object):
 
     @pytest.fixture
     def annotation_resource(self, patch):
-        return patch('h.streamer.messages.AnnotationResource')
+        return patch('h.streamer.messages.AnnotationContext')
 
 
 class TestHandleUserEvent(object):

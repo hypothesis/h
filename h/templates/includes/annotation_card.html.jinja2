@@ -51,9 +51,9 @@
       {{ presented_annotation.annotation.quote }}
     </blockquote>
   {% endif %}
-  <p class="annotation-card__text">
+  <div class="annotation-card__text">
     {{ presented_annotation.annotation.text_rendered }}
-  </p>
+  </div>
   <div title="Tags" class="annotation-card__tags">
     {% for tag in presented_annotation.annotation.tags%}
       <a class="annotation-card__tag" href="{{ tag_link(tag) }}">

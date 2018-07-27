@@ -9,6 +9,24 @@ info:
     See [the API overview](../api/) for an introduction to the API and information
     on how authorization works.
 
+    ## Expanding Resources
+
+    Resources often contain links to related resources in their response bodies.
+    Some endpoints support resource expansion, allowing those related resources
+    to be expanded inline within the response.
+
+    To expand resources (where supported), use the `expand` request parameter.
+    Documentation for endpoints identify which resources are expandable, if any.
+
+    ```
+    GET /api/things?expand=organization&expand=foobar
+    ```
+
+    Values for `expand` are the fields to expand. The above would expand
+    `organization` and `foobar` fields within the (hypothetical) returned `thing`
+    objects. You can expand multiple fields by providing multiple values in the
+    `expand` Array.
+
   termsOfService: https://hypothes.is/terms-of-service
   license:
     name: BSD (2-Clause)
@@ -32,9 +50,21 @@ securityDefinitions:
     description: Authorize using OAuth client credentials with HTTP Basic Auth.
 security:
   - developerAPIKey: []
+tags:
+  - name: general
+    description: General and miscellaneous API services
+  - name: annotations
+    description: Annotation resource services
+  - name: groups
+    description: Group resource services
+  - name: users
+    description: User and profile resource services
+
 paths:
   /:
     get:
+      tags:
+        - general
       summary: Service root
       description: Provides a list of links to resources offered by the API.
       operationId: root
@@ -44,6 +74,8 @@ paths:
       security: []
   /annotations:
     post:
+      tags:
+        - annotations
       summary: Create a new annotation
       operationId: createAnnotation
       parameters:
@@ -64,6 +96,8 @@ paths:
             $ref: '#/definitions/Error'
   /annotations/{id}:
     get:
+      tags:
+        - annotations
       summary: Fetch an annotation
       operationId: fetchAnnotation
       parameters:
@@ -82,6 +116,8 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     patch:
+      tags:
+        - annotations
       summary: Update an annotation
       description: |
         This endpoint is available under both the `PATCH` and `PUT`
@@ -120,6 +156,8 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     delete:
+      tags:
+        - annotations
       summary: Delete an annotation
       operationId: deleteAnnotation
       parameters:
@@ -149,6 +187,9 @@ paths:
             $ref: '#/definitions/Error'
   /profile:
     get:
+      tags:
+        - users
+      operationId: fetchProfile
       summary: Get the user's profile
       description: >
         This can either be accessed with an API key, in which case it will show
@@ -168,8 +209,77 @@ paths:
           description: Profile information
           schema:
             $ref: '#/definitions/Profile'
+  /groups:
+    get:
+      tags:
+        - groups
+      summary: Get list of groups
+      operationId: listGroups
+      description: >
+        Retrieve a list of accessible, applicable groups for this user for the
+        provided target document (document_uri).
+
+        Note: This API service is pre-release and currently under development.
+        Be aware that parameters and response body will be changing.
+
+      parameters:
+        - name: authority
+          in: query
+          description: >
+            Used to identify available public groups.
+            Applies only to non-authorized requests.
+          required: false
+          type: string
+          default: "hypothes.is"
+        - name: document_uri
+          in: query
+          description: >
+            The URI of the document currently being annotated.
+            Used to filter appropriate groups
+          required: false
+          type: string
+          format: uri
+        - name: expand
+          description: >
+            Array of fields to expand in the response
+          in: query
+          type: array
+          items:
+            type: string
+            enum:
+              - organization
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/GroupResults'
+    post:
+      tags:
+        - groups
+      summary: Create a new group
+      operationId: createGroup
+      description: >
+        Create a new, private group for the currently-authenticated user.
+      parameters:
+        - name: group
+          in: body
+          description: Group to be created
+          required: true
+          schema:
+            $ref: '#/definitions/NewGroup'
+      responses:
+        '200':
+          description: Group successfully created
+          schema:
+            $ref: '#/definitions/GroupResult'
+        '400':
+          description: Could not create group from your request
+          schema:
+            $ref: '#/definitions/Error'
   /search:
     get:
+      tags:
+        - annotations
       summary: Search for annotations
       operationId: search
       parameters:
@@ -245,10 +355,17 @@ paths:
             $ref: '#/definitions/SearchResults'
   /users:
     post:
+      tags:
+        - users
       summary: Create a new user
       description: |
         Only for specific auth clients, this API call allows clients with a
-        designated authority to create users within their authority.
+        designated authority to create users within their authority. Optional
+        identity information may be provided to maintain provider-specific
+        metadata about users.
+
+        This endpoint will return an HTTP 409 (Conflict) if the request represents
+        a duplicate of an existing user—email, username or identity collision.
       operationId: createUser
       parameters:
         - name: user
@@ -266,10 +383,16 @@ paths:
           description: Could not create user from your request
           schema:
             $ref: '#/definitions/Error'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ConflictError'
       security:
         - authClientCredentials: []
   /users/{username}:
     patch:
+      tags:
+        - users
       summary: Update an existing user
       description: |
         Only for specific auth clients, this API call allows clients with a
@@ -295,6 +418,8 @@ paths:
         - authClientCredentials: []
   /groups/{id}/members/{user}:
     delete:
+      tags:
+        - groups
       summary: Remove a member from a group
       operationId: deleteGroupMember
       parameters:
@@ -303,10 +428,10 @@ paths:
           description: Public ID of the group
           required: true
           type: string
-        - name: user
+        - name: userid
           in: path
           description: |
-            The user to remove from the group. For now, only the value `me` is
+            The userid of the user to remove from the group. For now, only the value `me` is
             supported, representing the currently-authenticated user.
           required: true
           type: string
@@ -316,6 +441,31 @@ paths:
           description: Success
         '404':
           description: Group not found
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - groups
+      summary: Add a member to a group
+      operationId: addGroupMember
+      parameters:
+        - name: id
+          in: path
+          description: Public ID of the group
+          required: true
+          type: string
+        - name: userid
+          in: path
+          description: |
+            User ID of the user to add to the group.
+            The userID should be of the format `acct:<username>@<authority>`
+          required: true
+          type: string
+      responses:
+        '204':
+          description: Success
+        '404':
+          description: User or Group not found
           schema:
             $ref: '#/definitions/Error'
 definitions:
@@ -341,6 +491,19 @@ definitions:
       reason:
         type: string
         description: A human-readable description of the reason(s) for failure.
+  ConflictError:
+    description: An error indicating a resource conflict, typically because a duplicate resource already exists.
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum:
+          - failure
+      reason:
+        type: string
+        description: One or more human-readable errors describing the conflict.
   SearchResults:
     type: object
     required:
@@ -354,6 +517,14 @@ definitions:
       total:
         description: Total number of results matching query.
         type: integer
+  NewGroup:
+    $ref: './schemas/new-group.yaml#/Group'
+  GroupResult:
+    $ref: './schemas/group.yaml#/Group'
+  GroupResults:
+    type: array
+    items:
+      $ref: './schemas/group.yaml#/Group'
   NewUser:
     $ref: './schemas/new-user-schema.json'
   UpdateUser:

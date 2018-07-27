@@ -11,7 +11,7 @@ class TestRenameUser(object):
     def test_it_raises_when_user_cannot_be_found(self, celery):
         with pytest.raises(ValueError) as err:
             rename_user(4, 'panda')
-        assert err.value.message == 'Could not find user with id 4'
+        assert str(err.value) == 'Could not find user with id 4'
 
     def test_it_finds_the_service(self, celery, user):
         rename_user(user.id, 'panda')

@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 
-from h.i18n import TranslationString as _
+from h.i18n import TranslationString as _  # noqa: N813
 
 
 class APIError(Exception):
@@ -26,6 +26,15 @@ class ClientUnauthorized(APIError):
     def __init__(self):
         message = _('Client credentials are invalid.')
         super(ClientUnauthorized, self).__init__(message, status_code=403)
+
+
+class ConflictError(APIError):
+    """
+    Exception raised if client request represents a duplicate of an
+    existing resource.
+    """
+    def __init__(self, message=_('Conflict')):
+        super(ConflictError, self).__init__(message, status_code=409)
 
 
 class OAuthTokenError(APIError):

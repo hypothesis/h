@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.indexer.reindexer import reindex, SETTING_NEW_INDEX
+from h.indexer.reindexer import reindex
 from h.search import client
+from h.services.nipsa import NipsaService
 
 
 @pytest.mark.usefixtures('BatchIndexer',
                          'configure_index',
+                         'delete_index',
+                         'nipsa_service',
                          'get_aliased_index',
                          'update_aliased_index',
                          'settings_service')
@@ -76,17 +80,30 @@ class TestReindex(object):
         with pytest.raises(RuntimeError):
             reindex(mock.sentinel.session, es, mock.sentinel.request)
 
-    def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service, configure_index):
+    @pytest.mark.parametrize(
+        'esversion,new_index_setting_name',
+        (((1, 5, 0), 'reindex.new_index'),
+        ((6, 2, 0), 'reindex.new_es6_index'))
+    )
+    def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service,
+                                               configure_index, esversion, new_index_setting_name):
+        es.version = esversion
         configure_index.return_value = 'hypothesis-abcd1234'
 
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.put.assert_called_once_with(SETTING_NEW_INDEX, 'hypothesis-abcd1234')
+        settings_service.put.assert_called_once_with(new_index_setting_name, 'hypothesis-abcd1234')
 
-    def test_deletes_index_name_setting(self, pyramid_request, es, settings_service):
+    @pytest.mark.parametrize(
+        'esversion,new_index_setting_name',
+        (((1, 5, 0), 'reindex.new_index'),
+        ((6, 2, 0), 'reindex.new_es6_index'))
+    )
+    def test_deletes_index_name_setting(self, pyramid_request, es, settings_service, esversion, new_index_setting_name):
+        es.version = esversion
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with(new_index_setting_name)
 
     def test_deletes_index_name_setting_when_exception_raised(self, pyramid_request, es, settings_service, batchindexer):
         batchindexer.index.side_effect = RuntimeError('boom!')
@@ -94,7 +111,18 @@ class TestReindex(object):
         with pytest.raises(RuntimeError):
             reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(SETTING_NEW_INDEX)
+        settings_service.delete.assert_called_once_with('reindex.new_index')
+
+    def test_deletes_old_index(self, pyramid_request, es, delete_index, get_aliased_index):
+        get_aliased_index.return_value = 'original_index'
+
+        reindex(mock.sentinel.session, es, pyramid_request)
+
+        delete_index.assert_called_once_with(es, 'original_index')
+
+    def test_populates_nipsa_cache(self, pyramid_request, es, nipsa_service):
+        reindex(mock.sentinel.session, es, pyramid_request)
+        nipsa_service.fetch_all_flagged_userids.assert_called_once_with()
 
     @pytest.fixture
     def BatchIndexer(self, patch):
@@ -111,6 +139,10 @@ class TestReindex(object):
         return func
 
     @pytest.fixture
+    def delete_index(self, patch):
+        return patch('h.indexer.reindexer.delete_index')
+
+    @pytest.fixture
     def update_aliased_index(self, patch):
         return patch('h.indexer.reindexer.update_aliased_index')
 
@@ -122,15 +154,22 @@ class TestReindex(object):
 
     @pytest.fixture
     def es(self):
-        mock_es = mock.Mock(spec=client.Client('localhost', 'hypothesis'))
-        mock_es.index = 'hypothesis'
-        mock_es.t.annotation = 'annotation'
+        mock_es = mock.create_autospec(client.Client, instance=True,
+                                       spec_set=True, index="hypothesis",
+                                       version=(1, 5, 0))
+        mock_es.mapping_type = 'annotation'
         return mock_es
 
     @pytest.fixture
     def settings_service(self, pyramid_config):
         service = mock.Mock()
         pyramid_config.register_service(service, name='settings')
+        return service
+
+    @pytest.fixture
+    def nipsa_service(self, pyramid_config):
+        service = mock.create_autospec(NipsaService, spec_set=True, instance=True)
+        pyramid_config.register_service(service, name='nipsa')
         return service
 
     @pytest.fixture

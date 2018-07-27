@@ -18,6 +18,9 @@ FEATURES = {
     'overlay_highlighter': "Use the new overlay highlighter?",
     'api_render_user_info': "Return users' extended info in API responses?",
     'client_display_names': "Render display names instead of user names in the client",
+    'index_es6': ("Index annotations into Elasticsearch 6 "
+                  "(only takes effect if enabled for everyone)?"),
+    'search_es6': "Search annotations in Elasticsearch 6",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -39,19 +42,6 @@ FEATURES = {
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
 FEATURES_PENDING_REMOVAL = {
-    'activity_pages': "Show the new activity pages?",
-    'client_oauth': ("Use OAuth for first party accounts in client? "
-                     "(Only takes effect if enabled for everyone)"),
-    'defer_realtime_updates': ("Require a user action before applying real-time"
-                               " updates to annotations in the client?"),
-    'flag_action': ("Enable user to flag inappropriate annotations in the "
-                    "client?"),
-    'homepage_redirects': "Enable homepage redirects (for WordPress migration)?",
-    'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
-    'search_for_doi': "Use DOI metadata when searching for annotations on the current page?",
-    'search_page': "Show the activity pages search skeleton page?",
-    'total_shared_annotations': "Show the total number of shared annotations for users and groups?",
-    'use_client_boot_script': "Use the client's boot script?",
 }
 
 

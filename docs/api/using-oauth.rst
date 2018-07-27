@@ -40,8 +40,7 @@ Registering an OAuth client
 ---------------------------
 
 To register an OAuth client on an instance of the h service for which you have
-admin access, go to the `/admin/oauthclients` page. To register an OAuth client
-on the public h service at https://hypothes.is, please contact us.
+admin access, go to the `/admin/oauthclients` page. 
 
 To register a new client as an admin of the "h" service:
 

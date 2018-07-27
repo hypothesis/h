@@ -20,9 +20,9 @@ class TestGenerate(object):
         generate(pyramid_request, 'meerkat@example.com')
 
         expected_context = {
-            'time': matchers.instance_of(string_types),
-            'hostname': matchers.instance_of(string_types),
-            'python_version': matchers.instance_of(string_types),
+            'time': matchers.InstanceOf(string_types),
+            'hostname': matchers.InstanceOf(string_types),
+            'python_version': matchers.InstanceOf(string_types),
             'version': __version__,
         }
         html_renderer.assert_(**expected_context)

@@ -8,12 +8,28 @@ matrix:
       python: '2.7'
       addons:
         postgresql: "9.4"
+      before_install:
+        - ./scripts/elasticsearch-old.sh
+        - ./scripts/elasticsearch.sh
       install: pip install tox
       before_script: createdb htest
       script: tox
       after_success:
         tox -e coverage
         tox -e codecov
+
+    - env: ACTION=tox-py3
+      language: python
+      python: '3.6'
+      addons:
+        postgresql: '9.4'
+      before_install:
+        - ./scripts/elasticsearch-old.sh
+        - ./scripts/elasticsearch.sh
+      install: pip install tox
+      before_script: createdb htest
+      script:
+        make test-py3
 
     # Test web application frontend
     - env: ACTION=gulp
@@ -29,7 +45,16 @@ matrix:
     - env: ACTION=frontend-lint
       language: node_js
       node_js: '6.7'
-      script: gulp lint
+      script:
+        gulp lint
+
+    # Lint backend code
+    - env: ACTION=backend-lint
+      language: python
+      python: '2.7'
+      script:
+        make lint
+
 
 cache:
   directories:

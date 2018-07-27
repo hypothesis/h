@@ -164,7 +164,7 @@
         <span class="search-result-sidebar__tag-container">
           {{ tag.tag }}
           <span class="search-result-sidebar__tag-count">
-            {{ tag.count }}
+            {{ tag.count | format_number}}
           </span>
         </span>
       </button>
@@ -173,23 +173,65 @@
 </section>
 {% endmacro %}
 
-{% macro sidebar(title, description) %}
+{% macro group_users(title, users, creator) %}
+<section class="search-result-sidebar__section">
+  <h3 class="search-result-sidebar__subtitle">
+    {% trans %} {{title}} {% endtrans %}
+    <span class="search-result-sidebar__subtitle-count">
+      {{ users|length }}
+    <span>
+  </h3>
+  <ul>
+    {% for user in users %}
+      <li>
+        <button type="submit"
+                form="search-bar"
+                name="toggle_user_facet"
+                value="{{ user.userid }}"
+                {% if user.faceted_by %}
+                  title="{% trans username=user.username %}Remove {{ username }} from the search query{% endtrans %}"
+                {% else %}
+                  title="{% trans username=user.username %}Limit the search to annotations by {{ username }}{% endtrans %}"
+                {% endif %}
+                class="search-result-sidebar__username">
+          {{ user.username }}
+          <span class="search-result-sidebar__annotations-count">
+            {{ user.count | format_number}}
+          </span>
+          {% if user.userid == creator %}
+            <span class="search-result-sidebar__creator">
+              creator
+            </span>
+          {% endif %}
+        </button>
+      </li>
+    {% endfor %}
+    </ul>
+  </form>
+</section>
+{% endmacro %}
+
+{% macro sidebar(title, organization) %}
 <aside class="search-result-sidebar {%- if not more_info %} search-result-hide-on-small-screens{% endif %}">
 
   {#- This form element is needed for Internet Explorer because it
       doesn't support the `form` attribute. See commit message. #}
   <form method="GET" action="{{ request.path_url }}">
     <input type="hidden" name="q" value="{{ q }}">
+    {% if organization %}
+      <div class="search-result-sidebar__organization">
+        <span class="search-result-sidebar__org-logo"> 
+          {% if organization.logo %}
+            <img src="{{ organization.logo }}" alt="Organization logo" class='search-result-sidebar__logo'></img>
+          {% endif %}
+        </span>
+        <span class="search-result-sidebar__org-name"> 
+          {{ organization.name }}
+        </span>
+      </div>
+    {% endif %}
 
     <h1 class="search-result-sidebar__title">{{ title }}</h1>
-
-    {% if description %}
-    <section class="search-result-sidebar__section">
-      {% for paragraph in description.split('\n') %}
-        <p>{{ paragraph }}</p>
-      {% endfor %}
-    </section>
-    {% endif %}
 
     {{ caller() }}
   </form>
@@ -197,157 +239,132 @@
 {% endmacro %}
 
 {% macro group_sidebar(group, group_edit_url, total, stats) %}
-  {% call sidebar(group.name, group.description) %}
-    <section class="search-result-sidebar__section">
-      <dl>
-        {% if stats.annotation_count  %}
-          <dt class="search-result-sidebar__dt">
-            {% trans %}Shared annotations:{% endtrans %}
-          </dt>
-          <dd class="search-result-sidebar__dd">{{ stats.annotation_count }}</dd>
-        {% endif %}
-        <dt class="search-result-sidebar__dt">
-          {% trans %}Created:{% endtrans %}
-        </dt>
-        <dd class="search-result-sidebar__dd">{{ group.created }}</dd>
-      </dl>
-    </section>
+  {% call sidebar(group.name, group.organization) %}
 
     <section class="search-result-sidebar__section">
-      <ul>
-        {% if group_edit_url %}
-          <li>
-            <a class="link"
-               href="{{ group_edit_url }}">
-              {% trans %}Edit group{% endtrans %}
-            </a>
-          </li>
-        {% endif %}
-        <li>
-          <button class="link--btn js-confirm-submit"
-                  type="submit"
-                  form="search-bar"
-                  formmethod="POST"
-                  name="group_leave"
-                  value="{{ group.pubid }}"
-                  data-confirm-message="Are you sure you want to leave the group &quot;{{ group.name }}&quot;?">
-              {% trans %}Leave this group{% endtrans %}
-          </button>
-        </li>
-      </ul>
+      {% if group.description %}
+        <div class="search-result-sidebar__subsection">
+        {% for paragraph in group.description.split('\n') %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+        </div>
+      {% endif %}
+      <div class="search-result-sidebar__subsection">
+        <p class="search-result-sidebar__subsection-p">
+          <span class="search-result-sidebar__subsection-key">{% trans %}Annotations:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-val">{{ stats.annotation_count | format_number}}</span>
+        </p>
+        <p class="search-result-sidebar__subsection-p">
+          <span class="search-result-sidebar__subsection-key">{% trans %}Created:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-val">{{ group.created }}</span>
+        </p>
+      </div>
+      <div class="search-result-sidebar__subsection">
+      {% if group_edit_url %}
+        <p class="search-result-sidebar__subsection-p">
+          <a class="link"
+              href="{{ group_edit_url }}">
+             {% trans %}Edit group{% endtrans %}
+          </a>
+        </p>
+      {% endif %}
+      {# only show ability to leave group if the logged in user is a member of that group #}
+      {% if show_leave_button %}
+        <button class="link--btn js-confirm-submit"
+                type="submit"
+                form="search-bar"
+                formmethod="POST"
+                name="group_leave"
+                value="{{ group.pubid }}"
+                data-confirm-message="Are you sure you want to leave the group &quot;{{ group.name }}&quot;?">
+          {% trans %}Leave this group{% endtrans %}
+        </button>
+      {% endif %}
+      </div>
     </section>
 
     {{ tags_section() }}
 
+    {{ group_users(*group_users_args) }}
     <section class="search-result-sidebar__section">
       <h3 class="search-result-sidebar__subtitle">
-        {% trans %}Members{% endtrans %}
-        <span class="search-result-sidebar-title__annotations-count">
-          {{ group.members|length }}
-        <span>
+        {{ group.share_subtitle }}
       </h3>
-      <ul>
-        {% for user in group.members %}
-          <li>
-            <button type="submit"
-                    form="search-bar"
-                    name="toggle_user_facet"
-                    value="{{ user.userid }}"
-                    {% if user.faceted_by %}
-                      title="{% trans username=user.username %}Remove {{ username }} from the search query{% endtrans %}"
-                    {% else %}
-                      title="{% trans username=user.username %}Limit the search to annotations by {{ username }}{% endtrans %}"
-                    {% endif %}
-                    class="search-result-sidebar__username">
-              {{ user.username }}
-              {% if user.count > 0 %}
-              <span class="search-result-sidebar__annotations-count">
-                {{ user.count }}
-              </span>
-              {% endif %}
-            </button>
-          </li>
-          {% endfor %}
-        </ul>
-      </form>
+      <p class="search-result-sidebar__share-link">
+        {{ group.share_msg }}
+      </p>
+      <div class="group-invite__container js-copy-button">
+        <input class="group-invite__input js-select-onfocus"
+               data-ref="input"
+               value="{{ group.url }}">
+        <button class="group-invite__clipboard-button"
+                data-ref="button"
+                title="Copy to clipboard">
+          {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
+        </button>
+      </div>
     </section>
-
-    <h3 class="group-invite__title">
-      {% trans %}Invite new members{% endtrans %}
-    </h3>
-    Sharing the link below lets people join this group:
-    <div class="group-invite__container js-copy-button">
-      <input class="group-invite__input js-select-onfocus"
-             data-ref="input"
-             value="{{ group.url }}">
-      <button class="group-invite__clipboard-button"
-              data-ref="button"
-              title="Copy to clipboard">
-        {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
-      </button>
-    </div>
   {% endcall %}
 {% endmacro %}
 
 {% macro user_sidebar(user, stats) %}
-  {% call sidebar(user.name, user.description) %}
+  {% call sidebar(user.name) %}
     <section class="search-result-sidebar__section">
-      <dl>
-        {% if stats.annotation_count %}
-          <dt class="search-result-sidebar__dt">
-            {% trans %}Annotations:{% endtrans %}
-          </dt>
-          <dd class="search-result-sidebar__dd">{{ stats.annotation_count }}</dd>
-        {% endif %}
-
-        <dt class="search-result-sidebar__dt">
-          {% trans %}Joined:{% endtrans %}
-        </dt>
-        <dd class="search-result-sidebar__dd">{{ user.registered_date }}</dd>
-
-        {%- if user.location %}
-          <dt class="search-result-sidebar__dt">
-            {% trans %}Location:{% endtrans %}
-          </dt>
-          <dd class="search-result-sidebar__dd">{{ user.location }}</dd>
-        {% endif -%}
-
-        {%- if user.uri %}
-          <dt class="search-result-sidebar__dt">
-            {% trans %}Link:{% endtrans %}
-          </dt>
-          <dd class="search-result-sidebar__dd">
+      {% if user.description %}
+        {% for paragraph in user.description.split('\n') %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+      {% endif %}
+    
+      <div class="search-result-sidebar__subsection">
+      {% if stats.annotation_count %}
+        <p class="search-result-sidebar__subsection-p">
+          <span class="search-result-sidebar__subsection-key">{% trans %}Annotations:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-val">{{ stats.annotation_count | format_number}}</span>
+        </p>
+      {% endif %}
+        <p class="search-result-sidebar__subsection-p">
+          <span class="search-result-sidebar__subsection-key">{% trans %}Joined:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-val">{{ user.registered_date }}</span>
+        </p>
+      {%- if user.location %}
+        <p class="search-result-sidebar__subsection-p">
+          <span class="search-result-sidebar__subsection-key">{% trans %}Location:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-val">{{ user.location }}</span>
+        </p>
+      {% endif %}
+      {%- if user.uri %}
+        <p class="search-result-sidebar__subsection-p">
+          <span class="search-result-sidebar__subsection-key">{% trans %}Link:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-val">
             <a href="{{ user.uri }}" rel="nofollow noopener" class="link--plain">
               {{ pretty_link(user.uri) }}
             </a>
-          </dd>
-        {% endif -%}
-
-        {%- if user.orcid %}
-          <dt class="search-result-sidebar__dt">
-            {% trans %}ORCID:{% endtrans %}
-          </dt>
-          <dd class="search-result-sidebar__dd">
+          </span>
+        </p>
+      {% endif %}
+      {%- if user.orcid %}
+        <p class="search-result-sidebar__subsection-p">
+          <span class="search-result-sidebar__subsection-key">{% trans %}ORCID:{% endtrans %}</span>
+          <span class="search-result-sidebar__subsection-val">
             <a href="https://orcid.org/{{ user.orcid }}"
                class="link--plain">
               {{ user.orcid }}
             </a>
-          </dd>
-        {% endif -%}
-      </dl>
-    </section>
-
-    <section class="search-result-sidebar__section">
-      <ul>
-        {% if user.edit_url %}
-          <li>
-            <a class="link"
-               href="{{ user.edit_url }}">
-              {% trans %}Edit profile{% endtrans %}
-            </a>
-          </li>
-        {% endif %}
-      </ul>
+          </span>
+        </p>
+      {% endif %}
+      </div>
+      <div class="search-result-sidebar__subsection">
+      {% if user.edit_url %}
+        <p class="search-result-sidebar__subsection-p">
+          <a class="link"
+             href="{{ user.edit_url }}">
+            {% trans %}Edit profile{% endtrans %}
+          </a>
+        </p>
+      {% endif %}
+      </div>
     </section>
 
     {{ tags_section() }}
@@ -371,7 +388,7 @@
       <div class="search-results {%- if more_info %} search-result-hide-on-small-screens{% endif %}">
 
         {% if q or user or group %}
-        <div class="search-results__total"> {{search_results.total}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
+        <div class="search-results__total"> {{search_results.total | format_number}} <b>{% trans %}Matching Annotations{% endtrans %}</b></div>
         {% endif %}
 
         <ol class="search-results__list"

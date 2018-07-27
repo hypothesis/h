@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Authentication configuration."""
+from __future__ import unicode_literals
 
 import logging
 

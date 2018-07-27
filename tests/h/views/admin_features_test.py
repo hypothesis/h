@@ -50,7 +50,7 @@ def test_features_save_sets_attributes_when_checkboxes_on(Feature, pyramid_reque
 
     features_save(pyramid_request)
 
-    assert foo.everyone == foo.staff == bar.admins == True
+    assert foo.everyone is foo.staff is bar.admins is True
 
 
 @features_save_fixtures
@@ -63,7 +63,7 @@ def test_features_save_sets_attributes_when_checkboxes_off(Feature, pyramid_requ
 
     features_save(pyramid_request)
 
-    assert foo.everyone == foo.staff == False
+    assert foo.everyone is foo.staff is False
 
 
 @features_save_fixtures
@@ -75,7 +75,7 @@ def test_features_save_ignores_unknown_fields(Feature, pyramid_request):
 
     features_save(pyramid_request)
 
-    assert foo.admins == False
+    assert foo.admins is False
 
 
 def test_cohorts_index_without_cohorts(pyramid_request):

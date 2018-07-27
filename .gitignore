@@ -18,6 +18,7 @@ mail/
 *.egg
 *.egg-info
 .pydeps
+.pytest_cache
 
 # development TLS cert/key
 .tlscert.pem
@@ -32,3 +33,6 @@ mail/
 
 celerybeat-schedule
 celerybeat-schedule.*
+
+# Temp file for `make test-py3` target
+tests/py3-actual-failures.txt

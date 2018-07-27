@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from functools import partial
 
 from h.emails import signup
-from h.models import Activation, Subscriptions, User
+from h.models import Activation, Subscriptions, User, UserIdentity
 from h.tasks import mailer
 
 
@@ -47,6 +47,10 @@ class UserSignupService(object):
         :param require_activation: The name to use.
         :type require_activation: bool.
 
+        :param identities: A list of dictionaries representing identities to
+        add to the new user. Each dictionary will be passed as keyword args
+        to :py:class:`h.models.UserIdentity`.
+
         Remaining keyword arguments are used to construct a new
         :py:class:`h.models.User` object.
 
@@ -59,7 +63,14 @@ class UserSignupService(object):
         # user's password.
         password = kwargs.pop('password', None)
 
+        # Extract any passed identities for this new user
+        identities = kwargs.pop('identities', [])
+
         user = User(**kwargs)
+
+        # Add identity relations to this new user, if provided
+        user.identities = [UserIdentity(user=user, **i_args) for i_args in identities]
+
         self.session.add(user)
 
         if password is not None:
