@@ -202,6 +202,24 @@ class TestValidateAuthClientAuthority(object):
         util.validate_auth_client_authority(auth_client, authority)
 
 
+class TestPrincipalsForAuthClient(object):
+
+    def test_it_sets_auth_client_principal(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert "auth_client:{authority}".format(authority=auth_client.authority) in principals
+
+    def test_it_sets_authority_principal(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert "authority:{authority}".format(authority=auth_client.authority) in principals
+
+    def test_it_returns_principals_as_list(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert isinstance(principals, list)
+
+
 class TestCheckAuthClient(object):
     def test_it_queries_for_auth_client_in_db(self, pyramid_request):
         pyramid_request.db.query.return_value.get.return_value = None
