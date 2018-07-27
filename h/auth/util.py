@@ -168,7 +168,7 @@ def principals_for_auth_client(client):
     :rtype: list
     """
 
-    principals = set()
+    principals = set([])
 
     principals.add('auth_client:{authority}'.format(authority=client.authority))
     principals.add('authority:{authority}'.format(authority=client.authority))
