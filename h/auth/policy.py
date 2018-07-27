@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 from pyramid import interfaces
+from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.authentication import CallbackAuthenticationPolicy
 from zope import interface
 
@@ -37,6 +38,45 @@ class AuthenticationPolicy(object):
         if _is_api_request(request):
             return self.api_policy.forget(request)
         return self.fallback_policy.forget(request)
+
+
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class AuthClientPolicy(BasicAuthAuthenticationPolicy):
+
+    """
+    An authentication policy for registered auth_clients.
+    """
+
+    def __init__(self, check, realm='Realm', debug=False):
+        self.check = check
+        self.realm = realm
+        self.debug = debug
+
+    def authenticated_userid(self, request):
+        """
+        Currently the behavior here is different than other Auth policies
+        as the net result is that, although Authentication may well be
+        successful, we don't end up with an authenticated ``userid``.
+
+        Thus, ``request.authenticated_userid`` will be None and
+        ```request.user`` will not be set (see :py:mod:`h.accounts`)
+
+        However, the request will be authenticated. In a view,
+        ``effective_principals=security.Authenticated`` would be satisfied.
+
+        .. todo::
+
+           Extend me here (carefully) to operate on behalf of user in authority)
+        """
+        return None
+
+    def remember(self, request, userid, **kw):
+        """Not implemented for basic auth client policy."""
+        return []
+
+    def forget(self, request):
+        """Not implemented for basic auth client policy."""
+        return []
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)

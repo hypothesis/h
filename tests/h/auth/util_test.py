@@ -10,6 +10,7 @@ import pytest
 import mock
 from hypothesis import strategies as st
 from hypothesis import given
+import sqlalchemy as sa
 
 from pyramid import security
 
@@ -18,6 +19,7 @@ from h.auth import util
 from h._compat import text_type
 from h.exceptions import ClientUnauthorized
 from h.models.auth_client import GrantType
+from h.models import AuthClient
 from h.schemas import ValidationError
 
 FakeUser = namedtuple('FakeUser', ['authority', 'admin', 'staff', 'groups'])
@@ -198,6 +200,114 @@ class TestValidateAuthClientAuthority(object):
         authority = 'weylandindustries.com'
 
         util.validate_auth_client_authority(auth_client, authority)
+
+
+class TestPrincipalsForAuthClient(object):
+
+    def test_it_sets_auth_client_principal(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert "auth_client:{authority}".format(authority=auth_client.authority) in principals
+
+    def test_it_sets_authority_principal(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert "authority:{authority}".format(authority=auth_client.authority) in principals
+
+    def test_it_returns_principals_as_list(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert isinstance(principals, list)
+
+
+class TestCheckAuthClient(object):
+    def test_it_queries_for_auth_client_in_db(self, pyramid_request):
+        pyramid_request.db.query.return_value.get.return_value = None
+        util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+
+        pyramid_request.db.query.assert_called_once_with(AuthClient)
+        pyramid_request.db.query.return_value.get.assert_called_once_with('whatever')
+
+    def test_it_handles_sa_statement_exception_if_client_id_malformed(self, pyramid_request):
+        pyramid_request.db.query.return_value.get.side_effect = sa.exc.StatementError(
+            message='You did it wrong',
+            statement=None,
+            params=None,
+            orig=None)
+
+        # does not raise
+        util.check_auth_client(username='malformed', password='random', request=pyramid_request)
+
+    def test_it_returns_None_if_client_id_malformed(self, pyramid_request):
+        pyramid_request.db.query.return_value.get.side_effect = sa.exc.StatementError(
+            message='You did it wrong',
+            statement=None,
+            params=None,
+            orig=None)
+
+        # does not raise
+        principals = util.check_auth_client(username='malformed', password='random', request=pyramid_request)
+
+        assert principals is None
+
+    def test_it_returns_None_if_no_authclient_record_found_in_db(self, pyramid_request):
+        pyramid_request.db.query.return_value.get.return_value = None
+        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+
+        assert principals is None
+
+    def test_it_returns_None_if_client_secret_is_None(self, pyramid_request, factories):
+        insecure_auth_client = factories.AuthClient()
+        pyramid_request.db.query.return_value.get.return_value = insecure_auth_client
+
+        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+
+        assert insecure_auth_client.secret is None
+        assert principals is None
+
+    def test_it_returns_None_if_grant_type_is_not_client_credentials(self, pyramid_request, factories):
+        auth_code_client = factories.ConfidentialAuthClient(authority='weylandindustries.com',
+                                                       grant_type=GrantType.authorization_code)
+        pyramid_request.db.query.return_value.get.return_value = auth_code_client
+
+        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+
+        assert auth_code_client.grant_type == GrantType.authorization_code
+        assert principals is None
+
+    def test_it_uses_key_hashing_on_client_secret_for_message_authentication(self, pyramid_request, hmac, auth_client):
+        pyramid_request.db.query.return_value.get.return_value = auth_client
+
+        util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+
+        hmac.compare_digest.assert_called_once_with(auth_client.secret, 'random')
+
+    def test_it_returns_None_if_hmac_hashing_match_fails_on_client_secret(self, pyramid_request, hmac, auth_client):
+        hmac.compare_digest.return_value = False
+
+        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+
+        assert principals is None
+
+    def test_it_proxies_to_principals_for_auth_client_if_successful(self, pyramid_request, auth_client, hmac, principals_for_auth_client):
+        pyramid_request.db.query.return_value.get.return_value = auth_client
+
+        util.check_auth_client(username=auth_client.id, password=auth_client.secret, request=pyramid_request)
+
+        principals_for_auth_client.assert_called_once_with(auth_client)
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, db_session):
+        pyramid_request.db = mock.create_autospec(db_session, spec_set=True, instance=True)
+        return pyramid_request
+
+    @pytest.fixture
+    def hmac(self, patch):
+        return patch('h.auth.util.hmac')
+
+    @pytest.fixture
+    def principals_for_auth_client(self, patch):
+        return patch('h.auth.util.principals_for_auth_client')
 
 
 class TestRequestAuthClient(object):
