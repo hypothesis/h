@@ -41,10 +41,10 @@
 .h-icon-google-plus:before {
     content: "\e906";
 }
-.h-icon-annotate:before {
+.h-icon-annotate:before, .h-icon-insert-comment:before {
     content: "\e903";
 }
-.h-icon-highlight:before {
+.h-icon-highlight:before, .h-icon-border-color:before {
     content: "\e904";
 }
 .h-icon-note:before {
@@ -149,9 +149,7 @@
 .h-icon-reply:before {
     content: "\e60d";
 }
-.h-icon-border-color:before {
-    content: "\e60e";
-}
+
 .h-icon-format-bold:before {
     content: "\e60f";
 }
@@ -170,9 +168,7 @@
 .h-icon-functions:before {
     content: "\e614";
 }
-.h-icon-insert-comment:before {
-    content: "\e617";
-}
+
 .h-icon-insert-link:before {
     content: "\e615";
 }
@@ -203,4 +199,3 @@
 .h-icon-mail:before {
     content: "\e62a";
 }
-
