@@ -70,6 +70,14 @@ class AuthClientPolicy(BasicAuthAuthenticationPolicy):
         """
         return None
 
+    def remember(self, request, userid, **kw):
+        """Not implemented for basic auth client policy."""
+        return []
+
+    def forget(self, request):
+        """Not implemented for basic auth client policy."""
+        return []
+
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):

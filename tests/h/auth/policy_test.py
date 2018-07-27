@@ -3,11 +3,13 @@
 from __future__ import unicode_literals
 import mock
 import pytest
+import base64
 
 from pyramid.interfaces import IAuthenticationPolicy
 
 from h.auth.policy import AuthenticationPolicy
 from h.auth.policy import TokenAuthenticationPolicy
+from h.auth.policy import AuthClientPolicy
 
 API_PATHS = (
     '/api',
@@ -107,6 +109,54 @@ class TestAuthenticationPolicy(object):
 
         self.api_policy.forget.assert_called_once_with(api_request)
         assert result == self.api_policy.forget.return_value
+
+
+class TestAuthClientAuthenticationPolicy(object):
+
+    def test_it_proxies_username_password_to_check_callback(self, pyramid_request, check):
+        check.return_value = []
+        policy = AuthClientPolicy(check=check)
+
+        policy.effective_principals(pyramid_request)
+
+        check.assert_called_once_with("foo", "bar", pyramid_request)
+
+    def test_it_returns_None_for_authenticated_userid(self, pyramid_request, check):
+        check.return_value = []
+        policy = AuthClientPolicy(check=check)
+
+        userid = policy.authenticated_userid(pyramid_request)
+
+        assert userid is None
+
+    def test_unauthenticated_userid_returns_client_id(self, pyramid_request, check):
+        check.return_value = []
+        policy = AuthClientPolicy(check=check)
+
+        userid = policy.unauthenticated_userid(pyramid_request)
+
+        assert userid == "foo"
+
+    def test_remember_does_nothing(self, pyramid_request, check):
+        policy = AuthClientPolicy(check=check)
+
+        assert policy.remember(pyramid_request, 'foo') == []
+
+    def test_forget_does_nothing(self, pyramid_request, check):
+        policy = AuthClientPolicy(check=check)
+
+        assert policy.forget(pyramid_request) == []
+
+    @pytest.fixture
+    def check(self):
+        return mock.Mock()
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        user_pass = "foo:bar"
+        encoded = base64.standard_b64encode(user_pass.encode('utf-8'))
+        pyramid_request.headers['Authorization'] = "Basic {creds}".format(creds=encoded.decode('ascii'))
+        return pyramid_request
 
 
 @pytest.mark.usefixtures('token_service')
