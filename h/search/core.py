@@ -35,10 +35,7 @@ class Search(object):
     """
     def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
         self.request = request
-        if self.request.feature('search_es6'):
-            self.es = request.es6
-        else:
-            self.es = request.es
+        self.es = request.es6
         self.separate_replies = separate_replies
         self.stats = stats
         self._replies_limit = _replies_limit
