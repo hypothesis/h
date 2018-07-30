@@ -17,10 +17,10 @@ class Client(object):
 
     :param host: Elasticsearch host URL
     :param index: index name
-    :param elasticsearch: Elasticsearch library defaulted to elasticsearch1
+    :param elasticsearch: Elasticsearch library defaulted to elasticsearch
     """
 
-    def __init__(self, host, index, elasticsearch=elasticsearch1, **kwargs):
+    def __init__(self, host, index, elasticsearch=elasticsearch, **kwargs):
         self._version = elasticsearch.__version__
         self._index = index
         self._conn = elasticsearch.Elasticsearch([host],
@@ -89,7 +89,7 @@ def get_client(settings):
                         'es')
         kwargs['http_auth'] = auth
         kwargs['connection_class'] = elasticsearch1.RequestsHttpConnection
-    return Client(host, index, **kwargs)
+    return Client(host, index, elasticsearch=elasticsearch1, **kwargs)
 
 
 def get_es6_client(settings):
@@ -99,4 +99,4 @@ def get_es6_client(settings):
     kwargs = _get_client_settings(settings)
     # nb. No AWS credentials here because we assume that if using AWS-managed
     # ES, the cluster lives inside a VPC.
-    return Client(host, index, elasticsearch=elasticsearch, **kwargs)
+    return Client(host, index, **kwargs)
