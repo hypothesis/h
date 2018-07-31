@@ -54,7 +54,13 @@ def delete_annotation(id_):
 @celery.task
 def reindex_user_annotations(userid):
     ids = [a.id for a in celery.request.db.query(models.Annotation.id).filter_by(userid=userid)]
+    reindex_annotations(ids)
 
+
+# Results are enabled for this task because the `search reindex` command awaits
+# completion.
+@celery.task(ignore_result=False)
+def reindex_annotations(ids):
     indexer = BatchIndexer(celery.request.db, celery.request.es, celery.request)
     errored = indexer.index(ids)
     if errored:

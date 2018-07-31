@@ -132,6 +132,10 @@ class BatchIndexer(object):
             annotations = _filtered_annotations(session=self.session,
                                                 ids=annotation_ids)
 
+        # Preload userids of shadowbanned users.
+        nipsa_svc = self.request.find_service(name='nipsa')
+        nipsa_svc.fetch_all_flagged_userids()
+
         # Report indexing status as we go
         annotations = _log_status(annotations, log_every=windowsize)
 

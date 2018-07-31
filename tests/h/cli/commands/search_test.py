@@ -20,7 +20,17 @@ class TestReindexCommand(object):
         assert result.exit_code == 0
         reindex.assert_called_once_with(pyramid_request.db,
                                         pyramid_request.es,
-                                        pyramid_request)
+                                        pyramid_request,
+                                        parallel=False)
+
+    def test_calls_reindex_with_parallel_option(self, cli, cliconfig, pyramid_request, reindex):
+        result = cli.invoke(search.reindex, ['--parallel'], obj=cliconfig)
+
+        assert result.exit_code == 0
+        reindex.assert_called_once_with(pyramid_request.db,
+                                        pyramid_request.es,
+                                        pyramid_request,
+                                        parallel=True)
 
     def test_calls_reindex_with_es6_client(self, cli, cliconfig, pyramid_request, reindex):
         result = cli.invoke(search.reindex, ['--es6'], obj=cliconfig)
@@ -28,7 +38,8 @@ class TestReindexCommand(object):
         assert result.exit_code == 0
         reindex.assert_called_once_with(pyramid_request.db,
                                         pyramid_request.es6,
-                                        pyramid_request)
+                                        pyramid_request,
+                                        parallel=False)
 
     @pytest.fixture
     def reindex(self, patch):

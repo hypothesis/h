@@ -28,7 +28,7 @@ __all__ = (
 
 log = logging.getLogger(__name__)
 
-celery = Celery('h')
+celery = Celery('h', backend='rpc://')
 celery.conf.update(
     broker_url=os.environ.get('CELERY_BROKER_URL',
                               os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
@@ -70,6 +70,7 @@ celery.conf.update(
     task_routes={
         'h.tasks.indexer.add_annotation': 'indexer',
         'h.tasks.indexer.delete_annotation': 'indexer',
+        'h.tasks.indexer.reindex_annotations': 'indexer',
         'h.tasks.indexer.reindex_user_annotations': 'indexer',
     },
     task_serializer='json',

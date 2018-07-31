@@ -6,13 +6,11 @@ import pytest
 
 from h.indexer.reindexer import reindex
 from h.search import client
-from h.services.nipsa import NipsaService
 
 
 @pytest.mark.usefixtures('BatchIndexer',
                          'configure_index',
                          'delete_index',
-                         'nipsa_service',
                          'get_aliased_index',
                          'update_aliased_index',
                          'settings_service')
@@ -83,7 +81,7 @@ class TestReindex(object):
     @pytest.mark.parametrize(
         'esversion,new_index_setting_name',
         (((1, 5, 0), 'reindex.new_index'),
-        ((6, 2, 0), 'reindex.new_es6_index'))
+         ((6, 2, 0), 'reindex.new_es6_index'))
     )
     def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service,
                                                configure_index, esversion, new_index_setting_name):
@@ -97,7 +95,7 @@ class TestReindex(object):
     @pytest.mark.parametrize(
         'esversion,new_index_setting_name',
         (((1, 5, 0), 'reindex.new_index'),
-        ((6, 2, 0), 'reindex.new_es6_index'))
+         ((6, 2, 0), 'reindex.new_es6_index'))
     )
     def test_deletes_index_name_setting(self, pyramid_request, es, settings_service, esversion, new_index_setting_name):
         es.version = esversion
@@ -120,9 +118,17 @@ class TestReindex(object):
 
         delete_index.assert_called_once_with(es, 'original_index')
 
-    def test_populates_nipsa_cache(self, pyramid_request, es, nipsa_service):
-        reindex(mock.sentinel.session, es, pyramid_request)
-        nipsa_service.fetch_all_flagged_userids.assert_called_once_with()
+    def test_parallel_reindex_executes_indexing_tasks(self):
+        # TODO - Test that reindex_annotations tasks are dispatched when `parallel=True`.
+        pass
+
+    def test_parallel_reindex_waits_for_indexing_tasks(self):
+        # TODO - Test that finalization happens only after indexing is completed.
+        pass
+
+    def test_parallel_reindex_limits_max_active_tasks(self):
+        # TODO - Test maximum number of active reindexing tasks.
+        pass
 
     @pytest.fixture
     def BatchIndexer(self, patch):
@@ -164,12 +170,6 @@ class TestReindex(object):
     def settings_service(self, pyramid_config):
         service = mock.Mock()
         pyramid_config.register_service(service, name='settings')
-        return service
-
-    @pytest.fixture
-    def nipsa_service(self, pyramid_config):
-        service = mock.create_autospec(NipsaService, spec_set=True, instance=True)
-        pyramid_config.register_service(service, name='nipsa')
         return service
 
     @pytest.fixture

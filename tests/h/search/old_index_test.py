@@ -14,6 +14,7 @@ import pytest
 from h import presenters
 from h.search import client
 from h.search import index
+from h.services.nipsa import NipsaService
 
 
 @pytest.mark.usefixtures('presenters')
@@ -100,6 +101,7 @@ class TestDeleteAnnotation:
         assert kwargs['index'] == 'custom-index'
 
 
+@pytest.mark.usefixtures('nipsa_service')
 class TestBatchIndexer(object):
     def test_index_indexes_all_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk, factories):
         ann_1, ann_2 = factories.Annotation(), factories.Annotation()
@@ -315,6 +317,13 @@ def es():
                                    index="hypothesis")
     mock_es.mapping_type = "annotation"
     return mock_es
+
+
+@pytest.fixture
+def nipsa_service(pyramid_config):
+    svc = mock.create_autospec(NipsaService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='nipsa')
+    return svc
 
 
 @pytest.fixture

@@ -15,8 +15,10 @@ def search():
 
 @search.command()
 @click.option('--es6', is_flag=True, help='Reindex into the Elasticsearch 6 cluster')
+@click.option('--parallel/--no-parallel', default=False,
+              help='Use Celery tasks to reindex annotations in parallel.')
 @click.pass_context
-def reindex(ctx, es6):
+def reindex(ctx, es6, parallel):
     """
     Reindex all annotations.
 
@@ -39,7 +41,7 @@ def reindex(ctx, es6):
     es_server_version = es_client.conn.info()['version']['number']
     click.echo('reindexing into Elasticsearch {} cluster'.format(es_server_version))
 
-    indexer.reindex(request.db, es_client, request)
+    indexer.reindex(request.db, es_client, request, parallel=parallel)
 
 
 @search.command('update-settings')
