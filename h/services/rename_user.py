@@ -91,6 +91,9 @@ def make_indexer(request):
             return
 
         request.tm.commit()
+        if request.feature("index_es6"):
+            indexer = index.BatchIndexer(request.db, request.es6, request)
+            indexer.index(ids)
         indexer = index.BatchIndexer(request.db, request.es, request)
         indexer.index(ids)
     return _reindex
