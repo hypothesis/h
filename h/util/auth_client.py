@@ -10,13 +10,22 @@ def split_client(clientid):
     For example if userid is u'client:04465aaa-8f73-11e8-91ca-8ba11742b240@hypothes.is' then return
     {'id': u'04465aaa-8f73-11e8-91ca-8ba11742b240', 'authority': u'hypothes.is'}'
 
-    :raises ValueError: if the given clientid isn't a valid clientid
+    :py:attr:`~h.models.user.AuthClient.id` must be a valid Python UUID
+
+    :raises ValueError: if the given clientid isn't a valid clientid or if the
+                        supplied AuthClient.id isn't a valid UUID
 
     """
-    match = re.match(r'^client:([^@]+)@(.*)$', clientid)
+    # Validates substring is a valid python UUID
+    uuid_match = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+    match = re.match(r'^client:(' + uuid_match + r')@(.*)$', clientid)
     if match:
-        return {
+        client = {
             'id': match.groups()[0],
             'authority': match.groups()[1]
         }
+
+        if uuid_match:
+            return client
+
     raise ValueError("{clientid} isn't a valid clientid".format(clientid=clientid))
