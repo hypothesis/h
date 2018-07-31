@@ -20,12 +20,9 @@ def split_client(clientid):
     uuid_match = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
     match = re.match(r'^client:(' + uuid_match + r')@(.*)$', clientid)
     if match:
-        client = {
+        return {
             'id': match.groups()[0],
             'authority': match.groups()[1]
         }
-
-        if uuid_match:
-            return client
 
     raise ValueError("{clientid} isn't a valid clientid".format(clientid=clientid))
