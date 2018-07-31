@@ -51,7 +51,7 @@ matrix:
     # Lint backend code
     - env: ACTION=backend-lint
       language: python
-      python: '2.7'
+      python: '3.6'
       script:
         make lint
 
