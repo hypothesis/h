@@ -5,9 +5,56 @@ from __future__ import unicode_literals
 import enum
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.ext.hybrid import hybrid_property, Comparator
 
 from h.db import Base
 from h.db.mixins import Timestamps
+from h.util.auth_client import split_client
+from h._compat import string_types
+
+
+class ClientIDComparator(Comparator):
+    """
+    Custom comparator for :py:attr:`~h.models.auth_client.AuthClient.clientid`.
+
+    Generate valid SQL queries for this compound attribute.
+
+    See :py:class:`h.models.user.UserIDComparator` for extended details
+    """
+    def __init__(self, id, authority):
+        self.id = id
+        self.authority = authority
+
+    def __clause_element__(self):
+        return sa.tuple_(self.id, self.authority)
+
+    def __eq__(self, other):
+        if isinstance(other, string_types):
+            try:
+                val = split_client(other)
+            except ValueError:
+                # The value being compared isn't a valid clientid
+                return False
+            else:
+                other = sa.tuple_(val['id'],
+                                  val['authority'])
+        return self.__clause_element__() == other
+
+    def in_(self, clientids):
+        others = []
+        for clientid in clientids:
+            try:
+                val = split_client(clientid)
+            except ValueError:
+                continue
+
+            other = sa.tuple_(val['id'], val['authority'])
+            others.append(other)
+
+        if not others:
+            return False
+
+        return self.__clause_element__().in_(others)
 
 
 class GrantType(enum.Enum):
@@ -108,6 +155,15 @@ class AuthClient(Base, Timestamps):
                         default=False,
                         server_default=sa.sql.expression.false(),
                         nullable=False)
+
+    @hybrid_property
+    def clientid(self):
+        return 'client:{id}@{authority}'.format(id=self.id,
+                                                authority=self.authority)
+
+    @clientid.comparator
+    def clientid(cls):  # noqa: N805
+        return ClientIDComparator(cls.id, cls.authority)
 
     def __repr__(self):
         return 'AuthClient(id={self.id!r})'.format(self=self)
