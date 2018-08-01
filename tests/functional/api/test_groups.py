@@ -8,6 +8,14 @@ import base64
 
 from h.models.auth_client import GrantType
 
+# String type for request/response headers and metadata in WSGI.
+#
+# Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even
+# though it has different meanings.
+#
+# See https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
+native_str = str
+
 
 @pytest.mark.functional
 class TestCreateGroup(object):
@@ -16,7 +24,6 @@ class TestCreateGroup(object):
         group = {
             'name': 'My Group'
         }
-
         res = app.post_json('/api/groups', group, headers=token_auth_header)
 
         assert res.status_code == 200
@@ -95,7 +102,7 @@ class TestAddMember(object):
     def auth_client_header(self, auth_client):
         user_pass = "{client_id}:{secret}".format(client_id=auth_client.id, secret=auth_client.secret)
         encoded = base64.standard_b64encode(user_pass.encode('utf-8'))
-        return {'Authorization': "Basic {creds}".format(creds=encoded.decode('ascii'))}
+        return {native_str('Authorization'): native_str("Basic {creds}".format(creds=encoded.decode('ascii')))}
 
     @pytest.fixture
     def user(self, db_session, factories):
@@ -111,7 +118,7 @@ class TestRemoveMember(object):
     def test_it_removes_authed_user_from_group(self, app, group, group_member_with_token):
 
         group_member, token = group_member_with_token
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        headers = {native_str('Authorization'): native_str('Bearer {}'.format(token.value))}
 
         app.delete('/api/groups/{}/members/me'.format(group.pubid),
                    headers=headers)
@@ -157,4 +164,4 @@ def user_with_token(db_session, factories):
 @pytest.fixture
 def token_auth_header(user_with_token):
     user, token = user_with_token
-    return {'Authorization': str('Bearer {}'.format(token.value))}
+    return {native_str('Authorization'): native_str('Bearer {}'.format(token.value))}
