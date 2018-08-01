@@ -124,9 +124,7 @@ class TestSearch(object):
         assert result.reply_ids == []
 
     def test_it_passes_es_version_to_builder(self, pyramid_request, Builder):
-        client = pyramid_request.es
-        if pyramid_request.feature('search_es6'):
-            client = pyramid_request.es6
+        client = pyramid_request.es6
 
         search.Search(pyramid_request)
 
@@ -246,9 +244,7 @@ class TestSearchWithSeparateReplies(object):
         assert oldest_reply.id not in result.reply_ids
 
 
-@pytest.fixture(params=['es1', 'es6'])
-def pyramid_request(request, pyramid_request, es_client, es6_client):
-    pyramid_request.es = es_client
+@pytest.fixture
+def pyramid_request(request, pyramid_request, es6_client):
     pyramid_request.es6 = es6_client
-    pyramid_request.feature.flags["search_es6"] = request.param == 'es6'
     return pyramid_request

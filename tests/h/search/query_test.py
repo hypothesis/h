@@ -652,11 +652,9 @@ class TestUsersAggregation(object):
         assert count_pc == 2
 
 
-@pytest.fixture(params=['es1', 'es6'])
-def pyramid_request(request, pyramid_request, es_client, es6_client):
-    pyramid_request.es = es_client
+@pytest.fixture
+def pyramid_request(request, pyramid_request, es6_client):
     pyramid_request.es6 = es6_client
-    pyramid_request.feature.flags['search_es6'] = request.param == 'es6'
     return pyramid_request
 
 
