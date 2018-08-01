@@ -41,34 +41,89 @@ class AuthenticationPolicy(object):
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class AuthClientPolicy(BasicAuthAuthenticationPolicy):
+class AuthClientPolicy(object):
 
     """
-    An authentication policy for registered auth_clients.
+    An authentication policy for registered auth_clients
+
+    Authentication for a request to API routes with HTTP Basic Authentication
+    credentials that represent a registered AuthClient with client_credentials
+    in the db.
+
+    Authentication can be of two types:
+
+    * The client itself. Some endpoints allow an authenticated auth_client to
+      take action on users within its authority, such as creating a user or
+      adding a user to a group. In this case, assuming credentials are valid,
+      the request will be authenticated, but no ``authenticated_userid`` (and
+      thus no request.user) will be set
+    * A user within the client's associated authority. If an HTTP
+      `X-Forwarded-User` header is present, its value will be treated as a
+      ``userid`` and, if the client credentials are valid _and_ the userid
+      represents an extant user within the client's authority, the request
+      will be authenticated as that user. In this case, ``authenticated_userid``
+      will be set and there will ultimately be a request.user available.
+
+    Note: To differentiate between request with a Token-authenticated user and
+    a request with an auth_client forwarded user, the latter has an additional
+    principal, ``client:{client_id}@{authority}`` to mark it as being authenticated
+    on behalf of an auth_client
     """
 
-    def __init__(self, check, realm='Realm', debug=False):
+    def __init__(self, check):
+        """
+        :param: check A callback function that accepts (username, password, request)
+                and should return a list of principals or `None` if auth
+                unsucessful; it will be called with the username and password
+                parsed from the Authentication header
+        """
+        self.basic_auth_policy = BasicAuthAuthenticationPolicy(check=check)
         self.check = check
-        self.realm = realm
-        self.debug = debug
+
+    def unauthenticated_userid(self, request):
+        """
+        Return the forwarded userid or the client_id
+
+        If a forwarded user header is set, return the ``userid`` (its value)
+        Otherwise return the username parsed from the Basic Auth header
+
+        :rtype: str
+        """
+        proxy_userid = self.forwarded_userid(request)
+        if proxy_userid is not None:
+            return proxy_userid
+
+        # username from BasicAuth header
+        return self.basic_auth_policy.unauthenticated_userid(request)
 
     def authenticated_userid(self, request):
         """
-        Currently the behavior here is different than other Auth policies
-        as the net result is that, although Authentication may well be
-        successful, we don't end up with an authenticated ``userid``.
+        Return any forwarded userid or None
 
-        Thus, ``request.authenticated_userid`` will be None and
-        ```request.user`` will not be set (see :py:mod:`h.accounts`)
+        Rely mostly on ``Pyramid.authentication.BasicAuthAuthenticationPolicy``'s
+        authenticated_userid, but don't
+        actually return a userid unless there is a forwarded user (the auth
+        client itself is not a "user")
 
-        However, the request will be authenticated. In a view,
-        ``effective_principals=security.Authenticated`` would be satisfied.
-
-        .. todo::
-
-           Extend me here (carefully) to operate on behalf of user in authority)
+        :rtype: `~h.models.user.User.userid` or None
         """
-        return None
+        forwarded_userid = self.forwarded_userid(request)
+
+        if forwarded_userid is None:  # only set authenticated_userid if forwarded user
+            return None
+
+        # username extracted from BasicAuth header
+        auth_userid = self.basic_auth_policy.unauthenticated_userid(request)
+
+        # authentication of BasicAuth and forwarded user
+        callback_ok = self.basic_auth_policy.callback(auth_userid, request)
+
+        if callback_ok is not None:
+            return forwarded_userid  # This should always be a userid, not an auth_client id
+
+    def effective_principals(self, request):
+        """Delegate this to BasicAuthAuthenticationPolicy"""
+        return self.basic_auth_policy.effective_principals(request)
 
     def remember(self, request, userid, **kw):
         """Not implemented for basic auth client policy."""
@@ -77,6 +132,10 @@ class AuthClientPolicy(BasicAuthAuthenticationPolicy):
     def forget(self, request):
         """Not implemented for basic auth client policy."""
         return []
+
+    def forwarded_userid(self, request):
+        """Look in header for userid"""
+        return request.headers.get('X-Forwarded-User', None)
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
