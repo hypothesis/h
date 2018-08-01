@@ -14,27 +14,20 @@ def search():
 
 
 @search.command()
-@click.option('--es6', is_flag=True, help='Reindex into the Elasticsearch 6 cluster')
 @click.pass_context
-def reindex(ctx, es6):
+def reindex(ctx):
     """
     Reindex all annotations.
 
     Creates a new search index from the data in PostgreSQL and atomically
     updates the index alias. This requires that the index is aliased already,
     and will raise an error if it is not.
-
-    Reindex into the Elasticsearch 1 cluster by default, unless the `--es6`
-    flag is set.
     """
     os.environ['ELASTICSEARCH_CLIENT_TIMEOUT'] = '30'
 
     request = ctx.obj['bootstrap']()
 
-    if es6:
-        es_client = request.es6
-    else:
-        es_client = request.es
+    es_client = request.es6
 
     es_server_version = es_client.conn.info()['version']['number']
     click.echo('reindexing into Elasticsearch {} cluster'.format(es_server_version))
@@ -67,6 +60,6 @@ def _update_settings_old(ctx):
     request = ctx.obj['bootstrap']()
 
     try:
-        config.update_index_settings(request.es)
+        config.update_index_settings(request.es6)
     except RuntimeError as e:
         raise click.ClickException(str(e))
