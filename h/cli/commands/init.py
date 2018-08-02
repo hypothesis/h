@@ -25,7 +25,6 @@ def init(ctx):
 
     _init_db(request.registry.settings)
     _init_search(request.registry.settings)
-    _init_search_es6(request.registry.settings)
 
 
 def _init_db(settings):
@@ -43,13 +42,6 @@ def _init_db(settings):
 
 
 def _init_search(settings):
-    client = search.get_client(settings)
-
-    log.info("initializing search index")
-    search.init(client)
-
-
-def _init_search_es6(settings):
     client = search.get_es6_client(settings)
 
     log.info("initializing ES6 search index")
