@@ -39,24 +39,12 @@ def reindex(ctx):
 @click.pass_context
 def update_settings(ctx):
     """
-    Attempt to update mappings and settings in all clusters.
+    Attempt to update mappings and settings in elasticsearch.
 
     Attempts to update mappings and index settings. This may fail if the
     pending changes to mappings are not compatible with the current index. In
     this case you will likely need to reindex.
     """
-    _update_settings_old(ctx)
-
-
-def _update_settings_old(ctx):
-    """
-    Attempt to update mappings and settings in the old cluster.
-
-    Attempts to update mappings and index settings. This may fail if the
-    pending changes to mappings are not compatible with the current index. In
-    this case you will likely need to reindex.
-    """
-
     request = ctx.obj['bootstrap']()
 
     try:
