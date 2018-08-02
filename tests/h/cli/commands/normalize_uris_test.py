@@ -179,7 +179,7 @@ def test_it_skips_reindexing_unaltered_annotations(req, index, factories, db_ses
 @pytest.fixture
 def req(pyramid_request):
     pyramid_request.tm = mock.MagicMock()
-    pyramid_request.es = mock.MagicMock()
+    pyramid_request.es6 = mock.MagicMock()
     return pyramid_request
 
 
