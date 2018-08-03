@@ -119,15 +119,15 @@ def authority(request):
 
 def verify_auth_client(client_id, client_secret, db_session):
     """
-    Look up ``auth_client`` corresponding to ``client_id`` and ``client_secret``
+    Return matching AuthClient or None
 
-    Retrieve and return valid auth_client matching credentials or ``None``.
+    Attempt to retrieve the :py:class:`h.models.auth_client.AuthClient` record
+    indicated by ``client_id`` and ``client_secret`` and perform some validation
+    checks on the record.
 
-    :param: client_id
-    :param: client_secret
-    :param: db_session
+    Returns ``None`` if retrieval or any checks fail
 
-    :rtype: h.models.AuthClient or None
+    :rtype: :py:class:`h.models.auth_client.AuthClient` or ``None``
     """
 
     # We fetch the client by its ID and then do a constant-time comparison of
@@ -152,75 +152,11 @@ def verify_auth_client(client_id, client_secret, db_session):
     return client
 
 
-def verify_forwarded_user(client, forwarded_userid, request):
-    """
-    Fetch user by forwarded_userid and verify its authority matches the client's
-
-    :rtype:`h.models.User` or None
-    """
-    if client.authority is None:
-        return None
-
-    user_service = request.find_service(name='user')
-    user = user_service.fetch(forwarded_userid)
-
-    if user and user.authority == client.authority:
-        return user
-
-    return None
-
-
-def check_auth_client(username, password, request):
-    """
-    Perform authentication for an auth_client client.
-
-    Return list of appropriate principals or None if authentication is
-    unsuccessful.
-
-    Validate the basic auth credentials from the request by matching them to
-    an auth_client record in the DB.
-
-    If an HTTP `X-Forwarded-User` header is present in the request, this
-    represents the intent to authenticate "on behalf of" a user within
-    the auth_client's authority. If this header is present, the user indicated
-    by its value (a `~h.models.user.User.userid`) _must_ exist and be within
-    the auth_client's authority, or authentication will fail.
-
-    This function is intended to be used as a callback for an
-    authentication policy
-
-    :param username: username parsed out of Authorization header (Basic)
-    :param password: password parsed out of Authorization header (Basic)
-    :returns: additional principals for the auth_client or None
-    :rtype: list or None
-    """
-    client_id = username
-    client_secret = password
-
-    # validate that the credentials in BasicAuth header
-    # match an AuthClient record in the db
-    client = verify_auth_client(client_id, client_secret, request.db)
-
-    if client is None:
-        return None
-
-    forwarded_userid = request.headers.get('X-Forwarded-User', None)
-
-    if forwarded_userid is None:  # No forwarded user; set principals for basic auth_client
-        return principals_for_auth_client(client)
-
-    user = verify_forwarded_user(client, forwarded_userid, request)
-    if user is not None:
-        return principals_for_auth_client_user(user, client)
-
-    return None
-
-
 def principals_for_auth_client(client):
     """
     Return the list of additional principals for an auth client
 
-    :type client: h.models.AuthClient
+    :type client: :py:class:`h.models.auth_client.AuthClient`
     :rtype: list
     """
 
@@ -236,10 +172,8 @@ def principals_for_auth_client_user(user, client):
     """
     Return a union of client and user principals for forwarded user
 
-    :param user:
-    :type user: `h.models.User`
-    :param client:
-    :type client: `h.models.AuthClient`
+    :type user: :py:class:`h.models.user.User`
+    :type client: :py:class:`h.models.auth_client.AuthClient`
     :rtype: list
     """
     user_principals = principals_for_user(user)
