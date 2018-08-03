@@ -89,7 +89,7 @@ class AuthClientPolicy(object):
 
         :rtype: str
         """
-        proxy_userid = self.forwarded_userid(request)
+        proxy_userid = AuthClientPolicy.forwarded_userid(request)
         if proxy_userid is not None:
             return proxy_userid
 
@@ -107,7 +107,7 @@ class AuthClientPolicy(object):
 
         :rtype: `~h.models.user.User.userid` or None
         """
-        forwarded_userid = self.forwarded_userid(request)
+        forwarded_userid = AuthClientPolicy.forwarded_userid(request)
 
         if forwarded_userid is None:  # only set authenticated_userid if forwarded user
             return None
@@ -133,7 +133,8 @@ class AuthClientPolicy(object):
         """Not implemented for basic auth client policy."""
         return []
 
-    def forwarded_userid(self, request):
+    @classmethod
+    def forwarded_userid(cls, request):
         """Look in header for userid"""
         return request.headers.get('X-Forwarded-User', None)
 
