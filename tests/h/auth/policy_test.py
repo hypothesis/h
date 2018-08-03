@@ -9,6 +9,7 @@ from pyramid.interfaces import IAuthenticationPolicy
 
 from h.auth.policy import AuthenticationPolicy
 from h.auth.policy import TokenAuthenticationPolicy
+from h.auth.policy import APIAuthenticationPolicy
 from h.auth.policy import AuthClientPolicy
 
 from h.services.user import UserService
@@ -111,6 +112,297 @@ class TestAuthenticationPolicy(object):
 
         self.api_policy.forget.assert_called_once_with(api_request)
         assert result == self.api_policy.forget.return_value
+
+
+@pytest.mark.usefixtures('token_service')
+class TestAPIAuthenticationPolicy(object):
+
+    def test_unauthenticated_user_returns_None_when_no_token_or_header(self, pyramid_request, api_policy):
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid is None
+
+    def test_unauthenticated_user_returns_token_user_when_valid(self, pyramid_request, api_policy):
+        pyramid_request.auth_token = 'valid123'
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid == 'acct:foo@example.com'
+
+    def test_unauthenticated_user_returns_None_when_token_invalid(self, pyramid_request, api_policy):
+        pyramid_request.auth_token = 'invalid'
+
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid is None
+
+    def test_unauthenticated_user_returns_None_when_token_missing(self, pyramid_request, api_policy):
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid is None
+
+    def test_unauthenticated_user_prefers_token_credentials_when_both_present(self, pyramid_request, client_header, api_policy):
+        pyramid_request.headers['Authorization'] = client_header
+        pyramid_request.auth_token = 'valid123'
+
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid == 'acct:foo@example.com'
+
+    def test_unauthenticated_returns_client_id_when_only_client_header(self,
+                                                                       valid_auth_client,
+                                                                       pyramid_request,
+                                                                       client_header,
+                                                                       api_policy):
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid == valid_auth_client.id
+
+    def test_unauthenticated_returns_token_userid_even_if_forwarded_user(self,
+                                                                         pyramid_request,
+                                                                         client_header,
+                                                                         forwarded_user,
+                                                                         api_policy):
+        pyramid_request.auth_token = 'valid123'
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid == 'acct:foo@example.com'
+
+    def test_unauthenticated_returns_forwarded_user_if_token_invalid(self,
+                                                                     pyramid_request,
+                                                                     client_header,
+                                                                     forwarded_user,
+                                                                     api_policy):
+        pyramid_request.auth_token = 'invalid'
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid == forwarded_user.userid
+
+    def test_unauthenticated_returns_forwarded_user_if_token_missing(self,
+                                                                     pyramid_request,
+                                                                     client_header,
+                                                                     forwarded_user,
+                                                                     api_policy):
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        assert userid == forwarded_user.userid
+
+    def test_authenticated_user_returns_None_when_no_token_or_header(self, pyramid_request, api_policy):
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid is None
+
+    def test_authenticated_user_returns_token_user_when_valid(self, pyramid_request, api_policy):
+        pyramid_request.auth_token = 'valid123'
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid == 'acct:foo@example.com'
+
+    def test_authenticated_user_returns_None_when_token_invalid(self, pyramid_request, api_policy):
+        pyramid_request.auth_token = 'invalid'
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid is None
+
+    def test_authenticated_user_returns_None_when_token_missing(self, pyramid_request, api_policy):
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid is None
+
+    def test_authenticated_user_prefers_token_credentials_when_both_present(self, pyramid_request, client_header, api_policy):
+        pyramid_request.headers['Authorization'] = client_header
+        pyramid_request.auth_token = 'valid123'
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid == 'acct:foo@example.com'
+
+    def test_authenticated_returns_None_when_only_client_header(self,
+                                                                valid_auth_client,
+                                                                pyramid_request,
+                                                                client_header,
+                                                                api_policy):
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid is None  # clients aren't considered "users" so userid is not set
+
+    def test_authenticated_returns_token_userid_even_if_forwarded_user(self,
+                                                                       pyramid_request,
+                                                                       client_header,
+                                                                       forwarded_user,
+                                                                       api_policy):
+        pyramid_request.auth_token = 'valid123'
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid == 'acct:foo@example.com'
+
+    def test_authenticated_returns_forwarded_user_if_token_invalid(self,
+                                                                   pyramid_request,
+                                                                   client_header,
+                                                                   forwarded_user,
+                                                                   api_policy):
+        pyramid_request.auth_token = 'invalid'
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid == forwarded_user.userid
+
+    def test_authenticated_returns_forwarded_user_if_token_missing(self,
+                                                                   pyramid_request,
+                                                                   client_header,
+                                                                   forwarded_user,
+                                                                   api_policy):
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid == forwarded_user.userid
+
+    def test_effective_principals_returns_only_Everyone_when_no_token_or_header(self, pyramid_request, api_policy):
+        principals = api_policy.effective_principals(pyramid_request)
+
+        assert principals == ['system.Everyone']
+
+    def test_effective_principal_adds_user_principals_when_token_valid(self, pyramid_request, api_policy):
+        pyramid_request.auth_token = 'valid123'
+
+        principals = api_policy.effective_principals(pyramid_request)
+
+        assert 'acct:foo@example.com' in principals
+
+    def test_effective_principals_returns_only_Everyone_when_token_invalid(self, pyramid_request, api_policy):
+        pyramid_request.auth_token = 'invalid'
+
+        principals = api_policy.effective_principals(pyramid_request)
+
+        assert principals == ['system.Everyone']
+
+    def test_effective_principals_returns_only_Everyone_when_token_missing(self, pyramid_request, api_policy):
+        principals = api_policy.effective_principals(pyramid_request)
+
+        assert principals == ['system.Everyone']
+
+    def test_effective_principals_prefers_token_credentials_when_both_present(self,
+                                                                              valid_auth_client,
+                                                                              pyramid_request,
+                                                                              client_header,
+                                                                              api_policy):
+        pyramid_request.headers['Authorization'] = client_header
+        pyramid_request.auth_token = 'valid123'
+
+        principals = api_policy.effective_principals(pyramid_request)
+
+        assert 'acct:foo@example.com' in principals
+        assert 'client:{client_id}@{authority}'.format(
+            client_id=valid_auth_client.id,
+            authority=valid_auth_client.authority) not in principals
+
+    def test_effective_principals_returns_client_principals_when_only_client_header(self,
+                                                                                    valid_auth_client,
+                                                                                    pyramid_request,
+                                                                                    client_header,
+                                                                                    api_policy):
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid is None  # clients aren't considered "users" so userid is not set
+
+    def test_authenticated_returns_user_principals_only_even_if_forwarded_user(self,
+                                                                               pyramid_request,
+                                                                               client_header,
+                                                                               forwarded_user,
+                                                                               api_policy,
+                                                                               valid_auth_client):
+        pyramid_request.auth_token = 'valid123'
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        principals = api_policy.effective_principals(pyramid_request)
+
+        assert 'client:{client_id}@{authority}'.format(
+            client_id=valid_auth_client.id,
+            authority=valid_auth_client.authority) not in principals
+
+    def test_effective_principals_returns_client_user_principals_if_token_missing(self,
+                                                                                  pyramid_request,
+                                                                                  client_header,
+                                                                                  forwarded_user,
+                                                                                  api_policy):
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        pyramid_request.headers['Authorization'] = client_header
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        assert userid == forwarded_user.userid
+
+    def test_remember_does_nothing(self,
+                                   pyramid_request,
+                                   client_header,
+                                   forwarded_user,
+                                   api_policy):
+        pyramid_request.auth_token = 'valid123'
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        remembered = api_policy.remember(pyramid_request, forwarded_user.userid)
+
+        assert remembered == []
+
+    def test_forget_does_nothing(self,
+                                 pyramid_request,
+                                 client_header,
+                                 forwarded_user,
+                                 api_policy):
+        pyramid_request.auth_token = 'valid123'
+        pyramid_request.headers['X-Forwarded-User'] = forwarded_user.userid
+        forgot = api_policy.forget(pyramid_request)
+
+        assert forgot == []
+
+    @pytest.fixture
+    def token_policy(self):
+        return TokenAuthenticationPolicy()
+
+    @pytest.fixture
+    def forwarded_user(self, factories):
+        return factories.User(authority='example.com')
+
+    @pytest.fixture
+    def client_policy(self, check):
+        return AuthClientPolicy(check=check)
+
+    @pytest.fixture
+    def api_policy(self, token_policy, client_policy):
+        return APIAuthenticationPolicy(user_policy=token_policy, client_policy=client_policy)
+
+    @pytest.fixture
+    def valid_auth_client(self, factories):
+        return factories.ConfidentialAuthClient(authority='example.com')
+
+    @pytest.fixture
+    def client_header(self, valid_auth_client):
+        user_pass = "{client_id}:{client_secret}".format(client_id=valid_auth_client.id,
+                                                         client_secret=valid_auth_client.secret)
+        encoded = base64.standard_b64encode(user_pass.encode('utf-8'))
+        return "Basic {creds}".format(creds=encoded.decode('ascii'))
 
 
 class TestAuthClientAuthenticationPolicy(object):
@@ -457,19 +749,34 @@ class TestTokenAuthenticationPolicy(object):
                                   'acct:foo@example.com.foo',
                                   'group:donkeys'])
 
-    @pytest.fixture
-    def fake_token(self):
-        return DummyToken()
 
-    @pytest.fixture
-    def token_service(self, pyramid_config, fake_token):
-        def validate(token_str):
-            if token_str == 'valid123':
-                return fake_token
-            return None
-        svc = mock.Mock(validate=mock.Mock(side_effect=validate))
-        pyramid_config.register_service(svc, name='auth_token')
-        return svc
+@pytest.fixture
+def check():
+    check_fn = mock.Mock()
+    check_fn.return_value = []
+    return check_fn
+
+
+@pytest.fixture
+def auth_policy(check):
+    auth_policy = AuthClientPolicy(check=check)
+    return auth_policy
+
+
+@pytest.fixture
+def fake_token():
+    return DummyToken()
+
+
+@pytest.fixture
+def token_service(pyramid_config, fake_token):
+    def validate(token_str):
+        if token_str == 'valid123':
+            return fake_token
+        return None
+    svc = mock.Mock(validate=mock.Mock(side_effect=validate))
+    pyramid_config.register_service(svc, name='auth_token')
+    return svc
 
 
 class DummyToken(object):

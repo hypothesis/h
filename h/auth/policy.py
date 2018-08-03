@@ -43,6 +43,45 @@ class AuthenticationPolicy(object):
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
+class APIAuthenticationPolicy(object):
+    """
+    An authentication policy for Hypothesis API endpoints
+
+    Two types of authentication apply to Hypothesis API endpoints:
+
+    * Authentication for a single user using Token authentication
+    * Authentication for an auth_client, either as the client itself or
+      "on behalf of" a user within that client's authority
+
+    This policy delegates to :py:class:`~h.auth.TokenAuthenticationPolicy` and
+    :py:class:`~h.auth.AuthClientPolicy`, always preferring Token when available
+    """
+    def __init__(self, user_policy, client_policy):
+        self.user_policy = user_policy
+        self.client_policy = client_policy
+
+    def authenticated_userid(self, request):
+        return (self.user_policy.authenticated_userid(request) or
+                self.client_policy.authenticated_userid(request))
+
+    def unauthenticated_userid(self, request):
+        return (self.user_policy.unauthenticated_userid(request) or
+                self.client_policy.unauthenticated_userid(request))
+
+    def effective_principals(self, request):
+        return (self.user_policy.effective_principals(request) or
+                self.client_policy.effective_principals(request))
+
+    def remember(self, request, userid, **kw):
+        return (self.user_policy.remember(request, userid, **kw) or
+                self.client_policy.remember(request, userid, **kw))
+
+    def forget(self, request):
+        return (self.user_policy.forget(request) or
+                self.client_policy.forget(request))
+
+
+@interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthClientPolicy(object):
 
     """
