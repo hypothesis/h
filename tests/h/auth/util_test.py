@@ -422,20 +422,3 @@ def principals_for_user(patch):
 @pytest.fixture
 def principals_for_auth_client(patch):
     return patch('h.auth.util.principals_for_auth_client')
-
-
-@pytest.fixture
-def verify_auth_client(patch):
-    return patch('h.auth.util.verify_auth_client')
-
-
-@pytest.fixture
-def verify_forwarded_user(patch):
-    patched = patch('h.auth.util.verify_forwarded_user')
-    patched.return_value = None
-    return patched
-
-
-@pytest.fixture
-def principals_for_auth_client_user(patch):
-    return patch('h.auth.util.principals_for_auth_client_user')
