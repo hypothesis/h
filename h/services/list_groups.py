@@ -117,8 +117,14 @@ class ListGroupsService(object):
         """
         scoped_groups = self._scoped_groups(authority, document_uri)
 
-        world_group = self._world_group(authority)
-        world_group = [world_group] if world_group else []
+        # For URLs that have associated groups, the "Public" group is only
+        # shown if the user is logged in.
+        # See https://github.com/hypothesis/product-backlog/issues/702
+        if user or not scoped_groups:
+            world_group = self._world_group(authority)
+            world_group = [world_group] if world_group else []
+        else:
+            world_group = []
 
         private_groups = self._private_groups(user)
 

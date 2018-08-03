@@ -123,9 +123,9 @@ class TestListGroupsAllGroups(object):
                                                private_groups):
         user.groups = private_groups
 
-        all_groups = scoped_open_groups + unscoped_open_groups + \
-                     scoped_restricted_groups + unscoped_restricted_groups + \
-                     private_groups
+        all_groups = (scoped_open_groups + unscoped_open_groups +
+                      scoped_restricted_groups + unscoped_restricted_groups +
+                      private_groups)
         expected = [group for group in all_groups if group.creator == user or user in group.members]
         results = svc.associated_groups(user=user)
 
@@ -206,10 +206,26 @@ class TestListGroupsSessionGroups(object):
 
 class TestListGroupsRequestGroups(object):
 
-    def test_it_returns_world_group(self, svc, default_authority):
-        results = svc.request_groups(authority=default_authority)
+    @pytest.mark.parametrize('logged_in, has_scoped_groups, should_show_world_group', [
+        (False, False, True),
+        (False, True, False),
+        (True, False, True),
+        (True, True, True),
+    ])
+    def test_it_returns_world_group_if_logged_in_or_no_scoped_groups(
+        self, svc, default_authority, user, document_uri, factories, origin,
+        logged_in, has_scoped_groups, should_show_world_group
+    ):
+        # Create a group associated with `document_uri` in the default authority.
+        factories.OpenGroup(authority=default_authority,
+                            scopes=[factories.GroupScope(origin=origin)])
 
-        assert results[0].pubid == '__world__'
+        groups = svc.request_groups(authority=default_authority,
+                                    user=user if logged_in else None,
+                                    document_uri=document_uri if has_scoped_groups else None)
+
+        world_groups = [g for g in groups if g.pubid == "__world__"]
+        assert bool(world_groups) == should_show_world_group
 
     def test_it_returns_matching_scoped_open_groups(self, svc, authority, document_uri, scoped_open_groups):
         results = svc.request_groups(authority=authority, document_uri=document_uri)
