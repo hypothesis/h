@@ -121,14 +121,11 @@ class TestAuthClientAuthenticationPolicy(object):
 
     def test_forwarded_userid_defaults_to_checking_XForwardedUser_header(self, check, pyramid_request):
         pyramid_request.headers['X-Forwarded-User'] = 'filbert'
-        auth_policy = AuthClientPolicy(check=check)
 
-        assert auth_policy.forwarded_userid(pyramid_request) == 'filbert'
+        assert AuthClientPolicy.forwarded_userid(pyramid_request) == 'filbert'
 
     def test_forwarded_userid_returns_None_if_header_not_set(self, check, pyramid_request):
-        auth_policy = AuthClientPolicy(check=check)
-
-        assert auth_policy.forwarded_userid(pyramid_request) is None
+        assert AuthClientPolicy.forwarded_userid(pyramid_request) is None
 
     def test_unauthenticated_userid_returns_forwarded_user_if_present(self, auth_policy, pyramid_request):
         pyramid_request.headers['X-Forwarded-User'] = 'filbert'
