@@ -119,7 +119,7 @@ def configure(environ=None, settings=None):
         logging.getLogger('sqlalchemy.engine').setLevel(level)
 
     # Add ES logging filter to filter out ReadTimeout warnings
-    es_logger = logging.getLogger('elasticsearch1')
+    es_logger = logging.getLogger('elasticsearch')
     es_logger.addFilter(ExceptionFilter((("ReadTimeout", "WARNING"),)))
 
     return Configurator(settings=settings)
