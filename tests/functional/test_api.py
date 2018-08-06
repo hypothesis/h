@@ -67,48 +67,6 @@ class TestAPI(object):
         assert res.status_code == 400
         assert res.json['reason'].startswith('group:')
 
-    def test_anonymous_profile_api(self, app):
-        """
-        Fetch an anonymous "profile".
-
-        With no authentication and no authority parameter, this should default
-        to the site's `authority` and show only the global group.
-        """
-
-        res = app.get('/api/profile')
-
-        assert res.json['userid'] is None
-        assert res.json['authority'] == 'example.com'
-        assert [group['id'] for group in res.json['groups']] == ['__world__']
-
-    def test_profile_api(self, app, user_with_token):
-        """Fetch a profile through the API for an authenticated user."""
-
-        user, token = user_with_token
-
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
-
-        res = app.get('/api/profile', headers=headers)
-
-        assert res.json['userid'] == user.userid
-        assert [group['id'] for group in res.json['groups']] == ['__world__']
-
-    def test_third_party_profile_api(self, app, open_group, third_party_user_with_token):
-        """Fetch a profile for a third-party account."""
-
-        user, token = third_party_user_with_token
-
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
-
-        res = app.get('/api/profile', headers=headers)
-
-        assert res.json['userid'] == user.userid
-
-        group_ids = [group['id'] for group in res.json['groups']]
-        # The profile API returns no open groups for third-party accounts.
-        # (The client gets open groups from the groups API instead.)
-        assert group_ids == []
-
     def test_cors_preflight(self, app):
         # Simulate a CORS preflight request made by the browser from a client
         # hosted on a domain other than the one the service is running on.
@@ -160,24 +118,10 @@ def auth_client(db_session, factories):
 
 
 @pytest.fixture
-def third_party_user(auth_client, db_session, factories):
-    user = factories.User(authority=auth_client.authority)
-    db_session.commit()
-    return user
-
-
-@pytest.fixture
 def open_group(auth_client, db_session, factories):
     group = factories.OpenGroup(authority=auth_client.authority)
     db_session.commit()
     return group
-
-
-@pytest.fixture
-def third_party_user_with_token(third_party_user, db_session, factories):
-    token = factories.DeveloperToken(userid=third_party_user.userid)
-    db_session.commit()
-    return (third_party_user, token)
 
 
 @pytest.fixture
