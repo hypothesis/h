@@ -5,8 +5,6 @@ import datetime
 
 import elasticsearch
 import elasticsearch_dsl
-import elasticsearch1
-import elasticsearch1_dsl
 import logging
 import mock
 import pytest
@@ -16,16 +14,13 @@ import h.search.index
 from tests.common.matchers import Matcher
 
 
-NOT_FOUND_ERROR = (elasticsearch1.exceptions.NotFoundError, elasticsearch.exceptions.NotFoundError)
-
-
 @pytest.mark.usefixtures("annotations")
 class TestIndex(object):
-    def test_annotation_ids_are_used_as_elasticsearch_ids(self, each_es_client,
+    def test_annotation_ids_are_used_as_elasticsearch_ids(self, es6_client,
                                                           factories,
                                                           index):
         annotation = factories.Annotation.build()
-        es_client = each_es_client
+        es_client = es6_client
 
         index(annotation)
 
@@ -155,8 +150,7 @@ class TestIndex(object):
 
         index(annotation_1, annotation_2)
 
-        agg = aggregate(search)
-        user_aggregation = agg('terms', field='user_raw')
+        user_aggregation = elasticsearch_dsl.A('terms', field='user_raw')
         search.aggs.bucket('user_raw_terms', user_aggregation)
 
         response = search.execute()
@@ -186,8 +180,7 @@ class TestIndex(object):
 
         index(annotation_1, annotation_2)
 
-        agg = aggregate(search)
-        tags_aggregation = agg('terms', field='tags_raw')
+        tags_aggregation = elasticsearch_dsl.A('terms', field='tags_raw')
         search.aggs.bucket('tags_raw_terms', tags_aggregation)
 
         response = search.execute()
@@ -293,10 +286,10 @@ class TestIndex(object):
         )
 
     @pytest.fixture
-    def get(self, each_es_client):
+    def get(self, es6_client):
         def _get(annotation_id):
             """Return the annotation with the given ID from Elasticsearch."""
-            es_client = each_es_client
+            es_client = es6_client
             return es_client.conn.get(
                 index=es_client.index, doc_type=es_client.mapping_type,
                 id=annotation_id)["_source"]
@@ -304,9 +297,9 @@ class TestIndex(object):
 
 
 class TestDelete(object):
-    def test_annotation_is_marked_deleted(self, each_es_client, factories, index):
+    def test_annotation_is_marked_deleted(self, es6_client, factories, index):
         annotation = factories.Annotation.build(id="test_annotation_id")
-        es_client = each_es_client
+        es_client = es6_client
 
         index(annotation)
         result = es_client.conn.get(index=es_client.index,
@@ -322,8 +315,8 @@ class TestDelete(object):
 
 
 class TestBatchIndexer(object):
-    def test_it_indexes_all_annotations(self, batch_indexer, each_es_client, factories):
-        es_client = each_es_client
+    def test_it_indexes_all_annotations(self, batch_indexer, es6_client, factories):
+        es_client = es6_client
         annotations = factories.Annotation.create_batch(3)
         ids = [a.id for a in annotations]
 
@@ -335,8 +328,8 @@ class TestBatchIndexer(object):
                                         id=_id)
             assert result["_id"] == _id
 
-    def test_it_indexes_specific_annotations(self, batch_indexer, each_es_client, factories):
-        es_client = each_es_client
+    def test_it_indexes_specific_annotations(self, batch_indexer, es6_client, factories):
+        es_client = es6_client
         annotations = factories.Annotation.create_batch(5)
         ids = [a.id for a in annotations]
         ids_to_index = ids[:3]
@@ -351,13 +344,13 @@ class TestBatchIndexer(object):
             assert result["_id"] == _id
 
         for _id in ids_not_to_index:
-            with pytest.raises(NOT_FOUND_ERROR):
+            with pytest.raises(elasticsearch.exceptions.NotFoundError):
                 es_client.conn.get(index=es_client.index,
                                    doc_type=es_client.mapping_type,
                                    id=_id)
 
-    def test_it_does_not_index_deleted_annotations(self, batch_indexer, each_es_client, factories):
-        es_client = each_es_client
+    def test_it_does_not_index_deleted_annotations(self, batch_indexer, es6_client, factories):
+        es_client = es6_client
         ann = factories.Annotation()
         # create deleted annotations
         ann_del = factories.Annotation(deleted=True)
@@ -369,7 +362,7 @@ class TestBatchIndexer(object):
                                             id=ann.id)
         assert result_indexed["_id"] == ann.id
 
-        with pytest.raises(NOT_FOUND_ERROR):
+        with pytest.raises(elasticsearch.exceptions.NotFoundError):
             es_client.conn.get(index=es_client.index,
                                doc_type=es_client.mapping_type,
                                id=ann_del.id)
@@ -407,8 +400,8 @@ class TestBatchIndexer(object):
                 assert 'indexed 0k annotations, rate=' in record.msg
         assert num_index_records == num_annotations // window_size
 
-    def test_it_correctly_indexes_fields_for_bulk_actions(self, batch_indexer, each_es_client, factories):
-        es_client = each_es_client
+    def test_it_correctly_indexes_fields_for_bulk_actions(self, batch_indexer, es6_client, factories):
+        es_client = es6_client
         annotations = factories.Annotation.create_batch(2, groupid="group_a")
 
         batch_indexer.index()
@@ -426,8 +419,8 @@ class TestBatchIndexer(object):
         annotations = factories.Annotation.create_batch(3)
         expected_errored_ids = set([annotations[0].id, annotations[2].id])
 
-        elasticsearch1.helpers.streaming_bulk = mock.Mock()
-        elasticsearch1.helpers.streaming_bulk.return_value = [
+        elasticsearch.helpers.streaming_bulk = mock.Mock()
+        elasticsearch.helpers.streaming_bulk.return_value = [
             (False, {'index': {'error': 'some error', '_id': annotations[0].id}}),
             (True, {}),
             (False, {'index': {'error': 'some error', '_id': annotations[2].id}})]
@@ -436,14 +429,14 @@ class TestBatchIndexer(object):
 
         assert errored == expected_errored_ids
 
-    def test_it_does_not_error_annotations_if_already_indexed(self, db_session, each_es_client,
+    def test_it_does_not_error_if_annotations_already_indexed(self, db_session, es6_client,
                                                               factories, pyramid_request):
-        es_client = each_es_client
+        es_client = es6_client
         annotations = factories.Annotation.create_batch(3)
         expected_errored_ids = set([annotations[1].id])
 
-        elasticsearch1.helpers.streaming_bulk = mock.Mock()
-        elasticsearch1.helpers.streaming_bulk.return_value = [
+        elasticsearch.helpers.streaming_bulk = mock.Mock()
+        elasticsearch.helpers.streaming_bulk.return_value = [
             (True, {}),
             (False, {'create': {'error': 'some error', '_id': annotations[1].id}}),
             (False, {'create': {'error': 'document already exists', '_id': annotations[2].id}})]
@@ -456,9 +449,9 @@ class TestBatchIndexer(object):
 
 class SearchResponseWithIDs(Matcher):
     """
-    Matches an elasticsearch1_dsl response with the given annotation ids.
+    Matches an elasticsearch_dsl response with the given annotation ids.
 
-    Matches any :py:class:`elasticsearch1_dsl.result.Response` search
+    Matches any :py:class:`elasticsearch_dsl.result.Response` search
     response object whose search results are exactly the annotations with
     the given ids, in the given order.
 
@@ -472,9 +465,9 @@ class SearchResponseWithIDs(Matcher):
 
 
 @pytest.fixture
-def batch_indexer(db_session, each_es_client, pyramid_request):
-    return h.search.index.BatchIndexer(db_session, each_es_client,
-                                       pyramid_request, each_es_client.index)
+def batch_indexer(db_session, es6_client, pyramid_request):
+    return h.search.index.BatchIndexer(db_session, es6_client,
+                                       pyramid_request, es6_client.index)
 
 
 @pytest.fixture
@@ -489,33 +482,7 @@ def AnnotationSearchIndexPresenter(patch):
     return class_
 
 
-@pytest.fixture(params=['es1', 'es6'])
-def search(es_client, es6_client, request):
-    """
-    Fixture to query against both ES 1 and ES 6 clusters.
-
-    Tests should use only one ES-version paramterized fixture.
-    """
-    if request.param == 'es1':
-        return elasticsearch1_dsl.Search(using=es_client.conn,
-                                         index=es_client.index).fields([])
+@pytest.fixture
+def search(es6_client, request):
     return elasticsearch_dsl.Search(using=es6_client.conn,
                                     index=es6_client.index)
-
-
-@pytest.fixture(params=['es1', 'es6'])
-def each_es_client(es_client, es6_client, request):
-    """
-    Fixture to run a test against both ES 1 and ES 6 clusters.
-
-    Tests should use only one ES-version parametrized fixture.
-    """
-    if request.param == 'es1':
-        return es_client
-    return es6_client
-
-
-def aggregate(search):
-    if isinstance(search, elasticsearch_dsl.Search):
-        return elasticsearch_dsl.A  # Using ES 6.x
-    return elasticsearch1_dsl.A  # Using ES 1.x

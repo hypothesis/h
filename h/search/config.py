@@ -11,7 +11,6 @@ these settings in an Elasticsearch instance.
 from __future__ import unicode_literals
 
 import binascii
-import elasticsearch1
 import elasticsearch
 import logging
 import os
@@ -19,109 +18,9 @@ import os
 
 log = logging.getLogger(__name__)
 
-ES_NOTFOUND_ERRORS = (
-    elasticsearch1.exceptions.NotFoundError,
-    elasticsearch.exceptions.NotFoundError,
-)
-ES_REQUEST_ERRORS = (
-    elasticsearch1.exceptions.RequestError,
-    elasticsearch.exceptions.RequestError,
-)
-
-# Elasticsearch mapping type for annotations for ES 1.x.
-#
-# These definition includes a number of legacy fields which don't need to be
-# indexed for historical reasons.
-ANNOTATION_MAPPING = {
-    '_id': {'path': 'id'},
-    '_source': {'excludes': ['id']},
-    'analyzer': 'keyword',
-    'properties': {
-        'annotator_schema_version': {'type': 'string'},
-        'authority': {'type': 'string', 'index': 'not_analyzed'},
-        'created': {'type': 'date'},
-        'updated': {'type': 'date'},
-        'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
-        'tags': {'type': 'string', 'analyzer': 'uni_normalizer'},
-        'tags_raw': {'type': 'string', 'index': 'not_analyzed'},
-        'text': {'type': 'string', 'analyzer': 'uni_normalizer'},
-        'deleted': {'type': 'boolean'},
-        'uri': {
-            'type': 'string',
-            'index_analyzer': 'uri',
-            'search_analyzer': 'uri',
-            'fields': {
-                'parts': {
-                    'type': 'string',
-                    'index_analyzer': 'uri_parts',
-                    'search_analyzer': 'uri_parts',
-                },
-            },
-        },
-        'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
-        'user_raw': {'type': 'string', 'index': 'not_analyzed'},
-        'target': {
-            'properties': {
-                'source': {
-                    'type': 'string',
-                    'index_analyzer': 'uri',
-                    'search_analyzer': 'uri',
-                    'copy_to': ['uri'],
-                },
-                # We store the 'scope' unanalyzed and only do term filters
-                # against this field.
-                'scope': {
-                    'type': 'string',
-                    'index': 'not_analyzed',
-                },
-                'selector': {
-                    'properties': {
-                        'type': {'type': 'string', 'index': 'no'},
-
-                        # Annotator XPath+offset selector
-                        'startContainer': {'type': 'string', 'index': 'no'},
-                        'startOffset': {'type': 'long', 'index': 'no'},
-                        'endContainer': {'type': 'string', 'index': 'no'},
-                        'endOffset': {'type': 'long', 'index': 'no'},
-
-                        # Open Annotation TextQuoteSelector
-                        'exact': {
-                            'path': 'just_name',
-                            'type': 'string',
-                            'fields': {
-                                'quote': {
-                                    'type': 'string',
-                                    'analyzer': 'uni_normalizer',
-                                },
-                            },
-                        },
-                        'prefix': {'type': 'string'},
-                        'suffix': {'type': 'string'},
-
-                        # Open Annotation (Data|Text)PositionSelector
-                        'start': {'type': 'long'},
-                        'end':   {'type': 'long'},
-                    }
-                }
-            }
-        },
-        'shared': {'type': 'boolean'},
-        'references': {'type': 'string'},
-        'document': {
-            'enabled': False,  # not indexed
-        },
-        'group': {
-            'type': 'string',
-        },
-        'thread_ids': {
-            'type': 'string', 'index': 'not_analyzed'
-        }
-    }
-}
 
 # Elasticsearch type mapping for annotations for ES 6.x and later.
-# This mapping does not include the legacy fields from the ES 1.x mapping.
-ES6_ANNOTATION_MAPPING = {
+ANNOTATION_MAPPING = {
     # Ignore unknown fields and do not add them to the mapping.
     # This ensures that only fields included in the "properties" section
     # here can be searched against.
@@ -185,7 +84,7 @@ ES6_ANNOTATION_MAPPING = {
     }
 }
 
-# Filter and tokenizer definitions shared by ES 1.x and ES 6.x mappings.
+# Filter and tokenizer definitions for ES 6.x and greater mappings.
 ANALYSIS_SETTINGS = {
     'char_filter': {
         'strip_scheme': {
@@ -259,7 +158,7 @@ def init(client):
 def configure_index(client):
     """Create a new randomly-named index and return its name."""
     index_name = client.index + '-' + _random_id()
-    mapping = _get_mapping(client)
+    mapping = ANNOTATION_MAPPING
     client.conn.indices.create(index_name, body={
         'mappings': {
             client.mapping_type: mapping,
@@ -280,7 +179,7 @@ def get_aliased_index(client):
     """
     try:
         result = client.conn.indices.get_alias(name=client.index)
-    except ES_NOTFOUND_ERRORS:  # no alias with that name
+    except elasticsearch.exceptions.NotFoundError:  # no alias with that name
         return None
     if len(result) > 1:
         raise RuntimeError("We don't support managing aliases that "
@@ -315,13 +214,7 @@ def delete_index(client, index_name):
     This must be an actual index and not an alias.
     """
 
-    try:
-        client.conn.indices.delete(index=index_name)
-    except elasticsearch1.exceptions.NotFoundError:
-        # In production using AWS Elasticsearch 1.5, `IndexMissingException`
-        # responses have been seen in response to index deletion requests which
-        # did actually succeed. We are just ignoring them here.
-        log.warn("NotFoundError reported when deleting index {}".format(index_name))
+    client.conn.indices.delete(index=index_name)
 
 
 def update_index_settings(client):
@@ -332,7 +225,7 @@ def update_index_settings(client):
     the index cannot be updated without reindexing.
     """
     index = get_aliased_index(client)
-    mapping = _get_mapping(client)
+    mapping = ANNOTATION_MAPPING
 
     _update_index_analysis(client.conn, index, ANALYSIS_SETTINGS)
     _update_index_mappings(client.conn, index,
@@ -373,7 +266,7 @@ def _update_index_mappings(conn, name, doc_type, mapping):
         conn.indices.put_mapping(index=name,
                                  doc_type=doc_type,
                                  body=mapping)
-    except ES_REQUEST_ERRORS as e:
+    except elasticsearch.exceptions.RequestError as e:
         if not e.error.startswith('MergeMappingException'):
             raise
 
@@ -387,10 +280,3 @@ def _update_index_mappings(conn, name, doc_type, mapping):
 def _random_id():
     """Generate a short random hex string."""
     return binascii.hexlify(os.urandom(4)).decode()
-
-
-def _get_mapping(client):
-    mapping = ES6_ANNOTATION_MAPPING
-    if client.version < (2,):
-        mapping = ANNOTATION_MAPPING
-    return mapping

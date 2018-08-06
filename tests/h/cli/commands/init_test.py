@@ -49,13 +49,11 @@ class TestInitCommand(object):
                                 cliconfig,
                                 search,
                                 pyramid_settings):
-        client = search.get_client.return_value
         es6_client = search.get_es6_client.return_value
 
         result = cli.invoke(init_cli.init, obj=cliconfig)
 
-        search.get_client.assert_called_once_with(pyramid_settings)
-        search.init.assert_any_call(client)
+        search.get_es6_client.assert_called_once_with(pyramid_settings)
         search.init.assert_any_call(es6_client)
         assert result.exit_code == 0
 
