@@ -40,8 +40,8 @@ def includeme(config):
     # Add a property to all requests for easy access to the elasticsearch 6.x
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
-    config.registry['es6.client'] = get_es6_client(settings)
+    config.registry['es.client'] = get_es6_client(settings)
     config.add_request_method(
-        lambda r: r.registry['es6.client'],
-        name='es6',
+        lambda r: r.registry['es.client'],
+        name='es',
         reify=True)

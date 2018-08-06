@@ -124,7 +124,7 @@ class TestSearch(object):
         assert result.reply_ids == []
 
     def test_it_passes_es_version_to_builder(self, pyramid_request, Builder):
-        client = pyramid_request.es6
+        client = pyramid_request.es
 
         search.Search(pyramid_request)
 
@@ -246,5 +246,5 @@ class TestSearchWithSeparateReplies(object):
 
 @pytest.fixture
 def pyramid_request(request, pyramid_request, es6_client):
-    pyramid_request.es6 = es6_client
+    pyramid_request.es = es6_client
     return pyramid_request

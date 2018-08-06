@@ -54,7 +54,7 @@ def move_uri(ctx, old, new):
         docuri.uri = new
 
     if annotations:
-        indexer = BatchIndexer(request.db, request.es6, request)
+        indexer = BatchIndexer(request.db, request.es, request)
         ids = [a.id for a in annotations]
         indexer.index(ids)
 

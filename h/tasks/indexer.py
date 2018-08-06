@@ -12,13 +12,13 @@ log = get_task_logger(__name__)
 def add_annotation(id_):
     annotation = storage.fetch_annotation(celery.request.db, id_)
     if annotation:
-        index(celery.request.es6, annotation, celery.request)
+        index(celery.request.es, annotation, celery.request)
 
         # If a reindex is running at the moment, add annotation to the new index
         # as well.
         future_es6_index = _current_reindex_new_name(celery.request, 'reindex.new_es6_index')
         if future_es6_index is not None:
-            index(celery.request.es6, annotation, celery.request,
+            index(celery.request.es, annotation, celery.request,
                   target_index=future_es6_index)
 
         if annotation.is_reply:
@@ -27,20 +27,20 @@ def add_annotation(id_):
 
 @celery.task
 def delete_annotation(id_):
-    delete(celery.request.es6, id_)
+    delete(celery.request.es, id_)
 
     # If a reindex is running at the moment, delete annotation from the
     # new index as well.
     future_es6_index = _current_reindex_new_name(celery.request, 'reindex.new_es6_index')
     if future_es6_index is not None:
-        delete(celery.request.es6, id_, target_index=future_es6_index)
+        delete(celery.request.es, id_, target_index=future_es6_index)
 
 
 @celery.task
 def reindex_user_annotations(userid):
     ids = [a.id for a in celery.request.db.query(models.Annotation.id).filter_by(userid=userid)]
 
-    indexer = BatchIndexer(celery.request.db, celery.request.es6, celery.request)
+    indexer = BatchIndexer(celery.request.db, celery.request.es, celery.request)
     errored = indexer.index(ids)
     if errored:
         log.warning('Failed to re-index annotations into ES6 %s', errored)

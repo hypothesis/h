@@ -27,7 +27,7 @@ def reindex(ctx):
 
     request = ctx.obj['bootstrap']()
 
-    es_client = request.es6
+    es_client = request.es
 
     es_server_version = es_client.conn.info()['version']['number']
     click.echo('reindexing into Elasticsearch {} cluster'.format(es_server_version))
@@ -48,6 +48,6 @@ def update_settings(ctx):
     request = ctx.obj['bootstrap']()
 
     try:
-        config.update_index_settings(request.es6)
+        config.update_index_settings(request.es)
     except RuntimeError as e:
         raise click.ClickException(str(e))

@@ -35,7 +35,7 @@ class Search(object):
     """
     def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
         self.request = request
-        self.es = request.es6
+        self.es = request.es
         self.separate_replies = separate_replies
         self.stats = stats
         self._replies_limit = _replies_limit

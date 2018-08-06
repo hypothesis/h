@@ -19,7 +19,7 @@ class TestReindexCommand(object):
 
         assert result.exit_code == 0
         reindex.assert_called_once_with(pyramid_request.db,
-                                        pyramid_request.es6,
+                                        pyramid_request.es,
                                         pyramid_request)
 
     @pytest.fixture
@@ -33,7 +33,7 @@ class TestUpdateSettingsCommand(object):
         result = cli.invoke(search.update_settings, [], obj=cliconfig)
 
         assert result.exit_code == 0
-        update_index_settings.assert_called_once_with(pyramid_request.es6)
+        update_index_settings.assert_called_once_with(pyramid_request.es)
 
     def test_handles_runtimeerror(self, cli, cliconfig, update_index_settings):
         update_index_settings.side_effect = RuntimeError("asplode!")
@@ -50,5 +50,5 @@ class TestUpdateSettingsCommand(object):
 
 @pytest.fixture
 def cliconfig(pyramid_request):
-    pyramid_request.es6 = mock.create_autospec(Client, spec_set=True, instance=True)
+    pyramid_request.es = mock.create_autospec(Client, spec_set=True, instance=True)
     return {'bootstrap': mock.Mock(return_value=pyramid_request)}
