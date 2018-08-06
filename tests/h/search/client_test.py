@@ -16,8 +16,6 @@ class TestClient(object):
         client = Client(host="http://localhost:9200", index="hypothesis")
 
         assert client.index == "hypothesis"
-        assert client.version == (6, 2, 0)
-        assert isinstance(client.conn, elasticsearch.Elasticsearch)
 
     def test_it_sets_the_version_property(self):
         client = Client(host="http://localhost:9200", index="hypothesis")
