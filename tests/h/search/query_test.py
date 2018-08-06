@@ -653,8 +653,8 @@ class TestUsersAggregation(object):
 
 
 @pytest.fixture
-def pyramid_request(request, pyramid_request, es6_client):
-    pyramid_request.es = es6_client
+def pyramid_request(request, pyramid_request, es_client):
+    pyramid_request.es = es_client
     return pyramid_request
 
 

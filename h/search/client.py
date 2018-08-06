@@ -68,7 +68,7 @@ def _get_client_settings(settings):
     return kwargs
 
 
-def get_es6_client(settings):
+def get_client(settings):
     """Return a client for the Elasticsearch index."""
     host = settings['es.url']
     index = settings['es.index']

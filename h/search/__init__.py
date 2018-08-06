@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from h.search.client import get_es6_client
+from h.search.client import get_client
 from h.search.config import init
 from h.search.connection import connect
 from h.search.core import Search
@@ -16,7 +16,7 @@ __all__ = (
     'AuthorityFilter',
     'TagsAggregation',
     'UsersAggregation',
-    'get_es6_client',
+    'get_client',
     'init',
     'connect'
 )
@@ -40,7 +40,7 @@ def includeme(config):
     # Add a property to all requests for easy access to the elasticsearch 6.x
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
-    config.registry['es.client'] = get_es6_client(settings)
+    config.registry['es.client'] = get_client(settings)
     config.add_request_method(
         lambda r: r.registry['es.client'],
         name='es',
