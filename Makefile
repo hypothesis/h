@@ -47,7 +47,6 @@ run-docker:
 		-e "AUTHORITY=localhost" \
 		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
 		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
-		-e "ELASTICSEARCH_HOST=http://elasticsearchold:9200" \
 		-e "ELASTICSEARCH_URL=http://elasticsearch:9201" \
 		-e "SECRET_KEY=notasecret" \
 		-p 5000:5000 \

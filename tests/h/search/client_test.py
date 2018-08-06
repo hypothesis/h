@@ -71,7 +71,6 @@ class TestGetClient(object):
     @pytest.fixture
     def settings(self):
         return {
-            'es.host': 'search.svc',
             'es.url': 'search.svc',
             'es.index': 'my-index',
         }

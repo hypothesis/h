@@ -7,7 +7,6 @@ import pytest
 
 from h import search
 
-ELASTICSEARCH_HOST = os.environ.get("ELASTICSEARCH_HOST", "http://localhost:9200")
 ELASTICSEARCH_INDEX = "hypothesis-test"
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
 

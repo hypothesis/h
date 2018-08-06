@@ -28,7 +28,6 @@ node {
         try {
             testApp(image: img, runArgs: "-u root " +
                                          "-e BROKER_URL=${brokerUrl} " +
-                                         "-e ELASTICSEARCH_HOST=${elasticsearchHost_old} " +
                                          "-e ELASTICSEARCH_URL=${elasticsearchHost} " +
                                          "-e TEST_DATABASE_URL=${databaseUrl}") {
                 // Test dependencies

@@ -20,7 +20,6 @@ def test_configure_updates_settings_from_env_vars(env_var, env_val, setting_name
     settings_from_conf = {'h.db_session_checks': True,
 
                           # Required settings
-                          'es.host': 'https://es1-search-cluster',
                           'es.url': 'https://es6-search-cluster',
                           'secret_key': 'notasecret',
                           'sqlalchemy.url': 'postgres://user@dbhost/dbname',
