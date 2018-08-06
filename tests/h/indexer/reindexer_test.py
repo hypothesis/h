@@ -80,30 +80,18 @@ class TestReindex(object):
         with pytest.raises(RuntimeError):
             reindex(mock.sentinel.session, es, mock.sentinel.request)
 
-    @pytest.mark.parametrize(
-        'esversion,new_index_setting_name',
-        (((1, 5, 0), 'reindex.new_index'),
-        ((6, 2, 0), 'reindex.new_es6_index'))
-    )
-    def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service,
-                                               configure_index, esversion, new_index_setting_name):
-        es.version = esversion
+    def test_stores_new_index_name_in_settings(self, pyramid_request, es, settings_service, configure_index):
         configure_index.return_value = 'hypothesis-abcd1234'
 
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.put.assert_called_once_with(new_index_setting_name, 'hypothesis-abcd1234')
+        settings_service.put.assert_called_once_with('reindex.new_index', 'hypothesis-abcd1234')
 
-    @pytest.mark.parametrize(
-        'esversion,new_index_setting_name',
-        (((1, 5, 0), 'reindex.new_index'),
-        ((6, 2, 0), 'reindex.new_es6_index'))
-    )
-    def test_deletes_index_name_setting(self, pyramid_request, es, settings_service, esversion, new_index_setting_name):
-        es.version = esversion
+
+    def test_deletes_index_name_setting(self, pyramid_request, es, settings_service):
         reindex(mock.sentinel.session, es, pyramid_request)
 
-        settings_service.delete.assert_called_once_with(new_index_setting_name)
+        settings_service.delete.assert_called_once_with('reindex.new_index')
 
     def test_deletes_index_name_setting_when_exception_raised(self, pyramid_request, es, settings_service, batchindexer):
         batchindexer.index.side_effect = RuntimeError('boom!')

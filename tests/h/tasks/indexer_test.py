@@ -46,7 +46,7 @@ class TestAddAnnotation(object):
         assert index.called is False
 
     def test_during_reindex_adds_to_current_index(self, fetch_annotation, annotation, index, celery, settings_service):
-        settings_service.put('reindex.new_es6_index', 'hypothesis-xyz123')
+        settings_service.put('reindex.new_index', 'hypothesis-xyz123')
         fetch_annotation.return_value = annotation
 
         indexer.add_annotation('test-annotation-id')
@@ -57,7 +57,7 @@ class TestAddAnnotation(object):
                               target_index='hypothesis-xyz123')
 
     def test_during_reindex_adds_to_new_index(self, fetch_annotation, annotation, index, celery, settings_service):
-        settings_service.put('reindex.new_es6_index', 'hypothesis-xyz123')
+        settings_service.put('reindex.new_index', 'hypothesis-xyz123')
         fetch_annotation.return_value = annotation
 
         indexer.add_annotation('test-annotation-id')
@@ -107,7 +107,7 @@ class TestDeleteAnnotation(object):
         delete.assert_any_call(celery.request.es, id_)
 
     def test_during_reindex_deletes_from_current_index(self, delete, celery, settings_service):
-        settings_service.put('reindex.new_es6_index', 'hypothesis-xyz123')
+        settings_service.put('reindex.new_index', 'hypothesis-xyz123')
 
         indexer.delete_annotation('test-annotation-id')
 
@@ -115,8 +115,7 @@ class TestDeleteAnnotation(object):
                                target_index='hypothesis-xyz123')
 
     def test_during_reindex_deletes_from_new_index(self, delete, celery, settings_service):
-        settings_service.put('reindex.new_index', 'hypothesis-abcdef123')
-        settings_service.put('reindex.new_es6_index', 'hypothesis-xyz123')
+        settings_service.put('reindex.new_index', 'hypothesis-xyz123')
 
         indexer.delete_annotation('test-annotation-id')
 

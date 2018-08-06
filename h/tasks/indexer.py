@@ -16,10 +16,10 @@ def add_annotation(id_):
 
         # If a reindex is running at the moment, add annotation to the new index
         # as well.
-        future_es6_index = _current_reindex_new_name(celery.request, 'reindex.new_es6_index')
-        if future_es6_index is not None:
+        future_index = _current_reindex_new_name(celery.request, 'reindex.new_index')
+        if future_index is not None:
             index(celery.request.es, annotation, celery.request,
-                  target_index=future_es6_index)
+                  target_index=future_index)
 
         if annotation.is_reply:
             add_annotation.delay(annotation.thread_root_id)
@@ -31,9 +31,9 @@ def delete_annotation(id_):
 
     # If a reindex is running at the moment, delete annotation from the
     # new index as well.
-    future_es6_index = _current_reindex_new_name(celery.request, 'reindex.new_es6_index')
-    if future_es6_index is not None:
-        delete(celery.request.es, id_, target_index=future_es6_index)
+    future_index = _current_reindex_new_name(celery.request, 'reindex.new_index')
+    if future_index is not None:
+        delete(celery.request.es, id_, target_index=future_index)
 
 
 @celery.task
