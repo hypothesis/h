@@ -10,10 +10,6 @@ services:
       - '127.0.0.1:9201:9200'
     environment:
       - discovery.type=single-node
-  elasticsearchold:
-    image: nickstenning/elasticsearch-icu
-    ports:
-      - '127.0.0.1:9200:9200'
   rabbit:
     image: rabbitmq:3.6-management-alpine
     ports:
