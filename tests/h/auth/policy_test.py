@@ -758,12 +758,6 @@ def check():
 
 
 @pytest.fixture
-def auth_policy(check):
-    auth_policy = AuthClientPolicy(check=check)
-    return auth_policy
-
-
-@pytest.fixture
 def fake_token():
     return DummyToken()
 
