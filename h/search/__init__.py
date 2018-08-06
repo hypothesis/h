@@ -16,7 +16,6 @@ __all__ = (
     'AuthorityFilter',
     'TagsAggregation',
     'UsersAggregation',
-    'get_client',
     'get_es6_client',
     'init',
     'connect'
