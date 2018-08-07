@@ -6,7 +6,6 @@ import pytest
 import webob
 
 from h.search import Search, index, query
-from h.search.query import AuthorityFilter, Builder
 
 
 class TestBuilder(object):
@@ -44,6 +43,7 @@ class TestBuilder(object):
 
     def test_it_ignores_unknown_sort_fields(self, search):
         search.run({"sort": "no_such_field"})
+
 
 class TestTopLevelAnnotationsFilter(object):
 

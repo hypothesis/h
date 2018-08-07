@@ -87,7 +87,6 @@ class TestReindex(object):
 
         settings_service.put.assert_called_once_with('reindex.new_index', 'hypothesis-abcd1234')
 
-
     def test_deletes_index_name_setting(self, pyramid_request, es, settings_service):
         reindex(mock.sentinel.session, es, pyramid_request)
 
