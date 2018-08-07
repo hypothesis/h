@@ -45,34 +45,6 @@ class TestBuilder(object):
     def test_it_ignores_unknown_sort_fields(self, search):
         search.run({"sort": "no_such_field"})
 
-    def test_it_uses_old_filter_syntax_for_es1(self):
-        # TODO - Remove this test once ES 1 support is dropped.
-
-        builder = Builder(es_version=(1, 7, 0))
-        filter_ = AuthorityFilter("default")
-        params = {}
-        builder.append_filter(filter_)
-
-        query = builder.build(params)["query"]
-
-        assert query == {"filtered": {"filter": {"and": [filter_(params)]},
-                                      "query": {"match_all": {}}}}
-
-    def test_it_uses_new_filter_syntax_for_es6(self):
-        # TODO - This test will be obsolete once the tests which execute
-        # searches against Elasticsearch are running against ES 6.
-
-        builder = Builder(es_version=(6, 2, 0))
-        filter_ = AuthorityFilter("default")
-        params = {}
-        builder.append_filter(filter_)
-
-        query = builder.build(params)["query"]
-
-        assert query == {"bool": {"filter": [filter_(params)],
-                                  "must": []}}
-
-
 class TestTopLevelAnnotationsFilter(object):
 
     def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, search):
