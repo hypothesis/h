@@ -7,7 +7,7 @@ services:
   elasticsearch:
     image: hypothesis/elasticsearch:latest
     ports:
-      - '127.0.0.1:9201:9200'
+      - '127.0.0.1:9200:9200'
     environment:
       - discovery.type=single-node
   rabbit:
