@@ -53,16 +53,15 @@ Match = namedtuple('Match', ['key', 'value'])
 def parse(q):
     """Parse a free text, Lucene-like, query string into a MultiDict.
 
-    "user:luke tag:foobar tag:news hello world" is parsed into:
-    ``
-    {
-        "user": "luke",
-        "tag": "foobar",
-        "tag": "news",
-        "any": "hello",
-        "any": "world"
-    }
-    ``
+    "user:luke tag:foobar tag:news hello world" is parsed into::
+
+      {
+          "user": "luke",
+          "tag": "foobar",
+          "tag": "news",
+          "any": "hello",
+          "any": "world"
+      }
 
     Supported keys for fields are ``user``, ``group``, ``tag``, ``uri``.
     Any other search terms will get the key ``any``.

@@ -162,7 +162,7 @@ def encode_headers_tween_factory(handler, registry):
 
     But once you add ``from __future__ import unicode_literals`` to a source
     code file the string literals become unicode strings in Python 2, and
-    violate PEP-3333. This violation causes ``AssertionError``s from WebTest,
+    violate PEP-3333. This violation causes ``AssertionError``\'s from WebTest,
     and may cause problems with WSGI servers.
 
     This tween fixes that by converting all header names and values to native

@@ -35,7 +35,7 @@ def document_uris_from_data(document_data, claimant):
     Returns one document uri dict for each document equivalence claim in
     document_data.
 
-    Each dict can be used to init a DocumentURI object directly:
+    Each dict can be used to init a DocumentURI object directly::
 
         document_uri = DocumentURI(**document_uri_dict)
 
@@ -91,7 +91,7 @@ def document_metas_from_data(document_data, claimant):
     Returns one document meta dict for each document metadata claim in
     document_data.
 
-    Each dict can be used to init a DocumentMeta object directly:
+    Each dict can be used to init a DocumentMeta object directly::
 
         document_meta = DocumentMeta(**document_meta_dict)
 

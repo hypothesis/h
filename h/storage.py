@@ -158,7 +158,7 @@ def update_annotation(request, id_, data, group_service):
     """
     Update an existing annotation and its associated document metadata.
 
-    Update the annotation identified by id_ with the given
+    Update the annotation identified by ``id_`` with the given
     data. Create, delete and update document metadata as appropriate.
 
     :param request: the request object

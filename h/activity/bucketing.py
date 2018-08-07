@@ -171,8 +171,6 @@ def bucket(annotations):
         annotation first, otherwise the bucketing algorithm will not return the
         right results.
 
-    :rtype: chronologically-ordered list of Timeframe objects
-
     """
     if not annotations:
         return []

@@ -93,13 +93,13 @@ def paginate_query(wrapped=None, page_size=PAGE_SIZE):
     Wraps a view function that returns a :py:class:`sqlalchemy.orm.query.Query`
     object in order to enable basic pagination. Returns a dictionary containing
     the results for the current page and page metadata. For example, the simple
-    view function
+    view function::
 
         @paginate_query
         def my_view(context, request):
             return request.db.query(User)
 
-    will, when wrapped, return a dictionary like the following:
+    will, when wrapped, return a dictionary like the following::
 
         {
             "results": [<user1>, <user2>, ..., <user20>],
@@ -113,7 +113,7 @@ def paginate_query(wrapped=None, page_size=PAGE_SIZE):
         }
 
     You can also call :py:func:`paginate_query` as a function which returns a
-    decorator, if you wish to modify the options used by the function:
+    decorator, if you wish to modify the options used by the function::
 
         paginate = paginator.paginate_query(page_size=10)
 

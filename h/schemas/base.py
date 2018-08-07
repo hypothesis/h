@@ -60,8 +60,8 @@ class JSONSchema(object):
         Validate `data` according to the current schema.
 
         :param data: The data to be validated
-        :return: valid data
-        :raises ValidationError: if the data is invalid
+        :returns: valid data
+        :raises ~h.schemas.ValidationError: if the data is invalid
         """
         # Take a copy to ensure we don't modify what we were passed.
         appstruct = copy.deepcopy(data)

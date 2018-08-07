@@ -19,7 +19,7 @@ class FlagCountService(object):
         :type annotation: h.models.Annotation
 
         :returns: The number of times the annotation has been flagged.
-        :rtype int
+        :rtype: int
         """
         return self._session.query(sa.func.count(Flag.id)) \
                             .filter_by(annotation_id=annotation.id) \
@@ -33,7 +33,7 @@ class FlagCountService(object):
         :type annotation_ids: sequence of unicode
 
         :returns: A map of annotation IDs to flag counts.
-        :rtype dict[unicode, int]
+        :rtype: dict[unicode, int]
         """
         if not annotation_ids:
             return {}

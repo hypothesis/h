@@ -19,7 +19,7 @@ class Token(object):
 
     Unlike ``models.Token`` this class is not a sqlalchemy ORM class so it can
     be used after the request's db session has been committed or invalidated
-    without getting ``DetachedInstanceError``s from sqlalchemy.
+    without getting ``DetachedInstanceError``\ s from sqlalchemy.
 
     """
 

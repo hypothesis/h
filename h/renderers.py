@@ -13,7 +13,7 @@ class SVGRenderer(object):
     A renderer for SVG image files.
 
     A view callable can use this renderer and just return a string of SVG
-    (u"<svg> ... </svg>") for the body of the response:
+    (u"<svg> ... </svg>") for the body of the response::
 
         @view_config(renderer="svg", ...)
         def my_svg_image_view(request):

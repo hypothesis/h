@@ -187,7 +187,7 @@ def request_auth_client(request):
     :rtype: an AuthClient model
 
     :raises ClientUnauthorized: if the client does not have a valid Client ID
-    and Client Secret or is not allowed to create users in their authority.
+      and Client Secret or is not allowed to create users in their authority.
     """
     creds = basic_auth_creds(request)
     if creds is None:
