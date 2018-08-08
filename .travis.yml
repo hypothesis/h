@@ -55,6 +55,13 @@ matrix:
       script:
         make lint
 
+    # Check the docs build for warnings or errors.
+    - env: ACTION=check-docs
+      language: python
+      python: '3.6'
+      install: pip install tox
+      script:
+        make checkdocs
 
 cache:
   directories:
