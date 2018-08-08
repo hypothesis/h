@@ -21,6 +21,7 @@ from h.exceptions import ClientUnauthorized
 from h.models.auth_client import GrantType
 from h.models import AuthClient
 from h.schemas import ValidationError
+from h.services.user import UserService
 
 FakeUser = namedtuple('FakeUser', ['authority', 'admin', 'staff', 'groups'])
 FakeGroup = namedtuple('FakeGroup', ['pubid'])
@@ -207,7 +208,8 @@ class TestPrincipalsForAuthClient(object):
     def test_it_sets_auth_client_principal(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
 
-        assert "auth_client:{authority}".format(authority=auth_client.authority) in principals
+        assert "client:{client_id}@{authority}".format(client_id=auth_client.id,
+                                                       authority=auth_client.authority) in principals
 
     def test_it_sets_authority_principal(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
@@ -220,10 +222,37 @@ class TestPrincipalsForAuthClient(object):
         assert isinstance(principals, list)
 
 
-class TestCheckAuthClient(object):
+class TestPrincipalsForAuthClientUser(object):
+
+    def test_it_proxies_to_principals_for_user(self, principals_for_user, factories, auth_client):
+        user = factories.User()
+        util.principals_for_auth_client_user(user, auth_client)
+
+        principals_for_user.assert_called_once_with(user)
+
+    def test_it_proxies_to_principals_for_auth_client(self, principals_for_auth_client, factories, auth_client):
+        util.principals_for_auth_client_user(factories.User(), auth_client)
+
+        principals_for_auth_client.assert_called_once_with(auth_client)
+
+    def test_it_returns_combined_principals(self, factories, auth_client):
+        user = factories.User(authority=auth_client.authority)
+        group = factories.Group()
+        user.groups.append(group)
+
+        principals = util.principals_for_auth_client_user(user, auth_client)
+
+        assert 'group:{pubid}'.format(pubid=group.pubid) in principals
+        assert 'client:{client_id}@{authority}'.format(client_id=auth_client.id,
+                                                       authority=auth_client.authority) in principals
+        assert 'authority:{authority}'.format(authority=auth_client.authority)
+
+
+class TestVerifyAuthClient(object):
+
     def test_it_queries_for_auth_client_in_db(self, pyramid_request):
         pyramid_request.db.query.return_value.get.return_value = None
-        util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+        util.verify_auth_client(client_id='whatever', client_secret='random', db_session=pyramid_request.db)
 
         pyramid_request.db.query.assert_called_once_with(AuthClient)
         pyramid_request.db.query.return_value.get.assert_called_once_with('whatever')
@@ -236,7 +265,7 @@ class TestCheckAuthClient(object):
             orig=None)
 
         # does not raise
-        util.check_auth_client(username='malformed', password='random', request=pyramid_request)
+        util.verify_auth_client(client_id='malformed', client_secret='random', db_session=pyramid_request.db)
 
     def test_it_returns_None_if_client_id_malformed(self, pyramid_request):
         pyramid_request.db.query.return_value.get.side_effect = sa.exc.StatementError(
@@ -246,13 +275,13 @@ class TestCheckAuthClient(object):
             orig=None)
 
         # does not raise
-        principals = util.check_auth_client(username='malformed', password='random', request=pyramid_request)
+        principals = util.verify_auth_client(client_id='malformed', client_secret='random', db_session=pyramid_request.db)
 
         assert principals is None
 
     def test_it_returns_None_if_no_authclient_record_found_in_db(self, pyramid_request):
         pyramid_request.db.query.return_value.get.return_value = None
-        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+        principals = util.verify_auth_client(client_id='whatever', client_secret='random', db_session=pyramid_request.db)
 
         assert principals is None
 
@@ -260,7 +289,7 @@ class TestCheckAuthClient(object):
         insecure_auth_client = factories.AuthClient()
         pyramid_request.db.query.return_value.get.return_value = insecure_auth_client
 
-        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+        principals = util.verify_auth_client(client_id='whatever', client_secret='random', db_session=pyramid_request.db)
 
         assert insecure_auth_client.secret is None
         assert principals is None
@@ -270,7 +299,7 @@ class TestCheckAuthClient(object):
                                                        grant_type=GrantType.authorization_code)
         pyramid_request.db.query.return_value.get.return_value = auth_code_client
 
-        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+        principals = util.verify_auth_client(client_id='whatever', client_secret='random', db_session=pyramid_request.db)
 
         assert auth_code_client.grant_type == GrantType.authorization_code
         assert principals is None
@@ -278,7 +307,7 @@ class TestCheckAuthClient(object):
     def test_it_uses_key_hashing_on_client_secret_for_message_authentication(self, pyramid_request, hmac, auth_client):
         pyramid_request.db.query.return_value.get.return_value = auth_client
 
-        util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+        util.verify_auth_client(client_id='whatever', client_secret='random', db_session=pyramid_request.db)
 
         hmac.compare_digest.assert_called_once_with(auth_client.secret, 'random')
 
@@ -286,16 +315,9 @@ class TestCheckAuthClient(object):
         pyramid_request.db.query.return_value.get.return_value = auth_client
         hmac.compare_digest.return_value = False
 
-        principals = util.check_auth_client(username='whatever', password='random', request=pyramid_request)
+        principals = util.verify_auth_client(client_id='whatever', client_secret='random', db_session=pyramid_request.db)
 
         assert principals is None
-
-    def test_it_proxies_to_principals_for_auth_client_if_successful(self, pyramid_request, auth_client, hmac, principals_for_auth_client):
-        pyramid_request.db.query.return_value.get.return_value = auth_client
-
-        util.check_auth_client(username=auth_client.id, password=auth_client.secret, request=pyramid_request)
-
-        principals_for_auth_client.assert_called_once_with(auth_client)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, db_session):
@@ -305,10 +327,6 @@ class TestCheckAuthClient(object):
     @pytest.fixture
     def hmac(self, patch):
         return patch('h.auth.util.hmac')
-
-    @pytest.fixture
-    def principals_for_auth_client(self, patch):
-        return patch('h.auth.util.principals_for_auth_client')
 
 
 class TestRequestAuthClient(object):
@@ -372,15 +390,10 @@ class TestRequestAuthClient(object):
 
 @pytest.fixture
 def user_service(pyramid_config):
-    service = mock.Mock(spec_set=['fetch'])
+    service = mock.create_autospec(UserService, spec_set=True, instance=True)
     service.fetch.return_value = None
     pyramid_config.register_service(service, name='user')
     return service
-
-
-@pytest.fixture
-def principals_for_user(patch):
-    return patch('h.auth.util.principals_for_user')
 
 
 @pytest.fixture
@@ -399,3 +412,13 @@ def basic_auth_creds(patch):
 @pytest.fixture
 def valid_auth(basic_auth_creds, auth_client):
     basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
+
+
+@pytest.fixture
+def principals_for_user(patch):
+    return patch('h.auth.util.principals_for_user')
+
+
+@pytest.fixture
+def principals_for_auth_client(patch):
+    return patch('h.auth.util.principals_for_auth_client')
