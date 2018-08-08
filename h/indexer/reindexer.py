@@ -29,7 +29,7 @@ def reindex(session, es, request):
 
     new_index = configure_index(es)
     log.info('configured new index {}'.format(new_index))
-    setting_name = 'reindex.new_es6_index'
+    setting_name = 'reindex.new_index'
     if es.version < (2,):
         setting_name = 'reindex.new_index'
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from h.search.client import get_client, get_es6_client
+from h.search.client import get_client
 from h.search.config import init
 from h.search.connection import connect
 from h.search.core import Search
@@ -17,7 +17,6 @@ __all__ = (
     'TagsAggregation',
     'UsersAggregation',
     'get_client',
-    'get_es6_client',
     'init',
     'connect'
 )
@@ -26,8 +25,6 @@ __all__ = (
 def includeme(config):
     settings = config.registry.settings
 
-    # Connection to version 6.x of ES follows
-    # TODO The munging of these settings may change when settings refactoring complete
     kwargs = {}
     kwargs['max_retries'] = settings.get('es.client.max_retries', 3)
     kwargs['retry_on_timeout'] = settings.get('es.client.retry_on_timeout', False)
@@ -38,24 +35,13 @@ def includeme(config):
 
     connect(hosts=[settings['es.url']], **kwargs)
 
-    # Connection to old (ES1.5) follows
-    settings.setdefault('es.host', 'http://localhost:9200')
     settings.setdefault('es.index', 'hypothesis')
 
-    # Add a property to all requests for easy access to the elasticsearch 1.x
+    # Add a property to all requests for easy access to the elasticsearch 6.x
     # client. This can be used for direct or bulk access without having to
     # reread the settings.
     config.registry['es.client'] = get_client(settings)
     config.add_request_method(
         lambda r: r.registry['es.client'],
         name='es',
-        reify=True)
-
-    # Add a property to all requests for easy access to the elasticsearch 6.x
-    # client. This can be used for direct or bulk access without having to
-    # reread the settings.
-    config.registry['es6.client'] = get_es6_client(settings)
-    config.add_request_method(
-        lambda r: r.registry['es6.client'],
-        name='es6',
         reify=True)

@@ -125,7 +125,7 @@ class TestBuilder(object):
 
         q = builder.build({})
 
-        assert q["query"] == {"match_all": {}}
+        assert q["query"] == {'bool': {'filter': [], 'must': []}}
 
     def test_default_param_action(self):
         """Other params are added as "match" clauses."""
@@ -133,7 +133,10 @@ class TestBuilder(object):
 
         q = builder.build({"foo": "bar"})
 
-        assert q["query"] == {"bool": {"must": [{"match": {"foo": "bar"}}]}}
+        assert q["query"] == {
+            'bool': {'filter': [],
+                     'must': [{'match': {'foo': 'bar'}}]},
+        }
 
     def test_default_params_multidict(self):
         """Multiple params go into multiple "match" dicts."""
@@ -145,12 +148,9 @@ class TestBuilder(object):
         q = builder.build(params)
 
         assert q["query"] == {
-            "bool": {
-                "must": [
-                    {"match": {"user": "fred"}},
-                    {"match": {"user": "bob"}}
-                ]
-            }
+            'bool': {'filter': [],
+                     'must': [{'match': {'user': 'fred'}},
+                              {'match': {'user': 'bob'}}]},
         }
 
     def test_with_evil_arguments(self):
@@ -164,7 +164,7 @@ class TestBuilder(object):
 
         assert q["from"] == 0
         assert q["size"] == 20
-        assert q["query"] == {'match_all': {}}
+        assert q["query"] == {'bool': {'filter': [], 'must': []}}
 
     def test_passes_params_to_filters(self):
         testfilter = mock.Mock()
@@ -183,7 +183,7 @@ class TestBuilder(object):
 
         q = builder.build({})
 
-        assert q["query"] == {"match_all": {}}
+        assert q["query"] == {'bool': {'filter': [], 'must': []}}
 
     def test_filters_query_by_filter_results(self):
         testfilter = mock.Mock()
@@ -192,12 +192,9 @@ class TestBuilder(object):
         builder.append_filter(testfilter)
 
         q = builder.build({})
-
         assert q["query"] == {
-            "filtered": {
-                "filter": {"and": [{"term": {"giraffe": "nose"}}]},
-                "query": {"match_all": {}},
-            },
+            'bool': {'filter': [{'term': {'giraffe': 'nose'}}],
+                     'must': []},
         }
 
     def test_passes_params_to_matchers(self):
@@ -218,7 +215,8 @@ class TestBuilder(object):
         q = builder.build({})
 
         assert q["query"] == {
-            "bool": {"must": [{"match": {"giraffe": "nose"}}]},
+            'bool': {'filter': [],
+                     'must': [{'match': {'giraffe': 'nose'}}]},
         }
 
     def test_passes_params_to_aggregations(self):

@@ -124,7 +124,7 @@ class TestMakeIndexer(object):
 
         batch_indexer = index.BatchIndexer.return_value
         batch_indexer.index.assert_called_once_with([1, 2, 3])
-        index.BatchIndexer.assert_any_call(req.db, req.es6, req)
+        index.BatchIndexer.assert_any_call(req.db, req.es, req)
 
     def test_it_skips_indexing_when_no_ids_given(self, req, index):
         indexer = make_indexer(req)
@@ -136,7 +136,7 @@ class TestMakeIndexer(object):
     @pytest.fixture
     def req(self, pyramid_request):
         pyramid_request.tm = mock.MagicMock()
-        pyramid_request.es6 = mock.MagicMock()
+        pyramid_request.es = mock.MagicMock()
         return pyramid_request
 
     @pytest.fixture

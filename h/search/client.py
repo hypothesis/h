@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import certifi
-import elasticsearch1
 import elasticsearch
-from requests_aws4auth import AWS4Auth
 
 
 class Client(object):
@@ -73,27 +70,6 @@ def _get_client_settings(settings):
 
 def get_client(settings):
     """Return a client for the Elasticsearch index."""
-    host = settings['es.host']
-    index = settings['es.index']
-    kwargs = _get_client_settings(settings)
-    # N.B. this won't be necessary if we upgrade
-    # to elasticsearch>=5.0.0.
-    kwargs['ca_certs'] = certifi.where()
-    have_aws_creds = ('es.aws.access_key_id' in settings and
-                      'es.aws.region' in settings and
-                      'es.aws.secret_access_key' in settings)
-    if have_aws_creds:
-        auth = AWS4Auth(settings['es.aws.access_key_id'],
-                        settings['es.aws.secret_access_key'],
-                        settings['es.aws.region'],
-                        'es')
-        kwargs['http_auth'] = auth
-        kwargs['connection_class'] = elasticsearch1.RequestsHttpConnection
-    return Client(host, index, elasticsearch=elasticsearch1, **kwargs)
-
-
-def get_es6_client(settings):
-    """Return a client for the Elasticsearch 6 index."""
     host = settings['es.url']
     index = settings['es.index']
     kwargs = _get_client_settings(settings)

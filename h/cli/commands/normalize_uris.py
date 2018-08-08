@@ -125,7 +125,7 @@ def _normalize_annotations_window(session, window):
 
 
 def _reindex_annotations(request, ids):
-    indexer = index.BatchIndexer(request.db, request.es6, request)
+    indexer = index.BatchIndexer(request.db, request.es, request)
 
     for _ in range(2):
         ids = indexer.index(ids)

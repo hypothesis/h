@@ -42,7 +42,7 @@ def _init_db(settings):
 
 
 def _init_search(settings):
-    client = search.get_es6_client(settings)
+    client = search.get_client(settings)
 
     log.info("initializing ES6 search index")
     search.init(client)

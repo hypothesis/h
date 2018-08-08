@@ -7,14 +7,13 @@ import pytest
 
 from h import search
 
-ELASTICSEARCH_HOST = os.environ.get("ELASTICSEARCH_HOST", "http://localhost:9200")
 ELASTICSEARCH_INDEX = "hypothesis-test"
 ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9201")
 
 
 @pytest.fixture
-def es6_client():
-    client = _es6_client()
+def es_client():
+    client = _es_client()
     yield client
     client.conn.delete_by_query(index=client.index, body={"query": {"match_all": {}}},
                                 # This query occassionally fails with a version conflict.
@@ -38,16 +37,16 @@ def init_elasticsearch(request):
     Connect to the instance of Elasticsearch and initialize the index
     once per test session and delete the index after the test is completed.
     """
-    es6_client = _es6_client()
+    es_client = _es_client()
 
     def maybe_delete_index():
         """Delete the test index if it exists."""
-        if es6_client.conn.indices.exists(index=ELASTICSEARCH_INDEX):
+        if es_client.conn.indices.exists(index=ELASTICSEARCH_INDEX):
             # The delete operation must be done on a concrete index, not an alias
             # in ES6. See https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
-            concrete_indexes = es6_client.conn.indices.get(index=ELASTICSEARCH_INDEX)
+            concrete_indexes = es_client.conn.indices.get(index=ELASTICSEARCH_INDEX)
             for index in concrete_indexes:
-                es6_client.conn.indices.delete(index=index)
+                es_client.conn.indices.delete(index=index)
 
     # Delete the test search index at the end of the test run.
     request.addfinalizer(maybe_delete_index)
@@ -57,8 +56,8 @@ def init_elasticsearch(request):
     maybe_delete_index()
 
     # Initialize the test search index.
-    search.init(es6_client)
+    search.init(es_client)
 
 
-def _es6_client():
-    return search.get_es6_client({'es.url': ELASTICSEARCH_URL, 'es.index': ELASTICSEARCH_INDEX})
+def _es_client():
+    return search.get_client({'es.url': ELASTICSEARCH_URL, 'es.index': ELASTICSEARCH_INDEX})

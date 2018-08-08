@@ -41,12 +41,8 @@ def configure(environ=None, settings=None):
     settings_manager.set('es.client.max_retries', 'ELASTICSEARCH_CLIENT_MAX_RETRIES', type_=int)
     settings_manager.set('es.client.retry_on_timeout', 'ELASTICSEARCH_CLIENT_RETRY_ON_TIMEOUT', type_=asbool)
     settings_manager.set('es.client.timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type_=float)
-    settings_manager.set('es.host', 'ELASTICSEARCH_HOST', required=True)
     settings_manager.set('es.url', 'ELASTICSEARCH_URL', required=True),
     settings_manager.set('es.index', 'ELASTICSEARCH_INDEX')
-    settings_manager.set('es.aws.access_key_id', 'ELASTICSEARCH_AWS_ACCESS_KEY_ID')
-    settings_manager.set('es.aws.region', 'ELASTICSEARCH_AWS_REGION')
-    settings_manager.set('es.aws.secret_access_key', 'ELASTICSEARCH_AWS_SECRET_ACCESS_KEY')
     settings_manager.set('mail.default_sender', 'MAIL_DEFAULT_SENDER')
     settings_manager.set('mail.host', 'MAIL_HOST')
     settings_manager.set('mail.port', 'MAIL_PORT', type_=int)

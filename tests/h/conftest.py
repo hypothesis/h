@@ -24,7 +24,7 @@ from h import db
 from h import models
 from h.settings import database_url
 from h._compat import text_type
-from tests.common.fixtures import es6_client, es_connect  # noqa: F401
+from tests.common.fixtures import es_client, es_connect  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
 
 TEST_AUTHORITY = 'example.com'

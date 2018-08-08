@@ -6,7 +6,7 @@ import pytest
 
 import elasticsearch
 
-from h.search.client import get_es6_client
+from h.search.client import get_client
 from h.search.client import Client
 
 
@@ -42,12 +42,12 @@ class TestClient(object):
 
 class TestGetClient(object):
     def test_initializes_client_with_host(self, settings, patched_client):
-        get_es6_client(settings)
+        get_client(settings)
         args, _ = patched_client.call_args
         assert args[0] == 'search.svc'
 
     def test_initializes_client_with_index(self, settings, patched_client):
-        get_es6_client(settings)
+        get_client(settings)
         args, _ = patched_client.call_args
         assert args[1] == 'my-index'
 
@@ -63,7 +63,7 @@ class TestGetClient(object):
     ])
     def test_client_configuration(self, settings, patched_client, key, value, settingkey):
         settings[settingkey] = value
-        get_es6_client(settings)
+        get_client(settings)
 
         _, kwargs = patched_client.call_args
         assert kwargs[key] == value
@@ -71,7 +71,6 @@ class TestGetClient(object):
     @pytest.fixture
     def settings(self):
         return {
-            'es.host': 'search.svc',
             'es.url': 'search.svc',
             'es.index': 'my-index',
         }

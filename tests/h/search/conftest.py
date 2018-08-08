@@ -32,17 +32,17 @@ def Annotation(factories, index):
 
 
 @pytest.fixture
-def index(es6_client, pyramid_request):
+def index(es_client, pyramid_request):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:
-            h.search.index.index(es6_client, annotation, pyramid_request)
-        es6_client.conn.indices.refresh(index=es6_client.index)
+            h.search.index.index(es_client, annotation, pyramid_request)
+        es_client.conn.indices.refresh(index=es_client.index)
 
     return _index
 
 
 @pytest.fixture
-def pyramid_request(es6_client, pyramid_request):
-    pyramid_request.es6 = es6_client
+def pyramid_request(es_client, pyramid_request):
+    pyramid_request.es = es_client
     return pyramid_request
