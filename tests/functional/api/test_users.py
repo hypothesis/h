@@ -57,7 +57,6 @@ def user_payload():
 def auth_client(db_session, factories):
     auth_client = factories.ConfidentialAuthClient(authority='example.com',
                                                    grant_type=GrantType.client_credentials)
-    db_session.add(auth_client)
     db_session.commit()
     return auth_client
 
@@ -72,6 +71,5 @@ def auth_client_header(auth_client):
 @pytest.fixture
 def user(db_session, factories):
     user = factories.User(username="filip", authority="example.com")
-    db_session.add(user)
     db_session.commit()
     return user
