@@ -70,6 +70,22 @@ lint: .pydeps
 	flake8 tests
 	flake8 --select FI14 --exclude 'h/cli/*,tests/h/cli/*,h/util/uri.py,h/migrations/versions/*' h tests
 
+.PHONY: docs
+docs:
+	tox -e docs
+
+.PHONY: checkdocs
+checkdocs:
+	tox -e checkdocs
+
+.PHONY: docstrings
+docstrings:
+	tox -e docstrings
+
+.PHONY: checkdocstrings
+checkdocstrings:
+	tox -e checkdocstrings
+
 ################################################################################
 
 # Fake targets to aid with deps installation
