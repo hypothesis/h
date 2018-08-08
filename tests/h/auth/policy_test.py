@@ -225,20 +225,12 @@ class TestAPIAuthenticationPolicy(object):
         assert forgot == client_policy.forget.return_value
 
     @pytest.fixture
-    def AuthClientPolicy_(self, patch):
-        return patch('h.auth.policy.AuthClientPolicy')
+    def client_policy(self):
+        return mock.create_autospec(AuthClientPolicy, instance=True, spec_set=True)
 
     @pytest.fixture
-    def TokenAuthenticationPolicy_(self, patch):
-        return patch('h.auth.policy.TokenAuthenticationPolicy')
-
-    @pytest.fixture
-    def client_policy(self, AuthClientPolicy_):
-        return AuthClientPolicy_.return_value
-
-    @pytest.fixture
-    def user_policy(self, TokenAuthenticationPolicy_):
-        return TokenAuthenticationPolicy_.return_value
+    def user_policy(self):
+        return mock.create_autospec(TokenAuthenticationPolicy, instance=True, spec_set=True)
 
     @pytest.fixture
     def api_policy(self, client_policy, user_policy):
