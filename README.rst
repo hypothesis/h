@@ -15,6 +15,9 @@ h
    :alt: License badge
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
    :alt: Python version badge
+.. image:: https://readthedocs.org/projects/h/badge/?version=latest
+   :target: https://h.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 h is the web app that serves most of the https://hypothes.is/ website,
 including the web annotations API at https://hypothes.is/api/.
