@@ -117,34 +117,26 @@ def authority(request):
     return text_type(request.registry.settings.get('h.authority', request.domain))
 
 
-def check_auth_client(username, password, request):
+def verify_auth_client(client_id, client_secret, db_session):
     """
-    Return list of principals for the auth_client matching the username and
-    password or None if no matching auth_client
+    Return matching AuthClient or None
 
-    Validate the basic auth credentials from the request by matching them to
-    an auth_client record in the DB.
+    Attempt to retrieve the :py:class:`h.models.auth_client.AuthClient` record
+    indicated by ``client_id`` and ``client_secret`` and perform some validation
+    checks on the record.
 
-    This function is intended to be used as a ``check`` callback for
-    AuthenticationPolicy classes that extend
-    :py:class:`pyramid.authentication.BasicAuthAuthenticationPolicy`, such
-    as :py:class:`h.auth.policy.AuthClientPolicy`
+    Returns ``None`` if retrieval or any checks fail
 
-    :param username: username parsed out of Authorization header (Basic)
-    :param password: password parsed out of Authorization header (Basic)
-    :returns: additional principals for the auth_client or None
-    :rtype: list or None
+    :rtype: :py:class:`h.models.auth_client.AuthClient` or ``None``
     """
+
     # We fetch the client by its ID and then do a constant-time comparison of
     # the secret with that provided in the request.
     #
     # It is important not to include the secret as part of the SQL query
     # because the resulting code may be subject to a timing attack.
-    client_id = username
-    client_secret = password
-
     try:  # fetch matching AuthClient record for `client_id`
-        client = request.db.query(AuthClient).get(client_id)
+        client = db_session.query(AuthClient).get(client_id)
     except sa.exc.StatementError:  # query: client_id is malformed
         return None
     if client is None:  # no record returned from query
@@ -157,23 +149,40 @@ def check_auth_client(username, password, request):
     if not hmac.compare_digest(client.secret, client_secret):
         return None
 
-    return principals_for_auth_client(client)
+    return client
 
 
 def principals_for_auth_client(client):
     """
     Return the list of additional principals for an auth client
 
-    :type client: h.models.AuthClient
+    :type client: :py:class:`h.models.auth_client.AuthClient`
     :rtype: list
     """
 
     principals = set([])
 
-    principals.add('auth_client:{authority}'.format(authority=client.authority))
+    principals.add('client:{client_id}@{authority}'.format(client_id=client.id, authority=client.authority))
     principals.add('authority:{authority}'.format(authority=client.authority))
 
     return list(principals)
+
+
+def principals_for_auth_client_user(user, client):
+    """
+    Return a union of client and user principals for forwarded user
+
+    :type user: :py:class:`h.models.user.User`
+    :type client: :py:class:`h.models.auth_client.AuthClient`
+    :rtype: list
+    """
+    user_principals = principals_for_user(user)
+    client_principals = principals_for_auth_client(client)
+
+    all_principals = user_principals + client_principals
+    distinct_principals = list(set(all_principals))
+
+    return distinct_principals
 
 
 def request_auth_client(request):
