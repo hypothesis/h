@@ -35,6 +35,26 @@ class TestCreateGroup(object):
 
         assert res.status_code == 400
 
+    def test_it_returns_http_400_if_no_authenticated_user(self, app, auth_client_header):
+        group = {
+            'name': 'My Group'
+        }
+        res = app.post_json('/api/groups', group, headers=auth_client_header, expect_errors=True)
+
+        assert res.status_code == 400
+        assert res.json['reason'] == 'Request must have an authenticated user'
+
+    def test_it_allows_auth_client_with_forwarded_user(self, app, auth_client_header, user):
+        headers = auth_client_header
+        headers[native_str('X-Forwarded-User')] = native_str(user.userid)
+        group = {
+            'name': 'My Group'
+        }
+
+        res = app.post_json('/api/groups', group, headers=headers)
+
+        assert res.status_code == 200
+
 
 @pytest.mark.functional
 class TestAddMember(object):
@@ -90,27 +110,6 @@ class TestAddMember(object):
 
         assert res.status_code == 403
 
-    @pytest.fixture
-    def auth_client(self, db_session, factories):
-        auth_client = factories.ConfidentialAuthClient(authority='example.com',
-                                                       grant_type=GrantType.client_credentials)
-        db_session.add(auth_client)
-        db_session.commit()
-        return auth_client
-
-    @pytest.fixture
-    def auth_client_header(self, auth_client):
-        user_pass = "{client_id}:{secret}".format(client_id=auth_client.id, secret=auth_client.secret)
-        encoded = base64.standard_b64encode(user_pass.encode('utf-8'))
-        return {native_str('Authorization'): native_str("Basic {creds}".format(creds=encoded.decode('ascii')))}
-
-    @pytest.fixture
-    def user(self, db_session, factories):
-        user = factories.User()
-        db_session.add(user)
-        db_session.commit()
-        return user
-
 
 @pytest.mark.functional
 class TestRemoveMember(object):
@@ -127,6 +126,28 @@ class TestRemoveMember(object):
         # future version we should be able to make a GET request here for the
         # group information and check it 404s
         assert group_member not in group.members
+
+
+@pytest.fixture
+def user(db_session, factories):
+    user = factories.User(authority='example.com')
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
+def auth_client(db_session, factories):
+    auth_client = factories.ConfidentialAuthClient(authority='example.com',
+                                                   grant_type=GrantType.client_credentials)
+    db_session.commit()
+    return auth_client
+
+
+@pytest.fixture
+def auth_client_header(auth_client):
+    user_pass = "{client_id}:{secret}".format(client_id=auth_client.id, secret=auth_client.secret)
+    encoded = base64.standard_b64encode(user_pass.encode('utf-8'))
+    return {native_str('Authorization'): native_str("Basic {creds}".format(creds=encoded.decode('ascii')))}
 
 
 @pytest.fixture
