@@ -56,18 +56,25 @@ class APIAuthenticationPolicy(object):
 
     This policy delegates to :py:class:`~h.auth.TokenAuthenticationPolicy` and
     :py:class:`~h.auth.AuthClientPolicy`, always preferring Token when available
+
+    Initially, the ``client_policy`` will only be used to authenticate requests
+    that correspond to certain endpoint services.
     """
     def __init__(self, user_policy, client_policy):
         self._user_policy = user_policy
         self._client_policy = client_policy
 
     def authenticated_userid(self, request):
-        return (self._user_policy.authenticated_userid(request) or
-                self._client_policy.authenticated_userid(request))
+        user_authid = self._user_policy.authenticated_userid(request)
+        if user_authid is None and _is_client_request(request):
+            return self._client_policy.authenticated_userid(request)
+        return user_authid
 
     def unauthenticated_userid(self, request):
-        return (self._user_policy.unauthenticated_userid(request) or
-                self._client_policy.unauthenticated_userid(request))
+        user_unauth_id = self._user_policy.unauthenticated_userid(request)
+        if user_unauth_id is None and _is_client_request(request):
+            return self._client_policy.unauthenticated_userid(request)
+        return user_unauth_id
 
     def effective_principals(self, request):
         """
@@ -84,18 +91,22 @@ class APIAuthenticationPolicy(object):
         :rtype: list Containing at minimum :py:attr:`pyramid.security.Everyone`
         """
         user_principals = self._user_policy.effective_principals(request)
-        # If authentication via user_policy was not successful:
-        if Authenticated not in user_principals:
+        # If authentication via user_policy was not successful
+        if Authenticated not in user_principals and _is_client_request(request):
             return self._client_policy.effective_principals(request)
         return user_principals
 
     def remember(self, request, userid, **kw):
-        return (self._user_policy.remember(request, userid, **kw) or
-                self._client_policy.remember(request, userid, **kw))
+        remembered = self._user_policy.remember(request, userid, **kw)
+        if remembered == [] and _is_client_request(request):
+            return self._client_policy.remember(request, userid, **kw)
+        return remembered
 
     def forget(self, request):
-        return (self._user_policy.forget(request) or
-                self._client_policy.forget(request))
+        forgot = self._user_policy.forget(request)
+        if forgot == [] and _is_client_request(request):
+            return self._client_policy.forget(request)
+        return forgot
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
@@ -324,6 +335,20 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
 def _is_api_request(request):
     return (request.path.startswith('/api') and
             request.path not in ['/api/token', '/api/badge'])
+
+
+def _is_client_request(request):
+    """
+    Is client_auth authentication valid for the given request?
+
+    For initial rollout, authentication should be performed by
+    :py:class:`~h.auth.policy.AuthClientPolicy` only for requests
+    to the `POST /api/groups` endpoint.
+
+    This is intended to be temporary.
+    """
+    return (request.path.startswith('/api/groups') and
+            request.method == 'POST')
 
 
 def _is_ws_request(request):

@@ -237,6 +237,12 @@ class TestAPIAuthenticationPolicy(object):
         return APIAuthenticationPolicy(user_policy=user_policy,
                                         client_policy=client_policy)
 
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.path = '/api/groups'
+        pyramid_request.method = 'POST'
+        return pyramid_request
+
 
 class TestAuthClientAuthenticationPolicy(object):
 
