@@ -8,7 +8,10 @@ import logging
 from pyramid.authentication import RemoteUserAuthenticationPolicy
 import pyramid_authsanity
 
-from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
+from h.auth.policy import AuthenticationPolicy
+from h.auth.policy import APIAuthenticationPolicy
+from h.auth.policy import AuthClientPolicy
+from h.auth.policy import TokenAuthenticationPolicy
 from h.auth.util import authority, groupfinder
 from h.security import derive_key
 
@@ -22,9 +25,14 @@ log = logging.getLogger(__name__)
 PROXY_POLICY = RemoteUserAuthenticationPolicy(environ_key='HTTP_X_FORWARDED_USER',
                                               callback=groupfinder)
 TICKET_POLICY = pyramid_authsanity.AuthServicePolicy()
-TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
 
-DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
+TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
+AUTH_CLIENT_POLICY = AuthClientPolicy()
+
+API_POLICY = APIAuthenticationPolicy(user_policy=TOKEN_POLICY,
+                                     client_policy=AUTH_CLIENT_POLICY)
+
+DEFAULT_POLICY = AuthenticationPolicy(api_policy=API_POLICY,
                                       fallback_policy=TICKET_POLICY)
 WEBSOCKET_POLICY = TOKEN_POLICY
 
@@ -50,7 +58,7 @@ def includeme(config):
                  'warning will result in ALL DATA stored by this service '
                  'being available to ANYONE!')
 
-        DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
+        DEFAULT_POLICY = AuthenticationPolicy(api_policy=API_POLICY,
                                               fallback_policy=PROXY_POLICY)
         WEBSOCKET_POLICY = TOKEN_POLICY
 
