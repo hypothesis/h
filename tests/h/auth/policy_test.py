@@ -6,9 +6,14 @@ import pytest
 import base64
 
 from pyramid.interfaces import IAuthenticationPolicy
+from pyramid.security import (
+    Everyone,
+    Authenticated
+)
 
 from h.auth.policy import AuthenticationPolicy
 from h.auth.policy import TokenAuthenticationPolicy
+from h.auth.policy import APIAuthenticationPolicy
 from h.auth.policy import AuthClientPolicy
 
 from h.services.user import UserService
@@ -111,6 +116,126 @@ class TestAuthenticationPolicy(object):
 
         self.api_policy.forget.assert_called_once_with(api_request)
         assert result == self.api_policy.forget.return_value
+
+
+class TestAPIAuthenticationPolicy(object):
+
+    def test_authenticated_userid_proxies_to_user_policy_first(self,
+                                                               pyramid_request,
+                                                               api_policy,
+                                                               user_policy,
+                                                               client_policy):
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        user_policy.authenticated_userid.assert_called_once_with(pyramid_request)
+        assert client_policy.authenticated_userid.call_count == 0
+        assert userid == user_policy.authenticated_userid.return_value
+
+    def test_authenticated_userid_proxies_to_client_policy_if_user_fails(self,
+                                                                         pyramid_request,
+                                                                         api_policy,
+                                                                         user_policy,
+                                                                         client_policy):
+        user_policy.authenticated_userid.return_value = None
+
+        userid = api_policy.authenticated_userid(pyramid_request)
+
+        user_policy.authenticated_userid.assert_called_once_with(pyramid_request)
+        client_policy.authenticated_userid.assert_called_once_with(pyramid_request)
+        assert userid == client_policy.authenticated_userid.return_value
+
+    def test_unauthenticated_userid_proxies_to_user_policy_first(self,
+                                                                 pyramid_request,
+                                                                 api_policy,
+                                                                 user_policy,
+                                                                 client_policy):
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        user_policy.unauthenticated_userid.assert_called_once_with(pyramid_request)
+        assert client_policy.unauthenticated_userid.call_count == 0
+        assert userid == user_policy.unauthenticated_userid.return_value
+
+    def test_unauthenticated_userid_proxies_to_client_policy_if_user_fails(self,
+                                                                           pyramid_request,
+                                                                           api_policy,
+                                                                           user_policy,
+                                                                           client_policy):
+        user_policy.unauthenticated_userid.return_value = None
+
+        userid = api_policy.unauthenticated_userid(pyramid_request)
+
+        user_policy.unauthenticated_userid.assert_called_once_with(pyramid_request)
+        client_policy.unauthenticated_userid.assert_called_once_with(pyramid_request)
+        assert userid == client_policy.unauthenticated_userid.return_value
+
+    def test_effective_principals_proxies_to_user_policy_first(self,
+                                                               pyramid_request,
+                                                               api_policy,
+                                                               user_policy,
+                                                               client_policy):
+        user_policy.effective_principals.return_value = [Everyone, Authenticated]
+
+        principals = api_policy.effective_principals(pyramid_request)
+
+        user_policy.effective_principals.assert_called_once_with(pyramid_request)
+        assert client_policy.effective_principals.call_count == 0
+        assert principals == user_policy.effective_principals.return_value
+
+    def test_effective_principals_proxies_to_client_if_auth_principal_missing(self,
+                                                                              pyramid_request,
+                                                                              api_policy,
+                                                                              user_policy,
+                                                                              client_policy):
+        user_policy.effective_principals.return_value = [Everyone]
+
+        principals = api_policy.effective_principals(pyramid_request)
+
+        user_policy.effective_principals.assert_called_once_with(pyramid_request)
+        client_policy.effective_principals.assert_called_once_with(pyramid_request)
+        assert principals == client_policy.effective_principals.return_value
+
+    def test_remember_proxies_to_user_policy_first(self, pyramid_request, api_policy, user_policy):
+        remembered = api_policy.remember(pyramid_request, 'acct:foo@bar.com')
+
+        user_policy.remember.assert_called_once_with(pyramid_request, 'acct:foo@bar.com')
+        assert remembered == user_policy.remember.return_value
+
+    def test_remember_proxies_to_client_policy_second(self, pyramid_request, api_policy, user_policy, client_policy):
+        user_policy.remember.return_value = []
+
+        remembered = api_policy.remember(pyramid_request, 'acct:foo@bar.com')
+
+        user_policy.remember.assert_called_once_with(pyramid_request, 'acct:foo@bar.com')
+        client_policy.remember.assert_called_once_with(pyramid_request, 'acct:foo@bar.com')
+        assert remembered == client_policy.remember.return_value
+
+    def test_forget_proxies_to_user_policy_first(self, pyramid_request, api_policy, user_policy):
+        forgot = api_policy.forget(pyramid_request)
+
+        user_policy.forget.assert_called_once_with(pyramid_request)
+        assert forgot == user_policy.forget.return_value
+
+    def test_forget_proxies_to_client_policy_second(self, pyramid_request, api_policy, user_policy, client_policy):
+        user_policy.forget.return_value = []
+
+        forgot = api_policy.forget(pyramid_request)
+
+        user_policy.forget.assert_called_once_with(pyramid_request)
+        client_policy.forget.assert_called_once_with(pyramid_request)
+        assert forgot == client_policy.forget.return_value
+
+    @pytest.fixture
+    def client_policy(self):
+        return mock.create_autospec(AuthClientPolicy, instance=True, spec_set=True)
+
+    @pytest.fixture
+    def user_policy(self):
+        return mock.create_autospec(TokenAuthenticationPolicy, instance=True, spec_set=True)
+
+    @pytest.fixture
+    def api_policy(self, client_policy, user_policy):
+        return APIAuthenticationPolicy(user_policy=user_policy,
+                                        client_policy=client_policy)
 
 
 class TestAuthClientAuthenticationPolicy(object):

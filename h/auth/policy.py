@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from pyramid import interfaces
 from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.authentication import CallbackAuthenticationPolicy
+from pyramid.security import Authenticated
 from zope import interface
 
 from h.auth import util
@@ -40,6 +41,61 @@ class AuthenticationPolicy(object):
         if _is_api_request(request):
             return self.api_policy.forget(request)
         return self.fallback_policy.forget(request)
+
+
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class APIAuthenticationPolicy(object):
+    """
+    An authentication policy for Hypothesis API endpoints
+
+    Two types of authentication apply to Hypothesis API endpoints:
+
+    * Authentication for a single user using Token authentication
+    * Authentication for an auth_client, either as the client itself or
+      "on behalf of" a user within that client's authority
+
+    This policy delegates to :py:class:`~h.auth.TokenAuthenticationPolicy` and
+    :py:class:`~h.auth.AuthClientPolicy`, always preferring Token when available
+    """
+    def __init__(self, user_policy, client_policy):
+        self._user_policy = user_policy
+        self._client_policy = client_policy
+
+    def authenticated_userid(self, request):
+        return (self._user_policy.authenticated_userid(request) or
+                self._client_policy.authenticated_userid(request))
+
+    def unauthenticated_userid(self, request):
+        return (self._user_policy.unauthenticated_userid(request) or
+                self._client_policy.unauthenticated_userid(request))
+
+    def effective_principals(self, request):
+        """
+        Return the request's effective principals
+
+        The ``effective_principals`` method of classes that implement
+        Pyramid's Authentication Interface always returns at least one principal:
+        :py:attr:`pyramid.security.Everyone`
+
+        The absence of :py:attr:`pyramid.security.Authenticated` in returned
+        principals means that authentication was not successful on this request
+        using the given policy.
+
+        :rtype: list Containing at minimum :py:attr:`pyramid.security.Everyone`
+        """
+        user_principals = self._user_policy.effective_principals(request)
+        # If authentication via user_policy was not successful:
+        if Authenticated not in user_principals:
+            return self._client_policy.effective_principals(request)
+        return user_principals
+
+    def remember(self, request, userid, **kw):
+        return (self._user_policy.remember(request, userid, **kw) or
+                self._client_policy.remember(request, userid, **kw))
+
+    def forget(self, request):
+        return (self._user_policy.forget(request) or
+                self._client_policy.forget(request))
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
