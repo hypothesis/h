@@ -5,6 +5,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 
 from elasticsearch.exceptions import ConnectionTimeout
+import elasticsearch_dsl
 
 from h.search import query
 
@@ -34,14 +35,25 @@ class Search(object):
     :type stats: statsd.client.StatsClient
     """
     def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
-        self.request = request
         self.es = request.es
         self.separate_replies = separate_replies
         self.stats = stats
         self._replies_limit = _replies_limit
-
-        self.builder = self._default_querybuilder(request, self.es)
-        self.reply_builder = self._default_querybuilder(request, self.es)
+        # Order matters! The KeyValueMatcher must be run last,
+        # after all other modifiers have popped off the params.
+        self._modifiers = [query.Sorter(),
+                           query.Limiter(),
+                           query.DeletedFilter(),
+                           query.AuthFilter(request),
+                           query.UriFilter(request),
+                           query.GroupFilter(),
+                           query.GroupAuthFilter(request),
+                           query.UserFilter(),
+                           query.NipsaFilter(request),
+                           query.AnyMatcher(),
+                           query.TagsMatcher(),
+                           query.KeyValueMatcher()]
+        self._aggregations = []
 
     def run(self, params):
         """
@@ -59,51 +71,67 @@ class Search(object):
         return SearchResult(total, annotation_ids, reply_ids, aggregations)
 
     def clear(self):
-        """Clear search filters, aggregators, and matchers."""
-        self.builder = query.Builder(es_version=self.es.version)
-        self.reply_builder = query.Builder(es_version=self.es.version)
+        """Clear search modifiers, aggregators, and matchers."""
+        self._modifiers = [query.Sorter()]
+        self._aggregations = []
 
-    def append_filter(self, filter_):
-        """Append a search filter to the annotation and reply query."""
-        self.builder.append_filter(filter_)
-        self.reply_builder.append_filter(filter_)
-
-    def append_matcher(self, matcher):
-        """Append a search matcher to the annotation and reply query."""
-        self.builder.append_matcher(matcher)
-        self.reply_builder.append_matcher(matcher)
+    def append_modifier(self, modifier):
+        """Append a search modifier, matcher, etc to the search query."""
+        # Note we must insert any new modifier at the begining of the list
+        # since the KeyValueFilter must always be run after all the other
+        # modifiers.
+        self._modifiers.insert(0, modifier)
 
     def append_aggregation(self, aggregation):
-        self.builder.append_aggregation(aggregation)
+        """Append an aggregation to the search query."""
+        self._aggregations.append(aggregation)
 
-    def _search_annotations(self, params):
-        if self.separate_replies:
-            self.builder.append_filter(query.TopLevelAnnotationsFilter())
+    def _search(self, modifiers, aggregations, params):
+        """
+        Applies the modifiers, aggregations, and executes the search.
+        """
+        # Don't return any fields, just the metadata so set _source=False.
+        search = elasticsearch_dsl.Search(
+            using=self.es.conn, index=self.es.index).source(False)
+
+        for agg in aggregations:
+            agg(search, params)
+        for qual in modifiers:
+            search = qual(search, params)
 
         response = None
         with self._instrument():
-            response = self.es.conn.search(index=self.es.index,
-                                           doc_type=self.es.mapping_type,
-                                           _source=False,
-                                           body=self.builder.build(params))
+            response = search.execute()
+
+        return response
+
+    def _search_annotations(self, params):
+        # If seperate_replies is True, don't return any replies to annotations.
+        modifiers = self._modifiers
+        if self.separate_replies:
+            modifiers = [query.TopLevelAnnotationsFilter()] + modifiers
+
+        response = self._search(modifiers,
+                                self._aggregations,
+                                params)
+
         total = response['hits']['total']
         annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
-        aggregations = self._parse_aggregation_results(response.get('aggregations', None))
+        aggregations = self._parse_aggregation_results(response.aggregations)
         return (total, annotation_ids, aggregations)
 
     def _search_replies(self, annotation_ids):
         if not self.separate_replies:
             return []
 
-        self.reply_builder.append_matcher(query.RepliesMatcher(annotation_ids))
-
-        response = None
-        with self._instrument():
-            response = self.es.conn.search(
-                index=self.es.index,
-                doc_type=self.es.mapping_type,
-                _source=False,
-                body=self.reply_builder.build({'limit': self._replies_limit}))
+        # The only difference between a search for annotations and a search for
+        # replies to annotations is the RepliesMatcher and the params passed to
+        # the modifiers.
+        response = self._search(
+            [query.RepliesMatcher(annotation_ids)] + self._modifiers,
+            [],  # Aggregations aren't used in replies.
+            {'limit': self._replies_limit},
+        )
 
         if len(response['hits']['hits']) < response['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "
@@ -118,14 +146,8 @@ class Search(object):
             return {}
 
         results = {}
-        for key, result in aggregations.items():
-            for agg in self.builder.aggregations:
-                if key != agg.key:
-                    continue
-
-                results[key] = agg.parse_result(result)
-                break
-
+        for agg in self._aggregations:
+            results[agg.name] = agg.parse_result(aggregations)
         return results
 
     @contextmanager
@@ -148,17 +170,3 @@ class Search(object):
         finally:
             timer.stop()
             s.send()
-
-    @staticmethod
-    def _default_querybuilder(request, es):
-        builder = query.Builder(es_version=es.version)
-        builder.append_filter(query.DeletedFilter())
-        builder.append_filter(query.AuthFilter(request))
-        builder.append_filter(query.UriFilter(request))
-        builder.append_filter(query.GroupFilter())
-        builder.append_filter(query.GroupAuthFilter(request))
-        builder.append_filter(query.UserFilter())
-        builder.append_filter(query.NipsaFilter(request))
-        builder.append_matcher(query.AnyMatcher())
-        builder.append_matcher(query.TagsMatcher())
-        return builder

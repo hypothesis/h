@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import datetime
 import pytest
 import webob
 import mock
@@ -18,246 +17,6 @@ LIMIT_MAX = query.LIMIT_MAX
 OFFSET_MAX = query.OFFSET_MAX
 
 
-class TestBuilder(object):
-    @pytest.mark.parametrize('offset,from_', [
-        # defaults to OFFSET_DEFAULT
-        (MISSING, OFFSET_DEFAULT),
-        # straightforward pass-through
-        (7, 7),
-        (42, 42),
-        # string values should be converted
-        ("23", 23),
-        ("82", 82),
-        # invalid values should be ignored and the default should be returned
-        ("foo",  OFFSET_DEFAULT),
-        ("",     OFFSET_DEFAULT),
-        ("   ",  OFFSET_DEFAULT),
-        ("-23",  OFFSET_DEFAULT),
-        ("32.7", OFFSET_DEFAULT),
-        ("9801", OFFSET_MAX),
-    ])
-    def test_offset(self, offset, from_):
-        builder = query.Builder(ES_VERSION)
-
-        if offset is MISSING:
-            q = builder.build({})
-        else:
-            q = builder.build({"offset": offset})
-
-        assert q["from"] == from_
-
-    @given(st.text())
-    @pytest.mark.fuzz
-    def test_limit_output_within_bounds(self, text):
-        """Given any string input, output should be in the allowed range."""
-        builder = query.Builder(ES_VERSION)
-
-        q = builder.build({"limit": text})
-
-        assert isinstance(q["size"], int)
-        assert 0 <= q["size"] <= LIMIT_MAX
-
-    @given(st.integers())
-    @pytest.mark.fuzz
-    def test_limit_output_within_bounds_int_input(self, lim):
-        """Given any integer input, output should be in the allowed range."""
-        builder = query.Builder(ES_VERSION)
-
-        q = builder.build({"limit": str(lim)})
-
-        assert isinstance(q["size"], int)
-        assert 0 <= q["size"] <= LIMIT_MAX
-
-    @given(st.integers(min_value=0, max_value=LIMIT_MAX))
-    @pytest.mark.fuzz
-    def test_limit_matches_input(self, lim):
-        """Given an integer in the allowed range, it should be passed through."""
-        builder = query.Builder(ES_VERSION)
-
-        q = builder.build({"limit": str(lim)})
-
-        assert q["size"] == lim
-
-    def test_limit_missing(self):
-        builder = query.Builder(ES_VERSION)
-
-        q = builder.build({})
-
-        assert q["size"] == LIMIT_DEFAULT
-
-    def test_defaults_to_match_all(self):
-        """If no query params are given a "match_all": {} query is returned."""
-        builder = query.Builder(ES_VERSION)
-
-        q = builder.build({})
-
-        assert q["query"] == {'bool': {'filter': [], 'must': []}}
-
-    def test_unknown_param_is_added_as_match_clause(self):
-        builder = query.Builder(ES_VERSION)
-
-        q = builder.build({"foo": "bar"})
-
-        assert q["query"] == {
-            'bool': {'filter': [],
-                     'must': [{'match': {'foo': 'bar'}}]},
-        }
-
-    def test_unknown_params_are_added_as_match_clauses(self):
-        builder = query.Builder(ES_VERSION)
-        params = webob.multidict.MultiDict()
-        params.add("user", "fred")
-        params.add("user", "bob")
-
-        q = builder.build(params)
-
-        assert q["query"] == {
-            'bool': {'filter': [],
-                     'must': [{'match': {'user': 'fred'}},
-                              {'match': {'user': 'bob'}}]},
-        }
-
-    def test_with_evil_arguments(self):
-        builder = query.Builder(ES_VERSION)
-        params = {
-            "offset": "3foo",
-            "limit": '\' drop table annotations'
-        }
-
-        q = builder.build(params)
-
-        assert q["from"] == 0
-        assert q["size"] == 20
-        assert q["query"] == {'bool': {'filter': [], 'must': []}}
-
-    def test_passes_params_to_filters(self):
-        testfilter = mock.Mock()
-        builder = query.Builder(ES_VERSION)
-        builder.append_filter(testfilter)
-
-        builder.build({"foo": "bar"})
-
-        testfilter.assert_called_with({"foo": "bar"})
-
-    def test_ignores_filters_returning_none(self):
-        testfilter = mock.Mock()
-        testfilter.return_value = None
-        builder = query.Builder(ES_VERSION)
-        builder.append_filter(testfilter)
-
-        q = builder.build({})
-
-        assert q["query"] == {'bool': {'filter': [], 'must': []}}
-
-    def test_filters_query_by_filter_results(self):
-        testfilter = mock.Mock()
-        testfilter.return_value = {"term": {"giraffe": "nose"}}
-        builder = query.Builder(ES_VERSION)
-        builder.append_filter(testfilter)
-
-        q = builder.build({})
-        assert q["query"] == {
-            'bool': {'filter': [{'term': {'giraffe': 'nose'}}],
-                     'must': []},
-        }
-
-    def test_passes_params_to_matchers(self):
-        testmatcher = mock.Mock()
-        builder = query.Builder(ES_VERSION)
-        builder.append_matcher(testmatcher)
-
-        builder.build({"foo": "bar"})
-
-        testmatcher.assert_called_with({"foo": "bar"})
-
-    def test_adds_matchers_to_query(self):
-        testmatcher = mock.Mock()
-        testmatcher.return_value = {"match": {"giraffe": "nose"}}
-        builder = query.Builder(ES_VERSION)
-        builder.append_matcher(testmatcher)
-
-        q = builder.build({})
-
-        assert q["query"] == {
-            'bool': {'filter': [],
-                     'must': [{'match': {'giraffe': 'nose'}}]},
-        }
-
-    def test_passes_params_to_aggregations(self):
-        testaggregation = mock.Mock()
-        builder = query.Builder(ES_VERSION)
-        builder.append_aggregation(testaggregation)
-
-        builder.build({"foo": "bar"})
-
-        testaggregation.assert_called_with({"foo": "bar"})
-
-    def test_adds_aggregations_to_query(self):
-        testaggregation = mock.Mock(key="foobar")
-        testaggregation.return_value = {"terms": {"field": "foo"}}
-        builder = query.Builder(ES_VERSION)
-        builder.append_aggregation(testaggregation)
-
-        q = builder.build({})
-
-        assert q["aggs"] == {
-            "foobar": {"terms": {"field": "foo"}}
-        }
-
-    @pytest.mark.parametrize("sort_key,order,expected_order", [
-        # Sort supports "updated" and "created" fields.
-        ("updated", "desc", [1, 0, 2]),
-        ("updated", "asc", [2, 0, 1]),
-        ("created", "desc", [2, 0, 1]),
-        ("created", "asc", [1, 0, 2]),
-        ("group", "asc", [2, 0, 1]),
-        ("id", "asc", [0, 2, 1]),
-        ("user", "asc", [2, 0, 1]),
-
-        # Default sort order should be descending.
-        ("updated", None, [1, 0, 2]),
-
-        # Default sort field should be "updated".
-        (None, "asc", [2, 0, 1]),
-    ])
-    def test_it_sorts_annotations(self, Annotation, search, sort_key, order, expected_order):
-        dt = datetime.datetime
-
-        # nb. Test annotations have a different ordering for updated vs created
-        # and creation order is different than updated/created asc/desc.
-        ann_ids = [Annotation(
-                    updated=dt(2017, 1, 1),
-                    groupid="12345",
-                    userid="acct:foo@auth1",
-                    id="1",
-                    created=dt(2017, 1, 1)).id,
-                   Annotation(
-                    updated=dt(2018, 1, 1),
-                    groupid="12347",
-                    userid="acct:foo@auth2",
-                    id="9",
-                    created=dt(2016, 1, 1)).id,
-                   Annotation(
-                    updated=dt(2016, 1, 1),
-                    groupid="12342",
-                    userid="acct:boo@auth1",
-                    id="2",
-                    created=dt(2018, 1, 1)).id]
-
-        params = {}
-        if sort_key:
-            params["sort"] = sort_key
-        if order:
-            params["order"] = order
-        result = search.run(params)
-
-        actual_order = [ann_ids.index(id_) for id_ in result.annotation_ids]
-        assert actual_order == expected_order
-
-    def test_it_ignores_unknown_sort_fields(self, search):
-        search.run({"sort": "no_such_field"})
-
-
 class TestTopLevelAnnotationsFilter(object):
 
     def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, search):
@@ -270,7 +29,7 @@ class TestTopLevelAnnotationsFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.TopLevelAnnotationsFilter())
+        search.append_qualifier(query.TopLevelAnnotationsFilter())
         return search
 
 
@@ -288,7 +47,7 @@ class TestAuthorityFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.AuthorityFilter("auth1"))
+        search.append_qualifier(query.AuthorityFilter("auth1"))
         return search
 
 
@@ -334,7 +93,7 @@ class TestAuthFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_filter(query.AuthFilter(pyramid_request))
+        search.append_qualifier(query.AuthFilter(pyramid_request))
         return search
 
 
@@ -351,7 +110,7 @@ class TestGroupFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.GroupFilter())
+        search.append_qualifier(query.GroupFilter())
         return search
 
     @pytest.fixture
@@ -386,7 +145,7 @@ class TestGroupAuthFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_filter(query.GroupAuthFilter(pyramid_request))
+        search.append_qualifier(query.GroupAuthFilter(pyramid_request))
         return search
 
 
@@ -428,7 +187,7 @@ class TestUserFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.UserFilter())
+        search.append_qualifier(query.UserFilter())
         return search
 
 
@@ -510,7 +269,7 @@ class TestUriFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_filter(query.UriFilter(pyramid_request))
+        search.append_qualifier(query.UriFilter(pyramid_request))
         return search
 
     @pytest.fixture
@@ -520,13 +279,13 @@ class TestUriFilter(object):
 
 class TestDeletedFilter(object):
 
-    def test_excludes_deleted_annotations(self, search, Annotation):
+    def test_excludes_deleted_annotations(self, search, es_client, Annotation):
         deleted_ids = [Annotation(deleted=True).id]
         not_deleted_ids = [Annotation(deleted=False).id]
 
         # Deleted annotations need to be marked in the index using `h.search.index.delete`.
         for id_ in deleted_ids:
-            index.delete(search.es, id_, refresh=True)
+            index.delete(es_client, id_, refresh=True)
 
         result = search.run({})
 
@@ -534,7 +293,7 @@ class TestDeletedFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.DeletedFilter())
+        search.append_qualifier(query.DeletedFilter())
         return search
 
 
@@ -545,7 +304,7 @@ class TestNipsaFilter(object):
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = user
-        search.append_filter(query.NipsaFilter(pyramid_request))
+        search.append_qualifier(query.NipsaFilter(pyramid_request))
         Annotation(userid=banned_user.userid)
         expected_ids = [Annotation(userid=user.userid).id]
 
@@ -557,7 +316,7 @@ class TestNipsaFilter(object):
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = banned_user
-        search.append_filter(query.NipsaFilter(pyramid_request))
+        search.append_qualifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(userid=banned_user.userid).id]
 
         result = search.run({})
@@ -570,7 +329,7 @@ class TestNipsaFilter(object):
     ):
         pyramid_request.user = user
         group_service.groupids_created_by.return_value = ["created_by_banneduser"]
-        search.append_filter(query.NipsaFilter(pyramid_request))
+        search.append_qualifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(groupid="created_by_banneduser",
                                    userid=banned_user.userid).id]
 
@@ -665,7 +424,7 @@ class TestAnyMatcher(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_matcher(query.AnyMatcher())
+        search.append_qualifier(query.AnyMatcher())
         return search
 
     @pytest.fixture
@@ -723,7 +482,7 @@ class TestTagsMatcher(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_matcher(query.TagsMatcher())
+        search.append_qualifier(query.TagsMatcher())
         return search
 
 
@@ -744,7 +503,7 @@ class TestRepliesMatcher(object):
         expected_reply_ids = [reply1.id, reply2.id, reply3.id]
 
         ann_ids = [ann1.id, ann2.id]
-        search.append_matcher(query.RepliesMatcher(ann_ids))
+        search.append_qualifier(query.RepliesMatcher(ann_ids))
         result = search.run({})
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
@@ -758,7 +517,7 @@ class TestRepliesMatcher(object):
         expected_reply_ids = [reply1.id, reply2.id]
 
         ann_ids = [ann1.id]
-        search.append_matcher(query.RepliesMatcher(ann_ids))
+        search.append_qualifier(query.RepliesMatcher(ann_ids))
         result = search.run({})
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
@@ -838,12 +597,6 @@ class TestUsersAggregation(object):
         assert len(users_results) == bucket_limit
         assert count_pb == 3
         assert count_pc == 2
-
-
-@pytest.fixture
-def pyramid_request(request, pyramid_request, es_client):
-    pyramid_request.es = es_client
-    return pyramid_request
 
 
 @pytest.fixture
