@@ -110,11 +110,11 @@ Installing the services
 h requires the following external services:
 
 - PostgreSQL_ 9.4+
-- Elasticsearch_ v1.5 or 1.6, with the `Elasticsearch ICU Analysis`_ plugin
+- Elasticsearch_ v6, with the `Elasticsearch ICU Analysis`_ plugin
 - RabbitMQ_ v3.5+
 
 .. _PostgreSQL: http://www.postgresql.org/
-.. _Elasticsearch: http://www.elasticsearch.org/
+.. _Elasticsearch: https://www.elastic.co/
 .. _Elasticsearch ICU Analysis: https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-icu.html
 .. _RabbitMQ: https://rabbitmq.com/
 
