@@ -169,6 +169,14 @@ class TestGroupContext(object):
 
         assert isinstance(group_context.organization, OrganizationContext)
 
+    def test_it_returns_None_for_missing_organization_relation(self, factories, pyramid_request):
+        group = factories.Group()
+        group.organization = None
+
+        group_context = GroupContext(group, pyramid_request)
+
+        assert group_context.organization is None
+
 
 @pytest.mark.usefixtures('organization_routes')
 class TestOrganizationContext(object):

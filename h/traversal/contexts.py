@@ -123,4 +123,6 @@ class GroupContext(object):
 
     @property
     def organization(self):
-        return OrganizationContext(self.group.organization, self.request)
+        if self.group.organization is not None:
+            return OrganizationContext(self.group.organization, self.request)
+        return None
