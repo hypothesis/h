@@ -42,8 +42,10 @@
               </a>
             </td>
             <td>
+            {% if group.organization %}
               {% set org_url = request.route_url('admin.organizations_edit', pubid=group.organization.pubid) %}
               <a href="{{ org_url }}">{{ group.organization.name }}</a>
+            {% endif %}
             </td>
             <td>
               {% if group.creator %}
