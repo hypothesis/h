@@ -16,9 +16,6 @@ node {
         postgres = docker.image('postgres:9.4').run('-P -e POSTGRES_DB=htest')
         databaseUrl = "postgresql://postgres@${hostIp}:${containerPort(postgres, 5432)}/htest"
 
-        elasticsearch_old = docker.image('nickstenning/elasticsearch-icu').run('-P', "-Des.cluster.name=${currentBuild.displayName}")
-        elasticsearchHost_old = "http://${hostIp}:${containerPort(elasticsearch_old, 9200)}"
-
         elasticsearch = docker.image('hypothesis/elasticsearch').run('-P -e "discovery.type=single-node"')
         elasticsearchHost = "http://${hostIp}:${containerPort(elasticsearch, 9200)}"
 
@@ -44,7 +41,6 @@ node {
         } finally {
             rabbit.stop()
             elasticsearch.stop()
-            elasticsearch_old.stop()
             postgres.stop()
         }
     }

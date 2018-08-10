@@ -9,7 +9,6 @@ matrix:
       addons:
         postgresql: "9.4"
       before_install:
-        - ./scripts/elasticsearch-old.sh
         - ./scripts/elasticsearch.sh
       install: pip install tox
       before_script: createdb htest
@@ -24,7 +23,6 @@ matrix:
       addons:
         postgresql: '9.4'
       before_install:
-        - ./scripts/elasticsearch-old.sh
         - ./scripts/elasticsearch.sh
       install: pip install tox
       before_script: createdb htest
