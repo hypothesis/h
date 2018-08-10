@@ -261,7 +261,7 @@ def nipsa_filter(group_service, user=None):
     """Return an Elasticsearch filter for filtering out NIPSA'd annotations.
 
     The returned filter is suitable for inserting into an Es query dict.
-    For example:
+    For example::
 
         query = {
             "query": {

@@ -90,7 +90,7 @@ def add_member(group, request):
     """Add a member to a given group.
 
     :raises HTTPNotFound: if the user is not found or if the use and group
-    authorities don't match.
+      authorities don't match.
     """
     client = request_auth_client(request)
 

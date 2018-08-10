@@ -47,13 +47,13 @@ The important parts of the ``h`` application can be broken down into:
 
 Models
     SQLAlchemy_ models representing the data objects that live in our database.
-    These live in :py:mod:`h.models`.
+    These live in ``h.models``.
 
 Views (and templates)
     Views are code that is called in response to a particular request. Templates
     can be used to render the output of a particular view, typically as HTML.
 
-    With a few exceptions, views live in :py:mod:`h.views`, and templates live
+    With a few exceptions, views live in ``h.views``, and templates live
     in the ``h/templates/`` directory.
 
 Services
@@ -65,17 +65,17 @@ Services
     objects with behaviour and (optionally) state, which can be retrieved from
     the ``request`` object.
 
-    Services live in :py:mod:`h.services`.
+    Services live in ``h.services``.
 
 Tasks
     Tasks are bits of code that run in background workers and which can be
     easily triggered from within the context of a request.
 
     We use Celery_ for background tasks, and task definitions can be found in
-    :py:mod:`h.tasks`.
+    ``h.tasks``.
 
 There are a number of other modules and packages in the ``h`` repository. Some
-of these (e.g. :py:mod:`h.auth`, :py:mod:`h.settings`) do one-off setup for a
+of these (e.g. ``h.auth``, ``h.settings``) do one-off setup for a
 booting application. Others may be business logic that dates from before we
 introduced the `services pattern`_, and thus might be more appropriately moved
 into a service in the future.

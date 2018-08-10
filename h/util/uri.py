@@ -60,7 +60,7 @@ possible if we can answer two questions:
 
 This package is responsible for defining URI normalization routines for use
 elsewhere in the Hypothesis application. URI expansion is handled by
-:py:function:`h.storage.expand_uri`.
+:py:func:`h.storage.expand_uri`.
 """
 import re
 
