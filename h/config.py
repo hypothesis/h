@@ -97,12 +97,12 @@ def configure(environ=None, settings=None):
     # Debug/development settings
     settings_manager.set('debug_query', 'DEBUG_QUERY')
 
-    if 'MANDRILL_USERNAME' in environ and 'MANDRILL_APIKEY' in environ:
-        settings_manager.set('mail.username', 'MANDRILL_USERNAME')
-        settings_manager.set('mail.password', 'MANDRILL_APIKEY')
-        settings_manager.set('mail.host', 'MANDRILL_HOST', default='smtp.mandrillapp.com')
-        settings_manager.set('mail.port', 'MANDRILL_PORT', default=587)
-        settings_manager.set('mail.tls', 'MANDRILL_TLS', default=True)
+    if 'SMTP_USERNAME' in environ and 'SMTP_PASSWORD' in environ:
+        settings_manager.set('mail.username', 'SMTP_USERNAME')
+        settings_manager.set('mail.password', 'SMTP_PASSWORD')
+        settings_manager.set('mail.host', 'SMTP_HOST')
+        settings_manager.set('mail.port', 'SMTP_PORT', default=587)
+        settings_manager.set('mail.tls', 'SMTP_TLS', default=True)
 
     # Get resolved settings.
     settings = settings_manager.settings
