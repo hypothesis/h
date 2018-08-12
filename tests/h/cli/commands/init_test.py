@@ -54,7 +54,7 @@ class TestInitCommand(object):
         result = cli.invoke(init_cli.init, obj=cliconfig)
 
         search.get_client.assert_called_once_with(pyramid_settings)
-        search.init.assert_any_call(es_client)
+        search.init.assert_any_call(es_client, pyramid_settings)
         assert result.exit_code == 0
 
 

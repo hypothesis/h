@@ -56,7 +56,7 @@ def init_elasticsearch(request):
     maybe_delete_index()
 
     # Initialize the test search index.
-    search.init(es_client)
+    search.init(es_client, {})
 
 
 def _es_client():
