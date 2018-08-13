@@ -28,7 +28,10 @@ from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
 from h.traversal import AnnotationContext
-from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
+from h.schemas.annotation import (
+    CreateAnnotationSchema,
+    SearchParamsSchema,
+    UpdateAnnotationSchema)
 from h.views.api.config import api_config, AngularRouteTemplater
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -96,7 +99,9 @@ def links(context, request):
             description='Search for annotations')
 def search(request):
     """Search the database for annotations matching with the given query."""
-    params = request.params.copy()
+    schema = SearchParamsSchema()
+
+    params = schema.validate(request.params.copy())
     _record_search_api_usage_metrics(params)
 
     separate_replies = params.pop('_separate_replies', False)
