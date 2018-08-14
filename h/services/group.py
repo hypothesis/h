@@ -6,7 +6,7 @@ from functools import partial
 import sqlalchemy as sa
 
 from h import session
-from h.models import Group, GroupScope, Organization, User
+from h.models import Group, GroupScope, User
 from h.models.group import ReadableBy, OPEN_GROUP_TYPE_FLAGS, PRIVATE_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
 
 
@@ -192,9 +192,8 @@ class GroupService(object):
         """
         creator = self.user_fetcher(userid)
         scopes = [GroupScope(origin=o) for o in origins]
-        if organization is None:
-            organization = Organization.default(self.session)
-        self._validate_authorities_match(creator.authority, organization.authority)
+        if organization is not None:
+            self._validate_authorities_match(creator.authority, organization.authority)
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
