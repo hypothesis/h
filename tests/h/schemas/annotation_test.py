@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from copy import deepcopy
 import mock
 import pytest
 import re
+from webob.multidict import NestedMultiDict, MultiDict
 
+from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
 from h.schemas import ValidationError
-from h.schemas.annotation import CreateAnnotationSchema, UpdateAnnotationSchema
+from h.schemas.annotation import (
+    CreateAnnotationSchema,
+    SearchParamsSchema,
+    UpdateAnnotationSchema)
+from h.schemas.util import validate_query_params
 
 
 def create_annotation_schema_validate(request, data):
@@ -606,6 +613,118 @@ class TestUpdateAnnotationSchema(object):
         document_claims.document_metas_from_data.assert_called_once_with(
             document_data,
             claimant=mock.sentinel.target_uri)
+
+
+class TestSearchParamsSchema(object):
+
+    def test_it_returns_only_known_params(self, schema):
+        expected_params = MultiDict({
+            '_separate_replies': True,
+            'group': "group1",
+            'quote': "quote me",
+            'references': "3456TA12",
+            'tag': "tagme",
+            'tags': "tagme2",
+            'text': "text me",
+            'uri': "foobar.com",
+            'url': "https://foobar.com",
+            'any': "foo",
+            'user': "pooky",
+            'sort': "created",
+            'limit': 10,
+            'order': "asc",
+            'offset': 0,
+        })
+        input_params = NestedMultiDict(MultiDict({
+            '_separate_replies': '1',
+            'group': "group1",
+            'quote': "quote me",
+            'references': "3456TA12",
+            'tag': "tagme",
+            'tags': "tagme2",
+            'text': "text me",
+            'uri': "foobar.com",
+            'url': "https://foobar.com",
+            'any': "foo",
+            'user': "pooky",
+            'sort': "created",
+            'limit': "10",
+            'order': "asc",
+            'offset': "0",
+            'unknown': "no_exist",
+            'no_exist': "unknown",
+        }))
+
+        params = validate_query_params(schema, input_params)
+
+        assert params == expected_params
+
+    def test_it_handles_duplicate_keys(self, schema):
+        expected_params = MultiDict([
+            ("url", "http://foobar"),
+            ("url", "http://foobat")])
+        input_params = deepcopy(expected_params)
+        input_params.add("unknownparam", "foo")
+        input_params.add("unknownparam", "bar")
+
+        params = validate_query_params(schema, NestedMultiDict(input_params))
+
+        assert params.getall("url") == ["http://foobar", "http://foobat"]
+        assert "unknownparam" not in params
+
+    def test_it_defaults_limit(self, schema):
+
+        params = validate_query_params(schema, NestedMultiDict())
+
+        assert params["limit"] == LIMIT_DEFAULT
+
+    def test_it_defaults_offset(self, schema):
+
+        params = validate_query_params(schema, NestedMultiDict())
+
+        assert params["offset"] == 0
+
+    def test_it_defaults_sort(self, schema):
+
+        params = validate_query_params(schema, NestedMultiDict())
+
+        assert params["sort"] == "updated"
+
+    def test_it_defaults_order(self, schema):
+
+        params = validate_query_params(schema, NestedMultiDict())
+
+        assert params["order"] == "desc"
+
+    def test_raises_if_invalid_sorting_order(self, schema):
+        input_params = NestedMultiDict(MultiDict({"order": "notrecognized"}))
+
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, input_params)
+
+    def test_raises_if_invalid_sort(self, schema):
+        input_params = NestedMultiDict(MultiDict({"sort": "notrecognized"}))
+
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, input_params)
+
+    @pytest.mark.parametrize('limit', (LIMIT_MAX + 1, -1))
+    def test_raises_if_invalid_limit(self, schema, limit):
+        input_params = NestedMultiDict(MultiDict({"limit": limit}))
+
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, input_params)
+
+    @pytest.mark.parametrize('offset', (OFFSET_MAX + 1, -1))
+    def test_raises_if_invalid_offset(self, schema, offset):
+        input_params = NestedMultiDict(MultiDict({"offset": offset}))
+
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, input_params)
+
+    @pytest.fixture
+    def schema(self):
+        return SearchParamsSchema()
 
 
 @pytest.fixture
