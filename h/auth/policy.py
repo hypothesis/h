@@ -262,7 +262,10 @@ class AuthClientPolicy(object):
             return util.principals_for_auth_client(client)
 
         user_service = request.find_service(name='user')
-        user = user_service.fetch(forwarded_userid)
+        try:
+            user = user_service.fetch(forwarded_userid)
+        except ValueError:  # raised if userid is invalid format
+            return None  # invalid user, so we are failing here
 
         if user and user.authority == client.authority:
             return util.principals_for_auth_client_user(user, client)

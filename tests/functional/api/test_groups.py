@@ -55,6 +55,16 @@ class TestCreateGroup(object):
 
         assert res.status_code == 200
 
+    def test_it_returns_http_404_with_invalid_forwarded_user_format(self, app, auth_client_header, user):
+        # FIXME: This should return a 403
+        headers = auth_client_header
+        headers[native_str('X-Forwarded-User')] = native_str('floopflarp')
+        group = {}
+
+        res = app.post_json('/api/groups', group, headers=headers, expect_errors=True)
+
+        assert res.status_code == 404
+
 
 @pytest.mark.functional
 class TestAddMember(object):

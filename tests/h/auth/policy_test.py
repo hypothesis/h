@@ -406,6 +406,18 @@ class TestAuthClientAuthenticationPolicy(object):
 
         user_service.fetch.assert_called_once_with('acct:flop@woebang.baz')
 
+    def test_check_returns_None_if_user_fetch_raises_valueError(self,
+                                                                pyramid_request,
+                                                                verify_auth_client,
+                                                                user_service):
+
+        pyramid_request.headers['X-Forwarded-User'] = 'flop@woebang.baz'
+        user_service.fetch.side_effect = ValueError('whoops')
+
+        principals = AuthClientPolicy.check('someusername', 'somepassword', pyramid_request)
+
+        assert principals is None
+
     def test_check_returns_None_if_fetch_forwarded_user_fails(self,
                                                               pyramid_request,
                                                               verify_auth_client,
