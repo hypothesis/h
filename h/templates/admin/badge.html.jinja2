@@ -44,7 +44,7 @@
       {% if uris %}
       <form
         method="POST"
-        action="{{ request.route_url('admin_badge') }}">
+        action="{{ request.route_url('admin.badge') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul>
           {% for uri in uris %}

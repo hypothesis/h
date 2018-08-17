@@ -9,7 +9,7 @@ from h import models
 from h.i18n import TranslationString as _  # noqa: N813
 
 
-@view_config(route_name='admin_badge',
+@view_config(route_name='admin.badge',
              request_method='GET',
              renderer='h:templates/admin/badge.html.jinja2',
              permission='admin_badge')
@@ -17,7 +17,7 @@ def badge_index(request):
     return {"uris": request.db.query(models.Blocklist).all()}
 
 
-@view_config(route_name='admin_badge',
+@view_config(route_name='admin.badge',
              request_method='POST',
              request_param='add',
              permission='admin_badge',
@@ -36,11 +36,11 @@ def badge_add(request):
         msg = _("{uri} is already blocked.").format(uri=uri)
         request.session.flash(msg, 'error')
 
-    index = request.route_path('admin_badge')
+    index = request.route_path('admin.badge')
     return httpexceptions.HTTPSeeOther(location=index)
 
 
-@view_config(route_name='admin_badge',
+@view_config(route_name='admin.badge',
              request_method='POST',
              request_param='remove',
              permission='admin_badge',
@@ -49,5 +49,5 @@ def badge_remove(request):
     uri = request.params['remove']
     request.db.query(models.Blocklist).filter_by(uri=uri).delete()
 
-    index = request.route_path('admin_badge')
+    index = request.route_path('admin.badge')
     return httpexceptions.HTTPSeeOther(location=index)
