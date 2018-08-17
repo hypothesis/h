@@ -10,7 +10,7 @@
   </p>
 
   <p>
-    <a href="{{ request.route_url('admin_oauthclients_create') }}">
+    <a href="{{ request.route_url('admin.oauthclients_create') }}">
       Register a new OAuth client
     </a>
   </p>
@@ -25,7 +25,7 @@
     <tbody>
       {% for client in clients %}
       <tr>
-        <td><a href="{{ request.route_url('admin_oauthclients_edit', id=client.id) }}">{{ client.name }}</a></td>
+        <td><a href="{{ request.route_url('admin.oauthclients_edit', id=client.id) }}">{{ client.name }}</a></td>
         <td>{{ client.id }}</td>
         <td>{{ client.authority }}</td>
         <td>{{ client.trusted }}</td>
