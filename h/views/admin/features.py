@@ -49,7 +49,7 @@ def features_save(request):
         location=request.route_url('admin.features'))
 
 
-@view_config(route_name='admin_cohorts',
+@view_config(route_name='admin.cohorts',
              request_method='GET',
              renderer='h:templates/admin/cohorts.html.jinja2',
              permission='admin_features')
@@ -59,7 +59,7 @@ def cohorts_index(context, request):
     return query.order_by(models.FeatureCohort.name)
 
 
-@view_config(route_name='admin_cohorts',
+@view_config(route_name='admin.cohorts',
              request_method='POST',
              request_param='add',
              renderer='h:templates/admin/cohorts.html.jinja2',
@@ -71,13 +71,13 @@ def cohorts_add(request):
     cohort = models.FeatureCohort(name=cohort_name)
     request.db.add(cohort)
 
-    url = request.route_url('admin_cohorts')
+    url = request.route_url('admin.cohorts')
     return httpexceptions.HTTPSeeOther(url)
 
 
-@view_config(route_name='admin_cohorts_edit',
+@view_config(route_name='admin.cohorts_edit',
              request_method='GET',
-             renderer='h:templates/admin/edit_cohort.html.jinja2',
+             renderer='h:templates/admin/cohorts_edit.html.jinja2',
              permission='admin_features')
 def cohorts_edit(context, request):
     id = request.matchdict['id']
@@ -89,10 +89,10 @@ def cohorts_edit(context, request):
     }
 
 
-@view_config(route_name='admin_cohorts_edit',
+@view_config(route_name='admin.cohorts_edit',
              request_method='POST',
              request_param='add',
-             renderer='h:templates/admin/edit_cohort.html.jinja2',
+             renderer='h:templates/admin/cohorts_edit.html.jinja2',
              permission='admin_features',
              require_csrf=True)
 def cohorts_edit_add(request):
@@ -110,14 +110,14 @@ def cohorts_edit_add(request):
         cohort = request.db.query(models.FeatureCohort).get(cohort_id)
         cohort.members.append(member)
 
-    url = request.route_url('admin_cohorts_edit', id=cohort_id)
+    url = request.route_url('admin.cohorts_edit', id=cohort_id)
     return httpexceptions.HTTPSeeOther(url)
 
 
-@view_config(route_name='admin_cohorts_edit',
+@view_config(route_name='admin.cohorts_edit',
              request_method='POST',
              request_param='remove',
-             renderer='h:templates/admin/edit_cohort.html.jinja2',
+             renderer='h:templates/admin/cohorts_edit.html.jinja2',
              permission='admin_features',
              require_csrf=True)
 def cohorts_edit_remove(request):
@@ -133,5 +133,5 @@ def cohorts_edit_remove(request):
             _("User {member_userid} doesn't exist.".format(member_userid=member_userid)),
             "error")
 
-    url = request.route_url('admin_cohorts_edit', id=cohort_id)
+    url = request.route_url('admin.cohorts_edit', id=cohort_id)
     return httpexceptions.HTTPSeeOther(url)

@@ -226,8 +226,8 @@ def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
 @pytest.fixture(autouse=True)
 def routes(pyramid_config):
     pyramid_config.add_route('admin.features', '/adm/features')
-    pyramid_config.add_route('admin_cohorts', '/adm/cohorts')
-    pyramid_config.add_route('admin_cohorts_edit', '/adm/cohorts/{id}')
+    pyramid_config.add_route('admin.cohorts', '/adm/cohorts')
+    pyramid_config.add_route('admin.cohorts_edit', '/adm/cohorts/{id}')
 
 
 @pytest.fixture

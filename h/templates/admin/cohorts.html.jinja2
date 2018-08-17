@@ -36,7 +36,7 @@
         {% for cohort in results %}
           <tr>
             <td>
-              <a href="{{ request.route_url('admin_cohorts_edit', id=cohort.id) }}">
+              <a href="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
                 {{ cohort.name }}
               </a>
             </td>
