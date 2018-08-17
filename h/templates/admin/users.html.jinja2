@@ -36,7 +36,7 @@
                 &#x2714;
               {% else %}
                 &#x2718;
-                <form action="{{request.route_path('admin_users_activate')}}"
+                <form action="{{request.route_path('admin.users_activate')}}"
                       class="users-activate-form"
                       method="POST">
                   <input type="hidden"
@@ -69,7 +69,7 @@
 
       <h3>Please-be-careful Zone</h3>
 
-      <form method="POST" action="{{request.route_path('admin_users_rename')}}" class="form-inline">
+      <form method="POST" action="{{request.route_path('admin.users_rename')}}" class="form-inline">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <input type="hidden" name="userid" value="{{user.userid}}">
         <input type="text" name="new_username" placeholder="New Username" pattern="^[A-Za-z0-9._]+$">
@@ -79,7 +79,7 @@
       <h3>Danger Zone</h3>
 
       <form method="POST"
-            action="{{request.route_path('admin_users_delete')}}"
+            action="{{request.route_path('admin.users_delete')}}"
             class="form-inline js-users-delete-form">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <input type="hidden" name="userid" value="{{user.userid}}">

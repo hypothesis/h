@@ -47,7 +47,7 @@
             </td>
             <td>
               {% if group.creator %}
-                <a href="{{ request.route_url('admin_users', _query={'username': group.creator.username, 'authority': group.creator.authority}) }}">
+                <a href="{{ request.route_url('admin.users', _query={'username': group.creator.username, 'authority': group.creator.authority}) }}">
                   {{ group.creator.username }}
                 </a>
               {% endif %}

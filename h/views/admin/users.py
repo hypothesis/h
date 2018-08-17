@@ -18,7 +18,7 @@ class UserNotFoundError(Exception):
     pass
 
 
-@view_config(route_name='admin_users',
+@view_config(route_name='admin.users',
              request_method='GET',
              renderer='h:templates/admin/users.html.jinja2',
              permission='admin_users')
@@ -49,7 +49,7 @@ def users_index(request):
     }
 
 
-@view_config(route_name='admin_users_activate',
+@view_config(route_name='admin.users_activate',
              request_method='POST',
              request_param='userid',
              permission='admin_users',
@@ -66,12 +66,12 @@ def users_activate(request):
     request.registry.notify(ActivationEvent(request, user))
 
     return httpexceptions.HTTPFound(
-        location=request.route_path('admin_users',
+        location=request.route_path('admin.users',
                                     _query=(('username', user.username),
                                             ('authority', user.authority))))
 
 
-@view_config(route_name='admin_users_rename',
+@view_config(route_name='admin.users_rename',
              request_method='POST',
              permission='admin_users',
              require_csrf=True)
@@ -92,19 +92,19 @@ def users_rename(request):
             (old_username, new_username), 'success')
 
         return httpexceptions.HTTPFound(
-            location=request.route_path('admin_users',
+            location=request.route_path('admin.users',
                                         _query=(('username', new_username),
                                                 ('authority', user.authority))))
 
     except (UserRenameError, ValueError) as e:
         request.session.flash(str(e), 'error')
         return httpexceptions.HTTPFound(
-            location=request.route_path('admin_users',
+            location=request.route_path('admin.users',
                                         _query=(('username', old_username),
                                                 ('authority', user.authority))))
 
 
-@view_config(route_name='admin_users_delete',
+@view_config(route_name='admin.users_delete',
              request_method='POST',
              permission='admin_users',
              require_csrf=True)
@@ -120,13 +120,13 @@ def users_delete(request):
         request.session.flash(str(e), 'error')
 
     return httpexceptions.HTTPFound(
-        location=request.route_path('admin_users'))
+        location=request.route_path('admin.users'))
 
 
 @view_config(context=UserNotFoundError)
 def user_not_found(exc, request):
     request.session.flash(jinja2.Markup(_(exc.message)), 'error')
-    return httpexceptions.HTTPFound(location=request.route_path('admin_users'))
+    return httpexceptions.HTTPFound(location=request.route_path('admin.users'))
 
 
 def _form_request_user(request):
