@@ -164,7 +164,7 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def handle_form_submission(patch):
-    return patch('h.views.admin_groups.form.handle_form_submission')
+    return patch('h.views.admin.groups.form.handle_form_submission')
 
 
 @pytest.fixture

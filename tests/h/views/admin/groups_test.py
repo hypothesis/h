@@ -9,8 +9,8 @@ import pytest
 import mock
 
 from h.models import Organization, User
-from h.views import admin_groups
-from h.views.admin_groups import GroupCreateController, GroupEditController
+from h.views.admin import groups
+from h.views.admin.groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
 from h.services.group import GroupService
 from h.services.delete_group import DeleteGroupService
@@ -26,12 +26,12 @@ class FakeForm(object):
 
 
 def test_index_lists_groups_sorted_by_created_desc(pyramid_request, routes, factories, authority):
-    groups = [factories.Group(created=datetime.datetime(2017, 8, 2)),
-              factories.Group(created=datetime.datetime(2015, 2, 1)),
-              factories.Group(),
-              factories.Group(created=datetime.datetime(2013, 2, 1))]
+    group_list = [factories.Group(created=datetime.datetime(2017, 8, 2)),
+                  factories.Group(created=datetime.datetime(2015, 2, 1)),
+                  factories.Group(),
+                  factories.Group(created=datetime.datetime(2013, 2, 1))]
 
-    ctx = admin_groups.groups_index(None, pyramid_request)
+    ctx = groups.groups_index(None, pyramid_request)
 
     # We can't avoid getting the Public group back, which is created outside of
     # these tests' sphere of influence. Remove it as it is not feasible to
@@ -39,12 +39,12 @@ def test_index_lists_groups_sorted_by_created_desc(pyramid_request, routes, fact
     filtered_groups = list(filter(lambda group: group.pubid != '__world__',
                                   ctx['results']))
 
-    expected_groups = [groups[2], groups[0], groups[1], groups[3]]
+    expected_groups = [group_list[2], group_list[0], group_list[1], group_list[3]]
     assert filtered_groups == expected_groups
 
 
 def test_index_paginates_results(pyramid_request, routes, paginate):
-    admin_groups.groups_index(None, pyramid_request)
+    groups.groups_index(None, pyramid_request)
 
     paginate.assert_called_once_with(pyramid_request, mock.ANY, mock.ANY)
 
@@ -66,7 +66,7 @@ def test_index_filters_results(pyramid_request, factories, query, expected_group
 
     if query:
         pyramid_request.GET['q'] = query
-    ctx = admin_groups.groups_index(None, pyramid_request)
+    ctx = groups.groups_index(None, pyramid_request)
 
     filtered_group_names = sorted([g.name for g in ctx['results']])
     assert filtered_group_names == expected_groups
@@ -120,7 +120,7 @@ class TestGroupCreateController(object):
 
         response = ctrl.post()
 
-        expected_location = pyramid_request.route_url('admin_groups')
+        expected_location = pyramid_request.route_url('admin.groups')
         assert response == matchers.Redirect302To(expected_location)
 
     @pytest.mark.parametrize('type_', [
@@ -323,18 +323,18 @@ def pyramid_request(pyramid_request, factories, authority):
 
 @pytest.fixture
 def paginate(patch):
-    return patch('h.views.admin_groups.paginator.paginate')
+    return patch('h.views.admin.groups.paginator.paginate')
 
 
 @pytest.fixture
 def handle_form_submission(patch):
-    return patch('h.views.admin_groups.form.handle_form_submission')
+    return patch('h.views.admin.groups.form.handle_form_submission')
 
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_groups', '/admin/groups')
-    pyramid_config.add_route('admin_groups_create', '/admin/groups/new')
+    pyramid_config.add_route('admin.groups', '/admin/groups')
+    pyramid_config.add_route('admin.groups_create', '/admin/groups/new')
     pyramid_config.add_route('group_read', '/groups/{pubid}/{slug}')
 
 
@@ -370,7 +370,7 @@ def list_orgs_svc(pyramid_config, db_session):
 @pytest.fixture
 def CreateAdminGroupSchema(patch):  # noqa: N802
     schema = mock.Mock(spec_set=['bind'])
-    CreateAdminGroupSchema = patch('h.views.admin_groups.CreateAdminGroupSchema')  # noqa: N806
+    CreateAdminGroupSchema = patch('h.views.admin.groups.CreateAdminGroupSchema')  # noqa: N806
     CreateAdminGroupSchema.return_value = schema
     return CreateAdminGroupSchema
 
