@@ -36,7 +36,7 @@ def test_includeme():
         call('activity.search', '/search'),
         call('activity.user_search', '/users/{username}', factory='h.traversal:UserRoot', traverse='/{username}'),
         call('admin_index', '/admin/'),
-        call('admin_admins', '/admin/admins'),
+        call('admin.admins', '/admin/admins'),
         call('admin_badge', '/admin/badge'),
         call('admin_features', '/admin/features'),
         call('admin_cohorts', '/admin/features/cohorts'),
