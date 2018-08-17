@@ -9,7 +9,7 @@ from h import paginator
 from h.i18n import TranslationString as _  # noqa: N813
 
 
-@view_config(route_name='admin_features',
+@view_config(route_name='admin.features',
              request_method='GET',
              renderer='h:templates/admin/features.html.jinja2',
              permission='admin_features')
@@ -23,7 +23,7 @@ def features_index(request):
     }
 
 
-@view_config(route_name='admin_features',
+@view_config(route_name='admin.features',
              request_method='POST',
              permission='admin_features',
              require_csrf=True)
@@ -46,7 +46,7 @@ def features_save(request):
 
     request.session.flash(_("Changes saved."), "success")
     return httpexceptions.HTTPSeeOther(
-        location=request.route_url('admin_features'))
+        location=request.route_url('admin.features'))
 
 
 @view_config(route_name='admin_cohorts',

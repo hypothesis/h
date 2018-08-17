@@ -38,7 +38,7 @@ def test_includeme():
         call('admin_index', '/admin/'),
         call('admin.admins', '/admin/admins'),
         call('admin.badge', '/admin/badge'),
-        call('admin_features', '/admin/features'),
+        call('admin.features', '/admin/features'),
         call('admin_cohorts', '/admin/features/cohorts'),
         call('admin_cohorts_edit', '/admin/features/cohorts/{id}'),
         call('admin_groups', '/admin/groups'),

@@ -35,7 +35,7 @@ def includeme(config):
     config.add_route('admin_index', '/admin/')
     config.add_route('admin.admins', '/admin/admins')
     config.add_route('admin.badge', '/admin/badge')
-    config.add_route('admin_features', '/admin/features')
+    config.add_route('admin.features', '/admin/features')
     config.add_route('admin_cohorts', '/admin/features/cohorts')
     config.add_route('admin_cohorts_edit', '/admin/features/cohorts/{id}')
     config.add_route('admin_groups', '/admin/groups')
