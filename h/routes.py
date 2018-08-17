@@ -32,7 +32,7 @@ def includeme(config):
                      traverse='/{username}')
 
     # Admin
-    config.add_route('admin_index', '/admin/')
+    config.add_route('admin.index', '/admin/')
     config.add_route('admin.admins', '/admin/admins')
     config.add_route('admin.badge', '/admin/badge')
     config.add_route('admin.features', '/admin/features')

@@ -35,7 +35,7 @@ def test_includeme():
         call('dismiss_sidebar_tutorial', '/app/dismiss_sidebar_tutorial'),
         call('activity.search', '/search'),
         call('activity.user_search', '/users/{username}', factory='h.traversal:UserRoot', traverse='/{username}'),
-        call('admin_index', '/admin/'),
+        call('admin.index', '/admin/'),
         call('admin.admins', '/admin/admins'),
         call('admin.badge', '/admin/badge'),
         call('admin.features', '/admin/features'),
