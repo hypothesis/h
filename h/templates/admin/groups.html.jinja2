@@ -42,7 +42,7 @@
               </a>
             </td>
             <td>
-              {% set org_url = request.route_url('admin_organizations_edit', pubid=group.organization.pubid) %}
+              {% set org_url = request.route_url('admin.organizations_edit', pubid=group.organization.pubid) %}
               <a href="{{ org_url }}">{{ group.organization.name }}</a>
             </td>
             <td>

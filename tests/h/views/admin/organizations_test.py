@@ -4,7 +4,7 @@ from mock import Mock
 import pytest
 
 from h.models import Organization
-from h.views.admin_organizations import index, OrganizationCreateController, OrganizationEditController
+from h.views.admin.organizations import index, OrganizationCreateController, OrganizationEditController
 
 
 class FakeForm(object):
@@ -74,7 +74,7 @@ class TestOrganizationCreateController(object):
 
         response = ctrl.post()
 
-        list_url = pyramid_request.route_url('admin_organizations')
+        list_url = pyramid_request.route_url('admin.organizations')
         assert response == matchers.Redirect302To(list_url)
 
 
@@ -96,7 +96,7 @@ class TestOrganizationEditController(object):
     def test_read_shows_delete_button(self, pyramid_request, org):
         ctrl = OrganizationEditController(org, pyramid_request)
         ctx = ctrl.read()
-        assert ctx['delete_url'] == pyramid_request.route_url('admin_organizations_delete', pubid=org.pubid)
+        assert ctx['delete_url'] == pyramid_request.route_url('admin.organizations_delete', pubid=org.pubid)
 
     def test_read_does_not_show_delete_button_for_default_org(self, pyramid_request, org):
         org.pubid = '__default__'
@@ -130,7 +130,7 @@ class TestOrganizationEditController(object):
 
         response = ctrl.delete()
 
-        list_url = pyramid_request.route_path('admin_organizations')
+        list_url = pyramid_request.route_path('admin.organizations')
         assert response == matchers.Redirect302To(list_url)
 
     def test_delete_fails_if_org_has_groups(self, factories, matchers, org, pyramid_request):
@@ -169,5 +169,5 @@ def handle_form_submission(patch):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_organizations', '/admin/organizations')
-    pyramid_config.add_route('admin_organizations_delete', '/admin/organizations/delete/{pubid}')
+    pyramid_config.add_route('admin.organizations', '/admin/organizations')
+    pyramid_config.add_route('admin.organizations_delete', '/admin/organizations/delete/{pubid}')

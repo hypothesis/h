@@ -16,7 +16,7 @@ from h.schemas.forms.admin.organization import OrganizationSchema
 _ = i18n.TranslationString
 
 
-@view_config(route_name='admin_organizations',
+@view_config(route_name='admin.organizations',
              request_method='GET',
              renderer='h:templates/admin/organizations.html.jinja2',
              permission='admin_organizations')
@@ -34,7 +34,7 @@ def index(context, request):
                       .order_by(Organization.created.desc()))
 
 
-@view_defaults(route_name='admin_organizations_create',
+@view_defaults(route_name='admin.organizations_create',
                renderer='h:templates/admin/organizations_create.html.jinja2',
                permission='admin_organizations')
 class OrganizationCreateController(object):
@@ -64,7 +64,7 @@ class OrganizationCreateController(object):
             self.request.session.flash(
                 Markup(_('Created new organization {}'.format(name))), 'success')
 
-            return HTTPFound(location=self.request.route_url('admin_organizations'))
+            return HTTPFound(location=self.request.route_url('admin.organizations'))
 
         return form.handle_form_submission(self.request, self.form,
                                            on_success=on_success,
@@ -74,7 +74,7 @@ class OrganizationCreateController(object):
         return {'form': self.form.render()}
 
 
-@view_defaults(route_name='admin_organizations_edit',
+@view_defaults(route_name='admin.organizations_edit',
                permission='admin_organizations',
                renderer='h:templates/admin/organizations_edit.html.jinja2')
 class OrganizationEditController(object):
@@ -92,7 +92,7 @@ class OrganizationEditController(object):
         return self._template_context()
 
     @view_config(request_method='POST',
-                 route_name='admin_organizations_delete')
+                 route_name='admin.organizations_delete')
     def delete(self):
         org = self.org
 
@@ -112,7 +112,7 @@ class OrganizationEditController(object):
         self.request.session.flash(
             _('Successfully deleted organization %s' % (org.name), 'success'))
         return HTTPFound(
-            location=self.request.route_path('admin_organizations'))
+            location=self.request.route_path('admin.organizations'))
 
     @view_config(request_method='POST')
     def update(self):
@@ -141,7 +141,7 @@ class OrganizationEditController(object):
     def _template_context(self):
         delete_url = None
         if self.org.pubid != '__default__':
-            delete_url = self.request.route_url('admin_organizations_delete', pubid=self.org.pubid)
+            delete_url = self.request.route_url('admin.organizations_delete', pubid=self.org.pubid)
         return {
             'form': self.form.render(),
             'delete_url': delete_url,

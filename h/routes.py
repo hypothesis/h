@@ -51,13 +51,13 @@ def includeme(config):
                      '/admin/oauthclients/{id}',
                      factory='h.traversal.AuthClientRoot',
                      traverse='/{id}')
-    config.add_route('admin_organizations', '/admin/organizations')
-    config.add_route('admin_organizations_create', '/admin/organizations/new')
-    config.add_route('admin_organizations_delete',
+    config.add_route('admin.organizations', '/admin/organizations')
+    config.add_route('admin.organizations_create', '/admin/organizations/new')
+    config.add_route('admin.organizations_delete',
                      '/admin/organizations/delete/{pubid}',
                      factory='h.traversal.OrganizationRoot',
                      traverse='/{pubid}')
-    config.add_route('admin_organizations_edit',
+    config.add_route('admin.organizations_edit',
                      '/admin/organizations/{pubid}',
                      factory='h.traversal.OrganizationRoot',
                      traverse='/{pubid}')
