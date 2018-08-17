@@ -36,7 +36,7 @@
     <div class="panel-body">
       <form
         method="POST"
-        action="{{ request.route_url('admin_staff') }}">
+        action="{{ request.route_url('admin.staff') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul>
           {% for user in staff %}

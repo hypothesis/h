@@ -61,7 +61,7 @@ def test_includeme():
              '/admin/organizations/{pubid}',
              factory='h.traversal.OrganizationRoot',
              traverse='/{pubid}'),
-        call('admin_staff', '/admin/staff'),
+        call('admin.staff', '/admin/staff'),
         call('admin_users', '/admin/users'),
         call('admin_users_activate', '/admin/users/activate'),
         call('admin_users_delete', '/admin/users/delete'),

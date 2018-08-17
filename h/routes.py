@@ -61,7 +61,7 @@ def includeme(config):
                      '/admin/organizations/{pubid}',
                      factory='h.traversal.OrganizationRoot',
                      traverse='/{pubid}')
-    config.add_route('admin_staff', '/admin/staff')
+    config.add_route('admin.staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
     config.add_route('admin_users_activate', '/admin/users/activate')
     config.add_route('admin_users_delete', '/admin/users/delete')

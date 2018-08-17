@@ -8,7 +8,7 @@ from h import models
 from h.i18n import TranslationString as _  # noqa: N813
 
 
-@view_config(route_name='admin_staff',
+@view_config(route_name='admin.staff',
              request_method='GET',
              renderer='h:templates/admin/staff.html.jinja2',
              permission='admin_staff')
@@ -21,7 +21,7 @@ def staff_index(request):
     }
 
 
-@view_config(route_name='admin_staff',
+@view_config(route_name='admin.staff',
              request_method='POST',
              request_param='add',
              renderer='h:templates/admin/staff.html.jinja2',
@@ -38,11 +38,11 @@ def staff_add(request):
             "error")
     else:
         user.staff = True
-    index = request.route_path('admin_staff')
+    index = request.route_path('admin.staff')
     return httpexceptions.HTTPSeeOther(location=index)
 
 
-@view_config(route_name='admin_staff',
+@view_config(route_name='admin.staff',
              request_method='POST',
              request_param='remove',
              renderer='h:templates/admin/staff.html.jinja2',
@@ -54,5 +54,5 @@ def staff_remove(request):
     user = request.db.query(models.User).filter_by(userid=userid).first()
     if user is not None:
         user.staff = False
-    index = request.route_path('admin_staff')
+    index = request.route_path('admin.staff')
     return httpexceptions.HTTPSeeOther(location=index)
