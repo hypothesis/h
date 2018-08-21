@@ -163,11 +163,7 @@ gulp.task('build-css', gulp.series(['build-vendor-css'], function() {
 }));
 
 gulp.task('watch-css', function() {
-  // Build initial CSS bundles. This is done rather than adding 'build-css' as
-  // a dependency of this task so that the process continues in the event of an
-  // error.
-  Promise.all(styleBundleEntryFiles.map(buildStyleBundle)).catch(log.error);
-  gulp.watch('h/static/styles/**/*.scss', ['build-css']);
+  gulp.watch('h/static/styles/**/*.scss', { ignoreInitial: false }, gulp.series('build-css'));
 });
 
 var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
@@ -179,7 +175,7 @@ gulp.task('build-fonts', function() {
 });
 
 gulp.task('watch-fonts', function() {
-  gulp.watch(fontFiles, ['build-fonts']);
+  gulp.watch(fontFiles, gulp.series('build-fonts'));
 });
 
 var imageFiles = 'h/static/images/**/*';
@@ -195,7 +191,7 @@ gulp.task('build-images', function() {
 });
 
 gulp.task('watch-images', function() {
-  gulp.watch(imageFiles, ['build-images']);
+  gulp.watch(imageFiles, gulp.series('build-images'));
 });
 
 var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/**/*.*';
@@ -224,7 +220,7 @@ gulp.task('watch-manifest', function() {
 });
 
 gulp.task('build', gulp.series(['build-js', 'build-css', 'build-fonts', 'build-images'], generateManifest))
-gulp.task('watch', gulp.series(['watch-js', 'watch-css', 'watch-fonts', 'watch-images', 'watch-manifest']))
+gulp.task('watch', gulp.parallel(['watch-js', 'watch-css', 'watch-fonts', 'watch-images', 'watch-manifest']))
 
 function runKarma(baseConfig, opts, done) {
   // See https://github.com/karma-runner/karma-mocha#configuration
