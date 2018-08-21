@@ -85,6 +85,11 @@ docstrings:
 checkdocstrings:
 	tox -e checkdocstrings
 
+.PHONY: sql
+sql:
+	@pip install -q tox
+	tox -e sql
+
 ################################################################################
 
 # Fake targets to aid with deps installation
