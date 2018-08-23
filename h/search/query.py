@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+from dateutil.parser import parse
+from dateutil import tz
+from datetime import datetime as dt
 from h import storage
 from h.util import uri
 from elasticsearch_dsl import Q
@@ -63,10 +66,13 @@ class Limiter(object):
 
 class Sorter(object):
     """
-    Sorts annotations.
+    Sorts and returns annotations after search_after.
 
     Sorts annotations by sort (the key to sort by)
     and the order (the order in which to sort by).
+
+    Returns annotations after search_after. search_after
+    must be the value of the annotation's sort field.
     """
 
     def __call__(self, search, params):
@@ -74,6 +80,16 @@ class Sorter(object):
         # Sorting must be done on non-analyzed fields.
         if sort_by == "user":
             sort_by = "user_raw"
+
+        # Since search_after depends on the field that the annotations are
+        # being sorted by, it is set here rather than in a seperate class.
+        search_after = params.pop("search_after", None)
+        if search_after:
+            if sort_by in ["updated", "created"]:
+                search_after = self._date_parser(search_after)
+
+        if search_after:
+            search = search.extra(search_after=[search_after])
 
         return search.sort(
             {sort_by:
@@ -88,6 +104,20 @@ class Sorter(object):
                  # that exists in both ES 1 and ES 6.
                  "unmapped_type": "boolean"}}
         )
+
+    def _date_parser(self, str_value):
+        try:
+            return float(str_value)
+        except ValueError:
+            try:
+                date = parse(str_value, )
+                # If timezone isn't specified assume it's utc.
+                if not date.tzinfo:
+                    date = date.replace(tzinfo=tz.tzutc())
+                epoch = dt.utcfromtimestamp(0).replace(tzinfo=tz.tzutc())
+                return (date - epoch).total_seconds() * 1000.0
+            except ValueError:
+                pass
 
 
 class TopLevelAnnotationsFilter(object):

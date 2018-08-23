@@ -192,6 +192,46 @@ class TestSorter(object):
     def test_it_ignores_unknown_sort_fields(self, search):
         search.run({"sort": "no_such_field"})
 
+    @pytest.mark.parametrize("date,expected",
+        [("1514773561300", [2]),
+         ("2018-01-01T02:26:01.03", [2]),
+         ("2018-01-01T02:26:01.03+00:00", [2]),
+         ("2018-01-01", [1, 2])],
+    )
+    def test_it_finds_all_annotations_after_ms_since_epoch_date(
+        self, search, Annotation, date, expected,
+    ):
+        dt = datetime.datetime
+
+        ann_ids = [Annotation(updated=dt(2017, 1, 1), created=dt(2017, 1, 1)).id,
+                   Annotation(updated=dt(2018, 1, 1, 2, 26, 1), created=dt(2016, 1, 1)).id,
+                   Annotation(updated=dt(2018, 1, 1, 2, 26, 1, 500000), created=dt(2016, 1, 1)).id,
+                   Annotation(updated=dt(2016, 1, 1), created=dt(2018, 1, 1)).id]
+
+        result = search.run({"search_after": date, "order": "asc"})
+
+        assert sorted(result.annotation_ids) == sorted([ann_ids[idx] for idx in expected])
+
+    def test_it_finds_all_annotations_after_id(self, search, Annotation):
+        ann_ids = sorted([str(Annotation(id="09").id),
+                          str(Annotation(id="11").id),
+                          str(Annotation(id="02").id)])
+
+        result = search.run({"search_after": ann_ids[1], "sort": "id", "order": "asc"})
+
+        assert result.annotation_ids == [ann_ids[2]]
+
+    def test_it_ignores_search_after_if_invalid_date_format(self, search, Annotation):
+        dt = datetime.datetime
+
+        ann_ids = [Annotation(updated=dt(2016, 1, 1), created=dt(2018, 1, 1)).id,
+                   Annotation(updated=dt(2017, 1, 1), created=dt(2017, 1, 1)).id,
+                   Annotation(updated=dt(2018, 1, 1, 2, 26, 1), created=dt(2016, 1, 1)).id]
+
+        result = search.run({"search_after": "invalid_date", "order": "asc"})
+
+        assert result.annotation_ids == ann_ids
+
 
 class TestTopLevelAnnotationsFilter(object):
 
