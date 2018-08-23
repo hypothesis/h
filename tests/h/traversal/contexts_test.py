@@ -162,12 +162,20 @@ class TestGroupContext(object):
 
         assert group_context.id == group.pubid  # NOT the group.id
 
-    def test_it_expands_organization(self, factories, pyramid_request):
+    def test_organization_is_None_if_the_group_has_no_organization(self, factories, pyramid_request):
         group = factories.Group()
 
         group_context = GroupContext(group, pyramid_request)
 
-        assert isinstance(group_context.organization, OrganizationContext)
+        assert group_context.organization is None
+
+    def test_it_expands_organization_if_the_group_has_one(self, factories, pyramid_request):
+        organization = factories.Organization()
+        group = factories.Group(organization=organization)
+
+        group_context = GroupContext(group, pyramid_request)
+
+        assert group_context.organization.organization == organization
 
     def test_it_returns_None_for_missing_organization_relation(self, factories, pyramid_request):
         group = factories.Group()

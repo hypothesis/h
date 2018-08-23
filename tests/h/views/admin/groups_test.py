@@ -256,8 +256,12 @@ class TestGroupEditController(object):
         assert [s.origin for s in group.scopes] == updated_origins
         assert ctx['form'] == self._expected_form(group)
 
-    def test_update_updates_group_members_on_success(self, factories, pyramid_request, group_svc, user_svc, handle_form_submission):
-        group = factories.RestrictedGroup(pubid='testgroup')
+    def test_update_updates_group_members_on_success(self, factories, pyramid_request, group_svc, user_svc, handle_form_submission, list_orgs_svc):
+        group = factories.RestrictedGroup(
+            pubid='testgroup',
+            organization=factories.Organization(),
+        )
+        list_orgs_svc.organizations.return_value = [group.organization]
 
         pyramid_request.matchdict = {'pubid': group.pubid}
 
@@ -296,7 +300,10 @@ class TestGroupEditController(object):
 
     @pytest.fixture
     def group(self, factories):
-        return factories.OpenGroup(pubid='testgroup')
+        return factories.OpenGroup(
+            pubid='testgroup',
+            organization=factories.Organization(),
+        )
 
     def _expected_form(self, group):
         return {'creator': group.creator.username if group.creator else '',

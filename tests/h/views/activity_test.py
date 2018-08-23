@@ -246,8 +246,7 @@ class TestGroupSearchController(object):
         assert group_info['description'] == test_group.description
         assert group_info['name'] == test_group.name
         assert group_info['pubid'] == test_group.pubid
-        assert group_info['organization']['logo'] == OrganizationContext(None, None).logo
-        assert group_info['organization']['name'] == default_org.name
+        assert group_info['organization'] is None
 
     @pytest.mark.parametrize('test_group,test_user',
                              [('no_organization_group', 'member')],
