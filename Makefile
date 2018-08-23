@@ -32,7 +32,7 @@ dev: build/manifest.json .pydeps
 ## Build hypothesis/hypothesis docker image
 .PHONY: docker
 docker:
-	git archive HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
+	git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
 
 # Run docker container.
 #
