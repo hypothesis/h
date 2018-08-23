@@ -7,7 +7,7 @@ import pytest
 from pyramid import httpexceptions
 
 from h import models
-from h.views.admin_badge import badge_add, badge_index, badge_remove
+from h.views.admin.badge import badge_add, badge_index, badge_remove
 
 
 class TestBadgeIndex(object):
@@ -94,4 +94,4 @@ def blocked_uris(db_session):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_badge', '/adm/badge')
+    pyramid_config.add_route('admin.badge', '/adm/badge')

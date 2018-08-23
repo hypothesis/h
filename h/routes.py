@@ -32,40 +32,40 @@ def includeme(config):
                      traverse='/{username}')
 
     # Admin
-    config.add_route('admin_index', '/admin/')
-    config.add_route('admin_admins', '/admin/admins')
-    config.add_route('admin_badge', '/admin/badge')
-    config.add_route('admin_features', '/admin/features')
-    config.add_route('admin_cohorts', '/admin/features/cohorts')
-    config.add_route('admin_cohorts_edit', '/admin/features/cohorts/{id}')
-    config.add_route('admin_groups', '/admin/groups')
-    config.add_route('admin_groups_create', '/admin/groups/new')
-    config.add_route('admin_groups_delete', '/admin/groups/delete/{pubid}')
-    config.add_route('admin_groups_edit', '/admin/groups/{pubid}')
-    config.add_route('admin_mailer', '/admin/mailer')
-    config.add_route('admin_mailer_test', '/admin/mailer/test')
-    config.add_route('admin_nipsa', '/admin/nipsa')
-    config.add_route('admin_oauthclients', '/admin/oauthclients')
-    config.add_route('admin_oauthclients_create', '/admin/oauthclients/new')
-    config.add_route('admin_oauthclients_edit',
+    config.add_route('admin.index', '/admin/')
+    config.add_route('admin.admins', '/admin/admins')
+    config.add_route('admin.badge', '/admin/badge')
+    config.add_route('admin.features', '/admin/features')
+    config.add_route('admin.cohorts', '/admin/features/cohorts')
+    config.add_route('admin.cohorts_edit', '/admin/features/cohorts/{id}')
+    config.add_route('admin.groups', '/admin/groups')
+    config.add_route('admin.groups_create', '/admin/groups/new')
+    config.add_route('admin.groups_delete', '/admin/groups/delete/{pubid}')
+    config.add_route('admin.groups_edit', '/admin/groups/{pubid}')
+    config.add_route('admin.mailer', '/admin/mailer')
+    config.add_route('admin.mailer_test', '/admin/mailer/test')
+    config.add_route('admin.nipsa', '/admin/nipsa')
+    config.add_route('admin.oauthclients', '/admin/oauthclients')
+    config.add_route('admin.oauthclients_create', '/admin/oauthclients/new')
+    config.add_route('admin.oauthclients_edit',
                      '/admin/oauthclients/{id}',
                      factory='h.traversal.AuthClientRoot',
                      traverse='/{id}')
-    config.add_route('admin_organizations', '/admin/organizations')
-    config.add_route('admin_organizations_create', '/admin/organizations/new')
-    config.add_route('admin_organizations_delete',
+    config.add_route('admin.organizations', '/admin/organizations')
+    config.add_route('admin.organizations_create', '/admin/organizations/new')
+    config.add_route('admin.organizations_delete',
                      '/admin/organizations/delete/{pubid}',
                      factory='h.traversal.OrganizationRoot',
                      traverse='/{pubid}')
-    config.add_route('admin_organizations_edit',
+    config.add_route('admin.organizations_edit',
                      '/admin/organizations/{pubid}',
                      factory='h.traversal.OrganizationRoot',
                      traverse='/{pubid}')
-    config.add_route('admin_staff', '/admin/staff')
-    config.add_route('admin_users', '/admin/users')
-    config.add_route('admin_users_activate', '/admin/users/activate')
-    config.add_route('admin_users_delete', '/admin/users/delete')
-    config.add_route('admin_users_rename', '/admin/users/rename')
+    config.add_route('admin.staff', '/admin/staff')
+    config.add_route('admin.users', '/admin/users')
+    config.add_route('admin.users_activate', '/admin/users/activate')
+    config.add_route('admin.users_delete', '/admin/users/delete')
+    config.add_route('admin.users_rename', '/admin/users/rename')
 
     # Annotations & stream
     config.add_route('annotation',

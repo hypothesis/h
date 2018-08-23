@@ -11,7 +11,7 @@ from h.services.annotation_stats import AnnotationStatsService
 from h.services.delete_user import DeleteUserService, UserDeleteError
 from h.services.user import UserService
 from h.models import Annotation
-from h.views.admin_users import (
+from h.views.admin.users import (
     UserNotFoundError,
     users_activate,
     users_delete,
@@ -216,17 +216,17 @@ def test_users_delete_reports_error(user_service, delete_user_service, pyramid_r
 
 @pytest.fixture(autouse=True)
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_users', '/adm/users')
+    pyramid_config.add_route('admin.users', '/adm/users')
 
 
 @pytest.fixture
 def ActivationEvent(patch):  # noqa N802
-    return patch('h.views.admin_users.ActivationEvent')
+    return patch('h.views.admin.users.ActivationEvent')
 
 
 @pytest.fixture
 def models(patch):
-    module = patch('h.views.admin_users.models')
+    module = patch('h.views.admin.users.models')
     module.Annotation = Annotation
     return module
 

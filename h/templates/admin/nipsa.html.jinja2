@@ -39,7 +39,7 @@
       {% if userids %}
       <form
         method="POST"
-        action="{{ request.route_url('admin_nipsa') }}">
+        action="{{ request.route_url('admin.nipsa') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul>
           {% for userid in userids %}

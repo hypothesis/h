@@ -17,7 +17,7 @@
       <h3 class="panel-title">Send a test email</h3>
     </div>
     <div class="panel-body">
-      <form method="POST" action="{{ request.route_path('admin_mailer_test') }}" class="form-inline">
+      <form method="POST" action="{{ request.route_path('admin.mailer_test') }}" class="form-inline">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <div class="form-group">
           <label for="recipient">Recipient</label>

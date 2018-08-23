@@ -6,7 +6,7 @@ import pytest
 
 from pyramid.httpexceptions import HTTPSeeOther
 
-from h.views.admin_mailer import mailer_index, mailer_test
+from h.views.admin.mailer import mailer_index, mailer_test
 
 
 class TestMailerIndex(object):
@@ -61,18 +61,18 @@ class FakeResult(object):
 
 @pytest.fixture
 def mailer(patch):
-    mailer = patch('h.views.admin_mailer.mailer')
+    mailer = patch('h.views.admin.mailer.mailer')
     mailer.send.delay.return_value = FakeResult()
     return mailer
 
 
 @pytest.fixture
 def testmail(patch):
-    test = patch('h.views.admin_mailer.test')
+    test = patch('h.views.admin.mailer.test')
     test.generate.side_effect = lambda _, r: ([r], 'TEST', 'text', 'html')
     return test
 
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_mailer', '/adm/mailer')
+    pyramid_config.add_route('admin.mailer', '/adm/mailer')

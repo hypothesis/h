@@ -12,7 +12,7 @@ class UserNotFoundError(Exception):
     pass
 
 
-@view_config(route_name='admin_nipsa',
+@view_config(route_name='admin.nipsa',
              request_method='GET',
              renderer='h:templates/admin/nipsa.html.jinja2',
              permission='admin_nipsa')
@@ -24,7 +24,7 @@ def nipsa_index(request):
     }
 
 
-@view_config(route_name='admin_nipsa',
+@view_config(route_name='admin.nipsa',
              request_method='POST',
              request_param='add',
              permission='admin_nipsa',
@@ -42,11 +42,11 @@ def nipsa_add(request):
     nipsa_service = request.find_service(name='nipsa')
     nipsa_service.flag(user)
 
-    index = request.route_path("admin_nipsa")
+    index = request.route_path("admin.nipsa")
     return httpexceptions.HTTPSeeOther(index)
 
 
-@view_config(route_name='admin_nipsa',
+@view_config(route_name='admin.nipsa',
              request_method='POST',
              request_param='remove',
              permission='admin_nipsa',
@@ -62,11 +62,11 @@ def nipsa_remove(request):
     nipsa_service = request.find_service(name='nipsa')
     nipsa_service.unflag(user)
 
-    index = request.route_path("admin_nipsa")
+    index = request.route_path("admin.nipsa")
     return httpexceptions.HTTPSeeOther(index)
 
 
 @view_config(context=UserNotFoundError)
 def user_not_found(exc, request):
     request.session.flash(str(exc), 'error')
-    return httpexceptions.HTTPFound(location=request.route_path('admin_nipsa'))
+    return httpexceptions.HTTPFound(location=request.route_path('admin.nipsa'))

@@ -19,7 +19,7 @@ from h.schemas.forms.admin.group import CreateAdminGroupSchema
 _ = i18n.TranslationString
 
 
-@view_config(route_name='admin_groups',
+@view_config(route_name='admin.groups',
              request_method='GET',
              renderer='h:templates/admin/groups.html.jinja2',
              permission='admin_groups')
@@ -37,7 +37,7 @@ def groups_index(context, request):
                       .order_by(models.Group.created.desc()))
 
 
-@view_defaults(route_name='admin_groups_create',
+@view_defaults(route_name='admin.groups_create',
                renderer='h:templates/admin/groups_create.html.jinja2',
                permission='admin_groups')
 class GroupCreateController(object):
@@ -98,7 +98,7 @@ class GroupCreateController(object):
                                         name=name, url=group_url)), queue='success')
 
             # Direct the user back to the admin page.
-            return HTTPFound(location=self.request.route_url('admin_groups'))
+            return HTTPFound(location=self.request.route_url('admin.groups'))
 
         return form.handle_form_submission(self.request, self.form,
                                            on_success=on_success,
@@ -108,7 +108,7 @@ class GroupCreateController(object):
         return {'form': self.form.render()}
 
 
-@view_defaults(route_name='admin_groups_edit',
+@view_defaults(route_name='admin.groups_edit',
                permission='admin_groups',
                renderer='h:templates/admin/groups_edit.html.jinja2')
 class GroupEditController(object):
@@ -139,7 +139,7 @@ class GroupEditController(object):
         return self._template_context()
 
     @view_config(request_method='POST',
-                 route_name='admin_groups_delete')
+                 route_name='admin.groups_delete')
     def delete(self):
         group = self.group
         svc = self.request.find_service(name='delete_group')
@@ -149,7 +149,7 @@ class GroupEditController(object):
             _('Successfully deleted group %s' % (group.name), 'success'))
 
         return HTTPFound(
-            location=self.request.route_path('admin_groups'))
+            location=self.request.route_path('admin.groups'))
 
     @view_config(request_method='POST')
     def update(self):

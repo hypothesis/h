@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import pytest
 from pyramid import httpexceptions
 
-from h.views.admin_nipsa import (
+from h.views.admin.nipsa import (
     UserNotFoundError,
     nipsa_add,
     nipsa_index,
@@ -109,7 +109,7 @@ def nipsa_service(pyramid_config, users):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_nipsa', '/adm/nipsa')
+    pyramid_config.add_route('admin.nipsa', '/adm/nipsa')
 
 
 @pytest.fixture

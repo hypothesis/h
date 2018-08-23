@@ -6,7 +6,7 @@ import mock
 import pytest
 from pyramid import httpexceptions
 
-from h.views.admin_admins import admins_add, admins_index, admins_remove
+from h.views.admin.admins import admins_add, admins_index, admins_remove
 
 
 @pytest.mark.usefixtures('routes')
@@ -134,7 +134,7 @@ class TestAdminsAddRemove(object):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_admins', '/adm/admins')
+    pyramid_config.add_route('admin.admins', '/adm/admins')
 
 
 @pytest.fixture

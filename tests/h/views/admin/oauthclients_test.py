@@ -6,7 +6,7 @@ from mock import create_autospec, Mock
 import pytest
 
 from h.models.auth_client import AuthClient, GrantType, ResponseType
-from h.views.admin_oauthclients import index, AuthClientCreateController, AuthClientEditController
+from h.views.admin.oauthclients import index, AuthClientCreateController, AuthClientEditController
 
 
 class FakeForm(object):
@@ -120,7 +120,7 @@ class TestAuthClientCreateController(object):
         response = ctrl.post()
 
         client = pyramid_request.db.query(AuthClient).one()
-        expected_location = pyramid_request.route_url('admin_oauthclients_edit',
+        expected_location = pyramid_request.route_url('admin.oauthclients_edit',
                                                       id=client.id)
         assert response == matchers.Redirect302To(expected_location)
 
@@ -189,7 +189,7 @@ class TestAuthClientEditController(object):
 
         response = ctrl.delete()
 
-        expected_location = pyramid_request.route_url('admin_oauthclients')
+        expected_location = pyramid_request.route_url('admin.oauthclients')
         assert response == matchers.Redirect302To(expected_location)
 
     def _expected_form(self, authclient):
@@ -238,6 +238,6 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def routes(pyramid_config):
-    pyramid_config.add_route('admin_oauthclients', '/admin/oauthclients')
-    pyramid_config.add_route('admin_oauthclients_create', '/admin/oauthclients/new')
-    pyramid_config.add_route('admin_oauthclients_edit', '/admin/oauthclients/{id}')
+    pyramid_config.add_route('admin.oauthclients', '/admin/oauthclients')
+    pyramid_config.add_route('admin.oauthclients_create', '/admin/oauthclients/new')
+    pyramid_config.add_route('admin.oauthclients_edit', '/admin/oauthclients/{id}')

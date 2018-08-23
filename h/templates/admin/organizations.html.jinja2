@@ -20,7 +20,7 @@
         {% for org in results %}
           <tr>
             <td>
-              {% set edit_url = request.route_url('admin_organizations_edit', pubid=org.pubid) %}
+              {% set edit_url = request.route_url('admin.organizations_edit', pubid=org.pubid) %}
               <a href="{{ edit_url }}">{{ org.name }}</a>
             </td>
           </tr>

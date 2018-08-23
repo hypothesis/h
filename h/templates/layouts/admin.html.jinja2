@@ -1,25 +1,25 @@
 {%- set nav_pages = [
-    ('index', 'admin_index', 'Home', []),
+    ('index', 'admin.index', 'Home', []),
 
-    ('admins', 'admin_admins', 'Administrators', []),
-    ('badge', 'admin_badge', 'Badge', []),
-    ('features', 'admin_features', 'Feature flags', [
-      ('features', 'admin_features', 'Manage feature flags'),
-      ('cohorts', 'admin_cohorts', 'Manage feature cohorts'),
+    ('admins', 'admin.admins', 'Administrators', []),
+    ('badge', 'admin.badge', 'Badge', []),
+    ('features', 'admin.features', 'Feature flags', [
+      ('features', 'admin.features', 'Manage feature flags'),
+      ('cohorts', 'admin.cohorts', 'Manage feature cohorts'),
     ]),
-    ('groups', 'admin_groups', 'Groups', [
-      ('groups', 'admin_groups', 'List Groups'),
-      ('groups_create', 'admin_groups_create', 'Create a Group'),
+    ('groups', 'admin.groups', 'Groups', [
+      ('groups', 'admin.groups', 'List Groups'),
+      ('groups_create', 'admin.groups_create', 'Create a Group'),
     ]),
-    ('mailer', 'admin_mailer', 'Mailer', []),
-    ('nipsa', 'admin_nipsa', 'NIPSA', []),
-    ('oauth', 'admin_oauthclients', 'OAuth clients', []),
-    ('organizations', 'admin_organizations', 'Organizations', [
-      ('organizations', 'admin_organizations', 'List organizations'),
-      ('organizations_create', 'admin_organizations_create', 'Create an organization'),
+    ('mailer', 'admin.mailer', 'Mailer', []),
+    ('nipsa', 'admin.nipsa', 'NIPSA', []),
+    ('oauth', 'admin.oauthclients', 'OAuth clients', []),
+    ('organizations', 'admin.organizations', 'Organizations', [
+      ('organizations', 'admin.organizations', 'List organizations'),
+      ('organizations_create', 'admin.organizations_create', 'Create an organization'),
     ]),
-    ('staff', 'admin_staff', 'Staff', []),
-    ('users', 'admin_users', 'Users', []),
+    ('staff', 'admin.staff', 'Staff', []),
+    ('users', 'admin.users', 'Users', []),
 ] -%}
 
 {%- set page_id = page_id|default('home') -%}
@@ -49,7 +49,7 @@
   <body>
     <nav class="admin-navbar">
       <div class="admin-navbar__container">
-        <a class="admin-navbar__logo-link" href="{{ request.route_url('admin_index') }}">
+        <a class="admin-navbar__logo-link" href="{{ request.route_url('admin.index') }}">
           {{ svg_icon('logo', 'admin-navbar__logo') }}
         </a>
         <ul class="admin-navbar__tab-list">

@@ -21,7 +21,7 @@ def _response_type_for_grant_type(grant_type):
         return None
 
 
-@view_config(route_name='admin_oauthclients',
+@view_config(route_name='admin.oauthclients',
              renderer='h:templates/admin/oauthclients.html.jinja2',
              permission='admin_oauthclients')
 def index(request):
@@ -31,7 +31,7 @@ def index(request):
     return {'clients': clients}
 
 
-@view_defaults(route_name='admin_oauthclients_create',
+@view_defaults(route_name='admin.oauthclients_create',
                permission='admin_oauthclients',
                renderer='h:templates/admin/oauthclients_create.html.jinja2')
 class AuthClientCreateController(object):
@@ -75,7 +75,7 @@ class AuthClientCreateController(object):
             self.request.db.add(client)
             self.request.db.flush()
 
-            read_url = self.request.route_url('admin_oauthclients_edit', id=client.id)
+            read_url = self.request.route_url('admin.oauthclients_edit', id=client.id)
             return HTTPFound(location=read_url)
 
         return form.handle_form_submission(self.request, self.form,
@@ -86,8 +86,8 @@ class AuthClientCreateController(object):
         return {'form': self.form.render()}
 
 
-@view_defaults(route_name='admin_oauthclients_edit',
-               permission='admin_oauthclients',
+@view_defaults(route_name='admin.oauthclients_edit',
+               permission='admin.oauthclients',
                renderer='h:templates/admin/oauthclients_edit.html.jinja2')
 class AuthClientEditController(object):
 
@@ -145,4 +145,4 @@ class AuthClientEditController(object):
                  request_param='delete')
     def delete(self):
         self.request.db.delete(self.client)
-        return HTTPFound(location=self.request.route_url('admin_oauthclients'))
+        return HTTPFound(location=self.request.route_url('admin.oauthclients'))
