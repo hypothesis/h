@@ -28,6 +28,19 @@ class TestIndex(object):
                                     id=annotation.id)
         assert result["_id"] == annotation.id
 
+    def test_it_indexes_presented_annotation(self, factories, get, index,
+                                             AnnotationSearchIndexPresenter):
+        annotation = factories.Annotation.build()
+        presenter = AnnotationSearchIndexPresenter.return_value
+        presenter.asdict.return_value = {'id': annotation.id,
+                                         'some_other_field': 'a_value'}
+
+        index(annotation)
+        indexed_doc = get(annotation.id)
+
+        AnnotationSearchIndexPresenter.assert_called_once_with(annotation)
+        assert indexed_doc == presenter.asdict.return_value
+
     def test_it_can_index_an_annotation_with_no_document(self, factories,
                                                          index, get):
         annotation = factories.Annotation.build(document=None)
