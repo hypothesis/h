@@ -103,7 +103,7 @@ class TestGroupJSONPresenter(object):
 
 class TestGroupsJSONPresenter(object):
 
-    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_, GroupContexts):  # noqa: N802
+    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_, GroupContexts):
         groups = [factories.Group(), factories.OpenGroup()]
         group_contexts = GroupContexts(groups)
         presenter = GroupsJSONPresenter(group_contexts)
@@ -141,24 +141,24 @@ def links_svc(pyramid_config):
 
 
 @pytest.fixture
-def GroupContext(pyramid_request, links_svc):  # noqa: N802
+def GroupContext(pyramid_request, links_svc):
     def resource_factory(group):
         return traversal.GroupContext(group, pyramid_request)
     return resource_factory
 
 
 @pytest.fixture
-def GroupContexts(pyramid_request, links_svc):  # noqa: N802
+def GroupContexts(pyramid_request, links_svc):
     def resource_factory(groups):
         return [traversal.GroupContext(group, pyramid_request) for group in groups]
     return resource_factory
 
 
 @pytest.fixture
-def GroupJSONPresenter_(patch):  # noqa: N802
+def GroupJSONPresenter_(patch):
     return patch('h.presenters.group_json.GroupJSONPresenter')
 
 
 @pytest.fixture
-def OrganizationJSONPresenter(patch):  # noqa: N802
+def OrganizationJSONPresenter(patch):
     return patch('h.presenters.group_json.OrganizationJSONPresenter')

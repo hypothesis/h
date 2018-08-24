@@ -489,7 +489,7 @@ class TestActivateController(object):
         assert success_flash
         assert success_flash[0].startswith("Your account has been activated")
 
-    def test_get_when_not_logged_in_successful_creates_ActivationEvent(  # noqa: N802
+    def test_get_when_not_logged_in_successful_creates_ActivationEvent(
             self,
             pyramid_request,
             user_model,
@@ -891,7 +891,7 @@ def activation_model(patch):
 
 
 @pytest.fixture
-def ActivationEvent(patch):  # noqa: N802
+def ActivationEvent(patch):
     return patch('h.views.accounts.ActivationEvent')
 
 

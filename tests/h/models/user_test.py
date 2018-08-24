@@ -179,7 +179,7 @@ class TestUserModelUserId(object):
 
 class TestUserModel(object):
 
-    def test_User_activate_activates_user(self, db_session):  # noqa: N802
+    def test_User_activate_activates_user(self, db_session):
         user = models.User(authority='example.com',
                            username='kiki',
                            email='kiki@kiki.com')
@@ -193,7 +193,7 @@ class TestUserModel(object):
 
         assert user.is_activated
 
-    def test_privacy_accepted_defaults_to_None(self, db_session):  # noqa: N802
+    def test_privacy_accepted_defaults_to_None(self, db_session):
         # nullable
         assert getattr(models.User(), "privacy_accepted") is None
 

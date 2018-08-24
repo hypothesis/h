@@ -164,7 +164,7 @@ def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyr
 
 
 @users_activate_fixtures
-def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request): # noqa N802
+def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
     users_activate(pyramid_request)
@@ -220,7 +220,7 @@ def routes(pyramid_config):
 
 
 @pytest.fixture
-def ActivationEvent(patch):  # noqa N802
+def ActivationEvent(patch):
     return patch('h.views.admin.users.ActivationEvent')
 
 
