@@ -370,7 +370,7 @@ def list_orgs_svc(pyramid_config, db_session):
 @pytest.fixture
 def CreateAdminGroupSchema(patch):
     schema = mock.Mock(spec_set=['bind'])
-    CreateAdminGroupSchema = patch('h.views.admin.groups.CreateAdminGroupSchema')  # noqa: N806
+    CreateAdminGroupSchema = patch('h.views.admin.groups.CreateAdminGroupSchema')
     CreateAdminGroupSchema.return_value = schema
     return CreateAdminGroupSchema
 
