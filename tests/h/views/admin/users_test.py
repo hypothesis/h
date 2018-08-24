@@ -154,7 +154,7 @@ def test_users_activate_flashes_success(pyramid_request):
 
 
 @users_activate_fixtures
-def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyramid_request): # noqa N803
+def test_users_activate_inits_ActivationEvent(ActivationEvent, user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
 
     users_activate(pyramid_request)
