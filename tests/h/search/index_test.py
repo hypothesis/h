@@ -28,7 +28,7 @@ class TestIndex(object):
                                     id=annotation.id)
         assert result["_id"] == annotation.id
 
-    def test_it_indexes_presented_annotation(self, factories, get, index,
+    def test_it_indexes_presented_annotation(self, factories, get_indexed_ann, index,
                                              AnnotationSearchIndexPresenter):
         annotation = factories.Annotation.build()
         presenter = AnnotationSearchIndexPresenter.return_value
@@ -36,21 +36,21 @@ class TestIndex(object):
                                          'some_other_field': 'a_value'}
 
         index(annotation)
-        indexed_doc = get(annotation.id)
+        indexed_ann = get_indexed_ann(annotation.id)
 
         AnnotationSearchIndexPresenter.assert_called_once_with(annotation)
-        assert indexed_doc == presenter.asdict.return_value
+        assert indexed_ann == presenter.asdict.return_value
 
     def test_it_can_index_an_annotation_with_no_document(self, factories,
-                                                         index, get):
+                                                         index, get_indexed_ann):
         annotation = factories.Annotation.build(document=None)
 
         index(annotation)
 
-        assert get(annotation.id)["document"] == {}
+        assert get_indexed_ann(annotation.id)["document"] == {}
 
     def test_it_indexes_the_annotations_document_web_uri(self, factories,
-                                                         index, get):
+                                                         index, get_indexed_ann):
         annotation = factories.Annotation.build(
             document=factories.Document.build(web_uri="https://example.com/example_article"),
         )
@@ -63,36 +63,36 @@ class TestIndex(object):
         # then access its ``document``. Bouncer
         # (https://github.com/hypothesis/bouncer) accesses h's Elasticsearch
         # index directly and uses this ``document`` field.
-        assert get(annotation.id)["document"]["web_uri"] == "https://example.com/example_article"
+        assert get_indexed_ann(annotation.id)["document"]["web_uri"] == "https://example.com/example_article"
 
-    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, factories, index, get):
+    def test_it_can_index_an_annotation_with_a_document_with_no_web_uri(self, factories, index, get_indexed_ann):
         annotation = factories.Annotation.build(
             document=factories.Document.build(web_uri=None),
         )
 
         index(annotation)
 
-        assert "web_uri" not in get(annotation.id)["document"]
+        assert "web_uri" not in get_indexed_ann(annotation.id)["document"]
 
     def test_it_indexes_the_annotations_document_title(self, factories,
-                                                       index, get):
+                                                       index, get_indexed_ann):
         annotation = factories.Annotation.build(
             document=factories.Document.build(title="test_document_title"),
         )
 
         index(annotation)
 
-        assert get(annotation.id)["document"]["title"] == ["test_document_title"]
+        assert get_indexed_ann(annotation.id)["document"]["title"] == ["test_document_title"]
 
     def test_it_can_index_an_annotation_with_a_document_with_no_title(self, factories,
-                                                                      index, get):
+                                                                      index, get_indexed_ann):
         annotation = factories.Annotation.build(
             document=factories.Document.build(title=None),
         )
 
         index(annotation)
 
-        assert "title" not in get(annotation.id)["document"]
+        assert "title" not in get_indexed_ann(annotation.id)["document"]
 
     def test_it_notifies(self, AnnotationTransformEvent, factories, pyramid_request, notify, index, search):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
@@ -294,47 +294,30 @@ class TestIndex(object):
             factories.Annotation.build(),
         )
 
-    @pytest.fixture
-    def get(self, es_client):
-        def _get(annotation_id):
-            """Return the annotation with the given ID from Elasticsearch."""
-            return es_client.conn.get(
-                index=es_client.index, doc_type=es_client.mapping_type,
-                id=annotation_id)["_source"]
-        return _get
-
 
 class TestDelete(object):
-    def test_annotation_is_marked_deleted(self, es_client, factories, index):
+    def test_annotation_is_marked_deleted(self, es_client, factories, get_indexed_ann, index):
         annotation = factories.Annotation.build(id="test_annotation_id")
 
         index(annotation)
-        result = es_client.conn.get(index=es_client.index,
-                                    doc_type=es_client.mapping_type,
-                                    id=annotation.id)
-        assert 'deleted' not in result.get('_source')
+
+        assert 'deleted' not in get_indexed_ann(annotation.id)
 
         h.search.index.delete(es_client, annotation.id)
-        result = es_client.conn.get(index=es_client.index,
-                                    doc_type=es_client.mapping_type,
-                                    id=annotation.id)
-        assert result.get('_source').get('deleted') is True
+        assert get_indexed_ann(annotation.id).get('deleted') is True
 
 
 class TestBatchIndexer(object):
-    def test_it_indexes_all_annotations(self, batch_indexer, es_client, factories):
+    def test_it_indexes_all_annotations(self, batch_indexer, factories, get_indexed_ann):
         annotations = factories.Annotation.create_batch(3)
         ids = [a.id for a in annotations]
 
         batch_indexer.index()
 
         for _id in ids:
-            result = es_client.conn.get(index=es_client.index,
-                                        doc_type=es_client.mapping_type,
-                                        id=_id)
-            assert result["_id"] == _id
+            assert get_indexed_ann(_id) is not None
 
-    def test_it_indexes_specific_annotations(self, batch_indexer, es_client, factories):
+    def test_it_indexes_specific_annotations(self, batch_indexer, factories, get_indexed_ann):
         annotations = factories.Annotation.create_batch(5)
         ids = [a.id for a in annotations]
         ids_to_index = ids[:3]
@@ -343,33 +326,23 @@ class TestBatchIndexer(object):
         batch_indexer.index(ids_to_index)
 
         for _id in ids_to_index:
-            result = es_client.conn.get(index=es_client.index,
-                                        doc_type=es_client.mapping_type,
-                                        id=_id)
-            assert result["_id"] == _id
+            assert get_indexed_ann(_id) is not None
 
         for _id in ids_not_to_index:
             with pytest.raises(elasticsearch.exceptions.NotFoundError):
-                es_client.conn.get(index=es_client.index,
-                                   doc_type=es_client.mapping_type,
-                                   id=_id)
+                get_indexed_ann(_id)
 
-    def test_it_does_not_index_deleted_annotations(self, batch_indexer, es_client, factories):
+    def test_it_does_not_index_deleted_annotations(self, batch_indexer, factories, get_indexed_ann):
         ann = factories.Annotation()
         # create deleted annotations
         ann_del = factories.Annotation(deleted=True)
 
         batch_indexer.index()
 
-        result_indexed = es_client.conn.get(index=es_client.index,
-                                            doc_type=es_client.mapping_type,
-                                            id=ann.id)
-        assert result_indexed["_id"] == ann.id
+        assert get_indexed_ann(ann.id) is not None
 
         with pytest.raises(elasticsearch.exceptions.NotFoundError):
-            es_client.conn.get(index=es_client.index,
-                               doc_type=es_client.mapping_type,
-                               id=ann_del.id)
+            get_indexed_ann(ann_del.id)
 
     def test_it_notifies(
         self, AnnotationSearchIndexPresenter, AnnotationTransformEvent,
@@ -404,19 +377,18 @@ class TestBatchIndexer(object):
                 assert 'indexed 0k annotations, rate=' in record.msg
         assert num_index_records == num_annotations // window_size
 
-    def test_it_correctly_indexes_fields_for_bulk_actions(self, batch_indexer, es_client, factories):
+    def test_it_correctly_indexes_fields_for_bulk_actions(self, batch_indexer, es_client, factories,
+                                                          get_indexed_ann):
         annotations = factories.Annotation.create_batch(2, groupid="group_a")
 
         batch_indexer.index()
 
         for ann in annotations:
-            result = es_client.conn.get(index=es_client.index,
-                                        doc_type=es_client.mapping_type,
-                                        id=ann.id)
-            assert result.get("_source").get("group") == ann.groupid
-            assert result.get("_source").get("authority") == ann.authority
-            assert result.get("_source").get("user") == ann.userid
-            assert result.get("_source").get("uri") == ann.target_uri
+            result = get_indexed_ann(ann.id)
+            assert result.get("group") == ann.groupid
+            assert result.get("authority") == ann.authority
+            assert result.get("user") == ann.userid
+            assert result.get("uri") == ann.target_uri
 
     def test_it_returns_errored_annotation_ids(self, batch_indexer, factories):
         annotations = factories.Annotation.create_batch(3)
@@ -488,3 +460,17 @@ def AnnotationSearchIndexPresenter(patch):
 def search(es_client, request):
     return elasticsearch_dsl.Search(using=es_client.conn,
                                     index=es_client.index)
+
+
+@pytest.fixture
+def get_indexed_ann(es_client):
+    def _get(annotation_id):
+        """
+        Return the annotation with the given ID from Elasticsearch.
+
+        Raises if the annotation is not found.
+        """
+        return es_client.conn.get(
+            index=es_client.index, doc_type=es_client.mapping_type,
+            id=annotation_id)["_source"]
+    return _get
