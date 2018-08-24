@@ -177,7 +177,7 @@ class GroupService(object):
         return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
 
     def _create(self, name, userid, description, type_flags,
-                origins=[], add_creator_as_member=False, organization=None):
+                origins=None, add_creator_as_member=False, organization=None):
         """
         Create a group and save it to the DB.
 
@@ -190,6 +190,9 @@ class GroupService(object):
         :param organization: the organization that this group belongs to
         :type organization: h.models.Organization
         """
+        if origins is None:
+            origins = []
+
         creator = self.user_fetcher(userid)
         scopes = [GroupScope(origin=o) for o in origins]
         if organization is not None:
