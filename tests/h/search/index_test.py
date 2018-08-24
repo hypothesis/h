@@ -88,11 +88,8 @@ class TestIndex(object):
 
         event = AnnotationTransformEvent.return_value
 
-        AnnotationTransformEvent.assert_called_with(pyramid_request, annotation, mock.ANY)
-
-        # `notify` will be called twice. Once when indexing with ES1, once when
-        # indexing with ES6.
-        notify.assert_called_with(event)
+        AnnotationTransformEvent.assert_called_once_with(pyramid_request, annotation, mock.ANY)
+        notify.assert_called_once_with(event)
 
     def test_you_can_filter_annotations_by_authority(self, factories, index, search):
         annotation = factories.Annotation.build(userid="acct:someone@example.com")
