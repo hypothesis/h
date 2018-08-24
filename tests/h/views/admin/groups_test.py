@@ -82,7 +82,7 @@ class TestGroupCreateController(object):
 
         assert 'form' in ctx
 
-    def test_get_lists_all_organizations(self, pyramid_request, factories, default_org,  # noqa: N803
+    def test_get_lists_all_organizations(self, pyramid_request, factories, default_org,
                                          CreateAdminGroupSchema, list_orgs_svc):
         GroupCreateController(pyramid_request)
 
@@ -166,7 +166,7 @@ class TestGroupCreateController(object):
 @pytest.mark.usefixtures('routes', 'user_svc', 'group_svc', 'list_orgs_svc')
 class TestGroupEditController(object):
 
-    def test_it_binds_schema(self, pyramid_request, group, user_svc,  # noqa: N803
+    def test_it_binds_schema(self, pyramid_request, group, user_svc,
                              default_org, CreateAdminGroupSchema):
         pyramid_request.matchdict = {'pubid': group.pubid}
 
@@ -207,7 +207,7 @@ class TestGroupEditController(object):
 
         assert ctx['form'] == self._expected_form(group)
 
-    def test_read_lists_organizations_in_groups_authority(self, factories, pyramid_request, group,  # noqa: N803
+    def test_read_lists_organizations_in_groups_authority(self, factories, pyramid_request, group,
                                                           default_org, CreateAdminGroupSchema,
                                                           list_orgs_svc):
         pyramid_request.matchdict = {'pubid': group.pubid}

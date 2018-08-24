@@ -11,7 +11,7 @@ from h import traversal
 
 
 class TestGroupJSONPresenter(object):
-    def test_private_group_asdict(self, factories, GroupContext, links_svc):  # noqa: N803
+    def test_private_group_asdict(self, factories, GroupContext, links_svc):
         group = factories.Group(name='My Group',
                                 pubid='mygroup')
         group_context = GroupContext(group)
@@ -27,7 +27,7 @@ class TestGroupJSONPresenter(object):
             'links': links_svc.get_all.return_value,
         }
 
-    def test_open_group_asdict(self, factories, GroupContext, links_svc):  # noqa: N803
+    def test_open_group_asdict(self, factories, GroupContext, links_svc):
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
         group_context = GroupContext(group)
@@ -43,7 +43,7 @@ class TestGroupJSONPresenter(object):
             'links': links_svc.get_all.return_value,
         }
 
-    def test_open_scoped_group_asdict(self, factories, GroupContext, links_svc):  # noqa: N803
+    def test_open_scoped_group_asdict(self, factories, GroupContext, links_svc):
         group = factories.OpenGroup(name='My Group',
                                     pubid='groupy',
                                     scopes=[factories.GroupScope(origin='http://foo.com')])
@@ -60,7 +60,7 @@ class TestGroupJSONPresenter(object):
             'links': links_svc.get_all.return_value,
         }
 
-    def test_it_does_not_contain_deprecated_url(self, factories, GroupContext, links_svc):  # noqa: N803
+    def test_it_does_not_contain_deprecated_url(self, factories, GroupContext, links_svc):
         links_svc.get_all.return_value = {
             'html': 'foobar'
         }
@@ -70,7 +70,7 @@ class TestGroupJSONPresenter(object):
 
         assert 'url' not in presenter.asdict()
 
-    def test_it_does_not_expand_by_default(self, factories, GroupContext):  # noqa: N803
+    def test_it_does_not_expand_by_default(self, factories, GroupContext):
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
         group_context = GroupContext(group)
@@ -80,7 +80,7 @@ class TestGroupJSONPresenter(object):
 
         assert model['organization'] == group_context.organization.id
 
-    def test_it_expands_organizations(self, factories, GroupContext, OrganizationJSONPresenter):  # noqa: N803
+    def test_it_expands_organizations(self, factories, GroupContext, OrganizationJSONPresenter):
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
         group_context = GroupContext(group)
@@ -90,7 +90,7 @@ class TestGroupJSONPresenter(object):
 
         assert model['organization'] == OrganizationJSONPresenter(group_context.organization).asdict.return_value
 
-    def test_it_ignores_unrecognized_expands(self, factories, GroupContext):  # noqa: N803
+    def test_it_ignores_unrecognized_expands(self, factories, GroupContext):
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
         group_context = GroupContext(group)
@@ -103,7 +103,7 @@ class TestGroupJSONPresenter(object):
 
 class TestGroupsJSONPresenter(object):
 
-    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_, GroupContexts):  # noqa: [N802, N803]
+    def test_proxies_to_GroupJSONPresenter(self, factories, GroupJSONPresenter_, GroupContexts):  # noqa: N802
         groups = [factories.Group(), factories.OpenGroup()]
         group_contexts = GroupContexts(groups)
         presenter = GroupsJSONPresenter(group_contexts)
@@ -113,7 +113,7 @@ class TestGroupsJSONPresenter(object):
 
         assert GroupJSONPresenter_.call_args_list == expected_call_args
 
-    def test_asdicts_returns_list_of_dicts(self, factories, GroupContexts):  # noqa: N803
+    def test_asdicts_returns_list_of_dicts(self, factories, GroupContexts):
         groups = [factories.Group(name='filbert'), factories.OpenGroup(name='delbert')]
         group_contexts = GroupContexts(groups)
         presenter = GroupsJSONPresenter(group_contexts)
@@ -122,7 +122,7 @@ class TestGroupsJSONPresenter(object):
 
         assert [group['name'] for group in result] == ['filbert', 'delbert']
 
-    def test_asdicts_injects_links(self, factories, links_svc, GroupContexts):  # noqa: N803
+    def test_asdicts_injects_links(self, factories, links_svc, GroupContexts):
         groups = [factories.Group(), factories.OpenGroup()]
         group_contexts = GroupContexts(groups)
         presenter = GroupsJSONPresenter(group_contexts)

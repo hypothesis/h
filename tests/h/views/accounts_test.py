@@ -489,7 +489,7 @@ class TestActivateController(object):
         assert success_flash
         assert success_flash[0].startswith("Your account has been activated")
 
-    def test_get_when_not_logged_in_successful_creates_ActivationEvent(  # noqa: N802, N803
+    def test_get_when_not_logged_in_successful_creates_ActivationEvent(  # noqa: N802
             self,
             pyramid_request,
             user_model,
@@ -502,7 +502,7 @@ class TestActivateController(object):
         ActivationEvent.assert_called_once_with(
             pyramid_request, user_model.get_by_activation.return_value)
 
-    def test_get_when_not_logged_in_successful_notifies(self,  # noqa: N803
+    def test_get_when_not_logged_in_successful_notifies(self,
                                                         notify,
                                                         pyramid_request,
                                                         user_model,
