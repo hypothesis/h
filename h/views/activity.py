@@ -97,7 +97,10 @@ class GroupSearchController(SearchController):
     def __init__(self, group, request):
         super(GroupSearchController, self).__init__(request)
         self.group = group
-        self._organization_context = OrganizationContext(group.organization, request)
+        if group.organization:
+            self._organization_context = OrganizationContext(group.organization, request)
+        else:
+            self._organization_context = None
 
     @view_config(request_method='GET')
     def search(self):
@@ -167,10 +170,15 @@ class GroupSearchController(SearchController):
                                           pubid=self.group.pubid,
                                           slug=self.group.slug),
             'share_subtitle': _('Share group'),
-            'share_msg': _('Sharing the link lets people view this group:'),
-            'organization': {'name': self.group.organization.name,
-                             'logo': self._organization_context.logo}
+            'share_msg': _('Sharing the link lets people view this group:')
         }
+        if self.group.organization:
+            result['group']['organization'] = {
+                'name': self.group.organization.name,
+                'logo': self._organization_context.logo
+            }
+        else:
+            result['group']['organization'] = None
 
         if self.group.type == 'private':
             result['group']['share_subtitle'] = _('Invite new members')

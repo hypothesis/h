@@ -73,7 +73,7 @@ class Group(Base, mixins.Timestamps):
 
     scopes = sa.orm.relationship('GroupScope', backref='group', cascade='all, delete-orphan')
 
-    organization_id = sa.Column(sa.Integer, sa.ForeignKey('organization.id'), nullable=False)
+    organization_id = sa.Column(sa.Integer, sa.ForeignKey('organization.id'), nullable=True)
     organization = sa.orm.relationship('Organization')
 
     def __init__(self, **kwargs):

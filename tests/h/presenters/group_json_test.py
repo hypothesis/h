@@ -70,6 +70,17 @@ class TestGroupJSONPresenter(object):
 
         assert 'url' not in presenter.asdict()
 
+    def test_it_sets_organization_None_if_group_has_no_organization(self, factories, GroupContext):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        group.organization = None
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
+
+        model = presenter.asdict()
+
+        assert model['organization'] is None
+
     def test_it_does_not_expand_by_default(self, factories, GroupContext):
         group = factories.OpenGroup(name='My Group',
                                     pubid='mygroup')
@@ -89,6 +100,17 @@ class TestGroupJSONPresenter(object):
         model = presenter.asdict(expand=['organization'])
 
         assert model['organization'] == OrganizationJSONPresenter(group_context.organization).asdict.return_value
+
+    def test_expanded_organizations_None_if_missing(self, factories, GroupContext, OrganizationJSONPresenter):
+        group = factories.OpenGroup(name='My Group',
+                                    pubid='mygroup')
+        group.organization = None
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
+
+        model = presenter.asdict(expand=['organization'])
+
+        assert model['organization'] is None
 
     def test_it_ignores_unrecognized_expands(self, factories, GroupContext):
         group = factories.OpenGroup(name='My Group',

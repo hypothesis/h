@@ -21,16 +21,20 @@ class GroupJSONPresenter(object):
 
     def _expand(self, model, expand=[]):
         if 'organization' in expand:
-            model['organization'] = OrganizationJSONPresenter(
-              self.organization_context
-            ).asdict()
+            if self.organization_context:
+                model['organization'] = OrganizationJSONPresenter(
+                  self.organization_context
+                ).asdict()
         return model
 
     def _model(self):
+        organization = None
+        if self.organization_context:
+            organization = self.organization_context.id
         model = {
           'id': self.context.id,
           'name': self.group.name,
-          'organization': self.organization_context.id,
+          'organization': organization,
           'public': self.group.is_public,  # DEPRECATED: TODO: remove from client
           'scoped': True if self.group.scopes else False,
           'type': self.group.type
