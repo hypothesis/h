@@ -292,6 +292,9 @@ class TestUriFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
+    # TODO - Explicit test of URL normalization (ie. that search normalizes input
+    # URL using `h.util.uri.normalize` and queries with that).
+
     @pytest.fixture
     def search(self, search, pyramid_request):
         search.append_filter(query.UriFilter(pyramid_request))
