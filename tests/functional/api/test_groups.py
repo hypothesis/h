@@ -81,6 +81,18 @@ class TestAddMember(object):
 
         assert user in group.members
 
+    def test_it_ignores_forwarded_user_header(self, app, user, factories, group, auth_client_header):
+        headers = auth_client_header
+        user2 = factories.User()
+        headers[native_str('X-Forwarded-User')] = native_str(user2.userid)
+
+        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
+                            headers=auth_client_header)
+
+        assert user in group.members
+        assert user2 not in group.members
+        assert res.status_code == 204
+
     def test_it_is_idempotent(self, app, user, group, auth_client_header):
         app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
                             headers=auth_client_header)
