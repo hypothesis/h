@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
+import re
+
 from pyramid import interfaces
 from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.authentication import CallbackAuthenticationPolicy
@@ -8,6 +11,11 @@ from pyramid.security import Authenticated
 from zope import interface
 
 from h.auth import util
+
+# As we roll out the new API Auth Policy with Auth Token Policy, we
+# want to keep it restricted to certain endpoints
+# Currently restricted to `POST /api/groups` only
+AUTH_TOKEN_PATH_PATTERN = '^\/api\/groups(\/?)$'
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
@@ -350,7 +358,7 @@ def _is_client_request(request):
 
     This is intended to be temporary.
     """
-    return (request.path.startswith('/api/groups') and
+    return (re.match(AUTH_TOKEN_PATH_PATTERN, request.path) and
             request.method == 'POST')
 
 
