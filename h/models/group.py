@@ -13,7 +13,7 @@ from h.db import mixins
 from h import pubid
 
 
-GROUP_NAME_MIN_LENGTH = 4
+GROUP_NAME_MIN_LENGTH = 3
 GROUP_NAME_MAX_LENGTH = 25
 GROUP_DESCRIPTION_MAX_LENGTH = 250
 

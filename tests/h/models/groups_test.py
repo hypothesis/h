@@ -19,9 +19,9 @@ def test_init_sets_given_attributes():
 
 
 def test_with_short_name():
-    """Should raise ValueError if name shorter than 4 characters."""
+    """Should raise ValueError if name shorter than 3 characters."""
     with pytest.raises(ValueError):
-        models.Group(name="abc")
+        models.Group(name="ab")
 
 
 def test_with_long_name():
