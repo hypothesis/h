@@ -89,15 +89,6 @@ class TestBuilder(object):
 
         assert q["size"] == LIMIT_DEFAULT
 
-    def test_with_custom_order(self):
-        """'order' params are returned in the query dict if given."""
-        builder = query.Builder(ES_VERSION)
-
-        q = builder.build({"order": "asc"})
-
-        sort = q["sort"]
-        assert sort[0]["updated"]["order"] == "asc"
-
     def test_defaults_to_match_all(self):
         """If no query params are given a "match_all": {} query is returned."""
         builder = query.Builder(ES_VERSION)
