@@ -9,6 +9,7 @@ from h.auth.util import request_auth_client, validate_auth_client_authority
 from h.exceptions import PayloadError
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema
+from h.schemas import ValidationError
 from h.traversal import GroupContext
 from h.views.api.config import api_config
 
@@ -42,6 +43,9 @@ def groups(request):
             description='Create a new group')
 def create(request):
     """Create a group from the POST payload."""
+    if request.user is None:
+        raise ValidationError('Request must have an authenticated user')
+
     schema = CreateGroupAPISchema()
 
     appstruct = schema.validate(_json_payload(request))

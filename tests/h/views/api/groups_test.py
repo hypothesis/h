@@ -179,6 +179,13 @@ class TestCreateGroup(object):
         GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(expand=['organization'])
 
+    def test_it_raises_validation_error_if_missing_request_user(self,
+                                                                pyramid_request):
+        pyramid_request.user = None
+
+        with pytest.raises(ValidationError, match="must have an authenticated user"):
+            views.create(pyramid_request)
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
         # Add a nominal json_body so that _json_payload() parsing of
