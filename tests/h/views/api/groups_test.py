@@ -7,7 +7,6 @@ import pytest
 
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 
-from h.exceptions import ClientUnauthorized
 from h.views.api import groups as views
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
@@ -196,9 +195,7 @@ class TestCreateGroup(object):
 
 
 @pytest.mark.usefixtures('group_service',
-                         'user_service',
-                         'request_auth_client',
-                         'validate_auth_client_authority')
+                         'user_service')
 class TestAddMember(object):
 
     def test_it_adds_user_from_request_params_to_group(self,
@@ -246,52 +243,6 @@ class TestAddMember(object):
 
         user_service.fetch.assert_called_once_with(user.userid)
 
-    def test_it_gets_the_auth_client_from_the_request(self,
-                                                      group,
-                                                      pyramid_request,
-                                                      request_auth_client):
-        views.add_member(group, pyramid_request)
-
-        request_auth_client.assert_called_once_with(pyramid_request)
-
-    def test_it_validates_auth_client_and_user_authorities(self,
-                                                           group,
-                                                           user,
-                                                           pyramid_request,
-                                                           validate_auth_client_authority,
-                                                           auth_client):
-        views.add_member(group, pyramid_request)
-
-        validate_auth_client_authority.assert_called_once_with(auth_client, user.authority)
-
-    def test_it_raises_ClientUnauthorized_with_bad_client_credentials(self,
-                                                                      group,
-                                                                      pyramid_request,
-                                                                      request_auth_client):
-        request_auth_client.side_effect = ClientUnauthorized()
-
-        with pytest.raises(ClientUnauthorized):
-            views.add_member(group, pyramid_request)
-
-    def test_it_raises_ClientUnauthorized_with_bad_auth_client(self,
-                                                               group,
-                                                               pyramid_request,
-                                                               request_auth_client):
-        request_auth_client.side_effect = ClientUnauthorized()
-
-        with pytest.raises(ClientUnauthorized):
-            views.add_member(group, pyramid_request)
-
-    def test_it_raises_ValidationError_with_mismatched_authorities(self,
-                                                                   group,
-                                                                   pyramid_request,
-                                                                   validate_auth_client_authority):
-        msg = "'authority' does not match authenticated client"
-        validate_auth_client_authority.side_effect = ValidationError()
-
-        with pytest.raises(ValidationError, message=msg):
-            views.add_member(group, pyramid_request)
-
     @pytest.fixture
     def group(self, factories):
         return factories.Group(authority='example.com')
@@ -317,16 +268,6 @@ class TestAddMember(object):
     def auth_client(self, factories):
         return factories.ConfidentialAuthClient(authority='example.com',
                                                 grant_type=GrantType.client_credentials)
-
-    @pytest.fixture
-    def request_auth_client(self, patch, auth_client):
-        request_auth_client = patch('h.views.api.groups.request_auth_client')
-        request_auth_client.return_value = auth_client
-        return request_auth_client
-
-    @pytest.fixture
-    def validate_auth_client_authority(self, patch):
-        return patch('h.views.api.groups.validate_auth_client_authority')
 
 
 @pytest.mark.usefixtures('authenticated_userid', 'group_service')

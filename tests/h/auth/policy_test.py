@@ -37,8 +37,7 @@ AUTH_CLIENT_PATHS = (
 )
 
 NON_AUTH_CLIENT_PATHS = (
-    '/api/groups//',
-    '/api/groups/33333',
+    '/api/gro',
     '/api/badge',
     '/api',
     '/groups/'
