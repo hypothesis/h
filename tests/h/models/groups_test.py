@@ -8,6 +8,7 @@ from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from h import models
+from h.auth import role
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
 
 
@@ -129,6 +130,9 @@ def test_non_public_group():
 
 
 class TestGroupACL(object):
+    def test_auth_clients_can_add_members(self, group, authz_policy):
+        assert authz_policy.permits(group, role.Authclient, 'member_add')
+
     def test_authority_joinable(self, group, authz_policy):
         group.joinable_by = JoinableBy.authority
 
