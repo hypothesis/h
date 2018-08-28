@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 import venusian
 
+from h.exceptions import PayloadError
+from h.schemas.base import validate_query_params
 from h.util import cors
 
 
@@ -14,7 +16,8 @@ cors_policy = cors.policy(
 
 
 def add_api_view(config, view, link_name=None, description=None,
-                 enable_preflight=True, **settings):
+                 enable_preflight=True, query_schema=None,
+                 body_schema=None, **settings):
 
     """
     Add a view configuration for an API view.
@@ -24,6 +27,14 @@ def add_api_view(config, view, link_name=None, description=None,
     specified it adds the view to the list of views returned by the `api.index`
     route.
 
+    If `query_schema` is provided, it specifies the schema for query parameters
+    for this request. In the view callable, the parsed and validated parameters
+    are available as `request.validated_params`.
+
+    If `body_schema` is provided, it specifies the schema for the JSON body
+    for this request. In the view callable, the parsed and validated body
+    is available as `request.validated_body`.
+
     :param config: The Pyramid `Configurator`
     :param view: The view callable
     :param link_name: Dotted path of the metadata for this route in the output
@@ -32,6 +43,10 @@ def add_api_view(config, view, link_name=None, description=None,
     :param enable_preflight: If `True` add support for CORS preflight requests
                              for this view. If `True`, a `route_name` must be
                              specified.
+    :param body_schema: JSON body schema for this request
+    :type body_schema: h.schemas.JSONSchema
+    :param query_schema: Query parameter schema for this request
+    :type query_schema: colander.Schema
     :param settings: Arguments to pass on to `config.add_view`
     """
 
@@ -58,7 +73,24 @@ def add_api_view(config, view, link_name=None, description=None,
             registry.api_links = []
         registry.api_links.append(link)
 
-    config.add_view(view=view, **settings)
+    def api_view_wrapper(request, *args, **kwargs):
+        if query_schema:
+            def validate_params(request):
+                return validate_query_params(query_schema, request.GET)
+            request.set_property(validate_params, name='validated_params')
+
+        if body_schema:
+            def validate_body(request):
+                try:
+                    body = request.json_body
+                except ValueError:
+                    raise PayloadError()
+                return body_schema.validate(body)
+            request.set_property(validate_body, name='validated_body')
+
+        return view(request, *args, **kwargs)
+
+    config.add_view(view=api_view_wrapper, **settings)
     if enable_preflight:
         cors.add_preflight_view(config, settings['route_name'], cors_policy)
 

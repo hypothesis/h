@@ -6,12 +6,13 @@ from h._compat import PY2
 import enum
 from mock import Mock
 import pytest
+from webob.multidict import MultiDict
 
 import colander
 from pyramid.exceptions import BadCSRFToken
 
 from h.schemas import ValidationError
-from h.schemas.base import enum_type, CSRFSchema, JSONSchema
+from h.schemas.base import enum_type, validate_query_params, CSRFSchema, JSONSchema
 
 
 class ExampleCSRFSchema(CSRFSchema):
@@ -119,3 +120,60 @@ class TestEnumType(object):
     @pytest.fixture
     def color_type(self):
         return enum_type(Color)()
+
+
+class QueryParamSchema(colander.Schema):
+
+    int_field = colander.SchemaNode(colander.Integer(), missing=0)
+
+    string_field = colander.SchemaNode(colander.String(), missing=None)
+
+    list_field = colander.SchemaNode(colander.Sequence(),
+                                     colander.SchemaNode(colander.String()),
+                                     missing=None)
+
+    enum_field = colander.SchemaNode(colander.String(),
+                                     validator=colander.OneOf(["up", "down"]),
+                                     missing="up")
+
+
+class TestValidateQueryParams(object):
+
+    def test_it_deserializes_params(self):
+        schema = QueryParamSchema()
+        params = MultiDict()
+        params.add("string_field", "test")
+
+        parsed = validate_query_params(schema, params)
+
+        assert parsed == {"int_field": 0,
+                          "string_field": "test",
+                          "list_field": None,
+                          "enum_field": "up"}
+
+    def test_it_raises_if_params_invalid(self):
+        schema = QueryParamSchema()
+        params = MultiDict({"int_field": "not-an-int"})
+
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, params)
+
+    def test_it_collects_values_into_a_list_for_sequence_fields(self):
+        schema = QueryParamSchema()
+        params = MultiDict()
+        params.add("list_field", "first")
+        params.add("list_field", "second")
+
+        parsed = validate_query_params(schema, params)
+
+        assert parsed["list_field"] == ["first", "second"]
+
+    def test_it_uses_last_value_for_non_sequence_fields(self):
+        schema = QueryParamSchema()
+        params = MultiDict()
+        params.add("string_field", "first")
+        params.add("string_field", "second")
+
+        parsed = validate_query_params(schema, params)
+
+        assert parsed["string_field"] == "second"

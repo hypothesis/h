@@ -99,6 +99,61 @@ def enum_type(enum_cls):
     return EnumType
 
 
+def _combine_repeated_fields(schema, data):
+    """
+    Convert a `MultiDict` into a dict.
+
+    Repeated fields are either dropped, except for the last entry, or combined
+    into a list, depending on the type of the corresponding schema node.
+
+    This is useful for preparing a query string multidict for processing with
+    a colander schema.
+
+    :type schema: colander.SchemaNode
+    :type data: webob.multidict.MultiDict
+    :rtype: Dict[str,Any]
+    """
+    result = data.dict_of_lists()
+    for key, values in result.items():
+        node = schema.get(key)
+
+        if not node or not isinstance(node.typ, colander.Sequence):
+            # Not a list-valued field, keep only the last entry.
+            result[key] = values[-1]
+
+    return result
+
+
+def _colander_exception_msg(exc):
+    """
+    Combine error messages from a `colander.Invalid` exception.
+
+    :type exc: colander.Invalid
+    :rtype str:
+    """
+    msg_dict = exc.asdict()
+    for child in exc.children:
+        msg_dict.update(child.asdict())
+    msg_list = ["{}: {}".format(field, err) for field, err in msg_dict.items()]
+    return "\n".join(msg_list)
+
+
+def validate_query_params(schema, params):
+    """
+    Validate query parameters using a colander schema.
+
+    :type schema: colander.Schema
+    :param params: Query parameter dict, usually `request.params`.
+    :type params: webob.multidict.MultiDict
+    :raises ValidationError:
+    """
+    try:
+        combined_params = _combine_repeated_fields(schema, params)
+        return schema.deserialize(combined_params)
+    except colander.Invalid as exc:
+        raise ValidationError(_colander_exception_msg(exc))
+
+
 def _format_jsonschema_error(error):
     """Format a :py:class:`jsonschema.ValidationError` as a string."""
     if error.path:
