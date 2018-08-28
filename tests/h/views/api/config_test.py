@@ -96,13 +96,13 @@ class TestAddApiView(object):
         validate_query_params.side_effect = ValidationError()
         pyramid_request.GET = MultiDict({})
         with pytest.raises(ValidationError):
-            wrapped_view(pyramid_request)
+            wrapped_view({}, pyramid_request)
 
         # Calling with a valid query should not raise.
         validate_query_params.side_effect = None
         validate_query_params.return_value = {"foo": 42}
         pyramid_request.GET = MultiDict({"foo": "42"})
-        wrapped_view(pyramid_request)
+        wrapped_view({}, pyramid_request)
 
     def test_api_view_validates_body(self, pyramid_config, pyramid_request):
         def validate(data):
@@ -123,11 +123,52 @@ class TestAddApiView(object):
         # Calling with an invalid body should raise.
         pyramid_request.json_body = {"foo": "wibble"}
         with pytest.raises(ValidationError):
-            wrapped_view(pyramid_request)
+            wrapped_view({}, pyramid_request)
 
         # Calling with a valid body should not raise.
         pyramid_request.json_body = {"foo": "bar"}
-        wrapped_view(pyramid_request)
+        wrapped_view({}, pyramid_request)
+
+    def test_wrapped_view_calls_original_view(self, pyramid_config, pyramid_request):
+        args = []
+
+        # Dummy view. We're not using Mock() here because Pyramid inspects
+        # `view`'s arguments and `Mock` doesn't replicate that faithfully.
+        def view(context, request):
+            args.extend([context, request])
+            return 'result'
+
+        api_config.add_api_view(pyramid_config, view, route_name='thing.update',
+                                body_schema=mock.Mock())
+        (_, kwargs) = pyramid_config.add_view.call_args
+        wrapped_view = kwargs['view']
+        context = mock.Mock()
+
+        result = wrapped_view(context, pyramid_request)
+
+        assert wrapped_view is not view
+        assert args == [context, pyramid_request]
+        assert result == 'result'
+
+    # Same as above but for a view that doesn't take a "context" argument.
+    def test_wrapped_view_calls_original_view_without_context(self, pyramid_config, pyramid_request):
+        args = []
+
+        # Dummy view. We're not using Mock() here because Pyramid inspects
+        # `view`'s arguments and `Mock` doesn't replicate that faithfully.
+        def view(request):
+            args.append(request)
+            return 'result'
+        api_config.add_api_view(pyramid_config, view, route_name='thing.update',
+                                body_schema=mock.Mock())
+        (_, kwargs) = pyramid_config.add_view.call_args
+        wrapped_view = kwargs['view']
+
+        result = wrapped_view(mock.Mock(), pyramid_request)
+
+        assert wrapped_view is not view
+        assert args == [pyramid_request]
+        assert result == 'result'
 
     @pytest.fixture
     def pyramid_config(self, pyramid_config):

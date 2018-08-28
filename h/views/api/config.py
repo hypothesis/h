@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+
+from pyramid.config.util import takes_one_arg
 import venusian
 
 from h.exceptions import PayloadError
@@ -73,24 +75,32 @@ def add_api_view(config, view, link_name=None, description=None,
             registry.api_links = []
         registry.api_links.append(link)
 
-    def api_view_wrapper(request, *args, **kwargs):
-        if query_schema:
-            def validate_params(request):
-                return validate_query_params(query_schema, request.GET)
-            request.set_property(validate_params, name='validated_params')
+    if query_schema is not None or body_schema is not None:
+        # Wrapper view which validates query and/or body before calling original.
+        def wrapped_view(context, request):
+            if query_schema:
+                def validate_params(request):
+                    return validate_query_params(query_schema, request.GET)
+                request.set_property(validate_params, name='validated_params')
 
-        if body_schema:
-            def validate_body(request):
-                try:
-                    body = request.json_body
-                except ValueError:
-                    raise PayloadError()
-                return body_schema.validate(body)
-            request.set_property(validate_body, name='validated_body')
+            if body_schema:
+                def validate_body(request):
+                    try:
+                        body = request.json_body
+                    except ValueError:
+                        raise PayloadError()
+                    return body_schema.validate(body)
+                request.set_property(validate_body, name='validated_body')
 
-        return view(request, *args, **kwargs)
+            if takes_one_arg(view):
+                return view(request)
+            else:
+                return view(context, request)
+    else:
+        # No validation required. Call the original view directly.
+        wrapped_view = view
 
-    config.add_view(view=api_view_wrapper, **settings)
+    config.add_view(view=wrapped_view, **settings)
     if enable_preflight:
         cors.add_preflight_view(config, settings['route_name'], cors_policy)
 
