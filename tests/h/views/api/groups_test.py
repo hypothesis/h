@@ -32,8 +32,8 @@ class TestGetGroups(object):
         )
 
     def test_proxies_request_params(self, anonymous_request, list_groups_service):
-        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
-        anonymous_request.params['authority'] = 'foo.com'
+        anonymous_request.validated_params['document_uri'] = 'http://example.com/thisthing.html'
+        anonymous_request.validated_params['authority'] = 'foo.com'
         views.groups(anonymous_request)
 
         list_groups_service.request_groups.assert_called_once_with(
@@ -43,7 +43,7 @@ class TestGetGroups(object):
         )
 
     def test_overrides_authority_with_user_authority(self, authenticated_request, list_groups_service):
-        authenticated_request.params['authority'] = 'foo.com'
+        authenticated_request.validated_params['authority'] = 'foo.com'
 
         views.groups(authenticated_request)
 
@@ -83,7 +83,7 @@ class TestGetGroups(object):
         assert result == GroupsJSONPresenter(open_groups).asdicts.return_value
 
     def test_proxies_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):
-        anonymous_request.params['expand'] = 'organization'
+        anonymous_request.validated_params['expand'] = ['organization']
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
@@ -91,8 +91,7 @@ class TestGetGroups(object):
         GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(expand=['organization'])
 
     def test_passes_multiple_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):
-        anonymous_request.GET.add('expand', 'organization')
-        anonymous_request.GET.add('expand', 'foobars')
+        anonymous_request.validated_params['expand'] = ['organization', 'foobars']
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)

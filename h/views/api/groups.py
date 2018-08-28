@@ -8,7 +8,7 @@ from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 from h.auth.util import request_auth_client, validate_auth_client_authority
 from h.exceptions import PayloadError
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
-from h.schemas.api.group import CreateGroupAPISchema
+from h.schemas.api.group import CreateGroupAPISchema, GetGroupsAPISchema
 from h.traversal import GroupContext
 from h.views.api.config import api_config
 
@@ -16,11 +16,12 @@ from h.views.api.config import api_config
 @api_config(route_name='api.groups',
             request_method='GET',
             link_name='groups.read',
-            description="Fetch the user's groups")
+            description="Fetch the user's groups",
+            query_schema=GetGroupsAPISchema())
 def groups(request):
-    authority = request.params.get('authority')
-    document_uri = request.params.get('document_uri')
-    expand = request.GET.getall('expand') or []
+    authority = request.validated_params['authority']
+    document_uri = request.validated_params['document_uri']
+    expand = request.validated_params['expand']
 
     list_svc = request.find_service(name='list_groups')
 
