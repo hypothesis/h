@@ -32,8 +32,8 @@ class TestGetGroups(object):
         )
 
     def test_proxies_request_params(self, anonymous_request, list_groups_service):
-        anonymous_request.params['document_uri'] = 'http://example.com/thisthing.html'
-        anonymous_request.params['authority'] = 'foo.com'
+        anonymous_request.validated_params['document_uri'] = 'http://example.com/thisthing.html'
+        anonymous_request.validated_params['authority'] = 'foo.com'
         views.groups(anonymous_request)
 
         list_groups_service.request_groups.assert_called_once_with(
@@ -43,7 +43,7 @@ class TestGetGroups(object):
         )
 
     def test_overrides_authority_with_user_authority(self, authenticated_request, list_groups_service):
-        authenticated_request.params['authority'] = 'foo.com'
+        authenticated_request.validated_params['authority'] = 'foo.com'
 
         views.groups(authenticated_request)
 
@@ -83,7 +83,7 @@ class TestGetGroups(object):
         assert result == GroupsJSONPresenter(open_groups).asdicts.return_value
 
     def test_proxies_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):
-        anonymous_request.params['expand'] = 'organization'
+        anonymous_request.validated_params['expand'] = ['organization']
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
@@ -91,8 +91,7 @@ class TestGetGroups(object):
         GroupsJSONPresenter(open_groups).asdicts.assert_called_once_with(expand=['organization'])
 
     def test_passes_multiple_expand_to_presenter(self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter):
-        anonymous_request.GET.add('expand', 'organization')
-        anonymous_request.GET.add('expand', 'foobars')
+        anonymous_request.validated_params['expand'] = ['organization', 'foobars']
         list_groups_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
@@ -108,35 +107,21 @@ class TestGetGroups(object):
         pyramid_request.user = factories.User()
         return pyramid_request
 
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.validated_params = {'authority': None, 'document_uri': None, 'expand': []}
+        return pyramid_request
 
-@pytest.mark.usefixtures('CreateGroupAPISchema',
-                         'group_service',
+
+@pytest.mark.usefixtures('group_service',
                          'GroupContext',
                          'GroupJSONPresenter')
 class TestCreateGroup(object):
 
-    def test_it_inits_group_create_schema(self, pyramid_request, CreateGroupAPISchema):
-        views.create(pyramid_request)
-
-        CreateGroupAPISchema.assert_called_once_with()
-
-    # @TODO Move this test once _json_payload() has been moved to a reusable util module
-    def test_it_raises_if_json_parsing_fails(self, pyramid_request):
-        """It raises PayloadError if parsing of the request body fails."""
-        # Make accessing the request.json_body property raise ValueError.
-        type(pyramid_request).json_body = {}
-        with mock.patch.object(type(pyramid_request),
-                               'json_body',
-                               new_callable=mock.PropertyMock) as json_body:
-            json_body.side_effect = ValueError()
-            with pytest.raises(views.PayloadError):
-                views.create(pyramid_request)
-
     def test_it_passes_request_params_to_group_create_service(self,
                                                               pyramid_request,
-                                                              CreateGroupAPISchema,
                                                               group_service):
-        CreateGroupAPISchema.return_value.validate.return_value = {
+        pyramid_request.validated_body = {
           'name': 'My Group',
           'description': 'How about that?',
          }
@@ -148,9 +133,8 @@ class TestCreateGroup(object):
 
     def test_it_sets_description_to_none_if_not_present(self,
                                                         pyramid_request,
-                                                        CreateGroupAPISchema,
                                                         group_service):
-        CreateGroupAPISchema.return_value.validate.return_value = {
+        pyramid_request.validated_body = {
           'name': 'My Group',
          }
         views.create(pyramid_request)
@@ -188,9 +172,7 @@ class TestCreateGroup(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, factories):
-        # Add a nominal json_body so that _json_payload() parsing of
-        # it doesn't raise
-        pyramid_request.json_body = {}
+        pyramid_request.validated_body = {'name': 'A group', 'description': 'About this group'}
         pyramid_request.user = factories.User()
         return pyramid_request
 
@@ -388,11 +370,6 @@ def GroupsJSONPresenter(patch):
 @pytest.fixture
 def GroupContext(patch):
     return patch('h.views.api.groups.GroupContext')
-
-
-@pytest.fixture
-def CreateGroupAPISchema(patch):
-    return patch('h.views.api.groups.CreateGroupAPISchema')
 
 
 @pytest.fixture

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
 import mock
 import pytest
+from webob.multidict import MultiDict
 
+from h.schemas.base import JSONSchema, ValidationError
 from h.views.api import config as api_config
 
 
@@ -76,6 +79,96 @@ class TestAddApiView(object):
             'method': expected_method,
             'route_name': route_name,
         }]
+
+    def test_api_view_validates_query(self, pyramid_config, pyramid_request, patch):
+        validate_query_params = patch('h.views.api.config.validate_query_params')
+
+        def view(request):
+            assert request.validated_params == {"foo": 42}
+
+        query_schema = mock.Mock()
+        api_config.add_api_view(pyramid_config, view, route_name='thing.read',
+                                query_schema=query_schema)
+        (_, kwargs) = pyramid_config.add_view.call_args
+        wrapped_view = kwargs['view']
+
+        # Calling with an invalid query should raise.
+        validate_query_params.side_effect = ValidationError()
+        pyramid_request.GET = MultiDict({})
+        with pytest.raises(ValidationError):
+            wrapped_view({}, pyramid_request)
+
+        # Calling with a valid query should not raise.
+        validate_query_params.side_effect = None
+        validate_query_params.return_value = {"foo": 42}
+        pyramid_request.GET = MultiDict({"foo": "42"})
+        wrapped_view({}, pyramid_request)
+
+    def test_api_view_validates_body(self, pyramid_config, pyramid_request):
+        def validate(data):
+            if data.get("foo", None) != "bar":
+                raise ValidationError()
+            return data
+
+        def view(request):
+            assert request.validated_body == {"foo": "bar"}
+
+        body_schema = mock.create_autospec(JSONSchema, spec_set=True, instance=True)
+        body_schema.validate.side_effect = validate
+        api_config.add_api_view(pyramid_config, view, route_name='thing.update',
+                                body_schema=body_schema)
+        (_, kwargs) = pyramid_config.add_view.call_args
+        wrapped_view = kwargs['view']
+
+        # Calling with an invalid body should raise.
+        pyramid_request.json_body = {"foo": "wibble"}
+        with pytest.raises(ValidationError):
+            wrapped_view({}, pyramid_request)
+
+        # Calling with a valid body should not raise.
+        pyramid_request.json_body = {"foo": "bar"}
+        wrapped_view({}, pyramid_request)
+
+    def test_wrapped_view_calls_original_view(self, pyramid_config, pyramid_request):
+        args = []
+
+        # Dummy view. We're not using Mock() here because Pyramid inspects
+        # `view`'s arguments and `Mock` doesn't replicate that faithfully.
+        def view(context, request):
+            args.extend([context, request])
+            return 'result'
+
+        api_config.add_api_view(pyramid_config, view, route_name='thing.update',
+                                body_schema=mock.Mock())
+        (_, kwargs) = pyramid_config.add_view.call_args
+        wrapped_view = kwargs['view']
+        context = mock.Mock()
+
+        result = wrapped_view(context, pyramid_request)
+
+        assert wrapped_view is not view
+        assert args == [context, pyramid_request]
+        assert result == 'result'
+
+    # Same as above but for a view that doesn't take a "context" argument.
+    def test_wrapped_view_calls_original_view_without_context(self, pyramid_config, pyramid_request):
+        args = []
+
+        # Dummy view. We're not using Mock() here because Pyramid inspects
+        # `view`'s arguments and `Mock` doesn't replicate that faithfully.
+        def view(request):
+            args.append(request)
+            return 'result'
+        api_config.add_api_view(pyramid_config, view, route_name='thing.update',
+                                body_schema=mock.Mock())
+        (_, kwargs) = pyramid_config.add_view.call_args
+        wrapped_view = kwargs['view']
+
+        result = wrapped_view(mock.Mock(), pyramid_request)
+
+        assert wrapped_view is not view
+        assert args == [pyramid_request]
+        assert result == 'result'
 
     @pytest.fixture
     def pyramid_config(self, pyramid_config):

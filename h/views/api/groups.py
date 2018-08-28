@@ -6,9 +6,8 @@ from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 
 from h.auth.util import request_auth_client, validate_auth_client_authority
-from h.exceptions import PayloadError
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
-from h.schemas.api.group import CreateGroupAPISchema
+from h.schemas.api.group import CreateGroupAPISchema, GetGroupsAPISchema
 from h.schemas import ValidationError
 from h.traversal import GroupContext
 from h.views.api.config import api_config
@@ -17,11 +16,12 @@ from h.views.api.config import api_config
 @api_config(route_name='api.groups',
             request_method='GET',
             link_name='groups.read',
-            description="Fetch the user's groups")
+            description="Fetch the user's groups",
+            query_schema=GetGroupsAPISchema())
 def groups(request):
-    authority = request.params.get('authority')
-    document_uri = request.params.get('document_uri')
-    expand = request.GET.getall('expand') or []
+    authority = request.validated_params['authority']
+    document_uri = request.validated_params['document_uri']
+    expand = request.validated_params['expand']
 
     list_svc = request.find_service(name='list_groups')
 
@@ -40,15 +40,14 @@ def groups(request):
 @api_config(route_name='api.groups',
             request_method='POST',
             effective_principals=security.Authenticated,
-            description='Create a new group')
+            description='Create a new group',
+            body_schema=CreateGroupAPISchema())
 def create(request):
     """Create a group from the POST payload."""
     if request.user is None:
         raise ValidationError('Request must have an authenticated user')
 
-    schema = CreateGroupAPISchema()
-
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = request.validated_body
     group_properties = {
         'name': appstruct['name'],
         'description': appstruct.get('description', None),
@@ -114,16 +113,3 @@ def add_member(group, request):
     group_svc.member_join(group, user.userid)
 
     return HTTPNoContent()
-
-
-# @TODO This is a duplication of code in h.views.api — move to a util module
-def _json_payload(request):
-    """
-    Return a parsed JSON payload for the request.
-
-    :raises PayloadError: if the body has no valid JSON body
-    """
-    try:
-        return request.json_body
-    except ValueError:
-        raise PayloadError()
