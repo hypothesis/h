@@ -71,18 +71,22 @@ lint: .pydeps
 
 .PHONY: docs
 docs:
+	@pip install -q tox
 	tox -e docs
 
 .PHONY: checkdocs
 checkdocs:
+	@pip install -q tox
 	tox -e checkdocs
 
 .PHONY: docstrings
 docstrings:
+	@pip install -q tox
 	tox -e docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings:
+	@pip install -q tox
 	tox -e checkdocstrings
 
 ################################################################################

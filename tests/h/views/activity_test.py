@@ -250,6 +250,26 @@ class TestGroupSearchController(object):
         assert group_info['organization']['name'] == default_org.name
 
     @pytest.mark.parametrize('test_group,test_user',
+                             [('no_organization_group', 'member')],
+                             indirect=['test_group', 'test_user'])
+    def test_search_does_not_return_organization_info_if_missing(
+            self,
+            controller,
+            factories,
+            test_group,
+            test_user,
+            default_org,
+            OrganizationContext,
+            pyramid_request):
+        group_info = controller.search()['group']
+
+        assert group_info['created'] == "{d:%B} {d.day}, {d:%Y}".format(d=test_group.created)
+        assert group_info['description'] == test_group.description
+        assert group_info['name'] == test_group.name
+        assert group_info['pubid'] == test_group.pubid
+        assert group_info['organization'] is None
+
+    @pytest.mark.parametrize('test_group,test_user',
                              [('no_creator_group', 'member'), ('no_creator_open_group', 'user')],
                              indirect=['test_group', 'test_user'])
     def test_search_does_not_show_the_edit_link_to_non_admin_users(self,
@@ -1179,6 +1199,13 @@ def no_creator_group(factories):
 
 
 @pytest.fixture
+def no_organization_group(factories):
+    group = factories.Group(organization=None)
+    group.members.extend([factories.User(), factories.User()])
+    return group
+
+
+@pytest.fixture
 def open_group(factories):
     open_group = factories.OpenGroup()
     return open_group
@@ -1199,10 +1226,11 @@ def no_creator_open_group(factories):
 
 
 @pytest.fixture
-def groups(group, open_group, no_creator_group, no_creator_open_group, restricted_group):
+def groups(group, open_group, no_creator_group, no_creator_open_group, no_organization_group, restricted_group):
     return {"open_group": open_group,
             "group": group,
             "no_creator_open_group": no_creator_open_group,
+            "no_organization_group": no_organization_group,
             "no_creator_group": no_creator_group,
             "restricted_group": restricted_group}
 

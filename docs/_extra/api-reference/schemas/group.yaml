@@ -21,11 +21,13 @@ Group:
     name:
       type: string
     organization:
-      description: "**EXPANDABLE** The organization to which this group belongs"
+      description: "**EXPANDABLE** The organization to which this group belongs. May be `null`, even if expanded, as not all groups belong to an organization"
       oneOf:
-        - $ref: './organization.yaml#/Organization'
-        - type: string
-          description: The unique ID for the organization (when not expanded)
+          - type: null
+            description: Not all groups have an organization
+          - type: string
+            description: The unique ID for the organization (when not expanded)
+          - $ref: './organization.yaml#/Organization'
     public:
       type: boolean
       deprecated: true
