@@ -32,7 +32,7 @@ class ListGroupsService(object):
 
            Determine the appropriate authority to use for querying groups.
            User's authority will always supersede if present; otherwise provide
-           default value—request.authority—if no authority specified.
+           default value—request.default_authority—if no authority specified.
         """
 
         if user is not None:
@@ -198,4 +198,4 @@ class ListGroupsService(object):
 def list_groups_factory(context, request):
     """Return a ListGroupsService instance for the passed context and request."""
     return ListGroupsService(session=request.db,
-                             request_authority=request.authority)
+                             request_authority=request.default_authority)
