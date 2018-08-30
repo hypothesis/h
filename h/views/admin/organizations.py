@@ -48,7 +48,7 @@ class OrganizationCreateController(object):
     @view_config(request_method='GET')
     def get(self):
         self.form.set_appstruct({
-            'authority': self.request.authority,
+            'authority': self.request.default_authority,
         })
         return self._template_context()
 
