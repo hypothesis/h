@@ -170,7 +170,7 @@ class TestUserServiceFactory(object):
     def test_provides_request_authority_as_default_authority(self, pyramid_request):
         svc = user_service_factory(None, pyramid_request)
 
-        assert svc.default_authority == pyramid_request.authority
+        assert svc.default_authority == pyramid_request.default_authority
 
     def test_provides_request_db_as_session(self, pyramid_request):
         svc = user_service_factory(None, pyramid_request)
