@@ -41,7 +41,7 @@ def users_index(request):
         user_meta['annotations_count'] = counts['total']
 
     return {
-        'default_authority': request.authority,
+        'default_authority': request.default_authority,
         'username': username,
         'authority': authority,
         'user': user,

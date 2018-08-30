@@ -26,7 +26,7 @@ def test_users_index(pyramid_request):
     result = users_index(pyramid_request)
 
     assert result == {
-        'default_authority': pyramid_request.authority,
+        'default_authority': pyramid_request.default_authority,
         'username': None,
         'authority': None,
         'user': None,
