@@ -30,4 +30,4 @@ class GroupfinderService(object):
 
 
 def groupfinder_service_factory(context, request):
-    return GroupfinderService(request.db, request.authority)
+    return GroupfinderService(request.db, request.default_authority)
