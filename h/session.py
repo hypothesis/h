@@ -10,7 +10,7 @@ def model(request):
     session = {}
     session['csrf'] = request.session.get_csrf_token()
     session['userid'] = request.authenticated_userid
-    session['groups'] = _current_groups(request, request.authority)
+    session['groups'] = _current_groups(request, request.default_authority)
     session['features'] = request.feature.all()
     session['preferences'] = _user_preferences(request.user)
     return session
@@ -31,7 +31,7 @@ def profile(request, authority=None):
     if user is not None:
         authority = user.authority
     else:
-        authority = authority or request.authority
+        authority = authority or request.default_authority
 
     profile = {}
     profile['userid'] = request.authenticated_userid

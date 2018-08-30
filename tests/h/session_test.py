@@ -13,14 +13,14 @@ class TestModel(object):
         session.model(authenticated_request)
 
         svc.session_groups.assert_called_once_with(user=authenticated_request.user,
-                                                   authority=authenticated_request.authority)
+                                                   authority=authenticated_request.default_authority)
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
         svc = unauthenticated_request.find_service(name='list_groups')
 
         session.model(unauthenticated_request)
 
-        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.default_authority,
                                                    user=None)
 
     def test_open_group_is_public(self, unauthenticated_request, world_group):
@@ -97,14 +97,14 @@ class TestProfile(object):
         session.profile(authenticated_request)
 
         svc.session_groups.assert_called_once_with(user=authenticated_request.user,
-                                                   authority=authenticated_request.authority)
+                                                   authority=authenticated_request.default_authority)
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
         svc = unauthenticated_request.find_service(name='list_groups')
 
         session.profile(unauthenticated_request)
 
-        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.default_authority,
                                                    user=None)
 
     def test_open_group_is_public(self, unauthenticated_request, world_group):
@@ -224,14 +224,14 @@ class TestProfileWithScopedGroups(object):
         session.profile(authenticated_request)
 
         svc.session_groups.assert_called_once_with(user=authenticated_request.user,
-                                                   authority=authenticated_request.authority)
+                                                   authority=authenticated_request.default_authority)
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
         svc = unauthenticated_request.find_service(name='list_groups')
 
         session.profile(unauthenticated_request)
 
-        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.authority,
+        svc.session_groups.assert_called_once_with(authority=unauthenticated_request.default_authority,
                                                    user=None)
 
     def test_private_group_is_not_public(self, authenticated_request, factories):
@@ -274,7 +274,7 @@ class FakeRequest(object):
 
     def __init__(self, authority, userid, user_authority,
                  fake_feature):
-        self.authority = authority
+        self.default_authority = authority
         self.authenticated_userid = userid
 
         if userid is None:
