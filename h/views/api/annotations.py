@@ -19,6 +19,7 @@ objects and Pyramid ACLs in :mod:`h.traversal`.
 from __future__ import unicode_literals
 from pyramid import i18n
 from pyramid import security
+import newrelic.agent
 
 from h import search as search_lib
 from h import storage
@@ -96,8 +97,10 @@ def links(context, request):
 def search(request):
     """Search the database for annotations matching with the given query."""
     params = request.params.copy()
+    _record_search_api_usage_metrics(params)
 
     separate_replies = params.pop('_separate_replies', False)
+
     stats = getattr(request, 'stats', None)
     result = search_lib.Search(request,
                                separate_replies=separate_replies,
@@ -250,3 +253,22 @@ def _annotation_resource(request, annotation):
     group_service = request.find_service(IGroupService)
     links_service = request.find_service(name='links')
     return AnnotationContext(annotation, group_service, links_service)
+
+
+def _record_search_api_usage_metrics(
+    params,
+    record_metrics=newrelic.agent.record_custom_metrics,
+):
+    metrics = [
+        # Record usage of deprecated offset.
+        ('Custom/SearchApi/offset', int("offset" in params)),
+
+        # Record usage of url/uri (url is an alias of uri).
+        ('Custom/SearchApi/url', int("url" in params)),
+        ('Custom/SearchApi/uri', int("uri" in params)),
+
+        # Record usage of tags/tag (tags is an alias of tag).
+        ('Custom/SearchApi/tags', int("tags" in params)),
+        ('Custom/SearchApi/tag', int("tag" in params)),
+    ]
+    record_metrics(metrics)
