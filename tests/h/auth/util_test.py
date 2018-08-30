@@ -200,6 +200,24 @@ class TestClientAuthority(object):
         assert util.client_authority(FakePrincipalsRequest()) == authority
 
 
+class TestAuthority(object):
+
+    def test_it_proxies_to_client_authority(self, pyramid_request, client_authority):
+        util.authority(pyramid_request)
+
+        client_authority.assert_called_once_with(pyramid_request)
+
+    def test_it_returns_client_authority_if_any_set(self, pyramid_request, client_authority):
+        client_authority.return_value = 'something.biz'
+
+        assert util.authority(pyramid_request) == 'something.biz'
+
+    def test_it_returns_default_authority_if_no_client_authority(self, pyramid_request, client_authority):
+        client_authority.return_value = None
+
+        assert util.authority(pyramid_request) == pyramid_request.default_authority
+
+
 class TestAuthDomain(object):
     def test_it_returns_the_request_domain_if_authority_isnt_set(
             self, pyramid_request):
@@ -441,6 +459,11 @@ def basic_auth_creds(patch):
 @pytest.fixture
 def valid_auth(basic_auth_creds, auth_client):
     basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
+
+
+@pytest.fixture
+def client_authority(patch):
+    return patch('h.auth.util.client_authority')
 
 
 @pytest.fixture

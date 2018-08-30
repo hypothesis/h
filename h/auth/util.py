@@ -138,6 +138,22 @@ def client_authority(request):
     return None
 
 
+def authority(request):
+    """
+    Return active authority for the current request.
+
+    Return the client_authority, if there is one, or the default authority
+
+    :rtype: str
+    """
+
+    active_authority = client_authority(request)
+    if active_authority is not None:
+        return active_authority
+
+    return default_authority(request)
+
+
 def verify_auth_client(client_id, client_secret, db_session):
     """
     Return matching AuthClient or None
