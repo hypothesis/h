@@ -171,6 +171,35 @@ def test_translate_annotation_principals(p_in, p_out):
     assert set(result) == set(p_out)
 
 
+class TestClientAuthority(object):
+
+    @pytest.mark.parametrize('principals', [
+        ['foo', 'bar', 'baz'],
+        ['authority', 'foo'],
+        [],
+        ['authority:'],
+        [' authority:biz.biz', 'foo'],
+        ['authority :biz.biz', 'foo'],
+    ])
+    def test_it_returns_None_if_no_authority_principal_match(self, principals):
+        class FakePrincipalsRequest(object):
+            """With a real request, you cannot set the ``effective_principals`` property"""
+            effective_principals = principals
+
+        assert util.client_authority(FakePrincipalsRequest()) is None
+
+    @pytest.mark.parametrize('principals,authority', [
+        (['foo', 'bar', 'baz', 'authority:felicitous.com'], 'felicitous.com'),
+        (['authority:somebody.likes.me', 'foo'], 'somebody.likes.me'),
+    ])
+    def test_it_returns_authority_if_authority_principal_match(self, principals, authority):
+        class FakePrincipalsRequest(object):
+            """With a real request, you cannot set the ``effective_principals`` property"""
+            effective_principals = principals
+
+        assert util.client_authority(FakePrincipalsRequest()) == authority
+
+
 class TestAuthDomain(object):
     def test_it_returns_the_request_domain_if_authority_isnt_set(
             self, pyramid_request):
