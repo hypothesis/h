@@ -156,7 +156,7 @@ class TestGroupCreateController(object):
         create_method.return_value = factories.RestrictedGroup(pubid='testgroup')
         ctrl.post()
 
-        expected_userid = User(username=creator, authority=pyramid_request.authority).userid
+        expected_userid = User(username=creator, authority=pyramid_request.default_authority).userid
 
         create_method.assert_called_with(name=name, userid=expected_userid, description=description,
                                          origins=origins, organization=default_org)
@@ -269,7 +269,7 @@ class TestGroupEditController(object):
 
         def call_on_success(request, form, on_success, on_failure):
             return on_success({
-                'authority': pyramid_request.authority,
+                'authority': pyramid_request.default_authority,
                 'creator': updated_creator.username,
                 'description': 'a desc',
                 'group_type': 'restricted',

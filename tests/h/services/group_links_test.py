@@ -31,7 +31,7 @@ class TestGroupLinksFactory(object):
 
         assert isinstance(svc, GroupLinksService)
 
-    def test_uses_request_authority(self, pyramid_request):
+    def test_uses_request_default_authority(self, pyramid_request):
         pyramid_request.default_authority = 'bar.com'
 
         svc = group_links_factory(None, pyramid_request)

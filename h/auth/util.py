@@ -227,7 +227,7 @@ def request_auth_client(request):
 
 def validate_auth_client_authority(client, authority):
     """
-    Validate that the auth client authority matches the request authority.
+    Validate that the auth client authority matches the provided ``authority``.
     """
     if client.authority != authority:
         raise ValidationError("'authority' does not match authenticated client")

@@ -284,7 +284,7 @@ class TestListGroupsFactory(object):
 
         assert isinstance(svc, ListGroupsService)
 
-    def test_uses_request_authority(self, pyramid_request):
+    def test_uses_request_default_authority(self, pyramid_request):
         pyramid_request.default_authority = 'bar.com'
 
         svc = list_groups_factory(None, pyramid_request)
