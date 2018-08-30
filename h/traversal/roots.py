@@ -216,7 +216,8 @@ class UserRoot(object):
         self.user_svc = self.request.find_service(name='user')
 
     def __getitem__(self, username):
-        user = self.user_svc.fetch(username, self.request.authority)
+        # FIXME: At present, this fetch would never work for third-party users
+        user = self.user_svc.fetch(username, self.request.default_authority)
 
         if not user:
             raise KeyError()

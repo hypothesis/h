@@ -229,7 +229,7 @@ class TestUserRoot(object):
     def test_it_fetches_the_requested_user(self, pyramid_request, user_factory, user_service):
         user_factory["bob"]
 
-        user_service.fetch.assert_called_once_with("bob", pyramid_request.authority)
+        user_service.fetch.assert_called_once_with("bob", pyramid_request.default_authority)
 
     def test_it_raises_KeyError_if_the_user_does_not_exist(self,
                                                            user_factory,
