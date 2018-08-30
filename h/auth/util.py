@@ -108,7 +108,7 @@ def translate_annotation_principals(principals):
     return list(result)
 
 
-def authority(request):
+def default_authority(request):
     """
     Return the value of the h.authority config settings.
 

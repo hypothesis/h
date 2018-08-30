@@ -237,7 +237,7 @@ def pyramid_config(pyramid_settings, pyramid_request):
 def pyramid_request(db_session, fake_feature, pyramid_settings):
     """Dummy Pyramid request object."""
     request = testing.DummyRequest(db=db_session, feature=fake_feature)
-    request.authority = text_type(TEST_AUTHORITY)
+    request.default_authority = text_type(TEST_AUTHORITY)
     request.create_form = mock.Mock()
     request.matched_route = mock.Mock()
     request.registry.settings = pyramid_settings
