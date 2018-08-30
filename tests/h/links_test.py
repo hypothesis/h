@@ -32,7 +32,7 @@ class TestHTMLLink(object):
     def test_html_link_returns_links_for_first_party_annotations(
             self, annotation, pyramid_request):
         # Specify the authority so that it's a first-party annotation.
-        annotation.authority = pyramid_request.authority
+        annotation.authority = pyramid_request.default_authority
 
         link = links.html_link(pyramid_request, annotation)
 

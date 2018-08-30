@@ -27,7 +27,7 @@ def pretty_link(url):
 
 def html_link(request, annotation):
     """Return a link to an HTML representation of the given annotation, or None."""
-    is_third_party_annotation = annotation.authority != request.authority
+    is_third_party_annotation = annotation.authority != request.default_authority
     if is_third_party_annotation:
         # We don't currently support HTML representations of third party
         # annotations.
