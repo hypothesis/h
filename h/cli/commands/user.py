@@ -61,7 +61,7 @@ def admin(ctx, username, authority, on):
     request = ctx.obj['bootstrap']()
 
     if not authority:
-        authority = request.authority
+        authority = request.default_authority
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
@@ -93,7 +93,7 @@ def password(ctx, username, authority, password):
     password_service = request.find_service(name='user_password')
 
     if not authority:
-        authority = request.authority
+        authority = request.default_authority
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
@@ -119,7 +119,7 @@ def delete(ctx, username, authority):
     request = ctx.obj['bootstrap']()
 
     if not authority:
-        authority = request.authority
+        authority = request.default_authority
 
     user = models.User.get_by_username(request.db, username, authority)
     if user is None:
