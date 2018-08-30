@@ -220,7 +220,8 @@ class TestCheckURL(object):
                          'Search',
                          'TagsAggregation',
                          'TopLevelAnnotationsFilter',
-                         'UsersAggregation')
+                         'UsersAggregation',
+                         'links')
 class TestExecute(object):
 
     PAGE_SIZE = 23
@@ -241,13 +242,13 @@ class TestExecute(object):
         TopLevelAnnotationsFilter.assert_called_once_with()
         search.append_modifier.assert_any_call(TopLevelAnnotationsFilter.return_value)
 
-    def test_it_only_shows_annotations_from_current_authority(self,
+    def test_it_only_shows_annotations_from_default_authority(self,
                                                               pyramid_request,
                                                               search,
                                                               AuthorityFilter):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        AuthorityFilter.assert_called_once_with(pyramid_request.authority)
+        AuthorityFilter.assert_called_once_with(pyramid_request.default_authority)
         search.append_modifier.assert_any_call(AuthorityFilter.return_value)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
@@ -499,11 +500,6 @@ class TestExecute(object):
         return patch('h.activity.query.fetch_annotations')
 
     @pytest.fixture
-    def links(self, patch):
-        links = patch('h.activity.query.links')
-        return links
-
-    @pytest.fixture
     def _fetch_groups(self, group_pubids, patch):
         _fetch_groups = patch('h.activity.query._fetch_groups')
         _fetch_groups.return_value = [mock.Mock(pubid=pubid)
@@ -631,6 +627,10 @@ class TestExecute(object):
     @pytest.fixture
     def UsersAggregation(self, patch):
         return patch('h.activity.query.UsersAggregation')
+
+    @pytest.fixture
+    def links(self, patch):
+        return patch('h.activity.query.links')
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):

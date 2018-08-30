@@ -92,7 +92,7 @@ def check_url(request, query, unparse=parser.unparse):
     elif _single_entry(query, 'user'):
         username = query.get('user')
         user = request.find_service(name='user').fetch(username,
-                                                       request.authority)
+                                                       request.default_authority)
         if user:
             query.pop('user')
             redirect = request.route_path('activity.user_search',
@@ -165,7 +165,7 @@ def fetch_annotations(session, ids):
 @newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
     search = Search(request, stats=request.stats)
-    search.append_modifier(AuthorityFilter(authority=request.authority))
+    search.append_modifier(AuthorityFilter(authority=request.default_authority))
     search.append_modifier(TopLevelAnnotationsFilter())
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
