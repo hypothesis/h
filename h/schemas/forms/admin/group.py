@@ -69,7 +69,7 @@ def group_creator_validator(node, kw):
 
 def member_exists_validator(node, val):
     user_svc = node.bindings["request"].find_service(name='user')
-    authority = node.bindings["request"].authority
+    authority = node.bindings["request"].default_authority
     if user_svc.fetch(val, authority) is None:
         raise colander.Invalid(node, _("Username not found"))
 
