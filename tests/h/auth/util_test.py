@@ -205,6 +205,11 @@ class TestValidateAuthClientAuthority(object):
 
 class TestPrincipalsForAuthClient(object):
 
+    def test_it_sets_auth_client_role_principal(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert role.Authclient in principals
+
     def test_it_sets_auth_client_principal(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
 

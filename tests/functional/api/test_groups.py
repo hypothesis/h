@@ -81,9 +81,10 @@ class TestAddMember(object):
 
         assert user in group.members
 
-    def test_it_ignores_forwarded_user_header(self, app, user, factories, group, auth_client_header):
+    def test_it_ignores_forwarded_user_header(self, app, user, factories, group, auth_client_header, db_session):
         headers = auth_client_header
         user2 = factories.User()
+        db_session.commit()
         headers[native_str('X-Forwarded-User')] = native_str(user2.userid)
 
         res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
@@ -119,18 +120,18 @@ class TestAddMember(object):
 
         assert res.status_code == 404
 
-    def test_it_returns_403_if_missing_auth(self, app, user, group):
+    def test_it_returns_404_if_missing_auth(self, app, user, group):
         res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
                             expect_errors=True)
 
-        assert res.status_code == 403
+        assert res.status_code == 404
 
-    def test_it_returns_403_with_token_auth(self, app, token_auth_header, user, group):
+    def test_it_returns_404_with_token_auth(self, app, token_auth_header, user, group):
         res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
                             headers=token_auth_header,
                             expect_errors=True)
 
-        assert res.status_code == 403
+        assert res.status_code == 404
 
 
 @pytest.mark.functional

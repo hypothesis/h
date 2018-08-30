@@ -8,6 +8,7 @@ import sqlalchemy as sa
 from pyramid import security
 import slugify
 
+from h.auth import role
 from h.db import Base
 from h.db import mixins
 from h import pubid
@@ -119,7 +120,24 @@ class Group(Base, mixins.Timestamps):
         return self.readable_by == ReadableBy.world
 
     def __acl__(self):
+        """
+        Build an appropriate ACL for this model instance.
+
+        FIXME: We should get ACL/auth'z logic out of model classes in the
+        future and fix up :py:module:`h.traversal.roots` and to appropriately
+        return contexts instead of models; then fix up `h.traversal.contexts`
+        to handle ACLs. See :py:class:`h.traversal.roots.AnnotationRoot` and
+        :py:class:`h.traversal.contexts.AnnotationContext` for the correct
+        way to do this.
+
+        .. note::
+
+            :py:attr:`h.auth.role.Authclient` is applied during authentication
+            for auth_client requests. See :py:func:`h.auth.util.principals_for_auth_client`
+        """
+
         terms = []
+        terms.append((security.Allow, role.Authclient, 'member_add'))
 
         join_principal = _join_principal(self)
         if join_principal is not None:
