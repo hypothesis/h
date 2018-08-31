@@ -18,6 +18,7 @@ from h import i18n
 from h import models
 from h import session
 from h.accounts import schemas
+from h.schemas.forms.accounts import EditProfileSchema
 from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
@@ -451,7 +452,7 @@ class EditProfileController(object):
 
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.EditProfileSchema().bind(request=self.request)
+        self.schema = EditProfileSchema().bind(request=self.request)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Save'),),
                                         use_inline_editing=True)
