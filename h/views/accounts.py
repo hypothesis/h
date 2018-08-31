@@ -19,6 +19,7 @@ from h import models
 from h import session
 from h.accounts import schemas
 from h.schemas.forms.accounts import EditProfileSchema
+from h.schemas.forms.accounts import ForgotPasswordSchema
 from h.schemas.forms.accounts import LoginSchema
 from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
@@ -175,7 +176,7 @@ class ForgotPasswordController(object):
 
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.ForgotPasswordSchema().bind(request=self.request)
+        self.schema = ForgotPasswordSchema().bind(request=self.request)
         self.form = request.create_form(self.schema, buttons=(_('Reset'),))
 
     @view_config(request_method='GET')
