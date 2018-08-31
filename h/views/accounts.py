@@ -19,6 +19,7 @@ from h import models
 from h import session
 from h.accounts import schemas
 from h.schemas.forms.accounts import EditProfileSchema
+from h.schemas.forms.accounts import LoginSchema
 from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
@@ -98,7 +99,7 @@ class AuthController(object):
             text=_('Forgot your password?'))
 
         self.request = request
-        self.schema = schemas.LoginSchema().bind(request=self.request)
+        self.schema = LoginSchema().bind(request=self.request)
 
         show_cancel_button = bool(request.params.get('for_oauth', False))
         self.form = request.create_form(self.schema,
