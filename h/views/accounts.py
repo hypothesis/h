@@ -21,6 +21,7 @@ from h.accounts import schemas
 from h.schemas.forms.accounts import EditProfileSchema
 from h.schemas.forms.accounts import ForgotPasswordSchema
 from h.schemas.forms.accounts import LoginSchema
+from h.schemas.forms.accounts import ResetPasswordSchema
 from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
@@ -226,7 +227,7 @@ class ResetController(object):
 
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.ResetPasswordSchema().bind(request=self.request)
+        self.schema = ResetPasswordSchema().bind(request=self.request)
         self.form = request.create_form(
             schema=self.schema,
             action=self.request.route_path('account_reset'),
@@ -251,7 +252,7 @@ class ResetController(object):
             raise httpexceptions.HTTPNotFound()
         else:
             # N.B. the form field for the reset code is called 'user'. See the
-            # comment in `schemas.ResetPasswordSchema` for details.
+            # comment in `~h.schemas.forms.accounts.ResetPasswordSchema` for details.
             self.form.set_appstruct({'user': user})
             self.form.set_widgets({'user': deform.widget.HiddenWidget()})
 
