@@ -100,7 +100,7 @@ class TestInit(object):
     def test_skips_plugin_check(self, client, configure_index):
         client.conn.cat.plugins.return_value = ''
 
-        init(client, {'es.skip_plugin_check': True})
+        init(client, {'es.check_icu_plugin': False})
 
         configure_index.assert_called_once_with(client)
 
