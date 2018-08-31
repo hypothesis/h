@@ -56,6 +56,15 @@ class TestValidateQueryParams(object):
 
         assert parsed.getall("list_field") == ["first", "second"]
 
+    def test_a_list_field_can_have_a_single_value(self):
+        schema = QueryParamSchema()
+        params = MultiDict()
+        params.add("list_field", "first")
+
+        parsed = validate_query_params(schema, params)
+
+        assert parsed.getall("list_field") == ["first"]
+
     def test_it_keeps_only_last_value_for_non_sequence_fields(self):
         schema = QueryParamSchema()
         params = MultiDict()

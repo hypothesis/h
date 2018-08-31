@@ -10,12 +10,12 @@ from h.search import Search, index, query
 from hypothesis import strategies as st
 from hypothesis import given
 
-
 MISSING = object()
 ES_VERSION = (1, 7, 0)
 OFFSET_DEFAULT = 0
-LIMIT_DEFAULT = 20
-LIMIT_MAX = 200
+LIMIT_DEFAULT = query.LIMIT_DEFAULT
+LIMIT_MAX = query.LIMIT_MAX
+OFFSET_MAX = query.OFFSET_MAX
 
 
 class TestBuilder(object):
@@ -34,6 +34,7 @@ class TestBuilder(object):
         ("   ",  OFFSET_DEFAULT),
         ("-23",  OFFSET_DEFAULT),
         ("32.7", OFFSET_DEFAULT),
+        ("9801", OFFSET_MAX),
     ])
     def test_offset(self, offset, from_):
         builder = query.Builder(ES_VERSION)

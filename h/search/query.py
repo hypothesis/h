@@ -5,7 +5,9 @@ from h import storage
 from h.util import uri
 
 LIMIT_DEFAULT = 20
+# Elasticsearch requires offset + limit must be <= 10,000.
 LIMIT_MAX = 200
+OFFSET_MAX = 9800
 
 
 class Builder(object):
@@ -74,6 +76,7 @@ class Builder(object):
 def extract_offset(params):
     try:
         val = int(params.pop("offset"))
+        val = min(val, OFFSET_MAX)
         if val < 0:
             raise ValueError
     except (ValueError, KeyError):
