@@ -156,34 +156,6 @@ class TestRegisterSchema(object):
 
 
 @pytest.mark.usefixtures('user_model')
-class TestForgotPasswordSchema(object):
-
-    def test_it_is_invalid_with_no_user(self,
-                                        pyramid_csrf_request,
-                                        user_model):
-        schema = schemas.ForgotPasswordSchema().bind(
-            request=pyramid_csrf_request)
-        user_model.get_by_email.return_value = None
-
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({'email': 'rapha@example.com'})
-
-        assert 'email' in exc.value.asdict()
-        assert exc.value.asdict()['email'] == 'Unknown email address.'
-
-    def test_it_returns_user_when_valid(self,
-                                        pyramid_csrf_request,
-                                        user_model):
-        schema = schemas.ForgotPasswordSchema().bind(
-            request=pyramid_csrf_request)
-        user = user_model.get_by_email.return_value
-
-        appstruct = schema.deserialize({'email': 'rapha@example.com'})
-
-        assert appstruct['user'] == user
-
-
-@pytest.mark.usefixtures('user_model')
 class TestResetPasswordSchema(object):
 
     def test_it_is_invalid_with_password_too_short(self, pyramid_csrf_request):

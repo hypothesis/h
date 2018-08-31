@@ -132,30 +132,6 @@ def _privacy_accepted_message():
     return privacy_msg
 
 
-class ForgotPasswordSchema(CSRFSchema):
-    email = colander.SchemaNode(
-        colander.String(),
-        validator=colander.All(validators.Email()),
-        title=_('Email address'),
-        widget=deform.widget.TextInputWidget(template='emailinput',
-                                             autofocus=True),
-    )
-
-    def validator(self, node, value):
-        super(ForgotPasswordSchema, self).validator(node, value)
-
-        request = node.bindings['request']
-        email = value.get('email')
-        user = models.User.get_by_email(request.db, email, request.authority)
-
-        if user is None:
-            err = colander.Invalid(node)
-            err['email'] = _('Unknown email address.')
-            raise err
-
-        value['user'] = user
-
-
 class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
