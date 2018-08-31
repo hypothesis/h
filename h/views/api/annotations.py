@@ -28,6 +28,7 @@ from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
 from h.traversal import AnnotationContext
+from h.schemas.util import validate_query_params
 from h.schemas.annotation import (
     CreateAnnotationSchema,
     SearchParamsSchema,
@@ -100,8 +101,8 @@ def links(context, request):
 def search(request):
     """Search the database for annotations matching with the given query."""
     schema = SearchParamsSchema()
+    params = validate_query_params(schema, request.params)
 
-    params = schema.validate(request.params.copy())
     _record_search_api_usage_metrics(params)
 
     separate_replies = params.pop('_separate_replies', False)
