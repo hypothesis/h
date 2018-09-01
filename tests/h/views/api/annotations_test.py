@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 import mock
 import pytest
-from webob.multidict import NestedMultiDict, MultiDict
 
 from pyramid import testing
 from pyramid.config import Configurator
@@ -89,13 +88,7 @@ class TestSearch(object):
         search_lib.Search.assert_called_with(pyramid_request,
                                              separate_replies=False,
                                              stats=pyramid_request.stats)
-
-        expected_params = MultiDict([
-            ('sort', 'updated'),
-            ('limit', 20),
-            ('order', 'desc'),
-            ('offset', 0)])
-        search.run.assert_called_once_with(expected_params)
+        search.run.assert_called_once_with(pyramid_request.params)
 
     def test_it_presents_search_results(self, pyramid_request, search_run, presentation_service):
         search_run.return_value = SearchResult(2, ['row-1', 'row-2'], [], {})
@@ -115,7 +108,7 @@ class TestSearch(object):
         assert views.search(pyramid_request) == expected
 
     def test_it_presents_replies(self, pyramid_request, search_run, presentation_service):
-        pyramid_request.params = NestedMultiDict(MultiDict({'_separate_replies': '1'}))
+        pyramid_request.params = {'_separate_replies': '1'}
         search_run.return_value = SearchResult(1, ['row-1'], ['reply-1', 'reply-2'], {})
 
         views.search(pyramid_request)
@@ -123,7 +116,7 @@ class TestSearch(object):
         presentation_service.present_all.assert_called_with(['reply-1', 'reply-2'])
 
     def test_it_returns_replies(self, pyramid_request, search_run, presentation_service):
-        pyramid_request.params = NestedMultiDict(MultiDict({'_separate_replies': '1'}))
+        pyramid_request.params = {'_separate_replies': '1'}
         search_run.return_value = SearchResult(1, ['row-1'], ['reply-1', 'reply-2'], {})
 
         expected = {
