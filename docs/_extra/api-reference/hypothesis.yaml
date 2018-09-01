@@ -294,19 +294,17 @@ paths:
         - name: offset
           in: query
           description: >
-            The number of initial annotations to skip. This is
+            The minimum number of initial annotations to skip. This is
             used for pagination.
           required: false
           type: integer
           default: 0
           minimum: 0
-          maximum: 9800
         - name: sort
           in: query
           description: The field by which annotations should be sorted.
           required: false
           type: string
-          enum: [created, updated, group, id, user]
           default: updated
         - name: order
           in: query
@@ -320,8 +318,7 @@ paths:
           description: |
             Limit the results to annotations matching the specific URI or equivalent URIs.
 
-            URI can be a URL (a web page address) or a URN representing another kind of 
-            resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
+            URI can be a URL (a web page address) or a URN representing another kind of resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
           required: false
           type: string
         - name: url
@@ -345,37 +342,10 @@ paths:
           description: Limit the results to annotations tagged with the specified value.
           required: false
           type: string
-        - name: tags
-          in: query
-          description: Alias of `tag`.
-          required: false
-          type: string
         - name: any
           in: query
-          description: Limit the results to annotations whose quote, tags, text or url 
-            fields contain this keyword.  
-          required: false
-          type: string
-        - name: group
-          in: query
-          description: Limit the results to this group of annotations.
-          required: false
-          type: string
-        - name: quote
-          in: query
-          description: Limit the results to annotations that contain this text inside
-            the text that was annotated.
-          required: false
-          type: string
-        - name: references
-          in: query
-          description: Returns annotations that are replies to this parent annotation id.
-          required: false
-          type: string
-        - name: text
-          in: query
-          description: Limit the results to annotations that contain this text in their 
-            textual body.
+          description: |
+            Limit the results to annotations in which one of a number of common fields contain the passed value.
           required: false
           type: string
       responses:
