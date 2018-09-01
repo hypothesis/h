@@ -10,12 +10,12 @@ from h.search import Search, index, query
 from hypothesis import strategies as st
 from hypothesis import given
 
-
 MISSING = object()
 ES_VERSION = (1, 7, 0)
 OFFSET_DEFAULT = 0
-LIMIT_DEFAULT = 20
-LIMIT_MAX = 200
+LIMIT_DEFAULT = query.LIMIT_DEFAULT
+LIMIT_MAX = query.LIMIT_MAX
+OFFSET_MAX = query.OFFSET_MAX
 
 
 class TestBuilder(object):
@@ -34,6 +34,7 @@ class TestBuilder(object):
         ("   ",  OFFSET_DEFAULT),
         ("-23",  OFFSET_DEFAULT),
         ("32.7", OFFSET_DEFAULT),
+        ("9801", OFFSET_MAX),
     ])
     def test_offset(self, offset, from_):
         builder = query.Builder(ES_VERSION)
@@ -209,6 +210,9 @@ class TestBuilder(object):
         ("updated", "asc", [2, 0, 1]),
         ("created", "desc", [2, 0, 1]),
         ("created", "asc", [1, 0, 2]),
+        ("group", "asc", [2, 0, 1]),
+        ("id", "asc", [0, 2, 1]),
+        ("user", "asc", [2, 0, 1]),
 
         # Default sort order should be descending.
         ("updated", None, [1, 0, 2]),
@@ -221,9 +225,24 @@ class TestBuilder(object):
 
         # nb. Test annotations have a different ordering for updated vs created
         # and creation order is different than updated/created asc/desc.
-        ann_ids = [Annotation(updated=dt(2017, 1, 1), created=dt(2017, 1, 1)).id,
-                   Annotation(updated=dt(2018, 1, 1), created=dt(2016, 1, 1)).id,
-                   Annotation(updated=dt(2016, 1, 1), created=dt(2018, 1, 1)).id]
+        ann_ids = [Annotation(
+                    updated=dt(2017, 1, 1),
+                    groupid="12345",
+                    userid="acct:foo@auth1",
+                    id="1",
+                    created=dt(2017, 1, 1)).id,
+                   Annotation(
+                    updated=dt(2018, 1, 1),
+                    groupid="12347",
+                    userid="acct:foo@auth2",
+                    id="9",
+                    created=dt(2016, 1, 1)).id,
+                   Annotation(
+                    updated=dt(2016, 1, 1),
+                    groupid="12342",
+                    userid="acct:boo@auth1",
+                    id="2",
+                    created=dt(2018, 1, 1)).id]
 
         params = {}
         if sort_key:
