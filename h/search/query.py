@@ -98,8 +98,12 @@ def extract_limit(params):
 
 
 def extract_sort(params):
+    sort_by = params.pop("sort", "updated")
+    # Sorting must be done on non-analyzed fields.
+    if sort_by == "user":
+        sort_by = "user_raw"
     return [{
-        params.pop("sort", "updated"): {
+        sort_by: {
             "order": params.pop("order", "desc"),
 
             # `unmapped_type` causes unknown fields specified as arguments to
