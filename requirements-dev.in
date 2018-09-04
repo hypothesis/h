@@ -1,8 +1,4 @@
 -r requirements.txt
 
-flake8
-flake8-future-import
 honcho
-pep257
-prospector[with_pyroma]
 pyramid_debugtoolbar
