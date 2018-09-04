@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
+import elasticsearch_dsl
 import pytest
 import webob
-import mock
 
 from h.search import Search, index, query
 from hypothesis import strategies as st
@@ -15,6 +16,181 @@ OFFSET_DEFAULT = 0
 LIMIT_DEFAULT = query.LIMIT_DEFAULT
 LIMIT_MAX = query.LIMIT_MAX
 OFFSET_MAX = query.OFFSET_MAX
+
+
+class TestLimiter(object):
+    def test_it_limits_number_of_annotations(self, Annotation, search):
+        ann_ids = [Annotation().id,
+                   Annotation().id,
+                   Annotation().id,
+                   Annotation().id]
+
+        params = webob.multidict.MultiDict([("offset", 1),
+                            ("limit", 2)])
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(ann_ids[1:3])
+
+    @pytest.mark.parametrize('offset,from_', [
+        # defaults to OFFSET_DEFAULT
+        (MISSING, OFFSET_DEFAULT),
+        # straightforward pass-through
+        (7, 7),
+        (42, 42),
+        # string values should be converted
+        ("23", 23),
+        ("82", 82),
+        # invalid values should be ignored and the default should be returned
+        ("foo",  OFFSET_DEFAULT),
+        ("",     OFFSET_DEFAULT),
+        ("   ",  OFFSET_DEFAULT),
+        ("-23",  OFFSET_DEFAULT),
+        ("32.7", OFFSET_DEFAULT),
+        ("9801", OFFSET_MAX),
+    ])
+    def test_offset(self, pyramid_request, offset, from_):
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        params = {"offset": offset}
+        if offset is MISSING:
+            params = {}
+
+        q = limiter(search, params).to_dict()
+
+        assert q["from"] == from_
+
+    @given(st.text())
+    @pytest.mark.fuzz
+    def test_limit_output_within_bounds(self, pyramid_request, text):
+        """Given any string input, output should be in the allowed range."""
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        q = limiter(search, {"limit": text}).to_dict()
+
+        assert isinstance(q["size"], int)
+        assert 0 <= q["size"] <= LIMIT_MAX
+
+    @given(st.integers())
+    @pytest.mark.fuzz
+    def test_limit_output_within_bounds_int_input(self, pyramid_request, lim):
+        """Given any integer input, output should be in the allowed range."""
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        q = limiter(search, {"limit": str(lim)}).to_dict()
+
+        assert isinstance(q["size"], int)
+        assert 0 <= q["size"] <= LIMIT_MAX
+
+    @given(st.integers(min_value=0, max_value=LIMIT_MAX))
+    @pytest.mark.fuzz
+    def test_limit_matches_input(self, pyramid_request, lim):
+        """Given an integer in the allowed range, it should be passed through."""
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        q = limiter(search, {"limit": str(lim)}).to_dict()
+
+        assert q["size"] == lim
+
+    def test_limit_set_to_default_when_missing(self, pyramid_request):
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        q = limiter(search, {}).to_dict()
+
+        assert q["size"] == LIMIT_DEFAULT
+
+    @pytest.fixture
+    def search(self, search):
+        search.append_modifier(query.Limiter())
+        return search
+
+
+class TestKeyValueMatcher(object):
+    def test_ands_multiple_key_values(self, Annotation, search):
+        ann_ids = [Annotation().id,
+                   Annotation().id]
+        reply1 = Annotation(references=[ann_ids[0]]).id
+        reply2 = Annotation(references=[ann_ids[0], reply1]).id
+
+        params = webob.multidict.MultiDict([("references", ann_ids[0]),
+                            ("references", reply1)])
+        result = search.run(params)
+
+        assert result.annotation_ids == [reply2]
+
+    @pytest.fixture
+    def search(self, search):
+        search.append_modifier(query.KeyValueMatcher())
+        return search
+
+
+class TestSorter(object):
+    @pytest.mark.parametrize("sort_key,order,expected_order", [
+        # Sort supports "updated" and "created" fields.
+        ("updated", "desc", [1, 0, 2]),
+        ("updated", "asc", [2, 0, 1]),
+        ("created", "desc", [2, 0, 1]),
+        ("created", "asc", [1, 0, 2]),
+        ("group", "asc", [2, 0, 1]),
+        ("id", "asc", [0, 2, 1]),
+        ("user", "asc", [2, 0, 1]),
+
+        # Default sort order should be descending.
+        ("updated", None, [1, 0, 2]),
+
+        # Default sort field should be "updated".
+        (None, "asc", [2, 0, 1]),
+    ])
+    def test_it_sorts_annotations(self, Annotation, search, sort_key, order, expected_order):
+        dt = datetime.datetime
+
+        # nb. Test annotations have a different ordering for updated vs created
+        # and creation order is different than updated/created asc/desc.
+        ann_ids = [Annotation(
+                    updated=dt(2017, 1, 1),
+                    groupid="12345",
+                    userid="acct:foo@auth1",
+                    id="1",
+                    created=dt(2017, 1, 1)).id,
+                   Annotation(
+                    updated=dt(2018, 1, 1),
+                    groupid="12347",
+                    userid="acct:foo@auth2",
+                    id="9",
+                    created=dt(2016, 1, 1)).id,
+                   Annotation(
+                    updated=dt(2016, 1, 1),
+                    groupid="12342",
+                    userid="acct:boo@auth1",
+                    id="2",
+                    created=dt(2018, 1, 1)).id]
+
+        params = {}
+        if sort_key:
+            params["sort"] = sort_key
+        if order:
+            params["order"] = order
+        result = search.run(params)
+
+        actual_order = [ann_ids.index(id_) for id_ in result.annotation_ids]
+        assert actual_order == expected_order
+
+    def test_it_ignores_unknown_sort_fields(self, search):
+        search.run({"sort": "no_such_field"})
 
 
 class TestTopLevelAnnotationsFilter(object):
@@ -29,7 +205,7 @@ class TestTopLevelAnnotationsFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_qualifier(query.TopLevelAnnotationsFilter())
+        search.append_modifier(query.TopLevelAnnotationsFilter())
         return search
 
 
@@ -47,7 +223,7 @@ class TestAuthorityFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_qualifier(query.AuthorityFilter("auth1"))
+        search.append_modifier(query.AuthorityFilter("auth1"))
         return search
 
 
@@ -93,7 +269,7 @@ class TestAuthFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_qualifier(query.AuthFilter(pyramid_request))
+        search.append_modifier(query.AuthFilter(pyramid_request))
         return search
 
 
@@ -110,7 +286,7 @@ class TestGroupFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_qualifier(query.GroupFilter())
+        search.append_modifier(query.GroupFilter())
         return search
 
     @pytest.fixture
@@ -145,7 +321,7 @@ class TestGroupAuthFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_qualifier(query.GroupAuthFilter(pyramid_request))
+        search.append_modifier(query.GroupAuthFilter(pyramid_request))
         return search
 
 
@@ -187,7 +363,7 @@ class TestUserFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_qualifier(query.UserFilter())
+        search.append_modifier(query.UserFilter())
         return search
 
 
@@ -269,7 +445,7 @@ class TestUriFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_qualifier(query.UriFilter(pyramid_request))
+        search.append_modifier(query.UriFilter(pyramid_request))
         return search
 
     @pytest.fixture
@@ -293,7 +469,7 @@ class TestDeletedFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_qualifier(query.DeletedFilter())
+        search.append_modifier(query.DeletedFilter())
         return search
 
 
@@ -304,7 +480,7 @@ class TestNipsaFilter(object):
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = user
-        search.append_qualifier(query.NipsaFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         Annotation(userid=banned_user.userid)
         expected_ids = [Annotation(userid=user.userid).id]
 
@@ -316,7 +492,7 @@ class TestNipsaFilter(object):
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = banned_user
-        search.append_qualifier(query.NipsaFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(userid=banned_user.userid).id]
 
         result = search.run({})
@@ -329,7 +505,7 @@ class TestNipsaFilter(object):
     ):
         pyramid_request.user = user
         group_service.groupids_created_by.return_value = ["created_by_banneduser"]
-        search.append_qualifier(query.NipsaFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(groupid="created_by_banneduser",
                                    userid=banned_user.userid).id]
 
@@ -424,7 +600,7 @@ class TestAnyMatcher(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_qualifier(query.AnyMatcher())
+        search.append_modifier(query.AnyMatcher())
         return search
 
     @pytest.fixture
@@ -482,7 +658,7 @@ class TestTagsMatcher(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_qualifier(query.TagsMatcher())
+        search.append_modifier(query.TagsMatcher())
         return search
 
 
@@ -503,7 +679,7 @@ class TestRepliesMatcher(object):
         expected_reply_ids = [reply1.id, reply2.id, reply3.id]
 
         ann_ids = [ann1.id, ann2.id]
-        search.append_qualifier(query.RepliesMatcher(ann_ids))
+        search.append_modifier(query.RepliesMatcher(ann_ids))
         result = search.run({})
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
@@ -517,7 +693,7 @@ class TestRepliesMatcher(object):
         expected_reply_ids = [reply1.id, reply2.id]
 
         ann_ids = [ann1.id]
-        search.append_qualifier(query.RepliesMatcher(ann_ids))
+        search.append_modifier(query.RepliesMatcher(ann_ids))
         result = search.run({})
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
@@ -602,6 +778,6 @@ class TestUsersAggregation(object):
 @pytest.fixture
 def search(pyramid_request):
     search = Search(pyramid_request)
-    # Remove all default filters, aggregators, and matchers.
+    # Remove all default modifiers and aggregators except Sorter.
     search.clear()
     return search
