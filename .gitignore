@@ -17,7 +17,6 @@ mail/
 .eggs/
 *.egg
 *.egg-info
-.pydeps
 .pytest_cache
 
 # development TLS cert/key

@@ -2,13 +2,6 @@ DOCKER_TAG = dev
 
 GULP := node_modules/.bin/gulp
 
-# Unless the user has specified otherwise in their environment, it's probably a
-# good idea to refuse to install unless we're in an activated virtualenv.
-ifndef PIP_REQUIRE_VIRTUALENV
-PIP_REQUIRE_VIRTUALENV = 1
-endif
-export PIP_REQUIRE_VIRTUALENV
-
 .PHONY: default
 default: test
 
@@ -20,14 +13,13 @@ build/manifest.json: node_modules/.uptodate
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	rm -f node_modules/.uptodate .pydeps
+	rm -f node_modules/.uptodate
 	rm -rf build
 
 ## Run the development H server locally
 .PHONY: dev
-dev: build/manifest.json .pydeps
-	@bin/hypothesis --dev init
-	@bin/hypothesis devserver
+dev: build/manifest.json
+	tox -e dev
 
 ## Build hypothesis/hypothesis docker image
 .PHONY: docker
@@ -57,7 +49,6 @@ run-docker:
 ## Run test suite
 .PHONY: test
 test: node_modules/.uptodate
-	@pip install -q tox
 	tox
 	$(GULP) test
 
@@ -71,31 +62,21 @@ lint:
 
 .PHONY: docs
 docs:
-	@pip install -q tox
 	tox -e docs
 
 .PHONY: checkdocs
 checkdocs:
-	@pip install -q tox
 	tox -e checkdocs
 
 .PHONY: docstrings
 docstrings:
-	@pip install -q tox
 	tox -e docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings:
-	@pip install -q tox
 	tox -e checkdocstrings
 
 ################################################################################
-
-# Fake targets to aid with deps installation
-.pydeps: requirements.txt requirements-dev.in
-	@echo installing python dependencies
-	@pip install -r requirements-dev.in tox
-	@touch $@
 
 node_modules/.uptodate: package.json
 	@echo installing javascript dependencies
