@@ -36,7 +36,7 @@ node {
                 sh 'cd /var/lib/hypothesis && tox'
                 // Functional tests
                 sh 'cd /var/lib/hypothesis && tox -e functional'
-                sh 'cd /var/lib/hypothesis && tox -e functional-py3'
+                sh 'cd /var/lib/hypothesis && tox -e functional-py36'
             }
         } finally {
             rabbit.stop()
