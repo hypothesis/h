@@ -289,7 +289,7 @@ class TestListGroupsFactory(object):
 
         svc = list_groups_factory(None, pyramid_request)
 
-        assert svc.request_authority == 'bar.com'
+        assert svc.default_authority == 'bar.com'
 
 
 @pytest.fixture
@@ -437,5 +437,5 @@ def mixed_groups(factories, user, authority, origin):
 def svc(pyramid_request, db_session):
     return ListGroupsService(
         session=db_session,
-        request_authority=pyramid_request.default_authority
+        default_authority=pyramid_request.default_authority
     )

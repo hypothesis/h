@@ -17,15 +17,15 @@ class ListGroupsService(object):
     ALl public methods return a list of relevant group model objects.
     """
 
-    def __init__(self, session, request_authority):
+    def __init__(self, session, default_authority):
         """
         Create a new list_groups service.
 
-        :param _session: the SQLAlchemy session object
-        :param _request_authority: the authority to use as a default
+        :param session: the SQLAlchemy session object
+        :param default_authority: the authority to use as a default
         """
         self._session = session
-        self.request_authority = request_authority
+        self.default_authority = default_authority
 
     def _authority(self, user=None, authority=None):
         """Determine which authority to use.
@@ -37,7 +37,7 @@ class ListGroupsService(object):
 
         if user is not None:
             return user.authority
-        return authority or self.request_authority
+        return authority or self.default_authority
 
     def all_groups(self, user=None, authority=None, document_uri=None):
         """
@@ -198,4 +198,4 @@ class ListGroupsService(object):
 def list_groups_factory(context, request):
     """Return a ListGroupsService instance for the passed context and request."""
     return ListGroupsService(session=request.db,
-                             request_authority=request.default_authority)
+                             default_authority=request.default_authority)
