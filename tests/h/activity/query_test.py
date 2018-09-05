@@ -239,7 +239,7 @@ class TestExecute(object):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         TopLevelAnnotationsFilter.assert_called_once_with()
-        search.append_filter.assert_any_call(TopLevelAnnotationsFilter.return_value)
+        search.append_modifier.assert_any_call(TopLevelAnnotationsFilter.return_value)
 
     def test_it_only_shows_annotations_from_current_authority(self,
                                                               pyramid_request,
@@ -248,7 +248,7 @@ class TestExecute(object):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         AuthorityFilter.assert_called_once_with(pyramid_request.authority)
-        search.append_filter.assert_any_call(AuthorityFilter.return_value)
+        search.append_modifier.assert_any_call(AuthorityFilter.return_value)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
                                                             pyramid_request,
@@ -603,7 +603,7 @@ class TestExecute(object):
     @pytest.fixture
     def search(self, annotations):
         search = mock.Mock(
-            spec_set=['append_filter', 'append_aggregation', 'run'])
+            spec_set=['append_modifier', 'append_aggregation', 'run'])
         search.run.return_value = mock.Mock(
             spec_set=['total', 'aggregations', 'annotation_ids'])
         search.run.return_value.total = 20

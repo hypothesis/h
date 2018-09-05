@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 import datetime
+import elasticsearch_dsl
 import pytest
 import webob
-import mock
 
 from h.search import Search, index, query
 from hypothesis import strategies as st
@@ -18,7 +18,19 @@ LIMIT_MAX = query.LIMIT_MAX
 OFFSET_MAX = query.OFFSET_MAX
 
 
-class TestBuilder(object):
+class TestLimiter(object):
+    def test_it_limits_number_of_annotations(self, Annotation, search):
+        ann_ids = [Annotation().id,
+                   Annotation().id,
+                   Annotation().id,
+                   Annotation().id]
+
+        params = webob.multidict.MultiDict([("offset", 1),
+                            ("limit", 2)])
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted(ann_ids[1:3])
+
     @pytest.mark.parametrize('offset,from_', [
         # defaults to OFFSET_DEFAULT
         (MISSING, OFFSET_DEFAULT),
@@ -36,174 +48,97 @@ class TestBuilder(object):
         ("32.7", OFFSET_DEFAULT),
         ("9801", OFFSET_MAX),
     ])
-    def test_offset(self, offset, from_):
-        builder = query.Builder(ES_VERSION)
+    def test_offset(self, pyramid_request, offset, from_):
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
 
+        params = {"offset": offset}
         if offset is MISSING:
-            q = builder.build({})
-        else:
-            q = builder.build({"offset": offset})
+            params = {}
+
+        q = limiter(search, params).to_dict()
 
         assert q["from"] == from_
 
     @given(st.text())
     @pytest.mark.fuzz
-    def test_limit_output_within_bounds(self, text):
+    def test_limit_output_within_bounds(self, pyramid_request, text):
         """Given any string input, output should be in the allowed range."""
-        builder = query.Builder(ES_VERSION)
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
 
-        q = builder.build({"limit": text})
+        q = limiter(search, {"limit": text}).to_dict()
 
         assert isinstance(q["size"], int)
         assert 0 <= q["size"] <= LIMIT_MAX
 
     @given(st.integers())
     @pytest.mark.fuzz
-    def test_limit_output_within_bounds_int_input(self, lim):
+    def test_limit_output_within_bounds_int_input(self, pyramid_request, lim):
         """Given any integer input, output should be in the allowed range."""
-        builder = query.Builder(ES_VERSION)
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
 
-        q = builder.build({"limit": str(lim)})
+        q = limiter(search, {"limit": str(lim)}).to_dict()
 
         assert isinstance(q["size"], int)
         assert 0 <= q["size"] <= LIMIT_MAX
 
     @given(st.integers(min_value=0, max_value=LIMIT_MAX))
     @pytest.mark.fuzz
-    def test_limit_matches_input(self, lim):
+    def test_limit_matches_input(self, pyramid_request, lim):
         """Given an integer in the allowed range, it should be passed through."""
-        builder = query.Builder(ES_VERSION)
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
 
-        q = builder.build({"limit": str(lim)})
+        q = limiter(search, {"limit": str(lim)}).to_dict()
 
         assert q["size"] == lim
 
-    def test_limit_missing(self):
-        builder = query.Builder(ES_VERSION)
+    def test_limit_set_to_default_when_missing(self, pyramid_request):
+        limiter = query.Limiter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
 
-        q = builder.build({})
+        q = limiter(search, {}).to_dict()
 
         assert q["size"] == LIMIT_DEFAULT
 
-    def test_defaults_to_match_all(self):
-        """If no query params are given a "match_all": {} query is returned."""
-        builder = query.Builder(ES_VERSION)
+    @pytest.fixture
+    def search(self, search):
+        search.append_modifier(query.Limiter())
+        return search
 
-        q = builder.build({})
 
-        assert q["query"] == {'bool': {'filter': [], 'must': []}}
+class TestKeyValueMatcher(object):
+    def test_ands_multiple_key_values(self, Annotation, search):
+        ann_ids = [Annotation().id,
+                   Annotation().id]
+        reply1 = Annotation(references=[ann_ids[0]]).id
+        reply2 = Annotation(references=[ann_ids[0], reply1]).id
 
-    def test_unknown_param_is_added_as_match_clause(self):
-        builder = query.Builder(ES_VERSION)
+        params = webob.multidict.MultiDict([("references", ann_ids[0]),
+                            ("references", reply1)])
+        result = search.run(params)
 
-        q = builder.build({"foo": "bar"})
+        assert result.annotation_ids == [reply2]
 
-        assert q["query"] == {
-            'bool': {'filter': [],
-                     'must': [{'match': {'foo': 'bar'}}]},
-        }
+    @pytest.fixture
+    def search(self, search):
+        search.append_modifier(query.KeyValueMatcher())
+        return search
 
-    def test_unknown_params_are_added_as_match_clauses(self):
-        builder = query.Builder(ES_VERSION)
-        params = webob.multidict.MultiDict()
-        params.add("user", "fred")
-        params.add("user", "bob")
 
-        q = builder.build(params)
-
-        assert q["query"] == {
-            'bool': {'filter': [],
-                     'must': [{'match': {'user': 'fred'}},
-                              {'match': {'user': 'bob'}}]},
-        }
-
-    def test_with_evil_arguments(self):
-        builder = query.Builder(ES_VERSION)
-        params = {
-            "offset": "3foo",
-            "limit": '\' drop table annotations'
-        }
-
-        q = builder.build(params)
-
-        assert q["from"] == 0
-        assert q["size"] == 20
-        assert q["query"] == {'bool': {'filter': [], 'must': []}}
-
-    def test_passes_params_to_filters(self):
-        testfilter = mock.Mock()
-        builder = query.Builder(ES_VERSION)
-        builder.append_filter(testfilter)
-
-        builder.build({"foo": "bar"})
-
-        testfilter.assert_called_with({"foo": "bar"})
-
-    def test_ignores_filters_returning_none(self):
-        testfilter = mock.Mock()
-        testfilter.return_value = None
-        builder = query.Builder(ES_VERSION)
-        builder.append_filter(testfilter)
-
-        q = builder.build({})
-
-        assert q["query"] == {'bool': {'filter': [], 'must': []}}
-
-    def test_filters_query_by_filter_results(self):
-        testfilter = mock.Mock()
-        testfilter.return_value = {"term": {"giraffe": "nose"}}
-        builder = query.Builder(ES_VERSION)
-        builder.append_filter(testfilter)
-
-        q = builder.build({})
-        assert q["query"] == {
-            'bool': {'filter': [{'term': {'giraffe': 'nose'}}],
-                     'must': []},
-        }
-
-    def test_passes_params_to_matchers(self):
-        testmatcher = mock.Mock()
-        builder = query.Builder(ES_VERSION)
-        builder.append_matcher(testmatcher)
-
-        builder.build({"foo": "bar"})
-
-        testmatcher.assert_called_with({"foo": "bar"})
-
-    def test_adds_matchers_to_query(self):
-        testmatcher = mock.Mock()
-        testmatcher.return_value = {"match": {"giraffe": "nose"}}
-        builder = query.Builder(ES_VERSION)
-        builder.append_matcher(testmatcher)
-
-        q = builder.build({})
-
-        assert q["query"] == {
-            'bool': {'filter': [],
-                     'must': [{'match': {'giraffe': 'nose'}}]},
-        }
-
-    def test_passes_params_to_aggregations(self):
-        testaggregation = mock.Mock()
-        builder = query.Builder(ES_VERSION)
-        builder.append_aggregation(testaggregation)
-
-        builder.build({"foo": "bar"})
-
-        testaggregation.assert_called_with({"foo": "bar"})
-
-    def test_adds_aggregations_to_query(self):
-        testaggregation = mock.Mock(key="foobar")
-        testaggregation.return_value = {"terms": {"field": "foo"}}
-        builder = query.Builder(ES_VERSION)
-        builder.append_aggregation(testaggregation)
-
-        q = builder.build({})
-
-        assert q["aggs"] == {
-            "foobar": {"terms": {"field": "foo"}}
-        }
-
+class TestSorter(object):
     @pytest.mark.parametrize("sort_key,order,expected_order", [
         # Sort supports "updated" and "created" fields.
         ("updated", "desc", [1, 0, 2]),
@@ -270,7 +205,7 @@ class TestTopLevelAnnotationsFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.TopLevelAnnotationsFilter())
+        search.append_modifier(query.TopLevelAnnotationsFilter())
         return search
 
 
@@ -288,7 +223,7 @@ class TestAuthorityFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.AuthorityFilter("auth1"))
+        search.append_modifier(query.AuthorityFilter("auth1"))
         return search
 
 
@@ -334,7 +269,7 @@ class TestAuthFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_filter(query.AuthFilter(pyramid_request))
+        search.append_modifier(query.AuthFilter(pyramid_request))
         return search
 
 
@@ -351,7 +286,7 @@ class TestGroupFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.GroupFilter())
+        search.append_modifier(query.GroupFilter())
         return search
 
     @pytest.fixture
@@ -386,7 +321,7 @@ class TestGroupAuthFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_filter(query.GroupAuthFilter(pyramid_request))
+        search.append_modifier(query.GroupAuthFilter(pyramid_request))
         return search
 
 
@@ -428,7 +363,7 @@ class TestUserFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.UserFilter())
+        search.append_modifier(query.UserFilter())
         return search
 
 
@@ -510,7 +445,7 @@ class TestUriFilter(object):
 
     @pytest.fixture
     def search(self, search, pyramid_request):
-        search.append_filter(query.UriFilter(pyramid_request))
+        search.append_modifier(query.UriFilter(pyramid_request))
         return search
 
     @pytest.fixture
@@ -520,13 +455,13 @@ class TestUriFilter(object):
 
 class TestDeletedFilter(object):
 
-    def test_excludes_deleted_annotations(self, search, Annotation):
+    def test_excludes_deleted_annotations(self, search, es_client, Annotation):
         deleted_ids = [Annotation(deleted=True).id]
         not_deleted_ids = [Annotation(deleted=False).id]
 
         # Deleted annotations need to be marked in the index using `h.search.index.delete`.
         for id_ in deleted_ids:
-            index.delete(search.es, id_, refresh=True)
+            index.delete(es_client, id_, refresh=True)
 
         result = search.run({})
 
@@ -534,7 +469,7 @@ class TestDeletedFilter(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_filter(query.DeletedFilter())
+        search.append_modifier(query.DeletedFilter())
         return search
 
 
@@ -545,7 +480,7 @@ class TestNipsaFilter(object):
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = user
-        search.append_filter(query.NipsaFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         Annotation(userid=banned_user.userid)
         expected_ids = [Annotation(userid=user.userid).id]
 
@@ -557,7 +492,7 @@ class TestNipsaFilter(object):
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = banned_user
-        search.append_filter(query.NipsaFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(userid=banned_user.userid).id]
 
         result = search.run({})
@@ -570,7 +505,7 @@ class TestNipsaFilter(object):
     ):
         pyramid_request.user = user
         group_service.groupids_created_by.return_value = ["created_by_banneduser"]
-        search.append_filter(query.NipsaFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(groupid="created_by_banneduser",
                                    userid=banned_user.userid).id]
 
@@ -665,7 +600,7 @@ class TestAnyMatcher(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_matcher(query.AnyMatcher())
+        search.append_modifier(query.AnyMatcher())
         return search
 
     @pytest.fixture
@@ -723,7 +658,7 @@ class TestTagsMatcher(object):
 
     @pytest.fixture
     def search(self, search):
-        search.append_matcher(query.TagsMatcher())
+        search.append_modifier(query.TagsMatcher())
         return search
 
 
@@ -744,7 +679,7 @@ class TestRepliesMatcher(object):
         expected_reply_ids = [reply1.id, reply2.id, reply3.id]
 
         ann_ids = [ann1.id, ann2.id]
-        search.append_matcher(query.RepliesMatcher(ann_ids))
+        search.append_modifier(query.RepliesMatcher(ann_ids))
         result = search.run({})
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
@@ -758,7 +693,7 @@ class TestRepliesMatcher(object):
         expected_reply_ids = [reply1.id, reply2.id]
 
         ann_ids = [ann1.id]
-        search.append_matcher(query.RepliesMatcher(ann_ids))
+        search.append_modifier(query.RepliesMatcher(ann_ids))
         result = search.run({})
 
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
@@ -841,14 +776,8 @@ class TestUsersAggregation(object):
 
 
 @pytest.fixture
-def pyramid_request(request, pyramid_request, es_client):
-    pyramid_request.es = es_client
-    return pyramid_request
-
-
-@pytest.fixture
 def search(pyramid_request):
     search = Search(pyramid_request)
-    # Remove all default filters, aggregators, and matchers.
+    # Remove all default modifiers and aggregators except Sorter.
     search.clear()
     return search

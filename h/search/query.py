@@ -3,6 +3,8 @@
 from __future__ import unicode_literals
 from h import storage
 from h.util import uri
+from elasticsearch_dsl import Q
+from elasticsearch_dsl.query import SimpleQueryString
 
 LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
@@ -10,120 +12,90 @@ LIMIT_MAX = 200
 OFFSET_MAX = 9800
 
 
-class Builder(object):
-
+class KeyValueMatcher(object):
     """
-    Build a query for execution in Elasticsearch.
+    Adds any parameters as straightforward key-value matchers.
+
+    This is intended to be run after all other matchers so that any
+    remaining params not popped by any other qualifier get dealt with here.
     """
 
-    def __init__(self, es_version):
-        """
-        Initialize query builder.
-
-        :param es_version: Elasticsearch library version.
-        :type es_version: Tuple[int,int,int]
-        """
-
-        self.filters = []
-        self.matchers = []
-        self.aggregations = []
-        self._es_version = es_version
-
-    def append_filter(self, f):
-        self.filters.append(f)
-
-    def append_matcher(self, m):
-        self.matchers.append(m)
-
-    def append_aggregation(self, a):
-        self.aggregations.append(a)
-
-    def build(self, params):
-        """Get the resulting query object from this query builder."""
-        params = params.copy()
-
-        p_from = extract_offset(params)
-        p_size = extract_limit(params)
-        p_sort = extract_sort(params)
-
-        filters = [f(params) for f in self.filters]
-        matchers = [m(params) for m in self.matchers]
-        aggregations = {a.key: a(params) for a in self.aggregations}
-        filters = [f for f in filters if f is not None]
-        matchers = [m for m in matchers if m is not None]
-
-        # Remaining parameters are added as straightforward key-value matchers
+    def __call__(self, search, params):
         for key, value in params.items():
-            matchers.append({"match": {key: value}})
-
-        # See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/query-dsl-filtered-query.html
-        query = {
-            "bool": {
-                "filter": filters,
-                "must": matchers,
-            },
-        }
-
-        return {
-            "from": p_from,
-            "size": p_size,
-            "sort": p_sort,
-            "query": query,
-            "aggs": aggregations,
-        }
+            search = search.filter("match", **{key: value})
+        return search
 
 
-def extract_offset(params):
-    try:
-        val = int(params.pop("offset"))
-        val = min(val, OFFSET_MAX)
-        if val < 0:
-            raise ValueError
-    except (ValueError, KeyError):
-        return 0
-    else:
-        return val
+class Limiter(object):
+    """
+    Limits the number of annotations returned by the search.
+
+    Searchers for annotations starting at offset and ending at limit.
+    """
+
+    def __call__(self, search, params):
+        starting_offset = self._extract_offset(params)
+        ending_offset = starting_offset + self._extract_limit(params)
+        return search[starting_offset:ending_offset]
+
+    def _extract_offset(self, params):
+        try:
+            val = int(params.pop("offset"))
+            val = min(val, OFFSET_MAX)
+            if val < 0:
+                raise ValueError
+        except (ValueError, KeyError):
+            return 0
+        else:
+            return val
+
+    def _extract_limit(self, params):
+        try:
+            val = int(params.pop("limit"))
+            val = min(val, LIMIT_MAX)
+            if val < 0:
+                raise ValueError
+        except (ValueError, KeyError):
+            return LIMIT_DEFAULT
+        else:
+            return val
 
 
-def extract_limit(params):
-    try:
-        val = int(params.pop("limit"))
-        val = min(val, LIMIT_MAX)
-        if val < 0:
-            raise ValueError
-    except (ValueError, KeyError):
-        return LIMIT_DEFAULT
-    else:
-        return val
+class Sorter(object):
+    """
+    Sorts annotations.
 
+    Sorts annotations by sort (the key to sort by)
+    and the order (the order in which to sort by).
+    """
 
-def extract_sort(params):
-    sort_by = params.pop("sort", "updated")
-    # Sorting must be done on non-analyzed fields.
-    if sort_by == "user":
-        sort_by = "user_raw"
-    return [{
-        sort_by: {
-            "order": params.pop("order", "desc"),
+    def __call__(self, search, params):
+        sort_by = params.pop("sort", "updated")
+        # Sorting must be done on non-analyzed fields.
+        if sort_by == "user":
+            sort_by = "user_raw"
 
-            # `unmapped_type` causes unknown fields specified as arguments to
-            # `sort` behave as if all documents contained empty values of the
-            # given type. Without this, specifying eg. `sort=foobar` throws
-            # an exception.
-            #
-            # We use the field type `boolean` to assist with migration because
-            # that exists in both ES 1 and ES 6.
-            "unmapped_type": "boolean",
-        }
-    }]
+        return search.sort(
+            {sort_by:
+                {"order": params.pop("order", "desc"),
+
+                 # `unmapped_type` causes unknown fields specified as arguments to
+                 # `sort` behave as if all documents contained empty values of the
+                 # given type. Without this, specifying eg. `sort=foobar` throws
+                 # an exception.
+                 #
+                 # We use the field type `boolean` to assist with migration because
+                 # that exists in both ES 1 and ES 6.
+                 "unmapped_type": "boolean"}}
+        )
 
 
 class TopLevelAnnotationsFilter(object):
 
     """Matches top-level annotations only, filters out replies."""
 
-    def __call__(self, _):
-        return {'bool': {'must_not': {'exists': {'field': 'references'}}}}
+    def __call__(self, search, _):
+        return search.exclude("exists", field="references")
 
 
 class AuthorityFilter(object):
@@ -135,8 +107,8 @@ class AuthorityFilter(object):
     def __init__(self, authority):
         self.authority = authority
 
-    def __call__(self, params):
-        return {'term': {'authority': self.authority}}
+    def __call__(self, search, params):
+        return search.filter("term", authority=self.authority)
 
 
 class AuthFilter(object):
@@ -156,15 +128,14 @@ class AuthFilter(object):
         """
         self.request = request
 
-    def __call__(self, params):
-        public_filter = {'term': {'shared': True}}
-
+    def __call__(self, search, params):
         userid = self.request.authenticated_userid
         if userid is None:
-            return public_filter
+            return search.filter("term", shared=True)
 
-        userid_filter = {'term': {'user_raw': userid}}
-        return {'bool': {'should': [public_filter, userid_filter]}}
+        return search.filter(Q("bool",
+                               should=[Q("term", shared=True),
+                                       Q("term", user_raw=userid)]))
 
 
 class GroupFilter(object):
@@ -173,12 +144,13 @@ class GroupFilter(object):
     Matches only those annotations belonging to the specified group.
     """
 
-    def __call__(self, params):
+    def __call__(self, search, params):
         # Remove parameter if passed, preventing fall-through to default query
         group = params.pop("group", None)
 
         if group is not None:
-            return {"term": {"group": group}}
+            return search.filter("term", group=group)
+        return search
 
 
 class GroupAuthFilter(object):
@@ -188,9 +160,9 @@ class GroupAuthFilter(object):
         self.user = request.user
         self.group_service = request.find_service(name="group")
 
-    def __call__(self, _):
+    def __call__(self, search, _):
         groups = self.group_service.groupids_readable_by(self.user)
-        return {"terms": {"group": groups}}
+        return search.filter("terms", group=groups)
 
 
 class UriFilter(object):
@@ -207,9 +179,9 @@ class UriFilter(object):
         """
         self.request = request
 
-    def __call__(self, params):
+    def __call__(self, search, params):
         if 'uri' not in params and 'url' not in params:
-            return None
+            return search
         query_uris = [v for k, v in params.items() if k in ['uri', 'url']]
         if 'uri' in params:
             del params['uri']
@@ -222,8 +194,8 @@ class UriFilter(object):
 
             us = [uri.normalize(u) for u in expanded]
             uris.update(us)
-
-        return {"terms": {"target.scope": list(uris)}}
+        return search.filter(
+            'terms', **{'target.scope': list(uris)})
 
 
 class UserFilter(object):
@@ -232,14 +204,14 @@ class UserFilter(object):
     A filter that selects only annotations where the 'user' parameter matches.
     """
 
-    def __call__(self, params):
+    def __call__(self, search, params):
         if 'user' not in params:
-            return None
+            return search
 
         users = [v.lower() for k, v in params.items() if k == 'user']
         del params['user']
 
-        return {'terms': {'user': users}}
+        return search.filter("terms", user=users)
 
 
 class DeletedFilter(object):
@@ -251,56 +223,34 @@ class DeletedFilter(object):
     deleted.
     """
 
-    def __call__(self, _):
-        return {"bool": {"must_not": {"exists": {"field": "deleted"}}}}
+    def __call__(self, search, _):
+        return search.exclude("exists", field="deleted")
 
 
 class NipsaFilter(object):
+    """Return an Elasticsearch filter for filtering out NIPSA'd annotations."""
+
     def __init__(self, request):
         self.group_service = request.find_service(name='group')
         self.user = request.user
 
-    def __call__(self, _):
-        return nipsa_filter(self.group_service, self.user)
+    def __call__(self, search, _):
+        """Filter out all NIPSA'd annotations except the current user's."""
+        # If any one of these "should" clauses is true then the annotation will
+        # get through the filter.
+        should_clauses = [Q("bool", must_not=Q("term", nipsa=True)),
+                          Q("exists", field="thread_ids")]
 
+        if self.user is not None:
+            # Always show the logged-in user's annotations even if they have nipsa.
+            should_clauses.append(Q("term", user=self.user.userid.lower()))
 
-def nipsa_filter(group_service, user=None):
-    """Return an Elasticsearch filter for filtering out NIPSA'd annotations.
+            # Also include nipsa'd annotations for groups that the user created.
+            created_groups = self.group_service.groupids_created_by(self.user)
+            if created_groups:
+                should_clauses.append(Q("terms", group=created_groups))
 
-    The returned filter is suitable for inserting into an Es query dict.
-    For example::
-
-        query = {
-            "query": {
-                "filtered": {
-                    "filter": nipsa_filter(),
-                    "query": {...}
-                }
-            }
-        }
-
-    :param user: The user whose annotations should not be filtered.
-        The returned filtered query won't filter out this user's annotations,
-        even if the annotations have the NIPSA flag.
-    :type user: h.models.User
-    """
-    # If any one of these "should" clauses is true then the annotation will
-    # get through the filter.
-    should_clauses = [
-        {"bool": {"must_not": {"term": {"nipsa": True}}}},
-        {"exists": {"field": "thread_ids"}},
-    ]
-
-    if user is not None:
-        # Always show the logged-in user's annotations even if they have nipsa.
-        should_clauses.append({"term": {"user": user.userid.lower()}})
-
-        # Also include nipsa'd annotations for groups that the user created.
-        created_groups = group_service.groupids_created_by(user)
-        if created_groups:
-            should_clauses.append({"terms": {"group": created_groups}})
-
-    return {"bool": {"should": should_clauses}}
+        return search.filter(Q("bool", should=should_clauses))
 
 
 class AnyMatcher(object):
@@ -309,34 +259,38 @@ class AnyMatcher(object):
     Matches the contents of a selection of fields against the `any` parameter.
     """
 
-    def __call__(self, params):
+    def __call__(self, search, params):
         if "any" not in params:
-            return None
+            return search
         qs = ' '.join([v for k, v in params.items() if k == "any"])
-        result = {
-            "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts"],
-                "query": qs,
-            }
-        }
         del params["any"]
-        return result
+        return search.query(
+            SimpleQueryString(
+                query=qs,
+                fields=["quote", "tags", "text", "uri.parts"],
+                # default_operator='or',
+            )
+        )
 
 
 class TagsMatcher(object):
 
     """Matches the tags field against 'tag' or 'tags' parameters."""
 
-    def __call__(self, params):
+    def __call__(self, search, params):
         tags = set(v for k, v in params.items() if k in ['tag', 'tags'])
         try:
             del params['tag']
             del params['tags']
         except KeyError:
             pass
-        matchers = [{'match': {'tags': {'query': t, 'operator': 'and'}}}
+        matchers = [Q("match", tags={"query": t, "operator": "and"})
                     for t in tags]
-        return {'bool': {'must': matchers}} if matchers else None
+        if matchers:
+            return search.query(
+                Q('bool', must=matchers)
+            )
+        return search
 
 
 class RepliesMatcher(object):
@@ -346,47 +300,37 @@ class RepliesMatcher(object):
     def __init__(self, ids):
         self.annotation_ids = ids
 
-    def __call__(self, _):
-        return {
-            'terms': {'references': self.annotation_ids}
-        }
+    def __call__(self, search, _):
+        return search.query(
+            Q('bool', must=[Q('terms', references=self.annotation_ids)])
+        )
 
 
 class TagsAggregation(object):
     def __init__(self, limit=10):
-        self.key = 'tags'
         self.limit = limit
+        self.name = "tags"
 
-    def __call__(self, _):
-        return {
-            "terms": {
-                "field": "tags_raw",
-                "size": self.limit
-            }
-        }
+    def __call__(self, search, _):
+        search.aggs.bucket(self.name, 'terms', size=self.limit, field='tags_raw')
 
     def parse_result(self, result):
         return [
-            {'tag': b['key'], 'count': b['doc_count']}
-            for b in result['buckets']
+            {'tag': b["key"], 'count': b["doc_count"]}
+            for b in result[self.name]["buckets"]
         ]
 
 
 class UsersAggregation(object):
     def __init__(self, limit=10):
-        self.key = 'users'
         self.limit = limit
+        self.name = "users"
 
-    def __call__(self, _):
-        return {
-            "terms": {
-                "field": "user_raw",
-                "size": self.limit
-            }
-        }
+    def __call__(self, search, _):
+        search.aggs.bucket(self.name, 'terms', size=self.limit, field='user_raw')
 
     def parse_result(self, result):
         return [
-            {'user': b['key'], 'count': b['doc_count']}
-            for b in result['buckets']
+            {'user': b["key"], 'count': b["doc_count"]}
+            for b in result[self.name]["buckets"]
         ]

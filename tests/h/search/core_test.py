@@ -10,7 +10,6 @@ Tests for filtering/matching/aggregating on specific annotation fields are in
 from __future__ import unicode_literals
 
 import datetime
-import pytest
 
 from h import search
 
@@ -123,18 +122,6 @@ class TestSearch(object):
 
         assert result.reply_ids == []
 
-    def test_it_passes_es_version_to_builder(self, pyramid_request, Builder):
-        client = pyramid_request.es
-
-        search.Search(pyramid_request)
-
-        assert Builder.call_count == 2
-        Builder.assert_any_call(es_version=client.version)
-
-    @pytest.fixture
-    def Builder(self, patch):
-        return patch('h.search.core.query.Builder', autospec=True)
-
 
 class TestSearchWithSeparateReplies(object):
     """Unit tests for search.Search when separate_replies=True is given."""
@@ -242,9 +229,3 @@ class TestSearchWithSeparateReplies(object):
 
         assert len(result.reply_ids) == 3
         assert oldest_reply.id not in result.reply_ids
-
-
-@pytest.fixture
-def pyramid_request(request, pyramid_request, es_client):
-    pyramid_request.es = es_client
-    return pyramid_request
