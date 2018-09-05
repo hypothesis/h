@@ -4,9 +4,10 @@ import colander
 import pytest
 from mock import Mock
 from pyramid.exceptions import BadCSRFToken
+from itsdangerous import BadData, SignatureExpired
 
 from h.accounts import schemas
-from h.services.user import UserService
+from h.services.user import UserNotActivated, UserService
 from h.services.user_password import UserPasswordService
 
 
@@ -152,6 +153,240 @@ class TestRegisterSchema(object):
             "password": "sdlkfjlk3j3iuei",
             "privacy_accepted": "true",
         })
+
+
+@pytest.mark.usefixtures('user_service', 'user_password_service')
+class TestLoginSchema(object):
+
+    def test_passes_username_to_user_service(self,
+                                             factories,
+                                             pyramid_csrf_request,
+                                             user_service):
+        user = factories.User.build(username='jeannie')
+        user_service.fetch_for_login.return_value = user
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+
+        schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
+
+        user_service.fetch_for_login.assert_called_once_with(username_or_email='jeannie')
+
+    def test_passes_password_to_user_password_service(self,
+                                                      factories,
+                                                      pyramid_csrf_request,
+                                                      user_service,
+                                                      user_password_service):
+        user = factories.User.build(username='jeannie')
+        user_service.fetch_for_login.return_value = user
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+
+        schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
+
+        user_password_service.check_password.assert_called_once_with(user, 'cake')
+
+    def test_it_returns_user_when_valid(self,
+                                        factories,
+                                        pyramid_csrf_request,
+                                        user_service):
+        user = factories.User.build(username='jeannie')
+        user_service.fetch_for_login.return_value = user
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+
+        result = schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
+
+        assert result['user'] is user
+
+    def test_invalid_with_bad_csrf(self, pyramid_request, user_service):
+        schema = schemas.LoginSchema().bind(request=pyramid_request)
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize({
+                'username': 'jeannie',
+                'password': 'cake',
+            })
+
+    def test_invalid_with_inactive_user(self,
+                                        pyramid_csrf_request,
+                                        user_service):
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+        user_service.fetch_for_login.side_effect = UserNotActivated()
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'username': 'jeannie',
+                'password': 'cake',
+            })
+        errors = exc.value.asdict()
+
+        assert 'username' in errors
+        assert 'activate your account' in errors['username']
+
+    def test_invalid_with_unknown_user(self,
+                                       pyramid_csrf_request,
+                                       user_service):
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+        user_service.fetch_for_login.return_value = None
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'username': 'jeannie',
+                'password': 'cake',
+            })
+        errors = exc.value.asdict()
+
+        assert 'username' in errors
+        assert 'does not exist' in errors['username']
+
+    def test_invalid_with_bad_password(self,
+                                       factories,
+                                       pyramid_csrf_request,
+                                       user_service,
+                                       user_password_service):
+        user = factories.User.build(username='jeannie')
+        user_service.fetch_for_login.return_value = user
+        user_password_service.check_password.return_value = False
+        schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'username': 'jeannie',
+                'password': 'cake',
+            })
+        errors = exc.value.asdict()
+
+        assert 'password' in errors
+        assert 'Wrong password' in errors['password']
+
+
+@pytest.mark.usefixtures('user_model')
+class TestForgotPasswordSchema(object):
+
+    def test_it_is_invalid_with_no_user(self,
+                                        pyramid_csrf_request,
+                                        user_model):
+        schema = schemas.ForgotPasswordSchema().bind(
+            request=pyramid_csrf_request)
+        user_model.get_by_email.return_value = None
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({'email': 'rapha@example.com'})
+
+        assert 'email' in exc.value.asdict()
+        assert exc.value.asdict()['email'] == 'Unknown email address.'
+
+    def test_it_returns_user_when_valid(self,
+                                        pyramid_csrf_request,
+                                        user_model):
+        schema = schemas.ForgotPasswordSchema().bind(
+            request=pyramid_csrf_request)
+        user = user_model.get_by_email.return_value
+
+        appstruct = schema.deserialize({'email': 'rapha@example.com'})
+
+        assert appstruct['user'] == user
+
+
+@pytest.mark.usefixtures('user_model')
+class TestResetPasswordSchema(object):
+
+    def test_it_is_invalid_with_password_too_short(self, pyramid_csrf_request):
+        schema = schemas.ResetPasswordSchema().bind(
+            request=pyramid_csrf_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({"password": "a"})
+        assert "password" in exc.value.asdict()
+
+    def test_it_is_invalid_with_invalid_user_token(self, pyramid_csrf_request):
+        pyramid_csrf_request.registry.password_reset_serializer = (
+            self.FakeInvalidSerializer())
+        schema = schemas.ResetPasswordSchema().bind(
+            request=pyramid_csrf_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'user': 'abc123',
+                'password': 'secret',
+            })
+
+        assert 'user' in exc.value.asdict()
+        assert 'Wrong reset code.' in exc.value.asdict()['user']
+
+    def test_it_is_invalid_with_expired_token(self, pyramid_csrf_request):
+        pyramid_csrf_request.registry.password_reset_serializer = (
+            self.FakeExpiredSerializer())
+        schema = schemas.ResetPasswordSchema().bind(
+            request=pyramid_csrf_request)
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'user': 'abc123',
+                'password': 'secret',
+            })
+
+        assert 'user' in exc.value.asdict()
+        assert 'Reset code has expired.' in exc.value.asdict()['user']
+
+    def test_it_is_invalid_if_user_has_already_reset_their_password(
+            self, pyramid_csrf_request, user_model):
+        pyramid_csrf_request.registry.password_reset_serializer = (
+            self.FakeSerializer())
+        schema = schemas.ResetPasswordSchema().bind(
+            request=pyramid_csrf_request)
+        user = user_model.get_by_username.return_value
+        user.password_updated = 2
+
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'user': 'abc123',
+                'password': 'secret',
+            })
+
+        assert 'user' in exc.value.asdict()
+        assert 'This reset code has already been used.' in exc.value.asdict()['user']
+
+    def test_it_returns_user_when_valid(self,
+                                        pyramid_csrf_request,
+                                        user_model):
+        pyramid_csrf_request.registry.password_reset_serializer = (
+            self.FakeSerializer())
+        schema = schemas.ResetPasswordSchema().bind(
+            request=pyramid_csrf_request)
+        user = user_model.get_by_username.return_value
+        user.password_updated = 0
+
+        appstruct = schema.deserialize({
+            'user': 'abc123',
+            'password': 'secret',
+        })
+
+        assert appstruct['user'] == user
+
+    class FakeSerializer(object):
+        def dumps(self, obj):
+            return 'faketoken'
+
+        def loads(self, token, max_age=0, return_timestamp=False):
+            payload = {'username': 'foo@bar.com'}
+            if return_timestamp:
+                return payload, 1
+            return payload
+
+    class FakeExpiredSerializer(FakeSerializer):
+        def loads(self, token, max_age=0, return_timestamp=False):
+            raise SignatureExpired("Token has expired")
+
+    class FakeInvalidSerializer(FakeSerializer):
+        def loads(self, token, max_age=0, return_timestamp=False):
+            raise BadData("Invalid token")
 
 
 @pytest.mark.usefixtures('models', 'user_password_service')
@@ -322,6 +557,42 @@ class TestPasswordChangeSchema(object):
 
         user_password_service.check_password.assert_called_once_with(user, 'flibble')
         assert 'password' in exc.value.asdict()
+
+
+class TestEditProfileSchema(object):
+    def test_accepts_valid_input(self, pyramid_csrf_request):
+        schema = schemas.EditProfileSchema().bind(request=pyramid_csrf_request)
+        schema.deserialize({
+            'display_name': 'Michael Granitzer',
+            'description': 'Professor at University of Passau',
+            'link': 'http://mgrani.github.io/',
+            'location': 'Bavaria, Germany',
+            'orcid': '0000-0003-3566-5507',
+        })
+
+    def test_rejects_invalid_orcid(self, pyramid_csrf_request, validate_orcid):
+        validate_orcid.side_effect = ValueError('Invalid ORCID')
+        schema = schemas.EditProfileSchema().bind(request=pyramid_csrf_request)
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({'orcid': 'abcdef'})
+        assert exc.value.asdict()['orcid'] == 'Invalid ORCID'
+
+    def test_rejects_invalid_url(self, pyramid_csrf_request, validate_url):
+        validate_url.side_effect = ValueError('Invalid URL')
+        schema = schemas.EditProfileSchema().bind(request=pyramid_csrf_request)
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({'link': '"invalid URL"'})
+        assert exc.value.asdict()['link'] == 'Invalid URL'
+
+
+@pytest.fixture
+def validate_url(patch):
+    return patch('h.accounts.schemas.util.validate_url')
+
+
+@pytest.fixture
+def validate_orcid(patch):
+    return patch('h.accounts.schemas.util.validate_orcid')
 
 
 @pytest.fixture
