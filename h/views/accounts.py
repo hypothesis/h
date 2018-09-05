@@ -21,6 +21,7 @@ from h.accounts import schemas
 from h.schemas.forms.accounts import EditProfileSchema
 from h.schemas.forms.accounts import ForgotPasswordSchema
 from h.schemas.forms.accounts import LoginSchema
+from h.schemas.forms.accounts import ResetCode
 from h.schemas.forms.accounts import ResetPasswordSchema
 from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
@@ -247,7 +248,7 @@ class ResetController(object):
         # If valid, we inject the supplied it into the form as a hidden field.
         # Otherwise, we 404.
         try:
-            user = schemas.ResetCode().deserialize(self.schema, code)
+            user = ResetCode().deserialize(self.schema, code)
         except colander.Invalid:
             raise httpexceptions.HTTPNotFound()
         else:
