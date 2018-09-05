@@ -5,14 +5,10 @@ import logging
 
 import colander
 import deform
-from itsdangerous import BadData, SignatureExpired
 from jinja2 import Markup
 
 from h import i18n, models, validators
-from h.accounts import util
-from h.services.user import UserNotActivated
 from h.models.user import (
-    DISPLAY_NAME_MAX_LENGTH,
     EMAIL_MAX_LENGTH,
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
@@ -135,73 +131,6 @@ def _privacy_accepted_message():
     return privacy_msg
 
 
-class LoginSchema(CSRFSchema):
-    username = colander.SchemaNode(
-        colander.String(),
-        title=_('Username / email'),
-        widget=deform.widget.TextInputWidget(autofocus=True),
-    )
-    password = colander.SchemaNode(
-        colander.String(),
-        title=_('Password'),
-        widget=deform.widget.PasswordWidget()
-    )
-
-    def validator(self, node, value):
-        super(LoginSchema, self).validator(node, value)
-
-        request = node.bindings['request']
-        username = value.get('username')
-        password = value.get('password')
-
-        user_service = request.find_service(name='user')
-        user_password_service = request.find_service(name='user_password')
-
-        try:
-            user = user_service.fetch_for_login(username_or_email=username)
-        except UserNotActivated:
-            err = colander.Invalid(node)
-            err['username'] = _("Please check your email and open the link "
-                                "to activate your account.")
-            raise err
-
-        if user is None:
-            err = colander.Invalid(node)
-            err['username'] = _('User does not exist.')
-            raise err
-
-        if not user_password_service.check_password(user, password):
-            err = colander.Invalid(node)
-            err['password'] = _('Wrong password.')
-            raise err
-
-        value['user'] = user
-
-
-class ForgotPasswordSchema(CSRFSchema):
-    email = colander.SchemaNode(
-        colander.String(),
-        validator=colander.All(validators.Email()),
-        title=_('Email address'),
-        widget=deform.widget.TextInputWidget(template='emailinput',
-                                             autofocus=True),
-    )
-
-    def validator(self, node, value):
-        super(ForgotPasswordSchema, self).validator(node, value)
-
-        request = node.bindings['request']
-        email = value.get('email')
-        user = models.User.get_by_email(request.db, email, request.authority)
-
-        if user is None:
-            err = colander.Invalid(node)
-            err['email'] = _('Unknown email address.')
-            raise err
-
-        value['user'] = user
-
-
 class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
@@ -235,57 +164,6 @@ class RegisterSchema(CSRFSchema):
             css_class='form-checkbox--inline'
         ),
     )
-
-
-class ResetCode(colander.SchemaType):
-
-    """Schema type transforming a reset code to a user and back."""
-
-    def serialize(self, node, appstruct):
-        if appstruct is colander.null:
-            return colander.null
-        if not isinstance(appstruct, models.User):
-            raise colander.Invalid(node, '%r is not a User' % appstruct)
-        request = node.bindings['request']
-        serializer = request.registry.password_reset_serializer
-        return serializer.dumps(appstruct.username)
-
-    def deserialize(self, node, cstruct):
-        if cstruct is colander.null:
-            return colander.null
-
-        request = node.bindings['request']
-        serializer = request.registry.password_reset_serializer
-
-        try:
-            (username, timestamp) = serializer.loads(cstruct,
-                                                     max_age=72*3600,
-                                                     return_timestamp=True)
-        except SignatureExpired:
-            raise colander.Invalid(node, _('Reset code has expired. Please reset your password again'))
-        except BadData:
-            raise colander.Invalid(node, _('Wrong reset code.'))
-
-        user = models.User.get_by_username(request.db, username, request.authority)
-        if user is None:
-            raise colander.Invalid(node, _('Your reset code is not valid'))
-        if user.password_updated is not None and timestamp < user.password_updated:
-            raise colander.Invalid(node,
-                                   _('This reset code has already been used.'))
-        return user
-
-
-class ResetPasswordSchema(CSRFSchema):
-    # N.B. this is the field into which the user puts their reset code, but we
-    # call it `user` because when validated, it will return a `User` object.
-    user = colander.SchemaNode(
-        ResetCode(),
-        title=_('Reset code'),
-        hint=_('This will be emailed to you.'),
-        widget=deform.widget.TextInputWidget(disable_autocomplete=True))
-    password = new_password_node(
-        title=_('New password'),
-        widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
 
 class EmailChangeSchema(CSRFSchema):
@@ -336,59 +214,6 @@ class PasswordChangeSchema(CSRFSchema):
 
         if exc.children:
             raise exc
-
-
-def validate_url(node, cstruct):
-    try:
-        util.validate_url(cstruct)
-    except ValueError as exc:
-        raise colander.Invalid(node, str(exc))
-
-
-def validate_orcid(node, cstruct):
-    try:
-        util.validate_orcid(cstruct)
-    except ValueError as exc:
-        raise colander.Invalid(node, str(exc))
-
-
-class EditProfileSchema(CSRFSchema):
-    display_name = colander.SchemaNode(
-        colander.String(),
-        missing=None,
-        validator=validators.Length(max=DISPLAY_NAME_MAX_LENGTH),
-        title=_('Display name'))
-
-    description = colander.SchemaNode(
-        colander.String(),
-        missing=None,
-        validator=validators.Length(max=250),
-        widget=deform.widget.TextAreaWidget(
-            max_length=250,
-            rows=4,
-        ),
-        title=_('Description'))
-
-    location = colander.SchemaNode(
-        colander.String(),
-        missing=None,
-        validator=validators.Length(max=100),
-        title=_('Location'))
-
-    link = colander.SchemaNode(
-        colander.String(),
-        missing=None,
-        validator=colander.All(
-            validators.Length(max=250),
-            validate_url),
-        title=_('Link'))
-
-    orcid = colander.SchemaNode(
-        colander.String(),
-        missing=None,
-        validator=validate_orcid,
-        title=_('ORCID'),
-        hint=_('ORCID provides a persistent identifier for researchers (see orcid.org).'))
 
 
 class NotificationsSchema(CSRFSchema):

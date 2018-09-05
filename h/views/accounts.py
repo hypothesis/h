@@ -18,6 +18,10 @@ from h import i18n
 from h import models
 from h import session
 from h.accounts import schemas
+from h.schemas.forms.accounts import EditProfileSchema
+from h.schemas.forms.accounts import ForgotPasswordSchema
+from h.schemas.forms.accounts import LoginSchema
+from h.schemas.forms.accounts import ResetPasswordSchema
 from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
@@ -97,7 +101,7 @@ class AuthController(object):
             text=_('Forgot your password?'))
 
         self.request = request
-        self.schema = schemas.LoginSchema().bind(request=self.request)
+        self.schema = LoginSchema().bind(request=self.request)
 
         show_cancel_button = bool(request.params.get('for_oauth', False))
         self.form = request.create_form(self.schema,
@@ -173,7 +177,7 @@ class ForgotPasswordController(object):
 
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.ForgotPasswordSchema().bind(request=self.request)
+        self.schema = ForgotPasswordSchema().bind(request=self.request)
         self.form = request.create_form(self.schema, buttons=(_('Reset'),))
 
     @view_config(request_method='GET')
@@ -223,7 +227,7 @@ class ResetController(object):
 
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.ResetPasswordSchema().bind(request=self.request)
+        self.schema = ResetPasswordSchema().bind(request=self.request)
         self.form = request.create_form(
             schema=self.schema,
             action=self.request.route_path('account_reset'),
@@ -248,7 +252,7 @@ class ResetController(object):
             raise httpexceptions.HTTPNotFound()
         else:
             # N.B. the form field for the reset code is called 'user'. See the
-            # comment in `schemas.ResetPasswordSchema` for details.
+            # comment in `~h.schemas.forms.accounts.ResetPasswordSchema` for details.
             self.form.set_appstruct({'user': user})
             self.form.set_widgets({'user': deform.widget.HiddenWidget()})
 
@@ -451,7 +455,7 @@ class EditProfileController(object):
 
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.EditProfileSchema().bind(request=self.request)
+        self.schema = EditProfileSchema().bind(request=self.request)
         self.form = request.create_form(self.schema,
                                         buttons=(_('Save'),),
                                         use_inline_editing=True)
