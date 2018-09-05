@@ -65,6 +65,7 @@ class Search(object):
         :returns: The search results
         :rtype: SearchResult
         """
+        params = params.copy()  # Avoid mutating input dict.
         total, annotation_ids, aggregations = self._search_annotations(params)
         reply_ids = self._search_replies(annotation_ids)
 
