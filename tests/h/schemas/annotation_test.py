@@ -634,6 +634,7 @@ class TestSearchParamsSchema(object):
             'limit': 10,
             'order': "asc",
             'offset': 0,
+            'search_after': "2018-01-01",
         })
         input_params = NestedMultiDict(MultiDict({
             '_separate_replies': '1',
@@ -653,6 +654,7 @@ class TestSearchParamsSchema(object):
             'offset': "0",
             'unknown': "no_exist",
             'no_exist': "unknown",
+            'search_after': "2018-01-01",
         }))
 
         params = validate_query_params(schema, input_params)

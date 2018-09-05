@@ -327,6 +327,15 @@ class SearchParamsSchema(colander.Schema):
         missing="updated",
         description="The field by which annotations should be sorted.",
     )
+    search_after = colander.SchemaNode(
+        colander.String(),
+        missing=colander.drop,
+        description="""Returns results after the annotation who's sort field
+                    has this value. If specifying a date use the format
+                    yyyy-MM-dd'T'HH:mm:ss.SSX or time in miliseconds since the
+                    epoch. This is used for iteration through large collections
+                    of results.""",
+    )
     limit = colander.SchemaNode(
         colander.Integer(),
         validator=colander.Range(min=0, max=LIMIT_MAX),
@@ -344,7 +353,9 @@ class SearchParamsSchema(colander.Schema):
         validator=colander.Range(min=0, max=OFFSET_MAX),
         missing=0,
         description="""The number of initial annotations to skip. This is
-                       used for pagination.""",
+                       used for pagination. Not suitable for paging through
+                       thousands of annotations-search_after should be used
+                       instead.""",
     )
     group = colander.SchemaNode(
         colander.String(),
