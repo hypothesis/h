@@ -30,7 +30,7 @@ node {
                 // Test dependencies
                 sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
                 sh 'apk add --no-cache python3 python3-dev'
-                sh 'pip install -q tox'
+                sh 'pip install -q tox tox-pip-extensions'
 
                 // Unit tests
                 sh 'cd /var/lib/hypothesis && tox'
