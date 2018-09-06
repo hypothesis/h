@@ -110,7 +110,7 @@ class UserSignupService(object):
 
 def user_signup_service_factory(context, request):
     """Return a UserSignupService instance for the passed context and request."""
-    return UserSignupService(default_authority=request.authority,
+    return UserSignupService(default_authority=request.default_authority,
                              mailer=mailer,
                              session=request.db,
                              signup_email=partial(signup.generate, request),

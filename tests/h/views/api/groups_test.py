@@ -27,7 +27,7 @@ class TestGetGroups(object):
 
         list_groups_service.request_groups.assert_called_once_with(
             user=None,
-            authority=anonymous_request.authority,
+            authority=anonymous_request.default_authority,
             document_uri=None
         )
 

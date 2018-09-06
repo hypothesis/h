@@ -20,7 +20,7 @@ def nipsa_index(request):
     nipsa_service = request.find_service(name='nipsa')
     return {
         "userids": sorted(nipsa_service.fetch_all_flagged_userids()),
-        "default_authority": request.authority,
+        "default_authority": request.default_authority,
     }
 
 

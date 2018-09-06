@@ -108,7 +108,7 @@ def translate_annotation_principals(principals):
     return list(result)
 
 
-def authority(request):
+def default_authority(request):
     """
     Return the value of the h.authority config settings.
 
@@ -227,7 +227,7 @@ def request_auth_client(request):
 
 def validate_auth_client_authority(client, authority):
     """
-    Validate that the auth client authority matches the request authority.
+    Validate that the auth client authority matches the provided ``authority``.
     """
     if client.authority != authority:
         raise ValidationError("'authority' does not match authenticated client")

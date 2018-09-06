@@ -44,7 +44,7 @@ class TestAdminsAddRemove(object):
     def test_add_is_idempotent(self, pyramid_request, users):
         pyramid_request.params = {
             "add": "agnos",
-            "authority": pyramid_request.authority,
+            "authority": pyramid_request.default_authority,
         }
 
         admins_add(pyramid_request)
@@ -61,7 +61,7 @@ class TestAdminsAddRemove(object):
     def test_add_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {
             "add": "eva",
-            "authority": pyramid_request.authority,
+            "authority": pyramid_request.default_authority,
         }
 
         result = admins_add(pyramid_request)
@@ -72,7 +72,7 @@ class TestAdminsAddRemove(object):
     def test_add_redirects_to_index_when_user_not_found(self, pyramid_request):
         pyramid_request.params = {
             "add": "florp",
-            "authority": pyramid_request.authority,
+            "authority": pyramid_request.default_authority,
         }
 
         result = admins_add(pyramid_request)
@@ -83,7 +83,7 @@ class TestAdminsAddRemove(object):
     def test_add_flashes_when_user_not_found(self, pyramid_request):
         pyramid_request.params = {
             "add": "florp",
-            "authority": pyramid_request.authority,
+            "authority": pyramid_request.default_authority,
         }
         pyramid_request.session.flash = mock.Mock()
 

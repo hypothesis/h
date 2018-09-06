@@ -29,10 +29,10 @@ class TestGroupServiceCreatePrivateGroup(object):
     def test_it_sets_group_authority(self, svc, creator, pyramid_request):
         group = svc.create_private_group('Anteater fans', creator.userid)
 
-        assert group.authority == pyramid_request.authority
+        assert group.authority == pyramid_request.default_authority
 
     def test_it_sets_group_authority_as_creator_authority(self, svc, creator, pyramid_request):
-        pyramid_request.authority = 'some_other_authority'
+        pyramid_request.default_authority = 'some_other_authority'
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.authority == creator.authority
@@ -114,7 +114,7 @@ class TestGroupServiceCreateOpenGroup(object):
         assert getattr(group, group_attr) == expected_value
 
     def test_it_sets_group_authority_as_creator_authority(self, svc, creator, pyramid_request):
-        pyramid_request.authority = 'some_other_authority'
+        pyramid_request.default_authority = 'some_other_authority'
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.authority == creator.authority
@@ -204,7 +204,7 @@ class TestGroupServiceCreateRestrictedGroup(object):
         assert getattr(group, group_attr) == expected_value
 
     def test_it_sets_group_authority_as_creator_authority(self, svc, creator, pyramid_request):
-        pyramid_request.authority = 'some_other_authority'
+        pyramid_request.default_authority = 'some_other_authority'
         group = svc.create_private_group('Anteater fans', creator.userid)
 
         assert group.authority == creator.authority

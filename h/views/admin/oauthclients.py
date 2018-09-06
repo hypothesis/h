@@ -47,7 +47,7 @@ class AuthClientCreateController(object):
     def get(self):
         # Set useful defaults for new clients.
         self.form.set_appstruct({
-            'authority': self.request.authority,
+            'authority': self.request.default_authority,
             'grant_type': GrantType.authorization_code,
             'response_type': ResponseType.code,
             'trusted': False,

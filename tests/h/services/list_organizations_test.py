@@ -52,7 +52,7 @@ class TestListOrganizationsFactory(object):
 
 @pytest.fixture
 def authority(pyramid_request):
-    return pyramid_request.authority
+    return pyramid_request.default_authority
 
 
 @pytest.fixture

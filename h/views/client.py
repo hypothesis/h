@@ -50,7 +50,7 @@ def sidebar_app(request, extra=None):
 
     app_config = {
         'apiUrl': request.route_url('api.index'),
-        'authDomain': request.authority,
+        'authDomain': request.default_authority,
         'oauthClientId': settings.get('h.client_oauth_id'),
         'release': __version__,
         'serviceUrl': request.route_url('index'),

@@ -184,7 +184,7 @@ class TestGenerate(object):
                                                 pyramid_request,
                                                 html_renderer,
                                                 text_renderer):
-        pyramid_request.authority = 'foo.org'
+        pyramid_request.default_authority = 'foo.org'
         expected_context = {
             'parent_user_url': None,
             'reply_user_url': None,

@@ -284,12 +284,12 @@ class TestListGroupsFactory(object):
 
         assert isinstance(svc, ListGroupsService)
 
-    def test_uses_request_authority(self, pyramid_request):
-        pyramid_request.authority = 'bar.com'
+    def test_uses_request_default_authority(self, pyramid_request):
+        pyramid_request.default_authority = 'bar.com'
 
         svc = list_groups_factory(None, pyramid_request)
 
-        assert svc.request_authority == 'bar.com'
+        assert svc.default_authority == 'bar.com'
 
 
 @pytest.fixture
@@ -305,7 +305,7 @@ def default_authority(pyramid_request):
 
     Return the default authority—this automatically has a `__world__` group
     """
-    return pyramid_request.authority
+    return pyramid_request.default_authority
 
 
 @pytest.fixture
@@ -437,5 +437,5 @@ def mixed_groups(factories, user, authority, origin):
 def svc(pyramid_request, db_session):
     return ListGroupsService(
         session=db_session,
-        request_authority=pyramid_request.authority
+        default_authority=pyramid_request.default_authority
     )

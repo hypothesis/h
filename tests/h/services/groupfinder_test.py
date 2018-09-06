@@ -43,4 +43,4 @@ class TestGroupfinderServiceFactory(object):
     def test_provides_authority(self, pyramid_request):
         svc = groupfinder_service_factory(None, pyramid_request)
 
-        assert svc.authority == pyramid_request.authority
+        assert svc.authority == pyramid_request.default_authority

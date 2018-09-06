@@ -24,7 +24,7 @@ class ForgotPasswordSchema(CSRFSchema):
 
         request = node.bindings['request']
         email = value.get('email')
-        user = models.User.get_by_email(request.db, email, request.authority)
+        user = models.User.get_by_email(request.db, email, request.default_authority)
 
         if user is None:
             err = colander.Invalid(node)

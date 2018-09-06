@@ -176,5 +176,5 @@ class UserService(object):
 
 def user_service_factory(context, request):
     """Return a UserService instance for the passed context and request."""
-    return UserService(default_authority=request.authority,
+    return UserService(default_authority=request.default_authority,
                        session=request.db)

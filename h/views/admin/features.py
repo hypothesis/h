@@ -85,7 +85,7 @@ def cohorts_edit(context, request):
     return {
         'cohort': cohort,
         'members': cohort.members,
-        'default_authority': request.authority
+        'default_authority': request.default_authority
     }
 
 

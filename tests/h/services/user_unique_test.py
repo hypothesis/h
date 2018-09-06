@@ -17,7 +17,7 @@ class TestUserUniqueEnsureUnique(object):
         with pytest.raises(DuplicateUserError,
                            match=(".*user with email address '{}' already exists".format(dupe_email))):
             svc.ensure_unique({'email': dupe_email},
-                              authority=pyramid_request.authority)
+                              authority=pyramid_request.default_authority)
 
     def test_it_allows_duplicate_email_at_different_authority(self, svc, user):
         svc.ensure_unique({'email': user.email}, authority='foo.com')
@@ -28,7 +28,7 @@ class TestUserUniqueEnsureUnique(object):
         with pytest.raises(DuplicateUserError,
                            match=(".*user with username '{}' already exists".format(dupe_username))):
             svc.ensure_unique({'username': dupe_username},
-                              authority=pyramid_request.authority)
+                              authority=pyramid_request.default_authority)
 
     def test_it_allows_duplicate_username_at_different_authority(self, svc, user):
         svc.ensure_unique({'username': user.username}, authority='foo.com')
@@ -37,7 +37,7 @@ class TestUserUniqueEnsureUnique(object):
         dupe_identity = {'provider': 'provider_a', 'provider_unique_id': '123'}
 
         with pytest.raises(DuplicateUserError, match=".*provider 'provider_a' and unique id '123' already exists"):
-            svc.ensure_unique({'identities': [dupe_identity]}, authority=pyramid_request.authority)
+            svc.ensure_unique({'identities': [dupe_identity]}, authority=pyramid_request.default_authority)
 
     def test_it_raises_if_identities_uniqueness_violated_at_different_authority(self, svc, user):
         # note that this is different from email and username behavior
@@ -46,21 +46,21 @@ class TestUserUniqueEnsureUnique(object):
             svc.ensure_unique({'identities': [dupe_identity]}, authority='foo.com')
 
     def test_it_proxies_email_lookup_to_model(self, svc, user_model, db_session, pyramid_request):
-        svc.ensure_unique({'email': 'foo@bar.com'}, pyramid_request.authority)
+        svc.ensure_unique({'email': 'foo@bar.com'}, pyramid_request.default_authority)
 
-        user_model.get_by_email.assert_called_once_with(db_session, 'foo@bar.com', pyramid_request.authority)
+        user_model.get_by_email.assert_called_once_with(db_session, 'foo@bar.com', pyramid_request.default_authority)
 
     def test_it_proxies_username_lookup_to_model(self, svc, user_model, db_session, pyramid_request):
-        svc.ensure_unique({'username': 'fernando'}, pyramid_request.authority)
+        svc.ensure_unique({'username': 'fernando'}, pyramid_request.default_authority)
 
-        user_model.get_by_username.assert_called_once_with(db_session, 'fernando', pyramid_request.authority)
+        user_model.get_by_username.assert_called_once_with(db_session, 'fernando', pyramid_request.default_authority)
 
     def test_it_proxies_identity_fetching_to_user_service(self, svc, user_service, pyramid_request):
         identity_data = [{'provider': 'provider_a', 'provider_unique_id': '123'},
                          {'provider': 'provider_a', 'provider_unique_id': '123'}]
         user_service.fetch_by_identity.return_value = None
 
-        svc.ensure_unique({'identities': identity_data}, authority=pyramid_request.authority)
+        svc.ensure_unique({'identities': identity_data}, authority=pyramid_request.default_authority)
 
         user_service.fetch_by_identity.assert_has_calls([
             mock.call(identity_data[0]['provider'], identity_data[0]['provider_unique_id']),
@@ -68,17 +68,17 @@ class TestUserUniqueEnsureUnique(object):
         ])
 
     def test_it_does_not_fetch_by_username_if_not_present(self, svc, user_model, db_session, pyramid_request):
-        svc.ensure_unique({'email': 'foo@bar.com'}, pyramid_request.authority)
+        svc.ensure_unique({'email': 'foo@bar.com'}, pyramid_request.default_authority)
 
         user_model.get_by_username.assert_not_called()
 
     def test_it_does_not_fetch_by_email_if_not_present(self, svc, user_model, db_session, pyramid_request):
-        svc.ensure_unique({'username': 'doodle'}, pyramid_request.authority)
+        svc.ensure_unique({'username': 'doodle'}, pyramid_request.default_authority)
 
         user_model.get_by_email.assert_not_called()
 
     def test_it_allows_empty_data(self, svc, pyramid_request):
-        svc.ensure_unique({}, authority=pyramid_request.authority)
+        svc.ensure_unique({}, authority=pyramid_request.default_authority)
         # does not raise
 
     def test_it_combines_error_messages(self, svc, user, pyramid_request):
@@ -88,7 +88,7 @@ class TestUserUniqueEnsureUnique(object):
             svc.ensure_unique({'email': user.email,
                                'username': user.username,
                                'identities': [dupe_identity]},
-                              authority=pyramid_request.authority)
+                              authority=pyramid_request.default_authority)
 
     def test_it_raises_if_authority_missing(self, svc):
         with pytest.raises(TypeError):
@@ -109,7 +109,7 @@ def user(factories, pyramid_request):
     user = factories.User(
         username="fernando",
         email="foo@example.com",
-        authority=pyramid_request.authority
+        authority=pyramid_request.default_authority
     )
     user.identities = [
         factories.UserIdentity(provider='provider_a', provider_unique_id='123', user=user)

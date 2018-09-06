@@ -28,7 +28,7 @@ def groups(request):
     if request.user is not None:
         authority = request.user.authority
     else:
-        authority = authority or request.authority
+        authority = authority or request.default_authority
     all_groups = list_svc.request_groups(user=request.user,
                                          authority=authority,
                                          document_uri=document_uri)

@@ -42,7 +42,7 @@ def get_blacklist():
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
     request = node.bindings['request']
-    user = models.User.get_by_email(request.db, value, request.authority)
+    user = models.User.get_by_email(request.db, value, request.default_authority)
     if user and user.userid != request.authenticated_userid:
         msg = _("Sorry, an account with this email address already exists.")
         raise colander.Invalid(node, msg)
@@ -51,7 +51,7 @@ def unique_email(node, value):
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     request = node.bindings['request']
-    user = models.User.get_by_username(request.db, value, request.authority)
+    user = models.User.get_by_username(request.db, value, request.default_authority)
     if user:
         msg = _("This username is already taken.")
         raise colander.Invalid(node, msg)

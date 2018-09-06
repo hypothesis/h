@@ -46,7 +46,7 @@ class TestOrganizationCreateController(object):
 
         ctx = ctrl.get()
 
-        assert ctx['form'] == {'authority': pyramid_request.authority}
+        assert ctx['form'] == {'authority': pyramid_request.default_authority}
 
     def test_post_creates_org(self, pyramid_request, handle_form_submission):
         def call_on_success(request, form, on_success, on_failure):
