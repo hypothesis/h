@@ -23,13 +23,6 @@ def es_client():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def es_connect():
-    # TODO handle deleting things out of this connection's index as
-    # the `es_client` fixture does
-    search.connect(hosts=[ELASTICSEARCH_URL])
-
-
-@pytest.fixture(scope="session", autouse=True)
 def init_elasticsearch(request):
     """
     Initialize the elasticsearch cluster.

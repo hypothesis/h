@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 from h.search.client import get_client
 from h.search.config import init
-from h.search.connection import connect
 from h.search.core import Search
 from h.search.query import TopLevelAnnotationsFilter
 from h.search.query import AuthorityFilter
@@ -18,7 +17,6 @@ __all__ = (
     'UsersAggregation',
     'get_client',
     'init',
-    'connect'
 )
 
 
@@ -32,8 +30,6 @@ def includeme(config):
 
     if 'es.client_poolsize' in settings:
         kwargs['maxsize'] = settings['es.client_poolsize']
-
-    connect(hosts=[settings['es.url']], **kwargs)
 
     settings.setdefault('es.index', 'hypothesis')
 
