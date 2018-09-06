@@ -43,12 +43,6 @@ class Limiter(object):
 
     def _extract_offset(self, params):
         offset = params.pop("offset", 0)
-
-        # Offset has been deprecated in favor of search_after so if
-        # search_after is specified use that instead.
-        if "search_after" in params:
-            return 0
-
         try:
             val = int(offset)
             # val must be 0 <= val <= OFFSET_MAX.
@@ -97,9 +91,6 @@ class Sorter(object):
                 search_after = self._date_parser(search_after)
 
         if search_after:
-            # Offset was deprecated in favor of search_after so if offset
-            # is specified remove it.
-            params.pop("offset", 0)
             search = search.extra(search_after=[search_after])
 
         return search.sort(

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import colander
 import copy
+from dateutil.parser import parse
 from pyramid import i18n
 
 from h.schemas.base import JSONSchema, ValidationError
@@ -420,3 +421,27 @@ class SearchParamsSchema(colander.Schema):
         missing=colander.drop,
         description="Limit the results to annotations made by the specified user.",
     )
+
+    def validator(self, node, cstruct):
+        sort = cstruct['sort']
+        search_after = cstruct.get('search_after', None)
+
+        if search_after:
+            if sort in ["updated", "created"]:
+                self._parsable_date(node, search_after)
+
+            # offset must be set to 0 if search_after is specified.
+            cstruct["offset"] = 0
+
+    def _parsable_date(self, node, value):
+        try:
+            float(value)
+        except ValueError:
+            try:
+                parse(value)
+            except ValueError:
+                raise colander.Invalid(
+                    node,
+                    """search_after must be a parsable date in the form
+                    yyyy-MM-dd'T'HH:mm:ss.SSX
+                    or time in miliseconds since the epoch.""")

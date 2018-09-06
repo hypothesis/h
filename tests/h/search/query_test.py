@@ -113,21 +113,6 @@ class TestLimiter(object):
 
         assert q["size"] == LIMIT_DEFAULT
 
-    def test_offset_is_ignored_when_search_after_is_specified(self, search, Annotation):
-        # In elasticsearch the id's are strings, not ints, thus it uses string sort.
-        ann_ids = sorted([str(Annotation(id=9).id),
-                          str(Annotation(id=11).id),
-                          str(Annotation(id=18).id),
-                          str(Annotation(id=14).id),
-                          str(Annotation(id=2).id)])
-
-        result = search.run({"search_after": ann_ids[1],
-                             "offset": 2,
-                             "sort": "id",
-                             "order": "asc"})
-
-        assert result.annotation_ids == ann_ids[2:]
-
     @pytest.fixture
     def search(self, search):
         search.append_modifier(query.Limiter())
@@ -246,21 +231,6 @@ class TestSorter(object):
         result = search.run({"search_after": "invalid_date", "order": "asc"})
 
         assert result.annotation_ids == ann_ids
-
-    def test_offset_is_popped_when_search_after_is_specified(self, search, Annotation):
-        # In elasticsearch the id's are strings, not ints, thus it uses string sort.
-        ann_ids = sorted([str(Annotation(id=9).id),
-                          str(Annotation(id=11).id),
-                          str(Annotation(id=2).id)])
-
-        params = {"search_after": ann_ids[1],
-                  "offset": 2,
-                  "sort": "id",
-                  "order": "asc"}
-        result = search.run(params)
-
-        assert result.annotation_ids == [ann_ids[2]]
-        assert params == {}
 
 
 class TestTopLevelAnnotationsFilter(object):

@@ -724,6 +724,36 @@ class TestSearchParamsSchema(object):
         with pytest.raises(ValidationError):
             validate_query_params(schema, input_params)
 
+    def test_raises_if_invalid_search_after_date(self, schema):
+        input_params = NestedMultiDict(MultiDict({"search_after": "invalid_date"}))
+
+        with pytest.raises(ValidationError):
+            validate_query_params(schema, input_params)
+
+    @pytest.mark.parametrize('search_after,sort', (
+        ("2009-02-16", "updated"),
+        ("2018-01-01T02:26:01.03-00:08", "created"),
+        ("5045000300.9", "updated"),
+        ("8273640", "id")))
+    def test_passes_validation_if_valid_search_after(self, schema, search_after, sort):
+        input_params = NestedMultiDict(
+            MultiDict({"search_after": search_after,
+                       "sort": sort}))
+
+        params = validate_query_params(schema, input_params)
+
+        assert params["search_after"] == search_after
+
+    def test_sets_offset_to_0_if_search_after(self, schema):
+        input_params = NestedMultiDict(
+            MultiDict({"search_after": "2009-02-16",
+                       "offset": 5}))
+
+        params = validate_query_params(schema, input_params)
+
+        assert params["offset"] == 0
+        assert params["search_after"] == "2009-02-16"
+
     @pytest.fixture
     def schema(self):
         return SearchParamsSchema()
