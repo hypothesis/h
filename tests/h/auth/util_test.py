@@ -171,6 +171,53 @@ def test_translate_annotation_principals(p_in, p_out):
     assert set(result) == set(p_out)
 
 
+class TestClientAuthority(object):
+
+    @pytest.mark.parametrize('principals', [
+        ['foo', 'bar', 'baz'],
+        ['authority', 'foo'],
+        [],
+        ['authority:'],
+        [' authority:biz.biz', 'foo'],
+        ['authority :biz.biz', 'foo'],
+    ])
+    def test_it_returns_None_if_no_authority_principal_match(self, principals):
+        class FakePrincipalsRequest(object):
+            """With a real request, you cannot set the ``effective_principals`` property"""
+            effective_principals = principals
+
+        assert util.client_authority(FakePrincipalsRequest()) is None
+
+    @pytest.mark.parametrize('principals,authority', [
+        (['foo', 'bar', 'baz', 'authority:felicitous.com'], 'felicitous.com'),
+        (['authority:somebody.likes.me', 'foo'], 'somebody.likes.me'),
+    ])
+    def test_it_returns_authority_if_authority_principal_match(self, principals, authority):
+        class FakePrincipalsRequest(object):
+            """With a real request, you cannot set the ``effective_principals`` property"""
+            effective_principals = principals
+
+        assert util.client_authority(FakePrincipalsRequest()) == authority
+
+
+class TestAuthority(object):
+
+    def test_it_proxies_to_client_authority(self, pyramid_request, client_authority):
+        util.authority(pyramid_request)
+
+        client_authority.assert_called_once_with(pyramid_request)
+
+    def test_it_returns_client_authority_if_any_set(self, pyramid_request, client_authority):
+        client_authority.return_value = 'something.biz'
+
+        assert util.authority(pyramid_request) == 'something.biz'
+
+    def test_it_returns_default_authority_if_no_client_authority(self, pyramid_request, client_authority):
+        client_authority.return_value = None
+
+        assert util.authority(pyramid_request) == pyramid_request.default_authority
+
+
 class TestAuthDomain(object):
     def test_it_returns_the_request_domain_if_authority_isnt_set(
             self, pyramid_request):
@@ -412,6 +459,11 @@ def basic_auth_creds(patch):
 @pytest.fixture
 def valid_auth(basic_auth_creds, auth_client):
     basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
+
+
+@pytest.fixture
+def client_authority(patch):
+    return patch('h.auth.util.client_authority')
 
 
 @pytest.fixture
