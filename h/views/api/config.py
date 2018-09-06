@@ -4,6 +4,17 @@ import venusian
 from h.util import cors
 
 
+#: Decorator that adds CORS headers to API responses.
+#:
+#: This decorator enables web applications not running on the same domain as h
+#: to make API requests and read the responses.
+#:
+#: For standard API views the decorator is automatically applied by the
+#: ``api_config`` decorator.
+#:
+#: Exception views need to independently apply this policy because any response
+#: headers set during standard request processing are discarded if an exception
+#: occurs and an exception view is invoked to generate the response instead.
 cors_policy = cors.policy(
     allow_headers=(
         'Authorization',
