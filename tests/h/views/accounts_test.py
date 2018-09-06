@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import mock
 import pytest
+import colander
 
 from pyramid import httpexceptions
 
@@ -312,6 +313,40 @@ class TestForgotPasswordController(object):
 @pytest.mark.usefixtures('routes', 'user_password_service')
 class TestResetController(object):
 
+    def test_get_returns_rendered_form(self, pyramid_request, form_validating_to):
+        controller = views.ResetController(pyramid_request)
+        controller.form = form_validating_to({})
+
+        result = controller.get()
+
+        assert result['form'] == 'valid form'
+        assert result['has_code'] is False
+
+    def test_get_with_prefilled_code_returns_rendered_form(self,
+                                                           pyramid_request,
+                                                           ResetCode,
+                                                           form_validating_to):
+        pyramid_request.matchdict['code'] = 'whatnot'
+        controller = views.ResetController(pyramid_request)
+        controller.form = form_validating_to({})
+
+        result = controller.get_with_prefilled_code()
+
+        assert result['form'] == 'valid form'
+        assert result['has_code'] is True
+
+    def test_get_with_prefilled_code_returns_404_if_invalid_code(self,
+                                                                 pyramid_request,
+                                                                 ResetCode,
+                                                                 form_validating_to):
+        pyramid_request.matchdict['code'] = 'whatnot'
+        ResetCode.return_value.deserialize.side_effect = colander.Invalid('nope')
+        controller = views.ResetController(pyramid_request)
+        controller.form = form_validating_to({})
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            controller.get_with_prefilled_code()
+
     def test_post_returns_form_when_validation_fails(self,
                                                      invalid_form,
                                                      pyramid_request):
@@ -372,6 +407,10 @@ class TestResetController(object):
         pyramid_config.add_route('login', '/login')
         pyramid_config.add_route('account_reset', '/reset')
         pyramid_config.add_route('account_reset_with_code', '/reset-with-code')
+
+    @pytest.fixture
+    def ResetCode(self, patch):
+        return patch('h.views.accounts.ResetCode')
 
 
 @pytest.mark.usefixtures('ActivationEvent',
