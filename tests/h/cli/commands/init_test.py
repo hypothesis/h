@@ -49,12 +49,12 @@ class TestInitCommand(object):
                                 cliconfig,
                                 search,
                                 pyramid_settings):
+        pyramid_settings['es.check_icu_plugin'] = False
         es_client = search.get_client.return_value
-
         result = cli.invoke(init_cli.init, obj=cliconfig)
 
         search.get_client.assert_called_once_with(pyramid_settings)
-        search.init.assert_any_call(es_client)
+        search.init.assert_any_call(es_client, pyramid_settings['es.check_icu_plugin'])
         assert result.exit_code == 0
 
 

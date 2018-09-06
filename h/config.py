@@ -43,6 +43,7 @@ def configure(environ=None, settings=None):
     settings_manager.set('es.client.timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type_=float)
     settings_manager.set('es.url', 'ELASTICSEARCH_URL', required=True),
     settings_manager.set('es.index', 'ELASTICSEARCH_INDEX')
+    settings_manager.set('es.check_icu_plugin', 'ELASTICSEARCH_CHECK_ICU_PLUGIN', type_=asbool, default=True)
     settings_manager.set('mail.default_sender', 'MAIL_DEFAULT_SENDER')
     settings_manager.set('mail.host', 'MAIL_HOST')
     settings_manager.set('mail.port', 'MAIL_PORT', type_=int)

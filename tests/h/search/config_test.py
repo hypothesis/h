@@ -97,6 +97,13 @@ class TestInit(object):
 
         assert 'plugin is not installed' in str(e.value)
 
+    def test_skips_plugin_check(self, client, configure_index):
+        client.conn.cat.plugins.return_value = ''
+
+        init(client, check_icu_plugin=False)
+
+        configure_index.assert_called_once_with(client)
+
     @pytest.fixture
     def client(self, client):
         # By default, pretend that no index exists already...
