@@ -47,7 +47,7 @@ def api_validation_error(context, request):
     return {'status': 'failure', 'reason': str(context)}
 
 
-@json_view(context=Exception)
+@json_view(context=Exception, decorator=cors_policy)
 def json_error(request):
     """Handle an unexpected exception where the request asked for JSON."""
     handle_exception(request)
