@@ -45,3 +45,19 @@ class TestCorsPreflight(object):
         assert 'POST' in res.headers['Access-Control-Allow-Methods']
         for header in ['Authorization', 'Content-Type', 'X-Client-Id']:
             assert header in res.headers['Access-Control-Allow-Headers']
+
+
+class TestCorsHeaders(object):
+    @pytest.mark.parametrize('url, expect_errors', [
+        # A request that succeeds.
+        ('/api/search', False),
+
+        # A request that triggers a validation error.
+        ('/api/search?sort=raise_an_error', True),
+
+        # A request that fails due to a missing resource.
+        ('/api/annotations/does_not_exist', True),
+    ])
+    def test_responses_have_cors_headers(self, app, url, expect_errors):
+        res = app.get(url, expect_errors=expect_errors)
+        assert res.headers.get('Access-Control-Allow-Origin', None) == '*'
