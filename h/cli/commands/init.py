@@ -45,4 +45,4 @@ def _init_search(settings):
     client = search.get_client(settings)
 
     log.info("initializing ES6 search index")
-    search.init(client, settings)
+    search.init(client, check_icu_plugin=settings.get('es.check_icu_plugin', True))

@@ -71,13 +71,13 @@ def test_uri_part_tokenizer():
 class TestInit(object):
     def test_configures_index_when_index_missing(self, client, configure_index):
         """Calls configure_index when one doesn't exist."""
-        init(client, {})
+        init(client)
 
         configure_index.assert_called_once_with(client)
 
     def test_configures_alias(self, client):
         """Adds an alias to the newly-created index."""
-        init(client, {})
+        init(client)
 
         client.conn.indices.put_alias.assert_called_once_with(index='foo-abcd1234', name='foo')
 
@@ -85,7 +85,7 @@ class TestInit(object):
         """Exits early if the index (or an alias) already exists."""
         client.conn.indices.exists.return_value = True
 
-        init(client, {})
+        init(client)
 
         assert not configure_index.called
 
@@ -93,14 +93,14 @@ class TestInit(object):
         client.conn.cat.plugins.return_value = ''
 
         with pytest.raises(RuntimeError) as e:
-            init(client, {})
+            init(client)
 
         assert 'plugin is not installed' in str(e.value)
 
     def test_skips_plugin_check(self, client, configure_index):
         client.conn.cat.plugins.return_value = ''
 
-        init(client, {'es.check_icu_plugin': False})
+        init(client, check_icu_plugin=False)
 
         configure_index.assert_called_once_with(client)
 

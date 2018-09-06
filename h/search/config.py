@@ -140,10 +140,10 @@ ANALYSIS_SETTINGS = {
 }
 
 
-def init(client, settings):
+def init(client, check_icu_plugin=True):
     """Initialise Elasticsearch, creating necessary indices and aliases."""
     # Ensure the ICU analysis plugin is installed
-    if settings.get('es.check_icu_plugin', True):
+    if check_icu_plugin:
         _ensure_icu_plugin(client.conn)
 
     # If the index already exists (perhaps as an alias), we're done...
