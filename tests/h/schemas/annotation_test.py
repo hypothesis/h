@@ -732,7 +732,9 @@ class TestSearchParamsSchema(object):
 
     @pytest.mark.parametrize('search_after,sort', (
         ("2009-02-16", "updated"),
-        ("2018-01-01T02:26:01.03-00:08", "created"),
+        ("2009-02", "updated"),
+        ("2009", "updated"),
+        ("2018-08-27T11:02:15.107224+00:00", "created"),
         ("5045000300.9", "updated"),
         ("8273640", "id")))
     def test_passes_validation_if_valid_search_after(self, schema, search_after, sort):

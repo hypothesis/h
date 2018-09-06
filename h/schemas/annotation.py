@@ -427,21 +427,28 @@ class SearchParamsSchema(colander.Schema):
         search_after = cstruct.get('search_after', None)
 
         if search_after:
-            if sort in ["updated", "created"]:
-                self._parsable_date(node, search_after)
-
-            # offset must be set to 0 if search_after is specified.
-            cstruct["offset"] = 0
-
-    def _parsable_date(self, node, value):
-        try:
-            float(value)
-        except ValueError:
-            try:
-                parse(value)
-            except ValueError:
+            if (sort in ["updated", "created"] and
+                    not self._date_is_parsable(search_after)):
                 raise colander.Invalid(
                     node,
                     """search_after must be a parsable date in the form
                     yyyy-MM-dd'T'HH:mm:ss.SSX
                     or time in miliseconds since the epoch.""")
+
+            # offset must be set to 0 if search_after is specified.
+            cstruct["offset"] = 0
+
+    def _date_is_parsable(self, value):
+        """Return True if date is parsable and False otherwise."""
+
+        # Dates like "2017" can also be cast as floats so if a number is less
+        # than 9999 it is assumed to be a year and not ms since the epoch.
+        try:
+            if float(value) < 9999:
+                raise ValueError("This is not in the form ms since the epoch.")
+        except ValueError:
+            try:
+                parse(value)
+            except ValueError:
+                return False
+        return True

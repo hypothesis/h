@@ -196,9 +196,12 @@ class TestSorter(object):
         [("1514773561300", [2]),
          ("2018-01-01T02:26:01.03", [2]),
          ("2018-01-01T02:26:01.03+00:00", [2]),
+         ("2018-01-01T02:26:01.037224+00:00", [2]),
+         ("2017-01", [1, 2]),
+         ("2017", [1, 2]),
          ("2018-01-01", [1, 2])],
     )
-    def test_it_finds_all_annotations_after_ms_since_epoch_date(
+    def test_it_finds_all_annotations_after_date(
         self, search, Annotation, date, expected,
     ):
         dt = datetime.datetime

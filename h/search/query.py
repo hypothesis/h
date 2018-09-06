@@ -88,7 +88,7 @@ class Sorter(object):
         search_after = params.pop("search_after", None)
         if search_after:
             if sort_by in ["updated", "created"]:
-                search_after = self._date_parser(search_after)
+                search_after = self._parse_date(search_after)
 
         if search_after:
             search = search.extra(search_after=[search_after])
@@ -107,12 +107,24 @@ class Sorter(object):
                  "unmapped_type": "boolean"}}
         )
 
-    def _date_parser(self, str_value):
+    def _parse_date(self, str_value):
+        """
+        Converts a string to a float representing miliseconds since the epoch.
+
+        Since the elasticsearch date parser is not run on search_after,
+        the date must be converted to ms since the epoch as that is how
+        the dates are stored in the elasticsearch index.
+        """
+        # Dates like "2017" can also be cast as floats so if a number is less
+        # than 9999 it is assumed to be a year and not ms since the epoch.
         try:
-            return float(str_value)
+            date = float(str_value)
+            if date < 9999:
+                raise ValueError("This is not in the form ms since the epoch.")
+            return date
         except ValueError:
             try:
-                date = parse(str_value, )
+                date = parse(str_value)
                 # If timezone isn't specified assume it's utc.
                 if not date.tzinfo:
                     date = date.replace(tzinfo=tz.tzutc())
