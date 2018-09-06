@@ -18,6 +18,10 @@ from h.schemas import ValidationError
 from h.util.view import handle_exception, json_view
 from h.views.api.config import cors_policy
 
+# All exception views below need to apply the `cors_policy` decorator for the
+# responses to be readable by web applications other than those on the same
+# origin as h itself.
+
 
 # Within the API, render a JSON 403/404 message.
 @forbidden_view_config(path_info='/api/', renderer='json', decorator=cors_policy)
