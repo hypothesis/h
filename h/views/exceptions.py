@@ -13,7 +13,8 @@ from pyramid.view import forbidden_view_config
 from pyramid.view import notfound_view_config
 from pyramid.view import view_config
 
-from h.util.view import handle_exception
+from h.i18n import TranslationString as _  # noqa: N813
+from h.util.view import handle_exception, json_view
 
 
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
@@ -32,3 +33,13 @@ def error(request):
     """Handle a request for which the handler threw an exception."""
     handle_exception(request)
     return {}
+
+
+@json_view(context=Exception)
+def json_error(request):
+    """Handle an unexpected exception where the request asked for JSON."""
+    handle_exception(request)
+    message = _("Hypothesis had a problem while handling this request. "
+                "Our team has been notified. Please contact support@hypothes.is"
+                " if the problem persists.")
+    return {'status': 'failure', 'reason': message}
