@@ -101,7 +101,10 @@ def add_member(group, request):
     user_svc = request.find_service(name='user')
     group_svc = request.find_service(name='group')
 
-    user = user_svc.fetch(request.matchdict['userid'])
+    try:
+        user = user_svc.fetch(request.matchdict['userid'])
+    except ValueError:
+        raise HTTPNotFound()
 
     if user is None:
         raise HTTPNotFound()

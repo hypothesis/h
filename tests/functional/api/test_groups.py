@@ -111,6 +111,13 @@ class TestAddMember(object):
 
         assert res.status_code == 404
 
+    def test_it_returns_404_if_malformed_userid(self, app, factories, group, auth_client_header):
+        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid='foo@bar.com'),
+                            headers=auth_client_header,
+                            expect_errors=True)
+
+        assert res.status_code == 404
+
     def test_it_returns_404_if_authority_mismatch_on_group(self, app, factories, user, auth_client_header):
         group = factories.Group(authority="somewhere-else.org")
         res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),

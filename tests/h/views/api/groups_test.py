@@ -237,6 +237,18 @@ class TestAddMember(object):
         with pytest.raises(HTTPNotFound):
             views.add_member(group, pyramid_request)
 
+    def test_it_raises_HTTPNotFound_if_userid_malformed(self,
+                                                        group,
+                                                        pyramid_request,
+                                                        user_service,):
+
+        user_service.fetch.side_effect = ValueError('nope')
+
+        pyramid_request.matchdict['userid'] = "invalidformat@wherever"
+
+        with pytest.raises(HTTPNotFound):  # view handles ValueError and raises NotFound
+            views.add_member(group, pyramid_request)
+
     def test_it_fetches_user_from_the_request_params(self,
                                                      group,
                                                      user,
