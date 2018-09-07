@@ -324,6 +324,11 @@ paths:
             resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
           required: false
           type: string
+        - name: uri.parts
+          in: query
+          description: |
+            Limit the results to annotations containing the given keywords in
+            the URL.
         - name: url
           in: query
           description: |
