@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 
-from h.auth.util import request_auth_client, validate_auth_client_authority
 from h.exceptions import PayloadError
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema
@@ -73,7 +72,6 @@ def create(request):
             effective_principals=security.Authenticated)
 def remove_member(group, request):
     """Remove a member from the given group."""
-
     # Currently, we only support removing the requesting user
     if request.matchdict.get('userid') == 'me':
         userid = request.authenticated_userid
@@ -89,6 +87,7 @@ def remove_member(group, request):
 @api_config(route_name='api.group_member',
             request_method='POST',
             link_name='group.member.add',
+            permission='member_add',
             description='Add the user in the request params to a group.')
 def add_member(group, request):
     """Add a member to a given group.
@@ -96,8 +95,6 @@ def add_member(group, request):
     :raises HTTPNotFound: if the user is not found or if the use and group
       authorities don't match.
     """
-    client = request_auth_client(request)
-
     user_svc = request.find_service(name='user')
     group_svc = request.find_service(name='group')
 
@@ -108,8 +105,6 @@ def add_member(group, request):
 
     if user is None:
         raise HTTPNotFound()
-
-    validate_auth_client_authority(client, user.authority)
 
     if user.authority != group.authority:
         raise HTTPNotFound()

@@ -14,8 +14,8 @@ from h.auth import util
 
 # As we roll out the new API Auth Policy with Auth Token Policy, we
 # want to keep it restricted to certain endpoints
-# Currently restricted to `POST /api/groups` only
-AUTH_TOKEN_PATH_PATTERN = '^\/api\/groups(\/?)$'
+# Currently restricted to `POST /api/groups*` only
+AUTH_TOKEN_PATH_PATTERN = '^\/api\/groups'
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
