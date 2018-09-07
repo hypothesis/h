@@ -47,14 +47,11 @@ def api_validation_error(context, request):
     return {'status': 'failure', 'reason': str(context)}
 
 
-@json_view(context=Exception, decorator=cors_policy)
+@json_view(context=Exception, path_info='/api/', decorator=cors_policy)
 def json_error(request):
-    """Handle an unexpected exception where the request asked for JSON."""
+    """Handle an unexpected exception in an API view."""
     handle_exception(request)
-    message = _("Uh-oh, something went wrong! We're very sorry, our "
-                "application wasn't able to load this page. The team has "
-                "been notified and we'll fix it shortly. If the problem "
-                "persists or you'd like more information please email "
-                "support@hypothes.is with the subject 'Internal Server "
-                "Error'.")
+    message = _("Hypothesis had a problem while handling this request. "
+                "Our team has been notified. Please contact support@hypothes.is"
+                " if the problem persists.")
     return {'status': 'failure', 'reason': message}
