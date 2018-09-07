@@ -329,7 +329,7 @@ paths:
           description: |
             Limit the results to annotations matching the specific URI or equivalent URIs.
 
-            URI can be a URL (a web page address) or a URN representing another kind of 
+            URI can be a URL (a web page address) or a URN representing another kind of
             resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
           required: false
           type: string
@@ -361,8 +361,8 @@ paths:
           type: string
         - name: any
           in: query
-          description: Limit the results to annotations whose quote, tags, text or url 
-            fields contain this keyword.  
+          description: Limit the results to annotations whose quote, tags, text or url
+            fields contain this keyword.
           required: false
           type: string
         - name: group
@@ -383,7 +383,7 @@ paths:
           type: string
         - name: text
           in: query
-          description: Limit the results to annotations that contain this text in their 
+          description: Limit the results to annotations that contain this text in their
             textual body.
           required: false
           type: string
@@ -507,6 +507,8 @@ paths:
           description: User or Group not found
           schema:
             $ref: '#/definitions/Error'
+      security:
+        - authClientCredentials: []
 definitions:
   NewAnnotation:
     $ref: './schemas/annotation-schema.json'
