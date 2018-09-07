@@ -396,7 +396,7 @@ class SearchParamsSchema(colander.Schema):
         colander.SchemaNode(colander.String()),
         name='uri.parts',
         missing=colander.drop,
-        description="""Limit the results to annotations with the given keywords
+        description="""Limit the results to annotations with the given keyword
                        appearing in the URL.""",
     )
     url = colander.SchemaNode(

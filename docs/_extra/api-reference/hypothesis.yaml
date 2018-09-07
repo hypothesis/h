@@ -327,7 +327,7 @@ paths:
         - name: uri.parts
           in: query
           description: |
-            Limit the results to annotations containing the given keywords in
+            Limit the results to annotations containing the given keyword in
             the URL.
         - name: url
           in: query
