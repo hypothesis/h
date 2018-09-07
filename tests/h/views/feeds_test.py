@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
+from h.schemas.annotation import SearchParamsSchema
 from h.views.feeds import stream_atom, stream_rss
 
 
@@ -50,6 +51,16 @@ class TestStreamRSS(object):
         result = stream_rss(pyramid_request)
 
         assert result == render_rss.return_value
+
+    def test_it_validates_query_params(self, matchers, pyramid_request, render_rss, patch, search):
+        validate_query_params = patch('h.views.feeds.validate_query_params')
+        searcher = search.Search.return_value
+
+        stream_rss(pyramid_request)
+
+        schema_matcher = matchers.InstanceOf(SearchParamsSchema)
+        validate_query_params.assert_called_with(schema_matcher, pyramid_request.params)
+        searcher.run.assert_called_with(validate_query_params.return_value)
 
 
 @pytest.fixture

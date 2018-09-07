@@ -7,6 +7,8 @@ from pyramid import i18n
 
 from h import search
 from h.feeds import render_atom, render_rss
+from h.schemas.annotation import SearchParamsSchema
+from h.schemas.util import validate_query_params
 from h.storage import fetch_ordered_annotations
 
 
@@ -15,7 +17,9 @@ _ = i18n.TranslationStringFactory(__package__)
 
 def _annotations(request):
     """Return the annotations from the search API."""
-    result = search.Search(request, stats=request.stats).run(request.params)
+    schema = SearchParamsSchema()
+    params = validate_query_params(schema, request.params)
+    result = search.Search(request, stats=request.stats).run(params)
     return fetch_ordered_annotations(request.db, result.annotation_ids)
 
 
