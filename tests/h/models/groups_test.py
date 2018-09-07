@@ -129,6 +129,21 @@ def test_non_public_group():
 
 
 class TestGroupACL(object):
+    def test_auth_client_with_matching_authority_may_add_members(self, group, authz_policy):
+        group.authority = 'weewhack.com'
+
+        assert authz_policy.permits(group, ['flip', 'client_authority:weewhack.com'], 'member_add')
+
+    def test_auth_client_without_matching_authority_may_not_add_members(self, group, authz_policy):
+        group.authority = 'weewhack.com'
+
+        assert not authz_policy.permits(group, ['flip', 'client_authority:2weewhack.com'], 'member_add')
+
+    def test_user_with_authority_may_not_add_members(self, group, authz_policy):
+        group.authority = 'fabuloso.biz'
+
+        assert not authz_policy.permits(group, ['flip', 'authority:fabuloso.biz'], 'member_add')
+
     def test_authority_joinable(self, group, authz_policy):
         group.joinable_by = JoinableBy.authority
 
