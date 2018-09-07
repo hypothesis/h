@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+from dateutil.parser import parse
+from dateutil import tz
+from datetime import datetime as dt
 from h import storage
 from h.util import uri
 from elasticsearch_dsl import Q
@@ -39,34 +42,39 @@ class Limiter(object):
         return search[starting_offset:ending_offset]
 
     def _extract_offset(self, params):
+        offset = params.pop("offset", 0)
         try:
-            val = int(params.pop("offset"))
+            val = int(offset)
+            # val must be 0 <= val <= OFFSET_MAX.
             val = min(val, OFFSET_MAX)
-            if val < 0:
-                raise ValueError
-        except (ValueError, KeyError):
+            val = max(val, 0)
+        except ValueError:
             return 0
-        else:
-            return val
+        return val
 
     def _extract_limit(self, params):
+        limit = params.pop("limit", LIMIT_DEFAULT)
         try:
-            val = int(params.pop("limit"))
+            val = int(limit)
+            # val must be 0 <= val <= LIMIT_MAX but if
+            # val < 0 then set it to the default.
             val = min(val, LIMIT_MAX)
             if val < 0:
-                raise ValueError
-        except (ValueError, KeyError):
+                return LIMIT_DEFAULT
+        except ValueError:
             return LIMIT_DEFAULT
-        else:
-            return val
+        return val
 
 
 class Sorter(object):
     """
-    Sorts annotations.
+    Sorts and returns annotations after search_after.
 
     Sorts annotations by sort (the key to sort by)
     and the order (the order in which to sort by).
+
+    Returns annotations after search_after. search_after
+    must be the value of the annotation's sort field.
     """
 
     def __call__(self, search, params):
@@ -74,6 +82,16 @@ class Sorter(object):
         # Sorting must be done on non-analyzed fields.
         if sort_by == "user":
             sort_by = "user_raw"
+
+        # Since search_after depends on the field that the annotations are
+        # being sorted by, it is set here rather than in a seperate class.
+        search_after = params.pop("search_after", None)
+        if search_after:
+            if sort_by in ["updated", "created"]:
+                search_after = self._parse_date(search_after)
+
+        if search_after:
+            search = search.extra(search_after=[search_after])
 
         return search.sort(
             {sort_by:
@@ -88,6 +106,32 @@ class Sorter(object):
                  # that exists in both ES 1 and ES 6.
                  "unmapped_type": "boolean"}}
         )
+
+    def _parse_date(self, str_value):
+        """
+        Converts a string to a float representing miliseconds since the epoch.
+
+        Since the elasticsearch date parser is not run on search_after,
+        the date must be converted to ms since the epoch as that is how
+        the dates are stored in the elasticsearch index.
+        """
+        # Dates like "2017" can also be cast as floats so if a number is less
+        # than 9999 it is assumed to be a year and not ms since the epoch.
+        try:
+            date = float(str_value)
+            if date < 9999:
+                raise ValueError("This is not in the form ms since the epoch.")
+            return date
+        except ValueError:
+            try:
+                date = parse(str_value)
+                # If timezone isn't specified assume it's utc.
+                if not date.tzinfo:
+                    date = date.replace(tzinfo=tz.tzutc())
+                epoch = dt.utcfromtimestamp(0).replace(tzinfo=tz.tzutc())
+                return (date - epoch).total_seconds() * 1000.0
+            except ValueError:
+                pass
 
 
 class TopLevelAnnotationsFilter(object):

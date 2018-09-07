@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import colander
 import copy
+from dateutil.parser import parse
 from pyramid import i18n
 
 from h.schemas.base import JSONSchema, ValidationError
@@ -327,6 +328,15 @@ class SearchParamsSchema(colander.Schema):
         missing="updated",
         description="The field by which annotations should be sorted.",
     )
+    search_after = colander.SchemaNode(
+        colander.String(),
+        missing=colander.drop,
+        description="""Returns results after the annotation who's sort field
+                    has this value. If specifying a date use the format
+                    yyyy-MM-dd'T'HH:mm:ss.SSX or time in miliseconds since the
+                    epoch. This is used for iteration through large collections
+                    of results.""",
+    )
     limit = colander.SchemaNode(
         colander.Integer(),
         validator=colander.Range(min=0, max=LIMIT_MAX),
@@ -344,7 +354,9 @@ class SearchParamsSchema(colander.Schema):
         validator=colander.Range(min=0, max=OFFSET_MAX),
         missing=0,
         description="""The number of initial annotations to skip. This is
-                       used for pagination.""",
+                       used for pagination. Not suitable for paging through
+                       thousands of annotations-search_after should be used
+                       instead.""",
     )
     group = colander.SchemaNode(
         colander.String(),
@@ -409,3 +421,34 @@ class SearchParamsSchema(colander.Schema):
         missing=colander.drop,
         description="Limit the results to annotations made by the specified user.",
     )
+
+    def validator(self, node, cstruct):
+        sort = cstruct['sort']
+        search_after = cstruct.get('search_after', None)
+
+        if search_after:
+            if (sort in ["updated", "created"] and
+                    not self._date_is_parsable(search_after)):
+                raise colander.Invalid(
+                    node,
+                    """search_after must be a parsable date in the form
+                    yyyy-MM-dd'T'HH:mm:ss.SSX
+                    or time in miliseconds since the epoch.""")
+
+            # offset must be set to 0 if search_after is specified.
+            cstruct["offset"] = 0
+
+    def _date_is_parsable(self, value):
+        """Return True if date is parsable and False otherwise."""
+
+        # Dates like "2017" can also be cast as floats so if a number is less
+        # than 9999 it is assumed to be a year and not ms since the epoch.
+        try:
+            if float(value) < 9999:
+                raise ValueError("This is not in the form ms since the epoch.")
+        except ValueError:
+            try:
+                parse(value)
+            except ValueError:
+                return False
+        return True
