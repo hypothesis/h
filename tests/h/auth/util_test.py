@@ -179,12 +179,12 @@ class TestClientAuthority(object):
             ["foo", "bar", "baz"],
             ["authority", "foo"],
             [],
-            ["authority:"],
-            [" authority:biz.biz", "foo"],
-            ["authority :biz.biz", "foo"],
+            ["client_authority:"],
+            [" client_authority:biz.biz", "foo"],
+            ["client_authority :biz.biz", "foo"],
         ],
     )
-    def test_it_returns_None_if_no_authority_principal_match(
+    def test_it_returns_None_if_no_client_authority_principal_match(
         self, principals, pyramid_request, pyramid_config
     ):
         pyramid_config.testing_securitypolicy("LYZADOODLE", groupids=principals)
@@ -194,8 +194,8 @@ class TestClientAuthority(object):
     @pytest.mark.parametrize(
         "principals,authority",
         [
-            (["foo", "bar", "baz", "authority:felicitous.com"], "felicitous.com"),
-            (["authority:somebody.likes.me", "foo"], "somebody.likes.me"),
+            (["foo", "bar", "baz", "client_authority:felicitous.com"], "felicitous.com"),
+            (["client_authority:somebody.likes.me", "foo"], "somebody.likes.me"),
         ],
     )
     def test_it_returns_authority_if_authority_principal_matchpyramid_requesi(
@@ -246,10 +246,10 @@ class TestPrincipalsForAuthClient(object):
         assert "client:{client_id}@{authority}".format(client_id=auth_client.id,
                                                        authority=auth_client.authority) in principals
 
-    def test_it_sets_authority_principal(self, auth_client):
+    def test_it_sets_client_authority_principal(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
 
-        assert "authority:{authority}".format(authority=auth_client.authority) in principals
+        assert "client_authority:{authority}".format(authority=auth_client.authority) in principals
 
     def test_it_returns_principals_as_list(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
