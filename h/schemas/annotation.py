@@ -403,6 +403,14 @@ class SearchParamsSchema(colander.Schema):
                        a URN representing another kind of resource such as DOI
                        (Digital Object Identifier) or a PDF fingerprint.""",
     )
+    uri_parts = colander.SchemaNode(
+        colander.Sequence(),
+        colander.SchemaNode(colander.String()),
+        name='uri.parts',
+        missing=colander.drop,
+        description="""Limit the results to annotations with the given keyword
+                       appearing in the URL.""",
+    )
     url = colander.SchemaNode(
         colander.Sequence(),
         colander.SchemaNode(colander.String()),
