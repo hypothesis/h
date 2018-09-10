@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "description": "The Internet, peer reviewed.",
   "scripts": {
-    "build": "gulp build"
+    "build": "gulp build",
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "autoprefixer": "^6.0.3",
