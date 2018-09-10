@@ -18,6 +18,9 @@ h
 .. image:: https://readthedocs.org/projects/h/badge/?version=latest
    :target: https://h.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
+.. image:: https://www.herokucdn.com/deploy/button.svg
+   :target: https://heroku.com/deploy?template=https://github.com/hypothesis/h
+   :alt: Deploy to Heroku
 
 h is the web app that serves most of the https://hypothes.is/ website,
 including the web annotations API at https://hypothes.is/api/.

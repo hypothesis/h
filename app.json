@@ -1,0 +1,29 @@
+{
+  "name": "hypothes.is",
+  "repository": "https://github.com/hypothesis/h",
+  "buildpacks": [
+    {"url": "heroku/nodejs"},
+    {"url": "heroku/python"}
+  ],
+  "addons": [
+    {"plan": "heroku-postgresql:hobby-dev"},
+    {"plan": "bonsai:sandbox-6"},
+    {"plan": "cloudamqp:lemur"},
+    {"plan": "mailgun:starter"}
+  ],
+  "formation": {
+    "web": {"quantity": 1},
+    "worker": {"quantity": 1}
+  },
+  "env": {
+    "AUTHORITY": {
+      "required": true
+    },
+    "SECRET_KEY": {
+      "generator": "secret"
+    },
+    "ELASTICSEARCH_CHECK_ICU_PLUGIN": {
+      "value": "false"
+    }
+  }
+}
