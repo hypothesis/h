@@ -131,7 +131,7 @@ def client_authority(request):
     :rtype: str or None
     """
     for principal in request.effective_principals:
-        match = re.match(r"^authority:(.+)$", principal)
+        match = re.match(r"^client_authority:(.+)$", principal)
         if match and match.group(1):
             return match.group(1)
 
@@ -184,7 +184,7 @@ def principals_for_auth_client(client):
     principals = set([])
 
     principals.add('client:{client_id}@{authority}'.format(client_id=client.id, authority=client.authority))
-    principals.add('authority:{authority}'.format(authority=client.authority))
+    principals.add('client_authority:{authority}'.format(authority=client.authority))
 
     return list(principals)
 
