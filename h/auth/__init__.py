@@ -52,11 +52,11 @@ def includeme(config):
     config.include('pyramid_authsanity')
 
     if config.registry.settings.get('h.proxy_auth'):
-        log.warn('Enabling proxy authentication mode: you MUST ensure that '
-                 'the X-Forwarded-User request header can ONLY be set by '
-                 'trusted downstream reverse proxies! Failure to heed this '
-                 'warning will result in ALL DATA stored by this service '
-                 'being available to ANYONE!')
+        log.warning('Enabling proxy authentication mode: you MUST ensure that '
+                    'the X-Forwarded-User request header can ONLY be set by '
+                    'trusted downstream reverse proxies! Failure to heed this '
+                    'warning will result in ALL DATA stored by this service '
+                    'being available to ANYONE!')
 
         DEFAULT_POLICY = AuthenticationPolicy(api_policy=API_POLICY,
                                               fallback_policy=PROXY_POLICY)

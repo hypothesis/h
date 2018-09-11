@@ -78,9 +78,9 @@ class SettingsManager(object):
         cast_message = None
         if envvar in self._environ:
             if deprecated_msg:
-                log.warn('use of envvar %s is deprecated: %s',
-                         envvar,
-                         deprecated_msg)
+                log.warning('use of envvar %s is deprecated: %s',
+                            envvar,
+                            deprecated_msg)
             val = self._environ[envvar]
             cast_message = "environment variable {}={!r}".format(envvar, val)
         elif default and name not in self.settings:
