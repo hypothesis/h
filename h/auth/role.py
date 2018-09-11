@@ -6,3 +6,6 @@ Admin = 'group:__admin__'
 
 #: Hypothesis staff. These users have limited access to admin functionality.
 Staff = 'group:__staff__'
+
+#: A request with client-credentials authentication
+AuthClient = 'group:__authclient__'

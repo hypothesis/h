@@ -251,6 +251,11 @@ class TestPrincipalsForAuthClient(object):
 
         assert "client_authority:{authority}".format(authority=auth_client.authority) in principals
 
+    def test_it_sets_authclient_role(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert role.AuthClient in principals
+
     def test_it_returns_principals_as_list(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
 
@@ -281,6 +286,7 @@ class TestPrincipalsForAuthClientUser(object):
         assert 'client:{client_id}@{authority}'.format(client_id=auth_client.id,
                                                        authority=auth_client.authority) in principals
         assert 'authority:{authority}'.format(authority=auth_client.authority)
+        assert role.AuthClient in principals
 
 
 class TestVerifyAuthClient(object):
