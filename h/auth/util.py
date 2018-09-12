@@ -185,6 +185,7 @@ def principals_for_auth_client(client):
 
     principals.add('client:{client_id}@{authority}'.format(client_id=client.id, authority=client.authority))
     principals.add('client_authority:{authority}'.format(authority=client.authority))
+    principals.add(role.AuthClient)
 
     return list(principals)
 
