@@ -33,7 +33,6 @@ Install the following packages:
     sudo apt-get install -y --no-install-recommends \
         build-essential \
         git \
-        tox \
         libevent-dev \
         libffi-dev \
         libfontconfig \
@@ -51,7 +50,7 @@ Upgrade pip and npm, and install tox-pip-extensions:
 
 .. code-block:: bash
 
-    sudo pip install -U pip tox-pip-extensions
+    sudo pip install -U pip tox tox-pip-extensions
     sudo npm install -g npm
 
 Installing the system dependencies on macOS
@@ -72,8 +71,7 @@ Install the following packages:
         libffi \
         node \
         postgresql \
-        python \
-        tox
+        python
 
 .. note:: Unfortunately you need to install the ``postgresql`` package, because
           Homebrew does not currently provide a standalone ``libpq`` package.
@@ -82,7 +80,7 @@ Upgrade pip and install tox-pip-extensions:
 
 .. code-block:: bash
 
-    pip install -U pip tox-pip-extensions
+    pip install -U pip tox tox-pip-extensions
 
 
 Getting the h source code from GitHub
