@@ -117,7 +117,7 @@ class Sorter(object):
             sort_by = "user_raw"
 
         # Since search_after depends on the field that the annotations are
-        # being sorted by, it is set here rather than in a seperate class.
+        # being sorted by, it is set here rather than in a separate class.
         search_after = params.pop("search_after", None)
         if search_after:
             if sort_by in ["updated", "created"]:
