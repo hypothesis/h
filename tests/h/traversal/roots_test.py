@@ -9,7 +9,9 @@ import mock
 
 import h.auth
 from h.models import AuthClient
+from h.auth import role
 from h.services.user import UserService
+from h.traversal.roots import Root
 from h.traversal.roots import AnnotationRoot
 from h.traversal.roots import AuthClientRoot
 from h.traversal.roots import OrganizationRoot
@@ -17,6 +19,55 @@ from h.traversal.roots import OrganizationLogoRoot
 from h.traversal.roots import GroupRoot
 from h.traversal.roots import UserRoot
 from h.traversal.contexts import AnnotationContext
+
+
+class TestRoot(object):
+    @pytest.mark.parametrize('permission', [
+        'admin_index',
+        'admin_groups',
+        'admin_mailer',
+        'admin_organizations',
+        'admin_users',
+        pyramid.security.ALL_PERMISSIONS,
+    ])
+    def test_it_denies_all_permissions_for_unauthed_request(self, pyramid_config, pyramid_request, permission):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy(None)
+        pyramid_config.set_authorization_policy(policy)
+
+        context = Root(pyramid_request)
+
+        assert not pyramid_request.has_permission(permission, context)
+
+    @pytest.mark.parametrize('permission', [
+        'admin_index',
+        'admin_groups',
+        'admin_mailer',
+        'admin_organizations',
+        'admin_users',
+    ])
+    def test_it_assigns_admin_permissions_to_requests_with_staff_role(self,
+                                                                      pyramid_config,
+                                                                      pyramid_request,
+                                                                      permission):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo', groupids=[role.Staff])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = Root(pyramid_request)
+
+        assert pyramid_request.has_permission(permission, context)
+
+    def test_it_assigns_all_permissions_to_requests_with_admin_role(self,
+                                                                    pyramid_config,
+                                                                    pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo', groupids=[role.Admin])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = Root(pyramid_request)
+
+        assert pyramid_request.has_permission(pyramid.security.ALL_PERMISSIONS, context)
 
 
 @pytest.mark.usefixtures('group_service', 'links_service')
