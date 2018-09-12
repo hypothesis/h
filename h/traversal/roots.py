@@ -211,6 +211,10 @@ class UserRoot(object):
     FIXME: This class should return UserContext objects, not User objects.
 
     """
+    __acl__ = [
+        (Allow, role.AuthClient, 'create'),
+    ]
+
     def __init__(self, request):
         self.request = request
         self.user_svc = self.request.find_service(name='user')
