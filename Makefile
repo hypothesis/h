@@ -19,7 +19,7 @@ clean:
 ## Run the development H server locally
 .PHONY: dev
 dev: build/manifest.json
-	tox -e dev
+	tox -e py27-dev
 
 ## Build hypothesis/hypothesis docker image
 .PHONY: docker
