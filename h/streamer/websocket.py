@@ -80,8 +80,8 @@ class WebSocket(_WebSocket):
             self._work_queue.put(Message(socket=self, payload=payload),
                                  timeout=0.1)
         except Full:
-            log.warn('Streamer work queue full! Unable to queue message from '
-                     'WebSocket client having waited 0.1s: giving up.')
+            log.warning('Streamer work queue full! Unable to queue message from '
+                        'WebSocket client having waited 0.1s: giving up.')
 
     def closed(self, code, reason=None):
         try:

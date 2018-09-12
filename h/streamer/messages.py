@@ -43,8 +43,8 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
             message = Message(topic=routing_key, payload=payload)
             work_queue.put(message, timeout=0.1)
         except Full:
-            log.warn('Streamer work queue full! Unable to queue message from '
-                     'h.realtime having waited 0.1s: giving up.')
+            log.warning('Streamer work queue full! Unable to queue message from '
+                        'h.realtime having waited 0.1s: giving up.')
 
     conn = realtime.get_connection(settings)
     sentry_client = h.sentry.get_client(settings)
@@ -89,7 +89,7 @@ def handle_annotation_event(message, sockets, settings, session):
     annotation = storage.fetch_annotation(session, id_)
 
     if annotation is None:
-        log.warn('received annotation event for missing annotation: %s', id_)
+        log.warning('received annotation event for missing annotation: %s', id_)
         return
 
     nipsa_service = NipsaService(session)

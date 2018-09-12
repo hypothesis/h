@@ -83,7 +83,7 @@ def get_notification(request, annotation, action):
     # this would be super weird, so log a warning.
     reply_user = user_service.fetch(reply.userid)
     if reply_user is None:
-        log.warn('user who just replied no longer exists: %s', reply.userid)
+        log.warning('user who just replied no longer exists: %s', reply.userid)
         return
 
     # Do not notify users about their own replies

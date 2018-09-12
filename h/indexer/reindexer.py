@@ -44,7 +44,7 @@ def reindex(session, es, request):
                 len(errored)))
             errored = indexer.index(errored)
             if errored:
-                log.warn('failed to index {} annotations: {!r}'.format(
+                log.warning('failed to index {} annotations: {!r}'.format(
                     len(errored),
                     errored))
 

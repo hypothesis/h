@@ -408,7 +408,7 @@ class TestCreateOrUpdateDocumentURI(object):
             created=now(),
             updated=now())
 
-        assert log.warn.call_count == 1
+        assert log.warning.call_count == 1
 
     def test_raises_retryable_error_when_flush_fails(self, db_session, monkeypatch):
         document_ = document.Document()
@@ -598,7 +598,7 @@ class TestCreateOrUpdateDocumentMeta(object):
             updated=now(),
         )
 
-        assert log.warn.call_count == 1
+        assert log.warning.call_count == 1
 
     def test_raises_retryable_error_when_flush_fails(self, db_session, monkeypatch):
         document_ = document.Document()

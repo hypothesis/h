@@ -135,10 +135,10 @@ class Search(object):
         )
 
         if len(response['hits']['hits']) < response['hits']['total']:
-            log.warn("The number of reply annotations exceeded the page size "
-                     "of the Elasticsearch query. We currently don't handle "
-                     "this, our search API doesn't support pagination of the "
-                     "reply set.")
+            log.warning("The number of reply annotations exceeded the page size "
+                        "of the Elasticsearch query. We currently don't handle "
+                        "this, our search API doesn't support pagination of the "
+                        "reply set.")
 
         return [hit['_id'] for hit in response['hits']['hits']]
 

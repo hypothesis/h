@@ -112,7 +112,7 @@ def _session(request):
         changes = tracker.uncommitted_changes() if tracker else []
         if changes:
             msg = 'closing a session with uncommitted changes %s'
-            log.warn(msg, changes, extra={
+            log.warning(msg, changes, extra={
                 'stack': True,
                 'changes': changes,
             })
