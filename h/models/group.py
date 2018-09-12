@@ -121,6 +121,11 @@ class Group(Base, mixins.Timestamps):
     def __acl__(self):
         terms = []
 
+        # auth_clients that have the same authority as the target group
+        # may add members to it
+        member_add_principal = "client_authority:{}".format(self.authority)
+        terms.append((security.Allow, member_add_principal, 'member_add'))
+
         join_principal = _join_principal(self)
         if join_principal is not None:
             terms.append((security.Allow, join_principal, 'join'))
