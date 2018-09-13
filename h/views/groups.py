@@ -23,7 +23,7 @@ class GroupCreateController(object):
         self.schema = schemas.group_schema(autofocus_name=True).bind(
             request=self.request)
 
-        submit = deform.Button(title=_('Create a new group'),
+        submit = deform.Button(title=_('Create group'),
                                css_class='primary-action-btn '
                                          'group-form__submit-btn '
                                          'js-create-group-create-btn')
