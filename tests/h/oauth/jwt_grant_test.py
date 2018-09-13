@@ -132,10 +132,10 @@ class TestJWTAuthorizationGrantValidateTokenRequest(object):
 
     def test_raises_when_user_authority_does_not_match_client_authority(self, grant, authclient, user):
         user.authority = 'bogus.org'
-        request = oauth_request(authclient, user)
+        oauth_request = _oauth_request(authclient, user)
 
         with pytest.raises(errors.InvalidGrantError) as exc:
-            grant.validate_token_request(request)
+            grant.validate_token_request(oauth_request)
 
         assert exc.value.description == 'Grant token subject (sub) does not match issuer (iss).'
 
@@ -147,8 +147,7 @@ def grant(pyramid_request, request_validator):
     return JWTAuthorizationGrant(request_validator, user_svc, 'domain.test')
 
 
-@pytest.fixture
-def oauth_request(authclient, user):
+def _oauth_request(authclient, user):
     exp = datetime.utcnow() + timedelta(minutes=5)
     nbf = datetime.utcnow() - timedelta(seconds=2)
     claims = {
@@ -162,6 +161,11 @@ def oauth_request(authclient, user):
 
     return OAuthRequest('/', body={'assertion': jwttok,
                                    'client': Client(authclient)})
+
+
+@pytest.fixture
+def oauth_request(authclient, user):
+    return _oauth_request(authclient, user)
 
 
 @pytest.fixture

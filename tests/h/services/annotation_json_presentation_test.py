@@ -12,46 +12,48 @@ from h.services.annotation_json_presentation import annotation_json_presentation
 
 @pytest.mark.usefixtures('presenters', 'formatters')
 class TestAnnotationJSONPresentationService(object):
-    def test_initializes_flag_formatter(self, services, formatters):
-        self.svc(services)
+    def test_initializes_flag_formatter(self, services, formatters, svc):
         formatters.AnnotationFlagFormatter.assert_called_once_with(services['flag'],
                                                                    mock.sentinel.user)
 
-    def test_it_configures_flag_formatter(self, services, formatters):
-        svc = self.svc(services)
+    def test_it_configures_flag_formatter(self, services, formatters, svc):
         assert formatters.AnnotationFlagFormatter.return_value in svc.formatters
 
-    def test_initializes_hidden_formatter(self, matchers, services, formatters):
-        self.svc(services)
+    def test_initializes_hidden_formatter(self, matchers, services, formatters, svc):
         formatters.AnnotationHiddenFormatter.assert_called_once_with(services['annotation_moderation'],
                                                                      matchers.AnyCallable(),
                                                                      mock.sentinel.user)
 
-    def test_it_configures_hidden_formatter(self, services, formatters):
-        svc = self.svc(services)
+    def test_it_configures_hidden_formatter(self, services, formatters, svc):
         assert formatters.AnnotationHiddenFormatter.return_value in svc.formatters
 
-    def test_initializes_moderation_formatter(self, services, formatters):
-        self.svc(services)
+    def test_initializes_moderation_formatter(self, services, formatters, svc):
         formatters.AnnotationModerationFormatter.assert_called_once_with(services['flag_count'],
                                                                          mock.sentinel.user,
                                                                          mock.sentinel.has_permission)
 
-    def test_it_configures_moderation_formatter(self, services, formatters):
-        svc = self.svc(services)
+    def test_it_configures_moderation_formatter(self, services, formatters, svc):
         assert formatters.AnnotationModerationFormatter.return_value in svc.formatters
 
-    def test_initializes_user_info_formatter(self, services, formatters):
-        self.svc(services)
+    def test_initializes_user_info_formatter(self, services, formatters, svc):
         formatters.AnnotationUserInfoFormatter.assert_called_once_with(mock.sentinel.db_session,
                                                                        services['user'])
 
-    def test_it_configures_user_info_formatter(self, services, formatters):
-        svc = self.svc(services)
+    def test_it_configures_user_info_formatter(self, services, formatters, svc):
         assert formatters.AnnotationUserInfoFormatter.return_value in svc.formatters
 
     def test_it_skips_configuring_user_info_formatter_when_told_to(self, services, formatters):
-        svc = self.svc(services, render_user_info=False)
+        svc = AnnotationJSONPresentationService(session=mock.sentinel.db_session,
+                                                user=mock.sentinel.user,
+                                                group_svc=services['group'],
+                                                links_svc=services['links'],
+                                                flag_svc=services['flag'],
+                                                flag_count_svc=services['flag_count'],
+                                                moderation_svc=services['annotation_moderation'],
+                                                user_svc=services['user'],
+                                                has_permission=mock.sentinel.has_permission,
+                                                render_user_info=False)
+
         assert formatters.AnnotationUserInfoFormatter.return_value not in svc.formatters
 
     def test_present_inits_presenter(self, svc, presenters, annotation_resource):
@@ -110,7 +112,7 @@ class TestAnnotationJSONPresentationService(object):
         assert result == [present.return_value]
 
     @pytest.fixture
-    def svc(self, services, render_user_info=True):
+    def svc(self, services):
         return AnnotationJSONPresentationService(session=mock.sentinel.db_session,
                                                  user=mock.sentinel.user,
                                                  group_svc=services['group'],
@@ -120,7 +122,7 @@ class TestAnnotationJSONPresentationService(object):
                                                  moderation_svc=services['annotation_moderation'],
                                                  user_svc=services['user'],
                                                  has_permission=mock.sentinel.has_permission,
-                                                 render_user_info=render_user_info)
+                                                 render_user_info=True)
 
     @pytest.fixture
     def annotation_resource(self):
