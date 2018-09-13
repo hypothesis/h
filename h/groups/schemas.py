@@ -18,12 +18,10 @@ from h.models.group import (
 
 _ = i18n.TranslationString
 
-GROUPSLUG_BLACKLIST = set(['edit', 'leave'])
 
-
-def unblacklisted_group_name_slug(node, value, blacklist=GROUPSLUG_BLACKLIST):
+def unblacklisted_group_name_slug(node, value):
     """Colander validator that ensures the "slugified" group name is not blacklisted."""
-    if slugify.slugify(value).lower() in blacklist:
+    if slugify.slugify(value).lower() in set(['edit', 'leave']):
         raise colander.Invalid(node, _("Sorry, this group name is not allowed. "
                                        "Please choose another one."))
 

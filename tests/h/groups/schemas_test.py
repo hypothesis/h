@@ -22,10 +22,8 @@ class TestUnblacklistedGroupNameSlug(object):
         'LeAvE???',
     ])
     def test_blacklisted(self, dummy_node, group_name):
-        blacklist = set(['edit', 'leave'])
-
         with pytest.raises(colander.Invalid):
-            schemas.unblacklisted_group_name_slug(dummy_node, group_name, blacklist)
+            schemas.unblacklisted_group_name_slug(dummy_node, group_name)
 
     @pytest.mark.parametrize('group_name', [
         'Birdwatchers',
@@ -35,9 +33,7 @@ class TestUnblacklistedGroupNameSlug(object):
         'Leavers',
     ])
     def test_passing(self, dummy_node, group_name):
-        blacklist = set(['edit', 'leave'])
-
-        schemas.unblacklisted_group_name_slug(dummy_node, group_name, blacklist)
+        schemas.unblacklisted_group_name_slug(dummy_node, group_name)
 
     @pytest.fixture
     def dummy_node(self, pyramid_request):
