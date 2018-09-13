@@ -22,10 +22,7 @@ class GroupJSONPresenter(object):
         model['links'] = self.context.links or {}
         return model
 
-    def _expand(self, model, expand=None):
-        if expand is None:
-            expand = []
-
+    def _expand(self, model, expand):
         if 'organization' in expand:
             if self.organization_context:
                 model['organization'] = OrganizationJSONPresenter(
