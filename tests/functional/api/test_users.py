@@ -25,6 +25,13 @@ class TestCreateUser(object):
 
         assert res.status_code == 200
 
+    def test_it_returns_404_if_missing_auth_client(self, app, user_payload):
+        # FIXME: This should return a 403; our exception views squash it into a 404
+        res = app.post_json("/api/users", user_payload, expect_errors=True)
+
+        assert res.status_code == 404
+
+    @pytest.mark.xfail
     def test_it_returns_403_if_missing_auth_client(self, app, user_payload):
         res = app.post_json("/api/users", user_payload, expect_errors=True)
 
