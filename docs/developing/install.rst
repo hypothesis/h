@@ -46,7 +46,7 @@ Install node by following the
 (the version of the nodejs package in the standard Ubuntu repositories is too
 old).
 
-Upgrade pip and npm, and install tox-pip-extensions:
+Upgrade pip and npm, and install tox and tox-pip-extensions:
 
 .. code-block:: bash
 
@@ -76,7 +76,7 @@ Install the following packages:
 .. note:: Unfortunately you need to install the ``postgresql`` package, because
           Homebrew does not currently provide a standalone ``libpq`` package.
 
-Upgrade pip and install tox-pip-extensions:
+Upgrade pip and install tox and tox-pip-extensions:
 
 .. code-block:: bash
 
