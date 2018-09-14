@@ -25,7 +25,7 @@ import re
 #
 # This also accepts DOIs represented as URLs (eg.
 # "https://doi.org/10.1000/123456").
-DOI_PATTERN = re.compile('(https?://(dx\.)?doi\.org/)?10\.[0-9]{4,}[.0-9]*/.*')
+DOI_PATTERN = re.compile(r'(https?://(dx\.)?doi\.org/)?10\.[0-9]{4,}[.0-9]*/.*')
 
 
 def document_uris_from_data(document_data, claimant):

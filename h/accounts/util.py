@@ -45,7 +45,7 @@ def validate_orcid(orcid):
     Returns the normalized ORCID if successfully parsed or raises a ValueError
     otherwise.
     """
-    orcid_regex = '\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z'
+    orcid_regex = r'\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z'
 
     if not re.match(orcid_regex, orcid):
         raise ValueError('The format of this ORCID is incorrect'.format(orcid))

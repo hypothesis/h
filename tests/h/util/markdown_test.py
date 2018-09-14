@@ -17,8 +17,8 @@ class TestRender(object):
         assert '<p>$$1 + 1 = 2$$</p>\n' == actual
 
     def test_it_ignores_inline_match(self):
-        actual = markdown.render('Foobar \(1 + 1 = 2\)')
-        assert '<p>Foobar \(1 + 1 = 2\)</p>\n' == actual
+        actual = markdown.render(r'Foobar \(1 + 1 = 2\)')
+        assert '<p>Foobar \\(1 + 1 = 2\\)</p>\n' == actual
 
     def test_it_sanitizes_the_output(self, markdown_render, sanitize):
         markdown.render('foobar')
