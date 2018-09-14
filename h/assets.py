@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import os
+import sys
 
 import json
 from pyramid.settings import asbool, aslist
@@ -131,7 +132,14 @@ def _add_cors_header(wrapped):
 def _load_bundles(fp):
     """Read an asset bundle config from a file object."""
     parser = configparser.ConfigParser()
-    parser.readfp(fp)
+
+    # readfp() changed to read_file() in Python 3.2.
+    # FIXME: Remove this once we no longer support Python 2.
+    if sys.version_info.major == 3 and sys.version_info.minor >= 2:
+        parser.read_file(fp)
+    else:
+        parser.readfp(fp)
+
     return {k: aslist(v) for k, v in parser.items('bundles')}
 
 
