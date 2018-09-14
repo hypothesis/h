@@ -60,7 +60,8 @@ describe('AutosuggestDropdownController', () => {
         },
         {
           title: 'url:',
-          explanation: 'see all annotations on a page',
+          explanation: `see all annotations on page(s) * matches any number 
+            of characters and ? matches any single character`,
         },
         {
           title: 'group:',
