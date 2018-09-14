@@ -23,7 +23,7 @@ def mailer_index(request):
 @view_config(route_name='admin.mailer_test',
              request_method='POST',
              permission='admin_mailer',
-             check_csrf=True)
+             require_csrf=True)
 def mailer_test(request):
     """Send a test email."""
     if 'recipient' not in request.params:
