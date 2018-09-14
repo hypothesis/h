@@ -499,55 +499,30 @@ class TestUriFilter(object):
 class TestUriCombinedWildcardFilter():
 
     @pytest.mark.parametrize('params,expected,separate_keys', [
+
     # Test with separate_keys = True (aka uri/url are exact match & wildcard_uri is wildcard match.)
-    (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/*-*")]),
-     [3, 4, 5, 9],
-     True),
     (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz?45")]),
-     [5, 6],
+     [2, 3],
      True),
-    (webob.multidict.MultiDict([("wildcard_uri", "file://localhost/*foo*bar.pdf")]),
-     [11, 12],
+    (webob.multidict.MultiDict([("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
+                                ("wildcard_uri", "http://bar.com/baz*45")]),
+     [2, 3, 4, 5],
      True),
-    (webob.multidict.MultiDict([("wildcard_uri", "urn:x-pdf:*")]),
-     [10],
+    (webob.multidict.MultiDict([("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
+                                ("url", "http://bar.com/baz*45")]),
+     [3, 5],
      True),
-    (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/*-*"), ("wildcard_uri", "http://baz.com/*-*")]),
-     [0, 3, 4, 5, 9],
-     True),
-    (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz?45"), ("uri", "http://bar.com/baz-45")]),
-     [5, 6],
-     True),
-    (webob.multidict.MultiDict([("uri", "https://www.foo.com"), ("wildcard_uri", "http://bar.com/baz*45")]),
-     [2, 5, 6, 7, 8],
-     True),
-    (webob.multidict.MultiDict([("uri", "https://www.foo.com"), ("url", "http://bar.com/foo")]),
-     [1, 2],
-     True),
+
     # Test with separate_keys = False (aka uri/url contain both exact &  wildcard matches.)
-    (webob.multidict.MultiDict([("uri", "http://bar.com/*-*")]),
-     [3, 4, 5, 9],
+    (webob.multidict.MultiDict([("uri", "http://bar.com/baz-45?")]),
+     [1],
      False),
-    (webob.multidict.MultiDict([("uri", "http://bar.com/baz?45")]),
-     [5, 6],
+    (webob.multidict.MultiDict([("uri", "http://bar.com/*")]),
+     [0, 1, 2, 3, 4],
      False),
-    (webob.multidict.MultiDict([("uri", "file://localhost/*foo*bar.pdf")]),
-     [11, 12],
-     False),
-    (webob.multidict.MultiDict([("uri", "urn:x-pdf:*")]),
-     [10],
-     False),
-    (webob.multidict.MultiDict([("uri", "http://bar.com/*-*"), ("uri", "http://baz.com/*-*")]),
-     [0, 3, 4, 5, 9],
-     False),
-    (webob.multidict.MultiDict([("url", "http://bar.com/baz?45"), ("uri", "http://bar.com/baz-45")]),
-     [5, 6],
-     False),
-    (webob.multidict.MultiDict([("uri", "https://www.foo.com"), ("uri", "http://bar.com/baz*45")]),
-     [2, 5, 6, 7, 8],
-     False),
-    (webob.multidict.MultiDict([("uri", "https://www.foo.com"), ("url", "http://bar.com/foo")]),
-     [1, 2],
+    (webob.multidict.MultiDict([("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
+                                ("uri", "http://bar.com/baz*45")]),
+     [2, 3, 4, 5],
      False),
     ])
     def test_matches(
@@ -564,19 +539,12 @@ class TestUriCombinedWildcardFilter():
         """
         search = self._get_search(search, pyramid_request, separate_keys)
 
-        ann_ids = [Annotation(target_uri="http://baz.com/foo-450").id,
-                        Annotation(target_uri="http://bar.com/foo").id,
-                        Annotation(target_uri="https://www.foo.com").id,
-                        Annotation(target_uri="https://bar.com/foo-43").id,
-                        Annotation(target_uri="http://bar.com/foo-457").id,
-                        Annotation(target_uri="http://bar.com/baz-45").id,
-                        Annotation(target_uri="http://bar.com/baz*45").id,
-                        Annotation(target_uri="http://bar.com/baz/*/45").id,
-                        Annotation(target_uri="https://bar.com/baz?=45").id,
-                        Annotation(target_uri="http://bar.com/baz-47").id,
-                        Annotation(target_uri="urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a").id,
-                        Annotation(target_uri="file://localhost/baz,%20foo%20bar.pdf").id,
-                        Annotation(target_uri="file://localhost/foobar.pdf").id]
+        ann_ids = [Annotation(target_uri="http://bar.com?foo").id,
+                   Annotation(target_uri="http://bar.com/baz-457").id,
+                   Annotation(target_uri="http://bar.com/baz-45").id,
+                   Annotation(target_uri="http://bar.com/baz*45").id,
+                   Annotation(target_uri="http://bar.com/baz/*/45").id,
+                   Annotation(target_uri="urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a").id]
 
         result = search.run(params)
 
@@ -623,13 +591,16 @@ class TestUriCombinedWildcardFilter():
 
 @pytest.mark.parametrize('wildcard_uri,expected', [
     ("http?://bar.com", False),
+    ("htt*://bar.com", False),
     ("http://localhost:3000*", False),
     ("http://bar*.com", False),
+    ("http://bar?com", False),
     ("*?http://bar.com", False),
     ("file://*", False),
+    ("https://foo.com", False),
     ("urn:*", False),
+    ("http://foo.com*", False),
     ("urn:x-pdf:*", True),
-    ("file://localhost/*", True),
     ("http://foo.com/*", True),
 ])
 def test_identifies_wildcard_uri_is_valid(wildcard_uri, expected):

@@ -4,10 +4,7 @@ from __future__ import unicode_literals
 from dateutil.parser import parse
 from dateutil import tz
 from datetime import datetime as dt
-try:
-    from urllib import parse as urlparse
-except ImportError:
-    import urlparse
+from h._compat import urlparse
 
 from h import storage
 from h.util import uri
@@ -24,19 +21,33 @@ def wildcard_uri_is_valid(wildcard_uri):
     """
     Return True if uri contains wildcards in appropriate places, return False otherwise.
 
-    Wildcards are not permitted in the domain of the uri (aka within http://foo.com/).
+    Wildcards are not permitted in the scheme or netloc of the uri.
     """
+    if "*" not in wildcard_uri and "?" not in wildcard_uri:
+        return False
     # If uri is in the form of a unique id, the domain will not be parsed correctly but
     # it is still valid. Check for this special case and return early.
     if wildcard_uri.startswith("urn:x-pdf:"):
         return True
-    # Let urlparse get what it thinks is the domain from the wildcard_uri and then
-    # strip any remaining "*"s and "?"s. If this matches the start of the original
-    # uri then the uri, the uri is valid.
-    domain = '{uri.scheme}://{uri.netloc}/'.format(
-        uri=urlparse.urlparse(wildcard_uri)).replace("*", "").replace("?", "")
+    # Let urlparse get what it thinks is the scheme+netloc from the wildcard_uri and then
+    # strip any remaining "*"s. "?"s will be stripped by urlparse. If this matches the
+    # start of the original uri and the scheme+netloc aren't empty then the uri is valid.
+    normalized_uri = urlparse.urlparse(wildcard_uri)
+    scheme = normalized_uri.scheme.replace("*", "")
+    netloc = normalized_uri.netloc.replace("?", "")
+
+    # Both scheme and netloc must be specified.
+    if scheme == "" or netloc in ["", ""]:
+        return False
+
+    domain = '{0}://{1}/'.format(scheme, netloc)
     if wildcard_uri.startswith(domain):
-        return True
+        # Make a final verification effort before returning.
+        try:
+            uri.normalize(wildcard_uri)
+            return True
+        except Exception:
+            pass
     return False
 
 
@@ -344,19 +355,23 @@ class UriCombinedWildcardFilter(object):
         """
         Same as uri.normalized but it doesn't strip ending `?` from uri's.
 
-        It's possible to have a wildcard `?` at the end of a uri, however
-        uri.normalize strips `?`s from the end of uris. To compinsate for this,
-        we check for an ending `?` and add it back after normalization.
+        It's possible to have a wildcard at the end of a uri, however
+        uri.normalize strips `?`s from the end of uris and something like
+        http://foo.com/* will not be normalized to http://foo.com* without
+        removing the `*` before normalization. To compinsate for this,
+        we check for an ending wildcard and add it back after normalization.
 
         While it's possible to escape `?` and `*` using `\`, the uri.normalize
         converts `\` to encoded url format which does not behave the same in
         elasticsearch. Thus, escaping wildcard characters is not currently
         supported.
         """
-        ending_question_mark = wildcard_uri.endswith("?")
+        ending_question_wildcard = ""
+        if wildcard_uri.endswith("?") or wildcard_uri.endswith("*"):
+            ending_question_wildcard = wildcard_uri[-1]
+            wildcard_uri = wildcard_uri[:-1]
         wildcard_uri = uri.normalize(wildcard_uri)
-        if ending_question_mark:
-            wildcard_uri += "?"
+        wildcard_uri += ending_question_wildcard
         return wildcard_uri
 
 
