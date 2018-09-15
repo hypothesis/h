@@ -25,9 +25,9 @@ def wildcard_uri_is_valid(wildcard_uri):
     """
     if "*" not in wildcard_uri and "?" not in wildcard_uri:
         return False
-    # If uri is in the form of a unique id, the domain will not be parsed correctly but
-    # it is still valid. Check for this special case and return early.
-    if wildcard_uri.startswith("urn:x-pdf:"):
+    # Accept all uri's without an authority (empty netloc).
+    normalized_uri = urlparse.urlparse(wildcard_uri)
+    if normalized_uri.scheme and not normalized_uri.netloc:
         return True
     # Let urlparse get what it thinks is the scheme+netloc from the wildcard_uri and then
     # strip any remaining "*"s. "?"s will be stripped by urlparse. If this matches the
@@ -329,7 +329,7 @@ class UriCombinedWildcardFilter(object):
             wildcard_uris = [u for u in uris if "*" in u or "?" in u]
             uris = [u for u in uris if "*" not in u and "?" not in u]
 
-        # Ignore all invalid wildcard uris.
+        # Only add valid uri's to the search list.
         wildcard_uris = self._normalize_uris(
             [u for u in wildcard_uris if wildcard_uri_is_valid(u)],
             normalize_method=self._wildcard_uri_normalized)
@@ -358,20 +358,20 @@ class UriCombinedWildcardFilter(object):
         It's possible to have a wildcard at the end of a uri, however
         uri.normalize strips `?`s from the end of uris and something like
         http://foo.com/* will not be normalized to http://foo.com* without
-        removing the `*` before normalization. To compinsate for this,
+        removing the `*` before normalization. To compensate for this,
         we check for an ending wildcard and add it back after normalization.
 
-        While it's possible to escape `?` and `*` using `\`, the uri.normalize
-        converts `\` to encoded url format which does not behave the same in
+        While it's possible to escape `?` and `*` using \\, the uri.normalize
+        converts \\ to encoded url format which does not behave the same in
         elasticsearch. Thus, escaping wildcard characters is not currently
         supported.
         """
-        ending_question_wildcard = ""
+        trailing_wildcard = ""
         if wildcard_uri.endswith("?") or wildcard_uri.endswith("*"):
-            ending_question_wildcard = wildcard_uri[-1]
+            trailing_wildcard = wildcard_uri[-1]
             wildcard_uri = wildcard_uri[:-1]
         wildcard_uri = uri.normalize(wildcard_uri)
-        wildcard_uri += ending_question_wildcard
+        wildcard_uri += trailing_wildcard
         return wildcard_uri
 
 
