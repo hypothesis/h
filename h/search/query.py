@@ -288,7 +288,7 @@ class UriCombinedWildcardFilter(object):
         are performed on uri/url parameters.
     If separate_keys is False:
         uri/url parameters are expected to contain exact matches and wildcard matches.
-        Values containing wildcards are intrepted as wildcard searches.
+        Values containing wildcards are interpreted as wildcard searches.
 
     If specifying a uri with wildcards:
     * will match any character sequence (including an empty one), and a ? will match
@@ -299,7 +299,7 @@ class UriCombinedWildcardFilter(object):
         """Initialize a new UriFilter.
 
         :param request: the pyramid.request object
-        :param separate_keys: if True will treate wildcard_uri as wildcards and uri/url
+        :param separate_keys: if True will treat wildcard_uri as wildcards and uri/url
             as exact match. If False will treat any values in uri/url containing wildcards
             ("?" or "*") as wildcard searches.
 
