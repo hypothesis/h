@@ -498,7 +498,7 @@ class TestUriFilter(object):
 
 class TestUriCombinedWildcardFilter():
 
-    @pytest.mark.parametrize('params,expected_ann_idxs,separate_keys', [
+    @pytest.mark.parametrize('params,expected_ann_indexes,separate_keys', [
 
     # Test with separate_keys = True (aka uri/url are exact match & wildcard_uri is wildcard match.)
     (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz?45")]),
@@ -531,7 +531,7 @@ class TestUriCombinedWildcardFilter():
         pyramid_request,
         Annotation,
         params,
-        expected_ann_idxs,
+        expected_ann_indexes,
         separate_keys,
     ):
         """
@@ -548,7 +548,7 @@ class TestUriCombinedWildcardFilter():
 
         result = search.run(params)
 
-        assert sorted(result.annotation_ids) == sorted([ann_ids[ann] for ann in expected_ann_idxs])
+        assert sorted(result.annotation_ids) == sorted([ann_ids[ann] for ann in expected_ann_indexes])
 
     @pytest.mark.parametrize('params,separate_keys', [
         (webob.multidict.MultiDict([("wildcard_uri", "http?://bar.com")]), True),
