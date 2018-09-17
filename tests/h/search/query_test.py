@@ -51,7 +51,7 @@ class TestLimiter(object):
     def test_offset(self, pyramid_request, offset, from_):
         limiter = query.Limiter()
         search = elasticsearch_dsl.Search(
-            using="default", index=pyramid_request.es.index
+            using=pyramid_request.es.conn,
         )
 
         params = {"offset": offset}
@@ -68,7 +68,7 @@ class TestLimiter(object):
         """Given any string input, output should be in the allowed range."""
         limiter = query.Limiter()
         search = elasticsearch_dsl.Search(
-            using="default", index=pyramid_request.es.index
+            using=pyramid_request.es.conn,
         )
 
         q = limiter(search, {"limit": text}).to_dict()
@@ -82,7 +82,7 @@ class TestLimiter(object):
         """Given any integer input, output should be in the allowed range."""
         limiter = query.Limiter()
         search = elasticsearch_dsl.Search(
-            using="default", index=pyramid_request.es.index
+            using=pyramid_request.es.conn,
         )
 
         q = limiter(search, {"limit": str(lim)}).to_dict()
@@ -96,7 +96,7 @@ class TestLimiter(object):
         """Given an integer in the allowed range, it should be passed through."""
         limiter = query.Limiter()
         search = elasticsearch_dsl.Search(
-            using="default", index=pyramid_request.es.index
+            using=pyramid_request.es.conn,
         )
 
         q = limiter(search, {"limit": str(lim)}).to_dict()
@@ -106,7 +106,7 @@ class TestLimiter(object):
     def test_limit_set_to_default_when_missing(self, pyramid_request):
         limiter = query.Limiter()
         search = elasticsearch_dsl.Search(
-            using="default", index=pyramid_request.es.index
+            using=pyramid_request.es.conn,
         )
 
         q = limiter(search, {}).to_dict()
