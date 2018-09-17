@@ -189,6 +189,22 @@ class TestSorter(object):
         actual_order = [ann_ids.index(id_) for id_ in result.annotation_ids]
         assert actual_order == expected_order
 
+    def test_incomplete_date_defaults_to_min_datetime_values(self, pyramid_request):
+        """
+        The default date should be:
+            1970, 1st month, 1st day, 0 hrs, 0 min, 0 sec, 0 ms
+        """
+        sorter = query.Sorter()
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        params = {"search_after": "2018"}
+
+        q = sorter(search, params).to_dict()
+
+        assert q["search_after"] == [1514764800000.0]
+
     def test_it_ignores_unknown_sort_fields(self, search):
         search.run({"sort": "no_such_field"})
 
