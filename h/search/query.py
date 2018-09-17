@@ -25,29 +25,21 @@ def wildcard_uri_is_valid(wildcard_uri):
     """
     if "*" not in wildcard_uri and "?" not in wildcard_uri:
         return False
-    # Accept all uri's without an authority (empty netloc).
-    normalized_uri = urlparse.urlparse(wildcard_uri)
-    if normalized_uri.scheme and not normalized_uri.netloc:
-        return True
-    # Let urlparse get what it thinks is the scheme+netloc from the wildcard_uri and then
-    # strip any remaining "*"s. "?"s will be stripped by urlparse. If this matches the
-    # start of the original uri and the scheme+netloc aren't empty then the uri is valid.
-    normalized_uri = urlparse.urlparse(wildcard_uri)
-    scheme = normalized_uri.scheme.replace("*", "")
-    netloc = normalized_uri.netloc.replace("?", "")
+    try:
+        normalized_uri = urlparse.urlparse(wildcard_uri)
 
-    # Both scheme and netloc must be specified.
-    if scheme == "" or netloc in ["", ""]:
-        return False
+        # Remove all parts of the url except the scheme, netloc, and provide a substitute
+        # path value "p" so that uri's that only have a scheme and path are still valid.
+        uri_parts = (normalized_uri.scheme, normalized_uri.netloc, "p", "", "", "")
 
-    domain = '{0}://{1}/'.format(scheme, netloc)
-    if wildcard_uri.startswith(domain):
-        # Make a final verification effort before returning.
-        try:
-            uri.normalize(wildcard_uri)
+        # Remove the "p" standing for path from the end of the uri.
+        begining_of_uri = urlparse.urlunparse(uri_parts)[:-1]
+
+        # If a wildcard was in the scheme the uri may come back as "" (a falsey value).
+        if begining_of_uri and wildcard_uri.startswith(begining_of_uri):
             return True
-        except Exception:
-            pass
+    except ValueError:
+        pass
     return False
 
 
