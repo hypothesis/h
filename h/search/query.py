@@ -44,11 +44,11 @@ def wildcard_uri_is_valid(wildcard_uri):
     return False
 
 
-def _pop_param_values(params, key):
-    """ Pops and returns all values of the key in params"""
-    values = params.getall(key)
+def popall(multidict, key):
+    """ Pops and returns all values of the key in multidict"""
+    values = multidict.getall(key)
     if values:
-        del params[key]
+        del multidict[key]
     return values
 
 
@@ -263,7 +263,7 @@ class UriFilter(object):
     def __call__(self, search, params):
         if 'uri' not in params and 'url' not in params:
             return search
-        query_uris = _pop_param_values(params, 'uri') + _pop_param_values(params, 'url')
+        query_uris = popall(params, 'uri') + popall(params, 'url')
 
         uris = set()
         for query_uri in query_uris:
@@ -310,10 +310,10 @@ class UriCombinedWildcardFilter(object):
             return search
 
         if self.separate_keys:
-            uris = _pop_param_values(params, 'uri') + _pop_param_values(params, 'url')
-            wildcard_uris = _pop_param_values(params, 'wildcard_uri')
+            uris = popall(params, 'uri') + popall(params, 'url')
+            wildcard_uris = popall(params, 'wildcard_uri')
         else:
-            uris = _pop_param_values(params, 'uri') + _pop_param_values(params, 'url')
+            uris = popall(params, 'uri') + popall(params, 'url')
             # Split into wildcard uris and non wildcard uris.
             wildcard_uris = [u for u in uris if "*" in u or "?" in u]
             uris = [u for u in uris if "*" not in u and "?" not in u]
@@ -374,7 +374,7 @@ class UserFilter(object):
         if 'user' not in params:
             return search
 
-        users = [v.lower() for v in _pop_param_values(params, 'user')]
+        users = [v.lower() for v in popall(params, 'user')]
 
         return search.filter("terms", user=users)
 
@@ -427,7 +427,7 @@ class AnyMatcher(object):
     def __call__(self, search, params):
         if "any" not in params:
             return search
-        qs = ' '.join(_pop_param_values(params, "any"))
+        qs = ' '.join(popall(params, "any"))
         return search.query(
             SimpleQueryString(
                 query=qs,
@@ -442,7 +442,7 @@ class TagsMatcher(object):
     """Matches the tags field against 'tag' or 'tags' parameters."""
 
     def __call__(self, search, params):
-        tags = set(_pop_param_values(params, 'tag') + _pop_param_values(params, 'tags'))
+        tags = set(popall(params, 'tag') + popall(params, 'tags'))
         matchers = [Q("match", tags={"query": t, "operator": "and"})
                     for t in tags]
         if matchers:
