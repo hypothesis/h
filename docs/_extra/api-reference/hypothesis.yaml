@@ -361,6 +361,8 @@ paths:
             Examples of valid uris: `http://foo.com/*` `urn:x-pdf:*` `file://localhost/?bc.pdf`
 
             Examples of invalid uris: `*foo.com` `u?n:*` `file://*` `http://foo.com*`
+            
+            <mark>This feature is experimental and the API may change.</mark>
           required: false
           type: string
         - name: user
