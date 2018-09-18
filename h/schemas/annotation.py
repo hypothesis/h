@@ -8,10 +8,20 @@ from dateutil.parser import parse
 from pyramid import i18n
 
 from h.schemas.base import JSONSchema, ValidationError
-from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
+from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX, wildcard_uri_is_valid
 from h.util import document_claims
 
 _ = i18n.TranslationStringFactory(__package__)
+
+
+def _validate_wildcard_uri(node, value):
+    """Raise if wildcards are within the domain of the uri."""
+    for val in value:
+        if not wildcard_uri_is_valid(val):
+            raise colander.Invalid(
+                node,
+                """Wildcards (? and *) are not permitted within the
+                domain of wildcard_uri""")
 
 
 class AnnotationSchema(JSONSchema):
@@ -416,6 +426,27 @@ class SearchParamsSchema(colander.Schema):
         colander.SchemaNode(colander.String()),
         missing=colander.drop,
         description="Alias of uri.",
+    )
+    wildcard_uri = colander.SchemaNode(
+        colander.Sequence(),
+        colander.SchemaNode(colander.String()),
+        validator=_validate_wildcard_uri,
+        missing=colander.drop,
+        description="""
+            Limit the results to annotations matching the wildcard URI.
+            URI can be a URL (a web page address) or a URN representing another
+            kind of resource such as DOI (Digital Object Identifier) or a
+            PDF fingerprint.
+
+            `*` will match any character sequence (including an empty one),
+            and a `?` will match any single character. Wildcards are only permitted
+            within the path and query parts of the URI.
+
+            Escaping wildcards is not supported.
+
+            Examples of valid uris":" `http://foo.com/*` `urn:x-pdf:*` `file://localhost/?bc.pdf`
+            Examples of invalid uris":" `*foo.com` `u?n:*` `file://*` `http://foo.com*`
+            """,
     )
     any = colander.SchemaNode(
         colander.Sequence(),
