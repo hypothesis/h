@@ -59,7 +59,7 @@ class Search(object):
         Execute the search query
 
         :param params: the search parameters
-        :type params: dict-like
+        :type params: webob.multidict.MultiDict
 
         :returns: The search results
         :rtype: SearchResult
