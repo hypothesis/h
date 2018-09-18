@@ -189,6 +189,9 @@ Install ``gulp-cli`` to get the ``gulp`` command:
 Creating a Python virtual environment
 -------------------------------------
 
+h requires either Python 2.7 or Python 3.6. Python >= 3.7 is not yet supported
+by some of h's dependencies.
+
 Create a Python virtual environment to install and run the h Python code and
 Python dependencies in:
 
