@@ -31,7 +31,7 @@ html5lib==0.999999999     # via bleach
 ipaddress==1.0.18         # via elasticsearch-dsl
 iso8601==0.1.11           # via colander
 itsdangerous==0.24
-jinja2==2.8               # via deform-jinja2, pyramid-jinja2
+jinja2==2.10              # via deform-jinja2, pyramid-jinja2
 jsonpointer==1.0
 jsonschema==2.5.1
 kombu==4.2.1
@@ -64,7 +64,7 @@ repoze.lru==0.6           # via pyramid
 repoze.sendmail==4.3      # via pyramid-mailer
 requests-aws4auth==0.9
 requests==2.13.0          # via requests-aws4auth
-six==1.10.0               # via bcrypt, bleach, elasticsearch-dsl, html5lib, python-dateutil
+six==1.10.0               # via bcrypt, bleach, elasticsearch-dsl, python-dateutil
 sqlalchemy==1.1.4
 statsd==3.2.1
 transaction==2.1.2
@@ -73,7 +73,6 @@ unidecode==0.4.19         # via python-slugify
 urllib3==1.22             # via elasticsearch
 venusian==1.0
 vine==1.1.4               # via amqp
-webencodings==0.5.1       # via html5lib
 webob==1.6.1              # via pyramid
 ws4py==0.4.2
 wsaccel==0.6.2
