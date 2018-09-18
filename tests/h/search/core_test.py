@@ -10,6 +10,7 @@ Tests for filtering/matching/aggregating on specific annotation fields are in
 from __future__ import unicode_literals
 
 import datetime
+from webob.multidict import MultiDict
 
 from h import search
 
@@ -28,7 +29,7 @@ class TestSearch(object):
         reply_1 = Annotation(shared=True, references=[annotation.id])
         reply_2 = Annotation(shared=True, references=[annotation.id])
 
-        result = search.Search(pyramid_request).run({})
+        result = search.Search(pyramid_request).run(MultiDict({}))
 
         assert result.annotation_ids == matchers.UnorderedList([annotation.id, reply_1.id,
                                                                 reply_2.id])
@@ -48,7 +49,7 @@ class TestSearch(object):
         result = search.Search(pyramid_request).run(
             # Search for annotations from ``user``, so that ``reply_user``'s
             # reply doesn't match.
-            params={"user": user.userid},
+            params=MultiDict({"user": user.userid}),
         )
 
         assert reply.id not in result.annotation_ids
@@ -66,12 +67,12 @@ class TestSearch(object):
             Annotation(shared=True)
 
         # The reply is on the first page of search results, but the original annotation isn't.
-        result = search.Search(pyramid_request).run(params={"offset": 0, "limit": 20})
+        result = search.Search(pyramid_request).run(params=MultiDict({"offset": 0, "limit": 20}))
         assert reply.id in result.annotation_ids
         assert annotation.id not in result.annotation_ids
 
         # The original annotation is on the second page of search results, but the reply isn't.
-        result = search.Search(pyramid_request).run(params={"offset": 20})
+        result = search.Search(pyramid_request).run(params=MultiDict({"offset": 20}))
         assert reply.id not in result.annotation_ids
         assert annotation.id in result.annotation_ids
 
@@ -86,7 +87,7 @@ class TestSearch(object):
         annotation = Annotation(updated=now, shared=True)
         reply = Annotation(updated=now + five_mins, references=[annotation.id], shared=True)
 
-        result = search.Search(pyramid_request).run({})
+        result = search.Search(pyramid_request).run(MultiDict({}))
 
         # The reply appears _before_ the annotation in the search results.
         assert result.annotation_ids == [reply.id, annotation.id]
@@ -103,7 +104,7 @@ class TestSearch(object):
         annotation = Annotation(updated=now + five_mins, shared=True)
         reply = Annotation(updated=now, references=[annotation.id], shared=True)
 
-        result = search.Search(pyramid_request).run({})
+        result = search.Search(pyramid_request).run(MultiDict({}))
 
         # The reply appears _after_ the annotation in the search results.
         assert result.annotation_ids == [annotation.id, reply.id]
@@ -118,12 +119,12 @@ class TestSearch(object):
         Annotation(references=[annotation.id], shared=True)
         Annotation(references=[annotation.id], shared=True)
 
-        result = search.Search(pyramid_request).run({})
+        result = search.Search(pyramid_request).run(MultiDict({}))
 
         assert result.reply_ids == []
 
     def test_it_does_not_modify_param_dict(self, pyramid_request):
-        params = {"sort": "updated"}
+        params = MultiDict({"sort": "updated"})
         original_params = params.copy()
 
         search.Search(pyramid_request).run(params)
@@ -141,7 +142,7 @@ class TestSearchWithSeparateReplies(object):
         reply_1 = Annotation(references=[annotation.id], shared=True)
         reply_2 = Annotation(references=[annotation.id], shared=True)
 
-        result = search.Search(pyramid_request, separate_replies=True).run({})
+        result = search.Search(pyramid_request, separate_replies=True).run(MultiDict({}))
 
         assert result.annotation_ids == [annotation.id]
         assert result.reply_ids == matchers.UnorderedList([reply_1.id, reply_2.id])
@@ -154,7 +155,7 @@ class TestSearchWithSeparateReplies(object):
         reply_2 = Annotation(updated=now, references=[annotation.id], shared=True)
         reply_3 = Annotation(updated=now + five_mins, references=[annotation.id], shared=True)
 
-        result = search.Search(pyramid_request, separate_replies=True).run({})
+        result = search.Search(pyramid_request, separate_replies=True).run(MultiDict({}))
 
         assert result.reply_ids == [reply_1.id, reply_3.id, reply_2.id]
 
@@ -168,9 +169,9 @@ class TestSearchWithSeparateReplies(object):
         reply_3 = Annotation(id="2", updated=now + (five_mins * 2), references=[annotation.id],
                              shared=True)
 
-        result = search.Search(pyramid_request, separate_replies=True).run({
+        result = search.Search(pyramid_request, separate_replies=True).run(MultiDict({
             "sort": "id", "order": "asc",
-        })
+        }))
 
         assert result.reply_ids == [reply_3.id, reply_2.id, reply_1.id]
 
@@ -191,7 +192,7 @@ class TestSearchWithSeparateReplies(object):
         result = search.Search(pyramid_request, separate_replies=True).run(
             # The reply would not match this search query because it's from
             # ``reply_user`` not ``user``.
-            params={"user": user.userid},
+            params=MultiDict({"user": user.userid}),
         )
 
         assert result.reply_ids == [reply.id]
@@ -210,7 +211,7 @@ class TestSearchWithSeparateReplies(object):
         for _ in range(19):
             Annotation(shared=True)
 
-        result = search.Search(pyramid_request, separate_replies=True).run(params={"limit": 20})
+        result = search.Search(pyramid_request, separate_replies=True).run(params=MultiDict({"limit": 20}))
 
         # Even though the reply would have been on the second page of the
         # search results, it is still included in reply_ids if
@@ -233,7 +234,7 @@ class TestSearchWithSeparateReplies(object):
         for _ in range(3):
             Annotation(references=[annotation.id], shared=True)
 
-        result = search.Search(pyramid_request, separate_replies=True, _replies_limit=3).run({})
+        result = search.Search(pyramid_request, separate_replies=True, _replies_limit=3).run(MultiDict({}))
 
         assert len(result.reply_ids) == 3
         assert oldest_reply.id not in result.reply_ids

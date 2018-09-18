@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 import logging
 from collections import namedtuple
 from contextlib import contextmanager
-
 from elasticsearch.exceptions import ConnectionTimeout
 import elasticsearch_dsl
+from webob.multidict import MultiDict
 
 from h.search import query
 
@@ -130,7 +130,7 @@ class Search(object):
         response = self._search(
             [query.RepliesMatcher(annotation_ids)] + self._modifiers,
             [],  # Aggregations aren't used in replies.
-            {'limit': self._replies_limit},
+            MultiDict({'limit': self._replies_limit}),
         )
 
         if len(response['hits']['hits']) < response['hits']['total']:
