@@ -602,7 +602,9 @@ class TestUriCombinedWildcardFilter():
     ("urn:*", True),
     ("urn:x-pdf:*", True),
     ("http://foo.com/*", True),
-    ("doi:10.101?", True)
+    ("doi:10.101?", True),
+    ("http://*.org/*", False),
+    ("http://example.*", False),
 ])
 def test_identifies_wildcard_uri_is_valid(wildcard_uri, expected):
     assert query.wildcard_uri_is_valid(wildcard_uri) == expected
