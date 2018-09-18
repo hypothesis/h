@@ -496,6 +496,118 @@ class TestUriFilter(object):
         return patch('h.search.query.storage')
 
 
+class TestUriCombinedWildcardFilter():
+
+    @pytest.mark.parametrize('params,expected_ann_indexes,separate_keys', [
+
+    # Test with separate_keys = True (aka uri/url are exact match & wildcard_uri is wildcard match.)
+    (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz?45")]),
+     [2, 3],
+     True),
+    (webob.multidict.MultiDict([("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
+                                ("wildcard_uri", "http://bar.com/baz*45")]),
+     [2, 3, 4, 5],
+     True),
+    (webob.multidict.MultiDict([("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
+                                ("url", "http://bar.com/baz*45")]),
+     [3, 5],
+     True),
+
+    # Test with separate_keys = False (aka uri/url contain both exact &  wildcard matches.)
+    (webob.multidict.MultiDict([("uri", "http://bar.com/baz-45?")]),
+     [1],
+     False),
+    (webob.multidict.MultiDict([("uri", "http://bar.com/*")]),
+     [0, 1, 2, 3, 4],
+     False),
+    (webob.multidict.MultiDict([("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
+                                ("uri", "http://bar.com/baz*45")]),
+     [2, 3, 4, 5],
+     False),
+    ])
+    def test_matches(
+        self,
+        search,
+        pyramid_request,
+        Annotation,
+        params,
+        expected_ann_indexes,
+        separate_keys,
+    ):
+        """
+        All uri matches (wildcard and exact) are OR'd.
+        """
+        search = self._get_search(search, pyramid_request, separate_keys)
+
+        ann_ids = [Annotation(target_uri="http://bar.com?foo").id,
+                   Annotation(target_uri="http://bar.com/baz-457").id,
+                   Annotation(target_uri="http://bar.com/baz-45").id,
+                   Annotation(target_uri="http://bar.com/baz*45").id,
+                   Annotation(target_uri="http://bar.com/baz/*/45").id,
+                   Annotation(target_uri="urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a").id]
+
+        result = search.run(params)
+
+        assert sorted(result.annotation_ids) == sorted([ann_ids[ann] for ann in expected_ann_indexes])
+
+    @pytest.mark.parametrize('params,separate_keys', [
+        (webob.multidict.MultiDict([("wildcard_uri", "http?://bar.com")]), True),
+        (webob.multidict.MultiDict([("url", "ur*n:x-pdf:*")]), False),
+    ])
+    def test_ignores_urls_with_wildcards_in_the_domain(self, pyramid_request, params, separate_keys):
+        urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys)
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        q = urifilter(search, params).to_dict()
+
+        assert "should" not in q['query']['bool']
+
+    @pytest.mark.parametrize('params,separate_keys', [
+        (webob.multidict.MultiDict([("wildcard_uri", "http?://bar.com"),
+                                    ("uri", "http://bar.com"),
+                                    ("url", "http://baz.com")]), True),
+        (webob.multidict.MultiDict([("uri", "http?://bar.com"),
+                                    ("url", "http://baz.com")]), False),
+    ])
+    def test_pops_params(self, pyramid_request, params, separate_keys):
+        urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys)
+        search = elasticsearch_dsl.Search(
+            using="default", index=pyramid_request.es.index
+        )
+
+        urifilter(search, params).to_dict()
+
+        assert "uri" not in params
+        assert "url" not in params
+        assert "wildcard_uri" not in params
+
+    def _get_search(self, search, pyramid_request, separate_keys):
+        search.append_modifier(query.UriCombinedWildcardFilter(
+            pyramid_request, separate_keys))
+        return search
+
+
+@pytest.mark.parametrize('wildcard_uri,expected', [
+    ("http?://bar.com", False),
+    ("htt*://bar.com", False),
+    ("http://localhost:3000*", False),
+    ("http://bar*.com", False),
+    ("http://bar?com", False),
+    ("*?http://bar.com", False),
+    ("file://*", False),
+    ("https://foo.com", False),
+    ("http://foo.com*", False),
+    ("urn:*", True),
+    ("urn:x-pdf:*", True),
+    ("http://foo.com/*", True),
+    ("doi:10.101?", True)
+])
+def test_identifies_wildcard_uri_is_valid(wildcard_uri, expected):
+    assert query.wildcard_uri_is_valid(wildcard_uri) == expected
+
+
 class TestDeletedFilter(object):
 
     def test_excludes_deleted_annotations(self, search, es_client, Annotation):

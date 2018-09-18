@@ -15,10 +15,11 @@ from h.activity import bucketing
 from h.models import Annotation, Group
 from h.search import Search
 from h.search import parser
-from h.search import TopLevelAnnotationsFilter
-from h.search import AuthorityFilter
-from h.search import TagsAggregation
-from h.search import UsersAggregation
+from h.search import (TopLevelAnnotationsFilter,
+                      AuthorityFilter,
+                      TagsAggregation,
+                      UsersAggregation,
+                      UriFilter)
 
 
 class ActivityResults(namedtuple('ActivityResults', [
@@ -167,6 +168,7 @@ def _execute_search(request, query, page_size):
     search = Search(request, stats=request.stats)
     search.append_modifier(AuthorityFilter(authority=request.default_authority))
     search.append_modifier(TopLevelAnnotationsFilter())
+    search.append_modifier(UriFilter(request=request))
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 

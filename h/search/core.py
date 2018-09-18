@@ -45,7 +45,6 @@ class Search(object):
                            query.Limiter(),
                            query.DeletedFilter(),
                            query.AuthFilter(request),
-                           query.UriFilter(request),
                            query.GroupFilter(),
                            query.GroupAuthFilter(request),
                            query.UserFilter(),
@@ -107,7 +106,7 @@ class Search(object):
         return response
 
     def _search_annotations(self, params):
-        # If seperate_replies is True, don't return any replies to annotations.
+        # If separate_replies is True, don't return any replies to annotations.
         modifiers = self._modifiers
         if self.separate_replies:
             modifiers = [query.TopLevelAnnotationsFilter()] + modifiers

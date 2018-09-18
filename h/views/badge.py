@@ -48,7 +48,9 @@ def badge(request):
         count = 0
     else:
         query = {'uri': uri, 'limit': 0}
-        result = search.Search(request, stats=request.stats).run(query)
+        s = search.Search(request, stats=request.stats)
+        s.append_modifier(search.UriFilter(request))
+        result = s.run(query)
         count = result.total
 
     return {'total': count}

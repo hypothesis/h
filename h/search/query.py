@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from dateutil.parser import parse
 from dateutil import tz
 from datetime import datetime as dt
+from h._compat import urlparse
+
 from h import storage
 from h.util import uri
 from elasticsearch_dsl import Q
@@ -13,6 +15,40 @@ LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
 LIMIT_MAX = 200
 OFFSET_MAX = 9800
+
+
+def wildcard_uri_is_valid(wildcard_uri):
+    """
+    Return True if uri contains wildcards in appropriate places, return False otherwise.
+
+    Wildcards are not permitted in the scheme or netloc of the uri.
+    """
+    if "*" not in wildcard_uri and "?" not in wildcard_uri:
+        return False
+    try:
+        normalized_uri = urlparse.urlparse(wildcard_uri)
+
+        # Remove all parts of the url except the scheme, netloc, and provide a substitute
+        # path value "p" so that uri's that only have a scheme and path are still valid.
+        uri_parts = (normalized_uri.scheme, normalized_uri.netloc, "p", "", "", "")
+
+        # Remove the "p" standing for path from the end of the uri.
+        begining_of_uri = urlparse.urlunparse(uri_parts)[:-1]
+
+        # If a wildcard was in the scheme the uri may come back as "" (a falsey value).
+        if begining_of_uri and wildcard_uri.startswith(begining_of_uri):
+            return True
+    except ValueError:
+        pass
+    return False
+
+
+def _pop_param_values(params, key):
+    """ Pops and returns all values of the key in params"""
+    values = params.getall(key)
+    if values:
+        del params[key]
+    return values
 
 
 class KeyValueMatcher(object):
@@ -84,7 +120,7 @@ class Sorter(object):
             sort_by = "user_raw"
 
         # Since search_after depends on the field that the annotations are
-        # being sorted by, it is set here rather than in a seperate class.
+        # being sorted by, it is set here rather than in a separate class.
         search_after = params.pop("search_after", None)
         if search_after:
             if sort_by in ["updated", "created"]:
@@ -240,6 +276,95 @@ class UriFilter(object):
             uris.update(us)
         return search.filter(
             'terms', **{'target.scope': list(uris)})
+
+
+class UriCombinedWildcardFilter(object):
+
+    """
+    A filter that selects only annotations where the uri matches.
+
+    If separate_keys is True:
+        Wildcard searches are only performed on wildcard_uri's, and exact match searches
+        are performed on uri/url parameters.
+    If separate_keys is False:
+        uri/url parameters are expected to contain exact matches and wildcard matches.
+        Values containing wildcards are interpreted as wildcard searches.
+
+    If specifying a uri with wildcards:
+    * will match any character sequence (including an empty one), and a ? will match
+    any single character.
+    """
+
+    def __init__(self, request, separate_keys=False):
+        """Initialize a new UriFilter.
+
+        :param request: the pyramid.request object
+        :param separate_keys: if True will treat wildcard_uri as wildcards and uri/url
+            as exact match. If False will treat any values in uri/url containing wildcards
+            ("?" or "*") as wildcard searches.
+
+        """
+        self.request = request
+        self.separate_keys = separate_keys
+
+    def __call__(self, search, params):
+        # If there are no uris to search for there is nothing to do so return early.
+        if not ("uri" in params or "url" in params or "wildcard_uri" in params):
+            return search
+
+        if self.separate_keys:
+            uris = _pop_param_values(params, 'uri') + _pop_param_values(params, 'url')
+            wildcard_uris = _pop_param_values(params, 'wildcard_uri')
+        else:
+            uris = _pop_param_values(params, 'uri') + _pop_param_values(params, 'url')
+            # Split into wildcard uris and non wildcard uris.
+            wildcard_uris = [u for u in uris if "*" in u or "?" in u]
+            uris = [u for u in uris if "*" not in u and "?" not in u]
+
+        # Only add valid uri's to the search list.
+        wildcard_uris = self._normalize_uris(
+            [u for u in wildcard_uris if wildcard_uri_is_valid(u)],
+            normalize_method=self._wildcard_uri_normalized)
+        uris = self._normalize_uris(uris)
+
+        queries = []
+        if wildcard_uris:
+            queries = [Q('wildcard', **{"target.scope": u}) for u in wildcard_uris]
+        if uris:
+            queries.append(Q("terms", **{'target.scope': uris}))
+        return search.query('bool', should=queries)
+
+    def _normalize_uris(self, query_uris, normalize_method=uri.normalize):
+        uris = set()
+        for query_uri in query_uris:
+            expanded = storage.expand_uri(self.request.db, query_uri)
+
+            us = [normalize_method(u) for u in expanded]
+            uris.update(us)
+        return list(uris)
+
+    def _wildcard_uri_normalized(self, wildcard_uri):
+        """
+        Same as uri.normalized but it doesn't strip ending `?` from uri's.
+
+        It's possible to have a wildcard at the end of a uri, however
+        uri.normalize strips `?`s from the end of uris and something like
+        http://foo.com/* will not be normalized to http://foo.com* without
+        removing the `*` before normalization. To compensate for this,
+        we check for an ending wildcard and add it back after normalization.
+
+        While it's possible to escape `?` and `*` using \\, the uri.normalize
+        converts \\ to encoded url format which does not behave the same in
+        elasticsearch. Thus, escaping wildcard characters is not currently
+        supported.
+        """
+        trailing_wildcard = ""
+        if wildcard_uri.endswith("?") or wildcard_uri.endswith("*"):
+            trailing_wildcard = wildcard_uri[-1]
+            wildcard_uri = wildcard_uri[:-1]
+        wildcard_uri = uri.normalize(wildcard_uri)
+        wildcard_uri += trailing_wildcard
+        return wildcard_uri
 
 
 class UserFilter(object):
