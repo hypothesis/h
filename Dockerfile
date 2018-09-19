@@ -18,8 +18,7 @@ RUN apk add --no-cache \
     libffi \
     libpq \
     nginx \
-    python2 \
-    py2-pip \
+    python3 \
     git
 
 # Create the hypothesis user, group, home directory and package directory.
@@ -32,14 +31,18 @@ RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
 # Copy minimal data to allow installation of dependencies.
 COPY requirements.txt ./
 
+# Install Golang implementation of supervisord
+COPY --from=ochinchina/supervisord:latest /usr/local/bin/supervisord /usr/local/bin/supervisord
+
 # Install build deps, build, and then clean up.
 RUN apk add --no-cache --virtual build-deps \
     build-base \
     libffi-dev \
     postgresql-dev \
-    python-dev \
-  && pip install --no-cache-dir -U pip supervisor \
-  && pip install --no-cache-dir -r requirements.txt \
+    python3-dev \
+  && python3 -m ensurepip \
+  && pip3 install --no-cache-dir -U pip \
+  && pip3 install --no-cache-dir -r requirements.txt \
   && apk del build-deps
 
 # Copy nginx config
@@ -66,6 +69,7 @@ EXPOSE 5000
 ENV PATH /var/lib/hypothesis/bin:$PATH
 ENV PYTHONIOENCODING utf_8
 ENV PYTHONPATH /var/lib/hypothesis:$PYTHONPATH
+RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 # Start the web server by default
 USER hypothesis
