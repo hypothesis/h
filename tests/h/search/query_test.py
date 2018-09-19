@@ -48,68 +48,53 @@ class TestLimiter(object):
         ("32.7", OFFSET_DEFAULT),
         ("9801", OFFSET_MAX),
     ])
-    def test_offset(self, pyramid_request, offset, from_):
+    def test_offset(self, es_dsl_search, pyramid_request, offset, from_):
         limiter = query.Limiter()
-        search = elasticsearch_dsl.Search(
-            using=pyramid_request.es.conn,
-        )
 
         params = {"offset": offset}
         if offset is MISSING:
             params = {}
 
-        q = limiter(search, params).to_dict()
+        q = limiter(es_dsl_search, params).to_dict()
 
         assert q["from"] == from_
 
     @given(st.text())
     @pytest.mark.fuzz
-    def test_limit_output_within_bounds(self, pyramid_request, text):
+    def test_limit_output_within_bounds(self, es_dsl_search, pyramid_request, text):
         """Given any string input, output should be in the allowed range."""
         limiter = query.Limiter()
-        search = elasticsearch_dsl.Search(
-            using=pyramid_request.es.conn,
-        )
 
-        q = limiter(search, {"limit": text}).to_dict()
+        q = limiter(es_dsl_search, {"limit": text}).to_dict()
 
         assert isinstance(q["size"], int)
         assert 0 <= q["size"] <= LIMIT_MAX
 
     @given(st.integers())
     @pytest.mark.fuzz
-    def test_limit_output_within_bounds_int_input(self, pyramid_request, lim):
+    def test_limit_output_within_bounds_int_input(self, es_dsl_search, pyramid_request, lim):
         """Given any integer input, output should be in the allowed range."""
         limiter = query.Limiter()
-        search = elasticsearch_dsl.Search(
-            using=pyramid_request.es.conn,
-        )
 
-        q = limiter(search, {"limit": str(lim)}).to_dict()
+        q = limiter(es_dsl_search, {"limit": str(lim)}).to_dict()
 
         assert isinstance(q["size"], int)
         assert 0 <= q["size"] <= LIMIT_MAX
 
     @given(st.integers(min_value=0, max_value=LIMIT_MAX))
     @pytest.mark.fuzz
-    def test_limit_matches_input(self, pyramid_request, lim):
+    def test_limit_matches_input(self, es_dsl_search, pyramid_request, lim):
         """Given an integer in the allowed range, it should be passed through."""
         limiter = query.Limiter()
-        search = elasticsearch_dsl.Search(
-            using=pyramid_request.es.conn,
-        )
 
-        q = limiter(search, {"limit": str(lim)}).to_dict()
+        q = limiter(es_dsl_search, {"limit": str(lim)}).to_dict()
 
         assert q["size"] == lim
 
-    def test_limit_set_to_default_when_missing(self, pyramid_request):
+    def test_limit_set_to_default_when_missing(self, es_dsl_search, pyramid_request):
         limiter = query.Limiter()
-        search = elasticsearch_dsl.Search(
-            using=pyramid_request.es.conn,
-        )
 
-        q = limiter(search, {}).to_dict()
+        q = limiter(es_dsl_search, {}).to_dict()
 
         assert q["size"] == LIMIT_DEFAULT
 
@@ -188,6 +173,19 @@ class TestSorter(object):
 
         actual_order = [ann_ids.index(id_) for id_ in result.annotation_ids]
         assert actual_order == expected_order
+
+    def test_incomplete_date_defaults_to_min_datetime_values(self, es_dsl_search, pyramid_request):
+        """
+        The default date should be:
+            1970, 1st month, 1st day, 0 hrs, 0 min, 0 sec, 0 ms
+        """
+        sorter = query.Sorter()
+
+        params = {"search_after": "2018"}
+
+        q = sorter(es_dsl_search, params).to_dict()
+
+        assert q["search_after"] == [1514764800000.0]
 
     def test_it_ignores_unknown_sort_fields(self, search):
         search.run({"sort": "no_such_field"})
@@ -554,13 +552,10 @@ class TestUriCombinedWildcardFilter():
         (webob.multidict.MultiDict([("wildcard_uri", "http?://bar.com")]), True),
         (webob.multidict.MultiDict([("url", "ur*n:x-pdf:*")]), False),
     ])
-    def test_ignores_urls_with_wildcards_in_the_domain(self, pyramid_request, params, separate_keys):
+    def test_ignores_urls_with_wildcards_in_the_domain(self, es_dsl_search, pyramid_request, params, separate_keys):
         urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys)
-        search = elasticsearch_dsl.Search(
-            using="default", index=pyramid_request.es.index
-        )
 
-        q = urifilter(search, params).to_dict()
+        q = urifilter(es_dsl_search, params).to_dict()
 
         assert "should" not in q['query']['bool']
 
@@ -571,13 +566,10 @@ class TestUriCombinedWildcardFilter():
         (webob.multidict.MultiDict([("uri", "http?://bar.com"),
                                     ("url", "http://baz.com")]), False),
     ])
-    def test_pops_params(self, pyramid_request, params, separate_keys):
+    def test_pops_params(self, es_dsl_search, pyramid_request, params, separate_keys):
         urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys)
-        search = elasticsearch_dsl.Search(
-            using="default", index=pyramid_request.es.index
-        )
 
-        urifilter(search, params).to_dict()
+        urifilter(es_dsl_search, params).to_dict()
 
         assert "uri" not in params
         assert "url" not in params
@@ -938,3 +930,11 @@ def search(pyramid_request):
     # Remove all default modifiers and aggregators except Sorter.
     search.clear()
     return search
+
+
+@pytest.fixture
+def es_dsl_search(pyramid_request):
+    return elasticsearch_dsl.Search(
+        using=pyramid_request.es.conn,
+        index=pyramid_request.es.index,
+    )

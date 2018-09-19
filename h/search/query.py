@@ -15,6 +15,7 @@ LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
 LIMIT_MAX = 200
 OFFSET_MAX = 9800
+DEFAULT_DATE = dt(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=tz.tzutc())
 
 
 def wildcard_uri_is_valid(wildcard_uri):
@@ -160,7 +161,7 @@ class Sorter(object):
             return date
         except ValueError:
             try:
-                date = parse(str_value)
+                date = parse(str_value, default=DEFAULT_DATE)
                 # If timezone isn't specified assume it's utc.
                 if not date.tzinfo:
                     date = date.replace(tzinfo=tz.tzutc())
