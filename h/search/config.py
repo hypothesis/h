@@ -40,6 +40,7 @@ ANNOTATION_MAPPING = {
         'quote': {'type': 'text', 'analyzer': 'uni_normalizer'},
         'references': {'type': 'keyword'},
         'shared': {'type': 'boolean'},
+        'hidden': {'type': 'boolean'},
         'tags': {'type': 'text', 'analyzer': 'uni_normalizer'},
         'tags_raw': {'type': 'keyword'},
         'text': {'type': 'text', 'analyzer': 'uni_normalizer'},

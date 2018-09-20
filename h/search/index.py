@@ -43,7 +43,7 @@ def index(es, annotation, request, target_index=None):
     :param target_index: the index name, uses default index if not given
     :type target_index: unicode
     """
-    presenter = presenters.AnnotationSearchIndexPresenter(annotation)
+    presenter = presenters.AnnotationSearchIndexPresenter(annotation, request)
     annotation_dict = presenter.asdict()
 
     event = AnnotationTransformEvent(request, annotation, annotation_dict)
@@ -155,7 +155,7 @@ class BatchIndexer(object):
         action = {self.op_type: {'_index': self._target_index,
                                  '_type': self.es_client.mapping_type,
                                  '_id': annotation.id}}
-        data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
+        data = presenters.AnnotationSearchIndexPresenter(annotation, self.request).asdict()
 
         event = AnnotationTransformEvent(self.request, annotation, data)
         self.request.registry.notify(event)
