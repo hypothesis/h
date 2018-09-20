@@ -58,13 +58,12 @@ class Search(object):
         """
         Execute the search query
 
-        :param params: the search parameters
+        :param params: the search parameters that will be popped by each of the filters.
         :type params: webob.multidict.MultiDict
 
         :returns: The search results
         :rtype: SearchResult
         """
-        params = params.copy()  # Avoid mutating input dict.
         total, annotation_ids, aggregations = self._search_annotations(params)
         reply_ids = self._search_replies(annotation_ids)
 

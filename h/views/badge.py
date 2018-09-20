@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from pyramid import httpexceptions
+from webob.multidict import MultiDict
 
 from h import models, search
 from h.util.view import json_view
@@ -47,7 +48,7 @@ def badge(request):
     elif models.Blocklist.is_blocked(request.db, uri):
         count = 0
     else:
-        query = {'uri': uri, 'limit': 0}
+        query = MultiDict({'uri': uri, 'limit': 0})
         s = search.Search(request, stats=request.stats)
         s.append_modifier(search.UriFilter(request))
         result = s.run(query)

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from pyramid.view import view_config
 from pyramid import i18n
+from webob.multidict import MultiDict
 
 from h import search
 from h.feeds import render_atom, render_rss
@@ -17,7 +18,7 @@ def _annotations(request):
     """Return the annotations from the search API."""
     s = search.Search(request, stats=request.stats)
     s.append_modifier(search.UriFilter(request))
-    result = s.run(request.params)
+    result = s.run(MultiDict(request.params))
     return fetch_ordered_annotations(request.db, result.annotation_ids)
 
 

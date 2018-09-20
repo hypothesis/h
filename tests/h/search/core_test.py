@@ -123,14 +123,6 @@ class TestSearch(object):
 
         assert result.reply_ids == []
 
-    def test_it_does_not_modify_param_dict(self, pyramid_request):
-        params = MultiDict({"sort": "updated"})
-        original_params = params.copy()
-
-        search.Search(pyramid_request).run(params)
-
-        assert params == original_params
-
 
 class TestSearchWithSeparateReplies(object):
     """Unit tests for search.Search when separate_replies=True is given."""
