@@ -252,14 +252,24 @@ class TestExecute(object):
         AuthorityFilter.assert_called_once_with(pyramid_request.default_authority)
         search.append_modifier.assert_any_call(AuthorityFilter.return_value)
 
+    @pytest.mark.parametrize('enable_flag', (True, False))
     def test_it_recognizes_wildcards_in_uri_url(self,
                                                 pyramid_request,
                                                 search,
-                                                UriCombinedWildcardFilter):
+                                                UriFilter,
+                                                UriCombinedWildcardFilter,
+                                                enable_flag):
+
+        pyramid_request.feature.flags['wildcard_search_on_activity_pages'] = enable_flag
+
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
-        UriCombinedWildcardFilter.assert_called_once_with(pyramid_request)
-        search.append_modifier.assert_any_call(UriCombinedWildcardFilter.return_value)
+        if enable_flag:
+            UriCombinedWildcardFilter.assert_called_once_with(pyramid_request)
+            search.append_modifier.assert_any_call(UriCombinedWildcardFilter.return_value)
+        else:
+            UriFilter.assert_called_once_with(pyramid_request)
+            search.append_modifier.assert_any_call(UriFilter.return_value)
 
     def test_it_adds_a_tags_aggregation_to_the_search_query(self,
                                                             pyramid_request,
@@ -629,6 +639,10 @@ class TestExecute(object):
     @pytest.fixture
     def AuthorityFilter(self, patch):
         return patch('h.activity.query.AuthorityFilter')
+
+    @pytest.fixture
+    def UriFilter(self, patch):
+        return patch('h.activity.query.UriFilter')
 
     @pytest.fixture
     def UriCombinedWildcardFilter(self, patch):
