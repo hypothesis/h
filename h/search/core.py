@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 import logging
 from collections import namedtuple
 from contextlib import contextmanager
-
 from elasticsearch.exceptions import ConnectionTimeout
 import elasticsearch_dsl
+from webob.multidict import MultiDict
 
 from h.search import query
 
@@ -58,13 +58,12 @@ class Search(object):
         """
         Execute the search query
 
-        :param params: the search parameters
-        :type params: dict-like
+        :param params: the search parameters that will be popped by each of the filters.
+        :type params: webob.multidict.MultiDict
 
         :returns: The search results
         :rtype: SearchResult
         """
-        params = params.copy()  # Avoid mutating input dict.
         total, annotation_ids, aggregations = self._search_annotations(params)
         reply_ids = self._search_replies(annotation_ids)
 
@@ -130,7 +129,7 @@ class Search(object):
         response = self._search(
             [query.RepliesMatcher(annotation_ids)] + self._modifiers,
             [],  # Aggregations aren't used in replies.
-            {'limit': self._replies_limit},
+            MultiDict({'limit': self._replies_limit}),
         )
 
         if len(response['hits']['hits']) < response['hits']['total']:

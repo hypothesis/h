@@ -6,6 +6,7 @@ import pytest
 import mock
 
 from pyramid import httpexceptions
+from webob.multidict import MultiDict
 
 from h.views.badge import badge
 
@@ -23,7 +24,7 @@ def test_badge_returns_number_from_search(models, pyramid_request, search_run, m
 
     result = badge(pyramid_request)
 
-    search_run.assert_called_once_with({'uri': 'http://example.com', 'limit': 0})
+    search_run.assert_called_once_with(MultiDict({'uri': 'http://example.com', 'limit': 0}))
     assert result == {'total': 29}
 
 
