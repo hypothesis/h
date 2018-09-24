@@ -76,8 +76,7 @@ class TestAnnotationSearchIndexPresenter(object):
             userid='acct:luke@hypothes.is',
             thread_ids=thread_ids)
 
-        moderation_service.hidden.return_value = True
-        moderation_service.all_hidden.return_value = thread_ids
+        moderation_service.all_hidden.return_value = [annotation.id] + thread_ids
 
         annotation_dict = AnnotationSearchIndexPresenter(annotation, pyramid_request).asdict()
 
@@ -105,8 +104,7 @@ class TestAnnotationSearchIndexPresenter(object):
             userid='acct:luke@hypothes.is',
             thread_ids=thread_ids)
 
-        moderation_service.all_hidden.return_value = thread_ids[1:]
-        moderation_service.hidden.return_value = True
+        moderation_service.all_hidden.return_value = [annotation.id] + thread_ids[1:]
 
         annotation_dict = AnnotationSearchIndexPresenter(annotation, pyramid_request).asdict()
 
@@ -123,9 +121,11 @@ class TestAnnotationSearchIndexPresenter(object):
         assert annotation_dict['hidden'] is False
 
     def test_it_marks_annotation_hidden_when_moderated_and_no_replies(self, pyramid_request, moderation_service):
-        annotation = mock.MagicMock(userid='acct:luke@hypothes.is')
+        thread_ids = []
+        annotation = mock.MagicMock(userid='acct:luke@hypothes.is',
+                                    thread_ids=thread_ids)
 
-        moderation_service.hidden.return_value = True
+        moderation_service.all_hidden.return_value = [annotation.id] + thread_ids
 
         annotation_dict = AnnotationSearchIndexPresenter(annotation, pyramid_request).asdict()
 
@@ -142,7 +142,6 @@ class TestAnnotationSearchIndexPresenter(object):
 def moderation_service(pyramid_config):
     svc = mock.create_autospec(AnnotationModerationService, spec_set=True, instance=True)
     svc.all_hidden.return_value = []
-    svc.hidden.return_value = False
     pyramid_config.register_service(svc, name='annotation_moderation')
     return svc
 
