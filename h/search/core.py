@@ -48,7 +48,7 @@ class Search(object):
                            query.GroupFilter(),
                            query.GroupAuthFilter(request),
                            query.UserFilter(),
-                           query.NipsaFilter(request),
+                           query.HiddenFilter(request),
                            query.AnyMatcher(),
                            query.TagsMatcher(),
                            query.KeyValueMatcher()]
