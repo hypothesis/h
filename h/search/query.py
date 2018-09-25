@@ -22,26 +22,20 @@ def wildcard_uri_is_valid(wildcard_uri):
     """
     Return True if uri contains wildcards in appropriate places, return False otherwise.
 
-    Wildcards are not permitted in the scheme or netloc of the uri.
+    *'s are not permitted in the scheme or netloc. ?'s are not permitted in the scheme.
     """
     if "*" not in wildcard_uri and "?" not in wildcard_uri:
         return False
-    try:
-        normalized_uri = urlparse.urlparse(wildcard_uri.replace("*", "").replace("?", ""))
 
-        # Remove all parts of the url except the scheme, netloc, and provide a substitute
-        # path value "p" so that uri's that only have a scheme and path are still valid.
-        uri_parts = (normalized_uri.scheme, normalized_uri.netloc, "p", "", "", "")
+    normalized_uri = urlparse.urlparse(wildcard_uri.replace("?", ""))
+    if not normalized_uri.scheme or "*" in normalized_uri.scheme or "*" in normalized_uri.netloc:
+        return False
 
-        # Remove the "p" standing for path from the end of the uri.
-        begining_of_uri = urlparse.urlunparse(uri_parts)[:-1]
+    normalized_uri = urlparse.urlparse(wildcard_uri.replace("*", ""))
+    if not normalized_uri.scheme:
+        return False
 
-        # If a wildcard was in the scheme the uri may come back as "" (a falsey value).
-        if begining_of_uri and wildcard_uri.startswith(begining_of_uri):
-            return True
-    except ValueError:
-        pass
-    return False
+    return True
 
 
 def popall(multidict, key):

@@ -582,21 +582,21 @@ class TestUriCombinedWildcardFilter():
 
 
 @pytest.mark.parametrize('wildcard_uri,expected', [
-    ("http?://bar.com", False),
     ("htt*://bar.com", False),
+    ("*http://bar.com", False),
+    ("http?://bar.com", False),
+    ("http://bar?com*", False),
+    ("?http://bar.com", False),
     ("http://localhost:3000*", False),
     ("http://bar*.com", False),
-    ("http://bar?com", False),
-    ("*?http://bar.com", False),
     ("file://*", False),
     ("https://foo.com", False),
     ("http://foo.com*", False),
-    ("urn:*", True),
-    ("urn:x-pdf:*", True),
     ("http://foo.com/*", True),
+    ("urn:*", True),
+    ("http://bar.com?foo=baz", True),
     ("doi:10.101?", True),
-    ("http://*.org/*", False),
-    ("http://example.*", False),
+    ("http://example.com?", True),
 ])
 def test_identifies_wildcard_uri_is_valid(wildcard_uri, expected):
     assert query.wildcard_uri_is_valid(wildcard_uri) == expected
