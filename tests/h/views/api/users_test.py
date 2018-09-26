@@ -65,6 +65,13 @@ class TestCreate(object):
         with pytest.raises(ValidationError):
             create(pyramid_request)
 
+    def test_raises_ValidationError_when_authority_mismatch(self, pyramid_request, valid_payload):
+        valid_payload['authority'] = 'invalid.com'
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(ValidationError, match="does not match client authority"):
+            create(pyramid_request)
+
     def test_it_proxies_uniqueness_check_to_service(self, valid_payload, pyramid_request, user_unique_svc, CreateUserAPISchema, auth_client):
         pyramid_request.json_body = valid_payload
         CreateUserAPISchema().validate.return_value = valid_payload

@@ -8,6 +8,7 @@ from h.auth.util import request_auth_client, client_authority
 from h.exceptions import PayloadError, ConflictError
 from h.presenters import UserJSONPresenter
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
+from h.schemas import ValidationError
 from h.services.user_unique import DuplicateUserError
 from h.util.view import json_view
 
@@ -23,18 +24,31 @@ def create(request):
     Client ID and Client Secret) to create users in their authority. These
     users are created pre-activated, and are unable to log in to the web
     service directly.
+
+    Note: the authority-enforcement logic herein is, by necessity, strange.
+    The API accepts an ``authority`` parameter but the only valid value for
+    the param is the client's verified authority. If the param does not
+    match the client's authority, ``ValidationError`` is raised.
+
+    :raises ValidationError: if ``authority`` param does not match client
+                             authority
+    :raises ConflictError:   if user already exists
     """
-    applied_authority = client_authority(request)
+    client_authority_ = client_authority(request)
     schema = CreateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 
-    # Enforce authority match to currently-active auth-client authority
-    appstruct['authority'] = applied_authority
+    # Enforce authority match
+    if appstruct['authority'] != client_authority_:
+        raise ValidationError(
+            "authority '{auth_param}' does not match client authority".format(
+                auth_param=appstruct['authority']
+            ))
 
     user_unique_service = request.find_service(name='user_unique')
 
     try:
-        user_unique_service.ensure_unique(appstruct, authority=applied_authority)
+        user_unique_service.ensure_unique(appstruct, authority=client_authority_)
     except DuplicateUserError as err:
         raise ConflictError(err)
 
