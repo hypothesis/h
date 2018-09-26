@@ -7,6 +7,8 @@ import pytest
 
 from h.services.annotation_stats import AnnotationStatsService
 from h.services.annotation_stats import annotation_stats_factory
+from h.search import Search
+from h.search import TopLevelAnnotationsFilter
 
 
 class TestAnnotationStatsService(object):
@@ -69,21 +71,36 @@ class TestAnnotationStatsService(object):
         assert results['group'] == 0
         assert results['total'] == 0
 
-    def test_annotation_count_returns_count_of_shared_annotations_for_group(self, svc, factories):
-        pubid = 'abc123'
-        for i in range(3):
-            factories.Annotation(groupid=pubid, shared=True)
-        for i in range(2):
-            factories.Annotation(groupid=pubid, shared=False)
+    def test_group_annotation_count_calls_search_with_request_and_stats(
+        self, svc, search, pyramid_request,
+    ):
+        svc.group_annotation_count('groupid')
 
-        assert svc.group_annotation_count(pubid) == 3
+        search.assert_called_with(pyramid_request, stats=pyramid_request.stats)
 
-    def test_group_annotation_count_excludes_deleted_annotations(self, svc, factories):
-        pubid = 'abc123'
-        for i in range(3):
-            factories.Annotation(groupid=pubid, shared=True, deleted=True)
+    def test_group_annotation_count_calls_run_with_groupid_and_limit(
+        self, svc, search,
+    ):
+        svc.group_annotation_count('groupid')
 
-        assert svc.group_annotation_count(pubid) == 0
+        search.return_value.run.assert_called_with({"limit": 0, "group": "groupid"})
+
+    def test_group_annotation_count_excludes_replies(
+        self, svc, search, top_level_annotation_filter,
+    ):
+        svc.group_annotation_count('groupid')
+
+        search.return_value.append_modifier.assert_called_with(
+            top_level_annotation_filter.return_value)
+
+    def test_group_annotation_count_returns_total(
+        self, svc, search,
+    ):
+        search.return_value.run.return_value.total = 3
+
+        anns = svc.group_annotation_count('groupid')
+
+        assert anns == 3
 
 
 class TestAnnotationStatsFactory(object):
@@ -92,13 +109,32 @@ class TestAnnotationStatsFactory(object):
 
         assert isinstance(svc, AnnotationStatsService)
 
-    def test_sets_session(self):
+    def test_sets_request(self):
         request = mock.Mock()
         svc = annotation_stats_factory(mock.Mock(), request)
 
-        assert svc.session == request.db
+        assert svc.request == request
 
 
 @pytest.fixture
-def svc(db_session):
-    return AnnotationStatsService(session=db_session)
+def svc(pyramid_request):
+    return AnnotationStatsService(request=pyramid_request)
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.es = mock.Mock()
+    pyramid_request.stats = mock.Mock()
+    return pyramid_request
+
+
+@pytest.fixture
+def search(patch):
+    return patch('h.services.annotation_stats.Search',
+                 autospec=Search, spec_set=True)
+
+
+@pytest.fixture
+def top_level_annotation_filter(patch):
+    return patch('h.services.annotation_stats.TopLevelAnnotationsFilter',
+                 autospec=TopLevelAnnotationsFilter, spec_set=True)
