@@ -114,7 +114,6 @@ class TestCreate(object):
 
 
 @pytest.mark.usefixtures('auth_client',
-                         'request_auth_client',
                          'user_svc',
                          'user')
 class TestUpdate(object):
@@ -223,13 +222,6 @@ class TestUpdate(object):
 def auth_client(factories):
     return factories.ConfidentialAuthClient(authority='weylandindustries.com',
                                             grant_type=GrantType.client_credentials)
-
-
-@pytest.fixture
-def request_auth_client(patch, auth_client):
-    request_auth_client = patch('h.views.api.users.request_auth_client')
-    request_auth_client.return_value = auth_client
-    return request_auth_client
 
 
 @pytest.fixture

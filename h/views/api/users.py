@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h.auth.util import request_auth_client, client_authority
+from h.auth.util import client_authority
 from h.exceptions import PayloadError, ConflictError
 from h.presenters import UserJSONPresenter
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
@@ -56,7 +56,9 @@ def create(request):
     return presenter.asdict()
 
 
-@json_view(route_name='api.user', request_method='PATCH')
+@json_view(route_name='api.user',
+           request_method='PATCH',
+           permission='update')
 def update(user, request):
     """
     Update a user.
@@ -64,8 +66,6 @@ def update(user, request):
     This API endpoint allows authorised clients (those able to provide a valid
     Client ID and Client Secret) to update users in their authority.
     """
-    request_auth_client(request)
-
     schema = UpdateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 

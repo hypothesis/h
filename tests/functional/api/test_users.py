@@ -84,12 +84,12 @@ class TestUpdateUser(object):
         assert res.json_body['email'] == patch_user_payload['email']
         assert res.json_body['display_name'] == patch_user_payload['display_name']
 
-    def test_it_returns_http_403_if_auth_client_missing(self, app, user, patch_user_payload):
+    def test_it_returns_http_404_if_auth_client_missing(self, app, user, patch_user_payload):
         url = "/api/users/{username}".format(username=user.username)
 
         res = app.patch_json(url, patch_user_payload, expect_errors=True)
 
-        assert res.status_code == 403
+        assert res.status_code == 404
 
     def test_it_returns_http_404_if_user_not_in_client_authority(self,
                                                                  app,
