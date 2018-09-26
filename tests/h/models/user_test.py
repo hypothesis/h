@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import pytest
 from sqlalchemy import exc
+from pyramid.authorization import ACLAuthorizationPolicy
 
 from h import models
 
@@ -268,3 +269,29 @@ class TestUserGetByUsername(object):
         }
         db_session.flush()
         return users
+
+
+class TestUserACL(object):
+    def test_auth_client_with_matching_authority_may_update_user(self, user, authz_policy):
+        user.authority = 'weewhack.com'
+
+        assert authz_policy.permits(user, ['flip', 'client_authority:weewhack.com'], 'update')
+
+    def test_auth_client_without_matching_authority_may_not_update_user(self, user, authz_policy):
+        user.authority = 'weewhack.com'
+
+        assert not authz_policy.permits(user, ['flip', 'client_authority:2weewhack.com'], 'update')
+
+    def test_user_with_authority_may_not_update_user(self, user, authz_policy):
+        user.authority = 'fabuloso.biz'
+
+        assert not authz_policy.permits(user, ['flip', 'authority:fabuloso.biz'], 'update')
+
+    @pytest.fixture
+    def authz_policy(self):
+        return ACLAuthorizationPolicy()
+
+    @pytest.fixture
+    def user(self):
+        user = models.User(username='filip', authority='example.com')
+        return user

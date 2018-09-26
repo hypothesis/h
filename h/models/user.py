@@ -7,6 +7,7 @@ import re
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy.ext.declarative import declared_attr
+from pyramid import security
 
 from h._compat import string_types
 from h.db import Base
@@ -313,6 +314,18 @@ class User(Base):
             cls.username == username,
             cls.authority == authority,
         ).first()
+
+    def __acl__(self):
+        terms = []
+
+        # auth_clients that have the same authority as the user
+        # may update the user
+        user_update_principal = "client_authority:{}".format(self.authority)
+        terms.append((security.Allow, user_update_principal, 'update'))
+
+        terms.append(security.DENY_ALL)
+
+        return terms
 
     def __repr__(self):
         return '<User: %s>' % self.username
