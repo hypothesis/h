@@ -274,7 +274,8 @@ class TestGroupRoot(object):
         return GroupRoot(pyramid_request)
 
 
-@pytest.mark.usefixtures('user_service')
+@pytest.mark.usefixtures('user_service',
+                         'client_authority')
 class TestUserRoot(object):
 
     def test_it_does_not_assign_create_permission_without_auth_client_role(self, pyramid_config, pyramid_request):
@@ -300,6 +301,18 @@ class TestUserRoot(object):
 
         user_service.fetch.assert_called_once_with("bob", pyramid_request.default_authority)
 
+    def test_it_proxies_to_client_authority(self, pyramid_request, user_factory, client_authority, user_service):
+        user_factory["bob"]
+
+        client_authority.assert_called_once_with(pyramid_request)
+        user_service.fetch.assert_called_once_with("bob", pyramid_request.default_authority)
+
+    def test_it_fetches_with_client_authority_if_present(self, pyramid_request, user_factory, client_authority, user_service):
+        client_authority.return_value = 'something.com'
+        user_factory["bob"]
+
+        user_service.fetch.assert_called_once_with("bob", client_authority.return_value)
+
     def test_it_raises_KeyError_if_the_user_does_not_exist(self,
                                                            user_factory,
                                                            user_service):
@@ -322,6 +335,12 @@ class TestUserRoot(object):
         user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
         pyramid_config.register_service(user_service, name='user')
         return user_service
+
+    @pytest.fixture
+    def client_authority(self, patch):
+        client_authority = patch('h.traversal.roots.client_authority')
+        client_authority.return_value = None
+        return client_authority
 
 
 @pytest.fixture
