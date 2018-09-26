@@ -118,7 +118,10 @@ def includeme(config):
     config.add_route('api.users',
                      '/api/users',
                      factory='h.traversal.UserRoot')
-    config.add_route('api.user', '/api/users/{username}')
+    config.add_route('api.user',
+                     '/api/users/{username}',
+                     factory='h.traversal.UserRoot',
+                     traverse='/{username}')
     config.add_route('badge', '/api/badge')
     config.add_route('token', '/api/token')
     config.add_route('oauth_authorize', '/oauth/authorize')
