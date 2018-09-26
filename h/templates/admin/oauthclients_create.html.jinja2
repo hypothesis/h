@@ -4,18 +4,20 @@
 {% set page_title = 'Create OAuth client' %}
 
 {% block content %}
-<h3>Security Warning</h3>
+<div class="warning-box">
+  <h3>Security Warning</h3>
 
-<p>Be especially careful and thoughtful when creating OAuth clients with grant type of
-<code>client_credentials</code> (a.k.a. "auth_client" credentials), as these grant
-significant powers:</p>
+  <p>Be especially careful and thoughtful when creating OAuth clients with grant type of
+  <code>client_credentials</code> (a.k.a. "auth_client" credentials), as these grant
+  significant powers:</p>
 
-<ul>
-  <li>Do not store this type of credentials in unencrypted form; share them securely only with their intended users.</li>
-  <li>These credentials grant the ability to create and manipulate all users and other resources (groups, e.g.) within <strong>an entire authority</strong>.</li>
-  <li>These credentials are intended for third parties. Creating <code>client_credentials</code>
-      for the "hypothes.is" authority would grant keys to the entire kingdom of first-party users.</li>
-</ul>
+  <ul>
+    <li>Do not store this type of credentials in unencrypted form; share them securely only with their intended users.</li>
+    <li>These credentials grant the ability to create and manipulate all users and other resources (groups, e.g.) within <strong>an entire authority</strong>.</li>
+    <li>These credentials are intended for third parties. Creating <code>client_credentials</code>
+        for the "hypothes.is" authority would grant keys to the entire kingdom of first-party users.</li>
+  </ul>
+</div>
 
   {{ form }}
 {% endblock content %}
