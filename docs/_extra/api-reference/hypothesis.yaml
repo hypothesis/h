@@ -47,7 +47,31 @@ securityDefinitions:
     in: header
   authClientCredentials:
     type: basic
-    description: Authorize using OAuth client credentials with HTTP Basic Auth.
+    description: |
+      Authorize using client credentials via HTTP Basic Auth.
+
+      Client credentials must be registered with the `h` service and are
+      associated with a particular _authority_. This type of credentials grant the
+      ability to create and manipulate users and other resources within the
+      associated authority.
+  authClientForwardedUser:
+    type: basic
+    description: |
+      Proxy as a user within an authority. Must be used in combination with
+      `authClientCredentials`.
+
+      In some cases, it is possible to make requests on behalf of valid users
+      within the authority associated with auth client credentials. This is
+      accomplished by setting an `X-Forwarded-User` header to the `userid` of
+      a valid user within the auth client's associated authority.
+
+      e.g. a request with valid auth client credentials associated with the authority
+      `example.com` could set the following forwarded-user header (assuming this
+      user exists):
+
+      ```
+      X-Forwarded-User: "acct:fiona_smith@example.com"
+      ```
 security:
   - developerAPIKey: []
 tags:
@@ -276,6 +300,9 @@ paths:
           description: Could not create group from your request
           schema:
             $ref: '#/definitions/Error'
+      security:
+        - authClientForwardedUser: []
+        - developerAPIKey: []
   /search:
     get:
       tags:
