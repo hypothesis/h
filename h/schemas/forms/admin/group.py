@@ -6,7 +6,7 @@ import colander
 from deform.widget import SelectWidget, SequenceWidget, TextAreaWidget, TextInputWidget
 
 from h import i18n
-from h import validators
+from h.schemas import validators
 from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,

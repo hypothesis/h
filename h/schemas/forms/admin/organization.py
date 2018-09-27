@@ -9,7 +9,7 @@ from h.models.organization import (
     ORGANIZATION_NAME_MIN_CHARS,
     ORGANIZATION_NAME_MAX_CHARS,
 )
-from h import validators
+from h.schemas import validators
 from h.schemas.base import CSRFSchema
 
 _ = h.i18n.TranslationString

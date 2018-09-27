@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 import colander
 import deform
 
-from h import i18n, models, validators
+from h import i18n, models
+from h.schemas import validators
 from h.schemas.base import CSRFSchema
 
 _ = i18n.TranslationString

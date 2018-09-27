@@ -7,7 +7,7 @@ import deform
 import slugify
 
 from h import i18n
-from h import validators
+from h.schemas import validators
 from h.accounts.schemas import CSRFSchema
 from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
