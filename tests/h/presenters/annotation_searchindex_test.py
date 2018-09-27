@@ -123,9 +123,7 @@ class TestAnnotationSearchIndexPresenter(object):
         assert annotation_dict['hidden'] is False
 
     def test_it_marks_annotation_hidden_when_moderated_and_no_replies(self, pyramid_request, moderation_service):
-        thread_ids = []
-        annotation = mock.MagicMock(userid='acct:luke@hypothes.is',
-                                    thread_ids=thread_ids)
+        annotation = mock.MagicMock(userid='acct:luke@hypothes.is')
 
         moderation_service.hidden.return_value = True
 
