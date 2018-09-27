@@ -95,7 +95,7 @@ def test_includeme():
         call('api.debug_token', '/api/debug-token'),
         call('api.group_member', '/api/groups/{pubid}/members/{userid}', factory='h.traversal.GroupRoot', traverse='/{pubid}'),
         call('api.search', '/api/search'),
-        call('api.users', '/api/users'),
+        call('api.users', '/api/users', factory='h.traversal.UserRoot'),
         call('api.user', '/api/users/{username}'),
         call('badge', '/api/badge'),
         call('token', '/api/token'),

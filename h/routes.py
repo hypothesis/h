@@ -115,7 +115,9 @@ def includeme(config):
                      factory='h.traversal.GroupRoot',
                      traverse='/{pubid}')
     config.add_route('api.search', '/api/search')
-    config.add_route('api.users', '/api/users')
+    config.add_route('api.users',
+                     '/api/users',
+                     factory='h.traversal.UserRoot')
     config.add_route('api.user', '/api/users/{username}')
     config.add_route('badge', '/api/badge')
     config.add_route('token', '/api/token')

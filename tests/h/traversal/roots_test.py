@@ -277,6 +277,24 @@ class TestGroupRoot(object):
 @pytest.mark.usefixtures('user_service')
 class TestUserRoot(object):
 
+    def test_it_does_not_assign_create_permission_without_auth_client_role(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo')
+        pyramid_config.set_authorization_policy(policy)
+
+        context = UserRoot(pyramid_request)
+
+        assert not pyramid_request.has_permission('create', context)
+
+    def test_it_assigns_create_permission_to_auth_client_role(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo', groupids=[role.AuthClient])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = UserRoot(pyramid_request)
+
+        assert pyramid_request.has_permission('create', context)
+
     def test_it_fetches_the_requested_user(self, pyramid_request, user_factory, user_service):
         user_factory["bob"]
 

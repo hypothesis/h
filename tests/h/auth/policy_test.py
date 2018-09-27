@@ -15,6 +15,7 @@ from h.auth.policy import AuthenticationPolicy
 from h.auth.policy import TokenAuthenticationPolicy
 from h.auth.policy import APIAuthenticationPolicy
 from h.auth.policy import AuthClientPolicy
+from h.auth.policy import AUTH_CLIENT_API_WHITELIST
 
 from h.services.user import UserService
 
@@ -31,17 +32,12 @@ NONAPI_PATHS = (
     '/api/token',
 )
 
-AUTH_CLIENT_PATHS = (
-    '/api/groups',
-    '/api/groups/',
-    '/api/groups/foobar/members/something',
-)
-
-NON_AUTH_CLIENT_PATHS = (
-    '/api/badge',
-    '/api',
-    '/groups/'
-)
+AUTH_CLIENT_API_BLACKLIST = [
+    ('api.groups', 'GET'),
+    ('api.user', 'POST'),
+    ('group_create', 'POST'),
+    ('api.group_member', 'DELETE')
+]
 
 
 class TestAuthenticationPolicy(object):
@@ -143,14 +139,16 @@ class TestAPIAuthenticationPolicy(object):
         assert client_policy.authenticated_userid.call_count == 0
         assert userid == user_policy.authenticated_userid.return_value
 
-    @pytest.mark.parametrize('path', AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_WHITELIST)
     def test_authenticated_userid_proxies_to_client_policy_if_user_fails(self,
                                                                          pyramid_request,
                                                                          api_policy,
                                                                          user_policy,
                                                                          client_policy,
-                                                                         path):
-        pyramid_request.path = path
+                                                                         route_name,
+                                                                         route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         user_policy.authenticated_userid.return_value = None
 
         userid = api_policy.authenticated_userid(pyramid_request)
@@ -159,14 +157,16 @@ class TestAPIAuthenticationPolicy(object):
         client_policy.authenticated_userid.assert_called_once_with(pyramid_request)
         assert userid == client_policy.authenticated_userid.return_value
 
-    @pytest.mark.parametrize('path', NON_AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_BLACKLIST)
     def test_authenticated_userid_does_not_proxy_to_client_policy_if_path_mismatch(self,
                                                                                    pyramid_request,
                                                                                    api_policy,
                                                                                    user_policy,
                                                                                    client_policy,
-                                                                                   path):
-        pyramid_request.path = path
+                                                                                   route_name,
+                                                                                   route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         user_policy.authenticated_userid.return_value = None
 
         userid = api_policy.authenticated_userid(pyramid_request)
@@ -175,14 +175,16 @@ class TestAPIAuthenticationPolicy(object):
         assert client_policy.authenticated_userid.call_count == 0
         assert userid == user_policy.authenticated_userid.return_value
 
-    @pytest.mark.parametrize('path', AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_WHITELIST)
     def test_unauthenticated_userid_proxies_to_user_policy_first(self,
                                                                  pyramid_request,
                                                                  api_policy,
                                                                  user_policy,
                                                                  client_policy,
-                                                                 path):
-        pyramid_request.path = path
+                                                                 route_name,
+                                                                 route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         userid = api_policy.unauthenticated_userid(pyramid_request)
 
         user_policy.unauthenticated_userid.assert_called_once_with(pyramid_request)
@@ -202,14 +204,16 @@ class TestAPIAuthenticationPolicy(object):
         client_policy.unauthenticated_userid.assert_called_once_with(pyramid_request)
         assert userid == client_policy.unauthenticated_userid.return_value
 
-    @pytest.mark.parametrize('path', NON_AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_BLACKLIST)
     def test_unauthenticated_userid_does_not_proxy_to_client_policy_if_path_mismatch(self,
                                                                                      pyramid_request,
                                                                                      api_policy,
                                                                                      user_policy,
                                                                                      client_policy,
-                                                                                     path):
-        pyramid_request.path = path
+                                                                                     route_name,
+                                                                                     route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         user_policy.unauthenticated_userid.return_value = None
 
         userid = api_policy.unauthenticated_userid(pyramid_request)
@@ -231,14 +235,16 @@ class TestAPIAuthenticationPolicy(object):
         assert client_policy.effective_principals.call_count == 0
         assert principals == user_policy.effective_principals.return_value
 
-    @pytest.mark.parametrize('path', AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_WHITELIST)
     def test_effective_principals_proxies_to_client_if_auth_principal_missing(self,
                                                                               pyramid_request,
                                                                               api_policy,
                                                                               user_policy,
                                                                               client_policy,
-                                                                              path):
-        pyramid_request.path = path
+                                                                              route_name,
+                                                                              route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         user_policy.effective_principals.return_value = [Everyone]
 
         principals = api_policy.effective_principals(pyramid_request)
@@ -247,14 +253,16 @@ class TestAPIAuthenticationPolicy(object):
         client_policy.effective_principals.assert_called_once_with(pyramid_request)
         assert principals == client_policy.effective_principals.return_value
 
-    @pytest.mark.parametrize('path', NON_AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_BLACKLIST)
     def test_effective_principals_does_not_proxy_to_client_if_path_mismatch(self,
                                                                             pyramid_request,
                                                                             api_policy,
                                                                             user_policy,
                                                                             client_policy,
-                                                                            path):
-        pyramid_request.path = path
+                                                                            route_name,
+                                                                            route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         user_policy.effective_principals.return_value = [Everyone]
 
         principals = api_policy.effective_principals(pyramid_request)
@@ -263,9 +271,15 @@ class TestAPIAuthenticationPolicy(object):
         assert client_policy.effective_principals.call_count == 0
         assert principals == user_policy.effective_principals.return_value
 
-    @pytest.mark.parametrize('path', AUTH_CLIENT_PATHS)
-    def test_remember_proxies_to_user_policy_first(self, pyramid_request, api_policy, user_policy, path):
-        pyramid_request.path = path
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_WHITELIST)
+    def test_remember_proxies_to_user_policy_first(self,
+                                                   pyramid_request,
+                                                   api_policy,
+                                                   user_policy,
+                                                   route_name,
+                                                   route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         remembered = api_policy.remember(pyramid_request, 'acct:foo@bar.com')
 
         user_policy.remember.assert_called_once_with(pyramid_request, 'acct:foo@bar.com')
@@ -280,14 +294,16 @@ class TestAPIAuthenticationPolicy(object):
         client_policy.remember.assert_called_once_with(pyramid_request, 'acct:foo@bar.com')
         assert remembered == client_policy.remember.return_value
 
-    @pytest.mark.parametrize('path', NON_AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_BLACKLIST)
     def test_remember_does_not_proxy_to_client_if_path_mismatch(self,
                                                                 pyramid_request,
                                                                 api_policy,
                                                                 user_policy,
                                                                 client_policy,
-                                                                path):
-        pyramid_request.path = path
+                                                                route_name,
+                                                                route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         user_policy.remember.return_value = []
 
         remembered = api_policy.remember(pyramid_request, 'acct:foo@bar.com')
@@ -296,9 +312,15 @@ class TestAPIAuthenticationPolicy(object):
         assert client_policy.remember.call_count == 0
         assert remembered == user_policy.remember.return_value
 
-    @pytest.mark.parametrize('path', AUTH_CLIENT_PATHS)
-    def test_forget_proxies_to_user_policy_first(self, pyramid_request, api_policy, user_policy, path):
-        pyramid_request.path = path
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_WHITELIST)
+    def test_forget_proxies_to_user_policy_first(self,
+                                                 pyramid_request,
+                                                 api_policy,
+                                                 user_policy,
+                                                 route_name,
+                                                 route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         forgot = api_policy.forget(pyramid_request)
 
         user_policy.forget.assert_called_once_with(pyramid_request)
@@ -313,14 +335,16 @@ class TestAPIAuthenticationPolicy(object):
         client_policy.forget.assert_called_once_with(pyramid_request)
         assert forgot == client_policy.forget.return_value
 
-    @pytest.mark.parametrize('path', NON_AUTH_CLIENT_PATHS)
+    @pytest.mark.parametrize('route_name,route_method', AUTH_CLIENT_API_BLACKLIST)
     def test_forget_does_not_proxy_to_client_if_path_mismatch(self,
                                                               pyramid_request,
                                                               api_policy,
                                                               user_policy,
                                                               client_policy,
-                                                              path):
-        pyramid_request.path = path
+                                                              route_name,
+                                                              route_method):
+        pyramid_request.method = route_method
+        pyramid_request.matched_route.name = route_name
         user_policy.forget.return_value = []
 
         forgot = api_policy.forget(pyramid_request)
@@ -344,7 +368,7 @@ class TestAPIAuthenticationPolicy(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.path = '/api/groups'
+        pyramid_request.matched_route.name = 'api.groups'
         pyramid_request.method = 'POST'
         return pyramid_request
 

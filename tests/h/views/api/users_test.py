@@ -15,9 +15,7 @@ from h.services.user_unique import UserUniqueService, DuplicateUserError
 from h.views.api.users import create, update
 
 
-@pytest.mark.usefixtures('auth_client',
-                         'request_auth_client',
-                         'validate_auth_client_authority',
+@pytest.mark.usefixtures('client_authority',
                          'user_signup_service',
                          'user_unique_svc')
 class TestCreate(object):
@@ -67,6 +65,13 @@ class TestCreate(object):
         with pytest.raises(ValidationError):
             create(pyramid_request)
 
+    def test_raises_ValidationError_when_authority_mismatch(self, pyramid_request, valid_payload):
+        valid_payload['authority'] = 'invalid.com'
+        pyramid_request.json_body = valid_payload
+
+        with pytest.raises(ValidationError, match="does not match client authority"):
+            create(pyramid_request)
+
     def test_it_proxies_uniqueness_check_to_service(self, valid_payload, pyramid_request, user_unique_svc, CreateUserAPISchema, auth_client):
         pyramid_request.json_body = valid_payload
         CreateUserAPISchema().validate.return_value = valid_payload
@@ -89,6 +94,12 @@ class TestCreate(object):
 
         with pytest.raises(PayloadError):
             create(pyramid_request)
+
+    @pytest.fixture
+    def client_authority(self, patch):
+        client_authority = patch('h.views.api.users.client_authority')
+        client_authority.return_value = 'weylandindustries.com'
+        return client_authority
 
     @pytest.fixture
     def valid_payload(self):
