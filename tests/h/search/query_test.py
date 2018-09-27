@@ -623,50 +623,13 @@ class TestDeletedFilter(object):
 
 
 @pytest.mark.usefixtures('pyramid_config')
-class TestHiddenFilter(object):
-
-    @pytest.mark.parametrize('nipsa,hidden,should_show_annotation', [
-        # both nipsa and hidden fields are set, so don't show the annotation
-        (True, True, False),
-        # nipsa field is set, so don't show the annotation
-        (True, False, False),
-        # hidden field is set, so don't show  the annotation
-        (False, True, False),
-        # neither field is set, show  the annotation
-        (False, False, True),
-    ])
-    def test_visibility_of_moderated_and_nipsaed_annotations(
-        self, index, Annotation, pyramid_request, search, user,
-        AnnotationSearchIndexPresenter, nipsa, hidden, should_show_annotation
-    ):
-
-        pyramid_request.user = user
-        search.append_modifier(query.HiddenFilter(pyramid_request))
-        presenter = AnnotationSearchIndexPresenter.return_value
-
-        presenter.asdict.return_value = {'id': 'ann1',
-                                         'hidden': hidden,
-                                         'nipsa': nipsa}
-        Annotation(id='ann1')
-
-        presenter.asdict.return_value = {'id': 'ann2',
-                                         'hidden': False,
-                                         'nipsa': False}
-        Annotation(id='ann2', userid=user.userid)
-
-        expected_ids = ['ann2']
-        if should_show_annotation:
-            expected_ids.append('ann1')
-
-        result = search.run({})
-
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
+class TestNipsaFilter(object):
 
     def test_hides_banned_users_annotations_from_other_users(
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = user
-        search.append_modifier(query.HiddenFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         Annotation(userid=banned_user.userid)
         expected_ids = [Annotation(userid=user.userid).id]
 
@@ -678,7 +641,7 @@ class TestHiddenFilter(object):
         self, pyramid_request, search, banned_user, user, Annotation
     ):
         pyramid_request.user = banned_user
-        search.append_modifier(query.HiddenFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(userid=banned_user.userid).id]
 
         result = search.run(webob.multidict.MultiDict({}))
@@ -691,7 +654,7 @@ class TestHiddenFilter(object):
     ):
         pyramid_request.user = user
         group_service.groupids_created_by.return_value = ["created_by_banneduser"]
-        search.append_modifier(query.HiddenFilter(pyramid_request))
+        search.append_modifier(query.NipsaFilter(pyramid_request))
         expected_ids = [Annotation(groupid="created_by_banneduser",
                                    userid=banned_user.userid).id]
 
@@ -975,10 +938,3 @@ def es_dsl_search(pyramid_request):
         using=pyramid_request.es.conn,
         index=pyramid_request.es.index,
     )
-
-
-@pytest.fixture
-def AnnotationSearchIndexPresenter(patch):
-    AnnotationSearchIndexPresenter = patch('h.search.index.presenters.AnnotationSearchIndexPresenter')
-    AnnotationSearchIndexPresenter.return_value.asdict.return_value = {'test': 'val'}
-    return AnnotationSearchIndexPresenter
