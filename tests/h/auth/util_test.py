@@ -17,7 +17,6 @@ from pyramid import security
 from h.auth import role
 from h.auth import util
 from h._compat import text_type
-from h.exceptions import ClientUnauthorized
 from h.models.auth_client import GrantType
 from h.models import AuthClient
 from h.schemas import ValidationError
@@ -368,65 +367,6 @@ class TestVerifyAuthClient(object):
     @pytest.fixture
     def hmac(self, patch):
         return patch('h.auth.util.hmac')
-
-
-class TestRequestAuthClient(object):
-
-    def test_raises_when_no_creds(self, pyramid_request, basic_auth_creds):
-        with pytest.raises(ClientUnauthorized):
-            util.request_auth_client(pyramid_request)
-
-    def test_raises_when_malformed_client_id(self,
-                                             basic_auth_creds,
-                                             pyramid_request):
-        basic_auth_creds.return_value = ('foobar', 'somerandomsecret')
-
-        with pytest.raises(ClientUnauthorized):
-            util.request_auth_client(pyramid_request)
-
-    def test_raises_when_no_client(self,
-                                   basic_auth_creds,
-                                   pyramid_request):
-        basic_auth_creds.return_value = ('C69BA868-5089-4EE4-ABB6-63A1C38C395B',
-                                         'somerandomsecret')
-
-        with pytest.raises(ClientUnauthorized):
-            util.request_auth_client(pyramid_request)
-
-    def test_raises_when_client_secret_invalid(self,
-                                               auth_client,
-                                               basic_auth_creds,
-                                               pyramid_request):
-        basic_auth_creds.return_value = (auth_client.id, 'incorrectsecret')
-
-        with pytest.raises(ClientUnauthorized):
-            util.request_auth_client(pyramid_request)
-
-    def test_raises_for_public_client(self,
-                                      factories,
-                                      basic_auth_creds,
-                                      pyramid_request):
-        auth_client = factories.AuthClient(authority='weylandindustries.com')
-        basic_auth_creds.return_value = (auth_client.id, '')
-
-        with pytest.raises(ClientUnauthorized):
-            util.request_auth_client(pyramid_request)
-
-    def test_raises_for_invalid_client_grant_type(self,
-                                                  factories,
-                                                  basic_auth_creds,
-                                                  pyramid_request):
-        auth_client = factories.ConfidentialAuthClient(authority='weylandindustries.com',
-                                                       grant_type=GrantType.authorization_code)
-        basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
-
-        with pytest.raises(ClientUnauthorized):
-            util.request_auth_client(pyramid_request)
-
-    def test_returns_client_when_valid_creds(self, pyramid_request, auth_client, valid_auth):
-        client = util.request_auth_client(pyramid_request)
-
-        assert client == auth_client
 
 
 @pytest.fixture
