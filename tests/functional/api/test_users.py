@@ -66,12 +66,60 @@ class TestCreateUser(object):
         assert res.status_code == 409
 
 
+@pytest.mark.functional
+class TestUpdateUser(object):
+
+    def test_it_returns_http_200_when_successful(self, app, auth_client_header, user, patch_user_payload):
+        url = "/api/users/{username}".format(username=user.username)
+
+        res = app.patch_json(url, patch_user_payload, headers=auth_client_header)
+
+        assert res.status_code == 200
+
+    def test_it_returns_updated_user_when_successful(self, app, auth_client_header, user, patch_user_payload):
+        url = "/api/users/{username}".format(username=user.username)
+
+        res = app.patch_json(url, patch_user_payload, headers=auth_client_header)
+
+        assert res.json_body['email'] == patch_user_payload['email']
+        assert res.json_body['display_name'] == patch_user_payload['display_name']
+
+    def test_it_returns_http_404_if_auth_client_missing(self, app, user, patch_user_payload):
+        url = "/api/users/{username}".format(username=user.username)
+
+        res = app.patch_json(url, patch_user_payload, expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_if_user_not_in_client_authority(self,
+                                                                 app,
+                                                                 auth_client_header,
+                                                                 user,
+                                                                 patch_user_payload,
+                                                                 db_session):
+        user.authority = 'somewhere.com'
+        db_session.commit()
+        url = "/api/users/{username}".format(username=user.username)
+
+        res = app.patch_json(url, patch_user_payload, headers=auth_client_header, expect_errors=True)
+
+        assert res.status_code == 404
+
+
 @pytest.fixture
 def user_payload():
     return {
         "username": "filip",
         "email": "filip@example.com",
         "authority": "example.com"
+    }
+
+
+@pytest.fixture
+def patch_user_payload():
+    return {
+        "email": "filip@example2.com",
+        "display_name": "Filip Pilip",
     }
 
 

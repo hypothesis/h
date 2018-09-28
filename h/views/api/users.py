@@ -2,9 +2,7 @@
 
 from __future__ import unicode_literals
 
-from pyramid.exceptions import HTTPNotFound
-
-from h.auth.util import request_auth_client, client_authority
+from h.auth.util import client_authority
 from h.exceptions import PayloadError, ConflictError
 from h.presenters import UserJSONPresenter
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
@@ -58,22 +56,16 @@ def create(request):
     return presenter.asdict()
 
 
-@json_view(route_name='api.user', request_method='PATCH')
-def update(request):
+@json_view(route_name='api.user',
+           request_method='PATCH',
+           permission='update')
+def update(user, request):
     """
     Update a user.
 
     This API endpoint allows authorised clients (those able to provide a valid
     Client ID and Client Secret) to update users in their authority.
     """
-    client = request_auth_client(request)
-
-    user_svc = request.find_service(name='user')
-    user = user_svc.fetch(request.matchdict['username'],
-                          client.authority)
-    if user is None:
-        raise HTTPNotFound()
-
     schema = UpdateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 

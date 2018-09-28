@@ -76,6 +76,7 @@ from h.models import AuthClient
 from h.models import Group
 from h.models import Organization
 from h.auth import role
+from h.auth.util import client_authority
 from h.interfaces import IGroupService
 from h.traversal import contexts
 
@@ -220,8 +221,8 @@ class UserRoot(object):
         self.user_svc = self.request.find_service(name='user')
 
     def __getitem__(self, username):
-        # FIXME: At present, this fetch would never work for third-party users
-        user = self.user_svc.fetch(username, self.request.default_authority)
+        authority = client_authority(self.request) or self.request.default_authority
+        user = self.user_svc.fetch(username, authority)
 
         if not user:
             raise KeyError()

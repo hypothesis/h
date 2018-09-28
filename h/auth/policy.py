@@ -17,6 +17,7 @@ AUTH_CLIENT_API_WHITELIST = [
     ('api.groups', 'POST'),
     ('api.group_member', 'POST'),
     ('api.users', 'POST'),
+    ('api.user', 'PATCH'),
 ]
 
 
