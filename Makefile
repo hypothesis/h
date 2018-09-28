@@ -54,27 +54,27 @@ test: node_modules/.uptodate
 
 .PHONY: test-py3
 test-py3: node_modules/.uptodate
-	tox -e py36 -- tests/h/
+	tox -e py36-tests
 
 .PHONY: lint
 lint:
-	tox -e lint
+	tox -e py27-lint
 
 .PHONY: docs
 docs:
-	tox -e docs
+	tox -e py27-docs
 
 .PHONY: checkdocs
 checkdocs:
-	tox -e checkdocs
+	tox -e py27-checkdocs
 
 .PHONY: docstrings
 docstrings:
-	tox -e docstrings
+	tox -e py27-docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings:
-	tox -e checkdocstrings
+	tox -e py27-checkdocstrings
 
 ################################################################################
 
