@@ -11,7 +11,6 @@ from pyramid import security
 from h.auth import role
 from h._compat import text_type
 from h.models.auth_client import GrantType, AuthClient
-from h.schemas import ValidationError
 
 
 def groupfinder(userid, request):
@@ -167,11 +166,3 @@ def principals_for_auth_client_user(user, client):
     distinct_principals = list(set(all_principals))
 
     return distinct_principals
-
-
-def validate_auth_client_authority(client, authority):
-    """
-    Validate that the auth client authority matches the provided ``authority``.
-    """
-    if client.authority != authority:
-        raise ValidationError("'authority' does not match authenticated client")

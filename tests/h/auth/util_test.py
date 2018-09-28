@@ -15,7 +15,6 @@ from h.auth import util
 from h._compat import text_type
 from h.models.auth_client import GrantType
 from h.models import AuthClient
-from h.schemas import ValidationError
 from h.services.user import UserService
 
 FakeUser = namedtuple('FakeUser', ['authority', 'admin', 'staff', 'groups'])
@@ -140,21 +139,6 @@ class TestAuthDomain(object):
     def test_it_returns_text_type(self, pyramid_request):
         pyramid_request.domain = str(pyramid_request.domain)
         assert type(util.default_authority(pyramid_request)) == text_type
-
-
-class TestValidateAuthClientAuthority(object):
-
-    def test_raises_when_authority_doesnt_match(self, pyramid_request, auth_client):
-        authority = 'mismatched_authority'
-
-        with pytest.raises(ValidationError,
-                           match=".*authority.*does not match authenticated client"):
-            util.validate_auth_client_authority(auth_client, authority)
-
-    def test_does_not_raise_when_authority_matches(self, pyramid_request, auth_client):
-        authority = 'weylandindustries.com'
-
-        util.validate_auth_client_authority(auth_client, authority)
 
 
 class TestPrincipalsForAuthClient(object):

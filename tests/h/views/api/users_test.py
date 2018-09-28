@@ -225,11 +225,6 @@ def auth_client(factories):
 
 
 @pytest.fixture
-def validate_auth_client_authority(patch):
-    return patch('h.views.api.users.validate_auth_client_authority')
-
-
-@pytest.fixture
 def user_signup_service(db_session, pyramid_config, user):
     service = mock.Mock(spec_set=UserSignupService(default_authority='example.com',
                                               mailer=None,
