@@ -7,13 +7,14 @@ import colander
 import deform
 from jinja2 import Markup
 
-from h import i18n, models, validators
+from h import i18n, models
 from h.models.user import (
     EMAIL_MAX_LENGTH,
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
 )
+from h.schemas import validators
 from h.schemas.base import CSRFSchema
 
 _ = i18n.TranslationString

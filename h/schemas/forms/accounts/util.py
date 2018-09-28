@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import colander
 import deform
 
-from h import validators
+from h.schemas import validators
 
 
 PASSWORD_MIN_LENGTH = 2  # FIXME: this is ridiculous

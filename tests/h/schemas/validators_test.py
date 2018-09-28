@@ -6,7 +6,7 @@ from mock import Mock
 
 import colander
 
-from h.validators import Email
+from h.schemas.validators import Email
 
 
 class TestEmail(object):

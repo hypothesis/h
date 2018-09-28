@@ -5,11 +5,12 @@ from __future__ import unicode_literals
 import colander
 import deform
 
-from h import i18n, validators
+from h import i18n
 from h.accounts import util
 from h.models.user import (
     DISPLAY_NAME_MAX_LENGTH,
 )
+from h.schemas import validators
 from h.schemas.base import CSRFSchema
 
 _ = i18n.TranslationString
