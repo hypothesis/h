@@ -2,14 +2,10 @@
 
 from __future__ import unicode_literals
 
-import base64
 from collections import namedtuple
-from h._compat import unichr
 
 import pytest
 import mock
-from hypothesis import strategies as st
-from hypothesis import given
 import sqlalchemy as sa
 
 from pyramid import security
@@ -24,82 +20,6 @@ from h.services.user import UserService
 
 FakeUser = namedtuple('FakeUser', ['authority', 'admin', 'staff', 'groups'])
 FakeGroup = namedtuple('FakeGroup', ['pubid'])
-
-# The most recent standard covering the 'Basic' HTTP Authentication scheme is
-# RFC 7617. It defines the allowable characters in usernames and passwords as
-# follows:
-#
-#     The user-id and password MUST NOT contain any control characters (see
-#     "CTL" in Appendix B.1 of [RFC5234]).
-#
-# RFC5234 defines CTL as:
-#
-#     CTL            =  %x00-1F / %x7F
-#
-CONTROL_CHARS = set(unichr(n) for n in range(0x00, 0x1F + 1)) | set('\x7f')
-
-# We assume user ID and password strings are UTF-8 and surrogates are not
-# allowed in UTF-8.
-SURROGATE_CHARS = set(unichr(n) for n in range(0xD800, 0xDBFF + 1)) | \
-                  set(unichr(n) for n in range(0xDC00, 0xDFFF + 1))
-INVALID_USER_PASS_CHARS = CONTROL_CHARS | SURROGATE_CHARS
-
-# Furthermore, from RFC 7617:
-#
-#     a user-id containing a colon character is invalid
-#
-INVALID_USERNAME_CHARS = INVALID_USER_PASS_CHARS | set(':')
-
-# The character encoding of the user-id and password is *undefined* by
-# specification for historical reasons:
-#
-#     The original definition of this authentication scheme failed to specify
-#     the character encoding scheme used to convert the user-pass into an
-#     octet sequence.  In practice, most implementations chose either a
-#     locale-specific encoding such as ISO-8859-1 ([ISO-8859-1]), or UTF-8
-#     ([RFC3629]).  For backwards compatibility reasons, this specification
-#     continues to leave the default encoding undefined, as long as it is
-#     compatible with US-ASCII (mapping any US-ASCII character to a single
-#     octet matching the US-ASCII character code).
-#
-# In particular, Firefox still does *very* special things if you provide
-# non-BMP characters in a username or password.
-#
-# There's not a lot we can do about this so we are going to assume UTF-8
-# encoding for the user-pass string, and these tests verify that we
-# successfully decode valid Unicode user-pass strings.
-#
-VALID_USERNAME_CHARS = st.characters(blacklist_characters=INVALID_USERNAME_CHARS)
-VALID_PASSWORD_CHARS = st.characters(blacklist_characters=INVALID_USER_PASS_CHARS)
-
-
-class TestBasicAuthCreds(object):
-
-    @given(username=st.text(alphabet=VALID_USERNAME_CHARS),
-           password=st.text(alphabet=VALID_PASSWORD_CHARS))
-    def test_valid(self, username, password, pyramid_request):
-        user_pass = username + ':' + password
-        creds = ('Basic', base64.standard_b64encode(user_pass.encode('utf-8')))
-        pyramid_request.authorization = creds
-
-        assert util.basic_auth_creds(pyramid_request) == (username, password)
-
-    def test_missing(self, pyramid_request):
-        pyramid_request.authorization = None
-
-        assert util.basic_auth_creds(pyramid_request) is None
-
-    def test_no_password(self, pyramid_request):
-        creds = ('Basic', base64.standard_b64encode('foobar'.encode('utf-8')))
-        pyramid_request.authorization = creds
-
-        assert util.basic_auth_creds(pyramid_request) is None
-
-    def test_other_authorization_type(self, pyramid_request):
-        creds = ('Digest', base64.standard_b64encode('foo:bar'.encode('utf-8')))
-        pyramid_request.authorization = creds
-
-        assert util.basic_auth_creds(pyramid_request) is None
 
 
 class TestGroupfinder(object):

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import base64
 import re
 
 import hmac
@@ -13,42 +12,6 @@ from h.auth import role
 from h._compat import text_type
 from h.models.auth_client import GrantType, AuthClient
 from h.schemas import ValidationError
-
-
-def basic_auth_creds(request):
-    """
-    Extract any HTTP Basic authentication credentials for the request.
-
-    Returns a tuple with the HTTP Basic access authentication credentials
-    ``(username, password)`` if provided, otherwise ``None``.
-
-    :param request: the request object
-    :type request: pyramid.request.Request
-
-    :returns: a tuple of (username, password) or None
-    :rtype: tuple or NoneType
-    """
-    try:
-        authtype, value = request.authorization
-    except TypeError:  # no authorization header
-        return None
-    if authtype.lower() != 'basic':
-        return None
-    try:
-        user_pass_bytes = base64.standard_b64decode(value)
-    except TypeError:  # failed to decode
-        return None
-    try:
-        # See the lengthy comment in the tests about why we assume UTF-8
-        # encoding here.
-        user_pass = user_pass_bytes.decode('utf-8')
-    except UnicodeError:  # not UTF-8
-        return None
-    try:
-        username, password = user_pass.split(':', 1)
-    except ValueError:  # not enough values to unpack
-        return None
-    return (username, password)
 
 
 def groupfinder(userid, request):
