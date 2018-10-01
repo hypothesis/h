@@ -72,6 +72,25 @@ class TestRoot(object):
 
 @pytest.mark.usefixtures('group_service', 'links_service')
 class TestAnnotationRoot(object):
+    def test_it_does_not_assign_create_permission_without_authenticated_user(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy(None, groupids=[pyramid.security.Everyone])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = AnnotationRoot(pyramid_request)
+
+        assert not pyramid_request.has_permission('create', context)
+
+    def test_it_assigns_create_permission_to_authenticated_request(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo',
+                                              groupids=[pyramid.security.Authenticated])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = AnnotationRoot(pyramid_request)
+
+        assert pyramid_request.has_permission('create', context)
+
     def test_get_item_fetches_annotation(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
 

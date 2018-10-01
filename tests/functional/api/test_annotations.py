@@ -41,6 +41,31 @@ class TestGetAnnotations(object):
 
 
 class TestWriteAnnotation(object):
+    def test_it_returns_http_404_if_unauthorized(self, app):
+        # FIXME: This should return a 403
+
+        # This isn't a valid payload, but it won't get validated because the
+        # authorization will fail first
+        annotation = {
+            'text': 'My annotation',
+            'uri': 'http://example.com',
+        }
+
+        res = app.post_json('/api/annotations', annotation, expect_errors=True)
+
+        assert res.status_code == 404
+
+    @pytest.mark.xfail
+    def test_it_returns_http_403_if_unauthorized(self, app):
+        annotation = {
+            'text': 'My annotation',
+            'uri': 'http://example.com',
+        }
+
+        res = app.post_json('/api/annotations', annotation, expect_errors=True)
+
+        assert res.status_code == 403
+
     def test_annotation_write_unauthorized_group(self, app, user_with_token, non_writeable_group):
         """
         Write an annotation to a group that doesn't allow writes.

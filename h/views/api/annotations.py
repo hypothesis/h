@@ -18,7 +18,6 @@ objects and Pyramid ACLs in :mod:`h.traversal`.
 """
 from __future__ import unicode_literals
 from pyramid import i18n
-from pyramid import security
 import newrelic.agent
 
 from h import search as search_lib
@@ -74,7 +73,7 @@ def search(request):
 
 @api_config(route_name='api.annotations',
             request_method='POST',
-            effective_principals=security.Authenticated,
+            permission='create',
             link_name='annotation.create',
             description='Create an annotation')
 def create(request):

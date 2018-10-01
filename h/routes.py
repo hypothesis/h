@@ -90,7 +90,9 @@ def includeme(config):
     # template generator in `h/views/api.py`
     config.add_route('api.index', '/api/')
     config.add_route('api.links', '/api/links')
-    config.add_route('api.annotations', '/api/annotations')
+    config.add_route('api.annotations',
+                     '/api/annotations',
+                     factory='h.traversal:AnnotationRoot')
     config.add_route('api.annotation',
                      '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
                      factory='h.traversal:AnnotationRoot',
