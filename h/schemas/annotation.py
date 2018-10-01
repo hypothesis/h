@@ -439,8 +439,9 @@ class SearchParamsSchema(colander.Schema):
             PDF fingerprint.
 
             `*` will match any character sequence (including an empty one),
-            and a `?` will match any single character. Wildcards are only permitted
-            within the path and query parts of the URI.
+            and a `?` will match any single character. `*`s are only permitted
+            within the path and query parts of the URI and `?`s are only permitted
+            within the domain, path, and query parts of the URI.
 
             Escaping wildcards is not supported.
 
