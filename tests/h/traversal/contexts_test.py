@@ -38,6 +38,7 @@ class TestAnnotationContext(object):
         res = AnnotationContext(ann, group_service, links_service)
         actual = res.__acl__()
         expect = [(security.Allow, 'saoirse', 'read'),
+                  (security.Allow, 'saoirse', 'flag'),
                   (security.Allow, 'saoirse', 'admin'),
                   (security.Allow, 'saoirse', 'update'),
                   (security.Allow, 'saoirse', 'delete'),
@@ -87,15 +88,15 @@ class TestAnnotationContext(object):
         ('unknown-group', 'francis', False),
         ('unknown-group', None, False),
     ])
-    def test_acl_shared(self,
-                        factories,
-                        pyramid_config,
-                        pyramid_request,
-                        groupid,
-                        userid,
-                        permitted,
-                        group_service,
-                        links_service):
+    def test_acl_read_shared(self,
+                            factories,
+                            pyramid_config,
+                            pyramid_request,
+                            groupid,
+                            userid,
+                            permitted,
+                            group_service,
+                            links_service):
         """
         Shared annotation contexts should delegate their 'read' permission to
         their containing group.
@@ -115,6 +116,51 @@ class TestAnnotationContext(object):
             assert pyramid_request.has_permission('read', res)
         else:
             assert not pyramid_request.has_permission('read', res)
+
+    @pytest.mark.parametrize('groupid,userid,permitted', [
+        ('freeforall', 'jim', True),
+        ('freeforall', 'saoirse', True),
+        ('freeforall', None, False),
+        ('only-saoirse', 'jim', False),
+        ('only-saoirse', 'saoirse', True),
+        ('only-saoirse', None, False),
+        ('pals', 'jim', True),
+        ('pals', 'saoirse', True),
+        ('pals', 'francis', False),
+        ('pals', None, False),
+        ('unknown-group', 'jim', False),
+        ('unknown-group', 'saoirse', False),
+        ('unknown-group', 'francis', False),
+        ('unknown-group', None, False),
+    ])
+    def test_acl_flag_shared(self,
+                            factories,
+                            pyramid_config,
+                            pyramid_request,
+                            groupid,
+                            userid,
+                            permitted,
+                            group_service,
+                            links_service):
+        """
+        Flag permissions should echo read permissions with the exception that
+        `Security.Everyone` does not get the permission
+        """
+        # Set up the test with a dummy authn policy and a real ACL authz
+        # policy:
+        policy = ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy(userid)
+        pyramid_config.set_authorization_policy(policy)
+
+        ann = factories.Annotation(shared=True,
+                                   userid='mioara',
+                                   groupid=groupid)
+        res = AnnotationContext(ann, group_service, links_service)
+
+        if permitted:
+            assert pyramid_request.has_permission('flag', res)
+        else:
+            assert not pyramid_request.has_permission('flag', res)
 
     @pytest.fixture
     def groups(self):
