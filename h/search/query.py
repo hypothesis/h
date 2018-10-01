@@ -28,7 +28,7 @@ def wildcard_uri_is_valid(wildcard_uri):
         return False
 
     normalized_uri = urlparse.urlparse(wildcard_uri.replace("?", ""))
-    if not normalized_uri.scheme or "*" in normalized_uri.scheme or "*" in normalized_uri.netloc:
+    if not normalized_uri.scheme or "*" in normalized_uri.netloc:
         return False
 
     normalized_uri = urlparse.urlparse(wildcard_uri.replace("*", ""))
