@@ -272,6 +272,24 @@ class TestOrganizationLogoRoot(object):
 @pytest.mark.usefixtures("groups")
 class TestGroupRoot(object):
 
+    def test_it_assigns_create_permission_with_user_role(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo', [role.User])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = GroupRoot(pyramid_request)
+
+        assert pyramid_request.has_permission('create', context)
+
+    def test_it_does_not_assign_create_permission_without_user_role(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo', ['whatever'])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = GroupRoot(pyramid_request)
+
+        assert not pyramid_request.has_permission('create', context)
+
     def test_it_returns_the_group_if_it_exists(self, factories, group_factory):
         group = factories.Group()
 

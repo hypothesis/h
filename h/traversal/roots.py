@@ -201,6 +201,11 @@ class GroupRoot(object):
     FIXME: This class should return GroupContext objects, not Group objects.
 
     """
+
+    __acl__ = [
+        (Allow, role.User, 'create'),  # Any authn'd user may create a group
+    ]
+
     def __init__(self, request):
         self.request = request
 
