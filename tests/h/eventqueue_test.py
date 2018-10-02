@@ -7,6 +7,13 @@ import pytest
 from h import eventqueue
 
 
+class DummyEvent(object):
+    def __init__(self, request):
+        # EventQueue currently assumes that events have a `request` attribute.
+        self.request = request
+
+
+@pytest.mark.usefixtures('pyramid_config')
 class TestEventQueue(object):
     def test_init_adds_response_callback(self, pyramid_request):
         request = mock.Mock()
@@ -22,48 +29,59 @@ class TestEventQueue(object):
         queue(event)
         assert list(queue.queue) == [event]
 
-    def test_publish_all_notifies_events_in_fifo_order(self, notify, pyramid_request):
+    def test_publish_all_notifies_events_in_fifo_order(self, pyramid_request, subscriber):
         queue = eventqueue.EventQueue(pyramid_request)
-        firstevent = mock.Mock(request=pyramid_request)
+        firstevent = DummyEvent(pyramid_request)
         queue(firstevent)
-        secondevent = mock.Mock(request=pyramid_request)
+        secondevent = DummyEvent(pyramid_request)
         queue(secondevent)
 
         queue.publish_all()
 
-        assert notify.call_args_list == [
+        assert subscriber.call_args_list == [
             mock.call(firstevent),
             mock.call(secondevent)
         ]
 
-    def test_publish_all_sandboxes_each_event(self, notify, pyramid_request):
+    def test_publish_all_sandboxes_each_subscriber(self, pyramid_request, pyramid_config):
         queue = eventqueue.EventQueue(pyramid_request)
-        firstevent = mock.Mock(request=pyramid_request)
-        queue(firstevent)
-        secondevent = mock.Mock(request=pyramid_request)
-        queue(secondevent)
 
+        def failing_subscriber(event):
+            raise Exception('failing_subscriber failed')
+        first_subscriber = mock.Mock()
+        second_subscriber = mock.Mock()
+        second_subscriber.side_effect = failing_subscriber
+        third_subscriber = mock.Mock()
+
+        subscribers = [first_subscriber, second_subscriber, third_subscriber]
+        for sub in subscribers:
+            pyramid_config.add_subscriber(sub, DummyEvent)
+
+        event = DummyEvent(pyramid_request)
+
+        queue(event)
         queue.publish_all()
 
-        assert notify.call_args_list == [
-            mock.call(firstevent),
-            mock.call(secondevent)
-        ]
+        # If one subscriber raises an exception, that shouldn't prevent others
+        # from running.
+        for sub in subscribers:
+            sub.assert_called_once_with(event)
 
-    def test_publish_all_sends_exception_to_sentry(self, notify, pyramid_request):
+    def test_publish_all_sends_exception_to_sentry(self, subscriber, pyramid_request):
         pyramid_request.sentry = mock.Mock()
-        notify.side_effect = ValueError('exploded!')
+        subscriber.side_effect = ValueError('exploded!')
         queue = eventqueue.EventQueue(pyramid_request)
-        event = mock.Mock(request=pyramid_request)
+        event = DummyEvent(pyramid_request)
         queue(event)
 
         queue.publish_all()
+
         assert pyramid_request.sentry.captureException.called
 
-    def test_publish_all_logs_exception_when_sentry_is_not_available(self, log, notify, pyramid_request):
-        notify.side_effect = ValueError('exploded!')
+    def test_publish_all_logs_exception_when_sentry_is_not_available(self, log, subscriber, pyramid_request):
+        subscriber.side_effect = ValueError('exploded!')
         queue = eventqueue.EventQueue(pyramid_request)
-        event = mock.Mock(request=pyramid_request)
+        event = DummyEvent(pyramid_request)
         queue(event)
 
         queue.publish_all()
@@ -89,6 +107,15 @@ class TestEventQueue(object):
     @pytest.fixture
     def publish_all(self, patch):
         return patch('h.eventqueue.EventQueue.publish_all')
+
+    @pytest.fixture
+    def subscriber(self):
+        return mock.Mock()
+
+    @pytest.fixture
+    def pyramid_config(self, pyramid_config, subscriber):
+        pyramid_config.add_subscriber(subscriber, DummyEvent)
+        return pyramid_config
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
