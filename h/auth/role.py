@@ -9,3 +9,8 @@ Staff = 'group:__staff__'
 
 #: A request with client-credentials authentication
 AuthClient = 'group:__authclient__'
+
+#: A request with an authenticated user
+#: c.f. ``AuthClient``, which can exist on an authenticated request but
+#: there is no user
+User = 'group:__user__'
