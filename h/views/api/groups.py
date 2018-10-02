@@ -8,7 +8,6 @@ from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 from h.exceptions import PayloadError
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema
-from h.schemas import ValidationError
 from h.traversal import GroupContext
 from h.views.api.config import api_config
 
@@ -38,13 +37,10 @@ def groups(request):
 
 @api_config(route_name='api.groups',
             request_method='POST',
-            effective_principals=security.Authenticated,
+            permission='create',
             description='Create a new group')
 def create(request):
     """Create a group from the POST payload."""
-    if request.user is None:
-        raise ValidationError('Request must have an authenticated user')
-
     schema = CreateGroupAPISchema()
 
     appstruct = schema.validate(_json_payload(request))
