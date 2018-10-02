@@ -157,13 +157,26 @@ class TestGroupACL(object):
         group.readable_by = ReadableBy.world
         assert authz_policy.permits(group, [security.Everyone], 'read')
 
+    def test_world_flaggable(self, group, authz_policy):
+        group.readable_by = ReadableBy.world
+        assert authz_policy.permits(group, [security.Authenticated], 'flag')
+        assert not authz_policy.permits(group, [security.Everyone], 'flag')
+
     def test_members_readable(self, group, authz_policy):
         group.readable_by = ReadableBy.members
         assert authz_policy.permits(group, ['group:test-group'], 'read')
 
+    def test_members_flaggable(self, group, authz_policy):
+        group.readable_by = ReadableBy.members
+        assert authz_policy.permits(group, ['group:test-group'], 'flag')
+
     def test_not_readable(self, group, authz_policy):
         group.readable_by = None
         assert not authz_policy.permits(group, [security.Everyone, 'group:test-group'], 'read')
+
+    def test_not_flaggable(self, group, authz_policy):
+        group.readable_by = None
+        assert not authz_policy.permits(group, [security.Authenticated, 'group:test-group'], 'flag')
 
     def test_authority_writeable(self, group, authz_policy):
         group.writeable_by = WriteableBy.authority
