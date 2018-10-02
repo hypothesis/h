@@ -18,6 +18,7 @@ from h import i18n
 from h import models
 from h import session
 from h.accounts import schemas
+from h.schemas.forms.accounts import ChangeEmailSchema
 from h.schemas.forms.accounts import EditProfileSchema
 from h.schemas.forms.accounts import ForgotPasswordSchema
 from h.schemas.forms.accounts import LoginSchema
@@ -386,7 +387,7 @@ class AccountController(object):
     def __init__(self, request):
         self.request = request
 
-        email_schema = schemas.EmailChangeSchema().bind(request=request)
+        email_schema = ChangeEmailSchema().bind(request=request)
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
         # Ensure deform generates unique field IDs for each field in this
