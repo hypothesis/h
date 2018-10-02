@@ -167,26 +167,6 @@ class RegisterSchema(CSRFSchema):
     )
 
 
-class EmailChangeSchema(CSRFSchema):
-    email = email_node(title=_('Email address'))
-    # No validators: all validation is done on the email field
-    password = password_node(title=_('Confirm password'),
-                             hide_until_form_active=True)
-
-    def validator(self, node, value):
-        super(EmailChangeSchema, self).validator(node, value)
-        exc = colander.Invalid(node)
-        request = node.bindings['request']
-        svc = request.find_service(name='user_password')
-        user = request.user
-
-        if not svc.check_password(user, value.get('password')):
-            exc['password'] = _('Wrong password.')
-
-        if exc.children:
-            raise exc
-
-
 class PasswordChangeSchema(CSRFSchema):
     password = password_node(title=_('Current password'),
                              inactive_label=_('Password'))
