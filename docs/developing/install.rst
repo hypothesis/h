@@ -39,21 +39,19 @@ Install the following packages:
         libpq-dev \
         libssl-dev \
         python-dev \
-        python-pip \
-        python-virtualenv
+        python-pip
 
 Install node by following the
 `instructions on nodejs.org <https://nodejs.org/en/download/package-manager/>`_
 (the version of the nodejs package in the standard Ubuntu repositories is too
 old).
 
-Upgrade pip, virtualenv and npm:
+Upgrade pip and npm, and install tox and tox-pip-extensions:
 
 .. code-block:: bash
 
-    sudo pip install -U pip virtualenv
+    sudo pip install -U pip tox tox-pip-extensions
     sudo npm install -g npm
-
 
 Installing the system dependencies on macOS
 -------------------------------------------
@@ -78,11 +76,12 @@ Install the following packages:
 .. note:: Unfortunately you need to install the ``postgresql`` package, because
           Homebrew does not currently provide a standalone ``libpq`` package.
 
-Upgrade pip and virtualenv:
+Upgrade pip and install tox and tox-pip-extensions:
 
 .. code-block:: bash
 
-    pip install -U pip virtualenv
+    pip install -U pip tox tox-pip-extensions
+
 
 Getting the h source code from GitHub
 -------------------------------------
@@ -184,39 +183,6 @@ Install ``gulp-cli`` to get the ``gulp`` command:
 .. code-block:: bash
 
     sudo npm install -g gulp-cli
-
-
-Creating a Python virtual environment
--------------------------------------
-
-Create a Python virtual environment to install and run the h Python code and
-Python dependencies in:
-
-.. code-block:: bash
-
-   virtualenv .venv
-
-
-.. _activating_your_virtual_environment:
-
-Activating your virtual environment
------------------------------------
-
-Activate the virtual environment that you've created:
-
-.. code-block:: bash
-
-   source .venv/bin/activate
-
-.. tip::
-
-   You'll need to re-activate this virtualenv with the
-   ``source .venv/bin/activate`` command each time you open a new terminal,
-   before running h.
-   See the `Virtual Environments`_ section in the Hitchhiker's guide to
-   Python for an introduction to Python virtual environments.
-
-.. _Virtual Environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
 
 Running h
