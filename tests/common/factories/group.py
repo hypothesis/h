@@ -12,11 +12,6 @@ from .group_scope import GroupScope
 from .user import User
 
 
-def default_organization():
-    from tests.common.factories.base import SESSION
-    return models.Organization.default(SESSION)
-
-
 class Group(ModelFactory):
 
     class Meta:
@@ -30,7 +25,6 @@ class Group(ModelFactory):
     readable_by = ReadableBy.members
     writeable_by = WriteableBy.members
     members = factory.LazyAttribute(lambda obj: [obj.creator])
-    organization = factory.LazyFunction(default_organization)
 
     @factory.post_generation
     def scopes(self, create, scopes=0, **kwargs):

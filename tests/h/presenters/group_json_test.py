@@ -13,7 +13,8 @@ from h import traversal
 class TestGroupJSONPresenter(object):
     def test_private_group_asdict(self, factories, GroupContext, links_svc):
         group = factories.Group(name='My Group',
-                                pubid='mygroup')
+                                pubid='mygroup',
+                                organization=factories.Organization())
         group_context = GroupContext(group)
         presenter = GroupJSONPresenter(group_context)
 
@@ -29,7 +30,8 @@ class TestGroupJSONPresenter(object):
 
     def test_open_group_asdict(self, factories, GroupContext, links_svc):
         group = factories.OpenGroup(name='My Group',
-                                    pubid='mygroup')
+                                    pubid='mygroup',
+                                    organization=factories.Organization())
         group_context = GroupContext(group)
         presenter = GroupJSONPresenter(group_context)
 
@@ -46,7 +48,8 @@ class TestGroupJSONPresenter(object):
     def test_open_scoped_group_asdict(self, factories, GroupContext, links_svc):
         group = factories.OpenGroup(name='My Group',
                                     pubid='groupy',
-                                    scopes=[factories.GroupScope(origin='http://foo.com')])
+                                    scopes=[factories.GroupScope(origin='http://foo.com')],
+                                    organization=factories.Organization())
         group_context = GroupContext(group)
         presenter = GroupJSONPresenter(group_context)
 
@@ -83,7 +86,8 @@ class TestGroupJSONPresenter(object):
 
     def test_it_does_not_expand_by_default(self, factories, GroupContext):
         group = factories.OpenGroup(name='My Group',
-                                    pubid='mygroup')
+                                    pubid='mygroup',
+                                    organization=factories.Organization())
         group_context = GroupContext(group)
         presenter = GroupJSONPresenter(group_context)
 
@@ -93,7 +97,8 @@ class TestGroupJSONPresenter(object):
 
     def test_it_expands_organizations(self, factories, GroupContext, OrganizationJSONPresenter):
         group = factories.OpenGroup(name='My Group',
-                                    pubid='mygroup')
+                                    pubid='mygroup',
+                                    organization=factories.Organization())
         group_context = GroupContext(group)
         presenter = GroupJSONPresenter(group_context)
 
@@ -114,7 +119,8 @@ class TestGroupJSONPresenter(object):
 
     def test_it_ignores_unrecognized_expands(self, factories, GroupContext):
         group = factories.OpenGroup(name='My Group',
-                                    pubid='mygroup')
+                                    pubid='mygroup',
+                                    organization=factories.Organization())
         group_context = GroupContext(group)
         presenter = GroupJSONPresenter(group_context)
 
