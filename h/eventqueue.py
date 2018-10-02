@@ -18,6 +18,18 @@ def _get_subscribers(registry, event):
 
 
 class EventQueue(object):
+    """
+    EventQueue enables dispatching Pyramid events at the end of a request.
+
+    An instance of this class is exposed on the request object via the
+    `notify_after_commit` method. The `_after_commit` part refers to the
+    database transaction associated with the request. Unlike calling
+    `request.registry.notify` during a request, failures will not cause a
+    database transaction rollback.
+
+    Events are dispatched in the order they are queued. Failure of one
+    event subscriber does not affect execution of other subscribers.
+    """
     def __init__(self, request):
         self.request = request
         self.queue = collections.deque()
