@@ -240,8 +240,8 @@ def user_service(pyramid_config, db_session):
 
 
 @pytest.fixture
-def annotation_stats_service(pyramid_config, db_session):
-    service = Mock(spec_set=AnnotationStatsService(session=db_session))
+def annotation_stats_service(pyramid_config, pyramid_request):
+    service = Mock(spec_set=AnnotationStatsService(request=pyramid_request))
     service.user_annotation_counts.return_value = {'total': 0}
     pyramid_config.register_service(service, name='annotation_stats')
     return service
