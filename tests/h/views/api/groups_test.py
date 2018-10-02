@@ -8,7 +8,6 @@ import pytest
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 
 from h.views.api import groups as views
-from h.schemas import ValidationError
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
 from h.services.user import UserService
