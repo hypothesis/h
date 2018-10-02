@@ -73,7 +73,7 @@ def test_includeme():
         call('assets', '/assets/*subpath'),
         call('api.index', '/api/'),
         call('api.links', '/api/links'),
-        call('api.annotations', '/api/annotations'),
+        call('api.annotations', '/api/annotations', factory='h.traversal:AnnotationRoot'),
         call('api.annotation',
              '/api/annotations/{id:[A-Za-z0-9_-]{20,22}}',
              factory='h.traversal:AnnotationRoot',

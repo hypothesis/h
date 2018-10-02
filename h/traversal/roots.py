@@ -67,6 +67,7 @@ from pyramid.security import (
     ALL_PERMISSIONS,
     DENY_ALL,
     Allow,
+    Authenticated
 )
 import sqlalchemy.exc
 import sqlalchemy.orm.exc
@@ -99,6 +100,11 @@ class Root(object):
 
 class AnnotationRoot(object):
     """Root factory for routes whose context is an :py:class:`h.traversal.AnnotationContext`."""
+
+    __acl__ = [
+        (Allow, Authenticated, 'create'),
+    ]
+
     def __init__(self, request):
         self.request = request
 
