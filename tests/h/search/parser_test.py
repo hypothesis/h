@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import pytest
 from hypothesis import strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 from webob.multidict import MultiDict
 
 from h.search import parser
@@ -98,6 +98,7 @@ def test_parse_with_odd_quotes_combinations(query_in, query_out):
 
 
 @given(st.text())
+@settings(max_examples=30)
 @pytest.mark.fuzz
 def test_parse_always_return_a_multidict(text):
     """Given any string input, output should always be a MultiDict."""
@@ -114,6 +115,7 @@ nonwhitespace_text = st.text(alphabet=nonwhitespace_chars, min_size=1)
 
 @given(kw=st.sampled_from(parser.named_fields),
        value=nonwhitespace_text)
+@settings(max_examples=30)
 @pytest.mark.fuzz
 def test_parse_with_any_nonwhitespace_text(kw, value):
     result = parser.parse(kw + ':' + value)
