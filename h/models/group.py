@@ -134,6 +134,10 @@ class Group(Base, mixins.Timestamps):
         if read_principal is not None:
             terms.append((security.Allow, read_principal, 'read'))
 
+        flag_principal = _flag_principal(self)
+        if flag_principal is not None:
+            terms.append((security.Allow, flag_principal, 'flag'))
+
         write_principal = _write_principal(self)
         if write_principal is not None:
             terms.append((security.Allow, write_principal, 'write'))
@@ -163,6 +167,16 @@ def _read_principal(group):
     return {
         ReadableBy.members: 'group:{}'.format(group.pubid),
         ReadableBy.world: security.Everyone,
+    }.get(group.readable_by)
+
+
+def _flag_principal(group):
+    # If a user can read (see) annotations within this group,
+    # they can also flag them—but they need to be logged in
+    # (``pyramid.security.Authenticated``)
+    return {
+        ReadableBy.members: 'group:{}'.format(group.pubid),
+        ReadableBy.world: security.Authenticated,
     }.get(group.readable_by)
 
 

@@ -296,8 +296,23 @@ class TestOrganizationContext(object):
 
 
 class FakeGroup(object):
+    # NB: Tests that use this do not validate that the principals are correct
+    # for the indicated group. They validate that those principals are being
+    # transferred over to the annotation as expected
+    # As such, this has sort of a partial and wonky re-implementation of
+    # ``h.models.Group.__acl__``
+    # This is a symptom of the disease that is splitting ACL concerns between
+    # traversal/resources and model classes
+    # TODO: Refactor once we're able to move ACLs off of models
     def __init__(self, principals):
-        self.__acl__ = [(security.Allow, p, 'read') for p in principals]
+        acl = []
+        for p in principals:
+            acl.append((security.Allow, p, 'read'))
+            if p == security.Everyone:
+                acl.append((security.Allow, security.Authenticated, 'flag'))
+            else:
+                acl.append((security.Allow, p, 'flag'))
+        self.__acl__ = acl
 
 
 @pytest.fixture

@@ -22,7 +22,7 @@ the view callable as the ``context`` argument.
 from __future__ import unicode_literals
 
 from pyramid.security import DENY_ALL
-from pyramid.security import Allow, Everyone, Authenticated
+from pyramid.security import Allow
 from pyramid.security import principals_allowed_by_permission
 
 from h.models.organization import ORGANIZATION_DEFAULT_PUBID
@@ -56,15 +56,12 @@ class AnnotationContext(object):
 
         acl = []
         if self.annotation.shared:
-            for principal in self._group_principals(self.group):
+            for principal in self._group_principals(self.group, 'read'):
                 acl.append((Allow, principal, 'read'))
-                # If this annotation is readable by everyone, it should be
-                # flaggable by any authenticated user, i.e. replace
-                # ``security.Everyone`` with ``security.Authenticated``
-                if principal == Everyone:
-                    acl.append((Allow, Authenticated, 'flag'))
-                else:
-                    acl.append((Allow, principal, 'flag'))
+
+            for principal in self._group_principals(self.group, 'flag'):
+                acl.append((Allow, principal, 'flag'))
+
         else:
             acl.append((Allow, self.annotation.userid, 'read'))
             acl.append((Allow, self.annotation.userid, 'flag'))
@@ -78,10 +75,11 @@ class AnnotationContext(object):
         return acl
 
     @staticmethod
-    def _group_principals(group):
+    def _group_principals(group, principal):
         if group is None:
             return []
-        return principals_allowed_by_permission(group, 'read')
+        principals = principals_allowed_by_permission(group, principal)
+        return principals
 
 
 class OrganizationContext(object):
