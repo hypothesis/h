@@ -31,7 +31,7 @@ class TestCreate(object):
         assert isinstance(response, HTTPNoContent)
 
 
-@pytest.mark.usefixtures('moderation_service', 'has_permission')
+@pytest.mark.usefixtures('moderation_service')
 class TestDelete(object):
     def test_it_unhides_the_annotation(self, pyramid_request, resource, moderation_service):
         views.delete(resource, pyramid_request)
@@ -51,15 +51,6 @@ class TestDelete(object):
         response = views.delete(resource, pyramid_request)
         assert isinstance(response, HTTPNoContent)
 
-    def test_it_checks_for_group_admin_permission(self, pyramid_request, resource):
-        views.delete(resource, pyramid_request)
-        pyramid_request.has_permission.assert_called_once_with('admin', resource.group)
-
-    def test_it_responds_with_not_found_when_no_admin_access_in_group(self, pyramid_request, resource):
-        pyramid_request.has_permission.return_value = False
-        with pytest.raises(HTTPNotFound):
-            views.delete(resource, pyramid_request)
-
 
 @pytest.fixture
 def resource():
@@ -71,13 +62,6 @@ def moderation_service(pyramid_config):
     svc = mock.Mock(spec_set=['hide', 'unhide'])
     pyramid_config.register_service(svc, name='annotation_moderation')
     return svc
-
-
-@pytest.fixture
-def has_permission(pyramid_request):
-    func = mock.Mock(return_value=True)
-    pyramid_request.has_permission = func
-    return func
 
 
 @pytest.fixture
