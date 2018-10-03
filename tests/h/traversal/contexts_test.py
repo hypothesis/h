@@ -69,7 +69,7 @@ class TestAnnotationContext(object):
         ann = factories.Annotation(userid='saoirse', deleted=True)
         res = AnnotationContext(ann, group_service, links_service)
 
-        for perm in ['read', 'admin', 'update', 'delete']:
+        for perm in ['read', 'admin', 'update', 'delete', 'moderate']:
             assert not policy.permits(res, ['saiorse'], perm)
 
     @pytest.mark.parametrize('groupid,userid,permitted', [

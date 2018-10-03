@@ -55,6 +55,10 @@ class AnnotationContext(object):
             return [DENY_ALL]
 
         acl = []
+
+        # For shared annotations, some permissions are derived from the
+        # permissions for this annotation's containing group.
+        # Otherwise they are derived from the annotation's creator
         if self.annotation.shared:
             for principal in self._group_principals(self.group, 'read'):
                 acl.append((Allow, principal, 'read'))
@@ -62,10 +66,17 @@ class AnnotationContext(object):
             for principal in self._group_principals(self.group, 'flag'):
                 acl.append((Allow, principal, 'flag'))
 
+            for principal in self._group_principals(self.group, 'moderate'):
+                acl.append((Allow, principal, 'moderate'))
+
         else:
             acl.append((Allow, self.annotation.userid, 'read'))
+            # Flagging one's own private annotations is nonsensical,
+            # but from an authz perspective, allowed. It is up to services/views
+            # to handle these situations appropriately
             acl.append((Allow, self.annotation.userid, 'flag'))
 
+        # The user who created the annotation always has the following permissions
         for action in ['admin', 'update', 'delete']:
             acl.append((Allow, self.annotation.userid, action))
 
