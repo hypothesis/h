@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from pyramid.httpexceptions import HTTPNoContent, HTTPNotFound
+from pyramid.httpexceptions import HTTPNoContent
 
 from h.views.api import moderation as views
 
 
-@pytest.mark.usefixtures('moderation_service', 'has_permission')
+@pytest.mark.usefixtures('moderation_service')
 class TestCreate(object):
     def test_it_hides_the_annotation(self, pyramid_request, resource, moderation_service):
         views.create(resource, pyramid_request)
@@ -29,15 +29,6 @@ class TestCreate(object):
     def test_it_renders_no_content(self, pyramid_request, resource):
         response = views.create(resource, pyramid_request)
         assert isinstance(response, HTTPNoContent)
-
-    def test_it_checks_for_group_admin_permission(self, pyramid_request, resource):
-        views.create(resource, pyramid_request)
-        pyramid_request.has_permission.assert_called_once_with('admin', resource.group)
-
-    def test_it_responds_with_not_found_when_no_admin_access_in_group(self, pyramid_request, resource):
-        pyramid_request.has_permission.return_value = False
-        with pytest.raises(HTTPNotFound):
-            views.create(resource, pyramid_request)
 
 
 @pytest.mark.usefixtures('moderation_service', 'has_permission')

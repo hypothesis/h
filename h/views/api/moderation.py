@@ -13,10 +13,8 @@ from h.views.api.config import api_config
             request_method='PUT',
             link_name='annotation.hide',
             description='Hide an annotation as a group moderator.',
-            effective_principals=security.Authenticated)
+            permission='moderate')
 def create(context, request):
-    if not request.has_permission('admin', context.group):
-        raise HTTPNotFound()
 
     svc = request.find_service(name='annotation_moderation')
     svc.hide(context.annotation)
