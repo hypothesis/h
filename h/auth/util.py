@@ -43,6 +43,7 @@ def principals_for_user(user):
         return None
 
     principals = set()
+    principals.add(role.User)
     if user.admin:
         principals.add(role.Admin)
     if user.staff:

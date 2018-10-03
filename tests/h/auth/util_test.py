@@ -39,24 +39,24 @@ class TestGroupfinder(object):
 @pytest.mark.parametrize('user,principals', (
     # User isn't found in the database: they're not authenticated at all
     (None, None),
-    # User found but not staff, admin, or a member of any groups: no additional principals
+    # User found but not staff, admin, or a member of any groups: only role is role.User
     (FakeUser(authority='example.com', admin=False, staff=False, groups=[]),
-     ['authority:example.com']),
+     ['authority:example.com', role.User]),
     # User is admin: role.Admin should be in principals
     (FakeUser(authority='foobar.org', admin=True, staff=False, groups=[]),
-     ['authority:foobar.org', role.Admin]),
+     ['authority:foobar.org', role.Admin, role.User]),
     # User is staff: role.Staff should be in principals
     (FakeUser(authority='example.com', admin=False, staff=True, groups=[]),
-     ['authority:example.com', role.Staff]),
+     ['authority:example.com', role.Staff, role.User]),
     # User is admin and staff
     (FakeUser(authority='foobar.org', admin=True, staff=True, groups=[]),
-     ['authority:foobar.org', role.Admin, role.Staff]),
+     ['authority:foobar.org', role.Admin, role.Staff, role.User]),
     # User is a member of some groups
     (FakeUser(authority='example.com', admin=False, staff=False, groups=[FakeGroup('giraffe'), FakeGroup('elephant')]),
-     ['authority:example.com', 'group:giraffe', 'group:elephant']),
+     ['authority:example.com', 'group:giraffe', 'group:elephant', role.User]),
     # User is admin, staff, and a member of some groups
     (FakeUser(authority='foobar.org', admin=True, staff=True, groups=[FakeGroup('donkeys')]),
-     ['authority:foobar.org', 'group:donkeys', role.Admin, role.Staff]),
+     ['authority:foobar.org', 'group:donkeys', role.Admin, role.Staff, role.User]),
 ))
 def test_principals_for_user(user, principals):
     result = util.principals_for_user(user)
@@ -158,6 +158,11 @@ class TestPrincipalsForAuthClient(object):
         principals = util.principals_for_auth_client(auth_client)
 
         assert role.AuthClient in principals
+
+    def test_it_does_not_set_user_role(self, auth_client):
+        principals = util.principals_for_auth_client(auth_client)
+
+        assert role.User not in principals
 
     def test_it_returns_principals_as_list(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)

@@ -35,14 +35,23 @@ class TestCreateGroup(object):
 
         assert res.status_code == 400
 
-    def test_it_returns_http_400_if_no_authenticated_user(self, app, auth_client_header):
+    def test_it_returns_http_404_if_no_authenticated_user(self, app, auth_client_header):
+        # FIXME: This should return a 403
         group = {
             'name': 'My Group'
         }
         res = app.post_json('/api/groups', group, headers=auth_client_header, expect_errors=True)
 
-        assert res.status_code == 400
-        assert res.json['reason'] == 'Request must have an authenticated user'
+        assert res.status_code == 404
+
+    @pytest.mark.xfail
+    def test_it_returns_http_403_if_no_authenticated_user(self, app, auth_client_header):
+        group = {
+            'name': 'My Group'
+        }
+        res = app.post_json('/api/groups', group, headers=auth_client_header, expect_errors=True)
+
+        assert res.status_code == 403
 
     def test_it_allows_auth_client_with_forwarded_user(self, app, auth_client_header, user):
         headers = auth_client_header
