@@ -7,8 +7,6 @@ import pytest
 import webob
 
 from h.search import Search, index, query
-from hypothesis import strategies as st
-from hypothesis import given
 
 MISSING = object()
 ES_VERSION = (1, 7, 0)
@@ -59,37 +57,22 @@ class TestLimiter(object):
 
         assert q["from"] == from_
 
-    @given(st.text())
-    @pytest.mark.fuzz
-    def test_limit_output_within_bounds(self, es_dsl_search, pyramid_request, text):
+    @pytest.mark.parametrize('limit,expected', [
+        ("MAX", LIMIT_DEFAULT),
+        (LIMIT_MAX + 1, LIMIT_MAX),
+        (LIMIT_MAX, LIMIT_MAX),
+        ("150", 150),
+        (0, 0),
+        (-1, LIMIT_DEFAULT),
+        (1.5, 1)])
+    def test_limit_output_within_bounds(self, es_dsl_search, pyramid_request, limit, expected):
         """Given any string input, output should be in the allowed range."""
         limiter = query.Limiter()
 
-        q = limiter(es_dsl_search, webob.multidict.MultiDict({"limit": text})).to_dict()
+        q = limiter(es_dsl_search, webob.multidict.MultiDict({"limit": limit})).to_dict()
 
         assert isinstance(q["size"], int)
-        assert 0 <= q["size"] <= LIMIT_MAX
-
-    @given(st.integers())
-    @pytest.mark.fuzz
-    def test_limit_output_within_bounds_int_input(self, es_dsl_search, pyramid_request, lim):
-        """Given any integer input, output should be in the allowed range."""
-        limiter = query.Limiter()
-
-        q = limiter(es_dsl_search, webob.multidict.MultiDict({"limit": str(lim)})).to_dict()
-
-        assert isinstance(q["size"], int)
-        assert 0 <= q["size"] <= LIMIT_MAX
-
-    @given(st.integers(min_value=0, max_value=LIMIT_MAX))
-    @pytest.mark.fuzz
-    def test_limit_matches_input(self, es_dsl_search, pyramid_request, lim):
-        """Given an integer in the allowed range, it should be passed through."""
-        limiter = query.Limiter()
-
-        q = limiter(es_dsl_search, webob.multidict.MultiDict({"limit": str(lim)})).to_dict()
-
-        assert q["size"] == lim
+        assert q["size"] == expected
 
     def test_limit_set_to_default_when_missing(self, es_dsl_search, pyramid_request):
         limiter = query.Limiter()
