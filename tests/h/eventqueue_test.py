@@ -67,6 +67,16 @@ class TestEventQueue(object):
         for sub in subscribers:
             sub.assert_called_once_with(event)
 
+    def test_publish_all_reraises_in_debug_mode(self, subscriber, pyramid_request):
+        queue = eventqueue.EventQueue(pyramid_request)
+        pyramid_request.debug = True
+        subscriber.side_effect = Exception('boom!')
+
+        with pytest.raises(Exception) as excinfo:
+            queue(DummyEvent(pyramid_request))
+            queue.publish_all()
+        assert str(excinfo.value) == 'boom!'
+
     def test_publish_all_sends_exception_to_sentry(self, subscriber, pyramid_request):
         pyramid_request.sentry = mock.Mock()
         subscriber.side_effect = ValueError('exploded!')
