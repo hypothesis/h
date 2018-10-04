@@ -293,18 +293,6 @@ def auth_client(factories):
 
 
 @pytest.fixture
-def basic_auth_creds(patch):
-    basic_auth_creds = patch('h.auth.util.basic_auth_creds')
-    basic_auth_creds.return_value = None
-    return basic_auth_creds
-
-
-@pytest.fixture
-def valid_auth(basic_auth_creds, auth_client):
-    basic_auth_creds.return_value = (auth_client.id, auth_client.secret)
-
-
-@pytest.fixture
 def principals_for_user(patch):
     return patch('h.auth.util.principals_for_user')
 

@@ -340,15 +340,6 @@ def user_model(patch):
 
 
 @pytest.fixture
-def user_service(db_session, pyramid_config):
-    service = Mock(spec_set=UserService(default_authority='example.com',
-                                        session=db_session))
-    service.fetch_for_login.return_value = None
-    pyramid_config.register_service(service, name='user')
-    return service
-
-
-@pytest.fixture
 def user_password_service(pyramid_config):
     service = Mock(spec_set=UserPasswordService())
     service.check_password.return_value = True

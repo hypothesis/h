@@ -195,15 +195,6 @@ def invalid_form():
 
 
 @pytest.fixture
-def mailer(pyramid_config):
-    from pyramid_mailer.interfaces import IMailer
-    from pyramid_mailer.testing import DummyMailer
-    mailer = DummyMailer()
-    pyramid_config.registry.registerUtility(mailer, IMailer)
-    return mailer
-
-
-@pytest.fixture
 def matchers():
     from ..common import matchers
     return matchers

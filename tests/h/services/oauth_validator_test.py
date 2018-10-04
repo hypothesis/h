@@ -211,10 +211,6 @@ class TestInvalidateAuthorizationCode(object):
 
         assert db_session.query(models.AuthzCode).get(keep_code.id) is not None
 
-    @pytest.fixture
-    def authz_code(self, factories):
-        return factories.AuthzCode()
-
 
 class TestInvalidateRefreshToken(object):
     def test_it_shortens_refresh_token_expires(self, svc, oauth_request, token, utcnow):

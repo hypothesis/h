@@ -75,10 +75,6 @@ class TestSearch(object):
     def search_run(self, search_lib):
         return search_lib.Search.return_value.run
 
-    @pytest.fixture
-    def storage(self, patch):
-        return patch('h.views.api.annotations.storage')
-
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'create_schema',
@@ -445,11 +441,6 @@ def group_service(pyramid_config):
 def pyramid_request(pyramid_request):
     pyramid_request.notify_after_commit = mock.Mock(spec_set=[])
     return pyramid_request
-
-
-@pytest.fixture
-def search_lib(patch):
-    return patch('h.views.api.annotations.search_lib')
 
 
 @pytest.fixture

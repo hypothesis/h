@@ -324,11 +324,6 @@ def user(factories, authority):
 
 
 @pytest.fixture
-def alternate_user(factories, alternate_authority):
-    return factories.User(authority=alternate_authority)
-
-
-@pytest.fixture
 def origin():
     return 'http://foo.com'
 
