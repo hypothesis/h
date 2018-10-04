@@ -6,7 +6,6 @@ from mock import Mock
 from pyramid.exceptions import BadCSRFToken
 
 from h.accounts import schemas
-from h.services.user import UserService
 from h.services.user_password import UserPasswordService
 
 
@@ -337,15 +336,6 @@ def dummy_node(pyramid_request):
 @pytest.fixture
 def user_model(patch):
     return patch('h.accounts.schemas.models.User')
-
-
-@pytest.fixture
-def user_service(db_session, pyramid_config):
-    service = Mock(spec_set=UserService(default_authority='example.com',
-                                        session=db_session))
-    service.fetch_for_login.return_value = None
-    pyramid_config.register_service(service, name='user')
-    return service
 
 
 @pytest.fixture

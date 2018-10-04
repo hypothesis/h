@@ -910,11 +910,6 @@ class TestDeveloperController(object):
 
 
 @pytest.fixture
-def session(patch):
-    return patch('h.views.accounts.session')
-
-
-@pytest.fixture
 def subscriptions_model(patch):
     return patch('h.models.Subscriptions')
 
@@ -940,19 +935,7 @@ def mailer(patch):
 
 
 @pytest.fixture
-def models(patch):
-    return patch('h.views.accounts.models')
-
-
-@pytest.fixture
 def user_password_service(pyramid_config):
     service = mock.Mock(spec_set=UserPasswordService())
     pyramid_config.register_service(service, name='user_password')
-    return service
-
-
-@pytest.fixture
-def user_signup_service(pyramid_config):
-    service = mock.Mock(spec_set=['signup'])
-    pyramid_config.register_service(service, name='user_signup')
     return service
