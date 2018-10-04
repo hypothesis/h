@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
+import mock
 from mock import MagicMock
 from pyramid import httpexceptions
 import pytest
@@ -233,15 +233,24 @@ def models(patch):
 
 @pytest.fixture
 def user_service(pyramid_config, db_session):
-    service = Mock(spec_set=UserService(default_authority='example.com',
-                                        session=db_session))
+    service = mock.create_autospec(
+        UserService,
+        instance=True,
+        spec_set=True)
+    service.return_value.default_authority = 'example.com'
+    service.return_value.session = db_session
+
     pyramid_config.register_service(service, name='user')
     return service
 
 
 @pytest.fixture
-def annotation_stats_service(pyramid_config, db_session):
-    service = Mock(spec_set=AnnotationStatsService(session=db_session))
+def annotation_stats_service(pyramid_config, pyramid_request):
+    service = mock.create_autospec(
+        AnnotationStatsService,
+        instance=True,
+        spec_set=True)
+    service.return_value.request = pyramid_request
     service.user_annotation_counts.return_value = {'total': 0}
     pyramid_config.register_service(service, name='annotation_stats')
     return service
@@ -249,6 +258,10 @@ def annotation_stats_service(pyramid_config, db_session):
 
 @pytest.fixture
 def delete_user_service(pyramid_config, pyramid_request):
-    service = Mock(spec_set=DeleteUserService(request=pyramid_request))
+    service = mock.create_autospec(
+        DeleteUserService,
+        instance=True,
+        spec_set=True)
+    service.return_value.request = pyramid_request
     pyramid_config.register_service(service, name='delete_user')
     return service

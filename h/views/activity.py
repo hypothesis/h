@@ -156,7 +156,7 @@ class GroupSearchController(SearchController):
                               for u in [self.group.creator]]
                 moderators = sorted(moderators, key=lambda k: k['username'].lower())
 
-        group_annotation_count = self.request.find_service(name='annotation_stats').group_annotation_count(self.group.pubid)
+        group_annotation_count = self._get_total_annotations_in_group(result, q, self.request)
 
         result['stats'] = {
             'annotation_count': group_annotation_count,
@@ -204,6 +204,19 @@ class GroupSearchController(SearchController):
         result['show_leave_button'] = self.request.user in self.group.members
 
         return result
+
+    def _get_total_annotations_in_group(self, result, q, request):
+        """
+        Get number of annotations in group.
+
+        If the search result already has this number don't run a query, just re-use it.
+        """
+        group_annotation_count = result['search_results'].total
+        if len(q) > 1:
+            group_annotation_count = (self.request
+                                      .find_service(name='annotation_stats')
+                                      .group_annotation_count(self.group.pubid))
+        return group_annotation_count
 
     @view_config(request_method='POST',
                  request_param='group_join')
