@@ -123,7 +123,6 @@ def svc(pyramid_request):
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
-    pyramid_request.es = mock.Mock()
     pyramid_request.stats = mock.Mock()
     return pyramid_request
 
