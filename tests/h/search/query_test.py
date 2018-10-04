@@ -707,21 +707,19 @@ class TestAnyMatcher(object):
 
         assert sorted(result.annotation_ids) == sorted(matched_ids)
 
-    def test_ors_any_matches(self, search, Annotation):
+    def test_ands_any_matches(self, search, Annotation):
         """
-        Any is expected to match any of the following fields;
+        Any is expected to match all of the following fields;
         quote, text, uri.parts, and tags
         that contain any of the passed keywords.
         """
-        Annotation(target_selectors=[{'exact': 'selected baz text'}])
-        Annotation(tags=["baz"])
-        Annotation(target_uri="baz.com")
-        Annotation(text="baz is best")
+        Annotation(text="bar is best").id
+        Annotation(tags=["foo"]).id
 
         matched_ids = [Annotation(target_uri="foo/bar/baz.com").id,
-                       Annotation(target_selectors=[{'exact': 'selected foo text'}]).id,
-                       Annotation(text="bar is best").id,
-                       Annotation(tags=["foo"]).id]
+                       Annotation(target_selectors=[{'exact': 'selected foo bar text'}]).id,
+                       Annotation(text="bar foo is best").id,
+                       Annotation(tags=["foo bar"]).id]
 
         params = webob.multidict.MultiDict()
         params.add("any", "foo")
