@@ -10,12 +10,11 @@ import mock
 import pytest
 
 import h.search.index
-from h.services.annotation_moderation import AnnotationModerationService
 
 from tests.common.matchers import Matcher
 
 
-@pytest.mark.usefixtures("annotations", "moderation_service")
+@pytest.mark.usefixtures("annotations")
 class TestIndex(object):
     def test_annotation_ids_are_used_as_elasticsearch_ids(self, es_client,
                                                           factories,
@@ -495,12 +494,3 @@ def get_indexed_ann(es_client):
             index=es_client.index, doc_type=es_client.mapping_type,
             id=annotation_id)["_source"]
     return _get
-
-
-@pytest.fixture
-def moderation_service(pyramid_config):
-    svc = mock.create_autospec(AnnotationModerationService, spec_set=True, instance=True)
-    svc.all_hidden.return_value = []
-    svc.hidden.return_value = False
-    pyramid_config.register_service(svc, name='annotation_moderation')
-    return svc
