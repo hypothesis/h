@@ -40,22 +40,36 @@ class TestTransformAnnotation(object):
         else:
             assert 'nipsa' not in ann.data
 
-    @pytest.mark.parametrize('ann,moderated', [
-        (FakeAnnotation({'id': 'normal'}), False),
-        (FakeAnnotation({'id': 'moderated'}), True)
+    @pytest.mark.parametrize('ann,moderated,enable_hidden_filter', [
+        (FakeAnnotation({'id': 'normal'}), False, True),
+        (FakeAnnotation({'id': 'moderated'}), True, True),
+        (FakeAnnotation({'id': 'normal'}), False, False),
+        (FakeAnnotation({'id': 'moderated'}), True, False)
     ])
-    def test_with_moderated_annotation(self, ann, moderated, moderation_service, pyramid_request):
+    def test_with_moderated_annotation(self,
+                                       ann,
+                                       moderated,
+                                       enable_hidden_filter,
+                                       moderation_service,
+                                       pyramid_request):
         moderation_service.hidden.return_value = moderated
         event = FakeEvent(request=pyramid_request,
                           annotation=ann,
                           annotation_dict=ann.data)
+        pyramid_request.feature.flags['replace_nipsa_with_hidden_filter'] = enable_hidden_filter
 
         subscribers.transform_annotation(event)
 
-        if moderated:
-            assert ann.data['nipsa'] is True
+        if enable_hidden_filter:
+            if moderated:
+                assert 'nipsa' not in ann.data
+            else:
+                assert 'nipsa' not in ann.data
         else:
-            assert 'nipsa' not in ann.data
+            if moderated:
+                assert ann.data['nipsa'] is True
+            else:
+                assert 'nipsa' not in ann.data
 
     @pytest.fixture
     def nipsa_service(self, pyramid_config):

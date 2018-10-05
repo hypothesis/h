@@ -670,6 +670,102 @@ class TestNipsaFilter(object):
         return group_service
 
 
+@pytest.mark.usefixtures('pyramid_config')
+class TestHiddenFilter(object):
+
+    @pytest.mark.parametrize('nipsa,hidden,should_show_annotation', [
+        # both nipsa and hidden fields are set, so don't show the annotation
+        (True, True, False),
+        # nipsa field is set, so don't show the annotation
+        (True, False, False),
+        # hidden field is set, so don't show the annotation
+        (False, True, False),
+        # neither field is set, show the annotation
+        (False, False, True),
+    ])
+    def test_visibility_of_moderated_and_nipsaed_annotations(
+        self, index, Annotation, pyramid_request, search, user,
+        AnnotationSearchIndexPresenter, nipsa, hidden, should_show_annotation
+    ):
+        pyramid_request.user = user
+        search.append_modifier(query.HiddenFilter(pyramid_request))
+        presenter = AnnotationSearchIndexPresenter.return_value
+        presenter.asdict.return_value = {'id': 'ann1',
+                                         'hidden': hidden,
+                                         'nipsa': nipsa}
+        Annotation(id='ann1')
+        presenter.asdict.return_value = {'id': 'ann2',
+                                         'hidden': False,
+                                         'nipsa': False}
+        Annotation(id='ann2', userid=user.userid)
+        expected_ids = ['ann2']
+        if should_show_annotation:
+            expected_ids.append('ann1')
+        result = search.run({})
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_hides_banned_users_annotations_from_other_users(
+        self, pyramid_request, search, banned_user, user, Annotation
+    ):
+        pyramid_request.user = user
+        search.append_modifier(query.HiddenFilter(pyramid_request))
+        Annotation(userid=banned_user.userid)
+        expected_ids = [Annotation(userid=user.userid).id]
+
+        result = search.run(webob.multidict.MultiDict({}))
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_shows_banned_users_annotations_to_banned_user(
+        self, pyramid_request, search, banned_user, user, Annotation
+    ):
+        pyramid_request.user = banned_user
+        search.append_modifier(query.HiddenFilter(pyramid_request))
+        expected_ids = [Annotation(userid=banned_user.userid).id]
+
+        result = search.run(webob.multidict.MultiDict({}))
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    def test_shows_banned_users_annotations_in_groups_they_created(
+        self, pyramid_request, search, banned_user, user, Annotation,
+        group_service,
+    ):
+        pyramid_request.user = user
+        group_service.groupids_created_by.return_value = ["created_by_banneduser"]
+        search.append_modifier(query.HiddenFilter(pyramid_request))
+        expected_ids = [Annotation(groupid="created_by_banneduser",
+                                   userid=banned_user.userid).id]
+
+        result = search.run(webob.multidict.MultiDict({}))
+
+        assert sorted(result.annotation_ids) == sorted(expected_ids)
+
+    @pytest.fixture
+    def banned_user(self, factories):
+        return factories.User(username="banned", nipsa=True)
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User(username="notbanned", nipsa=False)
+
+    @pytest.fixture
+    def pyramid_config(self, pyramid_config, banned_user):
+        # Fake implementation of the `AnnotationTransformEvent` subscriber
+        # which adds the "nipsa" flag to annotations during indexing.
+        def add_nipsa_flag(event):
+            if event.annotation.userid == banned_user.userid:
+                event.annotation_dict['nipsa'] = True
+        pyramid_config.add_subscriber(add_nipsa_flag, 'h.events.AnnotationTransformEvent')
+
+        return pyramid_config
+
+    @pytest.fixture
+    def group_service(self, group_service):
+        group_service.groupids_created_by.return_value = []
+        return group_service
+
+
 class TestAnyMatcher(object):
     def test_matches_uriparts(self, search, Annotation):
         Annotation(target_uri="http://bar.com")
@@ -919,3 +1015,10 @@ def es_dsl_search(pyramid_request):
         using=pyramid_request.es.conn,
         index=pyramid_request.es.index,
     )
+
+
+@pytest.fixture
+def AnnotationSearchIndexPresenter(patch):
+    AnnotationSearchIndexPresenter = patch('h.search.index.presenters.AnnotationSearchIndexPresenter')
+    AnnotationSearchIndexPresenter.return_value.asdict.return_value = {'test': 'val'}
+    return AnnotationSearchIndexPresenter
