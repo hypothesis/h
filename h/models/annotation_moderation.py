@@ -22,7 +22,8 @@ class AnnotationModeration(Base, Timestamps):
 
     annotation_id = sa.Column(types.URLSafeUUID,
                               sa.ForeignKey('annotation.id', ondelete='cascade'),
-                              nullable=False)
+                              nullable=False,
+                              unique=True)
 
     #: The annotation which has been flagged.
     annotation = sa.orm.relationship('Annotation',
