@@ -49,7 +49,7 @@ class TestTransformAnnotation(object):
     def test_with_moderated_annotation(self,
                                        ann,
                                        moderated,
-                                       enable_hidden_filter, 
+                                       enable_hidden_filter,
                                        moderation_service,
                                        pyramid_request):
         moderation_service.hidden.return_value = moderated

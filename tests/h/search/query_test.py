@@ -700,7 +700,7 @@ class TestHiddenFilter(object):
         Annotation(id='ann2', userid=user.userid)
         expected_ids = ['ann2']
         if should_show_annotation:
-           expected_ids.append('ann1')
+            expected_ids.append('ann1')
         result = search.run({})
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
