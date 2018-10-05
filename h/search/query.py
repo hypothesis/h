@@ -426,7 +426,7 @@ class AnyMatcher(object):
             SimpleQueryString(
                 query=qs,
                 fields=["quote", "tags", "text", "uri.parts"],
-                # default_operator='or',
+                default_operator='and',
             )
         )
 
