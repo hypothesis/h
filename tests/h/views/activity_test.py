@@ -19,6 +19,8 @@ GROUP_TYPE_OPTIONS = ('group', 'open_group', 'restricted_group')
 
 @pytest.mark.usefixtures('annotation_stats_service', 'paginate', 'query', 'routes')
 class TestSearchController(object):
+    def test_controller_populates_parsed_query_params(self, controller, pyramid_request, query):
+        assert controller.parsed_query_params == query.extract.return_value
 
     def test_search_checks_for_redirects(self, controller, pyramid_request, query):
         controller.search()
@@ -99,10 +101,6 @@ class TestSearchController(object):
     @pytest.fixture
     def controller(self, pyramid_request):
         return activity.SearchController(pyramid_request)
-
-    @pytest.fixture
-    def query(self, patch):
-        return patch('h.views.activity.query')
 
     @pytest.fixture
     def paginate(self, patch):
@@ -378,10 +376,11 @@ class TestGroupSearchController(object):
     def test_search_returns_group_members_faceted_by(self,
                                                      controller,
                                                      pyramid_request,
+                                                     query,
                                                      test_user,
                                                      test_group):
         faceted_user = test_group.members[0]
-        pyramid_request.params = {'q': 'user:%s' % test_group.members[0].username}
+        controller.parsed_query_params = MultiDict({"user": faceted_user.username})
 
         result = controller.search()
 
@@ -578,7 +577,6 @@ class TestGroupSearchController(object):
                                                                       query,
                                                                       annotation_stats_service,
                                                                       pyramid_request):
-        query.extract.return_value = MultiDict({"user": test_user, "group": test_group})
         result = controller.search()['stats']
         annotation_stats_service.group_annotation_count.assert_called_with(test_group.pubid)
         assert result['annotation_count'] == 5
@@ -600,7 +598,7 @@ class TestGroupSearchController(object):
         re-use that value rather than executing another query inside the stats
         service.
         """
-        query.extract.return_value = MultiDict({"group": test_group})
+        controller.parsed_query_params = MultiDict({"group": test_group})
         result = controller.search()['stats']
         annotation_stats_service.group_annotation_count.assert_not_called()
         assert result['annotation_count'] == 200
@@ -822,7 +820,7 @@ class TestGroupSearchController(object):
         return OrganizationContext
 
     @pytest.fixture
-    def controller(self, request, group, pyramid_request, OrganizationContext):
+    def controller(self, request, group, pyramid_request, OrganizationContext, query):
         test_group = group
         if 'test_group' in request.fixturenames:
             test_group = request.getfixturevalue('test_group')
@@ -859,10 +857,6 @@ class TestGroupSearchController(object):
     def toggle_user_facet_request(self, pyramid_request):
         pyramid_request.params['toggle_user_facet'] = 'acct:fred@hypothes.is'
         return pyramid_request
-
-    @pytest.fixture
-    def query(self, patch):
-        return patch('h.views.activity.query')
 
 
 @pytest.mark.usefixtures('annotation_stats_service', 'user_service', 'routes', 'search')
@@ -912,28 +906,28 @@ class TestUserSearchController(object):
     def test_search_passes_the_user_annotation_counts_to_the_template(self,
                                                                       controller,
                                                                       pyramid_config,
+                                                                      annotation_stats_service,
                                                                       user):
-        pyramid_config.testing_securitypolicy(user.userid)
+        result = controller.search()['stats']
+        annotation_stats_service.user_annotation_count.assert_called_with(user.userid)
+        assert result['annotation_count'] == 6
 
-        stats = controller.search()['stats']
-
-        assert stats['annotation_count'] == 6
-
-    def test_search_passes_public_annotation_counts_to_the_template(self,
-                                                                    controller,
-                                                                    factories,
-                                                                    pyramid_config,
-                                                                    pyramid_request):
+    def test_search_reuses_user_annotation_count_if_able(self,
+                                                         controller,
+                                                         pyramid_config,
+                                                         query,
+                                                         annotation_stats_service,
+                                                         user):
         """
-        The annotation count passed to the view should not include private and group annotation counts
-        if the user whose page we are on is different from the authenticated user.
-
+        In cases where the annotation count returned from search is the same calc
+        as the annotation count that would be returned from the stats service,
+        re-use that value rather than executing another query inside the stats
+        service.
         """
-        pyramid_config.testing_securitypolicy(factories.User().userid)
-
-        stats = controller.search()['stats']
-
-        assert stats['annotation_count'] == 1
+        controller.parsed_query_params = MultiDict({"user": user})
+        result = controller.search()['stats']
+        annotation_stats_service.user_annotation_count.assert_not_called()
+        assert result['annotation_count'] == 200
 
     def test_search_passes_the_other_user_details_to_the_template(self,
                                                                   controller,
@@ -1038,7 +1032,7 @@ class TestUserSearchController(object):
                 username=user.username))
 
     @pytest.fixture
-    def controller(self, user, pyramid_request):
+    def controller(self, user, pyramid_request, query):
         return activity.UserSearchController(user, pyramid_request)
 
     @pytest.fixture
@@ -1282,8 +1276,7 @@ def routes(pyramid_config):
 def annotation_stats_service(pyramid_config):
     ann_stat_svc = mock.create_autospec(AnnotationStatsService, instance=True, spec_set=True)
 
-    ann_stat_svc.user_annotation_counts.return_value = (
-        {'public': 1, 'private': 3, 'group': 2, 'total': 6})
+    ann_stat_svc.user_annotation_count.return_value = 6
     ann_stat_svc.group_annotation_count.return_value = 5
 
     pyramid_config.register_service(ann_stat_svc, name="annotation_stats")
@@ -1311,3 +1304,11 @@ def default_org(db_session):
 @pytest.fixture
 def user(factories):
     return factories.User()
+
+
+@pytest.fixture
+def query(patch):
+    q = patch('h.views.activity.query')
+    q.extract.return_value = MultiDict({
+        "user": "userid", "group": "groupid"})
+    return q
