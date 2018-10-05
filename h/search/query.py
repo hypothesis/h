@@ -386,6 +386,31 @@ class DeletedFilter(object):
         return search.exclude("exists", field="deleted")
 
 
+class HiddenFilter(object):
+    """Return an Elasticsearch filter for filtering out moderated or NIPSA'd annotations."""
+
+    def __init__(self, request):
+        self.group_service = request.find_service(name='group')
+        self.user = request.user
+
+    def __call__(self, search, _):
+        """Filter out all hidden and NIPSA'd annotations except the current user's."""
+        # If any one of these "should" clauses is true then the annotation will
+        # get through the filter.
+        should_clauses = [Q("bool", must_not=[Q("term", nipsa=True), Q("term", hidden=True)])]
+
+        if self.user is not None:
+            # Always show the logged-in user's annotations even if they have nipsa.
+            should_clauses.append(Q("term", user=self.user.userid.lower()))
+
+            # Also include nipsa'd annotations for groups that the user created.
+            created_groups = self.group_service.groupids_created_by(self.user)
+            if created_groups:
+                should_clauses.append(Q("terms", group=created_groups))
+
+        return search.filter(Q("bool", should=should_clauses))
+
+
 class NipsaFilter(object):
     """Return an Elasticsearch filter for filtering out NIPSA'd annotations."""
 

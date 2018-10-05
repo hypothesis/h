@@ -41,17 +41,30 @@ class Search(object):
         self._replies_limit = _replies_limit
         # Order matters! The KeyValueMatcher must be run last,
         # after all other modifiers have popped off the params.
-        self._modifiers = [query.Sorter(),
-                           query.Limiter(),
-                           query.DeletedFilter(),
-                           query.AuthFilter(request),
-                           query.GroupFilter(),
-                           query.GroupAuthFilter(request),
-                           query.UserFilter(),
-                           query.NipsaFilter(request),
-                           query.AnyMatcher(),
-                           query.TagsMatcher(),
-                           query.KeyValueMatcher()]
+        if request.feature('replace_nipsa_with_hidden_filter'):
+            self._modifiers = [query.Sorter(),
+                               query.Limiter(),
+                               query.DeletedFilter(),
+                               query.AuthFilter(request),
+                               query.GroupFilter(),
+                               query.GroupAuthFilter(request),
+                               query.UserFilter(),
+                               query.HiddenFilter(request),
+                               query.AnyMatcher(),
+                               query.TagsMatcher(),
+                               query.KeyValueMatcher()]
+        else:
+            self._modifiers = [query.Sorter(),
+                               query.Limiter(),
+                               query.DeletedFilter(),
+                               query.AuthFilter(request),
+                               query.GroupFilter(),
+                               query.GroupAuthFilter(request),
+                               query.UserFilter(),
+                               query.NipsaFilter(request),
+                               query.AnyMatcher(),
+                               query.TagsMatcher(),
+                               query.KeyValueMatcher()]
         self._aggregations = []
 
     def run(self, params):

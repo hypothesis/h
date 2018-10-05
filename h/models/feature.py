@@ -19,6 +19,7 @@ FEATURES = {
     'api_render_user_info': "Return users' extended info in API responses?",
     'client_display_names': "Render display names instead of user names in the client",
     'wildcard_search_on_activity_pages': "Enable wildcard search via url facet on activity pages.",
+    'replace_nipsa_with_hidden_filter': "Filter annotations which are marked as hidden or belong to a nipsaed user.",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
