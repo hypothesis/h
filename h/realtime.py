@@ -118,13 +118,18 @@ class Publisher(object):
 
     def _publish(self, routing_key, payload):
         headers = {'timestamp': datetime.utcnow().isoformat() + 'Z'}
+        retry_policy = {'max_retries': 5,
+                        'interval_start': 0.2,
+                        'interval_step': 0.3}
 
         with producer_pool[self.connection].acquire(block=True) as producer:
             producer.publish(payload,
                              exchange=self.exchange,
                              declare=[self.exchange],
                              routing_key=routing_key,
-                             headers=headers)
+                             headers=headers,
+                             retry=True,
+                             retry_policy=retry_policy)
 
 
 def get_exchange():
