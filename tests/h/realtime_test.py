@@ -99,7 +99,8 @@ class TestConsumer(object):
 
 
 class TestPublisher(object):
-    def test_publish_annotation(self, matchers, producer_pool, pyramid_request):
+    def test_publish_annotation(self, matchers, producer_pool, pyramid_request,
+                                retry_policy):
         payload = {'action': 'create', 'annotation': {'id': 'foobar'}}
         producer = producer_pool['foobar'].acquire().__enter__()
         exchange = realtime.get_exchange()
@@ -112,9 +113,12 @@ class TestPublisher(object):
                                                  exchange=exchange,
                                                  declare=[exchange],
                                                  routing_key='annotation',
-                                                 headers=expected_headers)
+                                                 headers=expected_headers,
+                                                 retry=True,
+                                                 retry_policy=retry_policy)
 
-    def test_publish_user(self, matchers, producer_pool, pyramid_request):
+    def test_publish_user(self, matchers, producer_pool, pyramid_request,
+                          retry_policy):
         payload = {'action': 'create', 'user': {'id': 'foobar'}}
         producer = producer_pool['foobar'].acquire().__enter__()
         exchange = realtime.get_exchange()
@@ -127,7 +131,15 @@ class TestPublisher(object):
                                                  exchange=exchange,
                                                  declare=[exchange],
                                                  routing_key='user',
-                                                 headers=expected_headers)
+                                                 headers=expected_headers,
+                                                 retry=True,
+                                                 retry_policy=retry_policy)
+
+    @pytest.fixture
+    def retry_policy(self):
+        return {'max_retries': 5,
+                'interval_start': 0.2,
+                'interval_step': 0.3}
 
     @pytest.fixture
     def producer_pool(self, patch):
