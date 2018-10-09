@@ -6,7 +6,7 @@ permissions. To grant admin permissions to a user, run the following command:
 
 .. code-block:: bash
 
-  tox -e py27-dev -- sh bin/hypothesis user admin <username>
+  tox -e py27-dev -- sh bin/hypothesis --dev user admin <username>
 
 For example, to make the user 'joe' an admin in the development environment:
 
