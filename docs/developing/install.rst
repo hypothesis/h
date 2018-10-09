@@ -46,12 +46,23 @@ Install node by following the
 (the version of the nodejs package in the standard Ubuntu repositories is too
 old).
 
-Upgrade pip and npm, and install tox and tox-pip-extensions:
+Upgrade pip and npm, and install tox 3.3.0 and tox-pip-extensions:
 
 .. code-block:: bash
 
-    sudo pip install -U pip tox tox-pip-extensions
+    sudo pip install -U pip tox==3.3.0 tox-pip-extensions
     sudo npm install -g npm
+
+.. note::
+
+   Tox version 3.3.0 is required until an incompatibility between
+   tox-pip-extensions and newer versions of tox is resolved:
+
+   https://github.com/tox-dev/tox-pip-extensions/issues/16
+
+   If you see a ``TypeError: 'NoneType' object is not iterable`` error from tox
+   then make sure you have tox 3.3 and not a newer version of tox installed
+   (``sudo pip install -U tox==3.3.0``).
 
 Installing the system dependencies on macOS
 -------------------------------------------
@@ -76,12 +87,22 @@ Install the following packages:
 .. note:: Unfortunately you need to install the ``postgresql`` package, because
           Homebrew does not currently provide a standalone ``libpq`` package.
 
-Upgrade pip and install tox and tox-pip-extensions:
+Upgrade pip and install tox 3.3.0 and tox-pip-extensions:
 
 .. code-block:: bash
 
-    pip install -U pip tox tox-pip-extensions
+    pip install -U pip tox==3.3.0 tox-pip-extensions
 
+.. note::
+
+   Tox version 3.3.0 is required until an incompatibility between
+   tox-pip-extensions and newer versions of tox is resolved:
+
+   https://github.com/tox-dev/tox-pip-extensions/issues/16
+
+   If you see a ``TypeError: 'NoneType' object is not iterable`` error from tox
+   then make sure you have Tox 3.3 and not a newer version of Tox installed
+   (``pip install -U tox==3.3.0``).
 
 Getting the h source code from GitHub
 -------------------------------------
