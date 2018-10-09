@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from webob.multidict import MultiDict
 
 from h.search import Search
-from h.search import TopLevelAnnotationsFilter
+from h.search import Limiter, DeletedFilter, UserFilter, TopLevelAnnotationsFilter
 
 
 class AnnotationStatsService(object):
@@ -23,6 +23,24 @@ class AnnotationStatsService(object):
         """
         params = MultiDict({'limit': 0, 'user': userid})
         return self._search(params)
+
+    def total_user_annotation_count(self, userid):
+        """
+        Return the count of all annotations for this user.
+
+        This disregards permissions, private/public, etc and returns the
+        total number of annotations the user has made (including replies).
+        """
+        params = MultiDict({'limit': 0, 'user': userid})
+
+        search = Search(self.request, stats=self.request.stats)
+        search.clear()
+        search.append_modifier(Limiter())
+        search.append_modifier(DeletedFilter())
+        search.append_modifier(UserFilter())
+
+        search_result = search.run(params)
+        return search_result.total
 
     def group_annotation_count(self, pubid):
         """

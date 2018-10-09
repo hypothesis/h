@@ -8,10 +8,46 @@ import pytest
 from h.services.annotation_stats import AnnotationStatsService
 from h.services.annotation_stats import annotation_stats_factory
 from h.search import Search
-from h.search import TopLevelAnnotationsFilter
+from h.search import Limiter, DeletedFilter, UserFilter, TopLevelAnnotationsFilter
 
 
 class TestAnnotationStatsService(object):
+    def test_total_user_annotation_count_calls_search_with_request_and_stats(
+        self, svc, search, pyramid_request,
+    ):
+        svc.total_user_annotation_count('userid')
+
+        search.assert_called_with(pyramid_request, stats=pyramid_request.stats)
+
+    def test_total_user_annotation_count_calls_run_with_userid_and_limit(
+        self, svc, search,
+    ):
+        svc.total_user_annotation_count('userid')
+
+        search.return_value.run.assert_called_with({"limit": 0, "user": "userid"})
+
+    def test_toal_user_annotation_count_attaches_correct_modifiers(
+        self, svc, search, limiter, deleted_filter, user_filter,
+    ):
+        svc.total_user_annotation_count('userid')
+
+        assert search.return_value.clear.called
+
+        assert search.return_value.append_modifier.call_count == 3
+        search.return_value.append_modifier.assert_has_calls([
+            mock.call(limiter.return_value),
+            mock.call(deleted_filter.return_value),
+            mock.call(user_filter.return_value)])
+
+    def test_total_user_annotation_count_returns_total(
+        self, svc, search,
+    ):
+        search.return_value.run.return_value.total = 3
+
+        anns = svc.total_user_annotation_count('userid')
+
+        assert anns == 3
+
     def test_user_annotation_count_calls_search_with_request_and_stats(
         self, svc, search, pyramid_request,
     ):
@@ -109,3 +145,21 @@ def search(patch):
 def top_level_annotation_filter(patch):
     return patch('h.services.annotation_stats.TopLevelAnnotationsFilter',
                  autospec=TopLevelAnnotationsFilter, spec_set=True)
+
+
+@pytest.fixture
+def limiter(patch):
+    return patch('h.services.annotation_stats.Limiter',
+                 autospec=Limiter, spec_set=True)
+
+
+@pytest.fixture
+def deleted_filter(patch):
+    return patch('h.services.annotation_stats.DeletedFilter',
+                 autospec=DeletedFilter, spec_set=True)
+
+
+@pytest.fixture
+def user_filter(patch):
+    return patch('h.services.annotation_stats.UserFilter',
+                 autospec=UserFilter, spec_set=True)

@@ -37,7 +37,7 @@ def users_index(request):
 
     if user is not None:
         svc = request.find_service(name='annotation_stats')
-        user_meta['annotations_count'] = svc.user_annotation_count(user.userid)
+        user_meta['annotations_count'] = svc.total_user_annotation_count(user.userid)
 
     return {
         'default_authority': request.default_authority,
