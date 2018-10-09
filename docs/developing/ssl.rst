@@ -18,7 +18,7 @@ To serve your local dev instance of h over HTTPS:
 
 3. Run ``hypothesis devserver`` with the ``--https`` option::
 
-    hypothesis devserver --https
+    tox -e py27-dev -- sh bin/hypothesis devserver --https
 
 4. Since the certificate is self-signed, you will need to instruct your browser to
    trust it explicitly by visiting https://localhost:5000 and selecting the option
