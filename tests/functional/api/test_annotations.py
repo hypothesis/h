@@ -185,6 +185,40 @@ class TestPatchAnnotation(object):
         assert res.status_code == 404
 
 
+@pytest.mark.functional
+class TestDeleteAnnotation(object):
+
+    def test_it_deletes_annotation_if_authorized(self, app, user_annotation, user_with_token):
+        """An annotation's creator (user) is blessed with the 'update' permission"""
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+
+        res = app.delete('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                        headers=headers)
+
+        assert res.status_code == 200
+        assert res.json['id'] == user_annotation.id
+
+    def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
+
+        res = app.delete('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                        expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_if_unauthorized(self, app, annotation, user_with_token):
+        """The user in this request is not the annotation's creator"""
+        user, token = user_with_token
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+
+        res = app.delete('/api/annotations/{id}'.format(id=annotation.id),
+                                                        headers=headers,
+                                                        expect_errors=True)
+
+        assert res.status_code == 404
+
+
 @pytest.fixture
 def annotation(db_session, factories):
     ann = factories.Annotation(userid='acct:testuser@example.com',
