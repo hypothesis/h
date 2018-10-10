@@ -17,6 +17,7 @@ from h.traversal.roots import AuthClientRoot
 from h.traversal.roots import OrganizationRoot
 from h.traversal.roots import OrganizationLogoRoot
 from h.traversal.roots import GroupRoot
+from h.traversal.roots import ProfileRoot
 from h.traversal.roots import UserRoot
 from h.traversal.contexts import AnnotationContext
 
@@ -267,6 +268,27 @@ class TestOrganizationLogoRoot(object):
     @pytest.fixture
     def organization_logo_factory(self, pyramid_request):
         return OrganizationLogoRoot(pyramid_request)
+
+
+class TestProfileRoot(object):
+
+    def test_it_assigns_update_permission_with_user_role(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo', [role.User])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = ProfileRoot(pyramid_request)
+
+        assert pyramid_request.has_permission('update', context)
+
+    def test_it_does_not_assign_update_permission_without_user_role(self, pyramid_config, pyramid_request):
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo', ['whatever'])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = ProfileRoot(pyramid_request)
+
+        assert not pyramid_request.has_permission('update', context)
 
 
 @pytest.mark.usefixtures("groups")
