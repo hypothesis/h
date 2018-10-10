@@ -482,7 +482,7 @@ class TestUriCombinedWildcardFilter():
     @pytest.mark.parametrize('params,expected_ann_indexes,separate_keys', [
 
     # Test with separate_keys = True (aka uri/url are exact match & wildcard_uri is wildcard match.)
-    (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz?45")]),
+    (webob.multidict.MultiDict([("wildcard_uri", "http://bar.com/baz_45")]),
      [2, 3],
      True),
     (webob.multidict.MultiDict([("uri", "urn:x-pdf:a34480f5dbed8c4482a3a921e0196d2a"),
@@ -495,7 +495,7 @@ class TestUriCombinedWildcardFilter():
      True),
 
     # Test with separate_keys = False (aka uri/url contain both exact &  wildcard matches.)
-    (webob.multidict.MultiDict([("uri", "http://bar.com/baz-45?")]),
+    (webob.multidict.MultiDict([("uri", "http://bar.com/baz-45_")]),
      [1],
      False),
     (webob.multidict.MultiDict([("uri", "http://bar.com/*")]),
@@ -532,10 +532,10 @@ class TestUriCombinedWildcardFilter():
         assert sorted(result.annotation_ids) == sorted([ann_ids[ann] for ann in expected_ann_indexes])
 
     @pytest.mark.parametrize('params,separate_keys', [
-        (webob.multidict.MultiDict([("wildcard_uri", "http?://bar.com")]), True),
+        (webob.multidict.MultiDict([("wildcard_uri", "http_://bar.com")]), True),
         (webob.multidict.MultiDict([("url", "ur*n:x-pdf:*")]), False),
     ])
-    def test_ignores_urls_with_wildcards_in_the_domain(self, es_dsl_search, pyramid_request, params, separate_keys):
+    def test_ignores_urls_with_wildcards_at_invalid_locations(self, es_dsl_search, pyramid_request, params, separate_keys):
         urifilter = query.UriCombinedWildcardFilter(pyramid_request, separate_keys)
 
         q = urifilter(es_dsl_search, params).to_dict()
@@ -543,10 +543,10 @@ class TestUriCombinedWildcardFilter():
         assert "should" not in q['query']['bool']
 
     @pytest.mark.parametrize('params,separate_keys', [
-        (webob.multidict.MultiDict([("wildcard_uri", "http?://bar.com"),
+        (webob.multidict.MultiDict([("wildcard_uri", "http_://bar.com"),
                                     ("uri", "http://bar.com"),
                                     ("url", "http://baz.com")]), True),
-        (webob.multidict.MultiDict([("uri", "http?://bar.com"),
+        (webob.multidict.MultiDict([("uri", "http_://bar.com"),
                                     ("url", "http://baz.com")]), False),
     ])
     def test_pops_params(self, es_dsl_search, pyramid_request, params, separate_keys):
@@ -567,19 +567,21 @@ class TestUriCombinedWildcardFilter():
 @pytest.mark.parametrize('wildcard_uri,expected', [
     ("htt*://bar.com", False),
     ("*http://bar.com", False),
-    ("http?://bar.com", False),
-    ("http://bar?com*", False),
-    ("?http://bar.com", False),
+    ("http_://bar.com", False),
+    ("http://bar_com*", False),
+    ("_http://bar.com", False),
     ("http://localhost:3000*", False),
+    ("http://localhost:_3000", False),
     ("http://bar*.com", False),
     ("file://*", False),
     ("https://foo.com", False),
     ("http://foo.com*", False),
     ("http://foo.com/*", True),
     ("urn:*", True),
-    ("http://bar.com?foo=baz", True),
-    ("doi:10.101?", True),
-    ("http://example.com?", True),
+    ("http://bar.com_foo=baz", True),
+    ("doi:10.101_", True),
+    ("http://example.com_", True),
+    ("http://example.com/__/", True),
 ])
 def test_identifies_wildcard_uri_is_valid(wildcard_uri, expected):
     assert query.wildcard_uri_is_valid(wildcard_uri) == expected
