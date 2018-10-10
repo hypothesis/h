@@ -72,10 +72,16 @@
       {% trans %}URL{% endtrans %}
     </h4>
     <div class="search-bucket-stats__val search-bucket-stats__url">
-        <a class="link--plain"
-           rel="nofollow noopener"
-           href="{{ bucket.uri }}"
-           target="_blank">{{ pretty_link(bucket.uri) }}</a>
+      <div class="group-invite__container js-copy-button">
+        <input class="group-invite__input js-select-onfocus"
+               data-ref="input"
+               value="{{ bucket.uri }}">
+        <button class="group-invite__clipboard-button"
+                data-ref="button"
+                title="Copy to clipboard">
+          {{ svg_icon('copy_to_clipboard', 'group-invite__clipboard-image') }}
+        </button>
+      </div>
     </div>
   {% endif %}
   <div class="u-stretch">
