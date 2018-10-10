@@ -232,6 +232,3 @@ class TestGroupACL(object):
                              creator=creator)
         group.pubid = 'test-group'
         return group
-
-    def permissions(self, acl):
-        return [term[-1] for term in acl]
