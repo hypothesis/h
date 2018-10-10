@@ -25,19 +25,73 @@ class TestGetAnnotations(object):
         res = app.get('/api/')
         assert 'links' in res.json
 
-    def test_annotation_read(self, app, annotation):
-        """Fetch an annotation by ID."""
+
+@pytest.mark.functional
+class TestGetAnnotation(object):
+    def test_it_returns_annotation_if_shared(self, app, annotation):
+        """Unauthenticated users may view shared annotations assuming they have group access"""
         res = app.get('/api/annotations/' + annotation.id,
                       headers={native_str('accept'): native_str('application/json')})
         data = res.json
         assert data['id'] == annotation.id
 
-    def test_annotation_read_jsonld(self, app, annotation):
-        """Fetch an annotation by ID in jsonld format."""
-        res = app.get('/api/annotations/' + annotation.id + '.jsonld')
+    def test_it_returns_http_404_for_private_annotation_when_unauthenticated(self,
+                                                                             app,
+                                                                             private_annotation):
+        res = app.get('/api/annotations/' + private_annotation.id,
+                      headers={native_str('accept'): native_str('application/json')},
+                      expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_for_private_annotation_when_unauthorized(self,
+                                                                          app,
+                                                                          private_annotation,
+                                                                          user_with_token):
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        res = app.get('/api/annotations/' + private_annotation.id,
+                      headers=headers,
+                      expect_errors=True)
+
+        assert res.status_code == 404
+
+
+@pytest.mark.functional
+class TestGetAnnotationJSONLD(object):
+    def test_it_returns_annotation_if_shared(self, app, annotation):
+        """Unauthenticated users may view shared annotations assuming they have group access"""
+        res = app.get('/api/annotations/' + annotation.id + '.jsonld',
+                      headers={native_str('accept'): native_str('application/json')})
         data = res.json
+
+        # In JSON-LD, the ID will be a URI per spec
+        # That URI does, however, contain the annotation's ID
         assert data['@context'] == 'http://www.w3.org/ns/anno.jsonld'
         assert data['id'] == 'http://example.com/a/' + annotation.id
+
+    def test_it_returns_http_404_for_private_annotation_when_unauthenticated(self,
+                                                                             app,
+                                                                             private_annotation):
+        res = app.get('/api/annotations/' + private_annotation.id + '.jsonld',
+                      headers={native_str('accept'): native_str('application/json')},
+                      expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_for_private_annotation_when_unauthorized(self,
+                                                                          app,
+                                                                          private_annotation,
+                                                                          user_with_token):
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        res = app.get('/api/annotations/' + private_annotation.id + '.jsonld',
+                      headers=headers,
+                      expect_errors=True)
+
+        assert res.status_code == 404
 
 
 class TestPostAnnotation(object):
@@ -100,6 +154,15 @@ def annotation(db_session, factories):
     ann = factories.Annotation(userid='acct:testuser@example.com',
                                groupid='__world__',
                                shared=True)
+    db_session.commit()
+    return ann
+
+
+@pytest.fixture
+def private_annotation(db_session, factories):
+    ann = factories.Annotation(userid='acct:testuser@example.com',
+                               groupid='__world__',
+                               shared=False)
     db_session.commit()
     return ann
 
