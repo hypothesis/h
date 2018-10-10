@@ -14,19 +14,6 @@ native_str = str
 
 
 @pytest.mark.functional
-class TestGetAnnotations(object):
-    def test_api_index(self, app):
-        """
-        Test the API index view.
-
-        This view is tested more thoroughly in the view tests, but this test
-        checks the view doesn't error out and returns appropriate-looking JSON.
-        """
-        res = app.get('/api/')
-        assert 'links' in res.json
-
-
-@pytest.mark.functional
 class TestGetAnnotation(object):
     def test_it_returns_annotation_if_shared(self, app, annotation):
         """Unauthenticated users may view shared annotations assuming they have group access"""
