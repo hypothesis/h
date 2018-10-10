@@ -415,15 +415,6 @@ class TestUriCombinedWildcardFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-    def test_filter_matches_invalid_uri(self, Annotation, get_search):
-        search = get_search()
-        Annotation(target_uri="https://bar.com")
-        expected_ids = [Annotation(target_uri="invalid-uri").id]
-
-        result = search.run(webob.multidict.MultiDict({"uri": "invalid-uri"}))
-
-        assert sorted(result.annotation_ids) == sorted(expected_ids)
-
     def test_filters_aliases_http_and_https(self, Annotation, get_search):
         search = get_search()
         expected_ids = [Annotation(target_uri="http://bar.com").id,
@@ -563,29 +554,6 @@ class TestUriCombinedWildcardFilter(object):
     @pytest.fixture
     def storage(self, patch):
         return patch('h.search.query.storage')
-
-
-@pytest.mark.parametrize('wildcard_uri,expected', [
-    ("htt*://bar.com", False),
-    ("*http://bar.com", False),
-    ("http_://bar.com", False),
-    ("http://bar_com*", False),
-    ("_http://bar.com", False),
-    ("http://localhost:3000*", False),
-    ("http://localhost:_3000", False),
-    ("http://bar.com_foo=baz", False),
-    ("http://example.com_", False),
-    ("http://bar*.com", False),
-    ("file://*", False),
-    ("https://foo.com", False),
-    ("http://foo.com*", False),
-    ("http://foo.com/*", True),
-    ("urn:*", True),
-    ("doi:10.101_", True),
-    ("http://example.com/__/", True),
-])
-def test_identifies_wildcard_uri_is_valid(wildcard_uri, expected):
-    assert query.wildcard_uri_is_valid(wildcard_uri) == expected
 
 
 class TestDeletedFilter(object):
