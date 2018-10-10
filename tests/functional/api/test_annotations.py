@@ -136,6 +136,55 @@ class TestPostAnnotation(object):
         assert res.json['reason'].startswith('group:')
 
 
+@pytest.mark.functional
+class TestPatchAnnotation(object):
+
+    def test_it_updates_annotation_if_authorized(self, app, user_annotation, user_with_token):
+        """An annotation's creator (user) is blessed with the 'update' permission"""
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        annotation_patch = {
+            'text': 'This is an updated annotation'
+        }
+
+        res = app.patch_json('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                            annotation_patch,
+                                                            headers=headers)
+
+        assert res.json['text'] == 'This is an updated annotation'
+        assert res.status_code == 200
+
+    def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
+
+        annotation_patch = {
+            'text': 'whatever'
+        }
+
+        res = app.patch_json('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                            annotation_patch,
+                                                            expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_if_unauthorized(self, app, annotation, user_with_token):
+        """The user in this request is not the annotation's creator"""
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+
+        annotation_patch = {
+            'text': 'whatever'
+        }
+
+        res = app.patch_json('/api/annotations/{id}'.format(id=annotation.id),
+                                                            annotation_patch,
+                                                            headers=headers,
+                                                            expect_errors=True)
+
+        assert res.status_code == 404
+
+
 @pytest.fixture
 def annotation(db_session, factories):
     ann = factories.Annotation(userid='acct:testuser@example.com',
@@ -159,6 +208,15 @@ def user(db_session, factories):
     user = factories.User()
     db_session.commit()
     return user
+
+
+@pytest.fixture
+def user_annotation(db_session, user, factories):
+    ann = factories.Annotation(userid=user.userid,
+                               groupid='__world__',
+                               shared=True)
+    db_session.commit()
+    return ann
 
 
 @pytest.fixture
