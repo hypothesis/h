@@ -40,7 +40,7 @@ class TestGetAnnotations(object):
         assert data['id'] == 'http://example.com/a/' + annotation.id
 
 
-class TestWriteAnnotation(object):
+class TestPostAnnotation(object):
     def test_it_returns_http_404_if_unauthorized(self, app):
         # FIXME: This should return a 403
 
@@ -66,7 +66,7 @@ class TestWriteAnnotation(object):
 
         assert res.status_code == 403
 
-    def test_annotation_write_unauthorized_group(self, app, user_with_token, non_writeable_group):
+    def test_it_returns_http_400_if_group_forbids_write(self, app, user_with_token, non_writeable_group):
         """
         Write an annotation to a group that doesn't allow writes.
 
