@@ -4,11 +4,32 @@ from __future__ import unicode_literals
 import collections
 import logging
 
+from zope.interface import providedBy
+
 
 log = logging.getLogger(__name__)
 
 
+def _get_subscribers(registry, event):
+    # This code is adapted from the `subscribers` method in
+    # `zope.interface.adapter` which is what Pyramid's `request.registry.notify`
+    # is a very thin wrapper around.
+    return registry.adapters.subscriptions(map(providedBy, [event]), None)
+
+
 class EventQueue(object):
+    """
+    EventQueue enables dispatching Pyramid events at the end of a request.
+
+    An instance of this class is exposed on the request object via the
+    `notify_after_commit` method. The `_after_commit` part refers to the
+    database transaction associated with the request. Unlike calling
+    `request.registry.notify` during a request, failures will not cause a
+    database transaction rollback.
+
+    Events are dispatched in the order they are queued. Failure of one
+    event subscriber does not affect execution of other subscribers.
+    """
     def __init__(self, request):
         self.request = request
         self.queue = collections.deque()
@@ -25,23 +46,26 @@ class EventQueue(object):
             except IndexError:
                 break
 
-            try:
-                # Notify all subscribers to this particular event. Note that the
-                # order in which subcribers run is not guaranteed [1] and if one
-                # fails, remaining subscribers to the same event which have not
-                # yet run will be skipped.
-                #
-                # [1] See https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/events.html
-                self.request.registry.notify(event)
-            except Exception:
-                sentry = getattr(event.request, 'sentry', None)
-                if sentry is not None:
-                    sentry.captureException()
-                else:
-                    log.exception('Queued event subscriber failed')
+            # Get subscribers to event and invoke them. The normal way to do
+            # this in Pyramid is to invoke `registry.notify`, but that provides
+            # no guarantee about the order of execution and any failure causes
+            # later subscribers not to run.
+            #
+            # Here we wrap each subscriber call in an exception handler to
+            # make failure independent in non-debug environments.
+            subscribers = _get_subscribers(self.request.registry, event)
+            for subscriber in subscribers:
+                try:
+                    subscriber(event)
+                except Exception:
+                    sentry = getattr(event.request, 'sentry', None)
+                    if sentry is not None:
+                        sentry.captureException()
+                    else:
+                        log.exception('Queued event subscriber failed')
 
-                if event.request.debug:
-                    raise
+                    if event.request.debug:
+                        raise
 
     def response_callback(self, request, response):
         if request.exception is not None:
