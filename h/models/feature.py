@@ -18,7 +18,6 @@ FEATURES = {
     'overlay_highlighter': "Use the new overlay highlighter?",
     'api_render_user_info': "Return users' extended info in API responses?",
     'client_display_names': "Render display names instead of user names in the client",
-    'wildcard_search_on_activity_pages': "Enable wildcard search via url facet on activity pages.",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -40,6 +39,7 @@ FEATURES = {
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
 FEATURES_PENDING_REMOVAL = {
+    'wildcard_search_on_activity_pages': "Enable wildcard search via url facet on activity pages.",
 }
 
 
