@@ -112,7 +112,9 @@ def includeme(config):
     config.add_route('api.groups',
                      '/api/groups',
                      factory='h.traversal.GroupRoot')
-    config.add_route('api.profile', '/api/profile')
+    config.add_route('api.profile',
+                     '/api/profile',
+                     factory='h.traversal.ProfileRoot')
     config.add_route('api.debug_token', '/api/debug-token')
     config.add_route('api.group_member',
                      '/api/groups/{pubid}/members/{userid}',

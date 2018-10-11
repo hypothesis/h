@@ -61,6 +61,72 @@ class TestGetProfile(object):
         assert group_ids == []
 
 
+@pytest.mark.functional
+class TestPatchProfile(object):
+
+    def test_it_allows_authenticated_user(self, app, user_with_token):
+        """PATCH profile will always act on the auth'd user's profile."""
+
+        user, token = user_with_token
+
+        headers = {'Authorization': native_str('Bearer {}'.format(token.value))}
+        profile = {
+            'preferences': {
+                'show_sidebar_tutorial': True
+            }
+        }
+
+        res = app.patch_json('/api/profile', profile, headers=headers)
+
+        # The ``show_sidebar_tutorial`` property is only present if
+        # its value is True
+        assert 'show_sidebar_tutorial' in res.json['preferences']
+        assert res.status_code == 200
+
+    def test_it_updates_user_profile(self, app, user_with_token):
+        """PATCH profile will always act on the auth'd user's profile."""
+
+        user, token = user_with_token
+
+        headers = {'Authorization': native_str('Bearer {}'.format(token.value))}
+        profile = {
+            'preferences': {
+                'show_sidebar_tutorial': False
+            }
+        }
+
+        res = app.patch_json('/api/profile', profile, headers=headers)
+
+        # The ``show_sidebar_tutorial`` property is only present if
+        # its value is True
+        assert 'show_sidebar_tutorial' not in res.json['preferences']
+        assert res.status_code == 200
+
+    def test_it_raises_http_404_if_unauthenticated(self, app):
+        # FIXME: This should return a 403
+        profile = {
+            'preferences': {
+                'show_sidebar_tutorial': False
+            }
+        }
+
+        res = app.patch_json('/api/profile', profile, expect_errors=True)
+
+        assert res.status_code == 404
+
+    @pytest.mark.xfail
+    def test_it_raises_http_403_if_unauthenticated(self, app):
+        profile = {
+            'preferences': {
+                'show_sidebar_tutorial': False
+            }
+        }
+
+        res = app.patch_json('/api/profile', profile, expect_errors=True)
+
+        assert res.status_code == 403
+
+
 @pytest.fixture
 def user(db_session, factories):
     user = factories.User()

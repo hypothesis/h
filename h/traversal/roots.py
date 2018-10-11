@@ -216,6 +216,18 @@ class GroupRoot(object):
             raise KeyError()
 
 
+class ProfileRoot(object):
+    """
+    Simple Root for API profile endpoints
+    """
+    __acl__ = [
+        (Allow, role.User, 'update'),
+    ]
+
+    def __init__(self, request):
+        self.request = request
+
+
 class UserRoot(object):
     """
     Root factory for routes whose context is an :py:class:`h.traversal.UserContext`.

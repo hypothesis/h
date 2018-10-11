@@ -93,7 +93,7 @@ def test_includeme():
         call('api.groups',
              '/api/groups',
              factory='h.traversal.GroupRoot'),
-        call('api.profile', '/api/profile'),
+        call('api.profile', '/api/profile', factory='h.traversal.ProfileRoot'),
         call('api.debug_token', '/api/debug-token'),
         call('api.group_member', '/api/groups/{pubid}/members/{userid}', factory='h.traversal.GroupRoot', traverse='/{pubid}'),
         call('api.search', '/api/search'),
