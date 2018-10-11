@@ -5,6 +5,9 @@ from h.search.client import get_client
 from h.search.config import init
 from h.search.core import Search
 from h.search.query import (TopLevelAnnotationsFilter,
+                            DeletedFilter,
+                            Limiter,
+                            UserFilter,
                             AuthorityFilter,
                             TagsAggregation,
                             UsersAggregation,
@@ -14,6 +17,9 @@ from h.search.query import (TopLevelAnnotationsFilter,
 __all__ = (
     'Search',
     'TopLevelAnnotationsFilter',
+    'DeletedFilter',
+    'Limiter',
+    'UserFilter',
     'AuthorityFilter',
     'TagsAggregation',
     'UsersAggregation',

@@ -35,10 +35,13 @@ class SearchController(object):
 
     def __init__(self, request):
         self.request = request
+        # Cache a copy of the extracted query params for the child controllers to use if needed.
+        self.parsed_query_params = query.extract(self.request)
 
     @view_config(request_method='GET')
     def search(self):
-        q = query.extract(self.request)
+        # Make a copy of the query params to be consumed by search.
+        q = self.parsed_query_params.copy()
 
         # Check whether a redirect is required.
         query.check_url(self.request, q)
@@ -125,7 +128,6 @@ class GroupSearchController(SearchController):
                     return user['count']
             return 0
 
-        q = query.extract(self.request)
         members = []
         moderators = []
         users_aggregation = result['search_results'].aggregations.get('users', [])
@@ -138,7 +140,7 @@ class GroupSearchController(SearchController):
                                                        u.userid),
                         'faceted_by': _faceted_by_user(self.request,
                                                        u.username,
-                                                       q)}
+                                                       self.parsed_query_params)}
                        for u in self.group.members]
             members = sorted(members, key=lambda k: k['username'].lower())
         else:
@@ -152,11 +154,11 @@ class GroupSearchController(SearchController):
                                                               u.userid),
                                'faceted_by': _faceted_by_user(self.request,
                                                               u.username,
-                                                              q)}
+                                                              self.parsed_query_params)}
                               for u in [self.group.creator]]
                 moderators = sorted(moderators, key=lambda k: k['username'].lower())
 
-        group_annotation_count = self._get_total_annotations_in_group(result, q, self.request)
+        group_annotation_count = self._get_total_annotations_in_group(result, self.request)
 
         result['stats'] = {
             'annotation_count': group_annotation_count,
@@ -205,14 +207,14 @@ class GroupSearchController(SearchController):
 
         return result
 
-    def _get_total_annotations_in_group(self, result, q, request):
+    def _get_total_annotations_in_group(self, result, request):
         """
         Get number of annotations in group.
 
         If the search result already has this number don't run a query, just re-use it.
         """
         group_annotation_count = result['search_results'].total
-        if len(q) > 1:
+        if len(self.parsed_query_params) > 1:
             group_annotation_count = (self.request
                                       .find_service(name='annotation_stats')
                                       .group_annotation_count(self.group.pubid))
@@ -350,11 +352,7 @@ class UserSearchController(SearchController):
                 return None
             return urlparse.urlparse(user.uri).netloc
 
-        user_annotation_counts = self.request.find_service(name='annotation_stats').user_annotation_counts(self.user.userid)
-        annotation_count = user_annotation_counts['public']
-        if self.request.authenticated_userid == self.user.userid:
-            annotation_count = user_annotation_counts['total']
-
+        annotation_count = self._get_total_user_annotations(result, self.request)
         result['stats'] = {
             'annotation_count': annotation_count,
         }
@@ -383,6 +381,19 @@ class UserSearchController(SearchController):
                         name=result['user']['name']))
 
         return result
+
+    def _get_total_user_annotations(self, result, request):
+        """
+        Get number of annotations that the user has made.
+
+        If the search result already has this number don't run a query, just re-use it.
+        """
+        user_annotation_count = result['search_results'].total
+        if len(self.parsed_query_params) > 1:
+            user_annotation_count = (self.request
+                                     .find_service(name='annotation_stats')
+                                     .user_annotation_count(self.user.userid))
+        return user_annotation_count
 
     @view_config(request_param='back')
     def back(self):

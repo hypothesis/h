@@ -72,7 +72,7 @@ def test_users_index_strips_spaces(models, pyramid_request):
 def test_users_index_queries_annotation_count_by_userid(models, factories, pyramid_request, annotation_stats_service):
     user = factories.User.build(username='bob')
     models.User.get_by_username.return_value = user
-    annotation_stats_service.user_annotation_counts.return_value = {'total': 8}
+    annotation_stats_service.total_user_annotation_count.return_value = 8
 
     pyramid_request.params = {"username": "bob", "authority": user.authority}
     result = users_index(pyramid_request)
@@ -251,7 +251,7 @@ def annotation_stats_service(pyramid_config, pyramid_request):
         instance=True,
         spec_set=True)
     service.return_value.request = pyramid_request
-    service.user_annotation_counts.return_value = {'total': 0}
+    service.total_user_annotation_count.return_value = 0
     pyramid_config.register_service(service, name='annotation_stats')
     return service
 
