@@ -439,14 +439,14 @@ class SearchParamsSchema(colander.Schema):
             PDF fingerprint.
 
             `*` will match any character sequence (including an empty one),
-            and a `?` will match any single character. `*`s are only permitted
-            within the path and query parts of the URI and `?`s are only permitted
+            and a `_` will match any single character. `*`s are only permitted
+            within the path and query parts of the URI and `_`s are only permitted
             within the domain, path, and query parts of the URI.
 
             Escaping wildcards is not supported.
 
-            Examples of valid uris":" `http://foo.com/*` `urn:x-pdf:*` `file://localhost/?bc.pdf`
-            Examples of invalid uris":" `*foo.com` `u?n:*` `file://*` `http://foo.com*`
+            Examples of valid uris":" `http://foo.com/*` `urn:x-pdf:*` `file://localhost/_bc.pdf`
+            Examples of invalid uris":" `*foo.com` `u_n:*` `file://*` `http://foo.com*`
             """,
     )
     any = colander.SchemaNode(

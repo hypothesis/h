@@ -22,19 +22,21 @@ def wildcard_uri_is_valid(wildcard_uri):
     """
     Return True if uri contains wildcards in appropriate places, return False otherwise.
 
-    *'s are not permitted in the scheme or netloc. ?'s are not permitted in the scheme.
+    *'s are not permitted in the scheme or netloc. _'s are not permitted in the scheme.
     """
-    if "*" not in wildcard_uri and "?" not in wildcard_uri:
+    if "*" not in wildcard_uri and "_" not in wildcard_uri:
         return False
 
-    normalized_uri = urlparse.urlparse(wildcard_uri.replace("?", ""))
+    normalized_uri = urlparse.urlparse(wildcard_uri)
     if not normalized_uri.scheme or "*" in normalized_uri.netloc:
         return False
 
-    normalized_uri = urlparse.urlparse(wildcard_uri.replace("*", ""))
-    if not normalized_uri.scheme:
+    # If a wildcard comes before the port aka: http://localhost:_3000 the request for the
+    # port will fail with a ValueError: invalid literal for int() with base 10: '_3000'.
+    try:
+        normalized_uri.port
+    except ValueError:
         return False
-
     return True
 
 
@@ -292,7 +294,7 @@ class UriCombinedWildcardFilter(object):
         :param request: the pyramid.request object
         :param separate_keys: if True will treat wildcard_uri as wildcards and uri/url
             as exact match. If False will treat any values in uri/url containing wildcards
-            ("?" or "*") as wildcard searches.
+            ("_" or "*") as wildcard searches.
 
         """
         self.request = request
@@ -309,8 +311,8 @@ class UriCombinedWildcardFilter(object):
         else:
             uris = popall(params, 'uri') + popall(params, 'url')
             # Split into wildcard uris and non wildcard uris.
-            wildcard_uris = [u for u in uris if "*" in u or "?" in u]
-            uris = [u for u in uris if "*" not in u and "?" not in u]
+            wildcard_uris = [u for u in uris if "*" in u or "_" in u]
+            uris = [u for u in uris if "*" not in u and "_" not in u]
 
         # Only add valid uri's to the search list.
         wildcard_uris = self._normalize_uris(
@@ -336,26 +338,25 @@ class UriCombinedWildcardFilter(object):
 
     def _wildcard_uri_normalized(self, wildcard_uri):
         """
-        Same as uri.normalized but it doesn't strip ending `?` from uri's.
+        Same as uri.normalized but it replaces _'s with ?'s after normalization.
 
-        It's possible to have a wildcard at the end of a uri, however
-        uri.normalize strips `?`s from the end of uris and something like
-        http://foo.com/* will not be normalized to http://foo.com* without
-        removing the `*` before normalization. To compensate for this,
-        we check for an ending wildcard and add it back after normalization.
+        Although elasticsearch uses ? we use _ since ? is a special reserved url
+        character and this means we can avoid dealing with normalization headaches.
 
-        While it's possible to escape `?` and `*` using \\, the uri.normalize
+        While it's possible to escape wildcards`using \\, the uri.normalize
         converts \\ to encoded url format which does not behave the same in
         elasticsearch. Thus, escaping wildcard characters is not currently
         supported.
         """
+        # If the url is something like http://example.com/*, normalize it to
+        #  http://example.com* so it finds all urls including the base url.
         trailing_wildcard = ""
-        if wildcard_uri.endswith("?") or wildcard_uri.endswith("*"):
+        if wildcard_uri.endswith("*"):
             trailing_wildcard = wildcard_uri[-1]
             wildcard_uri = wildcard_uri[:-1]
         wildcard_uri = uri.normalize(wildcard_uri)
         wildcard_uri += trailing_wildcard
-        return wildcard_uri
+        return wildcard_uri.replace("_", "?")
 
 
 class UserFilter(object):
