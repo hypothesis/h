@@ -5,7 +5,6 @@ backports.functools_lru_cache
 bcrypt
 bleach >= 2.0
 celery >= 4.2.1
-certifi
 cffi
 click
 deform < 1.0
@@ -39,7 +38,6 @@ pyramid_tm
 python-dateutil
 python-slugify < 1.2.0
 raven
-requests-aws4auth >= 0.9
 statsd
 transaction
 venusian
