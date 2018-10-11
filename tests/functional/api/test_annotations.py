@@ -14,33 +14,74 @@ native_str = str
 
 
 @pytest.mark.functional
-class TestGetAnnotations(object):
-    def test_api_index(self, app):
-        """
-        Test the API index view.
-
-        This view is tested more thoroughly in the view tests, but this test
-        checks the view doesn't error out and returns appropriate-looking JSON.
-        """
-        res = app.get('/api/')
-        assert 'links' in res.json
-
-    def test_annotation_read(self, app, annotation):
-        """Fetch an annotation by ID."""
+class TestGetAnnotation(object):
+    def test_it_returns_annotation_if_shared(self, app, annotation):
+        """Unauthenticated users may view shared annotations assuming they have group access"""
         res = app.get('/api/annotations/' + annotation.id,
                       headers={native_str('accept'): native_str('application/json')})
         data = res.json
         assert data['id'] == annotation.id
 
-    def test_annotation_read_jsonld(self, app, annotation):
-        """Fetch an annotation by ID in jsonld format."""
-        res = app.get('/api/annotations/' + annotation.id + '.jsonld')
+    def test_it_returns_http_404_for_private_annotation_when_unauthenticated(self,
+                                                                             app,
+                                                                             private_annotation):
+        res = app.get('/api/annotations/' + private_annotation.id,
+                      headers={native_str('accept'): native_str('application/json')},
+                      expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_for_private_annotation_when_unauthorized(self,
+                                                                          app,
+                                                                          private_annotation,
+                                                                          user_with_token):
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        res = app.get('/api/annotations/' + private_annotation.id,
+                      headers=headers,
+                      expect_errors=True)
+
+        assert res.status_code == 404
+
+
+@pytest.mark.functional
+class TestGetAnnotationJSONLD(object):
+    def test_it_returns_annotation_if_shared(self, app, annotation):
+        """Unauthenticated users may view shared annotations assuming they have group access"""
+        res = app.get('/api/annotations/' + annotation.id + '.jsonld',
+                      headers={native_str('accept'): native_str('application/json')})
         data = res.json
+
+        # In JSON-LD, the ID will be a URI per spec
+        # That URI does, however, contain the annotation's ID
         assert data['@context'] == 'http://www.w3.org/ns/anno.jsonld'
         assert data['id'] == 'http://example.com/a/' + annotation.id
 
+    def test_it_returns_http_404_for_private_annotation_when_unauthenticated(self,
+                                                                             app,
+                                                                             private_annotation):
+        res = app.get('/api/annotations/' + private_annotation.id + '.jsonld',
+                      headers={native_str('accept'): native_str('application/json')},
+                      expect_errors=True)
 
-class TestWriteAnnotation(object):
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_for_private_annotation_when_unauthorized(self,
+                                                                          app,
+                                                                          private_annotation,
+                                                                          user_with_token):
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        res = app.get('/api/annotations/' + private_annotation.id + '.jsonld',
+                      headers=headers,
+                      expect_errors=True)
+
+        assert res.status_code == 404
+
+
+class TestPostAnnotation(object):
     def test_it_returns_http_404_if_unauthorized(self, app):
         # FIXME: This should return a 403
 
@@ -66,7 +107,7 @@ class TestWriteAnnotation(object):
 
         assert res.status_code == 403
 
-    def test_annotation_write_unauthorized_group(self, app, user_with_token, non_writeable_group):
+    def test_it_returns_http_400_if_group_forbids_write(self, app, user_with_token, non_writeable_group):
         """
         Write an annotation to a group that doesn't allow writes.
 
@@ -95,6 +136,89 @@ class TestWriteAnnotation(object):
         assert res.json['reason'].startswith('group:')
 
 
+@pytest.mark.functional
+class TestPatchAnnotation(object):
+
+    def test_it_updates_annotation_if_authorized(self, app, user_annotation, user_with_token):
+        """An annotation's creator (user) is blessed with the 'update' permission"""
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        annotation_patch = {
+            'text': 'This is an updated annotation'
+        }
+
+        res = app.patch_json('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                            annotation_patch,
+                                                            headers=headers)
+
+        assert res.json['text'] == 'This is an updated annotation'
+        assert res.status_code == 200
+
+    def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
+
+        annotation_patch = {
+            'text': 'whatever'
+        }
+
+        res = app.patch_json('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                            annotation_patch,
+                                                            expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_if_unauthorized(self, app, annotation, user_with_token):
+        """The user in this request is not the annotation's creator"""
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+
+        annotation_patch = {
+            'text': 'whatever'
+        }
+
+        res = app.patch_json('/api/annotations/{id}'.format(id=annotation.id),
+                                                            annotation_patch,
+                                                            headers=headers,
+                                                            expect_errors=True)
+
+        assert res.status_code == 404
+
+
+@pytest.mark.functional
+class TestDeleteAnnotation(object):
+
+    def test_it_deletes_annotation_if_authorized(self, app, user_annotation, user_with_token):
+        """An annotation's creator (user) is blessed with the 'update' permission"""
+        user, token = user_with_token
+
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+
+        res = app.delete('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                        headers=headers)
+
+        assert res.status_code == 200
+        assert res.json['id'] == user_annotation.id
+
+    def test_it_returns_http_404_if_unauthenticated(self, app, user_annotation):
+
+        res = app.delete('/api/annotations/{id}'.format(id=user_annotation.id),
+                                                        expect_errors=True)
+
+        assert res.status_code == 404
+
+    def test_it_returns_http_404_if_unauthorized(self, app, annotation, user_with_token):
+        """The user in this request is not the annotation's creator"""
+        user, token = user_with_token
+        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+
+        res = app.delete('/api/annotations/{id}'.format(id=annotation.id),
+                                                        headers=headers,
+                                                        expect_errors=True)
+
+        assert res.status_code == 404
+
+
 @pytest.fixture
 def annotation(db_session, factories):
     ann = factories.Annotation(userid='acct:testuser@example.com',
@@ -105,10 +229,28 @@ def annotation(db_session, factories):
 
 
 @pytest.fixture
+def private_annotation(db_session, factories):
+    ann = factories.Annotation(userid='acct:testuser@example.com',
+                               groupid='__world__',
+                               shared=False)
+    db_session.commit()
+    return ann
+
+
+@pytest.fixture
 def user(db_session, factories):
     user = factories.User()
     db_session.commit()
     return user
+
+
+@pytest.fixture
+def user_annotation(db_session, user, factories):
+    ann = factories.Annotation(userid=user.userid,
+                               groupid='__world__',
+                               shared=True)
+    db_session.commit()
+    return ann
 
 
 @pytest.fixture

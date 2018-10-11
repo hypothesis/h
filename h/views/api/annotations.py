@@ -160,6 +160,7 @@ def delete(context, request):
         context.annotation,
         'delete')
 
+    # TODO: Track down why we don't return an HTTP 204 like other DELETEs
     return {'id': context.annotation.id, 'deleted': True}
 
 
