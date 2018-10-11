@@ -22,7 +22,8 @@ def wildcard_uri_is_valid(wildcard_uri):
     """
     Return True if uri contains wildcards in appropriate places, return False otherwise.
 
-    *'s and _'s are not permitted in the scheme or netloc.
+    *'s and _'s are not permitted in the scheme or netloc aka:
+        scheme://netloc/path;parameters?query#fragment.
     """
     if "*" not in wildcard_uri and "_" not in wildcard_uri:
         return False
