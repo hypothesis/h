@@ -37,6 +37,7 @@ class TestAnnotationContext(object):
         ann = factories.Annotation(shared=False, userid='saoirse')
         res = AnnotationContext(ann, group_service, links_service)
         actual = res.__acl__()
+        # Note NOT the ``moderate`` permission
         expect = [(security.Allow, 'saoirse', 'read'),
                   (security.Allow, 'saoirse', 'flag'),
                   (security.Allow, 'saoirse', 'admin'),
@@ -145,6 +146,52 @@ class TestAnnotationContext(object):
         """
         Flag permissions should echo read permissions with the exception that
         `Security.Everyone` does not get the permission
+        """
+        # Set up the test with a dummy authn policy and a real ACL authz
+        # policy:
+        policy = ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy(userid)
+        pyramid_config.set_authorization_policy(policy)
+
+        ann = factories.Annotation(shared=True,
+                                   userid='mioara',
+                                   groupid=groupid)
+        res = AnnotationContext(ann, group_service, links_service)
+
+        if permitted:
+            assert pyramid_request.has_permission('flag', res)
+        else:
+            assert not pyramid_request.has_permission('flag', res)
+
+    @pytest.mark.parametrize('groupid,userid,permitted', [
+        ('freeforall', 'jim', True),
+        ('freeforall', 'saoirse', True),
+        ('freeforall', None, False),
+        ('only-saoirse', 'jim', False),
+        ('only-saoirse', 'saoirse', True),
+        ('only-saoirse', None, False),
+        ('pals', 'jim', True),
+        ('pals', 'saoirse', True),
+        ('pals', 'francis', False),
+        ('pals', None, False),
+        ('unknown-group', 'jim', False),
+        ('unknown-group', 'saoirse', False),
+        ('unknown-group', 'francis', False),
+        ('unknown-group', None, False),
+    ])
+    def test_acl_moderate_shared(self,
+                                 factories,
+                                 pyramid_config,
+                                 pyramid_request,
+                                 groupid,
+                                 userid,
+                                 permitted,
+                                 group_service,
+                                 links_service):
+        """
+        Moderate permissions should only be applied when an annotation
+        is shared—as the annotation here is shared, anyone set as a principal
+        for the given ``FakeGroup`` will receive the ``moderate`` permission.
         """
         # Set up the test with a dummy authn policy and a real ACL authz
         # policy:
@@ -312,6 +359,13 @@ class FakeGroup(object):
                 acl.append((security.Allow, security.Authenticated, 'flag'))
             else:
                 acl.append((security.Allow, p, 'flag'))
+                # Normally, the ``moderate`` permission would only be applied
+                # to the admin (creator) of a group, but this ``FakeGroup``
+                # is indeed fake. Tests in this module are merely around whether
+                # this permission is translated appropriately from a group
+                # to an annotation context (i.e. it should not be applied
+                # to private annotations)
+                acl.append((security.Allow, p, 'moderate'))
         self.__acl__ = acl
 
 
