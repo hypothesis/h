@@ -63,7 +63,7 @@ raven==6.0.0
 repoze.lru==0.6           # via pyramid
 repoze.sendmail==4.3      # via pyramid-mailer
 requests-aws4auth==0.9
-requests==2.13.0          # via requests-aws4auth
+requests==2.19.1          # via requests-aws4auth
 six==1.10.0               # via bcrypt, bleach, elasticsearch-dsl, python-dateutil
 sqlalchemy==1.1.4
 statsd==3.2.1
