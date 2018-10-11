@@ -22,21 +22,17 @@ def wildcard_uri_is_valid(wildcard_uri):
     """
     Return True if uri contains wildcards in appropriate places, return False otherwise.
 
-    *'s are not permitted in the scheme or netloc. _'s are not permitted in the scheme.
+    *'s and _'s are not permitted in the scheme or netloc.
     """
     if "*" not in wildcard_uri and "_" not in wildcard_uri:
         return False
 
     normalized_uri = urlparse.urlparse(wildcard_uri)
-    if not normalized_uri.scheme or "*" in normalized_uri.netloc:
+    if (not normalized_uri.scheme or
+            "*" in normalized_uri.netloc or
+            "_" in normalized_uri.netloc):
         return False
 
-    # If a wildcard comes before the port aka: http://localhost:_3000 the request for the
-    # port will fail with a ValueError: invalid literal for int() with base 10: '_3000'.
-    try:
-        normalized_uri.port
-    except ValueError:
-        return False
     return True
 
 

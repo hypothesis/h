@@ -572,15 +572,15 @@ class TestUriCombinedWildcardFilter():
     ("_http://bar.com", False),
     ("http://localhost:3000*", False),
     ("http://localhost:_3000", False),
+    ("http://bar.com_foo=baz", False),
+    ("http://example.com_", False),
     ("http://bar*.com", False),
     ("file://*", False),
     ("https://foo.com", False),
     ("http://foo.com*", False),
     ("http://foo.com/*", True),
     ("urn:*", True),
-    ("http://bar.com_foo=baz", True),
     ("doi:10.101_", True),
-    ("http://example.com_", True),
     ("http://example.com/__/", True),
 ])
 def test_identifies_wildcard_uri_is_valid(wildcard_uri, expected):
