@@ -5,6 +5,7 @@ backports.functools_lru_cache
 bcrypt
 bleach >= 2.0
 celery >= 4.2.1
+certifi  # Required to connect to Elasticsearch over SSL.
 cffi
 click
 deform < 1.0
