@@ -20,7 +20,7 @@ def _validate_wildcard_uri(node, value):
         if not wildcard_uri_is_valid(val):
             raise colander.Invalid(
                 node,
-                """Wildcards (? and *) are not permitted within the
+                """Wildcards (_ and *) are not permitted within the
                 domain of wildcard_uri""")
 
 
@@ -439,9 +439,8 @@ class SearchParamsSchema(colander.Schema):
             PDF fingerprint.
 
             `*` will match any character sequence (including an empty one),
-            and a `_` will match any single character. `*`s are only permitted
-            within the path and query parts of the URI and `_`s are only permitted
-            within the domain, path, and query parts of the URI.
+            and a `_` will match any single character. Wildcards are only permitted
+            within the path and query parts of the URI.
 
             Escaping wildcards is not supported.
 
