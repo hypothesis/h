@@ -27,7 +27,7 @@ def wildcard_uri_is_valid(wildcard_uri):
     if "*" not in wildcard_uri and "_" not in wildcard_uri:
         return False
 
-    # Note: according to the spec _'s are allowed in the domain so this may be
+    # Note: according to the URL spec _'s are allowed in the domain so this may be
     # something that needs to be supported at a later date.
     normalized_uri = urlparse.urlparse(wildcard_uri)
     if (not normalized_uri.scheme or
