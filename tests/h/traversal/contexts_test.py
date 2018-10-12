@@ -205,9 +205,9 @@ class TestAnnotationContext(object):
         res = AnnotationContext(ann, group_service, links_service)
 
         if permitted:
-            assert pyramid_request.has_permission('flag', res)
+            assert pyramid_request.has_permission('moderate', res)
         else:
-            assert not pyramid_request.has_permission('flag', res)
+            assert not pyramid_request.has_permission('moderate', res)
 
     @pytest.fixture
     def groups(self):
@@ -357,6 +357,7 @@ class FakeGroup(object):
             acl.append((security.Allow, p, 'read'))
             if p == security.Everyone:
                 acl.append((security.Allow, security.Authenticated, 'flag'))
+                acl.append((security.Allow, security.Authenticated, 'moderate'))
             else:
                 acl.append((security.Allow, p, 'flag'))
                 # Normally, the ``moderate`` permission would only be applied
