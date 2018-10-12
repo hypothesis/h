@@ -10,14 +10,15 @@ from h.util.view import handle_exception, json_view
 
 class TestHandleException(object):
     def test_sets_response_status_500(self, pyramid_request):
-        handle_exception(pyramid_request)
+        handle_exception(pyramid_request, Mock())
 
         assert pyramid_request.response.status_int == 500
 
     def test_triggers_sentry_capture(self, pyramid_request):
-        handle_exception(pyramid_request)
+        exception = Mock()
+        handle_exception(pyramid_request, exception)
 
-        pyramid_request.sentry.captureException.assert_called_once_with()
+        pyramid_request.sentry.captureException.assert_called_once_with(exception)
 
     def test_reraises_in_debug_mode(self, pyramid_request):
         pyramid_request.debug = True
@@ -27,7 +28,7 @@ class TestHandleException(object):
             raise dummy_exc
         except:
             with pytest.raises(ValueError) as exc:
-                handle_exception(pyramid_request)
+                handle_exception(pyramid_request, Mock())
             assert exc.value == dummy_exc
 
     @pytest.fixture

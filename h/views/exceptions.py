@@ -29,16 +29,16 @@ def notfound(request):
 @view_config(context=Exception,
              accept='text/html',
              renderer='h:templates/5xx.html.jinja2')
-def error(request):
+def error(context, request):
     """Handle a request for which the handler threw an exception."""
-    handle_exception(request)
+    handle_exception(request, exception=context)
     return {}
 
 
 @json_view(context=Exception)
-def json_error(request):
+def json_error(context, request):
     """Handle an unexpected exception where the request asked for JSON."""
-    handle_exception(request)
+    handle_exception(request, exception=context)
     message = _("Hypothesis had a problem while handling this request. "
                 "Our team has been notified. Please contact support@hypothes.is"
                 " if the problem persists.")

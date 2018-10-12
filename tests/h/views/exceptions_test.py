@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from mock import Mock
+
 from h.views.exceptions import notfound, error, json_error
 
 
@@ -14,18 +16,20 @@ def test_notfound_view(pyramid_request):
 
 def test_error_view(patch, pyramid_request):
     handle_exception = patch('h.views.exceptions.handle_exception')
+    exception = Mock()
 
-    result = error(pyramid_request)
+    result = error(exception, pyramid_request)
 
-    handle_exception.assert_called_once_with(pyramid_request)
+    handle_exception.assert_called_once_with(pyramid_request, exception)
     assert result == {}
 
 
 def test_json_error_view(patch, pyramid_request):
     handle_exception = patch('h.views.exceptions.handle_exception')
+    exception = Mock()
 
-    result = json_error(pyramid_request)
+    result = json_error(exception, pyramid_request)
 
-    handle_exception.assert_called_once_with(pyramid_request)
+    handle_exception.assert_called_once_with(pyramid_request, exception)
     assert result['status'] == 'failure'
     assert result['reason']
