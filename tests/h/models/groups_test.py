@@ -157,10 +157,15 @@ class TestGroupACL(object):
         group.readable_by = ReadableBy.world
         assert authz_policy.permits(group, [security.Everyone], 'read')
 
-    def test_world_flaggable(self, group, authz_policy):
+    def test_world_readable_grants_flag_permissions(self, group, authz_policy):
         group.readable_by = ReadableBy.world
         assert authz_policy.permits(group, [security.Authenticated], 'flag')
         assert not authz_policy.permits(group, [security.Everyone], 'flag')
+
+    def test_world_readable_does_not_grant_moderate_permissions(self, group, authz_policy):
+        group.readable_by = ReadableBy.world
+        assert not authz_policy.permits(group, [security.Authenticated], 'moderate')
+        assert not authz_policy.permits(group, [security.Everyone], 'moderate')
 
     def test_members_readable(self, group, authz_policy):
         group.readable_by = ReadableBy.members
@@ -169,6 +174,10 @@ class TestGroupACL(object):
     def test_members_flaggable(self, group, authz_policy):
         group.readable_by = ReadableBy.members
         assert authz_policy.permits(group, ['group:test-group'], 'flag')
+
+    def test_non_creator_members_do_not_have_moderate_permission(self, group, authz_policy):
+        group.readable_by = ReadableBy.members
+        assert not authz_policy.permits(group, ['group:test-group'], 'moderate')
 
     def test_not_readable(self, group, authz_policy):
         group.readable_by = None
@@ -190,6 +199,9 @@ class TestGroupACL(object):
         group.writeable_by = None,
         assert not authz_policy.permits(group, ['authority:example.com', 'group:test-group'], 'write')
 
+    def test_creator_has_moderate_permission(self, group, authz_policy):
+        assert authz_policy.permits(group, 'acct:luke@example.com', 'moderate')
+
     def test_creator_has_admin_permissions(self, group, authz_policy):
         assert authz_policy.permits(group, 'acct:luke@example.com', 'admin')
 
@@ -197,6 +209,12 @@ class TestGroupACL(object):
         group.creator = None
 
         principals = authz_policy.principals_allowed_by_permission(group, 'admin')
+        assert len(principals) == 0
+
+    def test_no_moderate_permission_when_no_creator(self, group, authz_policy):
+        group.creator = None
+
+        principals = authz_policy.principals_allowed_by_permission(group, 'moderate')
         assert len(principals) == 0
 
     def test_fallback_is_deny_all(self, group, authz_policy):
@@ -214,6 +232,3 @@ class TestGroupACL(object):
                              creator=creator)
         group.pubid = 'test-group'
         return group
-
-    def permissions(self, acl):
-        return [term[-1] for term in acl]

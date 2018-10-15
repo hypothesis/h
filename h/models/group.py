@@ -144,6 +144,8 @@ class Group(Base, mixins.Timestamps):
 
         if self.creator:
             terms.append((security.Allow, self.creator.userid, 'admin'))
+            terms.append((security.Allow, self.creator.userid, 'moderate'))
+
         terms.append(security.DENY_ALL)
 
         return terms
