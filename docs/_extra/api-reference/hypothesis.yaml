@@ -209,6 +209,29 @@ paths:
           description: Annotation not found or no permission to delete
           schema:
             $ref: '#/definitions/Error'
+  /annotations/{id}/flag:
+    put:
+      tags:
+        - annotations
+      summary: Flag an annotation
+      operationId: flagAnnotation
+      description: >
+        Flag an annotation for moderation. The administrator (moderator) of the
+        group containing the annotation will be notified by email.
+      parameters:
+        - name: id
+          in: path
+          description: ID of annotation to flag for moderation
+          required: true
+          type: string
+      responses:
+        '204':
+          description: Success
+        '404':
+          description: Annotation not found or no permission to flag
+          schema:
+            $ref: '#/definitions/Error'
+
   /profile:
     get:
       tags:
