@@ -40,7 +40,6 @@ FEATURES = {
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
 FEATURES_PENDING_REMOVAL = {
-    'replace_nipsa_with_hidden_filter': "Filter annotations which are marked as hidden or belong to a nipsaed user.",
 }
 
 
