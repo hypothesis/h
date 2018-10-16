@@ -50,7 +50,6 @@ def badge(request):
     else:
         query = MultiDict({'uri': uri, 'limit': 0})
         s = search.Search(request, stats=request.stats)
-        s.append_modifier(search.UriFilter(request))
         result = s.run(query)
         count = result.total
 
