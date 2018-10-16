@@ -8,17 +8,27 @@ from mock import Mock
 from h.util.view import handle_exception, json_view
 
 
+@pytest.mark.usefixtures("sys_exc_info")
 class TestHandleException(object):
     def test_sets_response_status_500(self, pyramid_request):
         handle_exception(pyramid_request, Mock())
 
         assert pyramid_request.response.status_int == 500
 
-    def test_triggers_sentry_capture(self, pyramid_request):
-        exception = Mock()
-        handle_exception(pyramid_request, exception)
+    def test_triggers_sentry_capture_with_latest_exception(
+        self, pyramid_request, latest_exception
+    ):
+        handle_exception(pyramid_request, latest_exception)
+        pyramid_request.sentry.captureException.assert_called_once_with()
 
-        pyramid_request.sentry.captureException.assert_called_once_with(exception)
+    def test_triggers_sentry_capture_with_old_exception(
+        self, pyramid_request, old_exception
+    ):
+        handle_exception(pyramid_request, old_exception)
+        traceback = getattr(old_exception, "__traceback__", None)
+        pyramid_request.sentry.captureException.assert_called_once_with(
+            (type(old_exception), old_exception, traceback)
+        )
 
     def test_reraises_in_debug_mode(self, pyramid_request):
         pyramid_request.debug = True
@@ -37,6 +47,25 @@ class TestHandleException(object):
         pyramid_request.sentry = sentry
         pyramid_request.debug = False
         return pyramid_request
+
+    @pytest.fixture
+    def latest_exception(self):
+        return Exception("Last exception raised in thread")
+
+    @pytest.fixture
+    def old_exception(self):
+        try:
+            # Create exception and populate `__traceback__` in Python 3.
+            raise Exception("An earlier exception raised in thread")
+        except Exception as exc:
+            result = exc
+        return result
+
+    @pytest.fixture
+    def sys_exc_info(self, patch, latest_exception):
+        sys_exc_info = patch("h.util.view._exc_info")
+        sys_exc_info.return_value = (type(latest_exception), latest_exception, None)
+        return sys_exc_info
 
 
 @pytest.mark.usefixtures('view_config')
