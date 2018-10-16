@@ -24,6 +24,11 @@ def wildcard_uri_is_valid(wildcard_uri):
 
     *'s and _'s are not permitted in the scheme or netloc aka:
         scheme://netloc/path;parameters?query#fragment.
+
+    If a wildcard is near the begining of a url, elasticsearch will find a large portion of the
+    annotations because it is based on luncene which searches from left to right. In order to
+    avoid the performance implications of having such a large initial search space, wildcards are
+    not allowed in the begining of the url.
     """
     if "*" not in wildcard_uri and "_" not in wildcard_uri:
         return False
