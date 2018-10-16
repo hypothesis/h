@@ -391,9 +391,13 @@ class TestUserFilter(object):
         return search
 
 
-class TestUriFilter(object):
+class TestUriCombinedWildcardFilter():
+    # TODO - Explicit test of URL normalization (ie. that search normalizes input
+    # URL using `h.util.uri.normalize` and queries with that).
+
     @pytest.mark.parametrize("field", ("uri", "url"))
-    def test_filters_by_field(self, search, Annotation, field):
+    def test_filters_by_field(self, search, Annotation, pyramid_request, field):
+        search = self._get_search(search, pyramid_request, True)
         Annotation(target_uri="https://foo.com")
         expected_ids = [Annotation(target_uri="https://bar.com").id]
 
@@ -401,7 +405,8 @@ class TestUriFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-    def test_filters_on_whole_url(self, search, Annotation):
+    def test_filters_on_whole_url(self, search, Annotation, pyramid_request):
+        search = self._get_search(search, pyramid_request, True)
         Annotation(target_uri="http://bar.com/foo")
         expected_ids = [Annotation(target_uri="http://bar.com").id,
                         Annotation(target_uri="http://bar.com/").id]
@@ -410,7 +415,8 @@ class TestUriFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-    def test_filter_matches_invalid_uri(self, search, Annotation):
+    def test_filter_matches_invalid_uri(self, search, Annotation, pyramid_request):
+        search = self._get_search(search, pyramid_request, True)
         Annotation(target_uri="https://bar.com")
         expected_ids = [Annotation(target_uri="invalid-uri").id]
 
@@ -418,7 +424,8 @@ class TestUriFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-    def test_filters_aliases_http_and_https(self, search, Annotation):
+    def test_filters_aliases_http_and_https(self, search, Annotation, pyramid_request):
+        search = self._get_search(search, pyramid_request, True)
         expected_ids = [Annotation(target_uri="http://bar.com").id,
                         Annotation(target_uri="https://bar.com").id]
 
@@ -426,7 +433,8 @@ class TestUriFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-    def test_returns_all_annotations_with_equivalent_uris(self, search, Annotation, storage):
+    def test_returns_all_annotations_with_equivalent_uris(self, search, Annotation, pyramid_request, storage):
+        search = self._get_search(search, pyramid_request, True)
         # Mark all these uri's as equivalent uri's.
         storage.expand_uri.side_effect = lambda _, x: [
             "urn:x-pdf:1234",
@@ -447,7 +455,8 @@ class TestUriFilter(object):
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
 
-    def test_ors_multiple_url_uris(self, search, Annotation):
+    def test_ors_multiple_url_uris(self, search, Annotation, pyramid_request):
+        search = self._get_search(search, pyramid_request, True)
         Annotation(target_uri="http://baz.com")
         Annotation(target_uri="https://www.foo.com")
         expected_ids = [Annotation(target_uri="https://bar.com").id,
@@ -463,21 +472,6 @@ class TestUriFilter(object):
         result = search.run(params)
 
         assert sorted(result.annotation_ids) == sorted(expected_ids)
-
-    # TODO - Explicit test of URL normalization (ie. that search normalizes input
-    # URL using `h.util.uri.normalize` and queries with that).
-
-    @pytest.fixture
-    def search(self, search, pyramid_request):
-        search.append_modifier(query.UriFilter(pyramid_request))
-        return search
-
-    @pytest.fixture
-    def storage(self, patch):
-        return patch('h.search.query.storage')
-
-
-class TestUriCombinedWildcardFilter():
 
     @pytest.mark.parametrize('params,expected_ann_indexes,separate_keys', [
 
@@ -562,6 +556,10 @@ class TestUriCombinedWildcardFilter():
         search.append_modifier(query.UriCombinedWildcardFilter(
             pyramid_request, separate_keys))
         return search
+
+    @pytest.fixture
+    def storage(self, patch):
+        return patch('h.search.query.storage')
 
 
 @pytest.mark.parametrize('wildcard_uri,expected', [

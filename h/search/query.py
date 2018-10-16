@@ -246,35 +246,6 @@ class GroupAuthFilter(object):
         return search.filter("terms", group=groups)
 
 
-class UriFilter(object):
-
-    """
-    A filter that selects only annotations where the 'uri' parameter matches.
-    """
-
-    def __init__(self, request):
-        """Initialize a new UriFilter.
-
-        :param request: the pyramid.request object
-
-        """
-        self.request = request
-
-    def __call__(self, search, params):
-        if 'uri' not in params and 'url' not in params:
-            return search
-        query_uris = popall(params, 'uri') + popall(params, 'url')
-
-        uris = set()
-        for query_uri in query_uris:
-            expanded = storage.expand_uri(self.request.db, query_uri)
-
-            us = [uri.normalize(u) for u in expanded]
-            uris.update(us)
-        return search.filter(
-            'terms', **{'target.scope': list(uris)})
-
-
 class UriCombinedWildcardFilter(object):
 
     """

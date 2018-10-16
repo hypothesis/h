@@ -10,9 +10,7 @@ from h.search.query import (TopLevelAnnotationsFilter,
                             UserFilter,
                             AuthorityFilter,
                             TagsAggregation,
-                            UsersAggregation,
-                            UriCombinedWildcardFilter,
-                            UriFilter)
+                            UsersAggregation)
 
 __all__ = (
     'Search',
@@ -23,8 +21,6 @@ __all__ = (
     'AuthorityFilter',
     'TagsAggregation',
     'UsersAggregation',
-    'UriCombinedWildcardFilter',
-    'UriFilter',
     'get_client',
     'init',
 )
