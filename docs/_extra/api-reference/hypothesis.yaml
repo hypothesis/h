@@ -343,17 +343,17 @@ paths:
           default: 20
         - name: search_after
           in: query
-          description: Returns results after the annotation who's sort field has this value. 
-            If specifying a date use the format yyyy-MM-dd'T'HH:mm:ss.SSX or time in 
-            miliseconds since the epoch. This is used for iteration through large collections 
+          description: Returns results after the annotation who's sort field has this value.
+            If specifying a date use the format yyyy-MM-dd'T'HH:mm:ss.SSX or time in
+            miliseconds since the epoch. This is used for iteration through large collections
             of results.
           required: false
           type: string
         - name: offset
           in: query
           description: >
-            The number of initial annotations to skip. This is used for pagination. Not 
-            suitable for paging through thousands of annotations-search_after should be 
+            The number of initial annotations to skip. This is used for pagination. Not
+            suitable for paging through thousands of annotations-search_after should be
             used instead.
           required: false
           type: integer
@@ -397,22 +397,21 @@ paths:
         - name: wildcard_uri
           in: query
           description: |
-            Limit the results to annotations matching the wildcard URI. 
-            URI can be a URL (a web page address) or a URN representing another 
-            kind of resource such as DOI (Digital Object Identifier) or a 
+            Limit the results to annotations matching the wildcard URI.
+            URI can be a URL (a web page address) or a URN representing another
+            kind of resource such as DOI (Digital Object Identifier) or a
             PDF fingerprint.
 
-            `*` will match any character sequence (including an empty one), 
-            and a `_` will match any single character. `*`s are only permitted 
-            within the path and query parts of the URI and `_`s are only permitted
-            within the domain, path, and query parts of the URI.
+            `*` will match any character sequence (including an empty one),
+            and a `_` will match any single character. Wildcards are only permitted
+            within the path and query parts of the URI.
 
             Escaping wildcards is not supported.
 
             Examples of valid uris: `http://foo.com/*` `urn:x-pdf:*` `file://localhost/_bc.pdf`
 
             Examples of invalid uris: `*foo.com` `u_n:*` `file://*` `http://foo.com*`
-            
+
             <mark>This feature is experimental and the API may change.</mark>
           required: false
           type: string
