@@ -21,6 +21,10 @@ clean:
 dev: build/manifest.json
 	tox -e py27-dev
 
+.PHONY: sql
+sql:
+	docker-compose exec postgres psql -U postgres
+
 ## Build hypothesis/hypothesis docker image
 .PHONY: docker
 docker:

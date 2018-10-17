@@ -154,11 +154,12 @@ can be installed on:
 .. tip::
 
    You can use Docker Compose image to open a psql shell in your Dockerized
-   database container without having to install psql on your host machine. Do:
+   database container without having to install psql on your host machine.
+   We've provided a shortcut for this in our ``Makefile``, so just run:
 
    .. code-block:: bash
 
-      docker-compose exec postgres psql -U postgres
+      make sql
 
 .. tip::
 
