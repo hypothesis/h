@@ -39,7 +39,6 @@ FEATURES = {
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
 FEATURES_PENDING_REMOVAL = {
-    'wildcard_search_on_activity_pages': "Enable wildcard search via url facet on activity pages.",
 }
 
 
