@@ -19,14 +19,18 @@ from h import search
 class TestSearch(object):
     """Unit tests for search.Search when no separate_replies argument is given."""
     def test_it_defaults_separate_wildcard_uri_keys_to_true(self, pyramid_request, UriCombinedWildcardFilter):
+        separate_keys = True
+
         search.Search(pyramid_request)
 
-        UriCombinedWildcardFilter.assert_called_once_with(pyramid_request, True)
+        UriCombinedWildcardFilter.assert_called_once_with(pyramid_request, separate_keys)
 
     def test_it_passes_separate_wildcard_uri_keys_to_filter(self, pyramid_request, UriCombinedWildcardFilter):
-        search.Search(pyramid_request, separate_wildcard_uri_keys=False)
+        separate_keys = False
 
-        UriCombinedWildcardFilter.assert_called_once_with(pyramid_request, False)
+        search.Search(pyramid_request, separate_wildcard_uri_keys=separate_keys)
+
+        UriCombinedWildcardFilter.assert_called_once_with(pyramid_request, separate_keys)
 
     def test_it_returns_replies_in_annotations_ids(self, matchers, pyramid_request, Annotation):
         """Without separate_replies it returns replies in annotation_ids.
