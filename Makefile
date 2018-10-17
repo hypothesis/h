@@ -21,6 +21,10 @@ clean:
 dev: build/manifest.json
 	tox -e py27-dev
 
+.PHONY: shell
+shell:
+	tox -q -e py28-dev -- sh bin/hypothesis --dev shell
+
 .PHONY: sql
 sql:
 	docker-compose exec postgres psql -U postgres
