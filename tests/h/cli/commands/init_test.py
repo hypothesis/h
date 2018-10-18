@@ -7,7 +7,7 @@ import pytest
 from h.cli.commands import init as init_cli
 
 
-@pytest.mark.usefixtures('db', 'search')
+@pytest.mark.usefixtures('alembic_config', 'alembic_stamp', 'db', 'search')
 class TestInitCommand(object):
     def test_initialises_database(self,
                                   cli,
@@ -44,6 +44,18 @@ class TestInitCommand(object):
         assert not db.init.called
         assert result.exit_code == 0
 
+    def test_stamps_alembic_version(self, alembic_config, alembic_stamp, cli,
+                                    cliconfig, db, db_engine, pyramid_settings):
+        db.make_engine.return_value = db_engine
+        Config = alembic_config.Config
+        pyramid_settings['h.authority'] = 'foobar.org'
+
+        result = cli.invoke(init_cli.init, obj=cliconfig)
+
+        Config.assert_called_once_with('conf/alembic.ini')
+        alembic_stamp.assert_called_once_with(Config.return_value, 'head')
+        assert result.exit_code == 0
+
     def test_initialises_search(self,
                                 cli,
                                 cliconfig,
@@ -71,3 +83,13 @@ def db(patch):
 @pytest.fixture
 def search(patch):
     return patch('h.cli.commands.init.search')
+
+
+@pytest.fixture
+def alembic_config(patch):
+    return patch('h.cli.commands.init.alembic.config')
+
+
+@pytest.fixture
+def alembic_stamp(patch):
+    return patch('h.cli.commands.init.alembic.command.stamp')

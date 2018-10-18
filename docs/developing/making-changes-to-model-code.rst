@@ -64,21 +64,7 @@ steps to create a new migration script for h are:
       downgrade that adds the constraint back may not work with data created
       using the updated schema.
 
-3. Stamp your database.
-
-   Before running any upgrades or downgrades you need to stamp the database
-   with its current revision, so Alembic knows which migration scripts to run:
-
-   .. code-block:: bash
-
-      tox -e py27-dev -- sh bin/hypothesis migrate stamp <revision_id>
-
-   ``<revision_id>`` should be the revision corresponding to the version of the
-   code that was present when the current database was created. The will
-   usually be the ``down_revision`` from the migration script that you've just
-   generated.
-
-4. Test your ``upgrade()`` function by upgrading your database to the most
+3. Test your ``upgrade()`` function by upgrading your database to the most
    recent revision. This will run all migration scripts newer than the revision
    that your db is currently stamped with, which usually means just your new
    revision script:
@@ -96,7 +82,7 @@ steps to create a new migration script for h are:
       columns of the database before testing upgrading and downgrading it.
       Some migration script crashes will only happen when there's data present.
 
-5. Test your ``downgrade()`` function:
+4. Test your ``downgrade()`` function:
 
    .. code-block:: bash
 
