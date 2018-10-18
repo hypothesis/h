@@ -5,10 +5,7 @@ source =
     h
     tests/h
 omit =
-    # development
     h/debug.py
-
-    # migrations
     h/migrations/*
 
 [report]
