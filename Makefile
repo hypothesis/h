@@ -68,6 +68,10 @@ test-py3: node_modules/.uptodate
 coverage:
 	tox -e py27-coverage
 
+.PHONY: codecov
+codecov:
+	tox -e py27-codecov
+
 .PHONY: lint
 lint:
 	tox -e py27-lint
