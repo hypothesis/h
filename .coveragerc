@@ -1,8 +1,15 @@
 [run]
 branch = True
+parallel = True
+source =
+    h
+    tests/h
 omit =
     # development
     h/debug.py
 
     # migrations
     h/migrations/*
+
+[report]
+show_missing = True
