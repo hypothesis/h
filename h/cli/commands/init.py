@@ -3,6 +3,8 @@
 import logging
 import os
 
+import alembic.config
+import alembic.command
 import click
 import sqlalchemy
 
@@ -37,6 +39,11 @@ def _init_db(settings):
     except sqlalchemy.exc.ProgrammingError:
         log.info("initializing database")
         db.init(engine, should_create=True, authority=text_type(settings['h.authority']))
+
+        # Stamp the database with the current schema version so that future
+        # migrations start from the correct point.
+        alembic_cfg = alembic.config.Config('conf/alembic.ini')
+        alembic.command.stamp(alembic_cfg, 'head')
     else:
         log.info("detected alembic_version table, skipping db initialization")
 
