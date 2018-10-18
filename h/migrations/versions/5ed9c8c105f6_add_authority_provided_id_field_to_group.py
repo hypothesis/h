@@ -33,7 +33,7 @@ def upgrade():
     op.execute('COMMIT')
     op.create_index(op.f('ix__group__groupid'),
                     'group',
-                    ['authority_provided_id', 'authority'],
+                    ['authority', 'authority_provided_id'],
                     postgresql_concurrently=True,
                     unique=True)
 
