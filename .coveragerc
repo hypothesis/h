@@ -6,8 +6,3 @@ omit =
 
     # migrations
     h/migrations/*
-
-[paths]
-source =
-   src/memex
-   .tox/*/lib/python*/site-packages/memex
