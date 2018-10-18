@@ -18,8 +18,7 @@ from h.search import parser
 from h.search import (TopLevelAnnotationsFilter,
                       AuthorityFilter,
                       TagsAggregation,
-                      UsersAggregation,
-                      UriCombinedWildcardFilter)
+                      UsersAggregation)
 
 
 class ActivityResults(namedtuple('ActivityResults', [
@@ -165,10 +164,11 @@ def fetch_annotations(session, ids):
 
 @newrelic.agent.function_trace()
 def _execute_search(request, query, page_size):
-    search = Search(request, stats=request.stats)
+    # Wildcards and exact url matches are specified in the url facet so set
+    # separate_wildcard_uri_keys to False.
+    search = Search(request, stats=request.stats, separate_wildcard_uri_keys=False)
     search.append_modifier(AuthorityFilter(authority=request.default_authority))
     search.append_modifier(TopLevelAnnotationsFilter())
-    search.append_modifier(UriCombinedWildcardFilter(request=request))
     for agg in aggregations_for(query):
         search.append_aggregation(agg)
 

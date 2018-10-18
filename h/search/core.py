@@ -30,11 +30,23 @@ class Search(object):
         resulting annotations will only include top-level annotations, not replies.
     :type separate_replies: bool
 
+    :param separate_wildcard_uri_keys: If True, wildcard searches are only performed
+        on wildcard_uri's, and exact match searches are performed on uri/url parameters.
+        If False, uri/url parameters are expected to contain both wildcard and exact
+        matches.
+    :type separate_wildcard_uri_keys: bool
+
     :param stats: An optional statsd client to which some metrics will be
         published.
     :type stats: statsd.client.StatsClient
     """
-    def __init__(self, request, separate_replies=False, stats=None, _replies_limit=200):
+    def __init__(
+        self, request,
+        separate_replies=False,
+        separate_wildcard_uri_keys=True,
+        stats=None,
+        _replies_limit=200,
+    ):
         self.es = request.es
         self.separate_replies = separate_replies
         self.stats = stats
@@ -51,6 +63,7 @@ class Search(object):
                            query.HiddenFilter(request),
                            query.AnyMatcher(),
                            query.TagsMatcher(),
+                           query.UriCombinedWildcardFilter(request, separate_keys=separate_wildcard_uri_keys),
                            query.KeyValueMatcher()]
         self._aggregations = []
 
