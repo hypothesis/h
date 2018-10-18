@@ -1,13 +1,12 @@
 [run]
 branch = True
+parallel = True
+source =
+    h
+    tests/h
 omit =
-    # development
     h/debug.py
-
-    # migrations
     h/migrations/*
 
-[paths]
-source =
-   src/memex
-   .tox/*/lib/python*/site-packages/memex
+[report]
+show_missing = True

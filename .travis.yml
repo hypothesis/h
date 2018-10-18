@@ -14,8 +14,7 @@ matrix:
       before_script: createdb htest
       script: tox
       after_success:
-        tox -e py27-coverage
-        tox -e py27-codecov
+        make coverage codecov
 
     - env: ACTION=tox-py3
       language: python

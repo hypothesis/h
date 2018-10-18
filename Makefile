@@ -68,6 +68,14 @@ functests: build/manifest.json
 test-py3: node_modules/.uptodate
 	tox -e py36-tests
 
+.PHONY: coverage
+coverage:
+	tox -e py27-coverage
+
+.PHONY: codecov
+codecov:
+	tox -e py27-codecov
+
 .PHONY: lint
 lint:
 	tox -e py27-lint
