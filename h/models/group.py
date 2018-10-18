@@ -35,6 +35,22 @@ class WriteableBy(enum.Enum):
 class Group(Base, mixins.Timestamps):
     __tablename__ = 'group'
 
+    __table_args__ = (
+        # Add a composite index of the (authority, authority_provided_id)
+        # columns. Also impose uniqueness such that no two records may share
+        # the same (authority, authority_provided_id) composite
+        #
+        # See:
+        #
+        # * http://docs.sqlalchemy.org/en/latest/core/constraints.html#indexes
+        sa.Index(
+            "ix__group__groupid",
+            "authority",
+            "authority_provided_id",
+            unique=True,
+        ),
+    )
+
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     # We don't expose the integer PK to the world, so we generate a short
     # random string to use as the publicly visible ID.
@@ -50,6 +66,11 @@ class Group(Base, mixins.Timestamps):
     creator = sa.orm.relationship('User')
 
     description = sa.Column(sa.UnicodeText())
+
+    #: Allow authorities to define their own unique identifier for a group
+    #: (versus the pubid). This identifier is owned by the authority/client
+    #: versus ``pubid``, which is owned and controlled by the service.
+    authority_provided_id = sa.Column(sa.UnicodeText(), nullable=True)
 
     #: Which type of user is allowed to join this group, possible values are:
     #: authority, None

@@ -54,6 +54,12 @@ def test_type_returns_restricted_for_restricted_groups(factories):
     assert factories.RestrictedGroup().type == 'restricted'
 
 
+def test_it_returns_None_by_default_for_authority_provided_id():
+    group = models.Group(name="abcdefg")
+
+    assert group.authority_provided_id is None
+
+
 def test_type_raises_for_unknown_type_of_group(factories):
     group = factories.Group()
     # Set the group's access flags to an invalid / unused combination.
