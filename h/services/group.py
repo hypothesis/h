@@ -10,8 +10,6 @@ from h.models.group import ReadableBy
 
 class GroupService(object):
 
-    """A service for manipulating groups and group membership."""
-
     def __init__(self, session, user_fetcher):
         """
         Create a new groups service.
@@ -29,6 +27,8 @@ class GroupService(object):
 
         If the passed-in user is ``None``, this returns the list of
         world-readable groups.
+
+        :type user: `h.models.user.User`
         """
         readable = (Group.readable_by == ReadableBy.world)
 
@@ -43,6 +43,8 @@ class GroupService(object):
         Return a list of pubids which the user created.
 
         If the passed-in user is ``None``, this returns an empty list.
+
+        :type user: `h.models.user.User` or None
         """
         if user is None:
             return []

@@ -13,7 +13,7 @@ class GroupCreateService(object):
 
     def __init__(self, session, user_fetcher, publish):
         """
-        Create a new groups service.
+        Create a new GroupCreateService.
 
         :param session: the SQLAlchemy session object
         :param user_fetcher: a callable for fetching users by userid

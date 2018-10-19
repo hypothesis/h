@@ -8,11 +8,11 @@ from h import session
 
 class GroupMembersService(object):
 
-    """A service for manipulating groups and group membership."""
+    """A service for manipulating group membership."""
 
     def __init__(self, session, user_fetcher, publish):
         """
-        Create a new groups service.
+        Create a new GroupMembersService
 
         :param session: the SQLAlchemy session object
         :param user_fetcher: a callable for fetching users by userid
@@ -27,6 +27,9 @@ class GroupMembersService(object):
         Add the users indicated by userids to this group's members.
 
         Any pre-existing members will not be affected.
+
+        :type group: `h.models.group.Group`
+        :param userids: list of userids to add to this group's membership
         """
         for userid in userids:
             self.member_join(group, userid)
@@ -40,7 +43,7 @@ class GroupMembersService(object):
         Any pre-existing member whose userid is not present in userids will
         be removed as a member.
 
-        :param group:   group model
+        :type group: `h.models.group.Group`
         :param userids: the list of userids corresponding to users who should
                         be the members of this group
         """
