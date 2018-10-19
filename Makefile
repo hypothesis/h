@@ -1,5 +1,5 @@
 .PHONY: default
-default: test
+default: help
 
 .PHONY: help
 help:
