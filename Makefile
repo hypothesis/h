@@ -80,8 +80,6 @@ docstrings:
 checkdocstrings:
 	tox -e py27-checkdocstrings
 
-################################################################################
-
 .PHONY: help
 help:
 	@echo "make help              Show this help message"
