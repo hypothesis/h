@@ -63,7 +63,7 @@ class GroupCreateController(object):
     @view_config(request_method='POST')
     def post(self):
         def on_success(appstruct):
-            svc = self.request.find_service(name='group')
+            group_create_svc = self.request.find_service(name='group_create')
             group_members_svc = self.request.find_service(name='group_members')
 
             # Create the new group.
@@ -77,13 +77,13 @@ class GroupCreateController(object):
             userid = _userid(creator, organization.authority)
 
             if type_ == 'open':
-                group = svc.create_open_group(name=name, userid=userid,
-                                              origins=origins, description=description,
-                                              organization=organization)
+                group = group_create_svc.create_open_group(name=name, userid=userid,
+                                                           origins=origins, description=description,
+                                                           organization=organization)
             elif type_ == 'restricted':
-                group = svc.create_restricted_group(name=name, userid=userid,
-                                                    origins=origins, description=description,
-                                                    organization=organization)
+                group = group_create_svc.create_restricted_group(name=name, userid=userid,
+                                                                 origins=origins, description=description,
+                                                                 organization=organization)
             else:
                 raise Exception('Unsupported group type {}'.format(type_))
 
