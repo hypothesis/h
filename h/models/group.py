@@ -90,6 +90,14 @@ class Group(Base, mixins.Timestamps):
     writeable_by = sa.Column(sa.Enum(WriteableBy, name='group_writeable_by'),
                              nullable=True)
 
+    @property
+    def groupid(self):
+        if self.authority_provided_id is None:
+            return None
+        return 'group:{authority_provided_id}@{authority}'.format(
+            authority_provided_id=self.authority_provided_id,
+            authority=self.authority)
+
     # Group membership
     members = sa.orm.relationship(
         'User', secondary='user_group', backref=sa.orm.backref(

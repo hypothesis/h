@@ -65,6 +65,19 @@ def test_it_returns_None_by_default_for_authority_provided_id():
     assert group.authority_provided_id is None
 
 
+def test_it_returns_None_for_groupid_if_authority_provided_id_is_None(factories):
+    group = factories.Group()
+
+    assert group.groupid is None
+
+
+def test_it_returns_formatted_groupid_if_authority_provided_id(factories):
+    group = factories.Group()
+    group.authority_provided_id = 'hithere'
+
+    assert group.groupid == 'group:hithere@{authority}'.format(authority=group.authority)
+
+
 @pytest.mark.parametrize('authority_provided_id', [
     '%%&whatever',
     '^flop',
