@@ -1,81 +1,6 @@
 .PHONY: default
 default: test
 
-.PHONY: clean
-clean:
-	find . -type f -name "*.py[co]" -delete
-	find . -type d -name "__pycache__" -delete
-	rm -f node_modules/.uptodate
-	rm -rf build
-
-.PHONY: dev
-dev: build/manifest.json
-	tox -e py27-dev
-
-.PHONY: shell
-shell:
-	tox -q -e py28-dev -- sh bin/hypothesis --dev shell
-
-.PHONY: sql
-sql:
-	docker-compose exec postgres psql -U postgres
-
-.PHONY: docker
-docker:
-	git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
-
-.PHONY: run-docker
-run-docker:
-	docker run \
-		--net h_default \
-		-e "APP_URL=http://localhost:5000" \
-		-e "AUTHORITY=localhost" \
-		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
-		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
-		-e "ELASTICSEARCH_URL=http://elasticsearch:9200" \
-		-e "NEW_RELIC_APP_NAME=h (dev)" \
-		-e "NEW_RELIC_LICENSE_KEY" \
-		-e "SECRET_KEY=notasecret" \
-		-p 5000:5000 \
-		hypothesis/hypothesis:$(DOCKER_TAG)
-
-.PHONY: test
-test: node_modules/.uptodate
-	tox
-	$(GULP) test
-
-.PHONY: functests
-functests: build/manifest.json
-	tox -e py27-functests
-
-.PHONY: coverage
-coverage:
-	tox -e py27-coverage
-
-.PHONY: codecov
-codecov:
-	tox -e py27-codecov
-
-.PHONY: lint
-lint:
-	tox -e py27-lint
-
-.PHONY: docs
-docs:
-	tox -e py27-docs
-
-.PHONY: checkdocs
-checkdocs:
-	tox -e py27-checkdocs
-
-.PHONY: docstrings
-docstrings:
-	tox -e py27-docstrings
-
-.PHONY: checkdocstrings
-checkdocstrings:
-	tox -e py27-checkdocstrings
-
 .PHONY: help
 help:
 	@echo "make help              Show this help message"
@@ -99,6 +24,81 @@ help:
 	@echo "                       docker-compose in the 'h_default' network."
 	@echo "make clean             Delete development artefacts (cached files, "
 	@echo "                       dependencies, etc)"
+
+.PHONY: dev
+dev: build/manifest.json
+	tox -e py27-dev
+
+.PHONY: shell
+shell:
+	tox -q -e py28-dev -- sh bin/hypothesis --dev shell
+
+.PHONY: sql
+sql:
+	docker-compose exec postgres psql -U postgres
+
+.PHONY: lint
+lint:
+	tox -e py27-lint
+
+.PHONY: test
+test: node_modules/.uptodate
+	tox
+	$(GULP) test
+
+.PHONY: coverage
+coverage:
+	tox -e py27-coverage
+
+.PHONY: codecov
+codecov:
+	tox -e py27-codecov
+
+.PHONY: functests
+functests: build/manifest.json
+	tox -e py27-functests
+
+.PHONY: docs
+docs:
+	tox -e py27-docs
+
+.PHONY: checkdocs
+checkdocs:
+	tox -e py27-checkdocs
+
+.PHONY: docstrings
+docstrings:
+	tox -e py27-docstrings
+
+.PHONY: checkdocstrings
+checkdocstrings:
+	tox -e py27-checkdocstrings
+
+.PHONY: docker
+docker:
+	git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
+
+.PHONY: run-docker
+run-docker:
+	docker run \
+		--net h_default \
+		-e "APP_URL=http://localhost:5000" \
+		-e "AUTHORITY=localhost" \
+		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
+		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
+		-e "ELASTICSEARCH_URL=http://elasticsearch:9200" \
+		-e "NEW_RELIC_APP_NAME=h (dev)" \
+		-e "NEW_RELIC_LICENSE_KEY" \
+		-e "SECRET_KEY=notasecret" \
+		-p 5000:5000 \
+		hypothesis/hypothesis:$(DOCKER_TAG)
+
+.PHONY: clean
+clean:
+	find . -type f -name "*.py[co]" -delete
+	find . -type d -name "__pycache__" -delete
+	rm -f node_modules/.uptodate
+	rm -rf build
 
 DOCKER_TAG = dev
 
