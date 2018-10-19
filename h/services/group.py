@@ -97,59 +97,6 @@ class GroupService(object):
                             organization=organization,
                             )
 
-    def add_members(self, group, userids):
-        """
-        Add the users indicated by userids to this group's members.
-
-        Any pre-existing members will not be affected.
-        """
-        for userid in userids:
-            self.member_join(group, userid)
-
-    def update_members(self, group, userids):
-        """
-        Update this group's membership to be the list of users indicated by
-        userids.
-
-        The users indicated by userids will *replace* the members of this group.
-        Any pre-existing member whose userid is not present in userids will
-        be removed as a member.
-
-        :param group:   group model
-        :param userids: the list of userids corresponding to users who should
-                        be the members of this group
-        """
-        current_mem_ids = [member.userid for member in group.members]
-        userids_for_removal = [mem_id for mem_id in current_mem_ids if mem_id not in userids]
-
-        for userid in userids:
-            self.member_join(group, userid)
-
-        for userid in userids_for_removal:
-            self.member_leave(group, userid)
-
-    def member_join(self, group, userid):
-        """Add `userid` to the member list of `group`."""
-        user = self.user_fetcher(userid)
-
-        if user in group.members:
-            return
-
-        group.members.append(user)
-
-        self.publish('group-join', group.pubid, userid)
-
-    def member_leave(self, group, userid):
-        """Remove `userid` from the member list of `group`."""
-        user = self.user_fetcher(userid)
-
-        if user not in group.members:
-            return
-
-        group.members.remove(user)
-
-        self.publish('group-leave', group.pubid, userid)
-
     def groupids_readable_by(self, user):
         """
         Return a list of pubids for which the user has read access.
