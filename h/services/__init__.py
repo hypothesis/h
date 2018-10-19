@@ -20,6 +20,7 @@ def includeme(config):
     config.register_service_factory('.flag.flag_service_factory', name='flag')
     config.register_service_factory('.flag_count.flag_count_service_factory', name='flag_count')
     config.register_service_factory('.group.groups_factory', name='group')
+    config.register_service_factory('.group_create.group_create_factory', name='group_create')
     config.register_service_factory('.group_links.group_links_factory', name='group_links')
     config.register_service_factory('.group_members.group_members_factory', name='group_members')
     config.register_service_factory('.groupfinder.groupfinder_service_factory', iface='h.interfaces.IGroupService')
