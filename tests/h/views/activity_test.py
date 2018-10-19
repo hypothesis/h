@@ -112,7 +112,7 @@ class TestSearchController(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('annotation_stats_service', 'group_service', 'routes', 'search')
+@pytest.mark.usefixtures('annotation_stats_service', 'group_service', 'group_members_service', 'routes', 'search')
 class TestGroupSearchController(object):
 
     """Tests unique to GroupSearchController."""
@@ -520,14 +520,14 @@ class TestGroupSearchController(object):
                                     test_group,
                                     test_user,
                                     group_leave_request,
-                                    group_service,
+                                    group_members_service,
                                     pyramid_request,
                                     pyramid_config):
         pyramid_config.testing_securitypolicy(test_user.userid)
 
         controller.leave()
 
-        group_service.member_leave.assert_called_once_with(
+        group_members_service.member_leave.assert_called_once_with(
             test_group, test_user.userid)
 
     def test_leave_redirects_to_the_search_page(self,
@@ -550,12 +550,12 @@ class TestGroupSearchController(object):
         with pytest.raises(httpexceptions.HTTPNotFound):
             controller.join()
 
-    def test_join_adds_group_member(self, controller, group, pyramid_request, pyramid_config, group_service):
+    def test_join_adds_group_member(self, controller, group, pyramid_request, pyramid_config, group_members_service):
         pyramid_config.testing_securitypolicy('acct:doe@example.org')
 
         controller.join()
 
-        group_service.member_join.assert_called_once_with(group, 'acct:doe@example.org')
+        group_members_service.member_join.assert_called_once_with(group, 'acct:doe@example.org')
 
     @pytest.mark.parametrize('test_group', GROUP_TYPE_OPTIONS, indirect=['test_group'])
     def test_join_redirects_to_search_page(self, controller, test_group, pyramid_request):
@@ -840,6 +840,12 @@ class TestGroupSearchController(object):
         group_service = patch('h.services.group.GroupService')
         pyramid_config.register_service(group_service, name='group')
         return group_service
+
+    @pytest.fixture
+    def group_members_service(self, patch, pyramid_config):
+        group_members_service = patch('h.services.group_members.GroupMembersService')
+        pyramid_config.register_service(group_members_service, name='group_members')
+        return group_members_service
 
     @pytest.fixture
     def pyramid_request(self, request, group, pyramid_request):

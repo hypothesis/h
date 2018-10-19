@@ -232,9 +232,9 @@ class GroupSearchController(SearchController):
         if not self.request.has_permission('join', self.group):
             raise httpexceptions.HTTPNotFound()
 
-        groups_service = self.request.find_service(name='group')
-        groups_service.member_join(self.group,
-                                   self.request.authenticated_userid)
+        group_members_service = self.request.find_service(name='group_members')
+        group_members_service.member_join(self.group,
+                                          self.request.authenticated_userid)
 
         url = self.request.route_url('group_read',
                                      pubid=self.group.pubid,
@@ -252,9 +252,9 @@ class GroupSearchController(SearchController):
         browser to the search page.
 
         """
-        groups_service = self.request.find_service(name='group')
-        groups_service.member_leave(self.group,
-                                    self.request.authenticated_userid)
+        group_members_service = self.request.find_service(name='group_members')
+        group_members_service.member_leave(self.group,
+                                           self.request.authenticated_userid)
 
         new_params = _copy_params(self.request, self.request.POST.copy())
         del new_params['group_leave']
