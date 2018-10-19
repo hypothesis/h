@@ -26,7 +26,7 @@ matrix:
       install: pip install tox tox-pip-extensions
       before_script: createdb htest
       script:
-        make test-py3
+        tox -e py36-tests
 
     # Test web application frontend
     - env: ACTION=gulp

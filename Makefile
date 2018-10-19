@@ -48,10 +48,6 @@ test: node_modules/.uptodate
 functests: build/manifest.json
 	tox -e py27-functests
 
-.PHONY: test-py3
-test-py3: node_modules/.uptodate
-	tox -e py36-tests
-
 .PHONY: coverage
 coverage:
 	tox -e py27-coverage
