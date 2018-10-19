@@ -31,7 +31,7 @@ dev: build/manifest.json
 
 .PHONY: shell
 shell:
-	tox -q -e py28-dev -- sh bin/hypothesis --dev shell
+	tox -q -e py27-dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
 sql:
