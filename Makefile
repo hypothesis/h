@@ -1,12 +1,5 @@
-DOCKER_TAG = dev
-
-GULP := node_modules/.bin/gulp
-
 .PHONY: default
 default: test
-
-build/manifest.json: node_modules/.uptodate
-	$(GULP) build
 
 ## Clean up runtime artifacts (needed after a version update)
 .PHONY: clean
@@ -98,11 +91,6 @@ checkdocstrings:
 
 ################################################################################
 
-node_modules/.uptodate: package.json
-	@echo installing javascript dependencies
-	@node_modules/.bin/check-dependencies 2>/dev/null || npm install
-	@touch $@
-
 # Self documenting Makefile
 .PHONY: help
 help:
@@ -111,3 +99,15 @@ help:
 	@echo " dev        Run the development H server locally"
 	@echo " docker     Build hypothesis/hypothesis docker image"
 	@echo " test       Run the test suite (default)"
+
+DOCKER_TAG = dev
+
+GULP := node_modules/.bin/gulp
+
+build/manifest.json: node_modules/.uptodate
+	$(GULP) build
+
+node_modules/.uptodate: package.json
+	@echo installing javascript dependencies
+	@node_modules/.bin/check-dependencies 2>/dev/null || npm install
+	@touch $@
