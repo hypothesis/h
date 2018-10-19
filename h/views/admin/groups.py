@@ -64,6 +64,7 @@ class GroupCreateController(object):
     def post(self):
         def on_success(appstruct):
             svc = self.request.find_service(name='group')
+            group_members_svc = self.request.find_service(name='group_members')
 
             # Create the new group.
             creator = appstruct['creator']
@@ -88,7 +89,7 @@ class GroupCreateController(object):
 
             # Add members to the group
             member_userids = [_userid(username, organization.authority) for username in appstruct['members']]
-            svc.add_members(group, member_userids)
+            group_members_svc.add_members(group, member_userids)
 
             # Flush changes to allocate group a pubid
             self.request.db.flush(objects=[group])
@@ -157,7 +158,7 @@ class GroupEditController(object):
 
         def on_success(appstruct):
             user_svc = self.request.find_service(name='user')
-            group_svc = self.request.find_service(name='group')
+            group_members_svc = self.request.find_service(name='group_members')
 
             group.creator = user_svc.fetch(appstruct['creator'], group.authority)
             group.description = appstruct['description']
@@ -166,7 +167,7 @@ class GroupEditController(object):
             group.organization = self.organizations[appstruct['organization']]
 
             memberids = [_userid(username, group.authority) for username in appstruct['members']]
-            group_svc.update_members(group, memberids)
+            group_members_svc.update_members(group, memberids)
 
             self.form = _create_form(self.request, self.schema, (_('Save'),))
             self._update_appstruct()
