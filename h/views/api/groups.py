@@ -49,9 +49,9 @@ def create(request):
         'description': appstruct.get('description', None),
     }
 
-    group_service = request.find_service(name='group')
+    group_create_service = request.find_service(name='group_create')
 
-    group = group_service.create_private_group(
+    group = group_create_service.create_private_group(
         group_properties['name'],
         request.user.userid,
         description=group_properties['description'],
