@@ -10,6 +10,7 @@ from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 from h.views.api import groups as views
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
+from h.services.group_members import GroupMembersService
 from h.services.user import UserService
 from h.services.group_links import GroupLinksService
 
@@ -186,6 +187,7 @@ class TestCreateGroup(object):
 
 
 @pytest.mark.usefixtures('group_service',
+                         'group_members_service',
                          'user_service')
 class TestAddMember(object):
 
@@ -193,10 +195,10 @@ class TestAddMember(object):
                                                        group,
                                                        user,
                                                        pyramid_request,
-                                                       group_service,):
+                                                       group_members_service,):
         views.add_member(group, pyramid_request)
 
-        group_service.member_join.assert_called_once_with(group, user.userid)
+        group_members_service.member_join.assert_called_once_with(group, user.userid)
 
     def test_it_returns_HTTPNoContent_when_add_member_is_successful(self,
                                                                     group,
@@ -268,15 +270,15 @@ class TestAddMember(object):
         return service
 
 
-@pytest.mark.usefixtures('authenticated_userid', 'group_service')
+@pytest.mark.usefixtures('authenticated_userid', 'group_service', 'group_members_service')
 class TestRemoveMember(object):
 
-    def test_it_removes_current_user(self, shorthand_request, authenticated_userid, group_service):
+    def test_it_removes_current_user(self, shorthand_request, authenticated_userid, group_members_service):
         group = mock.sentinel.group
 
         views.remove_member(group, shorthand_request)
 
-        group_service.member_leave.assert_called_once_with(group, authenticated_userid)
+        group_members_service.member_leave.assert_called_once_with(group, authenticated_userid)
 
     def test_it_returns_no_content(self, shorthand_request):
         group = mock.sentinel.group
@@ -338,6 +340,13 @@ def CreateGroupAPISchema(patch):
 def group_service(pyramid_config):
     service = mock.create_autospec(GroupService, spec_set=True, instance=True)
     pyramid_config.register_service(service, name='group')
+    return service
+
+
+@pytest.fixture
+def group_members_service(pyramid_config):
+    service = mock.create_autospec(GroupMembersService, spec_set=True, instance=True)
+    pyramid_config.register_service(service, name='group_members')
     return service
 
 

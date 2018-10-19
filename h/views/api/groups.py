@@ -74,8 +74,8 @@ def remove_member(group, request):
     else:
         raise HTTPBadRequest('Only the "me" user value is currently supported')
 
-    group_service = request.find_service(name='group')
-    group_service.member_leave(group, userid)
+    group_members_service = request.find_service(name='group_members')
+    group_members_service.member_leave(group, userid)
 
     return HTTPNoContent()
 
@@ -92,7 +92,7 @@ def add_member(group, request):
       authorities don't match.
     """
     user_svc = request.find_service(name='user')
-    group_svc = request.find_service(name='group')
+    group_members_svc = request.find_service(name='group_members')
 
     try:
         user = user_svc.fetch(request.matchdict['userid'])
@@ -105,7 +105,7 @@ def add_member(group, request):
     if user.authority != group.authority:
         raise HTTPNotFound()
 
-    group_svc.member_join(group, user.userid)
+    group_members_svc.member_join(group, user.userid)
 
     return HTTPNoContent()
 
