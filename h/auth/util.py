@@ -162,8 +162,9 @@ def principals_for_auth_client_user(user, client):
     """
     user_principals = principals_for_user(user)
     client_principals = principals_for_auth_client(client)
+    auth_client_principals = [role.AuthClientUser]
 
-    all_principals = user_principals + client_principals
+    all_principals = user_principals + client_principals + auth_client_principals
     distinct_principals = list(set(all_principals))
 
     return distinct_principals

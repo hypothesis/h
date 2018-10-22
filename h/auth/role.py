@@ -14,3 +14,9 @@ AuthClient = 'group:__authclient__'
 #: c.f. ``AuthClient``, which can exist on an authenticated request but
 #: there is no user
 User = 'group:__user__'
+
+
+#: This role represents an authenticated authclient request that also has a
+#: verified forwarded user. This kind of request would also qualify for
+#: ``AuthClient`` and ``User`` roles.
+AuthClientUser = 'group:__authclientuser__'
