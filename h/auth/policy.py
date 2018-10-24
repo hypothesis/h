@@ -353,8 +353,8 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
 
 
 def _is_api_request(request):
-    return (request.path.startswith('/api') and
-            request.path not in ['/api/token', '/api/badge'])
+    return (request.path.startswith('/api')
+            and request.path not in ['/api/token', '/api/badge'])
 
 
 def _is_client_request(request):

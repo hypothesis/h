@@ -339,8 +339,8 @@ class TestCreateUpdateAnnotationSchema(object):
         validate(pyramid_request, {'document': document})
 
         assert (
-            document_claims.document_metas_from_data.call_args[0][0] ==
-            document)
+            document_claims.document_metas_from_data.call_args[0][0]
+            == document)
 
     def test_it_puts_document_metas_in_appstruct(self,
                                                  document_claims,

@@ -82,8 +82,8 @@ class OAuthValidatorService(RequestValidator):
             # `authenticate_client_id` will not authenticate a missing client.
             return False
 
-        if (request.grant_type == 'refresh_token' and
-                client.grant_type == AuthClientGrantType.jwt_bearer):
+        if (request.grant_type == 'refresh_token'
+                and client.grant_type == AuthClientGrantType.jwt_bearer):
             return False
 
         return (client.secret is not None)
@@ -283,8 +283,8 @@ class OAuthValidatorService(RequestValidator):
 
         client = self.find_client(client_id)
         if client is not None:
-            return (client.response_type is not None and
-                    client.response_type.value == response_type)
+            return (client.response_type is not None
+                    and client.response_type.value == response_type)
         return False
 
     def validate_scopes(self, client_id, scopes, request, *args, **kwargs):

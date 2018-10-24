@@ -75,9 +75,9 @@ class Document(Base, mixins.Timestamps):
                     continue
                 return document_uri.uri
 
-        self.web_uri = (first_http_url(type_='self-claim') or
-                        first_http_url(type_='rel-canonical') or
-                        first_http_url())
+        self.web_uri = (first_http_url(type_='self-claim')
+                        or first_http_url(type_='rel-canonical')
+                        or first_http_url())
 
     @classmethod
     def find_by_uris(cls, session, uris):

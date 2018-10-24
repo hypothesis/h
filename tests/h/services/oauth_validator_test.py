@@ -186,8 +186,8 @@ class TestGetOriginalScopes(object):
     def test_returns_original_scopes_from_default_ones(self, svc):
         refresh_token = mock.Mock()
         oauth_request = mock.Mock()
-        assert (svc.get_original_scopes(refresh_token, oauth_request) ==
-                svc.get_default_scopes('something', oauth_request))
+        assert (svc.get_original_scopes(refresh_token, oauth_request)
+                == svc.get_default_scopes('something', oauth_request))
 
 
 class TestInvalidateAuthorizationCode(object):

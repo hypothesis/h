@@ -36,10 +36,10 @@ def conditional_http_tween_factory(handler, registry):
         # status code of 200. The subtleties of doing it correctly in other
         # cases don't bear thinking about (at the moment).
         have_buffered_response = (isinstance(response.app_iter,
-                                             collections.Sequence) and
-                                  len(response.app_iter) == 1)
-        cacheable = (request.method in {"GET", "HEAD"} and
-                     response.status_code == 200)
+                                             collections.Sequence)
+                                  and len(response.app_iter) == 1)
+        cacheable = (request.method in {"GET", "HEAD"}
+                     and response.status_code == 200)
         if have_buffered_response and cacheable:
             response.conditional_response = True
             response.md5_etag()
