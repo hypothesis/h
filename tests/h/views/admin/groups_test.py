@@ -12,7 +12,8 @@ from h.models import Organization, User
 from h.views.admin import groups
 from h.views.admin.groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
-from h.services.group import GroupService
+from h.services.group_create import GroupCreateService
+from h.services.group_members import GroupMembersService
 from h.services.delete_group import DeleteGroupService
 from h.services.list_organizations import ListOrganizationsService
 
@@ -72,7 +73,7 @@ def test_index_filters_results(pyramid_request, factories, query, expected_group
     assert filtered_group_names == expected_groups
 
 
-@pytest.mark.usefixtures('group_svc', 'list_orgs_svc', 'routes', 'user_svc')
+@pytest.mark.usefixtures('group_create_svc', 'list_orgs_svc', 'routes', 'user_svc')
 class TestGroupCreateController(object):
 
     def test_get_sets_form(self, pyramid_request):
@@ -103,7 +104,7 @@ class TestGroupCreateController(object):
             ctrl._template_context
         )
 
-    def test_post_redirects_to_list_view_on_success(self, pyramid_request,
+    def test_post_redirects_to_list_view_on_success(self, pyramid_request, group_members_svc,
                                                     matchers, routes, handle_form_submission, default_org):
         def call_on_success(request, form, on_success, on_failure):
             return on_success({
@@ -127,7 +128,8 @@ class TestGroupCreateController(object):
         'open',
         'restricted',
     ])
-    def test_post_creates_group_on_success(self, factories, pyramid_request, group_svc, handle_form_submission,
+    def test_post_creates_group_on_success(self, factories, pyramid_request, group_create_svc, group_members_svc,
+                                           handle_form_submission,
                                            type_, default_org):
         name = 'My new group'
         creator = pyramid_request.user.username
@@ -149,9 +151,9 @@ class TestGroupCreateController(object):
         ctrl = GroupCreateController(pyramid_request)
 
         if type_ == 'open':
-            create_method = group_svc.create_open_group
+            create_method = group_create_svc.create_open_group
         else:
-            create_method = group_svc.create_restricted_group
+            create_method = group_create_svc.create_restricted_group
 
         create_method.return_value = factories.RestrictedGroup(pubid='testgroup')
         ctrl.post()
@@ -160,10 +162,10 @@ class TestGroupCreateController(object):
 
         create_method.assert_called_with(name=name, userid=expected_userid, description=description,
                                          origins=origins, organization=default_org)
-        group_svc.add_members.assert_called_once_with(create_method.return_value, [member_to_add.userid])
+        group_members_svc.add_members.assert_called_once_with(create_method.return_value, [member_to_add.userid])
 
 
-@pytest.mark.usefixtures('routes', 'user_svc', 'group_svc', 'list_orgs_svc')
+@pytest.mark.usefixtures('routes', 'user_svc', 'group_create_svc', 'group_members_svc', 'list_orgs_svc')
 class TestGroupEditController(object):
 
     def test_it_binds_schema(self, pyramid_request, group, user_svc,
@@ -219,7 +221,7 @@ class TestGroupEditController(object):
         (_, call_kwargs) = schema.bind.call_args
         assert call_kwargs['organizations'] == {default_org.pubid: default_org}
 
-    def test_update_updates_group_on_success(self, factories, pyramid_request, group_svc, user_svc,
+    def test_update_updates_group_on_success(self, factories, pyramid_request, group_create_svc, user_svc,
                                              list_orgs_svc, handle_form_submission):
         group = factories.RestrictedGroup(pubid='testgroup')
         pyramid_request.matchdict = {'pubid': group.pubid}
@@ -256,7 +258,8 @@ class TestGroupEditController(object):
         assert [s.origin for s in group.scopes] == updated_origins
         assert ctx['form'] == self._expected_form(group)
 
-    def test_update_updates_group_members_on_success(self, factories, pyramid_request, group_svc, user_svc, handle_form_submission, list_orgs_svc):
+    def test_update_updates_group_members_on_success(self, factories, pyramid_request, group_create_svc, user_svc,
+                                                     group_members_svc, handle_form_submission, list_orgs_svc):
         group = factories.RestrictedGroup(
             pubid='testgroup',
             organization=factories.Organization(),
@@ -287,7 +290,7 @@ class TestGroupEditController(object):
 
         ctrl.update()
 
-        group_svc.update_members.assert_any_call(group, [member_a.userid, member_b.userid])
+        group_members_svc.update_members.assert_any_call(group, [member_a.userid, member_b.userid])
 
     def test_delete_deletes_group(self, group, delete_group_svc, pyramid_request, routes):
         pyramid_request.matchdict = {"pubid": group.pubid}
@@ -353,9 +356,16 @@ def user_svc(pyramid_config):
 
 
 @pytest.fixture
-def group_svc(pyramid_config):
-    svc = mock.create_autospec(GroupService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name='group')
+def group_create_svc(pyramid_config):
+    svc = mock.create_autospec(GroupCreateService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='group_create')
+    return svc
+
+
+@pytest.fixture
+def group_members_svc(pyramid_config):
+    svc = mock.create_autospec(GroupMembersService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='group_members')
     return svc
 
 

@@ -63,7 +63,8 @@ class GroupCreateController(object):
     @view_config(request_method='POST')
     def post(self):
         def on_success(appstruct):
-            svc = self.request.find_service(name='group')
+            group_create_svc = self.request.find_service(name='group_create')
+            group_members_svc = self.request.find_service(name='group_members')
 
             # Create the new group.
             creator = appstruct['creator']
@@ -76,19 +77,19 @@ class GroupCreateController(object):
             userid = _userid(creator, organization.authority)
 
             if type_ == 'open':
-                group = svc.create_open_group(name=name, userid=userid,
-                                              origins=origins, description=description,
-                                              organization=organization)
+                group = group_create_svc.create_open_group(name=name, userid=userid,
+                                                           origins=origins, description=description,
+                                                           organization=organization)
             elif type_ == 'restricted':
-                group = svc.create_restricted_group(name=name, userid=userid,
-                                                    origins=origins, description=description,
-                                                    organization=organization)
+                group = group_create_svc.create_restricted_group(name=name, userid=userid,
+                                                                 origins=origins, description=description,
+                                                                 organization=organization)
             else:
                 raise Exception('Unsupported group type {}'.format(type_))
 
             # Add members to the group
             member_userids = [_userid(username, organization.authority) for username in appstruct['members']]
-            svc.add_members(group, member_userids)
+            group_members_svc.add_members(group, member_userids)
 
             # Flush changes to allocate group a pubid
             self.request.db.flush(objects=[group])
@@ -157,7 +158,7 @@ class GroupEditController(object):
 
         def on_success(appstruct):
             user_svc = self.request.find_service(name='user')
-            group_svc = self.request.find_service(name='group')
+            group_members_svc = self.request.find_service(name='group_members')
 
             group.creator = user_svc.fetch(appstruct['creator'], group.authority)
             group.description = appstruct['description']
@@ -166,7 +167,7 @@ class GroupEditController(object):
             group.organization = self.organizations[appstruct['organization']]
 
             memberids = [_userid(username, group.authority) for username in appstruct['members']]
-            group_svc.update_members(group, memberids)
+            group_members_svc.update_members(group, memberids)
 
             self.form = _create_form(self.request, self.schema, (_('Save'),))
             self._update_appstruct()

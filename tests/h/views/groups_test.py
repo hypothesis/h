@@ -9,10 +9,10 @@ from pyramid.httpexceptions import HTTPMovedPermanently
 from h.views import groups as views
 from h.models import (Group, User)
 from h.models.group import JoinableBy
-from h.services.group import GroupService
+from h.services.group_create import GroupCreateService
 
 
-@pytest.mark.usefixtures('group_service', 'handle_form_submission', 'routes')
+@pytest.mark.usefixtures('group_create_service', 'handle_form_submission', 'routes')
 class TestGroupCreateController(object):
 
     def test_get_renders_form(self, controller):
@@ -42,7 +42,7 @@ class TestGroupCreateController(object):
 
     def test_post_creates_new_group_if_form_valid(self,
                                                   controller,
-                                                  group_service,
+                                                  group_create_service,
                                                   handle_form_submission,
                                                   pyramid_config):
         pyramid_config.testing_securitypolicy('ariadna')
@@ -55,7 +55,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert group_service.create_private_group.call_args_list == [
+        assert group_create_service.create_private_group.call_args_list == [
             mock.call(name='my_new_group', userid='ariadna', description='foobar'),
         ]
 
@@ -74,7 +74,7 @@ class TestGroupCreateController(object):
 
     def test_post_does_not_create_group_if_form_invalid(self,
                                                         controller,
-                                                        group_service,
+                                                        group_create_service,
                                                         handle_form_submission):
         # If the form submission is invalid then handle_form_submission() should
         # call on_failure().
@@ -84,7 +84,7 @@ class TestGroupCreateController(object):
 
         controller.post()
 
-        assert not group_service.create_private_group.called
+        assert not group_create_service.create_private_group.called
 
     def test_post_returns_template_data_if_form_invalid(self,
                                                         controller,
@@ -188,10 +188,10 @@ def invalid_form():
 
 
 @pytest.fixture
-def group_service(pyramid_config):
-    service = mock.create_autospec(GroupService, spec_set=True, instance=True)
+def group_create_service(pyramid_config):
+    service = mock.create_autospec(GroupCreateService, spec_set=True, instance=True)
     service.create_private_group.return_value = FakeGroup('abc123', 'fake-group')
-    pyramid_config.register_service(service, name='group')
+    pyramid_config.register_service(service, name='group_create')
     return service
 
 
