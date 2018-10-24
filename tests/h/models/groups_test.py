@@ -8,7 +8,12 @@ from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from h import models
-from h.models.group import JoinableBy, ReadableBy, WriteableBy
+from h.models.group import (
+    JoinableBy,
+    ReadableBy,
+    WriteableBy,
+    AUTHORITY_PROVIDED_ID_MAX_LENGTH,
+)
 
 
 def test_init_sets_given_attributes():
@@ -52,6 +57,51 @@ def test_type_returns_private_for_private_groups(factories):
 
 def test_type_returns_restricted_for_restricted_groups(factories):
     assert factories.RestrictedGroup().type == 'restricted'
+
+
+def test_it_returns_None_by_default_for_authority_provided_id():
+    group = models.Group(name="abcdefg")
+
+    assert group.authority_provided_id is None
+
+
+def test_it_returns_None_for_groupid_if_authority_provided_id_is_None(factories):
+    group = factories.Group()
+
+    assert group.groupid is None
+
+
+def test_it_returns_formatted_groupid_if_authority_provided_id(factories):
+    group = factories.Group()
+    group.authority_provided_id = 'hithere'
+
+    assert group.groupid == 'group:hithere@{authority}'.format(authority=group.authority)
+
+
+@pytest.mark.parametrize('authority_provided_id', [
+    '%%&whatever',
+    '^flop',
+    '#---',
+    'ßeta',
+])
+def test_it_raises_ValueError_if_invalid_authority_provided_id(authority_provided_id):
+    group = models.Group(name="abcdefg")
+
+    with pytest.raises(ValueError, match="authority_provided_id must only contain"):
+        group.authority_provided_id = authority_provided_id
+
+
+def test_it_raises_ValueError_if_authority_provided_id_too_long():
+    group = models.Group(name="abcdefg")
+
+    with pytest.raises(ValueError, match="characters or fewer"):
+        group.authority_provided_id = ('a' * (AUTHORITY_PROVIDED_ID_MAX_LENGTH + 1))
+
+
+def test_it_allows_authority_provided_id_to_be_None():
+    group = models.Group(name="abcdefg")
+
+    group.authority_provided_id = None
 
 
 def test_type_raises_for_unknown_type_of_group(factories):

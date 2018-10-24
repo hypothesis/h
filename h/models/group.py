@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from collections import namedtuple
 
 import enum
+import re
 import sqlalchemy as sa
 from pyramid import security
 import slugify
@@ -16,6 +17,8 @@ from h import pubid
 GROUP_NAME_MIN_LENGTH = 3
 GROUP_NAME_MAX_LENGTH = 25
 GROUP_DESCRIPTION_MAX_LENGTH = 250
+AUTHORITY_PROVIDED_ID_PATTERN = r"^[a-zA-Z0-9._\-+!~*()']+$"
+AUTHORITY_PROVIDED_ID_MAX_LENGTH = 1024
 
 
 class JoinableBy(enum.Enum):
@@ -35,6 +38,22 @@ class WriteableBy(enum.Enum):
 class Group(Base, mixins.Timestamps):
     __tablename__ = 'group'
 
+    __table_args__ = (
+        # Add a composite index of the (authority, authority_provided_id)
+        # columns. Also impose uniqueness such that no two records may share
+        # the same (authority, authority_provided_id) composite
+        #
+        # See:
+        #
+        # * http://docs.sqlalchemy.org/en/latest/core/constraints.html#indexes
+        sa.Index(
+            "ix__group__groupid",
+            "authority",
+            "authority_provided_id",
+            unique=True,
+        ),
+    )
+
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     # We don't expose the integer PK to the world, so we generate a short
     # random string to use as the publicly visible ID.
@@ -51,6 +70,11 @@ class Group(Base, mixins.Timestamps):
 
     description = sa.Column(sa.UnicodeText())
 
+    #: Allow authorities to define their own unique identifier for a group
+    #: (versus the pubid). This identifier is owned by the authority/client
+    #: versus ``pubid``, which is owned and controlled by the service.
+    authority_provided_id = sa.Column(sa.UnicodeText(), nullable=True)
+
     #: Which type of user is allowed to join this group, possible values are:
     #: authority, None
     joinable_by = sa.Column(sa.Enum(JoinableBy, name='group_joinable_by'),
@@ -65,6 +89,14 @@ class Group(Base, mixins.Timestamps):
     #: are: authority, members
     writeable_by = sa.Column(sa.Enum(WriteableBy, name='group_writeable_by'),
                              nullable=True)
+
+    @property
+    def groupid(self):
+        if self.authority_provided_id is None:
+            return None
+        return 'group:{authority_provided_id}@{authority}'.format(
+            authority_provided_id=self.authority_provided_id,
+            authority=self.authority)
 
     # Group membership
     members = sa.orm.relationship(
@@ -86,6 +118,21 @@ class Group(Base, mixins.Timestamps):
                              'long'.format(min=GROUP_NAME_MIN_LENGTH,
                                            max=GROUP_NAME_MAX_LENGTH))
         return name
+
+    @sa.orm.validates('authority_provided_id')
+    def validate_authority_provided_id(self, key, authority_provided_id):
+        if not authority_provided_id:
+            return None
+
+        if not re.match(AUTHORITY_PROVIDED_ID_PATTERN, authority_provided_id):
+            raise ValueError("authority_provided_id must only contain characters allowed"
+                             r" in encoded URIs: [a-zA-Z0-9._\-+!~*()']")
+
+        if len(authority_provided_id) > AUTHORITY_PROVIDED_ID_MAX_LENGTH:
+            raise ValueError('authority_provided_id must be {max} characters or fewer'
+                             'characters long'.format(max=AUTHORITY_PROVIDED_ID_MAX_LENGTH))
+
+        return authority_provided_id
 
     @property
     def slug(self):
