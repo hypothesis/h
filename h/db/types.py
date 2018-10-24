@@ -123,11 +123,11 @@ def _get_hex_from_urlsafe(value):
         # These are ElasticSearch flake IDs, so to convert them into UUIDs we
         # insert the magic nibbles at the appropriate points. See the comments
         # on ES_FLAKE_MAGIC_BYTE for details.
-        return (hexstring[0:12] +
-                ES_FLAKE_MAGIC_BYTE[0] +
-                hexstring[12:15] +
-                ES_FLAKE_MAGIC_BYTE[1] +
-                hexstring[15:30])
+        return (hexstring[0:12]
+                + ES_FLAKE_MAGIC_BYTE[0]
+                + hexstring[12:15]
+                + ES_FLAKE_MAGIC_BYTE[1]
+                + hexstring[15:30])
 
     # Fallthrough: we must have a received a string of invalid length
     _fail()
@@ -144,15 +144,15 @@ def _get_urlsafe_from_hex(value):
     # Validate and normalise hex string
     hexstring = uuid.UUID(hex=value).hex
 
-    is_flake_id = (hexstring[12] == ES_FLAKE_MAGIC_BYTE[0] and
-                   hexstring[16] == ES_FLAKE_MAGIC_BYTE[1])
+    is_flake_id = (hexstring[12] == ES_FLAKE_MAGIC_BYTE[0]
+                   and hexstring[16] == ES_FLAKE_MAGIC_BYTE[1])
 
     if is_flake_id:
         # The hex representation of the flake ID is simply the UUID without the
         # two magic nibbles.
-        data = binascii.unhexlify(hexstring[0:12] +
-                                  hexstring[13:16] +
-                                  hexstring[17:32])
+        data = binascii.unhexlify(hexstring[0:12]
+                                  + hexstring[13:16]
+                                  + hexstring[17:32])
         return base64.urlsafe_b64encode(data).decode()
 
     # Encode UUID bytes and strip two bytes of padding

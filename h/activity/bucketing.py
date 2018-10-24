@@ -66,12 +66,12 @@ class DocumentBucket(object):
 
     def __eq__(self, other):
         return (
-            self.annotations == other.annotations and
-            self.tags == other.tags and
-            self.users == other.users and
-            self.uri == other.uri and
-            self.domain == other.domain and
-            self.title == other.title)
+            self.annotations == other.annotations
+            and self.tags == other.tags
+            and self.users == other.users
+            and self.uri == other.uri
+            and self.domain == other.domain
+            and self.title == other.title)
 
 
 class Timeframe(object):

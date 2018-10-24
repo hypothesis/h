@@ -209,8 +209,7 @@ class TestUpdate(object):
         svc = mock.Mock(spec_set=['fetch'])
 
         def fake_fetch(username, authority):
-            if (username == user.username and
-                    authority == user.authority):
+            if username == user.username and authority == user.authority:
                 return user
         svc.fetch.side_effect = fake_fetch
 

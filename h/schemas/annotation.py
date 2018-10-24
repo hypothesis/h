@@ -466,8 +466,7 @@ class SearchParamsSchema(colander.Schema):
         search_after = cstruct.get('search_after', None)
 
         if search_after:
-            if (sort in ["updated", "created"] and
-                    not self._date_is_parsable(search_after)):
+            if sort in ["updated", "created"] and not self._date_is_parsable(search_after):
                 raise colander.Invalid(
                     node,
                     """search_after must be a parsable date in the form

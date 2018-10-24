@@ -117,8 +117,8 @@ class Annotation(Base):
     document = sa.orm.relationship('Document', backref='annotations')
 
     thread = sa.orm.relationship('Annotation',
-                                 primaryjoin=(sa.orm.foreign(id) ==
-                                              sa.orm.remote(references[0])),
+                                 primaryjoin=(sa.orm.foreign(id)
+                                              == sa.orm.remote(references[0])),
                                  viewonly=True,
                                  uselist=True)
 

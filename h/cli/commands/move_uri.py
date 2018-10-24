@@ -29,11 +29,11 @@ def move_uri(ctx, old, new):
     docuris_claimant = _fetch_document_uri_claimants(request.db, old)
     docuris_uri = _fetch_document_uri_canonical_self_claim(request.db, old)
 
-    prompt = ('Changing all annotations and document data matching:\n' +
-              '"{old}"\nto:\n"{new}"\n' +
-              'This will affect {ann_count} annotations, {doc_claimant} ' +
-              'document uri claimants, and {doc_uri} document uri self-claims ' +
-              'or canonical uris.\n' +
+    prompt = ('Changing all annotations and document data matching:\n'
+              '"{old}"\nto:\n"{new}"\n'
+              'This will affect {ann_count} annotations, {doc_claimant} '
+              'document uri claimants, and {doc_uri} document uri self-claims '
+              'or canonical uris.\n'
               'Are you sure? [y/N]').format(old=old, new=new,
                                             ann_count=len(annotations),
                                             doc_claimant=len(docuris_claimant),

@@ -26,8 +26,8 @@ class timeframe_with(object):  # noqa: N801
         self.document_buckets = document_buckets
 
     def __eq__(self, timeframe):
-        return (self.label == timeframe.label and
-                self.document_buckets == timeframe.document_buckets)
+        return (self.label == timeframe.label
+                and self.document_buckets == timeframe.document_buckets)
 
     def __repr__(self):
         return '{class_} "{label}" with {n} document buckets'.format(

@@ -118,8 +118,8 @@ def create_annotation(request, data, group_service):
             data['groupid'] = top_level_annotation.groupid
         else:
             raise schemas.ValidationError(
-                'references.0: ' +
-                _('Annotation {id} does not exist').format(
+                'references.0: '
+                + _('Annotation {id} does not exist').format(
                     id=top_level_annotation_id)
             )
 
@@ -129,9 +129,9 @@ def create_annotation(request, data, group_service):
     # further checks.
     group = group_service.find(data['groupid'])
     if group is None or not request.has_permission('write', context=group):
-        raise schemas.ValidationError('group: ' +
-                                      _('You may not create annotations '
-                                        'in the specified group!'))
+        raise schemas.ValidationError('group: '
+                                      + _('You may not create annotations '
+                                          'in the specified group!'))
 
     _validate_group_scope(group, data['target_uri'])
 
@@ -187,8 +187,8 @@ def update_annotation(request, id_, data, group_service):
 
     group = group_service.find(annotation.groupid)
     if group is None:
-        raise schemas.ValidationError('group: ' +
-                                      _('Invalid group specified for annotation'))
+        raise schemas.ValidationError('group: '
+                                      + _('Invalid group specified for annotation'))
     if data.get('target_uri', None):
         _validate_group_scope(group, data['target_uri'])
 
@@ -265,6 +265,6 @@ def _validate_group_scope(group, target_uri):
     # of a group's defined scopes, if the group has any
     group_scopes = [scope.origin for scope in group.scopes]
     if not group_scope_match(target_uri, group_scopes):
-        raise schemas.ValidationError('group scope: ' +
-                                      _('Annotations for this target URI '
-                                        'are not allowed in this group'))
+        raise schemas.ValidationError('group scope: '
+                                      + _('Annotations for this target URI '
+                                          'are not allowed in this group'))
