@@ -21,6 +21,11 @@ class GroupService(object):
         self.session = session
         self.user_fetcher = user_fetcher
 
+    def fetch(self, pubid):
+        """Fetch a group by ``pubid``"""
+
+        return self.session.query(Group).filter_by(pubid=pubid).one_or_none()
+
     def groupids_readable_by(self, user):
         """
         Return a list of pubids for which the user has read access.

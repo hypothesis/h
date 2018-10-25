@@ -5,12 +5,28 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.models import User, GroupScope
+from h.models import User, Group, GroupScope
 from h.models.group import ReadableBy
 from h.services.group import GroupService
 from h.services.group import groups_factory
 from h.services.user import UserService
 from tests.common.matchers import Matcher
+
+
+class TestGroupServiceFetch(object):
+
+    def test_it_returns_group_model(self, svc, factories):
+        group = factories.Group()
+
+        fetched_group = svc.fetch(group.pubid)
+
+        assert fetched_group == group
+        assert isinstance(fetched_group, Group)
+
+    def test_it_returns_None_if_no_group_found(self, svc):
+        group = svc.fetch('abcdeff')
+
+        assert group is None
 
 
 class TestGroupServiceGroupIds(object):
