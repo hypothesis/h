@@ -12,6 +12,7 @@ from h.models import Organization, User
 from h.views.admin import groups
 from h.views.admin.groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
+from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
 from h.services.group_members import GroupMembersService
 from h.services.delete_group import DeleteGroupService
@@ -165,12 +166,13 @@ class TestGroupCreateController(object):
         group_members_svc.add_members.assert_called_once_with(create_method.return_value, [member_to_add.userid])
 
 
-@pytest.mark.usefixtures('routes', 'user_svc', 'group_create_svc', 'group_members_svc', 'list_orgs_svc')
+@pytest.mark.usefixtures('routes', 'user_svc', 'group_svc', 'group_create_svc', 'group_members_svc', 'list_orgs_svc')
 class TestGroupEditController(object):
 
     def test_it_binds_schema(self, pyramid_request, group, user_svc,
-                             default_org, CreateAdminGroupSchema):
+                             group_svc, default_org, CreateAdminGroupSchema):
         pyramid_request.matchdict = {'pubid': group.pubid}
+        group_svc.fetch.return_value = group
 
         GroupEditController(pyramid_request)
 
@@ -180,13 +182,14 @@ class TestGroupEditController(object):
                                        user_svc=user_svc,
                                        organizations={default_org.pubid: default_org})
 
-    def test_raises_not_found_if_unknown_group(self, pyramid_request):
-        pyramid_request.matchdict = {'pubid': 'unknown'}
+    def test_raises_not_found_if_unknown_group(self, pyramid_request, group_svc):
+        group_svc.fetch.return_value = None
+
         with pytest.raises(HTTPNotFound):
             GroupEditController(pyramid_request)
 
-    def test_read_renders_form(self, pyramid_request, factories, group):
-        pyramid_request.matchdict = {'pubid': group.pubid}
+    def test_read_renders_form(self, pyramid_request, factories, group, group_svc):
+        group_svc.fetch.return_value = group
         factories.Annotation(groupid=group.pubid)
         factories.Annotation(groupid=group.pubid)
 
@@ -200,9 +203,9 @@ class TestGroupEditController(object):
         assert ctx['member_count'] == len(group.members)
         assert ctx['annotation_count'] == 2
 
-    def test_read_renders_form_if_group_has_no_creator(self, pyramid_request, group):
-        pyramid_request.matchdict = {'pubid': group.pubid}
+    def test_read_renders_form_if_group_has_no_creator(self, pyramid_request, group, group_svc):
         group.creator = None
+        group_svc.fetch.return_value = group
         ctrl = GroupEditController(pyramid_request)
 
         ctx = ctrl.read()
@@ -211,8 +214,8 @@ class TestGroupEditController(object):
 
     def test_read_lists_organizations_in_groups_authority(self, factories, pyramid_request, group,
                                                           default_org, CreateAdminGroupSchema,
-                                                          list_orgs_svc):
-        pyramid_request.matchdict = {'pubid': group.pubid}
+                                                          list_orgs_svc, group_svc):
+        group_svc.fetch.return_value = group
 
         GroupEditController(pyramid_request)
 
@@ -222,9 +225,9 @@ class TestGroupEditController(object):
         assert call_kwargs['organizations'] == {default_org.pubid: default_org}
 
     def test_update_updates_group_on_success(self, factories, pyramid_request, group_create_svc, user_svc,
-                                             list_orgs_svc, handle_form_submission):
+                                             list_orgs_svc, handle_form_submission, group_svc):
         group = factories.RestrictedGroup(pubid='testgroup')
-        pyramid_request.matchdict = {'pubid': group.pubid}
+        group_svc.fetch.return_value = group
 
         updated_name = 'Updated group'
         updated_creator = factories.User()
@@ -259,14 +262,14 @@ class TestGroupEditController(object):
         assert ctx['form'] == self._expected_form(group)
 
     def test_update_updates_group_members_on_success(self, factories, pyramid_request, group_create_svc, user_svc,
-                                                     group_members_svc, handle_form_submission, list_orgs_svc):
+                                                     group_members_svc, handle_form_submission, list_orgs_svc, group_svc):
         group = factories.RestrictedGroup(
             pubid='testgroup',
             organization=factories.Organization(),
         )
         list_orgs_svc.organizations.return_value = [group.organization]
 
-        pyramid_request.matchdict = {'pubid': group.pubid}
+        group_svc.fetch.return_value = group
 
         member_a = factories.User()
         member_b = factories.User()
@@ -292,8 +295,8 @@ class TestGroupEditController(object):
 
         group_members_svc.update_members.assert_any_call(group, [member_a.userid, member_b.userid])
 
-    def test_delete_deletes_group(self, group, delete_group_svc, pyramid_request, routes):
-        pyramid_request.matchdict = {"pubid": group.pubid}
+    def test_delete_deletes_group(self, group, group_svc, delete_group_svc, pyramid_request, routes):
+        group_svc.fetch.return_value = group
 
         ctrl = GroupEditController(pyramid_request)
 
@@ -352,6 +355,13 @@ def routes(pyramid_config):
 def user_svc(pyramid_config):
     svc = mock.create_autospec(UserService, spec_set=True, instance=True)
     pyramid_config.register_service(svc, name='user')
+    return svc
+
+
+@pytest.fixture
+def group_svc(pyramid_config):
+    svc = mock.create_autospec(GroupService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='group')
     return svc
 
 

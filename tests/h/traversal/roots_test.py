@@ -10,6 +10,7 @@ import mock
 import h.auth
 from h.models import AuthClient
 from h.auth import role
+from h.services.group import GroupService
 from h.services.user import UserService
 from h.traversal.roots import Root
 from h.traversal.roots import AnnotationRoot
@@ -291,7 +292,7 @@ class TestProfileRoot(object):
         assert not pyramid_request.has_permission('update', context)
 
 
-@pytest.mark.usefixtures("groups")
+@pytest.mark.usefixtures("groups", "group_service")
 class TestGroupRoot(object):
 
     def test_it_assigns_create_permission_with_user_role(self, pyramid_config, pyramid_request):
@@ -312,12 +313,14 @@ class TestGroupRoot(object):
 
         assert not pyramid_request.has_permission('create', context)
 
-    def test_it_returns_the_group_if_it_exists(self, factories, group_factory):
+    def test_getitem_returns_fetched_group_if_not_None(self, factories, group_factory, group_service):
         group = factories.Group()
+        group_service.fetch.return_value = group
 
         assert group_factory[group.pubid] == group
 
-    def test_it_raises_KeyError_if_the_group_doesnt_exist(self, group_factory):
+    def test_getitem_raises_KeyError_if_fetch_returns_None(self, group_factory, group_service):
+        group_service.fetch.return_value = None
         with pytest.raises(KeyError):
             group_factory["does_not_exist"]
 
@@ -327,6 +330,12 @@ class TestGroupRoot(object):
         # These are groups that we _don't_ expect GroupRoot to return in
         # the tests.
         return [factories.Group(), factories.Group(), factories.Group()]
+
+    @pytest.fixture
+    def group_service(self, pyramid_config):
+        group_service = mock.create_autospec(GroupService, spec_set=True, instance=True)
+        pyramid_config.register_service(group_service, name='group')
+        return group_service
 
     @pytest.fixture
     def group_factory(self, pyramid_request):

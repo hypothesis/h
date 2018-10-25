@@ -74,7 +74,6 @@ import sqlalchemy.orm.exc
 
 from h import storage
 from h.models import AuthClient
-from h.models import Group
 from h.models import Organization
 from h.auth import role
 from h.auth.util import client_authority
@@ -208,12 +207,13 @@ class GroupRoot(object):
 
     def __init__(self, request):
         self.request = request
+        self.group_service = request.find_service(name='group')
 
     def __getitem__(self, pubid):
-        try:
-            return self.request.db.query(Group).filter_by(pubid=pubid).one()
-        except sqlalchemy.orm.exc.NoResultFound:
+        group = self.group_service.fetch(pubid=pubid)
+        if group is None:
             raise KeyError()
+        return group
 
 
 class ProfileRoot(object):
