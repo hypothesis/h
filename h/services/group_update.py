@@ -2,11 +2,8 @@
 
 from __future__ import unicode_literals
 
-import sys
-
 from sqlalchemy.exc import SQLAlchemyError
 
-from h._compat import PY2
 from h.services.exceptions import ValidationError, ConflictError
 
 
@@ -37,10 +34,7 @@ class GroupUpdateService(object):
             try:
                 setattr(group, key, value)
             except ValueError as err:
-                if PY2:
-                    raise ValidationError(err), None, sys.exc_info()[2]
-                else:
-                    raise ValidationError(err)
+                raise ValidationError(err)
 
         try:
             self.session.flush()
