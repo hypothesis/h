@@ -34,3 +34,24 @@ class TestSplitGroupID(object):
     def test_it_raises_ValueError_on_invalid_groupids(self, groupid):
         with pytest.raises(ValueError, match='valid groupid'):
             group_util.split_groupid(groupid)
+
+
+class TestIsGroupid(object):
+
+    @pytest.mark.parametrize('maybe_groupid,result', [
+        ('group:flashbang@dingdong.com', True),
+        ('group::ffff@dingdong.com', True),
+        ('group:\\f!orklift@sprongle.co', True),
+        ('group:.@dingdong.com', True),
+        ('group:group:@yep.nope', True),
+        ('group:()@hi.co', True),
+        ("group:!.~--_*'@hi.co", True),
+        ('groupp:whatnot@dingdong.co', False),
+        ('grou:whatnot@dingdong.co', False),
+        ('group:@dingdog.com', False),
+        ('group:@', False),
+        ('whatnot@dingdong.co', False),
+        ('group:@@dingdong.com', False)
+        ])
+    def test_it_detects_groupid_validity(self, maybe_groupid, result):
+        assert group_util.is_groupid(maybe_groupid) is result
