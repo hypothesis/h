@@ -6,6 +6,7 @@ import sqlalchemy as sa
 
 from h.models import Group, User
 from h.models.group import ReadableBy
+from h.util import group as group_util
 
 
 class GroupService(object):
@@ -25,6 +26,25 @@ class GroupService(object):
         """Fetch a group by ``pubid``"""
 
         return self.session.query(Group).filter_by(pubid=pubid).one_or_none()
+
+    def fetch_by_groupid(self, groupid):
+        """
+        Return a group with the given ``groupid`` combination or None
+
+        :param groupid:     String in groupid format, e.g. ``group:foo@bar.com``
+                            See :mod:`~h.models.group.Group`
+        :raises ValueError: if ``groupid`` is not a valid groupid
+                            see :func:`h.util.group.split_groupid`
+        :rtype:             `~h.models.group.Group` or None
+        """
+
+        parts = group_util.split_groupid(groupid)
+        authority = parts['authority']
+        authority_provided_id = parts['authority_provided_id']
+
+        return (self.session.query(Group).filter_by(authority=authority)
+                                         .filter_by(authority_provided_id=authority_provided_id)
+                                         .one_or_none())
 
     def groupids_readable_by(self, user):
         """

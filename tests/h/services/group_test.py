@@ -29,6 +29,24 @@ class TestGroupServiceFetch(object):
         assert group is None
 
 
+class TestGroupServiceFetchByGroupid(object):
+
+    def test_it_returns_group_model_of_matching_group(self, svc, factories):
+        group = factories.Group(authority_provided_id='dingdong',
+                                authority='foo.com')
+
+        fetched_group = svc.fetch_by_groupid(group.groupid)
+
+        assert isinstance(fetched_group, Group)
+
+    def test_it_raises_ValueError_if_invalid_groupid(self, svc):
+        with pytest.raises(ValueError, match="isn't a valid groupid"):
+            svc.fetch_by_groupid('fiddlesticks')
+
+    def test_it_returns_None_if_no_matching_group(self, svc):
+        assert svc.fetch_by_groupid('group:rando@dando.com') is None
+
+
 class TestGroupServiceGroupIds(object):
     """Unit tests for methods related to group IDs:
         - :py:meth:`GroupService.groupids_readable_by`
