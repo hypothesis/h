@@ -209,8 +209,8 @@ class GroupRoot(object):
         self.request = request
         self.group_service = request.find_service(name='group')
 
-    def __getitem__(self, pubid):
-        group = self.group_service.fetch(pubid=pubid)
+    def __getitem__(self, pubid_or_groupid):
+        group = self.group_service.fetch(pubid_or_groupid)
         if group is None:
             raise KeyError()
         return group

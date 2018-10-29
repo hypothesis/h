@@ -15,6 +15,23 @@ from tests.common.matchers import Matcher
 
 class TestGroupServiceFetch(object):
 
+    def test_it_proxies_to_fetch_by_groupid_if_groupid_valid(self, svc):
+        svc.fetch_by_groupid = mock.Mock()
+
+        result = svc.fetch('group:something@somewhere.com')
+
+        assert svc.fetch_by_groupid.called_once_with('group:something@somewhere.com')
+        assert result == svc.fetch_by_groupid.return_value
+
+    def test_it_proxies_to_fetch_by_pubid_if_not_groupid_syntax(self, svc):
+        svc.fetch_by_pubid = mock.Mock()
+
+        result = svc.fetch('abcdppp')
+
+        assert svc.fetch_by_pubid.called_once_with('abcdppp')
+        assert result == svc.fetch_by_pubid.return_value
+
+
 class TestGroupServiceFetchByPubid(object):
 
     def test_it_returns_group_model(self, svc, factories):

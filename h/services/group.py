@@ -22,8 +22,18 @@ class GroupService(object):
         self.session = session
         self.user_fetcher = user_fetcher
 
-    def fetch(self, pubid):
-        """Fetch a group by ``pubid``"""
+    def fetch(self, pubid_or_groupid):
+        """
+        Fetch a group, using either a groupid or a pubid
+
+        :param pubid_or_groupid: a string in either :mod:`~h.pubid` format
+                                 or as :attribute:`~h.models.group.Group.groupid`
+        :rtype:`~h.models.group.Group` or None
+        """
+
+        if group_util.is_groupid(pubid_or_groupid):
+            return self.fetch_by_groupid(pubid_or_groupid)
+        return self.fetch_by_pubid(pubid_or_groupid)
 
     def fetch_by_pubid(self, pubid):
         """Return a group with the given ``pubid`` or None"""
