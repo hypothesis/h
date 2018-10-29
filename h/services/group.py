@@ -25,6 +25,8 @@ class GroupService(object):
     def fetch(self, pubid):
         """Fetch a group by ``pubid``"""
 
+    def fetch_by_pubid(self, pubid):
+        """Return a group with the given ``pubid`` or None"""
         return self.session.query(Group).filter_by(pubid=pubid).one_or_none()
 
     def fetch_by_groupid(self, groupid):

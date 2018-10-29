@@ -15,16 +15,18 @@ from tests.common.matchers import Matcher
 
 class TestGroupServiceFetch(object):
 
+class TestGroupServiceFetchByPubid(object):
+
     def test_it_returns_group_model(self, svc, factories):
         group = factories.Group()
 
-        fetched_group = svc.fetch(group.pubid)
+        fetched_group = svc.fetch_by_pubid(group.pubid)
 
         assert fetched_group == group
         assert isinstance(fetched_group, Group)
 
     def test_it_returns_None_if_no_group_found(self, svc):
-        group = svc.fetch('abcdeff')
+        group = svc.fetch_by_pubid('abcdeff')
 
         assert group is None
 
