@@ -1,0 +1,104 @@
+// Headings
+// --------
+// Heading sizes created using a modular scale.
+// TODO: Use system font stack
+// TODO: Add font-weights
+// TODO: Implement base font sizes of 14px/15px/16px
+// TODO: Add margins to establish vertical baseline rhythm
+
+.heading--xlarge {
+  font-size: 2em;
+  line-height: 1.25;
+}
+
+.heading--large {
+  font-size: 1.625em;
+  line-height: 1.15;
+}
+
+.heading--medium {
+  font-size: 1.375em;
+  line-height: 1.15;
+}
+
+// Temporary style to preserve existing design
+.heading--medium-small {
+  font-size: 1.25em;
+}
+
+.heading--small {
+  font-size: 1.125em;
+  line-height: 1.15;
+}
+
+.heading--xsmall {
+  font-size: 1em;
+  line-height: 1.15;
+}
+
+.heading--separator {
+  font-size: 0.9em;
+  line-height: 1.375;
+  text-transform: uppercase;
+}
+
+.heading--sub {
+  font-size: 1em;
+  line-height: 1.15;
+}
+
+.heading--sup {
+  font-size: 0.9em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+@media (min-width: 43.75em) {
+  .heading--xlarge {
+    font-size: 2.5em;
+    line-height: 1.25;
+  }
+
+  .heading--large {
+    font-size: 2em;
+    line-height: 1.25;
+  }
+
+  .heading--medium {
+    font-size: 1.5em;
+    line-height: 1.25;
+  }
+
+  // Temporary style to preserve existing design
+  .heading--medium-small {
+    font-size: 1.375em;
+  }
+
+  .heading--small {
+    line-height: 1.25;
+  }
+
+  .heading--xsmall {
+    line-height: 1.25;
+  }
+}
+
+@media (min-width: 56.25em) {
+  .heading--xlarge {
+    font-size: 3em;
+    line-height: 1.15;
+  }
+
+  .heading--large {
+    font-size: 2.25em;
+  }
+
+  .heading--medium {
+    font-size: 1.75em;
+  }
+
+  // Temporary style to preserve existing design
+  .heading--medium-small {
+    font-size: 1.5em;
+  }
+}
