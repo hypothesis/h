@@ -1,59 +1,28 @@
-/*
-  Consistency fixes
-  adopted from http://necolas.github.com/normalize.css/
-  */
+/*! normalize.css v8.0.0 | MIT License | github.com/necolas/normalize.css */
+@import "normalize.css/normalize";
 
-* {
+/**
+ * Legacy list rules from previous Hypothesis reset
+ * (also based on Normalize.css, but an earlier version)
+ * ========================================================================== */
+
+*,
+*:after,
+*:before {
   box-sizing: border-box;
 }
 
-html {
-  height: 100%;
-  text-size-adjust: 100%;
-}
-
-body {
-  min-height: 100%;
-  font-size: 100%;
-  margin: 0;
-}
-
-sub, sup {
-  font-size: 75%;
-  line-height: 0;
-  position: relative;
-}
-
-sup {
-  top: -.5em;
-}
-
-sub {
-  bottom: -.25em;
-}
-
-pre {
-  white-space: pre;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-b, strong {
-  font-weight: bold;
-}
-
-abbr[title] {
-  border-bottom: 1px dotted;
-}
-
-a img, img {
-  -ms-interpolation-mode: bicubic;
-}
-
 input, textarea, button, select {
-  @include reset-font;
-  line-height: normal;
+  font: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+
+ul, ol, li {
+  border: 0;
+  list-style: none;
   margin: 0;
+  padding: 0;
 }
 
 button,
@@ -62,25 +31,4 @@ input[type="reset"],
 input[type="submit"] {
   cursor: pointer;
   -webkit-appearance: button;
-}
-
-textarea {
-  overflow: auto;
-}
-
-img::selection,
-img::-moz-selection {
-  background: transparent;
-}
-
-ul, ol, li {
-  @include reset-box-model;
-}
-
-ul, ol {
-  list-style: none;
-}
-
-blockquote {
-  margin: 0;
 }

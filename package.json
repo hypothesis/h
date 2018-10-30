@@ -34,6 +34,7 @@
     "keyboardevent-key-polyfill": "^1.0.2",
     "mkdirp": "^0.5.1",
     "node-sass": "^4.9.3",
+    "normalize.css": "^8.0.0",
     "popper.js": "^1.14.4",
     "postcss": "^6.0.21",
     "postcss-url": "^7.3.1",

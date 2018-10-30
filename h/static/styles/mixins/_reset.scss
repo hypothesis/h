@@ -1,15 +1,3 @@
-@mixin reset-font {
-  font: inherit;
-  font-size: 100%;
-  vertical-align: baseline;
-}
-
-@mixin reset-box-model {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
 /** Remove default border, background and padding from <button> elements. */
 @mixin reset-button {
   background: none;
