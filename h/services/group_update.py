@@ -21,12 +21,13 @@ class GroupUpdateService(object):
         """
         Update a group model with the args provided.
 
-        :type group:`~h.models.group.Group`
+        :arg group: the group to update
+        :type group: ~h.models.Group
 
-        :raises ValidationError: if setting an attribute on the model raises a ValueError
-        :raises ConflictError: if the ``authority_provided_id`` is already in use
+        :raise ValidationError: if setting an attribute on the model raises :exc:`ValueError`
+        :raise ConflictError: if the ``authority_provided_id`` is already in use
 
-        :rtype:`~h.models.group.Group`
+        :rtype: ~h.models.Group
         """
 
         for key, value in kwargs.items():
