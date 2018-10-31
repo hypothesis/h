@@ -6,6 +6,7 @@
 // TODO: Implement base font sizes of 14px/15px/16px
 // TODO: Add margins to establish vertical baseline rhythm
 
+// Roughly matches <h1> site on web; may or may not be used in products
 .heading--xlarge {
   font-size: 2em;
   line-height: 1.25;
@@ -37,17 +38,23 @@
   line-height: 1.15;
 }
 
+// For use in lists of lists, ex. "Annotators," "Tags," "URL," etc.
+// in the right sidebar of a document container on activity pages
 .heading--separator {
   font-size: 0.9em;
   line-height: 1.375;
   text-transform: uppercase;
 }
 
+// For use with meta/context information beneath titles,
+// ex. "In Hypothesis Reading" group identifier on an annotation card
 .heading--sub {
   font-size: 1em;
   line-height: 1.15;
 }
 
+// For use with "parent" info (conceptually or literally),
+// ex. domain name beside a document container on Activity pages
 .heading--sup {
   font-size: 0.9em;
   line-height: 1.15;
