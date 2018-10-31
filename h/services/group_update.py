@@ -25,7 +25,6 @@ class GroupUpdateService(object):
 
         :raises ValidationError: if setting an attribute on the model raises a ValueError
         :raises ConflictError: if the ``authority_provided_id`` is already in use
-        :raises SQLAlchemyError: if any unexpected SQL/DB Exception is encountered
 
         :rtype:`~h.models.group.Group`
         """
