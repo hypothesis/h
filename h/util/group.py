@@ -26,10 +26,5 @@ def split_groupid(groupid):
 
 
 def is_groupid(maybe_groupid):
-    """
-    Helper function to determine if a string looks like it is a groupid
-
-    :type maybe_groupid: str
-    :rtype: bool
-    """
+    """Return True if the given string looks like a groupid, else False."""
     return re.match(GROUPID_PATTERN, maybe_groupid) is not None
