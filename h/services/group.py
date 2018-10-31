@@ -24,13 +24,12 @@ class GroupService(object):
 
     def fetch(self, pubid_or_groupid):
         """
-        Fetch a group, using either a groupid or a pubid
+        Fetch a group using either a groupid or a pubid.
 
-        :param pubid_or_groupid: a string in either :mod:`~h.pubid` format
-                                 or as :attribute:`~h.models.group.Group.groupid`
-        :rtype:`~h.models.group.Group` or None
+        :arg pubid_or_groupid: a string in either :mod:`~h.pubid` format
+            or as :attr:`h.models.Group.groupid`
+        :rtype: :class:`~h.models.Group` or ``None``
         """
-
         if group_util.is_groupid(pubid_or_groupid):
             return self.fetch_by_groupid(pubid_or_groupid)
         return self.fetch_by_pubid(pubid_or_groupid)
