@@ -10,7 +10,6 @@ from h.util import group as group_util
 
 
 class GroupService(object):
-
     def __init__(self, session, user_fetcher):
         """
         Create a new groups service.
@@ -49,12 +48,15 @@ class GroupService(object):
         :rtype: :class:`~h.models.Group` or ``None``
         """
         parts = group_util.split_groupid(groupid)
-        authority = parts['authority']
-        authority_provided_id = parts['authority_provided_id']
+        authority = parts["authority"]
+        authority_provided_id = parts["authority_provided_id"]
 
-        return (self.session.query(Group).filter_by(authority=authority)
-                                         .filter_by(authority_provided_id=authority_provided_id)
-                                         .one_or_none())
+        return (
+            self.session.query(Group)
+            .filter_by(authority=authority)
+            .filter_by(authority_provided_id=authority_provided_id)
+            .one_or_none()
+        )
 
     def groupids_readable_by(self, user):
         """
@@ -65,13 +67,18 @@ class GroupService(object):
 
         :type user: `h.models.user.User`
         """
-        readable = (Group.readable_by == ReadableBy.world)
+        readable = Group.readable_by == ReadableBy.world
 
         if user is not None:
-            readable_member = sa.and_(Group.readable_by == ReadableBy.members, Group.members.any(User.id == user.id))
+            readable_member = sa.and_(
+                Group.readable_by == ReadableBy.members,
+                Group.members.any(User.id == user.id),
+            )
             readable = sa.or_(readable, readable_member)
 
-        return [record.pubid for record in self.session.query(Group.pubid).filter(readable)]
+        return [
+            record.pubid for record in self.session.query(Group.pubid).filter(readable)
+        ]
 
     def groupids_created_by(self, user):
         """
@@ -84,11 +91,12 @@ class GroupService(object):
         if user is None:
             return []
 
-        return [g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)]
+        return [
+            g.pubid for g in self.session.query(Group.pubid).filter_by(creator=user)
+        ]
 
 
 def groups_factory(context, request):
     """Return a GroupService instance for the passed context and request."""
-    user_service = request.find_service(name='user')
-    return GroupService(session=request.db,
-                        user_fetcher=user_service.fetch)
+    user_service = request.find_service(name="user")
+    return GroupService(session=request.db, user_fetcher=user_service.fetch)
