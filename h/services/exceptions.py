@@ -1,26 +1,17 @@
 # -*- coding: utf-8 -*-
 
-"""Exceptions raised by h services."""
+"""Exceptions raised by :mod:`h.services`."""
 
 from __future__ import unicode_literals
 
 
 class ServiceError(Exception):
-
-    """Base exception for problems in services."""
-
-    pass
+    """Base class for all :mod:`h.services` exception classes."""
 
 
 class ValidationError(ServiceError):
-
-    """Exception class for handling validation problems in models"""
-
-    pass
+    """A validation problem with a database model."""
 
 
 class ConflictError(ServiceError):
-
-    """Exception class for handling integrity problems with database operations"""
-
-    pass
+    """An integrity problem with a database operation."""
