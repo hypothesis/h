@@ -39,7 +39,7 @@ sql:
 
 .PHONY: lint
 lint:
-	tox -e py27-lint
+	tox -e py36-lint
 
 .PHONY: test
 test: node_modules/.uptodate
@@ -48,11 +48,11 @@ test: node_modules/.uptodate
 
 .PHONY: coverage
 coverage:
-	tox -e py27-coverage
+	tox -e py36-coverage
 
 .PHONY: codecov
 codecov:
-	tox -e py27-codecov
+	tox -e py36-codecov
 
 .PHONY: functests
 functests: build/manifest.json
@@ -60,19 +60,19 @@ functests: build/manifest.json
 
 .PHONY: docs
 docs:
-	tox -e py27-docs
+	tox -e py36-docs
 
 .PHONY: checkdocs
 checkdocs:
-	tox -e py27-checkdocs
+	tox -e py36-checkdocs
 
 .PHONY: docstrings
 docstrings:
-	tox -e py27-docstrings
+	tox -e py36-docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings:
-	tox -e py27-checkdocstrings
+	tox -e py36-checkdocstrings
 
 .PHONY: docker
 docker:
