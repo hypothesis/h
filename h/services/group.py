@@ -35,20 +35,19 @@ class GroupService(object):
         return self.fetch_by_pubid(pubid_or_groupid)
 
     def fetch_by_pubid(self, pubid):
-        """Return a group with the given ``pubid`` or None"""
+        """Return a group with the given ``pubid`` or ``None``."""
         return self.session.query(Group).filter_by(pubid=pubid).one_or_none()
 
     def fetch_by_groupid(self, groupid):
         """
-        Return a group with the given ``groupid`` combination or None
+        Return a group with the given ``groupid`` or ``None``.
 
-        :param groupid:     String in groupid format, e.g. ``group:foo@bar.com``
-                            See :mod:`~h.models.group.Group`
-        :raises ValueError: if ``groupid`` is not a valid groupid
-                            see :func:`h.util.group.split_groupid`
-        :rtype:             `~h.models.group.Group` or None
+        :arg groupid: String in groupid format, e.g. ``group:foo@bar.com``.
+            See :class:`~h.models.Group`
+        :raises ValueError: if ``groupid`` is not a valid groupid.
+            See :func:`h.util.group.split_groupid`
+        :rtype: :class:`~h.models.Group` or ``None``
         """
-
         parts = group_util.split_groupid(groupid)
         authority = parts['authority']
         authority_provided_id = parts['authority_provided_id']
