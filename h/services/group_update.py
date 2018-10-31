@@ -8,7 +8,6 @@ from h.services.exceptions import ValidationError, ConflictError
 
 
 class GroupUpdateService(object):
-
     def __init__(self, session):
         """
         Create a new GroupUpdateService
@@ -41,9 +40,15 @@ class GroupUpdateService(object):
 
         except SQLAlchemyError as err:
             # Handle DB integrity issues with duplicate ``authority_provided_id``
-            if 'duplicate key value violates unique constraint "ix__group__groupid"' in repr(err):
+            if (
+                'duplicate key value violates unique constraint "ix__group__groupid"'
+                in repr(err)
+            ):
                 raise ConflictError(
-                    "authority_provided_id '{id}' is already in use".format(id=kwargs['authority_provided_id']))
+                    "authority_provided_id '{id}' is already in use".format(
+                        id=kwargs["authority_provided_id"]
+                    )
+                )
             else:
                 # Re-raise as this is an unexpected problem
                 raise
