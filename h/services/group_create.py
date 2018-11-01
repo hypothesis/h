@@ -41,6 +41,7 @@ class GroupCreateService(object):
                             userid=userid,
                             description=description,
                             type_flags=PRIVATE_GROUP_TYPE_FLAGS,
+                            origins=[],
                             add_creator_as_member=True,
                             organization=organization,
                             )
@@ -95,7 +96,7 @@ class GroupCreateService(object):
                             )
 
     def _create(self, name, userid, description, type_flags,
-                origins=None, add_creator_as_member=False, organization=None):
+                origins, add_creator_as_member=False, organization=None):
         """
         Create a group and save it to the DB.
 
