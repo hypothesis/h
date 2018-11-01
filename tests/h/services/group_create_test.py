@@ -42,7 +42,9 @@ class TestCreatePrivateGroup(object):
         assert group.creator == creator
 
     def test_it_sets_description_when_present(self, svc, creator):
-        group = svc.create_private_group('Anteater fans', creator.userid, 'all about ant eaters')
+        group = svc.create_private_group(
+            "Anteater fans", creator.userid, description="all about ant eaters"
+        )
 
         assert group.description == 'all about ant eaters'
 

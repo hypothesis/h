@@ -23,7 +23,7 @@ class GroupCreateService(object):
         self.user_fetcher = user_fetcher
         self.publish = publish
 
-    def create_private_group(self, name, userid, description=None, organization=None):
+    def create_private_group(self, name, userid, **kwargs):
         """
         Create a new private group.
 
@@ -31,21 +31,19 @@ class GroupCreateService(object):
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
-        :param description: the description of the group
-        :param organization: the organization that this group belongs to
-        :type organization: h.models.Organization
+        :param kwargs: optional attributes to set on the group, as keyword
+            arguments
 
         :returns: the created group
         """
         return self._create(name=name,
                             userid=userid,
-                            description=description,
                             type_flags=PRIVATE_GROUP_TYPE_FLAGS,
+                            origins=[],
                             add_creator_as_member=True,
-                            organization=organization,
-                            )
+                            **kwargs)
 
-    def create_open_group(self, name, userid, origins, description=None, organization=None):
+    def create_open_group(self, name, userid, origins, **kwargs):
         """
         Create a new open group.
 
@@ -54,22 +52,19 @@ class GroupCreateService(object):
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
         :param origins: the list of origins that the group will be scoped to
-        :param description: the description of the group
-        :param organization: the organization that this group belongs to
-        :type organization: h.models.Organization
+        :param kwargs: optional attributes to set on the group, as keyword
+            arguments
 
         :returns: the created group
         """
         return self._create(name=name,
                             userid=userid,
-                            description=description,
                             type_flags=OPEN_GROUP_TYPE_FLAGS,
                             origins=origins,
                             add_creator_as_member=False,
-                            organization=organization,
-                            )
+                            **kwargs)
 
-    def create_restricted_group(self, name, userid, origins, description=None, organization=None):
+    def create_restricted_group(self, name, userid, origins, **kwargs):
         """
         Create a new restricted group.
 
@@ -79,52 +74,51 @@ class GroupCreateService(object):
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
         :param origins: the list of origins that the group will be scoped to
-        :param description: the description of the group
-        :param organization: the organization that this group belongs to
-        :type organization: h.models.Organization
+        :param kwargs: optional attributes to set on the group, as keyword
+            arguments
 
         :returns: the created group
         """
         return self._create(name=name,
                             userid=userid,
-                            description=description,
                             type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
                             origins=origins,
                             add_creator_as_member=True,
-                            organization=organization,
-                            )
+                            **kwargs)
 
-    def _create(self, name, userid, description, type_flags,
-                origins=None, add_creator_as_member=False, organization=None):
+    def _create(
+        self, name, userid, type_flags, origins, add_creator_as_member, **kwargs
+    ):
         """
         Create a group and save it to the DB.
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
-        :param description: the description of the group
         :param type_flags: the type of this group
         :param origins: the list of origins that the group will be scoped to
         :param add_creator_as_member: if the group creator should be added as a member
-        :param organization: the organization that this group belongs to
-        :type organization: h.models.Organization
+        :param kwargs: optional attributes to set on the group, as keyword
+            arguments
         """
         if origins is None:
             origins = []
 
         creator = self.user_fetcher(userid)
+
         scopes = [GroupScope(origin=o) for o in origins]
-        if organization is not None:
-            self._validate_authorities_match(creator.authority, organization.authority)
+
+        if "organization" in kwargs:
+            self._validate_authorities_match(creator.authority,
+                                             kwargs["organization"].authority)
+
         group = Group(name=name,
                       authority=creator.authority,
                       creator=creator,
-                      description=description,
                       joinable_by=type_flags.joinable_by,
                       readable_by=type_flags.readable_by,
                       writeable_by=type_flags.writeable_by,
                       scopes=scopes,
-                      organization=organization,
-                      )
+                      **kwargs)
         self.session.add(group)
 
         if add_creator_as_member:
