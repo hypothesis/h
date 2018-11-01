@@ -21,6 +21,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'mygroup',
+            'groupid': None,
             'organization': group_context.organization.id,
             'type': 'private',
             'public': False,
@@ -38,6 +39,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': group_context.id,
+            'groupid': None,
             'organization': group_context.organization.id,
             'type': 'open',
             'public': True,
@@ -56,6 +58,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict() == {
             'name': 'My Group',
             'id': 'groupy',
+            'groupid': None,
             'type': 'open',
             'organization': group_context.organization.id,
             'public': True,
@@ -127,6 +130,12 @@ class TestGroupJSONPresenter(object):
         model = presenter.asdict(expand=['foobars', 'dingdong'])
 
         assert model['organization'] == group_context.organization.id
+
+    def test_it_returns_groupid_if_set(self, factories, GroupContext, links_svc):
+        group = factories.Group(authority_provided_id="abc123")
+        presenter = GroupJSONPresenter(GroupContext(group))
+
+        assert presenter.asdict()["groupid"] == "group:abc123@example.com"
 
 
 class TestGroupsJSONPresenter(object):
