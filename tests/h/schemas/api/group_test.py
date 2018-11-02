@@ -101,3 +101,34 @@ class TestCreateGroupSchema(object):
 
         assert "groupid:" in str(exc.value)
         assert "does not match" in str(exc.value)
+
+    def test_validate_groupid_does_not_raise_on_groupid_if_third_party(self, appstruct):
+        CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                              group_authority='thirdparty.com',
+                                              default_authority='hypothes.is')
+
+    def test_validate_groupid_does_not_raise_when_groupid_None(self, appstruct):
+        appstruct['groupid'] = None
+        CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                              group_authority='hypothes.is',
+                                              default_authority='hypothes.is')
+
+    def test_validate_groupid_raises_ValidationError_if_first_party(self, appstruct):
+        with pytest.raises(ValidationError, match="groupid.*may not be set"):
+            CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                                  group_authority='hypothes.is',
+                                                  default_authority='hypothes.is')
+
+    def test_validate_groupid_raises_ValidationError_if_no_group_authority(self, appstruct):
+        with pytest.raises(ValidationError, match="groupid.*may not be set"):
+            CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                                  group_authority=None,
+                                                  default_authority='hypothes.is')
+
+    @pytest.fixture
+    def appstruct(self):
+        return {
+            'groupid': 'whatever',
+            'name': 'DingDong!',
+            'description': 'OH, hello there',
+        }
