@@ -78,7 +78,7 @@ class TestCreateGroup(object):
         headers[native_str('X-Forwarded-User')] = native_str(third_party_user.userid)
         group = {
             'name': 'My Group',
-            'groupid': '333vcdfkj~',
+            'groupid': 'group:333vcdfkj~@thirdparty.com',
         }
 
         res = app.post_json('/api/groups', group, headers=headers)
