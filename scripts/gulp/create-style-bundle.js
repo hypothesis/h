@@ -35,7 +35,10 @@ function compileSass(options) {
     sass.render({
       file: options.input,
       importer: options.onImport,
-      includePaths: [path.dirname(options.input)],
+      includePaths: [
+        path.dirname(options.input),
+        'node_modules',
+      ],
       outputStyle: options.minify ? 'compressed' : 'nested',
       sourceMap: sourcemapPath,
     }, (err, result) => {
