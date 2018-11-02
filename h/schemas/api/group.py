@@ -8,7 +8,7 @@ from h.models.group import (
     GROUP_NAME_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH,
 )
-from h.util.group import GROUPID_PATTERN
+from h.util.group import GROUPID_PATTERN, split_groupid
 
 
 class CreateGroupAPISchema(JSONSchema):
@@ -40,13 +40,42 @@ class CreateGroupAPISchema(JSONSchema):
         """
         Validate the groupid property. A non-None groupid is only allowed if the
         authority the group will be associated with is not the default authority
-        (i.e. third-party authority only)
+        (i.e. third-party authority only).
 
-        :raises ValidationError: if ``groupid`` is not allowed for the applied authority
+        Mutates and returns ``appstruct``, adding ``groupid`` entries if present
+        and valid.
+
+        :param group_authority:   The authority that is be associated with the group
+        :param default_authority: The service's default authority; if it is the same as
+                                  ``group_authority``, then this is considered a
+                                  "first-party" group
+        :raises ValidationError: * if ``groupid`` is not allowed for the applied authority
+                                 * if ``groupid`` is not in proper format
+                                 * if the ``authority`` part of ``groupid`` does not match
+                                   the group (client) authority
+        :rtype: dict or None
+        :return: the groupid parts or None
         """
         groupid = appstruct.get('groupid', None)
         if groupid is None:
-            return
+            return appstruct
 
         if (group_authority is None) or (group_authority == default_authority):
-            raise ValidationError('`groupid` may not be set for groups in the default authority')
+            raise ValidationError(
+                "groupid may only be set on groups oustide of the default authority '{authority}'".format(
+                    authority=default_authority
+                ))
+
+        try:
+            groupid_parts = split_groupid(groupid)
+        except ValueError:
+            raise ValidationError("'{groupid}' does not match valid groupid format: '{pattern}'".format(
+                groupid=groupid,
+                pattern=GROUPID_PATTERN))
+
+        if groupid_parts['authority'] != group_authority:
+            raise ValidationError("Invalid authority '{authority}' in groupid '{groupid}'".format(
+                authority=groupid_parts['authority'],
+                groupid=groupid))
+
+        return groupid_parts

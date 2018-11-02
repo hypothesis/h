@@ -110,28 +110,55 @@ class TestCreateGroupSchema(object):
                                               group_authority='thirdparty.com',
                                               default_authority='hypothes.is')
 
-    def test_validate_groupid_does_not_raise_when_groupid_None(self, appstruct):
+    def test_validate_groupid_does_not_raise_when_groupid_is_None(self, appstruct):
         appstruct['groupid'] = None
+
         CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
                                               group_authority='hypothes.is',
                                               default_authority='hypothes.is')
 
     def test_validate_groupid_raises_ValidationError_if_first_party(self, appstruct):
-        with pytest.raises(ValidationError, match="groupid.*may not be set"):
+        with pytest.raises(ValidationError, match="groupid may only be set on groups oustide of the default authority"):
             CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
                                                   group_authority='hypothes.is',
                                                   default_authority='hypothes.is')
 
     def test_validate_groupid_raises_ValidationError_if_no_group_authority(self, appstruct):
-        with pytest.raises(ValidationError, match="groupid.*may not be set"):
+        with pytest.raises(ValidationError, match="groupid may only be set on groups oustide of the default authority"):
             CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
                                                   group_authority=None,
                                                   default_authority='hypothes.is')
 
+    def test_validate_groupid_raises_ValidationError_groupid_format_invalid(self, appstruct):
+        appstruct['groupid'] = 'group:++{{":}"}}@thirdparty.com'
+        with pytest.raises(ValidationError, match="does not match valid groupid format"):
+            CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                                  group_authority='thirdparty.com',
+                                                  default_authority='hypothes.is')
+
+    def test_validate_groupid_raises_ValidationError_groupid_authority_mismatch(self, appstruct):
+        appstruct['groupid'] = 'group:valid_id@invalidauthority.com'
+        with pytest.raises(ValidationError, match="Invalid authority.*in groupid"):
+            CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                                  group_authority='thirdparty.com',
+                                                  default_authority='hypothes.is')
+
+    def test_validate_groupid_returns_groupid_parts(self, appstruct):
+        appstruct['groupid'] = 'group:hullo@thirdparty.com'
+
+        parts = CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                                      group_authority='thirdparty.com',
+                                                      default_authority='hypothes.is')
+
+        assert 'authority_provided_id' in parts
+        assert 'authority' in parts
+        assert parts['authority_provided_id'] == 'hullo'
+        assert parts['authority'] == 'thirdparty.com'
+
     @pytest.fixture
     def appstruct(self):
         return {
-            'groupid': 'whatever',
+            'groupid': 'group:valid_id@thirdparty.com',
             'name': 'DingDong!',
             'description': 'OH, hello there',
         }
