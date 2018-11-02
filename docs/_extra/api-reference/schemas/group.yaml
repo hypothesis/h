@@ -7,6 +7,7 @@ Group:
     - organization
     - public
     - scoped
+    - groupid
     - type
   properties:
     id:
@@ -32,6 +33,9 @@ Group:
       type: boolean
       deprecated: true
       description: Indicates whether a group's annotations are world-readable
+    groupid:
+      type: string
+      description: <mark>NEW/EXPERIMENTAL</mark> Authority-unique identifier that may be set for groups that are owned by a third-party authority. This field is currently present but unused for first-party-authority groups.
     scoped:
       type: boolean
       description: Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped groups allow annotation to documents at any URL
