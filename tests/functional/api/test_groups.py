@@ -35,6 +35,15 @@ class TestCreateGroup(object):
 
         assert res.status_code == 400
 
+    def test_it_returns_http_400_if_groupid_set_on_default_authority(self, app, token_auth_header):
+        group = {
+            'name': 'My Group',
+            'groupid': '3434kjkjk',
+        }
+        res = app.post_json('/api/groups', group, headers=token_auth_header, expect_errors=True)
+
+        assert res.status_code == 400
+
     def test_it_returns_http_404_if_no_authenticated_user(self, app, auth_client_header):
         # FIXME: This should return a 403
         group = {
@@ -53,9 +62,9 @@ class TestCreateGroup(object):
 
         assert res.status_code == 403
 
-    def test_it_allows_auth_client_with_forwarded_user(self, app, auth_client_header, user):
+    def test_it_allows_auth_client_with_forwarded_user(self, app, auth_client_header, third_party_user):
         headers = auth_client_header
-        headers[native_str('X-Forwarded-User')] = native_str(user.userid)
+        headers[native_str('X-Forwarded-User')] = native_str(third_party_user.userid)
         group = {
             'name': 'My Group'
         }
@@ -64,7 +73,22 @@ class TestCreateGroup(object):
 
         assert res.status_code == 200
 
-    def test_it_returns_http_404_with_invalid_forwarded_user_format(self, app, auth_client_header, user):
+    def test_it_allows_groupdid_from_auth_client_with_forwarded_user(self, app, auth_client_header, third_party_user):
+        headers = auth_client_header
+        headers[native_str('X-Forwarded-User')] = native_str(third_party_user.userid)
+        group = {
+            'name': 'My Group',
+            'groupid': '333vcdfkj~',
+        }
+
+        res = app.post_json('/api/groups', group, headers=headers)
+        data = res.json
+
+        assert res.status_code == 200
+        assert 'groupid' in data
+        assert data['groupid'] == "group:{groupid}@thirdparty.com".format(groupid='333vcdfkj~')
+
+    def test_it_returns_http_404_with_invalid_forwarded_user_format(self, app, auth_client_header):
         # FIXME: This should return a 403
         headers = auth_client_header
         headers[native_str('X-Forwarded-User')] = native_str('floopflarp')
@@ -78,40 +102,45 @@ class TestCreateGroup(object):
 @pytest.mark.functional
 class TestAddMember(object):
 
-    def test_it_returns_http_204_when_successful(self, app, user, group, auth_client_header):
-        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
-                            headers=auth_client_header)
+    def test_it_returns_http_204_when_successful(self, app, third_party_user, third_party_group, auth_client_header):
+        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=third_party_group.pubid,
+                                                                          userid=third_party_user.userid),
+                                                                          headers=auth_client_header)
 
         assert res.status_code == 204
 
-    def test_it_adds_member_to_group(self, app, user, group, auth_client_header):
-        app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
-                            headers=auth_client_header)
+    def test_it_adds_member_to_group(self, app, third_party_user, third_party_group, auth_client_header):
+        app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=third_party_group.pubid,
+                                                                    userid=third_party_user.userid),
+                                                                    headers=auth_client_header)
 
-        assert user in group.members
+        assert third_party_user in third_party_group.members
 
-    def test_it_ignores_forwarded_user_header(self, app, user, factories, group, db_session, auth_client_header):
+    def test_it_ignores_forwarded_user_header(self, app, third_party_user, factories, third_party_group, db_session, auth_client_header):
         headers = auth_client_header
-        user2 = factories.User()
+        user2 = factories.User(authority='thirdparty.com')
         db_session.commit()
 
-        headers[native_str('X-Forwarded-User')] = native_str(user2.userid)
+        headers[native_str('X-Forwarded-User')] = native_str(third_party_user.userid)
 
-        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
-                            headers=auth_client_header)
+        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=third_party_group.pubid,
+                                                                          userid=third_party_user.userid),
+                                                                          headers=auth_client_header)
 
-        assert user in group.members
-        assert user2 not in group.members
+        assert third_party_user in third_party_group.members
+        assert user2 not in third_party_group.members
         assert res.status_code == 204
 
-    def test_it_is_idempotent(self, app, user, group, auth_client_header):
-        app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
-                            headers=auth_client_header)
+    def test_it_is_idempotent(self, app, third_party_user, third_party_group, auth_client_header):
+        app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=third_party_group.pubid,
+                                                                    userid=third_party_user.userid),
+                                                                    headers=auth_client_header)
 
-        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=group.pubid, userid=user.userid),
-                            headers=auth_client_header)
+        res = app.post_json("/api/groups/{pubid}/members/{userid}".format(pubid=third_party_group.pubid,
+                                                                          userid=third_party_user.userid),
+                                                                          headers=auth_client_header)
 
-        assert user in group.members
+        assert third_party_user in third_party_group.members
         assert res.status_code == 204
 
     def test_it_returns_404_if_authority_mismatch_on_user(self, app, factories, group, auth_client_header):
@@ -176,8 +205,15 @@ def user(db_session, factories):
 
 
 @pytest.fixture
+def third_party_user(db_session, factories):
+    user = factories.User(authority='thirdparty.com')
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
 def auth_client(db_session, factories):
-    auth_client = factories.ConfidentialAuthClient(authority='example.com',
+    auth_client = factories.ConfidentialAuthClient(authority='thirdparty.com',
                                                    grant_type=GrantType.client_credentials)
     db_session.commit()
     return auth_client
@@ -193,6 +229,13 @@ def auth_client_header(auth_client):
 @pytest.fixture
 def group(db_session, factories):
     group = factories.Group()
+    db_session.commit()
+    return group
+
+
+@pytest.fixture
+def third_party_group(db_session, factories):
+    group = factories.Group(authority='thirdparty.com')
     db_session.commit()
     return group
 
