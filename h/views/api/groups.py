@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 
+from h.auth.util import client_authority
 from h.exceptions import PayloadError
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema
@@ -42,6 +43,9 @@ def groups(request):
 def create(request):
     """Create a group from the POST payload."""
     appstruct = CreateGroupAPISchema().validate(_json_payload(request))
+    CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
+                                          default_authority=request.default_authority,
+                                          group_authority=client_authority(request) or request.default_authority)
 
     group_create_service = request.find_service(name='group_create')
 
@@ -49,6 +53,7 @@ def create(request):
         name=appstruct['name'],
         userid=request.user.userid,
         description=appstruct.get('description', None),
+        authority_provided_id=appstruct.get('groupid', None),
     )
     return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
 
