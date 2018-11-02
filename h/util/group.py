@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import re
 
-GROUPID_PATTERN = r'^group:([^@]+)@(.*)$'
+GROUPID_PATTERN = r"^group:([a-zA-Z0-9._\-+!~*()']{1,1024})@(.*)$"
 
 
 def split_groupid(groupid):

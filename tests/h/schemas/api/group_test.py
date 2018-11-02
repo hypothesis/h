@@ -73,7 +73,7 @@ class TestCreateGroupSchema(object):
 
         appstruct = schema.validate({
             'name': 'This Seems Fine',
-            'groupid': '1234abcd!~*()',
+            'groupid': 'group:1234abcd!~*()@thirdparty.com',
         })
 
         assert 'groupid' in appstruct
@@ -84,11 +84,14 @@ class TestCreateGroupSchema(object):
         with pytest.raises(ValidationError) as exc:
             schema.validate({
                 'name': 'Name not the Problem',
-                'groupid': 'o' * (AUTHORITY_PROVIDED_ID_MAX_LENGTH + 1)
+                'groupid': 'group:' + ('o' * (AUTHORITY_PROVIDED_ID_MAX_LENGTH + 1)) + '@foobar.com'
             })
 
         assert "groupid:" in str(exc.value)
-        assert "is too long" in str(exc.value)
+        # Because of the complexity of ``groupid`` formatting, the length of the
+        # ``authority_provided_id`` segment of it is defined in the pattern for
+        # valid ``groupid``s — not as a length constraint
+        assert "does not match" in str(exc.value)
 
     def test_it_raises_if_groupid_has_invalid_chars(self):
         schema = CreateGroupAPISchema()
@@ -96,7 +99,7 @@ class TestCreateGroupSchema(object):
         with pytest.raises(ValidationError) as exc:
             schema.validate({
                 'name': 'Name not the Problem',
-                'groupid': '&&?'
+                'groupid': 'group:&&?@thirdparty.com'
             })
 
         assert "groupid:" in str(exc.value)

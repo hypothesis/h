@@ -7,9 +7,8 @@ from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH,
-    AUTHORITY_PROVIDED_ID_PATTERN,
-    AUTHORITY_PROVIDED_ID_MAX_LENGTH,
 )
+from h.util.group import GROUPID_PATTERN
 
 
 class CreateGroupAPISchema(JSONSchema):
@@ -28,8 +27,7 @@ class CreateGroupAPISchema(JSONSchema):
             },
             'groupid': {
                 'type': 'string',
-                'pattern': AUTHORITY_PROVIDED_ID_PATTERN,
-                'maxLength': AUTHORITY_PROVIDED_ID_MAX_LENGTH,
+                'pattern': GROUPID_PATTERN,
             },
         },
         'required': [
