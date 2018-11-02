@@ -41,24 +41,16 @@ def groups(request):
             description='Create a new group')
 def create(request):
     """Create a group from the POST payload."""
-    schema = CreateGroupAPISchema()
-
-    appstruct = schema.validate(_json_payload(request))
-    group_properties = {
-        'name': appstruct['name'],
-        'description': appstruct.get('description', None),
-    }
+    appstruct = CreateGroupAPISchema().validate(_json_payload(request))
 
     group_create_service = request.find_service(name='group_create')
 
     group = group_create_service.create_private_group(
-        group_properties['name'],
-        request.user.userid,
-        description=group_properties['description'],
+        name=appstruct['name'],
+        userid=request.user.userid,
+        description=appstruct.get('description', None),
     )
-
-    group_context = GroupContext(group, request)
-    return GroupJSONPresenter(group_context).asdict(expand=['organization'])
+    return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
 
 
 @api_config(route_name='api.group_member',
