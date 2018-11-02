@@ -36,6 +36,7 @@ class GroupJSONPresenter(object):
             organization = self.organization_context.id
         model = {
           'id': self.context.id,
+          'groupid': self.group.groupid,
           'name': self.group.name,
           'organization': organization,
           'public': self.group.is_public,  # DEPRECATED: TODO: remove from client
