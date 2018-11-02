@@ -7,6 +7,7 @@ from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH,
+    AUTHORITY_PROVIDED_ID_MAX_LENGTH,
 )
 
 from h.schemas.api.group import CreateGroupAPISchema
@@ -66,3 +67,37 @@ class TestCreateGroupSchema(object):
             })
         assert "description:" in str(exc.value)
         assert "is too long" in str(exc.value)
+
+    def test_it_validates_with_valid_groupid(self):
+        schema = CreateGroupAPISchema()
+
+        appstruct = schema.validate({
+            'name': 'This Seems Fine',
+            'groupid': '1234abcd!~*()',
+        })
+
+        assert 'groupid' in appstruct
+
+    def test_it_raises_if_groupid_too_long(self):
+        schema = CreateGroupAPISchema()
+
+        with pytest.raises(ValidationError) as exc:
+            schema.validate({
+                'name': 'Name not the Problem',
+                'groupid': 'o' * (AUTHORITY_PROVIDED_ID_MAX_LENGTH + 1)
+            })
+
+        assert "groupid:" in str(exc.value)
+        assert "is too long" in str(exc.value)
+
+    def test_it_raises_if_groupid_has_invalid_chars(self):
+        schema = CreateGroupAPISchema()
+
+        with pytest.raises(ValidationError) as exc:
+            schema.validate({
+                'name': 'Name not the Problem',
+                'groupid': '&&?'
+            })
+
+        assert "groupid:" in str(exc.value)
+        assert "does not match" in str(exc.value)
