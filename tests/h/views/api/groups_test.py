@@ -118,11 +118,6 @@ class TestCreateGroup(object):
 
         CreateGroupAPISchema.return_value.validate.assert_called_once_with({})
 
-    def test_it_validates_groupid(self, pyramid_request, CreateGroupAPISchema):
-        views.create(pyramid_request)
-
-        assert CreateGroupAPISchema.validate_groupid.call_count == 1
-
     # @TODO Move this test once _json_payload() has been moved to a reusable util module
     def test_it_raises_if_json_parsing_fails(self, pyramid_request):
         """It raises PayloadError if parsing of the request body fails."""
@@ -161,8 +156,9 @@ class TestCreateGroup(object):
         CreateGroupAPISchema.return_value.validate.return_value = {
           'name': 'My Group',
           'description': 'How about that?',
-          'groupid': 'something',
-         }
+          'groupid': 'group:something@example.com',
+          'authority_provided_id': 'something'
+        }
         views.create(pyramid_request)
 
         group_create_service.create_private_group.assert_called_once_with('My Group',

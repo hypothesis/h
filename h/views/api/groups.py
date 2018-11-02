@@ -42,10 +42,10 @@ def groups(request):
             description='Create a new group')
 def create(request):
     """Create a group from the POST payload."""
-    appstruct = CreateGroupAPISchema().validate(_json_payload(request))
-    CreateGroupAPISchema.validate_groupid(appstruct=appstruct,
-                                          default_authority=request.default_authority,
-                                          group_authority=client_authority(request) or request.default_authority)
+    appstruct = CreateGroupAPISchema(
+        default_authority=request.default_authority,
+        group_authority=client_authority(request) or request.default_authority
+    ).validate(_json_payload(request))
 
     group_create_service = request.find_service(name='group_create')
 
@@ -53,7 +53,7 @@ def create(request):
         name=appstruct['name'],
         userid=request.user.userid,
         description=appstruct.get('description', None),
-        authority_provided_id=appstruct.get('groupid', None),
+        authority_provided_id=appstruct.get('authority_provided_id', None),
     )
     return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
 
