@@ -1,7 +1,20 @@
+// 1. Fixes for https://github.com/hypothesis/h/issues/4236
+// --------------------------------------------------------
+
+html {
+  display: flex; // 1
+}
+
 body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  min-height: 100vh; // 1
+  width: 100vw; // 1
+}
+
+main {
+  flex-grow: 1; // 1
 }
 
 // Color palette
