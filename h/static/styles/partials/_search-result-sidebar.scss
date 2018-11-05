@@ -6,6 +6,8 @@
 }
 
 .search-result-sidebar__title {
+  font-size: 20px;
+  line-height: 1;
   margin-top: 0;
   margin-bottom: 20px;
 }
@@ -120,7 +122,7 @@
 
 .search-result-sidebar__logo {
   height: 20px;
-  width: 20px; 
+  width: 20px;
 }
 
 @media screen and (max-width: $tablet-width + 250px) {
