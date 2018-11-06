@@ -12,6 +12,7 @@ import slugify
 from h.db import Base
 from h.db import mixins
 from h import pubid
+from h.util.group import split_groupid
 
 
 GROUP_NAME_MIN_LENGTH = 3
@@ -97,6 +98,18 @@ class Group(Base, mixins.Timestamps):
         return 'group:{authority_provided_id}@{authority}'.format(
             authority_provided_id=self.authority_provided_id,
             authority=self.authority)
+
+    @groupid.setter
+    def groupid(self, value):
+        """
+        Deconstruct a formatted ``groupid`` and set its constituent properties
+        on the instance.
+
+        :raises ValueError: if ``groupid`` is an invalid format
+        """
+        groupid_parts = split_groupid(value)
+        self.authority_provided_id = groupid_parts['authority_provided_id']
+        self.authority = groupid_parts['authority']
 
     # Group membership
     members = sa.orm.relationship(
