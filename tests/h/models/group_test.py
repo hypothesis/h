@@ -78,6 +78,21 @@ def test_it_returns_formatted_groupid_if_authority_provided_id(factories):
     assert group.groupid == 'group:hithere@{authority}'.format(authority=group.authority)
 
 
+def test_groupid_setter_raises_ValueError_if_groupid_invalid(factories):
+    group = factories.Group()
+
+    with pytest.raises(ValueError, match="isn't a valid groupid"):
+        group.groupid = 'nonsense'
+
+
+def test_groupid_setter_sets_consistuent_fields(factories):
+    group = factories.Group()
+    group.groupid = 'group:onetwo@threefour.com'
+
+    assert group.authority_provided_id == 'onetwo'
+    assert group.authority == 'threefour.com'
+
+
 @pytest.mark.parametrize('authority_provided_id', [
     '%%&whatever',
     '^flop',
