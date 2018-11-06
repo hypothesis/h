@@ -10,10 +10,9 @@ from h.util import group as group_util
 class TestSplitGroupID(object):
     @pytest.mark.parametrize('groupid,authority_provided_id,authority', [
         ('group:flashbang@dingdong.com', 'flashbang', 'dingdong.com'),
-        ('group::ffff@dingdong.com', ':ffff', 'dingdong.com'),
-        ('group:\\f!orklift@sprongle.co', '\\f!orklift', 'sprongle.co'),
+        ('group:ffff@dingdong.com', 'ffff', 'dingdong.com'),
         ('group:.@dingdong.com', '.', 'dingdong.com'),
-        ('group:group:@yep.nope', 'group:', 'yep.nope'),
+        ('group:group@yep.nope', 'group', 'yep.nope'),
         ('group:()@hi.co', '()', 'hi.co'),
         ("group:!.~--_*'@hi.co", "!.~--_*'", 'hi.co'),
         ])
@@ -30,6 +29,8 @@ class TestSplitGroupID(object):
         'group:@',
         'whatnot@dingdong.co',
         'group:@@dingdong.com',
+        'group:\\f!orklift@sprongle.co',
+        'group:another:@ding.com',
     ])
     def test_it_raises_ValueError_on_invalid_groupids(self, groupid):
         with pytest.raises(ValueError, match='valid groupid'):
@@ -40,10 +41,10 @@ class TestIsGroupid(object):
 
     @pytest.mark.parametrize('maybe_groupid,result', [
         ('group:flashbang@dingdong.com', True),
-        ('group::ffff@dingdong.com', True),
-        ('group:\\f!orklift@sprongle.co', True),
+        ('group::ffff@dingdong.com', False),
+        ('group:\\f!orklift@sprongle.co', False),
         ('group:.@dingdong.com', True),
-        ('group:group:@yep.nope', True),
+        ('group:group@yep.nope', True),
         ('group:()@hi.co', True),
         ("group:!.~--_*'@hi.co", True),
         ('groupp:whatnot@dingdong.co', False),
