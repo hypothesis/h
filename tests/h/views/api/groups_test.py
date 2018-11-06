@@ -116,7 +116,7 @@ class TestCreateGroup(object):
     def test_it_inits_group_create_schema(self, pyramid_request, CreateGroupAPISchema):
         views.create(pyramid_request)
 
-        CreateGroupAPISchema.assert_called_once_with()
+        CreateGroupAPISchema.return_value.validate.assert_called_once_with({})
 
     # @TODO Move this test once _json_payload() has been moved to a reusable util module
     def test_it_raises_if_json_parsing_fails(self, pyramid_request):
@@ -142,7 +142,28 @@ class TestCreateGroup(object):
 
         group_create_service.create_private_group.assert_called_once_with('My Group',
                                                                           pyramid_request.user.userid,
-                                                                          description='How about that?')
+                                                                          description='How about that?',
+                                                                          groupid=None)
+
+    def test_it_passes_groupid_to_group_create_as_authority_provided_id(self,
+                                                                        pyramid_request,
+                                                                        CreateGroupAPISchema,
+                                                                        group_create_service):
+        # Note that CreateGroupAPISchema and its methods are mocked here, so
+        # ``groupid`` passes validation even though the request is not third party
+        # Tests for that are handled directly in the CreateGroupAPISchema unit tests
+        # and through functional tests
+        CreateGroupAPISchema.return_value.validate.return_value = {
+          'name': 'My Group',
+          'description': 'How about that?',
+          'groupid': 'group:something@example.com',
+        }
+        views.create(pyramid_request)
+
+        group_create_service.create_private_group.assert_called_once_with('My Group',
+                                                                          pyramid_request.user.userid,
+                                                                          description='How about that?',
+                                                                          groupid='group:something@example.com')
 
     def test_it_sets_description_to_none_if_not_present(self,
                                                         pyramid_request,
@@ -155,7 +176,8 @@ class TestCreateGroup(object):
 
         group_create_service.create_private_group.assert_called_once_with('My Group',
                                                                           pyramid_request.user.userid,
-                                                                          description=None)
+                                                                          description=None,
+                                                                          groupid=None)
 
     def test_it_creates_group_context_from_created_group(self,
                                                          pyramid_request,
