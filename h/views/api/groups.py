@@ -18,6 +18,8 @@ from h.views.api.config import api_config
             link_name='groups.read',
             description="Fetch the user's groups")
 def groups(request):
+    """Retrieve the groups for this request's user."""
+
     authority = request.params.get('authority')
     document_uri = request.params.get('document_uri')
     expand = request.GET.getall('expand') or []
@@ -85,7 +87,7 @@ def remove_member(group, request):
 def add_member(group, request):
     """Add a member to a given group.
 
-    :raises HTTPNotFound: if the user is not found or if the use and group
+    :raise HTTPNotFound: if the user is not found or if the use and group
       authorities don't match.
     """
     user_svc = request.find_service(name='user')
@@ -109,8 +111,7 @@ def add_member(group, request):
 
 # @TODO This is a duplication of code in h.views.api — move to a util module
 def _json_payload(request):
-    """
-    Return a parsed JSON payload for the request.
+    """Return a parsed JSON payload for the request.
 
     :raises PayloadError: if the body has no valid JSON body
     """
