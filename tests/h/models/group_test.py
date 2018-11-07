@@ -93,6 +93,16 @@ def test_groupid_setter_sets_consistuent_fields(factories):
     assert group.authority == 'threefour.com'
 
 
+def test_groupid_setter_accepts_None_and_nullifies_authority_provided_id(factories):
+    group = factories.Group()
+    group.groupid = 'group:onetwo@threefour.com'
+    group.groupid = None
+
+    assert group.groupid is None
+    assert group.authority == 'threefour.com'
+    assert group.authority_provided_id is None
+
+
 @pytest.mark.parametrize('authority_provided_id', [
     '%%&whatever',
     '^flop',
