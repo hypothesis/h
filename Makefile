@@ -35,7 +35,7 @@ shell:
 
 .PHONY: sql
 sql:
-	docker-compose exec postgres psql -U postgres
+	docker-compose exec postgres psql --expanded -U postgres
 
 .PHONY: lint
 lint:
