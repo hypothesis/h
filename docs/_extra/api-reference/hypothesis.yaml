@@ -364,6 +364,10 @@ paths:
           description: Could not create group from your request
           schema:
             $ref: '#/definitions/Error'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ConflictError'
       security:
         - authClientForwardedUser: []
         - developerAPIKey: []
