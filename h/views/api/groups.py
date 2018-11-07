@@ -6,7 +6,8 @@ from pyramid import security
 from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
 
 from h.auth.util import client_authority
-from h.exceptions import PayloadError
+from h.exceptions import ConflictError, PayloadError
+from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema
 from h.traversal import GroupContext
@@ -49,13 +50,21 @@ def create(request):
         group_authority=client_authority(request) or request.default_authority
     ).validate(_json_payload(request))
 
+    group_service = request.find_service(name='group')
     group_create_service = request.find_service(name='group_create')
+
+    # Check for duplicate group
+    groupid = appstruct.get('groupid', None)
+    if groupid is not None:
+        duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
+        if duplicate_group:
+            raise ConflictError(_("group with groupid '{}' already exists").format(groupid))
 
     group = group_create_service.create_private_group(
         name=appstruct['name'],
         userid=request.user.userid,
         description=appstruct.get('description', None),
-        groupid=appstruct.get('groupid', None),
+        groupid=groupid,
     )
     return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
 

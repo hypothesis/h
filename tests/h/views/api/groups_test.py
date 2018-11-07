@@ -5,10 +5,16 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
+from pyramid.httpexceptions import (
+    HTTPNoContent,
+    HTTPBadRequest,
+    HTTPNotFound
+)
 
+from h.exceptions import ConflictError
 from h.views.api import groups as views
 from h.services.list_groups import ListGroupsService
+from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
 from h.services.group_members import GroupMembersService
 from h.services.user import UserService
@@ -108,6 +114,7 @@ class TestGetGroups(object):
 
 
 @pytest.mark.usefixtures('CreateGroupAPISchema',
+                         'group_service',
                          'group_create_service',
                          'GroupContext',
                          'GroupJSONPresenter')
@@ -178,6 +185,18 @@ class TestCreateGroup(object):
                                                                           pyramid_request.user.userid,
                                                                           description=None,
                                                                           groupid=None)
+
+    def test_it_raises_ConflictError_on_duplicate(self,
+                                                  pyramid_request,
+                                                  CreateGroupAPISchema,
+                                                  group_service,
+                                                  factories):
+
+        group = factories.Group(authority_provided_id='something', authority='example.com')
+        group_service.fetch.return_value = group
+
+        with pytest.raises(ConflictError, match="group with groupid.*already exists"):
+            views.create(pyramid_request)
 
     def test_it_creates_group_context_from_created_group(self,
                                                          pyramid_request,
@@ -361,6 +380,14 @@ def CreateGroupAPISchema(patch):
 def group_create_service(pyramid_config):
     service = mock.create_autospec(GroupCreateService, spec_set=True, instance=True)
     pyramid_config.register_service(service, name='group_create')
+    return service
+
+
+@pytest.fixture
+def group_service(pyramid_config):
+    service = mock.create_autospec(GroupService, spec_set=True, instance=True)
+    service.fetch.return_value = None
+    pyramid_config.register_service(service, name='group')
     return service
 
 

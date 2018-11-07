@@ -88,6 +88,19 @@ class TestCreateGroup(object):
         assert 'groupid' in data
         assert data['groupid'] == "group:{groupid}@thirdparty.com".format(groupid='333vcdfkj~')
 
+    def test_it_returns_HTTP_Conflict_if_groupid_is_duplicate(self, app, auth_client_header, third_party_user):
+        headers = auth_client_header
+        headers[native_str('X-Forwarded-User')] = native_str(third_party_user.userid)
+        group = {
+            'name': 'My Group',
+            'groupid': 'group:333vcdfkj~@thirdparty.com',
+        }
+
+        res = app.post_json('/api/groups', group, headers=headers)
+        res = app.post_json('/api/groups', group, headers=headers, expect_errors=True)
+
+        assert res.status_code == 409
+
     def test_it_returns_http_404_with_invalid_forwarded_user_format(self, app, auth_client_header):
         # FIXME: This should return a 403
         headers = auth_client_header
