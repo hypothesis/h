@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 import datetime
-import newrelic.agent
 
+import newrelic.agent
 from zope.interface import implementer
 
 from h._compat import text_type
