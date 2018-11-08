@@ -152,6 +152,7 @@ a {
   list-style-type: none;
 
   &:before {
+    box-sizing: content-box;
     content: counter(numbered-list);
     display: block;
     position: absolute;
