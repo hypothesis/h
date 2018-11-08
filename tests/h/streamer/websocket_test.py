@@ -279,7 +279,7 @@ class TestHandleFilterMessage(object):
         message = websocket.Message(socket=socket, payload={
             'filter': {
                 'actions': {},
-                'match_policy': 'include_all',
+                'match_policy': 'include_any',
                 'clauses': [{
                     'field': '/uri',
                     'operator': 'equals',
@@ -301,7 +301,7 @@ class TestHandleFilterMessage(object):
         message = websocket.Message(socket=socket, payload={
             'filter': {
                 'actions': {},
-                'match_policy': 'include_all',
+                'match_policy': 'include_any',
                 'clauses': [{
                     'field': '/uri',
                     'operator': 'equals',
@@ -326,7 +326,7 @@ class TestHandleFilterMessage(object):
         message = websocket.Message(socket=socket, payload={
             'filter': {
                 'actions': {},
-                'match_policy': 'include_all',
+                'match_policy': 'include_any',
                 'clauses': [{
                     'field': '/uri',
                     'operator': 'equals',
