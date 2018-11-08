@@ -1,4 +1,6 @@
 // Core
+// ----------------------------------------------------------------------------
+
 @import 'core/reset';
 @import 'core/color';
 @import 'core/typography';
@@ -6,15 +8,32 @@
 
 @import 'partials/base';
 
+// Mixins
+// ----------------------------------------------------------------------------
+
+@import 'mixins/all';
+
+@mixin help-icon {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0.4em;
+  border-radius: 0.4em;
+  background: #FFF;
+  text-shadow: 0 0 2px #F9F9F9, 0 0 0 #777;
+  color: rgba(200, 200, 200, 0.3);
+  font-size: 10px;
+}
+
 // Components
+// ----------------------------------------------------------------------------
+
 @import 'partials/masthead';
 
-// Help page specific element styles
+// Rules
+// ----------------------------------------------------------------------------
+
 a {
   color: $brand;
 }
-
-// Help-page components
 
 .columns {
   display: flex;
@@ -104,16 +123,6 @@ a {
     border: $grey-3 dotted 2px;
     border-radius: 3px;
   }
-}
-
-@mixin help-icon {
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  padding: 0.4em;
-  border-radius: 0.4em;
-  background: #FFF;
-  text-shadow: 0 0 2px #F9F9F9, 0 0 0 #777;
-  color: rgba(200, 200, 200, 0.3);
-  font-size: 10px;
 }
 
 #help-1 {

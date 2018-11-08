@@ -44,7 +44,3 @@ $content-padding-left: 30px;
 $content-padding-right: 60px;
 $content-padding-left-on-small-screens: 10px;
 $content-padding-right-on-small-screens: 10px;
-
-// Include all mixins, making them available to the stylesheet. N.B. Mixins
-// should *never* output CSS, so this is safe.
-@import 'mixins/all';

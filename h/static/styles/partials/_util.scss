@@ -16,6 +16,29 @@
   flex-grow: 1;
 }
 
+// Helpers for changing element style or behavior depending on whether scripting
+// support is available and successfully loaded
+
+/**
+ * Mixin which enables styles if the user agent is JavaScript-capable and
+ * scripts are either loading or successfully loaded.
+ *
+ * Usage:
+ *   @include js {
+ *     // If JS is enabled, hide `thing` until the user performs some action
+ *     // which sets the 'is-expanded' state on the element.
+ *     //
+ *     // If JS is not enabled or failed to load, this selector will not apply
+ *     // and the element will not be hidden in the first place.
+ *     .thing:not(.is-expanded) { display: none };
+ *   }
+ */
+@mixin js {
+  .env-js-capable:not(.env-js-timeout) {
+    @content;
+  }
+}
+
 // Utility class that hides an element during initial page load until its
 // containing element is upgraded, or JS load times out.
 //

@@ -9,6 +9,11 @@
 @import 'partials/base';
 @import 'partials/util';
 
+// Mixins
+// ----------------------------------------------------------------------------
+
+@import 'mixins/all';
+
 // Components
 // ----------------------------------------------------------------------------
 
@@ -38,6 +43,9 @@
 @import 'partials/svg-icon';
 @import 'partials/tooltip';
 @import 'partials/tabs';
+
+// Rules
+// ----------------------------------------------------------------------------
 
 // This rule causes adverse effects in the admin and help pages, so it's
 // included here until we can tackle typography generally
