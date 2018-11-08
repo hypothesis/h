@@ -28,6 +28,7 @@
 
 // Legacy list rules from previous Hypothesis reset
 // (also based on Normalize.css, but an earlier version)
+// -----------------------------------------------------
 
 *,
 *:after,
@@ -57,6 +58,7 @@ input[type="submit"] {
 }
 
 // Basic standard styling for elements from partials/elements
+// ----------------------------------------------------------
 
 a, a:active, a:focus, a:hover {
   text-decoration: none;
