@@ -62,4 +62,5 @@ def auth_token(request):
     # should reject it.
     if not token:
         return None
+
     return token
