@@ -1,0 +1,32 @@
+// Core: Icons
+// ============================================================================
+
+// Vendor
+// ----------------------------------------------------------------------------
+
+// Variables
+// ----------------------------------------------------------------------------
+
+// Mixins
+// ----------------------------------------------------------------------------
+
+// Mixin for targeting icomoon fonts. This keeps the class namespace in one
+// place rather than spreading it through individual files.
+// NOTE: If you want to target a specific icon in a component give it a
+// distinct class name rather than using the icon class.
+//
+// Usage:
+//
+//  .my-element {
+//    @include icons {
+//      color: red; // Make any icon red.
+//    }
+//  }
+@mixin icons {
+  [class^="h-icon-"], [class*=" h-icon-"] {
+    @content;
+  }
+}
+
+// Rules
+// ----------------------------------------------------------------------------
