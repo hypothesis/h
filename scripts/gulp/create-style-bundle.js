@@ -9,7 +9,7 @@ var autoprefixer = require('autoprefixer');
 var gulpUtil = require('gulp-util');
 var postcss = require('postcss');
 var postcssURL = require('postcss-url');
-var sass = require('node-sass');
+var sass = require('sass');
 
 var log = gulpUtil.log;
 
@@ -39,7 +39,7 @@ function compileSass(options) {
         path.dirname(options.input),
         'node_modules',
       ],
-      outputStyle: options.minify ? 'compressed' : 'nested',
+      outputStyle: options.minify ? 'compressed' : 'expanded',
       sourceMap: sourcemapPath,
     }, (err, result) => {
       if (err) {
