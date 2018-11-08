@@ -1,3 +1,6 @@
+// Core
+@import 'core/typography';
+
 @import 'partials/base';
 @import 'partials/reset';
 @import 'partials/elements';
@@ -31,12 +34,6 @@
 @import 'partials/tooltip';
 @import 'partials/tabs';
 @import 'partials/text';
-
-body {
-  @include font-normal;
-
-  font-family: $sans-font-family;
-}
 
 .content {
   margin-bottom: 40px;
