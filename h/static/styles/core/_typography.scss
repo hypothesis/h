@@ -40,6 +40,124 @@ $touch-input-font-size: 16px;
   font-weight: 400;
 }
 
+@mixin styled-text() {
+  h1, h2, h3, h4, h5, h6, p, ol, ul, img, pre, blockquote {
+    margin: .618em 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: $sans-font-family;
+  }
+
+  // Use a modular scale for headings:
+  // http://modularscale.com/scale/?px1=13&px2=16&ra1=1.618&ra2=0
+  h1 {
+    font-size: 2.618em;
+    font-weight: bold;
+    margin: .2327em 0;
+  }
+
+  h2 {
+    font-size: 1.991em;
+    font-weight: bold;
+    margin: .309em 0;
+  }
+
+  h3 {
+    font-size: 1.991em;
+    margin: .309em 0;
+  }
+
+  h4 {
+    font-size: 1.618em;
+    margin: .3803em 0;
+  }
+
+  h5 {
+    font-size: 1.231em;
+    margin: .4944em 0;
+  }
+
+  h6 {
+    font-size: 1.231em;
+    margin: .4944em 0;
+  }
+
+  ol, ul {
+    list-style-position: inside;
+    padding-left: 0;
+
+    ol, ul {
+      padding-left: 1em;
+    }
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol, ul {
+    ul {
+      list-style-type: circle;
+    }
+  }
+
+  li {
+    margin-bottom: .291em;
+  }
+
+  li, p {
+    line-height: 1.3;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  blockquote {
+    @include font-normal;
+
+    border-left: 3px solid $grey-3;
+    color: $grey-4;
+    font-family: sans-serif;
+    font-size: 12px;
+    font-style: italic;
+    letter-spacing: 0.1px;
+    padding: 0 1em;
+    margin: 1em 0;
+
+    p, ol, ul, img, pre, blockquote {
+      margin: .7063em 0;
+    }
+
+    p, li {
+      line-height: 1.5;
+    }
+  }
+
+  code {
+    font-family: $mono-font-family;
+    font-size: .875em;
+    color: black;
+  }
+
+  pre code {
+    padding: 10px;
+    display: block;
+    background-color: $grey-1;
+    border-radius: 2px;
+  }
+}
+
 // Rules
 // ----------------------------------------------------------------------------
 
