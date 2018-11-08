@@ -43,11 +43,6 @@ $touch-input-font-size: 16px;
 // Rules
 // ----------------------------------------------------------------------------
 
-body {
-  @include font-normal;
-  font-family: $sans-font-family;
-}
-
 // Explanatory text paragraphs
 .text {
   color: $grey-6;

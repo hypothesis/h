@@ -35,6 +35,13 @@
 @import 'partials/tooltip';
 @import 'partials/tabs';
 
+// This rule causes adverse effects in the admin and help pages, so it's
+// included here until we can tackle typography generally
+body {
+  @include font-normal;
+  font-family: $sans-font-family;
+}
+
 .content {
   margin-bottom: 40px;
 }
