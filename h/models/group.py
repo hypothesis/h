@@ -105,11 +105,18 @@ class Group(Base, mixins.Timestamps):
         Deconstruct a formatted ``groupid`` and set its constituent properties
         on the instance.
 
+        If ``groupid`` is set to None, set ``authority_provided_id`` to None
+        but leave authority untouched—this allows a caller to nullify the
+        ``authority_provided_id`` field.
+
         :raises ValueError: if ``groupid`` is an invalid format
         """
-        groupid_parts = split_groupid(value)
-        self.authority_provided_id = groupid_parts['authority_provided_id']
-        self.authority = groupid_parts['authority']
+        if value is None:
+            self.authority_provided_id = None
+        else:
+            groupid_parts = split_groupid(value)
+            self.authority_provided_id = groupid_parts['authority_provided_id']
+            self.authority = groupid_parts['authority']
 
     # Group membership
     members = sa.orm.relationship(
