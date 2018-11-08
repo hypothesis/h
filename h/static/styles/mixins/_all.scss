@@ -1,6 +1,5 @@
 // Base mixins: these depend on nothing external to themselves.
 @import 'mixins/grid';
-@import 'mixins/reset';
 @import 'mixins/shadows';
 
 // Core mixins: these may depend on externally defined variables & base mixins.
