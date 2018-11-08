@@ -50,3 +50,14 @@ body {
   @include font-normal;
   font-family: $sans-font-family;
 }
+
+// Explanatory text paragraphs
+.text {
+  color: $grey-6;
+}
+
+// Prompt used in the OAuth "Authorize access?" screen.
+.text--auth-prompt {
+  color: $grey-5;
+  margin-bottom: 50px;
+}
