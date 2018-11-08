@@ -84,13 +84,3 @@
   border-color: #CECECE;
   color: $gray-light;
 }
-
-// Tint and shade functions from
-// https://css-tricks.com/snippets/sass/tint-shade-functions
-@function tint($color, $percent){
-  @return mix(white, $color, $percent);
-}
-
-@function shade($color, $percent){
-  @return mix(black, $color, $percent);
-}
