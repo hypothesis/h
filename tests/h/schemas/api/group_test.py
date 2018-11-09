@@ -10,11 +10,15 @@ from h.models.group import (
     AUTHORITY_PROVIDED_ID_MAX_LENGTH,
 )
 
-from h.schemas.api.group import CreateGroupAPISchema
+from h.schemas.api.group import (
+    GroupAPISchema,
+    CreateGroupAPISchema,
+    UpdateGroupAPISchema,
+)
 from h.schemas import ValidationError
 
 
-class TestCreateGroupSchema(object):
+class TestGroupAPISchema(object):
 
     def test_it_sets_authority_properties(self, third_party_schema):
         assert third_party_schema.group_authority == 'thirdparty.com'
@@ -30,10 +34,6 @@ class TestCreateGroupSchema(object):
         assert 'name' in appstruct
         assert 'organization' not in appstruct
         assert 'joinable_by' not in appstruct
-
-    def test_it_raises_if_name_missing(self, schema):
-        with pytest.raises(ValidationError, match=".*is a required property.*"):
-            schema.validate({})
 
     def test_it_raises_if_name_too_short(self, schema):
         with pytest.raises(ValidationError, match="name:.*is too short"):
@@ -128,12 +128,39 @@ class TestCreateGroupSchema(object):
 
     @pytest.fixture
     def schema(self):
-        schema = CreateGroupAPISchema(group_authority='hypothes.is',
-                                      default_authority='hypothes.is')
+        schema = GroupAPISchema(group_authority='hypothes.is',
+                                default_authority='hypothes.is')
         return schema
 
     @pytest.fixture
     def third_party_schema(self):
-        schema = CreateGroupAPISchema(group_authority='thirdparty.com',
+        schema = GroupAPISchema(group_authority='thirdparty.com',
+                                default_authority='hypothes.is')
+        return schema
+
+
+class TestCreateGroupAPISchema(object):
+
+    def test_it_raises_if_name_missing(self, schema):
+        with pytest.raises(ValidationError, match=".*is a required property.*"):
+            schema.validate({})
+
+    @pytest.fixture
+    def schema(self):
+        schema = CreateGroupAPISchema(group_authority='hypothes.is',
+                                      default_authority='hypothes.is')
+        return schema
+
+
+class TestUpdateGroupAPISchema(object):
+
+    def test_it_allows_empty_payload(self, schema):
+        appstruct = schema.validate({})
+
+        assert appstruct == {}
+
+    @pytest.fixture
+    def schema(self):
+        schema = UpdateGroupAPISchema(group_authority='hypothes.is',
                                       default_authority='hypothes.is')
         return schema
