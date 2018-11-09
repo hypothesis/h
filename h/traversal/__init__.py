@@ -8,11 +8,12 @@ from h.traversal.roots import OrganizationRoot
 from h.traversal.roots import OrganizationLogoRoot
 from h.traversal.roots import ProfileRoot
 from h.traversal.roots import GroupRoot
+from h.traversal.roots import GroupUpsertRoot
 from h.traversal.roots import UserRoot
 from h.traversal.contexts import AnnotationContext
 from h.traversal.contexts import OrganizationContext
 from h.traversal.contexts import GroupContext
-
+from h.traversal.contexts import GroupUpsertContext
 
 __all__ = (
     "Root",
@@ -21,9 +22,11 @@ __all__ = (
     "OrganizationRoot",
     "OrganizationLogoRoot",
     "GroupRoot",
+    "GroupUpsertRoot",
     "ProfileRoot",
     "UserRoot",
     "AnnotationContext",
     "OrganizationContext",
     "GroupContext",
+    "GroupUpsertContext",
 )

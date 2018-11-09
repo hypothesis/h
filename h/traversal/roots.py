@@ -216,6 +216,32 @@ class GroupRoot(object):
         return group
 
 
+class GroupUpsertRoot(object):
+    """
+    Root factory for group "UPSERT" API
+
+    This Root can support a route in which the traversal's ``__getitem__``
+    will attempt a lookup but will not raise if that fails.
+
+    This is to allow a single route that can accept and update an existing group
+    OR create a new one.
+    """
+
+    __acl__ = GroupRoot.__acl__
+
+    def __init__(self, request):
+        self._request = request
+        self._group_root = GroupRoot(request)
+
+    def __getitem__(self, pubid_or_groupid):
+        try:
+            group = self._group_root[pubid_or_groupid]
+        except KeyError:
+            group = None
+
+        return contexts.GroupUpsertContext(group=group, request=self._request)
+
+
 class ProfileRoot(object):
     """
     Simple Root for API profile endpoints
