@@ -61,6 +61,7 @@ class CreateGroupAPISchema(JSONSchema):
 
         """
         appstruct = super(CreateGroupAPISchema, self).validate(data)
+        appstruct = self._whitelisted_fields_only(appstruct)
         self._validate_groupid(appstruct)
 
         return appstruct
@@ -96,3 +97,14 @@ class CreateGroupAPISchema(JSONSchema):
             raise ValidationError("{err_msg} '{groupid}'".format(
                 err_msg=_("Invalid authority specified in groupid"),
                 groupid=groupid))
+
+    def _whitelisted_fields_only(self, appstruct):
+        """Return a new appstruct containing only schema-defined fields"""
+
+        new_appstruct = {}
+
+        for allowed_field in self.schema['properties'].keys():
+            if allowed_field in appstruct:
+                new_appstruct[allowed_field] = appstruct[allowed_field]
+
+        return new_appstruct

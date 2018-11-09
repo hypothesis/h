@@ -28,6 +28,16 @@ class TestCreateGroup(object):
 
         assert res.status_code == 200
 
+    def test_it_ignores_non_whitelisted_fields_in_payload(self, app, token_auth_header):
+        group = {
+            'name': 'My Group',
+            'organization': 'foobar',
+            'joinable_by': 'whoever',
+        }
+        res = app.post_json('/api/groups', group, headers=token_auth_header)
+
+        assert res.status_code == 200
+
     def test_it_returns_http_400_with_invalid_payload(self, app, token_auth_header):
         group = {}
 

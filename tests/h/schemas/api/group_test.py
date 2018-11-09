@@ -20,6 +20,17 @@ class TestCreateGroupSchema(object):
         assert third_party_schema.group_authority == 'thirdparty.com'
         assert third_party_schema.default_authority == 'hypothes.is'
 
+    def test_it_ignores_non_whitelisted_properties(self, schema):
+        appstruct = schema.validate({
+            'name': 'A proper name',
+            'organization': 'foobar',
+            'joinable_by': 'whoever',
+        })
+
+        assert 'name' in appstruct
+        assert 'organization' not in appstruct
+        assert 'joinable_by' not in appstruct
+
     def test_it_raises_if_name_missing(self, schema):
         with pytest.raises(ValidationError, match=".*is a required property.*"):
             schema.validate({})
