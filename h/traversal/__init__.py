@@ -13,6 +13,7 @@ from h.traversal.contexts import AnnotationContext
 from h.traversal.contexts import OrganizationContext
 from h.traversal.contexts import GroupContext
 
+from h.traversal.contexts import GroupUpsertContext
 
 __all__ = (
     "Root",
@@ -26,4 +27,5 @@ __all__ = (
     "AnnotationContext",
     "OrganizationContext",
     "GroupContext",
+    "GroupUpsertContext",
 )
