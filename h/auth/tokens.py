@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import datetime
 
+import newrelic.agent
 from zope.interface import implementer
 
 from h._compat import text_type
@@ -26,6 +27,9 @@ class Token(object):
     def __init__(self, token_model):
         self.expires = token_model.expires
         self.userid = token_model.userid
+
+        # Associates the userid with a given transaction/web request.
+        newrelic.agent.add_custom_parameter("userid", self.userid)
 
     def is_valid(self):
         """Return ``True`` if this token is not expired, ``False`` if it is."""
