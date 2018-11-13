@@ -1,16 +1,4 @@
 
-/* Style input placeholders */
-@mixin placeholder {
-  &.placeholder { @content; }
-  &:placeholder { @content; }
-  &::placeholder { @content; }
-}
-
-@mixin focus-outline {
-  border-color: #51A7E8;
-  box-shadow: 0px 1px 2px rgba(0, 0, 0, .075) inset, 0px 0px 5px rgba(81, 167, 232, .5);
-}
-
 @mixin form-input {
   @include font-normal;
   border: 1px solid $gray-lighter;
