@@ -9,7 +9,7 @@ from h.auth.util import client_authority
 from h.exceptions import ConflictError, PayloadError
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
-from h.schemas.api.group import CreateGroupAPISchema
+from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.traversal import GroupContext
 from h.views.api.config import api_config
 
@@ -66,6 +66,32 @@ def create(request):
         description=appstruct.get('description', None),
         groupid=groupid,
     )
+    return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
+
+
+@api_config(route_name='api.group',
+            request_method='PATCH',
+            permission='admin',
+            description='Update a group')
+def update(group, request):
+    """Update a group from a PATCH payload."""
+    appstruct = UpdateGroupAPISchema(
+        default_authority=request.default_authority,
+        group_authority=client_authority(request) or request.default_authority
+    ).validate(_json_payload(request))
+
+    group_update_service = request.find_service(name='group_update')
+    group_service = request.find_service(name='group')
+
+    # Check for duplicate group
+    groupid = appstruct.get('groupid', None)
+    if groupid is not None:
+        duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
+        if duplicate_group and (duplicate_group != group):
+            raise ConflictError(_("group with groupid '{}' already exists").format(groupid))
+
+    group = group_update_service.update(group, **appstruct)
+
     return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
 
 
