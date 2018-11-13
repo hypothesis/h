@@ -1,7 +1,0 @@
-// Base mixins: these depend on nothing external to themselves.
-
-// Core mixins: these may depend on externally defined variables & base mixins.
-
-// Component mixins: these may depend on core and base mixins, as well as
-// externally defined variables.
-@import 'mixins/forms';
