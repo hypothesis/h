@@ -4,7 +4,7 @@ ENV NODE_ENV production
 
 COPY . .
 
-RUN npm install --production && npm run build
+RUN npm ci --production && npm run build
 
 FROM alpine:3.7
 MAINTAINER Hypothes.is Project and contributors
