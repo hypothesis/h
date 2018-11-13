@@ -6,10 +6,12 @@ import mock
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
+from h.auth import role
 from h.models import Organization
 from h.services.group_links import GroupLinksService
 from h.traversal.contexts import AnnotationContext
 from h.traversal.contexts import GroupContext
+from h.traversal.contexts import GroupUpsertContext
 from h.traversal.contexts import OrganizationContext
 
 
@@ -340,6 +342,54 @@ class TestOrganizationContext(object):
         organization_context = OrganizationContext(organization, pyramid_request)
 
         assert organization_context.default is True
+
+
+@pytest.mark.usefixtures('links_svc')
+class TestGroupUpsertContext(object):
+
+    def test_acl_applies_root_upsert_to_user_role_when_no_group(self, pyramid_config, pyramid_request):
+        policy = ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo',
+                                              groupids=[security.Authenticated, role.User])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = GroupUpsertContext(group=None, request=pyramid_request)
+
+        assert pyramid_request.has_permission('upsert', context)
+
+    def test_acl_denies_root_upsert_if_no_user_role_and_no_group(self, pyramid_config, pyramid_request):
+        policy = ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo',
+                                              groupids=[security.Authenticated])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = GroupUpsertContext(group=None, request=pyramid_request)
+
+        assert not pyramid_request.has_permission('upsert', context)
+
+    def test_acl_applies_group_model_acl_if_group_is_not_None(self, pyramid_config, pyramid_request, factories):
+        group = factories.Group()
+        policy = ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo',
+                                              groupids=[security.Authenticated])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = GroupUpsertContext(group=group, request=pyramid_request)
+
+        assert context.__acl__() == group.__acl__()
+
+    def test_acl_does_not_apply_root_upsert_permission_if_group_is_not_None(self, pyramid_config, pyramid_request, factories):
+        group = factories.Group()
+        policy = ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy('acct:adminuser@foo',
+                                              groupids=[security.Authenticated, role.User])
+        pyramid_config.set_authorization_policy(policy)
+
+        context = GroupUpsertContext(group=group, request=pyramid_request)
+
+        # an `upsert` permission could be present in the ACL via the model IF the current
+        # user were the creator, but they're not
+        assert not pyramid_request.has_permission('upsert', context)
 
 
 class FakeGroup(object):

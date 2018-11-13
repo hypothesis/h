@@ -18,6 +18,7 @@ from h.traversal.roots import AuthClientRoot
 from h.traversal.roots import OrganizationRoot
 from h.traversal.roots import OrganizationLogoRoot
 from h.traversal.roots import GroupRoot
+from h.traversal.roots import GroupUpsertRoot
 from h.traversal.roots import ProfileRoot
 from h.traversal.roots import UserRoot
 from h.traversal.contexts import AnnotationContext
@@ -340,6 +341,39 @@ class TestGroupRoot(object):
     @pytest.fixture
     def group_factory(self, pyramid_request):
         return GroupRoot(pyramid_request)
+
+
+@pytest.mark.usefixtures("GroupRoot", "GroupUpsertContext")
+class TestGroupUpsertRoot(object):
+
+    def test_getitem_returns_empty_upsert_context_if_missing_group(self, pyramid_request, GroupRoot, GroupUpsertContext):
+        root = GroupUpsertRoot(pyramid_request)
+        GroupRoot.return_value.__getitem__.side_effect = KeyError('bang')
+
+        context = root['whatever']
+
+        GroupRoot.return_value.__getitem__.assert_called_once_with('whatever')
+        assert context == GroupUpsertContext.return_value
+        GroupUpsertContext.assert_called_once_with(group=None, request=pyramid_request)
+
+    def test_getitem_returns_populated_upsert_context_if_group_found(self, pyramid_request, GroupRoot, GroupUpsertContext, factories):
+        group = factories.Group()
+        root = GroupUpsertRoot(pyramid_request)
+        GroupRoot.return_value.__getitem__.return_value = group
+
+        context = root['agroup']
+
+        GroupRoot.return_value.__getitem__.assert_called_once_with('agroup')
+        assert context == GroupUpsertContext.return_value
+        GroupUpsertContext.assert_called_once_with(group=group, request=pyramid_request)
+
+    @pytest.fixture
+    def GroupRoot(self, patch):
+        return patch('h.traversal.roots.GroupRoot')
+
+    @pytest.fixture
+    def GroupUpsertContext(self, patch):
+        return patch('h.traversal.roots.contexts.GroupUpsertContext')
 
 
 @pytest.mark.usefixtures('user_service',

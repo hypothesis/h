@@ -48,34 +48,29 @@ class FilterHandler(object):
         if field_value is None:
             return False
 
-        cval = clause['value']
-        fval = field_value
+        filter_term = clause['value']
 
-        if isinstance(cval, list):
-            tval = []
-            for cv in cval:
-                tval.append(uni_fold(cv))
-            cval = tval
+        if isinstance(filter_term, list):
+            filter_term = [t for t in uni_fold(filter_term)]
         else:
-            cval = uni_fold(cval)
+            filter_term = uni_fold(filter_term)
 
-        if isinstance(fval, list):
-            tval = []
-            for fv in fval:
-                tval.append(uni_fold(fv))
-            fval = tval
+        if isinstance(field_value, list):
+            field_value = [v for v in uni_fold(field_value)]
         else:
-            fval = uni_fold(fval)
+            field_value = uni_fold(field_value)
 
         if clause['operator'] == 'one_of':
-            if isinstance(fval, list):
-                # Test whether a query value appears in a list of field values.
-                return cval in fval
+            # The `one_of` operator behaves differently depending on whether
+            # the annotation's field value is a list (eg. tags) or atom (eg. id).
+            #
+            # This is not ideal but the client currently relies on it.
+            if isinstance(field_value, list):
+                return filter_term in field_value
             else:
-                # Test whether a field value appears in a list of candidates.
-                return fval in cval
+                return field_value in filter_term
         else:
-            return fval == cval
+            return field_value == filter_term
 
     def include_any(self, target):
         for clause in self.filter['clauses']:
@@ -91,6 +86,12 @@ class FilterHandler(object):
 
 
 def uni_fold(text):
+    """
+    Return a case-folded and Unicode-normalized copy of ``text``.
+
+    This is used to ensure matching of filters against annotations ignores
+    differences in case or different ways of representing the same characters.
+    """
     # Convert bytes to text
     if isinstance(text, bytes):
         text = text_type(text, "utf-8")
