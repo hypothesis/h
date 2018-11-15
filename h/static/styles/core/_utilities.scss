@@ -1,0 +1,74 @@
+// Core: Utilities
+// ============================================================================
+
+// Vendor
+// ----------------------------------------------------------------------------
+
+// Variables
+// ----------------------------------------------------------------------------
+
+// Mixins
+// ----------------------------------------------------------------------------
+
+/**
+ * Mixin which enables styles if the user agent is JavaScript-capable and
+ * scripts are either loading or successfully loaded.
+ *
+ * Usage:
+ *   @include js {
+ *     // If JS is enabled, hide `thing` until the user performs some action
+ *     // which sets the 'is-expanded' state on the element.
+ *     //
+ *     // If JS is not enabled or failed to load, this selector will not apply
+ *     // and the element will not be hidden in the first place.
+ *     .thing:not(.is-expanded) { display: none };
+ *   }
+ */
+@mixin js {
+  .env-js-capable:not(.env-js-timeout) {
+    @content;
+  }
+}
+
+// See http://compass-style.org/reference/compass/utilities/general/clearfix/#mixin-pie-clearfix
+@mixin pie-clearfix {
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+@mixin smallshadow($a: 0, $b: 1px, $c: .1) {
+  box-shadow: $a $b 1px hsla(0, 0%, 0%, $c);
+}
+
+// Rules
+// ----------------------------------------------------------------------------
+
+.u-hidden {
+  display: none;
+}
+
+// Push any children after this child in a row-direction flex container all
+// the way along to the right side.
+.u-push-right {
+  margin-right: auto;
+}
+
+// Stretch an element to fill available space in its container.
+// Also useful for creating spacers
+.u-stretch {
+  flex-grow: 1;
+}
+
+// Utility class that hides an element during initial page load until its
+// containing element is upgraded, or JS load times out.
+//
+// This class is an exception to the rule that is-* state classes can only be
+// used with specific components.
+@include js {
+  .is-hidden-when-loading {
+    display: none !important;
+  }
+}

@@ -1,19 +1,32 @@
-@import 'partials/base';
-@import 'partials/util';
+// Admin area
+// ============================================================================
+
+// Core
+// ----------------------------------------------------------------------------
+
+@import 'core/color';
+@import 'core/typography';
+@import 'core/layout';
+@import 'core/icons';
+@import 'core/utilities';
 
 // Components
-@import 'partials/admin-navbar';
-@import 'partials/btn';
-@import 'partials/form-actions';
-@import 'partials/form-checkbox';
-@import 'partials/form-container';
-@import 'partials/form-input';
-@import 'partials/form';
-@import 'partials/list-input';
-@import 'partials/search-form';
-@import 'partials/svg-icon';
-@import 'partials/tooltip';
-@import 'partials/warning-box';
+// ----------------------------------------------------------------------------
+
+@import 'components/admin-navbar';
+@import 'components/btn';
+@import 'components/form';
+@import 'components/form-actions';
+@import 'components/form-checkbox';
+@import 'components/form-container';
+@import 'components/form-input';
+@import 'components/list-input';
+@import 'components/search-form';
+@import 'components/tooltip';
+@import 'components/warning-box';
+
+// Rules
+// ----------------------------------------------------------------------------
 
 .flashbar {
   margin-top: 20px;

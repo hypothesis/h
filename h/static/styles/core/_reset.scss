@@ -1,0 +1,91 @@
+// Core: Reset
+// ============================================================================
+
+// Vendor
+// ----------------------------------------------------------------------------
+
+/*! normalize.css v8.0.0 | MIT License | github.com/necolas/normalize.css */
+@import "normalize.css/normalize";
+
+// Mixins
+// ----------------------------------------------------------------------------
+
+// Remove default border, background and padding from <button> elements.
+@mixin reset-button {
+  background: none;
+  border: none;
+  padding: 0;
+
+  // See http://stackoverflow.com/questions/5517744
+  &::-moz-focus-inner {
+    padding: 0;
+    border-width: 0;
+  }
+}
+
+// Rules
+// ----------------------------------------------------------------------------
+
+// Legacy list rules from previous Hypothesis reset
+// (also based on Normalize.css, but an earlier version)
+// -----------------------------------------------------
+
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
+input, textarea, button, select {
+  font: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+
+ul, ol, li {
+  border: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  cursor: pointer;
+  -webkit-appearance: button;
+}
+
+// Basic standard styling for elements from partials/elements
+// ----------------------------------------------------------
+
+a, a:active, a:focus, a:hover {
+  text-decoration: none;
+}
+
+ol {
+  list-style-type: decimal;
+  padding-left: 3em;
+}
+
+svg {
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
+// Remove browser default styling for text input fields, such as the drop shadow
+// inside the field on iOS.
+// See http://stackoverflow.com/questions/23211656/remove-ios-input-shadow
+input:not([type]),
+input[type=email],
+input[type=password],
+input[type=text],
+textarea {
+  appearance: none;
+}
+
+// Hide contents of <template> elements in browsers that do not support
+// this element natively (eg. IE).
+template {
+  display: none;
+}

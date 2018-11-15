@@ -1,0 +1,42 @@
+// Core: Icons
+// ============================================================================
+
+// Vendor
+// ----------------------------------------------------------------------------
+
+// Variables
+// ----------------------------------------------------------------------------
+
+// Mixins
+// ----------------------------------------------------------------------------
+
+// Mixin for targeting icomoon fonts. This keeps the class namespace in one
+// place rather than spreading it through individual files.
+// NOTE: If you want to target a specific icon in a component give it a
+// distinct class name rather than using the icon class.
+//
+// Usage:
+//
+//  .my-element {
+//    @include icons {
+//      color: red; // Make any icon red.
+//    }
+//  }
+@mixin icons {
+  [class^="h-icon-"], [class*=" h-icon-"] {
+    @content;
+  }
+}
+
+// Rules
+// ----------------------------------------------------------------------------
+
+.svg-icon {
+  // This apparently no-op transform triggers snapping of the <svg> element to
+  // the nearest pixel, resulting in sharper rendering of icons, assuming that
+  // the icon itself has been pixel-fitted.
+  //
+  // See also https://bugzilla.mozilla.org/show_bug.cgi?id=608812 and
+  // https://github.com/hypothesis/h/pull/4215#issuecomment-267012849
+  transform: translateX(0);
+}
