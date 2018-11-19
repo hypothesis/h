@@ -12,33 +12,34 @@ from h.models.group import (
 from h.util.group import GROUPID_PATTERN, split_groupid
 from h.i18n import TranslationString as _
 
+GROUP_SCHEMA_PROPERTIES = {
+    'name': {
+        'type': 'string',
+        'minLength': GROUP_NAME_MIN_LENGTH,
+        'maxLength': GROUP_NAME_MAX_LENGTH,
+    },
+    'description': {
+        'type': 'string',
+        'maxLength': GROUP_DESCRIPTION_MAX_LENGTH,
+    },
+    'groupid': {
+        'type': 'string',
+        'pattern': GROUPID_PATTERN,
+    },
+}
 
-class CreateGroupAPISchema(JSONSchema):
+
+class GroupAPISchema(JSONSchema):
+    """Base class for validating group resource API data"""
 
     schema = {
         'type': 'object',
-        'properties': {
-            'name': {
-                'type': 'string',
-                'minLength': GROUP_NAME_MIN_LENGTH,
-                'maxLength': GROUP_NAME_MAX_LENGTH,
-            },
-            'description': {
-                'type': 'string',
-                'maxLength': GROUP_DESCRIPTION_MAX_LENGTH,
-            },
-            'groupid': {
-                'type': 'string',
-                'pattern': GROUPID_PATTERN,
-            },
-        },
-        'required': [
-            'name'
-        ],
+        'properties': GROUP_SCHEMA_PROPERTIES,
     }
 
     def __init__(self, group_authority=None, default_authority=None):
-        """Initialize a new group schema instance.
+        """
+        Initialize a new group schema instance.
 
         The ``group_authority`` and ``default_authority`` args are used for
         validating any ``groupid`` present in the data being validated.
@@ -48,25 +49,28 @@ class CreateGroupAPISchema(JSONSchema):
         :arg default_authority: The service's default authority (default None)
 
         """
-        super(CreateGroupAPISchema, self).__init__()
+        super(GroupAPISchema, self).__init__()
         self.group_authority = group_authority
         self.default_authority = default_authority
 
     def validate(self, data):
-        """Validate against the JSON schema and also valid any ``groupid`` present.
+        """
+        Validate against the JSON schema and also valid any ``groupid`` present.
 
         :raise h.schemas.ValidationError: if any part of validation fails
         :return: The validated data
         :rtype: dict
 
         """
-        appstruct = super(CreateGroupAPISchema, self).validate(data)
+        appstruct = super(GroupAPISchema, self).validate(data)
+        appstruct = self._whitelisted_fields_only(appstruct)
         self._validate_groupid(appstruct)
 
         return appstruct
 
     def _validate_groupid(self, appstruct):
-        """Validate the ``groupid`` to make sure it adheres to authority restrictions.
+        """
+        Validate the ``groupid`` to make sure it adheres to authority restrictions.
 
         ``groupid`` is only allowed if the authority of the group associated
         with it is not the default authority—i.e. this is a third-party group.
@@ -96,3 +100,33 @@ class CreateGroupAPISchema(JSONSchema):
             raise ValidationError("{err_msg} '{groupid}'".format(
                 err_msg=_("Invalid authority specified in groupid"),
                 groupid=groupid))
+
+    def _whitelisted_fields_only(self, appstruct):
+        """Return a new appstruct containing only schema-defined fields"""
+
+        new_appstruct = {}
+
+        for allowed_field in GROUP_SCHEMA_PROPERTIES.keys():
+            if allowed_field in appstruct:
+                new_appstruct[allowed_field] = appstruct[allowed_field]
+
+        return new_appstruct
+
+
+class CreateGroupAPISchema(GroupAPISchema):
+    """Schema for validating create-group API data"""
+    schema = {
+        'type': 'object',
+        'properties': GROUP_SCHEMA_PROPERTIES,
+        'required': [  # ``name`` is a required field when creating
+            'name'
+        ],
+    }
+
+
+class UpdateGroupAPISchema(GroupAPISchema):
+    """
+    Class for validating update-group API data
+
+    Currently identical to base schema
+    """
