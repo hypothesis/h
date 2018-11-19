@@ -183,6 +183,13 @@ class TestPrincipalsForAuthClientUser(object):
 
         principals_for_auth_client.assert_called_once_with(auth_client)
 
+    def test_it_adds_the_userid_principal(self, factories, auth_client):
+        user = factories.User(authority=auth_client.authority)
+
+        principals = util.principals_for_auth_client_user(user, auth_client)
+
+        assert user.userid in principals
+
     def test_it_adds_the_authclientuser_role(self, factories, auth_client):
         user = factories.User(authority=auth_client.authority)
 

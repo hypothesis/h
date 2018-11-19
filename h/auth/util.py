@@ -160,11 +160,20 @@ def principals_for_auth_client_user(user, client):
     :type client: :py:class:`h.models.auth_client.AuthClient`
     :rtype: list
     """
+
+    # Other auth policies that extend Pyramid auth policies, e.g.
+    # ``Pyramid.authentication.CallbackAuthenticationPolicy``, automatically
+    # get a ``userid`` principal via its ``effective_principals`` method.
+    # But :py:class:`h.auth.policy.AuthClientPolicy` overrides ``effective_principals``
+    # with its own method, so the ``userid`` principal needs to be added explicitly here
+    # for forwarded users
+    userid_principals = [user.userid]
+
     user_principals = principals_for_user(user)
     client_principals = principals_for_auth_client(client)
     auth_client_principals = [role.AuthClientUser]
 
-    all_principals = user_principals + client_principals + auth_client_principals
+    all_principals = userid_principals + user_principals + client_principals + auth_client_principals
     distinct_principals = list(set(all_principals))
 
     return distinct_principals
