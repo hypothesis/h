@@ -371,6 +371,44 @@ paths:
       security:
         - authClientForwardedUser: []
         - developerAPIKey: []
+
+  /groups/{id}:
+    patch:
+      tags:
+        - groups
+      summary: Update a  group
+      operationId: patchGroup
+      description: >
+        Update an existing group. The authenticated user must be the group's original creator to have permission to update it.
+      parameters:
+        - name: id
+          in: path
+          description: The group's `id` or `groupid`
+          required: true
+          type: string
+        - name: group
+          in: body
+          description: Group properties to update
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateGroup'
+      responses:
+        '200':
+          description: Group successfully updated
+          schema:
+            $ref: '#/definitions/GroupResult'
+        '400':
+          description: Could not update group from your request
+          schema:
+            $ref: '#/definitions/Error'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ConflictError'
+      security:
+        - authClientForwardedUser: []
+        - developerAPIKey: []
+
   /search:
     get:
       tags:
@@ -681,6 +719,8 @@ definitions:
         type: integer
   NewGroup:
     $ref: './schemas/new-group.yaml#/Group'
+  UpdateGroup:
+    $ref: './schemas/update-group.yaml#/Group'
   GroupResult:
     $ref: './schemas/group.yaml#/Group'
   GroupResults:
