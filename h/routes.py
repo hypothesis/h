@@ -112,6 +112,10 @@ def includeme(config):
     config.add_route('api.groups',
                      '/api/groups',
                      factory='h.traversal.GroupRoot')
+    config.add_route('api.group',
+                     '/api/groups/{id}',
+                     factory='h.traversal.GroupRoot',
+                     traverse='/{id}')
     config.add_route('api.profile',
                      '/api/profile',
                      factory='h.traversal.ProfileRoot')
