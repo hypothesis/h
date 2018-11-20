@@ -1,0 +1,22 @@
+Group:
+  type: object
+  properties:
+    name:
+      type: string
+      description: The name of the group
+      minLength: 3
+      maxLength: 25
+    description:
+      type: string
+      description: group description
+      maxLength: 250
+    groupid:
+      type: string
+      pattern: "group:[a-zA-Z0-9._\\-+!~*()']{1,1024}@.*$"
+      description: >
+        <p><mark>NEW/EXPERIMENTAL</mark></p>
+        <p>For AuthClient-authenticated requests only.</p>
+
+        <p>Optional unique identifier for this group, in the format `"group:<unique_identifier>@<authority>"`, e.g.: `"group:my-own-unique-id-123@myauthority.com"`. The `authority` value must match the requesting client's authorized authority. </p>
+
+        <p>This property is intended to allow third-party authorized clients to set their own unique identifier for a group. As such, the value of the `unique_identifier` string must be unique within the `authority`. A uniqueness violation will result in an `HTTP 409: Conflict` response.</p>
