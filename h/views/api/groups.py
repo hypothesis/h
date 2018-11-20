@@ -95,6 +95,61 @@ def update(group, request):
     return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
 
 
+@api_config(route_name='api.group_upsert',
+            request_method='PUT',
+            permission='upsert',
+            description='Create or update a group')
+def upsert(context, request):
+    """
+    Create or update a group from a PUT payload.
+
+    If no group model is present in the passed ``context`` (on ``context.group``),
+    treat this as a create action and delegate to ``create``.
+
+    Otherwise, replace the existing group's resource properties entirely and update
+    the object.
+
+    :arg context:
+    :type context: h.traversal.GroupUpsertContext
+    """
+    if context.group is None:
+        return create(request)
+
+    group = context.group
+
+    # Because this is a PUT endpoint and not a PATCH, a full replacement of the
+    # entire resource is expected. Thus, we're validating against the Create schema
+    # here as we want to make sure properties required for a fresh object are present
+    appstruct = CreateGroupAPISchema(
+        default_authority=request.default_authority,
+        group_authority=client_authority(request) or request.default_authority
+    ).validate(_json_payload(request))
+
+    group_update_service = request.find_service(name='group_update')
+    group_service = request.find_service(name='group')
+
+    # Check for duplicate group
+    groupid = appstruct.get('groupid', None)
+    if groupid is not None:
+        duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
+        if duplicate_group and (duplicate_group != group):
+            raise ConflictError(_("group with groupid '{}' already exists").format(groupid))
+
+    # Need to make sure every resource-defined property is present, as this
+    # is meant as a full-resource-replace operation.
+    # TODO: This may be better handled in the schema at some point
+    update_properties = {
+        'name': appstruct['name'],
+        'description': appstruct.get('description', ''),
+        'groupid': appstruct.get('groupid', None),
+    }
+
+    group = group_update_service.update(group, **update_properties)
+
+    # Note that this view takes a ``GroupUpsertContext`` but uses a ``GroupContext`` here
+    return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=['organization'])
+
+
 @api_config(route_name='api.group_member',
             request_method='DELETE',
             link_name='group.member.delete',
