@@ -129,11 +129,18 @@
   {# The content is the area that appears / disappears on expand / collapse. #}
   <div class="search-result-bucket__content">
     <div class="search-result-bucket__annotation-cards-container" data-ref="content">
-      <ol class="search-result-bucket__annotation-cards">
-        {% for result in bucket.presented_annotations %}
-          {{ annotation_card(result, request, tag_link) }}
-        {% endfor %}
+      {% if request.feature('render_buckets_lazily') %}
+      <ol class="search-result-bucket__annotation-cards"
+          data-ref="annotationCards"
+          data-ids="{{ ','.join(bucket.annotation_ids) }}">
       </ol>
+      {% else %}
+      <ol class="search-result-bucket__annotation-cards">
+          {% for ann in bucket.presented_annotations %}
+             {{ annotation_card(ann, request, tag_link) }}
+          {% endfor %}
+      </ol>
+      {% endif %}
       {{ search_bucket_stats(bucket) }}
     </div>
   </div>
@@ -220,12 +227,12 @@
     <input type="hidden" name="q" value="{{ q }}">
     {% if organization %}
       <div class="search-result-sidebar__organization">
-        <span class="search-result-sidebar__org-logo"> 
+        <span class="search-result-sidebar__org-logo">
           {% if organization.logo %}
             <img src="{{ organization.logo }}" alt="Organization logo" class='search-result-sidebar__logo'></img>
           {% endif %}
         </span>
-        <span class="search-result-sidebar__org-name"> 
+        <span class="search-result-sidebar__org-name">
           {{ organization.name }}
         </span>
       </div>
@@ -315,7 +322,7 @@
           <p>{{ paragraph }}</p>
         {% endfor %}
       {% endif %}
-    
+
       <div class="search-result-sidebar__subsection">
       {% if stats.annotation_count %}
         <p class="search-result-sidebar__subsection-p">

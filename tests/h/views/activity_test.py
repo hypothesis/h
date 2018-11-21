@@ -1206,6 +1206,18 @@ class TestGroupAndUserSearchController(object):
         return activity.UserSearchController(user, pyramid_request)
 
 
+class TestBucket(object):
+    # TODO - Tests
+    def test_it_presents_annotations(self):
+        pass
+
+    def test_it_returns_tag_links(self):
+        pass
+
+    def test_it_returns_400_for_invalid_json(self):
+        pass
+
+
 @pytest.fixture
 def group(factories):
     group = factories.Group()

@@ -405,6 +405,10 @@ class TestExecute(object):
         _fetch_groups.assert_called_once_with(
             pyramid_request.db, matchers.UnorderedList(group_pubids))
 
+    def test_it_does_not_fetch_groups_when_lazy_rendering(self):
+        # TODO
+        pass
+
     def test_it_returns_each_annotation_presented(self,
                                                   annotations,
                                                   pyramid_request):
@@ -421,6 +425,10 @@ class TestExecute(object):
                     break
             else:
                 assert False
+
+    def test_it_does_not_present_annotations_when_lazy_rendering(self):
+        # TODO
+        pass
 
     def test_it_returns_each_annotations_group(self,
                                                _fetch_groups,
@@ -635,8 +643,14 @@ class TestExecute(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
+        pyramid_request.feature.flags['render_buckets_lazily'] = False
         pyramid_request.stats = None
         return pyramid_request
+
+
+class TestPresentAnnotations(object):
+    # TODO - Test for presentation.
+    pass
 
 
 class TestFetchAnnotations(object):

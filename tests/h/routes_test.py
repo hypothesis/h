@@ -34,6 +34,7 @@ def test_includeme():
         call('claim_account_legacy', '/claim_account/{token}'),
         call('dismiss_sidebar_tutorial', '/app/dismiss_sidebar_tutorial'),
         call('activity.search', '/search'),
+        call('activity.bucket', '/search/bucket'),
         call('activity.user_search', '/users/{username}', factory='h.traversal:UserRoot', traverse='/{username}'),
         call('admin.index', '/admin/'),
         call('admin.admins', '/admin/admins'),

@@ -105,6 +105,14 @@ def check_url(request, query, unparse=parser.unparse):
 
 @newrelic.agent.function_trace()
 def execute(request, query, page_size):
+    """
+    Perform a search and return buckets of annotations.
+
+    If lazy rendering is disabled, the annotations are rendered to HTML
+    and returned as a `presented_annotations` attribute on each bucket.
+
+    :rtype: List[DocumentBucket]
+    """
     search_result = _execute_search(request, query, page_size)
 
     result = ActivityResults(total=search_result.total,
@@ -119,26 +127,51 @@ def execute(request, query, page_size):
     anns = fetch_annotations(request.db, search_result.annotation_ids)
     result.timeframes.extend(bucketing.bucket(anns))
 
-    # Fetch all groups
-    group_pubids = set([a.groupid
-                        for t in result.timeframes
-                        for b in t.document_buckets.values()
-                        for a in b.annotations])
-    groups = {g.pubid: g for g in _fetch_groups(request.db, group_pubids)}
+    render_lazily = request.feature('render_buckets_lazily')
 
-    # Add group information to buckets and present annotations
+    if not render_lazily:
+        group_pubids = set([a.groupid
+                            for t in result.timeframes
+                            for b in t.document_buckets.values()
+                            for a in b.annotations])
+        groups = {g.pubid: g for g in _fetch_groups(request.db, group_pubids)}
+
     for timeframe in result.timeframes:
         for bucket in timeframe.document_buckets.values():
-            bucket.presented_annotations = []
-            for annotation in bucket.annotations:
-                bucket.presented_annotations.append({
-                    'annotation': presenters.AnnotationHTMLPresenter(annotation),
-                    'group': groups.get(annotation.groupid),
-                    'html_link': links.html_link(request, annotation),
-                    'incontext_link': links.incontext_link(request, annotation)
-                })
+            if render_lazily:
+                bucket.annotation_ids = [ann.id for ann in bucket.annotations]
+            else:
+                bucket.presented_annotations = _present_annotations(
+                        request,
+                        bucket.annotations,
+                        groups)
 
     return result
+
+
+def present_annotations(request, ids):
+    """
+    Fetch a set of annotations and present them in HTML format.
+
+    :return: List of presented annotation dicts for use with search result
+             bucket template.
+    """
+    anns = fetch_annotations(request.db, ids)
+    group_pubids = set([ann.groupid for ann in anns])
+    groups = {g.pubid: g for g in _fetch_groups(request.db, group_pubids)}
+    return _present_annotations(request, anns, groups)
+
+
+def _present_annotations(request, anns, groups):
+    presented_annotations = []
+    for annotation in anns:
+        presented_annotations.append({
+            'annotation': presenters.AnnotationHTMLPresenter(annotation),
+            'group': groups.get(annotation.groupid),
+            'html_link': links.html_link(request, annotation),
+            'incontext_link': links.incontext_link(request, annotation)
+        })
+    return presented_annotations
 
 
 def aggregations_for(query):

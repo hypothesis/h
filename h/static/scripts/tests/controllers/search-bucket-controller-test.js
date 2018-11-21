@@ -99,4 +99,34 @@ describe('SearchBucketController', () => {
       assert.isTrue(ctrl.state.expanded);
     });
   });
+
+  context('when lazy rendering is enabled', () => {
+    it('fetches rendered annotations when bucket is expanded', () => {
+      // TODO
+    });
+
+    it('expands bucket once content is fetched', () => {
+      // TODO
+    });
+
+    it('expands bucket if content is not fetched after a timeout', () => {
+      // TODO
+    });
+
+    it('populates bucket with fetched HTML', () => {
+      // TODO
+    });
+
+    it('does not fetch rendered annotations if already fetched', () => {
+      // TODO
+    });
+
+    it('renders an error message if fetch fails', () => {
+      // TODO
+    });
+
+    it('pre-fetches rendered annotations on mousedown', () => {
+      // TODO
+    });
+  });
 });

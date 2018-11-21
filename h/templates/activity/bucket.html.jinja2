@@ -1,0 +1,5 @@
+{% from '../includes/annotation_card.html.jinja2' import annotation_card %}
+
+{% for ann in annotations %}
+  {{ annotation_card(ann, request, tag_link) }}
+{% endfor %}

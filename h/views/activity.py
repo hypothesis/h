@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 
 from h._compat import urlparse
 
+from functools import partial
+
 from jinja2 import Markup
 from pyramid import httpexceptions
 from pyramid import security
@@ -64,10 +66,6 @@ class SearchController(object):
                     'pubid': group.pubid
                 })
 
-        def tag_link(tag):
-            q = parser.unparse({'tag': tag})
-            return self.request.route_url('activity.search', _query=[('q', q)])
-
         def username_from_id(userid):
             parts = split_user(userid)
             return parts['username']
@@ -83,7 +81,7 @@ class SearchController(object):
             'page': paginate(self.request, results.total, page_size=page_size),
             'pretty_link': pretty_link,
             'q': self.request.params.get('q', ''),
-            'tag_link': tag_link,
+            'tag_link': partial(_tag_link, self.request),
             'user_link': user_link,
             'username_from_id': username_from_id,
             # The message that is shown (only) if there's no search results.
@@ -406,6 +404,29 @@ class UserSearchController(SearchController):
     @view_config(request_param='toggle_tag_facet')
     def toggle_tag_facet(self):
         return _toggle_tag_facet(self.request)
+
+
+@view_config(route_name='activity.bucket',
+             request_method='POST',
+             renderer='h:templates/activity/bucket.html.jinja2')
+def bucket(request):
+    """
+    Return a rendered bucket of annotation cards.
+    """
+    try:
+        annotation_ids = list(request.json_body["annotation_ids"])
+    except (ValueError, TypeError):
+        raise httpexceptions.HTTPBadRequest("Invalid annotation IDs")
+
+    annotations = query.present_annotations(request, annotation_ids)
+
+    return {'annotations': annotations,
+            'tag_link': partial(_tag_link, request)}
+
+
+def _tag_link(request, tag):
+    q = parser.unparse({'tag': tag})
+    return request.route_url('activity.search', _query=[('q', q)])
 
 
 def _parsed_query(request):

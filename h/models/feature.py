@@ -16,6 +16,8 @@ FEATURES = {
     'filter_highlights': ("Filter highlights in document based on visible"
                           " annotations in sidebar?"),
     'overlay_highlighter': "Use the new overlay highlighter?",
+    'render_buckets_lazily': ("Render annotation cards only when buckets are expanded "
+                              "in activity pages search results?"),
     'client_display_names': "Render display names instead of user names in the client",
 }
 

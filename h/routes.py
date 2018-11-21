@@ -26,6 +26,7 @@ def includeme(config):
 
     # Activity
     config.add_route('activity.search', '/search')
+    config.add_route('activity.bucket', '/search/bucket')
     config.add_route('activity.user_search',
                      '/users/{username}',
                      factory='h.traversal:UserRoot',
