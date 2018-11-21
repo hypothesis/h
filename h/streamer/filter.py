@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unicodedata
 
 from jsonpointer import resolve_pointer
+from h.util.uri import normalize as normalize_uri
 from h._compat import text_type
 
 SCHEMA = {
@@ -50,15 +51,25 @@ class FilterHandler(object):
 
         filter_term = clause['value']
 
+        def normalize(term):
+            # Apply generic normalization.
+            normalized = uni_fold(term)
+
+            # Apply field-specific normalization.
+            if clause['field'] == '/uri':
+                normalized = normalize_uri(term)
+
+            return normalized
+
         if isinstance(filter_term, list):
-            filter_term = [t for t in uni_fold(filter_term)]
+            filter_term = [normalize(t) for t in filter_term]
         else:
-            filter_term = uni_fold(filter_term)
+            filter_term = normalize(filter_term)
 
         if isinstance(field_value, list):
-            field_value = [v for v in uni_fold(field_value)]
+            field_value = [normalize(v) for v in field_value]
         else:
-            field_value = uni_fold(field_value)
+            field_value = normalize(field_value)
 
         if clause['operator'] == 'one_of':
             # The `one_of` operator behaves differently depending on whether
