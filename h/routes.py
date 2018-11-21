@@ -119,6 +119,7 @@ def includeme(config):
                      traverse='/{id}')
     config.add_route('api.group',
                      '/api/groups/{id}',
+                     request_method='PATCH',
                      factory='h.traversal.GroupRoot',
                      traverse='/{id}')
     config.add_route('api.profile',
