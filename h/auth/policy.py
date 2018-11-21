@@ -16,6 +16,7 @@ from h.auth import util
 AUTH_CLIENT_API_WHITELIST = [
     ('api.groups', 'POST'),
     ('api.group', 'PATCH'),
+    ('api.group_upsert', 'PUT'),
     ('api.group_member', 'POST'),
     ('api.users', 'POST'),
     ('api.user', 'PATCH'),

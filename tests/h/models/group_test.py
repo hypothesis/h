@@ -280,6 +280,9 @@ class TestGroupACL(object):
     def test_creator_has_admin_permissions(self, group, authz_policy):
         assert authz_policy.permits(group, 'acct:luke@example.com', 'admin')
 
+    def test_creator_has_upsert_permissions(self, group, authz_policy):
+        assert authz_policy.permits(group, 'acct:luke@example.com', 'upsert')
+
     def test_no_admin_permission_when_no_creator(self, group, authz_policy):
         group.creator = None
 
@@ -290,6 +293,12 @@ class TestGroupACL(object):
         group.creator = None
 
         principals = authz_policy.principals_allowed_by_permission(group, 'moderate')
+        assert len(principals) == 0
+
+    def test_no_upsert_permission_when_no_creator(self, group, authz_policy):
+        group.creator = None
+
+        principals = authz_policy.principals_allowed_by_permission(group, 'upsert')
         assert len(principals) == 0
 
     def test_fallback_is_deny_all(self, group, authz_policy):

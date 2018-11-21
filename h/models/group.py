@@ -212,6 +212,8 @@ class Group(Base, mixins.Timestamps):
         if self.creator:
             terms.append((security.Allow, self.creator.userid, 'admin'))
             terms.append((security.Allow, self.creator.userid, 'moderate'))
+            # The creator may update this group in an upsert context
+            terms.append((security.Allow, self.creator.userid, 'upsert'))
 
         terms.append(security.DENY_ALL)
 
