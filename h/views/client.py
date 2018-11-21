@@ -53,7 +53,6 @@ def sidebar_app(request, extra=None):
         'authDomain': request.default_authority,
         'oauthClientId': settings.get('h.client_oauth_id'),
         'release': __version__,
-        'serviceUrl': request.route_url('index'),
 
         # The list of origins that the client will respond to cross-origin RPC
         # requests from.

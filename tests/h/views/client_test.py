@@ -19,7 +19,6 @@ class TestSidebarApp(object):
         expected_config = {
                 'apiUrl': 'http://example.com/api',
                 'websocketUrl': 'wss://example.com/ws',
-                'serviceUrl': 'http://example.com/',
                 'release': __version__,
                 'raven': {
                     'dsn': 'test-sentry-dsn',
