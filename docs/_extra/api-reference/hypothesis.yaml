@@ -409,6 +409,48 @@ paths:
         - authClientForwardedUser: []
         - developerAPIKey: []
 
+    put:
+      tags:
+        - groups
+      summary: Create or Update a Group
+      operationId: upsertGroup
+      description: >
+        <mark>Experimental/New</mark> This is an experimental and new API service. It is recommended that, where feasible, the discrete `POST` and `PATCH` endpoints be used to create and update groups. This endpoint acts akin to an "UPSERT" operation and is for advanced use cases only.
+
+        <ul>
+        <li>If the group indicated by `id` in the path does not exist, a new group will be created. This is identical in functionality to the `POST /api/groups` endpoint.</li>
+        <li>If the group indicated by `id` in the path does exist AND the authenticated user is authorized to update the group (i.e. is the group's creator), that group resource will be _replaced_ by the payload of the request. Please be aware that this is a PUT, not a PATCH—the group is overwritten, not patched.</li>
+        </ul>
+      parameters:
+        - name: id
+          in: path
+          description: The group's `id` or `groupid`
+          required: true
+          type: string
+        - name: group
+          in: body
+          description: Full representation of group
+          required: true
+          schema:
+            $ref: '#/definitions/NewGroup'
+      responses:
+        '200':
+          description: Group successfully created or updated
+          schema:
+            $ref: '#/definitions/GroupResult'
+        '400':
+          description: Could not create or update group from your request
+          schema:
+            $ref: '#/definitions/Error'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ConflictError'
+      security:
+        - authClientForwardedUser: []
+        - developerAPIKey: []
+
+
   /search:
     get:
       tags:
