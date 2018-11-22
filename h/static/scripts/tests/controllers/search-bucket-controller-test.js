@@ -3,15 +3,27 @@
 const SearchBucketController = require('../../controllers/search-bucket-controller');
 const util = require('./util');
 
-const TEMPLATE = `<div class="js-search-bucket">
-  <div data-ref="header">
-    <a data-ref="domainLink">foo.com</a>
+function template({ lazyRendering }) {
+  const contentMarkup = lazyRendering ?
+    '<div data-ref="annotationCards"></div>' : '';
+
+  return `<div class="js-search-bucket">
+    <div data-ref="header">
+      <a data-ref="domainLink">foo.com</a>
+    </div>
+    <div data-ref="content">
+      ${contentMarkup}
+    </div>
+    <a data-ref="title"></a>
+    <button data-ref="collapseView"></button>
   </div>
-  <div data-ref="content"></div>
-  <a data-ref="title"></a>
-  <button data-ref="collapseView"></button>
-</div>
-`;
+  `;
+}
+
+const templates = {
+  lazyRender: template({ lazyRendering: true }),
+  noLazyRender: template({ lazyRendering: false }),
+};
 
 class FakeEnvFlags {
   constructor (flags = []) {
@@ -27,7 +39,7 @@ describe('SearchBucketController', () => {
   let ctrl;
 
   beforeEach(() => {
-    ctrl = util.setupComponent(document, TEMPLATE, SearchBucketController, {
+    ctrl = util.setupComponent(document, templates.noLazyRender, SearchBucketController, {
       envFlags: new FakeEnvFlags(),
     });
   });
@@ -85,7 +97,7 @@ describe('SearchBucketController', () => {
 
     beforeEach(() => {
       scrollTo = sinon.stub();
-      ctrl = util.setupComponent(document, TEMPLATE, SearchBucketController, {
+      ctrl = util.setupComponent(document, templates.noLazyRender, SearchBucketController, {
         scrollTo: scrollTo,
         envFlags: new FakeEnvFlags(['js-timeout']),
       });
@@ -101,6 +113,10 @@ describe('SearchBucketController', () => {
   });
 
   context('when lazy rendering is enabled', () => {
+    beforeEach(() => {
+      // TODO
+    });
+
     it('fetches rendered annotations when bucket is expanded', () => {
       // TODO
     });
