@@ -1,10 +1,23 @@
 from __future__ import unicode_literals
 
+import pytest
+
 from h.streamer.filter import FilterHandler
 
 
 class TestFilterHandler(object):
-    def test_it_matches_uri(self):
+    @pytest.mark.parametrize('query_uris,ann_uri,should_match', [
+        # Test cases that require only exact comparisons.
+        (["https://example.com", "https://example.org"], 'https://example.com', True),
+        (["https://example.com", "https://example.org"], 'https://example.net', False),
+
+        # Test cases that require comparison of normalized URIs.
+        (["https://example.com"], "http://example.com", True),
+        (["http://example.com"], "https://example.com", True),
+        (["http://example.com/?"], "https://example.com", True),
+        (["http://example.com"], "https://example.com/?", True),
+    ])
+    def test_it_matches_uri(self, query_uris, ann_uri, should_match):
         query = {
             "match_policy": "include_any",
             "actions": {},
@@ -12,17 +25,14 @@ class TestFilterHandler(object):
                 {
                     "field": "/uri",
                     "operator": "one_of",
-                    "value": ["https://example.com", "https://example.org"],
+                    "value": query_uris,
                 }
             ],
         }
         handler = FilterHandler(query)
 
-        ann = {"id": "123", "uri": "https://example.com"}
-        assert handler.match(ann) is True
-
-        ann = {"id": "123", "uri": "https://example.net"}
-        assert handler.match(ann) is False
+        ann = {"id": "123", "uri": ann_uri}
+        assert handler.match(ann) is should_match
 
     def test_it_matches_id(self):
         query = {
