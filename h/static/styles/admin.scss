@@ -4,6 +4,8 @@
 // Core
 // ----------------------------------------------------------------------------
 
+@import 'core/reset';
+@import 'core/variables';
 @import 'core/color';
 @import 'core/typography';
 @import 'core/layout';
@@ -27,6 +29,27 @@
 
 // Rules
 // ----------------------------------------------------------------------------
+
+// To be moved to core/typography
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 87.5%;
+  line-height: 1.5;
+}
+
+// To be moved to core/typography
+@media (min-width: $break-tablet) {
+  body {
+    font-size: 93.75%;
+  }
+}
+
+// To be moved to core/typography
+@media (min-width: $break-desktop) {
+  body {
+    font-size: 100%;
+  }
+}
 
 .flashbar {
   margin-top: 20px;

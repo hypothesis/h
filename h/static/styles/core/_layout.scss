@@ -6,38 +6,8 @@
 
 // Variables
 // ----------------------------------------------------------------------------
-
-// Z-index scale
-// -------------
-$zindex-modal-backdrop: 5; // Backdrop of a modal dialog or form
-$zindex-modal-content: 6;  // Content of a modal dialog or form
-$zindex-dropdown-menu: 10;
-$zindex-tooltip: 20;
-
-// Mobile device size breakpoints
-// ------------------------------
-// See the CSS width/height values at http://mydevice.io/devices/
-
-$max-phone-width: 500px;
-$tablet-width: 768px;
-$touch-target-size: 44px;
-
-$break-wide-handheld: 480px !default;
-$break-tablet: 768px !default;
-$break-desktop: 1024px !default;
-
-// Misc
-// ----
-$search-results-max-width: 950px;
-$search-results-margin-right: 30px;
-$search-result-sidebar-width: 285px;
-
-$content-max-width: $search-results-max-width + $search-results-margin-right + $search-result-sidebar-width;
-
-$content-padding-left: 30px;
-$content-padding-right: 60px;
-$content-padding-left-on-small-screens: 10px;
-$content-padding-right-on-small-screens: 10px;
+// NOTE: These have been relocated to core/variables to prevent circular
+// dependencies with core/typography
 
 // Mixins
 // ----------------------------------------------------------------------------
@@ -142,6 +112,49 @@ $content-padding-right-on-small-screens: 10px;
   .env-touch {
     @content;
   }
+}
+
+// Space within and around elements
+// --------------------------------
+
+@mixin container-inset {
+  padding: 1em;
+}
+
+@mixin container-inset--tight {
+  padding: 0.5em;
+}
+
+@mixin container-squish {
+  padding: 0.5em 1em;
+}
+
+@mixin container-squish--tight {
+  padding: 0.25em 0.5em;
+}
+
+@mixin container-stretch {
+  padding: 1em 0.5em;
+}
+
+@mixin container-stretch--tight {
+  padding: 0.5em 0.25em;
+}
+
+@mixin content-stack {
+  margin: 1em 0;
+}
+
+@mixin content-stack--tight {
+  margin: 0.25em 0;
+}
+
+@mixin component-space {
+  margin: 0 1em;
+}
+
+@mixin component-space--tight {
+  margin: 0 0.5em;
 }
 
 // Rules
