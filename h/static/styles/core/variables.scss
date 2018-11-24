@@ -1,0 +1,60 @@
+// Core: Variables
+// ============================================================================
+
+// Layout
+// ----------------------------------------------------------------------------
+
+// Z-index scale
+// -------------
+$zindex-modal-backdrop: 5; // Backdrop of a modal dialog or form
+$zindex-modal-content: 6;  // Content of a modal dialog or form
+$zindex-dropdown-menu: 10;
+$zindex-tooltip: 20;
+
+// Mobile device size breakpoints
+// ------------------------------
+// See the CSS width/height values at http://mydevice.io/devices/
+
+$max-phone-width: 500px;
+$tablet-width: 768px;
+$touch-target-size: 44px;
+
+$break-wide-handheld: 480px !default;
+$break-tablet: 768px !default;
+$break-desktop: 1024px !default;
+
+// Misc
+// ----
+$search-results-max-width: 950px;
+$search-results-margin-right: 30px;
+$search-result-sidebar-width: 285px;
+
+$content-max-width: $search-results-max-width + $search-results-margin-right + $search-result-sidebar-width;
+
+$content-padding-left: 30px;
+$content-padding-right: 60px;
+$content-padding-left-on-small-screens: 10px;
+$content-padding-right-on-small-screens: 10px;
+
+// Typography
+// ----------------------------------------------------------------------------
+
+$sans-font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !default;
+$mono-font-family: Open Sans Mono, Menlo, DejaVu Sans Mono, monospace !default;
+
+// Standard font sizes
+$normal-font-size: 13px;
+$normal-line-height: 15px;
+
+$small-font-size: 11px;
+$small-line-height: 12px;
+
+$title-font-size: 19px;
+$subtitle-font-size: 15px;
+
+// Font sizes for specific categories of control
+$input-font-size: 15px;
+
+// Minimum font size for <input> fields on iOS. If the font size is smaller than
+// this, iOS will zoom into the field when focused.
+$touch-input-font-size: 16px;

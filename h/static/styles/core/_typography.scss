@@ -3,26 +3,8 @@
 
 // Variables
 // ----------------------------------------------------------------------------
-
-$sans-font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !default;
-$mono-font-family: Open Sans Mono, Menlo, DejaVu Sans Mono, monospace !default;
-
-// Standard font sizes
-$normal-font-size: 13px;
-$normal-line-height: 15px;
-
-$small-font-size: 11px;
-$small-line-height: 12px;
-
-$title-font-size: 19px;
-$subtitle-font-size: 15px;
-
-// Font sizes for specific categories of control
-$input-font-size: 15px;
-
-// Minimum font size for <input> fields on iOS. If the font size is smaller than
-// this, iOS will zoom into the field when focused.
-$touch-input-font-size: 16px;
+// NOTE: These have been relocated to core/variables to prevent circular
+// dependencies with core/layout
 
 // Mixins
 // ----------------------------------------------------------------------------
@@ -170,4 +152,97 @@ $touch-input-font-size: 16px;
 .text--auth-prompt {
   color: $grey-5;
   margin-bottom: 50px;
+}
+
+// Headings
+.heading--xlarge {
+  font-size: 2em;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.heading--large {
+  font-size: 1.625em;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.heading--medium {
+  font-size: 1.375em;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.heading--small {
+  font-size: 1.125em;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.heading--xsmall {
+  font-size: 1em;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.heading--separator {
+  font-size: 0.9em;
+  font-weight: 600;
+  line-height: 1.375;
+  text-transform: uppercase;
+}
+
+.heading--sub {
+  font-size: 1em;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.heading--sup {
+  font-size: 0.9em;
+  font-weight: 400;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+@media (min-width: $break-tablet) {
+  .heading--xlarge {
+    font-size: 2.5em;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .heading--large {
+    font-size: 2em;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .heading--medium {
+    font-size: 1.5em;
+    line-height: 1.25;
+  }
+
+  .heading--small {
+    line-height: 1.25;
+  }
+
+  .heading--xsmall {
+    line-height: 1.25;
+  }
+}
+
+@media (min-width: $break-desktop) {
+  .heading--xlarge {
+    font-size: 3em;
+    line-height: 1.15;
+  }
+
+  .heading--large {
+    font-size: 2.25em;
+  }
+
+  .heading--medium {
+    font-size: 1.75em;
+  }
 }
