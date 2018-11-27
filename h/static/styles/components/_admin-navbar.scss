@@ -2,12 +2,16 @@
 // ============================================================================
 // The dark navbar shown at the top of `/admin` pages.
 
+// Rules
+// ----------------------------------------------------------------------------
+
 .admin-navbar {
   @include container-inset;
 
   align-items: center;
   background-color: $black;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 
@@ -21,6 +25,25 @@
 }
 
 .admin-navbar__menu {
+  display: none;
+  flex: 100%;
+
+  &.is-open {
+    display: block;
+  }
+}
+
+.admin-navbar__menu-link {
+  @include container-squish;
+
+  color: $white;
+  display: block;
+  font-size: 1.15em;
+  text-align: center;
+  width: 100%;
+}
+
+.admin-navbar__dropdown-menu {
   display: none;
 
   &.is-open {

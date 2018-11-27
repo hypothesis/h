@@ -1,0 +1,18 @@
+// Component: Lists
+// ============================================================================
+
+// Rules
+// ----------------------------------------------------------------------------
+
+.definition-list__term {
+  font-weight: 600;
+  margin-top: 1em;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.definition-list__definition {
+  margin-left: 0;
+}
