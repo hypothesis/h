@@ -5,10 +5,16 @@
 
 {% block content %}
   <p>Welcome to the Hypothesis administration console!</p>
-  <dl class='dl-horizontal'>
+  <dl class="definition-list">
     {% for key, value in release_info|dictsort %}
-      <dt>{{ key }}</dt>
-      <dd>{% if value|trim %}{{ value }}{% else %}<em>Unknown</em>{% endif %}</dd>
+      <dt class="definition-list__term">{{ key }}</dt>
+      <dd class="definition-list__definition">{% if value|trim %}{{ value }}{% else %}<em>Unknown</em>{% endif %}</dd>
     {% endfor %}
   </dl>
+  <section class="grid-container">
+    <ul class="cards">
+      <li class="card">
+      </li>
+    </ul>
+  </section>
 {% endblock %}

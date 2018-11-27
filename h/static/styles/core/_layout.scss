@@ -114,6 +114,22 @@
   }
 }
 
+// Page level layout (CSS grid)
+// ----------------------------
+
+@mixin display-grid {
+  display: grid;
+  grid-template-rows: auto;
+  grid-gap: 1.5em;
+}
+
+.grid-container {
+  @include tablet-and-up {
+    @include display-grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 // Space within and around elements
 // --------------------------------
 
@@ -177,4 +193,12 @@ body {
 
 main {
   flex-grow: 1; // 1
+}
+
+.container {
+  @include container-inset;
+}
+
+.grid-container {
+  @include display-grid;
 }

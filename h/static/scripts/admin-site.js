@@ -7,17 +7,17 @@ if (settings.raven) {
 }
 
 window.$ = window.jQuery = require('jquery');
-require('bootstrap');
 
 const sharedControllers = require('./controllers');
 const upgradeElements = require('./base/upgrade-elements');
 
 // Additional controllers for admin site.
 const AdminUsersController = require('./controllers/admin-users-controller');
+const AdminMenuToggleController = require('./controllers/admin-menu-toggle-controller');
 
 const controllers = Object.assign({}, {
   '.js-users-delete-form': AdminUsersController,
+  '.js-admin-navbar__menu-toggle': AdminMenuToggleController,
 }, sharedControllers);
 upgradeElements(document.body, controllers);
 window.envFlags.ready();
-

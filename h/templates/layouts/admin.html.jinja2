@@ -46,14 +46,14 @@
 
     {% include 'h:templates/includes/settings.html.jinja2' %}
   </head>
-  <body>
+  <body class="admin">
 
     <nav class="admin-navbar container">
       <a class="admin-navbar__logo-link" href="{{ request.route_url('admin.index') }}">
         {{ svg_icon('logo', 'admin-navbar__logo') }}
       </a>
-      <button class="admin-navbar__menu-toggle button button--outline button--tight button--reverse">Menu</button>
-      <ul class="admin-navbar__menu">
+      <button class="admin-navbar__menu-toggle button button--outline button--tight button--reverse js-admin-navbar__menu-toggle">Menu</button>
+      <ul class="admin-navbar__menu js-admin-navbar__menu">
         {% for id, permission, title, children in nav_pages %}
           {% if request.has_permission(permission) %}
             {% if not children %}
@@ -61,14 +61,14 @@
                 <a class="admin-navbar__menu-link" href="{{ request.route_url(permission) }}">{{ title }}</a>
               </li>
             {% else %}
-              <li class="admin-navbar__menu-item dropdown{% if id in page_id %} active{% endif %}">
-                  <a href="#" class="admin-navbar__menu-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <li class="admin-navbar__menu-item has_dropdown{% if id in page_id %} active{% endif %}">
+                  <a href="#" class="admin-navbar__menu-link admin-navbar__dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                   {{ title }}
                   <span class="caret"></span>
                   </a>
-                  <ul class="dropdown-menu">
+                  <ul class="admin-navbar__dropdown-menu">
                     {% for id, url, title in children %}
-                      <li><a href="{{ request.route_url(url) }}">{{ title }}</a></li>
+                      <li><a class="admin-navbar__menu-link" href="{{ request.route_url(url) }}">{{ title }}</a></li>
                     {% endfor %}
                   </ul>
               </li>
@@ -78,15 +78,11 @@
       </ul>
     </nav>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12 main">
-          {% include "h:templates/includes/flashbar.html.jinja2" %}
-          <h1 class="heading--xlarge">{{ page_title }}</h1>
-          {% block content %}{% endblock %}
-        </div>
-      </div>
-    </div>
+    <main class="container">
+      {% include "h:templates/includes/flashbar.html.jinja2" %}
+      <h1 class="heading--xlarge">{{ page_title }}</h1>
+      {% block content %}{% endblock %}
+    </main>
 
     {% for url in asset_urls("admin_js") %}
     <script src="{{ url }}"></script>
