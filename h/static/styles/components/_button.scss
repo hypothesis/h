@@ -1,0 +1,53 @@
+// Component: Button
+// ============================================================================
+
+.button {
+  @include container-squish;
+  background-color: $black;
+  border-color: $black;
+  border-radius: 0.25em;
+  border-style: solid;
+  border-width: 0.1em;
+  color: $white;
+  display: inline-block;
+  font-size: 1em;
+  font-weight: 500;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.button--outline {
+  background-color: transparent;
+  color: $black;
+}
+
+.button--reverse {
+  background-color: $white;
+  border-color: $white;
+  color: $black;
+}
+
+.button--text {
+  background-color: transparent;
+  color: $black;
+  border: 0;
+  padding-left: 0;
+  padding-right: 0;
+  text-decoration: underline;
+}
+
+.button--tight {
+  @include container-squish--tight;
+}
+
+@media (min-width: $break-tablet) {
+  .button {
+    font-size: 0.9em;
+  }
+}
+
+@media (min-width: $break-desktop) {
+  .button {
+    font-size: 0.8em;
+  }
+}
