@@ -26,7 +26,7 @@
 {%- set page_title = page_title|default('Administration pages') -%}
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
@@ -47,42 +47,42 @@
     {% include 'h:templates/includes/settings.html.jinja2' %}
   </head>
   <body>
-    <nav class="admin-navbar">
-      <div class="admin-navbar__container">
-        <a class="admin-navbar__logo-link" href="{{ request.route_url('admin.index') }}">
-          {{ svg_icon('logo', 'admin-navbar__logo') }}
-        </a>
-        <ul class="admin-navbar__tab-list">
-          {% for id, permission, title, children in nav_pages %}
-            {% if request.has_permission(permission) %}
-              {% if not children %}
-                <li class="admin-navbar__tab-item{% if id == page_id %} is-active{% endif %}">
-                  <a class="admin-navbar__tab-link" href="{{ request.route_url(permission) }}">{{ title }}</a>
-                </li>
-              {% else %}
-                <li class="admin-navbar__tab-item dropdown{% if id in page_id %} active{% endif %}">
-                    <a href="#" class="admin-navbar__tab-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    {{ title }}
-                    <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                      {% for id, url, title in children %}
-                        <li><a href="{{ request.route_url(url) }}">{{ title }}</a></li>
-                      {% endfor %}
-                    </ul>
-                </li>
-              {% endif %}
+
+    <nav class="admin-navbar container">
+      <a class="admin-navbar__logo-link" href="{{ request.route_url('admin.index') }}">
+        {{ svg_icon('logo', 'admin-navbar__logo') }}
+      </a>
+      <button class="admin-navbar__menu-toggle button button--outline button--tight button--reverse">Menu</button>
+      <ul class="admin-navbar__menu">
+        {% for id, permission, title, children in nav_pages %}
+          {% if request.has_permission(permission) %}
+            {% if not children %}
+              <li class="admin-navbar__menu-item{% if id == page_id %} is-active{% endif %}">
+                <a class="admin-navbar__menu-link" href="{{ request.route_url(permission) }}">{{ title }}</a>
+              </li>
+            {% else %}
+              <li class="admin-navbar__menu-item dropdown{% if id in page_id %} active{% endif %}">
+                  <a href="#" class="admin-navbar__menu-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  {{ title }}
+                  <span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    {% for id, url, title in children %}
+                      <li><a href="{{ request.route_url(url) }}">{{ title }}</a></li>
+                    {% endfor %}
+                  </ul>
+              </li>
             {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
+          {% endif %}
+        {% endfor %}
+      </ul>
     </nav>
 
     <div class="container">
       <div class="row">
         <div class="col-md-12 main">
           {% include "h:templates/includes/flashbar.html.jinja2" %}
-          <h1 class="page-header">{{ page_title }}</h1>
+          <h1 class="heading--xlarge">{{ page_title }}</h1>
           {% block content %}{% endblock %}
         </div>
       </div>
