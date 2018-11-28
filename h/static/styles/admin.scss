@@ -53,6 +53,14 @@ body {
   }
 }
 
+@media (min-width: $break-desktop) {
+  body {
+    @include display-grid;
+
+    grid-template-columns: 1fr 4fr;
+  }
+}
+
 .flashbar {
   margin-top: 20px;
 }
