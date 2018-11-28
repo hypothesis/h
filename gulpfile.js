@@ -55,13 +55,11 @@ function getEnv(key) {
 }
 
 var vendorBundles = {
-  jquery: ['jquery'],
-  bootstrap: ['bootstrap'],
   raven: ['raven-js'],
   unorm: ['unorm'],
 };
-var vendorModules = ['jquery', 'bootstrap', 'raven-js', 'unorm'];
-var vendorNoParseModules = ['jquery', 'unorm'];
+var vendorModules = ['raven-js', 'unorm'];
+var vendorNoParseModules = ['unorm'];
 
 // Builds the bundles containing vendor JS code
 gulp.task('build-vendor-js', function() {
@@ -129,7 +127,6 @@ gulp.task('build-vendor-css', function() {
   var vendorCSSFiles = [
     // Icon font
     './h/static/styles/vendor/icomoon.css',
-    './node_modules/bootstrap/dist/css/bootstrap.css',
   ];
 
   var cssURLRewriter = postcssURL({
