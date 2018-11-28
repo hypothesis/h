@@ -50,3 +50,25 @@
     display: block;
   }
 }
+
+@media (min-width: $break-desktop) {
+  .admin-navbar {
+    flex-direction: column;
+    flex-wrap: inherit;
+  }
+
+  .admin-navbar__logo-link {
+    @include container-squish;
+
+    text-align: center;
+    width: 100%;
+  }
+
+  .admin-navbar__menu-toggle {
+    display: none;
+  }
+
+  .admin-navbar__menu {
+    display: block;
+  }
+}
