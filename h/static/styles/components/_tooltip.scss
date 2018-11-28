@@ -25,10 +25,6 @@
 .tooltip {
   @include font-small;
 
-  // Override the opacity set by Bootstrap's "tooltip" class when this component
-  // is used in /admin pages. The rest of the site does not use Bootstrap.
-  opacity: initial;
-
   border-radius: 2px;
   background-color: $grey-7;
   color: white;

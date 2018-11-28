@@ -6,8 +6,6 @@ if (settings.raven) {
   require('./base/raven').init(settings.raven);
 }
 
-window.$ = window.jQuery = require('jquery');
-
 const sharedControllers = require('./controllers');
 const upgradeElements = require('./base/upgrade-elements');
 
