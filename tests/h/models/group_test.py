@@ -277,8 +277,18 @@ class TestGroupACL(object):
     def test_creator_has_moderate_permission(self, group, authz_policy):
         assert authz_policy.permits(group, 'acct:luke@example.com', 'moderate')
 
-    def test_creator_has_admin_permissions(self, group, authz_policy):
+    def test_creator_has_admin_permission(self, group, authz_policy):
         assert authz_policy.permits(group, 'acct:luke@example.com', 'admin')
+
+    def test_auth_client_with_matching_authority_has_admin_permission(self, group, authz_policy):
+        group.authority = 'weewhack.com'
+
+        assert authz_policy.permits(group, ['flip', 'client_authority:weewhack.com'], 'admin')
+
+    def test_auth_client_without_matching_authority_does_not_have_admin_permission(self, group, authz_policy):
+        group.authority = 'weewhack.com'
+
+        assert not authz_policy.permits(group, ['flip', 'client_authority:2weewhack.com'], 'admin')
 
     def test_creator_has_upsert_permissions(self, group, authz_policy):
         assert authz_policy.permits(group, 'acct:luke@example.com', 'upsert')
