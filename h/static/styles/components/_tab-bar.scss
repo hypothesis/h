@@ -1,0 +1,32 @@
+// Component: Tab bar
+// ============================================================================
+
+// Rules
+// ----------------------------------------------------------------------------
+
+.tab-bar {
+  @include content-stack;
+}
+
+.tab-bar__tabs {
+  display: flex;
+}
+
+.tab-bar__tab {
+  display: inline-block;
+  flex: 1;
+  max-width: 16em;
+  text-align: center;
+
+  &.is-active {
+    border-bottom: solid $brand 0.25em;
+  }
+}
+
+.tab-bar__link {
+  @include container-inset;
+
+  display: inline-block;
+  font-weight: 600;
+  text-transform: uppercase;
+}
