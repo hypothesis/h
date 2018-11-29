@@ -83,8 +83,7 @@
   "homepage": "https://github.com/hypothesis/h",
   "browserify": {
     "transform": [
-      "babelify",
-      "browserify-shim"
+      "babelify"
     ]
   }
 }
