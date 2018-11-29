@@ -216,5 +216,6 @@ def _record_search_api_usage_metrics(
 
     for k in keys:
         if k in params:
-            # The NewRelic query language does not permit _ at the begining.
-            record_param(k.lstrip('_'), str(params[k]))
+            # The New Relic Query Language does not permit _ at the begining
+            # and offset is a reserved key word.
+            record_param("es_{}".format(k), str(params[k]))
