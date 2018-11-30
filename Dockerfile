@@ -2,7 +2,11 @@ FROM node:alpine as build
 
 ENV NODE_ENV production
 
-COPY . .
+COPY package-lock.json ./
+COPY package.json ./
+COPY gulpfile.js ./ 
+COPY scripts/gulp ./scripts/gulp
+COPY h/static ./h/static
 
 RUN npm ci --production && npm run build
 
