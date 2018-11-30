@@ -123,24 +123,39 @@ class TestUpdateGroup(object):
         assert res.status_code == 200
         assert res.json_body['name'] == 'My Group'
 
-    def test_it_returns_404_if_forwarded_user_is_not_authorized(self,
-                                                                app,
-                                                                auth_client_header,
-                                                                third_party_user,
-                                                                factories,
-                                                                db_session):
-        # Not created by `third_party_user`
-        group = factories.Group(authority=third_party_user.authority)
+    def test_it_allows_auth_client_with_matching_authority(self,
+                                                           app,
+                                                           auth_client_header,
+                                                           third_party_user,
+                                                           factories,
+                                                           db_session):
+        group = factories.Group(creator=third_party_user, authority=third_party_user.authority)
         db_session.commit()
 
-        headers = auth_client_header
-        headers[native_str('X-Forwarded-User')] = native_str(third_party_user.userid)
         group_payload = {
             'name': 'My Group'
         }
 
         path = '/api/groups/{id}'.format(id=group.pubid)
-        res = app.patch_json(path, group_payload, headers=headers, expect_errors=True)
+        res = app.patch_json(path, group_payload, headers=auth_client_header)
+
+        assert res.status_code == 200
+        assert res.json_body['name'] == 'My Group'
+
+    def test_it_does_not_allow_auth_client_with_mismatched_authority(self,
+                                                                     app,
+                                                                     auth_client_header,
+                                                                     factories,
+                                                                     db_session):
+        group = factories.Group(authority='rando.biz')
+        db_session.commit()
+
+        group_payload = {
+            'name': 'My Group'
+        }
+
+        path = '/api/groups/{id}'.format(id=group.pubid)
+        res = app.patch_json(path, group_payload, headers=auth_client_header, expect_errors=True)
 
         assert res.status_code == 404
 

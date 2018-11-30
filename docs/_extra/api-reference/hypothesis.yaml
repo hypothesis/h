@@ -379,7 +379,7 @@ paths:
       summary: Update a  group
       operationId: patchGroup
       description: >
-        Update an existing group. The authenticated user must be the group's original creator to have permission to update it.
+        Update an existing group. If `developerAPIKey` authentication is used, the authenticated user must be the group's creator. If `authClientCredentials` or `authClientForwardedUser` are used, the group's authority must match the client's authority.
       parameters:
         - name: id
           in: path
@@ -407,6 +407,7 @@ paths:
             $ref: '#/definitions/ConflictError'
       security:
         - authClientForwardedUser: []
+        - authClientCredentials: []
         - developerAPIKey: []
 
     put:
