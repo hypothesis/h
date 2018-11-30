@@ -190,18 +190,32 @@ def _annotation_resource(request, annotation):
 
 def _record_search_api_usage_metrics(
     params,
-    record_metrics=newrelic.agent.record_custom_metrics,
+    record_param=newrelic.agent.add_custom_parameter,
 ):
-    metrics = [
-        # Record usage of deprecated offset.
-        ('Custom/SearchApi/offset', int("offset" in params)),
-
+    # Record usage of search params and associate them with a transaction.
+    keys = [
+        # Record usage of inefficient offset and it's alternative search_after.
+        "offset",
+        "search_after",
+        "sort",
         # Record usage of url/uri (url is an alias of uri).
-        ('Custom/SearchApi/url', int("url" in params)),
-        ('Custom/SearchApi/uri', int("uri" in params)),
-
+        "url",
+        "uri",
         # Record usage of tags/tag (tags is an alias of tag).
-        ('Custom/SearchApi/tags', int("tags" in params)),
-        ('Custom/SearchApi/tag', int("tag" in params)),
+        "tags",
+        "tag",
+        # Record usage of _separate_replies which will help distinguish client calls
+        # for loading the sidebar annotations from other api calls.
+        "_separate_replies",
+        # Record group and user-these help in identifying slow queries.
+        "group",
+        "user",
+        # Record usage of wildcard feature.
+        "wildcard_uri",
     ]
-    record_metrics(metrics)
+
+    for k in keys:
+        if k in params:
+            # The New Relic Query Language does not permit _ at the begining
+            # and offset is a reserved key word.
+            record_param("es_{}".format(k), str(params[k]))
