@@ -212,7 +212,7 @@ class Group(Base, mixins.Timestamps):
             terms.append((security.Allow, write_principal, 'write'))
 
         if self.creator:
-            # The creator of the grouop shoulld be able to update it
+            # The creator of the group should be able to update it
             terms.append((security.Allow, self.creator.userid, 'admin'))
             # auth_clients that have the same authority as this group
             # should be allowed to update it
