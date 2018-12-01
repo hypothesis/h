@@ -218,4 +218,4 @@ def _record_search_api_usage_metrics(
         if k in params:
             # The New Relic Query Language does not permit _ at the begining
             # and offset is a reserved key word.
-            record_param("es_{}".format(k), str(params[k]))
+            record_param("es_{}".format(k), params[k])
