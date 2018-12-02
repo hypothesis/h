@@ -11,7 +11,7 @@ COPY h/static ./h/static
 RUN npm ci --production && npm run build
 
 FROM alpine:3.7
-MAINTAINER Hypothes.is Project and contributors
+LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
 RUN apk add --no-cache \
