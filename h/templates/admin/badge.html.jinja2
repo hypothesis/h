@@ -19,48 +19,41 @@
     you can backslash-escape it in your pattern: <code>\_</code>.
   </p>
 
-  </ul>
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Add a URI</h3>
-    </div>
-    <div class="panel-body">
-      <form method="POST" class="form-inline">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <div class="form-group">
-          <label for="add">URI</label>
-          <input type="text" class="form-control" name="add">
-          <input type="submit" class="btn btn-default" value="Add">
-        </div>
-      </form>
-    </div>
-  </div>
+  <section class="card admin-form">
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+      <header class="card__header container">
+        <h2 class="heading--medium">Block a URI</h2>
+      </header>
+      <div class="card__body container">
+        <p class="form-input">
+          <label class="form-input__label" for="uri_to_block">URI</label>
+          <input class="form-input__input has-label" type="text" name="uri_to_block">
+        </p>
+        <p class="form-input">
+          <input type="submit" class="button" value="Add">
+        </p>
+      </div>
+    </form>
+  </section>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Remove a URI</h3>
-    </div>
-    <div class="panel-body">
-      {% if uris %}
-      <form
-        method="POST"
-        action="{{ request.route_url('admin.badge') }}">
+  <section class="admin-form">
+    <h2 class="heading--medium">Unblock a URI</h2>
+    {% if uris %}
+      <form method="POST" action="{{ request.route_url('admin.badge') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul>
           {% for uri in uris %}
             <li>
               {{ uri }}
-              <button type="submit" class="btn btn-link btn-sm"
-                      name="remove" value="{{ uri }}">
-                Remove
-              </button>
+              <button class="button button--outline" type="submit" name="remove" value="{{ uri }}">
             </li>
           {% endfor %}
         </ul>
       </form>
-      {% else %}
-        <p><em>No URIs are currently blocked&hellip;</em></p>
-      {% endif %}
-    </div>
-  </div>
+    {% else %}
+      <p><em>No URIs are currently blocked.</em></p>
+    {% endif %}
+  </section>
+
 {% endblock %}
