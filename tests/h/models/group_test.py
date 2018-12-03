@@ -293,11 +293,13 @@ class TestGroupACL(object):
     def test_creator_has_upsert_permissions(self, group, authz_policy):
         assert authz_policy.permits(group, 'acct:luke@example.com', 'upsert')
 
-    def test_no_admin_permission_when_no_creator(self, group, authz_policy):
+    def test_admin_allowed_only_for_authority_when_no_creator(self, group, authz_policy):
         group.creator = None
 
         principals = authz_policy.principals_allowed_by_permission(group, 'admin')
-        assert len(principals) == 0
+
+        assert 'client_authority:example.com' in principals
+        assert authz_policy.permits(group, ['flip', 'client_authority:example.com'], 'admin')
 
     def test_no_moderate_permission_when_no_creator(self, group, authz_policy):
         group.creator = None

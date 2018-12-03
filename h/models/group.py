@@ -187,13 +187,6 @@ class Group(Base, mixins.Timestamps):
 
     def __acl__(self):
         terms = []
-        # This authority principal may be used to grant auth clients
-        # permissions for groups within their authority
-        authority_principal = "client_authority:{}".format(self.authority)
-
-        # auth_clients that have the same authority as the target group
-        # may add members to it
-        terms.append((security.Allow, authority_principal, 'member_add'))
 
         join_principal = _join_principal(self)
         if join_principal is not None:
@@ -214,12 +207,23 @@ class Group(Base, mixins.Timestamps):
         if self.creator:
             # The creator of the group should be able to update it
             terms.append((security.Allow, self.creator.userid, 'admin'))
-            # auth_clients that have the same authority as this group
-            # should be allowed to update it
-            terms.append((security.Allow, authority_principal, 'admin'))
             terms.append((security.Allow, self.creator.userid, 'moderate'))
             # The creator may update this group in an upsert context
             terms.append((security.Allow, self.creator.userid, 'upsert'))
+
+        # This authority principal may be used to grant auth clients
+        # permissions for groups within their authority
+        authority_principal = "client_authority:{}".format(self.authority)
+
+        # auth_clients that have the same authority as the target group
+        # may add members to it
+        terms.append((security.Allow, authority_principal, 'member_add'))
+        # auth_clients that have the same authority as this group
+        # should be allowed to update it
+        terms.append((security.Allow, authority_principal, 'admin'))
+        # auth_clients with matching authority should be able to read
+        # the group
+        terms.append((security.Allow, authority_principal, 'read'))
 
         terms.append(security.DENY_ALL)
 
