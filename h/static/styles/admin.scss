@@ -73,6 +73,8 @@ body {
 
 .admin-form {
   @include content-stack;
+
+  max-width: 42em;
 }
 
 .table-auto {
