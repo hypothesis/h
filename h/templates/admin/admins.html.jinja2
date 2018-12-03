@@ -16,7 +16,7 @@
         <h2 class="heading--medium">Add an admin</h2>
       </header>
       <div class="card__body container">
-        <input type="hidden" name="csrf_token" value="{ request.session.get_csrf_token() }">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <p class="form-input js-form-input">
           <label class="form-input__label" for="admin_username">Username</label>
           <input class="form-input__input has-label" type="text" name="admin_username">
