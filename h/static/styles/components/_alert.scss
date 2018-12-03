@@ -1,0 +1,34 @@
+// Component: Alert
+// ============================================================================
+
+// Rules
+// ----------------------------------------------------------------------------
+
+.alert {
+  @include container-inset;
+  @include content-stack;
+
+  position: relative;
+}
+
+.alert-success {
+  background-color: #dbefdc;
+  color: #285b2a;
+}
+
+.alert__close-button {
+  height: 100%;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: 0;
+  width: 3em;
+}
+
+.alert__close-icon {
+  fill: #285b2a;
+  height: 1.5em;
+  overflow: hidden;
+  vertical-align: middle;
+  width: 1.5em;
+}

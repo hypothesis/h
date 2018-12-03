@@ -4,12 +4,20 @@
   ('warning', 'warning'),
   ('success', 'success'),
 ] -%}
+{%- set icon_class = "alert__close-icon" -%}
+
 <div class="flashbar">
   {% for flashkey, classname in flash_types %}
     {% for message in request.session.pop_flash(flashkey) %}
-      <div class="alert alert-{{ classname }} alert-dismissable" role="alert">
-	<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	{{ message }}
+      <div class="alert alert-{{ classname }} js-alert-dismissable" role="alert">
+        <button class="alert__close-button button button--text js-alert-close-button">
+          <svg class="svg-icon icon-close alert__close-icon" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" aria-labelledby="icon-close-title">
+            <title id="icon-close-title">Close</title>
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            <path d="M0 0h24v24H0z" fill="none"/>
+          </svg>
+        </button>
+        {{ message }}
       </div>
     {% endfor %}
   {% endfor %}
