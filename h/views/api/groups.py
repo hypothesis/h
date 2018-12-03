@@ -70,6 +70,18 @@ def create(request):
 
 
 @api_config(route_name='api.group',
+            request_method='GET',
+            permission='read',
+            description='Fetch a group')
+def read(group, request):
+    """Fetch a group."""
+
+    expand = request.GET.getall('expand') or []
+
+    return GroupJSONPresenter(GroupContext(group, request)).asdict(expand=expand)
+
+
+@api_config(route_name='api.group',
             request_method='PATCH',
             permission='admin',
             description='Update a group')
