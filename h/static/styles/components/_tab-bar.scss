@@ -26,6 +26,7 @@
 .tab-bar__link {
   @include container-inset;
 
+  color: $black;
   display: inline-block;
   font-weight: 600;
   text-transform: uppercase;

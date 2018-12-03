@@ -18,6 +18,7 @@
 @import 'components/admin-navbar';
 @import 'components/btn';
 @import 'components/button';
+@import 'components/card';
 @import 'components/form';
 @import 'components/form-actions';
 @import 'components/form-checkbox';
@@ -27,8 +28,14 @@
 @import 'components/lists';
 @import 'components/search-form';
 @import 'components/tab-bar';
+@import 'components/table';
 @import 'components/tooltip';
 @import 'components/warning-box';
+
+// Pages
+// ----------------------------------------------------------------------------
+
+@import 'pages/admin-features';
 
 // Rules
 // ----------------------------------------------------------------------------
