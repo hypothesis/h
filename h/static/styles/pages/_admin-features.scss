@@ -18,3 +18,9 @@
 .feature-flag__settings {
   display: flex;
 }
+
+.feature-flags__save-button {
+  @include container-inset;
+
+  text-align: center;
+}
