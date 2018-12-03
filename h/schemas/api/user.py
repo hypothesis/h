@@ -96,3 +96,19 @@ class UpdateUserAPISchema(JSONSchema):
             },
         },
     }
+
+    def validate(self, data):
+        appstruct = super(UpdateUserAPISchema, self).validate(data)
+        appstruct = self._whitelisted_properties_only(appstruct)
+        return appstruct
+
+    def _whitelisted_properties_only(self, appstruct):
+        """Return a new appstruct containing only schema-defined fields"""
+
+        new_appstruct = {}
+
+        for allowed_field in UpdateUserAPISchema.schema['properties'].keys():
+            if allowed_field in appstruct:
+                new_appstruct[allowed_field] = appstruct[allowed_field]
+
+        return new_appstruct
