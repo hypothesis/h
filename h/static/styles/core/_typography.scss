@@ -196,6 +196,7 @@
   font-size: 1em;
   font-weight: 400;
   line-height: 1.15;
+  margin-top: 0.25em;
 }
 
 .heading--sup {
@@ -245,4 +246,14 @@
   .heading--medium {
     font-size: 1.75em;
   }
+}
+
+// Layout tweaks
+
+.has-subheading {
+  margin-bottom: 0.25em;
+}
+
+.heading--component {
+  margin-bottom: 0.25em;
 }

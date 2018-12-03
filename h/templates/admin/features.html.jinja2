@@ -4,74 +4,68 @@
 {% set page_title = 'Feature flags' %}
 
 {% block content %}
-  <p>
-    This page allows you to configure various feature flags that change the
-    behaviour of the application.
-  </p>
-  <p>
-    <strong>N.B.</strong> your changes will take effect immediately when you
-    save.
-  </p>
 
-  <div class="table-responsive">
-    <form method="POST">
-      <input
-        type="hidden"
-        name="csrf_token"
-        value="{{ request.session.get_csrf_token() }}">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Everyone</th>
-            <th>Admins</th>
-            <th>Staff</th>
-            <th>Cohorts</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for feat in features %}
-          <tr>
-            <td>{{ feat.name }}</td>
-            <td>
-              <input
-                type="checkbox"
-                name="{{ feat.name }}[everyone]"
-                {% if feat.everyone %}checked{% endif %}>
-            </td>
-            <td>
-              <input
-                type="checkbox"
-                name="{{ feat.name }}[admins]"
-                {% if feat.admins %}checked{% endif %}>
-            </td>
-            <td>
-              <input
-                type="checkbox"
-                name="{{ feat.name }}[staff]"
-                {% if feat.staff %}checked{% endif %}>
-            </td>
-            <td>
-              {% for c in cohorts %}
-                <fieldset>
-                  <input
-                    type="checkbox"
-                    id="{{ feat.name }}[cohorts][{{ c.name }}]"
-                    name="{{ feat.name }}[cohorts][{{ c.name }}]"
-                    {% if c in feat.cohorts %}checked{% endif %}>
-                  <label for="{{ feat.name }}[cohorts][{{ c.name }}]">{{ c.name }}</label>
-                </fieldset>
+<p>
+  This page allows you to configure various feature flags that change the
+  behaviour of the application.
+</p>
+<p>
+  <strong>N.B.</strong> your changes will take effect immediately when you
+  save.
+</p>
+
+<form method="POST">
+  <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ request.session.get_csrf_token() }}">
+
+  <ul class="feature-flags">
+    {% for feature in features%}
+      <li class="card feature-flag">
+        <header class="card__header container">
+          <h2 class="heading--medium has-subheading">{{ feature.name }}</h2>
+          <p class="heading--sub">{{ feature.description }}</p>
+        </header>
+        <div class="card__body feature-flag__settings">
+          <div class="container">
+            <h3 class="heading--small heading--component">Applies to (users):</h3>
+            <ul>
+              <li><input type="checkbox"
+                    id="{{ feature.name }}[everyone]"
+                    name="{{ feature.name }}[everyone]"
+                    {% if feature.everyone %}checked{% endif %}>
+                  <label for="{{ feature.name }}[everyone]">Everyone</label></li>
+              <li><input type="checkbox"
+                    id="{{ feature.name }}[admins]"
+                    name="{{ feature.name }}[admins]"
+                    {% if feature.admins %}checked{% endif %}>
+                  <label for="{{ feature.name }}[admins]">Admins</label></li>
+              <li><input type="checkbox"
+                    id="{{ feature.name }}[staff]"
+                    name="{{ feature.name }}[staff]"
+                    {% if feature.staff %}checked{% endif %}>
+                  <label for="{{ feature.name }}[staff]">Staff</label></li>
+            </ul>
+          </div>
+          <div class="container">
+            <h3 class="heading--small heading--component">Belongs to (cohorts):</h3>
+            <ul>
+              {% for cohort in cohorts %}
+                <li><input type="checkbox"
+                      id="{{ feature.name }}[cohorts][{{ cohort.name }}]"
+                      name="{{ feature.name }}[cohorts][{{ cohort.name }}]"
+                      {% if cohort in feature.cohorts %}checked{% endif %}>
+                    <label for="{{ feature.name }}[cohorts][{{ cohort.name }}]">{{ cohort.name }}</label></li>
               {% endfor %}
-            </td>
-            <td>
-              {{ feat.description }}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <input class="btn btn-primary" type="submit" value="Save changes">
-    </form>
-  </div>
+            </ul>
+          </div>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <p><input class="button" type="submit" value="Save changes"></p>
+</form>
+
 {% endblock %}
