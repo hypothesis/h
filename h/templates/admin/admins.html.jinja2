@@ -4,54 +4,50 @@
 {% set page_title = 'Administrators' %}
 
 {% block content %}
+
   <p>
     On this page you can give users admin privileges! Admin privileges are
     powerful, so please be careful who you give them to.
   </p>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Add an admin</h3>
-    </div>
-    <div class="panel-body">
-      <form method="POST" class="form-inline">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <div class="form-group">
-          <label for="add">Username</label>
-          <input type="text" class="form-control" name="add">
-        </div>
-        <div class="form-group">
-          <label for="authority">Authority</label>
-          <input type="text" class="form-control" name="authority" value="{{ default_authority }}">
-          <input type="submit" class="btn btn-default" value="Add">
-        </div>
-      </form>
-    </div>
-  </div>
+  <section class="card admin-form">
+    <form method="POST">
+      <header class="card__header container">
+        <h2 class="heading--medium">Add an admin</h2>
+      </header>
+      <div class="card__body container">
+        <input type="hidden" name="csrf_token" value="{ request.session.get_csrf_token() }">
+        <p class="form-input js-form-input">
+          <label class="form-input__label" for="admin_username">Username</label>
+          <input class="form-input__input has-label" type="text" name="admin_username">
+        </p>
+        <p class="form-input js-form-input">
+          <label class="form-input__label" for="admin_authority">Authority</label>
+          <input class="form-input__input has-label" type="text" name="admin_authority" value="{{ default_authority }}">
+        </p>
+        <p><input class="button" type="submit" value="Add"></p>
+      </div>
+    </form>
+  </section>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Current administrators</h3>
-    </div>
-    <div class="panel-body">
-      <form
-        method="POST"
-        action="{{ request.route_url('admin.admins') }}">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <ul>
-          {% for user in admin_users %}
-            <li>
-              {{ user }}
-              {% if admin_users|length > 1 %}
-                <button type="submit" class="btn btn-link btn-sm"
-                        name="remove" value="{{ user }}">
-                  Remove
-                </button>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      </form>
-    </div>
-  </div>
+  <section class="admin-form">
+    <h2 class="heading--medium">Current Administrators</h2>
+    <form method="POST"
+      action="{{ request.route_url('admin.admins') }}">
+      <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+      <ul>
+        {% for user in admin_users %}
+          <li>
+            {{ user }}
+            {% if admin_users|length > 1 %}
+              <button type="submit" class="button button--text button--tight" name="remove" value="{{ user }}">
+                Remove
+              </button>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </form>
+  </section>
+
 {% endblock %}

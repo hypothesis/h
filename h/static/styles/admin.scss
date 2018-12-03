@@ -67,7 +67,12 @@ body {
     @include display-grid;
 
     grid-template-columns: 1fr 4fr;
+    max-width: 100em;
   }
+}
+
+.admin-form {
+  @include content-stack;
 }
 
 .table-auto {
@@ -81,6 +86,10 @@ body {
 
 .pager .pager__item--more {
   border: none;
+}
+
+.form-input {
+  max-width: 40em;
 }
 
 .form-input__error-list {
