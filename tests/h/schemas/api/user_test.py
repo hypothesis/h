@@ -213,6 +213,17 @@ class TestUpdateUserAPISchema(object):
         with pytest.raises(ValidationError):
             schema.validate(payload)
 
+    def test_it_ignores_non_whitelisted_properties(self, schema):
+        appstruct = schema.validate({
+            'display_name': 'Full Name',
+            'authority': 'dangerous.biz',
+            'orcid': '3094839jkfj',
+        })
+
+        assert 'display_name' in appstruct
+        assert 'authority' not in appstruct
+        assert 'orcid' not in appstruct
+
     @pytest.fixture
     def payload(self):
         return {
