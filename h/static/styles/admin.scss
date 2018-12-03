@@ -16,6 +16,7 @@
 // ----------------------------------------------------------------------------
 
 @import 'components/admin-navbar';
+@import 'components/alert';
 @import 'components/btn';
 @import 'components/button';
 @import 'components/card';
@@ -67,10 +68,6 @@ body {
 
     grid-template-columns: 1fr 4fr;
   }
-}
-
-.flashbar {
-  margin-top: 20px;
 }
 
 .table-auto {
