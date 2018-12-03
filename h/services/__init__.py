@@ -38,6 +38,7 @@ def includeme(config):
     config.register_service_factory('.user_unique.user_unique_factory', name='user_unique')
     config.register_service_factory('.user_password.user_password_service_factory', name='user_password')
     config.register_service_factory('.user_signup.user_signup_service_factory', name='user_signup')
+    config.register_service_factory('.user_update.user_update_factory', name='user_update')
 
     config.add_directive('add_annotation_link_generator',
                          '.links.add_annotation_link_generator')
