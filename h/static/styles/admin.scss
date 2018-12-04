@@ -77,6 +77,15 @@ body {
   max-width: 42em;
 }
 
+// This one belongs in the SHAME file
+.blocked-uri {
+  @include container-inset--tight;
+
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
 .table-auto {
   table-layout: auto;
   width: auto;
