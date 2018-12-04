@@ -28,25 +28,26 @@
       <div class="card__body container">
         <p class="form-input">
           <label class="form-input__label" for="uri_to_block">URI</label>
-          <input class="form-input__input has-label" type="text" name="uri_to_block">
+          <input class="form-input__input has-label" id="uri_to_block" type="text" name="add">
         </p>
         <p class="form-input">
-          <input type="submit" class="button" value="Add">
+          <input type="submit" class="button" value="Block">
         </p>
       </div>
     </form>
   </section>
 
   <section class="admin-form">
-    <h2 class="heading--medium">Unblock a URI</h2>
+      <h2 class="heading--medium">Currently blocked URIs</h2>
+    </header>
     {% if uris %}
       <form method="POST" action="{{ request.route_url('admin.badge') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <ul>
+        <ul class="list--striped">
           {% for uri in uris %}
-            <li>
-              {{ uri }}
-              <button class="button button--outline" type="submit" name="remove" value="{{ uri }}">
+            <li class="list__item blocked-uri">
+              <span class="heading--small">{{ uri }}</span>
+              <button class="button button--outline button--tight" type="submit" name="remove" value="{{ uri }}">Unblock</button>
             </li>
           {% endfor %}
         </ul>

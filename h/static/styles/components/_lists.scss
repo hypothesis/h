@@ -16,3 +16,9 @@
 .definition-list__definition {
   margin-left: 0;
 }
+
+.list--striped {
+  .list__item:nth-child(odd) {
+    background-color: $grey-1;
+  }
+}
