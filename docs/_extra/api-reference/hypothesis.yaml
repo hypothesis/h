@@ -373,6 +373,41 @@ paths:
         - developerAPIKey: []
 
   /groups/{id}:
+    get:
+      tags:
+        - groups
+      summary: Fetch a group
+      description: >
+        Any request (including unauthenticated requests) may retrieve any publicly-readable group.
+        When using AuthClient credentials, it is additionally possible to retrieve any group within
+        the associated authority.  Requests authenticated with an API key are able to retrieve any
+        publicly-readable group as well as any private group that the authenticated user created or
+        is a member of.
+      operationID: getGroup
+      parameters:
+        - name: id
+          in: path
+          description: the group's `id` or `groupid`
+          required: true
+          type: string
+        - name: expand
+          description: >
+            Array of fields to expand in the response
+          in: query
+          type: array
+          items:
+            type: string
+            enum:
+              - organization
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/GroupResult'
+      security:
+        - authClientCredentials: []
+        - developerAPIKey: []
+
     patch:
       tags:
         - groups
