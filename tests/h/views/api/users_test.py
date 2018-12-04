@@ -9,6 +9,7 @@ from h.exceptions import PayloadError, ConflictError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
+from h.services.user_update import UserUpdateService
 from h.services.user_unique import UserUniqueService, DuplicateUserError
 from h.views.api.users import create, update
 
@@ -33,17 +34,17 @@ class TestCreate(object):
             display_name='Jeremy Weyland',
             identities=[{'provider': 'provider_a', 'provider_unique_id': 'abc123'}])
 
-    def test_it_presents_user(self, pyramid_request, valid_payload, user, presenter):
+    def test_it_presents_user(self, pyramid_request, valid_payload, user, UserJSONPresenter):
         pyramid_request.json_body = valid_payload
         create(pyramid_request)
 
-        presenter.assert_called_once_with(user)
+        UserJSONPresenter.assert_called_once_with(user)
 
-    def test_it_returns_presented_user(self, pyramid_request, valid_payload, presenter):
+    def test_it_returns_presented_user(self, pyramid_request, valid_payload, UserJSONPresenter):
         pyramid_request.json_body = valid_payload
         result = create(pyramid_request)
 
-        assert result == presenter.return_value.asdict()
+        assert result == UserJSONPresenter.return_value.asdict()
 
     def test_it_validates_the_input(self, pyramid_request, valid_payload, CreateUserAPISchema):
         create_schema = CreateUserAPISchema.return_value
@@ -115,73 +116,48 @@ class TestCreate(object):
 
 @pytest.mark.usefixtures('auth_client',
                          'user_svc',
-                         'user')
+                         'user',
+                         'user_update_svc',
+                         'UpdateUserAPISchema',
+                         'UserJSONPresenter')
 class TestUpdate(object):
-    def test_it_updates_display_name(self, pyramid_request, valid_payload, user):
-        pyramid_request.json_body = valid_payload
-        update(user, pyramid_request)
 
-        assert user.display_name == 'Jeremy Weyland'
-
-    def test_it_updates_email(self, pyramid_request, valid_payload, user):
-        pyramid_request.json_body = valid_payload
-        update(user, pyramid_request)
-
-        assert user.email == 'jeremy@weylandtech.com'
-
-    def test_you_can_update_the_displayname_of_a_user_who_has_no_email(
-            self, factories, pyramid_request, user_svc, valid_payload):
-        user = factories.User(display_name='old_display_name', email=None)
-        user_svc.fetch.return_value = user
-        user_svc.fetch.side_effect = None
-        del valid_payload['email']
-        valid_payload['display_name'] = 'new_display_name'
-        pyramid_request.json_body = valid_payload
+    def test_it_validates_request_payload(self, pyramid_request, user, user_update_svc, UpdateUserAPISchema):
+        data = {
+            'display_name': 'Rudolph Blimp',
+            'email': 'fingers@perplexology.com'
+        }
+        pyramid_request.json_body = data
 
         update(user, pyramid_request)
 
-        assert user.display_name == 'new_display_name'
-        assert user.email is None
+        UpdateUserAPISchema.return_value.validate.assert_called_once_with(data)
 
-    def test_you_can_add_an_email_to_a_user_who_has_no_email(
-            self, factories, pyramid_request, user_svc, valid_payload):
-        user = factories.User(email=None)
-        user_svc.fetch.return_value = user
-        user_svc.fetch.side_effect = None
-        del valid_payload['display_name']
-        valid_payload['email'] = 'new@new.com'
-        pyramid_request.json_body = valid_payload
+    def test_it_proxies_to_user_update_svc(self, pyramid_request, user, user_update_svc, UpdateUserAPISchema):
+        appstruct = {
+            'display_name': 'Rudolph Blimp',
+            'email': 'fingers@perplexology.com'
+        }
+        UpdateUserAPISchema.return_value.validate.return_value = appstruct
+        user_update_svc.update.return_value = user
 
         update(user, pyramid_request)
 
-        assert user.email == 'new@new.com'
+        user_update_svc.update.assert_called_once_with(user, **appstruct)
 
-    def test_it_presents_user(self, pyramid_request, valid_payload, user, presenter):
-        pyramid_request.json_body = valid_payload
+    def test_it_presents_updated_user_returned_from_service(self, pyramid_request, user, UserJSONPresenter, user_update_svc):
+        user_update_svc.update.return_value = user
         update(user, pyramid_request)
 
-        presenter.assert_called_once_with(user)
+        UserJSONPresenter.assert_called_once_with(user)
 
-    def test_it_returns_presented_user(self, pyramid_request, valid_payload, presenter):
-        pyramid_request.json_body = valid_payload
+    def test_it_returns_presented_user(self, pyramid_request, valid_payload, UserJSONPresenter):
         result = update(user, pyramid_request)
 
-        assert result == presenter.return_value.asdict()
-
-    def test_it_validates_the_input(self, user, pyramid_request, valid_payload, UpdateUserAPISchema):
-        update_schema = UpdateUserAPISchema.return_value
-        update_schema.validate.return_value = valid_payload
-        pyramid_request.json_body = valid_payload
-
-        update(user, pyramid_request)
-
-        update_schema.validate.assert_called_once_with(valid_payload)
+        assert result == UserJSONPresenter.return_value.asdict()
 
     def test_raises_when_schema_validation_fails(self, user, pyramid_request, valid_payload, UpdateUserAPISchema):
-        update_schema = UpdateUserAPISchema.return_value
-        update_schema.validate.side_effect = ValidationError('validation failed')
-
-        pyramid_request.json_body = valid_payload
+        UpdateUserAPISchema.return_value.validate.side_effect = ValidationError('validation failed')
 
         with pytest.raises(ValidationError):
             update(user, pyramid_request)
@@ -194,6 +170,9 @@ class TestUpdate(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
+        # Add a nominal json_body so that _json_payload() parsing of
+        # it doesn't raise
+        pyramid_request.json_body = {}
         pyramid_request.matchdict['username'] = user.username
         return pyramid_request
 
@@ -244,6 +223,13 @@ def user_unique_svc(pyramid_config):
 
 
 @pytest.fixture
+def user_update_svc(pyramid_config):
+    svc = mock.create_autospec(UserUpdateService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name='user_update')
+    return svc
+
+
+@pytest.fixture
 def CreateUserAPISchema(patch):
     return patch('h.views.api.users.CreateUserAPISchema')
 
@@ -254,7 +240,7 @@ def UpdateUserAPISchema(patch):
 
 
 @pytest.fixture
-def presenter(patch):
+def UserJSONPresenter(patch):
     return patch('h.views.api.users.UserJSONPresenter')
 
 

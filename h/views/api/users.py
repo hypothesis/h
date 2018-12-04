@@ -69,17 +69,11 @@ def update(user, request):
     schema = UpdateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 
-    _update_user(user, appstruct)
+    user_update_service = request.find_service(name='user_update')
+    user = user_update_service.update(user, **appstruct)
 
     presenter = UserJSONPresenter(user)
     return presenter.asdict()
-
-
-def _update_user(user, appstruct):
-    if 'email' in appstruct:
-        user.email = appstruct['email']
-    if 'display_name' in appstruct:
-        user.display_name = appstruct['display_name']
 
 
 def _json_payload(request):
