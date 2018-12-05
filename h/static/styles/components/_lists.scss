@@ -18,7 +18,18 @@
 }
 
 .list--striped {
-  .list__item:nth-child(odd) {
+  .list-item:nth-child(odd) {
     background-color: $grey-1;
   }
+}
+
+.list-item {
+  @include container-inset--tight;
+
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.list-item__action {
 }
