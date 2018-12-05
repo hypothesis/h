@@ -100,7 +100,7 @@ def test_includeme():
              traverse='/{id}'),
         call('api.group',
              '/api/groups/{id}',
-             request_method='PATCH',
+             request_method=('GET', 'PATCH',),
              factory='h.traversal.GroupRoot',
              traverse='/{id}'),
         call('api.profile', '/api/profile', factory='h.traversal.ProfileRoot'),

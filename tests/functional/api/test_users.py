@@ -76,6 +76,19 @@ class TestUpdateUser(object):
 
         assert res.status_code == 200
 
+    def test_it_ignores_unrecognized_parameters(self, app, auth_client_header, user):
+        url = "/api/users/{username}".format(username=user.username)
+        payload = {
+            'email': 'fingers@bonzo.com',
+            'authority': 'nicetry.com'
+        }
+
+        res = app.patch_json(url, payload, headers=auth_client_header)
+
+        assert res.status_code == 200
+        assert res.json_body['email'] == 'fingers@bonzo.com'
+        assert res.json_body['authority'] == 'example.com'
+
     def test_it_returns_updated_user_when_successful(self, app, auth_client_header, user, patch_user_payload):
         url = "/api/users/{username}".format(username=user.username)
 

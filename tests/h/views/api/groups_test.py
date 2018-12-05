@@ -229,6 +229,34 @@ class TestCreateGroup(object):
         return pyramid_request
 
 
+@pytest.mark.usefixtures('GroupJSONPresenter',
+                         'GroupContext',)
+class TestReadGroup(object):
+
+    def test_it_creates_group_context_from_group_model(self, GroupContext, factories, pyramid_request):
+        group = factories.Group()
+
+        views.read(group, pyramid_request)
+
+        GroupContext.assert_called_once_with(group, pyramid_request)
+
+    def test_it_forwards_expand_param_to_presenter(self, GroupJSONPresenter, factories, pyramid_request):
+        pyramid_request.params['expand'] = 'organization'
+        group = factories.Group()
+
+        views.read(group, pyramid_request)
+
+        GroupJSONPresenter.return_value.asdict.assert_called_once_with(['organization'])
+
+    def test_it_returns_presented_group(self, GroupJSONPresenter, factories, pyramid_request):
+        pyramid_request.params['expand'] = 'organization'
+        group = factories.Group()
+
+        presented = views.read(group, pyramid_request)
+
+        assert presented == GroupJSONPresenter.return_value.asdict.return_value
+
+
 @pytest.mark.usefixtures('UpdateGroupAPISchema',
                          'group_service',
                          'group_update_service',
