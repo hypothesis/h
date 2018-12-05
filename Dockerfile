@@ -2,13 +2,16 @@ FROM node:alpine as build
 
 ENV NODE_ENV production
 
+# Install node dependencies.
 COPY package-lock.json ./
 COPY package.json ./
+RUN npm ci --production
+
+# Build h js/css.
 COPY gulpfile.js ./ 
 COPY scripts/gulp ./scripts/gulp
 COPY h/static ./h/static
-
-RUN npm ci --production && npm run build
+RUN npm run build
 
 FROM alpine:3.7
 LABEL maintainer="Hypothes.is Project and contributors"
