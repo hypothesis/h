@@ -4,23 +4,30 @@
 {% set page_title = 'Users' %}
 
 {% block content %}
+
   <p>
     On this page you can look up users by username and see their details.
   </p>
 
-  <form method="GET" class="form-inline">
-    <div class="form-group">
-      <label for="username">Username or email</label>
-      <input type="text" class="form-control" name="username">
-    </div>
-    <div class="form-group">
-      <label for="authority">Authority</label>
-      <input type="text" class="form-control" name="authority" value="{{ authority or default_authority }}">
-      <input type="submit" class="btn btn-default" value="Find">
-    </div>
-  </form>
+  <section class="admin-form">
+    <h2 class="heading--medium">Search for a user</h2>
+    <form method="GET">
+      <p class="form-input js-form-input">
+        <label class="form-input__label" for="search_query">Username or email</label>
+        <input class="form-input__input has-label" id="search_query" type="text" name="username">
+      </p>
+      <p class="form-input js-form-input">
+        <label class="form-input__label" for="search_authority">Authority</label>
+        <input class="form-input__input has-label" id="search_authority" type="text" name="authority" value="{{ authority or default_authority }}">
+      </p>
+      <p><input class="button" type="submit" value="Search"></p>
+    </form>
+  </section>
+
   {% if username %}
   <hr>
+
+  <section>
     {% if user %}
       <table class="table table-auto table-striped">
         <tbody>
@@ -122,5 +129,7 @@
     {% else %}
       <p>No user found with username or email <em>{{ username }}</em> and authority <em>{{ authority }}</em>!</p>
     {% endif %}
+
+  </section>
   {% endif %}
 {% endblock %}
