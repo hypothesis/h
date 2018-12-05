@@ -45,9 +45,9 @@
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul class="list--striped">
           {% for uri in uris %}
-            <li class="list__item blocked-uri">
+            <li class="list-item">
               <span class="heading--small">{{ uri }}</span>
-              <button class="button button--outline button--tight" type="submit" name="remove" value="{{ uri }}">Unblock</button>
+              <button class="list-item__action button button--outline button--tight" type="submit" name="remove" value="{{ uri }}">Unblock</button>
             </li>
           {% endfor %}
         </ul>
