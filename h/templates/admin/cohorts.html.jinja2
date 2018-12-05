@@ -8,44 +8,42 @@
     On this page you can see a list of all the feature cohorts.
   </p>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Create a feature cohort</h3>
-    </div>
-    <div class="panel-body">
-      <form method="POST" class="form-inline">
+  <section class="card admin-form">
+    <header class="card__header container">
+      <h2 class="heading--medium">Create a feature cohort</h2>
+    </header>
+    <div class="card__body container">
+      <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <div class="form-group">
-          <label for="add">Feature cohort name</label>
-          <input type="text" class="form-control" name="add">
-          <input type="submit" class="btn btn-default" value="Add">
-        </div>
+        <p class="form-input">
+          <label class="form-input__label" for="cohort_name">Cohort name</label>
+          <input class="form-input__input has-label" id="cohort_name" name="add" type="text">
+        </p>
+        <p><input class="button" type="submit" value="Add Cohort"></p>
       </form>
     </div>
-  </div>
+  </section>
 
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Members</th>
-        </tr>
-      </thead>
-      <tbody>
+  <section class="admin-form">
+    <h2 class="heading--medium">Current cohorts</h2>
+    {% if results %}
+      <ul class="list--striped">
         {% for cohort in results %}
-          <tr>
-            <td>
-              <a href="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
-                {{ cohort.name }}
-              </a>
-            </td>
-            <td>{{ cohort.members|length }}</td>
-          </tr>
+          <li class="list-item">
+            <p class="list-item__content">
+              <span class="heading--small">{{ cohort.name }}</span> ({{ cohort.members|length }} members)
+            </p>
+            <p class="list-item__actions">
+              <a class="list-item__action button button--outline button--tight"
+                href="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">Edit</a>
+            </p>
+          </li>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      </ul>
+    {% else %}
+      <p><em>No cohorts found.</em></p>
+    {% endif %}
+  </section>
 
   {% include "h:templates/includes/paginator.html.jinja2" %}
 {% endblock %}
