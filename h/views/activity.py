@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 from h._compat import urlparse
 
 from jinja2 import Markup
+import newrelic.agent
 from pyramid import httpexceptions
 from pyramid import security
 from pyramid.view import view_config
@@ -37,6 +38,7 @@ class SearchController(object):
         self.request = request
         # Cache a copy of the extracted query params for the child controllers to use if needed.
         self.parsed_query_params = query.extract(self.request)
+        _record_search_api_usage_metrics(self.parsed_query_params, record_param=newrelic.agent.add_custom_parameter)
 
     @view_config(request_method='GET')
     def search(self):
@@ -573,3 +575,23 @@ def _copy_params(request, params=None):
         del params['q']
 
     return params
+
+def _record_search_api_usage_metrics(params, record_param=newrelic.agent.add_custom_parameter):
+    # Record usage of search params and associate them with a transaction.
+    keys = [
+        # Record usage of url/uri (url is an alias of uri).
+        "url",
+        "uri",
+        # Record usage of tags/tag (tags is an alias of tag).
+        "tag",
+        # Record group and user-these help in identifying slow queries.
+        "group",
+        "user",
+        "any"
+    ]
+
+    for k in keys:
+        if k in params:
+            # The New Relic Query Language does not permit _ at the begining
+            # and offset is a reserved key word.
+            record_param("es_{}".format(k), params[k])
