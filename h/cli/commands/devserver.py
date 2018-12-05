@@ -85,14 +85,14 @@ def devserver(https, web, ws, worker, assets, beat):
     if web:
         m.add_process(
             "web",
-            "gunicorn --name web --reload --paste conf/development-app.ini %s"
+            "newrelic-admin run-program gunicorn --name web --reload --paste conf/development-app.ini %s"
             % gunicorn_args,
         )
 
     if ws:
         m.add_process(
             "ws",
-            "gunicorn --name websocket --reload --paste conf/development-websocket.ini %s"
+            "newrelic-admin run-program gunicorn --name websocket --reload --paste conf/development-websocket.ini %s"
             % gunicorn_args,
         )
 
