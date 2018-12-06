@@ -38,9 +38,11 @@ class SearchController(object):
         self.request = request
         # Cache a copy of the extracted query params for the child controllers to use if needed.
         self.parsed_query_params = query.extract(self.request)
-        _record_search_api_usage_metrics(self.parsed_query_params, record_param=newrelic.agent.add_custom_parameter)
 
     @view_config(request_method='GET')
+
+    _record_search_query_param_usage(self.parsed_query_params, record_param=newrelic.agent.add_custom_parameter)
+
     def search(self):
         # Make a copy of the query params to be consumed by search.
         q = self.parsed_query_params.copy()
@@ -576,7 +578,8 @@ def _copy_params(request, params=None):
 
     return params
 
-def _record_search_api_usage_metrics(params, record_param=newrelic.agent.add_custom_parameter):
+
+def _record_search_query_param_usage(params, record_param=newrelic.agent.add_custom_parameter):
     # Record usage of search params and associate them with a transaction.
     keys = [
         # Record usage of url/uri (url is an alias of uri).
