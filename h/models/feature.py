@@ -16,7 +16,6 @@ FEATURES = {
     'filter_highlights': ("Filter highlights in document based on visible"
                           " annotations in sidebar?"),
     'overlay_highlighter': "Use the new overlay highlighter?",
-    'api_render_user_info': "Return users' extended info in API responses?",
     'client_display_names': "Render display names instead of user names in the client",
 }
 
@@ -39,6 +38,7 @@ FEATURES = {
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
 FEATURES_PENDING_REMOVAL = {
+    'api_render_user_info': "Return users' extended info in API responses?",
 }
 
 
