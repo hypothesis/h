@@ -17,7 +17,7 @@ const AlertCloseButtonController = require('./controllers/alert-close-button-con
 const controllers = Object.assign({}, {
   '.js-users-delete-form': AdminUsersController,
   '.js-admin-navbar__menu-toggle': AdminMenuToggleController,
-  '.js-alert-close-button': AlertCloseButtonController
+  '.js-alert-close-button': AlertCloseButtonController,
 }, sharedControllers);
 upgradeElements(document.body, controllers);
 window.envFlags.ready();
