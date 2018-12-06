@@ -40,8 +40,7 @@ def profile(request, authority=None):
     profile['features'] = request.feature.all()
     profile['preferences'] = _user_preferences(user)
 
-    if request.feature('api_render_user_info'):
-        profile.update(user_info(user))
+    profile.update(user_info(user))
 
     return profile
 

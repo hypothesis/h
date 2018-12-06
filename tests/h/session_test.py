@@ -195,11 +195,6 @@ class TestProfile(object):
         user_info = profile['user_info']
         assert user_info['display_name'] == authenticated_request.user.display_name
 
-    def test_user_info_authenticated_when_flag_off(self, authenticated_request):
-        authenticated_request.feature.flags['api_render_user_info'] = False
-        profile = session.profile(authenticated_request)
-        assert 'user_info' not in profile
-
     def test_user_info_unauthenticated(self, unauthenticated_request):
         profile = session.profile(unauthenticated_request)
         assert 'user_info' not in profile

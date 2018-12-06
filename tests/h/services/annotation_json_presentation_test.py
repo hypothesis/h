@@ -42,20 +42,6 @@ class TestAnnotationJSONPresentationService(object):
     def test_it_configures_user_info_formatter(self, services, formatters, svc):
         assert formatters.AnnotationUserInfoFormatter.return_value in svc.formatters
 
-    def test_it_skips_configuring_user_info_formatter_when_told_to(self, services, formatters):
-        svc = AnnotationJSONPresentationService(session=mock.sentinel.db_session,
-                                                user=mock.sentinel.user,
-                                                group_svc=services['group'],
-                                                links_svc=services['links'],
-                                                flag_svc=services['flag'],
-                                                flag_count_svc=services['flag_count'],
-                                                moderation_svc=services['annotation_moderation'],
-                                                user_svc=services['user'],
-                                                has_permission=mock.sentinel.has_permission,
-                                                render_user_info=False)
-
-        assert formatters.AnnotationUserInfoFormatter.return_value not in svc.formatters
-
     def test_present_inits_presenter(self, svc, presenters, annotation_resource):
         svc.present(annotation_resource)
 
@@ -121,8 +107,7 @@ class TestAnnotationJSONPresentationService(object):
                                                  flag_count_svc=services['flag_count'],
                                                  moderation_svc=services['annotation_moderation'],
                                                  user_svc=services['user'],
-                                                 has_permission=mock.sentinel.has_permission,
-                                                 render_user_info=True)
+                                                 has_permission=mock.sentinel.has_permission)
 
     @pytest.fixture
     def annotation_resource(self):
