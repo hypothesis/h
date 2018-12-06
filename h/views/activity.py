@@ -42,7 +42,6 @@ class SearchController(object):
     @view_config(request_method='GET')
     def search(self):
         _record_search_api_usage_metrics(self.parsed_query_params, record_param=newrelic.agent.add_custom_parameter)
-
         # Make a copy of the query params to be consumed by search.
         q = self.parsed_query_params.copy()
 
