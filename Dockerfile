@@ -1,13 +1,22 @@
+# Stage 1: Build node portion of the H app.
 FROM node:alpine as build
 
 ENV NODE_ENV production
 
-COPY . .
+# Build node dependencies.
+COPY package-lock.json ./
+COPY package.json ./
+RUN npm ci --production
 
-RUN npm ci --production && npm run build
+# Build h js/css.
+COPY gulpfile.js ./ 
+COPY scripts/gulp ./scripts/gulp
+COPY h/static ./h/static
+RUN npm run build
 
+# Stage 2: Build the rest of the app using the build output from Stage 1.
 FROM alpine:3.7
-MAINTAINER Hypothes.is Project and contributors
+LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
 RUN apk add --no-cache \
