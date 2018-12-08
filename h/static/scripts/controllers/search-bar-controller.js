@@ -60,7 +60,7 @@ class SearchBarController extends Controller {
           matchOn: 'url',
           title: 'url:',
           explanation: `search by URL<br>for domain level search 
-            add trailing /* eg. https://example.com/*`,
+            add trailing /* eg. example.com/*`,
         },
         {
           matchOn: 'group',
