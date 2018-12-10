@@ -17,10 +17,11 @@ from h.models.group import (
 
 
 def test_init_sets_given_attributes():
-    group = models.Group(name="My group", authority="example.com")
+    group = models.Group(name="My group", authority="example.com", enforce_scope=False)
 
     assert group.name == "My group"
     assert group.authority == "example.com"
+    assert group.enforce_scope is False
 
 
 def test_with_short_name():
@@ -33,6 +34,28 @@ def test_with_long_name():
     """Should raise ValueError if name longer than 25 characters."""
     with pytest.raises(ValueError):
         models.Group(name="abcdefghijklmnopqrstuvwxyz")
+
+
+def test_enforce_scope_is_True_by_default(db_session, factories):
+    user = factories.User()
+    group = models.Group(name="Foobar", authority="foobar.com", creator=user)
+
+    db_session.add(group)
+    db_session.flush()
+
+    assert group.enforce_scope is True
+
+
+def test_enforce_scope_can_be_set_False(db_session, factories):
+    user = factories.User()
+    group = models.Group(
+        name="Foobar", authority="foobar.com", creator=user, enforce_scope=False
+    )
+
+    db_session.add(group)
+    db_session.flush()
+
+    assert group.enforce_scope is False
 
 
 def test_slug(db_session, factories, default_organization):
