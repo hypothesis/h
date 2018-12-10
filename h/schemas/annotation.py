@@ -8,7 +8,8 @@ from dateutil.parser import parse
 from pyramid import i18n
 
 from h.schemas.base import JSONSchema, ValidationError
-from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX, wildcard_uri_is_valid
+from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
+from h.search.util import wildcard_uri_is_valid
 from h.util import document_claims
 
 _ = i18n.TranslationStringFactory(__package__)

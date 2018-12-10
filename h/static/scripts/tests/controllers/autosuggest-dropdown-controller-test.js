@@ -61,7 +61,7 @@ describe('AutosuggestDropdownController', () => {
         {
           title: 'url:',
           explanation: `search by URL<br>for domain level search 
-            add trailing /* eg. https://example.com/*`,
+            add trailing /* eg. example.com/*`,
         },
         {
           title: 'group:',
