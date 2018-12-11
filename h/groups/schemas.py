@@ -21,9 +21,11 @@ _ = i18n.TranslationString
 
 def unblacklisted_group_name_slug(node, value):
     """Colander validator that ensures the "slugified" group name is not blacklisted."""
-    if slugify.slugify(value).lower() in set(['edit', 'leave']):
-        raise colander.Invalid(node, _("Sorry, this group name is not allowed. "
-                                       "Please choose another one."))
+    if slugify.slugify(value).lower() in set(["edit", "leave"]):
+        raise colander.Invalid(
+            node,
+            _("Sorry, this group name is not allowed. " "Please choose another one."),
+        )
 
 
 def group_schema(autofocus_name=False):
@@ -33,22 +35,25 @@ def group_schema(autofocus_name=False):
     schema = CSRFSchema()
     name = colander.SchemaNode(
         colander.String(),
-        name='name',
+        name="name",
         title=_("Name"),
         validator=colander.All(
             validators.Length(min=GROUP_NAME_MIN_LENGTH, max=GROUP_NAME_MAX_LENGTH),
-            unblacklisted_group_name_slug),
+            unblacklisted_group_name_slug,
+        ),
         widget=deform.widget.TextInputWidget(
             autofocus=autofocus_name,
             show_required=True,
             css_class="group-form__name-input js-group-name-input",
             disable_autocomplete=True,
             label_css_class="group-form__name-label",
-            max_length=GROUP_NAME_MAX_LENGTH))
+            max_length=GROUP_NAME_MAX_LENGTH,
+        ),
+    )
 
     description = colander.SchemaNode(
         colander.String(),
-        name='description',
+        name="description",
         title=_("Description"),
         validator=validators.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
         missing=None,
@@ -56,7 +61,9 @@ def group_schema(autofocus_name=False):
             css_class="group-form__description-input",
             label_css_class="group-form__description-label",
             min_length=0,
-            max_length=GROUP_DESCRIPTION_MAX_LENGTH))
+            max_length=GROUP_DESCRIPTION_MAX_LENGTH,
+        ),
+    )
 
     schema.add(name)
     schema.add(description)

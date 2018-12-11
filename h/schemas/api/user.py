@@ -15,63 +15,38 @@ class CreateUserAPISchema(JSONSchema):
     """Validate a user JSON object."""
 
     schema = {
-        'type': 'object',
-        'properties': {
-            'authority': {
-                'type': 'string',
-                'format': 'hostname',
+        "type": "object",
+        "properties": {
+            "authority": {"type": "string", "format": "hostname"},
+            "username": {
+                "type": "string",
+                "minLength": USERNAME_MIN_LENGTH,
+                "maxLength": USERNAME_MAX_LENGTH,
+                "pattern": "^[A-Za-z0-9._]+$",
             },
-            'username': {
-                'type': 'string',
-                'minLength': USERNAME_MIN_LENGTH,
-                'maxLength': USERNAME_MAX_LENGTH,
-                'pattern': '^[A-Za-z0-9._]+$',
+            "email": {
+                "type": "string",
+                "format": "email",
+                "maxLength": EMAIL_MAX_LENGTH,
             },
-            'email': {
-                'type': 'string',
-                'format': 'email',
-                'maxLength': EMAIL_MAX_LENGTH,
-            },
-            'display_name': {
-                'type': 'string',
-                'maxLength': DISPLAY_NAME_MAX_LENGTH,
-            },
-            'identities': {
-                'type': 'array',
-                'minItems': 1,
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'provider': {
-                            'type': 'string',
-                        },
-                        'provider_unique_id': {
-                            'type': 'string',
-                        },
+            "display_name": {"type": "string", "maxLength": DISPLAY_NAME_MAX_LENGTH},
+            "identities": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "provider": {"type": "string"},
+                        "provider_unique_id": {"type": "string"},
                     },
-                    'required': [
-                        'provider',
-                        'provider_unique_id',
-                    ]
-                }
+                    "required": ["provider", "provider_unique_id"],
+                },
             },
         },
-        'anyOf': [  # email may be empty if identities are present
-            {
-                'required': [
-                    'authority',
-                    'username',
-                    'email',
-                ],
-            },
-            {
-                'required': [
-                    'authority',
-                    'username',
-                    'identities',
-                ],
-            }
-        ]
+        "anyOf": [  # email may be empty if identities are present
+            {"required": ["authority", "username", "email"]},
+            {"required": ["authority", "username", "identities"]},
+        ],
     }
 
     def validate(self, data):
@@ -83,17 +58,14 @@ class UpdateUserAPISchema(JSONSchema):
     """Validate a user JSON object."""
 
     schema = {
-        'type': 'object',
-        'properties': {
-            'email': {
-                'type': 'string',
-                'format': 'email',
-                'maxLength': EMAIL_MAX_LENGTH,
+        "type": "object",
+        "properties": {
+            "email": {
+                "type": "string",
+                "format": "email",
+                "maxLength": EMAIL_MAX_LENGTH,
             },
-            'display_name': {
-                'type': 'string',
-                'maxLength': DISPLAY_NAME_MAX_LENGTH,
-            },
+            "display_name": {"type": "string", "maxLength": DISPLAY_NAME_MAX_LENGTH},
         },
     }
 
@@ -107,7 +79,7 @@ class UpdateUserAPISchema(JSONSchema):
 
         new_appstruct = {}
 
-        for allowed_field in UpdateUserAPISchema.schema['properties'].keys():
+        for allowed_field in UpdateUserAPISchema.schema["properties"].keys():
             if allowed_field in appstruct:
                 new_appstruct[allowed_field] = appstruct[allowed_field]
 

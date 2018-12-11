@@ -25,12 +25,7 @@ from sqlalchemy.orm import sessionmaker
 
 from h.util.session_tracker import Tracker
 
-__all__ = (
-    'Base',
-    'Session',
-    'init',
-    'make_engine',
-)
+__all__ = ("Base", "Session", "init", "make_engine")
 
 log = logging.getLogger(__name__)
 
@@ -40,13 +35,15 @@ log = logging.getLogger(__name__)
 #
 #   http://docs.sqlalchemy.org/en/latest/core/constraints.html#configuring-constraint-naming-conventions
 #
-metadata = sqlalchemy.MetaData(naming_convention={
-    "ix": "ix__%(column_0_label)s",
-    "uq": "uq__%(table_name)s__%(column_0_name)s",
-    "ck": "ck__%(table_name)s__%(constraint_name)s",
-    "fk": "fk__%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
-    "pk": "pk__%(table_name)s"
-})
+metadata = sqlalchemy.MetaData(
+    naming_convention={
+        "ix": "ix__%(column_0_label)s",
+        "uq": "uq__%(table_name)s__%(column_0_name)s",
+        "ck": "ck__%(table_name)s__%(constraint_name)s",
+        "fk": "fk__%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
+        "pk": "pk__%(table_name)s",
+    }
+)
 
 Base = declarative_base(metadata=metadata)
 
@@ -57,6 +54,7 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
     """Initialise the database tables managed by `h.db`."""
     # Import models package to populate the metadata
     import h.models  # noqa
+
     if should_drop:
         base.metadata.reflect(engine)
         base.metadata.drop_all(engine)
@@ -72,11 +70,11 @@ def init(engine, base=Base, should_create=False, should_drop=False, authority=No
 
 def make_engine(settings):
     """Construct a sqlalchemy engine from the passed ``settings``."""
-    return sqlalchemy.create_engine(settings['sqlalchemy.url'])
+    return sqlalchemy.create_engine(settings["sqlalchemy.url"])
 
 
 def _session(request):
-    engine = request.registry['sqlalchemy.engine']
+    engine = request.registry["sqlalchemy.engine"]
     session = Session(bind=engine)
 
     # If the request has a transaction manager, associate the session with it.
@@ -89,7 +87,7 @@ def _session(request):
 
     # Track uncommitted changes so we can verify that everything was either
     # committed or rolled back when the request finishes.
-    db_session_checks = request.registry.settings.get('h.db_session_checks', True)
+    db_session_checks = request.registry.settings.get("h.db_session_checks", True)
     if db_session_checks:
         tracker = Tracker(session)
     else:
@@ -111,11 +109,8 @@ def _session(request):
     def close_the_sqlalchemy_session(request):
         changes = tracker.uncommitted_changes() if tracker else []
         if changes:
-            msg = 'closing a session with uncommitted changes %s'
-            log.warning(msg, changes, extra={
-                'stack': True,
-                'changes': changes,
-            })
+            msg = "closing a session with uncommitted changes %s"
+            log.warning(msg, changes, extra={"stack": True, "changes": changes})
         session.close()
 
     return session
@@ -123,6 +118,7 @@ def _session(request):
 
 def _maybe_create_default_organization(engine, authority):
     from h import models
+
     session = Session(bind=engine)
 
     try:
@@ -131,11 +127,10 @@ def _maybe_create_default_organization(engine, authority):
         default_org = None
 
     if default_org is None:
-        default_org = models.Organization(name='Hypothesis',
-                                          authority=authority,
-                                          pubid='__default__',
-                                          )
-        with open('h/static/images/icons/logo.svg', 'rb') as h_logo:
+        default_org = models.Organization(
+            name="Hypothesis", authority=authority, pubid="__default__"
+        )
+        with open("h/static/images/icons/logo.svg", "rb") as h_logo:
             default_org.logo = h_logo.read().decode("utf-8")
         session.add(default_org)
 
@@ -148,16 +143,19 @@ def _maybe_create_default_organization(engine, authority):
 def _maybe_create_world_group(engine, authority, default_org):
     from h import models
     from h.models.group import ReadableBy, WriteableBy
+
     session = Session(bind=engine)
-    world_group = session.query(models.Group).filter_by(pubid='__world__').one_or_none()
+    world_group = session.query(models.Group).filter_by(pubid="__world__").one_or_none()
     if world_group is None:
-        world_group = models.Group(name='Public',
-                                   authority=authority,
-                                   joinable_by=None,
-                                   readable_by=ReadableBy.world,
-                                   writeable_by=WriteableBy.authority,
-                                   organization=default_org)
-        world_group.pubid = '__world__'
+        world_group = models.Group(
+            name="Public",
+            authority=authority,
+            joinable_by=None,
+            readable_by=ReadableBy.world,
+            writeable_by=WriteableBy.authority,
+            organization=default_org,
+        )
+        world_group.pubid = "__world__"
         session.add(world_group)
 
     session.commit()
@@ -167,9 +165,9 @@ def _maybe_create_world_group(engine, authority, default_org):
 def includeme(config):
     # Create the SQLAlchemy engine and save a reference in the app registry.
     engine = make_engine(config.registry.settings)
-    config.registry['sqlalchemy.engine'] = engine
+    config.registry["sqlalchemy.engine"] = engine
 
     # Add a property to all requests for easy access to the session. This means
     # that view functions need only refer to `request.db` in order to retrieve
     # the current database session.
-    config.add_request_method(_session, name='db', reify=True)
+    config.add_request_method(_session, name="db", reify=True)

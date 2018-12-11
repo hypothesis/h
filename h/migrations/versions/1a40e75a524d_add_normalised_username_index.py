@@ -12,18 +12,20 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = '1a40e75a524d'
-down_revision = '02db2fa6ea98'
+revision = "1a40e75a524d"
+down_revision = "02db2fa6ea98"
 
 
 def upgrade():
     # Creating an index concurrently does not work inside a transaction
-    op.execute('COMMIT')
-    op.create_index(op.f('ix__user__userid'),
-                    'user',
-                    [sa.text("lower(replace(username, '.', ''))"), 'authority'],
-                    postgresql_concurrently=True)
+    op.execute("COMMIT")
+    op.create_index(
+        op.f("ix__user__userid"),
+        "user",
+        [sa.text("lower(replace(username, '.', ''))"), "authority"],
+        postgresql_concurrently=True,
+    )
 
 
 def downgrade():
-    op.drop_index(op.f('ix__user__userid'), 'user')
+    op.drop_index(op.f("ix__user__userid"), "user")

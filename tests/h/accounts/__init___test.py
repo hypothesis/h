@@ -6,23 +6,21 @@ import pytest
 from h import accounts
 
 
-@pytest.mark.usefixtures('user_service')
+@pytest.mark.usefixtures("user_service")
 class TestGetUser(object):
-    def test_fetches_user_using_service(self,
-                                        factories,
-                                        pyramid_config,
-                                        pyramid_request,
-                                        user_service):
-        pyramid_config.testing_securitypolicy('userid')
+    def test_fetches_user_using_service(
+        self, factories, pyramid_config, pyramid_request, user_service
+    ):
+        pyramid_config.testing_securitypolicy("userid")
         user_service.fetch.return_value = factories.User.build()
 
         accounts.get_user(pyramid_request)
 
-        user_service.fetch.assert_called_once_with('userid')
+        user_service.fetch.assert_called_once_with("userid")
 
-    def test_does_not_invalidate_session_if_not_authenticated(self,
-                                                              pyramid_config,
-                                                              pyramid_request):
+    def test_does_not_invalidate_session_if_not_authenticated(
+        self, pyramid_config, pyramid_request
+    ):
         """
         If authenticated_userid is None it shouldn't invalidate the session.
 
@@ -37,12 +35,10 @@ class TestGetUser(object):
 
         assert not pyramid_request.session.invalidate.called
 
-    def test_returns_user(self,
-                          factories,
-                          pyramid_config,
-                          pyramid_request,
-                          user_service):
-        pyramid_config.testing_securitypolicy('userid')
+    def test_returns_user(
+        self, factories, pyramid_config, pyramid_request, user_service
+    ):
+        pyramid_config.testing_securitypolicy("userid")
         user = user_service.fetch.return_value = factories.User.build()
 
         result = accounts.get_user(pyramid_request)
@@ -52,7 +48,7 @@ class TestGetUser(object):
 
 @pytest.fixture
 def user_service(pyramid_config):
-    service = mock.Mock(spec_set=['fetch'])
+    service = mock.Mock(spec_set=["fetch"])
     service.fetch.return_value = None
-    pyramid_config.register_service(service, name='user')
+    pyramid_config.register_service(service, name="user")
     return service

@@ -12,19 +12,20 @@ from alembic import op
 import sqlalchemy
 
 
-revision = '02db2fa6ea98'
-down_revision = 'c739ee2ae59c'
+revision = "02db2fa6ea98"
+down_revision = "c739ee2ae59c"
 
 
 def upgrade():
-    op.execute('COMMIT')
+    op.execute("COMMIT")
     try:
-        op.create_unique_constraint('uq__token__refresh_token', 'token',
-                                    ['refresh_token'])
+        op.create_unique_constraint(
+            "uq__token__refresh_token", "token", ["refresh_token"]
+        )
     except sqlalchemy.exc.ProgrammingError as exc:
         if 'relation "uq__token__refresh_token" already exists' not in exc.message:
             raise
 
 
 def downgrade():
-    op.drop_constraint('uq__token__refresh_token', 'token')
+    op.drop_constraint("uq__token__refresh_token", "token")

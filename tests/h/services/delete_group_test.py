@@ -6,14 +6,17 @@ import mock
 import pytest
 
 from h.events import AnnotationEvent
-from h.services.delete_group import delete_group_service_factory, DeleteGroupService, DeletePublicGroupError
+from h.services.delete_group import (
+    delete_group_service_factory,
+    DeleteGroupService,
+    DeletePublicGroupError,
+)
 
 
 class TestDeleteGroupService(object):
-
     def test_delete_does_not_delete_public_group(self, svc, db_session, factories):
         group = factories.Group()
-        group.pubid = '__world__'
+        group.pubid = "__world__"
 
         with pytest.raises(DeletePublicGroupError):
             svc.delete(group)
@@ -27,26 +30,36 @@ class TestDeleteGroupService(object):
 
     def test_delete_deletes_annotations(self, svc, factories, storage, pyramid_request):
         group = factories.Group()
-        annotations = [factories.Annotation(groupid=group.pubid),
-                       factories.Annotation(groupid=group.pubid)]
+        annotations = [
+            factories.Annotation(groupid=group.pubid),
+            factories.Annotation(groupid=group.pubid),
+        ]
 
         svc.delete(group)
 
-        storage.delete_annotation.assert_has_calls([
-            mock.call(pyramid_request.db, annotations[0].id),
-            mock.call(pyramid_request.db, annotations[1].id),
-        ], any_order=True)
+        storage.delete_annotation.assert_has_calls(
+            [
+                mock.call(pyramid_request.db, annotations[0].id),
+                mock.call(pyramid_request.db, annotations[1].id),
+            ],
+            any_order=True,
+        )
 
-    def test_delete_publishes_annotation_events(self, storage, factories, pyramid_request, svc):
+    def test_delete_publishes_annotation_events(
+        self, storage, factories, pyramid_request, svc
+    ):
         group = factories.Group()
         annotation = factories.Annotation(groupid=group.pubid)
 
         svc.delete(group)
 
-        expected_event = AnnotationEvent(pyramid_request, annotation.id, 'delete')
+        expected_event = AnnotationEvent(pyramid_request, annotation.id, "delete")
         actual_event = pyramid_request.notify_after_commit.call_args[0][0]
-        assert (expected_event.request, expected_event.annotation_id, expected_event.action) == \
-               (actual_event.request, actual_event.annotation_id, actual_event.action)
+        assert (
+            expected_event.request,
+            expected_event.annotation_id,
+            expected_event.action,
+        ) == (actual_event.request, actual_event.annotation_id, actual_event.action)
 
     def test_delete_group_factory(self, pyramid_request):
         svc = delete_group_service_factory(None, pyramid_request)
@@ -62,7 +75,7 @@ def svc(db_session, pyramid_request):
 
 @pytest.fixture
 def storage(patch):
-    return patch('h.services.delete_group.storage')
+    return patch("h.services.delete_group.storage")
 
 
 @pytest.fixture

@@ -6,7 +6,7 @@ from h import models
 from h import security
 from h.util.db import lru_cache_in_transaction
 
-PREFIX = '6879-'
+PREFIX = "6879-"
 
 
 class DeveloperTokenService(object):
@@ -44,8 +44,7 @@ class DeveloperTokenService(object):
         :returns: a token instance
         :rtype: h.models.Token
         """
-        token = models.Token(userid=userid,
-                             value=self._generate_token())
+        token = models.Token(userid=userid, value=self._generate_token())
         self.session.add(token)
         return token
 
@@ -70,10 +69,12 @@ class DeveloperTokenService(object):
         if userid is None:
             return None
 
-        return (self.session.query(models.Token)
-                .filter_by(userid=userid, authclient=None)
-                .order_by(models.Token.created.desc())
-                .one_or_none())
+        return (
+            self.session.query(models.Token)
+            .filter_by(userid=userid, authclient=None)
+            .order_by(models.Token.created.desc())
+            .one_or_none()
+        )
 
     def _generate_token(self):
         return PREFIX + security.token_urlsafe()

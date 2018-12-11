@@ -22,8 +22,8 @@ log = logging.getLogger(__name__)
 WORK_QUEUE = gevent.queue.Queue(maxsize=4096)
 
 # Message queues that the streamer processes messages from
-ANNOTATION_TOPIC = 'annotation'
-USER_TOPIC = 'user'
+ANNOTATION_TOPIC = "annotation"
+USER_TOPIC = "user"
 
 
 class UnknownMessageType(Exception):
@@ -41,18 +41,12 @@ def start(event):
     settings = event.app.registry.settings
     greenlets = [
         # Start greenlets to process messages from RabbitMQ
-        gevent.spawn(messages.process_messages,
-                     settings,
-                     ANNOTATION_TOPIC,
-                     WORK_QUEUE),
-        gevent.spawn(messages.process_messages,
-                     settings,
-                     USER_TOPIC,
-                     WORK_QUEUE),
+        gevent.spawn(messages.process_messages, settings, ANNOTATION_TOPIC, WORK_QUEUE),
+        gevent.spawn(messages.process_messages, settings, USER_TOPIC, WORK_QUEUE),
         # A greenlet to periodically report to statsd
         gevent.spawn(report_stats, settings),
         # And one to process the queued work
-        gevent.spawn(process_work_queue, settings, WORK_QUEUE)
+        gevent.spawn(process_work_queue, settings, WORK_QUEUE),
     ]
 
     # Start a "greenlet of last resort" to monitor the worker greenlets and
@@ -79,21 +73,23 @@ def process_work_queue(settings, queue, session_factory=None):
     }
 
     for msg in queue:
-        t_total = s.timer('streamer.msg.handler_total')
+        t_total = s.timer("streamer.msg.handler_total")
         t_total.start()
         try:
             # All access to the database in the streamer is currently
             # read-only, so enforce that:
-            session.execute("SET TRANSACTION "
-                            "ISOLATION LEVEL SERIALIZABLE "
-                            "READ ONLY "
-                            "DEFERRABLE")
+            session.execute(
+                "SET TRANSACTION "
+                "ISOLATION LEVEL SERIALIZABLE "
+                "READ ONLY "
+                "DEFERRABLE"
+            )
 
             if isinstance(msg, messages.Message):
-                with s.timer('streamer.msg.handler_message'):
+                with s.timer("streamer.msg.handler_message"):
                     messages.handle_message(msg, settings, session, topic_handlers)
             elif isinstance(msg, websocket.Message):
-                with s.timer('streamer.msg.handler_websocket'):
+                with s.timer("streamer.msg.handler_websocket"):
                     websocket.handle_message(msg, session)
             else:
                 raise UnknownMessageType(repr(msg))
@@ -102,7 +98,7 @@ def process_work_queue(settings, queue, session_factory=None):
             session.rollback()
             raise
         except:  # noqa: E722
-            log.exception('Caught exception handling streamer message:')
+            log.exception("Caught exception handling streamer message:")
             session.rollback()
         else:
             session.commit()
@@ -115,9 +111,8 @@ def process_work_queue(settings, queue, session_factory=None):
 def report_stats(settings):
     client = stats.get_client(settings)
     while True:
-        client.gauge('streamer.connected_clients',
-                     len(websocket.WebSocket.instances))
-        client.gauge('streamer.queue_length', WORK_QUEUE.qsize())
+        client.gauge("streamer.connected_clients", len(websocket.WebSocket.instances))
+        client.gauge("streamer.queue_length", WORK_QUEUE.qsize())
         gevent.sleep(10)
 
 
@@ -127,10 +122,9 @@ def supervise(greenlets):
     except (KeyboardInterrupt, SystemExit):
         raise
     except:  # noqa: E722
-        log.critical('Unexpected exception in streamer greenlet:',
-                     exc_info=True)
+        log.critical("Unexpected exception in streamer greenlet:", exc_info=True)
     else:
-        log.critical('Unexpected early exit of streamer greenlets. Aborting!')
+        log.critical("Unexpected early exit of streamer greenlets. Aborting!")
     # If the worker greenlets exit early, our best option is to kill the worker
     # process and let the app server take care of restarting it.
     sys.exit(1)

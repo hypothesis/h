@@ -11,13 +11,13 @@ from __future__ import unicode_literals
 from alembic import op
 
 
-revision = 'de42d613c18d'
-down_revision = '2e2cc6a0c521'
+revision = "de42d613c18d"
+down_revision = "2e2cc6a0c521"
 
 
 def upgrade():
-    op.alter_column('user', 'authority', nullable=False)
+    op.alter_column("user", "authority", nullable=False)
 
 
 def downgrade():
-    op.alter_column('user', 'authority', nullable=True)
+    op.alter_column("user", "authority", nullable=True)

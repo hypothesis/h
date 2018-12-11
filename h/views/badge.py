@@ -17,12 +17,12 @@ def _has_uri_ever_been_annotated(db, uri):
     # and minimize SQLAlchemy overhead. We query `document_uri.uri_normalized`
     # instead of `annotation.target_uri_normalized` because there is an existing
     # index on `uri_normalized`.
-    query = 'SELECT EXISTS(SELECT 1 FROM document_uri WHERE uri_normalized = :uri)'
-    result = db.execute(query, {'uri': normalize(uri)}).first()
+    query = "SELECT EXISTS(SELECT 1 FROM document_uri WHERE uri_normalized = :uri)"
+    result = db.execute(query, {"uri": normalize(uri)}).first()
     return result[0] is True
 
 
-@json_view(route_name='badge')
+@json_view(route_name="badge")
 def badge(request):
     """Return the number of public annotations on a given page.
 
@@ -33,7 +33,7 @@ def badge(request):
     that there are 0 annotations.
 
     """
-    uri = request.params.get('uri')
+    uri = request.params.get("uri")
 
     if not uri:
         raise httpexceptions.HTTPBadRequest()
@@ -48,9 +48,9 @@ def badge(request):
     elif models.Blocklist.is_blocked(request.db, uri):
         count = 0
     else:
-        query = MultiDict({'uri': uri, 'limit': 0})
+        query = MultiDict({"uri": uri, "limit": 0})
         s = search.Search(request, stats=request.stats)
         result = s.run(query)
         count = result.total
 
-    return {'total': count}
+    return {"total": count}

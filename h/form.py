@@ -17,12 +17,9 @@ from pyramid.path import AssetResolver
 from h import i18n
 
 
-ENVIRONMENT_KEY = 'h.form.jinja2_environment'
+ENVIRONMENT_KEY = "h.form.jinja2_environment"
 
-SEARCH_PATHS = (
-    'h:templates/deform/',
-    'deform_jinja2:bootstrap_templates/',
-)
+SEARCH_PATHS = ("h:templates/deform/", "deform_jinja2:bootstrap_templates/")
 
 
 _ = i18n.TranslationString
@@ -46,8 +43,8 @@ class Jinja2Renderer(object):
 
     def __call__(self, template_name, **kwargs):
         """Render the named template with the passed keywords as context."""
-        if not template_name.endswith('.jinja2'):
-            template_name += '.jinja2'
+        if not template_name.endswith(".jinja2"):
+            template_name += ".jinja2"
 
         template = self._env.get_template(template_name)
         context = self._system.copy()
@@ -82,10 +79,8 @@ def create_form(request, *args, **kwargs):
     default) will use the renderer configured in the :py:mod:`h.form` module.
     """
     env = request.registry[ENVIRONMENT_KEY]
-    renderer = Jinja2Renderer(env, {
-        'feature': request.feature,
-    })
-    kwargs.setdefault('renderer', renderer)
+    renderer = Jinja2Renderer(env, {"feature": request.feature})
+    kwargs.setdefault("renderer", renderer)
 
     return deform.Form(*args, **kwargs)
 
@@ -136,8 +131,7 @@ def handle_form_submission(request, form, on_success, on_failure):
             result = httpexceptions.HTTPFound(location=request.url)
 
         if not request.is_xhr:
-            request.session.flash(_("Success. We've saved your changes."),
-                                  'success')
+            request.session.flash(_("Success. We've saved your changes."), "success")
 
     return to_xhr_response(request, result, form)
 
@@ -166,7 +160,7 @@ def to_xhr_response(request, non_xhr_result, form):
     if not request.is_xhr:
         return non_xhr_result
 
-    request.override_renderer = 'string'
+    request.override_renderer = "string"
     return form.render()
 
 

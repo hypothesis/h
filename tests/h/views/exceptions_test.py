@@ -15,7 +15,7 @@ def test_notfound_view(pyramid_request):
 
 
 def test_error_view(patch, pyramid_request):
-    handle_exception = patch('h.views.exceptions.handle_exception')
+    handle_exception = patch("h.views.exceptions.handle_exception")
     exception = Mock()
 
     result = error(exception, pyramid_request)
@@ -25,11 +25,11 @@ def test_error_view(patch, pyramid_request):
 
 
 def test_json_error_view(patch, pyramid_request):
-    handle_exception = patch('h.views.exceptions.handle_exception')
+    handle_exception = patch("h.views.exceptions.handle_exception")
     exception = Mock()
 
     result = json_error(exception, pyramid_request)
 
     handle_exception.assert_called_once_with(pyramid_request, exception)
-    assert result['status'] == 'failure'
-    assert result['reason']
+    assert result["status"] == "failure"
+    assert result["reason"]

@@ -11,14 +11,14 @@ from __future__ import unicode_literals
 from alembic import op
 import sqlalchemy as sa
 
-revision = '140b450225cd'
-down_revision = '3acf258322d5'
+revision = "140b450225cd"
+down_revision = "3acf258322d5"
 
-group_table = sa.table('group', sa.Column('authority', sa.UnicodeText()))
+group_table = sa.table("group", sa.Column("authority", sa.UnicodeText()))
 
 
 def upgrade():
-    op.execute(group_table.update().values(authority='hypothes.is'))
+    op.execute(group_table.update().values(authority="hypothes.is"))
 
 
 def downgrade():

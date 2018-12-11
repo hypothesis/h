@@ -31,15 +31,16 @@ from h.schemas.util import validate_query_params
 from h.schemas.annotation import (
     CreateAnnotationSchema,
     SearchParamsSchema,
-    UpdateAnnotationSchema)
+    UpdateAnnotationSchema,
+)
 from h.views.api.config import api_config
 
 _ = i18n.TranslationStringFactory(__package__)
 
 
-@api_config(route_name='api.search',
-            link_name='search',
-            description='Search for annotations')
+@api_config(
+    route_name="api.search", link_name="search", description="Search for annotations"
+)
 def search(request):
     """Search the database for annotations matching with the given query."""
     schema = SearchParamsSchema()
@@ -47,33 +48,30 @@ def search(request):
 
     _record_search_api_usage_metrics(params)
 
-    separate_replies = params.pop('_separate_replies', False)
+    separate_replies = params.pop("_separate_replies", False)
 
-    stats = getattr(request, 'stats', None)
+    stats = getattr(request, "stats", None)
 
-    search = search_lib.Search(request,
-                               separate_replies=separate_replies,
-                               stats=stats)
+    search = search_lib.Search(request, separate_replies=separate_replies, stats=stats)
     result = search.run(params)
 
-    svc = request.find_service(name='annotation_json_presentation')
+    svc = request.find_service(name="annotation_json_presentation")
 
-    out = {
-        'total': result.total,
-        'rows': svc.present_all(result.annotation_ids)
-    }
+    out = {"total": result.total, "rows": svc.present_all(result.annotation_ids)}
 
     if separate_replies:
-        out['replies'] = svc.present_all(result.reply_ids)
+        out["replies"] = svc.present_all(result.reply_ids)
 
     return out
 
 
-@api_config(route_name='api.annotations',
-            request_method='POST',
-            permission='create',
-            link_name='annotation.create',
-            description='Create an annotation')
+@api_config(
+    route_name="api.annotations",
+    request_method="POST",
+    permission="create",
+    link_name="annotation.create",
+    description="Create an annotation",
+)
 def create(request):
     """Create an annotation from the POST payload."""
     schema = CreateAnnotationSchema(request)
@@ -81,69 +79,73 @@ def create(request):
     group_service = request.find_service(IGroupService)
     annotation = storage.create_annotation(request, appstruct, group_service)
 
-    _publish_annotation_event(request, annotation, 'create')
+    _publish_annotation_event(request, annotation, "create")
 
-    svc = request.find_service(name='annotation_json_presentation')
+    svc = request.find_service(name="annotation_json_presentation")
     annotation_resource = _annotation_resource(request, annotation)
     return svc.present(annotation_resource)
 
 
-@api_config(route_name='api.annotation',
-            request_method='GET',
-            permission='read',
-            link_name='annotation.read',
-            description='Fetch an annotation')
+@api_config(
+    route_name="api.annotation",
+    request_method="GET",
+    permission="read",
+    link_name="annotation.read",
+    description="Fetch an annotation",
+)
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
-    svc = request.find_service(name='annotation_json_presentation')
+    svc = request.find_service(name="annotation_json_presentation")
     return svc.present(context)
 
 
-@api_config(route_name='api.annotation.jsonld',
-            request_method='GET',
-            permission='read')
+@api_config(route_name="api.annotation.jsonld", request_method="GET", permission="read")
 def read_jsonld(context, request):
-    request.response.content_type = 'application/ld+json'
+    request.response.content_type = "application/ld+json"
     request.response.content_type_params = {
-        'charset': 'UTF-8',
-        'profile': str(AnnotationJSONLDPresenter.CONTEXT_URL)}
+        "charset": "UTF-8",
+        "profile": str(AnnotationJSONLDPresenter.CONTEXT_URL),
+    }
     presenter = AnnotationJSONLDPresenter(context)
     return presenter.asdict()
 
 
-@api_config(route_name='api.annotation',
-            request_method=('PATCH', 'PUT'),
-            permission='update',
-            link_name='annotation.update',
-            description='Update an annotation')
+@api_config(
+    route_name="api.annotation",
+    request_method=("PATCH", "PUT"),
+    permission="update",
+    link_name="annotation.update",
+    description="Update an annotation",
+)
 def update(context, request):
     """Update the specified annotation with data from the PATCH payload."""
-    if request.method == 'PUT' and hasattr(request, 'stats'):
-        request.stats.incr('api.deprecated.put_update_annotation')
+    if request.method == "PUT" and hasattr(request, "stats"):
+        request.stats.incr("api.deprecated.put_update_annotation")
 
-    schema = UpdateAnnotationSchema(request,
-                                    context.annotation.target_uri,
-                                    context.annotation.groupid)
+    schema = UpdateAnnotationSchema(
+        request, context.annotation.target_uri, context.annotation.groupid
+    )
     appstruct = schema.validate(_json_payload(request))
     group_service = request.find_service(IGroupService)
 
-    annotation = storage.update_annotation(request,
-                                           context.annotation.id,
-                                           appstruct,
-                                           group_service)
+    annotation = storage.update_annotation(
+        request, context.annotation.id, appstruct, group_service
+    )
 
-    _publish_annotation_event(request, annotation, 'update')
+    _publish_annotation_event(request, annotation, "update")
 
-    svc = request.find_service(name='annotation_json_presentation')
+    svc = request.find_service(name="annotation_json_presentation")
     annotation_resource = _annotation_resource(request, annotation)
     return svc.present(annotation_resource)
 
 
-@api_config(route_name='api.annotation',
-            request_method='DELETE',
-            permission='delete',
-            link_name='annotation.delete',
-            description='Delete an annotation')
+@api_config(
+    route_name="api.annotation",
+    request_method="DELETE",
+    permission="delete",
+    link_name="annotation.delete",
+    description="Delete an annotation",
+)
 def delete(context, request):
     """Delete the specified annotation."""
     storage.delete_annotation(request.db, context.annotation.id)
@@ -153,13 +155,10 @@ def delete(context, request):
     # process the delete event. For example, the streamer needs to know the
     # target URLs of the deleted annotation in order to know which clients to
     # forward the delete event to.
-    _publish_annotation_event(
-        request,
-        context.annotation,
-        'delete')
+    _publish_annotation_event(request, context.annotation, "delete")
 
     # TODO: Track down why we don't return an HTTP 204 like other DELETEs
-    return {'id': context.annotation.id, 'deleted': True}
+    return {"id": context.annotation.id, "deleted": True}
 
 
 def _json_payload(request):
@@ -174,9 +173,7 @@ def _json_payload(request):
         raise PayloadError()
 
 
-def _publish_annotation_event(request,
-                              annotation,
-                              action):
+def _publish_annotation_event(request, annotation, action):
     """Publish an event to the annotations queue for this annotation action."""
     event = AnnotationEvent(request, annotation.id, action)
     request.notify_after_commit(event)
@@ -184,13 +181,12 @@ def _publish_annotation_event(request,
 
 def _annotation_resource(request, annotation):
     group_service = request.find_service(IGroupService)
-    links_service = request.find_service(name='links')
+    links_service = request.find_service(name="links")
     return AnnotationContext(annotation, group_service, links_service)
 
 
 def _record_search_api_usage_metrics(
-    params,
-    record_param=newrelic.agent.add_custom_parameter,
+    params, record_param=newrelic.agent.add_custom_parameter
 ):
     # Record usage of search params and associate them with a transaction.
     keys = [

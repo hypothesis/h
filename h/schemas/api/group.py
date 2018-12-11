@@ -13,29 +13,20 @@ from h.util.group import GROUPID_PATTERN, split_groupid
 from h.i18n import TranslationString as _
 
 GROUP_SCHEMA_PROPERTIES = {
-    'name': {
-        'type': 'string',
-        'minLength': GROUP_NAME_MIN_LENGTH,
-        'maxLength': GROUP_NAME_MAX_LENGTH,
+    "name": {
+        "type": "string",
+        "minLength": GROUP_NAME_MIN_LENGTH,
+        "maxLength": GROUP_NAME_MAX_LENGTH,
     },
-    'description': {
-        'type': 'string',
-        'maxLength': GROUP_DESCRIPTION_MAX_LENGTH,
-    },
-    'groupid': {
-        'type': 'string',
-        'pattern': GROUPID_PATTERN,
-    },
+    "description": {"type": "string", "maxLength": GROUP_DESCRIPTION_MAX_LENGTH},
+    "groupid": {"type": "string", "pattern": GROUPID_PATTERN},
 }
 
 
 class GroupAPISchema(JSONSchema):
     """Base class for validating group resource API data"""
 
-    schema = {
-        'type': 'object',
-        'properties': GROUP_SCHEMA_PROPERTIES,
-    }
+    schema = {"type": "object", "properties": GROUP_SCHEMA_PROPERTIES}
 
     def __init__(self, group_authority=None, default_authority=None):
         """
@@ -80,26 +71,33 @@ class GroupAPISchema(JSONSchema):
         :raise h.schemas.ValidationError:
 
         """
-        groupid = appstruct.get('groupid', None)
+        groupid = appstruct.get("groupid", None)
         if groupid is None:  # Nothing to validate
             return None
 
-        if (self.group_authority is None) or (self.group_authority == self.default_authority):
+        if (self.group_authority is None) or (
+            self.group_authority == self.default_authority
+        ):
             # This is a first-party group
             raise ValidationError(
                 "{err_msg} '{authority}'".format(
-                    err_msg=_("groupid may only be set on groups oustide of the default authority"),
-                    authority=self.default_authority
-                ))
+                    err_msg=_(
+                        "groupid may only be set on groups oustide of the default authority"
+                    ),
+                    authority=self.default_authority,
+                )
+            )
 
         groupid_parts = split_groupid(groupid)
 
-        if groupid_parts['authority'] != self.group_authority:
+        if groupid_parts["authority"] != self.group_authority:
             # The authority part of the ``groupid`` doesn't match the
             # group's authority
-            raise ValidationError("{err_msg} '{groupid}'".format(
-                err_msg=_("Invalid authority specified in groupid"),
-                groupid=groupid))
+            raise ValidationError(
+                "{err_msg} '{groupid}'".format(
+                    err_msg=_("Invalid authority specified in groupid"), groupid=groupid
+                )
+            )
 
     def _whitelisted_fields_only(self, appstruct):
         """Return a new appstruct containing only schema-defined fields"""
@@ -115,12 +113,11 @@ class GroupAPISchema(JSONSchema):
 
 class CreateGroupAPISchema(GroupAPISchema):
     """Schema for validating create-group API data"""
+
     schema = {
-        'type': 'object',
-        'properties': GROUP_SCHEMA_PROPERTIES,
-        'required': [  # ``name`` is a required field when creating
-            'name'
-        ],
+        "type": "object",
+        "properties": GROUP_SCHEMA_PROPERTIES,
+        "required": ["name"],  # ``name`` is a required field when creating
     }
 
 

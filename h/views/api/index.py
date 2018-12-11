@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.views.api.config import api_config, AngularRouteTemplater
 
 
-@api_config(route_name='api.index')
+@api_config(route_name="api.index")
 def index(context, request):
     """Return the API descriptor document.
 
@@ -18,21 +18,20 @@ def index(context, request):
     # paths and pass these explicitly into the templater. As and when new
     # parameter names are added, we'll need to add them here, or this view will
     # break (and get caught by the `test_api_index` functional test).
-    templater = AngularRouteTemplater(request.route_url,
-                                      params=['id', 'pubid', 'user', 'userid'])
+    templater = AngularRouteTemplater(
+        request.route_url, params=["id", "pubid", "user", "userid"]
+    )
 
     links = {}
     for link in api_links:
         method_info = {
-            'method': link['method'],
-            'url': templater.route_template(link['route_name']),
-            'desc': link['description'],
+            "method": link["method"],
+            "url": templater.route_template(link["route_name"]),
+            "desc": link["description"],
         }
-        _set_at_path(links, link['name'].split('.'), method_info)
+        _set_at_path(links, link["name"].split("."), method_info)
 
-    return {
-        'links': links,
-    }
+    return {"links": links}
 
 
 def _set_at_path(dict_, path, value):

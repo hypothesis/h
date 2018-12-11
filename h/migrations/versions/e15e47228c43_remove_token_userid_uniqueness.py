@@ -11,14 +11,13 @@ from __future__ import unicode_literals
 from alembic import op
 
 
-revision = 'e15e47228c43'
-down_revision = '5dce9a8c42c2'
+revision = "e15e47228c43"
+down_revision = "5dce9a8c42c2"
 
 
 def upgrade():
-    op.drop_constraint('uq__token__userid', 'token')
+    op.drop_constraint("uq__token__userid", "token")
 
 
 def downgrade():
-    op.create_unique_constraint(
-        'uq__token__userid', 'token', ['userid'])
+    op.create_unique_constraint("uq__token__userid", "token", ["userid"])

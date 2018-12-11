@@ -13,22 +13,18 @@ from h.services.group_update import group_update_factory
 
 
 class TestGroupUpdate(object):
-
     def test_it_updates_valid_group_attrs(self, factories, svc):
         group = factories.Group()
-        data = {
-            'name': 'foobar',
-            'description': 'I am foobar',
-        }
+        data = {"name": "foobar", "description": "I am foobar"}
 
         svc.update(group, **data)
 
-        assert group.name == 'foobar'
-        assert group.description == 'I am foobar'
+        assert group.name == "foobar"
+        assert group.description == "I am foobar"
 
     def test_it_returns_updated_group_model(self, factories, svc):
         group = factories.Group()
-        data = {'name': 'whatnot'}
+        data = {"name": "whatnot"}
 
         updated_group = svc.update(group, **data)
 
@@ -36,42 +32,51 @@ class TestGroupUpdate(object):
 
     def test_it_does_not_protect_against_undefined_properties(self, factories, svc):
         group = factories.Group()
-        data = {'some_random_field': 'whatever'}
+        data = {"some_random_field": "whatever"}
 
         updated_group = svc.update(group, **data)
 
         # This won't be persisted in the DB, of course, but the model instance
         # doesn't have a problem with it
-        assert updated_group.some_random_field == 'whatever'
+        assert updated_group.some_random_field == "whatever"
 
-    def test_it_raises_ValidationError_if_name_fails_model_validation(self, factories, svc, db_session):
+    def test_it_raises_ValidationError_if_name_fails_model_validation(
+        self, factories, svc, db_session
+    ):
         group = factories.Group()
 
-        with pytest.raises(ValidationError, match='name must be between'):
-            svc.update(group, name='ye')
+        with pytest.raises(ValidationError, match="name must be between"):
+            svc.update(group, name="ye")
 
-    def test_it_raises_ValidationError_if_authority_provided_id_fails_model_validation(self, factories, svc, db_session):
+    def test_it_raises_ValidationError_if_authority_provided_id_fails_model_validation(
+        self, factories, svc, db_session
+    ):
         group = factories.Group()
 
-        with pytest.raises(ValidationError, match='must only contain characters allowed in encoded URIs'):
-            svc.update(group, authority_provided_id='%%^&#*')
+        with pytest.raises(
+            ValidationError,
+            match="must only contain characters allowed in encoded URIs",
+        ):
+            svc.update(group, authority_provided_id="%%^&#*")
 
-    def test_it_raises_ConflictError_on_provided_id_uniqueness_violation(self, factories, svc, db_session):
-        factories.Group(authority_provided_id='foo', authority='foo.com')
-        group2 = factories.Group(authority_provided_id='bar', authority='foo.com')
+    def test_it_raises_ConflictError_on_provided_id_uniqueness_violation(
+        self, factories, svc, db_session
+    ):
+        factories.Group(authority_provided_id="foo", authority="foo.com")
+        group2 = factories.Group(authority_provided_id="bar", authority="foo.com")
 
-        with pytest.raises(ConflictError, match='authority_provided_id'):
-            svc.update(group2, authority_provided_id='foo')
+        with pytest.raises(ConflictError, match="authority_provided_id"):
+            svc.update(group2, authority_provided_id="foo")
 
     def test_it_raises_on_any_other_SQLAlchemy_exception(self, factories):
         fake_session = mock.Mock()
-        fake_session.flush.side_effect = SQLAlchemyError('foo')
+        fake_session.flush.side_effect = SQLAlchemyError("foo")
 
         update_svc = GroupUpdateService(session=fake_session)
-        group = factories.Group(authority_provided_id='foo', authority='foo.com')
+        group = factories.Group(authority_provided_id="foo", authority="foo.com")
 
         with pytest.raises(SQLAlchemyError):
-            update_svc.update(group, name='fingers')
+            update_svc.update(group, name="fingers")
 
 
 class TestFactory(object):

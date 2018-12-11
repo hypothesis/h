@@ -10,10 +10,9 @@ from .base import ModelFactory
 
 
 class Organization(ModelFactory):
-
     class Meta:
         model = models.Organization
-        sqlalchemy_session_persistence = 'flush'
+        sqlalchemy_session_persistence = "flush"
 
-    name = factory.Sequence(lambda n: 'Test Organization {n}'.format(n=str(n)))
-    authority = 'example.com'
+    name = factory.Sequence(lambda n: "Test Organization {n}".format(n=str(n)))
+    authority = "example.com"

@@ -14,7 +14,7 @@ from pyramid.session import check_csrf_token
 
 @colander.deferred
 def deferred_csrf_token(node, kw):
-    request = kw.get('request')
+    request = kw.get("request")
     return request.session.get_csrf_token()
 
 
@@ -30,13 +30,15 @@ class CSRFSchema(colander.Schema):
     serialized appstruct.
     """
 
-    csrf_token = colander.SchemaNode(colander.String(),
-                                     widget=deform.widget.HiddenWidget(),
-                                     default=deferred_csrf_token,
-                                     missing=None)
+    csrf_token = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.HiddenWidget(),
+        default=deferred_csrf_token,
+        missing=None,
+    )
 
     def validator(self, form, value):
-        request = form.bindings['request']
+        request = form.bindings["request"]
         check_csrf_token(request)
 
 
@@ -52,8 +54,9 @@ class JSONSchema(object):
 
     def __init__(self):
         format_checker = jsonschema.FormatChecker()
-        self.validator = jsonschema.Draft4Validator(self.schema,
-                                                    format_checker=format_checker)
+        self.validator = jsonschema.Draft4Validator(
+            self.schema, format_checker=format_checker
+        )
 
     def validate(self, data):
         """
@@ -68,7 +71,7 @@ class JSONSchema(object):
 
         errors = list(self.validator.iter_errors(appstruct))
         if errors:
-            msg = ', '.join([_format_jsonschema_error(e) for e in errors])
+            msg = ", ".join([_format_jsonschema_error(e) for e in errors])
             raise ValidationError(msg)
         return appstruct
 
@@ -80,6 +83,7 @@ def enum_type(enum_cls):
     :param enum_cls: The enum class
     :type enum_cls: enum.Enum
     """
+
     class EnumType(colander.SchemaType):
         def deserialize(self, node, cstruct):
             if cstruct == colander.null:
@@ -93,7 +97,7 @@ def enum_type(enum_cls):
 
         def serialize(self, node, appstruct):
             if not appstruct:
-                return ''
+                return ""
             return appstruct.name
 
     return EnumType
@@ -102,7 +106,6 @@ def enum_type(enum_cls):
 def _format_jsonschema_error(error):
     """Format a :py:class:`jsonschema.ValidationError` as a string."""
     if error.path:
-        dotted_path = '.'.join([str(c) for c in error.path])
-        return '{path}: {message}'.format(path=dotted_path,
-                                          message=error.message)
+        dotted_path = ".".join([str(c) for c in error.path])
+        return "{path}: {message}".format(path=dotted_path, message=error.message)
     return error.message

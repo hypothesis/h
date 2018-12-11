@@ -5,20 +5,16 @@ from __future__ import unicode_literals
 import sys
 
 __all__ = (
-    'PY2',
-
-    'text_type',
-    'string_types',
-
-    'configparser',
-
-    'urlparse',
-    'url_quote',
-    'url_quote_plus',
-    'url_unquote',
-    'url_unquote_plus',
-
-    'StringIO',
+    "PY2",
+    "text_type",
+    "string_types",
+    "configparser",
+    "urlparse",
+    "url_quote",
+    "url_quote_plus",
+    "url_unquote",
+    "url_unquote_plus",
+    "StringIO",
 )
 
 PY2 = sys.version_info[0] == 2
@@ -41,6 +37,7 @@ except ImportError:
 
 try:
     from urllib import parse as urlparse
+
     url_quote = urlparse.quote
     url_quote_plus = urlparse.quote_plus
     url_unquote = urlparse.unquote
@@ -48,6 +45,7 @@ try:
 except ImportError:
     import urllib
     import urlparse
+
     url_quote = urllib.quote
     url_quote_plus = urllib.quote_plus
     url_unquote = urllib.unquote
@@ -62,7 +60,8 @@ except ImportError:
 # native() function adapted from Pyramid:
 # https://github.com/Pylons/pyramid/blob/a851d05f76edc6bc6bf65269c20eeba7fe726ade/pyramid/compat.py#L78-L95
 if PY2:
-    def native(s, encoding='latin-1', errors='strict'):
+
+    def native(s, encoding="latin-1", errors="strict"):
         """
         Return the given string as a Python 2 native string (a byte string).
 
@@ -79,8 +78,11 @@ if PY2:
         if isinstance(s, unicode):  # noqa
             return s.encode(encoding, errors)
         return s
+
+
 else:
-    def native(s, encoding='latin-1', errors='strict'):
+
+    def native(s, encoding="latin-1", errors="strict"):
         """
         Return the given string as a Python 3 native string (a unicode string).
 

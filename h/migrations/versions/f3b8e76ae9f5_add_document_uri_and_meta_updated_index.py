@@ -7,21 +7,29 @@ Create Date: 2016-05-13 14:58:37.679724
 """
 
 # revision identifiers, used by Alembic.
-revision = 'f3b8e76ae9f5'
-down_revision = 'fde6cdcdd39a'
+revision = "f3b8e76ae9f5"
+down_revision = "fde6cdcdd39a"
 
 from alembic import op
 import sqlalchemy as sa
 
 
 def upgrade():
-    op.execute('COMMIT')
-    op.create_index(op.f('ix__document_uri_updated'), 'document_uri', ['updated'],
-                    postgresql_concurrently=True)
-    op.create_index(op.f('ix__document_meta_updated'), 'document_meta', ['updated'],
-                    postgresql_concurrently=True)
+    op.execute("COMMIT")
+    op.create_index(
+        op.f("ix__document_uri_updated"),
+        "document_uri",
+        ["updated"],
+        postgresql_concurrently=True,
+    )
+    op.create_index(
+        op.f("ix__document_meta_updated"),
+        "document_meta",
+        ["updated"],
+        postgresql_concurrently=True,
+    )
 
 
 def downgrade():
-    op.drop_index(op.f('ix__document_uri_updated'), 'document_uri')
-    op.drop_index(op.f('ix__document_meta_updated'), 'document_meta')
+    op.drop_index(op.f("ix__document_uri_updated"), "document_uri")
+    op.drop_index(op.f("ix__document_meta_updated"), "document_meta")

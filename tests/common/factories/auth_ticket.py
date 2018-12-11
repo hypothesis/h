@@ -15,14 +15,17 @@ from .user import User
 
 
 class AuthTicket(ModelFactory):
-
     class Meta:
         model = models.AuthTicket
 
     # Simulate how pyramid_authsanity generates ticket ids
-    id = factory.LazyAttribute(lambda _: base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode('ascii'))
+    id = factory.LazyAttribute(
+        lambda _: base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode("ascii")
+    )
     user = factory.SubFactory(User)
-    expires = factory.LazyAttribute(lambda _: (datetime.utcnow() + timedelta(minutes=10)))
+    expires = factory.LazyAttribute(
+        lambda _: (datetime.utcnow() + timedelta(minutes=10))
+    )
 
     @factory.lazy_attribute
     def user_userid(self):

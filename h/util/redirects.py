@@ -28,12 +28,17 @@ from __future__ import unicode_literals
 from collections import namedtuple
 
 
-class Redirect(namedtuple('Redirect', [
-    'src',       # matching prefix (if prefix redirect) or path (if exact)
-    'dst',       # route name (if internal redirect) or URL (if external)
-    'prefix',    # prefix redirect if true, exact otherwise
-    'internal',  # internal redirect if true, external otherwise
-])):
+class Redirect(
+    namedtuple(
+        "Redirect",
+        [
+            "src",  # matching prefix (if prefix redirect) or path (if exact)
+            "dst",  # route name (if internal redirect) or URL (if external)
+            "prefix",  # prefix redirect if true, exact otherwise
+            "internal",  # internal redirect if true, external otherwise
+        ],
+    )
+):
     pass
 
 
@@ -55,7 +60,7 @@ def lookup(redirects, request):
 
     for r in redirects:
         if r.prefix and path.startswith(r.src):
-            suffix = path.replace(r.src, '', 1)
+            suffix = path.replace(r.src, "", 1)
             return _dst_root(request, r) + suffix
         elif not r.prefix and path == r.src:
             return _dst_root(request, r)
@@ -67,23 +72,23 @@ def parse(specs):
     result = []
     for line in specs:
         # Ignore comments and blank lines
-        if line.startswith('#') or not line.strip():
+        if line.startswith("#") or not line.strip():
             continue
 
         try:
             src, typ, dst = line.split(None, 3)
         except ValueError:
-            raise ParseError('invalid redirect specification: {!r}'.format(line))
-        if typ == 'internal-exact':
+            raise ParseError("invalid redirect specification: {!r}".format(line))
+        if typ == "internal-exact":
             r = Redirect(prefix=False, internal=True, src=src, dst=dst)
-        elif typ == 'internal-prefix':
+        elif typ == "internal-prefix":
             r = Redirect(prefix=True, internal=True, src=src, dst=dst)
-        elif typ == 'exact':
+        elif typ == "exact":
             r = Redirect(prefix=False, internal=False, src=src, dst=dst)
-        elif typ == 'prefix':
+        elif typ == "prefix":
             r = Redirect(prefix=True, internal=False, src=src, dst=dst)
         else:
-            raise ParseError('unknown redirect type: {!r}'.format(typ))
+            raise ParseError("unknown redirect type: {!r}".format(typ))
         result.append(r)
     return result
 

@@ -10,13 +10,11 @@ from h.models import Subscriptions
 log = logging.getLogger(__name__)
 
 
-class Notification(namedtuple('Notification', [
-    'reply',
-    'reply_user',
-    'parent',
-    'parent_user',
-    'document',
-])):
+class Notification(
+    namedtuple(
+        "Notification", ["reply", "reply_user", "parent", "parent_user", "document"]
+    )
+):
     """
     A data structure representing a notification of a reply to an annotation.
 
@@ -52,7 +50,7 @@ def get_notification(request, annotation, action):
     :returns: a :py:class:`~h.notification.reply.Notification`, or None
     """
     # Only send notifications when new annotations are created
-    if action != 'create':
+    if action != "create":
         return
 
     # If the annotation doesn't have a parent, or we can't find its parent,
@@ -68,7 +66,7 @@ def get_notification(request, annotation, action):
     if parent is None:
         return
 
-    user_service = request.find_service(name='user')
+    user_service = request.find_service(name="user")
 
     # If the parent user doesn't exist (anymore), we can't send an email.
     parent_user = user_service.fetch(parent.userid)
@@ -83,7 +81,7 @@ def get_notification(request, annotation, action):
     # this would be super weird, so log a warning.
     reply_user = user_service.fetch(reply.userid)
     if reply_user is None:
-        log.warning('user who just replied no longer exists: %s', reply.userid)
+        log.warning("user who just replied no longer exists: %s", reply.userid)
         return
 
     # Do not notify users about their own replies
@@ -103,9 +101,11 @@ def get_notification(request, annotation, action):
 
     # Bail if there is no active 'reply' subscription for the user being
     # replied to.
-    sub = request.db.query(Subscriptions).filter_by(active=True,
-                                                    type='reply',
-                                                    uri=parent.userid).first()
+    sub = (
+        request.db.query(Subscriptions)
+        .filter_by(active=True, type="reply", uri=parent.userid)
+        .first()
+    )
     if sub is None:
         return
 

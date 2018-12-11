@@ -15,11 +15,14 @@ ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
 def es_client():
     client = _es_client()
     yield client
-    client.conn.delete_by_query(index=client.index, body={"query": {"match_all": {}}},
-                                # This query occassionally fails with a version conflict.
-                                # Forcing the deletion resolves the issue, but the exact
-                                # cause of the version conflict has not been found yet.
-                                conflicts='proceed')
+    client.conn.delete_by_query(
+        index=client.index,
+        body={"query": {"match_all": {}}},
+        # This query occassionally fails with a version conflict.
+        # Forcing the deletion resolves the issue, but the exact
+        # cause of the version conflict has not been found yet.
+        conflicts="proceed",
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -53,4 +56,6 @@ def init_elasticsearch(request):
 
 
 def _es_client():
-    return search.get_client({'es.url': ELASTICSEARCH_URL, 'es.index': ELASTICSEARCH_INDEX})
+    return search.get_client(
+        {"es.url": ELASTICSEARCH_URL, "es.index": ELASTICSEARCH_INDEX}
+    )

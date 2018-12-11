@@ -27,12 +27,14 @@ class ListOrganizationsService(object):
         """
         filter_args = {}
         if authority:
-            filter_args['authority'] = authority
+            filter_args["authority"] = authority
 
-        return (self._session.query(Organization)
-                    .filter_by(**filter_args)
-                    .order_by(Organization.name.asc())
-                    .all())
+        return (
+            self._session.query(Organization)
+            .filter_by(**filter_args)
+            .order_by(Organization.name.asc())
+            .all()
+        )
 
 
 def list_organizations_factory(context, request):

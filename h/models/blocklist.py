@@ -15,7 +15,7 @@ class Blocklist(Base):
 
     """
 
-    __tablename__ = 'blocklist'
+    __tablename__ = "blocklist"
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     uri = sa.Column(sa.UnicodeText(), nullable=False, unique=True)

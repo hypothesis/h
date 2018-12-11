@@ -30,6 +30,7 @@ class EventQueue(object):
     Events are dispatched in the order they are queued. Failure of one
     event subscriber does not affect execution of other subscribers.
     """
+
     def __init__(self, request):
         self.request = request
         self.queue = collections.deque()
@@ -58,11 +59,11 @@ class EventQueue(object):
                 try:
                     subscriber(event)
                 except Exception:
-                    sentry = getattr(event.request, 'sentry', None)
+                    sentry = getattr(event.request, "sentry", None)
                     if sentry is not None:
                         sentry.captureException()
                     else:
-                        log.exception('Queued event subscriber failed')
+                        log.exception("Queued event subscriber failed")
 
                     if event.request.debug:
                         raise
@@ -75,6 +76,4 @@ class EventQueue(object):
 
 
 def includeme(config):
-    config.add_request_method(EventQueue,
-                              name='notify_after_commit',
-                              reify=True)
+    config.add_request_method(EventQueue, name="notify_after_commit", reify=True)

@@ -11,27 +11,26 @@ from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 
 
-@view_config(renderer='h:templates/help.html.jinja2', route_name='custom_onboarding')
+@view_config(renderer="h:templates/help.html.jinja2", route_name="custom_onboarding")
 def custom_onboarding_page(context, request):
     return {
-        'embed_js_url': request.route_path('embed'),
-        'is_help': False,
-        'is_onboarding': True,
+        "embed_js_url": request.route_path("embed"),
+        "is_help": False,
+        "is_onboarding": True,
     }
 
 
-@view_config(renderer='h:templates/help.html.jinja2', route_name='onboarding')
+@view_config(renderer="h:templates/help.html.jinja2", route_name="onboarding")
 def onboarding_page(context, request):
-    return exc.HTTPFound(request.route_url('custom_onboarding',
-                                           slug=_random_word()))
+    return exc.HTTPFound(request.route_url("custom_onboarding", slug=_random_word()))
 
 
-@view_config(renderer='h:templates/help.html.jinja2', route_name='help')
+@view_config(renderer="h:templates/help.html.jinja2", route_name="help")
 def help_page(context, request):
     return {
-        'embed_js_url': request.route_path('embed'),
-        'is_help': True,
-        'is_onboarding': False,
+        "embed_js_url": request.route_path("embed"),
+        "is_help": True,
+        "is_onboarding": False,
     }
 
 

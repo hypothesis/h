@@ -14,17 +14,19 @@ from sqlalchemy import orm
 
 from h.util.user import split_user
 
-revision = 'b7117b569f8b'
-down_revision = 'ddb5f0baa429'
+revision = "b7117b569f8b"
+down_revision = "ddb5f0baa429"
 
 Session = orm.sessionmaker()
 
 
-user = sa.table('user',
-                sa.column('username', sa.UnicodeText),
-                sa.column('authority', sa.UnicodeText),
-                sa.column('nipsa', sa.Boolean))
-nipsa = sa.table('nipsa', sa.column('userid', sa.UnicodeText))
+user = sa.table(
+    "user",
+    sa.column("username", sa.UnicodeText),
+    sa.column("authority", sa.UnicodeText),
+    sa.column("nipsa", sa.Boolean),
+)
+nipsa = sa.table("nipsa", sa.column("userid", sa.UnicodeText))
 
 
 def upgrade():
@@ -37,11 +39,16 @@ def upgrade():
     # corresponding rows in the user table, if they exist.
     for (userid,) in session.query(nipsa):
         val = split_user(userid)
-        op.execute(user
-                   .update()
-                   .where(sa.and_(user.c.username == val['username'],
-                                  user.c.authority == val['domain']))
-                   .values(nipsa=True))
+        op.execute(
+            user.update()
+            .where(
+                sa.and_(
+                    user.c.username == val["username"],
+                    user.c.authority == val["domain"],
+                )
+            )
+            .values(nipsa=True)
+        )
 
 
 def downgrade():

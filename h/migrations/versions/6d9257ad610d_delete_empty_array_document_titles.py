@@ -16,8 +16,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-revision = '6d9257ad610d'
-down_revision = '3d71ec81d18c'
+revision = "6d9257ad610d"
+down_revision = "3d71ec81d18c"
 
 
 log = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ Session = sessionmaker()
 
 
 class DocumentMeta(Base):
-    __tablename__ = 'document_meta'
+    __tablename__ = "document_meta"
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     type = sa.Column(sa.UnicodeText)
     value = sa.Column(pg.ARRAY(sa.UnicodeText, zero_indexes=True))
@@ -37,14 +37,13 @@ class DocumentMeta(Base):
 def upgrade():
     session = Session(bind=op.get_bind())
     to_delete = []
-    for document_meta in session.query(DocumentMeta).filter_by(type='title'):
+    for document_meta in session.query(DocumentMeta).filter_by(type="title"):
         if document_meta.value == []:
             to_delete.append(document_meta)
     for document_meta in to_delete:
         session.delete(document_meta)
     session.commit()
-    log.info("deleted {n} empty-array document titles".format(
-        n=len(to_delete)))
+    log.info("deleted {n} empty-array document titles".format(n=len(to_delete)))
 
 
 def downgrade():

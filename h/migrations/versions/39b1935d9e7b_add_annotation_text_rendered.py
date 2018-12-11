@@ -11,13 +11,13 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = '39b1935d9e7b'
-down_revision = '6b801ecc60f1'
+revision = "39b1935d9e7b"
+down_revision = "6b801ecc60f1"
 
 
 def upgrade():
-    op.add_column('annotation', sa.Column('text_rendered', sa.UnicodeText))
+    op.add_column("annotation", sa.Column("text_rendered", sa.UnicodeText))
 
 
 def downgrade():
-    op.drop_column('annotation', 'text_rendered')
+    op.drop_column("annotation", "text_rendered")

@@ -61,24 +61,24 @@ class AnnotationContext(object):
         # permissions for this annotation's containing group.
         # Otherwise they are derived from the annotation's creator
         if self.annotation.shared:
-            for principal in self._group_principals(self.group, 'read'):
-                acl.append((Allow, principal, 'read'))
+            for principal in self._group_principals(self.group, "read"):
+                acl.append((Allow, principal, "read"))
 
-            for principal in self._group_principals(self.group, 'flag'):
-                acl.append((Allow, principal, 'flag'))
+            for principal in self._group_principals(self.group, "flag"):
+                acl.append((Allow, principal, "flag"))
 
-            for principal in self._group_principals(self.group, 'moderate'):
-                acl.append((Allow, principal, 'moderate'))
+            for principal in self._group_principals(self.group, "moderate"):
+                acl.append((Allow, principal, "moderate"))
 
         else:
-            acl.append((Allow, self.annotation.userid, 'read'))
+            acl.append((Allow, self.annotation.userid, "read"))
             # Flagging one's own private annotations is nonsensical,
             # but from an authz perspective, allowed. It is up to services/views
             # to handle these situations appropriately
-            acl.append((Allow, self.annotation.userid, 'flag'))
+            acl.append((Allow, self.annotation.userid, "flag"))
 
         # The user who created the annotation always has the following permissions
-        for action in ['admin', 'update', 'delete']:
+        for action in ["admin", "update", "delete"]:
             acl.append((Allow, self.annotation.userid, action))
 
         # If we haven't explicitly authorized it, it's not allowed.
@@ -118,8 +118,9 @@ class OrganizationContext(object):
     @property
     def logo(self):
         if self.organization.logo:
-            return self.request.route_url('organization_logo',
-                                          pubid=self.organization.pubid)
+            return self.request.route_url(
+                "organization_logo", pubid=self.organization.pubid
+            )
         return None
 
 
@@ -129,7 +130,7 @@ class GroupContext(object):
     def __init__(self, group, request):
         self.request = request
         self.group = group
-        self.links_service = self.request.find_service(name='group_links')
+        self.links_service = self.request.find_service(name="group_links")
 
     @property
     def id(self):
@@ -178,4 +179,4 @@ class GroupUpsertContext(object):
         # during traversal
         if self.group is not None:
             return self.group.__acl__()
-        return [(Allow, role.User, 'upsert')]
+        return [(Allow, role.User, "upsert")]

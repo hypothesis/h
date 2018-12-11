@@ -13,18 +13,21 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 
-revision = 'c36369fe730f'
-down_revision = 'e15e47228c43'
+revision = "c36369fe730f"
+down_revision = "e15e47228c43"
 
 
 def upgrade():
-    op.add_column('token', sa.Column(
-        'authclient_id',
-        postgresql.UUID(),
-        sa.ForeignKey('authclient.id', ondelete='cascade'),
-        nullable=True,
-    ))
+    op.add_column(
+        "token",
+        sa.Column(
+            "authclient_id",
+            postgresql.UUID(),
+            sa.ForeignKey("authclient.id", ondelete="cascade"),
+            nullable=True,
+        ),
+    )
 
 
 def downgrade():
-    op.drop_column('token', 'authclient_id')
+    op.drop_column("token", "authclient_id")

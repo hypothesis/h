@@ -15,7 +15,7 @@ from jinja2.ext import Extension
 
 from h._compat import url_unquote
 
-SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg'
+SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
 
 class Filters(Extension):
@@ -27,17 +27,17 @@ class Filters(Extension):
     def __init__(self, environment):
         super(Filters, self).__init__(environment)
 
-        environment.filters['to_json'] = to_json
-        environment.filters['human_timestamp'] = human_timestamp
-        environment.filters['format_number'] = format_number
-        environment.filters['url_unquote'] = url_unquote
+        environment.filters["to_json"] = to_json
+        environment.filters["human_timestamp"] = human_timestamp
+        environment.filters["format_number"] = format_number
+        environment.filters["url_unquote"] = url_unquote
 
 
 def human_timestamp(timestamp, now=datetime.datetime.utcnow):
     """Turn a :py:class:`datetime.datetime` into a human-friendly string."""
-    fmt = '%d %B at %H:%M'
+    fmt = "%d %B at %H:%M"
     if timestamp.year < now().year:
-        fmt = '%d %B %Y at %H:%M'
+        fmt = "%d %B %Y at %H:%M"
     return timestamp.strftime(fmt)
 
 
@@ -58,11 +58,13 @@ def to_json(value):
     """
 
     # Adapted from Flask's htmlsafe_dumps() function / tojson filter.
-    result = json.dumps(value) \
-                 .replace('<', '\\u003c') \
-                 .replace('>', '\\u003e') \
-                 .replace('&', '\\u0026') \
-                 .replace("'", '\\u0027')
+    result = (
+        json.dumps(value)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace("'", "\\u0027")
+    )
 
     return Markup(result)
 
@@ -77,12 +79,12 @@ class SvgIcon(Extension):
         super(SvgIcon, self).__init__(environment)
 
         def read_icon(name):
-            return open('build/images/icons/{}.svg'.format(name)).read()
+            return open("build/images/icons/{}.svg".format(name)).read()
 
-        environment.globals['svg_icon'] = partial(svg_icon, read_icon)
+        environment.globals["svg_icon"] = partial(svg_icon, read_icon)
 
 
-def svg_icon(loader, name, css_class=''):
+def svg_icon(loader, name, css_class=""):
     """
     Return inline SVG markup for an icon.
 
@@ -107,18 +109,18 @@ def svg_icon(loader, name, css_class=''):
     # ElementTree otherwise serializes SVG elements with an 'ns0' namespace (eg.
     # '<ns0:svg>...') and browsers will not render the result as SVG.
     # See http://stackoverflow.com/questions/8983041
-    ElementTree.register_namespace('', SVG_NAMESPACE_URI)
+    ElementTree.register_namespace("", SVG_NAMESPACE_URI)
     root = ElementTree.fromstring(loader(name))
 
     if css_class:
-        css_class = 'svg-icon ' + css_class
+        css_class = "svg-icon " + css_class
     else:
-        css_class = 'svg-icon'
-    root.set('class', css_class)
+        css_class = "svg-icon"
+    root.set("class", css_class)
 
     # If the SVG has its own title, ignore it in favor of the title attribute
     # of the <svg> or its containing element, which is usually a link.
-    title_el = root.find('{{{}}}title'.format(SVG_NAMESPACE_URI))
+    title_el = root.find("{{{}}}title".format(SVG_NAMESPACE_URI))
     if title_el is not None:
         root.remove(title_el)
 

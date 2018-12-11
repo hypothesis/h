@@ -25,28 +25,30 @@ class DummyFeature(object):
         self.staff = False
 
 
-features_save_fixtures = pytest.mark.usefixtures('Feature')
+features_save_fixtures = pytest.mark.usefixtures("Feature")
 
 
 def test_features_index_sorts_features(Feature, pyramid_request):
-    alpha = DummyFeature(name='alpha')
-    beta = DummyFeature(name='beta')
-    delta = DummyFeature(name='delta')
+    alpha = DummyFeature(name="alpha")
+    beta = DummyFeature(name="beta")
+    delta = DummyFeature(name="delta")
     Feature.all.return_value = [beta, delta, alpha]
 
     ctx = features_index(pyramid_request)
 
-    assert ctx['features'] == [alpha, beta, delta]
+    assert ctx["features"] == [alpha, beta, delta]
 
 
 @features_save_fixtures
 def test_features_save_sets_attributes_when_checkboxes_on(Feature, pyramid_request):
-    foo = DummyFeature(name='foo')
-    bar = DummyFeature(name='bar')
+    foo = DummyFeature(name="foo")
+    bar = DummyFeature(name="bar")
     Feature.all.return_value = [foo, bar]
-    pyramid_request.POST = {'foo[everyone]': 'on',
-                            'foo[staff]': 'on',
-                            'bar[admins]': 'on'}
+    pyramid_request.POST = {
+        "foo[everyone]": "on",
+        "foo[staff]": "on",
+        "bar[admins]": "on",
+    }
 
     features_save(pyramid_request)
 
@@ -55,7 +57,7 @@ def test_features_save_sets_attributes_when_checkboxes_on(Feature, pyramid_reque
 
 @features_save_fixtures
 def test_features_save_sets_attributes_when_checkboxes_off(Feature, pyramid_request):
-    foo = DummyFeature(name='foo')
+    foo = DummyFeature(name="foo")
     foo.everyone = True
     foo.staff = True
     Feature.all.return_value = [foo]
@@ -68,10 +70,9 @@ def test_features_save_sets_attributes_when_checkboxes_off(Feature, pyramid_requ
 
 @features_save_fixtures
 def test_features_save_ignores_unknown_fields(Feature, pyramid_request):
-    foo = DummyFeature(name='foo')
+    foo = DummyFeature(name="foo")
     Feature.all.return_value = [foo]
-    pyramid_request.POST = {'foo[wibble]': 'on',
-                            'foo[admins]': 'ignoreme'}
+    pyramid_request.POST = {"foo[wibble]": "on", "foo[admins]": "ignoreme"}
 
     features_save(pyramid_request)
 
@@ -84,8 +85,8 @@ def test_cohorts_index_without_cohorts(pyramid_request):
 
 
 def test_cohorts_index_with_cohorts(pyramid_request):
-    cohort1 = models.FeatureCohort(name='cohort1')
-    cohort2 = models.FeatureCohort(name='cohort2')
+    cohort1 = models.FeatureCohort(name="cohort1")
+    cohort2 = models.FeatureCohort(name="cohort2")
     pyramid_request.db.add(cohort1)
     pyramid_request.db.add(cohort2)
     pyramid_request.db.flush()
@@ -95,10 +96,12 @@ def test_cohorts_index_with_cohorts(pyramid_request):
 
 
 def test_cohorts_add_creates_cohort_with_no_members(pyramid_request):
-    pyramid_request.params['add'] = 'cohort'
+    pyramid_request.params["add"] = "cohort"
     cohorts_add(pyramid_request)
 
-    result = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').all()
+    result = (
+        pyramid_request.db.query(models.FeatureCohort).filter_by(name="cohort").all()
+    )
     assert len(result) == 1
 
     cohort = result[0]
@@ -107,15 +110,15 @@ def test_cohorts_add_creates_cohort_with_no_members(pyramid_request):
 
 
 def test_cohorts_edit_add_user(factories, pyramid_request):
-    user = factories.User(username='benoit')
-    cohort = models.FeatureCohort(name='FractalCohort')
+    user = factories.User(username="benoit")
+    cohort = models.FeatureCohort(name="FractalCohort")
 
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
-    pyramid_request.matchdict['id'] = cohort.id
-    pyramid_request.params['add'] = user.username
-    pyramid_request.params['authority'] = user.authority
+    pyramid_request.matchdict["id"] = cohort.id
+    pyramid_request.params["add"] = user.username
+    pyramid_request.params["authority"] = user.authority
     cohorts_edit_add(pyramid_request)
 
     assert len(cohort.members) == 1
@@ -123,15 +126,15 @@ def test_cohorts_edit_add_user(factories, pyramid_request):
 
 
 def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
-    user = factories.User(username='benoit', authority='foo.org')
-    cohort = models.FeatureCohort(name='FractalCohort')
+    user = factories.User(username="benoit", authority="foo.org")
+    cohort = models.FeatureCohort(name="FractalCohort")
 
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
-    pyramid_request.matchdict['id'] = cohort.id
-    pyramid_request.params['add'] = '   benoit   '
-    pyramid_request.params['authority'] = '    %s   ' % user.authority
+    pyramid_request.matchdict["id"] = cohort.id
+    pyramid_request.params["add"] = "   benoit   "
+    pyramid_request.params["authority"] = "    %s   " % user.authority
     cohorts_edit_add(pyramid_request)
 
     assert len(cohort.members) == 1
@@ -139,8 +142,8 @@ def test_cohorts_edit_add_user_strips_spaces(factories, pyramid_request):
 
 
 def test_cohorts_edit_remove_user(factories, pyramid_request):
-    user = factories.User(username='benoit', authority='foo.org')
-    cohort = models.FeatureCohort(name='FractalCohort')
+    user = factories.User(username="benoit", authority="foo.org")
+    cohort = models.FeatureCohort(name="FractalCohort")
     cohort.members.append(user)
 
     pyramid_request.db.add(cohort)
@@ -148,76 +151,80 @@ def test_cohorts_edit_remove_user(factories, pyramid_request):
 
     assert len(cohort.members) == 1
 
-    pyramid_request.matchdict['id'] = cohort.id
-    pyramid_request.params['remove'] = user.userid
+    pyramid_request.matchdict["id"] = cohort.id
+    pyramid_request.params["remove"] = user.userid
     cohorts_edit_remove(pyramid_request)
 
     assert len(cohort.members) == 0
 
 
 def test_cohorts_edit_with_no_users(pyramid_request):
-    cohort = models.FeatureCohort(name='FractalCohort')
+    cohort = models.FeatureCohort(name="FractalCohort")
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
-    pyramid_request.matchdict['id'] = cohort.id
+    pyramid_request.matchdict["id"] = cohort.id
     result = cohorts_edit({}, pyramid_request)
 
-    assert result['cohort'].id == cohort.id
-    assert len(result['cohort'].members) == 0
+    assert result["cohort"].id == cohort.id
+    assert len(result["cohort"].members) == 0
 
 
 def test_cohorts_edit_with_users(factories, pyramid_request):
-    cohort = models.FeatureCohort(name='FractalCohort')
-    user1 = factories.User(username='benoit')
-    user2 = factories.User(username='emily', authority='foo.org')
+    cohort = models.FeatureCohort(name="FractalCohort")
+    user1 = factories.User(username="benoit")
+    user2 = factories.User(username="emily", authority="foo.org")
     cohort.members.append(user1)
     cohort.members.append(user2)
 
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
-    pyramid_request.matchdict['id'] = cohort.id
+    pyramid_request.matchdict["id"] = cohort.id
     result = cohorts_edit({}, pyramid_request)
 
-    assert result['cohort'].id == cohort.id
-    assert len(result['cohort'].members) == 2
+    assert result["cohort"].id == cohort.id
+    assert len(result["cohort"].members) == 2
 
 
-@mock.patch.dict('h.models.feature.FEATURES', {'feat': 'A test feature'})
+@mock.patch.dict("h.models.feature.FEATURES", {"feat": "A test feature"})
 def test_features_save_sets_cohorts_when_checkboxes_on(pyramid_request):
-    feat = models.Feature(name='feat')
-    cohort = models.FeatureCohort(name='cohort')
+    feat = models.Feature(name="feat")
+    cohort = models.FeatureCohort(name="cohort")
 
     pyramid_request.db.add(feat)
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
-    pyramid_request.POST = {'feat[cohorts][cohort]': 'on'}
+    pyramid_request.POST = {"feat[cohorts][cohort]": "on"}
     features_save(pyramid_request)
 
-    feat = pyramid_request.db.query(models.Feature).filter_by(name='feat').first()
-    cohort = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').first()
+    feat = pyramid_request.db.query(models.Feature).filter_by(name="feat").first()
+    cohort = (
+        pyramid_request.db.query(models.FeatureCohort).filter_by(name="cohort").first()
+    )
 
     assert len(feat.cohorts) == 1
     assert cohort in feat.cohorts
 
 
-@mock.patch.dict('h.models.feature.FEATURES', {'feat': 'A test feature'})
+@mock.patch.dict("h.models.feature.FEATURES", {"feat": "A test feature"})
 def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
-    feat = models.Feature(name='feat')
-    cohort = models.FeatureCohort(name='cohort')
+    feat = models.Feature(name="feat")
+    cohort = models.FeatureCohort(name="cohort")
     feat.cohorts.append(cohort)
 
     pyramid_request.db.add(feat)
     pyramid_request.db.add(cohort)
     pyramid_request.db.flush()
 
-    pyramid_request.POST = {'feat[cohorts][cohort]': 'off'}
+    pyramid_request.POST = {"feat[cohorts][cohort]": "off"}
     features_save(pyramid_request)
 
-    feat = pyramid_request.db.query(models.Feature).filter_by(name='feat').first()
-    cohort = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').first()
+    feat = pyramid_request.db.query(models.Feature).filter_by(name="feat").first()
+    cohort = (
+        pyramid_request.db.query(models.FeatureCohort).filter_by(name="cohort").first()
+    )
 
     assert len(feat.cohorts) == 0
     assert cohort not in feat.cohorts
@@ -225,11 +232,11 @@ def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
 
 @pytest.fixture(autouse=True)
 def routes(pyramid_config):
-    pyramid_config.add_route('admin.features', '/adm/features')
-    pyramid_config.add_route('admin.cohorts', '/adm/cohorts')
-    pyramid_config.add_route('admin.cohorts_edit', '/adm/cohorts/{id}')
+    pyramid_config.add_route("admin.features", "/adm/features")
+    pyramid_config.add_route("admin.cohorts", "/adm/cohorts")
+    pyramid_config.add_route("admin.cohorts_edit", "/adm/cohorts/{id}")
 
 
 @pytest.fixture
 def Feature(patch):
-    return patch('h.models.Feature')
+    return patch("h.models.Feature")

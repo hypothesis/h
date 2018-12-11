@@ -11,15 +11,20 @@ from __future__ import unicode_literals
 from alembic import op
 
 
-revision = 'e554d862135f'
-down_revision = '5655d56d7c29'
+revision = "e554d862135f"
+down_revision = "5655d56d7c29"
 
 
 def upgrade():
-    op.execute('COMMIT')
-    op.create_index(op.f('ix__flag__user_id'), 'flag', ['user_id'],
-                    unique=False, postgresql_concurrently=True)
+    op.execute("COMMIT")
+    op.create_index(
+        op.f("ix__flag__user_id"),
+        "flag",
+        ["user_id"],
+        unique=False,
+        postgresql_concurrently=True,
+    )
 
 
 def downgrade():
-    op.drop_index(op.f('ix__flag__user_id'), 'flag')
+    op.drop_index(op.f("ix__flag__user_id"), "flag")

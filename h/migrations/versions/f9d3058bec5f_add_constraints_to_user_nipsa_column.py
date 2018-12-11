@@ -12,14 +12,15 @@ import sqlalchemy as sa
 from alembic import op
 
 
-revision = 'f9d3058bec5f'
-down_revision = 'b7117b569f8b'
+revision = "f9d3058bec5f"
+down_revision = "b7117b569f8b"
 
 
 def upgrade():
-    op.alter_column('user', 'nipsa', nullable=False)
-    op.alter_column('user', 'nipsa', server_default=sa.sql.expression.false())
+    op.alter_column("user", "nipsa", nullable=False)
+    op.alter_column("user", "nipsa", server_default=sa.sql.expression.false())
+
 
 def downgrade():
-    op.alter_column('user', 'nipsa', nullable=True)
-    op.alter_column('user', 'nipsa', server_default=None)
+    op.alter_column("user", "nipsa", nullable=True)
+    op.alter_column("user", "nipsa", server_default=None)

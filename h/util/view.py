@@ -30,7 +30,7 @@ def handle_exception(request, exception):
         request.sentry.captureException()
     else:
         # `__traceback__` is a Python 3-only property.
-        traceback = getattr(exception, '__traceback__', None)
+        traceback = getattr(exception, "__traceback__", None)
         exc_info = (type(exception), exception, traceback)
         request.sentry.captureException(exc_info)
 
@@ -42,6 +42,6 @@ def handle_exception(request, exception):
 
 def json_view(**settings):
     """A view configuration decorator with JSON defaults."""
-    settings.setdefault('accept', 'application/json')
-    settings.setdefault('renderer', 'json')
+    settings.setdefault("accept", "application/json")
+    settings.setdefault("renderer", "json")
     return view_config(**settings)

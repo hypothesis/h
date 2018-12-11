@@ -7,8 +7,8 @@ Create Date: 2016-01-06 19:12:14.402260
 """
 
 # revision identifiers, used by Alembic.
-revision = '6f6a853fa2a'
-down_revision = '1ef80156ee4'
+revision = "6f6a853fa2a"
+down_revision = "1ef80156ee4"
 
 from alembic import op
 import sqlalchemy as sa
@@ -18,7 +18,7 @@ from sqlalchemy import orm
 Session = orm.sessionmaker()
 
 
-user = sa.table('user', sa.column('sidebar_tutorial_dismissed', sa.Boolean))
+user = sa.table("user", sa.column("sidebar_tutorial_dismissed", sa.Boolean))
 
 
 def upgrade():

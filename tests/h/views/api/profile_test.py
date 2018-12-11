@@ -17,34 +17,35 @@ class TestProfile(object):
         assert result == session_profile.return_value
 
     def test_profile_passes_authority_parameter(self, session_profile, pyramid_request):
-        pyramid_request.params = {'authority': 'foo.com'}
+        pyramid_request.params = {"authority": "foo.com"}
 
         result = views.profile(pyramid_request)
 
-        session_profile.assert_called_once_with(pyramid_request, 'foo.com')
+        session_profile.assert_called_once_with(pyramid_request, "foo.com")
         assert result == session_profile.return_value
 
 
-@pytest.mark.usefixtures('user_service', 'session_profile')
+@pytest.mark.usefixtures("user_service", "session_profile")
 class TestUpdatePreferences(object):
     def test_updates_preferences(self, pyramid_request, user, user_service):
-        pyramid_request.json_body = {'preferences': {'show_sidebar_tutorial': True}}
+        pyramid_request.json_body = {"preferences": {"show_sidebar_tutorial": True}}
 
         views.update_preferences(pyramid_request)
 
         user_service.update_preferences.assert_called_once_with(
-                user, show_sidebar_tutorial=True)
+            user, show_sidebar_tutorial=True
+        )
 
     def test_handles_invalid_preferences_error(self, pyramid_request, user_service):
-        user_service.update_preferences.side_effect = TypeError('uh oh, wrong prefs')
+        user_service.update_preferences.side_effect = TypeError("uh oh, wrong prefs")
 
         with pytest.raises(APIError) as exc:
             views.update_preferences(pyramid_request)
 
-        assert str(exc.value) == 'uh oh, wrong prefs'
+        assert str(exc.value) == "uh oh, wrong prefs"
 
     def test_handles_missing_preferences_payload(self, pyramid_request):
-        pyramid_request.json_body = {'foo': 'bar'}
+        pyramid_request.json_body = {"foo": "bar"}
 
         # should not raise
         views.update_preferences(pyramid_request)
@@ -67,10 +68,10 @@ class TestUpdatePreferences(object):
     @pytest.fixture
     def user_service(self, pyramid_config):
         svc = mock.Mock()
-        pyramid_config.register_service(svc, name='user')
+        pyramid_config.register_service(svc, name="user")
         return svc
 
 
 @pytest.fixture
 def session_profile(patch):
-    return patch('h.session.profile')
+    return patch("h.session.profile")

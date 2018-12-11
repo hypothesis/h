@@ -16,10 +16,11 @@ def add_annotation(id_):
 
         # If a reindex is running at the moment, add annotation to the new index
         # as well.
-        future_index = _current_reindex_new_name(celery.request, 'reindex.new_index')
+        future_index = _current_reindex_new_name(celery.request, "reindex.new_index")
         if future_index is not None:
-            index(celery.request.es, annotation, celery.request,
-                  target_index=future_index)
+            index(
+                celery.request.es, annotation, celery.request, target_index=future_index
+            )
 
         if annotation.is_reply:
             add_annotation.delay(annotation.thread_root_id)
@@ -31,23 +32,26 @@ def delete_annotation(id_):
 
     # If a reindex is running at the moment, delete annotation from the
     # new index as well.
-    future_index = _current_reindex_new_name(celery.request, 'reindex.new_index')
+    future_index = _current_reindex_new_name(celery.request, "reindex.new_index")
     if future_index is not None:
         delete(celery.request.es, id_, target_index=future_index)
 
 
 @celery.task
 def reindex_user_annotations(userid):
-    ids = [a.id for a in celery.request.db.query(models.Annotation.id).filter_by(userid=userid)]
+    ids = [
+        a.id
+        for a in celery.request.db.query(models.Annotation.id).filter_by(userid=userid)
+    ]
 
     indexer = BatchIndexer(celery.request.db, celery.request.es, celery.request)
     errored = indexer.index(ids)
     if errored:
-        log.warning('Failed to re-index annotations into ES6 %s', errored)
+        log.warning("Failed to re-index annotations into ES6 %s", errored)
 
 
 def _current_reindex_new_name(request, new_index_setting_name):
-    settings = celery.request.find_service(name='settings')
+    settings = celery.request.find_service(name="settings")
     new_index = settings.get(new_index_setting_name)
 
     return new_index

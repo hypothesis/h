@@ -31,7 +31,7 @@ def groupfinder(userid, request):
     :returns: additional principals for the user (possibly empty) or None
     :rtype: list or None
     """
-    user_service = request.find_service(name='user')
+    user_service = request.find_service(name="user")
     user = user_service.fetch(userid)
 
     return principals_for_user(user)
@@ -49,8 +49,8 @@ def principals_for_user(user):
     if user.staff:
         principals.add(role.Staff)
     for group in user.groups:
-        principals.add('group:{group.pubid}'.format(group=group))
-    principals.add('authority:{authority}'.format(authority=user.authority))
+        principals.add("group:{group.pubid}".format(group=group))
+    principals.add("authority:{authority}".format(authority=user.authority))
 
     return list(principals)
 
@@ -62,9 +62,9 @@ def translate_annotation_principals(principals):
     result = set([])
     for principal in principals:
         # Ignore suspicious principals from annotations
-        if principal.startswith('system.'):
+        if principal.startswith("system."):
             continue
-        if principal == 'group:__world__':
+        if principal == "group:__world__":
             result.add(security.Everyone)
         else:
             result.add(principal)
@@ -77,7 +77,7 @@ def default_authority(request):
 
     Falls back on returning request.domain if h.authority isn't set.
     """
-    return text_type(request.registry.settings.get('h.authority', request.domain))
+    return text_type(request.registry.settings.get("h.authority", request.domain))
 
 
 def client_authority(request):
@@ -145,8 +145,12 @@ def principals_for_auth_client(client):
 
     principals = set([])
 
-    principals.add('client:{client_id}@{authority}'.format(client_id=client.id, authority=client.authority))
-    principals.add('client_authority:{authority}'.format(authority=client.authority))
+    principals.add(
+        "client:{client_id}@{authority}".format(
+            client_id=client.id, authority=client.authority
+        )
+    )
+    principals.add("client_authority:{authority}".format(authority=client.authority))
     principals.add(role.AuthClient)
 
     return list(principals)
@@ -173,7 +177,9 @@ def principals_for_auth_client_user(user, client):
     client_principals = principals_for_auth_client(client)
     auth_client_principals = [role.AuthClientUser]
 
-    all_principals = userid_principals + user_principals + client_principals + auth_client_principals
+    all_principals = (
+        userid_principals + user_principals + client_principals + auth_client_principals
+    )
     distinct_principals = list(set(all_principals))
 
     return distinct_principals

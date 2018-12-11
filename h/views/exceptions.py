@@ -17,18 +17,17 @@ from h.i18n import TranslationString as _  # noqa: N813
 from h.util.view import handle_exception, json_view
 
 
-@forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
-@notfound_view_config(renderer='h:templates/notfound.html.jinja2',
-                      append_slash=True)
+@forbidden_view_config(renderer="h:templates/notfound.html.jinja2")
+@notfound_view_config(renderer="h:templates/notfound.html.jinja2", append_slash=True)
 def notfound(request):
     """Handle a request for an unknown/forbidden resource."""
     request.response.status_int = 404
     return {}
 
 
-@view_config(context=Exception,
-             accept='text/html',
-             renderer='h:templates/5xx.html.jinja2')
+@view_config(
+    context=Exception, accept="text/html", renderer="h:templates/5xx.html.jinja2"
+)
 def error(context, request):
     """Handle a request for which the handler threw an exception."""
     handle_exception(request, exception=context)
@@ -39,7 +38,9 @@ def error(context, request):
 def json_error(context, request):
     """Handle an unexpected exception where the request asked for JSON."""
     handle_exception(request, exception=context)
-    message = _("Hypothesis had a problem while handling this request. "
-                "Our team has been notified. Please contact support@hypothes.is"
-                " if the problem persists.")
-    return {'status': 'failure', 'reason': message}
+    message = _(
+        "Hypothesis had a problem while handling this request. "
+        "Our team has been notified. Please contact support@hypothes.is"
+        " if the problem persists."
+    )
+    return {"status": "failure", "reason": message}

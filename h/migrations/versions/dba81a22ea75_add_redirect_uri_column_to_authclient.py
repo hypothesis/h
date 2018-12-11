@@ -12,13 +12,15 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = 'dba81a22ea75'
-down_revision = '0d1b3fd8807c'
+revision = "dba81a22ea75"
+down_revision = "0d1b3fd8807c"
 
 
 def upgrade():
-    op.add_column('authclient', sa.Column('redirect_uri', sa.UnicodeText(), nullable=True))
+    op.add_column(
+        "authclient", sa.Column("redirect_uri", sa.UnicodeText(), nullable=True)
+    )
 
 
 def downgrade():
-    op.drop_column('authclient', 'redirect_uri')
+    op.drop_column("authclient", "redirect_uri")

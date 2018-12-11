@@ -21,7 +21,7 @@ class AnnotationStatsService(object):
         If the logged in user has this userid, private annotations will be
         included in this count, otherwise they will not.
         """
-        params = MultiDict({'limit': 0, 'user': userid})
+        params = MultiDict({"limit": 0, "user": userid})
         return self._search(params)
 
     def total_user_annotation_count(self, userid):
@@ -31,7 +31,7 @@ class AnnotationStatsService(object):
         This disregards permissions, private/public, etc and returns the
         total number of annotations the user has made (including replies).
         """
-        params = MultiDict({'limit': 0, 'user': userid})
+        params = MultiDict({"limit": 0, "user": userid})
 
         search = Search(self.request, stats=self.request.stats)
         search.clear()
@@ -46,7 +46,7 @@ class AnnotationStatsService(object):
         """
         Return the count of searchable top level annotations for this group.
         """
-        params = MultiDict({'limit': 0, 'group': pubid})
+        params = MultiDict({"limit": 0, "group": pubid})
         return self._search(params)
 
     def _search(self, params):

@@ -8,7 +8,7 @@ from h.services import flag
 from h import models
 
 
-@pytest.mark.usefixtures('flags')
+@pytest.mark.usefixtures("flags")
 class TestFlagServiceFlagged(object):
     def test_it_returns_true_when_flag_exists(self, svc, flags):
         user = flags[-1].user
@@ -29,7 +29,7 @@ class TestFlagServiceFlagged(object):
 
         assert all_flagged == set([flags[-1].annotation_id])
 
-    @pytest.mark.usefixtures('flags')
+    @pytest.mark.usefixtures("flags")
     def test_it_handles_all_flagged_with_no_ids(self, svc, factories):
         user = factories.User()
         assert svc.all_flagged(user, []) == set()
@@ -51,22 +51,27 @@ class TestFlagServiceCreate(object):
 
         svc.create(user, annotation)
 
-        flag = db_session.query(models.Flag) \
-                         .filter_by(user_id=user.id,
-                                    annotation_id=annotation.id) \
-                         .first()
+        flag = (
+            db_session.query(models.Flag)
+            .filter_by(user_id=user.id, annotation_id=annotation.id)
+            .first()
+        )
 
         assert flag is not None
 
-    def test_it_skips_creating_flag_when_already_exists(self, svc, db_session, factories):
+    def test_it_skips_creating_flag_when_already_exists(
+        self, svc, db_session, factories
+    ):
         existing = factories.Flag()
 
         svc.create(existing.user, existing.annotation)
 
-        assert db_session.query(models.Flag) \
-                         .filter_by(user_id=existing.user.id,
-                                    annotation_id=existing.annotation.id) \
-                         .count() == 1
+        assert (
+            db_session.query(models.Flag)
+            .filter_by(user_id=existing.user.id, annotation_id=existing.annotation.id)
+            .count()
+            == 1
+        )
 
 
 class TestFlagServiceFactory(object):

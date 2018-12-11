@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from datetime import (datetime, timedelta)
+from datetime import datetime, timedelta
 
 import pytest
 
@@ -16,25 +16,28 @@ from h.tasks.cleanup import (
 )
 
 
-@pytest.mark.usefixtures('celery')
+@pytest.mark.usefixtures("celery")
 class TestPurgeDeletedAnnotations(object):
-    @pytest.mark.parametrize('deleted,mins_ago,purged', [
-        # Deleted more than 10 minutes ago... should be purged.
-        (True, 30, True),
-        (True, 3600, True),
-        # Deleted less than 10 minutes ago... should NOT be purged.
-        (True, -30, False),  # annotation from the future! wooOOOooo!
-        (True, 0, False),
-        (True, 1, False),
-        (True, 9, False),
-        # Not deleted... should NOT be purged.
-        (False, -30, False),
-        (False, 0, False),
-        (False, 1, False),
-        (False, 9, False),
-        (False, 30, False),
-        (False, 3600, False),
-    ])
+    @pytest.mark.parametrize(
+        "deleted,mins_ago,purged",
+        [
+            # Deleted more than 10 minutes ago... should be purged.
+            (True, 30, True),
+            (True, 3600, True),
+            # Deleted less than 10 minutes ago... should NOT be purged.
+            (True, -30, False),  # annotation from the future! wooOOOooo!
+            (True, 0, False),
+            (True, 1, False),
+            (True, 9, False),
+            # Not deleted... should NOT be purged.
+            (False, -30, False),
+            (False, 0, False),
+            (False, 1, False),
+            (False, 9, False),
+            (False, 30, False),
+            (False, 3600, False),
+        ],
+    )
     def test_purge(self, db_session, factories, deleted, mins_ago, purged):
         updated = datetime.utcnow() - timedelta(minutes=mins_ago)
         annotation = factories.Annotation(deleted=deleted, updated=updated)
@@ -48,7 +51,7 @@ class TestPurgeDeletedAnnotations(object):
             assert db_session.query(Annotation).count() == 1
 
 
-@pytest.mark.usefixtures('celery')
+@pytest.mark.usefixtures("celery")
 class TestPurgeExpiredAuthTickets(object):
     def test_it_removes_expired_tickets(self, db_session, factories):
         tickets = [
@@ -73,7 +76,7 @@ class TestPurgeExpiredAuthTickets(object):
         assert db_session.query(AuthTicket).count() == 1
 
 
-@pytest.mark.usefixtures('celery')
+@pytest.mark.usefixtures("celery")
 class TestPurgeExpiredAuthzCodes(object):
     def test_it_removes_expired_authz_codes(self, db_session, factories):
         authz_codes = [
@@ -98,27 +101,39 @@ class TestPurgeExpiredAuthzCodes(object):
         assert db_session.query(AuthzCode).count() == 1
 
 
-@pytest.mark.usefixtures('celery')
+@pytest.mark.usefixtures("celery")
 class TestPurgeExpiredTokens(object):
     def test_it_removes_expired_tokens(self, db_session, factories):
-        factories.DeveloperToken(expires=datetime(2014, 5, 6, 7, 8, 9),
-                                 refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9))
-        factories.DeveloperToken(expires=(datetime.utcnow() - timedelta(hours=2)),
-                                 refresh_token_expires=(datetime.utcnow() - timedelta(seconds=1)))
+        factories.DeveloperToken(
+            expires=datetime(2014, 5, 6, 7, 8, 9),
+            refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9),
+        )
+        factories.DeveloperToken(
+            expires=(datetime.utcnow() - timedelta(hours=2)),
+            refresh_token_expires=(datetime.utcnow() - timedelta(seconds=1)),
+        )
 
         assert db_session.query(Token).count() == 2
         purge_expired_tokens()
         assert db_session.query(Token).count() == 0
 
     def test_it_leaves_valid_tickets(self, db_session, factories):
-        factories.DeveloperToken(expires=datetime(2014, 5, 6, 7, 8, 9),
-                                 refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9))
-        factories.DeveloperToken(expires=(datetime.utcnow() + timedelta(hours=1)),
-                                 refresh_token_expires=datetime.utcnow() + timedelta(days=7))
-        factories.DeveloperToken(expires=(datetime.utcnow() - timedelta(hours=1)),
-                                 refresh_token_expires=datetime.utcnow() + timedelta(days=7))
-        factories.DeveloperToken(expires=(datetime.utcnow() + timedelta(hours=1)),
-                                 refresh_token_expires=datetime.utcnow() - timedelta(days=7))
+        factories.DeveloperToken(
+            expires=datetime(2014, 5, 6, 7, 8, 9),
+            refresh_token_expires=datetime(2014, 5, 13, 7, 8, 9),
+        )
+        factories.DeveloperToken(
+            expires=(datetime.utcnow() + timedelta(hours=1)),
+            refresh_token_expires=datetime.utcnow() + timedelta(days=7),
+        )
+        factories.DeveloperToken(
+            expires=(datetime.utcnow() - timedelta(hours=1)),
+            refresh_token_expires=datetime.utcnow() + timedelta(days=7),
+        )
+        factories.DeveloperToken(
+            expires=(datetime.utcnow() + timedelta(hours=1)),
+            refresh_token_expires=datetime.utcnow() - timedelta(days=7),
+        )
 
         assert db_session.query(Token).count() == 4
         purge_expired_tokens()
@@ -133,10 +148,10 @@ class TestPurgeExpiredTokens(object):
         assert db_session.query(Token).count() == 2
 
 
-@pytest.mark.usefixtures('celery')
+@pytest.mark.usefixtures("celery")
 class TestPurgeRemovedFeatures(object):
     def test_calls_remove_old_flags(self, db_session, patch):
-        Feature = patch('h.tasks.cleanup.models.Feature')
+        Feature = patch("h.tasks.cleanup.models.Feature")
 
         purge_removed_features()
 
@@ -145,6 +160,6 @@ class TestPurgeRemovedFeatures(object):
 
 @pytest.fixture
 def celery(patch, db_session):
-    cel = patch('h.tasks.cleanup.celery', autospec=False)
+    cel = patch("h.tasks.cleanup.celery", autospec=False)
     cel.request.db = db_session
     return cel

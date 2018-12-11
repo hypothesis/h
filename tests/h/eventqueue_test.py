@@ -13,7 +13,7 @@ class DummyEvent(object):
         self.request = request
 
 
-@pytest.mark.usefixtures('pyramid_config')
+@pytest.mark.usefixtures("pyramid_config")
 class TestEventQueue(object):
     def test_init_adds_response_callback(self, pyramid_request):
         request = mock.Mock()
@@ -29,7 +29,9 @@ class TestEventQueue(object):
         queue(event)
         assert list(queue.queue) == [event]
 
-    def test_publish_all_notifies_events_in_fifo_order(self, pyramid_request, subscriber):
+    def test_publish_all_notifies_events_in_fifo_order(
+        self, pyramid_request, subscriber
+    ):
         queue = eventqueue.EventQueue(pyramid_request)
         firstevent = DummyEvent(pyramid_request)
         queue(firstevent)
@@ -40,14 +42,17 @@ class TestEventQueue(object):
 
         assert subscriber.call_args_list == [
             mock.call(firstevent),
-            mock.call(secondevent)
+            mock.call(secondevent),
         ]
 
-    def test_publish_all_sandboxes_each_subscriber(self, pyramid_request, pyramid_config):
+    def test_publish_all_sandboxes_each_subscriber(
+        self, pyramid_request, pyramid_config
+    ):
         queue = eventqueue.EventQueue(pyramid_request)
 
         def failing_subscriber(event):
-            raise Exception('failing_subscriber failed')
+            raise Exception("failing_subscriber failed")
+
         first_subscriber = mock.Mock()
         second_subscriber = mock.Mock()
         second_subscriber.side_effect = failing_subscriber
@@ -70,16 +75,16 @@ class TestEventQueue(object):
     def test_publish_all_reraises_in_debug_mode(self, subscriber, pyramid_request):
         queue = eventqueue.EventQueue(pyramid_request)
         pyramid_request.debug = True
-        subscriber.side_effect = Exception('boom!')
+        subscriber.side_effect = Exception("boom!")
 
         with pytest.raises(Exception) as excinfo:
             queue(DummyEvent(pyramid_request))
             queue.publish_all()
-        assert str(excinfo.value) == 'boom!'
+        assert str(excinfo.value) == "boom!"
 
     def test_publish_all_sends_exception_to_sentry(self, subscriber, pyramid_request):
         pyramid_request.sentry = mock.Mock()
-        subscriber.side_effect = ValueError('exploded!')
+        subscriber.side_effect = ValueError("exploded!")
         queue = eventqueue.EventQueue(pyramid_request)
         event = DummyEvent(pyramid_request)
         queue(event)
@@ -88,8 +93,10 @@ class TestEventQueue(object):
 
         assert pyramid_request.sentry.captureException.called
 
-    def test_publish_all_logs_exception_when_sentry_is_not_available(self, log, subscriber, pyramid_request):
-        subscriber.side_effect = ValueError('exploded!')
+    def test_publish_all_logs_exception_when_sentry_is_not_available(
+        self, log, subscriber, pyramid_request
+    ):
+        subscriber.side_effect = ValueError("exploded!")
         queue = eventqueue.EventQueue(pyramid_request)
         event = DummyEvent(pyramid_request)
         queue(event)
@@ -98,8 +105,10 @@ class TestEventQueue(object):
 
         assert log.exception.called
 
-    def test_response_callback_skips_publishing_events_on_exception(self, publish_all, pyramid_request):
-        pyramid_request.exception = ValueError('exploded!')
+    def test_response_callback_skips_publishing_events_on_exception(
+        self, publish_all, pyramid_request
+    ):
+        pyramid_request.exception = ValueError("exploded!")
         queue = eventqueue.EventQueue(pyramid_request)
         queue.response_callback(pyramid_request, None)
         assert not publish_all.called
@@ -112,11 +121,11 @@ class TestEventQueue(object):
 
     @pytest.fixture
     def log(self, patch):
-        return patch('h.eventqueue.log')
+        return patch("h.eventqueue.log")
 
     @pytest.fixture
     def publish_all(self, patch):
-        return patch('h.eventqueue.EventQueue.publish_all')
+        return patch("h.eventqueue.EventQueue.publish_all")
 
     @pytest.fixture
     def subscriber(self):

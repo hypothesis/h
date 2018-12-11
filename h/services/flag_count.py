@@ -21,9 +21,11 @@ class FlagCountService(object):
         :returns: The number of times the annotation has been flagged.
         :rtype: int
         """
-        return self._session.query(sa.func.count(Flag.id)) \
-                            .filter_by(annotation_id=annotation.id) \
-                            .scalar()
+        return (
+            self._session.query(sa.func.count(Flag.id))
+            .filter_by(annotation_id=annotation.id)
+            .scalar()
+        )
 
     def flag_counts(self, annotation_ids):
         """
@@ -38,10 +40,13 @@ class FlagCountService(object):
         if not annotation_ids:
             return {}
 
-        query = self._session.query(sa.func.count(Flag.id).label('flag_count'),
-                                    Flag.annotation_id) \
-                             .filter(Flag.annotation_id.in_(annotation_ids)) \
-                             .group_by(Flag.annotation_id)
+        query = (
+            self._session.query(
+                sa.func.count(Flag.id).label("flag_count"), Flag.annotation_id
+            )
+            .filter(Flag.annotation_id.in_(annotation_ids))
+            .group_by(Flag.annotation_id)
+        )
 
         flag_counts = {f.annotation_id: f.flag_count for f in query}
         missing_ids = set(annotation_ids) - set(flag_counts.keys())

@@ -14,6 +14,6 @@ class DocumentJSONPresenter(object):
         d = {}
         title = self.document.title
         if title:
-            d['title'] = [title]
+            d["title"] = [title]
 
         return d

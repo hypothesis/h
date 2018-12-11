@@ -16,5 +16,5 @@ def rename_user(user_id, new_username):
     if user is None:
         raise ValueError("Could not find user with id %d" % user_id)
 
-    svc = celery.request.find_service(name='rename_user')
+    svc = celery.request.find_service(name="rename_user")
     svc.rename(user, new_username)

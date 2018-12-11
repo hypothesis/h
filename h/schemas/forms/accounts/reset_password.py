@@ -20,8 +20,8 @@ class ResetCode(colander.SchemaType):
         if appstruct is colander.null:
             return colander.null
         if not isinstance(appstruct, models.User):
-            raise colander.Invalid(node, '%r is not a User' % appstruct)
-        request = node.bindings['request']
+            raise colander.Invalid(node, "%r is not a User" % appstruct)
+        request = node.bindings["request"]
         serializer = request.registry.password_reset_serializer
         return serializer.dumps(appstruct.username)
 
@@ -29,24 +29,27 @@ class ResetCode(colander.SchemaType):
         if cstruct is colander.null:
             return colander.null
 
-        request = node.bindings['request']
+        request = node.bindings["request"]
         serializer = request.registry.password_reset_serializer
 
         try:
-            (username, timestamp) = serializer.loads(cstruct,
-                                                     max_age=72*3600,
-                                                     return_timestamp=True)
+            (username, timestamp) = serializer.loads(
+                cstruct, max_age=72 * 3600, return_timestamp=True
+            )
         except SignatureExpired:
-            raise colander.Invalid(node, _('Reset code has expired. Please reset your password again'))
+            raise colander.Invalid(
+                node, _("Reset code has expired. Please reset your password again")
+            )
         except BadData:
-            raise colander.Invalid(node, _('Wrong reset code.'))
+            raise colander.Invalid(node, _("Wrong reset code."))
 
-        user = models.User.get_by_username(request.db, username, request.default_authority)
+        user = models.User.get_by_username(
+            request.db, username, request.default_authority
+        )
         if user is None:
-            raise colander.Invalid(node, _('Your reset code is not valid'))
+            raise colander.Invalid(node, _("Your reset code is not valid"))
         if user.password_updated is not None and timestamp < user.password_updated:
-            raise colander.Invalid(node,
-                                   _('This reset code has already been used.'))
+            raise colander.Invalid(node, _("This reset code has already been used."))
         return user
 
 
@@ -55,9 +58,11 @@ class ResetPasswordSchema(CSRFSchema):
     # call it `user` because when validated, it will return a `User` object.
     user = colander.SchemaNode(
         ResetCode(),
-        title=_('Reset code'),
-        hint=_('This will be emailed to you.'),
-        widget=deform.widget.TextInputWidget(disable_autocomplete=True))
+        title=_("Reset code"),
+        hint=_("This will be emailed to you."),
+        widget=deform.widget.TextInputWidget(disable_autocomplete=True),
+    )
     password = util.new_password_node(
-        title=_('New password'),
-        widget=deform.widget.PasswordWidget(disable_autocomplete=True))
+        title=_("New password"),
+        widget=deform.widget.PasswordWidget(disable_autocomplete=True),
+    )

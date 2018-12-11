@@ -11,9 +11,7 @@ from h.services.user_unique import DuplicateUserError
 from h.util.view import json_view
 
 
-@json_view(route_name='api.users',
-           request_method='POST',
-           permission='create')
+@json_view(route_name="api.users", request_method="POST", permission="create")
 def create(request):
     """
     Create a user.
@@ -37,28 +35,27 @@ def create(request):
     appstruct = schema.validate(_json_payload(request))
 
     # Enforce authority match
-    if appstruct['authority'] != client_authority_:
+    if appstruct["authority"] != client_authority_:
         raise ValidationError(
             "authority '{auth_param}' does not match client authority".format(
-                auth_param=appstruct['authority']
-            ))
+                auth_param=appstruct["authority"]
+            )
+        )
 
-    user_unique_service = request.find_service(name='user_unique')
+    user_unique_service = request.find_service(name="user_unique")
 
     try:
         user_unique_service.ensure_unique(appstruct, authority=client_authority_)
     except DuplicateUserError as err:
         raise ConflictError(err)
 
-    user_signup_service = request.find_service(name='user_signup')
+    user_signup_service = request.find_service(name="user_signup")
     user = user_signup_service.signup(require_activation=False, **appstruct)
     presenter = UserJSONPresenter(user)
     return presenter.asdict()
 
 
-@json_view(route_name='api.user',
-           request_method='PATCH',
-           permission='update')
+@json_view(route_name="api.user", request_method="PATCH", permission="update")
 def update(user, request):
     """
     Update a user.
@@ -69,7 +66,7 @@ def update(user, request):
     schema = UpdateUserAPISchema()
     appstruct = schema.validate(_json_payload(request))
 
-    user_update_service = request.find_service(name='user_update')
+    user_update_service = request.find_service(name="user_update")
     user = user_update_service.update(user, **appstruct)
 
     presenter = UserJSONPresenter(user)

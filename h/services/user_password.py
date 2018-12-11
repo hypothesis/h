@@ -42,8 +42,7 @@ class UserPasswordService(object):
 
             return verified
 
-        verified, new_hash = self.hasher.verify_and_update(password,
-                                                           user.password)
+        verified, new_hash = self.hasher.verify_and_update(password, user.password)
         if not verified:
             return False
 

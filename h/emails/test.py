@@ -23,13 +23,13 @@ def generate(request, recipient):
     """
 
     context = {
-        'time': datetime.datetime.utcnow().isoformat(),
-        'hostname': platform.node(),
-        'python_version': platform.python_version(),
-        'version': __version__,
+        "time": datetime.datetime.utcnow().isoformat(),
+        "hostname": platform.node(),
+        "python_version": platform.python_version(),
+        "version": __version__,
     }
 
-    text = render('h:templates/emails/test.txt.jinja2', context, request=request)
-    html = render('h:templates/emails/test.html.jinja2', context, request=request)
+    text = render("h:templates/emails/test.txt.jinja2", context, request=request)
+    html = render("h:templates/emails/test.html.jinja2", context, request=request)
 
-    return [recipient], 'Test mail', text, html
+    return [recipient], "Test mail", text, html

@@ -12,16 +12,13 @@ from h.services.organization import organization_factory
 class TestOrganizationService(object):
     def test_create_returns_organization(self, service):
         organization = service.create(
-            name='Organization',
-            authority='publisher.com',
-            logo='<svg>H</svg>')
+            name="Organization", authority="publisher.com", logo="<svg>H</svg>"
+        )
 
         assert isinstance(organization, Organization)
 
     def test_create_with_default_logo_returns_organization(self, service):
-        organization = service.create(
-            name='Organization',
-            authority='publisher.com')
+        organization = service.create(name="Organization", authority="publisher.com")
 
         assert isinstance(organization, Organization)
         assert organization.logo is None

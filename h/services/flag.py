@@ -22,7 +22,9 @@ class FlagService(object):
         :returns: True/False depending on the existence of a flag.
         :rtype: bool
         """
-        query = self.session.query(models.Flag).filter_by(user=user, annotation=annotation)
+        query = self.session.query(models.Flag).filter_by(
+            user=user, annotation=annotation
+        )
         return query.count() > 0
 
     def all_flagged(self, user, annotation_ids):
@@ -43,9 +45,9 @@ class FlagService(object):
         if not annotation_ids:
             return set()
 
-        query = self.session.query(models.Flag.annotation_id) \
-                            .filter(models.Flag.annotation_id.in_(annotation_ids),
-                                    models.Flag.user == user)
+        query = self.session.query(models.Flag.annotation_id).filter(
+            models.Flag.annotation_id.in_(annotation_ids), models.Flag.user == user
+        )
 
         return set([f.annotation_id for f in query])
 
@@ -70,8 +72,7 @@ class FlagService(object):
         if self.flagged(user, annotation):
             return
 
-        flag = models.Flag(user=user,
-                           annotation=annotation)
+        flag = models.Flag(user=user, annotation=annotation)
         self.session.add(flag)
 
 

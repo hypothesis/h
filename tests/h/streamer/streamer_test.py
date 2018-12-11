@@ -11,40 +11,40 @@ from h.streamer import websocket
 
 
 def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(session):
-    message = messages.Message(topic='foo', payload='bar')
+    message = messages.Message(topic="foo", payload="bar")
     queue = [message]
-    settings = {'foo': 'bar'}
+    settings = {"foo": "bar"}
 
     streamer.process_work_queue(settings, queue, session_factory=lambda _: session)
 
-    messages.handle_message.assert_called_once_with(message,
-                                                    settings,
-                                                    session,
-                                                    topic_handlers=mock.ANY)
+    messages.handle_message.assert_called_once_with(
+        message, settings, session, topic_handlers=mock.ANY
+    )
 
 
-def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_messages(session):
-    message = messages.Message(topic='user', payload='bar')
+def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_messages(
+    session
+):
+    message = messages.Message(topic="user", payload="bar")
     queue = [message]
-    settings = {'foo': 'bar'}
+    settings = {"foo": "bar"}
 
-    streamer.process_work_queue(settings,
-                                queue,
-                                session_factory=lambda _: session)
+    streamer.process_work_queue(settings, queue, session_factory=lambda _: session)
 
     topic_handlers = {
-        'annotation': messages.handle_annotation_event,
-        'user': messages.handle_user_event,
+        "annotation": messages.handle_annotation_event,
+        "user": messages.handle_user_event,
     }
 
-    messages.handle_message.assert_called_once_with(mock.ANY,
-                                                    settings,
-                                                    session,
-                                                    topic_handlers=topic_handlers)
+    messages.handle_message.assert_called_once_with(
+        mock.ANY, settings, session, topic_handlers=topic_handlers
+    )
 
 
-def test_process_work_queue_sends_websocket_messages_to_websocket_handle_message(session):
-    message = websocket.Message(socket=mock.sentinel.SOCKET, payload='bar')
+def test_process_work_queue_sends_websocket_messages_to_websocket_handle_message(
+    session
+):
+    message = websocket.Message(socket=mock.sentinel.SOCKET, payload="bar")
     queue = [message]
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
@@ -53,8 +53,8 @@ def test_process_work_queue_sends_websocket_messages_to_websocket_handle_message
 
 
 def test_process_work_queue_commits_after_each_message(session):
-    message1 = websocket.Message(socket=mock.sentinel.SOCKET, payload='bar')
-    message2 = messages.Message(topic='user', payload='bar')
+    message1 = websocket.Message(socket=mock.sentinel.SOCKET, payload="bar")
+    message2 = messages.Message(topic="user", payload="bar")
     queue = [message1, message2]
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
@@ -63,10 +63,10 @@ def test_process_work_queue_commits_after_each_message(session):
 
 
 def test_process_work_queue_rolls_back_on_handler_exception(session):
-    message = messages.Message(topic='foo', payload='bar')
+    message = messages.Message(topic="foo", payload="bar")
     queue = [message]
 
-    messages.handle_message.side_effect = RuntimeError('explosion')
+    messages.handle_message.side_effect = RuntimeError("explosion")
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
@@ -75,7 +75,7 @@ def test_process_work_queue_rolls_back_on_handler_exception(session):
 
 
 def test_process_work_queue_rolls_back_on_unknown_message_type(session):
-    message = 'something that is not a message'
+    message = "something that is not a message"
     queue = [message]
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
@@ -85,41 +85,35 @@ def test_process_work_queue_rolls_back_on_unknown_message_type(session):
 
 
 def test_process_work_queue_calls_close_after_commit(session):
-    message = messages.Message(topic='annotation', payload='bar')
+    message = messages.Message(topic="annotation", payload="bar")
     queue = [message]
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
-    assert session.method_calls[-2:] == [
-        call.commit(),
-        call.close()
-    ]
+    assert session.method_calls[-2:] == [call.commit(), call.close()]
 
 
 def test_process_work_queue_calls_close_after_rollback(session):
-    message = messages.Message(topic='foo', payload='bar')
+    message = messages.Message(topic="foo", payload="bar")
     queue = [message]
 
-    messages.handle_message.side_effect = RuntimeError('explosion')
+    messages.handle_message.side_effect = RuntimeError("explosion")
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
-    assert session.method_calls[-2:] == [
-        call.rollback(),
-        call.close()
-    ]
+    assert session.method_calls[-2:] == [call.rollback(), call.close()]
 
 
 @pytest.fixture
 def session():
-    return mock.Mock(spec_set=['close', 'commit', 'execute', 'rollback'])
+    return mock.Mock(spec_set=["close", "commit", "execute", "rollback"])
 
 
 @pytest.fixture(autouse=True)
 def websocket_handle_message(patch):
-    return patch('h.streamer.websocket.handle_message')
+    return patch("h.streamer.websocket.handle_message")
 
 
 @pytest.fixture(autouse=True)
 def messages_handle_message(patch):
-    return patch('h.streamer.messages.handle_message')
+    return patch("h.streamer.messages.handle_message")

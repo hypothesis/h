@@ -13,7 +13,6 @@ from tests.common.matchers import Matcher
 
 
 class TestMemberJoin(object):
-
     def test_it_adds_user_to_group(self, group_members_service, factories):
         user = factories.User()
         group = factories.Group()
@@ -35,12 +34,13 @@ class TestMemberJoin(object):
 
         group_members_service.member_join(group, user.userid)
 
-        publish.assert_called_once_with('group-join', group.pubid, user.userid)
+        publish.assert_called_once_with("group-join", group.pubid, user.userid)
 
 
 class TestMemberLeave(object):
-
-    def test_it_removes_user_from_group(self, group_members_service, factories, creator):
+    def test_it_removes_user_from_group(
+        self, group_members_service, factories, creator
+    ):
         group = factories.Group(creator=creator)
         new_member = factories.User()
         group.members.append(new_member)
@@ -66,11 +66,10 @@ class TestMemberLeave(object):
 
         group_members_service.member_leave(group, new_member.userid)
 
-        publish.assert_called_once_with('group-leave', group.pubid, new_member.userid)
+        publish.assert_called_once_with("group-leave", group.pubid, new_member.userid)
 
 
 class TestAddMembers(object):
-
     def test_it_adds_users_in_userids(self, factories, group_members_service):
         group = factories.OpenGroup()
         users = [factories.User(), factories.User()]
@@ -80,7 +79,9 @@ class TestAddMembers(object):
 
         assert group.members == users
 
-    def test_it_does_not_remove_existing_members(self, factories, group_members_service):
+    def test_it_does_not_remove_existing_members(
+        self, factories, group_members_service
+    ):
         creator = factories.User()
         group = factories.Group(creator=creator)
         users = [factories.User(), factories.User()]
@@ -93,24 +94,21 @@ class TestAddMembers(object):
 
 
 class TestUpdateMembers(object):
-
     def test_it_adds_users_in_userids(self, factories, group_members_service):
         group = factories.OpenGroup()  # no members at outset
-        new_members = [
-            factories.User(),
-            factories.User()
-        ]
+        new_members = [factories.User(), factories.User()]
 
-        group_members_service.update_members(group, [user.userid for user in new_members])
+        group_members_service.update_members(
+            group, [user.userid for user in new_members]
+        )
 
         assert group.members == new_members
 
-    def test_it_removes_members_not_present_in_userids(self, factories, group_members_service, creator):
+    def test_it_removes_members_not_present_in_userids(
+        self, factories, group_members_service, creator
+    ):
         group = factories.Group(creator=creator)  # creator will be a member
-        new_members = [
-            factories.User(),
-            factories.User()
-        ]
+        new_members = [factories.User(), factories.User()]
         group.members.append(new_members[0])
         group.members.append(new_members[1])
 
@@ -118,49 +116,55 @@ class TestUpdateMembers(object):
 
         assert not group.members  # including the creator
 
-    def test_it_does_not_remove_members_present_in_userids(self, factories, group_members_service, publish):
+    def test_it_does_not_remove_members_present_in_userids(
+        self, factories, group_members_service, publish
+    ):
         group = factories.OpenGroup()  # no members at outset
-        new_members = [
-            factories.User(),
-            factories.User()
-        ]
+        new_members = [factories.User(), factories.User()]
         group.members.append(new_members[0])
         group.members.append(new_members[1])
 
-        group_members_service.update_members(group, [user.userid for user in group.members])
+        group_members_service.update_members(
+            group, [user.userid for user in group.members]
+        )
 
         assert new_members[0] in group.members
         assert new_members[1] in group.members
         publish.assert_not_called()
 
-    def test_it_proxies_to_member_join_and_leave(self, factories, group_members_service):
+    def test_it_proxies_to_member_join_and_leave(
+        self, factories, group_members_service
+    ):
         group_members_service.member_join = mock.Mock()
         group_members_service.member_leave = mock.Mock()
 
         group = factories.OpenGroup()  # no members at outset
-        new_members = [
-            factories.User(),
-            factories.User()
-        ]
+        new_members = [factories.User(), factories.User()]
         group.members.append(new_members[0])
 
         group_members_service.update_members(group, [new_members[1].userid])
 
-        group_members_service.member_join.assert_called_once_with(group, new_members[1].userid)
-        group_members_service.member_leave.assert_called_once_with(group, new_members[0].userid)
+        group_members_service.member_join.assert_called_once_with(
+            group, new_members[1].userid
+        )
+        group_members_service.member_leave.assert_called_once_with(
+            group, new_members[0].userid
+        )
 
     def test_it_does_not_add_duplicate_members(self, factories, group_members_service):
         # test for idempotency
         group = factories.OpenGroup()
         new_member = factories.User()
 
-        group_members_service.update_members(group, [new_member.userid, new_member.userid])
+        group_members_service.update_members(
+            group, [new_member.userid, new_member.userid]
+        )
 
         assert group.members == [new_member]
         assert len(group.members) == 1
 
 
-@pytest.mark.usefixtures('user_service')
+@pytest.mark.usefixtures("user_service")
 class TestFactory(object):
     def test_returns_groups_service(self, pyramid_request):
         group_members_service = group_members_factory(None, pyramid_request)
@@ -175,24 +179,26 @@ class TestFactory(object):
     def test_wraps_user_service_as_user_fetcher(self, pyramid_request, user_service):
         group_members_service = group_members_factory(None, pyramid_request)
 
-        group_members_service.user_fetcher('foo')
+        group_members_service.user_fetcher("foo")
 
-        user_service.fetch.assert_called_once_with('foo')
+        user_service.fetch.assert_called_once_with("foo")
 
     def test_provides_realtime_publisher_as_publish(self, patch, pyramid_request):
-        pyramid_request.realtime = mock.Mock(spec_set=['publish_user'])
-        session = patch('h.services.group_members.session')
+        pyramid_request.realtime = mock.Mock(spec_set=["publish_user"])
+        session = patch("h.services.group_members.session")
         group_members_service = group_members_factory(None, pyramid_request)
 
-        group_members_service.publish('group-join', 'abc123', 'theresa')
+        group_members_service.publish("group-join", "abc123", "theresa")
 
         session.model.assert_called_once_with(pyramid_request)
-        pyramid_request.realtime.publish_user.assert_called_once_with({
-            'type': 'group-join',
-            'session_model': session.model.return_value,
-            'userid': 'theresa',
-            'group': 'abc123',
-        })
+        pyramid_request.realtime.publish_user.assert_called_once_with(
+            {
+                "type": "group-join",
+                "session_model": session.model.return_value,
+                "userid": "theresa",
+                "group": "abc123",
+            }
+        )
 
 
 @pytest.fixture
@@ -202,12 +208,13 @@ def usr_group_members_service(pyramid_request, db_session):
         # we do want to be able to fetch user models for internal
         # module behavior tests
         return db_session.query(User).filter_by(userid=userid).one_or_none()
+
     return fetch
 
 
 @pytest.fixture
 def origins():
-    return ['http://example.com']
+    return ["http://example.com"]
 
 
 @pytest.fixture
@@ -222,13 +229,13 @@ def group_members_service(db_session, usr_group_members_service, publish):
 
 @pytest.fixture
 def creator(factories):
-    return factories.User(username='group_creator')
+    return factories.User(username="group_creator")
 
 
 @pytest.fixture
 def user_service(pyramid_config):
     service = mock.create_autospec(UserService, spec_set=True, instance=True)
-    pyramid_config.register_service(service, name='user')
+    pyramid_config.register_service(service, name="user")
     return service
 
 

@@ -8,6 +8,8 @@ help:
 	@echo "make shell             Launch a Python shell in the dev environment"
 	@echo "make sql               Connect to the dev database with a psql shell"
 	@echo "make lint              Run the code linter(s) and print any warnings"
+	@echo "make format            Correctly format the code"
+	@echo "make checkformatting   Crash if the code isn't correctly formatted"
 	@echo "make test              Run the unit tests"
 	@echo "make coverage          Print the unit test coverage report"
 	@echo "make codecov           Upload the coverage report to codecov.io"
@@ -40,6 +42,14 @@ sql:
 .PHONY: lint
 lint:
 	tox -e py36-lint
+
+.PHONY: format
+format:
+	tox -e py36-format
+
+PHONY: checkformatting
+checkformatting:
+	tox -e py36-checkformatting
 
 .PHONY: test
 test: node_modules/.uptodate

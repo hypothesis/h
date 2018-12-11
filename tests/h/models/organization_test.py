@@ -11,20 +11,18 @@ def test_init_sets_given_attributes():
             <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
             </svg>"""
     organization = models.Organization(
-        name='My organization',
-        logo=logo,
-        authority='example.com',
-        )
+        name="My organization", logo=logo, authority="example.com"
+    )
 
-    assert organization.name == 'My organization'
+    assert organization.name == "My organization"
     assert organization.logo == logo
-    assert organization.authority == 'example.com'
+    assert organization.authority == "example.com"
 
 
 def test_null_logo():
     organization = models.Organization(name="My Organization")
 
-    assert organization.name == 'My Organization'
+    assert organization.name == "My Organization"
     assert organization.logo is None
 
 
@@ -45,10 +43,11 @@ def test_none_logo_is_valid():
 
 def test_repr(db_session, factories):
     organization = models.Organization(
-        name='My Organization', authority='example.com', pubid='test_pubid')
+        name="My Organization", authority="example.com", pubid="test_pubid"
+    )
 
     assert repr(organization) == "<Organization: test_pubid>"
 
 
 def test_default_returns_the_default_organization(db_session):
-    assert models.Organization.default(db_session).pubid == '__default__'
+    assert models.Organization.default(db_session).pubid == "__default__"

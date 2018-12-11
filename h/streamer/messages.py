@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 
 # An incoming message from a subscribed realtime consumer
-Message = namedtuple('Message', ['topic', 'payload'])
+Message = namedtuple("Message", ["topic", "payload"])
 
 
 def process_messages(settings, routing_key, work_queue, raise_error=True):
@@ -43,21 +43,25 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
             message = Message(topic=routing_key, payload=payload)
             work_queue.put(message, timeout=0.1)
         except Full:
-            log.warning('Streamer work queue full! Unable to queue message from '
-                        'h.realtime having waited 0.1s: giving up.')
+            log.warning(
+                "Streamer work queue full! Unable to queue message from "
+                "h.realtime having waited 0.1s: giving up."
+            )
 
     conn = realtime.get_connection(settings)
     sentry_client = h.sentry.get_client(settings)
     statsd_client = h.stats.get_client(settings)
-    consumer = Consumer(connection=conn,
-                        routing_key=routing_key,
-                        handler=_handler,
-                        sentry_client=sentry_client,
-                        statsd_client=statsd_client)
+    consumer = Consumer(
+        connection=conn,
+        routing_key=routing_key,
+        handler=_handler,
+        sentry_client=sentry_client,
+        statsd_client=statsd_client,
+    )
     consumer.run()
 
     if raise_error:
-        raise RuntimeError('Realtime consumer quit unexpectedly!')
+        raise RuntimeError("Realtime consumer quit unexpectedly!")
 
 
 def handle_message(message, settings, session, topic_handlers):
@@ -74,8 +78,9 @@ def handle_message(message, settings, session, topic_handlers):
     try:
         handler = topic_handlers[message.topic]
     except KeyError:
-        raise RuntimeError("Don't know how to handle message from topic: "
-                           "{}".format(message.topic))
+        raise RuntimeError(
+            "Don't know how to handle message from topic: " "{}".format(message.topic)
+        )
 
     # N.B. We iterate over a non-weak list of instances because there's nothing
     # to stop connections being added or dropped during iteration, and if that
@@ -85,21 +90,23 @@ def handle_message(message, settings, session, topic_handlers):
 
 
 def handle_annotation_event(message, sockets, settings, session):
-    id_ = message['annotation_id']
+    id_ = message["annotation_id"]
     annotation = storage.fetch_annotation(session, id_)
 
     if annotation is None:
-        log.warning('received annotation event for missing annotation: %s', id_)
+        log.warning("received annotation event for missing annotation: %s", id_)
         return
 
     nipsa_service = NipsaService(session)
     user_nipsad = nipsa_service.is_flagged(annotation.userid)
 
-    authority = text_type(settings.get('h.authority', 'localhost'))
+    authority = text_type(settings.get("h.authority", "localhost"))
     group_service = GroupfinderService(session, authority)
 
     for socket in sockets:
-        reply = _generate_annotation_event(message, socket, annotation, user_nipsad, group_service)
+        reply = _generate_annotation_event(
+            message, socket, annotation, user_nipsad, group_service
+        )
         if reply is None:
             continue
         socket.send_json(reply)
@@ -123,12 +130,12 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad, group_s
     Returns None if the socket should not receive any message about this
     annotation event, otherwise a dict containing information about the event.
     """
-    action = message['action']
+    action = message["action"]
 
-    if action == 'read':
+    if action == "read":
         return None
 
-    if message['src_client_id'] == socket.client_id:
+    if message["src_client_id"] == socket.client_id:
         return None
 
     # We don't send anything until we have received a filter from the client
@@ -140,27 +147,23 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad, group_s
     if user_nipsad and socket.authenticated_userid != annotation.userid:
         return None
 
-    notification = {
-        'type': 'annotation-notification',
-        'options': {'action': action},
-    }
+    notification = {"type": "annotation-notification", "options": {"action": action}}
 
-    base_url = socket.registry.settings.get('h.app_url',
-                                            'http://localhost:5000')
+    base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
     links_service = LinksService(base_url, socket.registry)
     resource = AnnotationContext(annotation, group_service, links_service)
     serialized = presenters.AnnotationJSONPresenter(resource).asdict()
 
-    permissions = serialized.get('permissions')
+    permissions = serialized.get("permissions")
     if not _authorized_to_read(socket.effective_principals, permissions):
         return None
 
     if not socket.filter.match(serialized, action):
         return None
 
-    notification['payload'] = [serialized]
-    if action == 'delete':
-        notification['payload'] = [{'id': annotation.id}]
+    notification["payload"] = [serialized]
+    if action == "delete":
+        notification["payload"] = [{"id": annotation.id}]
     return notification
 
 
@@ -174,16 +177,16 @@ def _generate_user_event(message, socket):
     Returns None if the socket should not receive any message about this user
     event, otherwise a dict containing information about the event.
     """
-    if socket.authenticated_userid != message['userid']:
+    if socket.authenticated_userid != message["userid"]:
         return None
 
     # for session state change events, the full session model
     # is included so that clients can update themselves without
     # further API requests
     return {
-        'type': 'session-change',
-        'action': message['type'],
-        'model': message['session_model']
+        "type": "session-change",
+        "action": message["type"],
+        "model": message["session_model"],
     }
 
 
@@ -193,7 +196,7 @@ def _authorized_to_read(effective_principals, permissions):
     If the annotation belongs to a private group, this will return False if the
     authenticated user isn't a member of that group.
     """
-    read_permissions = permissions.get('read', [])
+    read_permissions = permissions.get("read", [])
     read_principals = translate_annotation_principals(read_permissions)
     if set(read_principals).intersection(effective_principals):
         return True

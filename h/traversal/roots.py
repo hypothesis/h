@@ -63,12 +63,7 @@ shouldn't return model objects directly).
 from __future__ import unicode_literals
 
 
-from pyramid.security import (
-    ALL_PERMISSIONS,
-    DENY_ALL,
-    Allow,
-    Authenticated
-)
+from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow, Authenticated
 import sqlalchemy.exc
 import sqlalchemy.orm.exc
 
@@ -83,14 +78,15 @@ from h.traversal import contexts
 
 class Root(object):
     """This app's default root factory."""
+
     __acl__ = [
-        (Allow, role.Staff, 'admin_index'),
-        (Allow, role.Staff, 'admin_groups'),
-        (Allow, role.Staff, 'admin_mailer'),
-        (Allow, role.Staff, 'admin_organizations'),
-        (Allow, role.Staff, 'admin_users'),
+        (Allow, role.Staff, "admin_index"),
+        (Allow, role.Staff, "admin_groups"),
+        (Allow, role.Staff, "admin_mailer"),
+        (Allow, role.Staff, "admin_organizations"),
+        (Allow, role.Staff, "admin_users"),
         (Allow, role.Admin, ALL_PERMISSIONS),
-        DENY_ALL
+        DENY_ALL,
     ]
 
     def __init__(self, request):
@@ -100,9 +96,7 @@ class Root(object):
 class AnnotationRoot(object):
     """Root factory for routes whose context is an :py:class:`h.traversal.AnnotationContext`."""
 
-    __acl__ = [
-        (Allow, Authenticated, 'create'),
-    ]
+    __acl__ = [(Allow, Authenticated, "create")]
 
     def __init__(self, request):
         self.request = request
@@ -113,7 +107,7 @@ class AnnotationRoot(object):
             raise KeyError()
 
         group_service = self.request.find_service(IGroupService)
-        links_service = self.request.find_service(name='links')
+        links_service = self.request.find_service(name="links")
         return contexts.AnnotationContext(annotation, group_service, links_service)
 
 
@@ -125,6 +119,7 @@ class AuthClientRoot(object):
     objects.
 
     """
+
     def __init__(self, request):
         self.request = request
 
@@ -156,6 +151,7 @@ class OrganizationRoot(object):
     objects.
 
     """
+
     def __init__(self, request):
         self.request = request
 
@@ -179,6 +175,7 @@ class OrganizationLogoRoot(object):
     organization logos.
 
     """
+
     def __init__(self, request):
         self.request = request
         self.organization_factory = OrganizationRoot(self.request)
@@ -201,13 +198,11 @@ class GroupRoot(object):
 
     """
 
-    __acl__ = [
-        (Allow, role.User, 'create'),  # Any authn'd user may create a group
-    ]
+    __acl__ = [(Allow, role.User, "create")]  # Any authn'd user may create a group
 
     def __init__(self, request):
         self.request = request
-        self.group_service = request.find_service(name='group')
+        self.group_service = request.find_service(name="group")
 
     def __getitem__(self, pubid_or_groupid):
         group = self.group_service.fetch(pubid_or_groupid)
@@ -246,9 +241,8 @@ class ProfileRoot(object):
     """
     Simple Root for API profile endpoints
     """
-    __acl__ = [
-        (Allow, role.User, 'update'),
-    ]
+
+    __acl__ = [(Allow, role.User, "update")]
 
     def __init__(self, request):
         self.request = request
@@ -261,13 +255,12 @@ class UserRoot(object):
     FIXME: This class should return UserContext objects, not User objects.
 
     """
-    __acl__ = [
-        (Allow, role.AuthClient, 'create'),
-    ]
+
+    __acl__ = [(Allow, role.AuthClient, "create")]
 
     def __init__(self, request):
         self.request = request
-        self.user_svc = self.request.find_service(name='user')
+        self.user_svc = self.request.find_service(name="user")
 
     def __getitem__(self, username):
         authority = client_authority(self.request) or self.request.default_authority

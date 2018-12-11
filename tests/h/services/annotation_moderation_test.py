@@ -21,7 +21,7 @@ class TestAnnotationModerationServiceHidden(object):
         assert svc.hidden(annotation) is False
 
 
-@pytest.mark.usefixtures('mods')
+@pytest.mark.usefixtures("mods")
 class TestAnnotationModerationServiceAllHidden(object):
     def test_it_lists_moderated_annotation_ids(self, svc, mods):
         ids = [m.annotation.id for m in mods[0:-1]]
@@ -45,20 +45,26 @@ class TestAnnotationModerationServiceHide(object):
         annotation = factories.Annotation()
         svc.hide(annotation)
 
-        mod = db_session.query(models.AnnotationModeration) \
-                        .filter_by(annotation=annotation) \
-                        .first()
+        mod = (
+            db_session.query(models.AnnotationModeration)
+            .filter_by(annotation=annotation)
+            .first()
+        )
 
         assert mod is not None
 
-    def test_it_skips_creating_moderation_when_already_exists(self, svc, factories, db_session):
+    def test_it_skips_creating_moderation_when_already_exists(
+        self, svc, factories, db_session
+    ):
         existing = factories.AnnotationModeration()
 
         svc.hide(existing.annotation)
 
-        count = db_session.query(models.AnnotationModeration) \
-                          .filter_by(annotation=existing.annotation) \
-                          .count()
+        count = (
+            db_session.query(models.AnnotationModeration)
+            .filter_by(annotation=existing.annotation)
+            .count()
+        )
 
         assert count == 1
 
@@ -79,7 +85,9 @@ class TestAnnotationModerationServiceUnhide(object):
 
         assert svc.hidden(mod2.annotation) is True
 
-    def test_it_skips_hiding_annotation_when_not_hidden(self, svc, factories, db_session):
+    def test_it_skips_hiding_annotation_when_not_hidden(
+        self, svc, factories, db_session
+    ):
         annotation = factories.Annotation()
 
         svc.unhide(annotation)

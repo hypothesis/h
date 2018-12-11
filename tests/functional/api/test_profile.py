@@ -23,39 +23,38 @@ class TestGetProfile(object):
         to the site's `authority` and show only the global group.
         """
 
-        res = app.get('/api/profile')
+        res = app.get("/api/profile")
 
-        assert res.json['userid'] is None
-        assert res.json['authority'] == 'example.com'
-        assert [group['id'] for group in res.json['groups']] == ['__world__']
+        assert res.json["userid"] is None
+        assert res.json["authority"] == "example.com"
+        assert [group["id"] for group in res.json["groups"]] == ["__world__"]
 
     def test_it_returns_profile_for_authenticated_user(self, app, user_with_token):
         """Fetch a profile through the API for an authenticated user."""
 
         user, token = user_with_token
 
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
 
-        res = app.get('/api/profile', headers=headers)
+        res = app.get("/api/profile", headers=headers)
 
-        assert res.json['userid'] == user.userid
-        assert [group['id'] for group in res.json['groups']] == ['__world__']
+        assert res.json["userid"] == user.userid
+        assert [group["id"] for group in res.json["groups"]] == ["__world__"]
 
-    def test_it_returns_profile_for_third_party_authd_user(self,
-                                                           app,
-                                                           open_group,
-                                                           third_party_user_with_token):
+    def test_it_returns_profile_for_third_party_authd_user(
+        self, app, open_group, third_party_user_with_token
+    ):
         """Fetch a profile for a third-party account."""
 
         user, token = third_party_user_with_token
 
-        headers = {'Authorization': str('Bearer {}'.format(token.value))}
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
 
-        res = app.get('/api/profile', headers=headers)
+        res = app.get("/api/profile", headers=headers)
 
-        assert res.json['userid'] == user.userid
+        assert res.json["userid"] == user.userid
 
-        group_ids = [group['id'] for group in res.json['groups']]
+        group_ids = [group["id"] for group in res.json["groups"]]
         # The profile API returns no open groups for third-party accounts.
         # (The client gets open groups from the groups API instead.)
         assert group_ids == []
@@ -63,24 +62,19 @@ class TestGetProfile(object):
 
 @pytest.mark.functional
 class TestPatchProfile(object):
-
     def test_it_allows_authenticated_user(self, app, user_with_token):
         """PATCH profile will always act on the auth'd user's profile."""
 
         user, token = user_with_token
 
-        headers = {'Authorization': native_str('Bearer {}'.format(token.value))}
-        profile = {
-            'preferences': {
-                'show_sidebar_tutorial': True
-            }
-        }
+        headers = {"Authorization": native_str("Bearer {}".format(token.value))}
+        profile = {"preferences": {"show_sidebar_tutorial": True}}
 
-        res = app.patch_json('/api/profile', profile, headers=headers)
+        res = app.patch_json("/api/profile", profile, headers=headers)
 
         # The ``show_sidebar_tutorial`` property is only present if
         # its value is True
-        assert 'show_sidebar_tutorial' in res.json['preferences']
+        assert "show_sidebar_tutorial" in res.json["preferences"]
         assert res.status_code == 200
 
     def test_it_updates_user_profile(self, app, user_with_token):
@@ -88,41 +82,29 @@ class TestPatchProfile(object):
 
         user, token = user_with_token
 
-        headers = {'Authorization': native_str('Bearer {}'.format(token.value))}
-        profile = {
-            'preferences': {
-                'show_sidebar_tutorial': False
-            }
-        }
+        headers = {"Authorization": native_str("Bearer {}".format(token.value))}
+        profile = {"preferences": {"show_sidebar_tutorial": False}}
 
-        res = app.patch_json('/api/profile', profile, headers=headers)
+        res = app.patch_json("/api/profile", profile, headers=headers)
 
         # The ``show_sidebar_tutorial`` property is only present if
         # its value is True
-        assert 'show_sidebar_tutorial' not in res.json['preferences']
+        assert "show_sidebar_tutorial" not in res.json["preferences"]
         assert res.status_code == 200
 
     def test_it_raises_http_404_if_unauthenticated(self, app):
         # FIXME: This should return a 403
-        profile = {
-            'preferences': {
-                'show_sidebar_tutorial': False
-            }
-        }
+        profile = {"preferences": {"show_sidebar_tutorial": False}}
 
-        res = app.patch_json('/api/profile', profile, expect_errors=True)
+        res = app.patch_json("/api/profile", profile, expect_errors=True)
 
         assert res.status_code == 404
 
     @pytest.mark.xfail
     def test_it_raises_http_403_if_unauthenticated(self, app):
-        profile = {
-            'preferences': {
-                'show_sidebar_tutorial': False
-            }
-        }
+        profile = {"preferences": {"show_sidebar_tutorial": False}}
 
-        res = app.patch_json('/api/profile', profile, expect_errors=True)
+        res = app.patch_json("/api/profile", profile, expect_errors=True)
 
         assert res.status_code == 403
 
@@ -144,7 +126,7 @@ def user_with_token(user, db_session, factories):
 
 @pytest.fixture
 def auth_client(db_session, factories):
-    auth_client = factories.AuthClient(authority='thirdparty.example.org')
+    auth_client = factories.AuthClient(authority="thirdparty.example.org")
     db_session.commit()
     return auth_client
 

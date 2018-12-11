@@ -23,18 +23,12 @@ def generate(request, id, email, activation_code):
     :returns: a 4-element tuple containing: recipients, subject, text, html
     """
     context = {
-        'activate_link': request.route_url('activate',
-                                           id=id,
-                                           code=activation_code),
+        "activate_link": request.route_url("activate", id=id, code=activation_code)
     }
 
-    subject = _('Please activate your account')
+    subject = _("Please activate your account")
 
-    text = render('h:templates/emails/signup.txt.jinja2',
-                  context,
-                  request=request)
-    html = render('h:templates/emails/signup.html.jinja2',
-                  context,
-                  request=request)
+    text = render("h:templates/emails/signup.txt.jinja2", context, request=request)
+    html = render("h:templates/emails/signup.html.jinja2", context, request=request)
 
     return [email], subject, text, html
