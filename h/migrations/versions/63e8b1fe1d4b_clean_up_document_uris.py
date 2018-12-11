@@ -15,8 +15,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-revision = '63e8b1fe1d4b'
-down_revision = '53a74d7ae1b0'
+revision = "63e8b1fe1d4b"
+down_revision = "53a74d7ae1b0"
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ Session = sessionmaker()
 
 
 class DocumentURI(Base):
-    __tablename__ = 'document_uri'
+    __tablename__ = "document_uri"
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     uri = sa.Column(sa.UnicodeText)
 
@@ -49,10 +49,8 @@ def upgrade():
 
     session.commit()
 
-    log.info(
-        "Removed whitespace from {n} document_uris".format(n=len(changed)))
-    log.info(
-        "Deleted {n} document_uris with empty uris".format(n=len(to_delete)))
+    log.info("Removed whitespace from {n} document_uris".format(n=len(changed)))
+    log.info("Deleted {n} document_uris with empty uris".format(n=len(to_delete)))
 
 
 def downgrade():

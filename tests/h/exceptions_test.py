@@ -7,17 +7,17 @@ from h import exceptions
 
 class TestAPIError(object):
     def test_message(self):
-        exc = exceptions.APIError('some message')
+        exc = exceptions.APIError("some message")
 
-        assert str(exc) == 'some message'
+        assert str(exc) == "some message"
 
     def test_default_status_code(self):
-        exc = exceptions.APIError('some message')
+        exc = exceptions.APIError("some message")
 
         assert exc.status_code == 500
 
     def test_custom_status_code(self):
-        exc = exceptions.APIError('some message', status_code=418)
+        exc = exceptions.APIError("some message", status_code=418)
 
         assert exc.status_code == 418
 
@@ -26,7 +26,7 @@ class TestClientUnauthorized(object):
     def test_message(self):
         exc = exceptions.ClientUnauthorized()
 
-        assert 'credentials are invalid' in str(exc)
+        assert "credentials are invalid" in str(exc)
 
     def test_status_code(self):
         exc = exceptions.ClientUnauthorized()
@@ -53,18 +53,18 @@ class TestConflictError(object):
 
 class TestOAuthTokenError(object):
     def test_it_sets_type_and_message(self):
-        exc = exceptions.OAuthTokenError('boom', 'mytype')
+        exc = exceptions.OAuthTokenError("boom", "mytype")
 
-        assert exc.type == 'mytype'
-        assert str(exc) == 'boom'
+        assert exc.type == "mytype"
+        assert str(exc) == "boom"
 
     def test_it_sets_default_response_code(self):
-        exc = exceptions.OAuthTokenError('boom', 'mytype')
+        exc = exceptions.OAuthTokenError("boom", "mytype")
 
         assert exc.status_code == 400
 
     def test_it_sets_custom_response_code(self):
-        exc = exceptions.OAuthTokenError('boom', 'mytype', 500)
+        exc = exceptions.OAuthTokenError("boom", "mytype", 500)
 
         assert exc.status_code == 500
 
@@ -74,4 +74,4 @@ class TestPayloadError(object):
         exc = exceptions.PayloadError()
 
         assert exc.status_code == 400
-        assert str(exc) == 'Expected a valid JSON payload, but none was found!'
+        assert str(exc) == "Expected a valid JSON payload, but none was found!"

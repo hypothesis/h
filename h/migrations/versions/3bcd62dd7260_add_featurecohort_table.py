@@ -7,32 +7,38 @@ Create Date: 2016-05-10 17:01:02.704596
 """
 
 # revision identifiers, used by Alembic.
-revision = '3bcd62dd7260'
-down_revision = 'dfa82518915a'
+revision = "3bcd62dd7260"
+down_revision = "dfa82518915a"
 
 from alembic import op
 import sqlalchemy as sa
 
 
 def upgrade():
-    op.create_table('featurecohort',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('name', sa.UnicodeText(), nullable=False),
-        sa.Column('created', sa.DateTime(), server_default=sa.func.now(), nullable=False),
-        sa.Column('updated', sa.DateTime(), server_default=sa.func.now(), nullable=False),
-        sa.PrimaryKeyConstraint('id'),
+    op.create_table(
+        "featurecohort",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("name", sa.UnicodeText(), nullable=False),
+        sa.Column(
+            "created", sa.DateTime(), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "updated", sa.DateTime(), server_default=sa.func.now(), nullable=False
+        ),
+        sa.PrimaryKeyConstraint("id"),
     )
-    op.create_table('featurecohort_user',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
-        sa.Column('cohort_id', sa.Integer(), nullable=False),
-        sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['cohort_id'], ['featurecohort.id']),
-        sa.ForeignKeyConstraint(['user_id'], ['user.id']),
-        sa.UniqueConstraint('cohort_id', 'user_id'),
+    op.create_table(
+        "featurecohort_user",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("cohort_id", sa.Integer(), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(["cohort_id"], ["featurecohort.id"]),
+        sa.ForeignKeyConstraint(["user_id"], ["user.id"]),
+        sa.UniqueConstraint("cohort_id", "user_id"),
     )
 
 
 def downgrade():
-    op.drop_table('featurecohort_user')
-    op.drop_table('featurecohort')
+    op.drop_table("featurecohort_user")
+    op.drop_table("featurecohort")

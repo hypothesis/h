@@ -11,17 +11,21 @@ from __future__ import unicode_literals
 from alembic import op
 import sqlalchemy as sa
 
-revision = '46a22db075d5'
-down_revision = '628c53b07'
+revision = "46a22db075d5"
+down_revision = "628c53b07"
 
 
 def upgrade():
-    op.add_column('group', sa.Column(
-        'organization_id',
-        sa.Integer,
-        sa.ForeignKey('organization.id'),
-        nullable=True))
+    op.add_column(
+        "group",
+        sa.Column(
+            "organization_id",
+            sa.Integer,
+            sa.ForeignKey("organization.id"),
+            nullable=True,
+        ),
+    )
 
 
 def downgrade():
-    op.drop_column('group', 'organization_id')
+    op.drop_column("group", "organization_id")

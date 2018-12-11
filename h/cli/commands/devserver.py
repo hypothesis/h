@@ -7,31 +7,38 @@ import click
 
 
 @click.command()
-@click.option('--https',
-              envvar='USE_HTTPS',
-              default=False,
-              is_flag=True,
-              help='Serve HTTPS rather than plain HTTP.')
-@click.option('--web/--no-web',
-              default=True,
-              help="Whether or not to run the Pyramid app process "
-                   "(default: --web).")
-@click.option('--ws/--no-ws',
-              default=True,
-              help="Whether or not to run the WebSocket process "
-                   "(default: --ws).")
-@click.option('--worker/--no-worker',
-              default=True,
-              help="Whether or not to run the Celery worker process "
-                   "(default: --worker).")
-@click.option('--assets/--no-assets',
-              default=True,
-              help="Whether or not to run the gulp watch process "
-                   "(default: --assets).")
-@click.option('--beat/--no-beat',
-              default=True,
-              help="Wheter or not to run the celery beat process "
-                   "(default: --beat).")
+@click.option(
+    "--https",
+    envvar="USE_HTTPS",
+    default=False,
+    is_flag=True,
+    help="Serve HTTPS rather than plain HTTP.",
+)
+@click.option(
+    "--web/--no-web",
+    default=True,
+    help="Whether or not to run the Pyramid app process " "(default: --web).",
+)
+@click.option(
+    "--ws/--no-ws",
+    default=True,
+    help="Whether or not to run the WebSocket process " "(default: --ws).",
+)
+@click.option(
+    "--worker/--no-worker",
+    default=True,
+    help="Whether or not to run the Celery worker process " "(default: --worker).",
+)
+@click.option(
+    "--assets/--no-assets",
+    default=True,
+    help="Whether or not to run the gulp watch process " "(default: --assets).",
+)
+@click.option(
+    "--beat/--no-beat",
+    default=True,
+    help="Wheter or not to run the celery beat process " "(default: --beat).",
+)
 def devserver(https, web, ws, worker, assets, beat):
     """
     Run a development server.
@@ -60,33 +67,43 @@ def devserver(https, web, ws, worker, assets, beat):
     try:
         from honcho.manager import Manager
     except ImportError:
-        raise click.ClickException('cannot import honcho: did you run `pip install -r requirements-dev.in` yet?')
+        raise click.ClickException(
+            "cannot import honcho: did you run `pip install -r requirements-dev.in` yet?"
+        )
 
-    os.environ['PYTHONUNBUFFERED'] = 'true'
+    os.environ["PYTHONUNBUFFERED"] = "true"
     if https:
-        gunicorn_args = '--certfile=.tlscert.pem --keyfile=.tlskey.pem'
-        os.environ['APP_URL'] = 'https://localhost:5000'
-        os.environ['WEBSOCKET_URL'] = 'wss://localhost:5001/ws'
+        gunicorn_args = "--certfile=.tlscert.pem --keyfile=.tlskey.pem"
+        os.environ["APP_URL"] = "https://localhost:5000"
+        os.environ["WEBSOCKET_URL"] = "wss://localhost:5001/ws"
     else:
-        gunicorn_args = ''
-        os.environ['APP_URL'] = 'http://localhost:5000'
-        os.environ['WEBSOCKET_URL'] = 'ws://localhost:5001/ws'
+        gunicorn_args = ""
+        os.environ["APP_URL"] = "http://localhost:5000"
+        os.environ["WEBSOCKET_URL"] = "ws://localhost:5001/ws"
 
     m = Manager()
     if web:
-        m.add_process('web', 'gunicorn --name web --reload --paste conf/development-app.ini %s' % gunicorn_args)
+        m.add_process(
+            "web",
+            "gunicorn --name web --reload --paste conf/development-app.ini %s"
+            % gunicorn_args,
+        )
 
     if ws:
-        m.add_process('ws', 'gunicorn --name websocket --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
+        m.add_process(
+            "ws",
+            "gunicorn --name websocket --reload --paste conf/development-websocket.ini %s"
+            % gunicorn_args,
+        )
 
     if worker:
-        m.add_process('worker', 'hypothesis --dev celery worker -l INFO')
+        m.add_process("worker", "hypothesis --dev celery worker -l INFO")
 
     if beat:
-        m.add_process('beat', 'hypothesis --dev celery beat')
+        m.add_process("beat", "hypothesis --dev celery beat")
 
     if assets:
-        m.add_process('assets', 'gulp watch')
+        m.add_process("assets", "gulp watch")
 
     m.loop()
 

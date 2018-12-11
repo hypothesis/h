@@ -10,14 +10,14 @@ def transform_annotation(event):
     nipsa = _user_nipsa(event.request, payload)
 
     if nipsa:
-        payload['nipsa'] = True
+        payload["nipsa"] = True
 
 
 def _user_nipsa(request, payload):
-    nipsa_service = request.find_service(name='nipsa')
-    return 'user' in payload and nipsa_service.is_flagged(payload['user'])
+    nipsa_service = request.find_service(name="nipsa")
+    return "user" in payload and nipsa_service.is_flagged(payload["user"])
 
 
 def _annotation_moderated(request, annotation):
-    svc = request.find_service(name='annotation_moderation')
+    svc = request.find_service(name="annotation_moderation")
     return svc.hidden(annotation)

@@ -10,9 +10,11 @@ from pyramid.httpexceptions import HTTPNoContent
 from h.views.api import moderation as views
 
 
-@pytest.mark.usefixtures('moderation_service')
+@pytest.mark.usefixtures("moderation_service")
 class TestCreate(object):
-    def test_it_hides_the_annotation(self, pyramid_request, resource, moderation_service):
+    def test_it_hides_the_annotation(
+        self, pyramid_request, resource, moderation_service
+    ):
         views.create(resource, pyramid_request)
 
         moderation_service.hide.assert_called_once_with(resource.annotation)
@@ -21,19 +23,23 @@ class TestCreate(object):
         views.create(resource, pyramid_request)
 
         events.AnnotationEvent.assert_called_once_with(
-            pyramid_request, resource.annotation.id, 'update')
+            pyramid_request, resource.annotation.id, "update"
+        )
 
         pyramid_request.notify_after_commit.assert_called_once_with(
-            events.AnnotationEvent.return_value)
+            events.AnnotationEvent.return_value
+        )
 
     def test_it_renders_no_content(self, pyramid_request, resource):
         response = views.create(resource, pyramid_request)
         assert isinstance(response, HTTPNoContent)
 
 
-@pytest.mark.usefixtures('moderation_service')
+@pytest.mark.usefixtures("moderation_service")
 class TestDelete(object):
-    def test_it_unhides_the_annotation(self, pyramid_request, resource, moderation_service):
+    def test_it_unhides_the_annotation(
+        self, pyramid_request, resource, moderation_service
+    ):
         views.delete(resource, pyramid_request)
 
         moderation_service.unhide.assert_called_once_with(resource.annotation)
@@ -42,10 +48,12 @@ class TestDelete(object):
         views.delete(resource, pyramid_request)
 
         events.AnnotationEvent.assert_called_once_with(
-            pyramid_request, resource.annotation.id, 'update')
+            pyramid_request, resource.annotation.id, "update"
+        )
 
         pyramid_request.notify_after_commit.assert_called_once_with(
-            events.AnnotationEvent.return_value)
+            events.AnnotationEvent.return_value
+        )
 
     def test_it_renders_no_content(self, pyramid_request, resource):
         response = views.delete(resource, pyramid_request)
@@ -54,19 +62,19 @@ class TestDelete(object):
 
 @pytest.fixture
 def resource():
-    return mock.Mock(spec_set=['annotation', 'group'])
+    return mock.Mock(spec_set=["annotation", "group"])
 
 
 @pytest.fixture
 def moderation_service(pyramid_config):
-    svc = mock.Mock(spec_set=['hide', 'unhide'])
-    pyramid_config.register_service(svc, name='annotation_moderation')
+    svc = mock.Mock(spec_set=["hide", "unhide"])
+    pyramid_config.register_service(svc, name="annotation_moderation")
     return svc
 
 
 @pytest.fixture
 def events(patch):
-    return patch('h.views.api.moderation.events')
+    return patch("h.views.api.moderation.events")
 
 
 @pytest.fixture

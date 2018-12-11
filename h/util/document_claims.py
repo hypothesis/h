@@ -25,7 +25,7 @@ import re
 #
 # This also accepts DOIs represented as URLs (eg.
 # "https://doi.org/10.1000/123456").
-DOI_PATTERN = re.compile(r'(https?://(dx\.)?doi\.org/)?10\.[0-9]{4,}[.0-9]*/.*')
+DOI_PATTERN = re.compile(r"(https?://(dx\.)?doi\.org/)?10\.[0-9]{4,}[.0-9]*/.*")
 
 
 def document_uris_from_data(document_data, claimant):
@@ -54,32 +54,26 @@ def document_uris_from_data(document_data, claimant):
     :rtype: list of dicts
 
     """
-    document_uris = document_uris_from_links(document_data.get('link', []),
-                                             claimant)
+    document_uris = document_uris_from_links(document_data.get("link", []), claimant)
 
     document_uris.extend(
-        document_uris_from_highwire_pdf(document_data.get('highwire', {}),
-                                        claimant)
+        document_uris_from_highwire_pdf(document_data.get("highwire", {}), claimant)
     )
 
     document_uris.extend(
-        document_uris_from_highwire_doi(document_data.get('highwire', {}),
-                                        claimant)
+        document_uris_from_highwire_doi(document_data.get("highwire", {}), claimant)
     )
 
-    document_uris.extend(
-        document_uris_from_dc(document_data.get('dc', {}),
-                              claimant)
-    )
+    document_uris.extend(document_uris_from_dc(document_data.get("dc", {}), claimant))
 
     document_uris.append(document_uri_self_claim(claimant))
 
     for document_uri in document_uris:
-        uri = document_uri['uri']
+        uri = document_uri["uri"]
         if uri:
-            document_uri['uri'] = uri.strip()
+            document_uri["uri"] = uri.strip()
 
-    document_uris = [d for d in document_uris if d['uri']]
+    document_uris = [d for d in document_uris if d["uri"]]
 
     return document_uris
 
@@ -107,6 +101,7 @@ def document_metas_from_data(document_data, claimant):
     :rtype: list of dicts
 
     """
+
     def transform_meta_(document_meta_dicts, items, path_prefix=None):
         """Fill document_meta_dicts with document meta dicts for the items."""
         if path_prefix is None:
@@ -117,16 +112,14 @@ def document_metas_from_data(document_data, claimant):
             keypath.append(key)
 
             if isinstance(value, dict):
-                transform_meta_(document_meta_dicts,
-                                value,
-                                path_prefix=keypath)
+                transform_meta_(document_meta_dicts, value, path_prefix=keypath)
             else:
                 if not isinstance(value, list):
                     value = [value]
 
-                type_ = '.'.join(keypath)
+                type_ = ".".join(keypath)
 
-                if type_ == 'title':
+                if type_ == "title":
                     # We don't allow None, empty strings, whitespace-only
                     # strings, leading or trailing whitespaces, or empty arrays
                     # in document title values.
@@ -134,13 +127,11 @@ def document_metas_from_data(document_data, claimant):
                     if not value:
                         continue
 
-                document_meta_dicts.append({
-                    'type': type_,
-                    'value': value,
-                    'claimant': claimant,
-                })
+                document_meta_dicts.append(
+                    {"type": type_, "value": value, "claimant": claimant}
+                )
 
-    items = {k: v for k, v in document_data.items() if k != 'link'}
+    items = {k: v for k, v in document_data.items() if k != "link"}
     document_meta_dicts = []
     transform_meta_(document_meta_dicts, items)
     return document_meta_dicts
@@ -163,37 +154,39 @@ def document_uris_from_links(link_dicts, claimant):
         link_keys = list(link.keys())
 
         # Disregard self-claim URLs as they're added separately later.
-        if link_keys == ['href'] and link['href'] == claimant:
+        if link_keys == ["href"] and link["href"] == claimant:
             continue
 
         # Disregard doi links as these are being added separately from the
         # highwire and dc metadata later on.
-        if link_keys == ['href'] and link['href'].startswith('doi:'):
+        if link_keys == ["href"] and link["href"].startswith("doi:"):
             continue
 
         # Disregard Highwire PDF links as these are being added separately from
         # the highwire metadata later on.
-        if set(link_keys) == set(['href', 'type']):
-            if link['type'] == 'application/pdf':
+        if set(link_keys) == set(["href", "type"]):
+            if link["type"] == "application/pdf":
                 continue
 
-        uri_ = link['href']
+        uri_ = link["href"]
 
         # Handle rel="..." links.
-        if 'rel' in link:
-            type_ = 'rel-{}'.format(link['rel'])
+        if "rel" in link:
+            type_ = "rel-{}".format(link["rel"])
         else:
-            type_ = ''
+            type_ = ""
 
         # The "type" item in link dicts becomes content_type in DocumentURIs.
-        content_type = link.get('type', '')
+        content_type = link.get("type", "")
 
-        document_uris.append({
-            'claimant': claimant,
-            'uri': uri_,
-            'type': type_,
-            'content_type': content_type,
-        })
+        document_uris.append(
+            {
+                "claimant": claimant,
+                "uri": uri_,
+                "type": type_,
+                "content_type": content_type,
+            }
+        )
 
     return document_uris
 
@@ -208,12 +201,16 @@ def document_uris_from_highwire_pdf(highwire_dict, claimant):
 
     """
     document_uris = []
-    hwpdfvalues = highwire_dict.get('pdf_url', [])
+    hwpdfvalues = highwire_dict.get("pdf_url", [])
     for pdf in hwpdfvalues:
-        document_uris.append({'claimant': claimant,
-                              'uri': pdf,
-                              'type': 'highwire-pdf',
-                              'content_type': 'application/pdf'})
+        document_uris.append(
+            {
+                "claimant": claimant,
+                "uri": pdf,
+                "type": "highwire-pdf",
+                "content_type": "application/pdf",
+            }
+        )
     return document_uris
 
 
@@ -227,14 +224,18 @@ def document_uris_from_highwire_doi(highwire_dict, claimant):
 
     """
     document_uris = []
-    hwdoivalues = highwire_dict.get('doi', [])
+    hwdoivalues = highwire_dict.get("doi", [])
     for doi in hwdoivalues:
         doi = doi_uri_from_string(doi)
         if doi is not None:
-            document_uris.append({'claimant': claimant,
-                                  'uri': doi,
-                                  'type': 'highwire-doi',
-                                  'content_type': ''})
+            document_uris.append(
+                {
+                    "claimant": claimant,
+                    "uri": doi,
+                    "type": "highwire-doi",
+                    "content_type": "",
+                }
+            )
     return document_uris
 
 
@@ -248,14 +249,13 @@ def document_uris_from_dc(dc_dict, claimant):
 
     """
     document_uris = []
-    dcdoivalues = dc_dict.get('identifier', [])
+    dcdoivalues = dc_dict.get("identifier", [])
     for doi in dcdoivalues:
         doi = doi_uri_from_string(doi)
         if doi is not None:
-            document_uris.append({'claimant': claimant,
-                                  'uri': doi,
-                                  'type': 'dc-doi',
-                                  'content_type': ''})
+            document_uris.append(
+                {"claimant": claimant, "uri": doi, "type": "dc-doi", "content_type": ""}
+            )
 
     return document_uris
 
@@ -263,10 +263,10 @@ def document_uris_from_dc(dc_dict, claimant):
 def document_uri_self_claim(claimant):
     """Return a "self-claim" document URI dict for the given claimant."""
     return {
-        'claimant': claimant,
-        'uri': claimant,
-        'type': 'self-claim',
-        'content_type': '',
+        "claimant": claimant,
+        "uri": claimant,
+        "type": "self-claim",
+        "content_type": "",
     }
 
 
@@ -284,14 +284,14 @@ def doi_uri_from_string(s):
     """
     s = s.strip()
 
-    if s.startswith('doi:'):
-        s = s[len('doi:'):]
+    if s.startswith("doi:"):
+        s = s[len("doi:") :]
 
     s = s.strip()
 
     if DOI_PATTERN.match(s) is None:
         return None
 
-    s = 'doi:{}'.format(s)
+    s = "doi:{}".format(s)
 
     return s

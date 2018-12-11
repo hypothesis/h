@@ -20,9 +20,9 @@ class UserJSONPresenter(object):
 
     def asdict(self):
         return {
-            'authority': self.user.authority,
-            'email': self.user.email,
-            'userid': self.user.userid,
-            'username': self.user.username,
-            'display_name': self.user.display_name,
+            "authority": self.user.authority,
+            "email": self.user.email,
+            "userid": self.user.userid,
+            "username": self.user.username,
+            "display_name": self.user.display_name,
         }

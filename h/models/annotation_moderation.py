@@ -16,21 +16,27 @@ class AnnotationModeration(Base, Timestamps):
     should be hidden from other users.
     """
 
-    __tablename__ = 'annotation_moderation'
+    __tablename__ = "annotation_moderation"
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    annotation_id = sa.Column(types.URLSafeUUID,
-                              sa.ForeignKey('annotation.id', ondelete='cascade'),
-                              nullable=False,
-                              unique=True)
+    annotation_id = sa.Column(
+        types.URLSafeUUID,
+        sa.ForeignKey("annotation.id", ondelete="cascade"),
+        nullable=False,
+        unique=True,
+    )
 
     #: The annotation which has been flagged.
-    annotation = sa.orm.relationship('Annotation',
-                                     backref=sa.orm.backref('moderation',
-                                                            uselist=False,
-                                                            cascade='all, delete-orphan',
-                                                            passive_deletes=True))
+    annotation = sa.orm.relationship(
+        "Annotation",
+        backref=sa.orm.backref(
+            "moderation",
+            uselist=False,
+            cascade="all, delete-orphan",
+            passive_deletes=True,
+        ),
+    )
 
     def __repr__(self):
-        return '<AnnotationModeration annotation_id=%s>' % self.annotation_id
+        return "<AnnotationModeration annotation_id=%s>" % self.annotation_id

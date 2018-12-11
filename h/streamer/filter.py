@@ -12,31 +12,23 @@ SCHEMA = {
     "type": "object",
     "properties": {
         # Ignored, but kept here for backwards compatibility.
-        "match_policy": {
-            "type": "string",
-            "enum": ["include_any"]
-        },
-
+        "match_policy": {"type": "string", "enum": ["include_any"]},
         # Ignored, but kept here for backwards compatibility.
         "actions": {
-            "create": {"type": "boolean", "default":  True},
-            "update": {"type": "boolean", "default":  True},
-            "delete": {"type": "boolean", "default":  True},
+            "create": {"type": "boolean", "default": True},
+            "update": {"type": "boolean", "default": True},
+            "delete": {"type": "boolean", "default": True},
         },
-
         "clauses": {
             "type": "array",
             "items": {
                 "field": {"type": "string", "format": "json-pointer"},
-                "operator": {
-                    "type": "string",
-                    "enum": ["equals", "one_of"]
-                },
+                "operator": {"type": "string", "enum": ["equals", "one_of"]},
                 "value": "object",
-            }
+            },
         },
     },
-    "required": ["match_policy", "clauses", "actions"]
+    "required": ["match_policy", "clauses", "actions"],
 }
 
 
@@ -45,18 +37,18 @@ class FilterHandler(object):
         self.filter = filter_json
 
     def evaluate_clause(self, clause, target):
-        field_value = resolve_pointer(target, clause['field'], None)
+        field_value = resolve_pointer(target, clause["field"], None)
         if field_value is None:
             return False
 
-        filter_term = clause['value']
+        filter_term = clause["value"]
 
         def normalize(term):
             # Apply generic normalization.
             normalized = uni_fold(term)
 
             # Apply field-specific normalization.
-            if clause['field'] == '/uri':
+            if clause["field"] == "/uri":
                 normalized = normalize_uri(term)
 
             return normalized
@@ -71,7 +63,7 @@ class FilterHandler(object):
         else:
             field_value = normalize(field_value)
 
-        if clause['operator'] == 'one_of':
+        if clause["operator"] == "one_of":
             # The `one_of` operator behaves differently depending on whether
             # the annotation's field value is a list (eg. tags) or atom (eg. id).
             #
@@ -84,13 +76,13 @@ class FilterHandler(object):
             return field_value == filter_term
 
     def include_any(self, target):
-        for clause in self.filter['clauses']:
+        for clause in self.filter["clauses"]:
             if self.evaluate_clause(clause, target):
                 return True
         return False
 
     def match(self, target, action=None):
-        if len(self.filter['clauses']) > 0:
+        if len(self.filter["clauses"]) > 0:
             return self.include_any(target)
         else:
             return True
@@ -112,5 +104,5 @@ def uni_fold(text):
         return text
 
     text = text.lower()
-    text = unicodedata.normalize('NFKD', text)
+    text = unicodedata.normalize("NFKD", text)
     return "".join([c for c in text if not unicodedata.combining(c)])

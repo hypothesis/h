@@ -11,7 +11,6 @@ from h.presenters.annotation_base import utc_iso8601
 
 
 class TestAnnotationBasePresenter(object):
-
     def test_constructor_args(self):
         annotation = mock.Mock()
         resource = mock.Mock(annotation=annotation)
@@ -36,7 +35,7 @@ class TestAnnotationBasePresenter(object):
 
         created = AnnotationBasePresenter(resource).created
 
-        assert created == '2012-03-14T23:34:47.000012+00:00'
+        assert created == "2012-03-14T23:34:47.000012+00:00"
 
     def test_updated_returns_none_if_missing(self):
         annotation = mock.Mock(updated=None)
@@ -53,7 +52,7 @@ class TestAnnotationBasePresenter(object):
 
         updated = AnnotationBasePresenter(resource).updated
 
-        assert updated == '1983-08-31T07:18:20.098763+00:00'
+        assert updated == "1983-08-31T07:18:20.098763+00:00"
 
     def test_links(self):
         annotation = mock.Mock()
@@ -63,25 +62,25 @@ class TestAnnotationBasePresenter(object):
         assert links == resource.links
 
     def test_text(self):
-        annotation = mock.Mock(text='It is magical!')
+        annotation = mock.Mock(text="It is magical!")
         resource = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(resource)
 
-        assert 'It is magical!' == presenter.text
+        assert "It is magical!" == presenter.text
 
     def test_text_missing(self):
         annotation = mock.Mock(text=None)
         resource = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(resource)
 
-        assert '' == presenter.text
+        assert "" == presenter.text
 
     def test_tags(self):
-        annotation = mock.Mock(tags=['interesting', 'magic'])
+        annotation = mock.Mock(tags=["interesting", "magic"])
         resource = mock.Mock(annotation=annotation)
         presenter = AnnotationBasePresenter(resource)
 
-        assert ['interesting', 'magic'] == presenter.tags
+        assert ["interesting", "magic"] == presenter.tags
 
     def test_tags_missing(self):
         annotation = mock.Mock(tags=None)
@@ -91,20 +90,26 @@ class TestAnnotationBasePresenter(object):
         assert [] == presenter.tags
 
     def test_target(self):
-        annotation = mock.Mock(target_uri='http://example.com',
-                               target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
+        annotation = mock.Mock(
+            target_uri="http://example.com",
+            target_selectors={"PositionSelector": {"start": 0, "end": 12}},
+        )
         resource = mock.Mock(annotation=annotation)
 
-        expected = [{'source': 'http://example.com', 'selector': {'PositionSelector': {'start': 0, 'end': 12}}}]
+        expected = [
+            {
+                "source": "http://example.com",
+                "selector": {"PositionSelector": {"start": 0, "end": 12}},
+            }
+        ]
         actual = AnnotationBasePresenter(resource).target
         assert expected == actual
 
     def test_target_missing_selectors(self):
-        annotation = mock.Mock(target_uri='http://example.com',
-                               target_selectors=None)
+        annotation = mock.Mock(target_uri="http://example.com", target_selectors=None)
         resource = mock.Mock(annotation=annotation)
 
-        expected = [{'source': 'http://example.com'}]
+        expected = [{"source": "http://example.com"}]
         actual = AnnotationBasePresenter(resource).target
         assert expected == actual
 
@@ -124,9 +129,9 @@ class Berlin(datetime.tzinfo):
 
 def test_utc_iso8601():
     t = datetime.datetime(2016, 2, 24, 18, 3, 25, 7685)
-    assert utc_iso8601(t) == '2016-02-24T18:03:25.007685+00:00'
+    assert utc_iso8601(t) == "2016-02-24T18:03:25.007685+00:00"
 
 
 def test_utc_iso8601_ignores_timezone():
     t = datetime.datetime(2016, 2, 24, 18, 3, 25, 7685, Berlin())
-    assert utc_iso8601(t) == '2016-02-24T18:03:25.007685+00:00'
+    assert utc_iso8601(t) == "2016-02-24T18:03:25.007685+00:00"

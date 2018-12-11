@@ -12,17 +12,22 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = 'addee5d1686f'
-down_revision = '63e8b1fe1d4b'
+revision = "addee5d1686f"
+down_revision = "63e8b1fe1d4b"
 
 
 def upgrade():
-    op.add_column('annotation', sa.Column('document_id',
-                                          sa.Integer,
-                                          sa.ForeignKey('document.id'),
-                                          nullable=True,
-                                          index=True))
+    op.add_column(
+        "annotation",
+        sa.Column(
+            "document_id",
+            sa.Integer,
+            sa.ForeignKey("document.id"),
+            nullable=True,
+            index=True,
+        ),
+    )
 
 
 def downgrade():
-    op.drop_column('annotation', 'document_id')
+    op.drop_column("annotation", "document_id")

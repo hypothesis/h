@@ -16,25 +16,29 @@ class Flag(Base, Timestamps):
     content policy of the group or service, or otherwise needs moderator attention.
     """
 
-    __tablename__ = 'flag'
-    __table_args__ = (sa.UniqueConstraint('annotation_id', 'user_id'),)
+    __tablename__ = "flag"
+    __table_args__ = (sa.UniqueConstraint("annotation_id", "user_id"),)
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    annotation_id = sa.Column(types.URLSafeUUID,
-                              sa.ForeignKey('annotation.id', ondelete='cascade'),
-                              nullable=False)
+    annotation_id = sa.Column(
+        types.URLSafeUUID,
+        sa.ForeignKey("annotation.id", ondelete="cascade"),
+        nullable=False,
+    )
 
     #: The annotation which has been flagged.
-    annotation = sa.orm.relationship('Annotation')
+    annotation = sa.orm.relationship("Annotation")
 
-    user_id = sa.Column(sa.Integer,
-                        sa.ForeignKey('user.id', ondelete='cascade'),
-                        nullable=False, index=True)
+    user_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("user.id", ondelete="cascade"),
+        nullable=False,
+        index=True,
+    )
 
     #: The user who created the flag.
-    user = sa.orm.relationship('User')
+    user = sa.orm.relationship("User")
 
     def __repr__(self):
-        return '<Flag annotation_id=%s user_id=%s>' % (self.annotation_id,
-                                                       self.user_id)
+        return "<Flag annotation_id=%s user_id=%s>" % (self.annotation_id, self.user_id)

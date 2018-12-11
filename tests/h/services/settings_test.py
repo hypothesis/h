@@ -19,22 +19,22 @@ class TestSettingsService(object):
         assert svc.get(setting.key) == setting.value
 
     def test_get_returns_none_when_missing(self, svc):
-        assert svc.get('missing') is None
+        assert svc.get("missing") is None
 
     def test_put_creates_new_setting(self, db_session, svc):
-        svc.put('custom-color', 'red')
+        svc.put("custom-color", "red")
 
-        setting = db_session.query(Setting).get('custom-color')
-        assert setting.key == 'custom-color'
-        assert setting.value == 'red'
+        setting = db_session.query(Setting).get("custom-color")
+        assert setting.key == "custom-color"
+        assert setting.value == "red"
 
     def test_put_overrides_existing_setting(self, db_session, svc, factories):
         setting = factories.Setting()
 
-        svc.put(setting.key, 'green')
+        svc.put(setting.key, "green")
 
         setting = db_session.query(Setting).get(setting.key)
-        assert setting.value == 'green'
+        assert setting.value == "green"
 
     def test_delete_deletes_existing_setting(self, db_session, svc, factories):
         setting = factories.Setting()
@@ -48,7 +48,7 @@ class TestSettingsService(object):
         # create a random setting
         factories.Setting()
 
-        svc.delete('missing')
+        svc.delete("missing")
 
 
 class TestSettingsFactory(object):

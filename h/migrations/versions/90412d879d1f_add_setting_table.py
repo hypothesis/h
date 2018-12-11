@@ -12,26 +12,19 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = '90412d879d1f'
-down_revision = '8ae9d103551f'
+revision = "90412d879d1f"
+down_revision = "8ae9d103551f"
 
 
 def upgrade():
-    op.create_table('setting',
-                    sa.Column('key',
-                              sa.UnicodeText(),
-                              primary_key=True),
-                    sa.Column('value',
-                              sa.UnicodeText()),
-                    sa.Column('created',
-                              sa.DateTime,
-                              server_default=sa.func.now(),
-                              nullable=False),
-                    sa.Column('updated',
-                              sa.DateTime,
-                              server_default=sa.func.now(),
-                              nullable=False))
+    op.create_table(
+        "setting",
+        sa.Column("key", sa.UnicodeText(), primary_key=True),
+        sa.Column("value", sa.UnicodeText()),
+        sa.Column("created", sa.DateTime, server_default=sa.func.now(), nullable=False),
+        sa.Column("updated", sa.DateTime, server_default=sa.func.now(), nullable=False),
+    )
 
 
 def downgrade():
-    op.drop_table('setting')
+    op.drop_table("setting")

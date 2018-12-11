@@ -14,8 +14,9 @@ import colander
 # This was chosen because it is a widely used and relatively simple pattern.
 # Unlike `colander.Email` it supports International Domain Names (IDNs) in
 # Punycode form.
-HTML5_EMAIL_REGEX = ("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@"
-                     "[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$")
+HTML5_EMAIL_REGEX = (
+    "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@" "[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$"
+)
 
 
 class Email(colander.Regex):
@@ -25,14 +26,15 @@ class Email(colander.Regex):
     This is a replacement for `colander.Email` which rejects certain valid email
     addresses (see https://github.com/hypothesis/h/issues/4662).
     """
-    def __init__(self, msg='Invalid email address.'):
+
+    def __init__(self, msg="Invalid email address."):
         super(Email, self).__init__(HTML5_EMAIL_REGEX, msg=msg)
 
 
 class Length(colander.Length):
     def __init__(self, *args, **kwargs):
-        if 'min_err' not in kwargs:
-            kwargs['min_err'] = "Must be ${min} characters or more."
-        if 'max_err' not in kwargs:
-            kwargs['max_err'] = "Must be ${max} characters or less."
+        if "min_err" not in kwargs:
+            kwargs["min_err"] = "Must be ${min} characters or more."
+        if "max_err" not in kwargs:
+            kwargs["max_err"] = "Must be ${max} characters or less."
         super(Length, self).__init__(*args, **kwargs)

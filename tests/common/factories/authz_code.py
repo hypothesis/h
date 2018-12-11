@@ -16,21 +16,20 @@ from .user import User
 
 def generate_code(_=None):
     """Simulate the way oauthlib generates authz codes."""
-    chars = ('abcdefghijklmnopqrstuvwxyz'
-             'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-             '012a456789')
+    chars = "abcdefghijklmnopqrstuvwxyz" "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "012a456789"
 
     rand = random.SystemRandom()
-    return ''.join(rand.choice(chars) for x in range(30))
+    return "".join(rand.choice(chars) for x in range(30))
 
 
 class AuthzCode(ModelFactory):
-
     class Meta:
         model = models.AuthzCode
-        sqlalchemy_session_persistence = 'flush'
+        sqlalchemy_session_persistence = "flush"
 
     user = factory.SubFactory(User)
     authclient = factory.SubFactory(AuthClient)
     code = factory.LazyAttribute(generate_code)
-    expires = factory.LazyAttribute(lambda _: (datetime.utcnow() + timedelta(minutes=10)))
+    expires = factory.LazyAttribute(
+        lambda _: (datetime.utcnow() + timedelta(minutes=10))
+    )

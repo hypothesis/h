@@ -19,14 +19,14 @@ from h.presenters.group_json import GroupsJSONPresenter
 from h.presenters.user_json import UserJSONPresenter
 
 __all__ = (
-    'AnnotationHTMLPresenter',
-    'AnnotationJSONPresenter',
-    'AnnotationJSONLDPresenter',
-    'AnnotationSearchIndexPresenter',
-    'DocumentHTMLPresenter',
-    'DocumentJSONPresenter',
-    'DocumentSearchIndexPresenter',
-    'GroupJSONPresenter',
-    'GroupsJSONPresenter',
-    'UserJSONPresenter',
+    "AnnotationHTMLPresenter",
+    "AnnotationJSONPresenter",
+    "AnnotationJSONLDPresenter",
+    "AnnotationSearchIndexPresenter",
+    "DocumentHTMLPresenter",
+    "DocumentJSONPresenter",
+    "DocumentSearchIndexPresenter",
+    "GroupJSONPresenter",
+    "GroupsJSONPresenter",
+    "UserJSONPresenter",
 )

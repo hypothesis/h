@@ -11,14 +11,15 @@ from __future__ import unicode_literals
 from alembic import op
 
 
-revision = 'e17d3ce4fcd2'
-down_revision = '9e01b7287da2'
+revision = "e17d3ce4fcd2"
+down_revision = "9e01b7287da2"
 
 
 def upgrade():
     op.create_unique_constraint(
-        'uq__user_group__user_id', 'user_group', ['user_id', 'group_id'])
+        "uq__user_group__user_id", "user_group", ["user_id", "group_id"]
+    )
 
 
 def downgrade():
-    op.drop_constraint('uq__user_group__user_id', 'user_group')
+    op.drop_constraint("uq__user_group__user_id", "user_group")

@@ -5,4 +5,4 @@ from __future__ import unicode_literals
 
 from h.schemas.base import ValidationError
 
-__all__ = ('ValidationError',)
+__all__ = ("ValidationError",)

@@ -15,7 +15,6 @@ def set_session(value):
 
 
 class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
-
     class Meta:
         abstract = True
 
@@ -27,9 +26,9 @@ class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
         # which is dynamically filled out by the `factories` fixture when
         # used.
         if SESSION is None:
-            raise RuntimeError('no session: did you use the factories fixture?')
+            raise RuntimeError("no session: did you use the factories fixture?")
         obj = model_class(*args, **kwargs)
         SESSION.add(obj)
-        if cls._meta.sqlalchemy_session_persistence == 'flush':
+        if cls._meta.sqlalchemy_session_persistence == "flush":
             SESSION.flush()
         return obj

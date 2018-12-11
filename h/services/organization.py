@@ -28,15 +28,11 @@ class OrganizationService(object):
 
         :returns: the created organization
         """
-        organization = Organization(name=name,
-                                    authority=authority,
-                                    logo=logo,
-                                    )
+        organization = Organization(name=name, authority=authority, logo=logo)
         self.session.add(organization)
         return organization
 
 
 def organization_factory(context, request):
     """Return a OrganizationService instance for the request."""
-    return OrganizationService(session=request.db,
-                               )
+    return OrganizationService(session=request.db)

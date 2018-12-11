@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 def utc_iso8601(datetime):
     """Convert a UTC datetime into an ISO8601 timestamp string."""
-    return datetime.strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
+    return datetime.strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
 
 
 def utc_us_style_date(datetime):

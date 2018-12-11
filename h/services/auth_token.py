@@ -50,9 +50,9 @@ class AuthTokenService(object):
 
         :returns: the token object or ``None``
         """
-        return (self._session.query(models.Token)
-                    .filter_by(value=token_str)
-                    .one_or_none())
+        return (
+            self._session.query(models.Token).filter_by(value=token_str).one_or_none()
+        )
 
     def _fetch_auth_token(self, token_str):
         token_model = self.fetch(token_str)

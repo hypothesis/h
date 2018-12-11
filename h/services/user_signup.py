@@ -13,13 +13,15 @@ class UserSignupService(object):
 
     """A service for registering users."""
 
-    def __init__(self,
-                 default_authority,
-                 mailer,
-                 session,
-                 signup_email,
-                 password_service,
-                 stats=None):
+    def __init__(
+        self,
+        default_authority,
+        mailer,
+        session,
+        signup_email,
+        password_service,
+        stats=None,
+    ):
         """
         Create a new user signup service.
 
@@ -57,14 +59,14 @@ class UserSignupService(object):
         :returns: the newly-created user object.
         :rtype: h.models.User
         """
-        kwargs.setdefault('authority', self.default_authority)
+        kwargs.setdefault("authority", self.default_authority)
 
         # We extract any passed password as we use that separately to set the
         # user's password.
-        password = kwargs.pop('password', None)
+        password = kwargs.pop("password", None)
 
         # Extract any passed identities for this new user
-        identities = kwargs.pop('identities', [])
+        identities = kwargs.pop("identities", [])
 
         user = User(**kwargs)
 
@@ -83,12 +85,12 @@ class UserSignupService(object):
         # FIXME: this is horrible, but is needed until the
         # notification/subscription system is made opt-out rather than opt-in
         # (at least from the perspective of the database).
-        sub = Subscriptions(uri=user.userid, type='reply', active=True)
+        sub = Subscriptions(uri=user.userid, type="reply", active=True)
         self.session.add(sub)
 
         # Record a registration with the stats service
         if self.stats is not None:
-            self.stats.incr('auth.local.register')
+            self.stats.incr("auth.local.register")
 
         return user
 
@@ -102,17 +104,19 @@ class UserSignupService(object):
         self.session.flush()
 
         # Send the activation email
-        mail_params = self.signup_email(id=user.id,
-                                        email=user.email,
-                                        activation_code=user.activation.code)
+        mail_params = self.signup_email(
+            id=user.id, email=user.email, activation_code=user.activation.code
+        )
         self.mailer.send.delay(*mail_params)
 
 
 def user_signup_service_factory(context, request):
     """Return a UserSignupService instance for the passed context and request."""
-    return UserSignupService(default_authority=request.default_authority,
-                             mailer=mailer,
-                             session=request.db,
-                             signup_email=partial(signup.generate, request),
-                             password_service=request.find_service(name='user_password'),
-                             stats=request.stats)
+    return UserSignupService(
+        default_authority=request.default_authority,
+        mailer=mailer,
+        session=request.db,
+        signup_email=partial(signup.generate, request),
+        password_service=request.find_service(name="user_password"),
+        stats=request.stats,
+    )

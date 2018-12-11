@@ -11,7 +11,6 @@ from h.search.client import Client
 
 
 class TestClient(object):
-
     def test_it_sets_the_index_property(self):
         client = Client(host="http://localhost:9200", index="hypothesis")
 
@@ -44,24 +43,29 @@ class TestGetClient(object):
     def test_initializes_client_with_host(self, settings, patched_client):
         get_client(settings)
         args, _ = patched_client.call_args
-        assert args[0] == 'search.svc'
+        assert args[0] == "search.svc"
 
     def test_initializes_client_with_index(self, settings, patched_client):
         get_client(settings)
         args, _ = patched_client.call_args
-        assert args[1] == 'my-index'
+        assert args[1] == "my-index"
 
-    @pytest.mark.parametrize('key,value,settingkey', [
-        ('max_retries', 7, 'es.client.max_retries'),
-        ('retry_on_timeout', True, 'es.client.retry_on_timeout'),
-        ('timeout', 15, 'es.client.timeout'),
-        ('maxsize', 4, 'es.client_poolsize'),
-        ('max_retries', 7, 'es.client.max_retries'),
-        ('retry_on_timeout', True, 'es.client.retry_on_timeout'),
-        ('timeout', 15, 'es.client.timeout'),
-        ('maxsize', 4, 'es.client_poolsize'),
-    ])
-    def test_client_configuration(self, settings, patched_client, key, value, settingkey):
+    @pytest.mark.parametrize(
+        "key,value,settingkey",
+        [
+            ("max_retries", 7, "es.client.max_retries"),
+            ("retry_on_timeout", True, "es.client.retry_on_timeout"),
+            ("timeout", 15, "es.client.timeout"),
+            ("maxsize", 4, "es.client_poolsize"),
+            ("max_retries", 7, "es.client.max_retries"),
+            ("retry_on_timeout", True, "es.client.retry_on_timeout"),
+            ("timeout", 15, "es.client.timeout"),
+            ("maxsize", 4, "es.client_poolsize"),
+        ],
+    )
+    def test_client_configuration(
+        self, settings, patched_client, key, value, settingkey
+    ):
         settings[settingkey] = value
         get_client(settings)
 
@@ -70,11 +74,8 @@ class TestGetClient(object):
 
     @pytest.fixture
     def settings(self):
-        return {
-            'es.url': 'search.svc',
-            'es.index': 'my-index',
-        }
+        return {"es.url": "search.svc", "es.index": "my-index"}
 
     @pytest.fixture
     def patched_client(self, patch):
-        return patch('h.search.client.Client')
+        return patch("h.search.client.Client")

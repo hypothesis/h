@@ -8,7 +8,7 @@ from h.models import User, UserIdentity
 from h.util.user import split_user
 from h.util.db import on_transaction_end
 
-UPDATE_PREFS_ALLOWED_KEYS = set(['show_sidebar_tutorial'])
+UPDATE_PREFS_ALLOWED_KEYS = set(["show_sidebar_tutorial"])
 
 
 class UserNotActivated(Exception):
@@ -59,17 +59,19 @@ class UserService(object):
         else:
             userid = userid_or_username
             parts = split_user(userid)
-            username = parts['username']
-            authority = parts['domain']
+            username = parts["username"]
+            authority = parts["domain"]
 
         # The cache is keyed by (username, authority) tuples.
         cache_key = (username, authority)
 
         if cache_key not in self._cache:
-            self._cache[cache_key] = (self.session.query(User)
-                                      .filter_by(username=username)
-                                      .filter_by(authority=authority)
-                                      .one_or_none())
+            self._cache[cache_key] = (
+                self.session.query(User)
+                .filter_by(username=username)
+                .filter_by(authority=authority)
+                .one_or_none()
+            )
 
         return self._cache[cache_key]
 
@@ -98,7 +100,7 @@ class UserService(object):
         for userid in userids:
             try:
                 val = split_user(userid)
-                key = (val['username'], val['domain'])
+                key = (val["username"], val["domain"])
                 cache_keys[key] = userid
             except ValueError:
                 continue
@@ -123,10 +125,11 @@ class UserService(object):
         :rtype: h.models.User or None
         """
 
-        identity = (self.session.query(UserIdentity)
-                                .filter_by(provider=provider,
-                                           provider_unique_id=provider_unique_id)
-                                .one_or_none())
+        identity = (
+            self.session.query(UserIdentity)
+            .filter_by(provider=provider, provider_unique_id=provider_unique_id)
+            .one_or_none()
+        )
         if identity:
             return identity.user
         return None
@@ -146,15 +149,12 @@ class UserService(object):
         :raises UserNotActivated: When the user is not activated.
         """
         filters = [(User.authority == self.default_authority)]
-        if '@' in username_or_email:
-            filters.append(
-                sa.func.lower(User.email) == username_or_email.lower())
+        if "@" in username_or_email:
+            filters.append(sa.func.lower(User.email) == username_or_email.lower())
         else:
             filters.append(User.username == username_or_email)
 
-        user = (self.session.query(User)
-                .filter(*filters)
-                .one_or_none())
+        user = self.session.query(User).filter(*filters).one_or_none()
 
         if user is None:
             return None
@@ -167,14 +167,13 @@ class UserService(object):
     def update_preferences(self, user, **kwargs):
         invalid_keys = set(kwargs.keys()) - UPDATE_PREFS_ALLOWED_KEYS
         if invalid_keys:
-            keys = ', '.join(sorted(invalid_keys))
+            keys = ", ".join(sorted(invalid_keys))
             raise TypeError("settings with keys %s are not allowed" % keys)
 
-        if 'show_sidebar_tutorial' in kwargs:
-            user.sidebar_tutorial_dismissed = not kwargs['show_sidebar_tutorial']
+        if "show_sidebar_tutorial" in kwargs:
+            user.sidebar_tutorial_dismissed = not kwargs["show_sidebar_tutorial"]
 
 
 def user_service_factory(context, request):
     """Return a UserService instance for the passed context and request."""
-    return UserService(default_authority=request.default_authority,
-                       session=request.db)
+    return UserService(default_authority=request.default_authority, session=request.db)

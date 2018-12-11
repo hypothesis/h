@@ -18,6 +18,7 @@ class GrantType(enum.Enum):
     access token endpoint in order to prove that the client is authorized for
     a specified user.
     """
+
     # N.B. we define all the known and valid grant types from the main OAuth
     # 2.0 standard, RFC6749, as well as the extension for JWT Bearer grants
     # specified in RFC7523.
@@ -29,20 +30,20 @@ class GrantType(enum.Enum):
 
     #: Authorization code grant. Used when exchanging an authorization code
     #: for an access token.
-    authorization_code = 'authorization_code'
+    authorization_code = "authorization_code"
 
     #: Client credentials grant. Used when a client wants to directly fetch an
     #: access token for its own purposes, rather than for a specific user.
-    client_credentials = 'client_credentials'
+    client_credentials = "client_credentials"
 
     #: JSON Web Token Bearer grant. Used by clients which are implicitly
     #: authorized on behalf of all their users and can sign JWTs which are
     #: exchangeable for an access token.
-    jwt_bearer = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+    jwt_bearer = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 
     #: Resource owner credentials grant. Can be used by trusted clients that
     #: are allowed to ask users for their login credentials directly.
-    password = 'password'
+    password = "password"
 
 
 class ResponseType(enum.Enum):
@@ -54,11 +55,11 @@ class ResponseType(enum.Enum):
     """
 
     #: Authorization code grant, which is later exchanged for an access token.
-    code = 'code'
+    code = "code"
 
     #: "Implicit" grant, in which an authorization request receives an access
     #: token directly.
-    token = 'token'
+    token = "token"
 
 
 class AuthClient(Base, Timestamps):
@@ -74,14 +75,18 @@ class AuthClient(Base, Timestamps):
     subsequently issue grant authorization tokens for any of those users.
     """
 
-    __tablename__ = 'authclient'
-    __table_args__ = (sa.CheckConstraint("(grant_type != 'authorization_code') OR (redirect_uri IS NOT NULL)",
-                                         name='authz_grant_redirect_uri'),)
+    __tablename__ = "authclient"
+    __table_args__ = (
+        sa.CheckConstraint(
+            "(grant_type != 'authorization_code') OR (redirect_uri IS NOT NULL)",
+            name="authz_grant_redirect_uri",
+        ),
+    )
 
     #: Public client identifier
-    id = sa.Column(postgresql.UUID,
-                   server_default=sa.func.uuid_generate_v1mc(),
-                   primary_key=True)
+    id = sa.Column(
+        postgresql.UUID, server_default=sa.func.uuid_generate_v1mc(), primary_key=True
+    )
 
     #: Human-readable name for reference.
     name = sa.Column(sa.UnicodeText, nullable=True)
@@ -93,21 +98,25 @@ class AuthClient(Base, Timestamps):
     authority = sa.Column(sa.UnicodeText, nullable=False)
 
     #: Grant type used by this client.
-    grant_type = sa.Column(sa.Enum(GrantType, name='authclient_grant_type'),
-                           nullable=True)
+    grant_type = sa.Column(
+        sa.Enum(GrantType, name="authclient_grant_type"), nullable=True
+    )
 
     #: Authorization response type used by this client.
-    response_type = sa.Column(sa.Enum(ResponseType, name='authclient_response_type'),
-                              nullable=True)
+    response_type = sa.Column(
+        sa.Enum(ResponseType, name="authclient_response_type"), nullable=True
+    )
     #: Redirect URI for OAuth 2 authorization code grant type.
     redirect_uri = sa.Column(sa.UnicodeText, nullable=True)
 
     #: Is this client trusted? That is, is this client one that we control?
     #: Trusted clients don't require explicit authorization from a user.
-    trusted = sa.Column(sa.Boolean,
-                        default=False,
-                        server_default=sa.sql.expression.false(),
-                        nullable=False)
+    trusted = sa.Column(
+        sa.Boolean,
+        default=False,
+        server_default=sa.sql.expression.false(),
+        nullable=False,
+    )
 
     def __repr__(self):
-        return 'AuthClient(id={self.id!r})'.format(self=self)
+        return "AuthClient(id={self.id!r})".format(self=self)

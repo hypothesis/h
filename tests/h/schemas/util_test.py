@@ -14,19 +14,20 @@ class QueryParamSchema(colander.Schema):
 
     string_field = colander.SchemaNode(colander.String(), missing=None)
 
-    list_field = colander.SchemaNode(colander.Sequence(),
-                                     colander.SchemaNode(colander.String()),
-                                     missing=None)
+    list_field = colander.SchemaNode(
+        colander.Sequence(), colander.SchemaNode(colander.String()), missing=None
+    )
 
-    enum_field = colander.SchemaNode(colander.String(),
-                                     validator=colander.OneOf(["up", "down"]),
-                                     missing="up")
+    enum_field = colander.SchemaNode(
+        colander.String(), validator=colander.OneOf(["up", "down"]), missing="up"
+    )
 
-    drop_if_not_set_field = colander.SchemaNode(colander.String(), missing=colander.drop)
+    drop_if_not_set_field = colander.SchemaNode(
+        colander.String(), missing=colander.drop
+    )
 
 
 class TestValidateQueryParams(object):
-
     def test_it_deserializes_params(self):
         schema = QueryParamSchema()
         params = MultiDict()
@@ -34,10 +35,12 @@ class TestValidateQueryParams(object):
 
         parsed = validate_query_params(schema, params)
 
-        assert parsed == {"int_field": 0,
-                          "string_field": "test",
-                          "list_field": None,
-                          "enum_field": "up"}
+        assert parsed == {
+            "int_field": 0,
+            "string_field": "test",
+            "list_field": None,
+            "enum_field": "up",
+        }
 
     def test_it_raises_if_params_invalid(self):
         schema = QueryParamSchema()

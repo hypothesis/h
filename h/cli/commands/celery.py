@@ -5,9 +5,10 @@ import click
 from h.celery import start
 
 
-@click.command(add_help_option=False,  # --help is passed through to Celery
-               context_settings={'allow_extra_args': True,
-                                 'ignore_unknown_options': True})
+@click.command(
+    add_help_option=False,  # --help is passed through to Celery
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+)
 @click.pass_context
 def celery(ctx):
     """
@@ -17,4 +18,4 @@ def celery(ctx):
     full Celery CLI.
     """
     argv = [ctx.command_path] + list(ctx.args)
-    start(argv=argv, bootstrap=ctx.obj['bootstrap'])
+    start(argv=argv, bootstrap=ctx.obj["bootstrap"])

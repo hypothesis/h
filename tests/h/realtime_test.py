@@ -14,7 +14,7 @@ class TestConsumer(object):
         assert consumer.connection == mock.sentinel.connection
 
     def test_init_stores_routing_key(self, consumer):
-        assert consumer.routing_key == 'annotation'
+        assert consumer.routing_key == "annotation"
 
     def test_init_stores_handler(self, consumer, handler):
         assert consumer.handler == handler
@@ -25,17 +25,20 @@ class TestConsumer(object):
 
         consumer.get_consumers(consumer_factory, mock.Mock())
 
-        Queue.assert_called_once_with(generate_queue_name.return_value,
-                                      exchange=exchange,
-                                      durable=False,
-                                      routing_key='annotation',
-                                      auto_delete=True)
+        Queue.assert_called_once_with(
+            generate_queue_name.return_value,
+            exchange=exchange,
+            durable=False,
+            routing_key="annotation",
+            auto_delete=True,
+        )
 
     def test_get_consumers_creates_a_consumer(self, Queue, consumer):
         consumer_factory = mock.Mock(spec_set=[])
         consumer.get_consumers(consumer_factory, channel=None)
-        consumer_factory.assert_called_once_with(queues=[Queue.return_value],
-                                                 callbacks=[consumer.handle_message])
+        consumer_factory.assert_called_once_with(
+            queues=[Queue.return_value], callbacks=[consumer.handle_message]
+        )
 
     def test_get_consumers_returns_list_of_one_consumer(self, consumer):
         consumer_factory = mock.Mock(spec_set=[])
@@ -49,29 +52,32 @@ class TestConsumer(object):
         message.ack.assert_called_once_with()
 
     def test_handle_message_calls_the_handler(self, consumer, handler):
-        body = {'foo': 'bar'}
+        body = {"foo": "bar"}
         consumer.handle_message(body, mock.Mock())
 
         handler.assert_called_once_with(body)
 
-    def test_handle_message_records_queue_time_if_timestamp_present(self, handler, matchers, statsd_client):
-        consumer = realtime.Consumer(mock.sentinel.connection,
-                                     'annotation',
-                                     handler,
-                                     statsd_client=statsd_client)
+    def test_handle_message_records_queue_time_if_timestamp_present(
+        self, handler, matchers, statsd_client
+    ):
+        consumer = realtime.Consumer(
+            mock.sentinel.connection, "annotation", handler, statsd_client=statsd_client
+        )
         message = mock.Mock()
-        message.headers = {'timestamp': datetime.utcnow().isoformat() + 'Z'}
+        message.headers = {"timestamp": datetime.utcnow().isoformat() + "Z"}
 
         consumer.handle_message({}, message)
 
-        statsd_client.timing.assert_called_once_with('streamer.msg.queueing',
-                                                     matchers.InstanceOf(int))
+        statsd_client.timing.assert_called_once_with(
+            "streamer.msg.queueing", matchers.InstanceOf(int)
+        )
 
-    def test_handle_message_doesnt_explode_if_timestamp_missing(self, handler, statsd_client):
-        consumer = realtime.Consumer(mock.sentinel.connection,
-                                     'annotation',
-                                     handler,
-                                     statsd_client=statsd_client)
+    def test_handle_message_doesnt_explode_if_timestamp_missing(
+        self, handler, statsd_client
+    ):
+        consumer = realtime.Consumer(
+            mock.sentinel.connection, "annotation", handler, statsd_client=statsd_client
+        )
         message = mock.Mock()
         message.headers = {}
 
@@ -79,11 +85,11 @@ class TestConsumer(object):
 
     @pytest.fixture
     def Queue(self, patch):
-        return patch('h.realtime.kombu.Queue')
+        return patch("h.realtime.kombu.Queue")
 
     @pytest.fixture
     def consumer(self, handler):
-        return realtime.Consumer(mock.sentinel.connection, 'annotation', handler)
+        return realtime.Consumer(mock.sentinel.connection, "annotation", handler)
 
     @pytest.fixture
     def handler(self):
@@ -91,70 +97,73 @@ class TestConsumer(object):
 
     @pytest.fixture
     def statsd_client(self):
-        return mock.Mock(spec_set=['timing'])
+        return mock.Mock(spec_set=["timing"])
 
     @pytest.fixture
     def generate_queue_name(self, patch):
-        return patch('h.realtime.Consumer.generate_queue_name')
+        return patch("h.realtime.Consumer.generate_queue_name")
 
 
 class TestPublisher(object):
-    def test_publish_annotation(self, matchers, producer_pool, pyramid_request,
-                                retry_policy):
-        payload = {'action': 'create', 'annotation': {'id': 'foobar'}}
-        producer = producer_pool['foobar'].acquire().__enter__()
+    def test_publish_annotation(
+        self, matchers, producer_pool, pyramid_request, retry_policy
+    ):
+        payload = {"action": "create", "annotation": {"id": "foobar"}}
+        producer = producer_pool["foobar"].acquire().__enter__()
         exchange = realtime.get_exchange()
 
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_annotation(payload)
 
-        expected_headers = matchers.MappingContaining('timestamp')
-        producer.publish.assert_called_once_with(payload,
-                                                 exchange=exchange,
-                                                 declare=[exchange],
-                                                 routing_key='annotation',
-                                                 headers=expected_headers,
-                                                 retry=True,
-                                                 retry_policy=retry_policy)
+        expected_headers = matchers.MappingContaining("timestamp")
+        producer.publish.assert_called_once_with(
+            payload,
+            exchange=exchange,
+            declare=[exchange],
+            routing_key="annotation",
+            headers=expected_headers,
+            retry=True,
+            retry_policy=retry_policy,
+        )
 
-    def test_publish_user(self, matchers, producer_pool, pyramid_request,
-                          retry_policy):
-        payload = {'action': 'create', 'user': {'id': 'foobar'}}
-        producer = producer_pool['foobar'].acquire().__enter__()
+    def test_publish_user(self, matchers, producer_pool, pyramid_request, retry_policy):
+        payload = {"action": "create", "user": {"id": "foobar"}}
+        producer = producer_pool["foobar"].acquire().__enter__()
         exchange = realtime.get_exchange()
 
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_user(payload)
 
-        expected_headers = matchers.MappingContaining('timestamp')
-        producer.publish.assert_called_once_with(payload,
-                                                 exchange=exchange,
-                                                 declare=[exchange],
-                                                 routing_key='user',
-                                                 headers=expected_headers,
-                                                 retry=True,
-                                                 retry_policy=retry_policy)
+        expected_headers = matchers.MappingContaining("timestamp")
+        producer.publish.assert_called_once_with(
+            payload,
+            exchange=exchange,
+            declare=[exchange],
+            routing_key="user",
+            headers=expected_headers,
+            retry=True,
+            retry_policy=retry_policy,
+        )
 
     @pytest.fixture
     def retry_policy(self):
-        return {'max_retries': 5,
-                'interval_start': 0.2,
-                'interval_step': 0.3}
+        return {"max_retries": 5, "interval_start": 0.2, "interval_step": 0.3}
 
     @pytest.fixture
     def producer_pool(self, patch):
-        return patch('h.realtime.producer_pool')
+        return patch("h.realtime.producer_pool")
 
 
 class TestGetExchange(object):
     def test_returns_the_exchange(self):
         import kombu
+
         exchange = realtime.get_exchange()
         assert isinstance(exchange, kombu.Exchange)
 
     def test_type(self):
         exchange = realtime.get_exchange()
-        assert exchange.type == 'direct'
+        assert exchange.type == "direct"
 
     def test_durable(self):
         exchange = realtime.get_exchange()
@@ -169,17 +178,17 @@ class TestGetExchange(object):
 class TestGetConnection(object):
     def test_defaults(self, Connection):
         realtime.get_connection({})
-        Connection.assert_called_once_with('amqp://guest:guest@localhost:5672//')
+        Connection.assert_called_once_with("amqp://guest:guest@localhost:5672//")
 
     def test_returns_the_connection(self, Connection):
         connection = realtime.get_connection({})
         assert connection == Connection.return_value
 
     def test_allows_to_overwrite_broker_url(self, Connection):
-        broker_url = 'amqp://alice:bob@rabbitmq.int:5673/prj'
-        realtime.get_connection({'broker_url': broker_url})
+        broker_url = "amqp://alice:bob@rabbitmq.int:5673/prj"
+        realtime.get_connection({"broker_url": broker_url})
         Connection.assert_called_once_with(broker_url)
 
     @pytest.fixture
     def Connection(self, patch):
-        return patch('h.realtime.kombu.Connection')
+        return patch("h.realtime.kombu.Connection")

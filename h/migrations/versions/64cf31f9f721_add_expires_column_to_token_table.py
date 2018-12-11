@@ -11,13 +11,13 @@ from __future__ import unicode_literals
 import sqlalchemy as sa
 from alembic import op
 
-revision = '64cf31f9f721'
-down_revision = 'd536d9a342f3'
+revision = "64cf31f9f721"
+down_revision = "d536d9a342f3"
 
 
 def upgrade():
-    op.add_column('token', sa.Column('expires', sa.DateTime, nullable=True))
+    op.add_column("token", sa.Column("expires", sa.DateTime, nullable=True))
 
 
 def downgrade():
-    op.drop_column('token', 'expires')
+    op.drop_column("token", "expires")

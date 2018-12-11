@@ -16,16 +16,14 @@ from h.util import cors
 #: headers set during standard request processing are discarded if an exception
 #: occurs and an exception view is invoked to generate the response instead.
 cors_policy = cors.policy(
-    allow_headers=(
-        'Authorization',
-        'Content-Type',
-        'X-Client-Id',
-    ),
-    allow_methods=('HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'))
+    allow_headers=("Authorization", "Content-Type", "X-Client-Id"),
+    allow_methods=("HEAD", "GET", "PATCH", "POST", "PUT", "DELETE"),
+)
 
 
-def add_api_view(config, view, link_name=None, description=None,
-                 enable_preflight=True, **settings):
+def add_api_view(
+    config, view, link_name=None, description=None, enable_preflight=True, **settings
+):
 
     """
     Add a view configuration for an API view.
@@ -47,31 +45,32 @@ def add_api_view(config, view, link_name=None, description=None,
     """
 
     # Get the HTTP method for use in the API links metadata
-    primary_method = settings.get('request_method', 'GET')
+    primary_method = settings.get("request_method", "GET")
     if isinstance(primary_method, tuple):
         # If the view matches multiple methods, assume the first one is
         # preferred
         primary_method = primary_method[0]
 
-    settings.setdefault('accept', 'application/json')
-    settings.setdefault('renderer', 'json')
-    settings.setdefault('decorator', cors_policy)
+    settings.setdefault("accept", "application/json")
+    settings.setdefault("renderer", "json")
+    settings.setdefault("decorator", cors_policy)
 
     if link_name:
-        link = {'name': link_name,
-                'method': primary_method,
-                'route_name': settings.get('route_name'),
-                'description': description,
-                }
+        link = {
+            "name": link_name,
+            "method": primary_method,
+            "route_name": settings.get("route_name"),
+            "description": description,
+        }
 
         registry = config.registry
-        if not hasattr(registry, 'api_links'):
+        if not hasattr(registry, "api_links"):
             registry.api_links = []
         registry.api_links.append(link)
 
     config.add_view(view=view, **settings)
     if enable_preflight:
-        cors.add_preflight_view(config, settings['route_name'], cors_policy)
+        cors.add_preflight_view(config, settings["route_name"], cors_policy)
 
 
 def api_config(link_name=None, description=None, **settings):
@@ -83,20 +82,22 @@ def api_config(link_name=None, description=None, **settings):
     """
 
     def callback(context, name, ob):
-        add_api_view(context.config,
-                     view=ob,
-                     link_name=link_name,
-                     description=description,
-                     **settings)
+        add_api_view(
+            context.config,
+            view=ob,
+            link_name=link_name,
+            description=description,
+            **settings
+        )
 
     def wrapper(wrapped):
-        info = venusian.attach(wrapped, callback, category='pyramid')
+        info = venusian.attach(wrapped, callback, category="pyramid")
 
         # Support use as a class method decorator.
         # Taken from Pyramid's `view_config` decorator implementation.
-        if info.scope == 'class':
-            if settings.get('attr') is None:
-                settings['attr'] = wrapped.__name__
+        if info.scope == "class":
+            if settings.get("attr") is None:
+                settings["attr"] = wrapped.__name__
 
         return wrapped
 
@@ -119,17 +120,16 @@ class AngularRouteTemplater(object):
     """
 
     class URLParameter(object):
-
         def __init__(self, name):
             self.name = name
 
         @property
         def url_safe(self):
-            return '__{}__'.format(self.name)
+            return "__{}__".format(self.name)
 
         @property
         def placeholder(self):
-            return ':{}'.format(self.name)
+            return ":{}".format(self.name)
 
     def __init__(self, route_url, params):
         """Instantiate the templater with a route-generating function.

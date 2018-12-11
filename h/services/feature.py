@@ -7,7 +7,7 @@ import re
 from h import models
 from h.util.db import lru_cache_in_transaction
 
-PARAM_PATTERN = re.compile(r'\A__feature__\[(?P<featurename>[A-Za-z0-9_-]+)\]\Z')
+PARAM_PATTERN = re.compile(r"\A__feature__\[(?P<featurename>[A-Za-z0-9_-]+)\]\Z")
 
 
 class UnknownFeatureError(Exception):
@@ -24,7 +24,7 @@ class FeatureRequestProperty(object):
 
     def __init__(self, request):
         self.request = request
-        self.svc = request.find_service(name='feature')
+        self.svc = request.find_service(name="feature")
 
     def __call__(self, name):
         """Get the status of feature flag `name` for the current user."""
@@ -48,9 +48,8 @@ class FeatureService(object):
     :param overrides: the names of any overridden flags
     :type overrides: list
     """
-    def __init__(self,
-                 session,
-                 overrides=None):
+
+    def __init__(self, session, overrides=None):
         self.session = session
         self.overrides = overrides
 
@@ -67,7 +66,7 @@ class FeatureService(object):
         features = self.all(user=user)
 
         if name not in features:
-            raise UnknownFeatureError('{0} is not a valid feature name'.format(name))
+            raise UnknownFeatureError("{0} is not a valid feature name".format(name))
 
         return features[name]
 
@@ -104,8 +103,7 @@ class FeatureService(object):
 
 
 def feature_service_factory(context, request):
-    return FeatureService(session=request.db,
-                          overrides=_feature_overrides(request))
+    return FeatureService(session=request.db, overrides=_feature_overrides(request))
 
 
 def _feature_overrides(request):
@@ -120,5 +118,5 @@ def _feature_overrides(request):
     for param in request.GET:
         m = PARAM_PATTERN.match(param)
         if m:
-            overrides.append(m.group('featurename'))
+            overrides.append(m.group("featurename"))
     return overrides

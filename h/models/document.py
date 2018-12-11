@@ -23,29 +23,29 @@ class ConcurrentUpdateError(transaction.interfaces.TransientError):
 
 
 class Document(Base, mixins.Timestamps):
-    __tablename__ = 'document'
+    __tablename__ = "document"
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
     #: The denormalized value of the first DocumentMeta record with type title.
-    title = sa.Column('title', sa.UnicodeText())
+    title = sa.Column("title", sa.UnicodeText())
 
     #: The denormalized value of the "best" http(s) DocumentURI for this Document.
-    web_uri = sa.Column('web_uri', sa.UnicodeText())
+    web_uri = sa.Column("web_uri", sa.UnicodeText())
 
     # FIXME: This relationship should be named `uris` again after the
     #        dependency on the annotator-store is removed, as it clashes with
     #        making the Postgres and Elasticsearch interface of a Document
     #        object behave the same way.
-    document_uris = sa.orm.relationship('DocumentURI',
-                                        backref='document',
-                                        order_by='DocumentURI.updated.desc()')
-    meta = sa.orm.relationship('DocumentMeta',
-                               backref='document',
-                               order_by='DocumentMeta.updated.desc()')
+    document_uris = sa.orm.relationship(
+        "DocumentURI", backref="document", order_by="DocumentURI.updated.desc()"
+    )
+    meta = sa.orm.relationship(
+        "DocumentMeta", backref="document", order_by="DocumentMeta.updated.desc()"
+    )
 
     def __repr__(self):
-        return '<Document %s>' % self.id
+        return "<Document %s>" % self.id
 
     def update_web_uri(self):
         """
@@ -56,6 +56,7 @@ class Document(Base, mixins.Timestamps):
         Set self.web_uri to None if there's no http(s) DocumentURIs.
 
         """
+
         def first_http_url(type_=None):
             """
             Return this document's first http(s) URL of the given type.
@@ -71,13 +72,15 @@ class Document(Base, mixins.Timestamps):
                 uri = document_uri.uri
                 if type_ is not None and document_uri.type != type_:
                     continue
-                if urlparse.urlparse(uri).scheme not in ['http', 'https']:
+                if urlparse.urlparse(uri).scheme not in ["http", "https"]:
                     continue
                 return document_uri.uri
 
-        self.web_uri = (first_http_url(type_='self-claim')
-                        or first_http_url(type_='rel-canonical')
-                        or first_http_url())
+        self.web_uri = (
+            first_http_url(type_="self-claim")
+            or first_http_url(type_="rel-canonical")
+            or first_http_url()
+        )
 
     @classmethod
     def find_by_uris(cls, session, uris):
@@ -86,16 +89,17 @@ class Document(Base, mixins.Timestamps):
 
         matching_claims = (
             session.query(DocumentURI)
-                   .filter(DocumentURI.uri_normalized.in_(query_uris))
-                   .distinct(DocumentURI.document_id)
-                   .subquery()
+            .filter(DocumentURI.uri_normalized.in_(query_uris))
+            .distinct(DocumentURI.document_id)
+            .subquery()
         )
 
         return session.query(Document).join(matching_claims)
 
     @classmethod
-    def find_or_create_by_uris(cls, session, claimant_uri, uris,
-                               created=None, updated=None):
+    def find_or_create_by_uris(
+        cls, session, claimant_uri, uris, created=None, updated=None
+    ):
         """
         Find or create documents from a claimant uri and a list of uris.
 
@@ -110,62 +114,52 @@ class Document(Base, mixins.Timestamps):
 
         if documents.count() == 0:
             doc = Document(created=created, updated=updated)
-            DocumentURI(document=doc,
-                        claimant=claimant_uri,
-                        uri=claimant_uri,
-                        type='self-claim',
-                        created=created,
-                        updated=updated)
+            DocumentURI(
+                document=doc,
+                claimant=claimant_uri,
+                uri=claimant_uri,
+                type="self-claim",
+                created=created,
+                updated=updated,
+            )
             session.add(doc)
 
         try:
             session.flush()
         except sa.exc.IntegrityError:
-            raise ConcurrentUpdateError('concurrent document creation')
+            raise ConcurrentUpdateError("concurrent document creation")
 
         return documents
 
 
 class DocumentURI(Base, mixins.Timestamps):
-    __tablename__ = 'document_uri'
+    __tablename__ = "document_uri"
     __table_args__ = (
-        sa.UniqueConstraint('claimant_normalized',
-                            'uri_normalized',
-                            'type',
-                            'content_type'),
-        sa.Index('ix__document_uri_document_id', 'document_id'),
-        sa.Index('ix__document_uri_updated', 'updated'),
+        sa.UniqueConstraint(
+            "claimant_normalized", "uri_normalized", "type", "content_type"
+        ),
+        sa.Index("ix__document_uri_document_id", "document_id"),
+        sa.Index("ix__document_uri_updated", "updated"),
     )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    _claimant = sa.Column('claimant',
-                          sa.UnicodeText,
-                          nullable=False)
-    _claimant_normalized = sa.Column('claimant_normalized',
-                                     sa.UnicodeText,
-                                     nullable=False)
+    _claimant = sa.Column("claimant", sa.UnicodeText, nullable=False)
+    _claimant_normalized = sa.Column(
+        "claimant_normalized", sa.UnicodeText, nullable=False
+    )
 
-    _uri = sa.Column('uri',
-                     sa.UnicodeText,
-                     nullable=False)
-    _uri_normalized = sa.Column('uri_normalized',
-                                sa.UnicodeText,
-                                nullable=False,
-                                index=True)
+    _uri = sa.Column("uri", sa.UnicodeText, nullable=False)
+    _uri_normalized = sa.Column(
+        "uri_normalized", sa.UnicodeText, nullable=False, index=True
+    )
 
-    type = sa.Column(sa.UnicodeText,
-                     nullable=False,
-                     default='',
-                     server_default='')
-    content_type = sa.Column(sa.UnicodeText,
-                             nullable=False,
-                             default='',
-                             server_default='')
+    type = sa.Column(sa.UnicodeText, nullable=False, default="", server_default="")
+    content_type = sa.Column(
+        sa.UnicodeText, nullable=False, default="", server_default=""
+    )
 
-    document_id = sa.Column(sa.Integer,
-                            sa.ForeignKey('document.id'),
-                            nullable=False)
+    document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
 
     @hybrid_property
     def claimant(self):
@@ -194,33 +188,28 @@ class DocumentURI(Base, mixins.Timestamps):
         return self._uri_normalized
 
     def __repr__(self):
-        return '<DocumentURI %s>' % self.id
+        return "<DocumentURI %s>" % self.id
 
 
 class DocumentMeta(Base, mixins.Timestamps):
-    __tablename__ = 'document_meta'
+    __tablename__ = "document_meta"
     __table_args__ = (
-        sa.UniqueConstraint('claimant_normalized', 'type'),
-        sa.Index('ix__document_meta_document_id', 'document_id'),
-        sa.Index('ix__document_meta_updated', 'updated'),
+        sa.UniqueConstraint("claimant_normalized", "type"),
+        sa.Index("ix__document_meta_document_id", "document_id"),
+        sa.Index("ix__document_meta_updated", "updated"),
     )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    _claimant = sa.Column('claimant',
-                          sa.UnicodeText,
-                          nullable=False)
-    _claimant_normalized = sa.Column('claimant_normalized',
-                                     sa.UnicodeText,
-                                     nullable=False)
+    _claimant = sa.Column("claimant", sa.UnicodeText, nullable=False)
+    _claimant_normalized = sa.Column(
+        "claimant_normalized", sa.UnicodeText, nullable=False
+    )
 
     type = sa.Column(sa.UnicodeText, nullable=False)
-    value = sa.Column(pg.ARRAY(sa.UnicodeText, zero_indexes=True),
-                      nullable=False)
+    value = sa.Column(pg.ARRAY(sa.UnicodeText, zero_indexes=True), nullable=False)
 
-    document_id = sa.Column(sa.Integer,
-                            sa.ForeignKey('document.id'),
-                            nullable=False)
+    document_id = sa.Column(sa.Integer, sa.ForeignKey("document.id"), nullable=False)
 
     @hybrid_property
     def claimant(self):
@@ -236,17 +225,12 @@ class DocumentMeta(Base, mixins.Timestamps):
         return self._claimant_normalized
 
     def __repr__(self):
-        return '<DocumentMeta %s>' % self.id
+        return "<DocumentMeta %s>" % self.id
 
 
-def create_or_update_document_uri(session,
-                                  claimant,
-                                  uri,
-                                  type,
-                                  content_type,
-                                  document,
-                                  created,
-                                  updated):
+def create_or_update_document_uri(
+    session, claimant, uri, type, content_type, document, created, updated
+):
     """
     Create or update a DocumentURI with the given parameters.
 
@@ -289,41 +273,48 @@ def create_or_update_document_uri(session,
     :type updated: datetime.datetime
 
     """
-    docuri = session.query(DocumentURI).filter(
-        DocumentURI.claimant_normalized == uri_normalize(claimant),
-        DocumentURI.uri_normalized == uri_normalize(uri),
-        DocumentURI.type == type,
-        DocumentURI.content_type == content_type).first()
+    docuri = (
+        session.query(DocumentURI)
+        .filter(
+            DocumentURI.claimant_normalized == uri_normalize(claimant),
+            DocumentURI.uri_normalized == uri_normalize(uri),
+            DocumentURI.type == type,
+            DocumentURI.content_type == content_type,
+        )
+        .first()
+    )
 
     if docuri is None:
-        docuri = DocumentURI(claimant=claimant,
-                             uri=uri,
-                             type=type,
-                             content_type=content_type,
-                             document=document,
-                             created=created,
-                             updated=updated)
+        docuri = DocumentURI(
+            claimant=claimant,
+            uri=uri,
+            type=type,
+            content_type=content_type,
+            document=document,
+            created=created,
+            updated=updated,
+        )
         session.add(docuri)
     elif not docuri.document == document:
-        log.warning("Found DocumentURI (id: %d)'s document_id (%d) doesn't match "
-                    "given Document's id (%d)",
-                    docuri.id, docuri.document_id, document.id)
+        log.warning(
+            "Found DocumentURI (id: %d)'s document_id (%d) doesn't match "
+            "given Document's id (%d)",
+            docuri.id,
+            docuri.document_id,
+            document.id,
+        )
 
     docuri.updated = updated
 
     try:
         session.flush()
     except sa.exc.IntegrityError:
-        raise ConcurrentUpdateError('concurrent document uri updates')
+        raise ConcurrentUpdateError("concurrent document uri updates")
 
 
-def create_or_update_document_meta(session,
-                                   claimant,
-                                   type,
-                                   value,
-                                   document,
-                                   created,
-                                   updated):
+def create_or_update_document_meta(
+    session, claimant, type, value, document, created, updated
+):
     """
     Create or update a DocumentMeta with the given parameters.
 
@@ -364,34 +355,45 @@ def create_or_update_document_meta(session,
     :type updated: datetime.datetime
 
     """
-    existing_dm = session.query(DocumentMeta).filter(
-        DocumentMeta.claimant_normalized == uri_normalize(claimant),
-        DocumentMeta.type == type).one_or_none()
+    existing_dm = (
+        session.query(DocumentMeta)
+        .filter(
+            DocumentMeta.claimant_normalized == uri_normalize(claimant),
+            DocumentMeta.type == type,
+        )
+        .one_or_none()
+    )
 
     if existing_dm is None:
-        session.add(DocumentMeta(
-                    claimant=claimant,
-                    type=type,
-                    value=value,
-                    document=document,
-                    created=created,
-                    updated=updated,
-                    ))
+        session.add(
+            DocumentMeta(
+                claimant=claimant,
+                type=type,
+                value=value,
+                document=document,
+                created=created,
+                updated=updated,
+            )
+        )
     else:
         existing_dm.value = value
         existing_dm.updated = updated
         if not existing_dm.document == document:
-            log.warning("Found DocumentMeta (id: %d)'s document_id (%d) doesn't "
-                        "match given Document's id (%d)",
-                        existing_dm.id, existing_dm.document_id, document.id)
+            log.warning(
+                "Found DocumentMeta (id: %d)'s document_id (%d) doesn't "
+                "match given Document's id (%d)",
+                existing_dm.id,
+                existing_dm.document_id,
+                document.id,
+            )
 
-    if type == 'title' and value and not document.title:
+    if type == "title" and value and not document.title:
         document.title = value[0]
 
     try:
         session.flush()
     except sa.exc.IntegrityError:
-        raise ConcurrentUpdateError('concurrent document meta updates')
+        raise ConcurrentUpdateError("concurrent document meta updates")
 
 
 def merge_documents(session, documents, updated=None):
@@ -422,24 +424,26 @@ def merge_documents(session, documents, updated=None):
 
     try:
         session.flush()
-        session.query(Annotation) \
-            .filter(Annotation.document_id.in_(duplicate_ids)) \
-            .update({Annotation.document_id: master.id}, synchronize_session='fetch')
-        session.query(Document) \
-            .filter(Document.id.in_(duplicate_ids)) \
-            .delete(synchronize_session='fetch')
+        session.query(Annotation).filter(
+            Annotation.document_id.in_(duplicate_ids)
+        ).update({Annotation.document_id: master.id}, synchronize_session="fetch")
+        session.query(Document).filter(Document.id.in_(duplicate_ids)).delete(
+            synchronize_session="fetch"
+        )
     except sa.exc.IntegrityError:
-        raise ConcurrentUpdateError('concurrent document merges')
+        raise ConcurrentUpdateError("concurrent document merges")
 
     return master
 
 
-def update_document_metadata(session,
-                             target_uri,
-                             document_meta_dicts,
-                             document_uri_dicts,
-                             created=None,
-                             updated=None):
+def update_document_metadata(
+    session,
+    target_uri,
+    document_meta_dicts,
+    document_uri_dicts,
+    created=None,
+    updated=None,
+):
     """
     Create and update document metadata from the given annotation.
 
@@ -475,14 +479,13 @@ def update_document_metadata(session,
     documents = Document.find_or_create_by_uris(
         session,
         target_uri,
-        [u['uri'] for u in document_uri_dicts],
+        [u["uri"] for u in document_uri_dicts],
         created=created,
-        updated=updated)
+        updated=updated,
+    )
 
     if documents.count() > 1:
-        document = merge_documents(session,
-                                   documents,
-                                   updated=updated)
+        document = merge_documents(session, documents, updated=updated)
     else:
         document = documents.first()
 
@@ -494,7 +497,8 @@ def update_document_metadata(session,
             document=document,
             created=created,
             updated=updated,
-            **document_uri_dict)
+            **document_uri_dict
+        )
 
     document.update_web_uri()
 
@@ -504,6 +508,7 @@ def update_document_metadata(session,
             document=document,
             created=created,
             updated=updated,
-            **document_meta_dict)
+            **document_meta_dict
+        )
 
     return document

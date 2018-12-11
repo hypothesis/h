@@ -48,7 +48,9 @@ class GroupMembersService(object):
                         be the members of this group
         """
         current_mem_ids = [member.userid for member in group.members]
-        userids_for_removal = [mem_id for mem_id in current_mem_ids if mem_id not in userids]
+        userids_for_removal = [
+            mem_id for mem_id in current_mem_ids if mem_id not in userids
+        ]
 
         for userid in userids:
             self.member_join(group, userid)
@@ -65,7 +67,7 @@ class GroupMembersService(object):
 
         group.members.append(user)
 
-        self.publish('group-join', group.pubid, userid)
+        self.publish("group-join", group.pubid, userid)
 
     def member_leave(self, group, userid):
         """Remove `userid` from the member list of `group`."""
@@ -76,21 +78,25 @@ class GroupMembersService(object):
 
         group.members.remove(user)
 
-        self.publish('group-leave', group.pubid, userid)
+        self.publish("group-leave", group.pubid, userid)
 
 
 def group_members_factory(context, request):
     """Return a GroupMembersService instance for the passed context and request."""
-    user_service = request.find_service(name='user')
-    return GroupMembersService(session=request.db,
-                               user_fetcher=user_service.fetch,
-                               publish=partial(_publish, request))
+    user_service = request.find_service(name="user")
+    return GroupMembersService(
+        session=request.db,
+        user_fetcher=user_service.fetch,
+        publish=partial(_publish, request),
+    )
 
 
 def _publish(request, event_type, groupid, userid):
-    request.realtime.publish_user({
-        'type': event_type,
-        'session_model': session.model(request),
-        'userid': userid,
-        'group': groupid,
-    })
+    request.realtime.publish_user(
+        {
+            "type": event_type,
+            "session_model": session.model(request),
+            "userid": userid,
+            "group": groupid,
+        }
+    )

@@ -11,7 +11,6 @@ from h.presenters.annotation_html import AnnotationHTMLPresenter
 
 
 class TestAnnotationHTMLPresenter(object):
-
     def _annotation(self, annotation=None, **kwargs):
         """Return an AnnotationHTMLPresenter for the given annotation.
 
@@ -24,21 +23,21 @@ class TestAnnotationHTMLPresenter(object):
     def test_uri_is_escaped(self):
         spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
 
-        uri = self._annotation(target_uri='http://</a>' + spam_link).uri
+        uri = self._annotation(target_uri="http://</a>" + spam_link).uri
 
         assert jinja2.escape(spam_link) in uri
-        for char in ['<', '>', '"', "'"]:
+        for char in ["<", ">", '"', "'"]:
             assert char not in uri
 
     def test_uri_returns_Markup(self):
-        assert isinstance(self._annotation(target_uri="http://foo.com").uri,
-                          jinja2.Markup)
+        assert isinstance(
+            self._annotation(target_uri="http://foo.com").uri, jinja2.Markup
+        )
 
     def test_quote(self):
         annotation = self._annotation(
             annotation=mock.Mock(
-                target_selectors=[{'exact': 'selected text'}],
-                text="entered text"
+                target_selectors=[{"exact": "selected text"}], text="entered text"
             )
         )
 
@@ -46,56 +45,52 @@ class TestAnnotationHTMLPresenter(object):
 
     def test_username(self):
         annotation = self._annotation(
-            annotation=mock.Mock(
-                userid="acct:jdoe@hypothes.is"
-            )
+            annotation=mock.Mock(userid="acct:jdoe@hypothes.is")
         )
 
         assert annotation.username == ("jdoe")
 
     def test_shared(self):
-        annotation = self._annotation(
-            annotation=mock.Mock()
-        )
+        annotation = self._annotation(annotation=mock.Mock())
 
         assert annotation.shared == annotation.annotation.shared
 
     def test_tags(self):
-        annotation = self._annotation(
-            annotation=mock.Mock()
-        )
+        annotation = self._annotation(annotation=mock.Mock())
 
         assert annotation.tags == annotation.annotation.tags
 
-    @pytest.mark.parametrize('value,expected', [
-        (None, jinja2.Markup('')),
-        ('', jinja2.Markup('')),
-        ('donkeys with umbrellas', jinja2.Markup('donkeys with umbrellas')),
-    ])
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (None, jinja2.Markup("")),
+            ("", jinja2.Markup("")),
+            ("donkeys with umbrellas", jinja2.Markup("donkeys with umbrellas")),
+        ],
+    )
     def test_text_rendered(self, value, expected):
-        annotation = self._annotation(
-            annotation=mock.Mock(text_rendered=value)
-        )
+        annotation = self._annotation(annotation=mock.Mock(text_rendered=value))
 
         assert annotation.text_rendered == expected
 
     def test_description(self):
         annotation = self._annotation(
             annotation=mock.Mock(
-                target_selectors=[{'exact': 'selected text'}],
-                text="entered text"
+                target_selectors=[{"exact": "selected text"}], text="entered text"
             )
         )
 
         assert annotation.description == (
-            "&lt;blockquote&gt;selected text&lt;/blockquote&gt;entered text")
+            "&lt;blockquote&gt;selected text&lt;/blockquote&gt;entered text"
+        )
 
     def test_created_day_string_from_annotation(self):
         annotation = self._annotation(
             annotation=mock.Mock(
-                created=datetime.datetime(2015, 9, 4, 17, 37, 49, 517852))
+                created=datetime.datetime(2015, 9, 4, 17, 37, 49, 517852)
             )
-        assert annotation.created_day_string == '2015-09-04'
+        )
+        assert annotation.created_day_string == "2015-09-04"
 
     def test_it_does_not_crash_when_annotation_has_no_document(self):
         annotation = mock.Mock(document=None)
@@ -111,9 +106,10 @@ class TestAnnotationHTMLPresenter(object):
         presenter.link_text
         presenter.title
 
-    @mock.patch('h.presenters.annotation_html.DocumentHTMLPresenter')
+    @mock.patch("h.presenters.annotation_html.DocumentHTMLPresenter")
     def test_it_does_not_init_DocumentHTMLPresenter_if_no_document(
-            self, DocumentHTMLPresenter):
+        self, DocumentHTMLPresenter
+    ):
         """
         It shouldn't init DocumentHTMLPresenter if document is None.
 

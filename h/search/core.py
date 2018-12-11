@@ -11,11 +11,9 @@ from h.search import query
 
 log = logging.getLogger(__name__)
 
-SearchResult = namedtuple('SearchResult', [
-    'total',
-    'annotation_ids',
-    'reply_ids',
-    'aggregations'])
+SearchResult = namedtuple(
+    "SearchResult", ["total", "annotation_ids", "reply_ids", "aggregations"]
+)
 
 
 class Search(object):
@@ -40,8 +38,10 @@ class Search(object):
         published.
     :type stats: statsd.client.StatsClient
     """
+
     def __init__(
-        self, request,
+        self,
+        request,
         separate_replies=False,
         separate_wildcard_uri_keys=True,
         stats=None,
@@ -53,18 +53,22 @@ class Search(object):
         self._replies_limit = _replies_limit
         # Order matters! The KeyValueMatcher must be run last,
         # after all other modifiers have popped off the params.
-        self._modifiers = [query.Sorter(),
-                           query.Limiter(),
-                           query.DeletedFilter(),
-                           query.AuthFilter(request),
-                           query.GroupFilter(),
-                           query.GroupAuthFilter(request),
-                           query.UserFilter(),
-                           query.HiddenFilter(request),
-                           query.AnyMatcher(),
-                           query.TagsMatcher(),
-                           query.UriCombinedWildcardFilter(request, separate_keys=separate_wildcard_uri_keys),
-                           query.KeyValueMatcher()]
+        self._modifiers = [
+            query.Sorter(),
+            query.Limiter(),
+            query.DeletedFilter(),
+            query.AuthFilter(request),
+            query.GroupFilter(),
+            query.GroupAuthFilter(request),
+            query.UserFilter(),
+            query.HiddenFilter(request),
+            query.AnyMatcher(),
+            query.TagsMatcher(),
+            query.UriCombinedWildcardFilter(
+                request, separate_keys=separate_wildcard_uri_keys
+            ),
+            query.KeyValueMatcher(),
+        ]
         self._aggregations = []
 
     def run(self, params):
@@ -104,7 +108,8 @@ class Search(object):
         """
         # Don't return any fields, just the metadata so set _source=False.
         search = elasticsearch_dsl.Search(
-            using=self.es.conn, index=self.es.index).source(False)
+            using=self.es.conn, index=self.es.index
+        ).source(False)
 
         for agg in aggregations:
             agg(search, params)
@@ -123,12 +128,10 @@ class Search(object):
         if self.separate_replies:
             modifiers = [query.TopLevelAnnotationsFilter()] + modifiers
 
-        response = self._search(modifiers,
-                                self._aggregations,
-                                params)
+        response = self._search(modifiers, self._aggregations, params)
 
-        total = response['hits']['total']
-        annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
+        total = response["hits"]["total"]
+        annotation_ids = [hit["_id"] for hit in response["hits"]["hits"]]
         aggregations = self._parse_aggregation_results(response.aggregations)
         return (total, annotation_ids, aggregations)
 
@@ -142,16 +145,18 @@ class Search(object):
         response = self._search(
             [query.RepliesMatcher(annotation_ids)] + self._modifiers,
             [],  # Aggregations aren't used in replies.
-            MultiDict({'limit': self._replies_limit}),
+            MultiDict({"limit": self._replies_limit}),
         )
 
-        if len(response['hits']['hits']) < response['hits']['total']:
-            log.warning("The number of reply annotations exceeded the page size "
-                        "of the Elasticsearch query. We currently don't handle "
-                        "this, our search API doesn't support pagination of the "
-                        "reply set.")
+        if len(response["hits"]["hits"]) < response["hits"]["total"]:
+            log.warning(
+                "The number of reply annotations exceeded the page size "
+                "of the Elasticsearch query. We currently don't handle "
+                "this, our search API doesn't support pagination of the "
+                "reply set."
+            )
 
-        return [hit['_id'] for hit in response['hits']['hits']]
+        return [hit["_id"] for hit in response["hits"]["hits"]]
 
     def _parse_aggregation_results(self, aggregations):
         if not aggregations:
@@ -169,15 +174,15 @@ class Search(object):
             return
 
         s = self.stats.pipeline()
-        timer = s.timer('search.query').start()
+        timer = s.timer("search.query").start()
         try:
             yield
-            s.incr('search.query.success')
+            s.incr("search.query.success")
         except ConnectionTimeout:
-            s.incr('search.query.timeout')
+            s.incr("search.query.timeout")
             raise
         except:  # noqa: E722
-            s.incr('search.query.error')
+            s.incr("search.query.error")
             raise
         finally:
             timer.stop()

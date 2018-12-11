@@ -19,9 +19,11 @@ def group_service(pyramid_config):
 
 @pytest.fixture(autouse=True)
 def moderation_service(pyramid_config):
-    svc = mock.create_autospec(AnnotationModerationService, spec_set=True, instance=True)
+    svc = mock.create_autospec(
+        AnnotationModerationService, spec_set=True, instance=True
+    )
     svc.all_hidden.return_value = []
-    pyramid_config.register_service(svc, name='annotation_moderation')
+    pyramid_config.register_service(svc, name="annotation_moderation")
     return svc
 
 
@@ -33,10 +35,12 @@ def Annotation(factories, index):
     strategy and automatically indexes the annotation into the test
     Elasticsearch index.
     """
+
     def _Annotation(**kwargs):
         annotation = factories.Annotation.build(**kwargs)
         index(annotation)
         return annotation
+
     return _Annotation
 
 
