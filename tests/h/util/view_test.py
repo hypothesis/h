@@ -15,21 +15,6 @@ class TestHandleException(object):
 
         assert pyramid_request.response.status_int == 500
 
-    def test_triggers_sentry_capture_with_latest_exception(
-        self, pyramid_request, latest_exception
-    ):
-        handle_exception(pyramid_request, latest_exception)
-        pyramid_request.sentry.captureException.assert_called_once_with()
-
-    def test_triggers_sentry_capture_with_old_exception(
-        self, pyramid_request, old_exception
-    ):
-        handle_exception(pyramid_request, old_exception)
-        traceback = getattr(old_exception, "__traceback__", None)
-        pyramid_request.sentry.captureException.assert_called_once_with(
-            (type(old_exception), old_exception, traceback)
-        )
-
     def test_reraises_in_debug_mode(self, pyramid_request):
         pyramid_request.debug = True
         dummy_exc = ValueError("dummy")
@@ -43,8 +28,6 @@ class TestHandleException(object):
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        sentry = Mock(spec_set=["captureException"])
-        pyramid_request.sentry = sentry
         pyramid_request.debug = False
         return pyramid_request
 

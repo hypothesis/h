@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import logging
 
 import mock
-import pytest
 
 from billiard.einfo import ExceptionInfo
 
@@ -12,14 +10,6 @@ from h import celery
 
 
 class TestCelery(object):
-    @pytest.fixture(autouse=True)
-    def register_signal(self, request):
-        return _patch("h.celery.register_signal", request)
-
-    @pytest.fixture(autouse=True)
-    def register_logger_signal(self, request):
-        return _patch("h.celery.register_logger_signal", request)
-
     def test_bootstrap_worker_bootstraps_application(self):
         sender = mock.Mock(spec=["app"])
 
@@ -34,20 +24,6 @@ class TestCelery(object):
         celery.bootstrap_worker(sender)
 
         assert sender.app.request == request
-
-    def test_bootstrap_worker_configures_sentry_reporting(
-        self, register_signal, register_logger_signal
-    ):
-        sender = mock.Mock(spec=["app"])
-        request = sender.app.webapp_bootstrap.return_value
-        request.sentry = mock.sentinel.sentry
-
-        celery.bootstrap_worker(sender)
-
-        register_signal.assert_called_once_with(mock.sentinel.sentry)
-        register_logger_signal.assert_called_once_with(
-            mock.sentinel.sentry, loglevel=logging.ERROR
-        )
 
     def test_nipsa_cache(self, pyramid_config, pyramid_request):
         sender = mock.Mock(app=mock.Mock(request=pyramid_request))

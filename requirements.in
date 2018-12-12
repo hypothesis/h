@@ -38,7 +38,7 @@ pyramid_mailer
 pyramid_tm
 python-dateutil
 python-slugify < 1.2.0
-raven
+sentry-sdk
 statsd
 transaction
 venusian

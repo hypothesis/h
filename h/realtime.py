@@ -21,17 +21,13 @@ class Consumer(ConsumerMixin):
     :param connection: a `kombe.Connection`
     :param routing_key: listen to messages with this routing key
     :param handler: the function which gets called when a messages arrives
-    :param sentry_client: an optional Sentry client for error reporting
     """
 
-    def __init__(
-        self, connection, routing_key, handler, sentry_client=None, statsd_client=None
-    ):
+    def __init__(self, connection, routing_key, handler, statsd_client=None):
         self.connection = connection
         self.routing_key = routing_key
         self.handler = handler
         self.exchange = get_exchange()
-        self.sentry_client = sentry_client
         self.statsd_client = statsd_client
 
     def get_consumers(self, consumer_factory, channel):
@@ -57,24 +53,6 @@ class Consumer(ConsumerMixin):
             self._record_time_in_queue(message)
         message.ack()
         self.handler(body)
-
-    def on_connection_error(self, exc, interval):
-        if self.sentry_client:
-            extra = {"exchange": self.exchange.name}
-            self.sentry_client.captureException(extra=extra)
-
-        super(Consumer, self).on_connection_error(exc, interval)
-
-    def on_decode_error(self, message, exc):
-        if self.sentry_client:
-            extra = {
-                "exchange": self.exchange.name,
-                "message_headers": message.headers,
-                "message_properties": message.properties,
-            }
-            self.sentry_client.captureException(extra=extra)
-
-        super(Consumer, self).on_decode_error(message, exc)
 
     def _random_id(self):
         """Generate a short random string"""
