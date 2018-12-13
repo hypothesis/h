@@ -30,6 +30,24 @@ class TestGroupUpdate(object):
 
         assert updated_group == group
 
+    def test_it_accepts_scope_relations(self, factories, svc, db_session):
+        group = factories.Group()
+        scopes = [factories.GroupScope(), factories.GroupScope()]
+        data = {"name": "whatnot", "scopes": scopes}
+
+        updated_group = svc.update(group, **data)
+
+        assert updated_group.scopes == scopes
+
+    def test_it_replaces_scope_relations(self, factories, svc, db_session):
+        group = factories.Group(scopes=[factories.GroupScope()])
+        updated_scopes = [factories.GroupScope(), factories.GroupScope()]
+        data = {"name": "whatnot", "scopes": updated_scopes}
+
+        updated_group = svc.update(group, **data)
+
+        assert updated_group.scopes == updated_scopes
+
     def test_it_does_not_protect_against_undefined_properties(self, factories, svc):
         group = factories.Group()
         data = {"some_random_field": "whatever"}
