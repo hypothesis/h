@@ -189,14 +189,23 @@ class GroupEditController(object):
         group = self.group
 
         def on_success(appstruct):
-            user_svc = self.request.find_service(name="user")
-            group_members_svc = self.request.find_service(name="group_members")
+            """Update the group resource on successful form validation"""
 
-            group.creator = user_svc.fetch(appstruct["creator"], group.authority)
-            group.description = appstruct["description"]
-            group.name = appstruct["name"]
-            group.scopes = [GroupScope(origin=o) for o in appstruct["origins"]]
-            group.organization = self.organizations[appstruct["organization"]]
+            user_svc = self.request.find_service(name="user")
+            group_update_svc = self.request.find_service(name="group_update")
+            group_members_svc = self.request.find_service(name="group_members")
+            organization = self.organizations[appstruct["organization"]]
+            scopes = [GroupScope(origin=o) for o in appstruct["origins"]]
+
+            group_update_svc.update(
+                group,
+                organization=organization,
+                creator=user_svc.fetch(appstruct["creator"], group.authority),
+                description=appstruct["description"],
+                name=appstruct["name"],
+                scopes=scopes,
+                enforce_scope=appstruct["enforce_scope"],
+            )
 
             memberids = [
                 _userid(username, group.authority) for username in appstruct["members"]
@@ -228,6 +237,7 @@ class GroupEditController(object):
                 "members": [m.username for m in group.members],
                 "organization": group.organization.pubid,
                 "origins": [s.origin for s in group.scopes],
+                "enforce_scope": group.enforce_scope,
             }
         )
 

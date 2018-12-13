@@ -24,6 +24,7 @@ class Group(ModelFactory):
     readable_by = ReadableBy.members
     writeable_by = WriteableBy.members
     members = factory.LazyAttribute(lambda obj: [obj.creator])
+    enforce_scope = True
 
     @factory.post_generation
     def scopes(self, create, scopes=0, **kwargs):
