@@ -104,7 +104,7 @@ class TestGroupCreateController(object):
         (_, call_kwargs) = schema.bind.call_args
         assert call_kwargs["organizations"] == {default_org.pubid: default_org}
 
-    def test_it_handles_form_submission(
+    def test_post_handles_form_submission(
         self, pyramid_request, handle_form_submission, matchers
     ):
         ctrl = GroupCreateController(pyramid_request)
@@ -134,6 +134,7 @@ class TestGroupCreateController(object):
                     "members": [],
                     "organization": default_org.pubid,
                     "origins": [],
+                    "enforce_scope": True,
                 }
             )
 
@@ -156,10 +157,8 @@ class TestGroupCreateController(object):
         type_,
         default_org,
     ):
-        name = "My new group"
         creator = pyramid_request.user.username
         member_to_add = factories.User()
-        description = "Purpose of new group"
         origins = ["https://example.com"]
 
         def call_on_success(request, form, on_success, on_failure):
@@ -167,11 +166,12 @@ class TestGroupCreateController(object):
                 {
                     "organization": default_org.pubid,
                     "creator": creator,
-                    "description": description,
+                    "description": "Whatnot",
                     "group_type": type_,
-                    "name": name,
+                    "name": "My New Group",
                     "origins": origins,
                     "members": [member_to_add.username],
+                    "enforce_scope": True,
                 }
             )
 
@@ -191,11 +191,12 @@ class TestGroupCreateController(object):
         ).userid
 
         create_method.assert_called_with(
-            name=name,
+            name="My New Group",
             userid=expected_userid,
-            description=description,
+            description="Whatnot",
             origins=origins,
             organization=default_org,
+            enforce_scope=True,
         )
         group_members_svc.add_members.assert_called_once_with(
             create_method.return_value, [member_to_add.userid]
