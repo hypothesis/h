@@ -167,6 +167,7 @@ def group_data(factories):
         "description": "Lorem ipsum dolor sit amet consectetuer",
         "organization": "__default__",
         "origins": ["http://www.foo.com", "https://www.foo.com"],
+        "enforce_scope": True,
     }
 
 
