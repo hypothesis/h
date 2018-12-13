@@ -3,7 +3,7 @@ SQLAlchemy >= 1.1.4
 alembic
 backports.functools_lru_cache
 bcrypt
-bleach >= 2.0
+bleach
 celery >= 4.2.1
 certifi  # Required to connect to Elasticsearch over SSL.
 cffi
