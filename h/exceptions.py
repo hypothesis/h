@@ -16,18 +16,6 @@ class APIError(Exception):
         super(APIError, self).__init__(message)
 
 
-class ClientUnauthorized(APIError):
-
-    """
-    Exception raised if the client credentials provided for an API request
-    were missing or invalid.
-    """
-
-    def __init__(self):
-        message = _("Client credentials are invalid.")
-        super(ClientUnauthorized, self).__init__(message, status_code=403)
-
-
 class ConflictError(APIError):
     """
     Exception raised if client request represents a duplicate of an
