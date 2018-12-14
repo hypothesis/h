@@ -59,10 +59,12 @@ class GroupCreateController(object):
 
     @view_config(request_method="GET")
     def get(self):
+
         self.form.set_appstruct(
             {
                 "creator": self.request.user.username,
                 "organization": Organization.default(self.request.db).pubid,
+                "enforce_scope": True,
             }
         )
         return self._template_context()
@@ -70,39 +72,35 @@ class GroupCreateController(object):
     @view_config(request_method="POST")
     def post(self):
         def on_success(appstruct):
+            """Create a group on successful validation of POSTed form data"""
+
             group_create_svc = self.request.find_service(name="group_create")
             group_members_svc = self.request.find_service(name="group_members")
 
-            # Create the new group.
-            creator = appstruct["creator"]
-            description = appstruct["description"]
-            name = appstruct["name"]
             organization = self.organizations[appstruct["organization"]]
-            origins = appstruct["origins"]
+            # We know this user exists because it is checked during schema validation
+            creator_userid = _userid(appstruct["creator"], organization.authority)
+
             type_ = appstruct["group_type"]
-
-            userid = _userid(creator, organization.authority)
-
-            if type_ == "open":
-                group = group_create_svc.create_open_group(
-                    name=name,
-                    userid=userid,
-                    origins=origins,
-                    description=description,
-                    organization=organization,
-                )
-            elif type_ == "restricted":
-                group = group_create_svc.create_restricted_group(
-                    name=name,
-                    userid=userid,
-                    origins=origins,
-                    description=description,
-                    organization=organization,
-                )
-            else:
+            if type_ not in ["open", "restricted"]:
                 raise Exception("Unsupported group type {}".format(type_))
 
-            # Add members to the group
+            create_fns = {
+                "open": group_create_svc.create_open_group,
+                "restricted": group_create_svc.create_restricted_group,
+            }
+
+            group = create_fns[type_](
+                name=appstruct["name"],
+                userid=creator_userid,
+                origins=appstruct["origins"],
+                description=appstruct["description"],
+                organization=organization,
+                enforce_scope=appstruct["enforce_scope"],
+            )
+
+            # Add members to the group. We know that these users exist
+            # because that check is part of form schema validation.
             member_userids = [
                 _userid(username, organization.authority)
                 for username in appstruct["members"]
@@ -118,7 +116,7 @@ class GroupCreateController(object):
             self.request.session.flash(
                 Markup(
                     'Created new group <a href="{url}">{name}</a>'.format(
-                        name=name, url=group_url
+                        name=group.name, url=group_url
                     )
                 ),
                 queue="success",
@@ -162,7 +160,7 @@ class GroupEditController(object):
         user_svc = request.find_service(name="user")
         self.request = request
         self.schema = CreateAdminGroupSchema().bind(
-            request=request,
+            request=self.request,
             group=self.group,
             organizations=self.organizations,
             user_svc=user_svc,
@@ -191,14 +189,23 @@ class GroupEditController(object):
         group = self.group
 
         def on_success(appstruct):
-            user_svc = self.request.find_service(name="user")
-            group_members_svc = self.request.find_service(name="group_members")
+            """Update the group resource on successful form validation"""
 
-            group.creator = user_svc.fetch(appstruct["creator"], group.authority)
-            group.description = appstruct["description"]
-            group.name = appstruct["name"]
-            group.scopes = [GroupScope(origin=o) for o in appstruct["origins"]]
-            group.organization = self.organizations[appstruct["organization"]]
+            user_svc = self.request.find_service(name="user")
+            group_update_svc = self.request.find_service(name="group_update")
+            group_members_svc = self.request.find_service(name="group_members")
+            organization = self.organizations[appstruct["organization"]]
+            scopes = [GroupScope(origin=o) for o in appstruct["origins"]]
+
+            group_update_svc.update(
+                group,
+                organization=organization,
+                creator=user_svc.fetch(appstruct["creator"], group.authority),
+                description=appstruct["description"],
+                name=appstruct["name"],
+                scopes=scopes,
+                enforce_scope=appstruct["enforce_scope"],
+            )
 
             memberids = [
                 _userid(username, group.authority) for username in appstruct["members"]
@@ -230,6 +237,7 @@ class GroupEditController(object):
                 "members": [m.username for m in group.members],
                 "organization": group.organization.pubid,
                 "origins": [s.origin for s in group.scopes],
+                "enforce_scope": group.enforce_scope,
             }
         )
 

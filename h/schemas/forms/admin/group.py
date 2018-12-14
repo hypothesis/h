@@ -3,7 +3,13 @@
 from __future__ import unicode_literals
 
 import colander
-from deform.widget import SelectWidget, SequenceWidget, TextAreaWidget, TextInputWidget
+from deform.widget import (
+    CheckboxWidget,
+    SelectWidget,
+    SequenceWidget,
+    TextAreaWidget,
+    TextInputWidget,
+)
 
 from h import i18n
 from h.schemas import validators
@@ -146,6 +152,18 @@ class CreateAdminGroupSchema(CSRFSchema):
         validator=colander.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
         widget=TextAreaWidget(rows=3, max_length=GROUP_DESCRIPTION_MAX_LENGTH),
         missing=None,
+    )
+
+    # Although the default value of the enforce_scope property is True,
+    # we need to allow the unchecking of the checkbox that represents it,
+    # which means that empty values should be treated as False.
+    enforce_scope = colander.SchemaNode(
+        colander.Boolean(),
+        hint=_(
+            "Only allow annotations for documents within this group's defined scopes"
+        ),
+        widget=CheckboxWidget(css_class="form-checkbox--inline"),
+        missing=False,
     )
 
     origins = colander.SequenceSchema(

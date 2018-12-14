@@ -90,6 +90,18 @@ class TestCreatePrivateGroup(object):
 
         assert group.organization == org
 
+    def test_it_creates_group_with_enforce_scope_True_by_default(self, creator, svc):
+        group = svc.create_private_group("Anteater fans", creator.userid)
+
+        assert group.enforce_scope is True
+
+    def test_it_sets_group_with_specified_enforce_scope(self, creator, svc):
+        group = svc.create_private_group(
+            "Anteater fans", creator.userid, enforce_scope=False
+        )
+
+        assert group.enforce_scope is False
+
     def test_it_adds_group_to_session(self, db_session, creator, svc):
         group = svc.create_private_group("Anteater fans", creator.userid)
 
@@ -182,6 +194,26 @@ class TestCreateOpenGroup(object):
         )
 
         assert group.organization == org
+
+    def test_it_creates_group_with_enforce_scope_True_by_default(
+        self, creator, svc, origins, db_session
+    ):
+        group = svc.create_open_group("Anteater fans", creator.userid, origins=origins)
+
+        db_session.flush()
+
+        assert group.enforce_scope is True
+
+    def test_it_creates_group_with_specified_enforce_scope(
+        self, creator, svc, origins, db_session
+    ):
+        group = svc.create_open_group(
+            "Anteater fans", creator.userid, origins=origins, enforce_scope=False
+        )
+
+        db_session.flush()
+
+        assert group.enforce_scope is False
 
     def test_it_adds_group_to_session(self, db_session, creator, svc, origins):
         group = svc.create_open_group("Anteater fans", creator.userid, origins=origins)
@@ -309,6 +341,28 @@ class TestCreateRestrictedGroup(object):
         )
 
         assert group.organization == org
+
+    def test_it_creates_group_with_enforce_scope_True_by_default(
+        self, creator, svc, origins, db_session
+    ):
+        group = svc.create_restricted_group(
+            "Anteater fans", creator.userid, origins=origins
+        )
+
+        db_session.flush()
+
+        assert group.enforce_scope is True
+
+    def test_it_creates_group_with_specified_enforce_scope(
+        self, creator, svc, origins, db_session
+    ):
+        group = svc.create_restricted_group(
+            "Anteater fans", creator.userid, origins=origins, enforce_scope=False
+        )
+
+        db_session.flush()
+
+        assert group.enforce_scope is False
 
     def test_it_adds_group_to_session(self, db_session, creator, svc, origins):
         group = svc.create_restricted_group(

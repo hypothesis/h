@@ -14,6 +14,7 @@ from h.views.admin.groups import GroupCreateController, GroupEditController
 from h.services.user import UserService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
+from h.services.group_update import GroupUpdateService
 from h.services.group_members import GroupMembersService
 from h.services.delete_group import DeleteGroupService
 from h.services.list_organizations import ListOrganizationsService
@@ -104,7 +105,7 @@ class TestGroupCreateController(object):
         (_, call_kwargs) = schema.bind.call_args
         assert call_kwargs["organizations"] == {default_org.pubid: default_org}
 
-    def test_it_handles_form_submission(
+    def test_post_handles_form_submission(
         self, pyramid_request, handle_form_submission, matchers
     ):
         ctrl = GroupCreateController(pyramid_request)
@@ -134,6 +135,7 @@ class TestGroupCreateController(object):
                     "members": [],
                     "organization": default_org.pubid,
                     "origins": [],
+                    "enforce_scope": True,
                 }
             )
 
@@ -156,10 +158,8 @@ class TestGroupCreateController(object):
         type_,
         default_org,
     ):
-        name = "My new group"
         creator = pyramid_request.user.username
         member_to_add = factories.User()
-        description = "Purpose of new group"
         origins = ["https://example.com"]
 
         def call_on_success(request, form, on_success, on_failure):
@@ -167,11 +167,12 @@ class TestGroupCreateController(object):
                 {
                     "organization": default_org.pubid,
                     "creator": creator,
-                    "description": description,
+                    "description": "Whatnot",
                     "group_type": type_,
-                    "name": name,
+                    "name": "My New Group",
                     "origins": origins,
                     "members": [member_to_add.username],
+                    "enforce_scope": True,
                 }
             )
 
@@ -191,11 +192,12 @@ class TestGroupCreateController(object):
         ).userid
 
         create_method.assert_called_with(
-            name=name,
+            name="My New Group",
             userid=expected_userid,
-            description=description,
+            description="Whatnot",
             origins=origins,
             organization=default_org,
+            enforce_scope=True,
         )
         group_members_svc.add_members.assert_called_once_with(
             create_method.return_value, [member_to_add.userid]
@@ -207,6 +209,7 @@ class TestGroupCreateController(object):
     "user_svc",
     "group_svc",
     "group_create_svc",
+    "group_update_svc",
     "group_members_svc",
     "list_orgs_svc",
 )
@@ -284,25 +287,22 @@ class TestGroupEditController(object):
         (_, call_kwargs) = schema.bind.call_args
         assert call_kwargs["organizations"] == {default_org.pubid: default_org}
 
-    def test_update_updates_group_on_success(
+    def test_update_proxies_to_update_svc_on_success(
         self,
         factories,
         pyramid_request,
-        group_create_svc,
         user_svc,
         list_orgs_svc,
         handle_form_submission,
         group_svc,
+        group_update_svc,
+        group,
+        GroupScope,
     ):
-        group = factories.RestrictedGroup(pubid="testgroup")
         group_svc.fetch.return_value = group
 
-        updated_name = "Updated group"
         updated_creator = factories.User()
         user_svc.fetch.return_value = updated_creator
-        updated_description = "New description"
-        updated_origins = ["https://a-new-site.com"]
-        updated_members = []
         updated_org = factories.Organization()
 
         list_orgs_svc.organizations.return_value.append(updated_org)
@@ -311,12 +311,13 @@ class TestGroupEditController(object):
             return on_success(
                 {
                     "creator": updated_creator.username,
-                    "description": updated_description,
+                    "description": "New description",
                     "group_type": "open",
-                    "name": updated_name,
+                    "name": "Updated group",
                     "organization": updated_org.pubid,
-                    "origins": updated_origins,
-                    "members": updated_members,
+                    "origins": ["http://somewhereelse.com", "http://www.gladiolus.org"],
+                    "members": [],
+                    "enforce_scope": False,
                 }
             )
 
@@ -325,11 +326,18 @@ class TestGroupEditController(object):
 
         ctx = ctrl.update()
 
-        assert group.creator.username == updated_creator.username
-        assert group.description == updated_description
-        assert group.name == updated_name
-        assert group.organization == updated_org
-        assert [s.origin for s in group.scopes] == updated_origins
+        group_update_svc.update.assert_called_once_with(
+            group,
+            organization=updated_org,
+            creator=updated_creator,
+            description="New description",
+            name="Updated group",
+            scopes=[
+                GroupScope(origin=o)
+                for o in ["http://somewhereelse.com", "http://www.gladiolus.org"]
+            ],
+            enforce_scope=False,
+        )
         assert ctx["form"] == self._expected_form(group)
 
     def test_update_updates_group_members_on_success(
@@ -367,6 +375,7 @@ class TestGroupEditController(object):
                     "members": [member_a.username, member_b.username],
                     "organization": group.organization.pubid,
                     "origins": ["http://www.example.com"],
+                    "enforce_scope": group.enforce_scope,
                 }
             )
 
@@ -405,12 +414,18 @@ class TestGroupEditController(object):
             "members": [m.username for m in group.members],
             "organization": group.organization.pubid,
             "origins": [s.origin for s in group.scopes],
+            "enforce_scope": group.enforce_scope,
         }
 
 
 @pytest.fixture
 def authority():
     return "foo.com"
+
+
+@pytest.fixture
+def GroupScope(patch):
+    return patch("h.views.admin.groups.GroupScope")
 
 
 @pytest.fixture
@@ -456,6 +471,13 @@ def group_svc(pyramid_config):
 def group_create_svc(pyramid_config):
     svc = mock.create_autospec(GroupCreateService, spec_set=True, instance=True)
     pyramid_config.register_service(svc, name="group_create")
+    return svc
+
+
+@pytest.fixture
+def group_update_svc(pyramid_config):
+    svc = mock.create_autospec(GroupUpdateService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name="group_update")
     return svc
 
 
