@@ -11,13 +11,13 @@ from __future__ import unicode_literals
 from alembic import op
 
 
-revision = 'a2295c2bbe29'
-down_revision = '05bd63575f19'
+revision = "a2295c2bbe29"
+down_revision = "05bd63575f19"
 
 
 def upgrade():
-    op.alter_column('authclient', 'secret', nullable=True)
+    op.alter_column("authclient", "secret", nullable=True)
 
 
 def downgrade():
-    op.alter_column('authclient', 'secret', nullable=False)
+    op.alter_column("authclient", "secret", nullable=False)

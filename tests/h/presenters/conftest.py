@@ -12,11 +12,11 @@ class FakeLinksService(object):
 
     def get(self, annotation, name):
         self.last_annotation = annotation
-        return 'http://fake-link/' + name
+        return "http://fake-link/" + name
 
     def get_all(self, annotation):
         self.last_annotation = annotation
-        return {'giraffe': 'http://giraffe.com', 'toad': 'http://toad.net'}
+        return {"giraffe": "http://giraffe.com", "toad": "http://toad.net"}
 
 
 @pytest.fixture
@@ -26,4 +26,4 @@ def fake_links_service():
 
 @pytest.fixture
 def group_service():
-    return mock.Mock(spec_set=['find'])
+    return mock.Mock(spec_set=["find"])

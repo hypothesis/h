@@ -22,9 +22,9 @@ DEFAULT_ENTROPY = 32
 #
 #   https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#context-migration-example
 #
-password_context = CryptContext(schemes=['bcrypt'],
-                                bcrypt__ident='2b',
-                                bcrypt__min_rounds=12)
+password_context = CryptContext(
+    schemes=["bcrypt"], bcrypt__ident="2b", bcrypt__min_rounds=12
+)
 
 
 def derive_key(key_material, salt, info):
@@ -51,4 +51,4 @@ def token_urlsafe(nbytes=None):
     if nbytes is None:
         nbytes = DEFAULT_ENTROPY
     tok = os.urandom(nbytes)
-    return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
+    return base64.urlsafe_b64encode(tok).rstrip(b"=").decode("ascii")

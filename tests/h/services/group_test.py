@@ -14,26 +14,24 @@ from tests.common.matchers import Matcher
 
 
 class TestGroupServiceFetch(object):
-
     def test_it_proxies_to_fetch_by_groupid_if_groupid_valid(self, svc):
         svc.fetch_by_groupid = mock.Mock()
 
-        result = svc.fetch('group:something@somewhere.com')
+        result = svc.fetch("group:something@somewhere.com")
 
-        assert svc.fetch_by_groupid.called_once_with('group:something@somewhere.com')
+        assert svc.fetch_by_groupid.called_once_with("group:something@somewhere.com")
         assert result == svc.fetch_by_groupid.return_value
 
     def test_it_proxies_to_fetch_by_pubid_if_not_groupid_syntax(self, svc):
         svc.fetch_by_pubid = mock.Mock()
 
-        result = svc.fetch('abcdppp')
+        result = svc.fetch("abcdppp")
 
-        assert svc.fetch_by_pubid.called_once_with('abcdppp')
+        assert svc.fetch_by_pubid.called_once_with("abcdppp")
         assert result == svc.fetch_by_pubid.return_value
 
 
 class TestGroupServiceFetchByPubid(object):
-
     def test_it_returns_group_model(self, svc, factories):
         group = factories.Group()
 
@@ -43,16 +41,14 @@ class TestGroupServiceFetchByPubid(object):
         assert isinstance(fetched_group, Group)
 
     def test_it_returns_None_if_no_group_found(self, svc):
-        group = svc.fetch_by_pubid('abcdeff')
+        group = svc.fetch_by_pubid("abcdeff")
 
         assert group is None
 
 
 class TestGroupServiceFetchByGroupid(object):
-
     def test_it_returns_group_model_of_matching_group(self, svc, factories):
-        group = factories.Group(authority_provided_id='dingdong',
-                                authority='foo.com')
+        group = factories.Group(authority_provided_id="dingdong", authority="foo.com")
 
         fetched_group = svc.fetch_by_groupid(group.groupid)
 
@@ -60,10 +56,10 @@ class TestGroupServiceFetchByGroupid(object):
 
     def test_it_raises_ValueError_if_invalid_groupid(self, svc):
         with pytest.raises(ValueError, match="isn't a valid groupid"):
-            svc.fetch_by_groupid('fiddlesticks')
+            svc.fetch_by_groupid("fiddlesticks")
 
     def test_it_returns_None_if_no_matching_group(self, svc):
-        assert svc.fetch_by_groupid('group:rando@dando.com') is None
+        assert svc.fetch_by_groupid("group:rando@dando.com") is None
 
 
 class TestGroupServiceGroupIds(object):
@@ -72,17 +68,19 @@ class TestGroupServiceGroupIds(object):
         - :py:meth:`GroupService.groupids_created_by`
     """
 
-    @pytest.mark.parametrize('with_user', [True, False])
+    @pytest.mark.parametrize("with_user", [True, False])
     def test_readable_by_includes_world(self, with_user, svc, db_session, factories):
         user = None
         if with_user:
             user = factories.User()
             db_session.flush()
 
-        assert '__world__' in svc.groupids_readable_by(user)
+        assert "__world__" in svc.groupids_readable_by(user)
 
-    @pytest.mark.parametrize('with_user', [True, False])
-    def test_readable_by_includes_world_readable_groups(self, with_user, svc, db_session, factories):
+    @pytest.mark.parametrize("with_user", [True, False])
+    def test_readable_by_includes_world_readable_groups(
+        self, with_user, svc, db_session, factories
+    ):
         # group readable by members
         factories.Group(readable_by=ReadableBy.members)
         # group readable by everyone
@@ -124,7 +122,7 @@ class TestGroupServiceGroupIds(object):
         assert svc.groupids_created_by(None) == []
 
 
-@pytest.mark.usefixtures('user_service')
+@pytest.mark.usefixtures("user_service")
 class TestGroupsFactory(object):
     def test_returns_groups_service(self, pyramid_request):
         svc = groups_factory(None, pyramid_request)
@@ -139,9 +137,9 @@ class TestGroupsFactory(object):
     def test_wraps_user_service_as_user_fetcher(self, pyramid_request, user_service):
         svc = groups_factory(None, pyramid_request)
 
-        svc.user_fetcher('foo')
+        svc.user_fetcher("foo")
 
-        user_service.fetch.assert_called_once_with('foo')
+        user_service.fetch.assert_called_once_with("foo")
 
 
 @pytest.fixture
@@ -151,6 +149,7 @@ def usr_svc(pyramid_request, db_session):
         # we do want to be able to fetch user models for internal
         # module behavior tests
         return db_session.query(User).filter_by(userid=userid).one_or_none()
+
     return fetch
 
 
@@ -162,7 +161,7 @@ def svc(db_session, usr_svc):
 @pytest.fixture
 def user_service(pyramid_config):
     service = mock.create_autospec(UserService, spec_set=True, instance=True)
-    pyramid_config.register_service(service, name='user')
+    pyramid_config.register_service(service, name="user")
     return service
 
 

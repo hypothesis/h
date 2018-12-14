@@ -6,28 +6,32 @@ from h.streamer.filter import FilterHandler
 
 
 class TestFilterHandler(object):
-    @pytest.mark.parametrize('query_uris,ann_uri,should_match', [
-        # Test cases that require only exact comparisons.
-        (["https://example.com", "https://example.org"], 'https://example.com', True),
-        (["https://example.com", "https://example.org"], 'https://example.net', False),
-
-        # Test cases that require comparison of normalized URIs.
-        (["https://example.com"], "http://example.com", True),
-        (["http://example.com"], "https://example.com", True),
-        (["http://example.com/?"], "https://example.com", True),
-        (["http://example.com"], "https://example.com/?", True),
-    ])
+    @pytest.mark.parametrize(
+        "query_uris,ann_uri,should_match",
+        [
+            # Test cases that require only exact comparisons.
+            (
+                ["https://example.com", "https://example.org"],
+                "https://example.com",
+                True,
+            ),
+            (
+                ["https://example.com", "https://example.org"],
+                "https://example.net",
+                False,
+            ),
+            # Test cases that require comparison of normalized URIs.
+            (["https://example.com"], "http://example.com", True),
+            (["http://example.com"], "https://example.com", True),
+            (["http://example.com/?"], "https://example.com", True),
+            (["http://example.com"], "https://example.com/?", True),
+        ],
+    )
     def test_it_matches_uri(self, query_uris, ann_uri, should_match):
         query = {
             "match_policy": "include_any",
             "actions": {},
-            "clauses": [
-                {
-                    "field": "/uri",
-                    "operator": "one_of",
-                    "value": query_uris,
-                }
-            ],
+            "clauses": [{"field": "/uri", "operator": "one_of", "value": query_uris}],
         }
         handler = FilterHandler(query)
 
@@ -38,13 +42,7 @@ class TestFilterHandler(object):
         query = {
             "match_policy": "include_any",
             "actions": {},
-            "clauses": [
-                {
-                    "field": "/id",
-                    "operator": "equals",
-                    "value": "123",
-                }
-            ],
+            "clauses": [{"field": "/id", "operator": "equals", "value": "123"}],
         }
         handler = FilterHandler(query)
 
@@ -58,13 +56,7 @@ class TestFilterHandler(object):
         query = {
             "match_policy": "include_any",
             "actions": {},
-            "clauses": [
-                {
-                    "field": "/references",
-                    "operator": "one_of",
-                    "value": "123",
-                }
-            ],
+            "clauses": [{"field": "/references", "operator": "one_of", "value": "123"}],
         }
         handler = FilterHandler(query)
 

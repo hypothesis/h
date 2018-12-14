@@ -12,19 +12,18 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = 'f0f42ffaa27d'
-down_revision = '9cbc5c5ad23d'
+revision = "f0f42ffaa27d"
+down_revision = "9cbc5c5ad23d"
 
 
 def upgrade():
-    op.alter_column('annotation',
-                    'deleted',
-                    nullable=False,
-                    server_default=sa.sql.expression.false())
+    op.alter_column(
+        "annotation",
+        "deleted",
+        nullable=False,
+        server_default=sa.sql.expression.false(),
+    )
 
 
 def downgrade():
-    op.alter_column('annotation',
-                    'deleted',
-                    nullable=True,
-                    server_default=None)
+    op.alter_column("annotation", "deleted", nullable=True, server_default=None)

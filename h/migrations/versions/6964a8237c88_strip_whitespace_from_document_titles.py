@@ -16,8 +16,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-revision = '6964a8237c88'
-down_revision = '5e535a075f16'
+revision = "6964a8237c88"
+down_revision = "5e535a075f16"
 
 
 log = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ Session = sessionmaker()
 
 
 class DocumentMeta(Base):
-    __tablename__ = 'document_meta'
+    __tablename__ = "document_meta"
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     type = sa.Column(sa.UnicodeText)
     value = sa.Column(pg.ARRAY(sa.UnicodeText, zero_indexes=True))
@@ -37,7 +37,7 @@ class DocumentMeta(Base):
 def upgrade():
     session = Session(bind=op.get_bind())
     n = 0
-    for document_meta in session.query(DocumentMeta).filter_by(type='title'):
+    for document_meta in session.query(DocumentMeta).filter_by(type="title"):
         new_titles = []
         for original_title in document_meta.value:
             stripped_title = original_title.strip()
@@ -45,8 +45,9 @@ def upgrade():
                 n += 1
                 log.info(
                     "updated '{original_title}' to '{stripped_title}'".format(
-                        original_title=original_title,
-                        stripped_title=stripped_title))
+                        original_title=original_title, stripped_title=stripped_title
+                    )
+                )
             new_titles.append(stripped_title)
 
         if new_titles != document_meta.value:

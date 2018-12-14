@@ -27,14 +27,19 @@ class RenameUserService(object):
     May raise a ValueError if the new username does not validate or
     UserRenameError if the new username is already taken by another account.
     """
+
     def __init__(self, session, reindex):
         self.session = session
         self.reindex = reindex
 
     def check(self, user, new_username):
-        existing_user = models.User.get_by_username(self.session, new_username, user.authority)
+        existing_user = models.User.get_by_username(
+            self.session, new_username, user.authority
+        )
         if existing_user and existing_user != user:
-            raise UserRenameError('Another user already has the username "%s"' % new_username)
+            raise UserRenameError(
+                'Another user already has the username "%s"' % new_username
+            )
 
         return True
 
@@ -60,14 +65,14 @@ class RenameUserService(object):
         self.reindex(ids)
 
     def _purge_auth_tickets(self, user):
-        self.session.query(models.AuthTicket) \
-            .filter(models.AuthTicket.user_id == user.id) \
-            .delete()
+        self.session.query(models.AuthTicket).filter(
+            models.AuthTicket.user_id == user.id
+        ).delete()
 
     def _update_tokens(self, old_userid, new_userid):
-        self.session.query(models.Token) \
-            .filter(models.Token.userid == old_userid) \
-            .update({'userid': new_userid}, synchronize_session='fetch')
+        self.session.query(models.Token).filter(
+            models.Token.userid == old_userid
+        ).update({"userid": new_userid}, synchronize_session="fetch")
 
     def _change_annotations(self, old_userid, new_userid):
         annotations = self._fetch_annotations(old_userid)
@@ -80,9 +85,11 @@ class RenameUserService(object):
         return ids
 
     def _fetch_annotations(self, userid):
-        return (self.session.query(models.Annotation)
-                .filter(models.Annotation.userid == userid)
-                .yield_per(100))
+        return (
+            self.session.query(models.Annotation)
+            .filter(models.Annotation.userid == userid)
+            .yield_per(100)
+        )
 
 
 def make_indexer(request):
@@ -93,10 +100,10 @@ def make_indexer(request):
         request.tm.commit()
         indexer = index.BatchIndexer(request.db, request.es, request)
         indexer.index(ids)
+
     return _reindex
 
 
 def rename_user_factory(context, request):
     """Return a RenameUserService instance for the passed context and request."""
-    return RenameUserService(session=request.db,
-                             reindex=make_indexer(request))
+    return RenameUserService(session=request.db, reindex=make_indexer(request))

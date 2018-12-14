@@ -25,15 +25,20 @@ from h.traversal.contexts import AnnotationContext
 
 
 class TestRoot(object):
-    @pytest.mark.parametrize('permission', [
-        'admin_index',
-        'admin_groups',
-        'admin_mailer',
-        'admin_organizations',
-        'admin_users',
-        pyramid.security.ALL_PERMISSIONS,
-    ])
-    def test_it_denies_all_permissions_for_unauthed_request(self, pyramid_config, pyramid_request, permission):
+    @pytest.mark.parametrize(
+        "permission",
+        [
+            "admin_index",
+            "admin_groups",
+            "admin_mailer",
+            "admin_organizations",
+            "admin_users",
+            pyramid.security.ALL_PERMISSIONS,
+        ],
+    )
+    def test_it_denies_all_permissions_for_unauthed_request(
+        self, pyramid_config, pyramid_request, permission
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
         pyramid_config.testing_securitypolicy(None)
         pyramid_config.set_authorization_policy(policy)
@@ -42,30 +47,36 @@ class TestRoot(object):
 
         assert not pyramid_request.has_permission(permission, context)
 
-    @pytest.mark.parametrize('permission', [
-        'admin_index',
-        'admin_groups',
-        'admin_mailer',
-        'admin_organizations',
-        'admin_users',
-    ])
-    def test_it_assigns_admin_permissions_to_requests_with_staff_role(self,
-                                                                      pyramid_config,
-                                                                      pyramid_request,
-                                                                      permission):
+    @pytest.mark.parametrize(
+        "permission",
+        [
+            "admin_index",
+            "admin_groups",
+            "admin_mailer",
+            "admin_organizations",
+            "admin_users",
+        ],
+    )
+    def test_it_assigns_admin_permissions_to_requests_with_staff_role(
+        self, pyramid_config, pyramid_request, permission
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo', groupids=[role.Staff])
+        pyramid_config.testing_securitypolicy(
+            "acct:adminuser@foo", groupids=[role.Staff]
+        )
         pyramid_config.set_authorization_policy(policy)
 
         context = Root(pyramid_request)
 
         assert pyramid_request.has_permission(permission, context)
 
-    def test_it_assigns_all_permissions_to_requests_with_admin_role(self,
-                                                                    pyramid_config,
-                                                                    pyramid_request):
+    def test_it_assigns_all_permissions_to_requests_with_admin_role(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo', groupids=[role.Admin])
+        pyramid_config.testing_securitypolicy(
+            "acct:adminuser@foo", groupids=[role.Admin]
+        )
         pyramid_config.set_authorization_policy(policy)
 
         context = Root(pyramid_request)
@@ -73,82 +84,97 @@ class TestRoot(object):
         assert pyramid_request.has_permission(pyramid.security.ALL_PERMISSIONS, context)
 
 
-@pytest.mark.usefixtures('group_service', 'links_service')
+@pytest.mark.usefixtures("group_service", "links_service")
 class TestAnnotationRoot(object):
-    def test_it_does_not_assign_create_permission_without_authenticated_user(self, pyramid_config, pyramid_request):
+    def test_it_does_not_assign_create_permission_without_authenticated_user(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(None, groupids=[pyramid.security.Everyone])
+        pyramid_config.testing_securitypolicy(
+            None, groupids=[pyramid.security.Everyone]
+        )
         pyramid_config.set_authorization_policy(policy)
 
         context = AnnotationRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission('create', context)
+        assert not pyramid_request.has_permission("create", context)
 
-    def test_it_assigns_create_permission_to_authenticated_request(self, pyramid_config, pyramid_request):
+    def test_it_assigns_create_permission_to_authenticated_request(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo',
-                                              groupids=[pyramid.security.Authenticated])
+        pyramid_config.testing_securitypolicy(
+            "acct:adminuser@foo", groupids=[pyramid.security.Authenticated]
+        )
         pyramid_config.set_authorization_policy(policy)
 
         context = AnnotationRoot(pyramid_request)
 
-        assert pyramid_request.has_permission('create', context)
+        assert pyramid_request.has_permission("create", context)
 
     def test_get_item_fetches_annotation(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
 
-        factory['123']
-        storage.fetch_annotation.assert_called_once_with(pyramid_request.db, '123')
+        factory["123"]
+        storage.fetch_annotation.assert_called_once_with(pyramid_request.db, "123")
 
     def test_get_item_returns_annotation_resource(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
-        resource = factory['123']
+        resource = factory["123"]
         assert isinstance(resource, AnnotationContext)
 
     def test_get_item_resource_has_right_annotation(self, pyramid_request, storage):
         factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
-        resource = factory['123']
+        resource = factory["123"]
         assert resource.annotation == storage.fetch_annotation.return_value
 
-    def test_get_item_raises_when_annotation_is_not_found(self, storage, pyramid_request):
+    def test_get_item_raises_when_annotation_is_not_found(
+        self, storage, pyramid_request
+    ):
         factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = None
 
         with pytest.raises(KeyError):
-            factory['123']
+            factory["123"]
 
-    def test_get_item_has_right_group_service(self, pyramid_request, storage, group_service):
+    def test_get_item_has_right_group_service(
+        self, pyramid_request, storage, group_service
+    ):
         factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
-        resource = factory['123']
+        resource = factory["123"]
         assert resource.group_service == group_service
 
-    def test_get_item_has_right_links_service(self, pyramid_request, storage, links_service):
+    def test_get_item_has_right_links_service(
+        self, pyramid_request, storage, links_service
+    ):
         factory = AnnotationRoot(pyramid_request)
         storage.fetch_annotation.return_value = mock.Mock()
 
-        resource = factory['123']
+        resource = factory["123"]
         assert resource.links_service == links_service
 
     @pytest.fixture
     def storage(self, patch):
-        return patch('h.traversal.roots.storage')
+        return patch("h.traversal.roots.storage")
 
     @pytest.fixture
     def group_service(self, pyramid_config):
-        group_service = mock.Mock(spec_set=['find'])
-        pyramid_config.register_service(group_service, iface='h.interfaces.IGroupService')
+        group_service = mock.Mock(spec_set=["find"])
+        pyramid_config.register_service(
+            group_service, iface="h.interfaces.IGroupService"
+        )
         return group_service
 
     @pytest.fixture
     def links_service(self, pyramid_config):
         service = mock.Mock()
-        pyramid_config.register_service(service, name='links')
+        pyramid_config.register_service(service, name="links")
         return service
 
 
@@ -174,10 +200,18 @@ class TestAuthClientRoot(object):
         with pytest.raises(KeyError):
             auth_client_root["1d5937d6-73be-11e8-9125-871084ad92cf"]
 
-    def test_getitem_returns_KeyError_if_no_matching_AuthClient_in_DB(self, db_session, pyramid_request):
+    def test_getitem_returns_KeyError_if_no_matching_AuthClient_in_DB(
+        self, db_session, pyramid_request
+    ):
         # Add a couple of noise AuthClients to the DB. It should not return these.
-        db_session.add(AuthClient(authority="elifesciences.org", id="c396be08-73bd-11e8-a791-e76551a909f6"))
-        db_session.add(AuthClient(authority="localhost", id="cf482552-73bd-11e8-a791-c37e5c2510d8"))
+        db_session.add(
+            AuthClient(
+                authority="elifesciences.org", id="c396be08-73bd-11e8-a791-e76551a909f6"
+            )
+        )
+        db_session.add(
+            AuthClient(authority="localhost", id="cf482552-73bd-11e8-a791-c37e5c2510d8")
+        )
 
         auth_client_root = AuthClientRoot(pyramid_request)
 
@@ -192,7 +226,8 @@ class TestAuthClientRoot(object):
 
     @pytest.mark.parametrize("permission", ("foo", "bar", "admin_oauthclients"))
     def test_getitem_grants_admins_all_permissions_on_the_AuthClient(
-            self, db_session, permission, pyramid_request):
+        self, db_session, permission, pyramid_request
+    ):
         auth_client = AuthClient(authority="hypothes.is")
         db_session.add(auth_client)
         db_session.flush()
@@ -201,14 +236,13 @@ class TestAuthClientRoot(object):
         auth_client = AuthClientRoot(pyramid_request)[auth_client.id]
 
         assert auth_policy.permits(
-            context=auth_client,
-            principals=(h.auth.role.Admin,),
-            permission=permission,
+            context=auth_client, principals=(h.auth.role.Admin,), permission=permission
         )
 
     @pytest.mark.parametrize("permission", ("foo", "bar", "admin_oauthclients"))
     def test_getitem_doesnt_grant_non_admins_all_permissions_on_the_AuthClient(
-            self, db_session, factories, permission, pyramid_request):
+        self, db_session, factories, permission, pyramid_request
+    ):
         user = factories.User()
         auth_client = AuthClient(authority="hypothes.is")
         db_session.add(auth_client)
@@ -233,37 +267,41 @@ class TestAuthClientRoot(object):
         )
 
 
-@pytest.mark.usefixtures('organizations')
+@pytest.mark.usefixtures("organizations")
 class TestOrganizationRoot(object):
-
-    def test_it_returns_the_requested_organization(self, organizations, organization_factory):
+    def test_it_returns_the_requested_organization(
+        self, organizations, organization_factory
+    ):
         organization = organizations[1]
 
         assert organization_factory[organization.pubid] == organization
 
     def test_it_404s_if_the_organization_doesnt_exist(self, organization_factory):
         with pytest.raises(KeyError):
-            organization_factory['does_not_exist']
+            organization_factory["does_not_exist"]
 
     @pytest.fixture
     def organization_factory(self, pyramid_request):
         return OrganizationRoot(pyramid_request)
 
 
-@pytest.mark.usefixtures('organizations')
+@pytest.mark.usefixtures("organizations")
 class TestOrganizationLogoRoot(object):
-
-    def test_it_returns_the_requested_organizations_logo(self, organizations, organization_logo_factory):
+    def test_it_returns_the_requested_organizations_logo(
+        self, organizations, organization_logo_factory
+    ):
         organization = organizations[1]
-        organization.logo = '<svg>blah</svg>'
+        organization.logo = "<svg>blah</svg>"
 
-        assert organization_logo_factory[organization.pubid] == '<svg>blah</svg>'
+        assert organization_logo_factory[organization.pubid] == "<svg>blah</svg>"
 
     def test_it_404s_if_the_organization_doesnt_exist(self, organization_logo_factory):
         with pytest.raises(KeyError):
-            organization_logo_factory['does_not_exist']
+            organization_logo_factory["does_not_exist"]
 
-    def test_it_404s_if_the_organization_has_no_logo(self, organizations, organization_logo_factory):
+    def test_it_404s_if_the_organization_has_no_logo(
+        self, organizations, organization_logo_factory
+    ):
         with pytest.raises(KeyError):
             assert organization_logo_factory[organizations[0].pubid]
 
@@ -273,54 +311,64 @@ class TestOrganizationLogoRoot(object):
 
 
 class TestProfileRoot(object):
-
-    def test_it_assigns_update_permission_with_user_role(self, pyramid_config, pyramid_request):
+    def test_it_assigns_update_permission_with_user_role(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo', [role.User])
+        pyramid_config.testing_securitypolicy("acct:adminuser@foo", [role.User])
         pyramid_config.set_authorization_policy(policy)
 
         context = ProfileRoot(pyramid_request)
 
-        assert pyramid_request.has_permission('update', context)
+        assert pyramid_request.has_permission("update", context)
 
-    def test_it_does_not_assign_update_permission_without_user_role(self, pyramid_config, pyramid_request):
+    def test_it_does_not_assign_update_permission_without_user_role(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo', ['whatever'])
+        pyramid_config.testing_securitypolicy("acct:adminuser@foo", ["whatever"])
         pyramid_config.set_authorization_policy(policy)
 
         context = ProfileRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission('update', context)
+        assert not pyramid_request.has_permission("update", context)
 
 
 @pytest.mark.usefixtures("groups", "group_service")
 class TestGroupRoot(object):
-
-    def test_it_assigns_create_permission_with_user_role(self, pyramid_config, pyramid_request):
+    def test_it_assigns_create_permission_with_user_role(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo', [role.User])
+        pyramid_config.testing_securitypolicy("acct:adminuser@foo", [role.User])
         pyramid_config.set_authorization_policy(policy)
 
         context = GroupRoot(pyramid_request)
 
-        assert pyramid_request.has_permission('create', context)
+        assert pyramid_request.has_permission("create", context)
 
-    def test_it_does_not_assign_create_permission_without_user_role(self, pyramid_config, pyramid_request):
+    def test_it_does_not_assign_create_permission_without_user_role(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo', ['whatever'])
+        pyramid_config.testing_securitypolicy("acct:adminuser@foo", ["whatever"])
         pyramid_config.set_authorization_policy(policy)
 
         context = GroupRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission('create', context)
+        assert not pyramid_request.has_permission("create", context)
 
-    def test_getitem_returns_fetched_group_if_not_None(self, factories, group_factory, group_service):
+    def test_getitem_returns_fetched_group_if_not_None(
+        self, factories, group_factory, group_service
+    ):
         group = factories.Group()
         group_service.fetch.return_value = group
 
         assert group_factory[group.pubid] == group
 
-    def test_getitem_raises_KeyError_if_fetch_returns_None(self, group_factory, group_service):
+    def test_getitem_raises_KeyError_if_fetch_returns_None(
+        self, group_factory, group_service
+    ):
         group_service.fetch.return_value = None
         with pytest.raises(KeyError):
             group_factory["does_not_exist"]
@@ -335,7 +383,7 @@ class TestGroupRoot(object):
     @pytest.fixture
     def group_service(self, pyramid_config):
         group_service = mock.create_autospec(GroupService, spec_set=True, instance=True)
-        pyramid_config.register_service(group_service, name='group')
+        pyramid_config.register_service(group_service, name="group")
         return group_service
 
     @pytest.fixture
@@ -345,79 +393,96 @@ class TestGroupRoot(object):
 
 @pytest.mark.usefixtures("GroupRoot", "GroupUpsertContext")
 class TestGroupUpsertRoot(object):
-
-    def test_getitem_returns_empty_upsert_context_if_missing_group(self, pyramid_request, GroupRoot, GroupUpsertContext):
+    def test_getitem_returns_empty_upsert_context_if_missing_group(
+        self, pyramid_request, GroupRoot, GroupUpsertContext
+    ):
         root = GroupUpsertRoot(pyramid_request)
-        GroupRoot.return_value.__getitem__.side_effect = KeyError('bang')
+        GroupRoot.return_value.__getitem__.side_effect = KeyError("bang")
 
-        context = root['whatever']
+        context = root["whatever"]
 
-        GroupRoot.return_value.__getitem__.assert_called_once_with('whatever')
+        GroupRoot.return_value.__getitem__.assert_called_once_with("whatever")
         assert context == GroupUpsertContext.return_value
         GroupUpsertContext.assert_called_once_with(group=None, request=pyramid_request)
 
-    def test_getitem_returns_populated_upsert_context_if_group_found(self, pyramid_request, GroupRoot, GroupUpsertContext, factories):
+    def test_getitem_returns_populated_upsert_context_if_group_found(
+        self, pyramid_request, GroupRoot, GroupUpsertContext, factories
+    ):
         group = factories.Group()
         root = GroupUpsertRoot(pyramid_request)
         GroupRoot.return_value.__getitem__.return_value = group
 
-        context = root['agroup']
+        context = root["agroup"]
 
-        GroupRoot.return_value.__getitem__.assert_called_once_with('agroup')
+        GroupRoot.return_value.__getitem__.assert_called_once_with("agroup")
         assert context == GroupUpsertContext.return_value
         GroupUpsertContext.assert_called_once_with(group=group, request=pyramid_request)
 
     @pytest.fixture
     def GroupRoot(self, patch):
-        return patch('h.traversal.roots.GroupRoot')
+        return patch("h.traversal.roots.GroupRoot")
 
     @pytest.fixture
     def GroupUpsertContext(self, patch):
-        return patch('h.traversal.roots.contexts.GroupUpsertContext')
+        return patch("h.traversal.roots.contexts.GroupUpsertContext")
 
 
-@pytest.mark.usefixtures('user_service',
-                         'client_authority')
+@pytest.mark.usefixtures("user_service", "client_authority")
 class TestUserRoot(object):
-
-    def test_it_does_not_assign_create_permission_without_auth_client_role(self, pyramid_config, pyramid_request):
+    def test_it_does_not_assign_create_permission_without_auth_client_role(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo')
+        pyramid_config.testing_securitypolicy("acct:adminuser@foo")
         pyramid_config.set_authorization_policy(policy)
 
         context = UserRoot(pyramid_request)
 
-        assert not pyramid_request.has_permission('create', context)
+        assert not pyramid_request.has_permission("create", context)
 
-    def test_it_assigns_create_permission_to_auth_client_role(self, pyramid_config, pyramid_request):
+    def test_it_assigns_create_permission_to_auth_client_role(
+        self, pyramid_config, pyramid_request
+    ):
         policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy('acct:adminuser@foo', groupids=[role.AuthClient])
+        pyramid_config.testing_securitypolicy(
+            "acct:adminuser@foo", groupids=[role.AuthClient]
+        )
         pyramid_config.set_authorization_policy(policy)
 
         context = UserRoot(pyramid_request)
 
-        assert pyramid_request.has_permission('create', context)
+        assert pyramid_request.has_permission("create", context)
 
-    def test_it_fetches_the_requested_user(self, pyramid_request, user_factory, user_service):
+    def test_it_fetches_the_requested_user(
+        self, pyramid_request, user_factory, user_service
+    ):
         user_factory["bob"]
 
-        user_service.fetch.assert_called_once_with("bob", pyramid_request.default_authority)
+        user_service.fetch.assert_called_once_with(
+            "bob", pyramid_request.default_authority
+        )
 
-    def test_it_proxies_to_client_authority(self, pyramid_request, user_factory, client_authority, user_service):
+    def test_it_proxies_to_client_authority(
+        self, pyramid_request, user_factory, client_authority, user_service
+    ):
         user_factory["bob"]
 
         client_authority.assert_called_once_with(pyramid_request)
-        user_service.fetch.assert_called_once_with("bob", pyramid_request.default_authority)
+        user_service.fetch.assert_called_once_with(
+            "bob", pyramid_request.default_authority
+        )
 
-    def test_it_fetches_with_client_authority_if_present(self, pyramid_request, user_factory, client_authority, user_service):
-        client_authority.return_value = 'something.com'
+    def test_it_fetches_with_client_authority_if_present(
+        self, pyramid_request, user_factory, client_authority, user_service
+    ):
+        client_authority.return_value = "something.com"
         user_factory["bob"]
 
         user_service.fetch.assert_called_once_with("bob", client_authority.return_value)
 
-    def test_it_raises_KeyError_if_the_user_does_not_exist(self,
-                                                           user_factory,
-                                                           user_service):
+    def test_it_raises_KeyError_if_the_user_does_not_exist(
+        self, user_factory, user_service
+    ):
         user_service.fetch.return_value = None
 
         with pytest.raises(KeyError):
@@ -435,12 +500,12 @@ class TestUserRoot(object):
     @pytest.fixture
     def user_service(self, pyramid_config):
         user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
-        pyramid_config.register_service(user_service, name='user')
+        pyramid_config.register_service(user_service, name="user")
         return user_service
 
     @pytest.fixture
     def client_authority(self, patch):
-        client_authority = patch('h.traversal.roots.client_authority')
+        client_authority = patch("h.traversal.roots.client_authority")
         client_authority.return_value = None
         return client_authority
 

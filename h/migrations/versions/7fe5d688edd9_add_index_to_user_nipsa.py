@@ -13,11 +13,16 @@ down_revision = "792debe852c3"
 
 
 def upgrade():
-    op.execute('COMMIT')
-    op.create_index(op.f('ix__user__nipsa'), 'user', ['nipsa'], unique=False,
-                    postgresql_concurrently=True,
-                    postgresql_where=sa.text('nipsa is true'))
+    op.execute("COMMIT")
+    op.create_index(
+        op.f("ix__user__nipsa"),
+        "user",
+        ["nipsa"],
+        unique=False,
+        postgresql_concurrently=True,
+        postgresql_where=sa.text("nipsa is true"),
+    )
 
 
 def downgrade():
-    op.drop_index(op.f('ix__user__nipsa'), table_name='user')
+    op.drop_index(op.f("ix__user__nipsa"), table_name="user")

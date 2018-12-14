@@ -34,16 +34,12 @@ def column_windows(session, column, windowsize=2000, where=None):
 
     def interval_for_range(start_id, end_id):
         if end_id:
-            return sa.and_(
-                column >= start_id,
-                column < end_id
-            )
+            return sa.and_(column >= start_id, column < end_id)
         else:
             return column >= start_id
 
     q = session.query(
-        column,
-        sa.func.row_number().over(order_by=column).label('rownum')
+        column, sa.func.row_number().over(order_by=column).label("rownum")
     )
 
     if where is not None:

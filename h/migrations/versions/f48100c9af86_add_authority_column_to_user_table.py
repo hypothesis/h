@@ -12,13 +12,13 @@ import sqlalchemy as sa
 from alembic import op
 
 
-revision = 'f48100c9af86'
-down_revision = '64cf31f9f721'
+revision = "f48100c9af86"
+down_revision = "64cf31f9f721"
 
 
 def upgrade():
-    op.add_column('user', sa.Column('authority', sa.UnicodeText(), nullable=True))
+    op.add_column("user", sa.Column("authority", sa.UnicodeText(), nullable=True))
 
 
 def downgrade():
-    op.drop_column('user', 'authority')
+    op.drop_column("user", "authority")

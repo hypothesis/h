@@ -13,22 +13,18 @@ from h.services.user_update import user_update_factory
 
 
 class TestUserUpdate(object):
-
     def test_it_updates_valid_user_attrs(self, factories, svc):
         user = factories.User()
-        data = {
-            'display_name': 'foobar',
-            'email': 'foobar@example.com',
-        }
+        data = {"display_name": "foobar", "email": "foobar@example.com"}
 
         svc.update(user, **data)
 
-        assert user.display_name == 'foobar'
-        assert user.email == 'foobar@example.com'
+        assert user.display_name == "foobar"
+        assert user.email == "foobar@example.com"
 
     def test_it_returns_updated_user_model(self, factories, svc):
         user = factories.User()
-        data = {'display_name': 'whatnot'}
+        data = {"display_name": "whatnot"}
 
         updated_user = svc.update(user, **data)
 
@@ -36,56 +32,70 @@ class TestUserUpdate(object):
 
     def test_it_does_not_protect_against_undefined_properties(self, factories, svc):
         user = factories.User()
-        data = {'some_random_field': 'whatever'}
+        data = {"some_random_field": "whatever"}
 
         updated_user = svc.update(user, **data)
 
         # This won't be persisted in the DB, of course, but the model instance
         # doesn't have a problem with it
-        assert updated_user.some_random_field == 'whatever'
+        assert updated_user.some_random_field == "whatever"
 
-    def test_it_raises_ValidationError_if_authority_present_in_kwargs(self, factories, svc, db_session):
+    def test_it_raises_ValidationError_if_authority_present_in_kwargs(
+        self, factories, svc, db_session
+    ):
         user = factories.User()
 
-        with pytest.raises(ValidationError, match="A user's authority may not be changed"):
-            svc.update(user, authority='something.com')
+        with pytest.raises(
+            ValidationError, match="A user's authority may not be changed"
+        ):
+            svc.update(user, authority="something.com")
 
-    def test_it_raises_ValidationError_if_email_fails_model_validation(self, factories, svc, db_session):
+    def test_it_raises_ValidationError_if_email_fails_model_validation(
+        self, factories, svc, db_session
+    ):
         user = factories.User()
 
-        with pytest.raises(ValidationError, match='email must be less than.*characters long'):
-            svc.update(user, email='o' * 150)
+        with pytest.raises(
+            ValidationError, match="email must be less than.*characters long"
+        ):
+            svc.update(user, email="o" * 150)
 
-    def test_it_raises_ValidationError_if_username_fails_model_validation(self, factories, svc, db_session):
+    def test_it_raises_ValidationError_if_username_fails_model_validation(
+        self, factories, svc, db_session
+    ):
         user = factories.User()
 
-        with pytest.raises(ValidationError, match='username must be between.*characters long'):
-            svc.update(user, username='lo')
+        with pytest.raises(
+            ValidationError, match="username must be between.*characters long"
+        ):
+            svc.update(user, username="lo")
 
     def test_it_will_not_raise_on_malformed_email(self, factories, svc, db_session):
         user = factories.User()
 
         # It's up to callers to validate email at this point
-        updated_user = svc.update(user, email='fingers')
+        updated_user = svc.update(user, email="fingers")
 
-        assert updated_user.email == 'fingers'
+        assert updated_user.email == "fingers"
 
-    def test_it_raises_ConflictError_on_username_authority_uniqueness_violation(self, factories, svc, db_session):
-        factories.User(username='user1', authority='baz.com')
-        user2 = factories.User(username='user2', authority='baz.com')
+    def test_it_raises_ConflictError_on_username_authority_uniqueness_violation(
+        self, factories, svc, db_session
+    ):
+        factories.User(username="user1", authority="baz.com")
+        user2 = factories.User(username="user2", authority="baz.com")
 
-        with pytest.raises(ConflictError, match='username'):
-            svc.update(user2, username='user1')
+        with pytest.raises(ConflictError, match="username"):
+            svc.update(user2, username="user1")
 
     def test_it_raises_on_any_other_SQLAlchemy_exception(self, factories):
         fake_session = mock.Mock()
-        fake_session.flush.side_effect = SQLAlchemyError('foo')
+        fake_session.flush.side_effect = SQLAlchemyError("foo")
 
         update_svc = UserUpdateService(session=fake_session)
         user = factories.User()
 
         with pytest.raises(SQLAlchemyError):
-            update_svc.update(user, username='fingers')
+            update_svc.update(user, username="fingers")
 
 
 class TestFactory(object):

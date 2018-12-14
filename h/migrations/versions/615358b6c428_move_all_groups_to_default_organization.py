@@ -122,8 +122,16 @@ def upgrade():
     session.commit()
 
     log.info("Skipped {n} groups that already had an organization".format(n=skipped))
-    log.info("Assigned {n} groups to the __default__ organization".format(n=assigned_to_default_org))
-    log.info("Assigned {n} groups to authority organizations".format(n=assigned_to_authority_org))
+    log.info(
+        "Assigned {n} groups to the __default__ organization".format(
+            n=assigned_to_default_org
+        )
+    )
+    log.info(
+        "Assigned {n} groups to authority organizations".format(
+            n=assigned_to_authority_org
+        )
+    )
 
 
 def downgrade():

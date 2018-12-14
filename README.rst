@@ -18,6 +18,8 @@ h
 .. image:: https://readthedocs.org/projects/h/badge/?version=latest
    :target: https://h.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/ambv/black
 
 h is the web app that serves most of the https://hypothes.is/ website,
 including the web annotations API at https://hypothes.is/api/.

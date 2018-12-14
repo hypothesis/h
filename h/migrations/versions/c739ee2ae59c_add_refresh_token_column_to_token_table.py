@@ -12,15 +12,13 @@ import sqlalchemy as sa
 from alembic import op
 
 
-revision = 'c739ee2ae59c'
-down_revision = '9f5e274b202c'
+revision = "c739ee2ae59c"
+down_revision = "9f5e274b202c"
 
 
 def upgrade():
-    op.add_column('token', sa.Column('refresh_token',
-                                     sa.UnicodeText,
-                                     nullable=True))
+    op.add_column("token", sa.Column("refresh_token", sa.UnicodeText, nullable=True))
 
 
 def downgrade():
-    op.drop_column('token', 'refresh_token')
+    op.drop_column("token", "refresh_token")

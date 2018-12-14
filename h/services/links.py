@@ -8,7 +8,7 @@ from pyramid.request import Request
 
 from h.auth import default_authority
 
-LINK_GENERATORS_KEY = 'h.links.link_generators'
+LINK_GENERATORS_KEY = "h.links.link_generators"
 
 
 class LinksService(object):
@@ -45,12 +45,14 @@ class LinksService(object):
         # generate a request object is that this is the simplest and least
         # error-prone way to get access to the route_url function, which can
         # be used by link generators.
-        self._request = Request.blank('/', base_url=base_url)
+        self._request = Request.blank("/", base_url=base_url)
         self._request.registry = registry
 
         # Allow retrieval of the authority from the fake request object, the
         # same as we do for real requests.
-        self._request.set_property(default_authority, name='default_authority', reify=True)
+        self._request.set_property(
+            default_authority, name="default_authority", reify=True
+        )
 
     def get(self, annotation, name):
         """Get the link named `name` for the passed `annotation`."""
@@ -71,10 +73,8 @@ class LinksService(object):
 
 def links_factory(context, request):
     """Return a LinksService instance for the passed context and request."""
-    base_url = request.registry.settings.get('h.app_url',
-                                             'http://localhost:5000')
-    return LinksService(base_url=base_url,
-                        registry=request.registry)
+    base_url = request.registry.settings.get("h.app_url", "http://localhost:5000")
+    return LinksService(base_url=base_url, registry=request.registry)
 
 
 def add_annotation_link_generator(config, name, generator, hidden=False):

@@ -25,14 +25,13 @@ class DeleteGroupService(object):
         self.request.db.delete(group)
 
     def _delete_annotations(self, group):
-        if group.pubid == '__world__':
-            raise DeletePublicGroupError('Public group can not be deleted')
+        if group.pubid == "__world__":
+            raise DeletePublicGroupError("Public group can not be deleted")
 
-        annotations = self.request.db.query(Annotation) \
-                                     .filter_by(groupid=group.pubid)
+        annotations = self.request.db.query(Annotation).filter_by(groupid=group.pubid)
         for annotation in annotations:
             storage.delete_annotation(self.request.db, annotation.id)
-            event = AnnotationEvent(self.request, annotation.id, 'delete')
+            event = AnnotationEvent(self.request, annotation.id, "delete")
             self.request.notify_after_commit(event)
 
 

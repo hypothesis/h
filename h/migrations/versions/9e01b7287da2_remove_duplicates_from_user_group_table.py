@@ -13,15 +13,15 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-revision = '9e01b7287da2'
-down_revision = '6f86796f64e0'
+revision = "9e01b7287da2"
+down_revision = "6f86796f64e0"
 
 Session = sessionmaker()
 
 
-user_group = sa.table('user_group',
-                      sa.Column('user_id', sa.Integer),
-                      sa.Column('group_id', sa.Integer))
+user_group = sa.table(
+    "user_group", sa.Column("user_id", sa.Integer), sa.Column("group_id", sa.Integer)
+)
 
 
 def upgrade():
@@ -31,8 +31,9 @@ def upgrade():
     # user_id and group_id values.
     groups = (
         session.query(user_group)
-        .group_by('user_id', 'group_id')
-        .having(sa.func.count('*') > 1))
+        .group_by("user_id", "group_id")
+        .having(sa.func.count("*") > 1)
+    )
 
     for user_id, group_id in groups:
         # Delete all the rows from the group of duplicate rows.
@@ -45,8 +46,7 @@ def upgrade():
         )
 
         # Re-insert one row in place of the deleted group of duplicate rows.
-        session.execute(user_group.insert().values(user_id=user_id,
-                                                   group_id=group_id))
+        session.execute(user_group.insert().values(user_id=user_id, group_id=group_id))
 
 
 def downgrade():

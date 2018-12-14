@@ -40,7 +40,7 @@ class AuthTicketService(object):
         """
 
         if self._userid is None:
-            raise AuthTicketNotLoadedError('auth ticket is not loaded yet')
+            raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
 
         return self._userid
 
@@ -48,7 +48,7 @@ class AuthTicketService(object):
         """Returns security principals of the logged-in user."""
 
         if self._userid is None:
-            raise AuthTicketNotLoadedError('auth ticket is not loaded yet')
+            raise AuthTicketNotLoadedError("auth ticket is not loaded yet")
 
         user = self.usersvc.fetch(self._userid)
         return principals_for_user(user)
@@ -65,11 +65,15 @@ class AuthTicketService(object):
         if ticket_id is None:
             return False
 
-        ticket = self.session.query(models.AuthTicket) \
-            .filter(models.AuthTicket.id == ticket_id,
-                    models.AuthTicket.user_userid == principal,
-                    models.AuthTicket.expires > sa.func.now()) \
+        ticket = (
+            self.session.query(models.AuthTicket)
+            .filter(
+                models.AuthTicket.id == ticket_id,
+                models.AuthTicket.user_userid == principal,
+                models.AuthTicket.expires > sa.func.now(),
+            )
             .one_or_none()
+        )
 
         if ticket is None:
             return False
@@ -89,12 +93,14 @@ class AuthTicketService(object):
 
         user = self.usersvc.fetch(principal)
         if user is None:
-            raise ValueError('Cannot find user with userid %s' % principal)
+            raise ValueError("Cannot find user with userid %s" % principal)
 
-        ticket = models.AuthTicket(id=ticket_id,
-                                   user=user,
-                                   user_userid=user.userid,
-                                   expires=(utcnow() + TICKET_TTL))
+        ticket = models.AuthTicket(
+            id=ticket_id,
+            user=user,
+            user_userid=user.userid,
+            expires=(utcnow() + TICKET_TTL),
+        )
         self.session.add(ticket)
         # We cache the new userid, this will allow us to migrate the old
         # session policy to this new ticket policy.
@@ -110,7 +116,7 @@ class AuthTicketService(object):
 
 def auth_ticket_service_factory(context, request):
     """Return a AuthTicketService instance for the passed context and request."""
-    user_service = request.find_service(name='user')
+    user_service = request.find_service(name="user")
     return AuthTicketService(request.db, user_service)
 
 

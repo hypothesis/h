@@ -9,8 +9,7 @@ from h import storage
 from h.util import uri
 from elasticsearch_dsl import Q
 from elasticsearch_dsl.query import SimpleQueryString
-from h.search.util import (add_default_scheme,
-                           wildcard_uri_is_valid)
+from h.search.util import add_default_scheme, wildcard_uri_is_valid
 
 LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.
@@ -106,17 +105,19 @@ class Sorter(object):
             search = search.extra(search_after=[search_after])
 
         return search.sort(
-            {sort_by:
-                {"order": params.pop("order", "desc"),
-
-                 # `unmapped_type` causes unknown fields specified as arguments to
-                 # `sort` behave as if all documents contained empty values of the
-                 # given type. Without this, specifying eg. `sort=foobar` throws
-                 # an exception.
-                 #
-                 # We use the field type `boolean` to assist with migration because
-                 # that exists in both ES 1 and ES 6.
-                 "unmapped_type": "boolean"}}
+            {
+                sort_by: {
+                    "order": params.pop("order", "desc"),
+                    # `unmapped_type` causes unknown fields specified as arguments to
+                    # `sort` behave as if all documents contained empty values of the
+                    # given type. Without this, specifying eg. `sort=foobar` throws
+                    # an exception.
+                    #
+                    # We use the field type `boolean` to assist with migration because
+                    # that exists in both ES 1 and ES 6.
+                    "unmapped_type": "boolean",
+                }
+            }
         )
 
     def _parse_date(self, str_value):
@@ -189,9 +190,9 @@ class AuthFilter(object):
         if userid is None:
             return search.filter("term", shared=True)
 
-        return search.filter(Q("bool",
-                               should=[Q("term", shared=True),
-                                       Q("term", user_raw=userid)]))
+        return search.filter(
+            Q("bool", should=[Q("term", shared=True), Q("term", user_raw=userid)])
+        )
 
 
 class GroupFilter(object):
@@ -256,10 +257,18 @@ class UriCombinedWildcardFilter(object):
             return search
 
         if self.separate_keys:
-            uris = [add_default_scheme(u) for u in popall(params, 'uri') + popall(params, 'url')]
-            wildcard_uris = [add_default_scheme(u) for u in popall(params, 'wildcard_uri')]
+            uris = [
+                add_default_scheme(u)
+                for u in popall(params, "uri") + popall(params, "url")
+            ]
+            wildcard_uris = [
+                add_default_scheme(u) for u in popall(params, "wildcard_uri")
+            ]
         else:
-            uris = [add_default_scheme(u) for u in popall(params, 'uri') + popall(params, 'url')]
+            uris = [
+                add_default_scheme(u)
+                for u in popall(params, "uri") + popall(params, "url")
+            ]
             # Split into wildcard uris and non wildcard uris.
             wildcard_uris = [u for u in uris if "*" in u or "_" in u]
             uris = [u for u in uris if "*" not in u and "_" not in u]
@@ -267,15 +276,16 @@ class UriCombinedWildcardFilter(object):
         # Only add valid uri's to the search list.
         wildcard_uris = self._normalize_uris(
             [u for u in wildcard_uris if wildcard_uri_is_valid(u)],
-            normalize_method=self._wildcard_uri_normalized)
+            normalize_method=self._wildcard_uri_normalized,
+        )
         uris = self._normalize_uris(uris)
 
         queries = []
         if wildcard_uris:
-            queries = [Q('wildcard', **{"target.scope": u}) for u in wildcard_uris]
+            queries = [Q("wildcard", **{"target.scope": u}) for u in wildcard_uris]
         if uris:
-            queries.append(Q("terms", **{'target.scope': uris}))
-        return search.query('bool', should=queries)
+            queries.append(Q("terms", **{"target.scope": uris}))
+        return search.query("bool", should=queries)
 
     def _normalize_uris(self, query_uris, normalize_method=uri.normalize):
         uris = set()
@@ -316,10 +326,10 @@ class UserFilter(object):
     """
 
     def __call__(self, search, params):
-        if 'user' not in params:
+        if "user" not in params:
             return search
 
-        users = [v.lower() for v in popall(params, 'user')]
+        users = [v.lower() for v in popall(params, "user")]
 
         return search.filter("terms", user=users)
 
@@ -341,14 +351,16 @@ class HiddenFilter(object):
     """Return an Elasticsearch filter for filtering out moderated or NIPSA'd annotations."""
 
     def __init__(self, request):
-        self.group_service = request.find_service(name='group')
+        self.group_service = request.find_service(name="group")
         self.user = request.user
 
     def __call__(self, search, _):
         """Filter out all hidden and NIPSA'd annotations except the current user's."""
         # If any one of these "should" clauses is true then the annotation will
         # get through the filter.
-        should_clauses = [Q("bool", must_not=[Q("term", nipsa=True), Q("term", hidden=True)])]
+        should_clauses = [
+            Q("bool", must_not=[Q("term", nipsa=True), Q("term", hidden=True)])
+        ]
 
         if self.user is not None:
             # Always show the logged-in user's annotations even if they have nipsa.
@@ -371,12 +383,12 @@ class AnyMatcher(object):
     def __call__(self, search, params):
         if "any" not in params:
             return search
-        qs = ' '.join(popall(params, "any"))
+        qs = " ".join(popall(params, "any"))
         return search.query(
             SimpleQueryString(
                 query=qs,
                 fields=["quote", "tags", "text", "uri.parts"],
-                default_operator='and',
+                default_operator="and",
             )
         )
 
@@ -386,13 +398,10 @@ class TagsMatcher(object):
     """Matches the tags field against 'tag' or 'tags' parameters."""
 
     def __call__(self, search, params):
-        tags = set(popall(params, 'tag') + popall(params, 'tags'))
-        matchers = [Q("match", tags={"query": t, "operator": "and"})
-                    for t in tags]
+        tags = set(popall(params, "tag") + popall(params, "tags"))
+        matchers = [Q("match", tags={"query": t, "operator": "and"}) for t in tags]
         if matchers:
-            return search.query(
-                Q('bool', must=matchers)
-            )
+            return search.query(Q("bool", must=matchers))
         return search
 
 
@@ -405,7 +414,7 @@ class RepliesMatcher(object):
 
     def __call__(self, search, _):
         return search.query(
-            Q('bool', must=[Q('terms', references=self.annotation_ids)])
+            Q("bool", must=[Q("terms", references=self.annotation_ids)])
         )
 
 
@@ -415,11 +424,11 @@ class TagsAggregation(object):
         self.name = "tags"
 
     def __call__(self, search, _):
-        search.aggs.bucket(self.name, 'terms', size=self.limit, field='tags_raw')
+        search.aggs.bucket(self.name, "terms", size=self.limit, field="tags_raw")
 
     def parse_result(self, result):
         return [
-            {'tag': b["key"], 'count': b["doc_count"]}
+            {"tag": b["key"], "count": b["doc_count"]}
             for b in result[self.name]["buckets"]
         ]
 
@@ -430,10 +439,10 @@ class UsersAggregation(object):
         self.name = "users"
 
     def __call__(self, search, _):
-        search.aggs.bucket(self.name, 'terms', size=self.limit, field='user_raw')
+        search.aggs.bucket(self.name, "terms", size=self.limit, field="user_raw")
 
     def parse_result(self, result):
         return [
-            {'user': b["key"], 'count': b["doc_count"]}
+            {"user": b["key"], "count": b["doc_count"]}
             for b in result[self.name]["buckets"]
         ]

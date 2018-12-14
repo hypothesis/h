@@ -13,8 +13,8 @@ import enum
 from alembic import op
 import sqlalchemy as sa
 
-revision = 'b980b1a8f6af'
-down_revision = '1c995723a271'
+revision = "b980b1a8f6af"
+down_revision = "1c995723a271"
 
 # N.B. for both grant type and response type we enumerate all valid types for
 # each field, even though we will not initially support all the valid
@@ -25,31 +25,38 @@ down_revision = '1c995723a271'
 # or resource owner credentials (AKA "password") grants, we'll save ourselves
 # some pain.
 
+
 class GrantType(enum.Enum):
-    authorization_code = 'authorization_code'
-    client_credentials = 'client_credentials'
-    jwt_bearer = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
-    password = 'password'
-grant_type = sa.Enum(GrantType, name='authclient_grant_type')
+    authorization_code = "authorization_code"
+    client_credentials = "client_credentials"
+    jwt_bearer = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+    password = "password"
+
+
+grant_type = sa.Enum(GrantType, name="authclient_grant_type")
 
 
 class ResponseType(enum.Enum):
-    code = 'code'
-    token = 'token'
-response_type = sa.Enum(ResponseType, name='authclient_response_type')
+    code = "code"
+    token = "token"
+
+
+response_type = sa.Enum(ResponseType, name="authclient_response_type")
 
 
 def upgrade():
     grant_type.create(op.get_bind())
-    op.add_column('authclient', sa.Column('grant_type', grant_type, nullable=True))
+    op.add_column("authclient", sa.Column("grant_type", grant_type, nullable=True))
 
     response_type.create(op.get_bind())
-    op.add_column('authclient', sa.Column('response_type', response_type, nullable=True))
+    op.add_column(
+        "authclient", sa.Column("response_type", response_type, nullable=True)
+    )
 
 
 def downgrade():
-    op.drop_column('authclient', 'grant_type')
+    op.drop_column("authclient", "grant_type")
     grant_type.drop(op.get_bind())
 
-    op.drop_column('authclient', 'response_type')
+    op.drop_column("authclient", "response_type")
     response_type.drop(op.get_bind())

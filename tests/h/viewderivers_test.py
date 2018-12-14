@@ -8,83 +8,90 @@ from h.viewderivers import csp_protected_view
 
 
 class TestCSPProtectedView(object):
-
     def test_noop_by_default(self, pyramid_request, derive_view):
         view = derive_view(_dummy_view)
 
         response = view(None, pyramid_request)
 
-        assert 'Content-Security-Policy' not in response.headers
+        assert "Content-Security-Policy" not in response.headers
 
     def test_policy(self, pyramid_request, derive_view):
-        pyramid_request.registry.settings.update({
-            'csp.enabled': True,
-            'csp': {'script-src': ["'self'"]},
-        })
+        pyramid_request.registry.settings.update(
+            {"csp.enabled": True, "csp": {"script-src": ["'self'"]}}
+        )
         view = derive_view(_dummy_view)
 
         response = view(None, pyramid_request)
 
-        assert response.headers['Content-Security-Policy'] == "script-src 'self'"
+        assert response.headers["Content-Security-Policy"] == "script-src 'self'"
 
     def test_policy_complex(self, pyramid_request, derive_view):
-        pyramid_request.registry.settings.update({
-            "csp.enabled": True,
-            "csp": {
-                "font-src": ["'self'", "fonts.gstatic.com"],
-                "report-uri": ['localhost'],
-                "script-src": ["'self'"],
-                "style-src": ["'self'", "fonts.googleapis.com"],
-            },
-        })
+        pyramid_request.registry.settings.update(
+            {
+                "csp.enabled": True,
+                "csp": {
+                    "font-src": ["'self'", "fonts.gstatic.com"],
+                    "report-uri": ["localhost"],
+                    "script-src": ["'self'"],
+                    "style-src": ["'self'", "fonts.googleapis.com"],
+                },
+            }
+        )
         view = derive_view(_dummy_view)
 
         response = view(None, pyramid_request)
 
-        expected = ("font-src 'self' fonts.gstatic.com; "
-                    "report-uri localhost; "
-                    "script-src 'self'; "
-                    "style-src 'self' fonts.googleapis.com")
-        assert response.headers['Content-Security-Policy'] == expected
+        expected = (
+            "font-src 'self' fonts.gstatic.com; "
+            "report-uri localhost; "
+            "script-src 'self'; "
+            "style-src 'self' fonts.googleapis.com"
+        )
+        assert response.headers["Content-Security-Policy"] == expected
 
     def test_report_only(self, pyramid_request, derive_view):
-        pyramid_request.registry.settings.update({
-            'csp.enabled': True,
-            'csp.report_only': True,
-            'csp': {'script-src': ["'self'"]},
-        })
+        pyramid_request.registry.settings.update(
+            {
+                "csp.enabled": True,
+                "csp.report_only": True,
+                "csp": {"script-src": ["'self'"]},
+            }
+        )
         view = derive_view(_dummy_view)
 
         response = view(None, pyramid_request)
 
-        assert response.headers['Content-Security-Policy-Report-Only'] == "script-src 'self'"
-        assert 'Content-Security-Policy' not in response.headers
+        assert (
+            response.headers["Content-Security-Policy-Report-Only"]
+            == "script-src 'self'"
+        )
+        assert "Content-Security-Policy" not in response.headers
 
     def test_optout(self, pyramid_request, derive_view):
         """
         Views should be able to opt out using the ``csp_insecure_optout`` view
         option.
         """
-        pyramid_request.registry.settings.update({
-            'csp.enabled': True,
-            'csp': {'script-src': ["'self'"]},
-        })
+        pyramid_request.registry.settings.update(
+            {"csp.enabled": True, "csp": {"script-src": ["'self'"]}}
+        )
         view = derive_view(_dummy_view, csp_insecure_optout=True)
 
         response = view(None, pyramid_request)
 
-        assert 'Content-Security-Policy' not in response.headers
+        assert "Content-Security-Policy" not in response.headers
 
     @pytest.fixture
     def derive_view(self, pyramid_config):
         def _impl(view, **kwargs):
             pyramid_config.add_view_deriver(csp_protected_view)
-            pyramid_config.add_route('testview', '/test')
-            pyramid_config.add_view(view, route_name='testview', **kwargs)
+            pyramid_config.add_route("testview", "/test")
+            pyramid_config.add_view(view, route_name="testview", **kwargs)
             introspector = pyramid_config.registry.introspector
-            for view in introspector.get_category('views'):
-                if view['introspectable']['route_name'] == 'testview':
-                    return view['introspectable']['derived_callable']
+            for view in introspector.get_category("views"):
+                if view["introspectable"]["route_name"] == "testview":
+                    return view["introspectable"]["derived_callable"]
+
         return _impl
 
 

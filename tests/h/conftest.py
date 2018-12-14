@@ -27,9 +27,10 @@ from h._compat import text_type
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
 
-TEST_AUTHORITY = 'example.com'
-TEST_DATABASE_URL = database_url(os.environ.get('TEST_DATABASE_URL',
-                                                'postgresql://postgres@localhost/htest'))
+TEST_AUTHORITY = "example.com"
+TEST_DATABASE_URL = database_url(
+    os.environ.get("TEST_DATABASE_URL", "postgresql://postgres@localhost/htest")
+)
 
 Session = sessionmaker()
 
@@ -93,7 +94,7 @@ class FakeInvalid(object):
 
 def autopatcher(request, target, **kwargs):
     """Patch and cleanup automatically. Wraps :py:func:`mock.patch`."""
-    options = {'autospec': True}
+    options = {"autospec": True}
     options.update(kwargs)
     patcher = mock.patch(target, **options)
     obj = patcher.start()
@@ -108,7 +109,7 @@ def cli():
         yield runner
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def db_engine():
     """Set up the database connection and create tables."""
     engine = sqlalchemy.create_engine(TEST_DATABASE_URL)
@@ -156,6 +157,7 @@ def db_session(db_engine):
 @pytest.fixture
 def factories(db_session):
     from ..common import factories
+
     factories.set_session(db_session)
     yield factories
     factories.set_session(None)
@@ -176,8 +178,9 @@ def form_validating_to():
     def form_validating_to(appstruct):
         form = mock.MagicMock()
         form.validate.return_value = appstruct
-        form.render.return_value = 'valid form'
+        form.render.return_value = "valid form"
         return form
+
     return form_validating_to
 
 
@@ -189,20 +192,22 @@ def invalid_form():
         invalid = FakeInvalid(errors)
         form = mock.MagicMock()
         form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
-        form.render.return_value = 'invalid form'
+        form.render.return_value = "invalid form"
         return form
+
     return invalid_form
 
 
 @pytest.fixture
 def matchers():
     from ..common import matchers
+
     return matchers
 
 
 @pytest.fixture
 def notify(pyramid_config, request):
-    patcher = mock.patch.object(pyramid_config.registry, 'notify', autospec=True)
+    patcher = mock.patch.object(pyramid_config.registry, "notify", autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
@@ -215,10 +220,11 @@ def patch(request):
 @pytest.fixture
 def pyramid_config(pyramid_settings, pyramid_request):
     """Pyramid configurator object."""
-    with testing.testConfig(request=pyramid_request,
-                            settings=pyramid_settings) as config:
+    with testing.testConfig(
+        request=pyramid_request, settings=pyramid_settings
+    ) as config:
         # Include pyramid_services so it's easy to set up fake services in tests
-        config.include('pyramid_services')
+        config.include("pyramid_services")
         apply_request_extensions(pyramid_request)
 
         yield config
@@ -243,13 +249,11 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
 @pytest.fixture
 def pyramid_csrf_request(pyramid_request):
     """Dummy Pyramid request object with a valid CSRF token."""
-    pyramid_request.headers['X-CSRF-Token'] = pyramid_request.session.get_csrf_token()
+    pyramid_request.headers["X-CSRF-Token"] = pyramid_request.session.get_csrf_token()
     return pyramid_request
 
 
 @pytest.fixture
 def pyramid_settings():
     """Default app settings."""
-    return {
-        'sqlalchemy.url': TEST_DATABASE_URL
-    }
+    return {"sqlalchemy.url": TEST_DATABASE_URL}

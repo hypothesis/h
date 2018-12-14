@@ -19,7 +19,12 @@ class AnnotationUserInfoFormatter(object):
         if not ids:
             return
 
-        userids = {t[0] for t in self.session.query(models.Annotation.userid).filter(models.Annotation.id.in_(ids))}
+        userids = {
+            t[0]
+            for t in self.session.query(models.Annotation.userid).filter(
+                models.Annotation.id.in_(ids)
+            )
+        }
         self.user_svc.fetch_all(userids)
 
     def format(self, annotation_resource):

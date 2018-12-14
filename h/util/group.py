@@ -19,8 +19,8 @@ def split_groupid(groupid):
     match = re.match(GROUPID_PATTERN, groupid)
     if match:
         return {
-            'authority_provided_id': match.groups()[0],
-            'authority': match.groups()[1]
+            "authority_provided_id": match.groups()[0],
+            "authority": match.groups()[1],
         }
     raise ValueError("{groupid} isn't a valid groupid".format(groupid=groupid))
 

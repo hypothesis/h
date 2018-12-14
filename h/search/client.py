@@ -20,8 +20,7 @@ class Client(object):
     def __init__(self, host, index, elasticsearch=elasticsearch, **kwargs):
         self._version = elasticsearch.__version__
         self._index = index
-        self._conn = elasticsearch.Elasticsearch([host],
-                                                 **kwargs)
+        self._conn = elasticsearch.Elasticsearch([host], **kwargs)
 
         # Our existing Elasticsearch 1.x indexes have a single mapping type
         # "annotation". For ES 6 we should change this to the preferred name
@@ -57,21 +56,21 @@ class Client(object):
 
 def _get_client_settings(settings):
     kwargs = {}
-    kwargs['max_retries'] = settings.get('es.client.max_retries', 3)
-    kwargs['retry_on_timeout'] = settings.get('es.client.retry_on_timeout', False)
-    kwargs['timeout'] = settings.get('es.client.timeout', 10)
+    kwargs["max_retries"] = settings.get("es.client.max_retries", 3)
+    kwargs["retry_on_timeout"] = settings.get("es.client.retry_on_timeout", False)
+    kwargs["timeout"] = settings.get("es.client.timeout", 10)
 
-    if 'es.client_poolsize' in settings:
-        kwargs['maxsize'] = settings['es.client_poolsize']
+    if "es.client_poolsize" in settings:
+        kwargs["maxsize"] = settings["es.client_poolsize"]
 
-    kwargs['verify_certs'] = True
+    kwargs["verify_certs"] = True
     return kwargs
 
 
 def get_client(settings):
     """Return a client for the Elasticsearch index."""
-    host = settings['es.url']
-    index = settings['es.index']
+    host = settings["es.url"]
+    index = settings["es.index"]
     kwargs = _get_client_settings(settings)
     # nb. No AWS credentials here because we assume that if using AWS-managed
     # ES, the cluster lives inside a VPC.

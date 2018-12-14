@@ -105,35 +105,33 @@ def create_annotation(request, data, group_service):
     """
     created = updated = datetime.utcnow()
 
-    document_uri_dicts = data['document']['document_uri_dicts']
-    document_meta_dicts = data['document']['document_meta_dicts']
-    del data['document']
+    document_uri_dicts = data["document"]["document_uri_dicts"]
+    document_meta_dicts = data["document"]["document_meta_dicts"]
+    del data["document"]
 
     # Replies must have the same group as their parent.
-    if data['references']:
-        top_level_annotation_id = data['references'][0]
-        top_level_annotation = fetch_annotation(request.db,
-                                                top_level_annotation_id)
+    if data["references"]:
+        top_level_annotation_id = data["references"][0]
+        top_level_annotation = fetch_annotation(request.db, top_level_annotation_id)
         if top_level_annotation:
-            data['groupid'] = top_level_annotation.groupid
+            data["groupid"] = top_level_annotation.groupid
         else:
             raise schemas.ValidationError(
-                'references.0: '
-                + _('Annotation {id} does not exist').format(
-                    id=top_level_annotation_id)
+                "references.0: "
+                + _("Annotation {id} does not exist").format(id=top_level_annotation_id)
             )
 
     # The user must have permission to create an annotation in the group
     # they've asked to create one in. If the application didn't configure
     # a groupfinder we will allow writing this annotation without any
     # further checks.
-    group = group_service.find(data['groupid'])
-    if group is None or not request.has_permission('write', context=group):
-        raise schemas.ValidationError('group: '
-                                      + _('You may not create annotations '
-                                          'in the specified group!'))
+    group = group_service.find(data["groupid"])
+    if group is None or not request.has_permission("write", context=group):
+        raise schemas.ValidationError(
+            "group: " + _("You may not create annotations " "in the specified group!")
+        )
 
-    _validate_group_scope(group, data['target_uri'])
+    _validate_group_scope(group, data["target_uri"])
 
     annotation = models.Annotation(**data)
     annotation.created = created
@@ -145,7 +143,8 @@ def create_annotation(request, data, group_service):
         document_meta_dicts,
         document_uri_dicts,
         created=created,
-        updated=updated)
+        updated=updated,
+    )
     annotation.document = document
 
     request.db.add(annotation)
@@ -180,31 +179,34 @@ def update_annotation(request, id_, data, group_service):
 
     # Remove any 'document' field first so that we don't try to save it on the
     # annotation object.
-    document = data.pop('document', None)
+    document = data.pop("document", None)
 
     annotation = request.db.query(models.Annotation).get(id_)
     annotation.updated = updated
 
     group = group_service.find(annotation.groupid)
     if group is None:
-        raise schemas.ValidationError('group: '
-                                      + _('Invalid group specified for annotation'))
-    if data.get('target_uri', None):
-        _validate_group_scope(group, data['target_uri'])
+        raise schemas.ValidationError(
+            "group: " + _("Invalid group specified for annotation")
+        )
+    if data.get("target_uri", None):
+        _validate_group_scope(group, data["target_uri"])
 
-    annotation.extra.update(data.pop('extra', {}))
+    annotation.extra.update(data.pop("extra", {}))
 
     for key, value in data.items():
         setattr(annotation, key, value)
 
     if document:
-        document_uri_dicts = document['document_uri_dicts']
-        document_meta_dicts = document['document_meta_dicts']
-        document = update_document_metadata(request.db,
-                                            annotation.target_uri,
-                                            document_meta_dicts,
-                                            document_uri_dicts,
-                                            updated=updated)
+        document_uri_dicts = document["document_uri_dicts"]
+        document_meta_dicts = document["document_meta_dicts"]
+        document = update_document_metadata(
+            request.db,
+            annotation.target_uri,
+            document_meta_dicts,
+            document_uri_dicts,
+            updated=updated,
+        )
         annotation.document = document
 
     return annotation
@@ -252,7 +254,7 @@ def expand_uri(session, uri):
     # field, so we don't need to expand to other URIs and risk false positives.
     docuris = doc.document_uris
     for docuri in docuris:
-        if docuri.uri == uri and docuri.type == 'rel-canonical':
+        if docuri.uri == uri and docuri.type == "rel-canonical":
             return [uri]
 
     return [docuri.uri for docuri in docuris]
@@ -265,6 +267,7 @@ def _validate_group_scope(group, target_uri):
     # of a group's defined scopes, if the group has any
     group_scopes = [scope.origin for scope in group.scopes]
     if not group_scope_match(target_uri, group_scopes):
-        raise schemas.ValidationError('group scope: '
-                                      + _('Annotations for this target URI '
-                                          'are not allowed in this group'))
+        raise schemas.ValidationError(
+            "group scope: "
+            + _("Annotations for this target URI " "are not allowed in this group")
+        )

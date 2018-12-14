@@ -8,8 +8,8 @@ Create Date: 2016-06-16 18:37:20.703447
 
 from __future__ import unicode_literals
 
-revision = '467ea2898660'
-down_revision = '40740282ae9e'
+revision = "467ea2898660"
+down_revision = "40740282ae9e"
 
 import logging
 
@@ -25,7 +25,7 @@ Session = sessionmaker()
 
 
 class DocumentURI(Base):
-    __tablename__ = 'document_uri'
+    __tablename__ = "document_uri"
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     updated = sa.Column(sa.DateTime)
@@ -35,7 +35,6 @@ class DocumentURI(Base):
 
     type = sa.Column(sa.UnicodeText)
     content_type = sa.Column(sa.UnicodeText)
-
 
 
 def batch_delete(query, session):
@@ -82,30 +81,38 @@ def merge_duplicate_document_uris(session):
 
     """
     groups = (
-        session.query(DocumentURI.claimant_normalized,
-                      DocumentURI.uri_normalized,
-                      DocumentURI.type,
-                      DocumentURI.content_type)
-       .group_by(DocumentURI.claimant_normalized,
-                 DocumentURI.uri_normalized,
-                 DocumentURI.type,
-                 DocumentURI.content_type)
-        .having(sa.func.count('*') > 1))
+        session.query(
+            DocumentURI.claimant_normalized,
+            DocumentURI.uri_normalized,
+            DocumentURI.type,
+            DocumentURI.content_type,
+        )
+        .group_by(
+            DocumentURI.claimant_normalized,
+            DocumentURI.uri_normalized,
+            DocumentURI.type,
+            DocumentURI.content_type,
+        )
+        .having(sa.func.count("*") > 1)
+    )
 
     n = 0
 
     for group in groups:
         document_uris = (
             session.query(DocumentURI)
-            .filter_by(claimant_normalized=group[0],
-                        uri_normalized=group[1],
-                        type=group[2],
-                        content_type=group[3])
+            .filter_by(
+                claimant_normalized=group[0],
+                uri_normalized=group[1],
+                type=group[2],
+                content_type=group[3],
+            )
             .order_by(DocumentURI.updated.desc())
-            .offset(1))
+            .offset(1)
+        )
         n += batch_delete(document_uris, session)
 
-    log.info('deleted %d duplicate rows from document_uri (NULL)' % n)
+    log.info("deleted %d duplicate rows from document_uri (NULL)" % n)
 
 
 def delete_conflicting_document_uris(session):
@@ -129,10 +136,7 @@ def delete_conflicting_document_uris(session):
 
     """
     doc_uris = session.query(DocumentURI).filter(
-        sa.or_(
-            DocumentURI.type == '',
-            DocumentURI.content_type == '',
-        )
+        sa.or_(DocumentURI.type == "", DocumentURI.content_type == "")
     )
 
     n = 0
@@ -145,37 +149,30 @@ def delete_conflicting_document_uris(session):
             DocumentURI.id != doc_uri.id,
         )
 
-        if doc_uri.type == '' and doc_uri.content_type == '':
+        if doc_uri.type == "" and doc_uri.content_type == "":
             conflicting_doc_uris = conflicting_doc_uris.filter(
+                sa.or_(DocumentURI.type == "", DocumentURI.type.is_(None)),
                 sa.or_(
-                    DocumentURI.type == '',
-                    DocumentURI.type.is_(None),
-                ),
-                sa.or_(
-                    DocumentURI.content_type == '',
-                    DocumentURI.content_type.is_(None),
+                    DocumentURI.content_type == "", DocumentURI.content_type.is_(None)
                 ),
             )
-        elif doc_uri.type == '':
+        elif doc_uri.type == "":
             conflicting_doc_uris = conflicting_doc_uris.filter(
-                sa.or_(
-                    DocumentURI.type == '',
-                    DocumentURI.type.is_(None),
-                ),
+                sa.or_(DocumentURI.type == "", DocumentURI.type.is_(None)),
                 DocumentURI.content_type == doc_uri.content_type,
             )
-        elif doc_uri.content_type == '':
+        elif doc_uri.content_type == "":
             conflicting_doc_uris = conflicting_doc_uris.filter(
                 DocumentURI.type == doc_uri.type,
                 sa.or_(
-                    DocumentURI.content_type == '',
-                    DocumentURI.content_type.is_(None),
+                    DocumentURI.content_type == "", DocumentURI.content_type.is_(None)
                 ),
             )
 
         n += batch_delete(conflicting_doc_uris, session)
 
-    log.info('deleted %d duplicate rows from document_uri (empty string/NULL)' % n)
+    log.info("deleted %d duplicate rows from document_uri (empty string/NULL)" % n)
+
 
 def change_nulls_to_empty_strings(session):
     """
@@ -204,8 +201,8 @@ def change_nulls_to_empty_strings(session):
 
         for doc_uri in doc_uris:
             n += 1
-            doc_uri.type = doc_uri.type or ''
-            doc_uri.content_type = doc_uri.content_type or ''
+            doc_uri.type = doc_uri.type or ""
+            doc_uri.content_type = doc_uri.content_type or ""
 
         session.commit()
 

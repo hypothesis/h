@@ -23,10 +23,11 @@ class DeleteUserService(object):
         message.
         """
 
-        created_groups = self.request.db.query(Group) \
-                                        .filter(Group.creator == user)
+        created_groups = self.request.db.query(Group).filter(Group.creator == user)
         if self._groups_have_anns_from_other_users(created_groups, user):
-            raise UserDeleteError('Other users have annotated in groups created by this user')
+            raise UserDeleteError(
+                "Other users have annotated in groups created by this user"
+            )
 
         self._delete_annotations(user)
         self._delete_groups(created_groups)
@@ -44,18 +45,18 @@ class DeleteUserService(object):
         if len(group_ids) == 0:
             return False
 
-        other_user_ann_count = self.request.db.query(Annotation) \
-                                              .filter(Annotation.groupid.in_(group_ids),
-                                                      Annotation.userid != user.userid) \
-                                              .count()
+        other_user_ann_count = (
+            self.request.db.query(Annotation)
+            .filter(Annotation.groupid.in_(group_ids), Annotation.userid != user.userid)
+            .count()
+        )
         return other_user_ann_count > 0
 
     def _delete_annotations(self, user):
-        annotations = self.request.db.query(Annotation) \
-                                     .filter_by(userid=user.userid)
+        annotations = self.request.db.query(Annotation).filter_by(userid=user.userid)
         for annotation in annotations:
             storage.delete_annotation(self.request.db, annotation.id)
-            event = AnnotationEvent(self.request, annotation.id, 'delete')
+            event = AnnotationEvent(self.request, annotation.id, "delete")
             self.request.notify_after_commit(event)
 
     def _delete_groups(self, groups):

@@ -29,15 +29,19 @@ down_revision = "5d256923d642"
 
 
 def upgrade():
-    op.add_column('group', sa.Column('authority_provided_id', sa.UnicodeText(), nullable=True))
-    op.execute('COMMIT')
-    op.create_index(op.f('ix__group__groupid'),
-                    'group',
-                    ['authority', 'authority_provided_id'],
-                    postgresql_concurrently=True,
-                    unique=True)
+    op.add_column(
+        "group", sa.Column("authority_provided_id", sa.UnicodeText(), nullable=True)
+    )
+    op.execute("COMMIT")
+    op.create_index(
+        op.f("ix__group__groupid"),
+        "group",
+        ["authority", "authority_provided_id"],
+        postgresql_concurrently=True,
+        unique=True,
+    )
 
 
 def downgrade():
-    op.drop_index(op.f('ix__group__groupid'))
-    op.drop_column('group', 'authority_provided_id')
+    op.drop_index(op.f("ix__group__groupid"))
+    op.drop_column("group", "authority_provided_id")

@@ -10,9 +10,8 @@ from .base import ModelFactory
 
 
 class AnnotationModeration(ModelFactory):
-
     class Meta:
         model = models.AnnotationModeration
-        sqlalchemy_session_persistence = 'flush'
+        sqlalchemy_session_persistence = "flush"
 
     annotation = factory.SubFactory(Annotation)

@@ -10,9 +10,9 @@ from h.schemas.forms.accounts.reset_password import ResetPasswordSchema
 
 
 __all__ = (
-    'EditProfileSchema',
-    'ForgotPasswordSchema',
-    'LoginSchema',
-    'ResetCode',
-    'ResetPasswordSchema',
+    "EditProfileSchema",
+    "ForgotPasswordSchema",
+    "LoginSchema",
+    "ResetCode",
+    "ResetPasswordSchema",
 )

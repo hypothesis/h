@@ -22,7 +22,8 @@ def _validate_wildcard_uri(node, value):
             raise colander.Invalid(
                 node,
                 """Wildcards (_ and *) are not permitted within the
-                domain of wildcard_uri""")
+                domain of wildcard_uri""",
+            )
 
 
 class AnnotationSchema(JSONSchema):
@@ -30,114 +31,70 @@ class AnnotationSchema(JSONSchema):
     """Validate an annotation object."""
 
     schema = {
-        'type': 'object',
-        'properties': {
-            'document': {
-                'type': 'object',
-                'properties': {
-                    'dc': {
-                        'type': 'object',
-                        'properties': {
-                            'identifier': {
-                                'type': 'array',
-                                'items': {
-                                    'type': 'string',
-                                },
-                            },
+        "type": "object",
+        "properties": {
+            "document": {
+                "type": "object",
+                "properties": {
+                    "dc": {
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "array", "items": {"type": "string"}}
                         },
                     },
-                    'highwire': {
-                        'type': 'object',
-                        'properties': {
-                            'doi': {
-                                'type': 'array',
-                                'items': {
-                                    'type': 'string',
-                                },
-                            },
-                            'pdf_url': {
-                                'type': 'array',
-                                'items': {
-                                    'type': 'string',
-                                },
-                            },
+                    "highwire": {
+                        "type": "object",
+                        "properties": {
+                            "doi": {"type": "array", "items": {"type": "string"}},
+                            "pdf_url": {"type": "array", "items": {"type": "string"}},
                         },
                     },
-                    'link': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'object',
-                            'properties': {
-                                'href': {
-                                    'type': 'string',
-                                },
-                                'type': {
-                                    'type': 'string',
-                                },
+                    "link": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "href": {"type": "string"},
+                                "type": {"type": "string"},
                             },
-                            'required': [
-                                'href',
-                            ],
+                            "required": ["href"],
                         },
                     },
                 },
             },
-            'group': {
-                'type': 'string',
-            },
-            'permissions': {
-                'title': 'Permissions',
-                'description': 'Annotation action access control list',
-                'type': 'object',
-                'patternProperties': {
-                    '^(admin|delete|read|update)$': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'string',
-                            'pattern': '^(acct:|group:).+$',
-                        },
+            "group": {"type": "string"},
+            "permissions": {
+                "title": "Permissions",
+                "description": "Annotation action access control list",
+                "type": "object",
+                "patternProperties": {
+                    "^(admin|delete|read|update)$": {
+                        "type": "array",
+                        "items": {"type": "string", "pattern": "^(acct:|group:).+$"},
                     }
                 },
-                'required': [
-                    'read',
-                ],
+                "required": ["read"],
             },
-            'references': {
-                'type': 'array',
-                'items': {
-                    'type': 'string',
-                },
-            },
-            'tags': {
-                'type': 'array',
-                'items': {
-                    'type': 'string',
-                },
-            },
-            'target': {
-                'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'selector': {
-                            'type': 'array',
-                            'items': {
-                                'type': 'object',
-                                'properties': {
-                                    'type': {'type': 'string'}
-                                },
-                                'required': ['type']
-                            }
-                        },
+            "references": {"type": "array", "items": {"type": "string"}},
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "target": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "selector": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {"type": {"type": "string"}},
+                                "required": ["type"],
+                            },
+                        }
                     },
                 },
             },
-            'text': {
-                'type': 'string',
-            },
-            'uri': {
-                'type': 'string',
-            },
+            "text": {"type": "string"},
+            "uri": {"type": "string"},
         },
     }
 
@@ -157,38 +114,41 @@ class CreateAnnotationSchema(object):
 
         _remove_protected_fields(appstruct)
 
-        new_appstruct['userid'] = self.request.authenticated_userid
+        new_appstruct["userid"] = self.request.authenticated_userid
 
-        uri = appstruct.pop('uri', '').strip()
+        uri = appstruct.pop("uri", "").strip()
         if not uri:
-            raise ValidationError('uri: ' + _("'uri' is a required property"))
-        new_appstruct['target_uri'] = uri
+            raise ValidationError("uri: " + _("'uri' is a required property"))
+        new_appstruct["target_uri"] = uri
 
-        new_appstruct['text'] = appstruct.pop('text', '')
-        new_appstruct['tags'] = appstruct.pop('tags', [])
-        new_appstruct['groupid'] = appstruct.pop('group', '__world__')
-        new_appstruct['references'] = appstruct.pop('references', [])
+        new_appstruct["text"] = appstruct.pop("text", "")
+        new_appstruct["tags"] = appstruct.pop("tags", [])
+        new_appstruct["groupid"] = appstruct.pop("group", "__world__")
+        new_appstruct["references"] = appstruct.pop("references", [])
 
-        if 'permissions' in appstruct:
-            new_appstruct['shared'] = _shared(appstruct.pop('permissions'),
-                                              new_appstruct['groupid'])
+        if "permissions" in appstruct:
+            new_appstruct["shared"] = _shared(
+                appstruct.pop("permissions"), new_appstruct["groupid"]
+            )
         else:
-            new_appstruct['shared'] = False
+            new_appstruct["shared"] = False
 
-        if 'target' in appstruct:
-            new_appstruct['target_selectors'] = _target_selectors(
-                appstruct.pop('target'))
+        if "target" in appstruct:
+            new_appstruct["target_selectors"] = _target_selectors(
+                appstruct.pop("target")
+            )
 
         # Replies always get the same groupid as their parent. The parent's
         # groupid is added to the reply annotation later by the storage code.
         # Here we just delete any group sent by the client from replies.
-        if new_appstruct['references'] and 'groupid' in new_appstruct:
-            del new_appstruct['groupid']
+        if new_appstruct["references"] and "groupid" in new_appstruct:
+            del new_appstruct["groupid"]
 
-        new_appstruct['document'] = _document(appstruct.pop('document', {}),
-                                              new_appstruct['target_uri'])
+        new_appstruct["document"] = _document(
+            appstruct.pop("document", {}), new_appstruct["target_uri"]
+        )
 
-        new_appstruct['extra'] = appstruct
+        new_appstruct["extra"] = appstruct
 
         return new_appstruct
 
@@ -211,38 +171,40 @@ class UpdateAnnotationSchema(object):
         _remove_protected_fields(appstruct)
 
         # Some fields are not allowed to be changed in annotation updates.
-        for key in ['group', 'groupid', 'userid', 'references']:
-            appstruct.pop(key, '')
+        for key in ["group", "groupid", "userid", "references"]:
+            appstruct.pop(key, "")
 
         # Fields that are allowed to be updated and that have a different name
         # internally than in the public API.
-        if 'uri' in appstruct:
-            new_uri = appstruct.pop('uri').strip()
+        if "uri" in appstruct:
+            new_uri = appstruct.pop("uri").strip()
             if not new_uri:
-                raise ValidationError(
-                    'uri: ' + _("'uri' is a required property"))
-            new_appstruct['target_uri'] = new_uri
+                raise ValidationError("uri: " + _("'uri' is a required property"))
+            new_appstruct["target_uri"] = new_uri
 
-        if 'permissions' in appstruct:
-            new_appstruct['shared'] = _shared(appstruct.pop('permissions'),
-                                              self.groupid)
+        if "permissions" in appstruct:
+            new_appstruct["shared"] = _shared(
+                appstruct.pop("permissions"), self.groupid
+            )
 
-        if 'target' in appstruct:
-            new_appstruct['target_selectors'] = _target_selectors(
-                appstruct.pop('target'))
+        if "target" in appstruct:
+            new_appstruct["target_selectors"] = _target_selectors(
+                appstruct.pop("target")
+            )
 
         # Fields that are allowed to be updated and that have the same internal
         # and external name.
-        for key in ['text', 'tags']:
+        for key in ["text", "tags"]:
             if key in appstruct:
                 new_appstruct[key] = appstruct.pop(key)
 
-        if 'document' in appstruct:
-            new_appstruct['document'] = _document(
-                appstruct.pop('document'),
-                new_appstruct.get('target_uri', self.existing_target_uri))
+        if "document" in appstruct:
+            new_appstruct["document"] = _document(
+                appstruct.pop("document"),
+                new_appstruct.get("target_uri", self.existing_target_uri),
+            )
 
-        new_appstruct['extra'] = appstruct
+        new_appstruct["extra"] = appstruct
 
         return new_appstruct
 
@@ -257,37 +219,38 @@ def _document(document, claimant):
     """
     document = document or {}
     document_uri_dicts = document_claims.document_uris_from_data(
-        copy.deepcopy(document),
-        claimant=claimant)
+        copy.deepcopy(document), claimant=claimant
+    )
     document_meta_dicts = document_claims.document_metas_from_data(
-        copy.deepcopy(document),
-        claimant=claimant)
+        copy.deepcopy(document), claimant=claimant
+    )
     return {
-        'document_uri_dicts': document_uri_dicts,
-        'document_meta_dicts': document_meta_dicts
+        "document_uri_dicts": document_uri_dicts,
+        "document_meta_dicts": document_meta_dicts,
     }
 
 
 def _format_jsonschema_error(error):
     """Format a :py:class:`jsonschema.ValidationError` as a string."""
     if error.path:
-        dotted_path = '.'.join([str(c) for c in error.path])
-        return '{path}: {message}'.format(path=dotted_path,
-                                          message=error.message)
+        dotted_path = ".".join([str(c) for c in error.path])
+        return "{path}: {message}".format(path=dotted_path, message=error.message)
     return error.message
 
 
 def _remove_protected_fields(appstruct):
     # Some fields are not to be set by the user, ignore them.
-    for field in ['created',
-                  'updated',
-                  'user',
-                  'id',
-                  'links',
-                  'flagged',
-                  'hidden',
-                  'moderation',
-                  'user_info']:
+    for field in [
+        "created",
+        "updated",
+        "user",
+        "id",
+        "links",
+        "flagged",
+        "hidden",
+        "moderation",
+        "user_info",
+    ]:
         appstruct.pop(field, None)
 
 
@@ -308,7 +271,7 @@ def _shared(permissions, groupid):
     :type groupid: unicode
 
     """
-    return permissions['read'] == ['group:{id}'.format(id=groupid)]
+    return permissions["read"] == ["group:{id}".format(id=groupid)]
 
 
 def _target_selectors(targets):
@@ -321,8 +284,8 @@ def _target_selectors(targets):
     """
     # Any targets other than the first in the list are discarded.
     # Any fields of the target other than 'selector' are discarded.
-    if targets and 'selector' in targets[0]:
-        return targets[0]['selector']
+    if targets and "selector" in targets[0]:
+        return targets[0]["selector"]
     else:
         return []
 
@@ -417,7 +380,7 @@ class SearchParamsSchema(colander.Schema):
     uri_parts = colander.SchemaNode(
         colander.Sequence(),
         colander.SchemaNode(colander.String()),
-        name='uri.parts',
+        name="uri.parts",
         missing=colander.drop,
         description="""Limit the results to annotations with the given keyword
                        appearing in the URL.""",
@@ -463,16 +426,19 @@ class SearchParamsSchema(colander.Schema):
     )
 
     def validator(self, node, cstruct):
-        sort = cstruct['sort']
-        search_after = cstruct.get('search_after', None)
+        sort = cstruct["sort"]
+        search_after = cstruct.get("search_after", None)
 
         if search_after:
-            if sort in ["updated", "created"] and not self._date_is_parsable(search_after):
+            if sort in ["updated", "created"] and not self._date_is_parsable(
+                search_after
+            ):
                 raise colander.Invalid(
                     node,
                     """search_after must be a parsable date in the form
                     yyyy-MM-dd'T'HH:mm:ss.SSX
-                    or time in miliseconds since the epoch.""")
+                    or time in miliseconds since the epoch.""",
+                )
 
             # offset must be set to 0 if search_after is specified.
             cstruct["offset"] = 0

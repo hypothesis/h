@@ -43,5 +43,5 @@ def _parse_origin(uri):
         return None
     parsed = urlparse.urlsplit(uri)
     # netloc contains both host and port
-    origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, '', '', '')
+    origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, "", "", "")
     return origin.geturl() or None

@@ -24,9 +24,7 @@ class GroupfinderService(object):
         return self._cached_find(id_)
 
     def _find(self, id_):
-        return (self.session.query(models.Group)
-                    .filter_by(pubid=id_)
-                    .one_or_none())
+        return self.session.query(models.Group).filter_by(pubid=id_).one_or_none()
 
 
 def groupfinder_service_factory(context, request):

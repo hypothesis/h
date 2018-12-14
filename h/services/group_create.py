@@ -6,11 +6,14 @@ from functools import partial
 
 from h import session
 from h.models import Group, GroupScope
-from h.models.group import OPEN_GROUP_TYPE_FLAGS, PRIVATE_GROUP_TYPE_FLAGS, RESTRICTED_GROUP_TYPE_FLAGS
+from h.models.group import (
+    OPEN_GROUP_TYPE_FLAGS,
+    PRIVATE_GROUP_TYPE_FLAGS,
+    RESTRICTED_GROUP_TYPE_FLAGS,
+)
 
 
 class GroupCreateService(object):
-
     def __init__(self, session, user_fetcher, publish):
         """
         Create a new GroupCreateService.
@@ -36,12 +39,14 @@ class GroupCreateService(object):
 
         :returns: the created group
         """
-        return self._create(name=name,
-                            userid=userid,
-                            type_flags=PRIVATE_GROUP_TYPE_FLAGS,
-                            origins=[],
-                            add_creator_as_member=True,
-                            **kwargs)
+        return self._create(
+            name=name,
+            userid=userid,
+            type_flags=PRIVATE_GROUP_TYPE_FLAGS,
+            origins=[],
+            add_creator_as_member=True,
+            **kwargs
+        )
 
     def create_open_group(self, name, userid, origins, **kwargs):
         """
@@ -57,12 +62,14 @@ class GroupCreateService(object):
 
         :returns: the created group
         """
-        return self._create(name=name,
-                            userid=userid,
-                            type_flags=OPEN_GROUP_TYPE_FLAGS,
-                            origins=origins,
-                            add_creator_as_member=False,
-                            **kwargs)
+        return self._create(
+            name=name,
+            userid=userid,
+            type_flags=OPEN_GROUP_TYPE_FLAGS,
+            origins=origins,
+            add_creator_as_member=False,
+            **kwargs
+        )
 
     def create_restricted_group(self, name, userid, origins, **kwargs):
         """
@@ -79,12 +86,14 @@ class GroupCreateService(object):
 
         :returns: the created group
         """
-        return self._create(name=name,
-                            userid=userid,
-                            type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
-                            origins=origins,
-                            add_creator_as_member=True,
-                            **kwargs)
+        return self._create(
+            name=name,
+            userid=userid,
+            type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
+            origins=origins,
+            add_creator_as_member=True,
+            **kwargs
+        )
 
     def _create(
         self, name, userid, type_flags, origins, add_creator_as_member, **kwargs
@@ -108,17 +117,20 @@ class GroupCreateService(object):
         scopes = [GroupScope(origin=o) for o in origins]
 
         if "organization" in kwargs:
-            self._validate_authorities_match(creator.authority,
-                                             kwargs["organization"].authority)
+            self._validate_authorities_match(
+                creator.authority, kwargs["organization"].authority
+            )
 
-        group = Group(name=name,
-                      authority=creator.authority,
-                      creator=creator,
-                      joinable_by=type_flags.joinable_by,
-                      readable_by=type_flags.readable_by,
-                      writeable_by=type_flags.writeable_by,
-                      scopes=scopes,
-                      **kwargs)
+        group = Group(
+            name=name,
+            authority=creator.authority,
+            creator=creator,
+            joinable_by=type_flags.joinable_by,
+            readable_by=type_flags.readable_by,
+            writeable_by=type_flags.writeable_by,
+            scopes=scopes,
+            **kwargs
+        )
         self.session.add(group)
 
         if add_creator_as_member:
@@ -127,28 +139,35 @@ class GroupCreateService(object):
             # Flush the DB to generate group.pubid before publish()ing it.
             self.session.flush()
 
-            self.publish('group-join', group.pubid, group.creator.userid)
+            self.publish("group-join", group.pubid, group.creator.userid)
 
         return group
 
     def _validate_authorities_match(self, group_authority, org_authority):
         if group_authority != org_authority:
-            raise ValueError("Organization's authority {} must match the group creator's authority {}."
-                             .format(org_authority, group_authority))
+            raise ValueError(
+                "Organization's authority {} must match the group creator's authority {}.".format(
+                    org_authority, group_authority
+                )
+            )
 
 
 def group_create_factory(context, request):
     """Return a GroupCreateService instance for the passed context and request."""
-    user_service = request.find_service(name='user')
-    return GroupCreateService(session=request.db,
-                              user_fetcher=user_service.fetch,
-                              publish=partial(_publish, request))
+    user_service = request.find_service(name="user")
+    return GroupCreateService(
+        session=request.db,
+        user_fetcher=user_service.fetch,
+        publish=partial(_publish, request),
+    )
 
 
 def _publish(request, event_type, groupid, userid):
-    request.realtime.publish_user({
-        'type': event_type,
-        'session_model': session.model(request),
-        'userid': userid,
-        'group': groupid,
-    })
+    request.realtime.publish_user(
+        {
+            "type": event_type,
+            "session_model": session.model(request),
+            "userid": userid,
+            "group": groupid,
+        }
+    )

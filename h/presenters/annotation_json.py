@@ -30,7 +30,9 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         try:
             verifyObject(IAnnotationFormatter, formatter)
         except DoesNotImplement:
-            raise ValueError('formatter is not implementing IAnnotationFormatter interface')
+            raise ValueError(
+                "formatter is not implementing IAnnotationFormatter interface"
+            )
 
         self._formatters.append(formatter)
 
@@ -38,22 +40,22 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         docpresenter = DocumentJSONPresenter(self.annotation.document)
 
         base = {
-            'id': self.annotation.id,
-            'created': self.created,
-            'updated': self.updated,
-            'user': self.annotation.userid,
-            'uri': self.annotation.target_uri,
-            'text': self.text,
-            'tags': self.tags,
-            'group': self.annotation.groupid,
-            'permissions': self.permissions,
-            'target': self.target,
-            'document': docpresenter.asdict(),
-            'links': self.links,
+            "id": self.annotation.id,
+            "created": self.created,
+            "updated": self.updated,
+            "user": self.annotation.userid,
+            "uri": self.annotation.target_uri,
+            "text": self.text,
+            "tags": self.tags,
+            "group": self.annotation.groupid,
+            "permissions": self.permissions,
+            "target": self.target,
+            "document": docpresenter.asdict(),
+            "links": self.links,
         }
 
         if self.annotation.references:
-            base['references'] = self.annotation.references
+            base["references"] = self.annotation.references
 
         annotation = copy.copy(self.annotation.extra) or {}
         annotation.update(base)
@@ -74,14 +76,17 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         """
         read = self.annotation.userid
         if self.annotation.shared:
-            read = 'group:{}'.format(self.annotation.groupid)
+            read = "group:{}".format(self.annotation.groupid)
 
             principals = security.principals_allowed_by_permission(
-                    self.annotation_resource, 'read')
+                self.annotation_resource, "read"
+            )
             if security.Everyone in principals:
-                read = 'group:__world__'
+                read = "group:__world__"
 
-        return {'read': [read],
-                'admin': [self.annotation.userid],
-                'update': [self.annotation.userid],
-                'delete': [self.annotation.userid]}
+        return {
+            "read": [read],
+            "admin": [self.annotation.userid],
+            "update": [self.annotation.userid],
+            "delete": [self.annotation.userid],
+        }

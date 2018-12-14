@@ -69,9 +69,9 @@ class JWTAuthorizationGrant(GrantTypeBase):
         """
 
         headers = {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
-            'Pragma': 'no-cache',
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
         }
 
         try:
@@ -79,7 +79,9 @@ class JWTAuthorizationGrant(GrantTypeBase):
         except errors.OAuth2Error as e:
             return headers, e.json, e.status_code
 
-        token = token_handler.create_token(request, refresh_token=True, save_token=False)
+        token = token_handler.create_token(
+            request, refresh_token=True, save_token=False
+        )
         self.request_validator.save_token(token, request)
         return headers, json.dumps(token), 200
 
@@ -101,14 +103,16 @@ class JWTAuthorizationGrant(GrantTypeBase):
         try:
             assertion = request.assertion
         except AttributeError:
-            raise errors.InvalidRequestFatalError('Missing assertion.')
+            raise errors.InvalidRequestFatalError("Missing assertion.")
 
         token = JWTGrantToken(assertion)
 
         # Update client_id in oauthlib request
         request.client_id = token.issuer
 
-        if not self.request_validator.authenticate_client_id(request.client_id, request):
+        if not self.request_validator.authenticate_client_id(
+            request.client_id, request
+        ):
             raise errors.InvalidClientError(request=request)
 
         # Ensure client is authorized use of this grant type
@@ -120,9 +124,13 @@ class JWTAuthorizationGrant(GrantTypeBase):
 
         user = self.user_svc.fetch(verified_token.subject)
         if user is None:
-            raise errors.InvalidGrantError('Grant token subject (sub) could not be found.')
+            raise errors.InvalidGrantError(
+                "Grant token subject (sub) could not be found."
+            )
 
         if user.authority != authclient.authority:
-            raise errors.InvalidGrantError('Grant token subject (sub) does not match issuer (iss).')
+            raise errors.InvalidGrantError(
+                "Grant token subject (sub) does not match issuer (iss)."
+            )
 
         request.user = user

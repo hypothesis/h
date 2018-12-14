@@ -19,188 +19,240 @@ from h.schemas.forms.admin.group import CreateAdminGroupSchema
 _ = i18n.TranslationString
 
 
-@view_config(route_name='admin.groups',
-             request_method='GET',
-             renderer='h:templates/admin/groups.html.jinja2',
-             permission='admin_groups')
+@view_config(
+    route_name="admin.groups",
+    request_method="GET",
+    renderer="h:templates/admin/groups.html.jinja2",
+    permission="admin_groups",
+)
 @paginator.paginate_query
 def groups_index(context, request):
-    q = request.params.get('q')
+    q = request.params.get("q")
 
     filter_terms = []
     if q:
         name = models.Group.name
-        filter_terms.append(func.lower(name).like('%{}%'.format(q.lower())))
+        filter_terms.append(func.lower(name).like("%{}%".format(q.lower())))
 
-    return (request.db.query(models.Group)
-                      .filter(*filter_terms)
-                      .order_by(models.Group.created.desc()))
+    return (
+        request.db.query(models.Group)
+        .filter(*filter_terms)
+        .order_by(models.Group.created.desc())
+    )
 
 
-@view_defaults(route_name='admin.groups_create',
-               renderer='h:templates/admin/groups_create.html.jinja2',
-               permission='admin_groups')
+@view_defaults(
+    route_name="admin.groups_create",
+    renderer="h:templates/admin/groups_create.html.jinja2",
+    permission="admin_groups",
+)
 class GroupCreateController(object):
-
     def __init__(self, request):
-        user_svc = request.find_service(name='user')
-        list_org_svc = request.find_service(name='list_organizations')
+        user_svc = request.find_service(name="user")
+        list_org_svc = request.find_service(name="list_organizations")
         self.organizations = {o.pubid: o for o in list_org_svc.organizations()}
-        self.schema = CreateAdminGroupSchema().bind(request=request,
-                                                    organizations=self.organizations,
-                                                    user_svc=user_svc)
+        self.schema = CreateAdminGroupSchema().bind(
+            request=request, organizations=self.organizations, user_svc=user_svc
+        )
         self.request = request
-        self.form = _create_form(self.request, self.schema, (_('Create New Group'),))
+        self.form = _create_form(self.request, self.schema, (_("Create New Group"),))
 
-    @view_config(request_method='GET')
+    @view_config(request_method="GET")
     def get(self):
-        self.form.set_appstruct({
-            'creator': self.request.user.username,
-            'organization': Organization.default(self.request.db).pubid,
-        })
+
+        self.form.set_appstruct(
+            {
+                "creator": self.request.user.username,
+                "organization": Organization.default(self.request.db).pubid,
+                "enforce_scope": True,
+            }
+        )
         return self._template_context()
 
-    @view_config(request_method='POST')
+    @view_config(request_method="POST")
     def post(self):
         def on_success(appstruct):
-            group_create_svc = self.request.find_service(name='group_create')
-            group_members_svc = self.request.find_service(name='group_members')
+            """Create a group on successful validation of POSTed form data"""
 
-            # Create the new group.
-            creator = appstruct['creator']
-            description = appstruct['description']
-            name = appstruct['name']
+            group_create_svc = self.request.find_service(name="group_create")
+            group_members_svc = self.request.find_service(name="group_members")
+
             organization = self.organizations[appstruct["organization"]]
-            origins = appstruct['origins']
-            type_ = appstruct['group_type']
+            # We know this user exists because it is checked during schema validation
+            creator_userid = _userid(appstruct["creator"], organization.authority)
 
-            userid = _userid(creator, organization.authority)
+            type_ = appstruct["group_type"]
+            if type_ not in ["open", "restricted"]:
+                raise Exception("Unsupported group type {}".format(type_))
 
-            if type_ == 'open':
-                group = group_create_svc.create_open_group(name=name, userid=userid,
-                                                           origins=origins, description=description,
-                                                           organization=organization)
-            elif type_ == 'restricted':
-                group = group_create_svc.create_restricted_group(name=name, userid=userid,
-                                                                 origins=origins, description=description,
-                                                                 organization=organization)
-            else:
-                raise Exception('Unsupported group type {}'.format(type_))
+            create_fns = {
+                "open": group_create_svc.create_open_group,
+                "restricted": group_create_svc.create_restricted_group,
+            }
 
-            # Add members to the group
-            member_userids = [_userid(username, organization.authority) for username in appstruct['members']]
+            group = create_fns[type_](
+                name=appstruct["name"],
+                userid=creator_userid,
+                origins=appstruct["origins"],
+                description=appstruct["description"],
+                organization=organization,
+                enforce_scope=appstruct["enforce_scope"],
+            )
+
+            # Add members to the group. We know that these users exist
+            # because that check is part of form schema validation.
+            member_userids = [
+                _userid(username, organization.authority)
+                for username in appstruct["members"]
+            ]
             group_members_svc.add_members(group, member_userids)
 
             # Flush changes to allocate group a pubid
             self.request.db.flush(objects=[group])
 
-            group_url = self.request.route_url('group_read', pubid=group.pubid, slug=group.slug)
-            self.request.session.flash(Markup('Created new group <a href="{url}">{name}</a>'.format(
-                                        name=name, url=group_url)), queue='success')
+            group_url = self.request.route_url(
+                "group_read", pubid=group.pubid, slug=group.slug
+            )
+            self.request.session.flash(
+                Markup(
+                    'Created new group <a href="{url}">{name}</a>'.format(
+                        name=group.name, url=group_url
+                    )
+                ),
+                queue="success",
+            )
 
             # Direct the user back to the admin page.
-            return HTTPFound(location=self.request.route_url('admin.groups'))
+            return HTTPFound(location=self.request.route_url("admin.groups"))
 
-        return form.handle_form_submission(self.request, self.form,
-                                           on_success=on_success,
-                                           on_failure=self._template_context)
+        return form.handle_form_submission(
+            self.request,
+            self.form,
+            on_success=on_success,
+            on_failure=self._template_context,
+        )
 
     def _template_context(self):
-        return {'form': self.form.render()}
+        return {"form": self.form.render()}
 
 
-@view_defaults(route_name='admin.groups_edit',
-               permission='admin_groups',
-               renderer='h:templates/admin/groups_edit.html.jinja2')
+@view_defaults(
+    route_name="admin.groups_edit",
+    permission="admin_groups",
+    renderer="h:templates/admin/groups_edit.html.jinja2",
+)
 class GroupEditController(object):
-
     def __init__(self, request):
         # Look up the group here rather than using traversal in the route
         # definition as that would apply `Group.__acl__` which will not match if
         # the current (admin) user is not the creator of the group.
         try:
-            pubid = request.matchdict.get('pubid')
+            pubid = request.matchdict.get("pubid")
             self.group = GroupRoot(request)[pubid]
         except KeyError:
             raise HTTPNotFound()
 
-        list_org_svc = request.find_service(name='list_organizations')
-        self.organizations = {o.pubid: o for o in list_org_svc.organizations(self.group.authority)}
+        list_org_svc = request.find_service(name="list_organizations")
+        self.organizations = {
+            o.pubid: o for o in list_org_svc.organizations(self.group.authority)
+        }
 
-        user_svc = request.find_service(name='user')
+        user_svc = request.find_service(name="user")
         self.request = request
-        self.schema = CreateAdminGroupSchema().bind(request=request, group=self.group,
-                                                    organizations=self.organizations,
-                                                    user_svc=user_svc)
-        self.form = _create_form(self.request, self.schema, (_('Save'),))
+        self.schema = CreateAdminGroupSchema().bind(
+            request=self.request,
+            group=self.group,
+            organizations=self.organizations,
+            user_svc=user_svc,
+        )
+        self.form = _create_form(self.request, self.schema, (_("Save"),))
 
-    @view_config(request_method='GET')
+    @view_config(request_method="GET")
     def read(self):
         self._update_appstruct()
         return self._template_context()
 
-    @view_config(request_method='POST',
-                 route_name='admin.groups_delete')
+    @view_config(request_method="POST", route_name="admin.groups_delete")
     def delete(self):
         group = self.group
-        svc = self.request.find_service(name='delete_group')
+        svc = self.request.find_service(name="delete_group")
 
         svc.delete(group)
         self.request.session.flash(
-            _('Successfully deleted group %s' % (group.name), 'success'))
+            _("Successfully deleted group %s" % (group.name), "success")
+        )
 
-        return HTTPFound(
-            location=self.request.route_path('admin.groups'))
+        return HTTPFound(location=self.request.route_path("admin.groups"))
 
-    @view_config(request_method='POST')
+    @view_config(request_method="POST")
     def update(self):
         group = self.group
 
         def on_success(appstruct):
-            user_svc = self.request.find_service(name='user')
-            group_members_svc = self.request.find_service(name='group_members')
+            """Update the group resource on successful form validation"""
 
-            group.creator = user_svc.fetch(appstruct['creator'], group.authority)
-            group.description = appstruct['description']
-            group.name = appstruct['name']
-            group.scopes = [GroupScope(origin=o) for o in appstruct['origins']]
-            group.organization = self.organizations[appstruct['organization']]
+            user_svc = self.request.find_service(name="user")
+            group_update_svc = self.request.find_service(name="group_update")
+            group_members_svc = self.request.find_service(name="group_members")
+            organization = self.organizations[appstruct["organization"]]
+            scopes = [GroupScope(origin=o) for o in appstruct["origins"]]
 
-            memberids = [_userid(username, group.authority) for username in appstruct['members']]
+            group_update_svc.update(
+                group,
+                organization=organization,
+                creator=user_svc.fetch(appstruct["creator"], group.authority),
+                description=appstruct["description"],
+                name=appstruct["name"],
+                scopes=scopes,
+                enforce_scope=appstruct["enforce_scope"],
+            )
+
+            memberids = [
+                _userid(username, group.authority) for username in appstruct["members"]
+            ]
             group_members_svc.update_members(group, memberids)
 
-            self.form = _create_form(self.request, self.schema, (_('Save'),))
+            self.form = _create_form(self.request, self.schema, (_("Save"),))
             self._update_appstruct()
 
             return self._template_context()
 
-        return form.handle_form_submission(self.request, self.form,
-                                           on_success=on_success,
-                                           on_failure=self._template_context)
+        return form.handle_form_submission(
+            self.request,
+            self.form,
+            on_success=on_success,
+            on_failure=self._template_context,
+        )
 
     def _update_appstruct(self):
         group = self.group
-        self.form.set_appstruct({
-            # `group.creator` is nullable but "Creator" is currently a required
-            # field, so the user will have to pick one when editing the group.
-            'creator': group.creator.username if group.creator else '',
-
-            'description': group.description or '',
-            'group_type': group.type,
-            'name': group.name,
-            'members': [m.username for m in group.members],
-            'organization': group.organization.pubid,
-            'origins': [s.origin for s in group.scopes],
-        })
+        self.form.set_appstruct(
+            {
+                # `group.creator` is nullable but "Creator" is currently a required
+                # field, so the user will have to pick one when editing the group.
+                "creator": group.creator.username if group.creator else "",
+                "description": group.description or "",
+                "group_type": group.type,
+                "name": group.name,
+                "members": [m.username for m in group.members],
+                "organization": group.organization.pubid,
+                "origins": [s.origin for s in group.scopes],
+                "enforce_scope": group.enforce_scope,
+            }
+        )
 
     def _template_context(self):
-        num_annotations = self.request.db.query(Annotation).filter_by(groupid=self.group.pubid).count()
+        num_annotations = (
+            self.request.db.query(Annotation)
+            .filter_by(groupid=self.group.pubid)
+            .count()
+        )
         return {
-            'form': self.form.render(),
-            'pubid': self.group.pubid,
-            'group_name': self.group.name,
-            'annotation_count': num_annotations,
-            'member_count': len(self.group.members),
+            "form": self.form.render(),
+            "pubid": self.group.pubid,
+            "group_name": self.group.name,
+            "annotation_count": num_annotations,
+            "member_count": len(self.group.members),
         }
 
 

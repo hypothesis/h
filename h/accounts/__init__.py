@@ -33,7 +33,7 @@ def get_user(request):
     if request.authenticated_userid is None:
         return None
 
-    user_service = request.find_service(name='user')
+    user_service = request.find_service(name="user")
     user = user_service.fetch(request.authenticated_userid)
 
     return user
@@ -51,13 +51,13 @@ def includeme(config):
     # This prevents retried requests (those that raise
     # `transaction.interfaces.TransientError`) gaining access to a stale
     # `User` instance.
-    config.add_request_method(get_user, name='user', property=True)
+    config.add_request_method(get_user, name="user", property=True)
 
-    config.include('.schemas')
-    config.include('.subscribers')
+    config.include(".schemas")
+    config.include(".subscribers")
 
-    secret = config.registry.settings['secret_key']
-    salt = config.registry.settings['secret_salt']
-    derived = derive_key(secret, salt, b'h.accounts')
+    secret = config.registry.settings["secret_key"]
+    salt = config.registry.settings["secret_salt"]
+    derived = derive_key(secret, salt, b"h.accounts")
     serializer = URLSafeTimedSerializer(derived)
     config.registry.password_reset_serializer = serializer

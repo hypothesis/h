@@ -15,8 +15,8 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-revision = '8a7f31c4525d'
-down_revision = '46a22db075d5'
+revision = "8a7f31c4525d"
+down_revision = "46a22db075d5"
 
 
 log = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ H_LOGO = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 
 class Group(Base):
-    __tablename__ = 'group'
+    __tablename__ = "group"
 
     id = sa.Column(sa.Integer, primary_key=True)
     pubid = sa.Column(sa.Text())
@@ -44,7 +44,7 @@ class Group(Base):
 
 
 class Organization(Base):
-    __tablename__ = 'organization'
+    __tablename__ = "organization"
     id = sa.Column(sa.Integer, primary_key=True)
     pubid = sa.Column(sa.Text, unique=True)
     name = sa.Column(sa.UnicodeText, index=True)
@@ -55,18 +55,20 @@ class Organization(Base):
 def upgrade():
     session = Session(bind=op.get_bind())
 
-    default_org = session.query(Organization).filter_by(pubid='__default__').one_or_none()
+    default_org = (
+        session.query(Organization).filter_by(pubid="__default__").one_or_none()
+    )
     if default_org:
         log.info("__default__ organization already exists, not creating it")
         return
 
     log.info("__default__ organization doesn't exist yet, creating it")
-    authority = session.query(Group).filter_by(pubid='__world__').one().authority
-    session.add(Organization(name='Hypothesis',
-                             logo=H_LOGO,
-                             pubid='__default__',
-                             authority=authority,
-                             ))
+    authority = session.query(Group).filter_by(pubid="__world__").one().authority
+    session.add(
+        Organization(
+            name="Hypothesis", logo=H_LOGO, pubid="__default__", authority=authority
+        )
+    )
     session.commit()
 
 

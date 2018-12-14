@@ -14,13 +14,13 @@ from h.auth import util
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
 AUTH_CLIENT_API_WHITELIST = [
-    ('api.groups', 'POST'),
-    ('api.group', 'PATCH'),
-    ('api.group', 'GET'),
-    ('api.group_upsert', 'PUT'),
-    ('api.group_member', 'POST'),
-    ('api.users', 'POST'),
-    ('api.user', 'PATCH'),
+    ("api.groups", "POST"),
+    ("api.group", "PATCH"),
+    ("api.group", "GET"),
+    ("api.group_upsert", "PUT"),
+    ("api.group_member", "POST"),
+    ("api.users", "POST"),
+    ("api.user", "PATCH"),
 ]
 
 
@@ -74,6 +74,7 @@ class APIAuthenticationPolicy(object):
     Initially, the ``client_policy`` will only be used to authenticate requests
     that correspond to certain endpoint services.
     """
+
     def __init__(self, user_policy, client_policy):
         self._user_policy = user_policy
         self._client_policy = client_policy
@@ -212,7 +213,9 @@ class AuthClientPolicy(object):
         callback_ok = self._basic_auth_policy.callback(auth_userid, request)
 
         if callback_ok is not None:
-            return forwarded_userid  # This should always be a userid, not an auth_client id
+            return (
+                forwarded_userid
+            )  # This should always be a userid, not an auth_client id
 
     def effective_principals(self, request):
         """
@@ -272,10 +275,12 @@ class AuthClientPolicy(object):
 
         forwarded_userid = AuthClientPolicy._forwarded_userid(request)
 
-        if forwarded_userid is None:  # No forwarded user; set principals for basic auth_client
+        if (
+            forwarded_userid is None
+        ):  # No forwarded user; set principals for basic auth_client
             return util.principals_for_auth_client(client)
 
-        user_service = request.find_service(name='user')
+        user_service = request.find_service(name="user")
         try:
             user = user_service.fetch(forwarded_userid)
         except ValueError:  # raised if userid is invalid format
@@ -289,7 +294,7 @@ class AuthClientPolicy(object):
     @staticmethod
     def _forwarded_userid(request):
         """Return forwarded userid or None"""
-        userid = request.headers.get('X-Forwarded-User', None)
+        userid = request.headers.get("X-Forwarded-User", None)
         if userid is not None:
             # In Python 2 request header values are byte strings, so we need to
             # decode them to get unicode.
@@ -340,14 +345,14 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         """
         token_str = None
         if _is_ws_request(request):
-            token_str = request.GET.get('access_token', None)
+            token_str = request.GET.get("access_token", None)
         if token_str is None:
-            token_str = getattr(request, 'auth_token', None)
+            token_str = getattr(request, "auth_token", None)
 
         if token_str is None:
             return None
 
-        svc = request.find_service(name='auth_token')
+        svc = request.find_service(name="auth_token")
         token = svc.validate(token_str)
         if token is None:
             return None
@@ -356,8 +361,10 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
 
 
 def _is_api_request(request):
-    return (request.path.startswith('/api')
-            and request.path not in ['/api/token', '/api/badge'])
+    return request.path.startswith("/api") and request.path not in [
+        "/api/token",
+        "/api/badge",
+    ]
 
 
 def _is_client_request(request):
@@ -378,4 +385,4 @@ def _is_client_request(request):
 
 
 def _is_ws_request(request):
-    return request.path == '/ws'
+    return request.path == "/ws"

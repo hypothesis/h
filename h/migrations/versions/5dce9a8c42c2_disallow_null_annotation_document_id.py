@@ -11,13 +11,13 @@ from __future__ import unicode_literals
 from alembic import op
 
 
-revision = '5dce9a8c42c2'
-down_revision = 'bcdd81e23920'
+revision = "5dce9a8c42c2"
+down_revision = "bcdd81e23920"
 
 
 def upgrade():
-    op.alter_column('annotation', 'document_id', nullable=False)
+    op.alter_column("annotation", "document_id", nullable=False)
 
 
 def downgrade():
-    op.alter_column('annotation', 'document_id', nullable=True)
+    op.alter_column("annotation", "document_id", nullable=True)

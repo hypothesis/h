@@ -16,28 +16,25 @@ from raven.utils.wsgi import get_environ
 from h import __version__
 
 PROCESSORS = (
-    'raven.processors.SanitizePasswordsProcessor',
-    'raven.processors.RemovePostDataProcessor',
+    "raven.processors.SanitizePasswordsProcessor",
+    "raven.processors.RemovePostDataProcessor",
 )
 
 
 def http_context_data(request):
     return {
-        'url': request.url,
-        'method': request.method,
-        'data': request.body,
-        'query_string': request.query_string,
-        'cookies': dict(request.cookies),
-        'headers': dict(request.headers),
-        'env': dict(get_environ(request.environ)),
+        "url": request.url,
+        "method": request.method,
+        "data": request.body,
+        "query_string": request.query_string,
+        "cookies": dict(request.cookies),
+        "headers": dict(request.headers),
+        "env": dict(get_environ(request.environ)),
     }
 
 
 def user_context_data(request):
-    return {
-        'id': request.authenticated_userid,
-        'ip_address': request.client_addr,
-    }
+    return {"id": request.authenticated_userid, "ip_address": request.client_addr}
 
 
 def get_client(settings):
@@ -46,20 +43,22 @@ def get_client(settings):
     """
     # If the `raven.transport` setting is set to 'gevent', then we use the
     # raven-supplied gevent compatible transport.
-    transport_name = settings.get('raven.transport')
-    transport = GeventedHTTPTransport if transport_name == 'gevent' else None
+    transport_name = settings.get("raven.transport")
+    transport = GeventedHTTPTransport if transport_name == "gevent" else None
 
     # Application environment name
-    environment = settings.get('h.env', 'dev')
+    environment = settings.get("h.env", "dev")
 
-    return raven.Client(environment=environment,
-                        release=__version__,
-                        transport=transport,
-                        processors=PROCESSORS)
+    return raven.Client(
+        environment=environment,
+        release=__version__,
+        transport=transport,
+        processors=PROCESSORS,
+    )
 
 
 def _get_request_client(request):
-    client = request.registry['sentry.client']
+    client = request.registry["sentry.client"]
     client.http_context(http_context_data(request))
     client.user_context(user_context_data(request))
     request.add_finished_callback(lambda _: client.context.clear())
@@ -68,7 +67,7 @@ def _get_request_client(request):
 
 def includeme(config):
     # Create a sentry client and store it in the registry
-    config.registry['sentry.client'] = get_client(config.registry.settings)
+    config.registry["sentry.client"] = get_client(config.registry.settings)
 
     # Allow retrieval of the client within a request as `request.sentry`
-    config.add_request_method(_get_request_client, 'sentry', reify=True)
+    config.add_request_method(_get_request_client, "sentry", reify=True)

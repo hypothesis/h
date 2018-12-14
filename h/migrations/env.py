@@ -19,21 +19,22 @@ config = context.config
 
 
 def configure_logging():
-    logging.basicConfig(format='%(asctime)s %(process)d %(name)s [%(levelname)s] '
-                               '%(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.INFO)
+    logging.basicConfig(
+        format="%(asctime)s %(process)d %(name)s [%(levelname)s] " "%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.INFO,
+    )
 
-    if 'DEBUG_QUERY' in os.environ:
+    if "DEBUG_QUERY" in os.environ:
         level = logging.INFO
-        if os.environ.get('DEBUG_QUERY') == 'trace':
+        if os.environ.get("DEBUG_QUERY") == "trace":
             level = logging.DEBUG
-        logging.getLogger('sqlalchemy.engine').setLevel(level)
+        logging.getLogger("sqlalchemy.engine").setLevel(level)
 
 
 def get_database_url():
-    if 'DATABASE_URL' in os.environ:
-        return database_url(os.environ['DATABASE_URL'])
+    if "DATABASE_URL" in os.environ:
+        return database_url(os.environ["DATABASE_URL"])
     return config.get_main_option("sqlalchemy.url")
 
 
@@ -49,8 +50,7 @@ def run_migrations_offline():
     script output.
 
     """
-    context.configure(url=get_database_url(),
-                      transaction_per_migration=True)
+    context.configure(url=get_database_url(), transaction_per_migration=True)
 
     context.run_migrations()
 
@@ -64,12 +64,11 @@ def run_migrations_online():
     """
     section = config.config_ini_section
 
-    config.set_section_option(section, 'sqlalchemy.url', get_database_url())
+    config.set_section_option(section, "sqlalchemy.url", get_database_url())
 
     engine = engine_from_config(
-        config.get_section(section),
-        prefix='sqlalchemy.',
-        poolclass=pool.NullPool)
+        config.get_section(section), prefix="sqlalchemy.", poolclass=pool.NullPool
+    )
 
     connection = engine.connect()
     context.configure(

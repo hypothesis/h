@@ -12,6 +12,7 @@ from .base import ModelFactory
 class GroupScope(ModelFactory):
     class Meta:
         model = models.GroupScope
+        sqlalchemy_session_persistence = "flush"
 
-    origin = factory.Faker('url')
-    group = factory.SubFactory('tests.common.factories.OpenGroup')
+    origin = factory.Faker("url")
+    group = factory.SubFactory("tests.common.factories.OpenGroup")

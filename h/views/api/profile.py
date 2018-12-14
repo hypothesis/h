@@ -7,24 +7,28 @@ from h.exceptions import APIError
 from h.views.api.config import api_config
 
 
-@api_config(route_name='api.profile',
-            request_method='GET',
-            link_name='profile.read',
-            description="Fetch the user's profile")
+@api_config(
+    route_name="api.profile",
+    request_method="GET",
+    link_name="profile.read",
+    description="Fetch the user's profile",
+)
 def profile(request):
-    authority = request.params.get('authority')
+    authority = request.params.get("authority")
     return h_session.profile(request, authority)
 
 
-@api_config(route_name='api.profile',
-            request_method='PATCH',
-            permission='update',
-            link_name='profile.update',
-            description="Update a user's preferences")
+@api_config(
+    route_name="api.profile",
+    request_method="PATCH",
+    permission="update",
+    link_name="profile.update",
+    description="Update a user's preferences",
+)
 def update_preferences(request):
-    preferences = request.json_body.get('preferences', {})
+    preferences = request.json_body.get("preferences", {})
 
-    svc = request.find_service(name='user')
+    svc = request.find_service(name="user")
     # TODO: The following exception doesn't match convention for validation
     # used in other endpoints
     try:

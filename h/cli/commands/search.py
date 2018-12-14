@@ -23,19 +23,19 @@ def reindex(ctx):
     updates the index alias. This requires that the index is aliased already,
     and will raise an error if it is not.
     """
-    os.environ['ELASTICSEARCH_CLIENT_TIMEOUT'] = '30'
+    os.environ["ELASTICSEARCH_CLIENT_TIMEOUT"] = "30"
 
-    request = ctx.obj['bootstrap']()
+    request = ctx.obj["bootstrap"]()
 
     es_client = request.es
 
-    es_server_version = es_client.conn.info()['version']['number']
-    click.echo('reindexing into Elasticsearch {} cluster'.format(es_server_version))
+    es_server_version = es_client.conn.info()["version"]["number"]
+    click.echo("reindexing into Elasticsearch {} cluster".format(es_server_version))
 
     indexer.reindex(request.db, es_client, request)
 
 
-@search.command('update-settings')
+@search.command("update-settings")
 @click.pass_context
 def update_settings(ctx):
     """
@@ -45,7 +45,7 @@ def update_settings(ctx):
     pending changes to mappings are not compatible with the current index. In
     this case you will likely need to reindex.
     """
-    request = ctx.obj['bootstrap']()
+    request = ctx.obj["bootstrap"]()
 
     try:
         config.update_index_settings(request.es)
