@@ -22,18 +22,6 @@ class TestAPIError(object):
         assert exc.status_code == 418
 
 
-class TestClientUnauthorized(object):
-    def test_message(self):
-        exc = exceptions.ClientUnauthorized()
-
-        assert "credentials are invalid" in str(exc)
-
-    def test_status_code(self):
-        exc = exceptions.ClientUnauthorized()
-
-        assert exc.status_code == 403
-
-
 class TestConflictError(object):
     def test_it_returns_the_correct_http_status(self):
         exc = exceptions.ConflictError()
