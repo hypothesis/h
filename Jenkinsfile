@@ -26,7 +26,9 @@ node {
             testApp(image: img, runArgs: "-u root " +
                                          "-e BROKER_URL=${brokerUrl} " +
                                          "-e ELASTICSEARCH_URL=${elasticsearchHost} " +
-                                         "-e TEST_DATABASE_URL=${databaseUrl}") {
+                                         "-e TEST_DATABASE_URL=${databaseUrl} " +
+                                         "-e SITE_PACKAGES=true"
+                                         ) {
                 // Test dependencies
                 sh 'apk add --no-cache build-base libffi-dev postgresql-dev python-dev'
                 sh 'apk add --no-cache python3 python3-dev'
