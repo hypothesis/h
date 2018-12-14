@@ -47,7 +47,7 @@ def create(request):
     try:
         user_unique_service.ensure_unique(appstruct, authority=client_authority_)
     except DuplicateUserError as err:
-        raise ConflictError(err)
+        raise ConflictError(str(err))
 
     user_signup_service = request.find_service(name="user_signup")
     user = user_signup_service.signup(require_activation=False, **appstruct)

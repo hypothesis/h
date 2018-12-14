@@ -456,9 +456,9 @@ class TestDebugToken(object):
 
 class TestAPITokenError(object):
     def test_it_sets_the_response_status_code(self, pyramid_request):
-        context = OAuthTokenError("the error message", "error_type", status_code=403)
+        context = OAuthTokenError("the error message", "error_type")
         views.api_token_error(context, pyramid_request)
-        assert pyramid_request.response.status_code == 403
+        assert pyramid_request.response.status_code == 401
 
     def test_it_returns_the_error(self, pyramid_request):
         context = OAuthTokenError("", "error_type")

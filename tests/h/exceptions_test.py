@@ -49,12 +49,7 @@ class TestOAuthTokenError(object):
     def test_it_sets_default_response_code(self):
         exc = exceptions.OAuthTokenError("boom", "mytype")
 
-        assert exc.status_code == 400
-
-    def test_it_sets_custom_response_code(self):
-        exc = exceptions.OAuthTokenError("boom", "mytype", 500)
-
-        assert exc.status_code == 500
+        assert exc.status_code == 401
 
 
 class TestPayloadError(object):

@@ -11,9 +11,9 @@ from __future__ import unicode_literals
 
 from pyramid.view import forbidden_view_config
 from pyramid.view import notfound_view_config
+from pyramid import httpexceptions
 
 from h.i18n import TranslationString as _  # noqa: N813
-from h.exceptions import APIError
 from h.schemas import ValidationError
 from h.util.view import handle_exception, json_view
 from h.views.api.config import cors_policy
@@ -36,7 +36,7 @@ def api_notfound(request):
     return {"status": "failure", "reason": message}
 
 
-@json_view(context=APIError, decorator=cors_policy)
+@json_view(context=httpexceptions.HTTPError, decorator=cors_policy)
 def api_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code

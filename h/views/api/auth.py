@@ -224,14 +224,14 @@ class OAuthRevocationController(object):
 def debug_token(request):
     if not request.auth_token:
         raise OAuthTokenError(
-            "Bearer token is missing in Authorization HTTP header", "missing_token", 401
+            "Bearer token is missing in Authorization HTTP header", "missing_token"
         )
 
     svc = request.find_service(name="auth_token")
     token = svc.validate(request.auth_token)
     if token is None:
         raise OAuthTokenError(
-            "Bearer token does not exist or is expired", "missing_token", 401
+            "Bearer token does not exist or is expired", "missing_token"
         )
 
     token = svc.fetch(request.auth_token)
