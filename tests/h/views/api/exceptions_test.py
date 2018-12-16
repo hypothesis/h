@@ -18,7 +18,7 @@ def test_api_notfound_view(pyramid_request):
 
 
 def test_api_error_view(pyramid_request):
-    context = APIError(message="asplosions!", status_code=418)
+    context = APIError(detail="asplosions!", status_code=418)
 
     result = views.api_error(context, pyramid_request)
 
