@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 from mock import Mock
+from pyramid.httpexceptions import HTTPExpectationFailed
 
-from h.exceptions import APIError
 from h.schemas import ValidationError
 from h.views.api import exceptions as views
 
@@ -18,11 +18,11 @@ def test_api_notfound_view(pyramid_request):
 
 
 def test_api_error_view(pyramid_request):
-    context = APIError(detail="asplosions!", status_code=418)
+    context = HTTPExpectationFailed(detail="asplosions!")
 
     result = views.api_error(context, pyramid_request)
 
-    assert pyramid_request.response.status_code == 418
+    assert pyramid_request.response.status_code == 417
     assert result["status"] == "failure"
     assert result["reason"] == "asplosions!"
 

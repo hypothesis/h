@@ -5,23 +5,6 @@ from __future__ import unicode_literals
 from h import exceptions
 
 
-class TestAPIError(object):
-    def test_message(self):
-        exc = exceptions.APIError("some message")
-
-        assert str(exc) == "some message"
-
-    def test_default_status_code(self):
-        exc = exceptions.APIError("some message")
-
-        assert exc.status_code == 500
-
-    def test_custom_status_code(self):
-        exc = exceptions.APIError("some message", status_code=418)
-
-        assert exc.status_code == 418
-
-
 class TestConflictError(object):
     def test_it_returns_the_correct_http_status(self):
         exc = exceptions.ConflictError()

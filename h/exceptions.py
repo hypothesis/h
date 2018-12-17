@@ -8,13 +8,6 @@ from pyramid import httpexceptions
 from h.i18n import TranslationString as _  # noqa: N813
 
 
-class APIError(httpexceptions.HTTPError):
-    """A problem handling an API request."""
-
-    def __init__(self, detail, status_code=500):
-        super(APIError, self).__init__(detail, status_code=status_code)
-
-
 class ConflictError(httpexceptions.HTTPConflict):
     """An API request represents a duplicate of an existing resource."""
 
