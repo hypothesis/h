@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import datetime
 
-from pyramid.httpexceptions import HTTPNotFound
 import pytest
 import mock
 
@@ -215,18 +214,10 @@ class TestGroupCreateController(object):
 )
 class TestGroupEditController(object):
     def test_it_binds_schema(
-        self,
-        pyramid_request,
-        group,
-        user_svc,
-        group_svc,
-        default_org,
-        CreateAdminGroupSchema,
+        self, pyramid_request, group, user_svc, default_org, CreateAdminGroupSchema
     ):
-        pyramid_request.matchdict = {"pubid": group.pubid}
-        group_svc.fetch.return_value = group
 
-        GroupEditController(pyramid_request)
+        GroupEditController(group, pyramid_request)
 
         schema = CreateAdminGroupSchema.return_value
         schema.bind.assert_called_with(
@@ -236,18 +227,11 @@ class TestGroupEditController(object):
             organizations={default_org.pubid: default_org},
         )
 
-    def test_raises_not_found_if_unknown_group(self, pyramid_request, group_svc):
-        group_svc.fetch.return_value = None
-
-        with pytest.raises(HTTPNotFound):
-            GroupEditController(pyramid_request)
-
-    def test_read_renders_form(self, pyramid_request, factories, group, group_svc):
-        group_svc.fetch.return_value = group
+    def test_read_renders_form(self, pyramid_request, factories, group):
         factories.Annotation(groupid=group.pubid)
         factories.Annotation(groupid=group.pubid)
 
-        ctrl = GroupEditController(pyramid_request)
+        ctrl = GroupEditController(group, pyramid_request)
 
         ctx = ctrl.read()
 
@@ -257,12 +241,9 @@ class TestGroupEditController(object):
         assert ctx["member_count"] == len(group.members)
         assert ctx["annotation_count"] == 2
 
-    def test_read_renders_form_if_group_has_no_creator(
-        self, pyramid_request, group, group_svc
-    ):
+    def test_read_renders_form_if_group_has_no_creator(self, pyramid_request, group):
         group.creator = None
-        group_svc.fetch.return_value = group
-        ctrl = GroupEditController(pyramid_request)
+        ctrl = GroupEditController(group, pyramid_request)
 
         ctx = ctrl.read()
 
@@ -276,11 +257,8 @@ class TestGroupEditController(object):
         default_org,
         CreateAdminGroupSchema,
         list_orgs_svc,
-        group_svc,
     ):
-        group_svc.fetch.return_value = group
-
-        GroupEditController(pyramid_request)
+        GroupEditController(group, pyramid_request)
 
         list_orgs_svc.organizations.assert_called_with(group.authority)
         schema = CreateAdminGroupSchema.return_value
@@ -294,12 +272,10 @@ class TestGroupEditController(object):
         user_svc,
         list_orgs_svc,
         handle_form_submission,
-        group_svc,
         group_update_svc,
         group,
         GroupScope,
     ):
-        group_svc.fetch.return_value = group
 
         updated_creator = factories.User()
         user_svc.fetch.return_value = updated_creator
@@ -322,7 +298,7 @@ class TestGroupEditController(object):
             )
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = GroupEditController(pyramid_request)
+        ctrl = GroupEditController(group, pyramid_request)
 
         ctx = ctrl.update()
 
@@ -349,14 +325,11 @@ class TestGroupEditController(object):
         group_members_svc,
         handle_form_submission,
         list_orgs_svc,
-        group_svc,
     ):
         group = factories.RestrictedGroup(
             pubid="testgroup", organization=factories.Organization()
         )
         list_orgs_svc.organizations.return_value = [group.organization]
-
-        group_svc.fetch.return_value = group
 
         member_a = factories.User()
         member_b = factories.User()
@@ -380,7 +353,7 @@ class TestGroupEditController(object):
             )
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = GroupEditController(pyramid_request)
+        ctrl = GroupEditController(group, pyramid_request)
 
         ctrl.update()
 
@@ -389,11 +362,10 @@ class TestGroupEditController(object):
         )
 
     def test_delete_deletes_group(
-        self, group, group_svc, delete_group_svc, pyramid_request, routes
+        self, group, delete_group_svc, pyramid_request, routes
     ):
-        group_svc.fetch.return_value = group
 
-        ctrl = GroupEditController(pyramid_request)
+        ctrl = GroupEditController(group, pyramid_request)
 
         ctrl.delete()
 

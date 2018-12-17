@@ -43,7 +43,12 @@ def includeme(config):
     config.add_route("admin.groups", "/admin/groups")
     config.add_route("admin.groups_create", "/admin/groups/new")
     config.add_route("admin.groups_delete", "/admin/groups/delete/{pubid}")
-    config.add_route("admin.groups_edit", "/admin/groups/{pubid}")
+    config.add_route(
+        "admin.groups_edit",
+        "/admin/groups/{id}",
+        factory="h.traversal.GroupRoot",
+        traverse="/{id}",
+    )
     config.add_route("admin.mailer", "/admin/mailer")
     config.add_route("admin.mailer_test", "/admin/mailer/test")
     config.add_route("admin.nipsa", "/admin/nipsa")
