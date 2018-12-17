@@ -140,22 +140,25 @@ class GroupCreateController(object):
     permission="admin",
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
-class GroupEditController(object):
+class GroupEditViews(object):
     def __init__(self, context, request):
         self.group = context
+        self.request = request
 
-        list_org_svc = request.find_service(name="list_organizations")
+        self.list_org_svc = request.find_service(name="list_organizations")
+        self.user_svc = request.find_service(name="user")
+        self.group_update_svc = self.request.find_service(name="group_update")
+        self.group_members_svc = self.request.find_service(name="group_members")
+
         self.organizations = {
-            o.pubid: o for o in list_org_svc.organizations(self.group.authority)
+            o.pubid: o for o in self.list_org_svc.organizations(self.group.authority)
         }
 
-        user_svc = request.find_service(name="user")
-        self.request = request
         self.schema = CreateAdminGroupSchema().bind(
             request=self.request,
             group=self.group,
             organizations=self.organizations,
-            user_svc=user_svc,
+            user_svc=self.user_svc,
         )
         self.form = _create_form(self.request, self.schema, (_("Save"),))
 
@@ -183,26 +186,24 @@ class GroupEditController(object):
         def on_success(appstruct):
             """Update the group resource on successful form validation"""
 
-            user_svc = self.request.find_service(name="user")
-            group_update_svc = self.request.find_service(name="group_update")
-            group_members_svc = self.request.find_service(name="group_members")
             organization = self.organizations[appstruct["organization"]]
             scopes = [GroupScope(origin=o) for o in appstruct["origins"]]
 
-            group_update_svc.update(
+            self.group_update_svc.update(
                 group,
                 organization=organization,
-                creator=user_svc.fetch(appstruct["creator"], group.authority),
+                creator=self.user_svc.fetch(appstruct["creator"], group.authority),
                 description=appstruct["description"],
                 name=appstruct["name"],
                 scopes=scopes,
                 enforce_scope=appstruct["enforce_scope"],
             )
 
-            memberids = [
-                _userid(username, group.authority) for username in appstruct["members"]
-            ]
-            group_members_svc.update_members(group, memberids)
+            memberids = []
+            for username in appstruct["members"]:
+                memberids.append(self.user_svc.fetch(username, group.authority))
+
+            self.group_members_svc.update_members(group, memberids)
 
             self.form = _create_form(self.request, self.schema, (_("Save"),))
             self._update_appstruct()
