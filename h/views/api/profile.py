@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals
 
+from pyramid.httpexceptions import HTTPBadRequest
+
 from h import session as h_session
-from h.exceptions import APIError
 from h.views.api.config import api_config
 
 
@@ -34,6 +35,6 @@ def update_preferences(request):
     try:
         svc.update_preferences(request.user, **preferences)
     except TypeError as e:
-        raise APIError(str(e), status_code=400)
+        raise HTTPBadRequest(str(e))
 
     return h_session.profile(request)
