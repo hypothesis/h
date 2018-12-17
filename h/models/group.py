@@ -12,6 +12,7 @@ import slugify
 from h.db import Base
 from h.db import mixins
 from h import pubid
+from h.auth import role
 from h.util.group import split_groupid
 
 
@@ -251,6 +252,10 @@ class Group(Base, mixins.Timestamps):
         # auth_clients with matching authority should be able to read
         # the group
         terms.append((security.Allow, authority_principal, "read"))
+
+        # Those with the admin or staff role should be able to admin/edit any group
+        terms.append((security.Allow, role.Staff, "admin"))
+        terms.append((security.Allow, role.Admin, "admin"))
 
         terms.append(security.DENY_ALL)
 
