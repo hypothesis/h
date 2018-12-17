@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import mock
 import pytest
+from pyramid.httpexceptions import HTTPInternalServerError
 
-from h.exceptions import APIError
 from h.views.status import status
 
 
@@ -18,7 +18,7 @@ class TestStatus(object):
     def test_it_fails_when_database_unreachable(self, pyramid_request, db):
         db.execute.side_effect = Exception("explode!")
 
-        with pytest.raises(APIError) as exc:
+        with pytest.raises(HTTPInternalServerError) as exc:
             status(pyramid_request)
 
         assert "Database connection failed" in str(exc.value)

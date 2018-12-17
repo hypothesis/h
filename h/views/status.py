@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 
 import logging
 
-from h.exceptions import APIError
+from pyramid.httpexceptions import HTTPInternalServerError
+
 from h.util.view import json_view
 
 
@@ -17,5 +18,5 @@ def status(request):
         request.db.execute("SELECT 1")
     except Exception as exc:
         log.exception(exc)
-        raise APIError("Database connection failed")
+        raise HTTPInternalServerError("Database connection failed")
     return {"status": "okay"}
