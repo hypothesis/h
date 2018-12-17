@@ -108,6 +108,18 @@ class TestPatchProfile(object):
 
         assert res.status_code == 403
 
+    def test_it_raises_http_400_for_disallowed_setting(self, app, user_with_token):
+        _, token = user_with_token
+        profile = {"preferences": {"foo": "bar"}}
+        headers = {"Authorization": native_str("Bearer {}".format(token.value))}
+
+        res = app.patch_json(
+            "/api/profile", profile, headers=headers, expect_errors=True
+        )
+
+        assert res.status_code == 400
+        assert res.json["reason"] == "settings with keys foo are not allowed"
+
 
 @pytest.fixture
 def user(db_session, factories):
