@@ -6,7 +6,7 @@ from mock import Mock
 from pyramid.httpexceptions import HTTPExpectationFailed
 
 from h.schemas import ValidationError
-from h.views.api import exceptions as views
+from h.views.api import errors as views
 
 
 def test_api_notfound_view(pyramid_request):
@@ -38,7 +38,7 @@ def test_api_validation_error(pyramid_request):
 
 
 def test_json_error_view(patch, pyramid_request):
-    handle_exception = patch("h.views.api.exceptions.handle_exception")
+    handle_exception = patch("h.views.api.errors.handle_exception")
 
     exception = Mock()
     result = views.json_error(exception, pyramid_request)
