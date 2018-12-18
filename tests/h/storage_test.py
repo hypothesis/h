@@ -210,11 +210,25 @@ class TestCreateAnnotation(object):
 
         assert result == models.Annotation.return_value
 
+    def test_it_allows_scope_mismatch_when_enforce_scope_is_False(
+        self, pyramid_request, pyramid_config, group_service, scoped_open_group, models
+    ):
+        scoped_open_group.enforce_scope = False
+        group_service.find.return_value = scoped_open_group
+        data = self.annotation_data()
+        # This target URI is not within any of the group's defined scopes
+        data["target_uri"] = "http://www.foo.com/boo/bah.html"
+
+        # This will not raise because ``enforce_scope`` is set to False for the
+        # annotation's group
+        result = storage.create_annotation(pyramid_request, data, group_service)
+
+        assert result == models.Annotation.return_value
+
     def test_it_allows_when_target_uri_matches_single_group_scope(
         self, pyramid_request, pyramid_config, group_service, scoped_open_group, models
     ):
         group_service.find.return_value = scoped_open_group
-
         data = self.annotation_data()
         data["target_uri"] = "http://www.foo.com/boo/bah.html"
 
@@ -229,7 +243,6 @@ class TestCreateAnnotation(object):
         scope = factories.GroupScope(origin="http://www.foo.com")
         scope2 = factories.GroupScope(origin="http://www.bar.com")
         group_service.find.return_value = factories.OpenGroup(scopes=[scope, scope2])
-
         data = self.annotation_data()
         data["target_uri"] = "http://www.bar.com/boo/bah.html"
 
@@ -242,7 +255,6 @@ class TestCreateAnnotation(object):
         self, pyramid_request, pyramid_config, group_service, scoped_open_group
     ):
         group_service.find.return_value = scoped_open_group
-
         data = self.annotation_data()
         data["target_uri"] = "http://www.bar.com/bing.html"
 
@@ -256,7 +268,6 @@ class TestCreateAnnotation(object):
     ):
         pyramid_config.testing_securitypolicy("userid", permissive=True)
         group_service.find.return_value = None
-
         data = self.annotation_data()
         data["groupid"] = "missing-group"
 
@@ -454,6 +465,8 @@ class TestUpdateAnnotation(object):
     def test_it_allows_when_group_scope_matches(
         self, annotation_data, pyramid_request, group_service, scoped_open_group, models
     ):
+        # This target URI matches at least one of the scopes for the group
+        # it will go into...
         annotation_data["target_uri"] = "http://www.foo.com/baz/ding.html"
 
         # this should not raise
@@ -466,6 +479,7 @@ class TestUpdateAnnotation(object):
     def test_it_raises_when_group_scope_mismatch(
         self, annotation_data, pyramid_request, group_service, scoped_open_group
     ):
+        # This target URI does not match any of the group's defined scopes
         annotation_data["target_uri"] = "http://www.bar.com/baz/ding.html"
         group_service.find.return_value = scoped_open_group
 
@@ -475,6 +489,22 @@ class TestUpdateAnnotation(object):
             )
 
         assert str(exc.value).startswith("group scope: ")
+
+    def test_it_allows_scope_mismatch_when_enforce_scope_is_False(
+        self, annotation_data, pyramid_request, group_service, scoped_open_group
+    ):
+        scoped_open_group.enforce_scope = False
+        group_service.find.return_value = scoped_open_group
+        # This target URI is not within any of the group's defined scopes
+        annotation_data["target_uri"] = "http://www.bar.com/baz/ding.html"
+
+        # This will not raise because ``enforce_scope`` is set to False for the
+        # annotation's group
+        annotation = storage.update_annotation(
+            pyramid_request, "test_annotation_id", annotation_data, group_service
+        )
+
+        assert annotation == pyramid_request.db.query.return_value.get.return_value
 
     def test_it_allows_group_scope_when_no_target_uri(
         self, annotation_data, pyramid_request, group_service, scoped_open_group
