@@ -3,10 +3,15 @@
 from __future__ import unicode_literals
 
 from pyramid import security
-from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
+from pyramid.httpexceptions import (
+    HTTPNoContent,
+    HTTPBadRequest,
+    HTTPNotFound,
+    HTTPConflict,
+)
 
 from h.auth.util import client_authority
-from h.exceptions import ConflictError, PayloadError
+from h.exceptions import PayloadError
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
@@ -62,7 +67,7 @@ def create(request):
     if groupid is not None:
         duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
         if duplicate_group:
-            raise ConflictError(
+            raise HTTPConflict(
                 _("group with groupid '{}' already exists").format(groupid)
             )
 
@@ -112,7 +117,7 @@ def update(group, request):
     if groupid is not None:
         duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
         if duplicate_group and (duplicate_group != group):
-            raise ConflictError(
+            raise HTTPConflict(
                 _("group with groupid '{}' already exists").format(groupid)
             )
 
@@ -163,7 +168,7 @@ def upsert(context, request):
     if groupid is not None:
         duplicate_group = group_service.fetch(pubid_or_groupid=groupid)
         if duplicate_group and (duplicate_group != group):
-            raise ConflictError(
+            raise HTTPConflict(
                 _("group with groupid '{}' already exists").format(groupid)
             )
 

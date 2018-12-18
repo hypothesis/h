@@ -8,16 +8,6 @@ from pyramid import httpexceptions
 from h.i18n import TranslationString as _  # noqa: N813
 
 
-class ConflictError(httpexceptions.HTTPConflict):
-    """An API request represents a duplicate of an existing resource."""
-
-    def __init__(self, detail=None):
-        if detail is None:
-            detail = _("Conflict")
-
-        super(ConflictError, self).__init__(detail)
-
-
 class OAuthTokenError(httpexceptions.HTTPUnauthorized):
     """
     An OAuth token request failure.
