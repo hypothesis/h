@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from jinja2 import Markup
 from pyramid.view import view_config, view_defaults
-from pyramid.httpexceptions import HTTPFound, HTTPNotFound
+from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import func
 
 from h import form  # noqa F401
@@ -11,7 +11,6 @@ from h import i18n
 from h import models
 from h import paginator
 from h.models.annotation import Annotation
-from h.traversal import GroupRoot
 from h.models.group_scope import GroupScope
 from h.models.organization import Organization
 from h.schemas.forms.admin.group import CreateAdminGroupSchema
@@ -138,19 +137,12 @@ class GroupCreateController(object):
 
 @view_defaults(
     route_name="admin.groups_edit",
-    permission="admin_groups",
+    permission="admin",
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
 class GroupEditController(object):
-    def __init__(self, request):
-        # Look up the group here rather than using traversal in the route
-        # definition as that would apply `Group.__acl__` which will not match if
-        # the current (admin) user is not the creator of the group.
-        try:
-            pubid = request.matchdict.get("pubid")
-            self.group = GroupRoot(request)[pubid]
-        except KeyError:
-            raise HTTPNotFound()
+    def __init__(self, context, request):
+        self.group = context
 
         list_org_svc = request.find_service(name="list_organizations")
         self.organizations = {

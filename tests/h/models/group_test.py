@@ -7,6 +7,7 @@ import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
+from h.auth import role
 from h import models
 from h.models.group import (
     JoinableBy,
@@ -384,6 +385,18 @@ class TestGroupACL(object):
 
         principals = authz_policy.principals_allowed_by_permission(group, "upsert")
         assert len(principals) == 0
+
+    def test_staff_user_has_admin_permission_on_any_group(self, group, authz_policy):
+        principals = authz_policy.principals_allowed_by_permission(group, "admin")
+
+        assert role.Staff in principals
+        assert authz_policy.permits(group, ["whatever", "group:__staff__"], "admin")
+
+    def test_admin_user_has_admin_permission_on_any_group(self, group, authz_policy):
+        principals = authz_policy.principals_allowed_by_permission(group, "admin")
+
+        assert role.Admin in principals
+        assert authz_policy.permits(group, ["whatever", "group:__admin__"], "admin")
 
     def test_fallback_is_deny_all(self, group, authz_policy):
         assert not authz_policy.permits(group, [security.Everyone], "foobar")
