@@ -9,7 +9,7 @@ import mock
 
 from h.models import Organization, User
 from h.views.admin import groups
-from h.views.admin.groups import GroupCreateController, GroupEditController
+from h.views.admin.groups import GroupCreateController, GroupEditViews
 from h.services.user import UserService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
@@ -212,12 +212,12 @@ class TestGroupCreateController(object):
     "group_members_svc",
     "list_orgs_svc",
 )
-class TestGroupEditController(object):
+class TestGroupEditViews(object):
     def test_it_binds_schema(
         self, pyramid_request, group, user_svc, default_org, CreateAdminGroupSchema
     ):
 
-        GroupEditController(group, pyramid_request)
+        GroupEditViews(group, pyramid_request)
 
         schema = CreateAdminGroupSchema.return_value
         schema.bind.assert_called_with(
@@ -231,9 +231,9 @@ class TestGroupEditController(object):
         factories.Annotation(groupid=group.pubid)
         factories.Annotation(groupid=group.pubid)
 
-        ctrl = GroupEditController(group, pyramid_request)
+        view = GroupEditViews(group, pyramid_request)
 
-        ctx = ctrl.read()
+        ctx = view.read()
 
         assert ctx["form"] == self._expected_form(group)
         assert ctx["pubid"] == group.pubid
@@ -243,22 +243,16 @@ class TestGroupEditController(object):
 
     def test_read_renders_form_if_group_has_no_creator(self, pyramid_request, group):
         group.creator = None
-        ctrl = GroupEditController(group, pyramid_request)
+        view = GroupEditViews(group, pyramid_request)
 
-        ctx = ctrl.read()
+        ctx = view.read()
 
         assert ctx["form"] == self._expected_form(group)
 
     def test_read_lists_organizations_in_groups_authority(
-        self,
-        factories,
-        pyramid_request,
-        group,
-        default_org,
-        CreateAdminGroupSchema,
-        list_orgs_svc,
+        self, pyramid_request, group, default_org, CreateAdminGroupSchema, list_orgs_svc
     ):
-        GroupEditController(group, pyramid_request)
+        GroupEditViews(group, pyramid_request)
 
         list_orgs_svc.organizations.assert_called_with(group.authority)
         schema = CreateAdminGroupSchema.return_value
@@ -277,8 +271,8 @@ class TestGroupEditController(object):
         GroupScope,
     ):
 
-        updated_creator = factories.User()
-        user_svc.fetch.return_value = updated_creator
+        fetched_user = factories.User()
+        user_svc.fetch.return_value = fetched_user
         updated_org = factories.Organization()
 
         list_orgs_svc.organizations.return_value.append(updated_org)
@@ -286,7 +280,7 @@ class TestGroupEditController(object):
         def call_on_success(request, form, on_success, on_failure):
             return on_success(
                 {
-                    "creator": updated_creator.username,
+                    "creator": fetched_user.username,
                     "description": "New description",
                     "group_type": "open",
                     "name": "Updated group",
@@ -298,14 +292,14 @@ class TestGroupEditController(object):
             )
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = GroupEditController(group, pyramid_request)
+        view = GroupEditViews(group, pyramid_request)
 
-        ctx = ctrl.update()
+        ctx = view.update()
 
         group_update_svc.update.assert_called_once_with(
             group,
             organization=updated_org,
-            creator=updated_creator,
+            creator=fetched_user,
             description="New description",
             name="Updated group",
             scopes=[
@@ -331,21 +325,18 @@ class TestGroupEditController(object):
         )
         list_orgs_svc.organizations.return_value = [group.organization]
 
-        member_a = factories.User()
-        member_b = factories.User()
-
-        updated_creator = factories.User()
-        user_svc.fetch.return_value = updated_creator
+        fetched_user = factories.User()
+        user_svc.fetch.return_value = fetched_user
 
         def call_on_success(request, form, on_success, on_failure):
             return on_success(
                 {
                     "authority": pyramid_request.default_authority,
-                    "creator": updated_creator.username,
+                    "creator": fetched_user.username,
                     "description": "a desc",
                     "group_type": "restricted",
                     "name": "a name",
-                    "members": [member_a.username, member_b.username],
+                    "members": ["phil", "sue"],
                     "organization": group.organization.pubid,
                     "origins": ["http://www.example.com"],
                     "enforce_scope": group.enforce_scope,
@@ -353,21 +344,21 @@ class TestGroupEditController(object):
             )
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = GroupEditController(group, pyramid_request)
+        view = GroupEditViews(group, pyramid_request)
 
-        ctrl.update()
+        view.update()
 
         group_members_svc.update_members.assert_any_call(
-            group, [member_a.userid, member_b.userid]
+            group, [fetched_user, fetched_user]
         )
 
     def test_delete_deletes_group(
         self, group, delete_group_svc, pyramid_request, routes
     ):
 
-        ctrl = GroupEditController(group, pyramid_request)
+        view = GroupEditViews(group, pyramid_request)
 
-        ctrl.delete()
+        view.delete()
 
         delete_group_svc.delete.assert_called_once_with(group)
 
