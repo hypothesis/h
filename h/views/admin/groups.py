@@ -45,24 +45,32 @@ def groups_index(context, request):
     renderer="h:templates/admin/groups_create.html.jinja2",
     permission="admin_groups",
 )
-class GroupCreateController(object):
+class GroupCreateViews(object):
+    """Views for admin create-group forms"""
+
     def __init__(self, request):
-        user_svc = request.find_service(name="user")
-        list_org_svc = request.find_service(name="list_organizations")
-        self.organizations = {o.pubid: o for o in list_org_svc.organizations()}
-        self.schema = CreateAdminGroupSchema().bind(
-            request=request, organizations=self.organizations, user_svc=user_svc
-        )
         self.request = request
+
+        self.user_svc = self.request.find_service(name="user")
+        self.list_org_svc = self.request.find_service(name="list_organizations")
+        self.group_create_svc = self.request.find_service(name="group_create")
+        self.group_members_svc = self.request.find_service(name="group_members")
+
+        self.organizations = {o.pubid: o for o in self.list_org_svc.organizations()}
+        self.default_org_id = Organization.default(self.request.db).pubid
+
+        self.schema = CreateAdminGroupSchema().bind(
+            request=request, organizations=self.organizations, user_svc=self.user_svc
+        )
         self.form = _create_form(self.request, self.schema, (_("Create New Group"),))
 
     @view_config(request_method="GET")
     def get(self):
-
+        """Render the admin create-group form"""
         self.form.set_appstruct(
             {
                 "creator": self.request.user.username,
-                "organization": Organization.default(self.request.db).pubid,
+                "organization": self.default_org_id,
                 "enforce_scope": True,
             }
         )
@@ -73,21 +81,20 @@ class GroupCreateController(object):
         def on_success(appstruct):
             """Create a group on successful validation of POSTed form data"""
 
-            group_create_svc = self.request.find_service(name="group_create")
-            group_members_svc = self.request.find_service(name="group_members")
-
             organization = self.organizations[appstruct["organization"]]
             # We know this user exists because it is checked during schema validation
-            creator_userid = _userid(appstruct["creator"], organization.authority)
+            creator_userid = self.user_svc.fetch(
+                appstruct["creator"], organization.authority
+            ).userid
+
+            create_fns = {
+                "open": self.group_create_svc.create_open_group,
+                "restricted": self.group_create_svc.create_restricted_group,
+            }
 
             type_ = appstruct["group_type"]
             if type_ not in ["open", "restricted"]:
                 raise Exception("Unsupported group type {}".format(type_))
-
-            create_fns = {
-                "open": group_create_svc.create_open_group,
-                "restricted": group_create_svc.create_restricted_group,
-            }
 
             group = create_fns[type_](
                 name=appstruct["name"],
@@ -100,24 +107,16 @@ class GroupCreateController(object):
 
             # Add members to the group. We know that these users exist
             # because that check is part of form schema validation.
-            member_userids = [
-                _userid(username, organization.authority)
-                for username in appstruct["members"]
-            ]
-            group_members_svc.add_members(group, member_userids)
+            member_userids = []
+            for username in appstruct["members"]:
+                member_userids.append(
+                    self.user_svc.fetch(username, organization.authority).userid
+                )
 
-            # Flush changes to allocate group a pubid
-            self.request.db.flush(objects=[group])
+            self.group_members_svc.add_members(group, member_userids)
 
-            group_url = self.request.route_url(
-                "group_read", pubid=group.pubid, slug=group.slug
-            )
             self.request.session.flash(
-                Markup(
-                    'Created new group <a href="{url}">{name}</a>'.format(
-                        name=group.name, url=group_url
-                    )
-                ),
+                Markup('Created new group "{name}"'.format(name=group.name)),
                 queue="success",
             )
 

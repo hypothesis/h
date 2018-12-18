@@ -7,9 +7,9 @@ import datetime
 import pytest
 import mock
 
-from h.models import Organization, User
+from h.models import Organization
 from h.views.admin import groups
-from h.views.admin.groups import GroupCreateController, GroupEditViews
+from h.views.admin.groups import GroupCreateViews, GroupEditViews
 from h.services.user import UserService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
@@ -80,26 +80,27 @@ def test_index_filters_results(pyramid_request, factories, query, expected_group
     assert filtered_group_names == expected_groups
 
 
-@pytest.mark.usefixtures("group_create_svc", "list_orgs_svc", "routes", "user_svc")
-class TestGroupCreateController(object):
+@pytest.mark.usefixtures(
+    "group_create_svc", "group_members_svc", "list_orgs_svc", "routes", "user_svc"
+)
+class TestGroupCreateView(object):
     def test_get_sets_form(self, pyramid_request):
-        ctrl = GroupCreateController(pyramid_request)
+        view = GroupCreateViews(pyramid_request)
 
-        ctx = ctrl.get()
+        ctx = view.get()
 
         assert "form" in ctx
 
-    def test_get_lists_all_organizations(
-        self,
-        pyramid_request,
-        factories,
-        default_org,
-        CreateAdminGroupSchema,
-        list_orgs_svc,
-    ):
-        GroupCreateController(pyramid_request)
+    def test_init_fetches_all_organizations(self, pyramid_request, list_orgs_svc):
+        GroupCreateViews(pyramid_request)
 
         list_orgs_svc.organizations.assert_called_with()
+
+    def test_init_binds_schema_with_organizations(
+        self, pyramid_request, default_org, CreateAdminGroupSchema, list_orgs_svc
+    ):
+        GroupCreateViews(pyramid_request)
+
         schema = CreateAdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
         assert call_kwargs["organizations"] == {default_org.pubid: default_org}
@@ -107,100 +108,120 @@ class TestGroupCreateController(object):
     def test_post_handles_form_submission(
         self, pyramid_request, handle_form_submission, matchers
     ):
-        ctrl = GroupCreateController(pyramid_request)
+        view = GroupCreateViews(pyramid_request)
 
-        ctrl.post()
+        view.post()
 
         handle_form_submission.assert_called_once_with(
-            ctrl.request, ctrl.form, matchers.AnyCallable(), ctrl._template_context
+            view.request, view.form, matchers.AnyCallable(), view._template_context
         )
 
     def test_post_redirects_to_list_view_on_success(
-        self,
-        pyramid_request,
-        group_members_svc,
-        matchers,
-        routes,
-        handle_form_submission,
-        default_org,
+        self, pyramid_request, matchers, routes, handle_form_submission, base_appstruct
     ):
         def call_on_success(request, form, on_success, on_failure):
-            return on_success(
-                {
-                    "name": "My New Group",
-                    "group_type": "restricted",
-                    "creator": pyramid_request.user.username,
-                    "description": None,
-                    "members": [],
-                    "organization": default_org.pubid,
-                    "origins": [],
-                    "enforce_scope": True,
-                }
-            )
+            return on_success(base_appstruct)
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = GroupCreateController(pyramid_request)
+        view = GroupCreateViews(pyramid_request)
 
-        response = ctrl.post()
+        response = view.post()
 
         expected_location = pyramid_request.route_url("admin.groups")
         assert response == matchers.Redirect302To(expected_location)
 
-    @pytest.mark.parametrize("type_", ["open", "restricted"])
-    def test_post_creates_group_on_success(
+    def test_post_creates_open_group_on_success(
+        self,
+        pyramid_request,
+        group_create_svc,
+        handle_form_submission,
+        default_org,
+        user_svc,
+        base_appstruct,
+    ):
+        def call_on_success(request, form, on_success, on_failure):
+            base_appstruct["group_type"] = "open"
+            return on_success(base_appstruct)
+
+        handle_form_submission.side_effect = call_on_success
+        view = GroupCreateViews(pyramid_request)
+
+        view.post()
+
+        group_create_svc.create_open_group.assert_called_with(
+            name="My New Group",
+            userid=user_svc.fetch.return_value.userid,
+            description=None,
+            origins=["http://example.com"],
+            organization=default_org,
+            enforce_scope=True,
+        )
+
+    def test_post_creates_restricted_group_on_success(
+        self,
+        pyramid_request,
+        group_create_svc,
+        handle_form_submission,
+        default_org,
+        user_svc,
+        base_appstruct,
+    ):
+        def call_on_success(request, form, on_success, on_failure):
+            base_appstruct["group_type"] = "restricted"
+            return on_success(base_appstruct)
+
+        handle_form_submission.side_effect = call_on_success
+        view = GroupCreateViews(pyramid_request)
+
+        view.post()
+
+        group_create_svc.create_restricted_group.assert_called_with(
+            name="My New Group",
+            userid=user_svc.fetch.return_value.userid,
+            description=None,
+            origins=["http://example.com"],
+            organization=default_org,
+            enforce_scope=True,
+        )
+
+    def test_post_adds_members_on_success(
         self,
         factories,
         pyramid_request,
         group_create_svc,
         group_members_svc,
         handle_form_submission,
-        type_,
-        default_org,
+        user_svc,
+        base_appstruct,
     ):
-        creator = pyramid_request.user.username
-        member_to_add = factories.User()
-        origins = ["https://example.com"]
+        user = factories.User()
+        user_svc.fetch.return_value = user
 
         def call_on_success(request, form, on_success, on_failure):
-            return on_success(
-                {
-                    "organization": default_org.pubid,
-                    "creator": creator,
-                    "description": "Whatnot",
-                    "group_type": type_,
-                    "name": "My New Group",
-                    "origins": origins,
-                    "members": [member_to_add.username],
-                    "enforce_scope": True,
-                }
-            )
+            base_appstruct["members"] = ["someusername"]
+            return on_success(base_appstruct)
 
         handle_form_submission.side_effect = call_on_success
-        ctrl = GroupCreateController(pyramid_request)
+        view = GroupCreateViews(pyramid_request)
 
-        if type_ == "open":
-            create_method = group_create_svc.create_open_group
-        else:
-            create_method = group_create_svc.create_restricted_group
+        view.post()
 
-        create_method.return_value = factories.RestrictedGroup(pubid="testgroup")
-        ctrl.post()
-
-        expected_userid = User(
-            username=creator, authority=pyramid_request.default_authority
-        ).userid
-
-        create_method.assert_called_with(
-            name="My New Group",
-            userid=expected_userid,
-            description="Whatnot",
-            origins=origins,
-            organization=default_org,
-            enforce_scope=True,
-        )
         group_members_svc.add_members.assert_called_once_with(
-            create_method.return_value, [member_to_add.userid]
+            group_create_svc.create_restricted_group.return_value, [user.userid]
         )
+
+    @pytest.fixture
+    def base_appstruct(self, pyramid_request, default_org):
+        return {
+            "name": "My New Group",
+            "group_type": "restricted",
+            "creator": pyramid_request.user.username,
+            "description": None,
+            "members": [],
+            "organization": default_org.pubid,
+            "origins": ["http://example.com"],
+            "enforce_scope": True,
+        }
 
 
 @pytest.mark.usefixtures(
