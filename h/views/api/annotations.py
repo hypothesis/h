@@ -22,7 +22,7 @@ import newrelic.agent
 
 from h import search as search_lib
 from h import storage
-from h.exceptions import PayloadError
+from h.views.api.exceptions import PayloadError
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter

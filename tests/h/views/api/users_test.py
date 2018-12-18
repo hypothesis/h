@@ -6,7 +6,7 @@ import pytest
 import mock
 from pyramid.httpexceptions import HTTPConflict
 
-from h.exceptions import PayloadError
+from h.views.api.exceptions import PayloadError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService

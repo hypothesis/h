@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h import exceptions
+from h.views.api import exceptions
 
 
 class TestOAuthTokenError(object):

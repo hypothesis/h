@@ -13,7 +13,7 @@ from oauthlib.common import Request as OAuthRequest
 from pyramid import httpexceptions
 
 from h._compat import urlparse
-from h.exceptions import OAuthTokenError
+from h.views.api.exceptions import OAuthTokenError
 from h.models.auth_client import ResponseType
 from h.services.auth_token import auth_token_service_factory
 from h.services.oauth_provider import OAuthProviderService

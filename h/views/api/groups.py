@@ -11,7 +11,7 @@ from pyramid.httpexceptions import (
 )
 
 from h.auth.util import client_authority
-from h.exceptions import PayloadError
+from h.views.api.exceptions import PayloadError
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
