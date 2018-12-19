@@ -194,7 +194,7 @@ class GroupEditViews(object):
 
             memberids = []
             for username in appstruct["members"]:
-                memberids.append(self.user_svc.fetch(username, group.authority))
+                memberids.append(self.user_svc.fetch(username, group.authority).userid)
 
             self.group_members_svc.update_members(group, memberids)
 

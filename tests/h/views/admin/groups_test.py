@@ -330,7 +330,7 @@ class TestGroupEditViews(object):
         view.update()
 
         group_members_svc.update_members.assert_any_call(
-            group, [fetched_user, fetched_user]
+            group, [fetched_user.userid, fetched_user.userid]
         )
 
     def test_delete_deletes_group(
