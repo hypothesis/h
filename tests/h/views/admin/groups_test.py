@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-import datetime
-
 import pytest
 import mock
 
@@ -27,57 +25,19 @@ class FakeForm(object):
         return self.appstruct
 
 
-def test_index_lists_groups_sorted_by_created_desc(
-    pyramid_request, routes, factories, authority
-):
-    group_list = [
-        factories.Group(created=datetime.datetime(2017, 8, 2)),
-        factories.Group(created=datetime.datetime(2015, 2, 1)),
-        factories.Group(),
-        factories.Group(created=datetime.datetime(2013, 2, 1)),
-    ]
+@pytest.mark.usefixtures("group_svc")
+class TestIndex(object):
+    def test_it_paginates_results(self, pyramid_request, routes, paginate):
+        groups.groups_index(None, pyramid_request)
 
-    ctx = groups.groups_index(None, pyramid_request)
+        paginate.assert_called_once_with(pyramid_request, mock.ANY, mock.ANY)
 
-    # We can't avoid getting the Public group back, which is created outside of
-    # these tests' sphere of influence. Remove it as it is not feasible to
-    # assert where it will appear in creation order.
-    filtered_groups = list(
-        filter(lambda group: group.pubid != "__world__", ctx["results"])
-    )
+    def test_it_filters_groups_with_name_param(self, pyramid_request, group_svc):
+        pyramid_request.params["q"] = "fingers"
 
-    expected_groups = [group_list[2], group_list[0], group_list[1], group_list[3]]
-    assert filtered_groups == expected_groups
+        groups.groups_index(None, pyramid_request)
 
-
-def test_index_paginates_results(pyramid_request, routes, paginate):
-    groups.groups_index(None, pyramid_request)
-
-    paginate.assert_called_once_with(pyramid_request, mock.ANY, mock.ANY)
-
-
-@pytest.mark.parametrize(
-    "query,expected_groups",
-    [
-        # All groups should be returned when there is no query.
-        (None, ["BioPub", "ChemPub", "Public"]),
-        # Only matching groups should be returned if there is a query.
-        ("BioPub", ["BioPub"]),
-        ("ChemPub", ["ChemPub"]),
-        # Filtering should be case-insensitive.
-        ("chem", ["ChemPub"]),
-    ],
-)
-def test_index_filters_results(pyramid_request, factories, query, expected_groups):
-    factories.Group(name="BioPub")
-    factories.Group(name="ChemPub")
-
-    if query:
-        pyramid_request.GET["q"] = query
-    ctx = groups.groups_index(None, pyramid_request)
-
-    filtered_group_names = sorted([g.name for g in ctx["results"]])
-    assert filtered_group_names == expected_groups
+        group_svc.filter_by_name.assert_called_once_with(name="fingers")
 
 
 @pytest.mark.usefixtures(

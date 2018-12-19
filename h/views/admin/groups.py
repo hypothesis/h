@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from jinja2 import Markup
 from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import HTTPFound
-from sqlalchemy import func
+
 
 from h import form  # noqa F401
 from h import i18n
@@ -26,18 +26,12 @@ _ = i18n.TranslationString
 )
 @paginator.paginate_query
 def groups_index(context, request):
-    q = request.params.get("q")
+    """Retrieve a paginated list of all groups, filtered by optional group name parameter"""
 
-    filter_terms = []
-    if q:
-        name = models.Group.name
-        filter_terms.append(func.lower(name).like("%{}%".format(q.lower())))
+    group_svc = request.find_service(name="group")
+    name = request.params.get("q")
 
-    return (
-        request.db.query(models.Group)
-        .filter(*filter_terms)
-        .order_by(models.Group.created.desc())
-    )
+    return group_svc.filter_by_name(name)
 
 
 @view_defaults(
