@@ -10,7 +10,7 @@ from h.search.core import SearchResult
 from h.views.api import annotations as views
 
 
-@pytest.mark.usefixtures("presentation_service", "search_lib")
+@pytest.mark.usefixtures("presentation_service", "search_lib", "metrics")
 class TestSearch(object):
     def test_it_searches(self, pyramid_request, search_lib):
         pyramid_request.stats = mock.Mock()
@@ -26,6 +26,15 @@ class TestSearch(object):
             [("sort", "updated"), ("limit", 20), ("order", "desc"), ("offset", 0)]
         )
         search.run.assert_called_once_with(expected_params)
+
+    def test_it_records_search_metrics(
+        self, pyramid_request, metrics, validate_query_params
+    ):
+        views.search(pyramid_request)
+
+        metrics.record_search_api_usage_metrics.assert_called_once_with(
+            validate_query_params.return_value
+        )
 
     def test_it_presents_search_results(
         self, pyramid_request, search_run, presentation_service
@@ -421,6 +430,16 @@ def AnnotationEvent(patch):
 @pytest.fixture
 def annotation_resource(patch):
     return patch("h.views.api.annotations.AnnotationContext")
+
+
+@pytest.fixture
+def metrics(patch):
+    return patch("h.views.api.annotations.metrics")
+
+
+@pytest.fixture
+def validate_query_params(patch):
+    return patch("h.views.api.annotations.validate_query_params")
 
 
 @pytest.fixture
