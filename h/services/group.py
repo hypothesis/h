@@ -58,6 +58,29 @@ class GroupService(object):
             .one_or_none()
         )
 
+    def filter_by_name(self, name=None):
+        """
+        Return a Query of all Groups, optionally filtered by name.
+
+        If ``name`` is present, groups will be filtered by name. Filtering
+        is case-insensitive and wildcarded. Otherwise, all groups will be
+        retrieved.
+
+        :rtype: sqlalchemy.orm.query.Query
+        """
+        filter_terms = []
+
+        if name:
+            filter_terms.append(
+                sa.func.lower(Group.name).like("%{}%".format(name.lower()))
+            )
+
+        return (
+            self.session.query(Group)
+            .filter(*filter_terms)
+            .order_by(Group.created.desc())
+        )
+
     def groupids_readable_by(self, user):
         """
         Return a list of pubids for which the user has read access.

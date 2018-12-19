@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import datetime
+
 import mock
 import pytest
 
@@ -60,6 +62,49 @@ class TestGroupServiceFetchByGroupid(object):
 
     def test_it_returns_None_if_no_matching_group(self, svc):
         assert svc.fetch_by_groupid("group:rando@dando.com") is None
+
+
+@pytest.mark.usefixtures("groups")
+class TestFilterByName(object):
+    def test_it_filters_by_name(self, svc):
+        filtered_groups = svc.filter_by_name(name="Hello")
+
+        assert len(filtered_groups.all()) == 1
+        assert filtered_groups.all() == [GroupWithName("Hello")]
+
+    def test_it_returns_all_groups_if_name_is_None(self, svc, groups):
+        filtered_groups = svc.filter_by_name()
+
+        # results include public group in addition to ``groups``
+        assert len(filtered_groups.all()) == len(groups) + 1
+
+    def test_it_is_case_insensitive(self, svc):
+        filtered_groups = svc.filter_by_name(name="Amber")
+
+        assert len(filtered_groups.all()) == 2
+
+    def test_it_performs_wildcard_search(self, svc):
+        filtered_groups = svc.filter_by_name(name="Finger")
+
+        assert len(filtered_groups.all()) == 2
+
+    def test_results_sorted_by_created_desc(self, svc):
+        filtered_groups = svc.filter_by_name("Finger")
+
+        assert filtered_groups.all() == [
+            GroupWithName("Fingers"),
+            GroupWithName("Finger"),
+        ]
+
+    @pytest.fixture
+    def groups(self, factories):
+        return [
+            factories.Group(name="Finger", created=datetime.datetime(2015, 8, 2)),
+            factories.Group(name="Fingers", created=datetime.datetime(2018, 2, 1)),
+            factories.Group(name="Hello"),
+            factories.Group(name="Amber"),
+            factories.Group(name="amber"),
+        ]
 
 
 class TestGroupServiceGroupIds(object):
@@ -163,6 +208,19 @@ def user_service(pyramid_config):
     service = mock.create_autospec(UserService, spec_set=True, instance=True)
     pyramid_config.register_service(service, name="user")
     return service
+
+
+class GroupWithName(Matcher):
+    """Matches any Group with the given name."""
+
+    def __init__(self, name):
+        self.name = name
+
+    def __eq__(self, group):
+        """Return True if group is instance of :class:h.models.Group and has matching name"""
+        if not isinstance(group, Group):
+            return False
+        return group.name == self.name
 
 
 class GroupScopeWithOrigin(Matcher):
