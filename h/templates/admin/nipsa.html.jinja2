@@ -11,51 +11,45 @@
     public stream or in default public searches.
   </p>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Flag a user</h3>
-    </div>
-    <div class="panel-body">
-      <form method="POST" class="form-inline">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <div class="form-group">
-          <label for="add">Username</label>
-          <input type="text" class="form-control" name="add">
-        </div>
-        <div class="form-group">
-          <label for="authority">Authority</label>
-          <input type="text" class="form-control" name="authority" value="{{ default_authority }}">
-          <input type="submit" class="btn btn-default" value="Add">
-        </div>
-      </form>
-    </div>
-  </div>
+  <section class="card admin-form">
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+      <header class="card__header container">
+        <h2 class="heading--medium">Flag a user</h2>
+      </header>
+      <div class="card__body container">
+        <p class="form-input">
+          <label class="form-input__label" for="username">Username</label>
+          <input class="form-input__input has-label" id="username" type="text" name="add">
+        </p>
+        <p class="form-input">
+          <label class="form-input__label" for="authority">Authority</label>
+          <input class="form-input__input has-label" id="authority" type="text" name="authority" value="{{ default_authority }}">
+        </p>
+        <p class="form-input">
+          <input type="submit" class="button" value="Add">
+        </p>
+      </div>
+    </form>
+  </section>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Unflag a user</h3>
-    </div>
-    <div class="panel-body">
-      {% if userids %}
-      <form
-        method="POST"
-        action="{{ request.route_url('admin.nipsa') }}">
+  <section class="admin-form">
+    <h2 class="heading--medium">Unflag a user</h2>
+    {% if userids %}
+      <form method="POST" action="{{ request.route_url('admin.nipsa') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <ul>
-          {% for userid in userids %}
-            <li>
-              {{ userid }}
-              <button type="submit" class="btn btn-link btn-sm"
-                      name="remove" value="{{ userid }}">
-                Remove
-              </button>
+        <ul class="list--striped">
+          {% for uri in uris %}
+            <li class="list-item">
+              <span class="heading--small">{{ uri }}</span>
+              <button class="list-item__action button button--outline button--tight" type="submit" name="remove" value="{{ uri }}">Unblock</button>
             </li>
           {% endfor %}
         </ul>
       </form>
-      {% else %}
-        <p><em>No users are currently flagged&hellip;</em></p>
-      {% endif %}
-    </div>
-  </div>
+    {% else %}
+      <p><em>No users are currently flagged.</em></p>
+    {% endif %}
+  </section>
+
 {% endblock %}
