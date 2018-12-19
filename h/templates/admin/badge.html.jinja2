@@ -38,8 +38,7 @@
   </section>
 
   <section class="admin-form">
-      <h2 class="heading--medium">Currently blocked URIs</h2>
-    </header>
+    <h2 class="heading--medium">Currently blocked URIs</h2>
     {% if uris %}
       <form method="POST" action="{{ request.route_url('admin.badge') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
