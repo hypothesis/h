@@ -14,14 +14,39 @@
 }
 
 .alert-info {
-  background-color: #d1ecf1;
-  border-color: #bee5eb;
-  color: #0c5460;
+  background-color: #e2e3e5;
+  border-color: #d6d8db;
+  color: #383d41;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+
+  .alert__close-icon {
+    fill: #721c24;
+  }
 }
 
 .alert-success {
-  background-color: #dbefdc;
-  color: #285b2a;
+  background-color: #d4edda;
+  border-color: #c3e5cb;
+  color: #155724;
+
+  .alert__close-icon {
+    fill: #155724;
+  }
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  color: #856404;
+
+  .alert__close-icon {
+    fill: #856404;
+  }
 }
 
 .alert__close-button {
@@ -34,7 +59,7 @@
 }
 
 .alert__close-icon {
-  fill: #285b2a;
+  fill: #383d41;
   height: 1.5em;
   overflow: hidden;
   vertical-align: middle;
