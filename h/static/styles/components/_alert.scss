@@ -8,7 +8,15 @@
   @include container-inset;
   @include content-stack;
 
+  border: 1px solid transparent;
+  border-radius: 0.25em;
   position: relative;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
 }
 
 .alert-success {
