@@ -73,7 +73,6 @@
     </nav>
 
     <main class="container">
-      {% include "h:templates/includes/flashbar.html.jinja2" %}
       <h1 class="heading--xlarge">{{ page_title }}</h1>
       {% if page_subnav.tabs %}
         <nav class="tab-bar">
@@ -86,6 +85,7 @@
           </ul>
         </nav>
       {% endif %}
+      {% include "h:templates/includes/flashbar.html.jinja2" %}
       {% block content %}{% endblock %}
     </main>
 
