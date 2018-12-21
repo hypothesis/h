@@ -73,6 +73,17 @@
     </nav>
 
     <main class="container">
+      {% if parent_id %}
+        <p>
+          <a class="button button--text button--back" href="{{ request.route_url(parent_id) }}">
+            <svg class="svg-icon icon-back" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
+              <path d="M0 0h24v24H0z" fill="none"/>
+              <path d="M21 11H6.83l3.58-3.59L9 6l-6 6 6 6 1.41-1.41L6.83 13H21z"/>
+            </svg>
+            Back
+          </a>
+        </p>
+      {% endif %}
       <h1 class="heading--xlarge">{{ page_title }}</h1>
       {% if page_subnav.tabs %}
         <nav class="tab-bar">

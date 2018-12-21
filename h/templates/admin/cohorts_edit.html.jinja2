@@ -1,65 +1,53 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
 {% set page_id = 'features.cohorts.edit' %}
-{% set page_title = 'Edit Cohort ' + cohort.name  %}
+{% set page_title = 'Edit "' + cohort.name + '" Cohort' %}
+{% set parent_id = 'admin.cohorts' %}
 
 {% block content %}
   <p>
-    Users currently belonging to cohort {{ cohort.name }}
-  </p>
-  <p>
-    Back to <a href="{{ request.route_url('admin.cohorts') }}">Feature flag cohorts</a>
+    Add and remove users to/from a feature cohort.
   </p>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Add user to cohort {{ cohort.name }}</h3>
-    </div>
-    <div class="panel-body">
-      <form method="POST"
-            class="form-inline"
-            action="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
+  <section class="card admin-form">
+    <header class="card__header container">
+      <h2 class="heading--medium">Add user to the "{{ cohort.name }}" cohort</h2>
+    </header>
+    <div class="card__body container">
+      <form method="POST" action="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <input type="hidden" name="cohort" value="{{ cohort.id }}">
-        <div class="form-group">
-          <label for="add">Username</label>
-          <input type="text" class="form-control" name="add">
-        </div>
-        <div class="form-group">
-          <label for="authority">Authority</label>
-          <input type="text" class="form-control" name="authority" value="{{ default_authority }}">
-          <input type="submit" class="btn btn-default" value="Add">
-        </div>
+        <p class="form-input">
+          <label class="form-input__label" for="username">Username</label>
+          <input class="form-input__input has-label" id="username" name="add" type="text">
+        </p>
+        <p class="form-input">
+          <label class="form-input__label" for="authority">Authority</label>
+          <input class="form-input__input has-label" id="authority" name="authority" value="{{ default_authority }}">
+        </p>
+        <p><input class="button" type="submit" value="Add"></p>
       </form>
     </div>
-  </div>
+  </section>
 
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Members</h3>
-    </div>
-    <div class="panel-body">
-      {% if members %}
-        <form method="POST" action="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
-          <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-          <input type="hidden" name="cohort" value="{{ cohort.id }}">
-          <ul>
-            {% for user in members %}
-              <li>
-                {{ user.userid }}
-                <button type="submit" class="btn btn-link btn-sm"
-                        name="remove" value="{{ user.userid }}">
-                  Remove
-                </button>
-              </li>
-            {% endfor %}
-          </ul>
-        </form>
-      {% else %}
-        <p><em>This cohort has no members&hellip;</em></p>
-      {% endif %}
-    </div>
-  </div>
+  <section class="admin-form">
+    <h2 class="heading--medium">Current Members</h2>
+    {% if members %}
+      <form method="POST" action="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+        <input type="hidden" name="cohort" value="{{ cohort.id }}">
+        <ul class="list--striped">
+          {% for user in members %}
+            <li class="list-item">
+              <span class="heading--small">{{ user.userid }}</span>
+              <button class="list-item__action button button--outline button--tight" type="submit" name="remove" value="{{ user.userid }}">Remove</button>
+            </li>
+          {% endfor %}
+        </ul>
+      </form>
+    {% else %}
+      <p><em>This cohort has no members.</em></p>
+    {% endif %}
+  </section>
 
 {% endblock %}
