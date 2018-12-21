@@ -48,7 +48,12 @@ def test_includeme():
         call("admin.cohorts_edit", "/admin/features/cohorts/{id}"),
         call("admin.groups", "/admin/groups"),
         call("admin.groups_create", "/admin/groups/new"),
-        call("admin.groups_delete", "/admin/groups/delete/{pubid}"),
+        call(
+            "admin.groups_delete",
+            "/admin/groups/delete/{id}",
+            factory="h.traversal.GroupRoot",
+            traverse="/{id}",
+        ),
         call(
             "admin.groups_edit",
             "/admin/groups/{id}",

@@ -167,7 +167,8 @@ class GroupEditViews(object):
 
         svc.delete(group)
         self.request.session.flash(
-            _("Successfully deleted group %s" % (group.name), "success")
+            _("Successfully deleted group %s" % (group.name), "success"),
+            queue="success",
         )
 
         return HTTPFound(location=self.request.route_path("admin.groups"))
