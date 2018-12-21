@@ -32,12 +32,11 @@
 
   <section class="admin-form">
     <h2 class="heading--medium">Current Administrators</h2>
-    <form method="POST"
-      action="{{ request.route_url('admin.admins') }}">
+    <form method="POST" action="{{ request.route_url('admin.admins') }}">
       <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-      <ul>
+      <ul class="list--striped">
         {% for user in admin_users %}
-          <li>
+          <li class="list-item">
             {{ user }}
             {% if admin_users|length > 1 %}
               <button type="submit" class="button button--text button--tight" name="remove" value="{{ user }}">
