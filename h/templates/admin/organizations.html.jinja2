@@ -7,27 +7,23 @@
 
 {% block content %}
 
-  {{ search_form('Search by name…', request.params.get('q')) }}
+  {{ search_form('Search by organziation name', request.params.get('q')) }}
 
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-        </tr>
-      </thead>
-      <tbody>
+  <section class="admin-form">
+    {% if results %}
+      <ul class="list--striped">
         {% for org in results %}
-          <tr>
-            <td>
-              {% set edit_url = request.route_url('admin.organizations_edit', pubid=org.pubid) %}
-              <a href="{{ edit_url }}">{{ org.name }}</a>
-            </td>
-          </tr>
+          <li class="list-item">
+            <span class="heading--small">{{ org.name }}</span>
+            {% set edit_url = request.route_url('admin.organizations_edit', pubid=org.pubid) %}
+            <a class="list-item__action button button--outline button--tight" href="{{ edit_url }}">Edit</a>
+          </li>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      </ul>
+    {% else %}
+      <p><em>No organizations found.</em></p>
+    {% endif %}
+  </section>
 
   {% include "h:templates/includes/paginator.html.jinja2" %}
 {% endblock %}
