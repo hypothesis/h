@@ -39,10 +39,10 @@
       <form method="POST" action="{{ request.route_url('admin.nipsa') }}">
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul class="list--striped">
-          {% for uri in uris %}
+          {% for userid in userids %}
             <li class="list-item">
-              <span class="heading--small">{{ uri }}</span>
-              <button class="list-item__action button button--outline button--tight" type="submit" name="remove" value="{{ uri }}">Unblock</button>
+              <span class="heading--small">{{ userid }}</span>
+              <button class="list-item__action button button--outline button--tight" type="submit" name="remove" value="{{ userid }}">Unflag</button>
             </li>
           {% endfor %}
         </ul>
