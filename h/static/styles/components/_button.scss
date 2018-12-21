@@ -17,6 +17,12 @@
   text-transform: uppercase;
 }
 
+.button--inline {
+  border: 0;
+  font-size: 0.8em;
+  padding: 0.1em 0.25em;
+}
+
 .button--reverse {
   background-color: $white;
   border-color: $white;

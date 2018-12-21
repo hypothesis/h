@@ -10,56 +10,56 @@
     On this page you can see a list of all the groups and their details.
   </p>
 
-  {{ search_form('Search by name…', request.params.get('q')) }}
+  {{ search_form('Search by group name', request.params.get('q')) }}
 
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>URL</th>
-          <th>Organization</th>
-          <th>Created by</th>
-          <th>Members</th>
-        </tr>
-      </thead>
-      <tbody>
+
+  <section>
+    {% if results %}
+      <ul class="list--striped">
         {% for group in results %}
-          <tr>
-            <td>
-              {% if group.type in ('open', 'restricted') %}
-              {% set edit_url = request.route_url('admin.groups_edit', id=group.pubid) %}
-              <a href="{{ edit_url }}">{{ group.name }}</a>
+          <li class="list-item group">
+            <div class="group__meta group__identifiers">
+              {% if group.organization %}
+                {% set org_url = request.route_url('admin.organizations_edit', pubid=group.organization.pubid) %}
+                <a class="group__organization heading--sup" href="{{ org_url }}">{{ group.organization.name }}</a>
               {% else %}
-              {# The group edit view does not currently support editing private groups. #}
-              {{ group.name }}
+                <span class="group__organization heading--sup">(No organization)</span>
               {% endif %}
-            </td>
-            <td>
+              <h2 class="group__name heading--small">
+                {{ group.name }}
+                {# The group edit view does not currently support editing private groups. #}
+                {% if group.type in ('open', 'restricted') %}
+                  {% set edit_url = request.route_url('admin.groups_edit', id=group.pubid) %}
+                  <a class="button button--inline" href="{{ edit_url }}">Edit</a>
+                {% endif %}
+              </h2>
               {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
-              <a href="{{ group_url }}">
+              <a class="group__url heading--sub" href="{{ group_url }}">
                 {{ group_url }}
               </a>
-            </td>
-            <td>
-            {% if group.organization %}
-              {% set org_url = request.route_url('admin.organizations_edit', pubid=group.organization.pubid) %}
-              <a href="{{ org_url }}">{{ group.organization.name }}</a>
-            {% endif %}
-            </td>
-            <td>
+            </div>
+            <div class="group__meta group__created">
+              <span class="heading--sup">Created</span><br>
+              {{ group.created.strftime('%Y-%m-%d') }}<br>
               {% if group.creator %}
-                <a href="{{ request.route_url('admin.users', _query={'username': group.creator.username, 'authority': group.creator.authority}) }}">
+                by <a href="{{ request.route_url('admin.users', _query={'username': group.creator.username, 'authority': group.creator.authority}) }}">
                   {{ group.creator.username }}
                 </a>
+              {% else %}
+                (No creator found)
               {% endif %}
-            </td>
-            <td>{{ group.members|length }}</td>
-          </tr>
+            </div>
+            <div class="group__meta group__members">
+              <span class="heading--sup">Members</span><br>
+              {{ group.members|length }}
+            </div>
+          </li>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      </ul>
+    {% else %}
+      <p><em>No groups found.</em></p>
+    {% endif %}
+  </section>
 
   {% include "h:templates/includes/paginator.html.jinja2" %}
 {% endblock %}

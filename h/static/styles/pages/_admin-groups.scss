@@ -1,0 +1,48 @@
+// Page: Admin area, Groups
+// ============================================================================
+
+.group {
+  align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.group__identifiers {
+  grid-column: 1 / 5;
+  grid-row: 1;
+
+  @media (min-width: $break-tablet) {
+    grid-column: 1 / 3;
+  }
+}
+
+.group__created {
+  grid-column: 1 / 3;
+  grid-row: 2;
+
+  @media (min-width: $break-tablet) {
+    grid-column: 3 / 4;
+    grid-row: 1;
+  }
+}
+
+.group__members {
+  grid-column: 3 / 5;
+  grid-row: 2;
+
+  @media (min-width: $break-tablet) {
+    grid-column: 4 / 5;
+    grid-row: 1;
+  }
+}
+
+.group__name {
+  margin: 0;
+}
+
+.group__url {
+  font-size: 0.8em;
+  font-style: italic;
+  position: relative;
+  top: -0.25em;
+}
