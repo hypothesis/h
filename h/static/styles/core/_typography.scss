@@ -169,13 +169,13 @@
 
 .heading--medium {
   font-size: 1.375em;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.15;
 }
 
 .heading--small {
   font-size: 1.125em;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.15;
 }
 
@@ -201,8 +201,9 @@
 
 .heading--sup {
   font-size: 0.9em;
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.15;
+  opacity: 0.5;
   text-transform: uppercase;
 }
 
