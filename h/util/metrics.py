@@ -42,4 +42,9 @@ def record_search_query_params(params):
     # The New Relic Query Language does not permit _ at the begining
     # and offset is a reserved key word.
     params = [("es_{}".format(k), params[k]) for k in keys if k in params]
-    newrelic.agent.current_transaction().add_custom_parameters(params)
+    # On startup, there is a race condition in NewRelic where there may not be
+    # a transaction. If there isn't, current_transaction will return None in which
+    # case we can't record params.
+    current_transaction = newrelic.agent.current_transaction()
+    if current_transaction:
+        newrelic.agent.current_transaction().add_custom_parameters(params)
