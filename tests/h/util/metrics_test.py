@@ -13,11 +13,16 @@ class TestRecordSearchQueryParams(object):
                            _separate_replies=True,
                            url="urlvalue",
                            bad="unwanted")
-        metrics.record_search_query_params(params)
+        metrics.record_search_query_params(params, True)
         newrelic_agent.current_transaction().add_custom_parameters.assert_called_once_with(
             [("es_url", "urlvalue"),
              ("es_tag", "tagsvalue"),
              ("es__separate_replies", True)])
+
+    def test_does_not_record_separate_replies_if_false(self, newrelic_agent):
+        params = MultiDict({})
+        metrics.record_search_query_params(params, False)
+        newrelic_agent.current_transaction().add_custom_parameters.assert_called_once_with([])
 
     def test_does_not_record_parameters_if_no_transaction(self, newrelic_agent):
         newrelic_agent.current_transaction.return_value = None
@@ -25,7 +30,7 @@ class TestRecordSearchQueryParams(object):
                            _separate_replies=True,
                            url="urlvalue",
                            bad="unwanted")
-        metrics.record_search_query_params(params)
+        metrics.record_search_query_params(params, True)
 
     @pytest.fixture
     def newrelic_agent(self, newrelic_agent):
