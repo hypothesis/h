@@ -18,7 +18,6 @@ objects and Pyramid ACLs in :mod:`h.traversal`.
 """
 from __future__ import unicode_literals
 from pyramid import i18n
-import newrelic.agent
 
 from h import search as search_lib
 from h import storage
@@ -45,8 +44,6 @@ def search(request):
     """Search the database for annotations matching with the given query."""
     schema = SearchParamsSchema()
     params = validate_query_params(schema, request.params)
-
-    _record_search_api_usage_metrics(params)
 
     separate_replies = params.pop("_separate_replies", False)
 
@@ -183,35 +180,3 @@ def _annotation_resource(request, annotation):
     group_service = request.find_service(IGroupService)
     links_service = request.find_service(name="links")
     return AnnotationContext(annotation, group_service, links_service)
-
-
-def _record_search_api_usage_metrics(
-    params, record_param=newrelic.agent.add_custom_parameter
-):
-    # Record usage of search params and associate them with a transaction.
-    keys = [
-        # Record usage of inefficient offset and it's alternative search_after.
-        "offset",
-        "search_after",
-        "sort",
-        # Record usage of url/uri (url is an alias of uri).
-        "url",
-        "uri",
-        # Record usage of tags/tag (tags is an alias of tag).
-        "tags",
-        "tag",
-        # Record usage of _separate_replies which will help distinguish client calls
-        # for loading the sidebar annotations from other api calls.
-        "_separate_replies",
-        # Record group and user-these help in identifying slow queries.
-        "group",
-        "user",
-        # Record usage of wildcard feature.
-        "wildcard_uri",
-    ]
-
-    for k in keys:
-        if k in params:
-            # The New Relic Query Language does not permit _ at the begining
-            # and offset is a reserved key word.
-            record_param("es_{}".format(k), params[k])
