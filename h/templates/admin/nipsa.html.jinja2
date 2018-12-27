@@ -40,7 +40,7 @@
         <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <ul class="list--striped">
           {% for userid in userids %}
-            <li class="list-item">
+            <li class="list-item list-item--flex">
               <span class="heading--small">{{ userid }}</span>
               <button class="list-item__action button button--outline button--tight" type="submit" name="remove" value="{{ userid }}">Unflag</button>
             </li>

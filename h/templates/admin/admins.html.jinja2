@@ -36,7 +36,7 @@
       <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
       <ul class="list--striped">
         {% for user in admin_users %}
-          <li class="list-item">
+          <li class="list-item list-item--flex">
             {{ user }}
             {% if admin_users|length > 1 %}
               <button type="submit" class="button button--text button--tight" name="remove" value="{{ user }}">
