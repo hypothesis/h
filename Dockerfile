@@ -59,14 +59,14 @@ RUN apk add --no-cache --virtual build-deps \
   && pip install --no-cache-dir -r requirements.txt \
   && apk del build-deps
 
+# Copy frontend assets.
+COPY --from=build /build build
+
 # Copy the rest of the application files.
 COPY . .
 
 # If we're building from a git clone, ensure that .git is writeable
 RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
-
-# Copy frontend assets.
-COPY --from=build /build build
 
 # Expose the default port.
 EXPOSE 5000
