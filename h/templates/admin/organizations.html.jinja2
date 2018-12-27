@@ -13,7 +13,7 @@
     {% if results %}
       <ul class="list--striped">
         {% for org in results %}
-          <li class="list-item">
+          <li class="list-item list-item--flex">
             <span class="heading--small">{{ org.name }}</span>
             {% set edit_url = request.route_url('admin.organizations_edit', pubid=org.pubid) %}
             <a class="list-item__action button button--outline button--tight" href="{{ edit_url }}">Edit</a>

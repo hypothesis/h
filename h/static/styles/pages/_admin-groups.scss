@@ -2,8 +2,6 @@
 // ============================================================================
 
 .group {
-  align-items: stretch;
-  display: grid;
   grid-template-columns: repeat(4, 1fr);
 }
 

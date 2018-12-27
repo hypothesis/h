@@ -29,14 +29,10 @@
     {% if results %}
       <ul class="list--striped">
         {% for cohort in results %}
-          <li class="list-item">
-            <p class="list-item__content">
-              <span class="heading--small">{{ cohort.name }}</span> ({{ cohort.members|length }} members)
-            </p>
-            <p class="list-item__actions">
-              <a class="list-item__action button button--outline button--tight"
-                href="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">Edit</a>
-            </p>
+          <li class="list-item list-item--flex">
+            <span class="heading--small">{{ cohort.name }} ({{ cohort.members|length }} members)</span>
+            <a class="list-item__action button button--outline button--tight"
+              href="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">Edit</a>
           </li>
         {% endfor %}
       </ul>

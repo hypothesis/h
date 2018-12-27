@@ -38,7 +38,7 @@
         <input type="hidden" name="cohort" value="{{ cohort.id }}">
         <ul class="list--striped">
           {% for user in members %}
-            <li class="list-item">
+            <li class="list-item list-item--flex">
               <span class="heading--small">{{ user.userid }}</span>
               <button class="list-item__action button button--outline button--tight" type="submit" name="remove" value="{{ user.userid }}">Remove</button>
             </li>

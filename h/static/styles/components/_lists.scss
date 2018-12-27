@@ -17,16 +17,36 @@
   margin-left: 0;
 }
 
+.list {
+  @include content-stack;
+}
+
+.list--bulleted {
+  list-style-type: disc;
+  margin-left: 1.125em;
+
+  li {
+    list-style-type: disc;
+  }
+}
+
 .list--striped {
   .list-item:nth-child(odd) {
     background-color: $grey-1;
   }
 }
 
-.list-item {
+.list-item--flex {
   @include container-inset--tight;
 
   align-items: center;
   display: flex;
   justify-content: space-between;
+}
+
+.list-item--grid {
+  @include container-inset;
+
+  align-items: stretch;
+  display: grid;
 }

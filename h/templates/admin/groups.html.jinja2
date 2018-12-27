@@ -17,7 +17,7 @@
     {% if results %}
       <ul class="list--striped">
         {% for group in results %}
-          <li class="list-item group">
+          <li class="list-item list-item--grid group">
             <div class="group__meta group__identifiers">
               {% if group.organization %}
                 {% set org_url = request.route_url('admin.organizations_edit', pubid=group.organization.pubid) %}
