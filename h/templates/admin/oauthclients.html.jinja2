@@ -10,37 +10,48 @@
   </p>
 
   <p>
-    <a href="{{ request.route_url('admin.oauthclients_create') }}">
+    <a class="button" href="{{ request.route_url('admin.oauthclients_create') }}">
       Register a new OAuth client
     </a>
   </p>
 
-  <table class="table table-striped">
-    <thead>
-      <th>Name</th>
-      <th>ID</th>
-      <th>Authority<sup>1</sup></th>
-      <th>Trusted<sup>2</sup> ?</th>
-    </thead>
-    <tbody>
-      {% for client in clients %}
-      <tr>
-        <td><a href="{{ request.route_url('admin.oauthclients_edit', id=client.id) }}">{{ client.name }}</a></td>
-        <td>{{ client.id }}</td>
-        <td>{{ client.authority }}</td>
-        <td>{{ client.trusted }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <p>
-    <sup>1</sup> Clients can only access user data for accounts associated with
-    their authority.
-  </p>
-  <p>
-    <sup>2</sup> Trusted clients do not require explicit user approval to
-    access their data.
-  </p>
+  <section>
+    <h2 class="heading--medium">Current OAuth Clients</h2>
+    <ul class="list list--bulleted">
+      <li class="list-item">
+        Clients can only access user data for accounts associated with their authority.
+      </li>
+      <li class="list-item">
+        Trusted clients do not require explicit user approval to access their data.
+      </li>
+    </ul>
+    {% if clients %}
+      <ul class="list--striped">
+        {% for client in clients %}
+          <li class="list-item list-item--grid client">
+            <div class="client__meta client__identifiers">
+              <span class="heading--sup">Name</span><br>
+              <h2 class="group__name heading--small">
+                {{ client.name }}
+                {% set edit_url = request.route_url('admin.oauthclients_edit', id=client.id) %}
+                <a class="button button--inline" href="{{ edit_url }}">Edit</a>
+              </h2>
+              <span class="heading--sub">{{ client.id }}</span>
+            </div>
+            <div class="client__meta client__authority">
+              <span class="heading--sup">Authority</span><br>
+              {{ client.authority }}
+            </div>
+            <div class="client__meta client__trusted">
+              <span class="heading--sup">Trusted</span><br>
+              {{ client.trusted }}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p><em>No OAuth clients found.</em></p>
+    {% endif %}
+  </section>
 
 {% endblock %}
