@@ -38,6 +38,14 @@ WORKDIR /var/lib/hypothesis
 # Ensure nginx state and log directories writeable by unprivileged user.
 RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
 
+# Copy nginx config
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+
+# Copy collectd config
+COPY conf/collectd.conf /etc/collectd/collectd.conf
+RUN mkdir /etc/collectd/collectd.conf.d \
+ && chown hypothesis:hypothesis /etc/collectd/collectd.conf.d
+
 # Copy minimal data to allow installation of dependencies.
 COPY requirements.txt ./
 
@@ -50,14 +58,6 @@ RUN apk add --no-cache --virtual build-deps \
   && pip install --no-cache-dir -U pip supervisor \
   && pip install --no-cache-dir -r requirements.txt \
   && apk del build-deps
-
-# Copy nginx config
-COPY conf/nginx.conf /etc/nginx/nginx.conf
-
-# Copy collectd config
-COPY conf/collectd.conf /etc/collectd/collectd.conf
-RUN mkdir /etc/collectd/collectd.conf.d \
- && chown hypothesis:hypothesis /etc/collectd/collectd.conf.d
 
 # Copy the rest of the application files.
 COPY . .
