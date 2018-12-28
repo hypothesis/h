@@ -19,9 +19,10 @@
 }
 
 .button--inline {
-  border: 0;
   font-size: 0.8em;
   padding: 0.1em 0.25em;
+  position: relative;
+  top: -0.125em;
 }
 
 .button--reverse {
@@ -51,6 +52,42 @@
   text-decoration: underline;
 }
 
+.button + .button {
+  margin-left: 1.5em;
+}
+
 .button--tight {
   @include container-squish--tight;
+}
+
+.button--danger {
+  background-color: $color--negative;
+  border-color: $color--negative;
+  color: $white;
+
+  &.button--outline {
+    background-color: transparent;
+    color: $color--negative;
+  }
+
+  &.button--text {
+    background-color: transparent;
+    color: $color--negative;
+  }
+}
+
+.button--warning {
+  background-color: $color--warning;
+  border-color: $color--warning;
+  color: $white;
+
+  &.button--outline {
+    background-color: transparent;
+    color: $color--warning;
+  }
+
+  &.button--text {
+    background-color: transparent;
+    color: $color--warning;
+  }
 }

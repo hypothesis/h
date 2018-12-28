@@ -207,6 +207,13 @@
   text-transform: uppercase;
 }
 
+.heading--sup + .heading--xlarge,
+.heading--sup + .heading--large,
+.heading--sup + .heading--medium,
+.heading--sup + .heading--small {
+  margin-top: 0;
+}
+
 @media (min-width: $break-tablet) {
   .heading--xlarge {
     font-size: 2.5em;

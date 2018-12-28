@@ -19,7 +19,9 @@
   color: #383d41;
 }
 
-.alert-error {
+.alert--error,
+.alert--danger,
+.alert--negative {
   background-color: #f8d7da;
   border-color: #f5c6cb;
   color: #721c24;
@@ -29,7 +31,8 @@
   }
 }
 
-.alert-success {
+.alert--success,
+.alert--positive {
   background-color: #d4edda;
   border-color: #c3e5cb;
   color: #155724;
@@ -39,7 +42,7 @@
   }
 }
 
-.alert-warning {
+.alert--warning {
   background-color: #fff3cd;
   border-color: #ffeeba;
   color: #856404;

@@ -27,109 +27,130 @@
   {% if username %}
   <hr>
 
-  <section>
-    {% if user %}
-      <table class="table table-auto table-striped">
-        <tbody>
-          <tr><th>Username</th><td>{{ user.username }}</td></tr>
-          <tr><th>Authority</th><td>{{ user.authority }}</td></tr>
-          <tr><th>Email</th><td>{{ user.email }}</td></tr>
-          <tr><th>Registered</th><td>{{ user.registered_date }}</td></tr>
-          <tr><th>Last login</th><td>{{ user.last_login_date }}</td></tr>
-          <tr>
-            <th>Is activated?</th>
-            <td>
-              {% if user.is_activated %}
-                &#x2714;
-              {% else %}
-                &#x2718;
-                <form action="{{request.route_path('admin.users_activate')}}"
-                      class="users-activate-form"
-                      method="POST">
-                  <input type="hidden"
-                         name="csrf_token"
-                         value="{{ request.session.get_csrf_token() }}">
-                  <input type="hidden"
-                         name="userid"
-                         value="{{user.userid}}">
-                  <button class="btn btn-primary btn-xs" type="submit">
-                    Activate
-                  </button>
-                </form>
-              {% endif %}
-            </td>
-          </tr>
-          <tr>
-            <th>Is admin?</th>
-            <td>{% if user.admin %}&#x2714;{% else %}&#x2718;{% endif %}</td>
-          </tr>
-          <tr>
-            <th>Is staff?</th>
-            <td>{% if user.staff %}&#x2714;{% else %}&#x2718;{% endif %}</td>
-          </tr>
-          <tr>
-            <th>Annotations</th>
-            <td>{{ user_meta['annotations_count'] }}</td>
-          </tr>
-        </tbody>
-      </table>
+  {% if user %}
+    <section class="card user-profile">
+      <div class="card__header">
+        <span class="heading--sup">
+          Username
+        </span>
+        <h3 class="heading--medium">
+          {{ user.username }}
+        </h3>
+      </div>
 
-      <h3>Please-be-careful Zone</h3>
+      <div class="card__body">
+        <dl class="definition-list definition-list--horizontal">
+          <dt class="definition-list__term">Authority</dt>
+          <dd class="definition-list__definition">{{ user.authority }}</dd>
 
-      <form method="POST" action="{{request.route_path('admin.users_rename')}}" class="form-inline">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <input type="hidden" name="userid" value="{{user.userid}}">
-        <input type="text" name="new_username" placeholder="New Username" pattern="^[A-Za-z0-9._]+$">
-        <button class="btn" type="submit">Change username</button>
-      </form>
+          <dt class="definition-list__term">Email</dt>
+          <dd class="definition-list__definition">{{ user.email }}</dd>
 
-      <h3>Danger Zone</h3>
+          <dt class="definition-list__term">Registered</dt>
+          <dd class="definition-list__definition">{{ user.registered_date }}</dd>
 
-      <form method="POST"
-            action="{{request.route_path('admin.users_delete')}}"
-            class="form-inline js-users-delete-form">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
-        <input type="hidden" name="userid" value="{{user.userid}}">
+          <dt class="definition-list__term">Last login</dt>
+          <dd class="definition-list__definition">{{ user.last_login_date }}</dd>
 
-        {% if user_meta['annotations_count'] > 100 %}
-          <div class="alert alert-warning" role="alert">
-            User has a lot of annotations, it might be safer to delete this user
-            directly in a shell.
-          </div>
-        {% endif %}
+          <dt class="definition-list__term">Activated?</dt>
+          <dd class="definition-list__definition{% if user.is_activated %} affirmative{% else %} negative{% endif %}">
+            {% if user.is_activated %}
+              Yes
+            {% else %}
+              <form action="{{request.route_path('admin.users_activate')}}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+                <input type="hidden" name="userid" value="{{user.userid}}">
+                No
+                <button class="button button--tight button--inline" type="submit">
+                  Activate
+                </button>
+              </form>
+            {% endif %}
+          </dd>
 
-        <button class="btn btn-danger" type="submit">Delete user</button>
-      </form>
+          <dt class="definition-list__term">Admin?</dt>
+          <dd class="definition-list__definition{% if user.admin %} affirmative{% else %} negative{% endif %}">
+            {% if user.admin %}
+              Yes
+            {% else %}
+              No
+            {% endif %}
+          </dd>
 
-      {% if user.groups %}
-        <hr>
+          <dt class="definition-list__term">Staff?</dt>
+          <dd class="definition-list__definition{% if user.staff %} affirmative{% else %} negative{% endif %}">
+            {% if user.staff %}
+              Yes
+            {% else %}
+              No
+            {% endif %}
+          </dd>
 
-        <h2>Groups this user belongs to</h2>
+          <dt class="definition-list__term">Annotations</dt>
+          <dd class="definition-list__definition">
+            {{ user_meta['annotations_count'] }}
+          </dd>
 
-        <table class="table table-auto table-striped">
-          <thead>
-            <th>Name</th>
-            <th>URL</th>
-          </thead>
-          <tbody>
-            {% for group in user.groups %}
-              <tr>
-                <td>{{group.name}}</td>
-                <td>
-                  {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
-                  <a href="{{ group_url }}">
-                    {{ group_url }}
-                  </a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% endif %}
+          <dt class="definition-list__term">Groups</dt>
+          <dd class="definition-list__definition">
+            {% if user.groups %}
+              <ul class="list--bulleted">
+                {% for group in user.groups %}
+                  <li class="list-item">
+                    {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
+                    <a class="button--text" href="{{ group_url }}">
+                      {{ group.name }}
+                      <svg class="svg-icon icon-inline" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+                      </svg>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p><em>User belongs to no groups.</em></p>
+            {% endif %}
+          </dd>
+        </dl>
+      </div>
+
+      <div class="card__footer">
+        <h4 class="heading--small">Change username</h4>
+        <p class="alert alert--warning">Please be careful here...</p>
+        <form method="POST" action="{{request.route_path('admin.users_rename')}}" class="form-inline">
+          <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+          <input type="hidden" name="userid" value="{{user.userid}}">
+          <p class="form-input js-form-input">
+            <label class="form-input__label" for="username">New username</label>
+            <input class="form-input__input has-label" id="username" type="text" name="new_username" pattern="^[A-Za-z0-9._]+$">
+          </p>
+          <button class="button" type="submit">Change username</button>
+        </form>
+      </div>
+
+      <div class="card__footer">
+        <h4 class="heading--small">Delete user</h4>
+        <p class="alert alert--danger">
+          DANGER: Are you sure you want to delete this user?
+          {% if user_meta['annotations_count'] > 100 %}
+          This user has a lot of annotations. It might be safer to delete this user directly in a shell.
+          {% endif %}
+        </p>
+        <form method="POST" action="{{request.route_path('admin.users_delete')}}"
+          class="form-inline js-users-delete-form">
+          <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+          <input type="hidden" name="userid" value="{{user.userid}}">
+          <button class="button button--danger" type="submit">Delete user</button>
+        </form>
+      </div>
+    </section>
+
     {% else %}
-      <p>No user found with username or email <em>{{ username }}</em> and authority <em>{{ authority }}</em>!</p>
+
+      <p>No user found with username or email <em>{{ username }}</em> and authority <em>{{ authority }}</em>.</p>
+
     {% endif %}
 
-  </section>
   {% endif %}
 {% endblock %}

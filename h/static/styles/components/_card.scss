@@ -15,7 +15,23 @@
   box-shadow: 0 12px 24px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
+.card__body {
+  @include container-inset;
+}
+
+.card__footer {
+  @include container-inset;
+
+  border-top: solid 1px $grey-3;
+}
+
+.card__footer *:first-child {
+  margin-top: 0;
+}
+
 .card__header {
+  @include container-inset;
+
   border-bottom: solid 1px $grey-3;
 }
 

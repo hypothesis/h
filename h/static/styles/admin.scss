@@ -26,7 +26,7 @@
 @import 'components/form-container';
 @import 'components/form-input';
 @import 'components/list-input';
-@import 'components/lists';
+@import 'components/list';
 @import 'components/pager';
 @import 'components/search-form';
 @import 'components/tab-bar';
@@ -41,6 +41,7 @@
 @import 'pages/admin-features';
 @import 'pages/admin-groups';
 @import 'pages/admin-oauth-clients';
+@import 'pages/admin-users';
 
 // Rules
 // ----------------------------------------------------------------------------

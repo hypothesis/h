@@ -219,3 +219,7 @@ main {
 .grid-container {
   @include display-grid;
 }
+
+.align-right {
+  float: right;
+}

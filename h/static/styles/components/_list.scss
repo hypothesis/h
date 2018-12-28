@@ -17,6 +17,24 @@
   margin-left: 0;
 }
 
+@media (min-width: $break-tablet) {
+  .definition-list--horizontal {
+    align-items: stretch;
+    display: grid;
+    grid-gap: 1em;
+    grid-template-columns: 1fr 4fr;
+    grid-template-rows: auto;
+
+    .definition-list__term {
+      margin-top: 0;
+      text-align: right;
+    }
+
+    .definition-list__definition {
+    }
+  }
+}
+
 .list {
   @include content-stack;
 }

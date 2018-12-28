@@ -19,6 +19,13 @@ $brand: #d00032;
 $highlight: #58cef4;
 $group-organization-color: #6d676d;
 
+$color--text: $grey-7;
+$color--text-reverse: $grey-1;
+
+$color--affirmative: hsl(134, 61%, 21%);
+$color--negative: hsl(354, 61%, 28%);
+$color--warning: hsl(45, 94%, 27%);
+
 // Functions
 // ----------------------------------------------------------------------------
 
@@ -29,4 +36,15 @@ $group-organization-color: #6d676d;
 
 @function shade($color, $percent){
   @return mix(black, $color, $percent);
+}
+
+// Rules
+// ----------------------------------------------------------------------------
+
+.affirmative {
+  color: $color--affirmative;
+}
+
+.negative {
+  color: $color--negative;
 }
