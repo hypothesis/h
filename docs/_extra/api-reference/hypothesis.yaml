@@ -502,25 +502,6 @@ paths:
           minimum: 0
           maximum: 200
           default: 20
-        - name: search_after
-          in: query
-          description: Returns results after the annotation who's sort field has this value.
-            If specifying a date use the format yyyy-MM-dd'T'HH:mm:ss.SSX or time in
-            miliseconds since the epoch. This is used for iteration through large collections
-            of results.
-          required: false
-          type: string
-        - name: offset
-          in: query
-          description: >
-            The number of initial annotations to skip. This is used for pagination. Not
-            suitable for paging through thousands of annotations-search_after should be
-            used instead.
-          required: false
-          type: integer
-          default: 0
-          minimum: 0
-          maximum: 9800
         - name: sort
           in: query
           description: The field by which annotations should be sorted.
@@ -528,6 +509,51 @@ paths:
           type: string
           enum: [created, updated, group, id, user]
           default: updated
+        - name: search_after
+          in: query
+          example: 2019-01-03T19:46:09.334539+00:00
+          description: >
+            <p>Define a start point for a subset (page) of annotation search results.</p>
+
+            <p>Working against the sorted, full set of annotation records matching the current
+            search query, the service will examine the values present in the field by which
+            annotations are sorted (i.e. `sort`). The returned subset
+            of search results will begin with the first annotation whose `sort` field's value
+            comes after the value of `search_after` sequentially.</p>
+
+            <p>The format of this property depends on the current value of `sort`.
+            When `search_after` is used in conjunction with a chronological `sort` value—e.g.
+            `updated`, `created`—this parameter should be formatted as an ISO 8601 string. It
+            may also be formatted in ms (milliseconds) since the Epoch.</p>
+
+            <p><em>Expanded example</em> — Given a query containing:</p>
+
+            <p><blockquote>`sort=created&search_after=2019-01-03T19:46:09.334539+00:00`</blockquote></p>
+
+            <p>The returned results would begin with the record immediately subsequent to the annotation
+            created at `2019-01-03T19:46:09.334539+00:00` in the full set of results. If there is no
+            annotation in the full result set whose `created` value exactly matches
+            `2019-01-03T19:46:09.334539+00:00`,
+            the returned subset will begin with the first annotation whose `created` value
+            comes sequentially "after" `2019-01-03T19:46:09.334539+00:00` in the full, sorted set.</p>
+
+            <p><em>Note:</em> `search_after` provides an efficient, stateless paging mechanism. Its
+            use is preferred over that of `offset`.</p>
+
+          required: false
+          type: string
+        - name: offset
+          in: query
+          description: >
+            <p>The number of initial annotations to skip in the result set.</p>
+
+            <p>May be used for pagination of result sets. The usage of `search_after` is preferred,
+            especially for large batches, as it is considerably more efficient.</p>
+          required: false
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 9800
         - name: order
           in: query
           description: The order in which the results should be sorted.
@@ -542,86 +568,146 @@ paths:
 
             URI can be a URL (a web page address) or a URN representing another kind of
             resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
+
+            Examples:
+
+            * `http://example.com/articles/01/name` (URL)
+            * `doi:10.1.1/1234` (DOI)
+            * `urn:x-pdf:1234` (PDF fingerprint)
+
           required: false
           type: string
-        - name: uri.parts
-          in: query
-          description: |
-            Limit the results to annotations containing the given keyword in
-            the URL.
         - name: url
           in: query
           description: |
             Alias of `uri`.
+        - name: uri.parts
+          in: query
+          example: 'yogur'
+          description: |
+            <p>Limit the results to annotations containing the given keyword (tokenized chunk) in
+            the URI. The value must exactly match an individual URI keyword.</p>
+
+            <p>URIs are split on characters `#+/:=?.-` into their keywords.</p>
+
+            <p><em>Expanded example </em> — given a value of `yogur`, annotations with any of the
+            following URIs would match:
+
+            * `https://www.yogur.com/foo/bar`
+            * `https://www.example.com/yogur/eatmore.html`
+            * `https://www.example.com/foo/eat-more-yogur-this-year`
+
+            The following would not be matches:
+
+            * `https://www.yogurt.com/foo/bar`
+            * `https://www.example.com/yogurt/eatmore.html`
+            * `https://www.example.com/foo/eat-more-yogurt-this-year`
+
+
           required: false
           type: string
         - name: wildcard_uri
           in: query
+          example: "http://foo.com/*"
           description: |
-            Limit the results to annotations matching the wildcard URI.
-            URI can be a URL (a web page address) or a URN representing another
-            kind of resource such as DOI (Digital Object Identifier) or a
-            PDF fingerprint.
+            <p>Limit the results to annotations whose URIs match the wildcard pattern.</p>
 
-            `*` will match any character sequence (including an empty one),
+            <p>`*` will match any character sequence (including an empty one),
             and a `_` will match any single character. Wildcards are only permitted
-            within the path and query parts of the URI.
+            within the path and query parts of the URI. Escaping wildcards is not supported.</p>
 
-            Escaping wildcards is not supported.
+            Examples of valid values:
 
-            Examples of valid uris: `http://foo.com/*` `urn:x-pdf:*` `file://localhost/_bc.pdf`
+            * `http://foo.com/*`
+            * `urn:x-pdf:*`
+            * `file://localhost/_bc.pdf`
 
-            Examples of invalid uris: `*foo.com` `u_n:*` `file://*` `http://foo.com*`
+            Examples of invalid values (not within path or query parts of URI):
+
+            * `*foo.com`
+            * `u_n:*`
+            * `file://*`
+            * `http://foo.com*`
 
             <mark>This feature is experimental and the API may change.</mark>
           required: false
           type: string
         - name: user
           in: query
-          description: Limit the results to annotations made by the specified user.
+          example: acct:username@hypothes.is
+          description: |
+            Limit the results to annotations made by the specified user.
+
           required: false
           type: string
         - name: group
           in: query
-          description: Limit the results to annotations made in the specified group.
+          example: "8JmD3iz1"
+          description: |
+            Limit the results to annotations made in the specified group (by group ID).
           required: false
           type: string
         - name: tag
           in: query
-          description: Limit the results to annotations tagged with the specified value.
+          example: "artificial intelligence"
+          description: |
+            Limit the results to annotations tagged with the specified value.
+
+            For example: `artificial intelligence` will find all annotations whose tags
+            contain both `artificial` **AND** `intelligence`.
           required: false
           type: string
         - name: tags
           in: query
-          description: Alias of `tag`.
+          example:
+            - artificial
+            - intelligence
+          description: |
+            Similar to `tag` but allows a comma-separated list of multiple tags.
+
+            For example: `[intelligence,artificial]` will find all annotations whose tags
+            contain both `artificial` **AND** `intelligence`.
           required: false
           type: string
         - name: any
           in: query
-          description: Limit the results to annotations whose quote, tags, text or url
-            fields contain this keyword.
-          required: false
-          type: string
-        - name: group
-          in: query
-          description: Limit the results to this group of annotations.
+          example: "ribosome"
+          description: |
+            Limit the results to annotations who contain the indicated keyword
+            in any of the following fields:
+
+            * `quote`
+            * `tags`
+            * `text`
+            * `url`
           required: false
           type: string
         - name: quote
           in: query
-          description: Limit the results to annotations that contain this text inside
-            the text that was annotated.
+          example: "unicorn helmets"
+          description: >
+            <p>Limit the results to annotations that contain this text inside
+            the text that was annotated.</p>
+
+            <p>For example: `unicorn helmets` would return all annotations containing
+            `unicorn` **OR** `helmets` in their quoted (i.e. annotated) text.</p>
+
           required: false
           type: string
         - name: references
           in: query
-          description: Returns annotations that are replies to this parent annotation id.
+          description: Returns annotations that are replies to this parent annotation ID.
           required: false
           type: string
         - name: text
           in: query
-          description: Limit the results to annotations that contain this text in their
-            textual body.
+          example: "penguin strength"
+          description: >
+            <p>Limit the results to annotations that contain this text in their
+            textual body.</p>
+
+            <p>For example: `penguin strength` would return all annotations containing
+            `penguin` **OR** `strength` in their text (body) content.</p>
           required: false
           type: string
       responses:
