@@ -11,15 +11,13 @@ def record_search_query_params(params, separate_replies):
     be str, int, float, or bool types.
 
     Disclaimer: If there are multiple values for a single key, only
-    submit the first value to NewRelic as there is no way of submitting
-    multiple values for a single attribute and submitting a list of values
-    would not be condusive to data aggregation.
-
+    submit the first value to New Relic as there is no way of submitting
+    multiple values for a single attribute.
 
     :arg params: the request params to record
     :type params: webob.multidict.MultiDict
     :arg separate_replies: the value of the separate_replies search setting
-    :type params: bool
+    :type separate_replies: bool
     """
     keys = [
         # Record usage of inefficient offset and it's alternative search_after.
@@ -43,11 +41,11 @@ def record_search_query_params(params, separate_replies):
     params = [("es_{}".format(k), params[k]) for k in keys if k in params]
 
     # Record usage of _separate_replies which will help distinguish client calls
-    # for loading the sidebar annotations from other api calls.
+    # for loading the sidebar annotations from other API calls.
     if separate_replies:
         params.append(("es__separate_replies", separate_replies))
 
-    # On startup, there is a race condition in NewRelic where there may not be
+    # On startup, there is a race condition in New Relic where there may not be
     # a transaction. If there isn't, current_transaction will return None in which
     # case we can't record params.
     current_transaction = newrelic.agent.current_transaction()
