@@ -8,6 +8,7 @@ import elasticsearch_dsl
 from webob.multidict import MultiDict
 
 from h.search import query
+from h.util import metrics
 
 log = logging.getLogger(__name__)
 
@@ -81,6 +82,7 @@ class Search(object):
         :returns: The search results
         :rtype: SearchResult
         """
+        metrics.record_search_query_params(params, self.separate_replies)
         total, annotation_ids, aggregations = self._search_annotations(params)
         reply_ids = self._search_replies(annotation_ids)
 
