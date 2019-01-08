@@ -19,23 +19,32 @@ class DeleteUserService(object):
         """
         Deletes a user with all their group memberships and annotations.
 
-        Raises UserDeleteError when deletion fails with the appropriate error
-        message.
+        If a user owns groups with collaborators, meaning there are annotations
+        in the group that have been made by other users, the user is unassigned
+        as creator but the group persists.
         """
 
         created_groups = self.request.db.query(Group).filter(Group.creator == user)
-        if self._groups_have_anns_from_other_users(created_groups, user):
-            raise UserDeleteError(
-                "Other users have annotated in groups created by this user"
-            )
+        groups_to_unassign_creator = self._groups_that_have_collaborators(
+            created_groups, user
+        )
+        groups_to_delete = list(set(created_groups) - set(groups_to_unassign_creator))
 
         self._delete_annotations(user)
-        self._delete_groups(created_groups)
+        self._delete_groups(groups_to_delete)
+        self._unassign_groups_creator(groups_to_unassign_creator)
         self.request.db.delete(user)
 
-    def _groups_have_anns_from_other_users(self, groups, user):
+    def _groups_that_have_collaborators(self, groups, user):
         """
-        Return `True` if users other than `user` have annotated in `groups`.
+        Return list of groups that have annotations from other users.
+        :param groups: List of group objects to evaluate.
+        :type groups: list[h.models.Group]
+        :param user: The user object and creator of the groups.
+        :type user: h.models.User
+
+        :returns: List of h.models.Group objects that contain annotations made by
+          other users.
         """
         group_ids = [g.pubid for g in groups]
 
@@ -43,14 +52,16 @@ class DeleteUserService(object):
         # expensive SQL query if `in_` is given an empty list (see
         # https://stackoverflow.com/questions/23523147/)
         if len(group_ids) == 0:
-            return False
+            return []
 
-        other_user_ann_count = (
-            self.request.db.query(Annotation)
+        query = (
+            self.request.db.query(Annotation.groupid)
             .filter(Annotation.groupid.in_(group_ids), Annotation.userid != user.userid)
-            .count()
+            .group_by(Annotation.groupid)
         )
-        return other_user_ann_count > 0
+        groupids_with_other_user_anns = [pubid for (pubid,) in query.all()]
+
+        return [g for g in groups if g.pubid in groupids_with_other_user_anns]
 
     def _delete_annotations(self, user):
         annotations = self.request.db.query(Annotation).filter_by(userid=user.userid)
@@ -62,6 +73,10 @@ class DeleteUserService(object):
     def _delete_groups(self, groups):
         for group in groups:
             self.request.db.delete(group)
+
+    def _unassign_groups_creator(self, groups):
+        for group in groups:
+            group.creator = None
 
 
 def delete_user_service_factory(context, request):

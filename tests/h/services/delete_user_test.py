@@ -8,7 +8,7 @@ import sqlalchemy
 
 from h.events import AnnotationEvent
 from h.models import Annotation, Document
-from h.services.delete_user import UserDeleteError, delete_user_service_factory
+from h.services.delete_user import delete_user_service_factory
 
 
 class TestDeleteUserService(object):
@@ -70,17 +70,17 @@ class TestDeleteUserService(object):
 
         svc.delete(creator)
 
-        db_session.flush()
         assert sqlalchemy.inspect(group).was_deleted
 
-    def test_delete_user_fails_if_groups_have_collaborators(
+    def test_creator_is_none_if_groups_have_collaborators(
         self, db_session, group_with_two_users, pyramid_request, svc
     ):
         pyramid_request.db = db_session
         (group, creator, member, creator_ann, member_ann) = group_with_two_users
 
-        with pytest.raises(UserDeleteError):
-            svc.delete(creator)
+        svc.delete(creator)
+
+        assert group.creator is None
 
     def test_delete_user_removes_only_groups_created_by_user(
         self, db_session, group_with_two_users, pyramid_request, svc
