@@ -1,5 +1,5 @@
-# Stage 1: Build node portion of the H app.
-FROM node:alpine as build
+# Stage 1: Build frontend assets (eg. JS, CSS bundles).
+FROM node:alpine AS node-build
 
 ENV NODE_ENV production
 
@@ -9,27 +9,49 @@ COPY package.json ./
 RUN npm ci --production
 
 # Build h js/css.
-COPY gulpfile.js ./ 
+COPY gulpfile.js ./
 COPY scripts/gulp ./scripts/gulp
 COPY h/static ./h/static
 RUN npm run build
 
-# Stage 2: Build the rest of the app using the build output from Stage 1.
+# Stage 2: Build and install Python dependencies.
+FROM alpine:3.7 AS python-build
+RUN apk add --no-cache \
+    build-base \
+    libffi-dev \
+    postgresql-dev \
+    python-dev \
+    py2-pip
+
+RUN pip install --no-cache-dir -U pip
+
+# Install Python packages into `/python`, so we can easily copy them,
+# without unrelated files, into the main Docker image.
+#
+# nb. supervisor requires `pkg_resources` (from `setuptools`) at runtime.
+ENV PATH /python/bin:$PATH
+COPY requirements.txt ./
+RUN pip install --prefix="/python" --no-cache-dir --ignore-installed \
+    -r requirements.txt \
+    setuptools \
+    supervisor
+
+# Stage 3: Build the main image for the h service.
 FROM alpine:3.7
 LABEL maintainer="Hypothes.is Project and contributors"
 
-# Install system build and runtime dependencies.
+# Install runtime dependencies.
+# (nb. `git` is indeed required at runtime).
 RUN apk add --no-cache \
     ca-certificates \
     collectd \
     collectd-disk \
     collectd-nginx \
+    git \
     libffi \
     libpq \
     nginx \
-    python2 \
-    py2-pip \
-    git
+    python2
 
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
@@ -46,21 +68,11 @@ COPY conf/collectd.conf /etc/collectd/collectd.conf
 RUN mkdir /etc/collectd/collectd.conf.d \
  && chown hypothesis:hypothesis /etc/collectd/collectd.conf.d
 
-# Copy minimal data to allow installation of dependencies.
-COPY requirements.txt ./
-
-# Install build deps, build, and then clean up.
-RUN apk add --no-cache --virtual build-deps \
-    build-base \
-    libffi-dev \
-    postgresql-dev \
-    python-dev \
-  && pip install --no-cache-dir -U pip supervisor \
-  && pip install --no-cache-dir -r requirements.txt \
-  && apk del build-deps
-
 # Copy frontend assets.
-COPY --from=build /build build
+COPY --from=node-build /build build
+
+# Copy Python packages and binaries.
+COPY --from=python-build /python/ /usr/
 
 # Copy the rest of the application files.
 COPY . .
