@@ -41,7 +41,6 @@ FROM alpine:3.7
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install runtime dependencies.
-# (nb. `git` is indeed required at runtime).
 RUN apk add --no-cache \
     ca-certificates \
     collectd \
