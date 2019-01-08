@@ -8,7 +8,6 @@ from pyramid.view import view_config
 
 from h import models
 from h.accounts.events import ActivationEvent
-from h.services.delete_user import UserDeleteError
 from h.services.rename_user import UserRenameError
 from h.tasks.admin import rename_user
 from h.i18n import TranslationString as _  # noqa
@@ -128,15 +127,12 @@ def users_delete(request):
     user = _form_request_user(request)
     svc = request.find_service(name="delete_user")
 
-    try:
-        svc.delete(user)
-        request.session.flash(
-            "Successfully deleted user %s with authority %s"
-            % (user.username, user.authority),
-            "success",
-        )
-    except UserDeleteError as e:
-        request.session.flash(str(e), "error")
+    svc.delete(user)
+    request.session.flash(
+        "Successfully deleted user %s with authority %s"
+        % (user.username, user.authority),
+        "success",
+    )
 
     return httpexceptions.HTTPFound(location=request.route_path("admin.users"))
 

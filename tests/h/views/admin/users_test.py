@@ -8,7 +8,7 @@ from pyramid import httpexceptions
 import pytest
 
 from h.services.annotation_stats import AnnotationStatsService
-from h.services.delete_user import DeleteUserService, UserDeleteError
+from h.services.delete_user import DeleteUserService
 from h.services.user import UserService
 from h.models import Annotation
 from h.views.admin.users import (
@@ -205,17 +205,6 @@ def test_users_delete_deletes_user(user_service, delete_user_service, pyramid_re
     users_delete(pyramid_request)
 
     delete_user_service.delete.assert_called_once_with(user)
-
-
-def test_users_delete_reports_error(user_service, delete_user_service, pyramid_request):
-    pyramid_request.params = {"userid": "acct:bob@example.com"}
-    user = MagicMock()
-    user_service.fetch.return_value = user
-    delete_user_service.delete.side_effect = UserDeleteError("cannot delete user")
-
-    users_delete(pyramid_request)
-
-    assert pyramid_request.session.peek_flash("error") == ["cannot delete user"]
 
 
 @pytest.fixture(autouse=True)

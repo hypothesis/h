@@ -7,10 +7,6 @@ from h.models import Annotation, Group
 from h import storage
 
 
-class UserDeleteError(Exception):
-    pass
-
-
 class DeleteUserService(object):
     def __init__(self, request):
         self.request = request
