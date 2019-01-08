@@ -70,7 +70,7 @@ def get_version():
     # First we try to retrieve the current application version from git.
     try:
         return git_version()
-    except subprocess.CalledProcessError:
+    except (OSError, subprocess.CalledProcessError):
         pass
 
     # We are not in a git checkout or extracting the version from git failed,

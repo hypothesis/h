@@ -47,7 +47,6 @@ RUN apk add --no-cache \
     collectd \
     collectd-disk \
     collectd-nginx \
-    git \
     libffi \
     libpq \
     nginx \
@@ -76,9 +75,6 @@ COPY --from=python-build /python/ /usr/
 
 # Copy the rest of the application files.
 COPY . .
-
-# If we're building from a git clone, ensure that .git is writeable
-RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
 
 # Expose the default port.
 EXPOSE 5000
