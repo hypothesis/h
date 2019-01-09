@@ -27,14 +27,8 @@ class TestLimiter(object):
         ]
 
         params = webob.multidict.MultiDict([("offset", 1), ("limit", 2)])
-        result = search.run(webob.multidict.MultiDict({}))
-        print(ann_ids)
-        print(result.annotation_ids)
-        assert sorted(result.annotation_ids) == sorted(ann_ids)
         result = search.run(params)
 
-        print(ann_ids)
-        print(result.annotation_ids)
         assert sorted(result.annotation_ids) == sorted(ann_ids[1:3])
 
     @pytest.mark.parametrize(
