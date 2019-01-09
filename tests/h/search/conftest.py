@@ -9,7 +9,7 @@ from h.services.group import GroupService
 from h.services.annotation_moderation import AnnotationModerationService
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def group_service(pyramid_config):
     group_service = mock.create_autospec(GroupService, instance=True, spec_set=True)
     group_service.groupids_readable_by.return_value = ["__world__"]
@@ -17,7 +17,7 @@ def group_service(pyramid_config):
     return group_service
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def moderation_service(pyramid_config):
     svc = mock.create_autospec(
         AnnotationModerationService, spec_set=True, instance=True
@@ -45,7 +45,7 @@ def Annotation(factories, index):
 
 
 @pytest.fixture
-def index(es_client, pyramid_request):
+def index(es_client, pyramid_request, moderation_service):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:

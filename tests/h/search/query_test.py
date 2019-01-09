@@ -1054,7 +1054,7 @@ class TestUsersAggregation(object):
 
 
 @pytest.fixture
-def search(pyramid_request):
+def search(pyramid_request, group_service):
     search = Search(pyramid_request)
     # Remove all default modifiers and aggregators except Sorter.
     search.clear()

@@ -564,7 +564,7 @@ class SearchResponseWithIDs(Matcher):
 
 
 @pytest.fixture
-def batch_indexer(db_session, es_client, pyramid_request):
+def batch_indexer(db_session, es_client, pyramid_request, moderation_service):
     return h.search.index.BatchIndexer(
         db_session, es_client, pyramid_request, es_client.index
     )
