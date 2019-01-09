@@ -45,7 +45,7 @@ def Annotation(factories, index):
 
 
 @pytest.fixture
-def index(es_client, pyramid_request, group_service, moderation_service):
+def index(es_client, pyramid_request, moderation_service):
     def _index(*annotations):
         """Index the given annotation(s) into Elasticsearch."""
         for annotation in annotations:
