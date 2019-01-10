@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+import elasticsearch_dsl
 
 import pytest
 
@@ -15,6 +16,8 @@ ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
 def es_client():
     client = _es_client()
     yield client
+    # Push all changes to segments to make sure all annotations that were added get removed.
+    elasticsearch_dsl.Index(client.index, using=client.conn).refresh()
     client.conn.delete_by_query(
         index=client.index,
         body={"query": {"match_all": {}}},
@@ -22,6 +25,8 @@ def es_client():
         # Forcing the deletion resolves the issue, but the exact
         # cause of the version conflict has not been found yet.
         conflicts="proceed",
+        # Add refresh to make deletion changes show up in search results.
+        refresh=True,
     )
 
 
