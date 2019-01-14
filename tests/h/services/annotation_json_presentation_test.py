@@ -29,12 +29,22 @@ class TestAnnotationJSONPresentationService(object):
             mock.sentinel.user,
         )
 
+    def test_hidden_status_included_if_user_can_moderate_group(
+        self, formatters, has_permission, svc
+    ):
+        group = mock.Mock()
+        moderator_check = formatters.AnnotationHiddenFormatter.call_args[0][1]
+        moderator_check(group)
+        has_permission.assert_called_once_with("moderate", group)
+
     def test_it_configures_hidden_formatter(self, services, formatters, svc):
         assert formatters.AnnotationHiddenFormatter.return_value in svc.formatters
 
-    def test_initializes_moderation_formatter(self, services, formatters, svc):
+    def test_initializes_moderation_formatter(
+        self, services, formatters, has_permission, svc
+    ):
         formatters.AnnotationModerationFormatter.assert_called_once_with(
-            services["flag_count"], mock.sentinel.user, mock.sentinel.has_permission
+            services["flag_count"], mock.sentinel.user, has_permission
         )
 
     def test_it_configures_moderation_formatter(self, services, formatters, svc):
@@ -113,7 +123,7 @@ class TestAnnotationJSONPresentationService(object):
         assert result == [present.return_value]
 
     @pytest.fixture
-    def svc(self, services):
+    def svc(self, services, has_permission):
         return AnnotationJSONPresentationService(
             session=mock.sentinel.db_session,
             user=mock.sentinel.user,
@@ -123,8 +133,12 @@ class TestAnnotationJSONPresentationService(object):
             flag_count_svc=services["flag_count"],
             moderation_svc=services["annotation_moderation"],
             user_svc=services["user"],
-            has_permission=mock.sentinel.has_permission,
+            has_permission=has_permission,
         )
+
+    @pytest.fixture
+    def has_permission(self):
+        return mock.Mock()
 
     @pytest.fixture
     def annotation_resource(self):

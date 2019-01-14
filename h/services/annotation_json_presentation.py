@@ -30,7 +30,7 @@ class AnnotationJSONPresentationService(object):
         self.links_svc = links_svc
 
         def moderator_check(group):
-            return has_permission("admin", group)
+            return has_permission("moderate", group)
 
         self.formatters = [
             formatters.AnnotationFlagFormatter(flag_svc, user),
