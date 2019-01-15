@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import pytest
 
-from h.services.list_groups import ListGroupsService
-from h.services.list_groups import list_groups_factory
+from h.services.group_list import GroupListService
+from h.services.group_list import group_list_factory
 
 
 class TestListGroupsAllGroups(object):
@@ -380,16 +380,16 @@ class TestListGroupsRequestGroups(object):
         assert [group.pubid for group in results] == expected_sorted_pubids
 
 
-class TestListGroupsFactory(object):
-    def test_list_groups_factory(self, pyramid_request):
-        svc = list_groups_factory(None, pyramid_request)
+class TestGroupListFactory(object):
+    def test_group_list_factory(self, pyramid_request):
+        svc = group_list_factory(None, pyramid_request)
 
-        assert isinstance(svc, ListGroupsService)
+        assert isinstance(svc, GroupListService)
 
     def test_uses_request_default_authority(self, pyramid_request):
         pyramid_request.default_authority = "bar.com"
 
-        svc = list_groups_factory(None, pyramid_request)
+        svc = group_list_factory(None, pyramid_request)
 
         assert svc.default_authority == "bar.com"
 
@@ -542,6 +542,6 @@ def mixed_groups(factories, user, authority, origin):
 
 @pytest.fixture
 def svc(pyramid_request, db_session):
-    return ListGroupsService(
+    return GroupListService(
         session=db_session, default_authority=pyramid_request.default_authority
     )

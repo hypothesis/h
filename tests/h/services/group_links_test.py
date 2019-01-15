@@ -28,7 +28,7 @@ class TestGroupLinks(object):
 
 
 class TestGroupLinksFactory(object):
-    def test_list_groups_factory(self, pyramid_request):
+    def test_group_links_factory(self, pyramid_request):
         svc = group_links_factory(None, pyramid_request)
 
         assert isinstance(svc, GroupLinksService)

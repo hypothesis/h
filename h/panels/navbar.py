@@ -29,7 +29,7 @@ def navbar(context, request, search=None, opts=None):
         )
         username = request.user.username
     # Make all groups associated with the user visible in the search auto complete.
-    list_group_service = request.find_service(name="list_groups")
+    list_group_service = request.find_service(name="group_list")
     groups = list_group_service.associated_groups(request.user)
 
     def _relationship(group, username):

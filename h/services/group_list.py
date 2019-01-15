@@ -7,7 +7,7 @@ from h.models import group
 from h.util import group_scope as scope_util
 
 
-class ListGroupsService(object):
+class GroupListService(object):
 
     """
     A service for providing filtered lists of groups.
@@ -19,7 +19,7 @@ class ListGroupsService(object):
 
     def __init__(self, session, default_authority):
         """
-        Create a new list_groups service.
+        Create a new group_list service.
 
         :param session: the SQLAlchemy session object
         :param default_authority: the authority to use as a default
@@ -204,8 +204,8 @@ class ListGroupsService(object):
         )
 
 
-def list_groups_factory(context, request):
-    """Return a ListGroupsService instance for the passed context and request."""
-    return ListGroupsService(
+def group_list_factory(context, request):
+    """Return a GroupListService instance for the passed context and request."""
+    return GroupListService(
         session=request.db, default_authority=request.default_authority
     )

@@ -72,7 +72,7 @@ def _current_groups(request, authority):
     """
 
     user = request.user
-    svc = request.find_service(name="list_groups")
+    svc = request.find_service(name="group_list")
     groups = svc.session_groups(user=user, authority=authority)
 
     return [_group_model(request.route_url, group) for group in groups]

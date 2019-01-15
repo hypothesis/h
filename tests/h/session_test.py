@@ -3,12 +3,12 @@ import pytest
 import mock
 
 from h import session
-from h.services.list_groups import ListGroupsService
+from h.services.group_list import GroupListService
 
 
 class TestModel(object):
     def test_proxies_group_lookup_to_service(self, authenticated_request):
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
 
         session.model(authenticated_request)
 
@@ -18,7 +18,7 @@ class TestModel(object):
         )
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
-        svc = unauthenticated_request.find_service(name="list_groups")
+        svc = unauthenticated_request.find_service(name="group_list")
 
         session.model(unauthenticated_request)
 
@@ -27,7 +27,7 @@ class TestModel(object):
         )
 
     def test_open_group_is_public(self, unauthenticated_request, world_group):
-        svc = unauthenticated_request.find_service(name="list_groups")
+        svc = unauthenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [world_group]
 
         model = session.model(unauthenticated_request)
@@ -36,7 +36,7 @@ class TestModel(object):
 
     def test_private_group_is_not_public(self, authenticated_request, factories):
         a_group = factories.Group()
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [a_group]
 
         model = session.model(authenticated_request)
@@ -44,7 +44,7 @@ class TestModel(object):
         assert not model["groups"][0]["public"]
 
     def test_open_group_has_no_url(self, unauthenticated_request, world_group):
-        svc = unauthenticated_request.find_service(name="list_groups")
+        svc = unauthenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [world_group]
 
         model = session.model(unauthenticated_request)
@@ -53,7 +53,7 @@ class TestModel(object):
 
     def test_private_group_has_url(self, authenticated_request, factories):
         a_group = factories.Group()
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [a_group]
 
         model = session.model(authenticated_request)
@@ -92,7 +92,7 @@ class TestProfile(object):
         assert profile["userid"] == "acct:user@example.com"
 
     def test_proxies_group_lookup_to_service(self, authenticated_request):
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
 
         session.profile(authenticated_request)
 
@@ -102,7 +102,7 @@ class TestProfile(object):
         )
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
-        svc = unauthenticated_request.find_service(name="list_groups")
+        svc = unauthenticated_request.find_service(name="group_list")
 
         session.profile(unauthenticated_request)
 
@@ -111,7 +111,7 @@ class TestProfile(object):
         )
 
     def test_open_group_is_public(self, unauthenticated_request, world_group):
-        svc = unauthenticated_request.find_service(name="list_groups")
+        svc = unauthenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [world_group]
 
         profile = session.profile(unauthenticated_request)
@@ -120,7 +120,7 @@ class TestProfile(object):
 
     def test_private_group_is_not_public(self, authenticated_request, factories):
         a_group = factories.Group()
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
@@ -128,7 +128,7 @@ class TestProfile(object):
         assert not profile["groups"][0]["public"]
 
     def test_open_group_has_no_url(self, unauthenticated_request, world_group):
-        svc = unauthenticated_request.find_service(name="list_groups")
+        svc = unauthenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [world_group]
 
         profile = session.profile(unauthenticated_request)
@@ -137,7 +137,7 @@ class TestProfile(object):
 
     def test_private_group_has_url(self, authenticated_request, factories):
         a_group = factories.Group()
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
@@ -219,7 +219,7 @@ class TestProfile(object):
 
 class TestProfileWithScopedGroups(object):
     def test_proxies_group_lookup_to_service(self, authenticated_request):
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
 
         session.profile(authenticated_request)
 
@@ -229,7 +229,7 @@ class TestProfileWithScopedGroups(object):
         )
 
     def test_proxies_group_lookup_to_service_for_unauth(self, unauthenticated_request):
-        svc = unauthenticated_request.find_service(name="list_groups")
+        svc = unauthenticated_request.find_service(name="group_list")
 
         session.profile(unauthenticated_request)
 
@@ -239,7 +239,7 @@ class TestProfileWithScopedGroups(object):
 
     def test_private_group_is_not_public(self, authenticated_request, factories):
         a_group = factories.Group()
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
@@ -248,7 +248,7 @@ class TestProfileWithScopedGroups(object):
 
     def test_private_group_has_url(self, authenticated_request, factories):
         a_group = factories.Group()
-        svc = authenticated_request.find_service(name="list_groups")
+        svc = authenticated_request.find_service(name="group_list")
         svc.session_groups.return_value = [a_group]
 
         profile = session.profile(authenticated_request)
@@ -287,8 +287,8 @@ class FakeRequest(object):
         self.route_url = mock.Mock(return_value="/group/a")
         self.session = mock.Mock(get_csrf_token=lambda: "__CSRF__")
 
-        self._list_groups_service = mock.create_autospec(
-            ListGroupsService, spec_set=True, instance=True
+        self._group_list_service = mock.create_autospec(
+            GroupListService, spec_set=True, instance=True
         )
 
     def set_features(self, feature_dict):
@@ -298,8 +298,8 @@ class FakeRequest(object):
         self.user.sidebar_tutorial_dismissed = dismissed
 
     def find_service(self, **kwargs):
-        if kwargs == {"name": "list_groups"}:
-            return self._list_groups_service
+        if kwargs == {"name": "group_list"}:
+            return self._group_list_service
         else:
             raise AssertionError(
                 "find_service called with unrecognised args " "{}".format(kwargs)
