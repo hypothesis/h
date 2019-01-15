@@ -6,6 +6,7 @@ import pytest
 
 from h.services.group_list import GroupListService
 from h.services.group_list import group_list_factory
+from h.models.group import Group
 
 
 class TestListGroupsSessionGroups(object):
@@ -96,14 +97,18 @@ class TestListGroupsRequestGroups(object):
     ):
         results = svc.request_groups(authority=authority, document_uri=document_uri)
 
-        assert results == scoped_open_groups
+        group_names = [group.name for group in results]
+        assert set(results) == set(scoped_open_groups)
+        assert group_names == ["Antigone", "Blender"]
 
     def test_it_returns_matching_scoped_restricted_groups(
         self, svc, authority, document_uri, scoped_restricted_groups
     ):
         results = svc.request_groups(authority=authority, document_uri=document_uri)
 
-        assert results == scoped_restricted_groups
+        group_names = [group.name for group in results]
+        assert group_names == ["Affluent", "Forensic"]
+        assert set(results) == set(scoped_restricted_groups)
 
     def test_it_returns_no_scoped_groups_if_uri_missing(
         self, svc, authority, scoped_open_groups, scoped_restricted_groups
@@ -193,6 +198,88 @@ class TestListGroupsRequestGroups(object):
         assert [group.pubid for group in results] == expected_sorted_pubids
 
 
+class TestUserGroups(object):
+    def test_it_returns_all_user_groups_sorted_by_group_name(
+        self, svc, user, user_groups
+    ):
+        user.groups = user_groups
+
+        u_groups = svc.user_groups(user)
+
+        group_names = [group.name for group in u_groups]
+        assert group_names == ["Alpha", "Beta", "Gamma", "Oomph"]
+
+    def test_it_returns_empty_list_if_no_user(self, svc):
+        u_groups = svc.user_groups(user=None)
+
+        assert u_groups == []
+
+
+class TestPrivateGroups(object):
+    def test_it_returns_a_users_private_groups(self, svc, user, user_groups):
+        user.groups = user_groups
+
+        p_groups = svc.private_groups(user)
+
+        group_names = [group.name for group in p_groups]
+        assert group_names == ["Alpha", "Beta", "Gamma"]
+
+    def test_it_returns_empty_list_if_no_user(self, svc):
+        p_groups = svc.private_groups(user=None)
+
+        assert p_groups == []
+
+
+@pytest.mark.use_fixtures("scoped_groups")
+class TestScopedGroups(object):
+    def test_it_returns_scoped_groups_that_match_document_uri_and_authority(
+        self, svc, document_uri, authority, scoped_groups
+    ):
+        s_groups = svc.scoped_groups(authority, document_uri)
+
+        group_names = [group.name for group in s_groups]
+        assert group_names == ["Affluent", "Antigone", "Blender", "Forensic"]
+
+    def test_it_returns_empty_list_if_no_scope_matches(self, svc, authority):
+        s_groups = svc.scoped_groups(authority, "https://www.whatever.org")
+
+        assert s_groups == []
+
+    def test_it_returns_empty_list_if_no_authority_matches(self, svc, document_uri):
+        s_groups = svc.scoped_groups("inventive.org", document_uri)
+
+        assert s_groups == []
+
+    def test_it_returns_empty_list_if_uri_scope_parsing_fails(
+        self, svc, document_uri, authority, scope_util
+    ):
+        scope_util.uri_scope.return_value = None
+
+        s_groups = svc.scoped_groups(authority, document_uri)
+
+        assert s_groups == []
+
+
+class TestWorldGroup(object):
+    def test_it_returns_world_group_if_one_exists_for_authority(
+        self, svc, default_authority
+    ):
+        # Unit test global setup includes the addition of a "__world__" group
+        # for the test-env's default authority. So that group exists in the
+        # test DB, always
+        w_group = svc.world_group(default_authority)
+
+        assert isinstance(w_group, Group)
+        assert w_group.pubid == "__world__"
+
+    def test_it_returns_None_if_no_world_group_for_authority(self, svc, authority):
+        # No "__world__" group exists in THIS test module's authority
+
+        w_group = svc.world_group(authority)
+
+        assert w_group is None
+
+
 class TestGroupListFactory(object):
     def test_group_list_factory(self, pyramid_request):
         svc = group_list_factory(None, pyramid_request)
@@ -239,6 +326,16 @@ def user(factories, authority):
 
 
 @pytest.fixture
+def user_groups(user, factories):
+    return [
+        factories.Group(name="Beta"),
+        factories.Group(name="Gamma"),
+        factories.RestrictedGroup(name="Oomph"),
+        factories.Group(name="Alpha"),
+    ]
+
+
+@pytest.fixture
 def origin():
     return "http://foo.com"
 
@@ -252,12 +349,15 @@ def document_uri():
 def scoped_open_groups(factories, authority, origin, user):
     return [
         factories.OpenGroup(
+            name="Blender",
             authority=authority,
             creator=user,
             scopes=[factories.GroupScope(origin=origin)],
         ),
         factories.OpenGroup(
-            authority=authority, scopes=[factories.GroupScope(origin=origin)]
+            name="Antigone",
+            authority=authority,
+            scopes=[factories.GroupScope(origin=origin)],
         ),
     ]
 
@@ -266,14 +366,22 @@ def scoped_open_groups(factories, authority, origin, user):
 def scoped_restricted_groups(factories, authority, origin, user):
     return [
         factories.RestrictedGroup(
+            name="Forensic",
             authority=authority,
             creator=user,
             scopes=[factories.GroupScope(origin=origin)],
         ),
         factories.RestrictedGroup(
-            authority=authority, scopes=[factories.GroupScope(origin=origin)]
+            name="Affluent",
+            authority=authority,
+            scopes=[factories.GroupScope(origin=origin)],
         ),
     ]
+
+
+@pytest.fixture
+def scoped_groups(scoped_open_groups, scoped_restricted_groups):
+    return scoped_open_groups + scoped_restricted_groups
 
 
 @pytest.fixture
@@ -351,6 +459,11 @@ def mixed_groups(factories, user, authority, origin):
             scopes=[factories.GroupScope(origin=origin)],
         ),
     ]
+
+
+@pytest.fixture
+def scope_util(patch):
+    return patch("h.services.group_list.scope_util")
 
 
 @pytest.fixture
