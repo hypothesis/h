@@ -5,9 +5,13 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from pyramid.httpexceptions import HTTPNoContent, HTTPBadRequest, HTTPNotFound
+from pyramid.httpexceptions import (
+    HTTPNoContent,
+    HTTPBadRequest,
+    HTTPNotFound,
+    HTTPConflict,
+)
 
-from h.exceptions import ConflictError
 from h.views.api import groups as views
 from h.services.list_groups import ListGroupsService
 from h.services.group import GroupService
@@ -198,7 +202,7 @@ class TestCreateGroup(object):
             "My Group", pyramid_request.user.userid, description=None, groupid=None
         )
 
-    def test_it_raises_ConflictError_on_duplicate(
+    def test_it_raises_HTTPConflict_on_duplicate(
         self, pyramid_request, CreateGroupAPISchema, group_service, factories
     ):
 
@@ -207,7 +211,7 @@ class TestCreateGroup(object):
         )
         group_service.fetch.return_value = group
 
-        with pytest.raises(ConflictError, match="group with groupid.*already exists"):
+        with pytest.raises(HTTPConflict, match="group with groupid.*already exists"):
             views.create(pyramid_request)
 
     def test_it_creates_group_context_from_created_group(
@@ -295,7 +299,7 @@ class TestUpdateGroup(object):
 
         group_update_service.update.assert_called_once_with(group, **patch_payload)
 
-    def test_it_raises_ConflictError_on_duplicate(
+    def test_it_raises_HTTPConflict_on_duplicate(
         self, pyramid_request, UpdateGroupAPISchema, group_service, factories
     ):
 
@@ -307,10 +311,10 @@ class TestUpdateGroup(object):
         )
         group_service.fetch.return_value = pre_existing_group
 
-        with pytest.raises(ConflictError, match="group with groupid.*already exists"):
+        with pytest.raises(HTTPConflict, match="group with groupid.*already exists"):
             views.update(group, pyramid_request)
 
-    def test_it_does_not_raise_ConflictError_if_duplicate_is_same_group(
+    def test_it_does_not_raise_HTTPConflict_if_duplicate_is_same_group(
         self, pyramid_request, UpdateGroupAPISchema, group_service, factories
     ):
         group = factories.Group(
@@ -393,7 +397,7 @@ class TestUpsertGroup(object):
             {"name": "Rename Group"}
         )
 
-    def test_it_raises_ConflictError_on_duplicate(
+    def test_it_raises_HTTPConflict_on_duplicate(
         self, pyramid_request, group_service, factories, GroupUpsertContext
     ):
 
@@ -408,10 +412,10 @@ class TestUpsertGroup(object):
 
         group_service.fetch.return_value = pre_existing_group
 
-        with pytest.raises(ConflictError, match="group with groupid.*already exists"):
+        with pytest.raises(HTTPConflict, match="group with groupid.*already exists"):
             views.upsert(context, pyramid_request)
 
-    def test_it_does_not_raise_ConflictError_if_duplicate_is_same_group(
+    def test_it_does_not_raise_HTTPConflict_if_duplicate_is_same_group(
         self, pyramid_request, group_service, factories, GroupUpsertContext
     ):
         group = factories.Group(

@@ -12,7 +12,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import models
 from h._compat import urlparse
-from h.exceptions import OAuthTokenError
+from h.views.api.exceptions import OAuthTokenError
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
 from h.views.api.config import api_config
@@ -224,14 +224,14 @@ class OAuthRevocationController(object):
 def debug_token(request):
     if not request.auth_token:
         raise OAuthTokenError(
-            "Bearer token is missing in Authorization HTTP header", "missing_token", 401
+            "Bearer token is missing in Authorization HTTP header", "missing_token"
         )
 
     svc = request.find_service(name="auth_token")
     token = svc.validate(request.auth_token)
     if token is None:
         raise OAuthTokenError(
-            "Bearer token does not exist or is expired", "missing_token", 401
+            "Bearer token does not exist or is expired", "missing_token"
         )
 
     token = svc.fetch(request.auth_token)

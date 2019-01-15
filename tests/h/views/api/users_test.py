@@ -4,8 +4,9 @@ from __future__ import unicode_literals
 
 import pytest
 import mock
+from pyramid.httpexceptions import HTTPConflict
 
-from h.exceptions import PayloadError, ConflictError
+from h.views.api.exceptions import PayloadError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
@@ -94,13 +95,13 @@ class TestCreate(object):
             valid_payload, authority=auth_client.authority
         )
 
-    def test_raises_conflict_error_from_duplicate_user_error(
+    def test_raises_HTTPConflict_from_DuplicateUserError(
         self, valid_payload, pyramid_request, user_unique_svc
     ):
         pyramid_request.json_body = valid_payload
         user_unique_svc.ensure_unique.side_effect = DuplicateUserError("nope")
 
-        with pytest.raises(ConflictError) as exc:
+        with pytest.raises(HTTPConflict) as exc:
             create(pyramid_request)
 
         assert "nope" in str(exc.value)

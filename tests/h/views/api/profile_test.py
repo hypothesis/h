@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.exceptions import APIError
+from pyramid.httpexceptions import HTTPBadRequest
+
 from h.views.api import profile as views
 
 
@@ -39,7 +40,7 @@ class TestUpdatePreferences(object):
     def test_handles_invalid_preferences_error(self, pyramid_request, user_service):
         user_service.update_preferences.side_effect = TypeError("uh oh, wrong prefs")
 
-        with pytest.raises(APIError) as exc:
+        with pytest.raises(HTTPBadRequest) as exc:
             views.update_preferences(pyramid_request)
 
         assert str(exc.value) == "uh oh, wrong prefs"

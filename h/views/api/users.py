@@ -2,8 +2,10 @@
 
 from __future__ import unicode_literals
 
+from pyramid.httpexceptions import HTTPConflict
+
 from h.auth.util import client_authority
-from h.exceptions import PayloadError, ConflictError
+from h.views.api.exceptions import PayloadError
 from h.presenters import UserJSONPresenter
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.schemas import ValidationError
@@ -28,7 +30,7 @@ def create(request):
 
     :raises ValidationError: if ``authority`` param does not match client
                              authority
-    :raises ConflictError:   if user already exists
+    :raises HTTPConflict:    if user already exists
     """
     client_authority_ = client_authority(request)
     schema = CreateUserAPISchema()
@@ -47,7 +49,7 @@ def create(request):
     try:
         user_unique_service.ensure_unique(appstruct, authority=client_authority_)
     except DuplicateUserError as err:
-        raise ConflictError(err)
+        raise HTTPConflict(str(err))
 
     user_signup_service = request.find_service(name="user_signup")
     user = user_signup_service.signup(require_activation=False, **appstruct)
