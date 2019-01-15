@@ -61,7 +61,7 @@ class WebSocketWSGIHandler(PyWSGIHandler):
 
     def finalize_headers(self):
         if self.environ.get("HTTP_UPGRADE", "").lower() == "websocket":
-            # Middleware, like Raven, may yield from the empty upgrade
+            # Middleware may yield from the empty upgrade
             # response, confusing this method into sending "Transfer-Encoding:
             # chunked" and, in turn, this confuses some strict WebSocket
             # clients.

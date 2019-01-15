@@ -114,6 +114,7 @@ def configure(environ=None, settings=None):
     # password component in the DSN URI.
     settings_manager.set("h.sentry_dsn_client", "SENTRY_DSN_CLIENT")
     settings_manager.set("h.sentry_dsn_frontend", "SENTRY_DSN_FRONTEND")
+    settings_manager.set("h.sentry_environment", "SENTRY_ENVIRONMENT", default="dev")
     settings_manager.set("h.websocket_url", "WEBSOCKET_URL")
 
     # Debug/development settings

@@ -67,7 +67,6 @@ def error_badhandshake(exc, request):
 @view_config(context=Exception, renderer="json")
 def error(context, request):
     request.response.status_code = 500
-    request.sentry.captureException()
     request.stats.incr("streamer.error.server_error")
     if request.debug:
         raise

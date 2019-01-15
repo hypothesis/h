@@ -6,6 +6,8 @@ import logging
 
 from zope.interface import providedBy
 
+from h.sentry import report_exception
+
 
 log = logging.getLogger(__name__)
 
@@ -59,14 +61,9 @@ class EventQueue(object):
                 try:
                     subscriber(event)
                 except Exception:
-                    sentry = getattr(event.request, "sentry", None)
-                    if sentry is not None:
-                        sentry.captureException()
-                    else:
-                        log.exception("Queued event subscriber failed")
-
                     if event.request.debug:
                         raise
+                    report_exception()
 
     def response_callback(self, request, response):
         if request.exception is not None:

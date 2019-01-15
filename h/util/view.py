@@ -21,19 +21,6 @@ def handle_exception(request, exception):
     """
     request.response.status_int = 500
 
-    # There are two code paths here depending on whether this is the most recent
-    # exception in the current thread. If it is, we can let Raven capture
-    # the details under Python 2 + 3. If not, we need to construct the
-    # exc_info tuple manually and the stacktrace is only available in Python 3.
-    last_exc_info = _exc_info()
-    if exception is last_exc_info[1]:
-        request.sentry.captureException()
-    else:
-        # `__traceback__` is a Python 3-only property.
-        traceback = getattr(exception, "__traceback__", None)
-        exc_info = (type(exception), exception, traceback)
-        request.sentry.captureException(exc_info)
-
     # In debug mode we should just reraise, so that the exception is caught by
     # the debug toolbar.
     if request.debug:

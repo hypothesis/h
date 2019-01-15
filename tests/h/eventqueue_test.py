@@ -82,29 +82,6 @@ class TestEventQueue(object):
             queue.publish_all()
         assert str(excinfo.value) == "boom!"
 
-    def test_publish_all_sends_exception_to_sentry(self, subscriber, pyramid_request):
-        pyramid_request.sentry = mock.Mock()
-        subscriber.side_effect = ValueError("exploded!")
-        queue = eventqueue.EventQueue(pyramid_request)
-        event = DummyEvent(pyramid_request)
-        queue(event)
-
-        queue.publish_all()
-
-        assert pyramid_request.sentry.captureException.called
-
-    def test_publish_all_logs_exception_when_sentry_is_not_available(
-        self, log, subscriber, pyramid_request
-    ):
-        subscriber.side_effect = ValueError("exploded!")
-        queue = eventqueue.EventQueue(pyramid_request)
-        event = DummyEvent(pyramid_request)
-        queue(event)
-
-        queue.publish_all()
-
-        assert log.exception.called
-
     def test_response_callback_skips_publishing_events_on_exception(
         self, publish_all, pyramid_request
     ):

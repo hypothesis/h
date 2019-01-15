@@ -16,7 +16,6 @@ from h.services.links import LinksService
 from h.services.nipsa import NipsaService
 from h.services.groupfinder import GroupfinderService
 from h.streamer import websocket
-import h.sentry
 import h.stats
 
 from h._compat import text_type
@@ -49,13 +48,11 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
             )
 
     conn = realtime.get_connection(settings)
-    sentry_client = h.sentry.get_client(settings)
     statsd_client = h.stats.get_client(settings)
     consumer = Consumer(
         connection=conn,
         routing_key=routing_key,
         handler=_handler,
-        sentry_client=sentry_client,
         statsd_client=statsd_client,
     )
     consumer.run()
