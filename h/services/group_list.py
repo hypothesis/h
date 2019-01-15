@@ -39,19 +39,6 @@ class GroupListService(object):
             return user.authority
         return authority or self.default_authority
 
-    def all_groups(self, user=None, authority=None, document_uri=None):
-        """
-        TODO: Remove this method once the scoped-groups feature flag is removed.
-        Return a list of groups relevant to this session/profile (i.e. user).
-
-        Return a list of groups filtered on user and authority. All open
-        groups matching the authority will be included.
-        """
-        world_readable_groups = self._readable_by_world_groups(user, authority)
-        user_groups = self._user_groups(user)
-
-        return world_readable_groups + user_groups
-
     def session_groups(self, authority, user=None):
         """
         Return a list of groups relevant to the user-session combination,
