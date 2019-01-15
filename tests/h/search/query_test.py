@@ -20,10 +20,10 @@ class TestLimiter(object):
     def test_it_limits_number_of_annotations(self, Annotation, search):
         dt = datetime.datetime
         ann_ids = [
-            Annotation(updated=dt(2017, 1, 1)).id,
-            Annotation(updated=dt(2017, 1, 2)).id,
-            Annotation(updated=dt(2017, 1, 3)).id,
             Annotation(updated=dt(2017, 1, 4)).id,
+            Annotation(updated=dt(2017, 1, 3)).id,
+            Annotation(updated=dt(2017, 1, 2)).id,
+            Annotation(updated=dt(2017, 1, 1)).id,
         ]
 
         params = webob.multidict.MultiDict([("offset", 1), ("limit", 2)])
