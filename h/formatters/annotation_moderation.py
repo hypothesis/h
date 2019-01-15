@@ -39,7 +39,7 @@ class AnnotationModerationFormatter(object):
         return flag_counts
 
     def format(self, annotation_resource):
-        if not self._has_permission("admin", annotation_resource.group):
+        if not self._has_permission("moderate", annotation_resource.group):
             return {}
 
         flag_count = self._load(annotation_resource.annotation)
