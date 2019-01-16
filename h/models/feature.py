@@ -20,6 +20,7 @@ FEATURES = {
     ),
     "overlay_highlighter": "Use the new overlay highlighter?",
     "client_display_names": "Render display names instead of user names in the client",
+    "community_groups": "Turn on community groups in the client and api.",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
