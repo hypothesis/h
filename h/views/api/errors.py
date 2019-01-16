@@ -11,12 +11,14 @@ from __future__ import unicode_literals
 
 from pyramid.view import forbidden_view_config
 from pyramid.view import notfound_view_config
+from pyramid.view import view_config
 from pyramid import httpexceptions
 
 from h.i18n import TranslationString as _  # noqa: N813
 from h.schemas import ValidationError
 from h.util.view import handle_exception, json_view
 from h.views.api.config import cors_policy
+from h.views.api.exceptions import OAuthAuthorizeError
 
 # All exception views below need to apply the `cors_policy` decorator for the
 # responses to be readable by web applications other than those on the same
@@ -34,6 +36,15 @@ def api_notfound(request):
         "not currently authorized to see it."
     )
     return {"status": "failure", "reason": message}
+
+
+@view_config(
+    context=OAuthAuthorizeError, renderer="h:templates/oauth/error.html.jinja2"
+)
+def oauth_error(context, request):
+    """Handle an expected/deliberately thrown OAuth exception."""
+    request.response.status_code = context.status_code
+    return {"detail": context.detail}
 
 
 @json_view(context=httpexceptions.HTTPError, decorator=cors_policy)
