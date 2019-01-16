@@ -7,6 +7,7 @@ import pytest
 
 from pyramid.httpexceptions import HTTPBadRequest
 
+from h.services.group_list import GroupListService
 from h.views.api import profile as views
 
 
@@ -57,20 +58,86 @@ class TestUpdatePreferences(object):
         assert result == session_profile.return_value
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, user):
-        pyramid_request.user = user
-        pyramid_request.json_body = {}
-        return pyramid_request
-
-    @pytest.fixture
-    def user(self, factories):
-        return factories.User.build()
-
-    @pytest.fixture
     def user_service(self, pyramid_config):
         svc = mock.Mock()
         pyramid_config.register_service(svc, name="user")
         return svc
+
+
+@pytest.mark.usefixtures("group_list_service", "GroupContext", "GroupsJSONPresenter")
+class TestProfileGroups(object):
+    def test_it_proxies_to_group_list_service(
+        self, pyramid_request, group_list_service
+    ):
+        views.profile_groups(pyramid_request)
+
+        group_list_service.user_groups.assert_called_once_with(
+            user=pyramid_request.user
+        )
+
+    def test_it_converts_group_models_to_contexts(
+        self, pyramid_request, group_list_service, GroupContext
+    ):
+        group_list_service.user_groups.return_value = [1, 2, 3]
+        views.profile_groups(pyramid_request)
+
+        GroupContext.assert_has_calls(
+            [
+                mock.call(1, pyramid_request),
+                mock.call(2, pyramid_request),
+                mock.call(3, pyramid_request),
+            ]
+        )
+
+    def test_it_returns_presented_groups(
+        self, pyramid_request, group_list_service, GroupsJSONPresenter
+    ):
+        group_list_service.user_groups.return_value = [1, 2, 3]
+
+        result = views.profile_groups(pyramid_request)
+
+        assert result == GroupsJSONPresenter([1, 2, 3]).asdicts.return_value
+
+    def test_it_proxies_expand_to_presenter(
+        self, pyramid_request, group_list_service, GroupsJSONPresenter
+    ):
+        pyramid_request.params["expand"] = "organization"
+        group_list_service.user_groups.return_value = [1, 2, 3]
+
+        views.profile_groups(pyramid_request)
+
+        GroupsJSONPresenter([1, 2, 3]).asdicts.assert_called_once_with(
+            expand=["organization"]
+        )
+
+
+@pytest.fixture
+def user(factories):
+    return factories.User.build()
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request, user):
+    pyramid_request.user = user
+    pyramid_request.json_body = {}
+    return pyramid_request
+
+
+@pytest.fixture
+def group_list_service(pyramid_config):
+    svc = mock.create_autospec(GroupListService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name="group_list")
+    return svc
+
+
+@pytest.fixture
+def GroupContext(patch):
+    return patch("h.views.api.profile.GroupContext")
+
+
+@pytest.fixture
+def GroupsJSONPresenter(patch):
+    return patch("h.views.api.profile.GroupsJSONPresenter")
 
 
 @pytest.fixture

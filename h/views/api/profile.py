@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 from pyramid.httpexceptions import HTTPBadRequest
 
 from h import session as h_session
+from h.presenters import GroupsJSONPresenter
+from h.traversal import GroupContext
 from h.views.api.config import api_config
 
 
@@ -17,6 +19,28 @@ from h.views.api.config import api_config
 def profile(request):
     authority = request.params.get("authority")
     return h_session.profile(request, authority)
+
+
+@api_config(
+    route_name="api.profile_groups",
+    request_method="GET",
+    description="Fetch the current user's groups",
+)
+def profile_groups(request):
+    """
+    Retrieve the groups for this request's user.
+
+    Retrieve all groups for which the request's user is a member, regardless
+    of type. Groups are sorted by (name, pubid).
+    """
+
+    expand = request.GET.getall("expand") or []
+    list_svc = request.find_service(name="group_list")
+
+    groups = list_svc.user_groups(user=request.user)
+    group_contexts = [GroupContext(group, request) for group in groups]
+    groups_formatted = GroupsJSONPresenter(group_contexts).asdicts(expand=expand)
+    return groups_formatted
 
 
 @api_config(

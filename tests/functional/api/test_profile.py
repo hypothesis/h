@@ -22,7 +22,6 @@ class TestGetProfile(object):
         With no authentication and no authority parameter, this should default
         to the site's `authority` and show only the global group.
         """
-
         res = app.get("/api/profile")
 
         assert res.json["userid"] is None
@@ -39,7 +38,6 @@ class TestGetProfile(object):
         res = app.get("/api/profile", headers=headers)
 
         assert res.json["userid"] == user.userid
-        assert [group["id"] for group in res.json["groups"]] == ["__world__"]
 
     def test_it_returns_profile_for_third_party_authd_user(
         self, app, open_group, third_party_user_with_token
@@ -58,6 +56,36 @@ class TestGetProfile(object):
         # The profile API returns no open groups for third-party accounts.
         # (The client gets open groups from the groups API instead.)
         assert group_ids == []
+
+
+@pytest.mark.functional
+class TestGetProfileGroups(object):
+    def test_it_returns_empty_list_when_not_authed(self, app):
+        res = app.get("/api/profile/groups")
+
+        assert res.json == []
+
+    def test_it_returns_users_groups_when_authed(self, app, user_with_token, groups):
+        user, token = user_with_token
+        user_groupids = [group.pubid for group in groups].sort()
+
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
+
+        res = app.get("/api/profile/groups", headers=headers)
+
+        returned_groupids = [group["id"] for group in res.json].sort()
+
+        assert user_groupids == returned_groupids
+
+    def test_it_returns_group_properties(self, app, user_with_token):
+        user, token = user_with_token
+
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
+
+        res = app.get("/api/profile/groups", headers=headers)
+
+        for property in ["id", "name", "scoped", "type"]:
+            assert property in res.json[0]
 
 
 @pytest.mark.functional
@@ -122,8 +150,20 @@ class TestPatchProfile(object):
 
 
 @pytest.fixture
-def user(db_session, factories):
+def groups(db_session, factories):
+    groups = [
+        factories.Group(),
+        factories.Group(),
+        factories.RestrictedGroup(),
+        factories.OpenGroup(),
+    ]
+    return groups
+
+
+@pytest.fixture
+def user(groups, db_session, factories):
     user = factories.User()
+    user.groups = groups
     db_session.commit()
     return user
 

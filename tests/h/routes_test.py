@@ -145,6 +145,7 @@ def test_includeme():
             traverse="/{id}",
         ),
         call("api.profile", "/api/profile", factory="h.traversal.ProfileRoot"),
+        call("api.profile_groups", "/api/profile/groups"),
         call("api.debug_token", "/api/debug-token"),
         call(
             "api.group_member",

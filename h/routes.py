@@ -150,6 +150,7 @@ def includeme(config):
         traverse="/{id}",
     )
     config.add_route("api.profile", "/api/profile", factory="h.traversal.ProfileRoot")
+    config.add_route("api.profile_groups", "/api/profile/groups")
     config.add_route("api.debug_token", "/api/debug-token")
     config.add_route(
         "api.group_member",
