@@ -13,7 +13,7 @@ from pyramid.httpexceptions import (
 )
 
 from h.views.api import groups as views
-from h.services.list_groups import ListGroupsService
+from h.services.group_list import GroupListService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
 from h.services.group_update import GroupUpdateService
@@ -25,43 +25,43 @@ from h import traversal
 pytestmark = pytest.mark.usefixtures("GroupsJSONPresenter")
 
 
-@pytest.mark.usefixtures("list_groups_service", "group_links_service")
+@pytest.mark.usefixtures("group_list_service", "group_links_service")
 class TestGetGroups(object):
-    def test_proxies_to_list_service(self, anonymous_request, list_groups_service):
+    def test_proxies_to_list_service(self, anonymous_request, group_list_service):
         views.groups(anonymous_request)
 
-        list_groups_service.request_groups.assert_called_once_with(
+        group_list_service.request_groups.assert_called_once_with(
             user=None, authority=anonymous_request.default_authority, document_uri=None
         )
 
-    def test_proxies_request_params(self, anonymous_request, list_groups_service):
+    def test_proxies_request_params(self, anonymous_request, group_list_service):
         anonymous_request.params["document_uri"] = "http://example.com/thisthing.html"
         anonymous_request.params["authority"] = "foo.com"
         views.groups(anonymous_request)
 
-        list_groups_service.request_groups.assert_called_once_with(
+        group_list_service.request_groups.assert_called_once_with(
             user=None,
             authority="foo.com",
             document_uri="http://example.com/thisthing.html",
         )
 
     def test_overrides_authority_with_user_authority(
-        self, authenticated_request, list_groups_service
+        self, authenticated_request, group_list_service
     ):
         authenticated_request.params["authority"] = "foo.com"
 
         views.groups(authenticated_request)
 
-        list_groups_service.request_groups.assert_called_once_with(
+        group_list_service.request_groups.assert_called_once_with(
             user=authenticated_request.user,
             authority=authenticated_request.user.authority,
             document_uri=None,
         )
 
     def test_converts_groups_to_resources(
-        self, GroupContext, anonymous_request, open_groups, list_groups_service
+        self, GroupContext, anonymous_request, open_groups, group_list_service
     ):
-        list_groups_service.request_groups.return_value = open_groups
+        group_list_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
@@ -76,30 +76,30 @@ class TestGetGroups(object):
         self,
         group_links_service,
         open_groups,
-        list_groups_service,
+        group_list_service,
         GroupsJSONPresenter,
         anonymous_request,
     ):
-        list_groups_service.request_groups.return_value = open_groups
+        group_list_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
         GroupsJSONPresenter.assert_called_once()
 
     def test_returns_dicts_from_presenter(
-        self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter
+        self, anonymous_request, open_groups, group_list_service, GroupsJSONPresenter
     ):
-        list_groups_service.request_groups.return_value = open_groups
+        group_list_service.request_groups.return_value = open_groups
 
         result = views.groups(anonymous_request)
 
         assert result == GroupsJSONPresenter(open_groups).asdicts.return_value
 
     def test_proxies_expand_to_presenter(
-        self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter
+        self, anonymous_request, open_groups, group_list_service, GroupsJSONPresenter
     ):
         anonymous_request.params["expand"] = "organization"
-        list_groups_service.request_groups.return_value = open_groups
+        group_list_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
@@ -108,11 +108,11 @@ class TestGetGroups(object):
         )
 
     def test_passes_multiple_expand_to_presenter(
-        self, anonymous_request, open_groups, list_groups_service, GroupsJSONPresenter
+        self, anonymous_request, open_groups, group_list_service, GroupsJSONPresenter
     ):
         anonymous_request.GET.add("expand", "organization")
         anonymous_request.GET.add("expand", "foobars")
-        list_groups_service.request_groups.return_value = open_groups
+        group_list_service.request_groups.return_value = open_groups
 
         views.groups(anonymous_request)
 
@@ -690,7 +690,7 @@ def group_links_service(pyramid_config):
 
 
 @pytest.fixture
-def list_groups_service(pyramid_config):
-    svc = mock.create_autospec(ListGroupsService, spec_set=True, instance=True)
-    pyramid_config.register_service(svc, name="list_groups")
+def group_list_service(pyramid_config):
+    svc = mock.create_autospec(GroupListService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name="group_list")
     return svc

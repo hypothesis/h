@@ -32,7 +32,7 @@ def groups(request):
     document_uri = request.params.get("document_uri")
     expand = request.GET.getall("expand") or []
 
-    list_svc = request.find_service(name="list_groups")
+    list_svc = request.find_service(name="group_list")
 
     if request.user is not None:
         authority = request.user.authority

@@ -7,10 +7,10 @@ from mock import PropertyMock
 import pytest
 
 from h.panels.navbar import navbar
-from h.services.list_groups import ListGroupsService
+from h.services.group_list import GroupListService
 
 
-@pytest.mark.usefixtures("routes", "list_groups_svc")
+@pytest.mark.usefixtures("routes", "group_list_svc")
 class TestNavbar(object):
     def test_it_sets_null_username_when_logged_out(self, req):
         result = navbar({}, req)
@@ -108,8 +108,8 @@ class TestNavbar(object):
         return pyramid_request
 
     @pytest.fixture
-    def list_groups_svc(self, pyramid_config, user):
-        svc = mock.create_autospec(ListGroupsService, spec_set=True, instance=True)
+    def group_list_svc(self, pyramid_config, user):
+        svc = mock.create_autospec(GroupListService, spec_set=True, instance=True)
         svc.associated_groups.return_value = user.groups
-        pyramid_config.register_service(svc, name="list_groups")
+        pyramid_config.register_service(svc, name="group_list")
         return svc

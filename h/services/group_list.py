@@ -7,19 +7,19 @@ from h.models import group
 from h.util import group_scope as scope_util
 
 
-class ListGroupsService(object):
+class GroupListService(object):
 
     """
     A service for providing filtered lists of groups.
 
     This service filters groups by user session, scope, etc.
 
-    ALl public methods return a list of relevant group model objects.
+    ALl public methods return relevant group model objects.
     """
 
     def __init__(self, session, default_authority):
         """
-        Create a new list_groups service.
+        Create a new group_list service.
 
         :param session: the SQLAlchemy session object
         :param default_authority: the authority to use as a default
@@ -38,19 +38,6 @@ class ListGroupsService(object):
         if user is not None:
             return user.authority
         return authority or self.default_authority
-
-    def all_groups(self, user=None, authority=None, document_uri=None):
-        """
-        TODO: Remove this method once the scoped-groups feature flag is removed.
-        Return a list of groups relevant to this session/profile (i.e. user).
-
-        Return a list of groups filtered on user and authority. All open
-        groups matching the authority will be included.
-        """
-        world_readable_groups = self._readable_by_world_groups(user, authority)
-        user_groups = self._user_groups(user)
-
-        return world_readable_groups + user_groups
 
     def session_groups(self, authority, user=None):
         """
@@ -71,9 +58,9 @@ class ListGroupsService(object):
         activity pages and/or other views on the h service.
         """
 
-        world_group = self._world_group(authority)
+        world_group = self.world_group(authority)
         world_group = [world_group] if world_group else []
-        user_groups = self._user_groups(user)
+        user_groups = self.user_groups(user)
 
         return world_group + user_groups
 
@@ -93,7 +80,7 @@ class ListGroupsService(object):
             for group in self._readable_by_world_groups(user, None)
             if group.creator == user or user in group.members
         ]
-        private_groups = self._private_groups(user)
+        private_groups = self.private_groups(user)
 
         return world_readable_groups + private_groups
 
@@ -117,42 +104,48 @@ class ListGroupsService(object):
           This should return a list of groups appropriate to the client
           via the API.
         """
-        scoped_groups = self._scoped_groups(authority, document_uri)
+        scoped_groups = self.scoped_groups(authority, document_uri)
 
-        world_group = self._world_group(authority)
+        world_group = self.world_group(authority)
         world_group = [world_group] if world_group else []
 
-        private_groups = self._private_groups(user)
+        private_groups = self.private_groups(user)
 
         return scoped_groups + world_group + private_groups
 
-    def _readable_by_world_groups(self, user=None, authority=None):
+    def user_groups(self, user=None):
         """
-        Return all groups readable by world for the authority.
+        Return a sorted list of a user's groups.
+
+        Return a list of all groups for which the given user is a member of,
+        regardless of group type or other considerations. Returned groups will
+        be sorted by name.
+
+        The returned list will be empty if no ``user`` is provided.
+
+        :type user: :class:~h.models.user or None
+        :rtype: list of :class:`h.models.group`
         """
-
-        authority = self._authority(user, authority)
-        groups = (
-            self._session.query(models.Group)
-            .filter_by(authority=authority, readable_by=group.ReadableBy.world)
-            .all()
-        )
-        return self._sort(groups)
-
-    def _user_groups(self, user=None):
-        """Return all groups that this user is a member of regardless of type"""
 
         if user is None:
             return []
         return self._sort(user.groups)
 
-    def _private_groups(self, user=None):
-        """Return all private groups that this user is a member of"""
+    def private_groups(self, user=None):
+        """
+        Return all private groups for this user.
 
-        user_groups = self._user_groups(user)
+        Retrieve all private groups that this user is a member of. List will
+        be empty if no ``user`` provided. Groups will be sorted by name.
+
+        :type user: :class:`~h.models.user`
+        :rtype: list of :class:`h.models.group`
+        """
+
+        user_groups = self.user_groups(user)
         return [group for group in user_groups if group.type == "private"]
 
-    def _scoped_groups(self, authority, document_uri):
+    def scoped_groups(self, authority, document_uri):
         """
         Return scoped groups for the URI and authority
 
@@ -162,6 +155,12 @@ class ListGroupsService(object):
 
         Note: If private groups are ever allowed to be scoped, this needs
         attention.
+
+        :param authority: Filter groups by this authority
+        :type authority: string
+        :arg document_uri: Use this URI to find groups with matching scopes
+        :type document_uri: string
+        :rtype: list of :class:`h.models.group`
         """
         origin = scope_util.uri_scope(document_uri)
         if not origin:
@@ -178,20 +177,22 @@ class ListGroupsService(object):
         scoped_groups = [group for groupscope, group in groups]
         return self._sort(scoped_groups)
 
-    def _sort(self, groups):
-        """ sort a list of groups of a single type """
-        return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
-
-    def _world_group(self, authority):
+    def world_group(self, authority):
         """
         Return the world group for the given authority, if any.
 
-        Return the so-called 'world-readable Public group' (or channel) for
+        Retrieve the so-called 'world-readable Public group' (or channel) for
         the indicated authority.
 
-        The Public group is special: at present its metadata makes it look
+        The Public/World group is special: at present its metadata makes it look
         identical to any non-scoped open group. Its only distinguishing
         characteristic is its unique and predictable ``pubid``
+
+        An authority may not have a world group, in which case this will
+        return ``None``.
+
+        :type authority: string
+        :rtype: :class:`h.models.group` or None
         """
         return (
             self._session.query(models.Group)
@@ -203,9 +204,26 @@ class ListGroupsService(object):
             .one_or_none()
         )
 
+    def _readable_by_world_groups(self, user=None, authority=None):
+        """
+        Return all groups readable by world for the authority.
+        """
 
-def list_groups_factory(context, request):
-    """Return a ListGroupsService instance for the passed context and request."""
-    return ListGroupsService(
+        authority = self._authority(user, authority)
+        groups = (
+            self._session.query(models.Group)
+            .filter_by(authority=authority, readable_by=group.ReadableBy.world)
+            .all()
+        )
+        return self._sort(groups)
+
+    def _sort(self, groups):
+        """ sort a list of groups of a single type """
+        return sorted(groups, key=lambda group: (group.name.lower(), group.pubid))
+
+
+def group_list_factory(context, request):
+    """Return a GroupListService instance for the passed context and request."""
+    return GroupListService(
         session=request.db, default_authority=request.default_authority
     )

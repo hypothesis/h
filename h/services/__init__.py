@@ -55,9 +55,7 @@ def includeme(config):
         ".groupfinder.groupfinder_service_factory", iface="h.interfaces.IGroupService"
     )
     config.register_service_factory(".links.links_factory", name="links")
-    config.register_service_factory(
-        ".list_groups.list_groups_factory", name="list_groups"
-    )
+    config.register_service_factory(".group_list.group_list_factory", name="group_list")
     config.register_service_factory(
         ".list_organizations.list_organizations_factory", name="list_organizations"
     )
