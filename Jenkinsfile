@@ -44,6 +44,7 @@ node {
             rabbit.stop()
             elasticsearch.stop()
             postgres.stop()
+            cleanWs()
         }
     }
 
