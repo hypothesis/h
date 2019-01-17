@@ -3,11 +3,9 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock, call
-import sqlalchemy
+from mock import Mock
 
 from h.events import AnnotationEvent
-from h.models import Annotation, Document
 from h.services.delete_annotation import delete_annotation_service_factory
 
 
