@@ -2,9 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h.events import AnnotationEvent
 from h.models import Annotation
-from h import storage
 
 
 class DeletePublicGroupError(Exception):
@@ -12,8 +10,9 @@ class DeletePublicGroupError(Exception):
 
 
 class DeleteGroupService(object):
-    def __init__(self, request):
+    def __init__(self, request, delete_annotation_service):
         self.request = request
+        self._delete_annotation_service = delete_annotation_service
 
     def delete(self, group):
         """
@@ -29,11 +28,10 @@ class DeleteGroupService(object):
             raise DeletePublicGroupError("Public group can not be deleted")
 
         annotations = self.request.db.query(Annotation).filter_by(groupid=group.pubid)
-        for annotation in annotations:
-            storage.delete_annotation(self.request.db, annotation.id)
-            event = AnnotationEvent(self.request, annotation.id, "delete")
-            self.request.notify_after_commit(event)
+        for ann in annotations:
+            self._delete_annotation_service.delete(ann)
 
 
 def delete_group_service_factory(context, request):
-    return DeleteGroupService(request=request)
+    delete_annotation_service = request.find_service(name="delete_annotation")
+    return DeleteGroupService(request, delete_annotation_service)
