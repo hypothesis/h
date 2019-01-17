@@ -10,9 +10,9 @@ class DeletePublicGroupError(Exception):
 
 
 class DeleteGroupService(object):
-    def __init__(self, request, delete_annotation_service):
+    def __init__(self, request, annotation_delete_service):
         self.request = request
-        self._delete_annotation_service = delete_annotation_service
+        self._annotation_delete_service = annotation_delete_service
 
     def delete(self, group):
         """
@@ -29,9 +29,9 @@ class DeleteGroupService(object):
 
         annotations = self.request.db.query(Annotation).filter_by(groupid=group.pubid)
         for ann in annotations:
-            self._delete_annotation_service.delete(ann)
+            self._annotation_delete_service.delete(ann)
 
 
 def delete_group_service_factory(context, request):
-    delete_annotation_service = request.find_service(name="delete_annotation")
-    return DeleteGroupService(request, delete_annotation_service)
+    annotation_delete_service = request.find_service(name="annotation_delete")
+    return DeleteGroupService(request, annotation_delete_service)

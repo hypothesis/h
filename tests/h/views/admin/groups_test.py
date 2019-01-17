@@ -14,7 +14,7 @@ from h.services.group_create import GroupCreateService
 from h.services.group_update import GroupUpdateService
 from h.services.group_members import GroupMembersService
 from h.services.delete_group import DeleteGroupService
-from h.services.delete_annotation import DeleteAnnotationService
+from h.services.annotation_delete import AnnotationDeleteService
 from h.services.list_organizations import ListOrganizationsService
 
 
@@ -435,7 +435,9 @@ def group_members_svc(pyramid_config):
 
 @pytest.fixture
 def delete_group_svc(pyramid_config, pyramid_request):
-    service = mock.Mock(spec_set=DeleteGroupService(pyramid_request, delete_annotation_svc))
+    service = mock.Mock(
+        spec_set=DeleteGroupService(pyramid_request, annotation_delete_svc)
+    )
     pyramid_config.register_service(service, name="delete_group")
     return service
 
@@ -449,11 +451,9 @@ def list_orgs_svc(pyramid_config, db_session):
 
 
 @pytest.fixture
-def delete_annotation_svc(pyramid_config):
-    svc = mock.create_autospec(
-        DeleteAnnotationService, spec_set=True, instance=True
-    )
-    pyramid_config.register_service(svc, name="delete_annotation")
+def annotation_delete_svc(pyramid_config):
+    svc = mock.create_autospec(AnnotationDeleteService, spec_set=True, instance=True)
+    pyramid_config.register_service(svc, name="annotation_delete")
     return svc
 
 

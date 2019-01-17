@@ -8,7 +8,7 @@ from h.events import AnnotationEvent
 from h.models import Annotation
 
 
-class DeleteAnnotationService(object):
+class AnnotationDeleteService(object):
     def __init__(self, request):
         self.request = request
 
@@ -27,5 +27,5 @@ class DeleteAnnotationService(object):
         self.request.notify_after_commit(event)
 
 
-def delete_annotation_service_factory(context, request):
-    return DeleteAnnotationService(request)
+def annotation_delete_service_factory(context, request):
+    return AnnotationDeleteService(request)

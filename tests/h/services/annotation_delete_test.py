@@ -6,10 +6,10 @@ import pytest
 from mock import Mock
 
 from h.events import AnnotationEvent
-from h.services.delete_annotation import delete_annotation_service_factory
+from h.services.annotation_delete import annotation_delete_service_factory
 
 
-class TestDeleteAnnotationService(object):
+class TestAnnotationDeleteService(object):
     def test_it_marks_the_annotation_as_deleted(
         self, svc, pyramid_request, factories, ann
     ):
@@ -44,7 +44,7 @@ def ann(factories):
 @pytest.fixture
 def svc(db_session, pyramid_request):
     pyramid_request.db = db_session
-    return delete_annotation_service_factory({}, pyramid_request)
+    return annotation_delete_service_factory({}, pyramid_request)
 
 
 @pytest.fixture
@@ -55,4 +55,4 @@ def pyramid_request(pyramid_request):
 
 @pytest.fixture
 def datetime(patch):
-    return patch("h.services.delete_annotation.datetime")
+    return patch("h.services.annotation_delete.datetime")

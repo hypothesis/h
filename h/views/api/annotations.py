@@ -145,8 +145,8 @@ def update(context, request):
 )
 def delete(context, request):
     """Delete the specified annotation."""
-    delete_annotation_service = request.find_service(name="delete_annotation")
-    delete_annotation_service.delete(context.annotation)
+    annotation_delete_service = request.find_service(name="annotation_delete")
+    annotation_delete_service.delete(context.annotation)
 
     # TODO: Track down why we don't return an HTTP 204 like other DELETEs
     return {"id": context.annotation.id, "deleted": True}
