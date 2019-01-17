@@ -10,6 +10,7 @@ import colander
 import deform
 import jsonschema
 from pyramid.session import check_csrf_token
+from pyramid import httpexceptions
 
 
 @colander.deferred
@@ -18,7 +19,7 @@ def deferred_csrf_token(node, kw):
     return request.session.get_csrf_token()
 
 
-class ValidationError(Exception):
+class ValidationError(httpexceptions.HTTPBadRequest):
     pass
 
 
