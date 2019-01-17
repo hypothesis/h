@@ -3,14 +3,15 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock, call
+import mock
 import sqlalchemy
 
-from h.events import AnnotationEvent
 from h.models import Annotation, Document
 from h.services.delete_user import delete_user_service_factory
+from h.services.annotation_delete import AnnotationDeleteService
 
 
+@pytest.mark.usefixtures("annotation_delete_service")
 class TestDeleteUserService(object):
     def test_delete_disassociate_group_memberships(self, factories, svc):
         user = factories.User()
@@ -20,7 +21,7 @@ class TestDeleteUserService(object):
         assert user.groups == []
 
     def test_delete_deletes_annotations(
-        self, api_storage, factories, pyramid_request, svc
+        self, factories, pyramid_request, svc, annotation_delete_service
     ):
         user = factories.User(username="bob")
         anns = [
@@ -30,29 +31,9 @@ class TestDeleteUserService(object):
 
         svc.delete(user)
 
-        api_storage.delete_annotation.assert_has_calls(
-            [
-                call(pyramid_request.db, anns[0].id),
-                call(pyramid_request.db, anns[1].id),
-            ],
-            any_order=True,
+        annotation_delete_service.delete.assert_has_calls(
+            [mock.call(anns[0]), mock.call(anns[1])], any_order=True
         )
-
-    def test_delete_publishes_event(
-        self, api_storage, db_session, factories, matchers, pyramid_request, svc
-    ):
-        user = factories.User()
-        ann = factories.Annotation(userid=user.userid)
-
-        svc.delete(user)
-
-        expected_event = AnnotationEvent(pyramid_request, ann.id, "delete")
-        actual_event = pyramid_request.notify_after_commit.call_args[0][0]
-        assert (
-            expected_event.request,
-            expected_event.annotation_id,
-            expected_event.action,
-        ) == (actual_event.request, actual_event.annotation_id, actual_event.action)
 
     def test_delete_deletes_user(self, db_session, factories, pyramid_request, svc):
         user = factories.User()
@@ -100,13 +81,8 @@ class TestDeleteUserService(object):
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
-    pyramid_request.notify_after_commit = Mock()
+    pyramid_request.notify_after_commit = mock.Mock()
     return pyramid_request
-
-
-@pytest.fixture
-def api_storage(patch):
-    return patch("h.services.delete_user.storage")
 
 
 @pytest.fixture
@@ -130,3 +106,12 @@ def group_with_two_users(db_session, factories):
     db_session.flush()
 
     return (group, creator, member, creator_ann, member_ann)
+
+
+@pytest.fixture
+def annotation_delete_service(pyramid_config):
+    service = mock.create_autospec(
+        AnnotationDeleteService, spec_set=True, instance=True
+    )
+    pyramid_config.register_service(service, name="annotation_delete")
+    return service
