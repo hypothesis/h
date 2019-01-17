@@ -21,6 +21,7 @@ from h.services.oauth_validator import DEFAULT_SCOPES
 from h.services.user import user_service_factory
 from h.util.datetime import utc_iso8601
 from h.views.api import auth as views
+from h.views.api.exceptions import OAuthAuthorizeError
 
 
 @pytest.mark.usefixtures("routes", "oauth_provider", "user_svc")
@@ -41,11 +42,11 @@ class TestOAuthAuthorizeController(object):
             "boom!"
         )
 
-        with pytest.raises(InvalidRequestFatalError) as exc:
+        with pytest.raises(OAuthAuthorizeError) as exc:
             view = getattr(controller, view_name)
             view()
 
-        assert exc.value.description == "boom!"
+        assert exc.value.detail == "boom!"
 
     @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
     def test_get_redirects_to_login_when_not_authenticated(

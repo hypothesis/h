@@ -8,6 +8,10 @@ from pyramid import httpexceptions
 from h.i18n import TranslationString as _  # noqa: N813
 
 
+class OAuthAuthorizeError(httpexceptions.HTTPBadRequest):
+    """An OAuth authorization request failure."""
+
+
 class OAuthTokenError(httpexceptions.HTTPUnauthorized):
     """
     An OAuth token request failure.

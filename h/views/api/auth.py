@@ -12,7 +12,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import models
 from h._compat import urlparse
-from h.views.api.exceptions import OAuthTokenError
+from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
 from h.views.api.config import api_config
@@ -104,17 +104,15 @@ class OAuthAuthorizeController(object):
         found = self._authorized_response()
         return self._render_web_message_response(found.location)
 
-    @view_config(context=OAuth2Error, renderer="h:templates/oauth/error.html.jinja2")
-    def error(self):
-        description = self.context.description
-        if not self.context.description:
-            description = "Error: {}".format(self.context.error)
-        return {"description": description}
-
     def _authorize(self):
-        scopes, credentials = self.oauth.validate_authorization_request(
-            self.request.url
-        )
+        try:
+            scopes, credentials = self.oauth.validate_authorization_request(
+                self.request.url
+            )
+        except OAuth2Error as err:
+            raise OAuthAuthorizeError(
+                err.description or "Error: {}".format(self.context.error)
+            )
 
         if self.request.authenticated_userid is None:
             raise HTTPFound(
