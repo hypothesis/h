@@ -45,9 +45,4 @@ def record_search_query_params(params, separate_replies):
     if separate_replies:
         params.append(("es__separate_replies", separate_replies))
 
-    # On startup, there is a race condition in New Relic where there may not be
-    # a transaction. If there isn't, current_transaction will return None in which
-    # case we can't record params.
-    current_transaction = newrelic.agent.current_transaction()
-    if current_transaction:
-        newrelic.agent.current_transaction().add_custom_parameters(params)
+    newrelic.agent.add_custom_parameters(params)
