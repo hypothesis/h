@@ -297,6 +297,38 @@ paths:
           description: Profile information
           schema:
             $ref: '#/definitions/Profile'
+
+  /profile/groups:
+    get:
+      tags:
+        - users
+      summary: Get the user's groups
+      operationId: profileGroups
+      description: >
+        When used with an API key, will return the list of groups for which
+        the corresponding authenticated user is a member.
+
+        If no authenticated user is present on the request, an empty list will
+        be returned.
+
+        Returned groups are sorted by name.
+
+      parameters:
+        - name: expand
+          description: >
+            Array of fields to expand in the response
+          in: query
+          type: array
+          items:
+            type: string
+            enum:
+              - organization
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/GroupResults'
+
   /groups:
     get:
       tags:
