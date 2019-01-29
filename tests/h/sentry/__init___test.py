@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import mock
 import pytest
 
 from h.sentry import includeme, report_exception
+from h.sentry.helpers.before_send import before_send
 
 
 class TestReportException(object):
@@ -32,7 +32,7 @@ class TestIncludeMe(object):
             ],
             environment="test",
             send_default_pii=True,
-            before_send=mock.ANY,
+            before_send=before_send,
         )
 
     @pytest.fixture(autouse=True)
