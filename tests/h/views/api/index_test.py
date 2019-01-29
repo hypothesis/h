@@ -188,3 +188,26 @@ class TestIndex(object):
 
         assert set(links["profile"].keys()) == set(["read", "update", "groups"])
         assert set(links["profile"]["groups"].keys()) == set(["read"])
+
+    def test_it_returns_the_right_links_for_user_endpoints(
+        self, pyramid_config, pyramid_request
+    ):
+
+        config = Configurator()
+        config.scan("h.views.api.users")
+        pyramid_request.registry.api_links = config.registry.api_links
+        host = "http://example.com"  # Pyramid's default host URL'
+
+        pyramid_config.add_route("api.users", "/dummy/users")
+        pyramid_config.add_route("api.user", "/dummy/users/:username")
+
+        result = views.index(testing.DummyResource(), pyramid_request)
+
+        links = result["links"]
+
+        assert links["user"]["create"]["method"] == "POST"
+        assert links["user"]["create"]["url"] == (host + "/dummy/users")
+        assert links["user"]["update"]["method"] == "PATCH"
+        assert links["user"]["update"]["url"] == (host + "/dummy/users/:username")
+
+        assert set(links["user"].keys()) == set(["create", "update"])

@@ -6,14 +6,20 @@ from pyramid.httpexceptions import HTTPConflict
 
 from h.auth.util import client_authority
 from h.views.api.exceptions import PayloadError
+from h.views.api.config import api_config
 from h.presenters import UserJSONPresenter
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.schemas import ValidationError
 from h.services.user_unique import DuplicateUserError
-from h.util.view import json_view
 
 
-@json_view(route_name="api.users", request_method="POST", permission="create")
+@api_config(
+    route_name="api.users",
+    request_method="POST",
+    link_name="user.create",
+    description="Create a new user",
+    permission="create",
+)
 def create(request):
     """
     Create a user.
@@ -57,7 +63,13 @@ def create(request):
     return presenter.asdict()
 
 
-@json_view(route_name="api.user", request_method="PATCH", permission="update")
+@api_config(
+    route_name="api.user",
+    request_method="PATCH",
+    link_name="user.update",
+    description="Update a user",
+    permission="update",
+)
 def update(user, request):
     """
     Update a user.
