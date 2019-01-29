@@ -23,7 +23,10 @@ def before_send(event_dict, hint_dict):
     # The list of filters that each event will be passed through.
     # If you add a new filter function you should add it to this list to enable
     # it.
-    filter_functions = [filters.filter_ws4py_error_terminating_connection]
+    filter_functions = [
+        filters.filter_ws4py_error_terminating_connection,
+        filters.filter_ws4py_handshake_error,
+    ]
 
     # If every filter returns True then do report the event to Sentry.
     if all(

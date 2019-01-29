@@ -9,6 +9,8 @@ filter returns ``False`` for a given event then the event is not reported.
 """
 from __future__ import unicode_literals
 
+import ws4py.exc
+
 
 def filter_ws4py_error_terminating_connection(event):
     """
@@ -23,4 +25,16 @@ def filter_ws4py_error_terminating_connection(event):
         "Error when terminating the connection"
     ):
         return False
+    return True
+
+
+def filter_ws4py_handshake_error(event):
+    """
+    Filter out ws4py's HandshakeError when no HTTP_UPGRADE header.
+
+    See https://github.com/hypothesis/h/issues/5498
+    """
+    if isinstance(event.exception, ws4py.exc.HandshakeError):
+        if str(event.exception) == "Header HTTP_UPGRADE is not defined":
+            return False
     return True

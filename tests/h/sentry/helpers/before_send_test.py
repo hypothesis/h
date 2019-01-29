@@ -18,7 +18,10 @@ class TestBeforeSend(object):
         before_send(mock.sentinel.event_dict, mock.sentinel.hint_dict)
 
         # If you've added a new filter function you should add it to this list.
-        filters = [filters.filter_ws4py_error_terminating_connection]
+        filters = [
+            filters.filter_ws4py_error_terminating_connection,
+            filters.filter_ws4py_handshake_error,
+        ]
 
         for filter in filters:
             filter.assert_called_once_with(Event.return_value)

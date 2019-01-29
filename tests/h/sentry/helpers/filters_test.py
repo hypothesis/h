@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
+import ws4py
+
 from h.sentry.helpers import filters
 from h.sentry.helpers.event import Event
 
@@ -30,6 +32,24 @@ class TestFilterWS4PYErrorTerminatingConnection(object):
             )
             is True
         )
+
+
+class TestFilterWS4PYHandshakeError(object):
+    def test_it_filters_HandshakeError_HTTP_UPGRADE_events(self):
+        event = exception_event(
+            ws4py.exc.HandshakeError("Header HTTP_UPGRADE is not defined")
+        )
+        assert filters.filter_ws4py_handshake_error(event) is False
+
+    def test_doesnt_filter_out_other_HandshakeErrors(self):
+        event = exception_event(ws4py.exc.HandshakeError("Some other message"))
+        assert filters.filter_ws4py_handshake_error(event) is True
+
+    def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
+        assert filters.filter_ws4py_handshake_error(unexpected_logger_event) is True
+
+    def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
+        assert filters.filter_ws4py_handshake_error(unexpected_exception_event) is True
 
 
 @pytest.fixture
