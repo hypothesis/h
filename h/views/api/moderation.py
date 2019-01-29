@@ -12,7 +12,7 @@ from h.views.api.config import api_config
     route_name="api.annotation_hide",
     request_method="PUT",
     link_name="annotation.hide",
-    description="Hide an annotation as a group moderator.",
+    description="Hide an annotation as a group moderator",
     permission="moderate",
 )
 def create(context, request):
@@ -30,7 +30,7 @@ def create(context, request):
     route_name="api.annotation_hide",
     request_method="DELETE",
     link_name="annotation.unhide",
-    description="Unhide an annotation as a group moderator.",
+    description="Unhide an annotation as a group moderator",
     permission="moderate",
 )
 def delete(context, request):

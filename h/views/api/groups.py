@@ -50,6 +50,7 @@ def groups(request):
     route_name="api.groups",
     request_method="POST",
     permission="create",
+    link_name="group.create",
     description="Create a new group",
 )
 def create(request):
@@ -86,6 +87,7 @@ def create(request):
     route_name="api.group",
     request_method="GET",
     permission="read",
+    link_name="group.read",
     description="Fetch a group",
 )
 def read(group, request):
@@ -100,6 +102,7 @@ def read(group, request):
     route_name="api.group",
     request_method="PATCH",
     permission="admin",
+    link_name="group.update",
     description="Update a group",
 )
 def update(group, request):
@@ -132,6 +135,7 @@ def update(group, request):
     route_name="api.group_upsert",
     request_method="PUT",
     permission="upsert",
+    link_name="group.create_or_update",
     description="Create or update a group",
 )
 def upsert(context, request):
@@ -193,7 +197,7 @@ def upsert(context, request):
     route_name="api.group_member",
     request_method="DELETE",
     link_name="group.member.delete",
-    description="Remove the current user from a group.",
+    description="Remove the current user from a group",
     effective_principals=security.Authenticated,
 )
 def remove_member(group, request):
