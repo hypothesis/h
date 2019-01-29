@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
 import mock
 import pytest
 
@@ -32,6 +34,20 @@ class TestBeforeSend(object):
         result = before_send(mock.sentinel.event_dict, mock.sentinel.hint_dict)
 
         assert result is None
+
+    def test_it_logs_when_it_filters_out_an_event(self, caplog, filters):
+        caplog.set_level(logging.INFO)
+        filters.filter_ws4py_error_terminating_connection.return_value = False
+
+        before_send(mock.sentinel.event_dict, mock.sentinel.hint_dict)
+
+        assert caplog.record_tuples == [
+            (
+                "h.sentry.helpers.before_send",
+                logging.INFO,
+                "Filtering out Sentry event: sentinel.hint_dict",
+            )
+        ]
 
     def test_it_lets_through_the_event_if_all_filters_pass(self):
         result = before_send(mock.sentinel.event_dict, mock.sentinel.hint_dict)

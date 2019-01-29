@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
 from h.sentry.helpers.event import Event
 from h.sentry.helpers import filters
+
+
+log = logging.getLogger(__name__)
 
 
 def before_send(event_dict, hint_dict):
@@ -35,4 +40,5 @@ def before_send(event_dict, hint_dict):
         return event_dict
 
     # If any one filter returned False then don't report the event to Sentry.
+    log.info("Filtering out Sentry event: %s", hint_dict)
     return None
