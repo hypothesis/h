@@ -82,8 +82,8 @@ def pyramid_app():
 
 # Always unconditionally wipe the Elasticsearch index after every functional
 # test.
-@pytest.fixture(autouse=True)  # noqa: F811
-def always_delete_all_elasticsearch_documents(es_client):
+@pytest.fixture(autouse=True)
+def always_delete_all_elasticsearch_documents(es_client):  # noqa: F811
     pass
 
 
