@@ -6,21 +6,7 @@ import sentry_sdk
 import sentry_sdk.integrations.celery
 import sentry_sdk.integrations.pyramid
 
-
-def _before_send(event, hint):
-    logger = event.get("logger")
-    message = event.get("logentry", {}).get("message")
-
-    # Filter out ws4py's "Error when terminating connection" message. It logs
-    # thousands of these a day in production and I don't think they're
-    # actually a problem.
-    # See: https://github.com/hypothesis/h/issues/5496
-    if logger == "ws4py" and message.startswith(
-        "Error when terminating the connection"
-    ):
-        return None
-
-    return event
+from h.sentry.helpers.before_send import before_send as _before_send
 
 
 def report_exception(exc=None):
