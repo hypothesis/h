@@ -3,9 +3,7 @@
 Configure deform to use custom templates.
 
 Sets up the form handling and rendering library, deform, to use our own custom
-form templates in preference to the defaults. Uses `deform_jinja2` to provide
-the fallback templates in Jinja2 format, which we can then extend and modify as
-necessary.
+form templates in preference to the defaults.
 """
 from __future__ import unicode_literals
 import deform
@@ -19,7 +17,7 @@ from h import i18n
 
 ENVIRONMENT_KEY = "h.form.jinja2_environment"
 
-SEARCH_PATHS = ("h:templates/deform/", "deform_jinja2:bootstrap_templates/")
+SEARCH_PATHS = ["h:templates/deform/"]
 
 
 _ = i18n.TranslationString
