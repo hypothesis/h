@@ -24,6 +24,7 @@ def profile(request):
 @api_config(
     route_name="api.profile_groups",
     request_method="GET",
+    link_name="profile.groups.read",
     description="Fetch the current user's groups",
 )
 def profile_groups(request):

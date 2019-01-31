@@ -15,7 +15,7 @@ from h.tasks import mailer
     route_name="api.annotation_flag",
     request_method="PUT",
     link_name="annotation.flag",
-    description="Flag an annotation for review.",
+    description="Flag an annotation for review",
     permission="flag",
 )
 def create(context, request):
