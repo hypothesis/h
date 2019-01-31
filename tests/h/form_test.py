@@ -70,7 +70,6 @@ class TestCreateEnvironment(object):
         loader = kwargs["loader"]
 
         assert "templates/deform" in loader.searchpath[0]
-        assert "bootstrap_templates" in loader.searchpath[1]
 
 
 class TestCreateForm(object):

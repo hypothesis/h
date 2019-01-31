@@ -9,7 +9,6 @@ certifi  # Required to connect to Elasticsearch over SSL.
 cffi
 click
 deform < 1.0
-deform-jinja2
 elasticsearch==6.3.1
 elasticsearch-dsl==6.3.1
 enum34
