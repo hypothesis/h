@@ -28,6 +28,23 @@ class GroupJSONPresenter(object):
                 model["organization"] = OrganizationJSONPresenter(
                     self.organization_context
                 ).asdict()
+        if "scopes" in expand:
+            model["scopes"] = {}
+            # The API representation of scope enforcement differs from the DB
+            # representation. All groups have an `enforce_scope` property, and
+            # it defaults to True. However, URL enforcement for incoming
+            # annotations only happens if there are 1 or more scopes to restrict
+            # to. Therefore, the API representation of this property is False
+            # if there are no scopes.
+            model["scopes"]["enforced"] = (
+                self.group.enforce_scope if self.group.scopes else False
+            )
+            # At this presentation layer, format scope origins to look like
+            # patterns—currently a simple wildcarded prefix—to give us more
+            # flexibility in making scope more granular later
+            model["scopes"]["uri_patterns"] = [
+                scope.origin + "*" for scope in self.group.scopes
+            ]
         return model
 
     def _model(self):

@@ -231,7 +231,7 @@ class TestCreateGroup(object):
 
         GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(
-            expand=["organization"]
+            expand=["organization", "scopes"]
         )
 
     @pytest.fixture
@@ -341,7 +341,7 @@ class TestUpdateGroup(object):
 
         GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(
-            expand=["organization"]
+            expand=["organization", "scopes"]
         )
 
     @pytest.fixture
@@ -472,7 +472,7 @@ class TestUpsertGroup(object):
 
         GroupJSONPresenter.assert_called_once_with(GroupContext.return_value)
         GroupJSONPresenter.return_value.asdict.assert_called_once_with(
-            expand=["organization"]
+            expand=["organization", "scopes"]
         )
 
     @pytest.fixture
