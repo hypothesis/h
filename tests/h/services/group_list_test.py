@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import pytest
+import mock
 
 from h.services.group_list import GroupListService
 from h.services.group_list import group_list_factory
@@ -91,6 +92,26 @@ class TestListGroupsRequestGroups(object):
         results = svc.request_groups(authority=default_authority)
 
         assert results[0].pubid == "__world__"
+
+    def test_it_overrides_authority_with_user_authority(self, svc, user):
+        svc.scoped_groups = mock.Mock()
+        svc.scoped_groups.return_value = []
+        svc.world_group = mock.Mock()
+
+        svc.request_groups(authority="foople.com", user=user)
+
+        svc.scoped_groups.assert_called_once_with(user.authority, None)
+        svc.world_group.assert_called_once_with(user.authority)
+
+    def test_it_defaults_to_default_authority(self, svc, default_authority):
+        svc.scoped_groups = mock.Mock()
+        svc.scoped_groups.return_value = []
+        svc.world_group = mock.Mock()
+
+        svc.request_groups()
+
+        svc.scoped_groups.assert_called_once_with(default_authority, None)
+        svc.world_group.assert_called_once_with(default_authority)
 
     def test_it_returns_matching_scoped_open_groups(
         self, svc, authority, document_uri, scoped_open_groups

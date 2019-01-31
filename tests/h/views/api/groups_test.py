@@ -31,7 +31,7 @@ class TestGetGroups(object):
         views.groups(anonymous_request)
 
         group_list_service.request_groups.assert_called_once_with(
-            user=None, authority=anonymous_request.default_authority, document_uri=None
+            user=None, authority=None, document_uri=None
         )
 
     def test_proxies_request_params(self, anonymous_request, group_list_service):
@@ -43,19 +43,6 @@ class TestGetGroups(object):
             user=None,
             authority="foo.com",
             document_uri="http://example.com/thisthing.html",
-        )
-
-    def test_overrides_authority_with_user_authority(
-        self, authenticated_request, group_list_service
-    ):
-        authenticated_request.params["authority"] = "foo.com"
-
-        views.groups(authenticated_request)
-
-        group_list_service.request_groups.assert_called_once_with(
-            user=authenticated_request.user,
-            authority=authenticated_request.user.authority,
-            document_uri=None,
         )
 
     def test_converts_groups_to_resources(

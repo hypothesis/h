@@ -84,7 +84,7 @@ class GroupListService(object):
 
         return world_readable_groups + private_groups
 
-    def request_groups(self, authority, user=None, document_uri=None):
+    def request_groups(self, authority=None, user=None, document_uri=None):
         """
         Return a list of groups relevant to this request context.
 
@@ -104,6 +104,7 @@ class GroupListService(object):
           This should return a list of groups appropriate to the client
           via the API.
         """
+        authority = self._authority(user, authority)
         scoped_groups = self.scoped_groups(authority, document_uri)
 
         world_group = self.world_group(authority)
