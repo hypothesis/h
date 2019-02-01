@@ -79,7 +79,7 @@ def create(request):
         groupid=groupid,
     )
     return GroupJSONPresenter(GroupContext(group, request)).asdict(
-        expand=["organization"]
+        expand=["organization", "scopes"]
     )
 
 
@@ -127,7 +127,7 @@ def update(group, request):
     group = group_update_service.update(group, **appstruct)
 
     return GroupJSONPresenter(GroupContext(group, request)).asdict(
-        expand=["organization"]
+        expand=["organization", "scopes"]
     )
 
 
@@ -189,7 +189,7 @@ def upsert(context, request):
 
     # Note that this view takes a ``GroupUpsertContext`` but uses a ``GroupContext`` here
     return GroupJSONPresenter(GroupContext(group, request)).asdict(
-        expand=["organization"]
+        expand=["organization", "scopes"]
     )
 
 

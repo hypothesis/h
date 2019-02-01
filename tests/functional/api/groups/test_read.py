@@ -12,6 +12,40 @@ native_str = str
 
 
 @pytest.mark.functional
+class TestReadGroups(object):
+    # TODO: In subsequent versions of the API, this should really be a group
+    # search endpoint and should have its own functional test module
+
+    def test_it_returns_world_group(self, app):
+        # world group is auto-added in tests
+        res = app.get("/api/groups")
+
+        assert res.status_code == 200
+        assert res.json[0]["id"] == "__world__"
+
+    def test_it_returns_private_groups_along_with_world_groups(
+        self, app, factories, db_session, user_with_token, token_auth_header
+    ):
+        user, _ = user_with_token
+        group1 = factories.Group(creator=user)
+        group2 = factories.Group(creator=user)
+        db_session.commit()
+
+        res = app.get("/api/groups", headers=token_auth_header)
+
+        groupids = [group["id"] for group in res.json]
+        assert "__world__" in groupids
+        assert group1.pubid in groupids
+        assert group2.pubid in groupids
+
+    def test_it_expands_scope_if_requested(self, app):
+        res = app.get("/api/groups?expand=scopes")
+
+        assert res.status_code == 200
+        assert "scopes" in res.json[0]
+
+
+@pytest.mark.functional
 class TestReadGroup(object):
     def test_it_returns_http_200_for_world_readable_group_pubid(
         self, app, factories, db_session

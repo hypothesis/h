@@ -100,6 +100,7 @@ class TestGroupJSONPresenter(object):
         model = presenter.asdict()
 
         assert model["organization"] == group_context.organization.id
+        assert "scopes" not in model
 
     def test_it_expands_organizations(
         self, factories, GroupContext, OrganizationJSONPresenter
@@ -128,6 +129,47 @@ class TestGroupJSONPresenter(object):
         model = presenter.asdict(expand=["organization"])
 
         assert model["organization"] is None
+
+    def test_it_expands_scopes(self, factories, GroupContext):
+        group = factories.OpenGroup(
+            enforce_scope=False,
+            scopes=[
+                factories.GroupScope(origin="http://foo.com"),
+                factories.GroupScope(origin="https://foo.com"),
+            ],
+        )
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
+
+        model = presenter.asdict(expand=["scopes"])
+
+        assert "scopes" in model
+        assert model["scopes"]["enforced"] is False
+        assert set(model["scopes"]["uri_patterns"]) == set(
+            ["http://foo.com*", "https://foo.com*"]
+        )
+
+    def test_expanded_scopes_uri_patterns_empty_if_no_scopes(
+        self, factories, GroupContext
+    ):
+        group = factories.OpenGroup()
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
+
+        model = presenter.asdict(expand=["scopes"])
+
+        assert model["scopes"]["uri_patterns"] == []
+
+    def test_expanded_scopes_enforced_false_if_no_scopes(self, factories, GroupContext):
+        group = factories.OpenGroup(enforce_scope=True)
+        group_context = GroupContext(group)
+        presenter = GroupJSONPresenter(group_context)
+
+        model = presenter.asdict(expand=["scopes"])
+
+        # Even though the model is configured to enforce scope, de facto
+        # it can't if there are no scopes
+        assert model["scopes"]["enforced"] is False
 
     def test_it_ignores_unrecognized_expands(self, factories, GroupContext):
         group = factories.OpenGroup(

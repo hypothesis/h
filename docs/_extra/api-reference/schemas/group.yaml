@@ -35,10 +35,42 @@ Group:
       description: Indicates whether a group's annotations are world-readable
     groupid:
       type: string
-      description: <mark>NEW/EXPERIMENTAL</mark> Authority-unique identifier that may be set for groups that are owned by a third-party authority. This field is currently present but unused for first-party-authority groups.
+      description: Authority-unique identifier that may be set for groups that are owned by a third-party authority. This field is currently present but unused for first-party-authority groups.
     scoped:
       type: boolean
       description: Whether or not this group has URL restrictions for documents that may be annotated within it. Non-scoped groups allow annotation to documents at any URL
+    scopes:
+      description: >
+        **EXPANDABLE** Information about the URL restrictions for annotations within this group. Only present if expanded
+      type: object
+      required:
+        - enforced
+        - uri_patterns
+      properties:
+        enforced:
+          type: boolean
+          description: >
+            <p>This property indicates whether there are enforced URI restrictions on annotated
+            documents within this group:</p>
+
+            * `true`: An annotation may only be made within this group if its target document
+               (i.e. `target_uri`) matches one or more of the entries in `uri_patterns`
+            * `false`: Annotations may be created in this group for documents web-wide
+
+               *Note*: When `false`: Any entries in `uri_patterns` define where this group
+               is deemed to be relevant or authoritative, but annotations are not restricted to these URIs.
+
+        uri_patterns:
+            type: array
+            items:
+              type: string
+            description: >
+              URI patterns of the defined scopes for this group. Examples:
+
+                  ['https://myfavoritesquirrel.com*',
+                   'http://myfavoritesquirrel.com*',
+                   'http://myfavoritesquirrel.org*']
+
     type:
       type: string
       enum:

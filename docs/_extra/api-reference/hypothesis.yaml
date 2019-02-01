@@ -323,6 +323,7 @@ paths:
             type: string
             enum:
               - organization
+              - scopes
       responses:
         '200':
           description: Success
@@ -368,6 +369,7 @@ paths:
             type: string
             enum:
               - organization
+              - scopes
       responses:
         '200':
           description: Success
@@ -431,6 +433,7 @@ paths:
             type: string
             enum:
               - organization
+              - scopes
       responses:
         '200':
           description: Success
