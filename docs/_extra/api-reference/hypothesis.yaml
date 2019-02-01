@@ -917,9 +917,9 @@ definitions:
         description: Total number of results matching query.
         type: integer
   NewGroup:
-    $ref: './schemas/new-group.yaml#/Group'
+    $ref: './schemas/group-new.yaml#/Group'
   UpdateGroup:
-    $ref: './schemas/update-group.yaml#/Group'
+    $ref: './schemas/group-update.yaml#/Group'
   GroupResult:
     $ref: './schemas/group.yaml#/Group'
   GroupResults:
