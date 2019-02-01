@@ -1,0 +1,9 @@
+User:
+  type: object
+  properties:
+    email:
+      type: string
+      format: email
+    display_name:
+      type: string
+      maxLength: 30
