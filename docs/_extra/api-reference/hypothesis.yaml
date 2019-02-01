@@ -933,4 +933,4 @@ definitions:
   User:
     $ref: './schemas/user-schema.json'
   Profile:
-    $ref: './schemas/profile-schema.json'
+    $ref: './schemas/profile.yaml#/Profile'
