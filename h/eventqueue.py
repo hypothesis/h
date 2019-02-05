@@ -16,7 +16,7 @@ def _get_subscribers(registry, event):
     # This code is adapted from the `subscribers` method in
     # `zope.interface.adapter` which is what Pyramid's `request.registry.notify`
     # is a very thin wrapper around.
-    return registry.adapters.subscriptions(map(providedBy, [event]), None)
+    return registry.adapters.subscriptions([providedBy(event)], None)
 
 
 class EventQueue(object):

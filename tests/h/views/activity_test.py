@@ -714,7 +714,7 @@ class TestGroupSearchController(object):
     ):
 
         info = controller.search()["group_users_args"]
-        userids = list(map(lambda i: i["userid"], info[1]))
+        userids = [i["userid"] for i in info[1]]
         for member in test_group.members:
             assert member.userid in userids
 
@@ -726,7 +726,7 @@ class TestGroupSearchController(object):
     ):
 
         info = controller.search()["group_users_args"]
-        userids = list(map(lambda i: i["userid"], info[1]))
+        userids = [i["userid"] for i in info[1]]
 
         # At the moment, for an open group we return the group creator as the moderator
         assert userids == [test_group.creator.userid]
