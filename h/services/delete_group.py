@@ -28,8 +28,7 @@ class DeleteGroupService(object):
             raise DeletePublicGroupError("Public group can not be deleted")
 
         annotations = self.request.db.query(Annotation).filter_by(groupid=group.pubid)
-        for ann in annotations:
-            self._annotation_delete_service.delete(ann)
+        self._annotation_delete_service.delete_annotations(annotations)
 
 
 def delete_group_service_factory(context, request):

@@ -34,15 +34,17 @@ class TestDeleteGroupService(object):
     ):
         group = factories.Group()
         annotations = [
-            factories.Annotation(groupid=group.pubid),
-            factories.Annotation(groupid=group.pubid),
+            factories.Annotation(groupid=group.pubid).id,
+            factories.Annotation(groupid=group.pubid).id,
         ]
 
         svc.delete(group)
 
-        annotation_delete_service.delete.assert_has_calls(
-            [mock.call(annotations[0]), mock.call(annotations[1])], any_order=True
-        )
+        deleted_anns = [
+            ann.id
+            for ann in annotation_delete_service.delete_annotations.call_args[0][0]
+        ]
+        assert sorted(deleted_anns) == sorted(annotations)
 
 
 @pytest.mark.usefixtures("annotation_delete_service")
