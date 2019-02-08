@@ -2,3 +2,4 @@
 
 honcho
 pyramid_debugtoolbar
+pip-tools
