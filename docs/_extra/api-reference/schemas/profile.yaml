@@ -1,0 +1,37 @@
+Profile:
+  type: object
+  required:
+    - authority
+    - features
+    - groups
+    - preferences
+    - userid
+  properties:
+    authority:
+      type: string
+    features:
+      type: object
+      additionalProperties:
+        type: boolean
+    groups:
+      deprecated: true
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+          public:
+            type: boolean
+    preferences:
+      type: object
+      additionalProperties:
+        type: boolean
+    userid:
+      oneOf:
+        - type: string
+          description: This property will be a string of the format `"acct:username@authority"` if the request is authenticated
+        - type: null
+          description: This property will be `null` for unauthenticated requests (no available `userid`)

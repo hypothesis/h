@@ -917,9 +917,9 @@ definitions:
         description: Total number of results matching query.
         type: integer
   NewGroup:
-    $ref: './schemas/new-group.yaml#/Group'
+    $ref: './schemas/group-new.yaml#/Group'
   UpdateGroup:
-    $ref: './schemas/update-group.yaml#/Group'
+    $ref: './schemas/group-update.yaml#/Group'
   GroupResult:
     $ref: './schemas/group.yaml#/Group'
   GroupResults:
@@ -927,10 +927,10 @@ definitions:
     items:
       $ref: './schemas/group.yaml#/Group'
   NewUser:
-    $ref: './schemas/new-user-schema.json'
+    $ref: './schemas/user-new.yaml#/User'
   UpdateUser:
-    $ref: './schemas/update-user-schema.json'
+    $ref: './schemas/user-update.yaml#/User'
   User:
-    $ref: './schemas/user-schema.json'
+    $ref: './schemas/user.yaml#/User'
   Profile:
-    $ref: './schemas/profile-schema.json'
+    $ref: './schemas/profile.yaml#/Profile'

@@ -1,0 +1,10 @@
+User:
+  allOf:
+    - $ref: './user-new.yaml#/User'
+    - type: object
+      properties:
+        userid:
+          type: string
+          pattern: ^acct:.+$
+      required:
+        - userid
