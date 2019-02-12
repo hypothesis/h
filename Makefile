@@ -18,6 +18,7 @@ help:
 	@echo "make checkdocs         Crash if building the docs website fails"
 	@echo "make docstrings        View all the docstrings locally as HTML"
 	@echo "make checkdocstrings   Crash if building the docstrings fails"
+	@echo "make pip-compile       Compile requirements.in to requirements.txt"
 	@echo "make docker            Make the app's Docker image"
 	@echo "make run-docker        Run the app's Docker image locally. "
 	@echo "                       This command exists for conveniently testing "
@@ -83,6 +84,10 @@ docstrings:
 .PHONY: checkdocstrings
 checkdocstrings:
 	tox -e py36-checkdocstrings
+
+.PHONY: pip-compile
+pip-compile:
+	tox -qe py27-dev -- pip-compile --output-file requirements.txt requirements.in
 
 .PHONY: docker
 docker:
