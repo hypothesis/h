@@ -28,18 +28,13 @@ from h.views.api.config import api_config
 def groups(request):
     """Retrieve the groups for this request's user."""
 
-    authority = request.params.get("authority")
-    document_uri = request.params.get("document_uri")
     expand = request.GET.getall("expand") or []
-
     list_svc = request.find_service(name="group_list")
 
-    if request.user is not None:
-        authority = request.user.authority
-    else:
-        authority = authority or request.default_authority
     all_groups = list_svc.request_groups(
-        user=request.user, authority=authority, document_uri=document_uri
+        user=request.user,
+        authority=request.params.get("authority"),
+        document_uri=request.params.get("document_uri"),
     )
     all_groups = [GroupContext(group, request) for group in all_groups]
     all_groups = GroupsJSONPresenter(all_groups).asdicts(expand=expand)

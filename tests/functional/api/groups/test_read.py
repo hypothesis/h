@@ -38,6 +38,20 @@ class TestReadGroups(object):
         assert group1.pubid in groupids
         assert group2.pubid in groupids
 
+    def test_it_overrides_authority_param_with_user_authority(
+        self, app, factories, db_session, user_with_token, token_auth_header
+    ):
+        user, _ = user_with_token
+        # This group will be created with the user's authority
+        group1 = factories.Group(creator=user)
+        db_session.commit()
+
+        res = app.get("/api/groups?authority=whatever.com", headers=token_auth_header)
+
+        groupids = [group["id"] for group in res.json]
+        # It still returns the groups from the user's authority
+        assert group1.pubid in groupids
+
     def test_it_expands_scope_if_requested(self, app):
         res = app.get("/api/groups?expand=scopes")
 
