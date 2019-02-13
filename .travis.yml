@@ -38,17 +38,14 @@ matrix:
     # Test web application frontend
     - env: ACTION=gulp
       language: node_js
-      # We currently build production against Alpine v3.4:
-      #
-      #   https://pkgs.alpinelinux.org/packages?name=nodejs&branch=v3.4
-      node_js: '6.7'
+      node_js: 'node'
       before_install: npm install gulp-cli
       script: gulp test
 
     # Lint frontend code
     - env: ACTION=frontend-lint
       language: node_js
-      node_js: '6.7'
+      node_js: 'node'
       script:
         gulp lint
 
