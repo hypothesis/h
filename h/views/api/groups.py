@@ -24,6 +24,7 @@ from h.views.api.config import api_config
     request_method="GET",
     link_name="groups.read",
     description="Fetch the user's groups",
+    versions=["v1"],
 )
 def groups(request):
     """Retrieve the groups for this request's user."""
@@ -39,6 +40,17 @@ def groups(request):
     all_groups = [GroupContext(group, request) for group in all_groups]
     all_groups = GroupsJSONPresenter(all_groups).asdicts(expand=expand)
     return all_groups
+
+
+@api_config(
+    route_name="api.groups",
+    request_method="GET",
+    link_name="groups.read",
+    description="Search groups",
+    versions=["v2"],
+)
+def groups_v2(request):
+    return {"status": "OK"}
 
 
 @api_config(

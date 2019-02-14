@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.views.api.config import api_config, AngularRouteTemplater
 
 
-@api_config(route_name="api.index")
+@api_config(route_name="api.index", versions=["v1"])
 def index(context, request):
     """Return the API descriptor document.
 
@@ -32,6 +32,17 @@ def index(context, request):
         _set_at_path(links, link["name"].split("."), method_info)
 
     return {"links": links}
+
+
+@api_config(route_name="api.index", versions=["v2"])
+def index_v2(context, request):
+    """Return the API descriptor document.
+
+    Clients may use this to discover endpoints for the API.
+    """
+
+    api_links = request.registry.api_links["v2"]
+    return api_links
 
 
 def _set_at_path(dict_, path, value):
