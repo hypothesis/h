@@ -120,7 +120,7 @@ class TestAddApiView(object):
             **kwargs
         )
 
-        assert pyramid_config.registry.api_links == [
+        assert pyramid_config.registry.api_links["v1"] == [
             {
                 "name": link_name,
                 "description": description,

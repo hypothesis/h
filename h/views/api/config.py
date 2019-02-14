@@ -70,6 +70,10 @@ def add_api_view(
     known_versions = config.registry.settings["api.versions"]
     view_versions = versions or [current_version]
 
+    registry = config.registry
+    if not hasattr(registry, "api_links"):
+        registry.api_links = {}
+
     for version in view_versions:
         if version not in known_versions:
             raise APIConfigError(
@@ -78,18 +82,17 @@ def add_api_view(
         if version == current_version:
             settings.setdefault("accept", "application/json")
 
-    if link_name:
-        link = {
-            "name": link_name,
-            "method": primary_method,
-            "route_name": settings.get("route_name"),
-            "description": description,
-        }
-
-        registry = config.registry
-        if not hasattr(registry, "api_links"):
-            registry.api_links = []
-        registry.api_links.append(link)
+        # Register one link per version supported by this view
+        if link_name:
+            link = {
+                "name": link_name,
+                "method": primary_method,
+                "route_name": settings.get("route_name"),
+                "description": description,
+            }
+            if version not in registry.api_links:
+                registry.api_links[version] = []
+            registry.api_links[version].append(link)
 
     config.add_view(view=view, **settings)
 
