@@ -143,6 +143,11 @@ def configure(environ=None, settings=None):
     es_logger = logging.getLogger("elasticsearch")
     es_logger.addFilter(ExceptionFilter((("ReadTimeoutError", "WARNING"),)))
 
+    # Add API version settings
+    # These cannot be overridden by env
+    settings["api.versions"] = ["v1", "v2"]
+    settings["api.version.current"] = "v1"
+
     return Configurator(settings=settings)
 
 

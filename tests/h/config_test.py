@@ -18,17 +18,30 @@ from h.config import configure
     ],
 )
 def test_configure_updates_settings_from_env_vars(
-    env_var, env_val, setting_name, setting_val
+    env_var, env_val, setting_name, setting_val, required_settings
 ):
     environ = {env_var: env_val} if env_var else {}
-    settings_from_conf = {
-        "h.db_session_checks": True,
-        # Required settings
-        "es.url": "https://es6-search-cluster",
-        "secret_key": "notasecret",
-        "sqlalchemy.url": "postgres://user@dbhost/dbname",
-    }
+    settings_from_conf = required_settings
+    settings_from_conf["h.db_session_checks"] = True
 
     config = configure(environ=environ, settings=settings_from_conf)
 
     assert config.registry.settings[setting_name] == setting_val
+
+
+def test_configure_sets_api_settings(required_settings):
+    environ = {}
+
+    config = configure(environ=environ, settings=required_settings)
+
+    assert config.registry.settings["api.versions"] == ["v1", "v2"]
+    assert config.registry.settings["api.version.current"] == "v1"
+
+
+@pytest.fixture
+def required_settings():
+    return {
+        "es.url": "https://es6-search-cluster",
+        "secret_key": "notasecret",
+        "sqlalchemy.url": "postgres://user@dbhost/dbname",
+    }
