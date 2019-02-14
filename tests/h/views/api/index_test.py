@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import pytest
+
 from pyramid import testing
 from pyramid.config import Configurator
 
@@ -10,12 +12,11 @@ from h.views.api import index as views
 
 class TestIndex(object):
     def test_it_returns_the_right_links_for_annotation_endpoints(
-        self, pyramid_config, pyramid_request
+        self, pyramid_config, pyramid_request, config
     ):
 
         # Scan `h.views.api_annotations` for API link metadata specified in @api_config
         # declarations.
-        config = Configurator()
         config.scan("h.views.api.annotations")
         pyramid_request.registry.api_links = config.registry.api_links
 
@@ -46,10 +47,9 @@ class TestIndex(object):
         assert set(links.keys()) == set(["annotation", "search"])
 
     def test_it_returns_the_right_links_for_flag_endpoints(
-        self, pyramid_config, pyramid_request
+        self, pyramid_config, pyramid_request, config
     ):
 
-        config = Configurator()
         config.scan("h.views.api.flags")
         pyramid_request.registry.api_links = config.registry.api_links
         host = "http://example.com"  # Pyramid's default host URL'
@@ -66,10 +66,9 @@ class TestIndex(object):
         )
 
     def test_it_returns_the_right_links_for_group_endpoints(
-        self, pyramid_config, pyramid_request
+        self, pyramid_config, pyramid_request, config
     ):
 
-        config = Configurator()
         config.scan("h.views.api.groups")
         pyramid_request.registry.api_links = config.registry.api_links
         host = "http://example.com"  # Pyramid's default host URL'
@@ -117,10 +116,9 @@ class TestIndex(object):
         assert set(links["group"]["member"].keys()) == set(["add", "delete"])
 
     def test_it_returns_the_right_links_for_links_endpoints(
-        self, pyramid_config, pyramid_request
+        self, pyramid_config, pyramid_request, config
     ):
 
-        config = Configurator()
         config.scan("h.views.api.links")
         pyramid_request.registry.api_links = config.registry.api_links
         host = "http://example.com"  # Pyramid's default host URL'
@@ -135,10 +133,9 @@ class TestIndex(object):
         assert links["links"]["url"] == (host + "/dummy/links")
 
     def test_it_returns_the_right_links_for_moderation_endpoints(
-        self, pyramid_config, pyramid_request
+        self, pyramid_config, pyramid_request, config
     ):
 
-        config = Configurator()
         config.scan("h.views.api.moderation")
         pyramid_request.registry.api_links = config.registry.api_links
         host = "http://example.com"  # Pyramid's default host URL'
@@ -161,10 +158,9 @@ class TestIndex(object):
         assert set(links["annotation"].keys()) == set(["hide", "unhide"])
 
     def test_it_returns_the_right_links_for_profile_endpoints(
-        self, pyramid_config, pyramid_request
+        self, pyramid_config, pyramid_request, config
     ):
 
-        config = Configurator()
         config.scan("h.views.api.profile")
         pyramid_request.registry.api_links = config.registry.api_links
         host = "http://example.com"  # Pyramid's default host URL'
@@ -190,10 +186,9 @@ class TestIndex(object):
         assert set(links["profile"]["groups"].keys()) == set(["read"])
 
     def test_it_returns_the_right_links_for_user_endpoints(
-        self, pyramid_config, pyramid_request
+        self, pyramid_config, pyramid_request, config
     ):
 
-        config = Configurator()
         config.scan("h.views.api.users")
         pyramid_request.registry.api_links = config.registry.api_links
         host = "http://example.com"  # Pyramid's default host URL'
@@ -211,3 +206,11 @@ class TestIndex(object):
         assert links["user"]["update"]["url"] == (host + "/dummy/users/:username")
 
         assert set(links["user"].keys()) == set(["create", "update"])
+
+
+@pytest.fixture
+def config():
+    config = Configurator()
+    config.registry.settings["api.versions"] = ["v1", "v2"]
+    config.registry.settings["api.version.current"] = "v1"
+    return config

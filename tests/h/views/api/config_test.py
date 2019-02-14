@@ -11,36 +11,36 @@ from h.views.api import config as api_config
 class TestAddApiView(object):
     def test_it_sets_accept_setting(self, pyramid_config, view):
         api_config.add_api_view(pyramid_config, view, route_name="thing.read")
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["accept"] == "application/json"
 
     def test_it_allows_accept_setting_override(self, pyramid_config, view):
         api_config.add_api_view(
             pyramid_config, view, accept="application/xml", route_name="thing.read"
         )
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["accept"] == "application/xml"
 
     def test_it_sets_renderer_setting(self, pyramid_config, view):
         api_config.add_api_view(pyramid_config, view, route_name="thing.read")
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["renderer"] == "json"
 
     def test_it_allows_renderer_setting_override(self, pyramid_config, view):
         api_config.add_api_view(
             pyramid_config, view, route_name="thing.read", renderer="xml"
         )
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["renderer"] == "xml"
 
     def test_it_sets_cors_decorator(self, pyramid_config, view):
         api_config.add_api_view(pyramid_config, view, route_name="thing.read")
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["decorator"] == api_config.cors_policy
 
     def test_it_adds_cors_preflight_view(self, pyramid_config, view, cors):
         api_config.add_api_view(pyramid_config, view, route_name="thing.read")
-        ([_, route_name, policy], _) = cors.add_preflight_view.call_args
+        ([_, route_name, policy], _) = cors.add_preflight_view.call_args_list[0]
         assert route_name == "thing.read"
         assert policy == api_config.cors_policy
 
@@ -57,8 +57,37 @@ class TestAddApiView(object):
         api_config.add_api_view(
             pyramid_config, view, route_name="thing.read", decorator=decorator
         )
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["decorator"] == decorator
+
+    def test_it_assigns_default_version_header(self, pyramid_config, view):
+        api_config.add_api_view(pyramid_config, view, route_name="thing.read")
+
+        (_, kwargs) = pyramid_config.add_view.call_args_list[1]
+        accepts = [
+            kwargs["accept"] for (_, kwargs) in pyramid_config.add_view.call_args_list
+        ]
+        assert "application/vnd.hypothesis.v1+json" in accepts
+
+    def test_it_does_not_assign_application_json_header_default_if_not_current_version(
+        self, pyramid_config, view
+    ):
+        api_config.add_api_view(
+            pyramid_config, view, route_name="thing.read", versions=["v2"]
+        )
+
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
+
+        assert "accept" not in kwargs
+
+    def test_it_raises_if_any_version_not_a_known_version(self, pyramid_config, view):
+        with pytest.raises(api_config.APIConfigError, match="known API version"):
+            api_config.add_api_view(
+                pyramid_config,
+                view,
+                route_name="thing.read",
+                versions=["v1", "nonsense"],
+            )
 
     @pytest.mark.parametrize(
         "link_name,route_name,description,request_method,expected_method",
@@ -103,6 +132,8 @@ class TestAddApiView(object):
     @pytest.fixture
     def pyramid_config(self, pyramid_config):
         pyramid_config.add_view = mock.Mock()
+        pyramid_config.registry.settings["api.versions"] = ["v1", "v2"]
+        pyramid_config.registry.settings["api.version.current"] = "v1"
         return pyramid_config
 
     @pytest.fixture

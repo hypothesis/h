@@ -4,6 +4,12 @@ import venusian
 from h.util import cors
 
 
+class APIConfigError(Exception):
+    """Exception thrown when API view configuration is invalid."""
+
+    pass
+
+
 #: Decorator that adds CORS headers to API responses.
 #:
 #: This decorator enables web applications not running on the same domain as h
@@ -22,7 +28,13 @@ cors_policy = cors.policy(
 
 
 def add_api_view(
-    config, view, link_name=None, description=None, enable_preflight=True, **settings
+    config,
+    view,
+    link_name=None,
+    description=None,
+    enable_preflight=True,
+    versions=None,
+    **settings
 ):
 
     """
@@ -51,9 +63,20 @@ def add_api_view(
         # preferred
         primary_method = primary_method[0]
 
-    settings.setdefault("accept", "application/json")
     settings.setdefault("renderer", "json")
     settings.setdefault("decorator", cors_policy)
+
+    current_version = config.registry.settings["api.version.current"]
+    known_versions = config.registry.settings["api.versions"]
+    view_versions = versions or [current_version]
+
+    for version in view_versions:
+        if version not in known_versions:
+            raise APIConfigError(
+                "Version " + version + " does not match any known API version"
+            )
+        if version == current_version:
+            settings.setdefault("accept", "application/json")
 
     if link_name:
         link = {
@@ -69,6 +92,13 @@ def add_api_view(
         registry.api_links.append(link)
 
     config.add_view(view=view, **settings)
+
+    # Add version-specific Accept headers. This requires re-adding the view
+    # as `add_view` only takes one value for `accept` at a time
+    for version in view_versions:
+        settings["accept"] = "application/vnd.hypothesis." + version + "+json"
+        config.add_view(view=view, **settings)
+
     if enable_preflight:
         cors.add_preflight_view(config, settings["route_name"], cors_policy)
 
