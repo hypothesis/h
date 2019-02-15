@@ -11,31 +11,31 @@ from h.views.api import config as api_config
 class TestAddApiView(object):
     def test_it_sets_accept_setting(self, pyramid_config, view):
         api_config.add_api_view(pyramid_config, view, route_name="thing.read")
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["accept"] == "application/json"
 
     def test_it_allows_accept_setting_override(self, pyramid_config, view):
         api_config.add_api_view(
             pyramid_config, view, accept="application/xml", route_name="thing.read"
         )
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["accept"] == "application/xml"
 
     def test_it_sets_renderer_setting(self, pyramid_config, view):
         api_config.add_api_view(pyramid_config, view, route_name="thing.read")
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["renderer"] == "json"
 
     def test_it_allows_renderer_setting_override(self, pyramid_config, view):
         api_config.add_api_view(
             pyramid_config, view, route_name="thing.read", renderer="xml"
         )
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["renderer"] == "xml"
 
     def test_it_sets_cors_decorator(self, pyramid_config, view):
         api_config.add_api_view(pyramid_config, view, route_name="thing.read")
-        (_, kwargs) = pyramid_config.add_view.call_args
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["decorator"] == api_config.cors_policy
 
     def test_it_adds_cors_preflight_view(self, pyramid_config, view, cors):
@@ -59,6 +59,11 @@ class TestAddApiView(object):
         )
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs["decorator"] == decorator
+
+    def test_it_adds_default_version_accept(self, pyramid_config, view):
+        api_config.add_api_view(pyramid_config, view, route_name="thing.read")
+        (_, kwargs) = pyramid_config.add_view.call_args_list[1]
+        assert kwargs["accept"] == "application/vnd.hypothesis.v1+json"
 
     @pytest.mark.parametrize(
         "link_name,route_name,description,request_method,expected_method",
