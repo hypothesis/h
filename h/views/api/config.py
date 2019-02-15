@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import venusian
 
-from h.util import cors
+from h.views.api.helpers import cors
 
 
 #: Decorator that adds CORS headers to API responses.
