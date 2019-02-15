@@ -2,7 +2,8 @@
 
 from __future__ import unicode_literals
 
-from h.views.api.config import api_config, AngularRouteTemplater
+from h.views.api.config import api_config
+from h.views.api.helpers.angular import AngularRouteTemplater
 
 
 @api_config(route_name="api.index")
