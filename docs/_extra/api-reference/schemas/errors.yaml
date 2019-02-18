@@ -1,0 +1,12 @@
+Conflict:
+  type: object
+  required:
+    - status
+  properties:
+    status:
+      type: string
+      enum:
+        - failure
+    reason:
+      type: string
+      description: One or more human-readable errors describing the conflict.
