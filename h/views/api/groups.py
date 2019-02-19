@@ -20,6 +20,7 @@ from h.views.api.config import api_config
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.groups",
     request_method="GET",
     link_name="groups.read",
@@ -42,6 +43,7 @@ def groups(request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.groups",
     request_method="POST",
     permission="create",
@@ -79,6 +81,7 @@ def create(request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.group",
     request_method="GET",
     permission="read",
@@ -94,6 +97,7 @@ def read(group, request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.group",
     request_method="PATCH",
     permission="admin",
@@ -127,6 +131,7 @@ def update(group, request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.group_upsert",
     request_method="PUT",
     permission="upsert",
@@ -189,6 +194,7 @@ def upsert(context, request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.group_member",
     request_method="DELETE",
     link_name="group.member.delete",
@@ -210,6 +216,7 @@ def remove_member(group, request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.group_member",
     request_method="POST",
     link_name="group.member.add",

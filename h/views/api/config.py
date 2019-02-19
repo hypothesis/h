@@ -3,7 +3,7 @@ import venusian
 
 from h.views.api.helpers import cors
 
-from h.views.api import API_VERSION_DEFAULT
+from h.views.api import API_VERSIONS
 
 
 #: Decorator that adds CORS headers to API responses.
@@ -26,7 +26,7 @@ cors_policy = cors.policy(
 def add_api_view(
     config,
     view,
-    versions=None,
+    versions,
     link_name=None,
     description=None,
     enable_preflight=True,
@@ -73,8 +73,6 @@ def add_api_view(
     settings.setdefault("renderer", "json")
     settings.setdefault("decorator", cors_policy)
 
-    versions = versions or [API_VERSION_DEFAULT]
-
     if link_name:
         link = {
             "name": link_name,
@@ -91,6 +89,11 @@ def add_api_view(
     config.add_view(view=view, **settings)
 
     for version in versions:
+        if version not in API_VERSIONS:
+            raise ValueError(
+                "API Configuration Error: Unrecognized API version " + version
+            )
+
         # config.add_view only allows one, string value for `accept`, so we
         # have to re-invoke it to add additional accept headers
         settings["accept"] = "application/vnd.hypothesis." + version + "+json"
@@ -100,7 +103,7 @@ def add_api_view(
         cors.add_preflight_view(config, settings["route_name"], cors_policy)
 
 
-def api_config(link_name=None, description=None, **settings):
+def api_config(versions, link_name=None, description=None, **settings):
     """
     A view configuration decorator for API views.
 
@@ -112,6 +115,7 @@ def api_config(link_name=None, description=None, **settings):
         add_api_view(
             context.config,
             view=ob,
+            versions=versions,
             link_name=link_name,
             description=description,
             **settings

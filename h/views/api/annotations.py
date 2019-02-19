@@ -38,7 +38,10 @@ _ = i18n.TranslationStringFactory(__package__)
 
 
 @api_config(
-    route_name="api.search", link_name="search", description="Search for annotations"
+    versions=["v1"],
+    route_name="api.search",
+    link_name="search",
+    description="Search for annotations",
 )
 def search(request):
     """Search the database for annotations matching with the given query."""
@@ -63,6 +66,7 @@ def search(request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.annotations",
     request_method="POST",
     permission="create",
@@ -84,6 +88,7 @@ def create(request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.annotation",
     request_method="GET",
     permission="read",
@@ -96,7 +101,12 @@ def read(context, request):
     return svc.present(context)
 
 
-@api_config(route_name="api.annotation.jsonld", request_method="GET", permission="read")
+@api_config(
+    versions=["v1"],
+    route_name="api.annotation.jsonld",
+    request_method="GET",
+    permission="read",
+)
 def read_jsonld(context, request):
     request.response.content_type = "application/ld+json"
     request.response.content_type_params = {
@@ -108,6 +118,7 @@ def read_jsonld(context, request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.annotation",
     request_method=("PATCH", "PUT"),
     permission="update",
@@ -137,6 +148,7 @@ def update(context, request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.annotation",
     request_method="DELETE",
     permission="delete",
