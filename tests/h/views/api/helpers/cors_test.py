@@ -7,7 +7,7 @@ from pyramid.request import Request
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPBadRequest
 
-from h.util.cors import add_preflight_view, policy, set_cors_headers
+from h.views.api.helpers.cors import add_preflight_view, policy, set_cors_headers
 
 
 def test_cors_passes_through_non_preflight():
@@ -161,7 +161,7 @@ class TestCorsViewDecorator(object):
 
     @pytest.fixture
     def set_cors_headers(self, patch):
-        return patch("h.util.cors.set_cors_headers")
+        return patch("h.views.api.helpers.cors.set_cors_headers")
 
 
 class TestAddPreflightView(object):
