@@ -50,7 +50,7 @@ components:
       in: query
       required: false
       description: >
-        One or more relations to expand for the group resource
+        One or more relations to expand for a group resource
       schema:
         type: array
         items:
@@ -125,9 +125,86 @@ components:
 
 
 # -----------------------------------------------------------------------------
-# API operations
+# API OPERATIONS
 # -----------------------------------------------------------------------------
 paths:
+
+  # ---------------------------------------------------------------------------
+  # Operations on Group collections
+  # ---------------------------------------------------------------------------
+
+  /groups:
+    # -----------------------------------------------------
+    # GET groups - Fetch a filtered list of Groups
+    # -----------------------------------------------------
+    get:
+      tags:
+        - groups
+      summary: Get a list of Groups
+      description: >
+        Retrieve a list of applicable Groups, filtered by authority and target
+        document (`document_uri`). Also retrieve user's private Groups.
+      security:
+        - ApiKey: []
+        - {} # Unauthenticated OK
+
+      parameters:
+        - name: authority
+          in: query
+          description: >
+            Filter returned groups to this authority. For authenticated requests,
+            the user's associated authority will supersede any provided value.
+          required: false
+          schema:
+            type: string
+            default: "hypothes.is"
+        - name: document_uri
+          in: query
+          description: >
+            Only retrieve public (i.e. non-private) groups that apply to a
+            given document URI (i.e. the target document being annotated).
+          required: false
+          schema:
+            type: string
+            format: uri
+        - $ref: '#/components/parameters/GroupExpand'
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/*json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+    post:
+      tags:
+        - groups
+      summary: Create a new group
+      description: >
+        Create a new, private group for the currently-authenticated user.
+      security:
+        - AuthClientForwardedUser: []
+        - ApiKey: []
+
+      requestBody:
+          description: Full representation of Group resource
+          required: true
+          content:
+            application/*json:
+              schema:
+                $ref: '#/components/schemas/GroupCreate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 
   # ---------------------------------------------------------------------------
   # Operations on individual Group resources
