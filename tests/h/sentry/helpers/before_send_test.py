@@ -21,7 +21,7 @@ class TestBeforeSend(object):
 
         # If you've added a new filter function you should add it to this list.
         filters = [
-            filters.filter_ws4py_error_terminating_connection,
+            filters.filter_ws4py_error_logging,
             filters.filter_ws4py_handshake_error,
         ]
 
@@ -29,7 +29,7 @@ class TestBeforeSend(object):
             filter.assert_called_once_with(Event.return_value)
 
     def test_it_filters_out_the_event_if_a_filter_fails(self, filters):
-        filters.filter_ws4py_error_terminating_connection.return_value = False
+        filters.filter_ws4py_error_logging.return_value = False
 
         result = before_send(mock.sentinel.event_dict, mock.sentinel.hint_dict)
 
@@ -37,7 +37,7 @@ class TestBeforeSend(object):
 
     def test_it_logs_when_it_filters_out_an_event(self, caplog, filters):
         caplog.set_level(logging.INFO)
-        filters.filter_ws4py_error_terminating_connection.return_value = False
+        filters.filter_ws4py_error_logging.return_value = False
 
         before_send(mock.sentinel.event_dict, mock.sentinel.hint_dict)
 
