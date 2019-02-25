@@ -10,28 +10,16 @@ from h.sentry.helpers import filters
 from h.sentry.helpers.event import Event
 
 
-class TestFilterWS4PYErrorTerminatingConnection(object):
-    def test_it_filters_terminating_connection_events(self):
+class TestFilterWS4PYErrorLogging(object):
+    def test_it_filters_ws4py_logger_events(self):
         event = logger_event("ws4py", "Error when terminating the connection")
-        assert filters.filter_ws4py_error_terminating_connection(event) is False
-
-    def test_it_doesnt_filter_other_ws4py_logger_events(self):
-        event = logger_event("ws4py", "Other message")
-        assert filters.filter_ws4py_error_terminating_connection(event) is True
+        assert filters.filter_ws4py_error_logging(event) is False
 
     def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
-        assert (
-            filters.filter_ws4py_error_terminating_connection(unexpected_logger_event)
-            is True
-        )
+        assert filters.filter_ws4py_error_logging(unexpected_logger_event) is True
 
     def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
-        assert (
-            filters.filter_ws4py_error_terminating_connection(
-                unexpected_exception_event
-            )
-            is True
-        )
+        assert filters.filter_ws4py_error_logging(unexpected_exception_event) is True
 
 
 class TestFilterWS4PYHandshakeError(object):

@@ -29,7 +29,7 @@ def before_send(event_dict, hint_dict):
     # If you add a new filter function you should add it to this list to enable
     # it.
     filter_functions = [
-        filters.filter_ws4py_error_terminating_connection,
+        filters.filter_ws4py_error_logging,
         filters.filter_ws4py_handshake_error,
     ]
 

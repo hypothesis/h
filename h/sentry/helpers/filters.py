@@ -12,18 +12,9 @@ from __future__ import unicode_literals
 import ws4py.exc
 
 
-def filter_ws4py_error_terminating_connection(event):
-    """
-    Filter out ws4py's "Error when terminating connection" message.
-
-    Thousands of these get logged every day in production and I don't think
-    they're actually a problem.
-
-    See: https://github.com/hypothesis/h/issues/5496
-    """
-    if event.logger == "ws4py" and event.message.startswith(
-        "Error when terminating the connection"
-    ):
+def filter_ws4py_error_logging(event):
+    """Filter out all error messages logged by ws4py."""
+    if event.logger == "ws4py":
         return False
     return True
 
