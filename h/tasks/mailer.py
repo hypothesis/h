@@ -41,7 +41,7 @@ def send(self, recipients, subject, body, html=None):
             log.info("emailing in debug mode: check the `mail/' directory")
         mailer.send_immediately(email)
     except smtplib.SMTPRecipientsRefused as exc:
-        log.warning(
+        log.info(
             "Recipient was refused when trying to send an email. Does the user have an invalid email address?",
             exc_info=exc,
         )
