@@ -40,6 +40,11 @@ def send(self, recipients, subject, body, html=None):
         if celery.request.debug:
             log.info("emailing in debug mode: check the `mail/' directory")
         mailer.send_immediately(email)
+    except smtplib.SMTPRecipientsRefused as exc:
+        log.debug(
+            "Recipient was refused when trying to send an email. Does the user have an invalid email address?",
+            exc_info=exc,
+        )
     except (smtplib.socket.error, smtplib.SMTPException) as exc:
         # Exponential backoff in case the SMTP service is having problems.
         countdown = self.default_retry_delay * 2 ** self.request.retries
