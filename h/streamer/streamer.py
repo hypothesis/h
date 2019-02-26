@@ -97,8 +97,8 @@ def process_work_queue(settings, queue, session_factory=None):
         except (KeyboardInterrupt, SystemExit):
             session.rollback()
             raise
-        except:  # noqa: E722
-            log.exception("Caught exception handling streamer message:")
+        except Exception as exc:  # noqa: E722
+            log.warning("Caught exception handling streamer message:", exc_info=exc)
             session.rollback()
         else:
             session.commit()
