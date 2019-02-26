@@ -212,21 +212,6 @@ def update_annotation(request, id_, data, group_service):
     return annotation
 
 
-def delete_annotation(session, id_):
-    """
-    Delete the annotation with the given id.
-
-    :param session: the database session
-    :type session: sqlalchemy.orm.session.Session
-
-    :param id_: the annotation ID
-    :type id_: str
-    """
-    annotation = session.query(models.Annotation).get(id_)
-    annotation.updated = datetime.utcnow()
-    annotation.deleted = True
-
-
 def expand_uri(session, uri):
     """
     Return all URIs which refer to the same underlying document as `uri`.

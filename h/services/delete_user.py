@@ -2,14 +2,13 @@
 
 from __future__ import unicode_literals
 
-from h.events import AnnotationEvent
 from h.models import Annotation, Group
-from h import storage
 
 
 class DeleteUserService(object):
-    def __init__(self, request):
+    def __init__(self, request, annotation_delete_service):
         self.request = request
+        self._annotation_delete_service = annotation_delete_service
 
     def delete(self, user):
         """
@@ -62,9 +61,7 @@ class DeleteUserService(object):
     def _delete_annotations(self, user):
         annotations = self.request.db.query(Annotation).filter_by(userid=user.userid)
         for annotation in annotations:
-            storage.delete_annotation(self.request.db, annotation.id)
-            event = AnnotationEvent(self.request, annotation.id, "delete")
-            self.request.notify_after_commit(event)
+            self._annotation_delete_service.delete(annotation)
 
     def _delete_groups(self, groups):
         for group in groups:
@@ -76,4 +73,5 @@ class DeleteUserService(object):
 
 
 def delete_user_service_factory(context, request):
-    return DeleteUserService(request=request)
+    annotation_delete_service = request.find_service(name="annotation_delete")
+    return DeleteUserService(request, annotation_delete_service)

@@ -25,6 +25,9 @@ def includeme(config):
         ".auth_token.auth_token_service_factory", name="auth_token"
     )
     config.register_service_factory(
+        ".annotation_delete.annotation_delete_service_factory", name="annotation_delete"
+    )
+    config.register_service_factory(
         ".delete_group.delete_group_service_factory", name="delete_group"
     )
     config.register_service_factory(

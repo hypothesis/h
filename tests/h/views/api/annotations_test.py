@@ -7,6 +7,7 @@ from webob.multidict import NestedMultiDict, MultiDict
 
 from h.schemas import ValidationError
 from h.search.core import SearchResult
+from h.services.annotation_delete import AnnotationDeleteService
 from h.views.api import annotations as views
 
 
@@ -381,29 +382,18 @@ class TestUpdate(object):
         return patch("h.views.api.annotations.UpdateAnnotationSchema")
 
 
-@pytest.mark.usefixtures("AnnotationEvent", "links_service", "storage")
+@pytest.mark.usefixtures(
+    "AnnotationEvent", "links_service", "annotation_delete_service"
+)
 class TestDelete(object):
-    def test_it_deletes_then_annotation_from_storage(self, pyramid_request, storage):
-        context = mock.Mock()
-
-        views.delete(context, pyramid_request)
-
-        storage.delete_annotation.assert_called_once_with(
-            pyramid_request.db, context.annotation.id
-        )
-
-    def test_it_inits_and_fires_an_AnnotationEvent(
-        self, AnnotationEvent, pyramid_request
+    def test_it_calls_the_annotation_delete_service(
+        self, pyramid_request, annotation_delete_service
     ):
         context = mock.Mock()
-        event = AnnotationEvent.return_value
 
         views.delete(context, pyramid_request)
 
-        AnnotationEvent.assert_called_once_with(
-            pyramid_request, context.annotation.id, "delete"
-        )
-        pyramid_request.notify_after_commit.assert_called_once_with(event)
+        annotation_delete_service.delete.assert_called_once_with(context.annotation)
 
     def test_it_returns_object(self, pyramid_request):
         context = mock.Mock()
@@ -453,3 +443,12 @@ def pyramid_request(pyramid_request):
 @pytest.fixture
 def storage(patch):
     return patch("h.views.api.annotations.storage")
+
+
+@pytest.fixture
+def annotation_delete_service(pyramid_config):
+    service = mock.create_autospec(
+        AnnotationDeleteService, spec_set=True, instance=True
+    )
+    pyramid_config.register_service(service, name="annotation_delete")
+    return service

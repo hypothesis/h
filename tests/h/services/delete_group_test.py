@@ -5,63 +5,51 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.events import AnnotationEvent
 from h.services.delete_group import (
     delete_group_service_factory,
     DeleteGroupService,
     DeletePublicGroupError,
 )
+from h.services.annotation_delete import AnnotationDeleteService
 
 
+@pytest.mark.usefixtures("annotation_delete_service")
 class TestDeleteGroupService(object):
-    def test_delete_does_not_delete_public_group(self, svc, db_session, factories):
+    def test_it_does_not_delete_public_group(self, svc, db_session, factories):
         group = factories.Group()
         group.pubid = "__world__"
 
         with pytest.raises(DeletePublicGroupError):
             svc.delete(group)
 
-    def test_delete_deletes_group(self, svc, db_session, factories):
+    def test_it_deletes_group(self, svc, db_session, factories):
         group = factories.Group()
 
         svc.delete(group)
 
         assert group in db_session.deleted
 
-    def test_delete_deletes_annotations(self, svc, factories, storage, pyramid_request):
+    def test_it_deletes_annotations(
+        self, svc, factories, pyramid_request, annotation_delete_service
+    ):
         group = factories.Group()
         annotations = [
-            factories.Annotation(groupid=group.pubid),
-            factories.Annotation(groupid=group.pubid),
+            factories.Annotation(groupid=group.pubid).id,
+            factories.Annotation(groupid=group.pubid).id,
         ]
 
         svc.delete(group)
 
-        storage.delete_annotation.assert_has_calls(
-            [
-                mock.call(pyramid_request.db, annotations[0].id),
-                mock.call(pyramid_request.db, annotations[1].id),
-            ],
-            any_order=True,
-        )
+        deleted_anns = [
+            ann.id
+            for ann in annotation_delete_service.delete_annotations.call_args[0][0]
+        ]
+        assert sorted(deleted_anns) == sorted(annotations)
 
-    def test_delete_publishes_annotation_events(
-        self, storage, factories, pyramid_request, svc
-    ):
-        group = factories.Group()
-        annotation = factories.Annotation(groupid=group.pubid)
 
-        svc.delete(group)
-
-        expected_event = AnnotationEvent(pyramid_request, annotation.id, "delete")
-        actual_event = pyramid_request.notify_after_commit.call_args[0][0]
-        assert (
-            expected_event.request,
-            expected_event.annotation_id,
-            expected_event.action,
-        ) == (actual_event.request, actual_event.annotation_id, actual_event.action)
-
-    def test_delete_group_factory(self, pyramid_request):
+@pytest.mark.usefixtures("annotation_delete_service")
+class TestDeleteGroupServiceFactory(object):
+    def test_it_returns_delete_group_service_instance(self, pyramid_request):
         svc = delete_group_service_factory(None, pyramid_request)
 
         assert isinstance(svc, DeleteGroupService)
@@ -74,11 +62,9 @@ def svc(db_session, pyramid_request):
 
 
 @pytest.fixture
-def storage(patch):
-    return patch("h.services.delete_group.storage")
-
-
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.notify_after_commit = mock.Mock()
-    return pyramid_request
+def annotation_delete_service(pyramid_config):
+    service = mock.create_autospec(
+        AnnotationDeleteService, spec_set=True, instance=True
+    )
+    pyramid_config.register_service(service, name="annotation_delete")
+    return service
