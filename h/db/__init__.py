@@ -141,8 +141,8 @@ def _maybe_create_default_organization(engine, authority):
 
 
 def _maybe_create_world_group(engine, authority, default_org):
-    from h import models
-    from h.models.group import ReadableBy, WriteableBy
+    from h import models  # pylint:disable=cyclic-import
+    from h.models.group import ReadableBy, WriteableBy  # pylint:disable=cyclic-import
 
     session = Session(bind=engine)
     world_group = session.query(models.Group).filter_by(pubid="__world__").one_or_none()
