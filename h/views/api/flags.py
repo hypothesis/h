@@ -12,6 +12,7 @@ from h.tasks import mailer
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.annotation_flag",
     request_method="PUT",
     link_name="annotation.flag",

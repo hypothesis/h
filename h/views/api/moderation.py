@@ -9,6 +9,7 @@ from h.views.api.config import api_config
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.annotation_hide",
     request_method="PUT",
     link_name="annotation.hide",
@@ -27,6 +28,7 @@ def create(context, request):
 
 
 @api_config(
+    versions=["v1"],
     route_name="api.annotation_hide",
     request_method="DELETE",
     link_name="annotation.unhide",

@@ -2,7 +2,15 @@
 from __future__ import unicode_literals
 
 API_VERSIONS = ["v1"]
+"""All of the app's known API versions"""
+
 API_VERSION_DEFAULT = "v1"
+"""
+The current API version.
+
+API requests will match to views supporting this version unless the request
+specifies a different version with a properly-formatted Accept header
+"""
 
 __all__ = ("API_VERSIONS", "API_VERSION_DEFAULT")
 

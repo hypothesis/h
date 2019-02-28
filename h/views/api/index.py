@@ -6,7 +6,7 @@ from h.views.api.config import api_config
 from h.views.api.helpers.angular import AngularRouteTemplater
 
 
-@api_config(route_name="api.index")
+@api_config(versions=["v1"], route_name="api.index")
 def index(context, request):
     """Return the API descriptor document.
 
