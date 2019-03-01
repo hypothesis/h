@@ -57,6 +57,14 @@ matrix:
       script:
         make lint
 
+    # Analyze backend code
+    - env: ACTION=backend-analyze
+      language: python
+      python: '3.6'
+      install: pip install tox tox-pip-extensions
+      script:
+        make analyze
+
     # Check the docs build for warnings or errors.
     - env: ACTION=check-docs
       language: python
