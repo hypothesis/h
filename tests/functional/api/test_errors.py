@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Functional tests for client API errors
+
+Uses create-group endpoint as it can raise all relevant client error codes.
+"""
 
 from __future__ import unicode_literals
 
@@ -12,18 +17,8 @@ native_str = str
 
 
 @pytest.mark.functional
-class TestCreateGroup(object):
-    def test_it_returns_http_200_with_valid_payload(self, app, token_auth_header):
-        group = {"name": "My Group"}
-        res = app.post_json("/api/groups", group, headers=token_auth_header)
-
-        assert res.status_code == 200
-
-    def test_it_ignores_non_whitelisted_fields_in_payload(self, app, token_auth_header):
-        group = {"name": "My Group", "organization": "foobar", "joinable_by": "whoever"}
-        res = app.post_json("/api/groups", group, headers=token_auth_header)
-
-        assert res.status_code == 200
+class Test400ErrorsUsingCreateGroup(object):
+    """Creating a group can raise all of the client errors we want to test"""
 
     def test_it_returns_http_400_with_invalid_payload(self, app, token_auth_header):
         group = {}
@@ -33,6 +28,17 @@ class TestCreateGroup(object):
         )
 
         assert res.status_code == 400
+
+    def test_it_returns_a_formatted_reason_with_invalid_payload(
+        self, app, token_auth_header
+    ):
+        group = {}
+
+        res = app.post_json(
+            "/api/groups", group, headers=token_auth_header, expect_errors=True
+        )
+
+        assert res.json["reason"] == "u'name' is a required property"
 
     def test_it_returns_http_400_if_groupid_set_on_default_authority(
         self, app, token_auth_header
@@ -44,6 +50,24 @@ class TestCreateGroup(object):
 
         assert res.status_code == 400
 
+    def test_it_returns_formatted_reason_if_groupid_set_on_default_authority(
+        self, app, token_auth_header
+    ):
+        # FIXME: The `reason` is double-escaped
+        group = {"name": "My Group", "groupid": "3434kjkjk"}
+        res = app.post_json(
+            "/api/groups", group, headers=token_auth_header, expect_errors=True
+        )
+
+        assert (
+            res.json["reason"]
+            == "groupid: u'3434kjkjk' does not match u\"^group:([a-zA-Z0-9._\\\\-+!~*()']{1,1024})@(.*)$\""
+        )
+
+
+@pytest.mark.functional
+class Test403ErrorsUsingCreateGroup(object):
+    # FIXME: API currently converts all 403s to 404s
     def test_it_returns_http_404_if_no_authenticated_user(
         self, app, auth_client_header
     ):
@@ -54,6 +78,20 @@ class TestCreateGroup(object):
         )
 
         assert res.status_code == 404
+
+    def test_it_returns_formatted_reason_if_no_authenticated_user(
+        self, app, auth_client_header
+    ):
+        # FIXME: This should return a 403
+        group = {"name": "My Group"}
+        res = app.post_json(
+            "/api/groups", group, headers=auth_client_header, expect_errors=True
+        )
+
+        assert (
+            res.json["reason"]
+            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
+        )
 
     @pytest.mark.xfail
     def test_it_returns_http_403_if_no_authenticated_user(
@@ -66,33 +104,25 @@ class TestCreateGroup(object):
 
         assert res.status_code == 403
 
-    def test_it_allows_auth_client_with_forwarded_user(
-        self, app, auth_client_header, third_party_user
-    ):
-        headers = auth_client_header
-        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
-        group = {"name": "My Group"}
 
-        res = app.post_json("/api/groups", group, headers=headers)
+@pytest.mark.functional
+class Test404ErrorsUsingCreateGroup(object):
+    def test_it_returns_http_404_if_endpoint_nonexistent(self, app):
+        res = app.get("/api/not_a_thing", expect_errors=True)
 
-        assert res.status_code == 200
+        assert res.status_code == 404
 
-    def test_it_allows_groupdid_from_auth_client_with_forwarded_user(
-        self, app, auth_client_header, third_party_user
-    ):
-        headers = auth_client_header
-        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
-        group = {"name": "My Group", "groupid": "group:333vcdfkj~@thirdparty.com"}
+    def test_it_returns_formatted_reason_if_endpoint_nonexistent(self, app):
+        res = app.get("/api/not_a_thing", expect_errors=True)
 
-        res = app.post_json("/api/groups", group, headers=headers)
-        data = res.json
-
-        assert res.status_code == 200
-        assert "groupid" in data
-        assert data["groupid"] == "group:{groupid}@thirdparty.com".format(
-            groupid="333vcdfkj~"
+        assert (
+            res.json["reason"]
+            == "Either the resource you requested doesn't exist, or you are not currently authorized to see it."
         )
 
+
+@pytest.mark.functional
+class Test409ErrorsUsingCreateGroup(object):
     def test_it_returns_HTTP_Conflict_if_groupid_is_duplicate(
         self, app, auth_client_header, third_party_user
     ):
@@ -105,17 +135,20 @@ class TestCreateGroup(object):
 
         assert res.status_code == 409
 
-    def test_it_returns_http_404_with_invalid_forwarded_user_format(
-        self, app, auth_client_header
+    def test_it_returns_formatted_reason_if_group_is_duplicate(
+        self, app, auth_client_header, third_party_user
     ):
-        # FIXME: This should return a 403
         headers = auth_client_header
-        headers[native_str("X-Forwarded-User")] = native_str("floopflarp")
-        group = {}
+        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
+        group = {"name": "My Group", "groupid": "group:333vcdfkj~@thirdparty.com"}
 
+        res = app.post_json("/api/groups", group, headers=headers)
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
 
-        assert res.status_code == 404
+        assert (
+            res.json["reason"]
+            == "group with groupid 'group:333vcdfkj~@thirdparty.com' already exists"
+        )
 
 
 @pytest.fixture
