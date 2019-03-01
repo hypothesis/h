@@ -50,7 +50,7 @@ def oauth_error(context, request):
 def api_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code
-    return {"status": "failure", "reason": str(context)}
+    return {"status": "failure", "reason": context.detail}
 
 
 @json_view(context=Exception, path_info="/api/", decorator=cors_policy)

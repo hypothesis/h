@@ -34,6 +34,17 @@ class TestCreateGroup(object):
 
         assert res.status_code == 400
 
+    def test_it_returns_a_formatted_reason_with_invalid_payload(
+        self, app, token_auth_header
+    ):
+        group = {}
+
+        res = app.post_json(
+            "/api/groups", group, headers=token_auth_header, expect_errors=True
+        )
+
+        assert res.json["reason"] == "u'name' is a required property"
+
     def test_it_returns_http_400_if_groupid_set_on_default_authority(
         self, app, token_auth_header
     ):
@@ -43,6 +54,20 @@ class TestCreateGroup(object):
         )
 
         assert res.status_code == 400
+
+    def test_it_returns_formatted_reason_if_groupid_set_on_default_authority(
+        self, app, token_auth_header
+    ):
+        # FIXME: The `reason` is double-escaped
+        group = {"name": "My Group", "groupid": "3434kjkjk"}
+        res = app.post_json(
+            "/api/groups", group, headers=token_auth_header, expect_errors=True
+        )
+
+        assert (
+            res.json["reason"]
+            == "groupid: u'3434kjkjk' does not match u\"^group:([a-zA-Z0-9._\\\\-+!~*()']{1,1024})@(.*)$\""
+        )
 
     def test_it_returns_http_404_if_no_authenticated_user(
         self, app, auth_client_header
@@ -104,6 +129,21 @@ class TestCreateGroup(object):
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
 
         assert res.status_code == 409
+
+    def test_it_returns_formatted_reason_if_group_is_duplicate(
+        self, app, auth_client_header, third_party_user
+    ):
+        headers = auth_client_header
+        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
+        group = {"name": "My Group", "groupid": "group:333vcdfkj~@thirdparty.com"}
+
+        res = app.post_json("/api/groups", group, headers=headers)
+        res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
+
+        assert (
+            res.json["reason"]
+            == "group with groupid 'group:333vcdfkj~@thirdparty.com' already exists"
+        )
 
     def test_it_returns_http_404_with_invalid_forwarded_user_format(
         self, app, auth_client_header
