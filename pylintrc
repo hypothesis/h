@@ -24,7 +24,7 @@ load-plugins=pylint.extensions.bad_builtin,
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 disable=missing-docstring,
-        imports
+        imports,
 
 [REPORTS]
 
