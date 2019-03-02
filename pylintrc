@@ -4,6 +4,14 @@
 # number of processors available to use.
 jobs=0
 
+load-plugins=pylint.extensions.bad_builtin,
+             pylint.extensions.check_elif,
+             pylint.extensions.comparetozero,
+             pylint.extensions.docparams,
+             pylint.extensions.emptystring,
+             pylint.extensions.overlapping_exceptions,
+             pylint.extensions.redefined_variable_type,
+
 [MESSAGES CONTROL]
 
 # Disable the message, report, category or checker with the given id(s). You
