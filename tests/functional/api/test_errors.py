@@ -9,6 +9,7 @@ from __future__ import unicode_literals
 
 import pytest
 import base64
+import re
 
 
 from h.models.auth_client import GrantType
@@ -38,7 +39,8 @@ class Test400ErrorsUsingCreateGroup(object):
             "/api/groups", group, headers=token_auth_header, expect_errors=True
         )
 
-        assert res.json["reason"] == "u'name' is a required property"
+        stripped = _strip_unicode_literal(res.json["reason"])
+        assert stripped == "'name' is a required property"
 
     def test_it_returns_http_400_if_groupid_set_on_default_authority(
         self, app, token_auth_header
@@ -53,16 +55,15 @@ class Test400ErrorsUsingCreateGroup(object):
     def test_it_returns_formatted_reason_if_groupid_set_on_default_authority(
         self, app, token_auth_header
     ):
-        # FIXME: The `reason` is double-escaped
         group = {"name": "My Group", "groupid": "3434kjkjk"}
         res = app.post_json(
             "/api/groups", group, headers=token_auth_header, expect_errors=True
         )
 
-        assert (
-            res.json["reason"]
-            == "groupid: u'3434kjkjk' does not match u\"^group:([a-zA-Z0-9._\\\\-+!~*()']{1,1024})@(.*)$\""
-        )
+        stripped = _strip_unicode_literal(res.json["reason"])
+        # FIXME: The `reason` is double-escaped
+        expected = "groupid: '3434kjkjk' does not match \"^group:([a-zA-Z0-9._\\\\-+!~*()']{1,1024})@(.*)$\""
+        assert stripped == expected
 
 
 @pytest.mark.functional
@@ -193,3 +194,10 @@ def user_with_token(db_session, factories):
 def token_auth_header(user_with_token):
     user, token = user_with_token
     return {native_str("Authorization"): native_str("Bearer {}".format(token.value))}
+
+
+def _strip_unicode_literal(original):
+    # Strip "u" literal prefixes that get added in front of property names in
+    # certain error messages in Python 2.
+    # See https://github.com/hypothesis/h/commit/992fa8005389ed52ebd076ae230d862b24449f2f
+    return re.sub(r"u(['\"])([^']+)'", "\\1\\2'", original)
