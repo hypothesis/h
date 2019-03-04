@@ -5,47 +5,59 @@ import pytest
 
 from pyramid.response import Response
 
-from pyramid.httpexceptions import HTTPForbidden, HTTPNotFound, HTTPGone
+from pyramid.httpexceptions import HTTPForbidden, HTTPNotFound
 
-from h.views.api.decorators.client_errors import client_error_decorator
+from h.views.api.decorators.client_errors import (
+    NOT_FOUND_MESSAGE,
+    unauthorized_to_not_found,
+    not_found_reason,
+)
 
 
-class TestClientErrorDecorator(object):
+class TestUnauthorizedToNotFound(object):
     def test_it_calls_wrapped_view_function(self, pyramid_request, testview):
 
-        client_error_decorator(testview)(None, pyramid_request)
+        unauthorized_to_not_found(testview)(None, pyramid_request)
 
         assert testview.called
 
-    def test_it_replaces_403s_with_404s(self, pyramid_request, testview):
-        wrapped = client_error_decorator(testview)
+    def test_it_replaces_context_with_404_exception(self, pyramid_request, testview):
+        wrapped = unauthorized_to_not_found(testview)
 
         wrapped(HTTPForbidden(), pyramid_request)
 
-        (context, _) = testview.call_args[0]
+        context, _ = testview.call_args[0]
 
         assert isinstance(context, HTTPNotFound)
 
     def test_it_replaces_404_message(self, pyramid_request, testview):
-        wrapped = client_error_decorator(testview)
-        default_not_found = HTTPNotFound()
+        wrapped = unauthorized_to_not_found(testview)
 
         wrapped(HTTPNotFound(), pyramid_request)
 
-        (context, _) = testview.call_args[0]
-        assert context.message != default_not_found.message
+        context, _ = testview.call_args[0]
+        assert context.message == NOT_FOUND_MESSAGE
 
-    def test_it_does_not_replace_other_http_4xx_messages(
-        self, pyramid_request, testview
-    ):
-        wrapped = client_error_decorator(testview)
-        default_gone = HTTPGone()
 
-        wrapped(HTTPGone(), pyramid_request)
+class TestNotFoundReason(object):
+    def test_it_replaces_context_message(self, pyramid_request, testview):
+        wrapped = not_found_reason(testview)
 
-        (context, _) = testview.call_args[0]
-        assert context.message == default_gone.message
+        wrapped(HTTPNotFound(), pyramid_request)
 
-    @pytest.fixture
-    def testview(self):
-        return mock.Mock(return_value=Response("OK"))
+        context, _ = testview.call_args[0]
+        assert context.message == NOT_FOUND_MESSAGE
+
+    def test_it_does_not_replace_context_exception(self, pyramid_request, testview):
+        wrapped = not_found_reason(testview)
+        not_found = HTTPNotFound()
+
+        wrapped(not_found, pyramid_request)
+
+        context, _ = testview.call_args[0]
+        assert context == not_found
+
+
+@pytest.fixture
+def testview():
+    return mock.Mock(return_value=Response("OK"))

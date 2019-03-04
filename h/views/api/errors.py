@@ -17,7 +17,7 @@ from pyramid import httpexceptions
 from h.i18n import TranslationString as _  # noqa: N813
 from h.util.view import handle_exception, json_view
 from h.views.api.config import cors_policy
-from h.views.api.decorators import client_error
+from h.views.api.decorators import unauthorized_to_not_found, not_found_reason
 from h.views.api.exceptions import OAuthAuthorizeError
 
 # All exception views below need to apply the `cors_policy` decorator for the
@@ -27,10 +27,12 @@ from h.views.api.exceptions import OAuthAuthorizeError
 
 # Within the API, render a JSON 403/404 message.
 @forbidden_view_config(
-    path_info="/api/", renderer="json", decorator=(cors_policy, client_error)
+    path_info="/api/",
+    renderer="json",
+    decorator=(cors_policy, unauthorized_to_not_found),
 )
 @notfound_view_config(
-    path_info="/api/", renderer="json", decorator=(cors_policy, client_error)
+    path_info="/api/", renderer="json", decorator=(cors_policy, not_found_reason)
 )
 def api_notfound(context, request):
     """Handle a request for an unknown/forbidden resource within the API."""
