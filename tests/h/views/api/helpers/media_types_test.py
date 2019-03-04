@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+import pytest
+
+from h.views.api.helpers import media_types
+
+
+class TestMediaTypeForVersion(object):
+    @pytest.mark.parametrize(
+        "version,expected",
+        [
+            ("v1", "application/vnd.hypothesis.v1+json"),
+            ("elephant", "application/vnd.hypothesis.elephant+json"),
+        ],
+    )
+    def test_it_formats_version_into_media_type_string(self, version, expected):
+        assert media_types.media_type_for_version(version) == expected
+
+    @pytest.mark.parametrize(
+        "version,subtype,expected",
+        [
+            ("v1", "json", "application/vnd.hypothesis.v1+json"),
+            ("elephant", "json", "application/vnd.hypothesis.elephant+json"),
+            ("v2", "json.ld", "application/vnd.hypothesis.v2+json.ld"),
+            ("v3", "whatever", "application/vnd.hypothesis.v3+whatever"),
+        ],
+    )
+    def test_it_appends_subtype_when_provided(self, version, subtype, expected):
+        assert media_types.media_type_for_version(version, subtype) == expected
+
+
+class TestValidMediaTypes(object):
+    def test_it_returns_list_containing_version_types(self):
+        assert media_types.valid_media_types(["foo", "bar"]) == [
+            "*/*",
+            "application/json",
+            "application/vnd.hypothesis.foo+json",
+            "application/vnd.hypothesis.bar+json",
+        ]
