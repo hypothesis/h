@@ -19,6 +19,7 @@ tags:
   - name: general
   - name: annotations
   - name: groups
+  - name: profile
   - name: users
 
 # -----------------------------------------------------------------------------
@@ -58,6 +59,14 @@ components:
           enum:
             - organization
             - scopes
+    Username:
+      name: username
+      in: path
+      required: true
+      description: >
+        The user's username
+      schema:
+        type: string
 
   # -------------------------
   # Reusable responses
@@ -122,6 +131,14 @@ components:
       $ref: './schemas/group-new.yaml#/Group'
     GroupUpdate:
       $ref: './schemas/group-update.yaml#/Group'
+    Profile:
+      $ref: './schemas/profile.yaml#/Profile'
+    User:
+      $ref: './schemas/user.yaml#/User'
+    UserCreate:
+      $ref: './schemas/user-new.yaml#/User'
+    UserUpdate:
+      $ref: './schemas/user-update.yaml#/User'
 
 
 # -----------------------------------------------------------------------------
@@ -303,3 +320,116 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+
+  # ---------------------------------------------------------------------------
+  # Operations on the currently-authenticated user (Profile)
+  # ---------------------------------------------------------------------------
+  /profile:
+
+    # -----------------------------------------------------
+    # GET profile - Retrieve user profile
+    # -----------------------------------------------------
+    get:
+      tags:
+        - profile
+      summary: Fetch user's profile
+      description: >
+        Fetch profile information for the currently-authenticated user.
+      security:
+        - ApiKey: []
+        - {} # Unauthenticated OK
+      responses:
+        '200':
+          description: Success
+          content:
+            application/*json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+  /profile/groups:
+    # -------------------------------------------------------------
+    # GET user's groups - Retrieve groups for currently auth'd user
+    # -------------------------------------------------------------
+    get:
+      tags:
+        - profile
+      summary: Fetch user's groups
+      description: >
+        Fetch the groups for which the currently-authenticated user is a member.
+      security:
+        - ApiKey: []
+        - {} # Unauthenticated OK
+      responses:
+        '200':
+          description: Success
+          content:
+            application/*json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+
+
+  # ---------------------------------------------------------------------------
+  # Operations on User Collections
+  # ---------------------------------------------------------------------------
+  /users:
+
+    post:
+      tags:
+        - users
+      summary: Create a new user
+      description: >
+        Create a new user within the client's associated authority.
+      security:
+        - AuthClient: []
+
+      requestBody:
+          description: Full representation of User resource
+          required: true
+          content:
+            application/*json:
+              schema:
+                $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  # ---------------------------------------------------------------------------
+  # Operations on single User Resources
+  # ---------------------------------------------------------------------------
+  /users/{username}:
+
+    patch:
+      tags:
+        - users
+      summary: Update a user
+      description: >
+        Update an existing user.
+      security:
+        - AuthClient: []
+
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      requestBody:
+          description: Properties to update in the User resource
+          required: true
+          content:
+            application/*json:
+              schema:
+                $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
