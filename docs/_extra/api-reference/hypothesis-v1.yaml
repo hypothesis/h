@@ -31,6 +31,13 @@ components:
   # Reusable parameters
   # -------------------------
   parameters:
+    AnnotationID:
+      name: id
+      in: path
+      required: true
+      schema:
+        description: The annotation's unique identifier
+        type: string
     GroupID:
       name: id
       in: path
@@ -125,6 +132,10 @@ components:
   # Resusable resource schemas
   # ------------------------------
   schemas:
+    Annotation:
+      $ref: './schemas/annotation-schema.json'
+    AnnotationCreate:
+      $ref: './schemas/annotation-schema.json'
     Group:
       $ref: './schemas/group.yaml#/Group'
     GroupCreate:
@@ -145,6 +156,120 @@ components:
 # API OPERATIONS
 # -----------------------------------------------------------------------------
 paths:
+
+  # ---------------------------------------------------------------------------
+  # Operations on Annotation collections
+  # ---------------------------------------------------------------------------
+  /annotations:
+
+    post:
+      tags:
+        - annotations
+      summary: Create a new annotation
+      security:
+        - ApiKey: []
+      requestBody:
+          description: Full representation of Annotation resource
+          required: true
+          content:
+            application/*json:
+              schema:
+                $ref: '#/components/schemas/AnnotationCreate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+
+  # ---------------------------------------------------------------------------
+  # Operations on single Annotation resources
+  # ---------------------------------------------------------------------------
+  /annotations/{id}:
+
+    # -----------------------------------------------------
+    # GET annotations/{id} - Fetch an Annotation
+    # -----------------------------------------------------
+    get:
+      tags:
+        - annotations
+      summary: Fetch an Annotation
+      security:
+        - ApiKey: []
+        - {} # Unauthenticated OK, depending on annotation status
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    # ------------------------------------------------------------------
+    # PATCH annotations/{id} - Update an Annotation (PUT also supported)
+    # ------------------------------------------------------------------
+    patch:
+      tags:
+        - annotations
+      summary: Update an Annotation
+      description: >
+        This endpoint is available under both the `PATCH` and `PUT`
+        request methods. Both endpoints have PATCH-characteristics
+        as defined in [RFC5789](https://tools.ietf.org/html/rfc5789#section-1),
+        meaning the request body does not have to include the whole annotation
+        object.
+
+        New implementations should use the `PATCH` request method, and existing
+        implementations continue to work under `PUT` but should switch to `PATCH`.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    # ------------------------------------------------------------------
+    # DELETE annotations/{id} - Delete an Annotation
+    # ------------------------------------------------------------------
+    delete:
+      tags:
+        - annotations
+      summary: Delete an Annotation
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - deleted
+                  - id
+                properties:
+                  deleted:
+                    type: boolean
+                    enum:
+                      - true
+                  id:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # ---------------------------------------------------------------------------
   # Operations on Group collections
