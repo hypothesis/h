@@ -116,6 +116,16 @@ components:
         The user's username
       schema:
         type: string
+    UserID:
+      name: user
+      in: path
+      required: true
+      description: >
+        Unique identifier for a user, with specified authority.
+        The userID should be of the format `acct:<username>@<authority>`
+      schema:
+        type: string
+        pattern: "acct:(?i)^[A-Z0-9._]+${3,30}@.*$"
 
   # -------------------------
   # Reusable responses
@@ -611,6 +621,66 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  # ---------------------------------------------------------------------------
+  # Operations on Group Membership
+  # ---------------------------------------------------------------------------
+  /groups/{id}/members/{user}:
+
+    # ----------------------------------------------------------
+    # POST groups/{id}/members/{user} - Add user to group
+    # ----------------------------------------------------------
+    post:
+      tags:
+        - groups
+      summary: Add member to group
+      description: >
+        Add a user as a member to a group. This endpoint is only accessible to
+        requests authenticated with `AuthClient` credentials and is restricted
+        to users and groups within the associated authority.
+      security:
+        - AuthClient: []
+      parameters:
+        - $ref: '#/components/parameters/GroupID'
+        - $ref: '#/components/parameters/UserID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+    # ----------------------------------------------------------
+    # DELETE groups/{id}/members/{user} - Remove user from group
+    # ----------------------------------------------------------
+    delete:
+      tags:
+        - groups
+      summary: Remove member from group
+      description: >
+        Remove a user from a group. At present, this endpoint only allows
+        the removal as one's self (authenticated with API Key) from the
+        indicated group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/GroupID'
+        - name: user
+          in: path
+          description: Currently, only the literal value `me` is accepted
+          required: true
+          schema:
+            type: string
+            enum:
+              - me
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
 
