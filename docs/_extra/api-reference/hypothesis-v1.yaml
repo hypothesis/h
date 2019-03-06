@@ -121,6 +121,8 @@ components:
   # Reusable responses
   # -------------------------
   responses:
+    NoContent:
+      description: Success (No Content)
     BadRequest:
       description: Bad Request
       content:
@@ -333,6 +335,86 @@ paths:
                       - true
                   id:
                     type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  # ---------------------------------------------------------------------------
+  # Annotation Moderation Operations: Flagging
+  # ---------------------------------------------------------------------------
+  /annotations/{id}/flag:
+
+    # --------------------------------------------------------
+    # PUT annotations/{id}/flag - Add a flag to an annotation
+    # --------------------------------------------------------
+    put:
+      tags:
+        - annotations
+      summary: Flag an annotation
+      description: >
+        Flag an annotation for review (moderation). The moderator of the group
+        containing the annotation will be notified of the flag and can decide
+        whether or not to hide the annotation. Note that flags persist and
+        cannot be removed once they are set.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  # ---------------------------------------------------------------------------
+  # Annotation Moderation Operations: Hiding/Unhiding
+  # ---------------------------------------------------------------------------
+  /annotations/{id}/hide:
+
+    # ----------------------------------------------------------
+    # PUT annotations/{id}/hide - Hide (moderate) an annotation
+    # ----------------------------------------------------------
+    put:
+      tags:
+        - annotations
+      summary: Hide an annotation
+      description: >
+        Hide an annotation. The authenticated user needs to have the moderate
+        permission for the group that contains the annotation—this permission
+        is granted to the user who created the group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+    # ----------------------------------------------------------
+    # DELETE annotations/{id}/hide - Unhide  an annotation
+    # ----------------------------------------------------------
+    delete:
+      tags:
+        - annotations
+      summary: Show an annotation
+      description: >
+        Show/"un-hide" an annotation. The authenticated user needs to have the
+        moderate permission for the group that contains the annotation—this
+        permission is granted to the user who created the group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
         '404':
           $ref: '#/components/responses/NotFound'
         '415':
