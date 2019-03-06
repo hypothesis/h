@@ -9,6 +9,48 @@ info:
   license:
     name: BSD (2-Clause)
     url: https://github.com/hypothesis/h/blob/master/LICENSE
+  description: |
+
+    # Introduction
+
+    This is a reference for the Hypothesis HTTP API version 1.0.
+    See [the API overview](../api/) for an introduction to the API and information
+    on how authorization works.
+
+    ## API Versions
+
+    TBD
+
+    ## Errors
+
+    The API uses standard HTTP status codes to indicate the success or failure
+    of requests. The body of the response will be JSON in the following format:
+
+    ```
+    {
+      "status": "failure",
+      "reason": "a human-readable string about what went wrong"
+    }
+    ```
+
+    ## Expanding Resources
+
+    Resources often contain links to related resources in their response bodies.
+    Some endpoints support resource expansion, allowing those related resources
+    to be expanded inline within the response.
+
+    To expand resources (where supported), use the `expand` request parameter.
+    Documentation for endpoints identify which resources are expandable, if any.
+
+    ```
+    GET /api/things?expand=organization&expand=foobar
+    ```
+
+    Values for `expand` are the fields to expand. The above would expand
+    `organization` and `foobar` fields within the (hypothetical) returned `thing`
+    objects. You can expand multiple fields by providing multiple values in the
+    `expand` Array.
+
 servers:
   - url: https://api.hypothes.is/api
 
