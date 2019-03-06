@@ -223,6 +223,20 @@ components:
 paths:
 
   # ---------------------------------------------------------------------------
+  # Service Root
+  # ---------------------------------------------------------------------------
+  /:
+    get:
+      tags:
+        - general
+      summary: Service root
+      description: Provides a list of links to resources offered by the API.
+      responses:
+        '200':
+          description: Success
+      security: []
+
+  # ---------------------------------------------------------------------------
   # Operations on Annotation collections
   # ---------------------------------------------------------------------------
   /annotations:
