@@ -3,13 +3,13 @@
 from __future__ import unicode_literals
 
 from mock import Mock
-from pyramid.httpexceptions import HTTPExpectationFailed
+from pyramid.httpexceptions import HTTPExpectationFailed, HTTPNotFound
 
 from h.views.api import errors as views
 
 
 def test_api_notfound_view(pyramid_request):
-    result = views.api_notfound(pyramid_request)
+    result = views.api_notfound(HTTPNotFound("Some Reason"), pyramid_request)
 
     assert pyramid_request.response.status_int == 404
     assert result["status"] == "failure"

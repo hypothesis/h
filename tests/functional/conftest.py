@@ -19,7 +19,7 @@ TEST_SETTINGS = {
     "es.index": ELASTICSEARCH_INDEX,
     "h.app_url": "http://example.com",
     "h.authority": "example.com",
-    "pyramid.debug_all": True,
+    "pyramid.debug_all": False,
     "secret_key": "notasecret",
     "sqlalchemy.url": os.environ.get(
         "TEST_DATABASE_URL", "postgresql://postgres@localhost/htest"
