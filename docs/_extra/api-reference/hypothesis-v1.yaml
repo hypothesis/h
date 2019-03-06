@@ -121,19 +121,30 @@ components:
   # Reusable responses
   # -------------------------
   responses:
-    Conflict:
-      description: >
-        An error indicating a resource conflict, typically because a
-        duplicate resource already exists.
+    BadRequest:
+      description: Bad Request
       content:
         application/*json:
           schema:
-            $ref: './schemas/errors.yaml#/Conflict'
+            $ref: './schemas/errors.yaml#/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/*json:
+          schema:
+            $ref: './schemas/errors.yaml#/Error'
     NotFound:
-      description: >
-        The specified resource was not found, or you do not have permission
-        to access it
-
+      description: Not Found or Permission Denied
+      content:
+        application/*json:
+          schema:
+            $ref: './schemas/errors.yaml#/Error'
+    UnsupportedMediaType:
+      description: Unsupported Media Type
+      content:
+        application/*json:
+          schema:
+            $ref: './schemas/errors.yaml#/Error'
 
   # --------------------------
   # Resusable security schemes
@@ -224,6 +235,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Annotation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on single Annotation resources
@@ -251,6 +268,8 @@ paths:
                 $ref: '#/components/schemas/Annotation'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ------------------------------------------------------------------
     # PATCH annotations/{id} - Update an Annotation (PUT also supported)
@@ -279,8 +298,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Annotation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ------------------------------------------------------------------
     # DELETE annotations/{id} - Delete an Annotation
@@ -312,6 +335,8 @@ paths:
                     type: string
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on Group collections
@@ -362,6 +387,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
     post:
       tags:
         - groups
@@ -386,8 +414,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
 
   # ---------------------------------------------------------------------------
@@ -422,6 +456,8 @@ paths:
                 $ref: '#/components/schemas/Group'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
     # -----------------------------------------------------
     # PATCH groups/{id} - Update a Group
@@ -451,10 +487,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ---------------------------------------------------------------------
     # PUT groups/{id} - Replace (Create or Update) a Group, a.k.a. "upsert"
@@ -483,10 +523,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on the currently-authenticated user (Profile)
@@ -512,6 +556,8 @@ paths:
             application/*json:
               schema:
                 $ref: '#/components/schemas/Profile'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   /profile/groups:
     # -------------------------------------------------------------
@@ -535,7 +581,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
-
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on User Collections
@@ -565,8 +612,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on single User Resources
@@ -598,5 +651,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
