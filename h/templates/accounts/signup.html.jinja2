@@ -10,11 +10,17 @@ Sign up for Hypothesis
 
 {% block content %}
 <div class="form-container content">
-  <h1 class="form-header">Sign up for Hypothesis</h1>
-  {{ form }}
-  <footer class="form-footer">
-    Already have an account?
-    <a class="link--footer" href="{{ request.route_path('login') }}">Log in</a>
-  </footer>
+  {% if form %}
+    <h1 class="form-header">Sign up for Hypothesis</h1>
+    {{ form }}
+    <footer class="form-footer">
+      Already have an account?
+      <a class="link--footer" href="{{ request.route_path('login') }}">Log in</a>
+    </footer>
+  {% else %}
+    <h1 class="form-header"> {{ heading }} </h1>
+    <p> {{ message }}</p>
+  {% endif %}
+    
 </div>
 {% endblock content %}

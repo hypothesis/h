@@ -9,6 +9,7 @@ from pyramid import httpexceptions
 
 from h.services.user_signup import UserSignupService
 from h.views import account_signup as views
+from h.services.exceptions import ConflictError
 
 
 @pytest.mark.usefixtures("pyramid_config", "routes", "user_signup_service")
@@ -56,7 +57,9 @@ class TestSignupController(object):
 
         assert not user_signup_service.signup.called
 
-    def test_post_redirects_on_success(self, form_validating_to, pyramid_request):
+    def test_post_displays_heading_and_message_on_success(
+        self, form_validating_to, pyramid_request
+    ):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to(
             {"username": "bob", "email": "bob@example.com", "password": "s3crets"}
@@ -64,7 +67,29 @@ class TestSignupController(object):
 
         result = controller.post()
 
-        assert isinstance(result, httpexceptions.HTTPRedirection)
+        assert result["heading"] == "Account registration successful"
+        assert result["message"] == (
+            "Please check your email and open the link to activate your account."
+        )
+
+    def test_post_displays_heading_and_message_on_conflict_error(
+        self, form_validating_to, pyramid_request, user_signup_service
+    ):
+        user_signup_service.signup.side_effect = ConflictError(
+            "The account bob@example.com is already registered."
+        )
+        controller = views.SignupController(pyramid_request)
+        controller.form = form_validating_to(
+            {"username": "bob", "email": "bob@example.com", "password": "s3crets"}
+        )
+
+        result = controller.post()
+
+        assert result["heading"] == "Account already registered"
+        assert result["message"] == (
+            "The account bob@example.com is already registered. "
+            "Please check your email and open the link to activate your account."
+        )
 
     def test_get_renders_form_when_not_logged_in(self, pyramid_request):
         controller = views.SignupController(pyramid_request)
