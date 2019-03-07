@@ -1,4 +1,4 @@
-Conflict:
+Error:
   type: object
   required:
     - status
@@ -9,4 +9,4 @@ Conflict:
         - failure
     reason:
       type: string
-      description: One or more human-readable errors describing the conflict.
+      description: One or more human-readable errors describing the problem.

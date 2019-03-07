@@ -9,6 +9,76 @@ info:
   license:
     name: BSD (2-Clause)
     url: https://github.com/hypothesis/h/blob/master/LICENSE
+  description: |
+
+    # Introduction
+
+    This is a reference for the Hypothesis HTTP API version 1.0.
+    See [the API overview](../api/) for an introduction to the API and information
+    on how authorization works.
+
+    # Expanding Resources
+
+    Resources often contain links to related resources in their response bodies.
+    Some endpoints support resource expansion, allowing those related resources
+    to be expanded inline within the response.
+
+
+    To expand resources (where supported), use the `expand` request parameter.
+    Documentation for endpoints identify which resources are expandable, if any.
+
+    ```
+    GET /api/things?expand=organization&expand=foobar
+    ```
+
+    Values for `expand` are the fields to expand. The above would expand
+    `organization` and `foobar` fields within the (hypothetical) returned `thing`
+    objects. You can expand multiple fields by providing multiple values in the
+    `expand` Array.
+
+    # Versions
+
+    ## Version History
+
+    TBD
+
+    ## Specifying API Version
+
+    By default, API requests will receive the **v1** version of the Hypothesis API.
+    Though not required, we urge clients to set an `Accept` header with a media
+    type corresponding to the desired version, e.g.
+
+    `Accept: application/vnd.hypothesis.v1+json`
+
+    If an `Accept` header is set with an unrecognized media type, the API will
+    return an HTTP 415 (Unsupported Media Type) error.
+
+    # Errors
+
+    The API uses standard HTTP status codes to indicate the success or failure
+    of requests. The body of the response will be JSON in the following format:
+
+    ```
+    {
+      "status": "failure",
+      "reason": "a human-readable string about what went wrong"
+    }
+    ```
+
+    ## HTTP Status Codes
+
+    | Code        | Title         | Notes                                       |
+    | ----------- | ------------- | ---------------------------------------------
+    | 200         | OK            | Successful request                          |
+    | 204         | No Content    | Successful request; no body returned (e.g. for `DELETE` operations) |
+    | 400         | Bad Request   | The server could not process the request because it was malformed |
+    | 403         | Unauthorized  | v1 of the API only returns 404s, to avoid leaking resource existence |
+    | 404         | Not Found     | Resource not found or permission failure    |
+    | 409         | Conflict      | Resource could not be created because of a conflict—resource already exists |
+    | 415         | Unsupported Media Type | The request's `Accept` header designates an unrecognized media type |
+    | 500         | Server Error  | An error occurred with our API |
+
+
 servers:
   - url: https://api.hypothes.is/api
 
@@ -31,6 +101,13 @@ components:
   # Reusable parameters
   # -------------------------
   parameters:
+    AnnotationID:
+      name: id
+      in: path
+      required: true
+      schema:
+        description: The annotation's unique identifier
+        type: string
     GroupID:
       name: id
       in: path
@@ -67,24 +144,47 @@ components:
         The user's username
       schema:
         type: string
+    UserID:
+      name: user
+      in: path
+      required: true
+      description: >
+        Unique identifier for a user, with specified authority.
+        The userID should be of the format `acct:<username>@<authority>`
+      schema:
+        type: string
+        pattern: "acct:(?i)^[A-Z0-9._]+${3,30}@.*$"
 
   # -------------------------
   # Reusable responses
   # -------------------------
   responses:
-    Conflict:
-      description: >
-        An error indicating a resource conflict, typically because a
-        duplicate resource already exists.
+    NoContent:
+      description: Success (No Content)
+    BadRequest:
+      description: Bad Request
       content:
         application/*json:
           schema:
-            $ref: './schemas/errors.yaml#/Conflict'
+            $ref: './schemas/errors.yaml#/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/*json:
+          schema:
+            $ref: './schemas/errors.yaml#/Error'
     NotFound:
-      description: >
-        The specified resource was not found, or you do not have permission
-        to access it
-
+      description: Not Found or Permission Denied
+      content:
+        application/*json:
+          schema:
+            $ref: './schemas/errors.yaml#/Error'
+    UnsupportedMediaType:
+      description: Unsupported Media Type
+      content:
+        application/*json:
+          schema:
+            $ref: './schemas/errors.yaml#/Error'
 
   # --------------------------
   # Resusable security schemes
@@ -125,6 +225,10 @@ components:
   # Resusable resource schemas
   # ------------------------------
   schemas:
+    Annotation:
+      $ref: './schemas/annotation-schema.json'
+    AnnotationCreate:
+      $ref: './schemas/annotation-schema.json'
     Group:
       $ref: './schemas/group.yaml#/Group'
     GroupCreate:
@@ -145,6 +249,228 @@ components:
 # API OPERATIONS
 # -----------------------------------------------------------------------------
 paths:
+
+  # ---------------------------------------------------------------------------
+  # Service Root
+  # ---------------------------------------------------------------------------
+  /:
+    get:
+      tags:
+        - general
+      summary: Service root
+      description: Provides a list of links to resources offered by the API.
+      responses:
+        '200':
+          description: Success
+      security: []
+
+  # ---------------------------------------------------------------------------
+  # Operations on Annotation collections
+  # ---------------------------------------------------------------------------
+  /annotations:
+
+    post:
+      tags:
+        - annotations
+      summary: Create a new annotation
+      security:
+        - ApiKey: []
+      requestBody:
+          description: Full representation of Annotation resource
+          required: true
+          content:
+            application/*json:
+              schema:
+                $ref: '#/components/schemas/AnnotationCreate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  # ---------------------------------------------------------------------------
+  # Operations on single Annotation resources
+  # ---------------------------------------------------------------------------
+  /annotations/{id}:
+
+    # -----------------------------------------------------
+    # GET annotations/{id} - Fetch an Annotation
+    # -----------------------------------------------------
+    get:
+      tags:
+        - annotations
+      summary: Fetch an Annotation
+      security:
+        - ApiKey: []
+        - {} # Unauthenticated OK, depending on annotation status
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+    # ------------------------------------------------------------------
+    # PATCH annotations/{id} - Update an Annotation (PUT also supported)
+    # ------------------------------------------------------------------
+    patch:
+      tags:
+        - annotations
+      summary: Update an Annotation
+      description: >
+        This endpoint is available under both the `PATCH` and `PUT`
+        request methods. Both endpoints have PATCH-characteristics
+        as defined in [RFC5789](https://tools.ietf.org/html/rfc5789#section-1),
+        meaning the request body does not have to include the whole annotation
+        object.
+
+        New implementations should use the `PATCH` request method, and existing
+        implementations continue to work under `PUT` but should switch to `PATCH`.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+    # ------------------------------------------------------------------
+    # DELETE annotations/{id} - Delete an Annotation
+    # ------------------------------------------------------------------
+    delete:
+      tags:
+        - annotations
+      summary: Delete an Annotation
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - deleted
+                  - id
+                properties:
+                  deleted:
+                    type: boolean
+                    enum:
+                      - true
+                  id:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  # ---------------------------------------------------------------------------
+  # Annotation Moderation Operations: Flagging
+  # ---------------------------------------------------------------------------
+  /annotations/{id}/flag:
+
+    # --------------------------------------------------------
+    # PUT annotations/{id}/flag - Add a flag to an annotation
+    # --------------------------------------------------------
+    put:
+      tags:
+        - annotations
+      summary: Flag an annotation
+      description: >
+        Flag an annotation for review (moderation). The moderator of the group
+        containing the annotation will be notified of the flag and can decide
+        whether or not to hide the annotation. Note that flags persist and
+        cannot be removed once they are set.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  # ---------------------------------------------------------------------------
+  # Annotation Moderation Operations: Hiding/Unhiding
+  # ---------------------------------------------------------------------------
+  /annotations/{id}/hide:
+
+    # ----------------------------------------------------------
+    # PUT annotations/{id}/hide - Hide (moderate) an annotation
+    # ----------------------------------------------------------
+    put:
+      tags:
+        - annotations
+      summary: Hide an annotation
+      description: >
+        Hide an annotation. The authenticated user needs to have the moderate
+        permission for the group that contains the annotation—this permission
+        is granted to the user who created the group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+    # ----------------------------------------------------------
+    # DELETE annotations/{id}/hide - Unhide  an annotation
+    # ----------------------------------------------------------
+    delete:
+      tags:
+        - annotations
+      summary: Show an annotation
+      description: >
+        Show/"un-hide" an annotation. The authenticated user needs to have the
+        moderate permission for the group that contains the annotation—this
+        permission is granted to the user who created the group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/AnnotationID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on Group collections
@@ -195,6 +521,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
     post:
       tags:
         - groups
@@ -219,8 +548,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
 
   # ---------------------------------------------------------------------------
@@ -255,6 +590,8 @@ paths:
                 $ref: '#/components/schemas/Group'
         '404':
           $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
     # -----------------------------------------------------
     # PATCH groups/{id} - Update a Group
@@ -284,10 +621,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ---------------------------------------------------------------------
     # PUT groups/{id} - Replace (Create or Update) a Group, a.k.a. "upsert"
@@ -316,10 +657,74 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  # ---------------------------------------------------------------------------
+  # Operations on Group Membership
+  # ---------------------------------------------------------------------------
+  /groups/{id}/members/{user}:
+
+    # ----------------------------------------------------------
+    # POST groups/{id}/members/{user} - Add user to group
+    # ----------------------------------------------------------
+    post:
+      tags:
+        - groups
+      summary: Add member to group
+      description: >
+        Add a user as a member to a group. This endpoint is only accessible to
+        requests authenticated with `AuthClient` credentials and is restricted
+        to users and groups within the associated authority.
+      security:
+        - AuthClient: []
+      parameters:
+        - $ref: '#/components/parameters/GroupID'
+        - $ref: '#/components/parameters/UserID'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+    # ----------------------------------------------------------
+    # DELETE groups/{id}/members/{user} - Remove user from group
+    # ----------------------------------------------------------
+    delete:
+      tags:
+        - groups
+      summary: Remove member from group
+      description: >
+        Remove a user from a group. At present, this endpoint only allows
+        the removal as one's self (authenticated with API Key) from the
+        indicated group.
+      security:
+        - ApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/GroupID'
+        - name: user
+          in: path
+          description: Currently, only the literal value `me` is accepted
+          required: true
+          schema:
+            type: string
+            enum:
+              - me
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on the currently-authenticated user (Profile)
@@ -345,6 +750,8 @@ paths:
             application/*json:
               schema:
                 $ref: '#/components/schemas/Profile'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   /profile/groups:
     # -------------------------------------------------------------
@@ -368,7 +775,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
-
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on User Collections
@@ -398,8 +806,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on single User Resources
@@ -431,5 +845,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
