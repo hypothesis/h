@@ -17,27 +17,12 @@ info:
     See [the API overview](../api/) for an introduction to the API and information
     on how authorization works.
 
-    ## API Versions
-
-    TBD
-
-    ## Errors
-
-    The API uses standard HTTP status codes to indicate the success or failure
-    of requests. The body of the response will be JSON in the following format:
-
-    ```
-    {
-      "status": "failure",
-      "reason": "a human-readable string about what went wrong"
-    }
-    ```
-
-    ## Expanding Resources
+    # Expanding Resources
 
     Resources often contain links to related resources in their response bodies.
     Some endpoints support resource expansion, allowing those related resources
     to be expanded inline within the response.
+
 
     To expand resources (where supported), use the `expand` request parameter.
     Documentation for endpoints identify which resources are expandable, if any.
@@ -50,6 +35,49 @@ info:
     `organization` and `foobar` fields within the (hypothetical) returned `thing`
     objects. You can expand multiple fields by providing multiple values in the
     `expand` Array.
+
+    # Versions
+
+    ## Version History
+
+    TBD
+
+    ## Specifying API Version
+
+    By default, API requests will receive the **v1** version of the Hypothesis API.
+    Though not required, we urge clients to set an `Accept` header with a media
+    type corresponding to the desired version, e.g.
+
+    `Accept: application/vnd.hypothesis.v1+json`
+
+    If an `Accept` header is set with an unrecognized media type, the API will
+    return an HTTP 415 (Unsupported Media Type) error.
+
+    # Errors
+
+    The API uses standard HTTP status codes to indicate the success or failure
+    of requests. The body of the response will be JSON in the following format:
+
+    ```
+    {
+      "status": "failure",
+      "reason": "a human-readable string about what went wrong"
+    }
+    ```
+
+    ## HTTP Status Codes
+
+    | Code        | Title         | Notes                                       |
+    | ----------- | ------------- | ---------------------------------------------
+    | 200         | OK            | Successful request                          |
+    | 204         | No Content    | Successful request; no body returned (e.g. for `DELETE` operations) |
+    | 400         | Bad Request   | The server could not process the request because it was malformed |
+    | 403         | Unauthorized  | v1 of the API only returns 404s, to avoid leaking resource existence |
+    | 404         | Not Found     | Resource not found or permission failure    |
+    | 409         | Conflict      | Resource could not be created because of a conflict—resource already exists |
+    | 415         | Unsupported Media Type | The request's `Accept` header designates an unrecognized media type |
+    | 500         | Server Error  | An error occurred with our API |
+
 
 servers:
   - url: https://api.hypothes.is/api
