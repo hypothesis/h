@@ -131,6 +131,21 @@ class TestUserSignupService(object):
 
         stats.incr.assert_called_once_with("auth.local.register")
 
+    def test_signup_logs_conflict_error_when_account_with_email_already_exists(
+        self, svc, db_session, patch
+    ):
+        log = patch("h.services.user_signup.log")
+
+        with pytest.raises(ConflictError):
+            svc.signup(username="foo", email="foo@bar.com")
+            svc.signup(username="foo", email="foo@bar.com")
+
+        assert (
+            "concurrent account signup conflict error occured during user "
+            "signup (psycopg2.IntegrityError) duplicate key value violates unique "
+            "constraint" in log.warning.call_args[0][0]
+        )
+
     @pytest.mark.parametrize(
         "username,email",
         [
