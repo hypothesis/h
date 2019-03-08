@@ -11,13 +11,13 @@ info:
     url: https://github.com/hypothesis/h/blob/master/LICENSE
   description: |
 
-    # Introduction
+    # Hypothesis API
 
     This is a reference for the Hypothesis HTTP API version 1.0.
     See [the API overview](../api/) for an introduction to the API and information
     on how authorization works.
 
-    # Expanding Resources
+    ## Expanding Resources
 
     Resources often contain links to related resources in their response bodies.
     Some endpoints support resource expansion, allowing those related resources
@@ -36,13 +36,7 @@ info:
     objects. You can expand multiple fields by providing multiple values in the
     `expand` Array.
 
-    # Versions
-
-    ## Version History
-
-    TBD
-
-    ## Specifying API Version
+    ## Versions
 
     By default, API requests will receive the **v1** version of the Hypothesis API.
     Though not required, we urge clients to set an `Accept` header with a media
@@ -53,7 +47,7 @@ info:
     If an `Accept` header is set with an unrecognized media type, the API will
     return an HTTP 415 (Unsupported Media Type) error.
 
-    # Errors
+    ## Errors
 
     The API uses standard HTTP status codes to indicate the success or failure
     of requests. The body of the response will be JSON in the following format:
@@ -65,12 +59,12 @@ info:
     }
     ```
 
-    ## HTTP Status Codes
+    ### HTTP Status Codes
+
+    Any API service may raise any of the following common errors.
 
     | Code        | Title         | Notes                                       |
     | ----------- | ------------- | ---------------------------------------------
-    | 200         | OK            | Successful request                          |
-    | 204         | No Content    | Successful request; no body returned (e.g. for `DELETE` operations) |
     | 400         | Bad Request   | The server could not process the request because it was malformed |
     | 403         | Unauthorized  | v1 of the API only returns 404s, to avoid leaking resource existence |
     | 404         | Not Found     | Resource not found or permission failure    |
@@ -292,12 +286,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Annotation'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # GET /search - Search annotations
@@ -566,10 +554,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Annotation'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ------------------------------------------------------------------
     # PATCH annotations/{id} - Update an Annotation (PUT also supported)
@@ -598,12 +582,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Annotation'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ------------------------------------------------------------------
     # DELETE annotations/{id} - Delete an Annotation
@@ -633,10 +611,6 @@ paths:
                       - true
                   id:
                     type: string
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Annotation Moderation Operations: Flagging
@@ -662,10 +636,6 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Annotation Moderation Operations: Hiding/Unhiding
@@ -690,10 +660,6 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ----------------------------------------------------------
     # DELETE annotations/{id}/hide - Unhide  an annotation
@@ -713,10 +679,6 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on Group collections
@@ -767,8 +729,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
     post:
       tags:
@@ -794,14 +754,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
 
   # ---------------------------------------------------------------------------
@@ -834,10 +786,6 @@ paths:
             application/*json:
               schema:
                 $ref: '#/components/schemas/Group'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
     # -----------------------------------------------------
     # PATCH groups/{id} - Update a Group
@@ -867,14 +815,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ---------------------------------------------------------------------
     # PUT groups/{id} - Replace (Create or Update) a Group, a.k.a. "upsert"
@@ -903,14 +843,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on Group Membership
@@ -936,10 +868,6 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
     # ----------------------------------------------------------
     # DELETE groups/{id}/members/{user} - Remove user from group
@@ -967,10 +895,6 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/NoContent'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on the currently-authenticated user (Profile)
@@ -996,8 +920,6 @@ paths:
             application/*json:
               schema:
                 $ref: '#/components/schemas/Profile'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   /profile/groups:
     # -------------------------------------------------------------
@@ -1021,8 +943,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on User Collections
@@ -1052,14 +972,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
   # Operations on single User Resources
@@ -1091,11 +1003,3 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '415':
-          $ref: '#/components/responses/UnsupportedMediaType'
