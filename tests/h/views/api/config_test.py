@@ -98,22 +98,23 @@ class TestAddApiView(object):
             )
 
     @pytest.mark.parametrize(
-        "link_name,route_name,description,request_method,expected_method",
+        "link_name,route_name,description,request_method",
         [
-            ("read", "thing.read", "Fetch a thing", None, "GET"),
-            ("update", "thing.update", "Update a thing", ("PUT", "PATCH"), "PUT"),
-            ("delete", "thing.delete", "Delete a thing", "DELETE", "DELETE"),
+            ("read", "thing.read", "Fetch a thing", None),
+            ("update", "thing.update", "Update a thing", ("PUT", "PATCH")),
+            ("delete", "thing.delete", "Delete a thing", "DELETE"),
+            (None, "thing.empty", None, None),
         ],
     )
     def test_it_adds_api_links_to_registry(
         self,
         pyramid_config,
         view,
+        links,
         link_name,
         route_name,
         description,
         request_method,
-        expected_method,
     ):
         kwargs = {}
         if request_method:
@@ -129,14 +130,23 @@ class TestAddApiView(object):
             **kwargs
         )
 
-        assert pyramid_config.registry.api_links == [
-            {
-                "name": link_name,
-                "description": description,
-                "method": expected_method,
-                "route_name": route_name,
-            }
-        ]
+        if link_name:
+            links.register_link.assert_called_once_with(
+                link=links.ServiceLink(
+                    name=link_name,
+                    route_name=route_name,
+                    method=request_method,
+                    description=description,
+                ),
+                versions=["v1"],
+                registry=pyramid_config.registry,
+            )
+        else:
+            links.register_link.assert_not_called()
+
+    @pytest.fixture
+    def links(self, patch):
+        return patch("h.views.api.config.links")
 
     @pytest.fixture
     def pyramid_config(self, pyramid_config):
