@@ -1,0 +1,83 @@
+Annotation:
+  type: object
+  required:
+    - uri
+  properties:
+    uri:
+      type: string
+      format: uri
+      description: The URI to the annotation's target
+
+    document:
+      type: object
+      description: Further metadata about the target document
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        dc:
+          type: object
+          properties:
+            identifier:
+              type: array
+              items:
+                type: string
+        highwire:
+          type: object
+          properties:
+            doi:
+              type: array
+              items:
+                type: string
+            pdf_url:
+              type: array
+              items:
+                type: string
+        link:
+          type: array
+          items:
+            type: object
+            required:
+              - href
+            properties:
+              href:
+                type: string
+              "type":
+                type: string
+
+    text:
+      type: string
+      description: The text content of the annotation body
+    tags:
+      type: array
+      items:
+        type: string
+    group:
+      type: string
+      description: >
+        The unique identifier for the annotation's group. If an
+        annotation is a reply to another annotation (see `references`), this field
+        will be ignored—replies belong to the same group as their parent annotations.
+    permissions:
+      type: object
+    target:
+      type: object
+      properties:
+        selector:
+          type: array
+          description: An array of selectors that refine this annotation's target
+          items:
+            type: object
+            description: >
+              A selector for refining the annotation target. See
+              [the Web Annotation Data Model W3C Recommendation](https://www.w3.org/TR/annotation-model/#selectors)
+              for details about different selector types and properties.
+            properties:
+              "type":
+                type: string
+    references:
+      type: array
+      description: Annotation IDs for any annotations this annotation references (e.g. is a reply to)
+      items:
+        type: string
