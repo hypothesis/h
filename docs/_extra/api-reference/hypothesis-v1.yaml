@@ -297,6 +297,249 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
 
   # ---------------------------------------------------------------------------
+  # GET /search - Search annotations
+  # ---------------------------------------------------------------------------
+  /search:
+    get:
+      tags:
+        - annotations
+      summary: Search for annotations
+      parameters:
+        - name: limit
+          in: query
+          description: The maximum number of annotations to return.
+          schema:
+            type: integer
+            minimum: 0
+            default: 20
+            maximum: 200
+        - name: sort
+          in: query
+          schema:
+            description: The field by which annotations should be sorted.
+            type: string
+            enum: [created, updated, group, id, user]
+            default: updated
+        - name: search_after
+          in: query
+          example: 2019-01-03T19:46:09.334539+00:00
+          description: >
+            <p>Define a start point for a subset (page) of annotation search results.</p>
+
+            <p>Working against the sorted, full set of annotation records matching the current
+            search query, the service will examine the values present in the field by which
+            annotations are sorted (i.e. `sort`). The returned subset
+            of search results will begin with the first annotation whose `sort` field's value
+            comes after the value of `search_after` sequentially.</p>
+
+            <p>The format of this property depends on the current value of `sort`.
+            When `search_after` is used in conjunction with a chronological `sort` value—e.g.
+            `updated`, `created`—this parameter should be formatted as an ISO 8601 string. It
+            may also be formatted in ms (milliseconds) since the Epoch.</p>
+
+            <p><em>Expanded example</em> — Given a query containing:</p>
+
+            <p><blockquote>`sort=created&search_after=2019-01-03T19:46:09.334539+00:00`</blockquote></p>
+
+            <p>The returned results would begin with the record immediately subsequent to the annotation
+            created at `2019-01-03T19:46:09.334539+00:00` in the full set of results. If there is no
+            annotation in the full result set whose `created` value exactly matches
+            `2019-01-03T19:46:09.334539+00:00`,
+            the returned subset will begin with the first annotation whose `created` value
+            comes sequentially "after" `2019-01-03T19:46:09.334539+00:00` in the full, sorted set.</p>
+
+            <p><em>Note:</em> `search_after` provides an efficient, stateless paging mechanism. Its
+            use is preferred over that of `offset`.</p>
+
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: >
+            <p>The number of initial annotations to skip in the result set.</p>
+
+            <p>May be used for pagination of result sets. The usage of `search_after` is preferred,
+            especially for large batches, as it is considerably more efficient.</p>
+          schema:
+            type: integer
+            maximum: 9800
+            default: 0
+        - name: order
+          in: query
+          description: The order in which the results should be sorted.
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: uri
+          in: query
+          description: |
+            Limit the results to annotations matching the specific URI or equivalent URIs.
+
+            URI can be a URL (a web page address) or a URN representing another kind of
+            resource such as DOI (Digital Object Identifier) or a PDF fingerprint.
+
+            Examples:
+
+            * `http://example.com/articles/01/name` (URL)
+            * `doi:10.1.1/1234` (DOI)
+            * `urn:x-pdf:1234` (PDF fingerprint)
+          schema:
+            type: string
+            format: uri
+        - name: url
+          in: query
+          description: Alias of `uri`
+          schema:
+            type: string
+            format: uri
+        - name: uri.parts
+          in: query
+          example: 'yogur'
+          description: |
+            <p>Limit the results to annotations containing the given keyword (tokenized chunk) in
+            the URI. The value must exactly match an individual URI keyword.</p>
+
+            <p>URIs are split on characters `#+/:=?.-` into their keywords.</p>
+
+            <p><em>Expanded example </em> — given a value of `yogur`, annotations with any of the
+            following URIs would match:
+
+            * `https://www.yogur.com/foo/bar`
+            * `https://www.example.com/yogur/eatmore.html`
+            * `https://www.example.com/foo/eat-more-yogur-this-year`
+
+            The following would not be matches:
+
+            * `https://www.yogurt.com/foo/bar`
+            * `https://www.example.com/yogurt/eatmore.html`
+            * `https://www.example.com/foo/eat-more-yogurt-this-year`
+
+          schema:
+            type: string
+        - name: wildcard_uri
+          in: query
+          example: "http://foo.com/*"
+          description: |
+            <p>Limit the results to annotations whose URIs match the wildcard pattern.</p>
+
+            <p>`*` will match any character sequence (including an empty one),
+            and a `_` will match any single character. Wildcards are only permitted
+            within the path and query parts of the URI. Escaping wildcards is not supported.</p>
+
+            Examples of valid values:
+
+            * `http://foo.com/*`
+            * `urn:x-pdf:*`
+            * `file://localhost/_bc.pdf`
+
+            Examples of invalid values (not within path or query parts of URI):
+
+            * `*foo.com`
+            * `u_n:*`
+            * `file://*`
+            * `http://foo.com*`
+
+            <mark>This feature is experimental and the API may change.</mark>
+          schema:
+            type: string
+        - name: user
+          in: query
+          example: acct:username@hypothes.is
+          description: Limit the results to annotations made by the specified user.
+          schema:
+            type: string
+            pattern: "acct:^[A-Z0-9._]{3,30}@.*$"
+        - name: group
+          in: query
+          example: "8JmD3iz1"
+          description: Limit the results to annotations made in the specified group (by group ID).
+          schema:
+            type: string
+        - name: tag
+          in: query
+          example: "artificial intelligence"
+          description: |
+            Limit the results to annotations tagged with the specified value.
+
+            For example: `artificial intelligence` will find all annotations whose tags
+            contain both `artificial` **AND** `intelligence`.
+          schema:
+            type: string
+        - name: tags
+          in: query
+          example:
+            - artificial
+            - intelligence
+          description: |
+            Similar to `tag` but allows a comma-separated list of multiple tags.
+
+            For example: `[intelligence,artificial]` will find all annotations whose tags
+            contain both `artificial` **AND** `intelligence`.
+          schema:
+            type: array
+            items:
+              type:
+                string
+        - name: any
+          in: query
+          example: "ribosome"
+          description: |
+            Limit the results to annotations who contain the indicated keyword
+            in any of the following fields:
+
+            * `quote`
+            * `tags`
+            * `text`
+            * `url`
+          schema:
+            type: string
+        - name: quote
+          in: query
+          example: "unicorn helmets"
+          description: >
+            <p>Limit the results to annotations that contain this text inside
+            the text that was annotated.</p>
+
+            <p>For example: `unicorn helmets` would return all annotations containing
+            `unicorn` **OR** `helmets` in their quoted (i.e. annotated) text.</p>
+          schema:
+            type: string
+        - name: references
+          in: query
+          description: Returns annotations that are replies to this parent annotation ID.
+          schema:
+            type: string
+        - name: text
+          in: query
+          example: "penguin strength"
+          description: >
+            <p>Limit the results to annotations that contain this text in their
+            textual body.</p>
+
+            <p>For example: `penguin strength` would return all annotations containing
+            `penguin` **OR** `strength` in their text (body) content.</p>
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - rows
+                  - total
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Annotation'
+                  total:
+                    description: Total number of results matching query.
+                    type: integer
+  # ---------------------------------------------------------------------------
   # Operations on single Annotation resources
   # ---------------------------------------------------------------------------
   /annotations/{id}:
