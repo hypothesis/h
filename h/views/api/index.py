@@ -13,7 +13,7 @@ def index(context, request):
     Clients may use this to discover endpoints for the API.
     """
 
-    api_links = request.registry.api_links
+    api_links = request.registry.api_links["v1"]
 
     # We currently need to keep a list of the parameter names we use in our API
     # paths and pass these explicitly into the templater. As and when new
@@ -26,11 +26,11 @@ def index(context, request):
     links = {}
     for link in api_links:
         method_info = {
-            "method": link["method"],
-            "url": templater.route_template(link["route_name"]),
-            "desc": link["description"],
+            "method": link.primary_method(),
+            "url": templater.route_template(link.route_name),
+            "desc": link.description,
         }
-        _set_at_path(links, link["name"].split("."), method_info)
+        _set_at_path(links, link.name.split("."), method_info)
 
     return {"links": links}
 

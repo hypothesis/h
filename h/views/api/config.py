@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import venusian
 
 from h.views.api.helpers import cors
+from h.views.api.helpers import links
 
 from h.views.api import API_VERSIONS
 
@@ -48,7 +49,7 @@ def add_api_view(
       version(s).
 
     :param config:
-    :type config: :class:`Pyramid.config.Configurator`
+    :type config: :class:`pyramid.config.Configurator`
     :param view: The view callable
     :param versions: API versions this view supports. Each entry must be one of
                      the versions defined in :py:const:`h.views.api.API_VERSIONS`
@@ -61,30 +62,19 @@ def add_api_view(
                                   `route_name` must be specified.
     :param dict settings: Arguments to pass on to ``config.add_view``
     """
-
-    # Get the HTTP method for use in the API links metadata
-    primary_method = settings.get("request_method", "GET")
-    if isinstance(primary_method, tuple):
-        # If the view matches multiple methods, assume the first one is
-        # preferred
-        primary_method = primary_method[0]
-
     settings.setdefault("accept", "application/json")
     settings.setdefault("renderer", "json")
     settings.setdefault("decorator", cors_policy)
 
     if link_name:
-        link = {
-            "name": link_name,
-            "method": primary_method,
-            "route_name": settings.get("route_name"),
-            "description": description,
-        }
+        link = links.ServiceLink(
+            name=link_name,
+            route_name=settings.get("route_name"),
+            method=settings.get("request_method", "GET"),
+            description=description,
+        )
 
-        registry = config.registry
-        if not hasattr(registry, "api_links"):
-            registry.api_links = []
-        registry.api_links.append(link)
+        links.register_link(link, versions, config.registry)
 
     config.add_view(view=view, **settings)
 
