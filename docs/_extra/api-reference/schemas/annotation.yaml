@@ -26,7 +26,7 @@ Annotation:
       format: date-time
     user:
       type: string
-      pattern: "acct:^[A-Z0-9._]{3,30}@.*$"
+      pattern: "acct:^[A-Za-z0-9._]{3,30}@.*$"
       description: user account ID in the format `"acct:<username>@<authority>"`
       example: "acct:felicity_nunsun@hypothes.is"
     uri:
