@@ -84,12 +84,16 @@ class TestAddApiView(object):
         (_, kwargs) = pyramid_config.add_view.call_args
         assert kwargs["decorator"] == decorator
 
-    def test_it_adds_default_version_accept(self, pyramid_config, view):
+    def test_it_adds_default_version_accept(
+        self, pyramid_config, view, media_type_for_version
+    ):
         api_config.add_api_view(
             pyramid_config, view, versions=["v1"], route_name="thing.read"
         )
         (_, kwargs) = pyramid_config.add_view.call_args_list[1]
-        assert kwargs["accept"] == "application/vnd.hypothesis.v1+json"
+
+        media_type_for_version.assert_called_once_with("v1")
+        assert kwargs["accept"] == media_type_for_version.return_value
 
     def test_it_raises_ValueError_on_unrecognized_version(self, pyramid_config, view):
         with pytest.raises(ValueError, match="Unrecognized API version"):
@@ -143,6 +147,10 @@ class TestAddApiView(object):
             )
         else:
             links.register_link.assert_not_called()
+
+    @pytest.fixture
+    def media_type_for_version(self, patch):
+        return patch("h.views.api.config.media_type_for_version")
 
     @pytest.fixture
     def links(self, patch):
