@@ -273,7 +273,11 @@ paths:
       security:
         - ApiKey: []
       requestBody:
-          description: Full representation of Annotation resource
+          description: >
+            Full representation of Annotation resource and applicable relationships.
+            _Note_: While the API accepts arbitrary Annotation selectors in the
+            `target.selector` property, the Hypothesis client currently supports
+            `TextQuoteSelector`, `RangeSelector` and `TextPositionSelector` selector.
           required: true
           content:
             application/*json:
