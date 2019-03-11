@@ -30,8 +30,8 @@ Profile:
       additionalProperties:
         type: boolean
     userid:
-      oneOf:
-        - type: string
-          description: This property will be a string of the format `"acct:username@authority"` if the request is authenticated
-        - type: null
-          description: This property will be `null` for unauthenticated requests (no available `userid`)
+      type: string
+      description: >
+        This property will be a string of the format `"acct:username@authority"`
+        if the request is authenticated. This property will be `null` if the
+        request is not authenticated.
