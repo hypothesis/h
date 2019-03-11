@@ -18,6 +18,13 @@ class GroupScope(Base):
     """
 
     __tablename__ = "groupscope"
+
+    __table_args__ = (
+        # Add a composite index of the (origin, path) columns for better
+        # lookup performance.
+        sa.Index("ix__groupscope__scope", "origin", "path"),
+    )
+
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     group_id = sa.Column(
         sa.Integer, sa.ForeignKey("group.id", ondelete="cascade"), nullable=False
@@ -32,6 +39,15 @@ class GroupScope(Base):
     #: https://web.hypothes.is
     #: http://localhost:5000
     origin = sa.Column(sa.UnicodeText, nullable=False)
+
+    #: A path which, concatenated with ``origin``, creates a wildcarded prefix
+    #: against which URLs may be compared for scope. This allows for scope
+    #: granularity at a path level (instead of just origin).
+    #: e.g. for a group with scope origin ``https://foo.com`` and a path ``/bar``:
+    #:
+    #: * ``https://foo.com/bar/baz.html`` in scope
+    #: * ``https://foo.com/ding/foo.html`` NOT in scope
+    path = sa.Column(sa.UnicodeText, nullable=True)
 
     def __repr__(self):
         return "<GroupScope %s>" % self.origin
