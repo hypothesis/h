@@ -245,7 +245,7 @@ class TestCreateOpenGroup(object):
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
         origins = ["https://biopub.org", "http://example.com"]
-        scopes = [factories.GroupScope(origin=h) for h in origins]
+        scopes = [factories.GroupScope(scope=h) for h in origins]
 
         group = svc.create_open_group(
             name="test_group", userid=creator.userid, origins=origins
@@ -409,7 +409,7 @@ class TestCreateRestrictedGroup(object):
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
         origins = ["https://biopub.org", "http://example.com"]
-        scopes = [factories.GroupScope(origin=h) for h in origins]
+        scopes = [factories.GroupScope(scope=h) for h in origins]
 
         group = svc.create_restricted_group(
             name="test_group", userid=creator.userid, origins=origins

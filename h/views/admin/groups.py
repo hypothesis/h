@@ -181,7 +181,7 @@ class GroupEditViews(object):
             """Update the group resource on successful form validation"""
 
             organization = self.organizations[appstruct["organization"]]
-            scopes = [GroupScope(origin=o) for o in appstruct["origins"]]
+            scopes = [GroupScope(scope=o) for o in appstruct["origins"]]
 
             self.group_update_svc.update(
                 group,

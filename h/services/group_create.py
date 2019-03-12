@@ -114,7 +114,7 @@ class GroupCreateService(object):
 
         creator = self.user_fetcher(userid)
 
-        scopes = [GroupScope(origin=o) for o in origins]
+        scopes = [GroupScope(scope=o) for o in origins]
 
         if "organization" in kwargs:
             self._validate_authorities_match(

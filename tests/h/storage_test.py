@@ -240,8 +240,8 @@ class TestCreateAnnotation(object):
     def test_it_allows_when_target_uri_matches_multiple_group_scope(
         self, pyramid_request, pyramid_config, group_service, factories, models
     ):
-        scope = factories.GroupScope(origin="http://www.foo.com")
-        scope2 = factories.GroupScope(origin="http://www.bar.com")
+        scope = factories.GroupScope(scope="http://www.foo.com")
+        scope2 = factories.GroupScope(scope="http://www.bar.com")
         group_service.find.return_value = factories.OpenGroup(scopes=[scope, scope2])
         data = self.annotation_data()
         data["target_uri"] = "http://www.bar.com/boo/bah.html"
@@ -638,7 +638,7 @@ def datetime(patch):
 
 @pytest.fixture
 def scoped_open_group(factories):
-    scope = factories.GroupScope(origin="http://www.foo.com")
+    scope = factories.GroupScope(scope="http://www.foo.com")
     return factories.OpenGroup(scopes=[scope])
 
 
