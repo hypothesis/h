@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 
 import sqlalchemy as sa
 
+from h._compat import urlparse
 from h.db import Base
+from h.util.group_scope import uri_to_scope
 
 
 class GroupScope(Base):
@@ -48,6 +50,16 @@ class GroupScope(Base):
     #: * ``https://foo.com/bar/baz.html`` in scope
     #: * ``https://foo.com/ding/foo.html`` NOT in scope
     path = sa.Column(sa.UnicodeText, nullable=True)
+
+    @property
+    def scope(self):
+        """Return a URI composed from the origin and path attrs"""
+        return urlparse.urljoin(self.origin, self.path)
+
+    @scope.setter
+    def scope(self, value):
+        """Take a URI and split it into origin, path"""
+        self.origin, self.path = uri_to_scope(value)
 
     def __repr__(self):
         return "<GroupScope %s>" % self.origin
