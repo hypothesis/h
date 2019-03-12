@@ -3,6 +3,7 @@ import venusian
 
 from h.views.api.helpers import cors
 from h.views.api.helpers import links
+from h.views.api.helpers.media_types import media_type_for_version
 
 from h.views.api import API_VERSIONS
 
@@ -86,7 +87,7 @@ def add_api_view(
 
         # config.add_view only allows one, string value for `accept`, so we
         # have to re-invoke it to add additional accept headers
-        settings["accept"] = "application/vnd.hypothesis." + version + "+json"
+        settings["accept"] = media_type_for_version(version)
         config.add_view(view=view, **settings)
 
     if enable_preflight:
