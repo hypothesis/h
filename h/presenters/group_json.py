@@ -39,11 +39,11 @@ class GroupJSONPresenter(object):
             model["scopes"]["enforced"] = (
                 self.group.enforce_scope if self.group.scopes else False
             )
-            # At this presentation layer, format scope origins to look like
+            # At this presentation layer, format scopes to look like
             # patterns—currently a simple wildcarded prefix—to give us more
             # flexibility in making scope more granular later
             model["scopes"]["uri_patterns"] = [
-                scope.origin + "*" for scope in self.group.scopes
+                scope.scope + "*" for scope in self.group.scopes
             ]
         return model
 

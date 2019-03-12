@@ -14,5 +14,5 @@ class GroupScope(ModelFactory):
         model = models.GroupScope
         sqlalchemy_session_persistence = "flush"
 
-    origin = factory.Faker("url")
+    scope = factory.Faker("url")
     group = factory.SubFactory("tests.common.factories.OpenGroup")
