@@ -18,6 +18,8 @@ def match(uri, scopes):
     return scope in scopes
 
 
+# TODO: This concept no longer makes sense with more granular scoping. There is
+# no equivalent 1:1 uri <-> scope relationship. Remove this function soon.
 def uri_scope(uri):
     """
     Return the scope for a given URI
@@ -26,6 +28,30 @@ def uri_scope(uri):
     proxies to _parse_origin.
     """
     return _parse_origin(uri)
+
+
+def uri_to_scope(uri):
+    """
+    Return a tuple representing the origin and path of a URI
+
+    :arg uri: The URI from which to derive scope
+    :type uri: str
+    :rtype: tuple(str, str or None)
+    """
+    # A URL with no origin component will result in a `None` value for
+    # origin, while a URL with no path component will result in an empty
+    # string for path.
+    origin = _parse_origin(uri)
+    path = _parse_path(uri) or None
+    return (origin, path)
+
+
+def _parse_path(uri):
+    """Return the path component of a URI string"""
+    if uri is None:
+        return None
+    parsed = urlparse.urlsplit(uri)
+    return parsed[2]
 
 
 def _parse_origin(uri):

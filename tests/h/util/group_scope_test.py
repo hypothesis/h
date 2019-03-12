@@ -67,3 +67,23 @@ class TestScopeMatch(object):
     @pytest.fixture
     def multiple_scopes(self):
         return ["http://www.foo.com", "http://www.bar.com"]
+
+
+class TestURIToScope(object):
+    @pytest.mark.parametrize(
+        "uri,expected_scope",
+        [
+            ("https://www.foo.com/foo", ("https://www.foo.com", "/foo")),
+            ("https://foo.com/bar/baz", ("https://foo.com", "/bar/baz")),
+            ("http://foo.com", ("http://foo.com", None)),
+            ("/foo/bar", (None, "/foo/bar")),
+            (
+                "https://foo.com/foo/bar/baz.html",
+                ("https://foo.com", "/foo/bar/baz.html"),
+            ),
+            ("http://foo.com//bar/baz", ("http://foo.com", "//bar/baz")),
+            ("http://foo.com/bar?what=how", ("http://foo.com", "/bar")),
+        ],
+    )
+    def test_it_parses_origin_and_path_from_uri(self, uri, expected_scope):
+        assert scope_util.uri_to_scope(uri) == expected_scope
