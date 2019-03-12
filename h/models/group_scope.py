@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import sqlalchemy as sa
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from h._compat import urlparse
 from h.db import Base
@@ -40,7 +41,11 @@ class GroupScope(Base):
     #: http://example.com
     #: https://web.hypothes.is
     #: http://localhost:5000
-    origin = sa.Column(sa.UnicodeText, nullable=False)
+    _origin = sa.Column("origin", sa.UnicodeText, nullable=False)
+
+    @hybrid_property
+    def origin(self):
+        return self._origin
 
     #: A path which, concatenated with ``origin``, creates a wildcarded prefix
     #: against which URLs may be compared for scope. This allows for scope
@@ -49,19 +54,29 @@ class GroupScope(Base):
     #:
     #: * ``https://foo.com/bar/baz.html`` in scope
     #: * ``https://foo.com/ding/foo.html`` NOT in scope
-    path = sa.Column(sa.UnicodeText, nullable=True)
+    _path = sa.Column("path", sa.UnicodeText, nullable=True)
+
+    @hybrid_property
+    def path(self):
+        return self._path
 
     @property
     def scope(self):
         """Return a URI composed from the origin and path attrs"""
-        return urlparse.urljoin(self.origin, self.path)
+        return urlparse.urljoin(self._origin, self.path)
 
     @scope.setter
     def scope(self, value):
-        """Take a URI and split it into origin, path"""
+        """
+        Take a URI and split it into origin, path
+
+        :raises ValueError: if URI is invalid (origin cannot be parsed)
+        """
         parsed_scope = uri_to_scope(value)
-        self.origin = parsed_scope[0]
-        self.path = parsed_scope[1]
+        if parsed_scope[0] is None:
+            raise ValueError("Invalid URL for scope: missing origin component")
+        self._origin = parsed_scope[0]
+        self._path = parsed_scope[1]
 
     def __repr__(self):
         return "<GroupScope %s>" % self.origin

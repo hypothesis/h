@@ -51,7 +51,7 @@ class TestGroupJSONPresenter(object):
         group = factories.OpenGroup(
             name="My Group",
             pubid="groupy",
-            scopes=[factories.GroupScope(origin="http://foo.com")],
+            scopes=[factories.GroupScope(scope="http://foo.com")],
             organization=factories.Organization(),
         )
         group_context = GroupContext(group)
@@ -134,8 +134,8 @@ class TestGroupJSONPresenter(object):
         group = factories.OpenGroup(
             enforce_scope=False,
             scopes=[
-                factories.GroupScope(origin="http://foo.com"),
-                factories.GroupScope(origin="https://foo.com"),
+                factories.GroupScope(scope="http://foo.com"),
+                factories.GroupScope(scope="https://foo.com"),
             ],
         )
         group_context = GroupContext(group)
