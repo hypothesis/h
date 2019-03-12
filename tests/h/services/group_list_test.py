@@ -373,12 +373,12 @@ def scoped_open_groups(factories, authority, origin, user):
             name="Blender",
             authority=authority,
             creator=user,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
         factories.OpenGroup(
             name="Antigone",
             authority=authority,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
     ]
 
@@ -390,12 +390,12 @@ def scoped_restricted_groups(factories, authority, origin, user):
             name="Forensic",
             authority=authority,
             creator=user,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
         factories.RestrictedGroup(
             name="Affluent",
             authority=authority,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
     ]
 
@@ -420,13 +420,13 @@ def scoped_restricted_user_groups(factories, authority, user, origin):
             name="Alpha",
             authority=authority,
             creator=user,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
         factories.RestrictedGroup(
             name="Beta",
             authority=authority,
             creator=user,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
     ]
 
@@ -465,19 +465,19 @@ def mixed_groups(factories, user, authority, origin):
             name="Yaks",
             pubid="yaks",
             authority=authority,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
         factories.RestrictedGroup(
             name="Xander",
             pubid="xander",
             authority=authority,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
         factories.OpenGroup(
             name="wadsworth",
             pubid="wadsworth",
             authority=authority,
-            scopes=[factories.GroupScope(origin=origin)],
+            scopes=[factories.GroupScope(scope=origin)],
         ),
     ]
 

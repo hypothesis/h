@@ -113,7 +113,7 @@ class TestGroupCreateView(object):
             name="My New Group",
             userid=user_svc.fetch.return_value.userid,
             description=None,
-            origins=["http://example.com"],
+            scopes=["http://example.com"],
             organization=default_org,
             enforce_scope=True,
         )
@@ -140,7 +140,7 @@ class TestGroupCreateView(object):
             name="My New Group",
             userid=user_svc.fetch.return_value.userid,
             description=None,
-            origins=["http://example.com"],
+            scopes=["http://example.com"],
             organization=default_org,
             enforce_scope=True,
         )
@@ -285,7 +285,7 @@ class TestGroupEditViews(object):
             description="New description",
             name="Updated group",
             scopes=[
-                GroupScope(origin=o)
+                GroupScope(scope=o)
                 for o in ["http://somewhereelse.com", "http://www.gladiolus.org"]
             ],
             enforce_scope=False,
