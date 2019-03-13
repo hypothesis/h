@@ -7,216 +7,131 @@ import mock
 
 from h.services.group_list import GroupListService
 from h.services.group_list import group_list_factory
+from h.services.group_scope import GroupScopeService
 from h.models.group import Group
+from h.models.group_scope import GroupScope
 
 
 class TestListGroupsSessionGroups(object):
-    def test_it_returns_no_scoped_open_groups_except_world(
-        self, svc, user, default_authority, mixed_groups
-    ):
-        results = svc.session_groups(user=user, authority=default_authority)
+    def test_it_retrieves_world_group(self, svc, user, authority):
+        svc.world_group = mock.Mock()
 
-        non_world_groups = [group for group in results if group.pubid != "__world__"]
+        svc.session_groups(authority, user)
 
-        for group in non_world_groups:
-            assert group.type != "open"
+        svc.world_group.assert_called_once_with(authority)
 
-    def test_it_returns_no_unscoped_open_groups(
-        self, svc, user, authority, unscoped_open_groups
-    ):
-        results = svc.session_groups(user=user, authority=authority)
+    def test_it_includes_world_group_if_world_group_found(self, svc, user, authority):
+        svc.world_group = mock.Mock()
+        svc.user_groups = mock.Mock()
+        svc.user_groups.return_value = (
+            []
+        )  # No user groups, so world group will be the only group
 
-        assert results == []
+        groups = svc.session_groups(authority, user)
 
-    def test_it_returns_scoped_restricted_groups_if_user_member(
-        self, svc, user, scoped_restricted_user_groups, authority
-    ):
-        user.groups = scoped_restricted_user_groups
-        results = svc.session_groups(user=user, authority=authority)
+        assert groups == [svc.world_group.return_value]
 
-        assert results == user.groups
-        for group in results:
-            assert group.type == "restricted"
+    def test_it_excludes_world_group_if_not_found(self, svc, user, authority):
+        svc.world_group = mock.Mock()
+        svc.world_group.return_value = None  # mocking no world group
+        svc.user_groups = mock.Mock()
+        svc.user_groups.return_value = []
 
-    def test_it_excludes_scoped_restricted_groups_if_user_not_member(
-        self, svc, user, scoped_restricted_groups, authority
-    ):
-        expected = [
-            group for group in scoped_restricted_groups if user in group.members
-        ]
-        results = svc.session_groups(user=user, authority=authority)
+        groups = svc.session_groups(authority, user)
 
-        assert results == expected
+        assert groups == []
 
-    def test_it_returns_the_world_group(self, svc, user, default_authority):
-        results = svc.session_groups(user=user, authority=default_authority)
+    def test_it_includes_user_groups(self, svc, user, authority):
+        svc.user_groups = mock.Mock()
+        svc.user_groups.return_value = []
 
-        assert results[0].pubid == "__world__"
+        svc.session_groups(authority, user)
 
-    def test_it_returns_world_group_only_if_no_user(
-        self,
-        svc,
-        default_authority,
-        unscoped_restricted_groups,
-        scoped_restricted_groups,
-        unscoped_open_groups,
-        scoped_open_groups,
-    ):
-        results = svc.session_groups(user=None, authority=default_authority)
+        svc.user_groups.assert_called_once_with(user)
 
-        assert results[0].pubid == "__world__"
-        assert len(results) == 1
+    def test_it_includes_world_and_user_groups(self, svc, user, authority):
+        fakeGroup = mock.Mock()
+        svc.world_group = mock.Mock()
+        svc.user_groups = mock.Mock()
+        svc.user_groups.return_value = [fakeGroup]
 
-    def test_it_returns_private_groups_for_user(
-        self, user, svc, authority, private_groups
-    ):
-        user.groups = private_groups
-        results = svc.session_groups(user=user, authority=authority)
+        groups = svc.session_groups(authority, user)
 
-        for group in user.groups:
-            assert group in results
-            assert group.type == "private"
-
-    def test_world_group_is_first(self, user, svc, default_authority, private_groups):
-        user.groups = private_groups
-        results = svc.session_groups(user=user, authority=default_authority)
-
-        world_group = results.pop(0)
-        assert world_group.pubid == "__world__"
-        for group in results:
-            assert group.type == "private"
+        assert groups == [svc.world_group.return_value, fakeGroup]
 
 
 class TestListGroupsRequestGroups(object):
     def test_it_returns_world_group(self, svc, default_authority):
-        results = svc.request_groups(authority=default_authority)
-
-        assert results[0].pubid == "__world__"
-
-    def test_it_overrides_authority_with_user_authority(self, svc, user):
-        svc.scoped_groups = mock.Mock()
-        svc.scoped_groups.return_value = []
         svc.world_group = mock.Mock()
+        svc.request_groups(authority=default_authority)
 
-        svc.request_groups(authority="foople.com", user=user)
-
-        svc.scoped_groups.assert_called_once_with(user.authority, None)
-        svc.world_group.assert_called_once_with(user.authority)
-
-    def test_it_defaults_to_default_authority(self, svc, default_authority):
-        svc.scoped_groups = mock.Mock()
-        svc.scoped_groups.return_value = []
-        svc.world_group = mock.Mock()
-
-        svc.request_groups()
-
-        svc.scoped_groups.assert_called_once_with(default_authority, None)
         svc.world_group.assert_called_once_with(default_authority)
 
-    def test_it_returns_matching_scoped_open_groups(
-        self, svc, authority, document_uri, scoped_open_groups
+    def test_it_overrides_authority_with_user_authority(self, svc, user, document_uri):
+        svc.scoped_groups = mock.Mock()
+        svc.scoped_groups.return_value = []
+        svc.world_group = mock.Mock()
+
+        svc.request_groups(authority="foople.com", user=user, document_uri=document_uri)
+
+        svc.scoped_groups.assert_called_once_with(user.authority, document_uri)
+        svc.world_group.assert_called_once_with(user.authority)
+
+    def test_it_defaults_to_default_authority(
+        self, svc, default_authority, document_uri
     ):
-        results = svc.request_groups(authority=authority, document_uri=document_uri)
+        svc.scoped_groups = mock.Mock()
+        svc.scoped_groups.return_value = []
+        svc.world_group = mock.Mock()
 
-        group_names = [group.name for group in results]
-        assert set(results) == set(scoped_open_groups)
-        assert group_names == ["Antigone", "Blender"]
+        svc.request_groups(document_uri=document_uri)
 
-    def test_it_returns_matching_scoped_restricted_groups(
-        self, svc, authority, document_uri, scoped_restricted_groups
+        svc.scoped_groups.assert_called_once_with(default_authority, document_uri)
+        svc.world_group.assert_called_once_with(default_authority)
+
+    def test_it_returns_results_including_scoped_groups(
+        self, svc, authority, document_uri
     ):
-        results = svc.request_groups(authority=authority, document_uri=document_uri)
+        svc.scoped_groups = mock.Mock()
+        svc.scoped_groups.return_value = []
+        svc.request_groups(authority=authority, document_uri=document_uri)
 
-        group_names = [group.name for group in results]
-        assert group_names == ["Affluent", "Forensic"]
-        assert set(results) == set(scoped_restricted_groups)
+        svc.scoped_groups.assert_called_once_with(authority, document_uri)
 
-    def test_it_returns_no_scoped_groups_if_uri_missing(
-        self, svc, authority, scoped_open_groups, scoped_restricted_groups
-    ):
-        results = svc.request_groups(authority=authority)
+    def test_it_returns_no_scoped_groups_if_uri_missing(self, svc, authority):
+        svc.scoped_groups = mock.Mock()
+        svc.request_groups(authority=authority)
 
-        assert results == []
+        svc.scoped_groups.assert_not_called()
 
-    def test_it_returns_no_unscoped_open_groups(
-        self, svc, authority, scoped_open_groups, unscoped_open_groups
-    ):
-        results = svc.request_groups(authority=authority)
+    def test_it_returns_private_groups_if_user(self, svc, user, authority):
+        svc.private_groups = mock.Mock()
+        svc.private_groups.return_value = []
 
-        assert results == []
+        svc.request_groups(user=user, authority=authority)
 
-    def test_it_returns_no_unscoped_restricted_groups(
-        self, svc, authority, unscoped_restricted_groups
-    ):
-        results = svc.request_groups(authority=authority)
+        svc.private_groups.assert_called_once_with(user)
 
-        assert results == []
+    def test_it_returns_no_private_groups_if_no_user(self, svc, authority):
+        svc.private_groups = mock.Mock()
 
-    def test_it_returns_no_unscoped_restricted_user_groups(
-        self, svc, authority, user, unscoped_restricted_groups
-    ):
-        user.groups = unscoped_restricted_groups
-        results = svc.request_groups(user=user, authority=authority)
+        svc.request_groups(authority=authority)
 
-        assert results == []
+        svc.private_groups.assert_not_called()
 
-    def test_it_returns_private_groups_if_user(
-        self, svc, user, authority, private_groups
-    ):
-        user.groups = private_groups
-        results = svc.request_groups(user=user, authority=authority)
+    def test_returns_ordered_list_of_groups(self, svc, authority, user, document_uri):
+        fake_private_group = mock.Mock()
+        fake_scoped_group = mock.Mock()
+        fake_world_group = mock.Mock()
+        svc.world_group = mock.Mock(return_value=fake_world_group)
+        svc.private_groups = mock.Mock(return_value=[fake_private_group])
+        svc.scoped_groups = mock.Mock(return_value=[fake_scoped_group])
 
-        assert results == private_groups
-
-    def test_it_returns_no_group_dupes(
-        self,
-        svc,
-        user,
-        authority,
-        private_groups,
-        document_uri,
-        scoped_restricted_user_groups,
-    ):
-        user.groups = private_groups + scoped_restricted_user_groups
         results = svc.request_groups(
-            user=user, authority=authority, document_uri=document_uri
+            authority=authority, user=user, document_uri=document_uri
         )
 
-        assert results == scoped_restricted_user_groups + private_groups
-
-    def test_returned_open_groups_must_match_authority(
-        self, svc, alternate_authority, unscoped_open_groups, scoped_open_groups
-    ):
-        results = svc.request_groups(authority=alternate_authority)
-
-        assert results == []
-
-    def test_returned_restricted_groups_must_match_authority(
-        self, svc, alternate_authority, scoped_restricted_groups
-    ):
-        results = svc.request_groups(authority=alternate_authority)
-
-        assert results == []
-
-    def test_groups_are_sorted_by_type(
-        self, svc, user, mixed_groups, authority, document_uri
-    ):
-        expected_sorted_types = ["open", "restricted", "open", "private", "private"]
-        results = svc.request_groups(
-            user=user, authority=authority, document_uri=document_uri
-        )
-
-        assert [group.type for group in results] == expected_sorted_types
-
-    def test_groups_are_sorted_alphabetically(
-        self, svc, user, mixed_groups, authority, document_uri
-    ):
-        expected_sorted_pubids = ["wadsworth", "xander", "yaks", "spectacle", "yams"]
-        results = svc.request_groups(
-            user=user, authority=authority, document_uri=document_uri
-        )
-
-        assert [group.pubid for group in results] == expected_sorted_pubids
+        assert results == [fake_scoped_group, fake_world_group, fake_private_group]
 
 
 class TestUserGroups(object):
@@ -237,13 +152,25 @@ class TestUserGroups(object):
 
 
 class TestPrivateGroups(object):
-    def test_it_returns_a_users_private_groups(self, svc, user, user_groups):
-        user.groups = user_groups
+    def test_it_retrieves_all_user_groups(self, svc, user):
+        svc.user_groups = mock.Mock(return_value=[])
+
+        svc.private_groups(user)
+
+        svc.user_groups.assert_called_once_with(user)
+
+    def test_it_returns_only_private_groups(self, svc, user, factories):
+        private_group = factories.Group()
+        open_group = factories.OpenGroup()
+        restricted_group = factories.RestrictedGroup()
+
+        user.groups = [private_group, open_group, restricted_group]
 
         p_groups = svc.private_groups(user)
 
-        group_names = [group.name for group in p_groups]
-        assert group_names == ["Alpha", "Beta", "Gamma"]
+        assert private_group in p_groups
+        assert open_group not in p_groups
+        assert restricted_group not in p_groups
 
     def test_it_returns_empty_list_if_no_user(self, svc):
         p_groups = svc.private_groups(user=None)
@@ -251,34 +178,138 @@ class TestPrivateGroups(object):
         assert p_groups == []
 
 
-@pytest.mark.use_fixtures("scoped_groups")
 class TestScopedGroups(object):
-    def test_it_returns_scoped_groups_that_match_document_uri_and_authority(
-        self, svc, document_uri, authority, scoped_groups
+    def test_it_fetches_matching_scopes_from_group_scope_service(
+        self, svc, authority, document_uri, group_scope_service
     ):
-        s_groups = svc.scoped_groups(authority, document_uri)
+        svc.scoped_groups(authority, document_uri)
 
-        group_names = [group.name for group in s_groups]
-        assert group_names == ["Affluent", "Antigone", "Blender", "Forensic"]
+        group_scope_service.fetch_by_scope.assert_called_once_with(document_uri)
 
-    def test_it_returns_empty_list_if_no_scope_matches(self, svc, authority):
-        s_groups = svc.scoped_groups(authority, "https://www.whatever.org")
-
-        assert s_groups == []
-
-    def test_it_returns_empty_list_if_no_authority_matches(self, svc, document_uri):
-        s_groups = svc.scoped_groups("inventive.org", document_uri)
-
-        assert s_groups == []
-
-    def test_it_returns_empty_list_if_uri_scope_parsing_fails(
-        self, svc, document_uri, authority, scope_util
+    def test_it_returns_empty_list_if_no_matching_scopes(
+        self, svc, authority, document_uri, group_scope_service
     ):
-        scope_util.uri_scope.return_value = None
+        # TODO this should take a fixture
+        group_scope_service.fetch_by_scope.return_value = []
 
-        s_groups = svc.scoped_groups(authority, document_uri)
+        results = svc.scoped_groups(authority, document_uri)
 
-        assert s_groups == []
+        assert results == []
+
+    def test_it_only_returns_public_groups(
+        self,
+        factories,
+        svc,
+        origin,
+        document_uri,
+        group_scope_service,
+        default_authority,
+        db_session,
+    ):
+        private_group = factories.Group(scopes=[GroupScope(scope=origin)])
+        open_group = factories.OpenGroup(scopes=[GroupScope(scope=origin)])
+        restricted_group = factories.RestrictedGroup(scopes=[GroupScope(scope=origin)])
+
+        db_session.commit()  # FIXME
+
+        combined_scopes = [
+            private_group.scopes[0],
+            open_group.scopes[0],
+            restricted_group.scopes[0],
+        ]
+
+        group_scope_service.fetch_by_scope.return_value = combined_scopes
+        results = svc.scoped_groups(default_authority, document_uri)
+
+        assert private_group not in results
+        assert open_group in results
+        assert restricted_group in results
+
+    def test_it_sorts_groups(
+        self,
+        factories,
+        origin,
+        group_scope_service,
+        svc,
+        default_authority,
+        document_uri,
+        db_session,
+    ):
+        groups = [
+            factories.OpenGroup(name="Calendar", scopes=[GroupScope(scope=origin)]),
+            factories.OpenGroup(name="Braille", scopes=[GroupScope(scope=origin)]),
+            factories.OpenGroup(name="Abacus", scopes=[GroupScope(scope=origin)]),
+        ]
+
+        db_session.commit()  # FIXME
+
+        group_scope_service.fetch_by_scope.return_value = [
+            groups[0].scopes[0],
+            groups[1].scopes[0],
+            groups[2].scopes[0],
+        ]
+
+        results = svc.scoped_groups(default_authority, document_uri)
+
+        assert results[0].name == "Abacus"
+        assert results[1].name == "Braille"
+        assert results[2].name == "Calendar"
+
+    def test_it_only_returns_groups_matching_authority(
+        self,
+        factories,
+        origin,
+        group_scope_service,
+        svc,
+        default_authority,
+        authority,
+        document_uri,
+        db_session,
+    ):
+        groups = [
+            factories.OpenGroup(
+                name="Calendar", scopes=[GroupScope(scope=origin)], authority=authority
+            ),
+            factories.OpenGroup(name="Braille", scopes=[GroupScope(scope=origin)]),
+            factories.OpenGroup(
+                name="Abacus", scopes=[GroupScope(scope=origin)], authority=authority
+            ),
+        ]
+
+        db_session.commit()  # FIXME
+
+        group_scope_service.fetch_by_scope.return_value = [
+            groups[0].scopes[0],
+            groups[1].scopes[0],
+            groups[2].scopes[0],
+        ]
+
+        results = svc.scoped_groups(default_authority, document_uri)
+
+        assert len(results) == 1
+        assert results[0].name == "Braille"
+
+    def test_it_de_dupes_matching_groups(
+        self,
+        svc,
+        group_scope_service,
+        default_authority,
+        origin,
+        document_uri,
+        factories,
+        db_session,
+    ):
+        # Both of this group's scopes will be a match
+        open_group = factories.OpenGroup(
+            scopes=[GroupScope(scope=origin), GroupScope(scope=origin)]
+        )
+        db_session.commit()  # FIXME
+        group_scope_service.fetch_by_scope.return_value = open_group.scopes
+
+        results = svc.scoped_groups(default_authority, document_uri)
+
+        # But only one instance of the group is returned
+        assert results == [open_group]
 
 
 class TestWorldGroup(object):
@@ -302,12 +333,12 @@ class TestWorldGroup(object):
 
 
 class TestGroupListFactory(object):
-    def test_group_list_factory(self, pyramid_request):
+    def test_group_list_factory(self, pyramid_request, group_scope_service):
         svc = group_list_factory(None, pyramid_request)
 
         assert isinstance(svc, GroupListService)
 
-    def test_uses_request_default_authority(self, pyramid_request):
+    def test_uses_request_default_authority(self, pyramid_request, group_scope_service):
         pyramid_request.default_authority = "bar.com"
 
         svc = group_list_factory(None, pyramid_request)
@@ -337,11 +368,6 @@ def alternate_authority():
 
 
 @pytest.fixture
-def default_user(factories, default_authority):
-    return factories.User(authority=default_authority)
-
-
-@pytest.fixture
 def user(factories, authority):
     return factories.User(authority=authority)
 
@@ -367,53 +393,6 @@ def document_uri():
 
 
 @pytest.fixture
-def scoped_open_groups(factories, authority, origin, user):
-    return [
-        factories.OpenGroup(
-            name="Blender",
-            authority=authority,
-            creator=user,
-            scopes=[factories.GroupScope(scope=origin)],
-        ),
-        factories.OpenGroup(
-            name="Antigone",
-            authority=authority,
-            scopes=[factories.GroupScope(scope=origin)],
-        ),
-    ]
-
-
-@pytest.fixture
-def scoped_restricted_groups(factories, authority, origin, user):
-    return [
-        factories.RestrictedGroup(
-            name="Forensic",
-            authority=authority,
-            creator=user,
-            scopes=[factories.GroupScope(scope=origin)],
-        ),
-        factories.RestrictedGroup(
-            name="Affluent",
-            authority=authority,
-            scopes=[factories.GroupScope(scope=origin)],
-        ),
-    ]
-
-
-@pytest.fixture
-def scoped_groups(scoped_open_groups, scoped_restricted_groups):
-    return scoped_open_groups + scoped_restricted_groups
-
-
-@pytest.fixture
-def unscoped_restricted_groups(factories, authority, user):
-    return [
-        factories.RestrictedGroup(authority=authority, creator=user),
-        factories.RestrictedGroup(authority=authority),
-    ]
-
-
-@pytest.fixture
 def scoped_restricted_user_groups(factories, authority, user, origin):
     return [
         factories.RestrictedGroup(
@@ -429,27 +408,6 @@ def scoped_restricted_user_groups(factories, authority, user, origin):
             scopes=[factories.GroupScope(scope=origin)],
         ),
     ]
-
-
-@pytest.fixture
-def unscoped_open_groups(factories, authority, user):
-    return [
-        factories.OpenGroup(authority=authority, creator=user),
-        factories.OpenGroup(authority=authority),
-    ]
-
-
-@pytest.fixture
-def alternate_unscoped_open_groups(factories, alternate_authority):
-    return [
-        factories.OpenGroup(authority=alternate_authority),
-        factories.OpenGroup(authority=alternate_authority),
-    ]
-
-
-@pytest.fixture
-def private_groups(factories, authority):
-    return [factories.Group(authority=authority), factories.Group(authority=authority)]
 
 
 @pytest.fixture
@@ -483,12 +441,16 @@ def mixed_groups(factories, user, authority, origin):
 
 
 @pytest.fixture
-def scope_util(patch):
-    return patch("h.services.group_list.scope_util")
+def group_scope_service(pyramid_config):
+    service = mock.create_autospec(GroupScopeService, spec_set=True, instance=True)
+    pyramid_config.register_service(service, name="group_scope")
+    return service
 
 
 @pytest.fixture
-def svc(pyramid_request, db_session):
+def svc(pyramid_request, db_session, group_scope_service):
     return GroupListService(
-        session=db_session, default_authority=pyramid_request.default_authority
+        session=db_session,
+        default_authority=pyramid_request.default_authority,
+        group_scope_service=group_scope_service,
     )
