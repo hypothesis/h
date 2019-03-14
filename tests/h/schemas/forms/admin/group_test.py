@@ -65,17 +65,15 @@ class TestCreateGroupSchema(object):
 
         bound_schema.deserialize(group_data)
 
-    @pytest.mark.parametrize("invalid_origin", ["not-a-url"])
-    def test_it_raises_if_origin_invalid(
-        self, group_data, bound_schema, invalid_origin
-    ):
-        group_data["origins"] = [invalid_origin]
-        with pytest.raises(colander.Invalid, match="origins.*Must be a URL"):
+    @pytest.mark.parametrize("invalid_scope", ["not-a-url"])
+    def test_it_raises_if_origin_invalid(self, group_data, bound_schema, invalid_scope):
+        group_data["scopes"] = [invalid_scope]
+        with pytest.raises(colander.Invalid, match="scopes.*Must be a URL"):
             bound_schema.deserialize(group_data)
 
     def test_it_raises_if_no_origins(self, group_data, bound_schema):
-        group_data["origins"] = []
-        with pytest.raises(colander.Invalid, match="At least one origin"):
+        group_data["scopes"] = []
+        with pytest.raises(colander.Invalid, match="At least one scope"):
             bound_schema.deserialize(group_data)
 
     def test_it_raises_if_group_type_changed(
@@ -166,7 +164,7 @@ def group_data(factories):
         "creator": factories.User().username,
         "description": "Lorem ipsum dolor sit amet consectetuer",
         "organization": "__default__",
-        "origins": ["http://www.foo.com", "https://www.foo.com"],
+        "scopes": ["http://www.foo.com", "https://www.foo.com"],
         "enforce_scope": True,
     }
 

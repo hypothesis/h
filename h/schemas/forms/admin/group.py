@@ -166,14 +166,17 @@ class CreateAdminGroupSchema(CSRFSchema):
         missing=False,
     )
 
-    origins = colander.SequenceSchema(
+    scopes = colander.SequenceSchema(
         colander.Sequence(),
-        colander.SchemaNode(colander.String(), name="origin", validator=colander.url),
-        title=_("Scope Origins"),
-        hint=_('Origins where this group appears (e.g. "https://example.com")'),
-        widget=SequenceWidget(add_subitem_text_template=_("Add origin"), min_len=1),
+        colander.SchemaNode(colander.String(), name="scope", validator=colander.url),
+        title=_("Scopes"),
+        hint=_(
+            "Define where this group appears. A web page's URL must start with one or more"
+            " of the entered scope strings (e.g. 'http://www.example.com')"
+        ),
+        widget=SequenceWidget(add_subitem_text_template=_("Add scope"), min_len=1),
         validator=colander.Length(
-            min=1, min_err=_("At least one origin must be specified")
+            min=1, min_err=_("At least one scope must be specified")
         ),
     )
 
