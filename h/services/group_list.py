@@ -168,7 +168,6 @@ class GroupListService(object):
             .filter(
                 models.Group.readable_by == group.ReadableBy.world
             )  # Only "public" groups
-            .group_by(models.Group.id)  # de-dupe
             .all()
         )
         return self._sort(scoped_groups)

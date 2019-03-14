@@ -93,7 +93,7 @@ class GroupCreateViews(object):
             group = create_fns[type_](
                 name=appstruct["name"],
                 userid=creator_userid,
-                scopes=appstruct["origins"],
+                scopes=appstruct["scopes"],
                 description=appstruct["description"],
                 organization=organization,
                 enforce_scope=appstruct["enforce_scope"],
@@ -181,7 +181,7 @@ class GroupEditViews(object):
             """Update the group resource on successful form validation"""
 
             organization = self.organizations[appstruct["organization"]]
-            scopes = [GroupScope(scope=o) for o in appstruct["origins"]]
+            scopes = [GroupScope(scope=o) for o in appstruct["scopes"]]
 
             self.group_update_svc.update(
                 group,
@@ -223,7 +223,7 @@ class GroupEditViews(object):
                 "name": group.name,
                 "members": [m.username for m in group.members],
                 "organization": group.organization.pubid,
-                "origins": [s.origin for s in group.scopes],
+                "scopes": [s.scope for s in group.scopes],
                 "enforce_scope": group.enforce_scope,
             }
         )
