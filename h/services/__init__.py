@@ -60,6 +60,9 @@ def includeme(config):
     config.register_service_factory(".links.links_factory", name="links")
     config.register_service_factory(".group_list.group_list_factory", name="group_list")
     config.register_service_factory(
+        ".group_scope.group_scope_factory", name="group_scope"
+    )
+    config.register_service_factory(
         ".list_organizations.list_organizations_factory", name="list_organizations"
     )
     config.register_service_factory(".nipsa.nipsa_factory", name="nipsa")
