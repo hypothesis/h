@@ -5,19 +5,6 @@ from __future__ import unicode_literals
 from h._compat import urlparse
 
 
-def match(uri, scopes):
-    """
-    Return boolean: Does the URI's scope match any of the scopes?
-
-    Return True if the scope of URI is present in the scopes list
-
-    :param uri: URI string in question
-    :param scopes: List of scope (URI origin) strings
-    """
-    scope = uri_scope(uri)
-    return scope in scopes
-
-
 def uri_in_scope(uri, scopes):
     """
     Does the URI match any of the scope patterns?
@@ -35,18 +22,6 @@ def uri_in_scope(uri, scopes):
     if len(scope_matches):
         return True
     return False
-
-
-# TODO: This concept no longer makes sense with more granular scoping. There is
-# no equivalent 1:1 uri <-> scope relationship. Remove this function soon.
-def uri_scope(uri):
-    """
-    Return the scope for a given URI
-
-    Parse a scope from a URI string. Presently a scope is an origin, so this
-    proxies to parse_origin.
-    """
-    return parse_origin(uri)
 
 
 def uri_to_scope(uri):
