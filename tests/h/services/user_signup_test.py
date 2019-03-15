@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from h.models import Activation, Subscriptions, User
 from h.services.user_password import UserPasswordService
 from h.services.user_signup import UserSignupService, user_signup_service_factory
+from h.services.exceptions import ConflictError
 
 
 class TestUserSignupService(object):
@@ -129,6 +130,45 @@ class TestUserSignupService(object):
         svc.signup(username="foo", email="foo@bar.com")
 
         stats.incr.assert_called_once_with("auth.local.register")
+
+    def test_signup_logs_conflict_error_when_account_with_email_already_exists(
+        self, svc, db_session, patch
+    ):
+        log = patch("h.services.user_signup.log")
+
+        with pytest.raises(ConflictError):
+            svc.signup(username="foo", email="foo@bar.com")
+            svc.signup(username="foo", email="foo@bar.com")
+
+        assert (
+            "concurrent account signup conflict error occured during user "
+            "signup (psycopg2.IntegrityError) duplicate key value violates unique "
+            "constraint" in log.warning.call_args[0][0]
+        )
+
+    @pytest.mark.parametrize(
+        "username,email",
+        [
+            # In the real world these values would be identical to the first signup but
+            # since we need to force one to error before the other, only the email or
+            # only the username matches. Assume that when one of these happens it means
+            # the user issued identical signup requests concurrently.
+            # Catches Integrity error on identical email.
+            ("bar", "foo@bar.com"),
+            # Catches Integrity error on identical username.
+            ("foo", "foo1@bar.com"),
+        ],
+    )
+    def test_signup_raises_conflict_error_when_account_already_exists(
+        self, svc, db_session, username, email
+    ):
+        """This happens when two or more identical concurrent signup requests race each other to the db."""
+        with pytest.raises(
+            ConflictError,
+            match="The email address {} has already been registered.".format(email),
+        ):
+            svc.signup(username="foo", email="foo@bar.com")
+            svc.signup(username=username, email=email)
 
     @pytest.fixture
     def svc(self, db_session, mailer, signup_email, user_password_service):

@@ -4,12 +4,12 @@ from __future__ import unicode_literals
 import datetime
 
 import deform
-import jinja2
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 
 from h import i18n
 from h.accounts import schemas
+from h.services.exceptions import ConflictError
 
 _ = i18n.TranslationString
 
@@ -53,24 +53,24 @@ class SignupController(object):
             return {"form": self.form.render()}
 
         signup_service = self.request.find_service(name="user_signup")
-        signup_service.signup(
-            username=appstruct["username"],
-            email=appstruct["email"],
-            password=appstruct["password"],
-            privacy_accepted=datetime.datetime.utcnow(),
-        )
-
-        self.request.session.flash(
-            jinja2.Markup(
-                _(
-                    "Please check your email and open the link to activate your "
-                    "account."
-                )
-            ),
-            "success",
-        )
-
-        return httpexceptions.HTTPFound(location=self.request.route_url("index"))
+        try:
+            signup_service.signup(
+                username=appstruct["username"],
+                email=appstruct["email"],
+                password=appstruct["password"],
+                privacy_accepted=datetime.datetime.utcnow(),
+            )
+            heading = _("Account registration successful")
+            message = _(
+                "Please check your email and open the link to activate your account."
+            )
+        except ConflictError as e:
+            heading = _("Account already registered")
+            message = _(
+                "{failure_reason} Please check your email and open the link to activate your "
+                "account.".format(failure_reason=e.args[0])
+            )
+        return {"heading": heading, "message": message}
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
