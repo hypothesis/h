@@ -43,7 +43,7 @@ class GroupJSONPresenter(object):
             # patterns—currently a simple wildcarded prefix—to give us more
             # flexibility in making scope more granular later
             model["scopes"]["uri_patterns"] = [
-                scope.origin + "*" for scope in self.group.scopes
+                scope.scope + "*" for scope in self.group.scopes
             ]
         return model
 

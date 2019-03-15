@@ -134,8 +134,8 @@ class TestGroupJSONPresenter(object):
         group = factories.OpenGroup(
             enforce_scope=False,
             scopes=[
-                factories.GroupScope(scope="http://foo.com"),
-                factories.GroupScope(scope="https://foo.com"),
+                factories.GroupScope(scope="http://foo.com/bar"),
+                factories.GroupScope(scope="https://foo.com/baz"),
             ],
         )
         group_context = GroupContext(group)
@@ -146,7 +146,7 @@ class TestGroupJSONPresenter(object):
         assert "scopes" in model
         assert model["scopes"]["enforced"] is False
         assert set(model["scopes"]["uri_patterns"]) == set(
-            ["http://foo.com*", "https://foo.com*"]
+            ["http://foo.com/bar*", "https://foo.com/baz*"]
         )
 
     def test_expanded_scopes_uri_patterns_empty_if_no_scopes(
