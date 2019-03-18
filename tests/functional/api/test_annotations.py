@@ -143,6 +143,21 @@ class TestPostAnnotation(object):
         assert res.status_code == 400
         assert res.json["reason"].startswith("group:")
 
+    # TODO: This endpoint should return a 201
+    def test_it_returns_http_200_when_annotation_created(self, app, user_with_token):
+        user, token = user_with_token
+
+        headers = {"Authorization": str("Bearer {}".format(token.value))}
+        annotation = {
+            "group": "__world__",
+            "text": "My annotation",
+            "uri": "http://example.com",
+        }
+
+        res = app.post_json("/api/annotations", annotation, headers=headers)
+
+        assert res.status_code == 200
+
 
 @pytest.mark.functional
 class TestPatchAnnotation(object):
