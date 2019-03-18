@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from h.views.api.config import api_config
 from h.views.api.helpers.angular import AngularRouteTemplater
-from h.views.api.helpers import links
+from h.views.api.helpers import links as link_helpers
 
 
 @api_config(versions=["v1"], route_name="api.index")
@@ -24,4 +24,4 @@ def index(context, request):
         request.route_url, params=["id", "pubid", "user", "userid", "username"]
     )
 
-    return {"links": links.format_nested_links(api_links, "v1", templater)}
+    return {"links": link_helpers.format_nested_links(api_links, "v1", templater)}

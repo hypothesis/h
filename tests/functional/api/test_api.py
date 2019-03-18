@@ -13,19 +13,6 @@ import pytest
 native_str = str
 
 
-@pytest.mark.functional
-class TestGetIndex(object):
-    def test_api_index(self, app):
-        """
-        Test the API index view.
-
-        This view is tested more thoroughly in the view tests, but this test
-        checks the view doesn't error out and returns appropriate-looking JSON.
-        """
-        res = app.get("/api/")
-        assert "links" in res.json
-
-
 class TestCorsPreflight(object):
     def test_cors_preflight(self, app):
         # Simulate a CORS preflight request made by the browser from a client
