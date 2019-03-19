@@ -4,6 +4,7 @@ import venusian
 from h.views.api.helpers import cors
 from h.views.api.helpers import links
 from h.views.api.helpers.media_types import media_type_for_version
+from h.views.api.decorators.response import version_media_type_header
 
 from h.views.api import API_VERSIONS
 
@@ -65,7 +66,7 @@ def add_api_view(
     """
     settings.setdefault("accept", "application/json")
     settings.setdefault("renderer", "json")
-    settings.setdefault("decorator", cors_policy)
+    settings.setdefault("decorator", (cors_policy, version_media_type_header))
 
     if link_name:
         link = links.ServiceLink(

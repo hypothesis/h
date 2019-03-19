@@ -18,6 +18,19 @@ native_str = str
 
 @pytest.mark.functional
 class TestIndexEndpointVersions(object):
+    def test_index_sets_version_response_header(self, app):
+        """
+        A custom response header should be present confirming the version of
+        the API used.
+        """
+        res = app.get("/api/")
+
+        assert res.status_code == 200
+        assert "Hypothesis-Media-Type" in res.headers
+        assert (
+            res.headers["Hypothesis-Media-Type"] == "application/vnd.hypothesis.v1+json"
+        )
+
     def test_index_200s_when_accept_empty(self, app):
         """
         Don't send any Accept headers and we should get a 200 response.

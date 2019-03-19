@@ -42,10 +42,19 @@ info:
     Though not required, we urge clients to set an `Accept` header with a media
     type corresponding to the desired version, e.g.
 
-    `Accept: application/vnd.hypothesis.v1+json`
+    ```
+    Accept: application/vnd.hypothesis.v1+json
+    ```
 
     If an `Accept` header is set with an unrecognized media type, the API will
     return an HTTP 415 (Unsupported Media Type) error.
+
+    Responses to API requests include a header indicating which API version was used
+    to handle the request, e.g.:
+
+    ```
+    X-Hypothesis-Media-Type: application/vnd.hypothesis.v1+json
+    ```
 
     ## Errors
 
