@@ -152,6 +152,8 @@ class GroupListService(object):
         return [group for group in user_groups if group.type == "private"]
 
     def scoped_groups(self, authority, document_uri):
+        if not document_uri:
+            return []
         matching_scopes = self._group_scope_service.fetch_by_scope(document_uri)
         matching_scope_groupids = [scope.group_id for scope in matching_scopes]
 
