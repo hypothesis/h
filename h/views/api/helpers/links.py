@@ -55,3 +55,35 @@ def register_link(link, versions, registry):
         if version not in registry.api_links:
             registry.api_links[version] = []
         registry.api_links[version].append(link)
+
+
+def format_nested_links(api_links, version, templater):
+    """Format API link metadata as nested dicts for V1 variant of API index"""
+    formatted_links = {}
+    for link in api_links:
+        method_info = {
+            "method": link.primary_method(),
+            "url": templater.route_template(link.route_name),
+            "desc": link.description,
+        }
+        _set_at_path(formatted_links, link.name.split("."), method_info)
+
+    return formatted_links
+
+
+def _set_at_path(dict_, path, value):
+    """
+    Set the value at a given `path` within a nested `dict`.
+
+    :param dict_: The root `dict` to update
+    :param path: List of path components
+    :param value: Value to assign
+    """
+    key = path[0]
+    if key not in dict_:
+        dict_[key] = {}
+
+    if len(path) == 1:
+        dict_[key] = value
+    else:
+        _set_at_path(dict_[key], path[1:], value)

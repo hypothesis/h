@@ -2,8 +2,10 @@
 from __future__ import unicode_literals
 
 import pytest
+import mock
 
 from h.views.api.helpers import links
+from h.views.api.helpers.angular import AngularRouteTemplater
 
 
 class TestServiceLink(object):
@@ -55,6 +57,37 @@ class TestRegisterLink(object):
         assert second_service not in pyramid_config.registry.api_links["v2"]
 
 
+def TestFormatNestedLinks(object):
+    def test_it_formats_link_objects_as_dicts(self, templater):
+        link = _service_link(name="flat")
+
+        formatted = links.format_nested_links([link], "v1", templater)
+
+        assert "flat" in formatted
+        assert formatted["flat"] == {
+            "method": link.primary_method(),
+            "url": templater.route_template(link.route_name),
+            "desc": link.description,
+        }
+
+    def test_it_nests_links_based_on_service_name_split_on_periods(self, templater):
+        api_links = [
+            _service_link(name="1"),
+            _service_link(name="1.2"),
+            _service_link(name="1.2.3"),
+            _service_link(name="1.2.A"),
+            _service_link(name="1.B"),
+        ]
+
+        formatted = links.format_nested_links([api_links], "v1", templater)
+
+        assert "1" in formatted
+        assert "2" in formatted["1"]
+        assert "B" in formatted["1"]
+        assert "3" in formatted["1"]["2"]
+        assert "A" in formatted["1"]["2"]
+
+
 def _service_link(name="api.example_service"):
     return links.ServiceLink(
         name="name",
@@ -62,6 +95,11 @@ def _service_link(name="api.example_service"):
         method="POST",
         description="Create a new Foo",
     )
+
+
+@pytest.fixture
+def templater():
+    return mock.create_autospec(AngularRouteTemplater, spec_set=True, instance=True)
 
 
 @pytest.fixture

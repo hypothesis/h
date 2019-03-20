@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from h.views.api.config import api_config
 from h.views.api.helpers.angular import AngularRouteTemplater
+from h.views.api.helpers import links as link_helpers
 
 
 @api_config(versions=["v1"], route_name="api.index")
@@ -23,31 +24,4 @@ def index(context, request):
         request.route_url, params=["id", "pubid", "user", "userid", "username"]
     )
 
-    links = {}
-    for link in api_links:
-        method_info = {
-            "method": link.primary_method(),
-            "url": templater.route_template(link.route_name),
-            "desc": link.description,
-        }
-        _set_at_path(links, link.name.split("."), method_info)
-
-    return {"links": links}
-
-
-def _set_at_path(dict_, path, value):
-    """
-    Set the value at a given `path` within a nested `dict`.
-
-    :param dict_: The root `dict` to update
-    :param path: List of path components
-    :param value: Value to assign
-    """
-    key = path[0]
-    if key not in dict_:
-        dict_[key] = {}
-
-    if len(path) == 1:
-        dict_[key] = value
-    else:
-        _set_at_path(dict_[key], path[1:], value)
+    return {"links": link_helpers.format_nested_links(api_links, "v1", templater)}
