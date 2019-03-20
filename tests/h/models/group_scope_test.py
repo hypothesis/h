@@ -54,6 +54,22 @@ class TestGroupScope(object):
         with pytest.raises(AttributeError):
             factories.GroupScope(path="/foo/bar")
 
+    def test_setting_scope_property_sets_origin_and_path(self, factories):
+        group_scope = GroupScope(scope="http://www.foo.com/bar/baz")
+
+        assert group_scope.origin == "http://www.foo.com"
+        assert group_scope.path == "/bar/baz"
+        assert group_scope.scope == "http://www.foo.com/bar/baz"
+
+    def test_setting_scope_with_no_path_element_sets_None_for_path_attr(
+        self, factories
+    ):
+        group_scope = GroupScope(scope="http://www.foo.com")
+
+        assert group_scope.origin == "http://www.foo.com"
+        assert group_scope.path is None
+        assert group_scope.scope == "http://www.foo.com"
+
     def test_you_can_get_a_groupscopes_group_by_the_group_property(self, factories):
         group = factories.OpenGroup()
         group_scope = factories.GroupScope(group=group)
