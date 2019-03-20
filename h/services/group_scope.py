@@ -11,7 +11,7 @@ class GroupScopeService(object):
         self._session = session
 
     def fetch_by_origin(self, uri):
-        """Retrieve all GroupScope records that match on ``origin``
+        """Return all GroupScope records that match on ``origin``
 
         :arg uri: URI whose origin should be matched for
         :type uri: str

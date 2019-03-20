@@ -17,11 +17,7 @@ def uri_in_scope(uri, scopes):
     :type scopes: list(str)
     :rtype: bool
     """
-    scope_matches = [scope for scope in scopes if uri.startswith(scope)]
-
-    if len(scope_matches):
-        return True
-    return False
+    return any((uri.startswith(scope) for scope in scopes))
 
 
 def uri_to_scope(uri):

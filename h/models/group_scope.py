@@ -72,11 +72,11 @@ class GroupScope(Base):
 
         :raises ValueError: if URI is invalid (origin cannot be parsed)
         """
-        parsed_scope = uri_to_scope(value)
-        if parsed_scope[0] is None:
+        parsed_origin, parsed_path = uri_to_scope(value)
+        if parsed_origin is None:
             raise ValueError("Invalid URL for scope: missing origin component")
-        self._origin = parsed_scope[0]
-        self._path = parsed_scope[1]
+        self._origin = parsed_origin
+        self._path = parsed_path
 
     def __repr__(self):
         return "<GroupScope %s>" % self.origin
