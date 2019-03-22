@@ -18,7 +18,7 @@ def media_type_for_version(version, subtype="json"):
     return "application/vnd.hypothesis.{}+{}".format(version, subtype)
 
 
-def valid_media_types(versions=None):
+def valid_media_types():
     """
     Return a list of all valid API media types
 
@@ -31,13 +31,23 @@ def valid_media_types(versions=None):
     * An Accept header containing at least one of the media types returned by
       this function.
 
-    :arg versions: List of version strings to include in the valid media types.
-                   Defaults to the app's known version list.
+    :rtype: list(str)
+    """
+    valid_types = ["*/*", "application/json"] + version_media_types()
+    return valid_types
+
+
+def version_media_types(versions=None):
+    """
+    Return the media types corresponding to versions
+
+    :arg versions: media types will be returned for these versions, e.g. "v1",
+                   defaults to all known versions
     :type versions: list(str) or None
     :rtype: list(str)
     """
     versions = versions or API_VERSIONS
-    valid_types = ["*/*", "application/json"]
+    version_types = []
     for version in versions:
-        valid_types.append(media_type_for_version(version))
-    return valid_types
+        version_types.append(media_type_for_version(version))
+    return version_types

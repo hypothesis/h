@@ -32,9 +32,21 @@ class TestMediaTypeForVersion(object):
 
 class TestValidMediaTypes(object):
     def test_it_returns_list_containing_version_types(self):
-        assert media_types.valid_media_types(["foo", "bar"]) == [
+        assert media_types.valid_media_types() == [
             "*/*",
             "application/json",
+            "application/vnd.hypothesis.v1+json",
+        ]
+
+
+class TestVersionMediaTypes(object):
+    def test_it_returns_media_types_for_versions(self):
+        assert media_types.version_media_types(["foo", "bar"]) == [
             "application/vnd.hypothesis.foo+json",
             "application/vnd.hypothesis.bar+json",
+        ]
+
+    def test_it_returns_all_known_versions_if_versions_is_None(self):
+        assert media_types.version_media_types() == [
+            "application/vnd.hypothesis.v1+json"
         ]
