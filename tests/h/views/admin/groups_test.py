@@ -113,7 +113,7 @@ class TestGroupCreateView(object):
             name="My New Group",
             userid=user_svc.fetch.return_value.userid,
             description=None,
-            origins=["http://example.com"],
+            scopes=["http://example.com"],
             organization=default_org,
             enforce_scope=True,
         )
@@ -140,7 +140,7 @@ class TestGroupCreateView(object):
             name="My New Group",
             userid=user_svc.fetch.return_value.userid,
             description=None,
-            origins=["http://example.com"],
+            scopes=["http://example.com"],
             organization=default_org,
             enforce_scope=True,
         )
@@ -180,7 +180,7 @@ class TestGroupCreateView(object):
             "description": None,
             "members": [],
             "organization": default_org.pubid,
-            "origins": ["http://example.com"],
+            "scopes": ["http://example.com"],
             "enforce_scope": True,
         }
 
@@ -267,7 +267,7 @@ class TestGroupEditViews(object):
                     "group_type": "open",
                     "name": "Updated group",
                     "organization": updated_org.pubid,
-                    "origins": ["http://somewhereelse.com", "http://www.gladiolus.org"],
+                    "scopes": ["http://somewhereelse.com", "http://www.gladiolus.org"],
                     "members": [],
                     "enforce_scope": False,
                 }
@@ -285,7 +285,7 @@ class TestGroupEditViews(object):
             description="New description",
             name="Updated group",
             scopes=[
-                GroupScope(origin=o)
+                GroupScope(scope=o)
                 for o in ["http://somewhereelse.com", "http://www.gladiolus.org"]
             ],
             enforce_scope=False,
@@ -320,7 +320,7 @@ class TestGroupEditViews(object):
                     "name": "a name",
                     "members": ["phil", "sue"],
                     "organization": group.organization.pubid,
-                    "origins": ["http://www.example.com"],
+                    "scopes": ["http://www.example.com"],
                     "enforce_scope": group.enforce_scope,
                 }
             )
@@ -358,7 +358,7 @@ class TestGroupEditViews(object):
             "name": group.name,
             "members": [m.username for m in group.members],
             "organization": group.organization.pubid,
-            "origins": [s.origin for s in group.scopes],
+            "scopes": [s.scope for s in group.scopes],
             "enforce_scope": group.enforce_scope,
         }
 

@@ -19,6 +19,7 @@ from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
 )
 from h.schemas.base import CSRFSchema
+from h.util import group_scope
 
 _ = i18n.TranslationString
 
@@ -75,6 +76,17 @@ def member_exists_validator(node, val):
     authority = node.bindings["request"].default_authority
     if user_svc.fetch(val, authority) is None:
         raise colander.Invalid(node, _("Username not found"))
+
+
+def url_with_origin_validator(node, val):
+    """Validate that entered URL can be parsed into a scope"""
+    if not group_scope.parse_origin(val):
+        raise colander.Invalid(
+            node,
+            _(
+                "Each scope (prefix) must be a complete URL (e.g. 'http://www.example.com' or `https://foo.com/bar`)"
+            ),
+        )
 
 
 @colander.deferred
@@ -166,14 +178,19 @@ class CreateAdminGroupSchema(CSRFSchema):
         missing=False,
     )
 
-    origins = colander.SequenceSchema(
+    scopes = colander.SequenceSchema(
         colander.Sequence(),
-        colander.SchemaNode(colander.String(), name="origin", validator=colander.url),
-        title=_("Scope Origins"),
-        hint=_('Origins where this group appears (e.g. "https://example.com")'),
-        widget=SequenceWidget(add_subitem_text_template=_("Add origin"), min_len=1),
+        colander.SchemaNode(
+            colander.String(), name="scope", validator=url_with_origin_validator
+        ),
+        title=_("Scopes"),
+        hint=_(
+            "Define where this group appears. A document's URL must start with one or more"
+            " of the entered scope strings (e.g. 'http://www.example.com')"
+        ),
+        widget=SequenceWidget(add_subitem_text_template=_("Add scope"), min_len=1),
         validator=colander.Length(
-            min=1, min_err=_("At least one origin must be specified")
+            min=1, min_err=_("At least one scope must be specified")
         ),
     )
 

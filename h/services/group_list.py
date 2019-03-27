@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from h import models
 from h.models import group
-from h.util import group_scope as scope_util
 
 
 class GroupListService(object):
@@ -17,7 +16,7 @@ class GroupListService(object):
     ALl public methods return relevant group model objects.
     """
 
-    def __init__(self, session, default_authority):
+    def __init__(self, session, default_authority, group_scope_service):
         """
         Create a new group_list service.
 
@@ -25,6 +24,7 @@ class GroupListService(object):
         :param default_authority: the authority to use as a default
         """
         self._session = session
+        self._group_scope_service = group_scope_service
         self.default_authority = default_authority
 
     def _authority(self, user=None, authority=None):
@@ -105,12 +105,17 @@ class GroupListService(object):
           via the API.
         """
         authority = self._authority(user, authority)
-        scoped_groups = self.scoped_groups(authority, document_uri)
+        scoped_groups = []
+        private_groups = []
+
+        if document_uri:
+            scoped_groups = self.scoped_groups(authority, document_uri)
 
         world_group = self.world_group(authority)
         world_group = [world_group] if world_group else []
 
-        private_groups = self.private_groups(user)
+        if user:
+            private_groups = self.private_groups(user)
 
         return scoped_groups + world_group + private_groups
 
@@ -147,35 +152,24 @@ class GroupListService(object):
         return [group for group in user_groups if group.type == "private"]
 
     def scoped_groups(self, authority, document_uri):
-        """
-        Return scoped groups for the URI and authority
+        if not document_uri:
+            return []
+        matching_scopes = self._group_scope_service.fetch_by_scope(document_uri)
+        matching_scope_groupids = [scope.group_id for scope in matching_scopes]
 
-        Only open and restricted groups are "supposed" to have scope, but
-        technically this query is agnostic to the group's type—it will return
-        any group who has a scope that matches the document_uri's scope.
-
-        Note: If private groups are ever allowed to be scoped, this needs
-        attention.
-
-        :param authority: Filter groups by this authority
-        :type authority: string
-        :arg document_uri: Use this URI to find groups with matching scopes
-        :type document_uri: string
-        :rtype: list of :class:`h.models.group`
-        """
-        origin = scope_util.uri_scope(document_uri)
-        if not origin:
+        if not matching_scope_groupids:
             return []
 
-        groups = (
-            self._session.query(models.GroupScope, models.Group)
-            .filter(models.Group.id == models.GroupScope.group_id)
-            .filter(models.GroupScope.origin == origin)
+        # Retrieve groups for these IDs
+        scoped_groups = (
+            self._session.query(models.Group)
+            .filter(models.Group.id.in_(matching_scope_groupids))
             .filter(models.Group.authority == authority)
+            .filter(
+                models.Group.readable_by == group.ReadableBy.world
+            )  # Only "public" groups
             .all()
         )
-
-        scoped_groups = [group for groupscope, group in groups]
         return self._sort(scoped_groups)
 
     def world_group(self, authority):
@@ -225,6 +219,9 @@ class GroupListService(object):
 
 def group_list_factory(context, request):
     """Return a GroupListService instance for the passed context and request."""
+    group_scope_service = request.find_service(name="group_scope")
     return GroupListService(
-        session=request.db, default_authority=request.default_authority
+        session=request.db,
+        default_authority=request.default_authority,
+        group_scope_service=group_scope_service,
     )

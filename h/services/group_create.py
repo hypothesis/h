@@ -43,12 +43,12 @@ class GroupCreateService(object):
             name=name,
             userid=userid,
             type_flags=PRIVATE_GROUP_TYPE_FLAGS,
-            origins=[],
+            scopes=[],
             add_creator_as_member=True,
             **kwargs
         )
 
-    def create_open_group(self, name, userid, origins, **kwargs):
+    def create_open_group(self, name, userid, scopes, **kwargs):
         """
         Create a new open group.
 
@@ -56,7 +56,8 @@ class GroupCreateService(object):
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
-        :param origins: the list of origins that the group will be scoped to
+        :param scopes: the list of URIs that the group will be scoped to
+        :type scopes: list(str)
         :param kwargs: optional attributes to set on the group, as keyword
             arguments
 
@@ -66,12 +67,12 @@ class GroupCreateService(object):
             name=name,
             userid=userid,
             type_flags=OPEN_GROUP_TYPE_FLAGS,
-            origins=origins,
+            scopes=scopes,
             add_creator_as_member=False,
             **kwargs
         )
 
-    def create_restricted_group(self, name, userid, origins, **kwargs):
+    def create_restricted_group(self, name, userid, scopes, **kwargs):
         """
         Create a new restricted group.
 
@@ -80,7 +81,8 @@ class GroupCreateService(object):
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
-        :param origins: the list of origins that the group will be scoped to
+        :param scopes: the list of URIs that the group will be scoped to
+        :type scopes: list(str)
         :param kwargs: optional attributes to set on the group, as keyword
             arguments
 
@@ -90,13 +92,13 @@ class GroupCreateService(object):
             name=name,
             userid=userid,
             type_flags=RESTRICTED_GROUP_TYPE_FLAGS,
-            origins=origins,
+            scopes=scopes,
             add_creator_as_member=True,
             **kwargs
         )
 
     def _create(
-        self, name, userid, type_flags, origins, add_creator_as_member, **kwargs
+        self, name, userid, type_flags, scopes, add_creator_as_member, **kwargs
     ):
         """
         Create a group and save it to the DB.
@@ -104,17 +106,18 @@ class GroupCreateService(object):
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
         :param type_flags: the type of this group
-        :param origins: the list of origins that the group will be scoped to
+        :param scopes: the list of scopes (URIs) that the group will be scoped to
+        :type scopes: list(str)
         :param add_creator_as_member: if the group creator should be added as a member
         :param kwargs: optional attributes to set on the group, as keyword
             arguments
         """
-        if origins is None:
-            origins = []
+        if scopes is None:
+            scopes = []
 
         creator = self.user_fetcher(userid)
 
-        scopes = [GroupScope(origin=o) for o in origins]
+        group_scopes = [GroupScope(scope=s) for s in scopes]
 
         if "organization" in kwargs:
             self._validate_authorities_match(
@@ -128,7 +131,7 @@ class GroupCreateService(object):
             joinable_by=type_flags.joinable_by,
             readable_by=type_flags.readable_by,
             writeable_by=type_flags.writeable_by,
-            scopes=scopes,
+            scopes=group_scopes,
             **kwargs
         )
         self.session.add(group)
