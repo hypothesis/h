@@ -5,46 +5,43 @@ from __future__ import unicode_literals
 from h._compat import urlparse
 
 
-def uri_in_scope(uri, scopes):
+def url_in_scope(url, scope_urls):
     """
-    Does the URI match any of the scope patterns?
+    Does the URL match any of the scopes represented by ``scope_urls``?
 
-    Return True if the URI matches one or more patterns in scopes (if the
-    URI string begins with any of the scope strings)
+    Return True if the URL matches one or more of the provided patterns (if the
+    URL string begins with any of the scope URL strings)
 
-    :arg uri: URI string in question
-    :arg scopes: List of URIs that define scope
-    :type scopes: list(str)
+    :arg url: URL string in question
+    :arg scope_urls: List of URLs that define scopes to check against
+    :type scope_urls: list(str)
     :rtype: bool
     """
-    return any((uri.startswith(scope) for scope in scopes))
+    return any((url.startswith(scope_url) for scope_url in scope_urls))
 
 
-def uri_to_scope(uri):
+def parse_scope_from_url(url):
     """
-    Return a tuple representing the origin and path of a URI
+    Return a tuple representing the origin and path of a URL
 
-    :arg uri: The URI from which to derive scope
-    :type uri: str
+    :arg url: The URL from which to derive scope
+    :type url: str
     :rtype: tuple(str, str or None)
     """
-    # A URL with no origin component will result in a `None` value for
-    # origin, while a URL with no path component will result in an empty
-    # string for path.
-    origin = parse_origin(uri)
-    path = _parse_path(uri) or None
+    origin = parse_origin(url)
+    path = _parse_path(url) or None
     return (origin, path)
 
 
-def _parse_path(uri):
-    """Return the path component of a URI string"""
-    if uri is None:
+def _parse_path(url):
+    """Return the path component of a URL string"""
+    if url is None:
         return None
-    parsed = urlparse.urlsplit(uri)
+    parsed = urlparse.urlsplit(url)
     return parsed.path
 
 
-def parse_origin(uri):
+def parse_origin(url):
     """
     Return the origin of a URL or None if empty or invalid.
 
@@ -52,13 +49,13 @@ def parse_origin(uri):
     Return ``<scheme> + '://' + <host> + <port>``
     for a URL.
 
-    :param uri: URL string
+    :param url: URL string
     :rtype: str or None
     """
 
-    if uri is None:
+    if url is None:
         return None
-    parsed = urlparse.urlsplit(uri)
+    parsed = urlparse.urlsplit(url)
     # netloc contains both host and port
     origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, "", "", "")
     return origin.geturl() or None

@@ -26,7 +26,7 @@ class GroupScopeService(object):
         return [
             scope
             for scope in origin_scopes
-            if scope_util.uri_in_scope(url, [scope.scope])
+            if scope_util.url_in_scope(url, [scope.scope])
         ]
 
 

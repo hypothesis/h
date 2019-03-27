@@ -19,13 +19,13 @@ class TestFetchByScope(object):
     def test_it_only_returns_scopes_that_pass_util_scope_test(
         self, svc, scope_util, sample_scopes
     ):
-        scope_util.uri_in_scope.return_value = False
+        scope_util.url_in_scope.return_value = False
         scope_util.parse_origin.return_value = "http://foo.com"
 
-        # All sample_scopes match this URL, but fail the `uri_in_scope` test
+        # All sample_scopes match this URL, but fail the `url_in_scope` test
         scopes = svc.fetch_by_scope("http://foo.com")
 
-        assert scope_util.uri_in_scope.call_count == len(sample_scopes)
+        assert scope_util.url_in_scope.call_count == len(sample_scopes)
         assert scopes == []
 
     def test_it_returns_list_of_matching_scopes(self, svc, document_uri, sample_scopes):
