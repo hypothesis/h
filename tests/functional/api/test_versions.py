@@ -94,3 +94,28 @@ class TestIndexEndpointVersions(object):
         res = app.get("/api/", headers=headers, expect_errors=True)
 
         assert res.status_code == 415
+
+    def test_index_adds_v1_response_header(self, app):
+        """
+        An Accept header with the value of 'application/json' will be serviced
+        by the default version of the API, which is v1
+        """
+
+        res = app.get("/api/")
+
+        assert (
+            res.headers["Hypothesis-Media-Type"] == "application/vnd.hypothesis.v1+json"
+        )
+
+    def test_index_adds_v2_response_header(self, app):
+        """
+        Set a v2 Accept header and we should get a version media type
+        response header.
+        """
+        headers = {"Accept": str("application/vnd.hypothesis.v2+json")}
+
+        res = app.get("/api/", headers=headers)
+
+        assert (
+            res.headers["Hypothesis-Media-Type"] == "application/vnd.hypothesis.v2+json"
+        )
