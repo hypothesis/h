@@ -5,7 +5,7 @@ matrix:
     - env: ACTION=checkformatting
       language: python
       python: '3.6'
-      install: pip install tox tox-pip-extensions
+      install: pip install tox>=3.8.0
       script:
         make checkformatting
 
@@ -17,7 +17,7 @@ matrix:
         postgresql: "9.4"
       before_install:
         - ./scripts/elasticsearch.sh
-      install: pip install tox tox-pip-extensions
+      install: pip install tox>=3.8.0
       before_script: createdb htest
       script: tox
       after_success:
@@ -30,7 +30,7 @@ matrix:
         postgresql: '9.4'
       before_install:
         - ./scripts/elasticsearch.sh
-      install: pip install tox tox-pip-extensions
+      install: pip install tox>=3.8.0
       before_script: createdb htest
       script:
         tox -e py36-tests
@@ -53,7 +53,7 @@ matrix:
     - env: ACTION=backend-lint
       language: python
       python: '3.6'
-      install: pip install tox tox-pip-extensions
+      install: pip install tox>=3.8.0
       script:
         make lint
 
@@ -61,7 +61,7 @@ matrix:
     - env: ACTION=check-docs
       language: python
       python: '3.6'
-      install: pip install tox tox-pip-extensions
+      install: pip install tox>=3.8.0
       script:
         make checkdocs
 
