@@ -63,6 +63,17 @@ class TestIndexEndpointVersions(object):
         assert res.status_code == 200
         assert "links" in res.json
 
+    def test_index_200s_with_v2_header(self, app):
+        """
+        Set a v2 Accept header and we should get a 200 response.
+        """
+        headers = {"Accept": str("application/vnd.hypothesis.v2+json")}
+
+        res = app.get("/api/", headers=headers)
+
+        assert res.status_code == 200
+        assert "links" in res.json
+
     def test_index_415s_with_invalid_version_header(self, app):
         """
         Set a v3 Accept header and we should get a 415 response.

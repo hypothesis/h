@@ -25,3 +25,19 @@ def index(context, request):
     )
 
     return {"links": link_helpers.format_nested_links(api_links, "v1", templater)}
+
+
+@api_config(versions=["v2"], route_name="api.index", link_name="index")
+def index_v2(context, request):
+    """Return the API descriptor document.
+
+    Clients may use this to discover endpoints for the API.
+    """
+
+    api_links = request.registry.api_links["v2"]
+
+    templater = AngularRouteTemplater(
+        request.route_url, params=["id", "pubid", "user", "userid", "username"]
+    )
+
+    return {"links": link_helpers.format_nested_links(api_links, "v2", templater)}
