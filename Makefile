@@ -31,11 +31,11 @@ help:
 
 .PHONY: dev
 dev: build/manifest.json
-	tox -qe py27-dev
+	tox -q -e py27-dev
 
 .PHONY: shell
 shell:
-	tox -qe py27-dev -- sh bin/hypothesis --dev shell
+	tox -q -e py27-dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
 sql:
@@ -43,7 +43,7 @@ sql:
 
 .PHONY: lint
 lint:
-	tox -qe py36-lint
+	tox -q -e py36-lint
 
 .PHONY: analyze
 analyze:
@@ -51,11 +51,11 @@ analyze:
 
 .PHONY: format
 format:
-	tox -qe py36-format
+	tox -q -e py36-format
 
 PHONY: checkformatting
 checkformatting:
-	tox -qe py36-checkformatting
+	tox -q -e py36-checkformatting
 
 .PHONY: test
 test: node_modules/.uptodate
@@ -64,35 +64,35 @@ test: node_modules/.uptodate
 
 .PHONY: coverage
 coverage:
-	tox -qe py36-coverage
+	tox -q -e py36-coverage
 
 .PHONY: codecov
 codecov:
-	tox -qe py36-codecov
+	tox -q -e py36-codecov
 
 .PHONY: functests
 functests: build/manifest.json
-	tox -qe py27-functests
+	tox -q -e py27-functests
 
 .PHONY: docs
 docs:
-	tox -qe py36-docs
+	tox -q -e py36-docs
 
 .PHONY: checkdocs
 checkdocs:
-	tox -qe py36-checkdocs
+	tox -q -e py36-checkdocs
 
 .PHONY: docstrings
 docstrings:
-	tox -qe py36-docstrings
+	tox -q -e py36-docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings:
-	tox -qe py36-checkdocstrings
+	tox -q -e py36-checkdocstrings
 
 .PHONY: pip-compile
 pip-compile:
-	tox -qe py27-dev -- pip-compile --output-file requirements.txt requirements.in
+	tox -q -e py27-dev -- pip-compile --output-file requirements.txt requirements.in
 
 .PHONY: docker
 docker:
