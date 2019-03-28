@@ -102,7 +102,7 @@ class TestAddApiView(object):
     def test_it_raises_ValueError_on_unrecognized_version(self, pyramid_config, view):
         with pytest.raises(ValueError, match="Unrecognized API version"):
             api_config.add_api_view(
-                pyramid_config, view, versions=["v2"], route_name="thing.read"
+                pyramid_config, view, versions=["v3"], route_name="thing.read"
             )
 
     @pytest.mark.parametrize(

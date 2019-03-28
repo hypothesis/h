@@ -65,10 +65,10 @@ class TestIndexEndpointVersions(object):
 
     def test_index_415s_with_invalid_version_header(self, app):
         """
-        Set a v2 Accept header and we should get a 415 response.
-        (For now because the version doesn't exist quite yet)
+        Set a v3 Accept header and we should get a 415 response.
+        (For now because the version doesn't exist yet)
         """
-        headers = {"Accept": str("application/vnd.hypothesis.v2+json")}
+        headers = {"Accept": str("application/vnd.hypothesis.v3+json")}
 
         res = app.get("/api/", headers=headers, expect_errors=True)
 

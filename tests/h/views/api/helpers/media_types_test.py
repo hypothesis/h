@@ -36,6 +36,7 @@ class TestValidMediaTypes(object):
             "*/*",
             "application/json",
             "application/vnd.hypothesis.v1+json",
+            "application/vnd.hypothesis.v2+json",
         ]
 
 
@@ -48,5 +49,6 @@ class TestVersionMediaTypes(object):
 
     def test_it_returns_all_known_versions_if_versions_is_None(self):
         assert media_types.version_media_types() == [
-            "application/vnd.hypothesis.v1+json"
+            "application/vnd.hypothesis.v1+json",
+            "application/vnd.hypothesis.v2+json",
         ]
