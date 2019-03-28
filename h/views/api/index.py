@@ -24,7 +24,7 @@ def index(context, request):
         request.route_url, params=["id", "pubid", "user", "userid", "username"]
     )
 
-    return {"links": link_helpers.format_nested_links(api_links, "v1", templater)}
+    return {"links": link_helpers.format_nested_links(api_links, templater)}
 
 
 @api_config(versions=["v2"], route_name="api.index", link_name="index")
@@ -40,4 +40,4 @@ def index_v2(context, request):
         request.route_url, params=["id", "pubid", "user", "userid", "username"]
     )
 
-    return {"links": link_helpers.format_nested_links(api_links, "v2", templater)}
+    return {"links": link_helpers.format_nested_links(api_links, templater)}

@@ -30,9 +30,7 @@ class TestIndex(object):
         views.index(None, pyramid_request)
 
         link_helpers.format_nested_links.assert_called_once_with(
-            pyramid_request.registry.api_links["v1"],
-            "v1",
-            AngularRouteTemplater.return_value,
+            pyramid_request.registry.api_links["v1"], AngularRouteTemplater.return_value
         )
 
 
@@ -56,9 +54,7 @@ class TestIndexV2(object):
         views.index_v2(None, pyramid_request)
 
         link_helpers.format_nested_links.assert_called_once_with(
-            pyramid_request.registry.api_links["v2"],
-            "v2",
-            AngularRouteTemplater.return_value,
+            pyramid_request.registry.api_links["v2"], AngularRouteTemplater.return_value
         )
 
 
