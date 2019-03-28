@@ -6,9 +6,9 @@ import pytest
 from h.util import group_scope as scope_util
 
 
-class TestURIInScope(object):
+class TestURLInScope(object):
     @pytest.mark.parametrize(
-        "uri,in_origin,in_path,in_other",
+        "url,in_origin,in_path,in_other",
         [
             ("https://www.foo.com", True, False, False),
             ("http://foo.com", False, False, False),
@@ -23,12 +23,12 @@ class TestURIInScope(object):
             ("", False, False, False),
         ],
     )
-    def test_it_returns_True_if_uri_matches_one_or_more_scopes(
-        self, scope_lists, uri, in_origin, in_path, in_other
+    def test_it_returns_True_if_url_matches_one_or_more_scopes(
+        self, scope_lists, url, in_origin, in_path, in_other
     ):
-        assert scope_util.uri_in_scope(uri, scope_lists["origin_only"]) == in_origin
-        assert scope_util.uri_in_scope(uri, scope_lists["with_path"]) == in_path
-        assert scope_util.uri_in_scope(uri, scope_lists["with_other"]) == in_other
+        assert scope_util.url_in_scope(url, scope_lists["origin_only"]) == in_origin
+        assert scope_util.url_in_scope(url, scope_lists["with_path"]) == in_path
+        assert scope_util.url_in_scope(url, scope_lists["with_other"]) == in_other
 
     @pytest.fixture
     def scope_lists(self):
@@ -46,9 +46,9 @@ class TestURIInScope(object):
         }
 
 
-class TestURIToScope(object):
+class TestParseURLFromScope(object):
     @pytest.mark.parametrize(
-        "uri,expected_scope",
+        "url,expected_scope",
         [
             ("https://www.foo.com/foo", ("https://www.foo.com", "/foo")),
             ("https://foo.com/bar/baz", ("https://foo.com", "/bar/baz")),
@@ -62,13 +62,13 @@ class TestURIToScope(object):
             ("http://foo.com/bar?what=how", ("http://foo.com", "/bar")),
         ],
     )
-    def test_it_parses_origin_and_path_from_uri(self, uri, expected_scope):
-        assert scope_util.uri_to_scope(uri) == expected_scope
+    def test_it_parses_origin_and_path_from_url(self, url, expected_scope):
+        assert scope_util.parse_scope_from_url(url) == expected_scope
 
 
 class TestParseOrigin(object):
     @pytest.mark.parametrize(
-        "uri,expected_origin",
+        "url,expected_origin",
         [
             ("https://www.foo.com/foo/qux/bar.html", "https://www.foo.com"),
             ("http://foo.com/baz", "http://foo.com"),
@@ -77,5 +77,5 @@ class TestParseOrigin(object):
             ("foo.com", None),
         ],
     )
-    def test_it_parses_origin_from_uri(self, uri, expected_origin):
-        assert scope_util.parse_origin(uri) == expected_origin
+    def test_it_parses_origin_from_url(self, url, expected_origin):
+        assert scope_util.parse_origin(url) == expected_origin

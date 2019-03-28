@@ -7,7 +7,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from h._compat import urlparse
 from h.db import Base
-from h.util.group_scope import uri_to_scope
+from h.util.group_scope import parse_scope_from_url
 
 
 class GroupScope(Base):
@@ -58,7 +58,7 @@ class GroupScope(Base):
 
     @property
     def scope(self):
-        """Return a URI composed from the origin and path attrs"""
+        """Return a URL composed from the origin and path attrs"""
         return urlparse.urljoin(self._origin, self._path)
 
     @scope.setter
@@ -67,7 +67,7 @@ class GroupScope(Base):
 
         :raises ValueError: if URL is invalid (origin cannot be parsed)
         """
-        parsed_origin, parsed_path = uri_to_scope(value)
+        parsed_origin, parsed_path = parse_scope_from_url(value)
         if parsed_origin is None:
             raise ValueError("Invalid URL for scope: missing origin component")
         self._origin = parsed_origin
