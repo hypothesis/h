@@ -10,12 +10,23 @@ from h.views.api.decorators.response import version_media_type_header
 
 @pytest.mark.usefixtures("cors")
 class TestAddApiView(object):
-    def test_it_sets_accept_setting(self, pyramid_config, view):
+    def test_it_sets_default_accept_if_view_supports_default_version(
+        self, pyramid_config, view
+    ):
         api_config.add_api_view(
             pyramid_config, view, versions=["v1"], route_name="thing.read"
         )
         (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["accept"] == "application/json"
+
+    def test_it_doesnt_set_default_accept_if_view_doesnt_support_default_version(
+        self, pyramid_config, view
+    ):
+        api_config.add_api_view(
+            pyramid_config, view, versions=["v2"], route_name="thing.read"
+        )
+        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
+        assert kwargs["accept"] != "application/json"
 
     def test_it_allows_accept_setting_override(self, pyramid_config, view):
         api_config.add_api_view(
