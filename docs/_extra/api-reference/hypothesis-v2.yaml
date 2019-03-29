@@ -4,7 +4,7 @@ openapi: 3.0.0
 # -----------------------------------------------------------------------------
 info:
   title: Hypothesis API
-  version: 1.0.0
+  version: 2.0.0
   termsOfService: https://hypothes.is/terms-of-service
   license:
     name: BSD (2-Clause)
@@ -13,7 +13,9 @@ info:
 
     # Hypothesis API
 
-    This is a reference for the Hypothesis HTTP API version 1.0.
+    This is a reference for the Hypothesis HTTP API version 2.0.
+
+    **This version is experimental and breaking changes may occur without warning.**
 
     See [the API overview](https://h.readthedocs.io/en/latest/api/)
     for an introduction to the API and information about other versions.
