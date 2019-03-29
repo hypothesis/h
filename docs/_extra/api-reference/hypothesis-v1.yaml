@@ -14,8 +14,43 @@ info:
     # Hypothesis API
 
     This is a reference for the Hypothesis HTTP API version 1.0.
-    See [the API overview](../api/) for an introduction to the API and information
+    See [the API overview](https://h.readthedocs.io/en/latest/api/)
+    for an introduction to the API and information
     on how authorization works.
+
+    ## Versions
+
+    There are currently two versions of the Hypothesis API.
+
+    * stable: v1 — This version is recommended for all users at this time
+    * experimental: v2
+
+    By default, API requests will receive the **v1** version of the Hypothesis API.
+    Though not required, we urge clients to set an `Accept` header with a media
+    type corresponding to the desired version, e.g.
+
+    ```
+    Accept: application/vnd.hypothesis.v1+json
+    ```
+
+    If an `Accept` header is set with an unrecognized media type, the API will
+    return an HTTP 415 (Unsupported Media Type) error.
+
+    Responses to API requests include a header indicating which API version was used
+    to handle the request, e.g.:
+
+    ```
+    X-Hypothesis-Media-Type: application/vnd.hypothesis.v1+json
+    ```
+
+    ## Authorization
+
+    API requests which only read public data do not require authorization.
+
+    Other requests need to be authenticated and authorized. To learn more, see:
+
+    * [The Authentication section of this document](https://h.readthedocs.io/en/latest/api-reference/v1/#section/Authentication)
+    * [Hypothesis API authorization documentation](https://h.readthedocs.io/en/latest/api/authorization)
 
     ## Expanding Resources
 
@@ -35,26 +70,6 @@ info:
     `organization` and `foobar` fields within the (hypothetical) returned `thing`
     objects. You can expand multiple fields by providing multiple values in the
     `expand` Array.
-
-    ## Versions
-
-    By default, API requests will receive the **v1** version of the Hypothesis API.
-    Though not required, we urge clients to set an `Accept` header with a media
-    type corresponding to the desired version, e.g.
-
-    ```
-    Accept: application/vnd.hypothesis.v1+json
-    ```
-
-    If an `Accept` header is set with an unrecognized media type, the API will
-    return an HTTP 415 (Unsupported Media Type) error.
-
-    Responses to API requests include a header indicating which API version was used
-    to handle the request, e.g.:
-
-    ```
-    X-Hypothesis-Media-Type: application/vnd.hypothesis.v1+json
-    ```
 
     ## Errors
 
