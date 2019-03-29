@@ -47,7 +47,7 @@ lint:
 
 .PHONY: analyze
 analyze:
-	tox -qqe py36-analyze
+	tox -qq -e py36-analyze
 
 .PHONY: format
 format:
