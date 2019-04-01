@@ -1,5 +1,5 @@
 # Stage 1: Build node portion of the H app.
-FROM node:11.12.0-alpine as build
+FROM node:11.13-alpine as build
 
 ENV NODE_ENV production
 
