@@ -11,7 +11,7 @@ from h.views.api.config import api_config
 
 
 @api_config(
-    versions=["v1"],
+    versions=["v1", "v2"],
     route_name="api.profile",
     request_method="GET",
     link_name="profile.read",
@@ -23,7 +23,7 @@ def profile(request):
 
 
 @api_config(
-    versions=["v1"],
+    versions=["v1", "v2"],
     route_name="api.profile_groups",
     request_method="GET",
     link_name="profile.groups.read",
@@ -47,7 +47,7 @@ def profile_groups(request):
 
 
 @api_config(
-    versions=["v1"],
+    versions=["v1", "v2"],
     route_name="api.profile",
     request_method="PATCH",
     permission="update",

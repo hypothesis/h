@@ -7,7 +7,7 @@ from h.views.api.helpers.angular import AngularRouteTemplater
 
 
 @api_config(
-    versions=["v1"],
+    versions=["v1", "v2"],
     route_name="api.links",
     link_name="links",
     renderer="json_sorted",

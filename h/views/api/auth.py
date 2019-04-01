@@ -184,7 +184,7 @@ class OAuthAccessTokenController(object):
 
         self.oauth = self.request.find_service(name="oauth_provider")
 
-    @api_config(versions=["v1"], route_name="token", request_method="POST")
+    @api_config(versions=["v1", "v2"], route_name="token", request_method="POST")
     def post(self):
         headers, body, status = self.oauth.create_token_response(
             self.request.url,
@@ -204,7 +204,7 @@ class OAuthRevocationController(object):
 
         self.oauth = self.request.find_service(name="oauth_provider")
 
-    @api_config(versions=["v1"], route_name="oauth_revoke", request_method="POST")
+    @api_config(versions=["v1", "v2"], route_name="oauth_revoke", request_method="POST")
     def post(self):
         headers, body, status = self.oauth.create_revocation_response(
             self.request.url,
@@ -218,7 +218,7 @@ class OAuthRevocationController(object):
             raise exception_response(status, body=body)
 
 
-@api_config(versions=["v1"], route_name="api.debug_token", request_method="GET")
+@api_config(versions=["v1", "v2"], route_name="api.debug_token", request_method="GET")
 def debug_token(request):
     if not request.auth_token:
         raise OAuthTokenError(
@@ -237,7 +237,7 @@ def debug_token(request):
 
 
 @api_config(
-    versions=["v1"],
+    versions=["v1", "v2"],
     context=OAuthTokenError,
     # This is a handler called only if a request fails, so the CORS
     # preflight request will have been handled by the original view.
