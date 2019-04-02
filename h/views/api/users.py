@@ -14,7 +14,7 @@ from h.services.user_unique import DuplicateUserError
 
 
 @api_config(
-    versions=["v1"],
+    versions=["v1", "v2"],
     route_name="api.users",
     request_method="POST",
     link_name="user.create",
@@ -65,7 +65,7 @@ def create(request):
 
 
 @api_config(
-    versions=["v1"],
+    versions=["v1", "v2"],
     route_name="api.user",
     request_method="PATCH",
     link_name="user.update",

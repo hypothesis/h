@@ -6,7 +6,7 @@ from h.views.api.helpers import links
 from h.views.api.helpers.media_types import media_type_for_version
 from h.views.api.decorators.response import version_media_type_header
 
-from h.views.api import API_VERSIONS
+from h.views.api import API_VERSIONS, API_VERSION_DEFAULT
 
 
 #: Decorator that adds CORS headers to API responses.
@@ -64,7 +64,6 @@ def add_api_view(
                                   `route_name` must be specified.
     :param dict settings: Arguments to pass on to ``config.add_view``
     """
-    settings.setdefault("accept", "application/json")
     settings.setdefault("renderer", "json")
     settings.setdefault("decorator", (cors_policy, version_media_type_header))
 
@@ -78,7 +77,11 @@ def add_api_view(
 
         links.register_link(link, versions, config.registry)
 
-    config.add_view(view=view, **settings)
+    if API_VERSION_DEFAULT in versions:
+        # If this view claims to support the default API version, register it
+        # with the default (application/json) media-type accept handler
+        settings.setdefault("accept", "application/json")
+        config.add_view(view=view, **settings)
 
     for version in versions:
         if version not in API_VERSIONS:
