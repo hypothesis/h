@@ -100,11 +100,19 @@ docker:
 
 .PHONY: run-docker
 run-docker:
+	# To use the local client with the Docker container, you must run the service,
+	# navigate to /admin/oauthclients and register an "authorization_code" OAuth
+	# client, then restart the service with the `CLIENT_OAUTH_ID` environment
+	# variable set.
+	#
+	# If you don't intend to use the client with the container, you can skip this.
 	docker run \
 		--net h_default \
 		-e "APP_URL=http://localhost:5000" \
 		-e "AUTHORITY=localhost" \
 		-e "BROKER_URL=amqp://guest:guest@rabbit:5672//" \
+		-e "CLIENT_OAUTH_ID" \
+		-e "CLIENT_URL=http://localhost:3001/hypothesis" \
 		-e "DATABASE_URL=postgresql://postgres@postgres/postgres" \
 		-e "ELASTICSEARCH_URL=http://elasticsearch:9200" \
 		-e "NEW_RELIC_APP_NAME=h (dev)" \
