@@ -4,7 +4,7 @@ alembic
 backports.functools_lru_cache
 bcrypt
 bleach
-celery >= 4.2.1
+celery >= 4.3
 certifi  # Required to connect to Elasticsearch over SSL.
 cffi
 click
