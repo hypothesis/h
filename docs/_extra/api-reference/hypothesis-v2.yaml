@@ -43,7 +43,7 @@ info:
     to handle the request, e.g.:
 
     ```
-    X-Hypothesis-Media-Type: application/vnd.hypothesis.v1+json
+    Hypothesis-Media-Type: application/vnd.hypothesis.v1+json
     ```
 
     ## Authorization
