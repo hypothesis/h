@@ -131,7 +131,11 @@ class TestHandleMessage(object):
 
 
 @pytest.mark.usefixtures(
-    "fetch_annotation", "groupfinder_service", "links_service", "nipsa_service"
+    "fetch_annotation",
+    "user_service",
+    "groupfinder_service",
+    "links_service",
+    "nipsa_service",
 )
 class TestHandleAnnotationEvent(object):
     def test_it_fetches_the_annotation(self, fetch_annotation, presenter_asdict):
@@ -187,6 +191,7 @@ class TestHandleAnnotationEvent(object):
         groupfinder_service,
         annotation_resource,
         presenters,
+        AnnotationUserInfoFormatter,
     ):
         message = {"action": "_", "annotation_id": "_", "src_client_id": "_"}
         socket = FakeSocket("giraffe")
@@ -205,7 +210,8 @@ class TestHandleAnnotationEvent(object):
         )
 
         presenters.AnnotationJSONPresenter.assert_called_once_with(
-            annotation_resource.return_value
+            annotation_resource.return_value,
+            formatters=[AnnotationUserInfoFormatter.return_value],
         )
         assert presenters.AnnotationJSONPresenter.return_value.asdict.called
 
@@ -397,8 +403,16 @@ class TestHandleAnnotationEvent(object):
         return patch("h.streamer.messages.presenters")
 
     @pytest.fixture
+    def AnnotationUserInfoFormatter(self, patch):
+        return patch("h.streamer.messages.AnnotationUserInfoFormatter")
+
+    @pytest.fixture
     def presenter_asdict(self, patch):
         return patch("h.streamer.messages.presenters.AnnotationJSONPresenter.asdict")
+
+    @pytest.fixture
+    def user_service(self, patch):
+        return patch("h.streamer.messages.UserService")
 
     @pytest.fixture
     def links_service(self, patch):
