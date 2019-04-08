@@ -9,12 +9,14 @@ from gevent.queue import Full
 from h import presenters
 from h import realtime
 from h import storage
+from h.formatters import AnnotationUserInfoFormatter
 from h.realtime import Consumer
 from h.traversal import AnnotationContext
 from h.auth.util import translate_annotation_principals
 from h.services.links import LinksService
 from h.services.nipsa import NipsaService
 from h.services.groupfinder import GroupfinderService
+from h.services.user import UserService
 from h.streamer import websocket
 import h.stats
 
@@ -99,10 +101,12 @@ def handle_annotation_event(message, sockets, settings, session):
 
     authority = text_type(settings.get("h.authority", "localhost"))
     group_service = GroupfinderService(session, authority)
+    user_service = UserService(authority, session)
+    formatters = [AnnotationUserInfoFormatter(session, user_service)]
 
     for socket in sockets:
         reply = _generate_annotation_event(
-            message, socket, annotation, user_nipsad, group_service
+            message, socket, annotation, user_nipsad, group_service, formatters
         )
         if reply is None:
             continue
@@ -117,7 +121,9 @@ def handle_user_event(message, sockets, settings, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(message, socket, annotation, user_nipsad, group_service):
+def _generate_annotation_event(
+    message, socket, annotation, user_nipsad, group_service, formatters
+):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -149,7 +155,9 @@ def _generate_annotation_event(message, socket, annotation, user_nipsad, group_s
     base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
     links_service = LinksService(base_url, socket.registry)
     resource = AnnotationContext(annotation, group_service, links_service)
-    serialized = presenters.AnnotationJSONPresenter(resource).asdict()
+    serialized = presenters.AnnotationJSONPresenter(
+        resource, formatters=formatters
+    ).asdict()
 
     permissions = serialized.get("permissions")
     if not _authorized_to_read(socket.effective_principals, permissions):
