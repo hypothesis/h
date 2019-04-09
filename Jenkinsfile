@@ -35,7 +35,8 @@ node {
                 sh 'pip3 install -q tox>=3.8.0'
 
                 // Unit tests
-                sh 'cd /var/lib/hypothesis && tox'
+                sh 'cd /var/lib/hypothesis && tox -e py27-tests'
+                sh 'cd /var/lib/hypothesis && tox -e py36-tests'
                 // Functional tests
                 sh 'cd /var/lib/hypothesis && tox -e py27-functests'
                 sh 'cd /var/lib/hypothesis && tox -e py36-functests'
