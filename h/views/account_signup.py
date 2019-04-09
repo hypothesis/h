@@ -26,8 +26,8 @@ class SignupController(object):
         self.schema = schemas.RegisterSchema().bind(request=self.request)
         self.form = request.create_form(
             self.schema,
-            buttons=(deform.Button(title=_("Sign up"), css_class="js-signup-btn"),),
-            css_class="js-signup-form",
+            buttons=(deform.Button(title=_("Sign up")),),
+            css_class="js-disable-on-submit",
         )
 
     @view_config(request_method="GET")

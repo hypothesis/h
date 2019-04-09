@@ -1,14 +1,14 @@
 'use strict';
 
-const SignupFormController = require('../../controllers/signup-form-controller');
+const DisableOnSubmitController = require('../../controllers/disable-on-submit-controller');
 
 const TEMPLATE = `
-  <form class="js-signup-form">
-    <input type="submit" class="js-signup-btn">
+  <form class="js-any-form js-disable-on-submit">
+    <input type="submit" class="any-submit">
   </form>
   `;
 
-describe('SignupFormController', () => {
+describe('DisableOnSubmitController', () => {
   let element;
   let form;
   let submitBtn;
@@ -16,12 +16,12 @@ describe('SignupFormController', () => {
   beforeEach(() => {
     element = document.createElement('div');
     element.innerHTML = TEMPLATE;
-    form = element.querySelector('.js-signup-form');
-    submitBtn = element.querySelector('.js-signup-btn');
+    form = element.querySelector('.js-disable-on-submit');
+    submitBtn = element.querySelector('.any-submit');
   });
 
   it('disables the submit button on form submit', () => {
-    new SignupFormController(form);
+    new DisableOnSubmitController(form);
     assert.isFalse(submitBtn.disabled);
     form.dispatchEvent(new Event('submit'));
     assert.isTrue(submitBtn.disabled);
