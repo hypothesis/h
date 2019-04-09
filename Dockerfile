@@ -55,7 +55,7 @@ RUN apk add --no-cache --virtual build-deps \
     libffi-dev \
     postgresql-dev \
     python-dev \
-  && pip install --no-cache-dir -U pip supervisor \
+  && pip install --no-cache-dir -U pip \
   && pip install --no-cache-dir -r requirements.txt \
   && apk del build-deps
 
