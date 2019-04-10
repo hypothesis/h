@@ -15,7 +15,7 @@ COPY h/static ./h/static
 RUN npm run build
 
 # Stage 2: Build the rest of the app using the build output from Stage 1.
-FROM alpine:3.9.2
+FROM alpine:20190408
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
