@@ -5,7 +5,7 @@ import pytest
 
 import colander
 
-from h.groups import schemas
+from h.schemas.forms.group import unblacklisted_group_name_slug
 
 
 class TestUnblacklistedGroupNameSlug(object):
@@ -24,16 +24,18 @@ class TestUnblacklistedGroupNameSlug(object):
             "LeAvE???",
         ],
     )
-    def test_blacklisted(self, dummy_node, group_name):
+    def test_it_raises_if_group_name_is_blacklisted(self, dummy_node, group_name):
         with pytest.raises(colander.Invalid):
-            schemas.unblacklisted_group_name_slug(dummy_node, group_name)
+            unblacklisted_group_name_slug(dummy_node, group_name)
 
     @pytest.mark.parametrize(
         "group_name",
         ["Birdwatchers", "My Book Club", "Hello World", "Editors", "Leavers"],
     )
-    def test_passing(self, dummy_node, group_name):
-        schemas.unblacklisted_group_name_slug(dummy_node, group_name)
+    def test_it_does_not_raise_if_group_name_is_not_blacklisted(
+        self, dummy_node, group_name
+    ):
+        unblacklisted_group_name_slug(dummy_node, group_name)
 
     @pytest.fixture
     def dummy_node(self, pyramid_request):

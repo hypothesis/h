@@ -8,7 +8,7 @@ from pyramid.view import view_config, view_defaults
 
 from h import form
 from h import i18n
-from h.groups import schemas
+from h.schemas.forms.group import group_schema
 
 _ = i18n.TranslationString
 
@@ -22,9 +22,7 @@ class GroupCreateController(object):
     def __init__(self, request):
         self.request = request
 
-        self.schema = schemas.group_schema(autofocus_name=True).bind(
-            request=self.request
-        )
+        self.schema = group_schema(autofocus_name=True).bind(request=self.request)
 
         submit = deform.Button(
             title=_("Create group"),
@@ -79,7 +77,7 @@ class GroupEditController(object):
     def __init__(self, group, request):
         self.group = group
         self.request = request
-        self.schema = schemas.group_schema().bind(request=self.request)
+        self.schema = group_schema().bind(request=self.request)
         self.form = request.create_form(
             self.schema, buttons=(_("Save"),), use_inline_editing=True
         )
