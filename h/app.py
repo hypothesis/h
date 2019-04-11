@@ -134,7 +134,6 @@ def includeme(config):
 
     # Site modules
     config.include("h.accounts")
-    config.include("h.groups")
     config.include("h.links")
     config.include("h.nipsa")
     config.include("h.notification")
