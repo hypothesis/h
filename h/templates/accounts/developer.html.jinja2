@@ -19,7 +19,7 @@
       </p>
     {% endif %}
 
-      <form method="POST">
+      <form method="post" class="js-disable-on-submit">
         {% if token %}
           <button type="submit" class="btn"
                   title="{% trans %}Delete your API token and generate a new one{% endtrans%}">

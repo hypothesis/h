@@ -14,6 +14,7 @@
 const CharacterLimitController = require('./character-limit-controller');
 const CopyButtonController = require('./copy-button-controller');
 const ConfirmSubmitController = require('./confirm-submit-controller');
+const DisableOnSubmitController = require('./disable-on-submit-controller');
 const DropdownMenuController = require('./dropdown-menu-controller');
 const FormController = require('./form-controller');
 const FormCancelController = require('./form-cancel-controller');
@@ -27,6 +28,7 @@ module.exports = {
   '.js-character-limit': CharacterLimitController,
   '.js-copy-button': CopyButtonController,
   '.js-confirm-submit': ConfirmSubmitController,
+  '.js-disable-on-submit': DisableOnSubmitController,
   '.js-dropdown-menu': DropdownMenuController,
   '.js-form': FormController,
   '.js-form-cancel': FormCancelController,
