@@ -1,11 +1,9 @@
 'use strict';
 
-const proxyquire = require('proxyquire');
-const noCallThru = require('../util').noCallThru;
+const raven = require('../../base/raven');
 
 describe('raven', () => {
   let fakeRavenJS;
-  let raven;
 
   beforeEach(() => {
     fakeRavenJS = {
@@ -17,9 +15,13 @@ describe('raven', () => {
       setUserContext: sinon.stub(),
     };
 
-    raven = proxyquire('../../base/raven', noCallThru({
+    raven.$imports.$mock({
       'raven-js': fakeRavenJS,
-    }));
+    });
+  });
+
+  afterEach(() => {
+    raven.$imports.$restore();
   });
 
   describe('.init()', () => {

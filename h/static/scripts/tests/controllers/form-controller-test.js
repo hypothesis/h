@@ -1,10 +1,8 @@
 'use strict';
 
-const proxyquire = require('proxyquire');
-
 const { hyphenate } = require('../../util/string');
-const { noCallThru } = require('../util');
 const upgradeElements = require('../../base/upgrade-elements');
+const FormController = require('../../controllers/form-controller');
 
 /**
  * Converts a map of data attribute names to string values into a string
@@ -72,8 +70,8 @@ describe('FormController', () => {
 
   function initForm(template) {
     fakeSubmitForm = sinon.stub();
-    const FormController = proxyquire('../../controllers/form-controller', {
-      '../util/submit-form': noCallThru(fakeSubmitForm),
+    FormController.$imports.$mock({
+      '../util/submit-form': fakeSubmitForm,
     });
 
     const container = document.createElement('div');
@@ -107,6 +105,7 @@ describe('FormController', () => {
   afterEach(() => {
     ctrl.beforeRemove();
     ctrl.element.remove();
+    FormController.$imports.$restore();
   });
 
   function isEditing() {
