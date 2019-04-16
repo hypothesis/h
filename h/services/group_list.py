@@ -68,21 +68,31 @@ class GroupListService(object):
         """
         Return a list of groups associated with a user.
 
-        Relevant groups include groups the user is a
-        creator/moderator/member of.
+        Include groups that this user is a member of as well as public groups
+        that this user is the creator of.
 
         If the user is None it returns an empty list.
         """
         if user is None:
             return []
-        world_readable_groups = [
-            group
-            for group in self._readable_by_world_groups(user, None)
-            if group.creator == user or user in group.members
-        ]
-        private_groups = self.private_groups(user)
 
-        return world_readable_groups + private_groups
+        # All groups the user is a member of
+        user_groups = self.user_groups(user)
+
+        # Retrieve all non-private groups that this user is the creator of.
+        # This confers "moderator" rights to this user over that group
+        creator_public_groups = (
+            self._session.query(models.Group)
+            .filter_by(
+                authority=self._authority(user),
+                readable_by=group.ReadableBy.world,
+                creator=user,
+            )
+            .all()
+        )
+
+        # De-dupe
+        return self._sort(list(set(creator_public_groups + user_groups)))
 
     def request_groups(self, authority=None, user=None, document_uri=None):
         """
@@ -198,19 +208,6 @@ class GroupListService(object):
             )
             .one_or_none()
         )
-
-    def _readable_by_world_groups(self, user=None, authority=None):
-        """
-        Return all groups readable by world for the authority.
-        """
-
-        authority = self._authority(user, authority)
-        groups = (
-            self._session.query(models.Group)
-            .filter_by(authority=authority, readable_by=group.ReadableBy.world)
-            .all()
-        )
-        return self._sort(groups)
 
     def _sort(self, groups):
         """ sort a list of groups of a single type """

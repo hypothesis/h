@@ -28,6 +28,70 @@ class TestListGroupsSessionGroups(object):
         assert sample_groups["private"] in groups
 
 
+class TestAssociatedGroups(object):
+    def test_it_does_not_return_world_group(self, svc, sample_groups, user):
+        groups = svc.associated_groups(user)
+
+        assert "__world__" not in [group.pubid for group in groups]
+
+    def test_it_returns_user_private_groups(self, svc, sample_groups, user):
+        groups = svc.associated_groups(user)
+
+        assert sample_groups["private"] in groups
+
+    def test_it_returns_restricted_groups_if_user_is_member(self, svc, factories, user):
+        restricted_group = factories.RestrictedGroup(
+            members=[user], authority=user.authority
+        )
+        groups = svc.associated_groups(user)
+
+        assert restricted_group in groups
+
+    def test_it_returns_public_groups_if_user_is_creator(
+        self, svc, sample_groups, user
+    ):
+        groups = svc.associated_groups(user)
+
+        # Both the open and restricted groups are in the results even though the
+        # user is not a member—the user is the creator, so they are included
+        assert sample_groups["open"] in groups
+        assert sample_groups["restricted"] in groups
+
+    def test_it_does_not_return_private_groups_if_user_is_not_member(
+        self, svc, factories, user
+    ):
+        # This one's a little interesting. Recall that a user may "leave" a private
+        # group. However, that group is not deleted in this case, and they are still
+        # the creator of the group. That means that this private group is still associated
+        # with this user in some form—but we want to make sure it does not appear
+        # in these results.
+        private_group = factories.Group(
+            creator=user, authority=user.authority, members=[]
+        )
+
+        groups = svc.associated_groups(user)
+
+        assert private_group not in groups
+
+    def test_it_returns_empty_list_if_user_is_None(self, svc, sample_groups):
+        groups = svc.associated_groups(user=None)
+
+        assert groups == []
+
+    def test_it_does_not_duplicate_groups_in_results(
+        self, svc_no_sample_groups, user, factories
+    ):
+        # This user is both a member of and a creator of this group; make sure it only
+        # comes back once
+        restricted_group = factories.RestrictedGroup(
+            members=[user], authority=user.authority, creator=user
+        )
+
+        groups = svc_no_sample_groups.associated_groups(user)
+
+        assert groups == [restricted_group]
+
+
 class TestListGroupsRequestGroups(object):
     def test_it_returns_world_group(self, svc, default_authority, sample_groups):
         groups = svc.request_groups(authority=default_authority)
@@ -265,15 +329,22 @@ def document_uri():
 def sample_groups(factories, other_authority, document_uri, default_authority, user):
     return {
         "open": factories.OpenGroup(
+            name="sample open",
             authority=default_authority,
             scopes=[factories.GroupScope(scope=document_uri)],
+            creator=user,
         ),
         "restricted": factories.RestrictedGroup(
+            name="sample restricted",
             authority=default_authority,
             scopes=[factories.GroupScope(scope=document_uri)],
+            creator=user,
         ),
         "other_authority": factories.OpenGroup(
-            authority=other_authority, scopes=[factories.GroupScope(scope=document_uri)]
+            name="sample other authority",
+            authority=other_authority,
+            scopes=[factories.GroupScope(scope=document_uri)],
+            creator=user,
         ),
         "private": factories.Group(creator=user),
     }
@@ -298,4 +369,20 @@ def svc(pyramid_request, db_session, group_scope_service):
         session=db_session,
         default_authority=pyramid_request.default_authority,
         group_scope_service=group_scope_service,
+    )
+
+
+@pytest.fixture
+def svc_no_sample_groups(pyramid_request, pyramid_config, db_session):
+    # The way that the group_scope_service is mocked in the main `svc`
+    # fixture brings `sample_groups` into the DB. For a clean service with
+    # no groups in the DB...here we go
+    group_scope_svc = mock.create_autospec(
+        GroupScopeService, spec_set=True, instance=True
+    )
+    pyramid_config.register_service(group_scope_svc, name="group_scope")
+    return GroupListService(
+        session=db_session,
+        default_authority=pyramid_request.default_authority,
+        group_scope_service=group_scope_svc,
     )
