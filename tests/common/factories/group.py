@@ -17,7 +17,7 @@ class Group(ModelFactory):
         model = models.Group
         sqlalchemy_session_persistence = "flush"
 
-    name = factory.Sequence(lambda n: "Test Group {n}".format(n=str(n)))
+    name = factory.Sequence(lambda n: "Group {n}".format(n=str(n)))
     authority = "example.com"
     creator = factory.SubFactory(User)
     joinable_by = JoinableBy.authority
@@ -36,7 +36,7 @@ class Group(ModelFactory):
 
 class OpenGroup(Group):
 
-    name = factory.Sequence(lambda n: "Test Open Group {n}".format(n=str(n)))
+    name = factory.Sequence(lambda n: "Open Group {n}".format(n=str(n)))
 
     joinable_by = None
     readable_by = ReadableBy.world
@@ -45,7 +45,7 @@ class OpenGroup(Group):
 
 
 class RestrictedGroup(Group):
-    name = factory.Sequence(lambda n: "Test Restricted Group {n}".format(n=str(n)))
+    name = factory.Sequence(lambda n: "Restricted Group {n}".format(n=str(n)))
 
     joinable_by = None
     readable_by = ReadableBy.world
