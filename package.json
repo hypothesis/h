@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "description": "The Internet, peer reviewed.",
   "scripts": {
-    "build": "gulp build"
+    "build": "gulp build",
+    "checkformatting": "prettier --check *.js {h,scripts}/**/*.js",
+    "format": "prettier --list-different --write *.js {h,scripts}/**/*.js"
   },
   "dependencies": {
     "autoprefixer": "^6.0.3",
@@ -65,6 +67,7 @@
     "karma-phantomjs-launcher": "^1.0.1",
     "karma-sinon": "^1.0.5",
     "mocha": "^5.2.0",
+    "prettier": "1.17.0",
     "sinon": "^1.17.3",
     "syn": "^0.2.2",
     "websocket": "^1.0.22"
