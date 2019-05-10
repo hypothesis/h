@@ -41,6 +41,9 @@ $touch-input-font-size: 16px;
 }
 
 @mixin styled-text() {
+  // Reset the line-height in case any parent elements have set it.
+  line-height: normal;
+
   h1, h2, h3, h4, h5, h6, p, ol, ul, img, pre, blockquote {
     margin: .618em 0;
   }
