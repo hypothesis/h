@@ -19,8 +19,11 @@ Sign up for Hypothesis
     </footer>
   {% else %}
     <h1 class="form-header"> {{ heading }} </h1>
-    <p> {{ message }}</p>
+    {% if message %}
+      <p> {{ message }} </p>
+    {% endif %}
+    <p>Please check your email and open the link to activate your account. If you don't receive your activation link within a few minutes, send an email to <a href="mailto:support@hypothes.is">support@hypothes.is</a></p>
   {% endif %}
-    
+
 </div>
 {% endblock content %}

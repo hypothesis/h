@@ -53,6 +53,8 @@ class SignupController(object):
             return {"form": self.form.render()}
 
         signup_service = self.request.find_service(name="user_signup")
+
+        template_context = {"heading": _("Account registration successful")}
         try:
             signup_service.signup(
                 username=appstruct["username"],
@@ -60,17 +62,13 @@ class SignupController(object):
                 password=appstruct["password"],
                 privacy_accepted=datetime.datetime.utcnow(),
             )
-            heading = _("Account registration successful")
-            message = _(
-                "Please check your email and open the link to activate your account."
-            )
         except ConflictError as e:
-            heading = _("Account already registered")
-            message = _(
-                "{failure_reason} Please check your email and open the link to activate your "
-                "account.".format(failure_reason=e.args[0])
+            template_context["heading"] = _("Account already registered")
+            template_context["message"] = _(
+                "{failure_reason}".format(failure_reason=e.args[0])
             )
-        return {"heading": heading, "message": message}
+
+        return template_context
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
