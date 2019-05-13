@@ -13,7 +13,6 @@ import pytest
 native_str = str
 
 
-@pytest.mark.functional
 class TestGetAnnotation(object):
     def test_it_returns_annotation_if_shared(self, app, annotation):
         """Unauthenticated users may view shared annotations assuming they have group access"""
@@ -50,7 +49,6 @@ class TestGetAnnotation(object):
         assert res.status_code == 404
 
 
-@pytest.mark.functional
 class TestGetAnnotationJSONLD(object):
     def test_it_returns_annotation_if_shared(self, app, annotation):
         """Unauthenticated users may view shared annotations assuming they have group access"""
@@ -159,7 +157,6 @@ class TestPostAnnotation(object):
         assert res.status_code == 200
 
 
-@pytest.mark.functional
 class TestPatchAnnotation(object):
     def test_it_updates_annotation_if_authorized(
         self, app, user_annotation, user_with_token
@@ -211,7 +208,6 @@ class TestPatchAnnotation(object):
         assert res.status_code == 404
 
 
-@pytest.mark.functional
 class TestDeleteAnnotation(object):
     def test_it_deletes_annotation_if_authorized(
         self, app, user_annotation, user_with_token

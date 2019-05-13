@@ -11,7 +11,6 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-@pytest.mark.functional
 class TestAddMember(object):
     def test_it_returns_http_204_when_successful(
         self, app, third_party_user, third_party_group, auth_client_header
@@ -146,7 +145,6 @@ class TestAddMember(object):
         assert res.status_code == 404
 
 
-@pytest.mark.functional
 class TestRemoveMember(object):
     def test_it_removes_authed_user_from_group(
         self, app, group, group_member_with_token

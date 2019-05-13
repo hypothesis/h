@@ -13,7 +13,6 @@ import jwt
 from h.models.auth_client import GrantType
 
 
-@pytest.mark.functional
 class TestOAuth(object):
     def test_getting_an_access_token(self, app, authclient, userid):
         """Test using grant tokens and access tokens."""

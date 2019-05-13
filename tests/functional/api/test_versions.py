@@ -16,7 +16,6 @@ import pytest
 native_str = str
 
 
-@pytest.mark.functional
 class TestIndexEndpointVersions(object):
     def test_index_sets_version_response_header(self, app):
         """

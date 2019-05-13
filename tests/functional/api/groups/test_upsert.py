@@ -10,7 +10,6 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-@pytest.mark.functional
 class TestUpsertGroupUpdate(object):
     def test_it_returns_http_404_if_no_authenticated_user(self, app, first_party_group):
         group = {"name": "My Group"}
@@ -210,7 +209,6 @@ class TestUpsertGroupUpdate(object):
         assert res.status_code == 409
 
 
-@pytest.mark.functional
 class TestUpsertGroupCreate(object):
     def test_it_allows_auth_client_with_forwarded_user(
         self, app, auth_client_header, third_party_user

@@ -17,7 +17,6 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-@pytest.mark.functional
 class TestCreateUser(object):
     def test_it_returns_http_200_when_successful(
         self, app, auth_client_header, user_payload
@@ -86,7 +85,6 @@ class TestCreateUser(object):
         assert res.status_code == 409
 
 
-@pytest.mark.functional
 class TestUpdateUser(object):
     def test_it_returns_http_200_when_successful(
         self, app, auth_client_header, user, patch_user_payload

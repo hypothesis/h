@@ -6,7 +6,6 @@ import pytest
 
 
 @pytest.mark.xfail  # See https://github.com/hypothesis/product-backlog/issues/109
-@pytest.mark.functional
 def test_group_page_includes_referrer_tag(app, db_session, factories, user):
     """
     The group read page should include a referrer tag.
@@ -27,7 +26,6 @@ def test_group_page_includes_referrer_tag(app, db_session, factories, user):
     assert res.html.head.find("meta", attrs={"name": "referrer"}, content="origin")
 
 
-@pytest.mark.functional
 def test_submit_create_group_form_without_xhr_returns_full_html_page(app):
     res = app.get("/groups/new")
     group_form = res.forms["deform"]
@@ -38,7 +36,6 @@ def test_submit_create_group_form_without_xhr_returns_full_html_page(app):
     assert res.text.startswith("<!DOCTYPE html>")
 
 
-@pytest.mark.functional
 def test_submit_create_group_form_with_xhr_returns_partial_html_snippet(app):
     res = app.get("/groups/new")
     group_form = res.forms["deform"]
@@ -49,7 +46,6 @@ def test_submit_create_group_form_with_xhr_returns_partial_html_snippet(app):
     assert res.body.strip(b"\n").startswith(b"<form")
 
 
-@pytest.mark.functional
 def test_submit_create_group_form_with_xhr_returns_plain_text(app):
     res = app.get("/groups/new")
     group_form = res.forms["deform"]

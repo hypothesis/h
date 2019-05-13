@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import pytest
 
 
-@pytest.mark.functional
 class TestAccountSettings(object):
     """Tests for the /account/settings page."""
 
