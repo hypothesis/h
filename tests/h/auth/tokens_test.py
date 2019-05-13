@@ -6,7 +6,6 @@ import datetime
 import jwt
 import mock
 
-import pytest
 from hypothesis import strategies as st
 from hypothesis import assume, given
 
@@ -77,7 +76,6 @@ class TestAuthToken(object):
         assert result is None
 
     @given(header=st.text())
-    @pytest.mark.fuzz
     def test_returns_none_for_malformed_header_fuzz(self, header, pyramid_request):
         assume(not header.startswith("Bearer "))
         pyramid_request.headers["Authorization"] = header

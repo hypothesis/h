@@ -128,7 +128,6 @@ def test_parse_with_odd_quotes_combinations(query_in, query_out):
 
 @given(st.text())
 @settings(max_examples=30)
-@pytest.mark.fuzz
 def test_parse_always_return_a_multidict(text):
     """Given any string input, output should always be a MultiDict."""
     result = parser.parse(text)
@@ -144,7 +143,6 @@ nonwhitespace_text = st.text(alphabet=nonwhitespace_chars, min_size=1)
 
 @given(kw=st.sampled_from(parser.named_fields), value=nonwhitespace_text)
 @settings(max_examples=30)
-@pytest.mark.fuzz
 def test_parse_with_any_nonwhitespace_text(kw, value):
     result = parser.parse(kw + ":" + value)
     assert result.get(kw) == value

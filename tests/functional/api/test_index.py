@@ -13,7 +13,6 @@ import pytest
 native_str = str
 
 
-@pytest.mark.functional
 class TestGetIndex(object):
     def test_it_returns_links(self, app):
         res = app.get("/api/")

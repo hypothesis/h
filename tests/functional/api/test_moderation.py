@@ -13,7 +13,6 @@ import pytest
 native_str = str
 
 
-@pytest.mark.functional
 class TestPutHide(object):
     def test_it_returns_http_204_for_group_creator(
         self, app, group_annotation, user_with_token
@@ -67,7 +66,6 @@ class TestPutHide(object):
         assert res.status_code == 404
 
 
-@pytest.mark.functional
 class TestDeleteHide(object):
     def test_it_returns_http_204_for_group_creator(
         self, app, group_annotation, user_with_token
