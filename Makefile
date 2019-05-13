@@ -4,6 +4,8 @@ default: help
 .PHONY: help
 help:
 	@echo "make help              Show this help message"
+	@echo 'make services          Run the services that `make dev` requires'
+	@echo "                       (Postgres, Elasticsearch, etc) in Docker Compose"
 	@echo "make dev               Run the app in the development server"
 	@echo "make shell             Launch a Python shell in the dev environment"
 	@echo "make sql               Connect to the dev database with a psql shell"
@@ -28,6 +30,10 @@ help:
 	@echo "                       docker-compose in the 'h_default' network."
 	@echo "make clean             Delete development artefacts (cached files, "
 	@echo "                       dependencies, etc)"
+
+.PHONY: services
+services:
+	docker-compose up -d
 
 .PHONY: dev
 dev: build/manifest.json
