@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-import pytest
-
 
 def test_atom_feed(app):
     app.get("/stream.atom")

@@ -3,8 +3,6 @@
 
 from __future__ import unicode_literals
 
-import pytest
-
 
 def test_search_input_text_is_submitted_as_q_without_javascript(app):
     res = app.get("/search")

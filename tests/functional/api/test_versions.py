@@ -5,8 +5,6 @@ Test the versioning of our API using Accept headers
 
 from __future__ import unicode_literals
 
-import pytest
-
 # String type for request/response headers and metadata in WSGI.
 #
 # Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even

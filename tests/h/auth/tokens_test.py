@@ -6,7 +6,6 @@ import datetime
 import jwt
 import mock
 
-import pytest
 from hypothesis import strategies as st
 from hypothesis import assume, given
 
