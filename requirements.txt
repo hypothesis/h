@@ -28,7 +28,7 @@ hkdf==0.0.3
 ipaddress==1.0.18         # via elasticsearch-dsl
 iso8601==0.1.11           # via colander
 itsdangerous==0.24
-jinja2==2.10              # via pyramid-jinja2
+jinja2==2.10.1            # via pyramid-jinja2
 jsonpointer==1.0
 jsonschema==2.5.1
 kombu==4.5.0
