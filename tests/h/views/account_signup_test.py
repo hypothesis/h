@@ -68,9 +68,7 @@ class TestSignupController(object):
         result = controller.post()
 
         assert result["heading"] == "Account registration successful"
-        assert result["message"] == (
-            "Please check your email and open the link to activate your account."
-        )
+        assert "message" not in result
 
     def test_post_displays_heading_and_message_on_conflict_error(
         self, form_validating_to, pyramid_request, user_signup_service
@@ -87,8 +85,7 @@ class TestSignupController(object):
 
         assert result["heading"] == "Account already registered"
         assert result["message"] == (
-            "The account bob@example.com is already registered. "
-            "Please check your email and open the link to activate your account."
+            "The account bob@example.com is already registered."
         )
 
     def test_get_renders_form_when_not_logged_in(self, pyramid_request):
