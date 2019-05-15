@@ -16,7 +16,7 @@ from h.presenters.document_json import DocumentJSONPresenter
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
 from h.presenters.group_json import GroupJSONPresenter
 from h.presenters.group_json import GroupsJSONPresenter
-from h.presenters.user_json import UserJSONPresenter
+from h.presenters.user_json import UserJSONPresenter, TrustedUserJSONPresenter
 
 __all__ = (
     "AnnotationHTMLPresenter",
@@ -29,4 +29,5 @@ __all__ = (
     "GroupJSONPresenter",
     "GroupsJSONPresenter",
     "UserJSONPresenter",
+    "TrustedUserJSONPresenter",
 )

@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPConflict
 from h.auth.util import client_authority
 from h.views.api.exceptions import PayloadError
 from h.views.api.config import api_config
-from h.presenters import UserJSONPresenter
+from h.presenters import TrustedUserJSONPresenter
 from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.schemas import ValidationError
 from h.services.user_unique import DuplicateUserError
@@ -60,7 +60,7 @@ def create(request):
 
     user_signup_service = request.find_service(name="user_signup")
     user = user_signup_service.signup(require_activation=False, **appstruct)
-    presenter = UserJSONPresenter(user)
+    presenter = TrustedUserJSONPresenter(user)
     return presenter.asdict()
 
 
@@ -85,7 +85,7 @@ def update(user, request):
     user_update_service = request.find_service(name="user_update")
     user = user_update_service.update(user, **appstruct)
 
-    presenter = UserJSONPresenter(user)
+    presenter = TrustedUserJSONPresenter(user)
     return presenter.asdict()
 
 

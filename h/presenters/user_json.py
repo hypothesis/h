@@ -4,15 +4,10 @@ from __future__ import unicode_literals
 
 
 class UserJSONPresenter(object):
-    """
-    Present a user in the JSON format returned by API requests.
+    """Present a user.
 
-    Note that this presenter as of now returns some information
-    that should not be publicly available, like the users email
-    address. This is fine for now because it is only used in
-    places where the caller has access to this. We would need
-    to refactor this as soon as we use this presenter for a
-    public API.
+    Format a user's data in JSON for use in API services. Only include
+    properties that are public-facing.
     """
 
     def __init__(self, user):
@@ -21,8 +16,23 @@ class UserJSONPresenter(object):
     def asdict(self):
         return {
             "authority": self.user.authority,
-            "email": self.user.email,
             "userid": self.user.userid,
             "username": self.user.username,
             "display_name": self.user.display_name,
         }
+
+
+class TrustedUserJSONPresenter(object):
+    """Present a user to a trusted consumer.
+
+    Format a user's data in JSON for use in API services, including any
+    sensitive/private properties.
+    """
+
+    def __init__(self, user):
+        self.user = user
+
+    def asdict(self):
+        user_presented = UserJSONPresenter(self.user).asdict()
+        user_presented["email"] = self.user.email
+        return user_presented
