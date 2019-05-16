@@ -43,9 +43,11 @@ module.exports = function(config) {
 
     browserify: {
       debug: true,
-      configure: function (bundle) {
-        bundle.plugin('proxyquire-universal');
-      },
+      transform: [
+        ['babelify', {
+          plugins: ['mockable-imports'],
+        }],
+      ],
     },
 
     mochaReporter: {
