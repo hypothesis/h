@@ -243,6 +243,24 @@ def test_non_public_group():
 
 
 class TestGroupACL(object):
+    def test_auth_client_with_matching_authority_may_read_members(
+        self, group, authz_policy
+    ):
+        group.authority = "weewhack.com"
+
+        assert authz_policy.permits(
+            group, ["flip", "client_authority:weewhack.com"], "member_read"
+        )
+
+    def test_auth_client_without_matching_authority_may_not_read_members(
+        self, group, authz_policy
+    ):
+        group.authority = "weewhack.com"
+
+        assert not authz_policy.permits(
+            group, ["flip", "client_authority:2weewhack.com"], "member_read"
+        )
+
     def test_auth_client_with_matching_authority_may_add_members(
         self, group, authz_policy
     ):
@@ -283,6 +301,10 @@ class TestGroupACL(object):
         group.readable_by = ReadableBy.world
         assert authz_policy.permits(group, [security.Everyone], "read")
 
+    def test_world_readable_allows_member_read_for_everyone(self, group, authz_policy):
+        group.readable_by = ReadableBy.world
+        assert authz_policy.permits(group, [security.Everyone], "member_read")
+
     def test_world_readable_grants_flag_permissions(self, group, authz_policy):
         group.readable_by = ReadableBy.world
         assert authz_policy.permits(group, [security.Authenticated], "flag")
@@ -299,6 +321,10 @@ class TestGroupACL(object):
         group.readable_by = ReadableBy.members
         assert authz_policy.permits(group, ["group:test-group"], "read")
 
+    def test_members_should_be_readable_by_group_members(self, group, authz_policy):
+        group.readable_by = ReadableBy.members
+        assert authz_policy.permits(group, ["group:test-group"], "member_read")
+
     def test_members_flaggable(self, group, authz_policy):
         group.readable_by = ReadableBy.members
         assert authz_policy.permits(group, ["group:test-group"], "flag")
@@ -313,6 +339,14 @@ class TestGroupACL(object):
         group.readable_by = None
         assert not authz_policy.permits(
             group, [security.Everyone, "group:test-group"], "read"
+        )
+
+    def test_member_read_permission_not_granted_if_group_not_readable(
+        self, group, authz_policy
+    ):
+        group.readable_by = None
+        assert not authz_policy.permits(
+            group, [security.Everyone, "group:test-group"], "member_read"
         )
 
     def test_not_flaggable(self, group, authz_policy):

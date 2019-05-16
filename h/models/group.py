@@ -223,6 +223,9 @@ class Group(Base, mixins.Timestamps):
         read_principal = _read_principal(self)
         if read_principal is not None:
             terms.append((security.Allow, read_principal, "read"))
+            # Any user who can read the group should also be able to see
+            # who is a member of the group
+            terms.append((security.Allow, read_principal, "member_read"))
 
         flag_principal = _flag_principal(self)
         if flag_principal is not None:
@@ -243,6 +246,9 @@ class Group(Base, mixins.Timestamps):
         # permissions for groups within their authority
         authority_principal = "client_authority:{}".format(self.authority)
 
+        # auth_clients that have the same authority as the target group
+        # may read the members within it
+        terms.append((security.Allow, authority_principal, "member_read"))
         # auth_clients that have the same authority as the target group
         # may add members to it
         terms.append((security.Allow, authority_principal, "member_add"))
