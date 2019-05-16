@@ -32,20 +32,20 @@ class TestCreate(object):
         )
 
     def test_it_presents_user(
-        self, pyramid_request, valid_payload, user, UserJSONPresenter
+        self, pyramid_request, valid_payload, user, TrustedUserJSONPresenter
     ):
         pyramid_request.json_body = valid_payload
         create(pyramid_request)
 
-        UserJSONPresenter.assert_called_once_with(user)
+        TrustedUserJSONPresenter.assert_called_once_with(user)
 
     def test_it_returns_presented_user(
-        self, pyramid_request, valid_payload, UserJSONPresenter
+        self, pyramid_request, valid_payload, TrustedUserJSONPresenter
     ):
         pyramid_request.json_body = valid_payload
         result = create(pyramid_request)
 
-        assert result == UserJSONPresenter.return_value.asdict()
+        assert result == TrustedUserJSONPresenter.return_value.asdict()
 
     def test_it_validates_the_input(
         self, pyramid_request, valid_payload, CreateUserAPISchema
@@ -135,7 +135,7 @@ class TestCreate(object):
     "user",
     "user_update_svc",
     "UpdateUserAPISchema",
-    "UserJSONPresenter",
+    "TrustedUserJSONPresenter",
 )
 class TestUpdate(object):
     def test_it_validates_request_payload(
@@ -163,19 +163,19 @@ class TestUpdate(object):
         user_update_svc.update.assert_called_once_with(user, **appstruct)
 
     def test_it_presents_updated_user_returned_from_service(
-        self, pyramid_request, user, UserJSONPresenter, user_update_svc
+        self, pyramid_request, user, TrustedUserJSONPresenter, user_update_svc
     ):
         user_update_svc.update.return_value = user
         update(user, pyramid_request)
 
-        UserJSONPresenter.assert_called_once_with(user)
+        TrustedUserJSONPresenter.assert_called_once_with(user)
 
     def test_it_returns_presented_user(
-        self, pyramid_request, valid_payload, UserJSONPresenter
+        self, pyramid_request, valid_payload, TrustedUserJSONPresenter
     ):
         result = update(user, pyramid_request)
 
-        assert result == UserJSONPresenter.return_value.asdict()
+        assert result == TrustedUserJSONPresenter.return_value.asdict()
 
     def test_raises_when_schema_validation_fails(
         self, user, pyramid_request, valid_payload, UpdateUserAPISchema
@@ -268,8 +268,8 @@ def UpdateUserAPISchema(patch):
 
 
 @pytest.fixture
-def UserJSONPresenter(patch):
-    return patch("h.views.api.users.UserJSONPresenter")
+def TrustedUserJSONPresenter(patch):
+    return patch("h.views.api.users.TrustedUserJSONPresenter")
 
 
 @pytest.fixture
