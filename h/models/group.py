@@ -244,6 +244,9 @@ class Group(Base, mixins.Timestamps):
         authority_principal = "client_authority:{}".format(self.authority)
 
         # auth_clients that have the same authority as the target group
+        # may read the members within it
+        terms.append((security.Allow, authority_principal, "member_read"))
+        # auth_clients that have the same authority as the target group
         # may add members to it
         terms.append((security.Allow, authority_principal, "member_add"))
         # auth_clients that have the same authority as this group

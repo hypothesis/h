@@ -243,6 +243,24 @@ def test_non_public_group():
 
 
 class TestGroupACL(object):
+    def test_auth_client_with_matching_authority_may_read_members(
+        self, group, authz_policy
+    ):
+        group.authority = "weewhack.com"
+
+        assert authz_policy.permits(
+            group, ["flip", "client_authority:weewhack.com"], "member_read"
+        )
+
+    def test_auth_client_without_matching_authority_may_not_read_members(
+        self, group, authz_policy
+    ):
+        group.authority = "weewhack.com"
+
+        assert not authz_policy.permits(
+            group, ["flip", "client_authority:2weewhack.com"], "member_read"
+        )
+
     def test_auth_client_with_matching_authority_may_add_members(
         self, group, authz_policy
     ):
