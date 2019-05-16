@@ -15,7 +15,7 @@ certifi==2018.8.24
 cffi==1.11.5
 chameleon==2.24           # via deform
 click==6.6
-colander==1.3.1           # via deform
+colander==1.7.0           # via deform
 deform==0.9.9
 elasticsearch-dsl==6.3.1
 elasticsearch==6.3.1
