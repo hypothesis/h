@@ -1,8 +1,7 @@
 'use strict';
 
-require('core-js/es6/promise');
-require('core-js/fn/object/assign');
-require('core-js/fn/string');
+/* eslint-env node */
+/* eslint-disable no-var, prefer-arrow-callback */
 
 var path = require('path');
 
@@ -46,13 +45,6 @@ function parseCommandLine() {
 }
 
 var taskArgs = parseCommandLine();
-
-function getEnv(key) {
-  if (!process.env.hasOwnProperty(key)) {
-    throw new Error(`Environment variable ${key} is not set`);
-  }
-  return process.env[key];
-}
 
 var vendorBundles = {
   jquery: ['jquery'],
@@ -113,10 +105,8 @@ gulp.task('build-js', gulp.series(['build-vendor-js'], function() {
   }));
 }));
 
-gulp.task('watch-js', gulp.series(['build-vendor-js'], function(){
-  bundleConfigs.map(function(config) {
-    createBundle(config, {watch: true});
-  });
+gulp.task('watch-js', gulp.series(['build-vendor-js'], function() {
+  return bundleConfigs.map(config => createBundle(config, { watch: true }));
 }));
 
 // Rewrite font URLs to look for fonts in 'build/fonts' instead of
@@ -219,8 +209,8 @@ gulp.task('watch-manifest', function() {
   }));
 });
 
-gulp.task('build', gulp.series(['build-js', 'build-css', 'build-fonts', 'build-images'], generateManifest))
-gulp.task('watch', gulp.parallel(['watch-js', 'watch-css', 'watch-fonts', 'watch-images', 'watch-manifest']))
+gulp.task('build', gulp.series(['build-js', 'build-css', 'build-fonts', 'build-images'], generateManifest));
+gulp.task('watch', gulp.parallel(['watch-js', 'watch-css', 'watch-fonts', 'watch-images', 'watch-manifest']));
 
 function runKarma(baseConfig, opts, done) {
   // See https://github.com/karma-runner/karma-mocha#configuration
@@ -231,14 +221,6 @@ function runKarma(baseConfig, opts, done) {
       },
     },
   };
-
-  // Work around a bug in Karma 1.10 which causes console log messages not to
-  // be displayed when using a non-default reporter.
-  // See https://github.com/karma-runner/karma/pull/2220
-  var BaseReporter = require('karma/lib/reporters/base');
-  BaseReporter.decoratorFactory.$inject =
-    BaseReporter.decoratorFactory.$inject.map(dep =>
-        dep.replace('browserLogOptions', 'browserConsoleLogOptions'));
 
   var karma = require('karma');
   new karma.Server(Object.assign({}, {
@@ -258,7 +240,7 @@ gulp.task('lint', function() {
   // Adapted from usage example at https://www.npmjs.com/package/gulp-eslint
   // `gulp-eslint` is loaded lazily so that it is not required during Docker image builds
   var eslint = require('gulp-eslint');
-  return gulp.src(['h/static/scripts/**/*.js'])
+  return gulp.src(['gulpfile.js', 'h/static/scripts/**/*.js'])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
