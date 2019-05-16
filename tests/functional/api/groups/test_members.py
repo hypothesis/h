@@ -11,6 +11,54 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
+class TestReadMembers(object):
+    def test_it_returns_list_of_members_for_restricted_group_without_authn(
+        self, app, factories, db_session
+    ):
+        group = factories.RestrictedGroup()
+        group.members = [factories.User(), factories.User(), factories.User()]
+        db_session.commit()
+        res = app.get("/api/groups/{pubid}/members".format(pubid=group.pubid))
+
+        assert res.status_code == 200
+        assert len(res.json) == 3
+
+    def test_it_returns_list_of_members_if_user_has_access_to_private_group(
+        self, app, factories, db_session, group, user_with_token, token_auth_header
+    ):
+        user, _ = user_with_token
+        group.members.append(user)
+        db_session.commit()
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            headers=token_auth_header,
+        )
+
+        returned_usernames = [member["username"] for member in res.json]
+        assert user.username in returned_usernames
+        assert group.creator.username in returned_usernames
+
+        assert res.status_code == 200
+
+    def test_it_returns_404_if_user_does_not_have_read_access_to_group(
+        self, app, group, user_with_token, token_auth_header
+    ):
+        # This user is not a member of the group
+        user, _ = user_with_token
+        res = app.get(
+            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            headers=token_auth_header,
+            expect_errors=True,
+        )
+
+        assert res.status_code == 404
+
+    def test_it_returns_empty_list_if_no_members_in_group(self, app):
+        res = app.get("/api/groups/__world__/members")
+
+        assert res.json == []
+
+
 class TestAddMember(object):
     def test_it_returns_http_204_when_successful(
         self, app, third_party_user, third_party_group, auth_client_header

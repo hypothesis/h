@@ -491,6 +491,22 @@ class TestUpsertGroup(object):
         return context_factory
 
 
+class TestReadMembers(object):
+    def test_it_returns_formatted_users_from_group(
+        self, factories, pyramid_request, UserJSONPresenter
+    ):
+        group = factories.Group.build()
+        group.members = [
+            factories.User.build(),
+            factories.User.build(),
+            factories.User.build(),
+        ]
+
+        views.read_members(group, pyramid_request)
+
+        assert UserJSONPresenter.call_count == len(group.members)
+
+
 @pytest.mark.usefixtures("group_members_service", "user_service")
 class TestAddMember(object):
     def test_it_adds_user_from_request_params_to_group(
@@ -623,6 +639,11 @@ def GroupJSONPresenter(patch):
 @pytest.fixture
 def GroupsJSONPresenter(patch):
     return patch("h.views.api.groups.GroupsJSONPresenter")
+
+
+@pytest.fixture
+def UserJSONPresenter(patch):
+    return patch("h.views.api.groups.UserJSONPresenter")
 
 
 @pytest.fixture

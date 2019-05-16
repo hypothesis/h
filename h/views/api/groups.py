@@ -13,7 +13,7 @@ from pyramid.httpexceptions import (
 from h.auth.util import client_authority
 from h.views.api.exceptions import PayloadError
 from h.i18n import TranslationString as _  # noqa: N813
-from h.presenters import GroupJSONPresenter, GroupsJSONPresenter
+from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.traversal import GroupContext
 from h.views.api.config import api_config
@@ -191,6 +191,19 @@ def upsert(context, request):
     return GroupJSONPresenter(GroupContext(group, request)).asdict(
         expand=["organization", "scopes"]
     )
+
+
+@api_config(
+    versions=["v1", "v2"],
+    route_name="api.group_members",
+    request_method="GET",
+    link_name="group.members.read",
+    description="Fetch all members of a group",
+    permission="member_read",
+)
+def read_members(group, request):
+    """Fetch the members of a group."""
+    return [UserJSONPresenter(user).asdict() for user in group.members]
 
 
 @api_config(
