@@ -21,7 +21,12 @@ from h.views.api import API_VERSIONS, API_VERSION_DEFAULT
 #: headers set during standard request processing are discarded if an exception
 #: occurs and an exception view is invoked to generate the response instead.
 cors_policy = cors.policy(
-    allow_headers=("Authorization", "Content-Type", "X-Client-Id"),
+    allow_headers=(
+        "Authorization",
+        "Content-Type",
+        "Hypothesis-Client-Version",
+        "X-Client-Id",
+    ),
     allow_methods=("HEAD", "GET", "PATCH", "POST", "PUT", "DELETE"),
 )
 
