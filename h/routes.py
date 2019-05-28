@@ -153,6 +153,12 @@ def includeme(config):
     config.add_route("api.profile_groups", "/api/profile/groups")
     config.add_route("api.debug_token", "/api/debug-token")
     config.add_route(
+        "api.group_members",
+        "/api/groups/{pubid}/members",
+        factory="h.traversal.GroupRoot",
+        traverse="/{pubid}",
+    )
+    config.add_route(
         "api.group_member",
         "/api/groups/{pubid}/members/{userid}",
         factory="h.traversal.GroupRoot",

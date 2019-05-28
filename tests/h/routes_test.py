@@ -148,6 +148,12 @@ def test_includeme():
         call("api.profile_groups", "/api/profile/groups"),
         call("api.debug_token", "/api/debug-token"),
         call(
+            "api.group_members",
+            "/api/groups/{pubid}/members",
+            factory="h.traversal.GroupRoot",
+            traverse="/{pubid}",
+        ),
+        call(
             "api.group_member",
             "/api/groups/{pubid}/members/{userid}",
             factory="h.traversal.GroupRoot",
