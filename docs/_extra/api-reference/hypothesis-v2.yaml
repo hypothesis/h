@@ -260,6 +260,8 @@ components:
       $ref: './schemas/profile.yaml#/Profile'
     User:
       $ref: './schemas/user.yaml#/User'
+    UserFull:
+      $ref: './schemas/user.yaml#/UserFull'
     UserCreate:
       $ref: './schemas/user-new.yaml#/User'
     UserUpdate:
@@ -878,6 +880,34 @@ paths:
   # ---------------------------------------------------------------------------
   # Operations on Group Membership
   # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # GET groups/{id}/members - Get group members
+  # ---------------------------------------------------------------------------
+  /groups/{id}/members:
+    get:
+      tags:
+        - groups
+      summary: Get group members
+      description: >
+        Fetch a list of all members (users) in a group. Returned user resource only
+        contains public-facing user data. Authenticated user must have read access
+        to the group. Does not require authentication for reading members of
+        public groups. Returned members are unsorted.
+      security:
+        - AuthClient: []
+        - ApiKey: []
+        - {} # Unauthenticated OK for public groups
+      responses:
+        '200':
+          description: Success
+          content:
+            application/*json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
   /groups/{id}/members/{user}:
 
     # ----------------------------------------------------------

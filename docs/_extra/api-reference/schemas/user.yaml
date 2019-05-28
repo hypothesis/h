@@ -1,4 +1,26 @@
 User:
+  type: object
+  properties:
+    authority:
+      type: string
+    username:
+      type: string
+      minLength: 3
+      maxLength: 30
+      pattern: ^[A-Za-z0-9._]+$
+    userid:
+      type: string
+      pattern: ^acct:.+$
+    display_name:
+      type: string
+      maxLength: 30
+  required:
+    - authority
+    - username
+    - userid
+    - display_name
+
+UserFull:
   allOf:
     - $ref: './user-new.yaml#/User'
     - type: object
