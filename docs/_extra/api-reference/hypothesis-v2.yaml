@@ -99,7 +99,6 @@ info:
     | 415         | Unsupported Media Type | The request's `Accept` header designates an unrecognized media type |
     | 500         | Server Error  | An error occurred with our API |
 
-
 servers:
   - url: https://api.hypothes.is/api
 
@@ -117,7 +116,6 @@ tags:
 # Reusable components
 # -----------------------------------------------------------------------------
 components:
-
   # -------------------------
   # Reusable parameters
   # -------------------------
@@ -143,7 +141,7 @@ components:
           - type: string
             pattern: "group:[a-zA-Z0-9._\\-+!~*()']{1,1024}@.*$"
             description: Unique identifier assigned by the group's owning authority
-            example: "group:338facc93@myauthority.net"
+            example: 'group:338facc93@myauthority.net'
     GroupExpand:
       name: expand
       in: query
@@ -174,7 +172,7 @@ components:
         The userID should be of the format `acct:<username>@<authority>`
       schema:
         type: string
-        pattern: "acct:^[A-Za-z0-9._]{3,30}@.*$"
+        pattern: 'acct:^[A-Za-z0-9._]{3,30}@.*$'
 
   # -------------------------
   # Reusable responses
@@ -211,7 +209,6 @@ components:
   # Resusable security schemes
   # --------------------------
   securitySchemes:
-
     AuthClient:
       type: http
       scheme: basic
@@ -267,12 +264,10 @@ components:
     UserUpdate:
       $ref: './schemas/user-update.yaml#/User'
 
-
 # -----------------------------------------------------------------------------
 # API OPERATIONS
 # -----------------------------------------------------------------------------
 paths:
-
   # ---------------------------------------------------------------------------
   # Service Root
   # ---------------------------------------------------------------------------
@@ -291,7 +286,6 @@ paths:
   # Operations on Annotation collections
   # ---------------------------------------------------------------------------
   /annotations:
-
     # ---------------------------------------------------------------------------
     # POST annotations - Create an annotation
     # ---------------------------------------------------------------------------
@@ -302,16 +296,16 @@ paths:
       security:
         - ApiKey: []
       requestBody:
-          description: >
-            Full representation of Annotation resource and applicable relationships.
-            _Note_: While the API accepts arbitrary Annotation selectors in the
-            `target.selector` property, the Hypothesis client currently supports
-            `TextQuoteSelector`, `RangeSelector` and `TextPositionSelector` selector.
-          required: true
-          content:
-            application/*json:
-              schema:
-                $ref: '#/components/schemas/AnnotationCreate'
+        description: >
+          Full representation of Annotation resource and applicable relationships.
+          _Note_: While the API accepts arbitrary Annotation selectors in the
+          `target.selector` property, the Hypothesis client currently supports
+          `TextQuoteSelector`, `RangeSelector` and `TextPositionSelector` selector.
+        required: true
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/AnnotationCreate'
       responses:
         '200':
           description: Success
@@ -443,7 +437,7 @@ paths:
             type: string
         - name: wildcard_uri
           in: query
-          example: "http://foo.com/*"
+          example: 'http://foo.com/*'
           description: |
             <p>Limit the results to annotations whose URIs match the wildcard pattern.</p>
 
@@ -473,16 +467,16 @@ paths:
           description: Limit the results to annotations made by the specified user.
           schema:
             type: string
-            pattern: "acct:^[A-Z0-9._]{3,30}@.*$"
+            pattern: 'acct:^[A-Z0-9._]{3,30}@.*$'
         - name: group
           in: query
-          example: "8JmD3iz1"
+          example: '8JmD3iz1'
           description: Limit the results to annotations made in the specified group (by group ID).
           schema:
             type: string
         - name: tag
           in: query
-          example: "artificial intelligence"
+          example: 'artificial intelligence'
           description: |
             Limit the results to annotations tagged with the specified value.
 
@@ -503,11 +497,10 @@ paths:
           schema:
             type: array
             items:
-              type:
-                string
+              type: string
         - name: any
           in: query
-          example: "ribosome"
+          example: 'ribosome'
           description: |
             Limit the results to annotations who contain the indicated keyword
             in any of the following fields:
@@ -520,7 +513,7 @@ paths:
             type: string
         - name: quote
           in: query
-          example: "unicorn helmets"
+          example: 'unicorn helmets'
           description: >
             <p>Limit the results to annotations that contain this text inside
             the text that was annotated.</p>
@@ -536,7 +529,7 @@ paths:
             type: string
         - name: text
           in: query
-          example: "penguin strength"
+          example: 'penguin strength'
           description: >
             <p>Limit the results to annotations that contain this text in their
             textual body.</p>
@@ -567,7 +560,6 @@ paths:
   # Operations on single Annotation resources
   # ---------------------------------------------------------------------------
   /annotations/{id}:
-
     # -----------------------------------------------------
     # GET annotations/{id} - Fetch an Annotation
     # -----------------------------------------------------
@@ -649,7 +641,6 @@ paths:
   # Annotation Moderation Operations: Flagging
   # ---------------------------------------------------------------------------
   /annotations/{id}/flag:
-
     # --------------------------------------------------------
     # PUT annotations/{id}/flag - Add a flag to an annotation
     # --------------------------------------------------------
@@ -674,7 +665,6 @@ paths:
   # Annotation Moderation Operations: Hiding/Unhiding
   # ---------------------------------------------------------------------------
   /annotations/{id}/hide:
-
     # ----------------------------------------------------------
     # PUT annotations/{id}/hide - Hide (moderate) an annotation
     # ----------------------------------------------------------
@@ -741,7 +731,7 @@ paths:
           required: false
           schema:
             type: string
-            default: "hypothes.is"
+            default: 'hypothes.is'
         - name: document_uri
           in: query
           description: >
@@ -774,12 +764,12 @@ paths:
         - ApiKey: []
 
       requestBody:
-          description: Full representation of Group resource
-          required: true
-          content:
-            application/*json:
-              schema:
-                $ref: '#/components/schemas/GroupCreate'
+        description: Full representation of Group resource
+        required: true
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/GroupCreate'
       responses:
         '200':
           description: Success
@@ -787,7 +777,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-
 
   # ---------------------------------------------------------------------------
   # Operations on individual Group resources
@@ -834,12 +823,12 @@ paths:
         - AuthClientForwardedUser: []
         - ApiKey: []
       requestBody:
-          description: Properties to update in Group resource
-          required: true
-          content:
-            application/*json:
-              schema:
-                $ref: '#/components/schemas/GroupUpdate'
+        description: Properties to update in Group resource
+        required: true
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/GroupUpdate'
 
       responses:
         '200':
@@ -860,15 +849,15 @@ paths:
         Update the group with the indicated `id` or create one if it does
         not exist.
       security:
-          - ApiKey: []
-          - AuthClientForwardedUser: []
+        - ApiKey: []
+        - AuthClientForwardedUser: []
       requestBody:
-          description: Full representation of Group resource
-          required: true
-          content:
-            application/*json:
-              schema:
-                $ref: '#/components/schemas/GroupCreate'
+        description: Full representation of Group resource
+        required: true
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/GroupCreate'
       responses:
         '200':
           description: Success
@@ -909,7 +898,6 @@ paths:
                   $ref: '#/components/schemas/User'
 
   /groups/{id}/members/{user}:
-
     # ----------------------------------------------------------
     # POST groups/{id}/members/{user} - Add user to group
     # ----------------------------------------------------------
@@ -961,7 +949,6 @@ paths:
   # Operations on the currently-authenticated user (Profile)
   # ---------------------------------------------------------------------------
   /profile:
-
     # -----------------------------------------------------
     # GET profile - Retrieve user profile
     # -----------------------------------------------------
@@ -1009,7 +996,6 @@ paths:
   # Operations on User Collections
   # ---------------------------------------------------------------------------
   /users:
-
     post:
       tags:
         - users
@@ -1020,12 +1006,12 @@ paths:
         - AuthClient: []
 
       requestBody:
-          description: Full representation of User resource
-          required: true
-          content:
-            application/*json:
-              schema:
-                $ref: '#/components/schemas/UserCreate'
+        description: Full representation of User resource
+        required: true
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
       responses:
         '200':
           description: Success
@@ -1038,7 +1024,6 @@ paths:
   # Operations on single User Resources
   # ---------------------------------------------------------------------------
   /users/{username}:
-
     patch:
       tags:
         - users
@@ -1051,12 +1036,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Username'
       requestBody:
-          description: Properties to update in the User resource
-          required: true
-          content:
-            application/*json:
-              schema:
-                $ref: '#/components/schemas/UserUpdate'
+        description: Properties to update in the User resource
+        required: true
+        content:
+          application/*json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
       responses:
         '200':
           description: Success
