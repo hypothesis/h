@@ -21,7 +21,7 @@ require('element-dataset')();
 
 // Element.prototype.remove. Required by IE 10/11
 if (!Element.prototype.remove) {
-  Element.prototype.remove = function () {
+  Element.prototype.remove = function() {
     if (this.parentNode) {
       this.parentNode.removeChild(this);
     }

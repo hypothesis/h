@@ -14,7 +14,7 @@ describe('upgradeElements', () => {
     const root = document.createElement('div');
     root.innerHTML = '<div class="js-test"></div>';
 
-    upgradeElements(root, {'.js-test': TestController});
+    upgradeElements(root, { '.js-test': TestController });
 
     assert.instanceOf(root.children[0].controllers[0], TestController);
   });
@@ -23,18 +23,19 @@ describe('upgradeElements', () => {
     const root = document.createElement('div');
     root.innerHTML = '<div class="js-test is-hidden-when-loading"></div>';
 
-    upgradeElements(root, {'.js-test': TestController});
+    upgradeElements(root, { '.js-test': TestController });
 
     assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
   });
 
   it('should unhide child elements hidden until upgrade', () => {
     const root = document.createElement('div');
-    root.innerHTML = '<div class="js-test">' +
-                     '<span class="is-hidden-when-loading"></span>' +
-                     '</div>';
+    root.innerHTML =
+      '<div class="js-test">' +
+      '<span class="is-hidden-when-loading"></span>' +
+      '</div>';
 
-    upgradeElements(root, {'.js-test': TestController});
+    upgradeElements(root, { '.js-test': TestController });
 
     assert.equal(root.querySelectorAll('.is-hidden-when-loading').length, 0);
   });
@@ -45,11 +46,11 @@ describe('upgradeElements', () => {
     function setupAndReload() {
       const root = document.createElement('div');
       root.innerHTML = '<div class="js-test">Original content</div>';
-      upgradeElements(root, {'.js-test': TestController});
+      upgradeElements(root, { '.js-test': TestController });
 
       const reloadFn = root.children[0].controllers[0].options.reload;
       const reloadResult = reloadFn(newContent);
-      return {root: root, reloadResult: reloadResult};
+      return { root: root, reloadResult: reloadResult };
     }
 
     it('replaces element markup', () => {
@@ -72,7 +73,7 @@ describe('upgradeElements', () => {
     it('calls #beforeRemove on the original controllers', () => {
       const root = document.createElement('div');
       root.innerHTML = '<div class="js-test">Original content</div>';
-      upgradeElements(root, {'.js-test': TestController});
+      upgradeElements(root, { '.js-test': TestController });
       const ctrl = root.children[0].controllers[0];
       ctrl.beforeRemove = sinon.stub();
       const reloadFn = ctrl.options.reload;

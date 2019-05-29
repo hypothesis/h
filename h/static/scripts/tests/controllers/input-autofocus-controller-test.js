@@ -11,7 +11,7 @@ const { setupComponent } = require('./util');
  */
 function sendKey(key, opts = {}) {
   // Note: PhantomJS 2.x does not support the KeyboardEvent constructor
-  const event = new Event('keydown', {bubbles: true});
+  const event = new Event('keydown', { bubbles: true });
   event.key = key;
   Object.assign(event, opts);
   document.activeElement.dispatchEvent(event);
@@ -63,9 +63,9 @@ describe('InputAutofocusController', () => {
     });
 
     it('should not focus the input if a letter key is pressed with a modifier', () => {
-      sendKey('a', {ctrlKey: true});
-      sendKey('b', {altKey: true});
-      sendKey('c', {metaKey: true});
+      sendKey('a', { ctrlKey: true });
+      sendKey('b', { altKey: true });
+      sendKey('c', { metaKey: true });
       assert.notEqual(document.activeElement, ctrl.element);
     });
   });

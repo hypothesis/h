@@ -15,7 +15,7 @@ function CreateGroupFormController(element) {
   self._groupNameInput.addEventListener('input', groupNameChanged);
   groupNameChanged();
 
-  this._infoLink.addEventListener('click', (event) => {
+  this._infoLink.addEventListener('click', event => {
     event.preventDefault();
     self._infoLink.classList.add('is-hidden');
     self._infoText.classList.remove('is-hidden');

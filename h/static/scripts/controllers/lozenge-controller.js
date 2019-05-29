@@ -17,7 +17,6 @@ const { setElementState } = require('../util/dom');
  * });
  */
 class LozengeController extends Controller {
-
   constructor(element, options) {
     super(element, options);
 
@@ -32,14 +31,16 @@ class LozengeController extends Controller {
     let facetValue = options.content;
 
     if (searchTextParser.hasKnownNamedQueryTerm(options.content)) {
-      const queryTerm = searchTextParser.getLozengeFacetNameAndValue(options.content);
+      const queryTerm = searchTextParser.getLozengeFacetNameAndValue(
+        options.content
+      );
       facetName = queryTerm.facetName;
       facetValue = queryTerm.facetValue;
     }
 
     element.classList.add('js-lozenge');
 
-    this.refs.deleteButton.addEventListener('click', (event) => {
+    this.refs.deleteButton.addEventListener('click', event => {
       event.preventDefault();
       options.deleteCallback();
     });
@@ -52,7 +53,7 @@ class LozengeController extends Controller {
   }
 
   update(state) {
-    setElementState(this.element, {disabled: state.disabled});
+    setElementState(this.element, { disabled: state.disabled });
     let facetName = state.facetName;
     if (facetName) {
       facetName += ':';

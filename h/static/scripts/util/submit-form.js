@@ -67,25 +67,28 @@ function submitForm(formEl, fetch = window.fetch) {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },
-  }).then((response_) => {
-    response = response_;
-    return response.text();
-  }).then((body) => {
-    const { status } = response;
-    switch (status) {
-    case 200:
-      return {status, form: body};
-    case 400:
-      throw new FormSubmitError('Form validation failed', {
-        status, form: body,
-      });
-    default:
-      throw new FormSubmitError('Form submission failed', {
-        status,
-        reason: response.statusText,
-      });
-    }
-  });
+  })
+    .then(response_ => {
+      response = response_;
+      return response.text();
+    })
+    .then(body => {
+      const { status } = response;
+      switch (status) {
+        case 200:
+          return { status, form: body };
+        case 400:
+          throw new FormSubmitError('Form validation failed', {
+            status,
+            form: body,
+          });
+        default:
+          throw new FormSubmitError('Form submission failed', {
+            status,
+            reason: response.statusText,
+          });
+      }
+    });
 }
 
 module.exports = submitForm;

@@ -11,7 +11,7 @@ class FormSelectOnFocusController extends Controller {
       element.select();
     }
 
-    element.addEventListener('focus', (event) => {
+    element.addEventListener('focus', event => {
       event.target.select();
     });
   }

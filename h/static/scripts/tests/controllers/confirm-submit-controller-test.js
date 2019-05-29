@@ -4,7 +4,6 @@ const ConfirmSubmitController = require('../../controllers/confirm-submit-contro
 const util = require('./util');
 
 describe('ConfirmSubmitController', () => {
-
   let ctrl;
 
   afterEach(() => {
@@ -20,7 +19,8 @@ describe('ConfirmSubmitController', () => {
    *
    */
   function component(windowConfirmReturnValue) {
-    const confirmMessage = "Are you sure you want to leave the group 'Test Group'?";
+    const confirmMessage =
+      "Are you sure you want to leave the group 'Test Group'?";
     const template = `<button type="submit"
       class="js-confirm-submit"
       data-confirm-message="${confirmMessage}">
@@ -30,10 +30,9 @@ describe('ConfirmSubmitController', () => {
       confirm: sinon.stub().returns(windowConfirmReturnValue),
     };
 
-    ctrl = util.setupComponent(document,
-                               template,
-                               ConfirmSubmitController,
-                               {window: fakeWindow});
+    ctrl = util.setupComponent(document, template, ConfirmSubmitController, {
+      window: fakeWindow,
+    });
 
     return {
       ctrl: ctrl,
@@ -51,7 +50,7 @@ describe('ConfirmSubmitController', () => {
   }
 
   it('shows a confirm dialog using the text from the data-confirm-message attribute', () => {
-    const {ctrl, fakeWindow, confirmMessage} = component(true);
+    const { ctrl, fakeWindow, confirmMessage } = component(true);
 
     ctrl.element.dispatchEvent(new Event('click'));
 

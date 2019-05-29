@@ -25,20 +25,21 @@ class TooltipController extends Controller {
     // focus.
     // See http://www.codediesel.com/javascript/making-mouseover-event-work-on-an-ipad/
     el.addEventListener('mouseover', () => {
-      this.setState({target: el});
+      this.setState({ target: el });
     });
 
     el.addEventListener('mouseout', () => {
-      this.setState({target: null});
+      this.setState({ target: null });
     });
 
     this._tooltipEl = el.ownerDocument.createElement('div');
-    this._tooltipEl.innerHTML = '<span class="tooltip-label js-tooltip-label"></span>';
+    this._tooltipEl.innerHTML =
+      '<span class="tooltip-label js-tooltip-label"></span>';
     this._tooltipEl.className = 'tooltip';
     el.appendChild(this._tooltipEl);
     this._labelEl = this._tooltipEl.querySelector('.js-tooltip-label');
 
-    this.setState({target: null});
+    this.setState({ target: null });
   }
 
   update(state) {

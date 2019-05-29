@@ -16,8 +16,9 @@ describe('FormSelectOnFocusController', () => {
 
   beforeEach(() => {
     root = document.createElement('div');
-    root.innerHTML = '<form id="js-users-delete-form">' +
-                     '<input type="text" class="js-select-onfocus" value="some-test-value">';
+    root.innerHTML =
+      '<form id="js-users-delete-form">' +
+      '<input type="text" class="js-select-onfocus" value="some-test-value">';
     document.body.appendChild(root);
   });
 

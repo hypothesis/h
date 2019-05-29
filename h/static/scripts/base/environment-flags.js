@@ -17,9 +17,9 @@
  */
 class EnvironmentFlags {
   /**
-    * @param {Element} element - DOM element which environment flags will be added
-    *                  to.
-    */
+   * @param {Element} element - DOM element which environment flags will be added
+   *                  to.
+   */
   constructor(element) {
     this._element = element;
   }
@@ -79,8 +79,10 @@ class EnvironmentFlags {
     }, JS_LOAD_TIMEOUT);
 
     // Process flag overrides specified in URL
-    const flags = envFlagsFromUrl(url || this._element.ownerDocument.location.href);
-    flags.forEach((flag) => {
+    const flags = envFlagsFromUrl(
+      url || this._element.ownerDocument.location.href
+    );
+    flags.forEach(flag => {
       if (flag.indexOf('no-') === 0) {
         this.set(flag.slice(3), false);
       } else {

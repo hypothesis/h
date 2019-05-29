@@ -15,7 +15,7 @@ const FormController = require('../../controllers/form-controller');
  */
 function dataAttrs(data) {
   const dataAttrs = [];
-  Object.keys(data || {}).forEach((key) => {
+  Object.keys(data || {}).forEach(key => {
     dataAttrs.push(`data-${hyphenate(key)}="${data[key]}"`);
   });
   return dataAttrs.join(' ');
@@ -29,7 +29,9 @@ function fieldTemplate(field) {
 
   return `<div class="js-form-input" data-ref="${field.fieldRef}" ${dataAttr}>
     <label data-ref="label ${field.labelRef}">Label</label>
-    <input id="deformField" data-ref="formInput ${field.ref}" ${typeAttr} value="${field.value}">
+    <input id="deformField" data-ref="formInput ${
+      field.ref
+    }" ${typeAttr} value="${field.value}">
   </div>`;
 }
 
@@ -50,16 +52,20 @@ function formTemplate(fields) {
 `;
 }
 
-const FORM_TEMPLATE = formTemplate([{
-  ref: 'firstInput',
-  value: 'original value',
-},{
-  ref: 'secondInput',
-  value: 'original value 2',
-},{
-  ref: 'checkboxInput',
-  type: 'checkbox',
-}]);
+const FORM_TEMPLATE = formTemplate([
+  {
+    ref: 'firstInput',
+    value: 'original value',
+  },
+  {
+    ref: 'secondInput',
+    value: 'original value 2',
+  },
+  {
+    ref: 'checkboxInput',
+    type: 'checkbox',
+  },
+]);
 
 const UPDATED_FORM = FORM_TEMPLATE.replace('js-form', 'js-form is-updated');
 
@@ -86,7 +92,7 @@ describe('FormController', () => {
     // spy on calls to it and update `ctrl` to the new controller instance
     // when the form is reloaded
     const reloadFn = ctrl.options.reload;
-    reloadSpy = sinon.spy((html) => {
+    reloadSpy = sinon.spy(html => {
       const newElement = reloadFn(html);
       ctrl = newElement.controllers[0];
       return newElement;
@@ -146,14 +152,16 @@ describe('FormController', () => {
 
   it('reverts the form when "Escape" key is pressed', () => {
     startEditing();
-    const event = new Event('keydown', {bubbles: true});
+    const event = new Event('keydown', { bubbles: true });
     event.key = 'Escape';
     ctrl.refs.firstInput.dispatchEvent(event);
     assert.equal(ctrl.refs.firstInput.value, 'original value');
   });
 
   it('submits the form when "Save" is clicked', () => {
-    fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
+    fakeSubmitForm.returns(
+      Promise.resolve({ status: 200, form: UPDATED_FORM })
+    );
     ctrl.refs.testSaveBtn.click();
     assert.calledWith(fakeSubmitForm, ctrl.element);
 
@@ -164,14 +172,18 @@ describe('FormController', () => {
 
   context('when form is successfully submitted', () => {
     it('updates form with new rendered version from server', () => {
-      fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
+      fakeSubmitForm.returns(
+        Promise.resolve({ status: 200, form: UPDATED_FORM })
+      );
       return submitForm().then(() => {
         assert.isTrue(ctrl.element.classList.contains('is-updated'));
       });
     });
 
     it('stops editing the form', () => {
-      fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
+      fakeSubmitForm.returns(
+        Promise.resolve({ status: 200, form: UPDATED_FORM })
+      );
       return submitForm().then(() => {
         assert.isFalse(isEditing());
       });
@@ -181,7 +193,9 @@ describe('FormController', () => {
   context('when validation fails', () => {
     it('updates form with rendered version from server', () => {
       startEditing();
-      fakeSubmitForm.returns(Promise.reject({status: 400, form: UPDATED_FORM}));
+      fakeSubmitForm.returns(
+        Promise.reject({ status: 400, form: UPDATED_FORM })
+      );
       return submitForm().then(() => {
         assert.isTrue(ctrl.element.classList.contains('is-updated'));
       });
@@ -189,7 +203,9 @@ describe('FormController', () => {
 
     it('marks updated form as dirty', () => {
       startEditing();
-      fakeSubmitForm.returns(Promise.reject({status: 400, form: UPDATED_FORM}));
+      fakeSubmitForm.returns(
+        Promise.reject({ status: 400, form: UPDATED_FORM })
+      );
       return submitForm().then(() => {
         assert.isTrue(ctrl.state.dirty);
       });
@@ -197,7 +213,9 @@ describe('FormController', () => {
 
     it('continues editing current field', () => {
       startEditing();
-      fakeSubmitForm.returns(Promise.reject({status: 400, form: UPDATED_FORM}));
+      fakeSubmitForm.returns(
+        Promise.reject({ status: 400, form: UPDATED_FORM })
+      );
       return submitForm().then(() => {
         assert.isTrue(isEditing());
       });
@@ -205,7 +223,9 @@ describe('FormController', () => {
 
     it('focuses the matching input field in the re-rendered form', () => {
       startEditing();
-      fakeSubmitForm.returns(Promise.reject({status: 400, form: UPDATED_FORM}));
+      fakeSubmitForm.returns(
+        Promise.reject({ status: 400, form: UPDATED_FORM })
+      );
 
       // Simulate the user saving the form by clicking the 'Save' button, which
       // changes the focus from the input field to the button
@@ -219,7 +239,9 @@ describe('FormController', () => {
   });
 
   it('enters the "saving" state while the form is being submitted', () => {
-    fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
+    fakeSubmitForm.returns(
+      Promise.resolve({ status: 200, form: UPDATED_FORM })
+    );
     const saved = submitForm();
     assert.isTrue(isSaving());
     return saved.then(() => {
@@ -228,7 +250,9 @@ describe('FormController', () => {
   });
 
   it('displays an error if form submission fails without returning a new form', () => {
-    fakeSubmitForm.returns(Promise.reject({status: 501, reason: 'Internal Server Error'}));
+    fakeSubmitForm.returns(
+      Promise.reject({ status: 501, reason: 'Internal Server Error' })
+    );
     return submitForm().then(() => {
       assert.equal(submitError(), 'Internal Server Error');
     });
@@ -243,7 +267,7 @@ describe('FormController', () => {
 
   it('ignores clicks outside the field being edited', () => {
     startEditing();
-    const event = new Event('mousedown', {cancelable: true});
+    const event = new Event('mousedown', { cancelable: true });
     ctrl.refs.formBackdrop.dispatchEvent(event);
     assert.isTrue(event.defaultPrevented);
   });
@@ -251,7 +275,7 @@ describe('FormController', () => {
   it('sets form state to dirty if user modifies active field', () => {
     startEditing();
 
-    ctrl.refs.firstInput.dispatchEvent(new Event('input', {bubbles: true}));
+    ctrl.refs.firstInput.dispatchEvent(new Event('input', { bubbles: true }));
 
     assert.isTrue(ctrl.state.dirty);
   });
@@ -272,7 +296,7 @@ describe('FormController', () => {
 
     it('keeps focus in previous input if it has unsaved changes', () => {
       startEditing();
-      ctrl.setState({dirty: true});
+      ctrl.setState({ dirty: true });
 
       // Simulate user/browser attempting to switch to another field
       ctrl.refs.secondInput.focus();
@@ -304,7 +328,7 @@ describe('FormController', () => {
 
     it('keeps current field focused if it has unsaved changes', () => {
       startEditing();
-      ctrl.setState({dirty: true});
+      ctrl.setState({ dirty: true });
 
       // Simulate user/browser attempting to switch focus to an element outside
       // the form
@@ -316,9 +340,13 @@ describe('FormController', () => {
 
   context('when a checkbox is toggled', () => {
     beforeEach(() => {
-      fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
+      fakeSubmitForm.returns(
+        Promise.resolve({ status: 200, form: UPDATED_FORM })
+      );
       ctrl.refs.checkboxInput.focus();
-      ctrl.refs.checkboxInput.dispatchEvent(new Event('change', {bubbles: true}));
+      ctrl.refs.checkboxInput.dispatchEvent(
+        new Event('change', { bubbles: true })
+      );
     });
 
     afterEach(() => {
@@ -340,19 +368,24 @@ describe('FormController', () => {
       // Setup a form like the 'Change Email' which has a field that is initially
       // visible plus additional fields that are shown once the form is being
       // edited
-      initForm(formTemplate([{
-        fieldRef: 'emailContainer',
-        ref: 'emailInput',
-        value: 'jim@smith.com',
-      },{
-        fieldRef: 'passwordContainer',
-        ref: 'passwordInput',
-        value: '',
-        type: 'password',
-        data: {
-          hideUntilActive: true,
-        },
-      }]));
+      initForm(
+        formTemplate([
+          {
+            fieldRef: 'emailContainer',
+            ref: 'emailInput',
+            value: 'jim@smith.com',
+          },
+          {
+            fieldRef: 'passwordContainer',
+            ref: 'passwordInput',
+            value: '',
+            type: 'password',
+            data: {
+              hideUntilActive: true,
+            },
+          },
+        ])
+      );
     });
 
     function isConfirmFieldHidden() {
@@ -380,13 +413,18 @@ describe('FormController', () => {
     });
 
     it('shows all fields in an editing state when any is focused', () => {
-      const containers = [ctrl.refs.emailContainer, ctrl.refs.passwordContainer];
+      const containers = [
+        ctrl.refs.emailContainer,
+        ctrl.refs.passwordContainer,
+      ];
       const inputs = [ctrl.refs.emailInput, ctrl.refs.passwordInput];
 
-      inputs.forEach((input) => {
+      inputs.forEach(input => {
         input.focus();
 
-        const editing = containers.filter(el => el.classList.contains('is-editing'));
+        const editing = containers.filter(el =>
+          el.classList.contains('is-editing')
+        );
         assert.equal(editing.length, 2);
       });
     });
@@ -394,15 +432,19 @@ describe('FormController', () => {
 
   describe('fields with inactive and active labels', () => {
     beforeEach(() => {
-      initForm(formTemplate([{
-        labelRef: 'passwordLabel',
-        ref: 'passwordInput',
-        type: 'password',
-        data: {
-          activeLabel: 'Current password',
-          inactiveLabel: 'Password',
-        },
-      }]));
+      initForm(
+        formTemplate([
+          {
+            labelRef: 'passwordLabel',
+            ref: 'passwordInput',
+            type: 'password',
+            data: {
+              activeLabel: 'Current password',
+              inactiveLabel: 'Password',
+            },
+          },
+        ])
+      );
     });
 
     it('uses the inactive label for fields when the form is inactive', () => {
@@ -417,15 +459,18 @@ describe('FormController', () => {
 
   describe('password fields', () => {
     beforeEach(() => {
-      initForm(formTemplate([{
-        ref: 'password',
-        type: 'password',
-      }]));
+      initForm(
+        formTemplate([
+          {
+            ref: 'password',
+            type: 'password',
+          },
+        ])
+      );
     });
 
     it('adds a placeholder to inactive password fields', () => {
-      assert.equal(ctrl.refs.password.getAttribute('placeholder'),
-        '••••••••');
+      assert.equal(ctrl.refs.password.getAttribute('placeholder'), '••••••••');
     });
 
     it('clears the placeholder when the password field is focused', () => {

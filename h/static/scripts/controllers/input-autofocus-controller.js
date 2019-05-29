@@ -3,8 +3,9 @@
 const Controller = require('../base/controller');
 
 function isWordChar(event) {
-  return event.key.match(/^\w$/) && !event.ctrlKey && !event.altKey &&
-                                    !event.metaKey;
+  return (
+    event.key.match(/^\w$/) && !event.ctrlKey && !event.altKey && !event.metaKey
+  );
 }
 
 /**
@@ -19,7 +20,7 @@ class InputAutofocusController extends Controller {
   constructor(element) {
     super(element);
 
-    this._onKeyDown = (event) => {
+    this._onKeyDown = event => {
       if (document.activeElement === document.body) {
         if (isWordChar(event) || event.key === 'Backspace') {
           element.focus();

@@ -29,20 +29,24 @@ describe('Controller', () => {
   });
 
   it('exposes elements with "data-ref" attributes on the `refs` property', () => {
-    assert.deepEqual(ctrl.refs, {test: ctrl.element.children[0]});
+    assert.deepEqual(ctrl.refs, { test: ctrl.element.children[0] });
   });
 
   describe('#setState', () => {
     it('calls update() with new and previous state', () => {
-      ctrl.setState({open: true});
+      ctrl.setState({ open: true });
       ctrl.update = sinon.stub();
-      ctrl.setState({open: true, saving: true});
-      assert.calledWith(ctrl.update, {
-        open: true,
-        saving: true,
-      }, {
-        open: true,
-      });
+      ctrl.setState({ open: true, saving: true });
+      assert.calledWith(
+        ctrl.update,
+        {
+          open: true,
+          saving: true,
+        },
+        {
+          open: true,
+        }
+      );
     });
   });
 });

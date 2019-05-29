@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = {
-
   /**
    * compare two list arrays and decide if they have changed
    *
@@ -11,7 +10,6 @@ module.exports = {
    *   arrays seem like they have changed. True if they have changed
    */
   listIsDifferent: function(listA, listB) {
-
     if (!(Array.isArray(listA) && Array.isArray(listB))) {
       return true;
     }

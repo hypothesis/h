@@ -2,18 +2,12 @@
 
 module.exports = function(config) {
   config.set({
-
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: './',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: [
-      'browserify',
-      'mocha',
-      'chai',
-      'sinon',
-    ],
+    frameworks: ['browserify', 'mocha', 'chai', 'sinon'],
 
     // list of files / patterns to load in the browser
     files: [
@@ -26,12 +20,16 @@ module.exports = function(config) {
       // Karma watching is disabled for these files because they are
       // bundled with karma-browserify which handles watching itself via
       // watchify
-      { pattern: 'tests/**/*-test.js', watched: false, included: true, served: true },
+      {
+        pattern: 'tests/**/*-test.js',
+        watched: false,
+        included: true,
+        served: true,
+      },
     ],
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: [],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
@@ -44,9 +42,12 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       transform: [
-        ['babelify', {
-          plugins: ['mockable-imports'],
-        }],
+        [
+          'babelify',
+          {
+            plugins: ['mockable-imports'],
+          },
+        ],
       ],
     },
 

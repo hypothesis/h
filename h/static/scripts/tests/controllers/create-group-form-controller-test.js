@@ -20,10 +20,11 @@ describe('CreateGroupFormController', () => {
   let template;
 
   before(() => {
-    template = '<input type="text" class="js-group-name-input">' +
-               '<input type="submit" class="js-create-group-create-btn">' +
-               '<a href="" class="js-group-info-link">Tell me more!</a>' +
-               '<div class="js-group-info-text is-hidden">More!</div>';
+    template =
+      '<input type="text" class="js-group-name-input">' +
+      '<input type="submit" class="js-create-group-create-btn">' +
+      '<a href="" class="js-group-info-link">Tell me more!</a>' +
+      '<div class="js-group-info-text is-hidden">More!</div>';
   });
 
   beforeEach(() => {

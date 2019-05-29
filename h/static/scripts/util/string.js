@@ -18,8 +18,8 @@ function unhyphenate(name) {
   if (idx === -1) {
     return name;
   } else {
-    const ch = (name[idx+1] || '').toUpperCase();
-    return unhyphenate(name.slice(0,idx) + ch + name.slice(idx+2));
+    const ch = (name[idx + 1] || '').toUpperCase();
+    return unhyphenate(name.slice(0, idx) + ch + name.slice(idx + 2));
   }
 }
 

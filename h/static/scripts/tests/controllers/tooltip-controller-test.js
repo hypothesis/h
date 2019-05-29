@@ -9,8 +9,9 @@ describe('TooltipController', () => {
   let tooltipEl;
 
   before(() => {
-    template = '<div class="form-input__hint-icon js-tooltip"' +
-     'aria-label="Test"></div>';
+    template =
+      '<div class="form-input__hint-icon js-tooltip"' +
+      'aria-label="Test"></div>';
   });
 
   beforeEach(() => {
@@ -22,7 +23,6 @@ describe('TooltipController', () => {
 
     tooltipEl = testEl.querySelector('.tooltip');
   });
-
 
   it('appears when the target is hovered', () => {
     targetEl.dispatchEvent(new Event('mouseover'));

@@ -15,9 +15,12 @@ const upgradeElements = require('./base/upgrade-elements');
 // Additional controllers for admin site.
 const AdminUsersController = require('./controllers/admin-users-controller');
 
-const controllers = Object.assign({}, {
-  '.js-users-delete-form': AdminUsersController,
-}, sharedControllers);
+const controllers = Object.assign(
+  {},
+  {
+    '.js-users-delete-form': AdminUsersController,
+  },
+  sharedControllers
+);
 upgradeElements(document.body, controllers);
 window.envFlags.ready();
-

@@ -6,7 +6,7 @@
 function markReady(element) {
   const HIDE_CLASS = 'is-hidden-when-loading';
   const hideOnLoad = Array.from(element.querySelectorAll('.' + HIDE_CLASS));
-  hideOnLoad.forEach((el) => {
+  hideOnLoad.forEach(el => {
     el.classList.remove(HIDE_CLASS);
   });
   element.classList.remove(HIDE_CLASS);
@@ -23,7 +23,7 @@ let upgradedElements = [];
  * document.
  */
 function removeControllers(root) {
-  upgradedElements = upgradedElements.filter((el) => {
+  upgradedElements = upgradedElements.filter(el => {
     if (root.contains(el)) {
       el.controllers.forEach(ctrl => ctrl.beforeRemove());
       el.controllers = [];
@@ -65,9 +65,9 @@ function upgradeElements(root, controllers) {
     return newElement;
   }
 
-  Object.keys(controllers).forEach((selector) => {
+  Object.keys(controllers).forEach(selector => {
     const elements = Array.from(root.querySelectorAll(selector));
-    elements.forEach((el) => {
+    elements.forEach(el => {
       const ControllerClass = controllers[selector];
       try {
         new ControllerClass(el, {
@@ -76,7 +76,13 @@ function upgradeElements(root, controllers) {
         upgradedElements.push(el);
         markReady(el);
       } catch (err) {
-        console.error('Failed to upgrade element %s with controller', el, ControllerClass, ':', err.toString());
+        console.error(
+          'Failed to upgrade element %s with controller',
+          el,
+          ControllerClass,
+          ':',
+          err.toString()
+        );
 
         // Re-raise error so that Raven can capture and report it
         throw err;

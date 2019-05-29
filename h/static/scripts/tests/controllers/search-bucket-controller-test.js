@@ -14,7 +14,7 @@ const TEMPLATE = `<div class="js-search-bucket">
 `;
 
 class FakeEnvFlags {
-  constructor (flags = []) {
+  constructor(flags = []) {
     this.flags = flags;
   }
 
@@ -46,7 +46,7 @@ describe('SearchBucketController', () => {
   });
 
   it('does not expand when domain link is clicked', () => {
-    ctrl.refs.domainLink.dispatchEvent(new Event('click', {bubbles: true}));
+    ctrl.refs.domainLink.dispatchEvent(new Event('click', { bubbles: true }));
     assert.isFalse(ctrl.refs.content.classList.contains('is-expanded'));
   });
 

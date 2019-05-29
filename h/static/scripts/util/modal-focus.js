@@ -33,7 +33,7 @@ function trap(elements, callback) {
   //
   // Instead we watch the 'focus' event on the document itself.
 
-  const onFocusChange = (event) => {
+  const onFocusChange = event => {
     if (elements.some(el => el.contains(event.target))) {
       // Focus remains within modal group
       return;
@@ -55,7 +55,11 @@ function trap(elements, callback) {
   const releaseFn = () => {
     if (currentReleaseFn === releaseFn) {
       currentReleaseFn = null;
-      document.removeEventListener('focus', onFocusChange, true /* useCapture */);
+      document.removeEventListener(
+        'focus',
+        onFocusChange,
+        true /* useCapture */
+      );
     }
   };
   currentReleaseFn = releaseFn;

@@ -26,33 +26,35 @@ function compileSass(options) {
   var postcssPlugins = [autoprefixer];
 
   if (options.urlRewriter) {
-    postcssPlugins.push(postcssURL({
-      url: options.urlRewriter,
-    }));
+    postcssPlugins.push(
+      postcssURL({
+        url: options.urlRewriter,
+      })
+    );
   }
 
   var sassBuild = new Promise((resolve, reject) => {
-    sass.render({
-      file: options.input,
-      importer: options.onImport,
-      includePaths: [
-        path.dirname(options.input),
-        'node_modules',
-      ],
-      outputStyle: options.minify ? 'compressed' : 'expanded',
-      sourceMap: sourcemapPath,
-    }, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
+    sass.render(
+      {
+        file: options.input,
+        importer: options.onImport,
+        includePaths: [path.dirname(options.input), 'node_modules'],
+        outputStyle: options.minify ? 'compressed' : 'expanded',
+        sourceMap: sourcemapPath,
+      },
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
       }
-    });
+    );
   });
 
-  return sassBuild.then(result => {
-    return postcss(postcssPlugins)
-      .process(result.css, {
+  return sassBuild
+    .then(result => {
+      return postcss(postcssPlugins).process(result.css, {
         from: options.output,
         to: options.output,
         map: {
@@ -60,13 +62,15 @@ function compileSass(options) {
           prev: result.map.toString(),
         },
       });
-  }).then(result => {
-    fs.writeFileSync(options.output, result.css);
-    fs.writeFileSync(sourcemapPath, result.map.toString());
-  }).catch(srcErr => {
-    // Rewrite error so that the message property contains the file path
-    throw new Error(`SASS build error in ${srcErr.file}: ${srcErr.message}`);
-  });
+    })
+    .then(result => {
+      fs.writeFileSync(options.output, result.css);
+      fs.writeFileSync(sourcemapPath, result.map.toString());
+    })
+    .catch(srcErr => {
+      // Rewrite error so that the message property contains the file path
+      throw new Error(`SASS build error in ${srcErr.file}: ${srcErr.message}`);
+    });
 }
 
 module.exports = compileSass;

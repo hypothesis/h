@@ -18,11 +18,10 @@ function settings(document, settingsClass) {
   if (!settingsClass) {
     settingsClass = 'js-hypothesis-settings';
   }
-  const settingsElements =
-    document.querySelectorAll('script.' + settingsClass);
+  const settingsElements = document.querySelectorAll('script.' + settingsClass);
 
   const config = {};
-  for (let i=0; i < settingsElements.length; i++) {
+  for (let i = 0; i < settingsElements.length; i++) {
     Object.assign(config, JSON.parse(settingsElements[i].textContent));
   }
   return config;

@@ -11,7 +11,7 @@ describe('util/modal-focus', () => {
   let releaseFocus;
 
   beforeEach(() => {
-    insideEls = [1,2,3].map(() => document.createElement('input'));
+    insideEls = [1, 2, 3].map(() => document.createElement('input'));
     insideEls.forEach(el => document.body.appendChild(el));
 
     outsideEl = document.createElement('input');

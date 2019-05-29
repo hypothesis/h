@@ -15,8 +15,10 @@ const SearchBarController = require('../../controllers/search-bar-controller');
  * @param {SearchBarController} ctrl
  * @return {string[]}
  */
-const getLozengeValues = (ctrl) => {
-  return Array.from(ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')).map((el) => {
+const getLozengeValues = ctrl => {
+  return Array.from(
+    ctrl.refs.searchBarLozenges.querySelectorAll('.lozenge')
+  ).map(el => {
     const facetName = el.querySelector('.lozenge__facet-name').textContent;
     const facetValue = el.querySelector('.lozenge__facet-value').textContent;
     return facetName + facetValue;
@@ -53,7 +55,9 @@ describe('SearchBarController', () => {
     `;
 
     const getItemTitles = function() {
-      return Array.from(dropdown.querySelectorAll('.search-bar__dropdown-menu-title')).map((node) => {
+      return Array.from(
+        dropdown.querySelectorAll('.search-bar__dropdown-menu-title')
+      ).map(node => {
         return node.textContent.trim();
       });
     };
@@ -181,21 +185,19 @@ describe('SearchBarController', () => {
     beforeEach(setup);
     afterEach(teardown);
 
-    it('uses autosuggestion for initial facets', (done) => {
-
+    it('uses autosuggestion for initial facets', done => {
       assert.isFalse(dropdown.classList.contains('is-open'));
 
-      syn
-        .click(input, () => {
-          assert.isTrue(dropdown.classList.contains('is-open'));
+      syn.click(input, () => {
+        assert.isTrue(dropdown.classList.contains('is-open'));
 
-          assert.deepEqual(getItemTitles(), ['user:', 'tag:', 'url:', 'group:']);
+        assert.deepEqual(getItemTitles(), ['user:', 'tag:', 'url:', 'group:']);
 
-          done();
-        });
+        done();
+      });
     });
 
-    it('it filters and updates input with autosuggested facet selection', (done) => {
+    it('it filters and updates input with autosuggested facet selection', done => {
       syn
         .click(input, () => {
           assert.notOk(input.value, 'baseline no value in input');
@@ -206,8 +208,7 @@ describe('SearchBarController', () => {
         });
     });
 
-
-    it('allows submitting the form dropdown is open but has no selected value', (done) => {
+    it('allows submitting the form dropdown is open but has no selected value', done => {
       const form = testEl.querySelector('form');
       const submit = sinon.stub(form, 'submit');
 
@@ -217,14 +218,16 @@ describe('SearchBarController', () => {
           assert.isTrue(dropdown.classList.contains('is-open'));
         })
         .type('[enter]', () => {
-          assert.equal(testEl.querySelector('input[type=hidden]').value, 'test');
+          assert.equal(
+            testEl.querySelector('input[type=hidden]').value,
+            'test'
+          );
           assert.isTrue(submit.calledOnce);
           done();
         });
     });
 
     describe('it allows group value suggestions', () => {
-
       beforeEach(() => {
         // we need to setup the env vars before invoking controller
         teardown();
@@ -234,86 +237,136 @@ describe('SearchBarController', () => {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      unroll('shows group suggestions', (done, fixture) => {
-        syn
-          .click(input)
-          .type(fixture.text, () => {
-            assert.isTrue(dropdown.classList.contains('is-open'));
+      unroll(
+        'shows group suggestions',
+        (done, fixture) => {
+          syn
+            .click(input)
+            .type(fixture.text, () => {
+              assert.isTrue(dropdown.classList.contains('is-open'));
 
-            const titles = getItemTitles();
+              const titles = getItemTitles();
 
-            assert.lengthOf(titles, 5, 'we should be enforcing the 5 item max');
-          })
-          .type('[backspace][backspace][backspace][backspace][backspace][backspace]', () => {
-            assert.deepEqual(getItemTitles(), [ 'user:', 'tag:', 'url:', 'group:' ], 'group suggestions go away as facet is removed');
-            done();
-          });
-      },[
-        {text: 'group:'},
-        {text: 'Group:'},
-        {text: 'GROUP:'},
-      ]);
+              assert.lengthOf(
+                titles,
+                5,
+                'we should be enforcing the 5 item max'
+              );
+            })
+            .type(
+              '[backspace][backspace][backspace][backspace][backspace][backspace]',
+              () => {
+                assert.deepEqual(
+                  getItemTitles(),
+                  ['user:', 'tag:', 'url:', 'group:'],
+                  'group suggestions go away as facet is removed'
+                );
+                done();
+              }
+            );
+        },
+        [{ text: 'group:' }, { text: 'Group:' }, { text: 'GROUP:' }]
+      );
 
-      it('orders groups by earliest value match first', (done) => {
+      it('orders groups by earliest value match first', done => {
         syn
           .click(input)
           .type('group:', () => {
-            assert.deepEqual(getItemTitles(), [ 'aaac', 'aaab', 'aaaa', 'aaae', 'aaad' ], 'default ordering based on original order with no input');
+            assert.deepEqual(
+              getItemTitles(),
+              ['aaac', 'aaab', 'aaaa', 'aaae', 'aaad'],
+              'default ordering based on original order with no input'
+            );
           })
           .type('aad', () => {
-            assert.deepEqual(getItemTitles(), [ 'aadf', 'aaad'], 'sorting by indexof score with some input');
+            assert.deepEqual(
+              getItemTitles(),
+              ['aadf', 'aaad'],
+              'sorting by indexof score with some input'
+            );
             done();
           });
       });
 
-      it('supports multi word matching', (done) => {
+      it('supports multi word matching', done => {
         syn
           .click(input)
           .type('group:"mul', () => {
-            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a double quote initial input');
+            assert.deepEqual(
+              getItemTitles(),
+              ['multi word'],
+              'supports matching on a double quote initial input'
+            );
           })
-          .type('[backspace][backspace][backspace][backspace]\'mul', () => {
-            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a single quote initial input');
+          .type("[backspace][backspace][backspace][backspace]'mul", () => {
+            assert.deepEqual(
+              getItemTitles(),
+              ['multi word'],
+              'supports matching on a single quote initial input'
+            );
             done();
           });
       });
 
-      it('handles filtering matches with unicode', (done) => {
-        syn
-          .click(input)
-          .type('group:éf', () => {
-            assert.deepEqual(getItemTitles(), [ 'effort' ], 'matches éffort with unicode value');
-            done();
-          });
+      it('handles filtering matches with unicode', done => {
+        syn.click(input).type('group:éf', () => {
+          assert.deepEqual(
+            getItemTitles(),
+            ['effort'],
+            'matches éffort with unicode value'
+          );
+          done();
+        });
       });
 
-      it('sets input and display friendly name value', (done) => {
+      it('sets input and display friendly name value', done => {
         syn
           .click(input)
           .type('group:"mul[down][enter]', () => {
-            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid8', 'pubid should be added to the hidden input');
-            assert.deepEqual(getLozengeValues(ctrl), ['group:"multi word"'], 'adds and wraps multi word with quotes');
+            assert.equal(
+              testEl.querySelector('input[type=hidden]').value.trim(),
+              'group:pid8',
+              'pubid should be added to the hidden input'
+            );
+            assert.deepEqual(
+              getLozengeValues(ctrl),
+              ['group:"multi word"'],
+              'adds and wraps multi word with quotes'
+            );
           })
           .type('group:a[down][enter]', () => {
-            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid8 group:pid1', 'pubid should be added to the hidden input');
-            assert.deepEqual(getLozengeValues(ctrl), ['group:"multi word"', 'group:aaac'], 'adds single word as is to lozenge');
+            assert.equal(
+              testEl.querySelector('input[type=hidden]').value.trim(),
+              'group:pid8 group:pid1',
+              'pubid should be added to the hidden input'
+            );
+            assert.deepEqual(
+              getLozengeValues(ctrl),
+              ['group:"multi word"', 'group:aaac'],
+              'adds single word as is to lozenge'
+            );
             done();
           });
       });
 
-      it('matches escaped values', (done) => {
-        syn
-          .click(input)
-          .type('group:<[down][enter]', () => {
-            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'group:pid10', 'pubid should be added to the hidden input');
-            assert.deepEqual(getLozengeValues(ctrl), ['group:"<*>Haskell fans<*>"'], 'adds and wraps multi word with quotes');
-            done();
-          });
+      it('matches escaped values', done => {
+        syn.click(input).type('group:<[down][enter]', () => {
+          assert.equal(
+            testEl.querySelector('input[type=hidden]').value.trim(),
+            'group:pid10',
+            'pubid should be added to the hidden input'
+          );
+          assert.deepEqual(
+            getLozengeValues(ctrl),
+            ['group:"<*>Haskell fans<*>"'],
+            'adds and wraps multi word with quotes'
+          );
+          done();
+        });
       });
     });
 
     describe('it allows tag value suggestions', () => {
-
       beforeEach(() => {
         // we need to setup the env vars before invoking controller
         teardown();
@@ -323,62 +376,91 @@ describe('SearchBarController', () => {
         sinon.stub(testEl.querySelector('form'), 'submit');
       });
 
-      unroll('shows tag suggestions', (done, fixture) => {
-        syn
-          .click(input)
-          .type(fixture.text, () => {
-            assert.isTrue(dropdown.classList.contains('is-open'));
+      unroll(
+        'shows tag suggestions',
+        (done, fixture) => {
+          syn
+            .click(input)
+            .type(fixture.text, () => {
+              assert.isTrue(dropdown.classList.contains('is-open'));
 
-            const titles = getItemTitles();
+              const titles = getItemTitles();
 
-            assert.lengthOf(titles, 5, 'we should be enforcing the 5 item max');
-          })
-          .type('[backspace][backspace][backspace][backspace]', () => {
-            assert.deepEqual(getItemTitles(), [ 'user:', 'tag:', 'url:', 'group:' ], 'tags go away as facet is removed');
-            done();
-          });
-      },[
-        {text: 'tag:'},
-        {text: 'Tag:'},
-        {text: 'TAG:'},
-      ]);
+              assert.lengthOf(
+                titles,
+                5,
+                'we should be enforcing the 5 item max'
+              );
+            })
+            .type('[backspace][backspace][backspace][backspace]', () => {
+              assert.deepEqual(
+                getItemTitles(),
+                ['user:', 'tag:', 'url:', 'group:'],
+                'tags go away as facet is removed'
+              );
+              done();
+            });
+        },
+        [{ text: 'tag:' }, { text: 'Tag:' }, { text: 'TAG:' }]
+      );
 
-      it('orders tags by priority and indexOf score', (done) => {
+      it('orders tags by priority and indexOf score', done => {
         syn
           .click(input)
           .type('tag:', () => {
-            assert.deepEqual(getItemTitles(), [ 'aaac', 'aaad', 'aadf', 'aaag', 'aaaa' ], 'default ordering based on priority');
+            assert.deepEqual(
+              getItemTitles(),
+              ['aaac', 'aaad', 'aadf', 'aaag', 'aaaa'],
+              'default ordering based on priority'
+            );
           })
           .type('aad', () => {
-            assert.deepEqual(getItemTitles(), [ 'aadf', 'aaad'], 'sorting by indexof score with equal priority');
+            assert.deepEqual(
+              getItemTitles(),
+              ['aadf', 'aaad'],
+              'sorting by indexof score with equal priority'
+            );
             done();
           });
       });
 
-      it('matches on multi word searches', (done) => {
+      it('matches on multi word searches', done => {
         syn
           .click(input)
           .type('tag:"mul', () => {
-            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a double quote initial input');
+            assert.deepEqual(
+              getItemTitles(),
+              ['multi word'],
+              'supports matching on a double quote initial input'
+            );
           })
-          .type('[backspace][backspace][backspace][backspace]\'mul', () => {
-            assert.deepEqual(getItemTitles(), [ 'multi word' ], 'supports matching on a single quote initial input');
+          .type("[backspace][backspace][backspace][backspace]'mul", () => {
+            assert.deepEqual(
+              getItemTitles(),
+              ['multi word'],
+              'supports matching on a single quote initial input'
+            );
           })
           .type('[down][enter][enter]', () => {
-            assert.equal(testEl.querySelector('input[type=hidden]').value.trim(), 'tag:"multi word"', 'selecting a multi word tag should wrap with quotes');
+            assert.equal(
+              testEl.querySelector('input[type=hidden]').value.trim(),
+              'tag:"multi word"',
+              'selecting a multi word tag should wrap with quotes'
+            );
             done();
           });
       });
 
-      it('handles filtering matches with unicode', (done) => {
-        syn
-          .click(input)
-          .type('tag:éf', () => {
-            assert.deepEqual(getItemTitles(), [ 'effort' ], 'matches éffort with unicode value');
-            done();
-          });
+      it('handles filtering matches with unicode', done => {
+        syn.click(input).type('tag:éf', () => {
+          assert.deepEqual(
+            getItemTitles(),
+            ['effort'],
+            'matches éffort with unicode value'
+          );
+          done();
+        });
       });
-
     });
   });
 
@@ -430,67 +512,72 @@ describe('SearchBarController', () => {
     }
 
     it('should create lozenges for existing query terms in the input on page load', () => {
-      const {ctrl} = component('foo');
+      const { ctrl } = component('foo');
 
       assert.deepEqual(getLozengeValues(ctrl), ['foo']);
     });
 
     it('inserts a hidden input on init', () => {
-      const {hiddenInput} = component();
+      const { hiddenInput } = component();
 
       assert.notEqual(hiddenInput, null);
     });
 
     it('removes the name="q" attribute from the input on init', () => {
-      const {input} = component();
+      const { input } = component();
 
       assert.isFalse(input.hasAttribute('name'));
     });
 
     it('adds the name="q" attribute to the hidden input on init', () => {
-      const {hiddenInput} = component();
+      const { hiddenInput } = component();
 
       assert.equal(hiddenInput.getAttribute('name'), 'q');
     });
 
     it('leaves the hidden input empty on init if the visible input is empty', () => {
-      const {hiddenInput} = component();
+      const { hiddenInput } = component();
 
       assert.equal(hiddenInput.value, '');
     });
 
     it('copies lozengifiable text from the input into the hidden input on init', () => {
-      const {hiddenInput} = component('these are my tag:lozenges');
+      const { hiddenInput } = component('these are my tag:lozenges');
 
       assert.equal(hiddenInput.value, 'these are my tag:lozenges');
     });
 
     it('copies unlozengifiable text from the input into the hidden input on init', () => {
-      const {hiddenInput} = component("group:'unclosed quotes");
+      const { hiddenInput } = component("group:'unclosed quotes");
 
       assert.equal(hiddenInput.value, "group:'unclosed quotes");
     });
 
     it('copies lozengifiable and unlozengifiable text from the input into the hidden input on init', () => {
-      const {hiddenInput} = component("these are my tag:lozenges group:'unclosed quotes");
+      const { hiddenInput } = component(
+        "these are my tag:lozenges group:'unclosed quotes"
+      );
 
-      assert.equal(hiddenInput.value, "these are my tag:lozenges group:'unclosed quotes");
+      assert.equal(
+        hiddenInput.value,
+        "these are my tag:lozenges group:'unclosed quotes"
+      );
     });
 
     it('updates the value of the hidden input as text is typed into the visible input', () => {
-      const {input, hiddenInput} = component('initial text');
+      const { input, hiddenInput } = component('initial text');
 
-      input.value = 'new text';  // This is just "new text" and not
-                                 // "initial text new text" because the
-                                 // "initial text" will have been moved into
-                                 // lozenges.
+      input.value = 'new text'; // This is just "new text" and not
+      // "initial text new text" because the
+      // "initial text" will have been moved into
+      // lozenges.
       input.dispatchEvent(new Event('input'));
 
       assert.equal(hiddenInput.value, 'initial text new text');
     });
 
     it('updates the value of the hidden input as unlozengifiable text is typed into the visible input', () => {
-      const {input, hiddenInput} = component("group:'unclosed quotes");
+      const { input, hiddenInput } = component("group:'unclosed quotes");
 
       input.value = "group:'unclosed quotes still unclosed";
       input.dispatchEvent(new Event('input'));
@@ -499,7 +586,7 @@ describe('SearchBarController', () => {
     });
 
     it('updates the value of the hidden input when a lozenge is deleted', () => {
-      const {ctrl, hiddenInput} = component('foo bar');
+      const { ctrl, hiddenInput } = component('foo bar');
 
       const lozenge = getLozenges(ctrl)[0];
       lozenge.controllers[0].options.deleteCallback();
@@ -508,14 +595,14 @@ describe('SearchBarController', () => {
     });
 
     it('should not create a lozenge for incomplete query strings in the input on page load', () => {
-      const {ctrl, input} = component("'bar");
+      const { ctrl, input } = component("'bar");
 
       assert.equal(getLozenges(ctrl).length, 0);
       assert.equal(input.value, "'bar");
     });
 
-    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', (done) => {
-      const {ctrl, input} = component('foo');
+    it('should create a lozenge when the user presses space and there are no incomplete query strings in the input', done => {
+      const { ctrl, input } = component('foo');
 
       syn
         .click(input)
@@ -526,20 +613,20 @@ describe('SearchBarController', () => {
         });
     });
 
-    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', (done) => {
-      const {ctrl, input} = component("'bar gar'");
+    it('should create a lozenge when the user completes a previously incomplete query string and then presses the space key', done => {
+      const { ctrl, input } = component("'bar gar'");
 
       syn
         .click(input)
-        .type(' gar\'')
+        .type(" gar'")
         .type('[space]', () => {
           assert.deepEqual(getLozengeValues(ctrl), ["'bar gar'"]);
           done();
         });
     });
 
-    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', (done) => {
-      const {ctrl, input} = component("'bar");
+    it('should not create a lozenge when the user does not completes a previously incomplete query string and presses the space key', done => {
+      const { ctrl, input } = component("'bar");
 
       syn
         .click(input)
@@ -554,14 +641,15 @@ describe('SearchBarController', () => {
     });
 
     describe('mapping initial input value to proper group lozenge and input values', () => {
-
       let groupsScript;
 
       beforeEach(() => {
-        const suggestions = [{
-          name: 'abc 123',
-          pubid: 'pid124',
-        }];
+        const suggestions = [
+          {
+            name: 'abc 123',
+            pubid: 'pid124',
+          },
+        ];
 
         groupsScript = document.createElement('script');
         groupsScript.innerHTML = JSON.stringify(suggestions);
@@ -574,8 +662,7 @@ describe('SearchBarController', () => {
       });
 
       it('should map an initial group name to proper group pubid input value', () => {
-
-        const {input, hiddenInput} = component("group:'abc 123'");
+        const { input, hiddenInput } = component("group:'abc 123'");
 
         assert.deepEqual(getLozengeValues(ctrl), ['group:"abc 123"']);
         assert.equal(input.value, '');
@@ -583,16 +670,14 @@ describe('SearchBarController', () => {
       });
 
       it('should map an initial group pubid to proper group name lozenge value', () => {
-
-        const {input, hiddenInput} = component('group:pid124');
+        const { input, hiddenInput } = component('group:pid124');
 
         assert.deepEqual(getLozengeValues(ctrl), ['group:"abc 123"']);
         assert.equal(input.value, '');
         assert.equal(hiddenInput.value, 'group:pid124');
       });
 
-
-      it('places lozenges as first elements in container', (done) => {
+      it('places lozenges as first elements in container', done => {
         const template = `
             <div>
               <form data-ref="searchBarForm">
@@ -603,7 +688,11 @@ describe('SearchBarController', () => {
             </div>
           `.trim();
 
-        const ctrl = util.setupComponent(document, template, SearchBarController);
+        const ctrl = util.setupComponent(
+          document,
+          template,
+          SearchBarController
+        );
 
         // Stub the submit method so it doesn't actually do a full page reload.
         ctrl.refs.searchBarForm.submit = sinon.stub();
@@ -613,21 +702,25 @@ describe('SearchBarController', () => {
 
         let currentChildrenCount = container.children.length;
 
-        syn
-          .click(input)
-          .type('foo[space]', () => {
+        syn.click(input).type('foo[space]', () => {
+          currentChildrenCount += 1;
 
-            currentChildrenCount += 1;
+          assert.lengthOf(
+            container.children,
+            currentChildrenCount,
+            'lozenge add should be added as a child'
+          );
 
-            assert.lengthOf(container.children, currentChildrenCount, 'lozenge add should be added as a child');
+          assert.ok(
+            container.children[0].classList.contains('lozenge'),
+            'should be set as first child'
+          );
 
-            assert.ok(container.children[0].classList.contains('lozenge'), 'should be set as first child');
-
-            done();
-          });
+          done();
+        });
       });
 
-      it('places lozenges after any initial lozenges', (done) => {
+      it('places lozenges after any initial lozenges', done => {
         const template = `
             <div>
               <form data-ref="searchBarForm">
@@ -638,7 +731,11 @@ describe('SearchBarController', () => {
             </div>
           `.trim();
 
-        const ctrl = util.setupComponent(document, template, SearchBarController);
+        const ctrl = util.setupComponent(
+          document,
+          template,
+          SearchBarController
+        );
 
         // Stub the submit method so it doesn't actually do a full page reload.
         ctrl.refs.searchBarForm.submit = sinon.stub();
@@ -646,7 +743,7 @@ describe('SearchBarController', () => {
         const container = ctrl.element.querySelector('.search-bar__lozenges');
 
         const lozengeEl = cloneTemplate(lozengeTemplateEl);
-        new LozengeController(lozengeEl, {content: 'seeded'});
+        new LozengeController(lozengeEl, { content: 'seeded' });
 
         container.insertBefore(lozengeEl, container.firstChild);
 
@@ -654,23 +751,19 @@ describe('SearchBarController', () => {
 
         let currentChildrenCount = container.children.length;
 
-        syn
-          .click(input)
-          .type('foo[space]', () => {
+        syn.click(input).type('foo[space]', () => {
+          currentChildrenCount += 1;
 
-            currentChildrenCount += 1;
+          assert.lengthOf(container.children, currentChildrenCount);
 
-            assert.lengthOf(container.children, currentChildrenCount);
+          assert.ok(container.children[0].classList.contains('lozenge'));
+          assert.ok(container.children[1].classList.contains('lozenge'));
 
-            assert.ok(container.children[0].classList.contains('lozenge'));
-            assert.ok(container.children[1].classList.contains('lozenge'));
+          assert.deepEqual(getLozengeValues(ctrl), ['seeded', 'foo']);
 
-            assert.deepEqual(getLozengeValues(ctrl), ['seeded', 'foo']);
-
-            done();
-          });
+          done();
+        });
       });
-
     });
   });
 });
