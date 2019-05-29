@@ -47,8 +47,7 @@ matrix:
       language: node_js
       node_js: 'node'
       script:
-        gulp lint
-        npm run-script checkformatting
+        make frontend-lint
 
     # Lint backend code
     - env: ACTION=backend-lint

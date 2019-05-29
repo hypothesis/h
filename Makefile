@@ -51,6 +51,11 @@ sql:
 lint:
 	tox -q -e py36-lint
 
+.PHONY: frontend-lint
+frontend-lint:
+	$(GULP) lint
+	npm run-script checkformatting
+
 .PHONY: analyze
 analyze:
 	tox -qq -e py36-analyze
