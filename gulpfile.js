@@ -5,10 +5,8 @@
 
 var path = require('path');
 
-var batch = require('gulp-batch');
 var changed = require('gulp-changed');
 var commander = require('commander');
-var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var log = require('gulplog');
@@ -230,14 +228,7 @@ function generateManifest() {
 }
 
 gulp.task('watch-manifest', function() {
-  gulp.watch(
-    MANIFEST_SOURCE_FILES,
-    batch(function(events, done) {
-      endOfStream(generateManifest(), function() {
-        done();
-      });
-    })
-  );
+  gulp.watch(MANIFEST_SOURCE_FILES, generateManifest);
 });
 
 gulp.task(
