@@ -48,6 +48,7 @@ matrix:
       node_js: 'node'
       script:
         gulp lint
+        npm run-script checkformatting
 
     # Lint backend code
     - env: ACTION=backend-lint
