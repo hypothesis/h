@@ -1,10 +1,8 @@
 {
   "extends": "hypothesis",
   "rules": {
-    "arrow-parens": ["error", "as-needed", { "requireForBlockBody": true }],
-    "arrow-spacing": "error",
+    "indent": "off",
     "no-var": "error",
-    "keyword-spacing": "error",
     "prefer-arrow-callback": "error",
     "prefer-const": ["error", { "destructuring": "all" }],
     "space-before-blocks": "error"
