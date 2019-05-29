@@ -289,14 +289,3 @@ gulp.task('test', function(callback) {
 gulp.task('test-watch', function(callback) {
   runKarma('./h/static/scripts/karma.config.js', {}, callback);
 });
-
-gulp.task('lint', function() {
-  // Adapted from usage example at https://www.npmjs.com/package/gulp-eslint
-  // `gulp-eslint` is loaded lazily so that it is not required during Docker image builds
-  var eslint = require('gulp-eslint');
-  return gulp
-    .src(['gulpfile.js', 'h/static/scripts/**/*.js'])
-    .pipe(eslint())
-    .pipe(eslint.format())
-    .pipe(eslint.failAfterError());
-});

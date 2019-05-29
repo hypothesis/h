@@ -53,7 +53,7 @@ lint:
 
 .PHONY: frontend-lint
 frontend-lint:
-	$(GULP) lint
+	npm run-script lint
 	npm run-script checkformatting
 
 .PHONY: analyze

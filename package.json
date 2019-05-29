@@ -6,7 +6,8 @@
   "scripts": {
     "build": "gulp build",
     "checkformatting": "prettier --check *.js {h,scripts}/**/*.js",
-    "format": "prettier --list-different --write *.js {h,scripts}/**/*.js"
+    "format": "prettier --list-different --write *.js {h,scripts}/**/*.js",
+    "lint": "eslint h/static/scripts"
   },
   "dependencies": {
     "autoprefixer": "^6.0.3",
@@ -58,7 +59,6 @@
     "eslint": "^3.9.1",
     "eslint-config-hypothesis": "^1.0.0",
     "fetch-mock": "^5.1.5",
-    "gulp-eslint": "^3.0.1",
     "karma": "^3.0.0",
     "karma-browserify": "^5.3.0",
     "karma-chai": "^0.1.0",
