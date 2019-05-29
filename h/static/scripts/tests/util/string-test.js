@@ -20,7 +20,6 @@ describe('util/string', () => {
   });
 
   describe('stringUtil helpers', () => {
-
     it('removes hungarian marks', () => {
       const text = 'Fürge rőt róka túlszökik zsíros étkű kutyán';
       const decoded = stringUtil.fold(stringUtil.normalize(text));
@@ -62,12 +61,13 @@ describe('util/string', () => {
     });
 
     it('removes all marks', () => {
-      const text = '̀ ́ ̂ ̃ ̄ ̅ ̆ ̇ ̈ ̉ ̊ ̋ ̌ ̍ ̎ ̏ ̐ ̑ ̒ ̓ ̔ ̕ ̖ ̗ ̘ ̙ ̚ ̛ ̜ ̝ ̞ ̟ ̠ ̡ ̢ ̣ ̤ ̥ ̦ ̧ ̨ ̩ ̪ ̫ ̬ ̭ ̮ ̯ ̰ ̱ ̲ ̳ ̴ ̵ ̶ ̷ ̸ ̹ ̺ ̻ ̼ ̽ ̾ ̿ ̀ ́ ͂ ̓ ̈́ ͅ ͠ ͡"';
+      const text =
+        '̀ ́ ̂ ̃ ̄ ̅ ̆ ̇ ̈ ̉ ̊ ̋ ̌ ̍ ̎ ̏ ̐ ̑ ̒ ̓ ̔ ̕ ̖ ̗ ̘ ̙ ̚ ̛ ̜ ̝ ̞ ̟ ̠ ̡ ̢ ̣ ̤ ̥ ̦ ̧ ̨ ̩ ̪ ̫ ̬ ̭ ̮ ̯ ̰ ̱ ̲ ̳ ̴ ̵ ̶ ̷ ̸ ̹ ̺ ̻ ̼ ̽ ̾ ̿ ̀ ́ ͂ ̓ ̈́ ͅ ͠ ͡"';
       const decoded = stringUtil.fold(stringUtil.normalize(text));
-      const expected = '                                                                       "';
+      const expected =
+        '                                                                       "';
 
       assert.equal(decoded, expected);
     });
-
   });
 });

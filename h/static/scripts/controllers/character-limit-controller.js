@@ -18,8 +18,8 @@ class CharacterLimitController extends Controller {
     const maxlength = parseInt(input.dataset.maxlength);
     const counter = this.refs.characterLimitCounter;
     counter.textContent = input.value.length + '/' + maxlength;
-    setElementState(counter, {tooLong: input.value.length > maxlength});
-    setElementState(this.refs.characterLimitCounter, {ready: true});
+    setElementState(counter, { tooLong: input.value.length > maxlength });
+    setElementState(this.refs.characterLimitCounter, { ready: true });
   }
 }
 

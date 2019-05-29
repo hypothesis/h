@@ -14,14 +14,18 @@ class ConfirmSubmitController extends Controller {
 
     const window_ = options.window || window;
 
-    element.addEventListener('click', (event) => {
-      if (!window_.confirm(element.dataset.confirmMessage)) {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        return;
-      }
-    }, /*capture*/ true);
+    element.addEventListener(
+      'click',
+      event => {
+        if (!window_.confirm(element.dataset.confirmMessage)) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          return;
+        }
+      },
+      /*capture*/ true
+    );
   }
 }
 

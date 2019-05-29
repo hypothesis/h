@@ -31,9 +31,13 @@ describe('raven', () => {
         release: 'release',
         userid: 'acct:foobar@hypothes.is',
       });
-      assert.calledWith(fakeRavenJS.config, 'dsn', sinon.match({
-        release: 'release',
-      }));
+      assert.calledWith(
+        fakeRavenJS.config,
+        'dsn',
+        sinon.match({
+          release: 'release',
+        })
+      );
     });
 
     it('sets the user context when a userid is specified', () => {
@@ -42,9 +46,12 @@ describe('raven', () => {
         release: 'release',
         userid: 'acct:foobar@hypothes.is',
       });
-      assert.calledWith(fakeRavenJS.setUserContext, sinon.match({
-        id: 'acct:foobar@hypothes.is',
-      }));
+      assert.calledWith(
+        fakeRavenJS.setUserContext,
+        sinon.match({
+          id: 'acct:foobar@hypothes.is',
+        })
+      );
     });
 
     it('does not set the user context when a userid is not specified', () => {
@@ -62,18 +69,25 @@ describe('raven', () => {
         release: 'release',
       });
       const event = document.createEvent('Event');
-      event.initEvent('unhandledrejection', true /* bubbles */, true /* cancelable */);
+      event.initEvent(
+        'unhandledrejection',
+        true /* bubbles */,
+        true /* cancelable */
+      );
       event.reason = new Error('Some error');
       window.dispatchEvent(event);
 
-      assert.calledWith(fakeRavenJS.captureException, event.reason,
-        sinon.match.any);
+      assert.calledWith(
+        fakeRavenJS.captureException,
+        event.reason,
+        sinon.match.any
+      );
     });
   });
 
   describe('.report()', () => {
     it('extracts the message property from Error-like objects', () => {
-      raven.report({message: 'An error'}, 'context');
+      raven.report({ message: 'An error' }, 'context');
       assert.calledWith(fakeRavenJS.captureException, 'An error', {
         extra: {
           when: 'context',

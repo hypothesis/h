@@ -46,7 +46,10 @@ function sendAuthResponse() {
       clientWindow.dispatchEvent(event);
       window.close();
     } catch (err) {
-      console.error('The "web_message" response mode is not supported in IE', err);
+      console.error(
+        'The "web_message" response mode is not supported in IE',
+        err
+      );
     }
     return;
   }
@@ -56,4 +59,3 @@ function sendAuthResponse() {
 }
 
 sendAuthResponse();
-

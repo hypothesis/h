@@ -4,7 +4,6 @@ const CharacterLimitController = require('../../controllers/character-limit-cont
 const util = require('./util');
 
 describe('CharacterLimitController', () => {
-
   let ctrl;
 
   afterEach(() => {
@@ -22,7 +21,10 @@ describe('CharacterLimitController', () => {
     maxlength = maxlength || 250;
 
     let template = '<div class="js-character-limit">';
-    template += '<textarea data-ref="characterLimitInput" data-maxlength="' + maxlength + '">';
+    template +=
+      '<textarea data-ref="characterLimitInput" data-maxlength="' +
+      maxlength +
+      '">';
     if (value) {
       template += value;
     }
@@ -104,22 +106,19 @@ describe('CharacterLimitController', () => {
   it('does not add error class when no pre-rendered text', () => {
     const counterEl = component(null, 5).counterEl;
 
-    assert.equal(counterEl.classList.contains('is-too-long'),
-                 false);
+    assert.equal(counterEl.classList.contains('is-too-long'), false);
   });
 
   it('does not add error class when pre-rendered text short enough', () => {
     const counterEl = component('foo', 5).counterEl;
 
-    assert.equal(counterEl.classList.contains('is-too-long'),
-                 false);
+    assert.equal(counterEl.classList.contains('is-too-long'), false);
   });
 
   it('adds an error class to the counter when pre-rendered value too long', () => {
     const counterEl = component('Too long', 5).counterEl;
 
-    assert.equal(counterEl.classList.contains('is-too-long'),
-                 true);
+    assert.equal(counterEl.classList.contains('is-too-long'), true);
   });
 
   it('adds an error class to the counter when too much text entered', () => {
@@ -130,8 +129,7 @@ describe('CharacterLimitController', () => {
     textarea.value = 'too long';
     textarea.dispatchEvent(new Event('input'));
 
-    assert.equal(counterEl.classList.contains('is-too-long'),
-                 true);
+    assert.equal(counterEl.classList.contains('is-too-long'), true);
   });
 
   it('removes error class from counter when text reduced', () => {
@@ -142,7 +140,6 @@ describe('CharacterLimitController', () => {
     textarea.value = 'short';
     textarea.dispatchEvent(new Event('input'));
 
-    assert.equal(counterEl.classList.contains('is-too-long'),
-                 false);
+    assert.equal(counterEl.classList.contains('is-too-long'), false);
   });
 });

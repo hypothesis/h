@@ -8,10 +8,12 @@ class AdminUsersController extends Controller {
 
     const window_ = options.window || window;
     function confirmFormSubmit() {
-      return window_.confirm('This will permanently delete all the user\'s data. Are you sure?');
+      return window_.confirm(
+        "This will permanently delete all the user's data. Are you sure?"
+      );
     }
 
-    this.on('submit', (event) => {
+    this.on('submit', event => {
       if (!confirmFormSubmit()) {
         event.preventDefault();
       }

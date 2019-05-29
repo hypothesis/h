@@ -12,7 +12,7 @@ class DropdownMenuController extends Controller {
 
     const toggleEl = this.refs.dropdownMenuToggle;
 
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (!this.refs.dropdownMenuContent.contains(event.target)) {
         // When clicking outside the menu on the toggle element, stop the event
         // so that it does not re-trigger the menu
@@ -21,27 +21,36 @@ class DropdownMenuController extends Controller {
           event.preventDefault();
         }
 
-        this.setState({open: false});
+        this.setState({ open: false });
 
-        element.ownerDocument.removeEventListener('click', handleClickOutside,
-          true /* capture */);
+        element.ownerDocument.removeEventListener(
+          'click',
+          handleClickOutside,
+          true /* capture */
+        );
       }
     };
 
-    toggleEl.addEventListener('click', (event) => {
+    toggleEl.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
 
-      this.setState({open: true});
+      this.setState({ open: true });
 
-      element.ownerDocument.addEventListener('click', handleClickOutside,
-        true /* capture */);
+      element.ownerDocument.addEventListener(
+        'click',
+        handleClickOutside,
+        true /* capture */
+      );
     });
   }
 
   update(state) {
-    setElementState(this.refs.dropdownMenuContent, {open: state.open});
-    this.refs.dropdownMenuToggle.setAttribute('aria-expanded', state.open.toString());
+    setElementState(this.refs.dropdownMenuContent, { open: state.open });
+    this.refs.dropdownMenuToggle.setAttribute(
+      'aria-expanded',
+      state.open.toString()
+    );
   }
 }
 

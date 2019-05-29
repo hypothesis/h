@@ -26,7 +26,7 @@ class SearchBucketController extends Controller {
 
     this.scrollTo = this.options.scrollTo || scrollIntoView;
 
-    this.refs.header.addEventListener('click', (event) => {
+    this.refs.header.addEventListener('click', event => {
       if (this.refs.domainLink.contains(event.target)) {
         return;
       }
@@ -34,18 +34,18 @@ class SearchBucketController extends Controller {
       event.stopPropagation();
       event.preventDefault();
 
-      this.setState({expanded: !this.state.expanded});
+      this.setState({ expanded: !this.state.expanded });
     });
 
-    this.refs.title.addEventListener('click', (event) => {
+    this.refs.title.addEventListener('click', event => {
       event.stopPropagation();
       event.preventDefault();
 
-      this.setState({expanded: !this.state.expanded});
+      this.setState({ expanded: !this.state.expanded });
     });
 
     this.refs.collapseView.addEventListener('click', () => {
-      this.setState({expanded: !this.state.expanded});
+      this.setState({ expanded: !this.state.expanded });
     });
 
     const envFlags = this.options.envFlags || window.envFlags;
@@ -56,8 +56,8 @@ class SearchBucketController extends Controller {
   }
 
   update(state, prevState) {
-    setElementState(this.refs.content, {expanded: state.expanded});
-    setElementState(this.element, {expanded: state.expanded});
+    setElementState(this.refs.content, { expanded: state.expanded });
+    setElementState(this.element, { expanded: state.expanded });
 
     this.refs.title.setAttribute('aria-expanded', state.expanded.toString());
 

@@ -21,19 +21,31 @@ function canLozengify(phrase) {
     return false;
   }
   // if a phrase starts with a double quote, it has to have a closing double quote
-  if (phrase.indexOf('"') === 0 && (phrase.indexOf('"', 1) > phrase.length - 1 || phrase.indexOf('"', 1) < 0)) {
+  if (
+    phrase.indexOf('"') === 0 &&
+    (phrase.indexOf('"', 1) > phrase.length - 1 || phrase.indexOf('"', 1) < 0)
+  ) {
     return false;
   }
   // if a phrase starts with a single quote, it has to have a closing double quote
-  if (phrase.indexOf("'") === 0 && (phrase.indexOf("'", 1) > phrase.length - 1 || phrase.indexOf("'", 1) < 0)) {
+  if (
+    phrase.indexOf("'") === 0 &&
+    (phrase.indexOf("'", 1) > phrase.length - 1 || phrase.indexOf("'", 1) < 0)
+  ) {
     return false;
   }
   // if phrase ends with a double quote it has to start with one
-  if (phrase.indexOf('"', 1) === phrase.length - 1 && phrase.indexOf('"') !== 0) {
+  if (
+    phrase.indexOf('"', 1) === phrase.length - 1 &&
+    phrase.indexOf('"') !== 0
+  ) {
     return false;
   }
   // if phrase ends with a single quote it has to start with one
-  if (phrase.indexOf("'", 1) === phrase.length - 1 && phrase.indexOf("'") !== 0) {
+  if (
+    phrase.indexOf("'", 1) === phrase.length - 1 &&
+    phrase.indexOf("'") !== 0
+  ) {
     return false;
   }
   return true;
@@ -63,11 +75,13 @@ function shouldLozengify(phrase) {
     if (!canLozengify(queryTerm.facetName)) {
       return false;
     }
-    if (queryTerm.facetValue.length > 0 && !canLozengify(queryTerm.facetValue)) {
+    if (
+      queryTerm.facetValue.length > 0 &&
+      !canLozengify(queryTerm.facetValue)
+    ) {
       return false;
     }
-  }
-  else if (!canLozengify(phrase)) {
+  } else if (!canLozengify(phrase)) {
     return false;
   }
   return true;
@@ -93,7 +107,7 @@ function getLozengeValues(queryString) {
   let inputTerms = '';
   let quoted;
   const queryTerms = [];
-  queryString.split(' ').forEach((term) => {
+  queryString.split(' ').forEach(term => {
     if (quoted) {
       inputTerms = inputTerms + ' ' + term;
       if (shouldLozengify(inputTerms)) {
@@ -131,11 +145,7 @@ function getLozengeValues(queryString) {
  * hasKnownNamedQueryTerm('user:foo')
  */
 function hasKnownNamedQueryTerm(queryTerm) {
-  const knownNamedQueryTerms = ['user',
-    'uri',
-    'url',
-    'group',
-    'tag'];
+  const knownNamedQueryTerms = ['user', 'uri', 'url', 'group', 'tag'];
 
   const facetName = getLozengeFacetNameAndValue(queryTerm).facetName;
 
@@ -173,10 +183,10 @@ function getLozengeFacetNameAndValue(queryTerm) {
   if (queryTerm.indexOf(':') >= 0) {
     i = queryTerm.indexOf(':');
 
-    lozengeFacetNameAndValue.facetName =
-      queryTerm.slice(0, i).trim();
-    lozengeFacetNameAndValue.facetValue =
-      queryTerm.slice(i+1, queryTerm.length).trim();
+    lozengeFacetNameAndValue.facetName = queryTerm.slice(0, i).trim();
+    lozengeFacetNameAndValue.facetValue = queryTerm
+      .slice(i + 1, queryTerm.length)
+      .trim();
 
     return lozengeFacetNameAndValue;
   }

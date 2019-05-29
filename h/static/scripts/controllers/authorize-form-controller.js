@@ -44,10 +44,13 @@ class AuthorizeFormController extends Controller {
 
       // Since this message contains no private data, just set the origin to
       // '*' (any).
-      window.opener.postMessage({
-        type: 'authorization_canceled',
-        state,
-      }, '*');
+      window.opener.postMessage(
+        {
+          type: 'authorization_canceled',
+          state,
+        },
+        '*'
+      );
     }
   }
 

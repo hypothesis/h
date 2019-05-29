@@ -30,18 +30,20 @@
  * @param {Array<T>} fixtures - Array of fixture objects.
  */
 function unroll(description, testFn, fixtures) {
-  fixtures.forEach((fixture) => {
+  fixtures.forEach(fixture => {
     const caseDescription = Object.keys(fixture).reduce((desc, key) => {
       return desc.replace('#' + key, String(fixture[key]));
     }, description);
-    it(caseDescription, (done) => {
+    it(caseDescription, done => {
       if (testFn.length === 1) {
         // Test case does not accept a 'done' callback argument, so we either
         // call done() immediately if it returns a non-Promiselike object
         // or when the Promise resolves otherwise
         const result = testFn(fixture);
         if (typeof result === 'object' && result.then) {
-          result.then(() => { done(); }, done);
+          result.then(() => {
+            done();
+          }, done);
         } else {
           done();
         }

@@ -59,13 +59,15 @@ var vendorNoParseModules = ['jquery', 'unorm'];
 gulp.task('build-vendor-js', function() {
   var finished = [];
   Object.keys(vendorBundles).forEach(function(name) {
-    finished.push(createBundle({
-      name: name,
-      require: vendorBundles[name],
-      minify: IS_PRODUCTION_BUILD,
-      path: SCRIPT_DIR,
-      noParse: vendorNoParseModules,
-    }));
+    finished.push(
+      createBundle({
+        name: name,
+        require: vendorBundles[name],
+        minify: IS_PRODUCTION_BUILD,
+        path: SCRIPT_DIR,
+        noParse: vendorNoParseModules,
+      })
+    );
   });
   return Promise.all(finished);
 });
@@ -77,37 +79,50 @@ var bundleBaseConfig = {
   noParse: vendorNoParseModules,
 };
 
-var bundles = [{
-  // Public-facing website
-  name: 'site',
-  entry: './h/static/scripts/site',
-},{
-  // Admin areas of the site
-  name: 'admin-site',
-  entry: './h/static/scripts/admin-site',
-},{
-  // Header script inserted inline at the top of the page
-  name: 'header',
-  entry: './h/static/scripts/header',
-},{
-  // Helper script for the OAuth post-authorization page.
-  name: 'post-auth',
-  entry: './h/static/scripts/post-auth',
-}];
+var bundles = [
+  {
+    // Public-facing website
+    name: 'site',
+    entry: './h/static/scripts/site',
+  },
+  {
+    // Admin areas of the site
+    name: 'admin-site',
+    entry: './h/static/scripts/admin-site',
+  },
+  {
+    // Header script inserted inline at the top of the page
+    name: 'header',
+    entry: './h/static/scripts/header',
+  },
+  {
+    // Helper script for the OAuth post-authorization page.
+    name: 'post-auth',
+    entry: './h/static/scripts/post-auth',
+  },
+];
 
 var bundleConfigs = bundles.map(function(config) {
   return Object.assign({}, bundleBaseConfig, config);
 });
 
-gulp.task('build-js', gulp.series(['build-vendor-js'], function() {
-  return Promise.all(bundleConfigs.map(function(config) {
-    return createBundle(config);
-  }));
-}));
+gulp.task(
+  'build-js',
+  gulp.series(['build-vendor-js'], function() {
+    return Promise.all(
+      bundleConfigs.map(function(config) {
+        return createBundle(config);
+      })
+    );
+  })
+);
 
-gulp.task('watch-js', gulp.series(['build-vendor-js'], function() {
-  return bundleConfigs.map(config => createBundle(config, { watch: true }));
-}));
+gulp.task(
+  'watch-js',
+  gulp.series(['build-vendor-js'], function() {
+    return bundleConfigs.map(config => createBundle(config, { watch: true }));
+  })
+);
 
 // Rewrite font URLs to look for fonts in 'build/fonts' instead of
 // 'build/styles/fonts'
@@ -126,7 +141,8 @@ gulp.task('build-vendor-css', function() {
     url: rewriteCSSURL,
   });
 
-  return gulp.src(vendorCSSFiles)
+  return gulp
+    .src(vendorCSSFiles)
     .pipe(newer(STYLE_DIR))
     .pipe(postcss([cssURLRewriter]))
     .pipe(gulp.dest(STYLE_DIR));
@@ -148,18 +164,26 @@ function buildStyleBundle(entryFile, options) {
   });
 }
 
-gulp.task('build-css', gulp.series(['build-vendor-css'], function() {
-  return Promise.all(styleBundleEntryFiles.map(buildStyleBundle));
-}));
+gulp.task(
+  'build-css',
+  gulp.series(['build-vendor-css'], function() {
+    return Promise.all(styleBundleEntryFiles.map(buildStyleBundle));
+  })
+);
 
 gulp.task('watch-css', function() {
-  gulp.watch('h/static/styles/**/*.scss', { ignoreInitial: false }, gulp.series('build-css'));
+  gulp.watch(
+    'h/static/styles/**/*.scss',
+    { ignoreInitial: false },
+    gulp.series('build-css')
+  );
 });
 
 var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
 
 gulp.task('build-fonts', function() {
-  return gulp.src(fontFiles)
+  return gulp
+    .src(fontFiles)
     .pipe(changed(FONTS_DIR))
     .pipe(gulp.dest(FONTS_DIR));
 });
@@ -174,7 +198,8 @@ gulp.task('build-images', function() {
     return IS_PRODUCTION_BUILD && file.path.match(/\.svg$/);
   };
 
-  return gulp.src(imageFiles)
+  return gulp
+    .src(imageFiles)
     .pipe(changed(IMAGES_DIR))
     .pipe(gulpIf(shouldMinifySVG, svgmin()))
     .pipe(gulp.dest(IMAGES_DIR));
@@ -191,26 +216,47 @@ var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/**/*.*';
  * URLs containing cache-busting query string parameters.
  */
 function generateManifest() {
-  return gulp.src(MANIFEST_SOURCE_FILES)
-    .pipe(manifest({name: 'manifest.json'}))
-    .pipe(through.obj(function(file, enc, callback) {
-      log.info('Updated asset manifest');
-      this.push(file);
-      callback();
-    }))
+  return gulp
+    .src(MANIFEST_SOURCE_FILES)
+    .pipe(manifest({ name: 'manifest.json' }))
+    .pipe(
+      through.obj(function(file, enc, callback) {
+        log.info('Updated asset manifest');
+        this.push(file);
+        callback();
+      })
+    )
     .pipe(gulp.dest('build/'));
 }
 
 gulp.task('watch-manifest', function() {
-  gulp.watch(MANIFEST_SOURCE_FILES, batch(function(events, done) {
-    endOfStream(generateManifest(), function() {
-      done();
-    });
-  }));
+  gulp.watch(
+    MANIFEST_SOURCE_FILES,
+    batch(function(events, done) {
+      endOfStream(generateManifest(), function() {
+        done();
+      });
+    })
+  );
 });
 
-gulp.task('build', gulp.series(['build-js', 'build-css', 'build-fonts', 'build-images'], generateManifest));
-gulp.task('watch', gulp.parallel(['watch-js', 'watch-css', 'watch-fonts', 'watch-images', 'watch-manifest']));
+gulp.task(
+  'build',
+  gulp.series(
+    ['build-js', 'build-css', 'build-fonts', 'build-images'],
+    generateManifest
+  )
+);
+gulp.task(
+  'watch',
+  gulp.parallel([
+    'watch-js',
+    'watch-css',
+    'watch-fonts',
+    'watch-images',
+    'watch-manifest',
+  ])
+);
 
 function runKarma(baseConfig, opts, done) {
   // See https://github.com/karma-runner/karma-mocha#configuration
@@ -223,13 +269,21 @@ function runKarma(baseConfig, opts, done) {
   };
 
   var karma = require('karma');
-  new karma.Server(Object.assign({}, {
-    configFile: path.resolve(__dirname, baseConfig),
-  }, cliOpts, opts), done).start();
+  new karma.Server(
+    Object.assign(
+      {},
+      {
+        configFile: path.resolve(__dirname, baseConfig),
+      },
+      cliOpts,
+      opts
+    ),
+    done
+  ).start();
 }
 
 gulp.task('test', function(callback) {
-  runKarma('./h/static/scripts/karma.config.js', {singleRun:true}, callback);
+  runKarma('./h/static/scripts/karma.config.js', { singleRun: true }, callback);
 });
 
 gulp.task('test-watch', function(callback) {
@@ -240,7 +294,8 @@ gulp.task('lint', function() {
   // Adapted from usage example at https://www.npmjs.com/package/gulp-eslint
   // `gulp-eslint` is loaded lazily so that it is not required during Docker image builds
   var eslint = require('gulp-eslint');
-  return gulp.src(['gulpfile.js', 'h/static/scripts/**/*.js'])
+  return gulp
+    .src(['gulpfile.js', 'h/static/scripts/**/*.js'])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());

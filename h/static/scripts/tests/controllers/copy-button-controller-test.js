@@ -16,7 +16,7 @@ describe('CopyButtonController', () => {
   beforeEach(() => {
     copySuccess = false;
     copiedText = '';
-    sinon.stub(document, 'execCommand', (command) => {
+    sinon.stub(document, 'execCommand', command => {
       if (command === 'copy') {
         copiedText = document.getSelection().toString();
         return copySuccess;
@@ -54,7 +54,8 @@ describe('CopyButtonController', () => {
   });
 
   it('leaves the input field read-write on Mobile Safari', () => {
-    const mobileSafariUserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1';
+    const mobileSafariUserAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1';
     ctrl = setupComponent(document, template, CopyButtonController, {
       userAgent: mobileSafariUserAgent,
     });

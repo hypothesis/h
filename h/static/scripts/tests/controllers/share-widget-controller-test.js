@@ -5,7 +5,6 @@ const syn = require('syn');
 const ShareWidgetController = require('../../controllers/share-widget-controller');
 
 describe('ShareWidgetController', () => {
-
   // this is pseudo duplicating you see in share_widget.html.jinja2
   // but it only has the needed pieces to perform the functions we test
   const widgetTemplate = `
@@ -60,22 +59,32 @@ describe('ShareWidgetController', () => {
   };
 
   const widgetIsVisble = () => {
-    return container.querySelector('.js-share-widget').style.visibility === 'visible';
+    return (
+      container.querySelector('.js-share-widget').style.visibility === 'visible'
+    );
   };
 
-  const urlsReflectUpdate = (interpolatedValue) => {
-    return Array.from(container.querySelectorAll('[share-target-href]')).every((anchor) => {
-      const tmpl = anchor.getAttribute('share-target-href');
-      return tmpl.replace('{href}', interpolatedValue) === anchor.href;
-    });
+  const urlsReflectUpdate = interpolatedValue => {
+    return Array.from(container.querySelectorAll('[share-target-href]')).every(
+      anchor => {
+        const tmpl = anchor.getAttribute('share-target-href');
+        return tmpl.replace('{href}', interpolatedValue) === anchor.href;
+      }
+    );
   };
 
   const privateMessageVisible = () => {
-    return container.querySelector('.js-share-widget-msg-private').style.display === 'block';
+    return (
+      container.querySelector('.js-share-widget-msg-private').style.display ===
+      'block'
+    );
   };
 
   const groupMessageVisible = () => {
-    return container.querySelector('.js-share-widget-msg-group').style.display === 'block';
+    return (
+      container.querySelector('.js-share-widget-msg-group').style.display ===
+      'block'
+    );
   };
 
   beforeEach(() => {
@@ -84,8 +93,9 @@ describe('ShareWidgetController', () => {
 
     document.body.appendChild(container);
 
-    ctrl = new ShareWidgetController(document.querySelector('.js-share-widget'));
-
+    ctrl = new ShareWidgetController(
+      document.querySelector('.js-share-widget')
+    );
   });
 
   afterEach(() => {
@@ -93,8 +103,7 @@ describe('ShareWidgetController', () => {
     ctrl.beforeRemove();
   });
 
-  it('shows/hides widget on clicking', (done) => {
-
+  it('shows/hides widget on clicking', done => {
     assert.isFalse(widgetIsVisble(), 'not visible by default');
 
     const btns = getTriggers();
@@ -104,22 +113,33 @@ describe('ShareWidgetController', () => {
         assert.isTrue(widgetIsVisble(), 'visible after clicking trigger');
       })
       .click(document.body, () => {
-        assert.isFalse(widgetIsVisble(), 'hidden after clicking another trigger while it is open');
+        assert.isFalse(
+          widgetIsVisble(),
+          'hidden after clicking another trigger while it is open'
+        );
       })
       .click(btns[3].querySelector('b'), () => {
-        assert.isTrue(widgetIsVisble(), 'opens when clicking elements inside of trigger');
+        assert.isTrue(
+          widgetIsVisble(),
+          'opens when clicking elements inside of trigger'
+        );
       })
       .click(btns[2], () => {
-        assert.isTrue(widgetIsVisble(), 'keeps trigger open when clicking another trigger while another dialog is open');
+        assert.isTrue(
+          widgetIsVisble(),
+          'keeps trigger open when clicking another trigger while another dialog is open'
+        );
       })
       .click(btns[2], () => {
-        assert.isFalse(widgetIsVisble(), 'close widget when clicking on the currently open trigger again');
+        assert.isFalse(
+          widgetIsVisble(),
+          'close widget when clicking on the currently open trigger again'
+        );
         done();
       });
   });
 
-  it('displays correctly for current share link', (done) => {
-
+  it('displays correctly for current share link', done => {
     const btns = getTriggers();
 
     syn
@@ -145,5 +165,4 @@ describe('ShareWidgetController', () => {
         done();
       });
   });
-
 });

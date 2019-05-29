@@ -8,11 +8,13 @@
  * as expected in tests.
  */
 function toResult(promise) {
-  return promise.then((result) => {
-    return { result: result };
-  }).catch((err) => {
-    return { error: err };
-  });
+  return promise
+    .then(result => {
+      return { result: result };
+    })
+    .catch(err => {
+      return { error: err };
+    });
 }
 
 module.exports = {

@@ -11,12 +11,12 @@ const CLIPBOARD_INPUT_SELECTOR = '.js-share-widget-clipboard';
 const PRIVATE_MSG_SELECTOR = '.js-share-widget-msg-private';
 const GROUP_MSG_SELECTOR = '.js-share-widget-msg-group';
 
-const ARROW_PADDING_RIGHT =  16;
-const ARROW_PADDING_BOTTOM =  5;
+const ARROW_PADDING_RIGHT = 16;
+const ARROW_PADDING_BOTTOM = 5;
 
 let shareWidgetAttached = false;
 
-const getOffset = (el) => {
+const getOffset = el => {
   el = el.getBoundingClientRect();
   return {
     // adjust for top left of the document
@@ -27,11 +27,8 @@ const getOffset = (el) => {
   };
 };
 
-
 class ShareWidget {
-
   constructor(containerElement) {
-
     // we only attach one to the dom since it's a global listener
     if (shareWidgetAttached) {
       return;
@@ -46,8 +43,7 @@ class ShareWidget {
     // on initialize we need to reset container visbility
     this.hide();
 
-    this._handler = (event) => {
-
+    this._handler = event => {
       const target = event.target;
 
       // do nothing if we are clicking inside of the widget
@@ -58,7 +54,6 @@ class ShareWidget {
       const trigger = target.closest(TRIGGER_SELECTOR);
 
       if (trigger) {
-
         const config = JSON.parse(trigger.getAttribute(CONFIG_ATTR));
 
         // if we click the same trigger twice we expect
@@ -78,7 +73,6 @@ class ShareWidget {
         event.stopPropagation();
         event.stopImmediatePropagation();
         return;
-
       }
 
       // hide the widget if the click was not handled by
@@ -105,14 +99,17 @@ class ShareWidget {
    *   with the correct information per card.
    */
   _renderWidgetTemplate(config) {
-
     // copy to clipboard input
     this._widget.querySelector(CLIPBOARD_INPUT_SELECTOR).value = config.url;
 
     // social links
-    Array.from(this._widget.querySelectorAll(TARGET_HREF_SELECTOR)).forEach((target) => {
-      target.href = target.getAttribute(TARGET_HREF_ATTR).replace('{href}', encodeURI(config.url));
-    });
+    Array.from(this._widget.querySelectorAll(TARGET_HREF_SELECTOR)).forEach(
+      target => {
+        target.href = target
+          .getAttribute(TARGET_HREF_ATTR)
+          .replace('{href}', encodeURI(config.url));
+      }
+    );
 
     // scope access dialog
     const privateMessage = this._widget.querySelector(PRIVATE_MSG_SELECTOR);
@@ -128,7 +125,6 @@ class ShareWidget {
     }
   }
 
-
   /**
    * Given a node, update the template, repostion the widget properly,
    *  and make it visible.
@@ -138,7 +134,6 @@ class ShareWidget {
    * @param  {ConfigOptions} config Passed through to rendering/interpolation
    */
   showForNode(node, config) {
-
     if (!node || !config) {
       throw new Error('showForNode did not recieve both arguments');
     }
@@ -146,11 +141,17 @@ class ShareWidget {
     this._renderWidgetTemplate(config);
 
     // offsets affecting height need to be updated after variable replacement
-    const widgetOffsets =  getOffset(this._widget);
+    const widgetOffsets = getOffset(this._widget);
     const nodeOffset = getOffset(node);
 
-    this._widget.style.top = (nodeOffset.top - widgetOffsets.height - ARROW_PADDING_BOTTOM) + 'px';
-    this._widget.style.left = ((ARROW_PADDING_RIGHT + nodeOffset.left + (nodeOffset.width / 2)) - widgetOffsets.width) + 'px';
+    this._widget.style.top =
+      nodeOffset.top - widgetOffsets.height - ARROW_PADDING_BOTTOM + 'px';
+    this._widget.style.left =
+      ARROW_PADDING_RIGHT +
+      nodeOffset.left +
+      nodeOffset.width / 2 -
+      widgetOffsets.width +
+      'px';
 
     this._container.style.visibility = 'visible';
 
@@ -161,7 +162,6 @@ class ShareWidget {
     this._container.style.visibility = 'hidden';
     this._widgetVisible = false;
   }
-
 
   /**
    * Utility to clean up the listeners applied. Otherwise the subsequent
@@ -180,7 +180,6 @@ class ShareWidget {
  * the libraries api
  */
 class ShareWidgetController extends Controller {
-
   constructor(element, options = {}) {
     super(element, options);
 
