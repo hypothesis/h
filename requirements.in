@@ -8,7 +8,7 @@ celery >= 4.3
 certifi  # Required to connect to Elasticsearch over SSL.
 cffi
 click
-deform < 1.0
+deform
 elasticsearch==6.3.1
 elasticsearch-dsl==6.3.1
 enum34
