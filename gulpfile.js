@@ -152,13 +152,12 @@ var styleBundleEntryFiles = [
   './h/static/styles/site.scss',
 ];
 
-function buildStyleBundle(entryFile, options) {
+function buildStyleBundle(entryFile) {
   return createStyleBundle({
     input: entryFile,
     output: './build/styles/' + path.basename(entryFile, '.scss') + '.css',
     minify: IS_PRODUCTION_BUILD,
     urlRewriter: rewriteCSSURL,
-    watch: options.watch,
   });
 }
 
