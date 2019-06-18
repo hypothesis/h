@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
+import transaction
 import ws4py
 
 from h.sentry.helpers import filters
@@ -38,6 +39,20 @@ class TestFilterWS4PYHandshakeError(object):
 
     def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
         assert filters.filter_ws4py_handshake_error(unexpected_exception_event) is True
+
+
+class TestFilterTransientError(object):
+    def test_it_filters_TransientError_events(self):
+        event = exception_event(
+            transaction.interfaces.TransientError("concurrent document creation")
+        )
+        assert filters.filter_transient_error(event) is False
+
+    def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
+        assert filters.filter_transient_error(unexpected_logger_event) is True
+
+    def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
+        assert filters.filter_transient_error(unexpected_exception_event) is True
 
 
 @pytest.fixture

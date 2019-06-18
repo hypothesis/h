@@ -31,6 +31,7 @@ def before_send(event_dict, hint_dict):
     filter_functions = [
         filters.filter_ws4py_error_logging,
         filters.filter_ws4py_handshake_error,
+        filters.filter_transient_error,
     ]
 
     # If every filter returns True then do report the event to Sentry.

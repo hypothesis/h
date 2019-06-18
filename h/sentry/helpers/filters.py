@@ -9,6 +9,7 @@ filter returns ``False`` for a given event then the event is not reported.
 """
 from __future__ import unicode_literals
 
+import transaction
 import ws4py.exc
 
 
@@ -28,4 +29,16 @@ def filter_ws4py_handshake_error(event):
     if isinstance(event.exception, ws4py.exc.HandshakeError):
         if str(event.exception) == "Header HTTP_UPGRADE is not defined":
             return False
+    return True
+
+
+def filter_transient_error(event):
+    """
+    Filter out `transaction.interfaces.TransientError`.
+
+    Concurrent database write errors are raised as TransientErrors
+    and the request is retried by pyramid_tm.
+    """
+    if isinstance(event.exception, transaction.interfaces.TransientError):
+        return False
     return True
