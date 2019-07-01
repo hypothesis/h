@@ -20,7 +20,6 @@ FEATURES = {
     ),
     "overlay_highlighter": "Use the new overlay highlighter?",
     "client_display_names": "Render display names instead of user names in the client",
-    "community_groups": "Turn on community groups in the client and api.",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -42,7 +41,8 @@ FEATURES = {
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
 FEATURES_PENDING_REMOVAL = {
-    "api_render_user_info": "Return users' extended info in API responses?"
+    "api_render_user_info": "Return users' extended info in API responses?",
+    "community_groups": "Turn on community groups in the client and api.",
 }
 
 
