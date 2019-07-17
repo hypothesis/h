@@ -60,7 +60,7 @@ def annotation_page(context, request):
 @view_config(route_name="robots", http_cache=(86400, {"public": True}))
 def robots(context, request):
     return response.FileResponse(
-        "h/static/robots.txt", request=request, content_type=b"text/plain"
+        "h/static/robots.txt", request=request, content_type="text/plain"
     )
 
 
