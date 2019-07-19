@@ -1,10 +1,112 @@
 Testing
 =======
 
-This section covers writing tests for the ``h`` codebase.
+This section covers running and writing tests for the ``h`` codebase.
 
-Getting started
----------------
+Create the ``htest`` database
+------------------------------
+
+To be able to run the tests you need to create the ``htest`` database in the
+``postgres`` container:
+
+.. code-block:: shell
+
+   docker-compose exec postgres psql -U postgres -c "CREATE DATABASE htest;"
+
+.. _running-the-tests:
+
+Running the tests, linters and code formatters
+----------------------------------------------
+
+To run the unit tests (both backend and frontend) run:
+
+.. code-block:: shell
+
+   make test
+
+To run the functional tests:
+
+.. code-block:: shell
+
+   make functests
+
+To format your code correctly:
+
+.. code-block:: shell
+
+   make format
+
+To run the linter:
+
+.. code-block:: shell
+
+   make lint
+
+For many more useful ``make`` commands see:
+
+.. code-block:: shell
+
+   make help
+
+Running the backend tests only
+##############################
+
+To run the backend test suite only call ``tox`` directly. For example:
+
+.. code-block:: shell
+
+   # Run the backend unit tests:
+   tox
+
+   # Run the backend unit tests in Python 3:
+   tox -e py36-tests
+
+   # Run the backend functional tests:
+   tox -e py27-functests
+   tox -e py36-functests
+
+   # Run only one test directory or test file:
+   tox tests/h/models/annotation_test.py
+   tox -e py36-tests tests/h/models/annotation_test.py
+   tox -e py27-functests tests/functional/api/test_profile.py
+   tox -e py36-functests tests/functional/api/test_profile.py
+
+   # To pass arguments to pytest put them after a `--`:
+   tox -- --exitfirst --pdb --failed-first tests/h
+   tox -e pyXY-FOO -- --exitfirst --pdb --failed-first tests/h
+
+   # See all of pytest's command line options:
+   tox -- -h
+
+Running the frontend tests only
+###############################
+
+To run the frontend test suite only, run the appropriate test task with gulp.
+For example:
+
+.. code-block:: shell
+
+    gulp test
+
+When working on the front-end code, you can run the Karma test runner in
+auto-watch mode which will re-run the tests whenever a change is made to the
+source code. To start the test runner in auto-watch mode, run:
+
+.. code-block:: shell
+
+    gulp test-watch
+
+To run only a subset of tests for front-end code, use the ``--grep``
+argument or mocha's `.only()`_ modifier.
+
+.. code-block:: shell
+
+    gulp test-watch --grep <pattern>
+
+.. _.only(): http://jaketrent.com/post/run-single-mocha-test/
+
+Writing tests
+-------------
 
 Sean Hammond has written up a `guide to getting started`_ running and writing
 our tests, which covers some of the tools we use (``tox`` and ``pytest``) and
@@ -13,7 +115,7 @@ some of the testing techniques they provide (factories and parametrization).
 .. _guide to getting started: https://www.seanh.cc/post/running-the-h-tests
 
 Unit and functional tests
--------------------------
+#########################
 
 We keep our functional tests separate from our unit tests, in the
 ``tests/functional`` directory. Because these are slow to run, we will usually
@@ -21,7 +123,7 @@ write one or two functional tests to check a new feature works in the common
 case, and unit tests for all the other cases.
 
 Using mock objects
-------------------
+##################
 
 The ``mock`` library lets us construct fake versions of our objects to help with
 testing. While this can make it easier to write fast, isolated tests, it also
