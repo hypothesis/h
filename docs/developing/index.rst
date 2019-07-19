@@ -10,6 +10,7 @@ and how to contribute code or documentation to the project.
    cla
    install
    administration
+   feature-flags
    introduction
    submitting-a-pr
    code-style
