@@ -102,13 +102,6 @@ This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
-SQL query logging
------------------
-
-You can turn on SQL query logging by setting the ``DEBUG_QUERY``
-environment variable (to any value). Set it to the special value ``trace`` to
-turn on result set logging as well.
-
 Feature flags
 -------------
 
