@@ -29,7 +29,8 @@ RUN apk add --no-cache \
     nginx \
     python2 \
     py2-pip \
-    git
+    git \
+    nginx-mod-http-geoip
 
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
