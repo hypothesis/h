@@ -20,16 +20,14 @@ LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
 RUN apk add --no-cache \
-    ca-certificates \
     collectd \
     collectd-disk \
     collectd-nginx \
     libffi \
     libpq \
     nginx \
-    python2 \
-    py2-pip \
-    git
+    git \
+    nginx-mod-http-geoip
 
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
