@@ -341,43 +341,45 @@ paths:
         - name: search_after
           in: query
           example: 2019-01-03T19:46:09.334539+00:00
-          description: >
-            <p>Define a start point for a subset (page) of annotation search results.</p>
+          description: |
+            Define a start point for a subset (page) of annotation search results.
 
-            <p>Working against the sorted, full set of annotation records matching the current
+            Working against the sorted, full set of annotation records matching the current
             search query, the service will examine the values present in the field by which
             annotations are sorted (i.e. `sort`). The returned subset
             of search results will begin with the first annotation whose `sort` field's value
-            comes after the value of `search_after` sequentially.</p>
+            comes after the value of `search_after` sequentially.
 
-            <p>The format of this property depends on the current value of `sort`.
+            The format of this property depends on the current value of `sort`.
             When `search_after` is used in conjunction with a chronological `sort` value—e.g.
             `updated`, `created`—this parameter should be formatted as an ISO 8601 string. It
-            may also be formatted in ms (milliseconds) since the Epoch.</p>
+            may also be formatted in ms (milliseconds) since the Epoch.
 
-            <p><em>Expanded example</em> — Given a query containing a (URI-encoded) `search_after` value of `2019-01-03T19:46:09.334539+00:00`:</p>
+            *Expanded example*
 
-            <p><blockquote>`sort=created&search_after=2019-01-03T19%3A46%3A09.334539%2B00%3A00`</blockquote></p>
+            Given a query containing a (URI-encoded) `search_after` value of `2019-01-03T19:46:09.334539+00:00`:
 
-            <p>The returned results would begin with the record immediately subsequent to the annotation
+            >`sort=created&search_after=2019-01-03T19%3A46%3A09.334539%2B00%3A00`
+
+            The returned results would begin with the record immediately subsequent to the annotation
             created at `2019-01-03T19:46:09.334539+00:00` in the full set of results. If there is no
             annotation in the full result set whose `created` value exactly matches
             `2019-01-03T19:46:09.334539+00:00`,
+
             the returned subset will begin with the first annotation whose `created` value
-            comes sequentially "after" `2019-01-03T19:46:09.334539+00:00` in the full, sorted set.</p>
+            comes sequentially "after" `2019-01-03T19:46:09.334539+00:00` in the full, sorted set.
 
-            <p><em>Note:</em> `search_after` provides an efficient, stateless paging mechanism. Its
-            use is preferred over that of `offset`.</p>
-
+            _Note:_ `search_after` provides an efficient, stateless paging mechanism. Its
+            use is preferred over that of `offset`.
           schema:
             type: string
         - name: offset
           in: query
-          description: >
-            <p>The number of initial annotations to skip in the result set.</p>
+          description: |
+            The number of initial annotations to skip in the result set.
 
-            <p>May be used for pagination of result sets. The usage of `search_after` is preferred,
-            especially for large batches, as it is considerably more efficient.</p>
+            May be used for pagination of result sets. The usage of `search_after` is preferred,
+            especially for large batches, as it is considerably more efficient.
           schema:
             type: integer
             maximum: 9800
@@ -415,13 +417,14 @@ paths:
           in: query
           example: 'yogur'
           description: |
-            <p>Limit the results to annotations containing the given keyword (tokenized chunk) in
-            the URI. The value must exactly match an individual URI keyword.</p>
+            Limit the results to annotations containing the given keyword (tokenized chunk) in
+            the URI. The value must exactly match an individual URI keyword.
 
-            <p>URIs are split on characters `#+/:=?.-` into their keywords.</p>
+            URIs are split on characters `#+/:=?.-` into their keywords.
 
-            <p><em>Expanded example </em> — given a value of `yogur`, annotations with any of the
-            following URIs would match:
+            *Expanded example*
+
+            Given a value of `yogur`, annotations with any of the following URIs would match:
 
             * `https://www.yogur.com/foo/bar`
             * `https://www.example.com/yogur/eatmore.html`
@@ -439,11 +442,11 @@ paths:
           in: query
           example: 'http://foo.com/*'
           description: |
-            <p>Limit the results to annotations whose URIs match the wildcard pattern.</p>
+            Limit the results to annotations whose URIs match the wildcard pattern.
 
-            <p>`*` will match any character sequence (including an empty one),
+            `*` will match any character sequence (including an empty one),
             and a `_` will match any single character. Wildcards are only permitted
-            within the path and query parts of the URI. Escaping wildcards is not supported.</p>
+            within the path and query parts of the URI. Escaping wildcards is not supported.
 
             Examples of valid values:
 
@@ -514,12 +517,12 @@ paths:
         - name: quote
           in: query
           example: 'unicorn helmets'
-          description: >
-            <p>Limit the results to annotations that contain this text inside
-            the text that was annotated.</p>
+          description: |
+            Limit the results to annotations that contain this text inside
+            the text that was annotated.
 
-            <p>For example: `unicorn helmets` would return all annotations containing
-            `unicorn` **OR** `helmets` in their quoted (i.e. annotated) text.</p>
+            For example: `unicorn helmets` would return all annotations containing
+            `unicorn` **OR** `helmets` in their quoted (i.e. annotated) text.
           schema:
             type: string
         - name: references
@@ -530,12 +533,12 @@ paths:
         - name: text
           in: query
           example: 'penguin strength'
-          description: >
-            <p>Limit the results to annotations that contain this text in their
-            textual body.</p>
+          description: |
+            Limit the results to annotations that contain this text in their
+            textual body.
 
-            <p>For example: `penguin strength` would return all annotations containing
-            `penguin` **OR** `strength` in their text (body) content.</p>
+            For example: `penguin strength` would return all annotations containing
+            `penguin` **OR** `strength` in their text (body) content.
           schema:
             type: string
       responses:
