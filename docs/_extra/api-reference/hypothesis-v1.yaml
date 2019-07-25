@@ -353,9 +353,9 @@ paths:
             `updated`, `created`—this parameter should be formatted as an ISO 8601 string. It
             may also be formatted in ms (milliseconds) since the Epoch.</p>
 
-            <p><em>Expanded example</em> — Given a query containing:</p>
+            <p><em>Expanded example</em> — Given a query containing a (URI-encoded) `search_after` value of `2019-01-03T19:46:09.334539+00:00`:</p>
 
-            <p><blockquote>`sort=created&search_after=2019-01-03T19:46:09.334539+00:00`</blockquote></p>
+            <p><blockquote>`sort=created&search_after=2019-01-03T19%3A46%3A09.334539%2B00%3A00`</blockquote></p>
 
             <p>The returned results would begin with the record immediately subsequent to the annotation
             created at `2019-01-03T19:46:09.334539+00:00` in the full set of results. If there is no
