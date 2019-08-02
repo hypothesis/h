@@ -12,7 +12,7 @@ matrix:
     # Python (backend) tests
     - env: ACTION=tox
       language: python
-      python: '2.7'
+      python: '3.6'
       addons:
         postgresql: "9.4"
       before_install:
@@ -22,18 +22,6 @@ matrix:
       script: tox
       after_success:
         make coverage codecov
-
-    - env: ACTION=tox-py3
-      language: python
-      python: '3.6'
-      addons:
-        postgresql: '9.4'
-      before_install:
-        - ./scripts/elasticsearch.sh
-      install: pip install tox>=3.8.0
-      before_script: createdb htest
-      script:
-        tox -e py36-tests
 
     # Test web application frontend
     - env: ACTION=gulp

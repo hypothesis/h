@@ -26,8 +26,6 @@ RUN apk add --no-cache \
     libffi \
     libpq \
     nginx \
-    python2 \
-    py2-pip \
     git
 
 # Create the hypothesis user, group, home directory and package directory.

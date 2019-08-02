@@ -37,11 +37,11 @@ services:
 
 .PHONY: dev
 dev: build/manifest.json
-	tox -q -e py27-dev
+	tox -q -e py36-dev
 
 .PHONY: shell
 shell:
-	tox -q -e py27-dev -- sh bin/hypothesis --dev shell
+	tox -q -e py36-dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
 sql:
@@ -83,7 +83,7 @@ codecov:
 
 .PHONY: functests
 functests: build/manifest.json
-	tox -q -e py27-functests
+	tox -q -e py36-functests
 
 .PHONY: docs
 docs:
@@ -103,7 +103,7 @@ checkdocstrings:
 
 .PHONY: pip-compile
 pip-compile:
-	tox -q -e py27-dev -- pip-compile --output-file requirements.txt requirements.in
+	tox -q -e py36-dev -- pip-compile --output-file requirements.txt requirements.in
 
 .PHONY: docker
 docker:
