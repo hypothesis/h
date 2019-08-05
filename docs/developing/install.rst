@@ -39,7 +39,6 @@ each of these prerequisites:
   Follow the `instructions on the Docker website <https://docs.docker.com/compose/install/>`_
   to install these.
 
-
 * `pyenv`_.
   Follow the instructions in the pyenv README to install it.
 
@@ -76,14 +75,11 @@ running ``make sql``.
 Use pyenv to install Python and tox
 -----------------------------------
 
-Install Python 2.7 and 3.6 in pyenv and install tox in each:
+Install Python 3.6 and tox in pyenv:
 
 .. code-block:: shell
 
-   pyenv install 2.7.16
    pyenv install 3.6.8
-   pyenv shell 2.7.16
-   pip install tox>=3.8.0
    pyenv shell 3.6.8
    pip install tox>=3.8.0
    pyenv shell --unset
@@ -124,10 +120,8 @@ to either:
 
 * Prefix all ``docker`` and ``docker-compose`` commands with ``sudo``.
 
-
 .. _Git repo named h: https://github.com/hypothesis/h/
 .. _pyenv: https://github.com/pyenv/pyenv
-
 
 pyenv errors on macOS
 #####################

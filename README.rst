@@ -13,7 +13,7 @@ h
 .. image:: https://img.shields.io/badge/license-BSD-blue.svg
    :target: https://github.com/hypothesis/h/blob/master/LICENSE
    :alt: License badge
-.. image:: https://img.shields.io/badge/python-2.7-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
    :alt: Python version badge
 .. image:: https://readthedocs.org/projects/h/badge/?version=latest
    :target: https://h.readthedocs.io/en/latest/?badge=latest

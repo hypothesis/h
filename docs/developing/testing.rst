@@ -62,13 +62,11 @@ To run the backend test suite only call ``tox`` directly. For example:
    tox -e py36-tests
 
    # Run the backend functional tests:
-   tox -e py27-functests
    tox -e py36-functests
 
    # Run only one test directory or test file:
    tox tests/h/models/annotation_test.py
    tox -e py36-tests tests/h/models/annotation_test.py
-   tox -e py27-functests tests/functional/api/test_profile.py
    tox -e py36-functests tests/functional/api/test_profile.py
 
    # To pass arguments to pytest put them after a `--`:
