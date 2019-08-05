@@ -75,7 +75,7 @@ running ``make sql``.
 Use pyenv to install Python and tox
 -----------------------------------
 
-Install 3.6 and tox in pyenv:
+Install Python 3.6 and tox in pyenv:
 
 .. code-block:: shell
 
