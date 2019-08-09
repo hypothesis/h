@@ -1,6 +1,3 @@
-.PHONY: default
-default: help
-
 .PHONY: help
 help:
 	@echo "make help              Show this help message"
