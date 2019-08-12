@@ -13,6 +13,7 @@ from h.traversal.contexts import AnnotationContext
 from h.traversal.contexts import GroupContext
 from h.traversal.contexts import GroupUpsertContext
 from h.traversal.contexts import OrganizationContext
+from h.traversal.contexts import UserContext
 
 
 @pytest.mark.usefixtures("group_service", "links_service")
@@ -424,6 +425,24 @@ class TestGroupUpsertContext(object):
         # an `upsert` permission could be present in the ACL via the model IF the current
         # user were the creator, but they're not
         assert not pyramid_request.has_permission("upsert", context)
+
+
+class TestUserContext(object):
+    def test_acl_assigns_read_to_AuthClient_with_user_authority(self, factories):
+        user = factories.User(username="fiona", authority="myauthority.com")
+        res = UserContext(user)
+        actual = res.__acl__()
+        expect = [(security.Allow, "client_authority:myauthority.com", "read")]
+        assert actual == expect
+
+    def test_acl_matching_authority_allows_read(self, factories):
+        policy = ACLAuthorizationPolicy()
+
+        user = factories.User(username="fiona", authority="myauthority.com")
+        res = UserContext(user)
+
+        assert policy.permits(res, ["client_authority:myauthority.com"], "read")
+        assert not policy.permits(res, ["client_authority:example.com"], "read")
 
 
 class FakeGroup(object):
