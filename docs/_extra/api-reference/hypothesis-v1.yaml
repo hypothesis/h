@@ -1024,6 +1024,30 @@ paths:
   # ---------------------------------------------------------------------------
   # Operations on single User Resources
   # ---------------------------------------------------------------------------
+  /users/{user}:
+    # ----------------------------------------------------------
+    # GET users/{user} -- Fetch a user by `userid`
+    # ----------------------------------------------------------
+    get:
+      tags:
+        - users
+      summary: Fetch a user
+      description: |
+        Fetch a single user. This endpoint is only accessible to
+        requests authenticated with `AuthClient` credentials and is restricted
+        to users within the associated authority.
+      security:
+        - AuthClient: []
+      parameters:
+        - $ref: '#/components/parameters/UserID'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFull'
+
   /users/{username}:
     patch:
       tags:
