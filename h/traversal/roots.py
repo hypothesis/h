@@ -250,7 +250,7 @@ class ProfileRoot(object):
 
 class UserRoot(object):
     """
-    Root factory for routes whose context is an :py:class:`h.traversal.UserContext`.
+    Root factory for routes which traverse Users by ``username``
 
     FIXME: This class should return UserContext objects, not User objects.
 
@@ -270,3 +270,25 @@ class UserRoot(object):
             raise KeyError()
 
         return user
+
+
+class UserUserIDRoot(object):
+    """
+    Root factory for routes whose context is a :class:`h.traversal.UserContext`.
+
+    .. todo:: This should be the main Root for User objects
+    """
+
+    __acl__ = [(Allow, role.AuthClient, "create")]
+
+    def __init__(self, request):
+        self.request = request
+        self.user_svc = self.request.find_service(name="user")
+
+    def __getitem__(self, userid):
+        user = self.user_svc.fetch(userid)
+
+        if not user:
+            raise KeyError()
+
+        return contexts.UserContext(user)

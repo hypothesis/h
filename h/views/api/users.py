@@ -15,6 +15,24 @@ from h.services.user_unique import DuplicateUserError
 
 @api_config(
     versions=["v1", "v2"],
+    route_name="api.user_read",
+    request_method="GET",
+    link_name="user.read",
+    description="Fetch a user",
+    permission="read",
+)
+def read(context, request):
+    """
+    Fetch a user.
+
+    This API endpoint allows authorized clients (those able to provide a valid
+    Client ID and Client Secret) to read users in their authority.
+    """
+    return TrustedUserJSONPresenter(context.user).asdict()
+
+
+@api_config(
+    versions=["v1", "v2"],
     route_name="api.users",
     request_method="POST",
     link_name="user.create",
