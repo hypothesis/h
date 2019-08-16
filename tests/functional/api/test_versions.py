@@ -82,7 +82,7 @@ class TestIndexEndpointVersions(object):
 
         assert res.status_code == 406
 
-    def test_index_406s_with_invalid_accept_header_value(self, app):
+    def test_index_200s_with_invalid_accept_header_value(self, app):
         """
         Set a generally-invalid Accept header and we should always get a 406.
         """
@@ -90,7 +90,11 @@ class TestIndexEndpointVersions(object):
 
         res = app.get("/api/", headers=headers, expect_errors=True)
 
-        assert res.status_code == 406
+        assert res.status_code == 200
+        assert "links" in res.json
+        assert (
+            res.headers["Hypothesis-Media-Type"] == "application/vnd.hypothesis.v1+json"
+        )
 
     def test_index_adds_v1_response_header(self, app):
         """
