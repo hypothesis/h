@@ -50,7 +50,7 @@ pyramid-layout==1.0
 pyramid-mailer==0.15.1
 pyramid-services==0.4
 pyramid-tm==1.1.1
-pyramid==1.7.3
+pyramid==1.7.6
 python-dateutil==2.5.3
 python-editor==1.0.1      # via alembic
 python-slugify==1.1.4
@@ -77,4 +77,4 @@ zope.interface==4.3.2
 zope.sqlalchemy==1.1
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.0.1        # via pyramid, repoze.sendmail, zope.deprecation, zope.interface, zope.sqlalchemy
+# setuptools==41.1.0        # via pyramid, repoze.sendmail, zope.deprecation, zope.interface, zope.sqlalchemy
