@@ -37,7 +37,7 @@ info:
     ```
 
     If an `Accept` header is set with an unrecognized media type, the API will
-    return an HTTP 415 (Unsupported Media Type) error.
+    return an HTTP 406 (Not Acceptable) error.
 
     Responses to API requests include a header indicating which API version was used
     to handle the request, e.g.:
@@ -96,7 +96,7 @@ info:
     | 403         | Unauthorized  | v1 of the API only returns 404s, to avoid leaking resource existence |
     | 404         | Not Found     | Resource not found or permission failure    |
     | 409         | Conflict      | Resource could not be created because of a conflict—resource already exists |
-    | 415         | Unsupported Media Type | The request's `Accept` header designates an unrecognized media type |
+    | 406         | Not Acceptable | The request's `Accept` header designates an unacceptable media type |
     | 500         | Server Error  | An error occurred with our API |
 
 servers:
@@ -198,8 +198,8 @@ components:
         application/*json:
           schema:
             $ref: './schemas/errors.yaml#/Error'
-    UnsupportedMediaType:
-      description: Unsupported Media Type
+    NotAcceptable:
+      description: Not Acceptable
       content:
         application/*json:
           schema:
