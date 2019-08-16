@@ -4,7 +4,7 @@ import mock
 import pytest
 
 from pyramid.response import Response
-from webob.acceptparse import MIMENilAccept, MIMEAccept
+from webob.acceptparse import create_accept_header
 
 from h.views.api.decorators.response import version_media_type_header
 
@@ -43,7 +43,7 @@ class TestVersionMediaTypeHeader(object):
     def test_it_sets_response_header_based_on_value_of_accept(
         self, pyramid_request, testview, accept, expected_header
     ):
-        pyramid_request.accept = MIMEAccept(accept)
+        pyramid_request.accept = create_accept_header(accept)
 
         res = version_media_type_header(testview)(None, pyramid_request)
 
@@ -59,5 +59,5 @@ def testview():
 def pyramid_request(pyramid_request):
     # Set an empty accept on the request, imitating what pyramid does
     # in real life if no Accept header is set on the incoming request
-    pyramid_request.accept = MIMENilAccept()
+    pyramid_request.accept = create_accept_header(None)
     return pyramid_request
