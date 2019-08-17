@@ -45,8 +45,8 @@ Linting
 
 We use `Flake8 <https://pypi.python.org/pypi/flake8>`_ for linting Python code.
 Lint checks are run as part of our continuous integration builds and can be run
-locally using ``make lint``. You may find it helpful to use a flake8 plugin for
-your editor to get live feedback as you make changes.
+locally using ``make backend-lint``. You may find it helpful to use a flake8
+plugin for your editor to get live feedback as you make changes.
 
 Automated code formatting
 `````````````````````````
