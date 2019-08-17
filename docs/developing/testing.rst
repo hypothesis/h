@@ -3,16 +3,6 @@ Testing
 
 This section covers running and writing tests for the ``h`` codebase.
 
-Create the ``htest`` database
-------------------------------
-
-To be able to run the tests you need to create the ``htest`` database in the
-``postgres`` container:
-
-.. code-block:: shell
-
-   make services args='exec postgres psql -U postgres -c "CREATE DATABASE htest;"'
-
 .. _running-the-tests:
 
 Running the tests, linters and code formatters
