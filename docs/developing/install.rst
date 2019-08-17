@@ -35,9 +35,9 @@ each of these prerequisites:
   Once you have npm you can just run ``sudo npm install -g gulp-cli`` to install ``gulp``.
   On macOS it's recommended to run ``npm install -g gulp-cli`` without the ``sudo``.
 
-* `Docker CE <https://docs.docker.com/install/>`_ and `Docker Compose <https://docs.docker.com/compose/>`_.
-  Follow the `instructions on the Docker website <https://docs.docker.com/compose/install/>`_
-  to install these.
+* `Docker <https://docs.docker.com/install/>`_.
+  Follow the `instructions on the Docker website <https://docs.docker.com/install/>`_
+  to install "Docker Engine - Community".
 
 * `pyenv`_.
   Follow the instructions in the pyenv README to install it.
@@ -67,10 +67,10 @@ Start the services that h requires using Docker Compose:
    make services
 
 You'll now have some Docker containers running the PostgreSQL, RabbitMQ, and
-Elasticsearch services. You should be able to see them by running ``docker-compose
-ps``. You should also be able to visit your Elasticsearch service by opening
-http://localhost:9200/ in a browser, and connect to your PostgreSQL by
-running ``make sql``.
+Elasticsearch services. You should be able to see them by running
+``make services args=ps``. You should also be able to visit your Elasticsearch
+service by opening http://localhost:9200/ in a browser, and connect to your
+PostgreSQL by running ``make sql``.
 
 Start the development server
 ----------------------------

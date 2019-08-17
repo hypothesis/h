@@ -11,7 +11,7 @@ To be able to run the tests you need to create the ``htest`` database in the
 
 .. code-block:: shell
 
-   docker-compose exec postgres psql -U postgres -c "CREATE DATABASE htest;"
+   make services args='exec postgres psql -U postgres -c "CREATE DATABASE htest;"'
 
 .. _running-the-tests:
 
