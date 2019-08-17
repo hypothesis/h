@@ -70,9 +70,10 @@ Front-end Development
 See the `Hypothesis Front-end Toolkit`_ repository for documentation on code
 style and tooling for JavaScript, CSS and HTML.
 
-We use `ESLint <https://eslint.org>`_ for linting front-end code. Use ``gulp
-lint`` to run ESlint locally. You may find it helpful to install an ESLint
-plugin for your editor to get live feedback as you make changes.
+We use `ESLint <https://eslint.org>`_ for linting front-end code.
+Use ``make frontend-lint`` to run ESlint locally. You may find it helpful to
+install an ESLint plugin for your editor to get live feedback as you make
+changes.
 
 .. _Hypothesis Front-end Toolkit: https://github.com/hypothesis/frontend-toolkit
 

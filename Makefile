@@ -50,7 +50,7 @@ lint: python
 	tox -q -e py36-lint
 
 .PHONY: frontend-lint
-frontend-lint:
+frontend-lint: node_modules/.uptodate
 	npm run-script lint
 	npm run-script checkformatting
 
@@ -152,3 +152,7 @@ node_modules/.uptodate: package.json
 .PHONY: python
 python:
 	@./bin/install-python
+
+.PHONY: gulp
+gulp: node_modules/.uptodate
+	$(GULP) $(args)

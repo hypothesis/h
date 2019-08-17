@@ -31,10 +31,6 @@ each of these prerequisites:
   too old.
   On macOS you should use `Homebrew <https://brew.sh/>`_ to install node.
 
-* `Gulp <https://gulpjs.com/>`_.
-  Once you have npm you can just run ``sudo npm install -g gulp-cli`` to install ``gulp``.
-  On macOS it's recommended to run ``npm install -g gulp-cli`` without the ``sudo``.
-
 * `Docker <https://docs.docker.com/install/>`_.
   Follow the `instructions on the Docker website <https://docs.docker.com/install/>`_
   to install "Docker Engine - Community".
