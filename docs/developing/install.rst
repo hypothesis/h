@@ -72,18 +72,6 @@ ps``. You should also be able to visit your Elasticsearch service by opening
 http://localhost:9200/ in a browser, and connect to your PostgreSQL by
 running ``make sql``.
 
-Use pyenv to install Python and tox
------------------------------------
-
-Install Python 3.6 and tox in pyenv:
-
-.. code-block:: shell
-
-   pyenv install 3.6.8
-   pyenv shell 3.6.8
-   pip install tox>=3.8.0
-   pyenv shell --unset
-
 Start the development server
 ----------------------------
 
