@@ -5,7 +5,7 @@ import pytest
 
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPForbidden, HTTPNotFound, HTTPNotAcceptable
-from webob.acceptparse import MIMEAccept, MIMENilAccept
+from webob.acceptparse import create_accept_header
 
 from h.views.api.decorators.client_errors import (
     unauthorized_to_not_found,
@@ -84,7 +84,7 @@ class TestValidateMediaTypes(object):
         self, pyramid_request, testview
     ):
         # At least one of these is valid
-        pyramid_request.accept = MIMEAccept("application/json, foo/bar")
+        pyramid_request.accept = create_accept_header("application/json, foo/bar")
         fake_context = mock.Mock()
         validate_media_types(testview)(fake_context, pyramid_request)
 
@@ -95,7 +95,9 @@ class TestValidateMediaTypes(object):
         self, pyramid_request, testview
     ):
         # None of these is valid
-        pyramid_request.accept = MIMEAccept("application/something+json, foo/bar")
+        pyramid_request.accept = create_accept_header(
+            "application/something+json, foo/bar"
+        )
         fake_context = mock.Mock()
         validate_media_types(testview)(fake_context, pyramid_request)
 
@@ -106,7 +108,7 @@ class TestValidateMediaTypes(object):
     def pyramid_request(self, pyramid_request):
         # Set an empty accept on the request, imitating what pyramid does
         # in real life if no Accept header is set on the incoming request
-        pyramid_request.accept = MIMENilAccept()
+        pyramid_request.accept = create_accept_header(None)
         return pyramid_request
 
 
