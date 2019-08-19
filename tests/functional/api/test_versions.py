@@ -84,7 +84,7 @@ class TestIndexEndpointVersions(object):
 
     def test_index_200s_with_invalid_accept_header_value(self, app):
         """
-        Set a generally-invalid Accept header and we should always get a 406.
+        Set a generally-invalid Accept header and we should get a 200.
         """
         headers = {"Accept": str("nonsensical")}
 
