@@ -7,14 +7,12 @@ in a local development environment.
 
 .. seealso::
 
-   This page documents how to setup a development install of h.
-   For installing the Hypothesis client for development see
-   https://github.com/hypothesis/client/, and for the browser extension
-   see https://github.com/hypothesis/browser-extension.
+   * https://github.com/hypothesis/client/ for installing the Hypothesis client
+   * https://github.com/hypothesis/browser-extension. for the browser extension
+   * To get "direct" or "in context" links working you need to install Bouncer and Via:\ 
 
-   To get "direct" or "in context" links working you need to install Bouncer
-   and Via. See https://github.com/hypothesis/bouncer and
-   https://github.com/hypothesis/via.
+     * https://github.com/hypothesis/bouncer
+     * https://github.com/hypothesis/via
 
 .. seealso::
 
