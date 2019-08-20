@@ -39,6 +39,7 @@ these prerequisites:
 
 * `pyenv`_.
   Follow the instructions in the pyenv README to install it.
+  The Homebrew method works best on macOS.
 
 Clone the Git repo
 ------------------
