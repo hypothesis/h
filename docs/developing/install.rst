@@ -65,12 +65,6 @@ Start the services that h requires using Docker Compose:
 
    make services
 
-You'll now have some Docker containers running the PostgreSQL, RabbitMQ, and
-Elasticsearch services. You should be able to see them by running
-``make services args=ps``. You should also be able to visit your Elasticsearch
-service by opening http://localhost:9200/ in a browser, and connect to your
-PostgreSQL by running ``make sql``.
-
 Start the development server
 ----------------------------
 
