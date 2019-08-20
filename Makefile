@@ -29,8 +29,9 @@ help:
 	@echo "                       dependencies, etc)"
 
 .PHONY: services
+services: args?=up -d
 services:
-	docker-compose up -d
+	@tox -q -e docker-compose -- $(args)
 
 .PHONY: dev
 dev: build/manifest.json python
@@ -42,14 +43,17 @@ shell: python
 
 .PHONY: sql
 sql:
-	docker-compose exec postgres psql --pset expanded=auto -U postgres
+	@tox -q -e docker-compose -- exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
-lint: python
+lint: backend-lint frontend-lint
+
+.PHONY: backend-lint
+backend-lint: python
 	tox -q -e py36-lint
 
 .PHONY: frontend-lint
-frontend-lint:
+frontend-lint: node_modules/.uptodate
 	npm run-script lint
 	npm run-script checkformatting
 
@@ -151,3 +155,7 @@ node_modules/.uptodate: package.json
 .PHONY: python
 python:
 	@./bin/install-python
+
+.PHONY: gulp
+gulp: node_modules/.uptodate
+	$(GULP) $(args)

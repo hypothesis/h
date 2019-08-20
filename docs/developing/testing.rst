@@ -3,16 +3,6 @@ Testing
 
 This section covers running and writing tests for the ``h`` codebase.
 
-Create the ``htest`` database
-------------------------------
-
-To be able to run the tests you need to create the ``htest`` database in the
-``postgres`` container:
-
-.. code-block:: shell
-
-   docker-compose exec postgres psql -U postgres -c "CREATE DATABASE htest;"
-
 .. _running-the-tests:
 
 Running the tests, linters and code formatters
@@ -84,7 +74,7 @@ For example:
 
 .. code-block:: shell
 
-    gulp test
+    make gulp args=test
 
 When working on the front-end code, you can run the Karma test runner in
 auto-watch mode which will re-run the tests whenever a change is made to the
@@ -92,14 +82,14 @@ source code. To start the test runner in auto-watch mode, run:
 
 .. code-block:: shell
 
-    gulp test-watch
+    make gulp args=test-watch
 
 To run only a subset of tests for front-end code, use the ``--grep``
 argument or mocha's `.only()`_ modifier.
 
 .. code-block:: shell
 
-    gulp test-watch --grep <pattern>
+    make gulp args=test-watch --grep <pattern>
 
 .. _.only(): http://jaketrent.com/post/run-single-mocha-test/
 

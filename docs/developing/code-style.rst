@@ -45,8 +45,8 @@ Linting
 
 We use `Flake8 <https://pypi.python.org/pypi/flake8>`_ for linting Python code.
 Lint checks are run as part of our continuous integration builds and can be run
-locally using ``make lint``. You may find it helpful to use a flake8 plugin for
-your editor to get live feedback as you make changes.
+locally using ``make backend-lint``. You may find it helpful to use a flake8
+plugin for your editor to get live feedback as you make changes.
 
 Automated code formatting
 `````````````````````````
@@ -70,9 +70,10 @@ Front-end Development
 See the `Hypothesis Front-end Toolkit`_ repository for documentation on code
 style and tooling for JavaScript, CSS and HTML.
 
-We use `ESLint <https://eslint.org>`_ for linting front-end code. Use ``gulp
-lint`` to run ESlint locally. You may find it helpful to install an ESLint
-plugin for your editor to get live feedback as you make changes.
+We use `ESLint <https://eslint.org>`_ for linting front-end code.
+Use ``make frontend-lint`` to run ESlint locally. You may find it helpful to
+install an ESLint plugin for your editor to get live feedback as you make
+changes.
 
 .. _Hypothesis Front-end Toolkit: https://github.com/hypothesis/frontend-toolkit
 

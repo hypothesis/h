@@ -20,3 +20,4 @@ and how to contribute code or documentation to the project.
    making-changes-to-model-code
    debugging-sql-queries
    envvars
+   troubleshooting

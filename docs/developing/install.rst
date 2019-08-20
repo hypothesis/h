@@ -7,20 +7,22 @@ in a local development environment.
 
 .. seealso::
 
-   This page documents how to setup a development install of h.
-   For installing the Hypothesis client for development see
-   https://github.com/hypothesis/client/, and for the browser extension
-   see https://github.com/hypothesis/browser-extension.
+   * https://github.com/hypothesis/client/ for installing the Hypothesis client
+   * https://github.com/hypothesis/browser-extension for the browser extension
+   * To get "direct" or "in context" links working you need to install Bouncer and Via:\ 
 
-   To get "direct" or "in context" links working you need to install Bouncer
-   and Via. See https://github.com/hypothesis/bouncer and
-   https://github.com/hypothesis/via.
+     * https://github.com/hypothesis/bouncer
+     * https://github.com/hypothesis/via
+
+.. seealso::
+
+   :doc:`troubleshooting` if you run into any problems during installation
 
 You will need
 -------------
 
-Before installing your local development environment you'll need to install
-each of these prerequisites:
+Before installing your development environment you'll need to install each of
+these prerequisites:
 
 * `Git <https://git-scm.com/>`_
 
@@ -31,16 +33,13 @@ each of these prerequisites:
   too old.
   On macOS you should use `Homebrew <https://brew.sh/>`_ to install node.
 
-* `Gulp <https://gulpjs.com/>`_.
-  Once you have npm you can just run ``sudo npm install -g gulp-cli`` to install ``gulp``.
-  On macOS it's recommended to run ``npm install -g gulp-cli`` without the ``sudo``.
-
-* `Docker CE <https://docs.docker.com/install/>`_ and `Docker Compose <https://docs.docker.com/compose/>`_.
-  Follow the `instructions on the Docker website <https://docs.docker.com/compose/install/>`_
-  to install these.
+* `Docker <https://docs.docker.com/install/>`_.
+  Follow the `instructions on the Docker website <https://docs.docker.com/install/>`_
+  to install "Docker Engine - Community".
 
 * `pyenv`_.
   Follow the instructions in the pyenv README to install it.
+  The Homebrew method works best on macOS.
 
 Clone the Git repo
 ------------------
@@ -66,12 +65,6 @@ Start the services that h requires using Docker Compose:
 
    make services
 
-You'll now have some Docker containers running the PostgreSQL, RabbitMQ, and
-Elasticsearch services. You should be able to see them by running ``docker-compose
-ps``. You should also be able to visit your Elasticsearch service by opening
-http://localhost:9200/ in a browser, and connect to your PostgreSQL by
-running ``make sql``.
-
 Start the development server
 ----------------------------
 
@@ -86,38 +79,9 @@ This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
-Troubleshooting
----------------
-
-Cannot connect to the Docker daemon
-###################################
-
-If you get an error that looks like this when trying to run ``docker``
-commands::
-
- Cannot connect to the Docker daemon. Is the docker daemon running on this host?
- Error: failed to start containers: postgres
-
-it could be because you don't have permission to access the Unix socket that
-the docker daemon is bound to. On some operating systems (e.g. Linux) you need
-to either:
-
-* Take additional steps during Docker installation to give your Unix user
-  access to the Docker daemon's port (consult the installation
-  instructions for your operating system on the Docker website), or
-
-* Prefix all ``docker`` and ``docker-compose`` commands with ``sudo``.
+**That's it!** You've finished setting up your h development environment.
+Run ``make help`` to see all the commands that're available for running the
+tests, linting, code formatting, Python and SQL shells, etc.
 
 .. _Git repo named h: https://github.com/hypothesis/h/
 .. _pyenv: https://github.com/pyenv/pyenv
-
-pyenv errors on macOS
-#####################
-
-``pyenv install`` commands might fail on macOS with error messages such as:
-
-* "symbol(s) not found for architecture x86_64"
-* "ERROR: The Python zlib extension was not compiled. Missing the zlib?"
-
-Read `pyenv's Common Build Problems page <https://github.com/pyenv/pyenv/wiki/common-build-problems>`_
-for the solutions to these.
