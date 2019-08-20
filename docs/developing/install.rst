@@ -8,7 +8,7 @@ in a local development environment.
 .. seealso::
 
    * https://github.com/hypothesis/client/ for installing the Hypothesis client
-   * https://github.com/hypothesis/browser-extension. for the browser extension
+   * https://github.com/hypothesis/browser-extension for the browser extension
    * To get "direct" or "in context" links working you need to install Bouncer and Via:\ 
 
      * https://github.com/hypothesis/bouncer
