@@ -16,6 +16,10 @@ in a local development environment.
    and Via. See https://github.com/hypothesis/bouncer and
    https://github.com/hypothesis/via.
 
+.. seealso::
+
+   :doc:`troubleshooting` if you run into any problems during installation
+
 You will need
 -------------
 
@@ -82,38 +86,9 @@ This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
-Troubleshooting
----------------
-
-Cannot connect to the Docker daemon
-###################################
-
-If you get an error that looks like this when trying to run ``docker``
-commands::
-
- Cannot connect to the Docker daemon. Is the docker daemon running on this host?
- Error: failed to start containers: postgres
-
-it could be because you don't have permission to access the Unix socket that
-the docker daemon is bound to. On some operating systems (e.g. Linux) you need
-to either:
-
-* Take additional steps during Docker installation to give your Unix user
-  access to the Docker daemon's port (consult the installation
-  instructions for your operating system on the Docker website), or
-
-* Prefix all ``docker`` and ``docker-compose`` commands with ``sudo``.
+**That's it!** You've finished setting up your h development environment.
+Run ``make help`` to see all the commands that're available for running the
+tests, linting, code formatting, Python and SQL shells, etc.
 
 .. _Git repo named h: https://github.com/hypothesis/h/
 .. _pyenv: https://github.com/pyenv/pyenv
-
-pyenv errors on macOS
-#####################
-
-``pyenv install`` commands might fail on macOS with error messages such as:
-
-* "symbol(s) not found for architecture x86_64"
-* "ERROR: The Python zlib extension was not compiled. Missing the zlib?"
-
-Read `pyenv's Common Build Problems page <https://github.com/pyenv/pyenv/wiki/common-build-problems>`_
-for the solutions to these.
