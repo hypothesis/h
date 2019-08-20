@@ -21,8 +21,8 @@ in a local development environment.
 You will need
 -------------
 
-Before installing your local development environment you'll need to install
-each of these prerequisites:
+Before installing your development environment you'll need to install each of
+these prerequisites:
 
 * `Git <https://git-scm.com/>`_
 
