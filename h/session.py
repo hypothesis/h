@@ -8,7 +8,6 @@ from h.security import derive_key
 
 def model(request):
     session = {}
-    session["csrf"] = request.session.get_csrf_token()
     session["userid"] = request.authenticated_userid
     session["groups"] = _current_groups(request, request.default_authority)
     session["features"] = request.feature.all()
