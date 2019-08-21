@@ -6,6 +6,9 @@ import pytest
 from h.schemas.forms.accounts import ForgotPasswordSchema
 
 
+pytestmark = pytest.mark.usefixtures("pyramid_config")
+
+
 @pytest.mark.usefixtures("user_model")
 class TestForgotPasswordSchema(object):
     def test_it_is_invalid_with_no_user(self, pyramid_csrf_request, user_model):

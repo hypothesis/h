@@ -285,7 +285,7 @@ class FakeRequest(object):
 
         self.feature = fake_feature
         self.route_url = mock.Mock(return_value="/group/a")
-        self.session = mock.Mock(get_csrf_token=lambda: "__CSRF__")
+        self.session = mock.Mock()
 
         self._group_list_service = mock.create_autospec(
             GroupListService, spec_set=True, instance=True
