@@ -14,7 +14,7 @@
     </div>
     <div class="panel-body">
       <form method="POST" class="form-inline">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+        <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
         <div class="form-group">
           <label for="add">Feature cohort name</label>
           <input type="text" class="form-control" name="add">

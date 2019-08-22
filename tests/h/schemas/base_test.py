@@ -8,10 +8,14 @@ from mock import Mock
 import pytest
 
 import colander
+from pyramid import csrf
 from pyramid.exceptions import BadCSRFToken
 
 from h.schemas import ValidationError
 from h.schemas.base import enum_type, CSRFSchema, JSONSchema
+
+
+pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 
 class ExampleCSRFSchema(CSRFSchema):
@@ -42,7 +46,7 @@ class TestCSRFSchema(object):
             schema.deserialize({})
 
     def test_ok_with_good_csrf(self, pyramid_request):
-        csrf_token = pyramid_request.session.get_csrf_token()
+        csrf_token = csrf.get_csrf_token(pyramid_request)
         pyramid_request.POST["csrf_token"] = csrf_token
         schema = ExampleCSRFSchema().bind(request=pyramid_request)
 

@@ -9,6 +9,9 @@ from h.accounts import schemas
 from h.services.user_password import UserPasswordService
 
 
+pytestmark = pytest.mark.usefixtures("pyramid_config")
+
+
 class TestUnblacklistedUsername(object):
     def test(self, dummy_node):
         blacklist = set(["admin", "root", "postmaster"])

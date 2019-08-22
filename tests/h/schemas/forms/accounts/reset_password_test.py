@@ -7,6 +7,9 @@ from itsdangerous import BadData, SignatureExpired
 from h.schemas.forms.accounts import ResetPasswordSchema
 
 
+pytestmark = pytest.mark.usefixtures("pyramid_config")
+
+
 @pytest.mark.usefixtures("user_model")
 class TestResetPasswordSchema(object):
     def test_it_is_invalid_with_password_too_short(self, pyramid_csrf_request):
