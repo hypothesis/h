@@ -38,7 +38,7 @@ mistune==0.8.3
 newrelic==4.10.0.112
 oauthlib==2.0.2
 passlib==1.7.1
-pastedeploy==2.0.1        # via plaster-pastedeploy, pyramid
+pastedeploy==2.0.1        # via plaster-pastedeploy
 peppercorn==0.5           # via deform
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
@@ -53,12 +53,11 @@ pyramid-layout==1.0
 pyramid-mailer==0.15.1
 pyramid-services==0.4
 pyramid-tm==1.1.1
-pyramid==1.9.4
+pyramid==1.10.4
 python-dateutil==2.5.3
 python-editor==1.0.1      # via alembic
 python-slugify==1.1.4
 pytz==2016.6.1            # via celery
-repoze.lru==0.6           # via pyramid
 repoze.sendmail==4.3      # via pyramid-mailer
 sentry-sdk==0.6.2
 six==1.10.0               # via bcrypt, bleach, elasticsearch-dsl, python-dateutil
