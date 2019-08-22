@@ -64,7 +64,7 @@ RUN apk add --no-cache --virtual build-deps \
 COPY --from=build /build build
 
 # Copy the rest of the application files.
-#COPY . .
+COPY . .
 
 # If we're building from a git clone, ensure that .git is writeable
 RUN [ -d .git ] && chown -R hypothesis:hypothesis .git || :
