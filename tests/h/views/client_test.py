@@ -19,7 +19,7 @@ class TestSidebarApp(object):
             "apiUrl": "http://example.com/api",
             "websocketUrl": "wss://example.com/ws",
             "release": __version__,
-            "raven": {"dsn": "test-sentry-dsn", "release": __version__},
+            "sentry": {"dsn": "test-sentry-dsn"},
             "authDomain": "example.com",
             "googleAnalytics": "UA-4567",
             "oauthClientId": "test-client-id",

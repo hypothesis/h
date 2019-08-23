@@ -64,7 +64,7 @@ def sidebar_app(request, extra=None):
         app_config.update({"websocketUrl": websocket_url})
 
     if sentry_public_dsn:
-        app_config.update({"raven": {"dsn": sentry_public_dsn, "release": __version__}})
+        app_config.update({"sentry": {"dsn": sentry_public_dsn}})
 
     if ga_client_tracking_id:
         app_config.update({"googleAnalytics": ga_client_tracking_id})
