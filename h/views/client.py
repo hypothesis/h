@@ -64,7 +64,12 @@ def sidebar_app(request, extra=None):
         app_config.update({"websocketUrl": websocket_url})
 
     if sentry_public_dsn:
-        app_config.update({"raven": {"dsn": sentry_public_dsn, "release": __version__}})
+        # `h.sentry_environment` primarily refers to h's Sentry environment,
+        # but it also matches the client environment for the embed (dev, qa, prod).
+        sentry_environment = settings.get("h.sentry_environment")
+        app_config.update(
+            {"sentry": {"dsn": sentry_public_dsn, "environment": sentry_environment}}
+        )
 
     if ga_client_tracking_id:
         app_config.update({"googleAnalytics": ga_client_tracking_id})
