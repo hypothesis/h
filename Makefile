@@ -4,6 +4,7 @@ help:
 	@echo 'make services          Run the services that `make dev` requires'
 	@echo "                       (Postgres, Elasticsearch, etc) in Docker Compose"
 	@echo "make dev               Run the app in the development server"
+	@echo "make devdata           Insert standard development data into the DB"
 	@echo "make shell             Launch a Python shell in the dev environment"
 	@echo "make sql               Connect to the dev database with a psql shell"
 	@echo "make lint              Run the code linter(s) and print any warnings"
@@ -36,6 +37,10 @@ services:
 .PHONY: dev
 dev: build/manifest.json python
 	tox -q -e py36-dev
+
+.PHONY: devdata
+devdata: python
+	@tox -q -e py36-dev -- sh bin/hypothesis --dev devdata
 
 .PHONY: shell
 shell: python
