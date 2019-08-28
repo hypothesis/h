@@ -21,7 +21,9 @@ from h.traversal.roots import GroupRoot
 from h.traversal.roots import GroupUpsertRoot
 from h.traversal.roots import ProfileRoot
 from h.traversal.roots import UserRoot
+from h.traversal.roots import UserUserIDRoot
 from h.traversal.contexts import AnnotationContext
+from h.traversal.contexts import UserContext
 
 
 class TestRoot(object):
@@ -497,17 +499,48 @@ class TestUserRoot(object):
     def user_factory(self, pyramid_request):
         return UserRoot(pyramid_request)
 
-    @pytest.fixture
-    def user_service(self, pyramid_config):
-        user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
-        pyramid_config.register_service(user_service, name="user")
-        return user_service
+
+@pytest.mark.usefixtures("user_service")
+class TestUserUserIDRoot(object):
+    def test_it_fetches_the_requested_user(
+        self, pyramid_request, user_userid_root, user_service
+    ):
+        user_userid_root["acct:bob@example.com"]
+
+        user_service.fetch.assert_called_once_with("acct:bob@example.com")
+
+    def test_it_raises_KeyError_if_the_user_does_not_exist(
+        self, user_userid_root, user_service
+    ):
+        user_service.fetch.return_value = None
+
+        with pytest.raises(KeyError):
+            user_userid_root["does_not_exist"]
+
+    def test_it_returns_UserContexts(self, factories, user_userid_root, user_service):
+        user_service.fetch.return_value = user = factories.User.build()
+
+        resource = user_userid_root[user.username]
+
+        assert isinstance(resource, UserContext)
 
     @pytest.fixture
-    def client_authority(self, patch):
-        client_authority = patch("h.traversal.roots.client_authority")
-        client_authority.return_value = None
-        return client_authority
+    def user_userid_root(self, pyramid_request):
+        return UserUserIDRoot(pyramid_request)
+
+
+@pytest.fixture
+def client_authority(patch):
+    client_authority = patch("h.traversal.roots.client_authority")
+    client_authority.return_value = None
+    return client_authority
+
+
+@pytest.fixture
+def user_service(pyramid_config):
+    user_service = mock.create_autospec(UserService, spec_set=True, instance=True)
+    pyramid_config.register_service(user_service, name="user")
+    return user_service
 
 
 @pytest.fixture

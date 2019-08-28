@@ -17,7 +17,7 @@
       <input
         type="hidden"
         name="csrf_token"
-        value="{{ request.session.get_csrf_token() }}">
+        value="{{ get_csrf_token() }}">
       <table class="table table-striped">
         <thead>
           <tr>

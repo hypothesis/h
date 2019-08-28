@@ -10,6 +10,7 @@ and how to contribute code or documentation to the project.
    cla
    install
    administration
+   feature-flags
    introduction
    submitting-a-pr
    code-style
@@ -17,4 +18,6 @@ and how to contribute code or documentation to the project.
    documentation
    ssl
    making-changes-to-model-code
+   debugging-sql-queries
    envvars
+   troubleshooting

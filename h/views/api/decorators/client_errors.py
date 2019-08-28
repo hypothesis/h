@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from pyramid.httpexceptions import HTTPNotFound, HTTPUnsupportedMediaType
+from pyramid.httpexceptions import HTTPNotFound, HTTPNotAcceptable
 
 from h.views.api.helpers.media_types import valid_media_types
 
@@ -32,15 +32,15 @@ def normalize_not_found(wrapped):
 
 
 def validate_media_types(wrapped):
-    """View decorator to convert certain 4xx errors to 415s"""
+    """View decorator to convert certain 4xx errors to 406s"""
 
     def wrapper(context, request):
         # If Accept has been set
         if request.accept:
             # At least one of the media types in Accept must be known to the app
             if not any([t in valid_media_types() for t in request.accept]):
-                # If no Accept media types are known, convert to a 415 error
-                context = HTTPUnsupportedMediaType("Unsupported media type")
+                # If no Accept media types are known, convert to a 406 error
+                context = HTTPNotAcceptable("Not acceptable")
         response = wrapped(context, request)
         return response
 

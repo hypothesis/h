@@ -55,7 +55,6 @@ def includeme(config):
 
     config.add_tween("h.tweens.conditional_http_tween_factory", under=EXCVIEW)
     config.add_tween("h.tweens.redirect_tween_factory")
-    config.add_tween("h.tweens.csrf_tween_factory")
     config.add_tween("h.tweens.invalid_path_tween_factory")
     config.add_tween("h.tweens.security_header_tween_factory")
     config.add_tween("h.tweens.cache_header_tween_factory")

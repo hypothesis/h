@@ -9,6 +9,9 @@ from h.schemas.forms.admin.organization import (
 )
 
 
+pytestmark = pytest.mark.usefixtures("pyramid_config")
+
+
 class TestOrganizationSchema(object):
     def test_it_allows_valid_data(self, org_data, bound_schema):
         bound_schema.deserialize(org_data)

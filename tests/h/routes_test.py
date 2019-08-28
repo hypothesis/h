@@ -162,6 +162,13 @@ def test_includeme():
         call("api.search", "/api/search"),
         call("api.users", "/api/users", factory="h.traversal.UserRoot"),
         call(
+            "api.user_read",
+            "/api/users/{userid}",
+            request_method="GET",
+            factory="h.traversal.UserUserIDRoot",
+            traverse="/{userid}",
+        ),
+        call(
             "api.user",
             "/api/users/{username}",
             factory="h.traversal.UserRoot",

@@ -769,6 +769,7 @@ class TestNotificationsController(object):
         pyramid_config.add_route("account_notifications", "/p/notifications")
 
 
+@pytest.mark.usefixtures("pyramid_config")
 class TestEditProfileController(object):
     def test_get_reads_user_properties(self, pyramid_request):
         pyramid_request.user = mock.Mock()

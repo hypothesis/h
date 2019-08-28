@@ -19,7 +19,7 @@
       <form method="POST"
             class="form-inline"
             action="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
-        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+        <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
         <input type="hidden" name="cohort" value="{{ cohort.id }}">
         <div class="form-group">
           <label for="add">Username</label>
@@ -42,7 +42,7 @@
     <div class="panel-body">
       {% if members %}
         <form method="POST" action="{{ request.route_url('admin.cohorts_edit', id=cohort.id) }}">
-          <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+          <input type="hidden" name="csrf_token" value="{{ get_csrf_token() }}">
           <input type="hidden" name="cohort" value="{{ cohort.id }}">
           <ul>
             {% for user in members %}

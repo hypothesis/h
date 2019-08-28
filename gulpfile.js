@@ -195,10 +195,23 @@ gulp.task('build-images', function() {
     return IS_PRODUCTION_BUILD && file.path.match(/\.svg$/);
   };
 
+  // See https://github.com/ben-eb/gulp-svgmin#plugins
+  var svgminConfig = {
+    plugins: [
+      {
+        // svgo removes `viewBox` by default, which breaks scaled rendering of
+        // the SVG.
+        //
+        // See https://github.com/svg/svgo/issues/1128
+        removeViewBox: false,
+      },
+    ],
+  };
+
   return gulp
     .src(imageFiles)
     .pipe(changed(IMAGES_DIR))
-    .pipe(gulpIf(shouldMinifySVG, svgmin()))
+    .pipe(gulpIf(shouldMinifySVG, svgmin(svgminConfig)))
     .pipe(gulp.dest(IMAGES_DIR));
 });
 

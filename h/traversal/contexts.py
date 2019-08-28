@@ -180,3 +180,31 @@ class GroupUpsertContext(object):
         if self.group is not None:
             return self.group.__acl__()
         return [(Allow, role.User, "upsert")]
+
+
+class UserContext(object):
+    """
+    Context for user-centered views
+
+    .. todo:: Most views still traverse using ``username`` and work directly
+       with User models (:class:`h.models.User`). This context should be
+       expanded as we continue to move over to a more resource-based approach.
+    """
+
+    def __init__(self, user):
+        self.user = user
+
+    def __acl__(self):
+        """
+        Set the "read" permission for AuthClients that have a matching authority
+        to the user. This supercedes the ACL in :class:`h.models.User`.
+
+        .. todo:: This ACL should be expanded (as needed) as more views make use of
+        a context versus a model directly.
+        """
+        acl = []
+
+        user_authority_principal = f"client_authority:{self.user.authority}"
+        acl.append((Allow, user_authority_principal, "read"))
+
+        return acl

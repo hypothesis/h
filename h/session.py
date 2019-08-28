@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
+from pyramid.csrf import SessionCSRFStoragePolicy
 from pyramid.session import SignedCookieSessionFactory
 
 from h.security import derive_key
@@ -8,7 +10,6 @@ from h.security import derive_key
 
 def model(request):
     session = {}
-    session["csrf"] = request.session.get_csrf_token()
     session["userid"] = request.authenticated_userid
     session["groups"] = _current_groups(request, request.default_authority)
     session["features"] = request.feature.all()
@@ -111,3 +112,4 @@ def includeme(config):
         timeout=3600,
     )
     config.set_session_factory(factory)
+    config.set_csrf_storage_policy(SessionCSRFStoragePolicy())
