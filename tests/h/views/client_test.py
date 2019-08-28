@@ -35,6 +35,15 @@ class TestSidebarApp(object):
 
         assert ctx["embed_url"] == "/embed.js"
 
+    def test_it_sets_custom_content_security_policy_header(self, pyramid_request):
+        client.sidebar_app(pyramid_request)
+        csp_header = pyramid_request.response.headers["Content-Security-Policy"]
+
+        assert (
+            csp_header
+            == "script-src 'self' https://cdn.hypothes.is https://www.google-analytics.com; style-src https://cdn.hypothes.is"
+        )
+
 
 @pytest.mark.usefixtures("routes", "pyramid_settings")
 class TestEmbedRedirect(object):

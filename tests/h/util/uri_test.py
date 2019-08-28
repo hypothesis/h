@@ -162,3 +162,16 @@ def test_normalize(url_in, url_out):
 @pytest.mark.parametrize("url,_", TEST_URLS)
 def test_normalize_returns_unicode(url, _):
     assert isinstance(uri.normalize(url), text_type)
+
+
+@pytest.mark.parametrize(
+    "url_in,url_out",
+    [
+        ("https://example.com", "https://example.com"),
+        ("https://example.com/foo?bar=baz#frag", "https://example.com"),
+        ("http://localhost:3000/foo", "http://localhost:3000"),
+        ("HTTP://LOCALHOST:3000/foo", "http://LOCALHOST:3000"),
+    ],
+)
+def test_origin(url_in, url_out):
+    assert uri.origin(url_in) == url_out
