@@ -167,6 +167,13 @@ def includeme(config):
     config.add_route("api.search", "/api/search")
     config.add_route("api.users", "/api/users", factory="h.traversal.UserRoot")
     config.add_route(
+        "api.user_read",
+        "/api/users/{userid}",
+        request_method="GET",
+        factory="h.traversal.UserUserIDRoot",
+        traverse="/{userid}",
+    )
+    config.add_route(
         "api.user",
         "/api/users/{username}",
         factory="h.traversal.UserRoot",

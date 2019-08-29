@@ -37,7 +37,6 @@ node {
                 // Unit tests
                 sh 'cd /var/lib/hypothesis && tox'
                 // Functional tests
-                sh 'cd /var/lib/hypothesis && tox -e py27-functests'
                 sh 'cd /var/lib/hypothesis && tox -e py36-functests'
             }
         } finally {

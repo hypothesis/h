@@ -20,6 +20,7 @@ AUTH_CLIENT_API_WHITELIST = [
     ("api.group_upsert", "PUT"),
     ("api.group_member", "POST"),
     ("api.users", "POST"),
+    ("api.user_read", "GET"),
     ("api.user", "PATCH"),
 ]
 

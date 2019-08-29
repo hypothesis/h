@@ -15,7 +15,7 @@ COPY h/static ./h/static
 RUN npm run build
 
 # Stage 2: Build the rest of the app using the build output from Stage 1.
-FROM alpine:3.9.4
+FROM python:3.6.9-alpine3.10
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
@@ -52,7 +52,6 @@ RUN apk add --no-cache --virtual build-deps \
     build-base \
     libffi-dev \
     postgresql-dev \
-    python-dev \
   && pip install --no-cache-dir -U pip \
   && pip install --no-cache-dir -r requirements.txt \
   && apk del build-deps

@@ -12,7 +12,26 @@ from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
 from h.services.user_update import UserUpdateService
 from h.services.user_unique import UserUniqueService, DuplicateUserError
-from h.views.api.users import create, update
+from h.traversal import UserContext
+from h.views.api.users import read, create, update
+
+
+class TestRead(object):
+    def test_it_presents_user(self, pyramid_request, context, TrustedUserJSONPresenter):
+        read(context, pyramid_request)
+
+        TrustedUserJSONPresenter.assert_called_once_with(context.user)
+        TrustedUserJSONPresenter.return_value.asdict.assert_called_once_with()
+
+    def test_it_returns_presented_user(
+        self, pyramid_request, context, TrustedUserJSONPresenter
+    ):
+        result = read(context, pyramid_request)
+        assert result == TrustedUserJSONPresenter.return_value.asdict.return_value
+
+    @pytest.fixture
+    def context(self, user):
+        return mock.create_autospec(UserContext, instance=True, user=user)
 
 
 @pytest.mark.usefixtures("client_authority", "user_signup_service", "user_unique_svc")

@@ -9,14 +9,14 @@ import copy
 import colander
 import deform
 import jsonschema
-from pyramid.session import check_csrf_token
+from pyramid.csrf import check_csrf_token, get_csrf_token
 from pyramid import httpexceptions
 
 
 @colander.deferred
 def deferred_csrf_token(node, kw):
     request = kw.get("request")
-    return request.session.get_csrf_token()
+    return get_csrf_token(request)
 
 
 class ValidationError(httpexceptions.HTTPBadRequest):

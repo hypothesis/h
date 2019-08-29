@@ -127,7 +127,7 @@ class TestStreamUserRedirect(object):
         with pytest.raises(httpexceptions.HTTPFound) as exc:
             main.stream_user_redirect(pyramid_request)
 
-        assert exc.value.location == "http://example.com/user/acct%3Abob"
+        assert exc.value.location == "http://example.com/user/acct:bob"
 
     @pytest.fixture
     def routes(self, pyramid_config):

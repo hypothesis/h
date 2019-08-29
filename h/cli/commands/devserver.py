@@ -103,7 +103,7 @@ def devserver(https, web, ws, worker, assets, beat):
         m.add_process("beat", "hypothesis --dev celery beat")
 
     if assets:
-        m.add_process("assets", "gulp watch")
+        m.add_process("assets", "node_modules/.bin/gulp watch")
 
     m.loop()
 

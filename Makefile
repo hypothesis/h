@@ -1,6 +1,3 @@
-.PHONY: default
-default: help
-
 .PHONY: help
 help:
 	@echo "make help              Show this help message"
@@ -32,78 +29,82 @@ help:
 	@echo "                       dependencies, etc)"
 
 .PHONY: services
+services: args?=up -d
 services:
-	docker-compose up -d
+	@tox -q -e docker-compose -- $(args)
 
 .PHONY: dev
-dev: build/manifest.json
-	tox -q -e py27-dev
+dev: build/manifest.json python
+	tox -q -e py36-dev
 
 .PHONY: shell
-shell:
-	tox -q -e py27-dev -- sh bin/hypothesis --dev shell
+shell: python
+	tox -q -e py36-dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
 sql:
-	docker-compose exec postgres psql --pset expanded=auto -U postgres
+	@tox -q -e docker-compose -- exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
-lint:
+lint: backend-lint frontend-lint
+
+.PHONY: backend-lint
+backend-lint: python
 	tox -q -e py36-lint
 
 .PHONY: frontend-lint
-frontend-lint:
+frontend-lint: node_modules/.uptodate
 	npm run-script lint
 	npm run-script checkformatting
 
 .PHONY: analyze
-analyze:
+analyze: python
 	tox -qq -e py36-analyze
 
 .PHONY: format
-format:
+format: python
 	tox -q -e py36-format
 
 PHONY: checkformatting
-checkformatting:
+checkformatting: python
 	tox -q -e py36-checkformatting
 
 .PHONY: test
-test: node_modules/.uptodate
+test: node_modules/.uptodate python
 	tox
 	$(GULP) test
 
 .PHONY: coverage
-coverage:
+coverage: python
 	tox -q -e py36-coverage
 
 .PHONY: codecov
-codecov:
+codecov: python
 	tox -q -e py36-codecov
 
 .PHONY: functests
-functests: build/manifest.json
-	tox -q -e py27-functests
+functests: build/manifest.json python
+	tox -q -e py36-functests
 
 .PHONY: docs
-docs:
+docs: python
 	tox -q -e py36-docs
 
 .PHONY: checkdocs
-checkdocs:
+checkdocs: python
 	tox -q -e py36-checkdocs
 
 .PHONY: docstrings
-docstrings:
+docstrings: python
 	tox -q -e py36-docstrings
 
 .PHONY: checkdocstrings
-checkdocstrings:
+checkdocstrings: python
 	tox -q -e py36-checkdocstrings
 
 .PHONY: pip-compile
-pip-compile:
-	tox -q -e py27-dev -- pip-compile --output-file requirements.txt requirements.in
+pip-compile: python
+	tox -q -e py36-dev -- pip-compile --output-file requirements.txt requirements.in
 
 .PHONY: docker
 docker:
@@ -150,3 +151,11 @@ node_modules/.uptodate: package.json
 	@echo installing javascript dependencies
 	@node_modules/.bin/check-dependencies 2>/dev/null || npm install
 	@touch $@
+
+.PHONY: python
+python:
+	@./bin/install-python
+
+.PHONY: gulp
+gulp: node_modules/.uptodate
+	$(GULP) $(args)

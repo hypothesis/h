@@ -110,22 +110,22 @@ class Test409Errors(object):
         )
 
 
-class Test415Errors(object):
-    def test_it_415s_if_not_found_with_bad_accept(self, app):
+class Test406Errors(object):
+    def test_it_406s_if_not_found_with_bad_accept(self, app):
         headers = {}
         headers[native_str("Accept")] = native_str("application/totally_random")
         res = app.get("/api/not_a_thing", headers=headers, expect_errors=True)
 
-        assert res.status_code == 415
-        assert res.json["reason"] == "Unsupported media type"
+        assert res.status_code == 406
+        assert res.json["reason"] == "Not acceptable"
 
-    def test_it_415s_if_path_extant_but_bad_accept(self, app):
+    def test_it_406s_if_path_extant_but_bad_accept(self, app):
         headers = {}
         headers[native_str("Accept")] = native_str("application/totally_random")
         res = app.get("/api/groups", headers=headers, expect_errors=True)
 
-        assert res.status_code == 415
-        assert res.json["reason"] == "Unsupported media type"
+        assert res.status_code == 406
+        assert res.json["reason"] == "Not acceptable"
 
 
 @pytest.fixture

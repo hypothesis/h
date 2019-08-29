@@ -50,29 +50,6 @@ def conditional_http_tween_factory(handler, registry):
     return conditional_http_tween
 
 
-def csrf_tween_factory(handler, registry):
-    """A tween that sets a 'XSRF-TOKEN' cookie."""
-
-    def csrf_tween(request):
-        response = handler(request)
-
-        # NB: the session does not necessarily supply __len__.
-        session_is_empty = len(request.session.keys()) == 0
-
-        # Ignore an empty session.
-        if request.session.new and session_is_empty:
-            return response
-
-        csrft = request.session.get_csrf_token()
-
-        if request.cookies.get("XSRF-TOKEN") != csrft:
-            response.set_cookie("XSRF-TOKEN", csrft)
-
-        return response
-
-    return csrf_tween
-
-
 def invalid_path_tween_factory(handler, registry):
     def invalid_path_tween(request):
         # Due to a bug in WebOb accessing request.path (or request.path_info
