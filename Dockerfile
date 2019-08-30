@@ -26,8 +26,7 @@ RUN apk add --no-cache \
     libffi \
     libpq \
     nginx \
-    git \
-    nginx-mod-http-geoip
+    git
 
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
