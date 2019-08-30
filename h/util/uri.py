@@ -186,6 +186,16 @@ def normalize(uristr):
     return decode_result(uri.geturl())
 
 
+def origin(url):
+    """
+    Return a copy of ``url`` with the path, query string and fragment removed.
+
+    ``url`` is assumed to be an HTTP(S) URL.
+    """
+    url_parts = urlparse.urlsplit(url)
+    return urlparse.SplitResult(url_parts.scheme, url_parts.netloc, "", "", "").geturl()
+
+
 def _normalize_scheme(uri):
     scheme = uri.scheme
 

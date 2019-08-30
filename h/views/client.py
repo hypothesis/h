@@ -15,6 +15,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from h import __version__
+from h.util.uri import origin
 
 # Default URL for the client, which points to the latest version of the client
 # that was published to npm.
@@ -81,6 +82,22 @@ def sidebar_app(request, extra=None):
 
     if extra is not None:
         ctx.update(extra)
+
+    # Add CSP headers to prevent scripts or styles from unexpected locations
+    # being loaded in the page. Note that the client sidebar app uses a different
+    # CSP than pages that are part of the 'h' website.
+    #
+    # As well as offering an extra layer of protection against various security
+    # risks, this also helps to reduce noise in Sentry reports due to script
+    # tags added by e.g. browser extensions.
+    #
+    # The `'self'` script-src is needed because app.html references the `/embed.js`
+    # route from h.
+    client_origin = origin(_client_url(request))
+    ga_origin = "https://www.google-analytics.com"
+    request.response.headers[
+        "Content-Security-Policy"
+    ] = f"script-src 'self' {client_origin} {ga_origin}; style-src {client_origin}"
 
     return ctx
 
