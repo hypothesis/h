@@ -56,15 +56,6 @@ installation process:
 
    cd h
 
-Run the services with Docker Compose
-------------------------------------
-
-Start the services that h requires using Docker Compose:
-
-.. code-block:: shell
-
-   make services
-
 Start the development server
 ----------------------------
 

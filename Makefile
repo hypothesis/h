@@ -1,8 +1,6 @@
 .PHONY: help
 help:
 	@echo "make help              Show this help message"
-	@echo 'make services          Run the services that `make dev` requires'
-	@echo "                       (Postgres, Elasticsearch, etc) in Docker Compose"
 	@echo "make dev               Run the app in the development server"
 	@echo "make shell             Launch a Python shell in the dev environment"
 	@echo "make sql               Connect to the dev database with a psql shell"
@@ -31,18 +29,21 @@ help:
 .PHONY: services
 services: args?=up -d
 services:
-	@tox -q -e docker-compose -- $(args)
+	@tox -q -e docker-compose -- $(args) > /dev/null
+	@bin/wait-for-port localhost 5432
+	@bin/wait-for-port localhost 9200
+	@bin/wait-for-port localhost 5672
 
 .PHONY: dev
-dev: build/manifest.json python
+dev: build/manifest.json services python
 	tox -q -e py36-dev
 
 .PHONY: shell
-shell: python
+shell: services python
 	tox -q -e py36-dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
-sql:
+sql: services
 	@tox -q -e docker-compose -- exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
@@ -70,7 +71,7 @@ checkformatting: python
 	tox -q -e py36-checkformatting
 
 .PHONY: test
-test: node_modules/.uptodate python
+test: services node_modules/.uptodate python
 	tox
 	$(GULP) test
 
@@ -83,7 +84,7 @@ codecov: python
 	tox -q -e py36-codecov
 
 .PHONY: functests
-functests: build/manifest.json python
+functests: services build/manifest.json python
 	tox -q -e py36-functests
 
 .PHONY: docs

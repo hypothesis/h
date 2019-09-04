@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+#
+# Wait for the given host and port to start responding.
+#
+# Repeatedly try to contact the given host and port over TCP until it responds,
+# then exit with status 0.
+#
+# If the host:port does not respond after 10 seconds of trying then exit with
+# status 1.
+#
+# Usage
+# =====
+#
+#     bin/wait-for-port localhost 5432
+set -e
+
+if [ $# -ne 2 ]; then
+    echo "Wrong number of command line arguments."
+    echo "Usage:"
+    echo ""
+    echo "    $0 <HOST> <PORT>"
+    echo ""
+    echo "Example:"
+    echo ""
+    echo "    $0 localhost 5432"
+    exit 1
+fi
+
+n=0
+while [ "$n" -lt 100 ]; do
+    n=$(( n + 1 ))
+    nc -z "$1" "$2" && exit 0
+    sleep 0.1
+done
+
+exit 1
