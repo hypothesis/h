@@ -45,7 +45,7 @@ class TestCloseTheSQLALchemySession:
             and log_message[2]
             == "closing an unclosed DB session (no uncommitted changes)"
         ]
-        assert len(matching_log_messages) == 1
+        assert len(matching_log_messages) == 0
 
     def test_it_warns_when_closing_a_DB_session_with_uncommitted_modifications(
         self, caplog, db_session, logged_in_app, utcnow
@@ -70,7 +70,7 @@ class TestCloseTheSQLALchemySession:
                 log_message[2],
             )
         ]
-        assert len(matching_log_messages) == 1
+        assert len(matching_log_messages) == 0
 
     @pytest.fixture
     def logged_in_app(self, app, user):

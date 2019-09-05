@@ -85,15 +85,13 @@ def includeme(config):
     # retrieving services bound to the request.
     config.include("pyramid_services")
 
-    # Configure the transaction manager to support retrying retryable
-    # exceptions, and generate a new transaction manager for each request.
     config.add_settings(
         {
-            "tm.attempts": 3,
             "tm.manager_hook": lambda request: transaction.TransactionManager(),
             "tm.annotate_user": False,
         }
     )
+    config.include("pyramid_retry")
     config.include("pyramid_tm")
 
     # Define the global default Content Security Policy
