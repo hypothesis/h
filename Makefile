@@ -18,7 +18,11 @@ help:
 	@echo "make checkdocs         Crash if building the docs website fails"
 	@echo "make docstrings        View all the docstrings locally as HTML"
 	@echo "make checkdocstrings   Crash if building the docstrings fails"
-	@echo "make pip-compile       Compile requirements.in to requirements.txt"
+	@echo "make pip-compile       Compile requirements.in to requirements.txt."
+	@echo "                       Use this command after editing requirements.in, for"
+	@echo "                       example after adding or removing a requirement."
+	@echo "make upgrade-package   Upgrade the version of a package in requirements.txt."
+	@echo '                       Usage: `make upgrade-package name=some-package`.'
 	@echo "make docker            Make the app's Docker image"
 	@echo "make run-docker        Run the app's Docker image locally. "
 	@echo "                       This command exists for conveniently testing "
@@ -105,6 +109,10 @@ checkdocstrings: python
 .PHONY: pip-compile
 pip-compile: python
 	tox -q -e py36-dev -- pip-compile
+
+.PHONY: upgrade-package
+upgrade-package: python
+	@tox -qe py36-dev -- pip-compile --upgrade-package $(name)
 
 .PHONY: docker
 docker:
