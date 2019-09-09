@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from pyramid.csrf import SessionCSRFStoragePolicy
-from pyramid.session import SignedCookieSessionFactory
+from pyramid.session import SignedCookieSessionFactory, JSONSerializer
 
 from h.security import derive_key
 
@@ -110,6 +110,7 @@ def includeme(config):
         hashalg="sha512",
         httponly=True,
         timeout=3600,
+        serializer=JSONSerializer(),
     )
     config.set_session_factory(factory)
     config.set_csrf_storage_policy(SessionCSRFStoragePolicy())
