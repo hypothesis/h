@@ -94,10 +94,15 @@ def sidebar_app(request, extra=None):
     # The `'self'` script-src is needed because app.html references the `/embed.js`
     # route from h.
     client_origin = origin(_client_url(request))
-    ga_origin = "https://www.google-analytics.com"
+    script_src = f"'self' {client_origin} https://www.google-analytics.com"
+
+    # nb. Inline styles are currently allowed for the client because LaTeX
+    # math rendering using KaTeX relies on them.
+    style_src = f"{client_origin} 'unsafe-inline'"
+
     request.response.headers[
         "Content-Security-Policy"
-    ] = f"script-src 'self' {client_origin} {ga_origin}; style-src {client_origin}"
+    ] = f"script-src {script_src}; style-src {style_src}"
 
     return ctx
 
