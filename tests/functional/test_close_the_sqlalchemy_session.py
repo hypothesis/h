@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
 
 import datetime
+import logging
 import re
 from unittest import mock
 
 import pytest
+
+from h.models import AuthTicket
 
 
 class TestCloseTheSQLALchemySession:
@@ -21,6 +24,28 @@ class TestCloseTheSQLALchemySession:
     This class tests a couple of situations in which
     close_the_sqlalchemy_session() is required to do its job.
     """
+
+    def test_it_warns_when_closing_a_DB_session_with_no_modifications(
+        self, caplog, db_session, logged_in_app, utcnow
+    ):
+        # Set the current time to the updated time of the logged-in user's auth
+        # ticket.
+        # This ensures that AuthTicketService will *not* modify the DB by
+        # updating the ticket's expiry time, because it only does that if one
+        # minute or more has elapsed since the ticket's updated time.
+        utcnow.return_value = db_session.query(AuthTicket).one().updated
+
+        logged_in_app.get("/foo/bar/gar", status=404)
+
+        matching_log_messages = [
+            log_message
+            for log_message in caplog.record_tuples
+            if log_message[0] == "h.db"
+            and log_message[1] == logging.WARN
+            and log_message[2]
+            == "closing an unclosed DB session (no uncommitted changes)"
+        ]
+        assert len(matching_log_messages) == 1
 
     def test_it_warns_when_closing_a_DB_session_with_uncommitted_modifications(
         self, caplog, db_session, logged_in_app, utcnow
