@@ -110,6 +110,20 @@ def _session(request):
         if changes:
             msg = "closing a session with uncommitted changes %s"
             log.warning(msg, changes, extra={"stack": True, "changes": changes})
+
+        elif len(session.transaction._connections) > 1:
+            # There are no uncommitted changes but there do appear to be
+            # unclosed database connections.
+            log.warning(
+                "closing an unclosed DB session (no uncommitted changes)",
+                extra={"stack": True},
+            )
+
+        # Close any unclosed DB connections.
+        # This is done outside of either of the `if` statements above just in
+        # case: it's okay to call `session.close()` even if the session does
+        # not need to be closed, so just call it unconditionally so that
+        # there's no chance of leaking any unclosed DB connections.
         session.close()
 
     return session
