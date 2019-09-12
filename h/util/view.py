@@ -21,11 +21,6 @@ def handle_exception(request, exception):
     """
     request.response.status_int = 500
 
-    # In debug mode we should just reraise, so that the exception is caught by
-    # the debug toolbar.
-    if request.debug:
-        raise
-
 
 def json_view(**settings):
     """A view configuration decorator with JSON defaults."""
