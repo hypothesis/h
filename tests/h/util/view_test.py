@@ -15,20 +15,8 @@ class TestHandleException(object):
 
         assert pyramid_request.response.status_int == 500
 
-    def test_reraises_in_debug_mode(self, pyramid_request):
-        pyramid_request.debug = True
-        dummy_exc = ValueError("dummy")
-
-        try:
-            raise dummy_exc
-        except:
-            with pytest.raises(ValueError) as exc:
-                handle_exception(pyramid_request, Mock())
-            assert exc.value == dummy_exc
-
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.debug = False
         return pyramid_request
 
     @pytest.fixture

@@ -136,7 +136,3 @@ def includeme(config):
     config.include("h.links")
     config.include("h.nipsa")
     config.include("h.notification")
-
-    # Debugging assistance
-    if asbool(config.registry.settings.get("h.debug")):
-        config.include("pyramid_debugtoolbar")
