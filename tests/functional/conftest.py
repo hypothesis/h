@@ -19,6 +19,7 @@ TEST_SETTINGS = {
     "es.index": ELASTICSEARCH_INDEX,
     "h.app_url": "http://example.com",
     "h.authority": "example.com",
+    "h.sentry_dsn_frontend": "TEST_SENTRY_DSN_FRONTEND",
     "pyramid.debug_all": False,
     "secret_key": "notasecret",
     "sqlalchemy.url": os.environ.get(
