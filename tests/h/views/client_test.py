@@ -41,7 +41,7 @@ class TestSidebarApp(object):
 
         assert (
             csp_header
-            == "script-src 'self' https://cdn.hypothes.is https://www.google-analytics.com; style-src https://cdn.hypothes.is"
+            == "script-src 'self' https://cdn.hypothes.is https://www.google-analytics.com; style-src https://cdn.hypothes.is 'unsafe-inline'"
         )
 
 
