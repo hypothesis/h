@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import datetime
 import uuid
+from unittest import mock
 
-import mock
 import pytest
 
 from oauthlib.common import Request as OAuthRequest

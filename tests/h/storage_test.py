@@ -3,9 +3,9 @@
 from __future__ import unicode_literals
 
 import copy
+from unittest import mock
 
 import pytest
-import mock
 
 from h.models.annotation import Annotation
 from h.models.document import Document, DocumentURI

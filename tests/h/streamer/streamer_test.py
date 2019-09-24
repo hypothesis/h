@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import mock
-from mock import call
+
+from unittest import mock
 import pytest
 
 from h.streamer import messages
@@ -90,7 +90,7 @@ def test_process_work_queue_calls_close_after_commit(session):
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
-    assert session.method_calls[-2:] == [call.commit(), call.close()]
+    assert session.method_calls[-2:] == [mock.call.commit(), mock.call.close()]
 
 
 def test_process_work_queue_calls_close_after_rollback(session):
@@ -101,7 +101,7 @@ def test_process_work_queue_calls_close_after_rollback(session):
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
-    assert session.method_calls[-2:] == [call.rollback(), call.close()]
+    assert session.method_calls[-2:] == [mock.call.rollback(), mock.call.close()]
 
 
 @pytest.fixture

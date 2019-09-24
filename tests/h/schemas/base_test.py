@@ -3,8 +3,10 @@
 from __future__ import unicode_literals
 
 from h._compat import PY2
+
 import enum
-from mock import Mock
+from unittest.mock import Mock
+
 import pytest
 
 import colander

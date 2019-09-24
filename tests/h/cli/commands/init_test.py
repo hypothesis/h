@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import mock
+from unittest import mock
+
 import pytest
 
 from h.cli.commands import init as init_cli

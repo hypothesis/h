@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 import datetime
+from unittest import mock
 
 import elasticsearch
 import elasticsearch_dsl
 import logging
-import mock
 import pytest
 
 import h.search.index

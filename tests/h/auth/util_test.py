@@ -3,9 +3,9 @@
 from __future__ import unicode_literals
 
 from collections import namedtuple
+from unittest import mock
 
 import pytest
-import mock
 import sqlalchemy as sa
 
 from pyramid import security

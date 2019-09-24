@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
+from unittest.mock import Mock
 
 from h.views.errors import notfound, error, json_error
 

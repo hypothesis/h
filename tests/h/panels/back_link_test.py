@@ -2,7 +2,8 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
+from unittest.mock import Mock
+
 import pytest
 
 from h.panels.back_link import back_link

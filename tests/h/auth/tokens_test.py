@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
 import datetime
+from unittest import mock
 
 import jwt
-import mock
+
 
 from hypothesis import strategies as st
 from hypothesis import assume, given

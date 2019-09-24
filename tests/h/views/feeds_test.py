@@ -2,7 +2,8 @@
 
 from __future__ import unicode_literals
 
-import mock
+from unittest import mock
+
 import pytest
 
 from h.views.feeds import stream_atom, stream_rss

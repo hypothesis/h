@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 
-import mock
-from mock import PropertyMock
+from unittest import mock
+
 import pytest
 
 from h.panels.navbar import navbar
@@ -59,14 +59,16 @@ class TestNavbar(object):
         assert result["q"] == "tag:question"
 
     def test_it_includes_search_url_when_on_user_search(self, req):
-        type(req.matched_route).name = PropertyMock(return_value="activity.user_search")
+        type(req.matched_route).name = mock.PropertyMock(
+            return_value="activity.user_search"
+        )
         req.matchdict = {"username": "luke"}
 
         result = navbar({}, req)
         assert result["search_url"] == "http://example.com/users/luke"
 
     def test_it_includes_search_url_when_on_group_search(self, req):
-        type(req.matched_route).name = PropertyMock(return_value="group_read")
+        type(req.matched_route).name = mock.PropertyMock(return_value="group_read")
         req.matchdict = {"pubid": "foobar", "slug": "slugbar"}
 
         result = navbar({}, req)

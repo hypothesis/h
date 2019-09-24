@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 
-import mock
-from mock import MagicMock
+from unittest import mock
+
 from pyramid import httpexceptions
 import pytest
 
@@ -198,7 +198,7 @@ def test_users_delete_user_not_found_error(user_service, pyramid_request):
 
 def test_users_delete_deletes_user(user_service, delete_user_service, pyramid_request):
     pyramid_request.params = {"userid": "acct:bob@example.com"}
-    user = MagicMock()
+    user = mock.MagicMock()
 
     user_service.fetch.return_value = user
 

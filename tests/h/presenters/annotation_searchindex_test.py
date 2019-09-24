@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 import datetime
+from unittest import mock
 
-import mock
 import pytest
 
 from h.presenters.annotation_searchindex import AnnotationSearchIndexPresenter

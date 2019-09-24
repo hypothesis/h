@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 import datetime
+from unittest import mock
 
 import pytest
-import mock
 from pyramid import httpexceptions
 from webob.multidict import MultiDict
 

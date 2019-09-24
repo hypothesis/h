@@ -2,7 +2,8 @@
 
 from __future__ import unicode_literals
 
-import mock
+from unittest import mock
+
 from pyramid import httpexceptions
 import pytest
 

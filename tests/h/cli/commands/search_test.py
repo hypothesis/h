@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import mock
 import os
+from unittest import mock
+
 import pytest
 
 from h.cli.commands import search

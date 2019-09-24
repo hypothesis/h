@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 
 from copy import deepcopy
-import mock
+from unittest import mock
+
 import pytest
 import re
 from webob.multidict import NestedMultiDict, MultiDict

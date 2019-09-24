@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import pytest
-from mock import Mock
+from unittest.mock import Mock
 
+import pytest
 import colander
 
 from h.schemas.validators import Email

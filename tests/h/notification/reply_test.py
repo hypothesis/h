@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import pytest
-import mock
 
 from h.models import Annotation
 from h.models import Document, DocumentMeta

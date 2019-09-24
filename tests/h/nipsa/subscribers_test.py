@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from collections import namedtuple
 
-import mock
+from collections import namedtuple
+from unittest import mock
+
 import pytest
 
 from h.nipsa import subscribers

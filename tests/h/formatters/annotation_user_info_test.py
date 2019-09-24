@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 from collections import namedtuple
+from unittest import mock
 
-import mock
 import pytest
 
 from h.formatters.annotation_user_info import AnnotationUserInfoFormatter

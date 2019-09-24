@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import pytest
-import mock
 
 from h.views.api.helpers import links
 from h.views.api.helpers.angular import AngularRouteTemplater

@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock, call
+from unittest.mock import Mock, call
 
 from h.routes import includeme
 

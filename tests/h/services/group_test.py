@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 import datetime
+from unittest import mock
 
-import mock
 import pytest
 
 from h.models import User, Group, GroupScope

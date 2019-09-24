@@ -3,7 +3,7 @@
 """Unit tests for h/atom.py."""
 from __future__ import unicode_literals
 from datetime import datetime
-import mock
+from unittest import mock
 
 from h import models
 from h.feeds import atom

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
 from h._compat import text_type
 
+from unittest import mock
+
 import pytest
-import mock
 import jinja2
 
 from h.presenters.document_html import DocumentHTMLPresenter

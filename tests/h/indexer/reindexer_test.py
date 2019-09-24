@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import mock
+
+from unittest import mock
+
 import pytest
 
 from h.indexer.reindexer import reindex
