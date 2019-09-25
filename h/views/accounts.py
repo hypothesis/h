@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import datetime
 import itertools
+from urllib.parse import urlparse
 
 import colander
 import deform
@@ -30,7 +31,6 @@ from h.accounts.events import LoginEvent
 from h.emails import reset_password
 from h.tasks import mailer
 from h.util.view import json_view
-from h._compat import urlparse
 
 _ = i18n.TranslationString
 
@@ -56,7 +56,7 @@ def bad_csrf_token_html(context, request):
     request.response.status_code = 403
 
     next_path = "/"
-    referer = urlparse.urlparse(request.referer or "")
+    referer = urlparse(request.referer or "")
     if referer.hostname == request.domain:
         next_path = referer.path
 

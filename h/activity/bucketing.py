@@ -5,11 +5,11 @@ from __future__ import unicode_literals
 
 import collections
 import datetime
+from urllib.parse import urlparse
 
 import newrelic.agent
 from pyramid import i18n
 
-from h._compat import urlparse
 from h import links
 from h import presenters
 
@@ -29,7 +29,7 @@ class DocumentBucket:
         presented_document = presenters.DocumentHTMLPresenter(document)
 
         if presented_document.web_uri:
-            parsed = urlparse.urlparse(presented_document.web_uri)
+            parsed = urlparse(presented_document.web_uri)
             self.uri = parsed.geturl()
             self.domain = parsed.netloc
         else:

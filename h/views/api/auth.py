@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import json
 import logging
+from urllib.parse import parse_qs, urlparse
 
 from oauthlib.oauth2 import OAuth2Error
 from pyramid import security
@@ -11,7 +12,6 @@ from pyramid.httpexceptions import HTTPFound, exception_response
 from pyramid.view import view_config, view_defaults
 
 from h import models
-from h._compat import urlparse
 from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
@@ -166,8 +166,8 @@ class OAuthAuthorizeController:
             )
 
     def _render_web_message_response(self, redirect_uri):
-        location = urlparse.urlparse(redirect_uri)
-        params = urlparse.parse_qs(location.query)
+        location = urlparse(redirect_uri)
+        params = parse_qs(location.query)
         origin = "{url.scheme}://{url.netloc}".format(url=location)
 
         state = None

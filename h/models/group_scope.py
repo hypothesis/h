@@ -2,10 +2,11 @@
 
 from __future__ import unicode_literals
 
+from urllib.parse import urljoin
+
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from h._compat import urlparse
 from h.db import Base
 from h.util.group_scope import parse_scope_from_url
 
@@ -59,7 +60,7 @@ class GroupScope(Base):
     @property
     def scope(self):
         """Return a URL composed from the origin and path attrs"""
-        return urlparse.urljoin(self._origin, self._path)
+        return urljoin(self._origin, self._path)
 
     @scope.setter
     def scope(self, value):

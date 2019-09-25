@@ -4,8 +4,8 @@
 
 from __future__ import unicode_literals
 
-from h._compat import urlparse
 import logging
+from urllib.parse import urlparse
 
 import transaction
 from pyramid.settings import asbool
@@ -98,7 +98,7 @@ def includeme(config):
 
     # Define the global default Content Security Policy
     client_url = settings.get("h.client_url", DEFAULT_CLIENT_URL)
-    client_host = urlparse.urlparse(client_url).netloc
+    client_host = urlparse(client_url).netloc
     settings["csp"] = {
         "font-src": ["'self'", "fonts.gstatic.com", client_host],
         "script-src": ["'self'", client_host, "www.google-analytics.com"],

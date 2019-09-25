@@ -6,6 +6,7 @@ from unittest import mock
 
 import datetime
 import json
+import urllib.parse
 
 import pytest
 
@@ -13,7 +14,6 @@ from oauthlib.oauth2 import InvalidRequestFatalError
 from oauthlib.common import Request as OAuthRequest
 from pyramid import httpexceptions
 
-from h._compat import urlparse
 from h.views.api.exceptions import OAuthTokenError
 from h.models.auth_client import ResponseType
 from h.services.auth_token import auth_token_service_factory
@@ -57,9 +57,9 @@ class TestOAuthAuthorizeController:
             view = getattr(controller, view_name)
             view()
 
-        parsed_url = urlparse.urlparse(exc.value.location)
+        parsed_url = urllib.parse.urlparse(exc.value.location)
         assert parsed_url.path == "/login"
-        assert urlparse.parse_qs(parsed_url.query) == {
+        assert urllib.parse.parse_qs(parsed_url.query) == {
             "next": [pyramid_request.url],
             "for_oauth": ["True"],
         }

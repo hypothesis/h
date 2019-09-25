@@ -9,14 +9,13 @@ Create Date: 2016-09-12 15:31:00.597582
 from __future__ import unicode_literals
 
 from collections import namedtuple
+from urllib.parse import urlparse
 
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import subqueryload
-
-from h._compat import urlparse
 
 
 revision = "a44ef07b085a"
@@ -74,7 +73,7 @@ def downgrade():
 
 def _document_web_uri(document):
     for docuri in document.document_uris:
-        uri = urlparse.urlparse(docuri.uri)
+        uri = urlparse(docuri.uri)
         if uri.scheme in ["http", "https"]:
             return docuri.uri
 

@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from h._compat import urlparse
+import urllib.parse
 
 
 def url_in_scope(url, scope_urls):
@@ -37,7 +37,7 @@ def _parse_path(url):
     """Return the path component of a URL string"""
     if url is None:
         return None
-    parsed = urlparse.urlsplit(url)
+    parsed = urllib.parse.urlsplit(url)
     return parsed.path
 
 
@@ -55,7 +55,7 @@ def parse_origin(url):
 
     if url is None:
         return None
-    parsed = urlparse.urlsplit(url)
+    parsed = urllib.parse.urlsplit(url)
     # netloc contains both host and port
-    origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, "", "", "")
+    origin = urllib.parse.SplitResult(parsed.scheme, parsed.netloc, "", "", "")
     return origin.geturl() or None

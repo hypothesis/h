@@ -2,25 +2,10 @@
 """Helpers for the Python 2 to Python 3 transition."""
 from __future__ import unicode_literals
 
-from urllib import parse as urlparse
-
-__all__ = (
-    "text_type",
-    "string_types",
-    "urlparse",
-    "url_quote",
-    "url_quote_plus",
-    "url_unquote",
-    "url_unquote_plus",
-)
+__all__ = ("text_type", "string_types")
 
 text_type = str
 string_types = (str,)
-
-url_quote = urlparse.quote
-url_quote_plus = urlparse.quote_plus
-url_unquote = urlparse.unquote
-url_unquote_plus = urlparse.unquote_plus
 
 
 # native() function adapted from Pyramid:

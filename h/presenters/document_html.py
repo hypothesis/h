@@ -2,9 +2,11 @@
 
 from __future__ import unicode_literals
 
+from urllib.parse import urlparse, unquote
+
 import jinja2
 
-from h._compat import text_type, urlparse, url_unquote
+from h._compat import text_type
 
 
 class DocumentHTMLPresenter:
@@ -71,9 +73,9 @@ class DocumentHTMLPresenter:
 
         """
         if self.filename:
-            return jinja2.escape(url_unquote(self.filename))
+            return jinja2.escape(unquote(self.filename))
         else:
-            hostname = urlparse.urlparse(self.uri).hostname
+            hostname = urlparse(self.uri).hostname
 
             # urlparse()'s .hostname is sometimes None.
             hostname = hostname or ""
@@ -145,8 +147,8 @@ class DocumentHTMLPresenter:
         # the front and unquote it for link text.
         lower = title.lower()
         if lower.startswith("http://") or lower.startswith("https://"):
-            parts = urlparse.urlparse(title)
-            return url_unquote(parts.netloc + parts.path)
+            parts = urlparse(title)
+            return unquote(parts.netloc + parts.path)
 
         else:
             return title
@@ -173,9 +175,9 @@ class DocumentHTMLPresenter:
             return jinja2.escape(title)
 
         if self.filename:
-            return jinja2.escape(url_unquote(self.filename))
+            return jinja2.escape(unquote(self.filename))
         else:
-            return jinja2.escape(url_unquote(self.uri))
+            return jinja2.escape(unquote(self.uri))
 
     @property
     def uri(self):

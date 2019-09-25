@@ -5,8 +5,7 @@ Provides links to different representations of annotations.
 """
 from __future__ import unicode_literals
 
-
-from h._compat import urlparse, url_unquote
+from urllib.parse import urlparse, unquote, urljoin
 
 
 def pretty_link(url):
@@ -16,13 +15,13 @@ def pretty_link(url):
     This strips off 'visual noise' from the URL including common schemes
     (HTTP, HTTPS), domain prefixes ('www.') and query strings.
     """
-    parsed = urlparse.urlparse(url)
+    parsed = urlparse(url)
     if parsed.scheme not in ["http", "https"]:
         return url
     netloc = parsed.netloc
     if netloc.startswith("www."):
         netloc = netloc[4:]
-    return url_unquote(netloc + parsed.path)
+    return unquote(netloc + parsed.path)
 
 
 def html_link(request, annotation):
@@ -41,7 +40,7 @@ def incontext_link(request, annotation):
     if not bouncer_url:
         return None
 
-    link = urlparse.urljoin(bouncer_url, annotation.thread_root_id)
+    link = urljoin(bouncer_url, annotation.thread_root_id)
     uri = annotation.target_uri
     if uri.startswith(("http://", "https://")):
         # We can't use urljoin here, because if it detects the second argument
