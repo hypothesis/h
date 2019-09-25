@@ -2,13 +2,11 @@
 """Helpers for the Python 2 to Python 3 transition."""
 from __future__ import unicode_literals
 
-import configparser
 from urllib import parse as urlparse
 
 __all__ = (
     "text_type",
     "string_types",
-    "configparser",
     "urlparse",
     "url_quote",
     "url_quote_plus",
