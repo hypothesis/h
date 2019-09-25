@@ -144,7 +144,7 @@ def _fetch_windows(session, chunksize=200):
         Window(
             start=updated[min(x + chunksize, count) - 1].updated, end=updated[x].updated
         )
-        for x in xrange(0, count, chunksize)
+        for x in range(0, count, chunksize)
     ]
 
     return windows

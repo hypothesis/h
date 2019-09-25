@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from h._compat import xrange
 from collections import namedtuple
 
 import click
@@ -154,7 +153,7 @@ def _fetch_windows(session, column, chunksize=100):
         Window(
             start=updated[min(x + chunksize, count) - 1].updated, end=updated[x].updated
         )
-        for x in xrange(0, count, chunksize)
+        for x in range(0, count, chunksize)
     ]
 
     return windows
