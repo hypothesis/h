@@ -14,7 +14,6 @@ __all__ = (
     "url_quote_plus",
     "url_unquote",
     "url_unquote_plus",
-    "StringIO",
 )
 
 PY2 = sys.version_info[0] == 2
@@ -50,11 +49,6 @@ except ImportError:
     url_quote_plus = urllib.quote_plus
     url_unquote = urllib.unquote
     url_unquote_plus = urllib.unquote_plus
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 
 # native() function adapted from Pyramid:

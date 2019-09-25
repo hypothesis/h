@@ -2,12 +2,12 @@
 
 from __future__ import unicode_literals
 
+from io import StringIO
 from sys import version_info
 from unittest.mock import patch
 
 import pytest
 
-from h._compat import StringIO
 from h.assets import Environment
 
 if version_info.major == 2:
