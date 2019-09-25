@@ -13,7 +13,7 @@ import pytest
 native_str = str
 
 
-class TestGetAnnotation(object):
+class TestGetAnnotation:
     def test_it_returns_annotation_if_shared(self, app, annotation):
         """Unauthenticated users may view shared annotations assuming they have group access"""
         res = app.get(
@@ -49,7 +49,7 @@ class TestGetAnnotation(object):
         assert res.status_code == 404
 
 
-class TestGetAnnotationJSONLD(object):
+class TestGetAnnotationJSONLD:
     def test_it_returns_annotation_if_shared(self, app, annotation):
         """Unauthenticated users may view shared annotations assuming they have group access"""
         res = app.get(
@@ -89,7 +89,7 @@ class TestGetAnnotationJSONLD(object):
         assert res.status_code == 404
 
 
-class TestPostAnnotation(object):
+class TestPostAnnotation:
     def test_it_returns_http_404_if_unauthorized(self, app):
         # FIXME: This should return a 403
 
@@ -157,7 +157,7 @@ class TestPostAnnotation(object):
         assert res.status_code == 200
 
 
-class TestPatchAnnotation(object):
+class TestPatchAnnotation:
     def test_it_updates_annotation_if_authorized(
         self, app, user_annotation, user_with_token
     ):
@@ -208,7 +208,7 @@ class TestPatchAnnotation(object):
         assert res.status_code == 404
 
 
-class TestDeleteAnnotation(object):
+class TestDeleteAnnotation:
     def test_it_deletes_annotation_if_authorized(
         self, app, user_annotation, user_with_token
     ):

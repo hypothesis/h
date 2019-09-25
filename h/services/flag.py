@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h import models
 
 
-class FlagService(object):
+class FlagService:
     def __init__(self, session):
         self.session = session
 

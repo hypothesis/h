@@ -12,7 +12,7 @@ from h.views.admin.organizations import (
 )
 
 
-class FakeForm(object):
+class FakeForm:
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 
@@ -20,7 +20,7 @@ class FakeForm(object):
         return self.appstruct
 
 
-class TestIndex(object):
+class TestIndex:
     @pytest.mark.parametrize(
         "query,expected_orgs",
         [
@@ -51,7 +51,7 @@ class TestIndex(object):
 
 
 @pytest.mark.usefixtures("routes")
-class TestOrganizationCreateController(object):
+class TestOrganizationCreateController:
     def test_get_sets_default_values(self, pyramid_request):
         ctrl = OrganizationCreateController(pyramid_request)
 
@@ -100,7 +100,7 @@ class TestOrganizationCreateController(object):
 
 
 @pytest.mark.usefixtures("routes")
-class TestOrganizationEditController(object):
+class TestOrganizationEditController:
     def test_read_presents_org(self, pyramid_request, org):
         ctrl = OrganizationEditController(org, pyramid_request)
         ctx = ctrl.read()

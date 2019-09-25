@@ -15,7 +15,7 @@ from h.services.feature import (
 )
 
 
-class TestFeatureRequestProperty(object):
+class TestFeatureRequestProperty:
     def test_single_feature_fetch(self, pyramid_request, feature_service):
         result = pyramid_request.feature("foo")
 
@@ -53,7 +53,7 @@ class TestFeatureRequestProperty(object):
 
 
 @pytest.mark.usefixtures("features")
-class TestFeatureService(object):
+class TestFeatureService:
     def test_enabled_true_if_overridden(self, db_session):
         svc = FeatureService(session=db_session, overrides=["foo"])
 
@@ -174,7 +174,7 @@ class TestFeatureService(object):
         return models.FeatureCohort(name="cohort")
 
 
-class TestFeatureServiceFactory(object):
+class TestFeatureServiceFactory:
     def test_passes_session(self, pyramid_request):
         svc = feature_service_factory(None, pyramid_request)
 

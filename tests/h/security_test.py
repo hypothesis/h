@@ -21,7 +21,7 @@ REASONABLE_KEY_MATERIAL = st.binary(min_size=8, max_size=128)
 REASONABLE_SALT = st.binary(min_size=64, max_size=64)
 
 
-class TestDeriveKey(object):
+class TestDeriveKey:
     @given(
         info_a=REASONABLE_INFO,
         info_b=REASONABLE_INFO,

@@ -11,7 +11,7 @@ import jinja2
 from h.presenters.annotation_html import AnnotationHTMLPresenter
 
 
-class TestAnnotationHTMLPresenter(object):
+class TestAnnotationHTMLPresenter:
     def _annotation(self, annotation=None, **kwargs):
         """Return an AnnotationHTMLPresenter for the given annotation.
 

@@ -10,7 +10,7 @@ import pytest
 from h import realtime
 
 
-class TestConsumer(object):
+class TestConsumer:
     def test_init_stores_connection(self, consumer):
         assert consumer.connection == mock.sentinel.connection
 
@@ -105,7 +105,7 @@ class TestConsumer(object):
         return patch("h.realtime.Consumer.generate_queue_name")
 
 
-class TestPublisher(object):
+class TestPublisher:
     def test_publish_annotation(
         self, matchers, producer_pool, pyramid_request, retry_policy
     ):
@@ -155,7 +155,7 @@ class TestPublisher(object):
         return patch("h.realtime.producer_pool")
 
 
-class TestGetExchange(object):
+class TestGetExchange:
     def test_returns_the_exchange(self):
         import kombu
 
@@ -176,7 +176,7 @@ class TestGetExchange(object):
         assert exchange.delivery_mode == 1
 
 
-class TestGetConnection(object):
+class TestGetConnection:
     def test_defaults(self, Connection):
         realtime.get_connection({})
         Connection.assert_called_once_with("amqp://guest:guest@localhost:5672//")

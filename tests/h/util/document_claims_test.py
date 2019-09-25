@@ -9,7 +9,7 @@ from h.util import document_claims
 from h.util.document_claims import doi_uri_from_string
 
 
-class TestDocumentURIsFromLinks(object):
+class TestDocumentURIsFromLinks:
     def test_it_ignores_href_links_that_match_the_claimant_uri(self):
         """
         Links containing only the claimant URI should be ignored.
@@ -110,7 +110,7 @@ class TestDocumentURIsFromLinks(object):
         assert len(document_uris) == 3
 
 
-class TestDocumentMetasFromData(object):
+class TestDocumentMetasFromData:
     @pytest.mark.parametrize(
         "input_,output",
         [
@@ -329,7 +329,7 @@ class TestDocumentMetasFromData(object):
             ]
 
 
-class TestDocumentURIsFromHighwirePDF(object):
+class TestDocumentURIsFromHighwirePDF:
     def test_highwire_pdf_values_produce_highwire_pdf_document_uris(self):
         highwire_dict = {
             "pdf_url": [
@@ -353,7 +353,7 @@ class TestDocumentURIsFromHighwirePDF(object):
             }
 
 
-class TestDOIURIFromString(object):
+class TestDOIURIFromString:
     @pytest.mark.parametrize("doi", ["10.1001/1234", "doi:10.1001/1234"])
     def test_it_prepends_doi_prefix(self, doi):
         assert doi_uri_from_string(doi) == "doi:{}".format(strip_prefix("doi:", doi))
@@ -400,7 +400,7 @@ class TestDOIURIFromString(object):
         assert doi_uri_from_string(doi) == re.sub("\\s+", "", doi)
 
 
-class TestDocumentURIsFromHighwireDOI(object):
+class TestDocumentURIsFromHighwireDOI:
     def test_highwire_doi_values_produce_highwire_doi_document_uris(self):
         highwire_dict = {
             "doi": [
@@ -432,7 +432,7 @@ class TestDocumentURIsFromHighwireDOI(object):
         assert len(document_uris) == 0
 
 
-class TestDocumentURIsFromDC(object):
+class TestDocumentURIsFromDC:
     def test_dc_identifiers_produce_dc_doi_document_uris(self):
         """Each 'identifier' list item in the 'dc' dict becomes a doc URI."""
         dc_dict = {
@@ -465,7 +465,7 @@ class TestDocumentURIsFromDC(object):
         assert len(document_uris) == 0
 
 
-class TestDocumentURISelfClaim(object):
+class TestDocumentURISelfClaim:
     def test_document_uri_self_claim(self):
         claimant = "http://localhost:5000/docs/help"
 
@@ -486,7 +486,7 @@ class TestDocumentURISelfClaim(object):
     "document_uris_from_links",
     "document_uri_self_claim",
 )
-class TestDocumentURIsFromData(object):
+class TestDocumentURIsFromData:
     def test_it_gets_document_uris_from_links(self, document_uris_from_links):
         document_data = {
             "link": [

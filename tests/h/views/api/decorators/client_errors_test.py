@@ -16,7 +16,7 @@ from h.views.api.decorators.client_errors import (
 )
 
 
-class TestUnauthorizedToNotFound(object):
+class TestUnauthorizedToNotFound:
     def test_it_calls_wrapped_view_function(self, pyramid_request, testview):
 
         unauthorized_to_not_found(testview)(None, pyramid_request)
@@ -44,7 +44,7 @@ class TestUnauthorizedToNotFound(object):
         )
 
 
-class TestNormalizeNotFound(object):
+class TestNormalizeNotFound:
     def test_it_sets_appropriate_message(self, pyramid_request, testview):
         wrapped = normalize_not_found(testview)
 
@@ -67,7 +67,7 @@ class TestNormalizeNotFound(object):
         assert isinstance(context, HTTPNotFound)
 
 
-class TestValidateMediaTypes(object):
+class TestValidateMediaTypes:
     def test_it_calls_wrapped_view_function(self, pyramid_request, testview):
         validate_media_types(testview)(None, pyramid_request)
 

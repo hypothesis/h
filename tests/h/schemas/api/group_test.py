@@ -18,7 +18,7 @@ from h.schemas.api.group import (
 from h.schemas import ValidationError
 
 
-class TestGroupAPISchema(object):
+class TestGroupAPISchema:
     def test_it_sets_authority_properties(self, third_party_schema):
         assert third_party_schema.group_authority == "thirdparty.com"
         assert third_party_schema.default_authority == "hypothes.is"
@@ -149,7 +149,7 @@ class TestGroupAPISchema(object):
         return schema
 
 
-class TestCreateGroupAPISchema(object):
+class TestCreateGroupAPISchema:
     def test_it_raises_if_name_missing(self, schema):
         with pytest.raises(ValidationError, match=".*is a required property.*"):
             schema.validate({})
@@ -162,7 +162,7 @@ class TestCreateGroupAPISchema(object):
         return schema
 
 
-class TestUpdateGroupAPISchema(object):
+class TestUpdateGroupAPISchema:
     def test_it_allows_empty_payload(self, schema):
         appstruct = schema.validate({})
 

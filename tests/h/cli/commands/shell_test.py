@@ -8,7 +8,7 @@ import pytest
 from h.cli.commands import shell
 
 
-class TestAutoDetect(object):
+class TestAutoDetect:
     def test_bpython(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "bpython", mock.sentinel.bpython)
         assert shell.autodetect() == "bpython"
@@ -27,7 +27,7 @@ class TestAutoDetect(object):
 
 
 @pytest.mark.usefixtures("banner")
-class TestShells(object):
+class TestShells:
     def test_bpython(self, monkeypatch):
         fake_bpython = mock.Mock(spec_set=["embed"])
         monkeypatch.setitem(sys.modules, "bpython", fake_bpython)
@@ -70,7 +70,7 @@ class TestShells(object):
 
 
 @pytest.mark.usefixtures("code", "models")
-class TestShellCommand(object):
+class TestShellCommand:
     def test_runs_bootstrap(self, cli):
         config = {"bootstrap": mock.Mock(spec_set=[])}
 

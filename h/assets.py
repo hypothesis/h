@@ -10,7 +10,7 @@ from pyramid.static import static_view
 from h._compat import configparser
 
 
-class _CachedFile(object):
+class _CachedFile:
 
     """
     Parses content from a file and caches the result.
@@ -51,7 +51,7 @@ class _CachedFile(object):
         return self._cached
 
 
-class Environment(object):
+class Environment:
 
     """
     Environment for generating URLs for Hypothesis' static assets.

@@ -11,7 +11,7 @@ from h.views.notification import unsubscribe
 
 
 @pytest.mark.usefixtures("subscriptions", "token_serializer")
-class TestUnsubscribe(object):
+class TestUnsubscribe:
     def test_deserializes_token(self, pyramid_request, token_serializer):
         pyramid_request.matchdict = {"token": "wibble"}
 

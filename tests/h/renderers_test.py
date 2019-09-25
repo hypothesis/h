@@ -11,7 +11,7 @@ from h.renderers import json_sorted_factory
 from h.renderers import SVGRenderer
 
 
-class TestSortedJSONRenderer(object):
+class TestSortedJSONRenderer:
     def test_sorts_response_keys(self):
         # An OrderedDict makes sure the keys won't end up in order by chance
         data = OrderedDict([("bar", 1), ("foo", "bang"), ("baz", 5)])
@@ -22,7 +22,7 @@ class TestSortedJSONRenderer(object):
         assert result == '{"bar": 1, "baz": 5, "foo": "bang"}'
 
 
-class TestSVGRenderer(object):
+class TestSVGRenderer:
     def test_it_sets_the_content_type(self, pyramid_request, system, svg_renderer):
         svg_renderer(mock.sentinel.svg_content, system)
 

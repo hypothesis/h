@@ -11,7 +11,7 @@ from h.services.user_unique import DuplicateUserError
 from h.services.user import UserService
 
 
-class TestUserUniqueEnsureUnique(object):
+class TestUserUniqueEnsureUnique:
     def test_it_raises_if_email_uniqueness_violated(self, svc, user, pyramid_request):
         dupe_email = user.email
 
@@ -148,7 +148,7 @@ class TestUserUniqueEnsureUnique(object):
 
 
 @pytest.mark.usefixtures("user_service")
-class TestUserUniqueFactory(object):
+class TestUserUniqueFactory:
     def test_user_unique_factory(self, pyramid_request):
         svc = user_unique_factory(None, pyramid_request)
 

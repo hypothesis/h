@@ -16,7 +16,7 @@ class SettingError(Exception):
     pass
 
 
-class SettingsManager(object):
+class SettingsManager:
     """
     Configuration setting resolver.
 

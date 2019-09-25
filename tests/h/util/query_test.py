@@ -29,7 +29,7 @@ except AttributeError:
 
 
 @pytest.mark.usefixtures("cw_table")
-class TestColumnWindows(object):
+class TestColumnWindows:
     @pytest.mark.parametrize(
         "windowsize,expected",
         [

@@ -31,7 +31,7 @@ PAGE_SIZE = 200
 @view_defaults(
     route_name="activity.search", renderer="h:templates/activity/search.html.jinja2"
 )
-class SearchController(object):
+class SearchController:
     """View callables for the "activity.search" route."""
 
     def __init__(self, request):

@@ -13,7 +13,7 @@ import jwt
 from h.models.auth_client import GrantType
 
 
-class TestOAuth(object):
+class TestOAuth:
     def test_getting_an_access_token(self, app, authclient, userid):
         """Test using grant tokens and access tokens."""
         # Test using a grant token to get an access token.

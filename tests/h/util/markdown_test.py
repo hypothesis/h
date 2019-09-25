@@ -7,7 +7,7 @@ import pytest
 from h.util import markdown
 
 
-class TestRender(object):
+class TestRender:
     def test_it_renders_markdown(self):
         actual = markdown.render("_emphasis_ **bold**")
         assert "<p><em>emphasis</em> <strong>bold</strong></p>\n" == actual
@@ -33,7 +33,7 @@ class TestRender(object):
         return patch("h.util.markdown.sanitize")
 
 
-class TestSanitize(object):
+class TestSanitize:
     @pytest.mark.parametrize(
         "text,expected",
         [

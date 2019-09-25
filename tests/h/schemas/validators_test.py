@@ -9,7 +9,7 @@ import colander
 from h.schemas.validators import Email
 
 
-class TestEmail(object):
+class TestEmail:
     @pytest.mark.parametrize(
         "email",
         [

@@ -76,7 +76,7 @@ from h.interfaces import IGroupService
 from h.traversal import contexts
 
 
-class Root(object):
+class Root:
     """This app's default root factory."""
 
     __acl__ = [
@@ -93,7 +93,7 @@ class Root(object):
         self.request = request
 
 
-class AnnotationRoot(object):
+class AnnotationRoot:
     """Root factory for routes whose context is an :py:class:`h.traversal.AnnotationContext`."""
 
     __acl__ = [(Allow, Authenticated, "create")]
@@ -111,7 +111,7 @@ class AnnotationRoot(object):
         return contexts.AnnotationContext(annotation, group_service, links_service)
 
 
-class AuthClientRoot(object):
+class AuthClientRoot:
     """
     Root factory for routes whose context is an :py:class:`h.traversal.AuthClientContext`.
 
@@ -143,7 +143,7 @@ class AuthClientRoot(object):
         return client
 
 
-class OrganizationRoot(object):
+class OrganizationRoot:
     """
     Root factory for routes whose context is an :py:class:`h.traversal.OrganizationContext`.
 
@@ -167,7 +167,7 @@ class OrganizationRoot(object):
             raise KeyError()
 
 
-class OrganizationLogoRoot(object):
+class OrganizationLogoRoot:
     """
     Root factory for routes whose context is an :py:class:`h.traversal.OrganizationLogoContext`.
 
@@ -190,7 +190,7 @@ class OrganizationLogoRoot(object):
         return organization.logo
 
 
-class GroupRoot(object):
+class GroupRoot:
     """
     Root factory for routes whose context is an :py:class:`h.traversal.GroupContext`.
 
@@ -211,7 +211,7 @@ class GroupRoot(object):
         return group
 
 
-class GroupUpsertRoot(object):
+class GroupUpsertRoot:
     """
     Root factory for group "UPSERT" API
 
@@ -237,7 +237,7 @@ class GroupUpsertRoot(object):
         return contexts.GroupUpsertContext(group=group, request=self._request)
 
 
-class ProfileRoot(object):
+class ProfileRoot:
     """
     Simple Root for API profile endpoints
     """
@@ -248,7 +248,7 @@ class ProfileRoot(object):
         self.request = request
 
 
-class UserRoot(object):
+class UserRoot:
     """
     Root factory for routes which traverse Users by ``username``
 
@@ -272,7 +272,7 @@ class UserRoot(object):
         return user
 
 
-class UserUserIDRoot(object):
+class UserUserIDRoot:
     """
     Root factory for routes whose context is a :class:`h.traversal.UserContext`.
 

@@ -9,7 +9,7 @@ from h.presenters.annotation_base import AnnotationBasePresenter
 from h.presenters.annotation_base import utc_iso8601
 
 
-class TestAnnotationBasePresenter(object):
+class TestAnnotationBasePresenter:
     def test_constructor_args(self):
         annotation = mock.Mock()
         resource = mock.Mock(annotation=annotation)

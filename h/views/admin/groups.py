@@ -39,7 +39,7 @@ def groups_index(context, request):
     renderer="h:templates/admin/groups_create.html.jinja2",
     permission="admin_groups",
 )
-class GroupCreateViews(object):
+class GroupCreateViews:
     """Views for admin create-group forms"""
 
     def __init__(self, request):
@@ -133,7 +133,7 @@ class GroupCreateViews(object):
     permission="admin",
     renderer="h:templates/admin/groups_edit.html.jinja2",
 )
-class GroupEditViews(object):
+class GroupEditViews:
     def __init__(self, context, request):
         self.group = context
         self.request = request

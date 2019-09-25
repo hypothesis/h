@@ -12,7 +12,7 @@ from webob.multidict import MultiDict
 from h.activity.query import execute, extract, check_url, fetch_annotations
 
 
-class TestExtract(object):
+class TestExtract:
     def test_parses_param_value_with_parser(self, parse, pyramid_request):
         pyramid_request.GET["q"] = "giraffe"
 
@@ -72,7 +72,7 @@ class TestExtract(object):
 
 
 @pytest.mark.usefixtures("routes", "user_service")
-class TestCheckURL(object):
+class TestCheckURL:
     def test_redirects_to_group_search_page_if_one_group_in_query(
         self, group, pyramid_request, unparse
     ):
@@ -222,7 +222,7 @@ class TestCheckURL(object):
     "UsersAggregation",
     "links",
 )
-class TestExecute(object):
+class TestExecute:
 
     PAGE_SIZE = 23
 
@@ -643,7 +643,7 @@ class TestExecute(object):
         return pyramid_request
 
 
-class TestFetchAnnotations(object):
+class TestFetchAnnotations:
     def test_it_returns_annotations_by_ids(self, db_session, factories):
         annotations = factories.Annotation.create_batch(3)
         ids = [a.id for a in annotations]
@@ -655,7 +655,7 @@ class TestFetchAnnotations(object):
 
 @pytest.fixture
 def pyramid_request(pyramid_request):
-    class DummyRoute(object):
+    class DummyRoute:
         name = "activity.search"
 
     pyramid_request.matched_route = DummyRoute()

@@ -14,7 +14,7 @@ from h.services.annotation_moderation import AnnotationModerationService
 @pytest.mark.usefixtures(
     "DocumentSearchIndexPresenter", "moderation_service", "thread_ids"
 )
-class TestAnnotationSearchIndexPresenter(object):
+class TestAnnotationSearchIndexPresenter:
     def test_asdict(self, DocumentSearchIndexPresenter, pyramid_request, thread_ids):
 
         annotation = mock.MagicMock(

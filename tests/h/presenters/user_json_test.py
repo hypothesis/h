@@ -7,7 +7,7 @@ import pytest
 from h.presenters.user_json import UserJSONPresenter, TrustedUserJSONPresenter
 
 
-class TestUserJSONPresenter(object):
+class TestUserJSONPresenter:
     def test_asdict(self, user):
         presenter = UserJSONPresenter(user)
 
@@ -19,7 +19,7 @@ class TestUserJSONPresenter(object):
         }
 
 
-class TestTrustedUserJSONPresenter(object):
+class TestTrustedUserJSONPresenter:
     def test_asdict(self, user):
         presenter = TrustedUserJSONPresenter(user)
 

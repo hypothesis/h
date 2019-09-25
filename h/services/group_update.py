@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from h.services.exceptions import ValidationError, ConflictError
 
 
-class GroupUpdateService(object):
+class GroupUpdateService:
     def __init__(self, session):
         """
         Create a new GroupUpdateService

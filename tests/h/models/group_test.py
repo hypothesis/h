@@ -242,7 +242,7 @@ def test_non_public_group():
     assert not group.is_public
 
 
-class TestGroupACL(object):
+class TestGroupACL:
     def test_auth_client_with_matching_authority_may_read_members(
         self, group, authz_policy
     ):

@@ -10,7 +10,7 @@ from h.emails.test import generate
 from h import __version__
 
 
-class TestGenerate(object):
+class TestGenerate:
     def test_calls_renderers_with_appropriate_context(
         self, pyramid_request, html_renderer, text_renderer, matchers
     ):

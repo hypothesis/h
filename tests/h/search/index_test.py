@@ -15,7 +15,7 @@ from tests.common.matchers import Matcher
 
 
 @pytest.mark.usefixtures("annotations")
-class TestIndex(object):
+class TestIndex:
     def test_annotation_ids_are_used_as_elasticsearch_ids(
         self, es_client, factories, index
     ):
@@ -388,7 +388,7 @@ class TestIndex(object):
         )
 
 
-class TestDelete(object):
+class TestDelete:
     def test_annotation_is_marked_deleted(
         self, es_client, factories, get_indexed_ann, index
     ):
@@ -402,7 +402,7 @@ class TestDelete(object):
         assert get_indexed_ann(annotation.id).get("deleted") is True
 
 
-class TestBatchIndexer(object):
+class TestBatchIndexer:
     def test_it_indexes_all_annotations(
         self, batch_indexer, factories, get_indexed_ann
     ):

@@ -11,7 +11,7 @@ from pyramid.config import Configurator
 from h.views.api import index as views
 
 
-class TestIndex(object):
+class TestIndex:
     def test_it_returns_links(self, pyramid_request):
         result = views.index(None, pyramid_request)
 
@@ -35,7 +35,7 @@ class TestIndex(object):
         )
 
 
-class TestIndexV2(object):
+class TestIndexV2:
     def test_it_returns_links(self, pyramid_request):
         result = views.index_v2(None, pyramid_request)
 

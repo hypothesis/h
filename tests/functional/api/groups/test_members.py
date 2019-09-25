@@ -11,7 +11,7 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-class TestReadMembers(object):
+class TestReadMembers:
     def test_it_returns_list_of_members_for_restricted_group_without_authn(
         self, app, factories, db_session
     ):
@@ -59,7 +59,7 @@ class TestReadMembers(object):
         assert res.json == []
 
 
-class TestAddMember(object):
+class TestAddMember:
     def test_it_returns_http_204_when_successful(
         self, app, third_party_user, third_party_group, auth_client_header
     ):
@@ -193,7 +193,7 @@ class TestAddMember(object):
         assert res.status_code == 404
 
 
-class TestRemoveMember(object):
+class TestRemoveMember:
     def test_it_removes_authed_user_from_group(
         self, app, group, group_member_with_token
     ):

@@ -10,7 +10,7 @@ from h.oauth.errors import (
 )
 
 
-class TestMissingJWTGrantTokenClaimError(object):
+class TestMissingJWTGrantTokenClaimError:
     def test_sets_correct_description_with_claim_description(self):
         exc = MissingJWTGrantTokenClaimError("iss", "issuer")
         assert exc.description == "Missing claim 'iss' (issuer) from grant token."
@@ -27,7 +27,7 @@ class TestMissingJWTGrantTokenClaimError(object):
         }
 
 
-class TestInvalidJWTGrantTokenClaimError(object):
+class TestInvalidJWTGrantTokenClaimError:
     def test_sets_correct_description_with_claim_description(self):
         exc = InvalidJWTGrantTokenClaimError("iss", "issuer")
         assert exc.description == "Invalid claim 'iss' (issuer) in grant token."

@@ -11,7 +11,7 @@ from h.services.group_list import GroupListService
 
 
 @pytest.mark.usefixtures("routes", "group_list_svc")
-class TestNavbar(object):
+class TestNavbar:
     def test_it_sets_null_username_when_logged_out(self, req):
         result = navbar({}, req)
         assert result["username"] is None

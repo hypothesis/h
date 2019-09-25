@@ -11,7 +11,7 @@ from h.views.status import status
 
 
 @pytest.mark.usefixtures("db")
-class TestStatus(object):
+class TestStatus:
     def test_it_returns_okay_on_success(self, pyramid_request):
         result = status(pyramid_request)
         assert result

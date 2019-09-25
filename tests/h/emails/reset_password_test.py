@@ -10,7 +10,7 @@ from h.emails.reset_password import generate
 
 
 @pytest.mark.usefixtures("routes")
-class TestGenerate(object):
+class TestGenerate:
     def test_calls_renderers_with_appropriate_context(
         self, pyramid_request, html_renderer, text_renderer, serializer, user
     ):

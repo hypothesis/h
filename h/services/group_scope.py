@@ -6,7 +6,7 @@ from h.models import GroupScope
 from h.util import group_scope as scope_util
 
 
-class GroupScopeService(object):
+class GroupScopeService:
     def __init__(self, session):
         self._session = session
 

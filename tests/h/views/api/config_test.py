@@ -11,7 +11,7 @@ from h.views.api.decorators.response import version_media_type_header
 
 
 @pytest.mark.usefixtures("cors")
-class TestAddApiView(object):
+class TestAddApiView:
     def test_it_sets_default_accept_if_view_supports_default_version(
         self, pyramid_config, view
     ):

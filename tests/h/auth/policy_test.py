@@ -30,7 +30,7 @@ AUTH_CLIENT_API_BLACKLIST = [
 ]
 
 
-class TestAuthenticationPolicy(object):
+class TestAuthenticationPolicy:
     @pytest.fixture(autouse=True)
     def policy(self):
         self.api_policy = mock.Mock(spec_set=list(IAuthenticationPolicy))
@@ -130,7 +130,7 @@ class TestAuthenticationPolicy(object):
         assert result == self.api_policy.forget.return_value
 
 
-class TestAPIAuthenticationPolicy(object):
+class TestAPIAuthenticationPolicy:
     def test_authenticated_userid_proxies_to_user_policy_first(
         self, pyramid_request, api_policy, user_policy, client_policy
     ):
@@ -395,7 +395,7 @@ class TestAPIAuthenticationPolicy(object):
         return pyramid_request
 
 
-class TestAuthClientAuthenticationPolicy(object):
+class TestAuthClientAuthenticationPolicy:
     def test_it_instantiates_a_BasicAuthAuthenticationPolicy(
         self, BasicAuthAuthenticationPolicy
     ):
@@ -715,7 +715,7 @@ class TestAuthClientAuthenticationPolicy(object):
 
 
 @pytest.mark.usefixtures("token_service")
-class TestTokenAuthenticationPolicy(object):
+class TestTokenAuthenticationPolicy:
     def test_remember_does_nothing(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
 
@@ -832,7 +832,7 @@ class TestTokenAuthenticationPolicy(object):
         return svc
 
 
-class DummyToken(object):
+class DummyToken:
     def __init__(self, userid="acct:foo@example.com", valid=True):
         self.userid = userid
         self._valid = valid

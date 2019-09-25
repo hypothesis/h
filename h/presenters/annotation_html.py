@@ -9,7 +9,7 @@ import jinja2
 from h.presenters.document_html import DocumentHTMLPresenter
 
 
-class AnnotationHTMLPresenter(object):
+class AnnotationHTMLPresenter:
     """Wraps Annotation model objects and adds some HTML properties."""
 
     def __init__(self, annotation):

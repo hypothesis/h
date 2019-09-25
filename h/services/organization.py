@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from h.models import Organization
 
 
-class OrganizationService(object):
+class OrganizationService:
 
     """A service for manipulating organizations."""
 

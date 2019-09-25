@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h import models
 
 
-class AnnotationModerationService(object):
+class AnnotationModerationService:
     def __init__(self, session):
         self.session = session
 

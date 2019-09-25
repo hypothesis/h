@@ -17,7 +17,7 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-class TestReadUser(object):
+class TestReadUser:
     def test_it_returns_http_404_if_auth_client_missing(self, app, user):
         url = "/api/users/{userid}".format(userid=user.userid)
 
@@ -34,7 +34,7 @@ class TestReadUser(object):
         assert res.json_body["display_name"] == user.display_name
 
 
-class TestCreateUser(object):
+class TestCreateUser:
     def test_it_returns_http_200_when_successful(
         self, app, auth_client_header, user_payload
     ):
@@ -102,7 +102,7 @@ class TestCreateUser(object):
         assert res.status_code == 409
 
 
-class TestUpdateUser(object):
+class TestUpdateUser:
     def test_it_returns_http_200_when_successful(
         self, app, auth_client_header, user, patch_user_payload
     ):

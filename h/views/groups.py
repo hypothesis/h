@@ -18,7 +18,7 @@ _ = i18n.TranslationString
     renderer="h:templates/groups/create.html.jinja2",
     effective_principals=security.Authenticated,
 )
-class GroupCreateController(object):
+class GroupCreateController:
     def __init__(self, request):
         self.request = request
 
@@ -73,7 +73,7 @@ class GroupCreateController(object):
     renderer="h:templates/groups/edit.html.jinja2",
     permission="admin",
 )
-class GroupEditController(object):
+class GroupEditController:
     def __init__(self, group, request):
         self.group = group
         self.request = request

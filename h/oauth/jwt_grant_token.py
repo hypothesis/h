@@ -14,7 +14,7 @@ from oauthlib.oauth2 import (
 from h.oauth import errors
 
 
-class JWTGrantToken(object):
+class JWTGrantToken:
     """
     Represents a JWT bearer grant token.
 

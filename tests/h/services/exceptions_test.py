@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.services import exceptions
 
 
-class TestServiceError(object):
+class TestServiceError:
     def test_it_is_an_exception(self):
         exc = exceptions.ServiceError("a message")
 
@@ -18,7 +18,7 @@ class TestServiceError(object):
         assert "a message" in repr(exc)
 
 
-class TestValidationError(object):
+class TestValidationError:
     def test_it_extends_ServiceError(self):
         exc = exceptions.ValidationError("some message")
 
@@ -31,7 +31,7 @@ class TestValidationError(object):
         assert "a message" in repr(exc)
 
 
-class TestConflictError(object):
+class TestConflictError:
     def test_it_extends_ServiceError(self):
         exc = exceptions.ConflictError("some message")
 

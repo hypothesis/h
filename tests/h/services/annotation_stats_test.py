@@ -12,7 +12,7 @@ from h.search import Search
 from h.search import Limiter, DeletedFilter, UserFilter, TopLevelAnnotationsFilter
 
 
-class TestAnnotationStatsService(object):
+class TestAnnotationStatsService:
     def test_total_user_annotation_count_calls_search_with_request_and_stats(
         self, svc, search, pyramid_request
     ):
@@ -107,7 +107,7 @@ class TestAnnotationStatsService(object):
         assert anns == 3
 
 
-class TestAnnotationStatsFactory(object):
+class TestAnnotationStatsFactory:
     def test_returns_service(self):
         svc = annotation_stats_factory(mock.Mock(), mock.Mock())
 

@@ -10,7 +10,7 @@ from oauthlib.common import Request as OAuthRequest
 from h.oauth.tokens import BearerToken
 
 
-class TestBearerToken(object):
+class TestBearerToken:
     @pytest.mark.parametrize(
         "attr",
         [

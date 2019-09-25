@@ -13,7 +13,7 @@ from h.services.user_password import UserPasswordService
 
 
 @pytest.mark.usefixtures("user_service", "user_password_service")
-class TestLoginSchema(object):
+class TestLoginSchema:
     def test_passes_username_to_user_service(
         self, factories, pyramid_csrf_request, user_service
     ):

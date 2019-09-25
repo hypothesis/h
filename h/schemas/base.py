@@ -43,7 +43,7 @@ class CSRFSchema(colander.Schema):
         check_csrf_token(request)
 
 
-class JSONSchema(object):
+class JSONSchema:
     """
     Validate data according to a Draft 4 JSON Schema.
 

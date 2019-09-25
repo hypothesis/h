@@ -8,7 +8,7 @@ from webob.multidict import MultiDict
 from h.util import metrics
 
 
-class TestRecordSearchQueryParams(object):
+class TestRecordSearchQueryParams:
     def test_it_passes_parameters_to_newrelic(self, newrelic_agent):
         params = MultiDict(tag="tagsvalue", _separate_replies=True, url="urlvalue")
         metrics.record_search_query_params(params, True)

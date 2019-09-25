@@ -6,7 +6,7 @@ from h import models
 from h.auth.tokens import Token
 
 
-class AuthTokenService(object):
+class AuthTokenService:
     def __init__(self, session):
         self._session = session
         self._validate_cache = {}

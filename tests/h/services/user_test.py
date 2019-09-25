@@ -9,7 +9,7 @@ from h.services.user import UserNotActivated, UserService, user_service_factory
 
 
 @pytest.mark.usefixtures("users")
-class TestUserService(object):
+class TestUserService:
     def test_fetch_retrieves_user_by_userid(self, svc):
         result = svc.fetch("acct:jacqui@foo.com")
 
@@ -174,7 +174,7 @@ class TestUserService(object):
         return users
 
 
-class TestUserServiceFactory(object):
+class TestUserServiceFactory:
     def test_returns_user_service(self, pyramid_request):
         svc = user_service_factory(None, pyramid_request)
 

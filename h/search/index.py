@@ -95,7 +95,7 @@ def delete(es, annotation_id, target_index=None, refresh=False):
     )
 
 
-class BatchIndexer(object):
+class BatchIndexer:
     """
     A convenience class for reindexing all annotations from the database to
     the search index.

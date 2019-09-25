@@ -17,7 +17,7 @@ from h.traversal import UserContext
 from h.views.api.users import read, create, update
 
 
-class TestRead(object):
+class TestRead:
     def test_it_presents_user(self, pyramid_request, context, TrustedUserJSONPresenter):
         read(context, pyramid_request)
 
@@ -36,7 +36,7 @@ class TestRead(object):
 
 
 @pytest.mark.usefixtures("client_authority", "user_signup_service", "user_unique_svc")
-class TestCreate(object):
+class TestCreate:
     def test_signs_up_user(self, pyramid_request, user_signup_service, valid_payload):
         pyramid_request.json_body = valid_payload
 
@@ -157,7 +157,7 @@ class TestCreate(object):
     "UpdateUserAPISchema",
     "TrustedUserJSONPresenter",
 )
-class TestUpdate(object):
+class TestUpdate:
     def test_it_validates_request_payload(
         self, pyramid_request, user, user_update_svc, UpdateUserAPISchema
     ):

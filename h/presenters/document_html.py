@@ -7,7 +7,7 @@ import jinja2
 from h._compat import text_type, urlparse, url_unquote
 
 
-class DocumentHTMLPresenter(object):
+class DocumentHTMLPresenter:
     """Wraps Document model objects and adds some HTML properties."""
 
     def __init__(self, document):

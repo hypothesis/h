@@ -11,7 +11,7 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-class TestCreateGroup(object):
+class TestCreateGroup:
     def test_it_returns_http_200_with_valid_payload(self, app, token_auth_header):
         group = {"name": "My Group"}
         res = app.post_json("/api/groups", group, headers=token_auth_header)

@@ -15,7 +15,7 @@ from h.services.user_password import UserPasswordService
 from h.views import accounts as views
 
 
-class FakeForm(object):
+class FakeForm:
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 
@@ -23,13 +23,13 @@ class FakeForm(object):
         return self.appstruct
 
 
-class FakeSubscription(object):
+class FakeSubscription:
     def __init__(self, type_, active):
         self.type = type_
         self.active = active
 
 
-class FakeSerializer(object):
+class FakeSerializer:
     def dumps(self, obj):
         return "faketoken"
 
@@ -38,7 +38,7 @@ class FakeSerializer(object):
 
 
 @pytest.mark.usefixtures("routes")
-class TestBadCSRFTokenHTML(object):
+class TestBadCSRFTokenHTML:
     def test_it_returns_login_with_root_next_as_default(self, pyramid_request):
         pyramid_request.referer = None
         result = views.bad_csrf_token_html(None, pyramid_request)
@@ -70,7 +70,7 @@ class TestBadCSRFTokenHTML(object):
 
 
 @pytest.mark.usefixtures("routes")
-class TestAuthController(object):
+class TestAuthController:
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
         pyramid_request.user = mock.Mock(username="janedoe")
@@ -215,7 +215,7 @@ class TestAuthController(object):
 
 
 @pytest.mark.usefixtures("activation_model", "mailer", "reset_password_email", "routes")
-class TestForgotPasswordController(object):
+class TestForgotPasswordController:
     def test_post_returns_form_when_validation_fails(
         self, invalid_form, pyramid_request
     ):
@@ -308,7 +308,7 @@ class TestForgotPasswordController(object):
 
 
 @pytest.mark.usefixtures("routes", "user_password_service")
-class TestResetController(object):
+class TestResetController:
     def test_get_returns_rendered_form(self, pyramid_request, form_validating_to):
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({})
@@ -403,7 +403,7 @@ class TestResetController(object):
 @pytest.mark.usefixtures(
     "ActivationEvent", "activation_model", "notify", "routes", "user_model"
 )
-class TestActivateController(object):
+class TestActivateController:
     def test_get_when_not_logged_in_404s_if_id_not_int(self, pyramid_request):
         pyramid_request.matchdict = {"id": "abc", "code": "abc456"}  # Not an int.
 
@@ -576,7 +576,7 @@ class TestActivateController(object):
 
 
 @pytest.mark.usefixtures("routes", "user_password_service")
-class TestAccountController(object):
+class TestAccountController:
     def test_get_returns_email_if_set(self, pyramid_request):
         pyramid_request.user = mock.Mock()
         pyramid_request.create_form.return_value = mock.Mock()
@@ -680,7 +680,7 @@ class TestAccountController(object):
 
 
 @pytest.mark.usefixtures("pyramid_config", "routes", "subscriptions_model")
-class TestNotificationsController(object):
+class TestNotificationsController:
     def test_get_sets_subscriptions_data_in_form(
         self, form_validating_to, pyramid_config, pyramid_request, subscriptions_model
     ):
@@ -772,7 +772,7 @@ class TestNotificationsController(object):
 
 
 @pytest.mark.usefixtures("pyramid_config")
-class TestEditProfileController(object):
+class TestEditProfileController:
     def test_get_reads_user_properties(self, pyramid_request):
         pyramid_request.user = mock.Mock()
         pyramid_request.create_form.return_value = FakeForm()
@@ -819,7 +819,7 @@ class TestEditProfileController(object):
 
 
 @pytest.mark.usefixtures("authenticated_userid", "token_service")
-class TestDeveloperController(object):
+class TestDeveloperController:
     def test_get_fetches_token(self, controller, token_service, authenticated_userid):
         controller.get()
 

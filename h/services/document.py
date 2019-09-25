@@ -9,7 +9,7 @@ from h.models import Document, Annotation
 MAX_DOCUMENT_COUNT = 100
 
 
-class DocumentService(object):
+class DocumentService:
     def __init__(self, session):
         self._session = session
 

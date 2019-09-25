@@ -27,7 +27,7 @@ pytestmark = pytest.mark.usefixtures("GroupsJSONPresenter")
 
 
 @pytest.mark.usefixtures("group_list_service", "group_links_service")
-class TestGetGroups(object):
+class TestGetGroups:
     def test_proxies_to_list_service(self, anonymous_request, group_list_service):
         views.groups(anonymous_request)
 
@@ -125,7 +125,7 @@ class TestGetGroups(object):
     "GroupContext",
     "GroupJSONPresenter",
 )
-class TestCreateGroup(object):
+class TestCreateGroup:
     def test_it_inits_group_create_schema(self, pyramid_request, CreateGroupAPISchema):
         views.create(pyramid_request)
 
@@ -232,7 +232,7 @@ class TestCreateGroup(object):
 
 
 @pytest.mark.usefixtures("GroupJSONPresenter", "GroupContext")
-class TestReadGroup(object):
+class TestReadGroup:
     def test_it_creates_group_context_from_group_model(
         self, GroupContext, factories, pyramid_request
     ):
@@ -270,7 +270,7 @@ class TestReadGroup(object):
     "GroupContext",
     "GroupJSONPresenter",
 )
-class TestUpdateGroup(object):
+class TestUpdateGroup:
     def test_it_inits_group_update_schema(
         self, pyramid_request, group, UpdateGroupAPISchema
     ):
@@ -353,7 +353,7 @@ class TestUpdateGroup(object):
     "GroupContext",
     "GroupJSONPresenter",
 )
-class TestUpsertGroup(object):
+class TestUpsertGroup:
     def test_it_proxies_to_create_if_group_empty(
         self, pyramid_request, create, GroupUpsertContext
     ):
@@ -492,7 +492,7 @@ class TestUpsertGroup(object):
         return context_factory
 
 
-class TestReadMembers(object):
+class TestReadMembers:
     def test_it_returns_formatted_users_from_group(
         self, factories, pyramid_request, UserJSONPresenter
     ):
@@ -509,7 +509,7 @@ class TestReadMembers(object):
 
 
 @pytest.mark.usefixtures("group_members_service", "user_service")
-class TestAddMember(object):
+class TestAddMember:
     def test_it_adds_user_from_request_params_to_group(
         self, group, user, pyramid_request, group_members_service
     ):
@@ -584,7 +584,7 @@ class TestAddMember(object):
 
 
 @pytest.mark.usefixtures("authenticated_userid", "group_members_service")
-class TestRemoveMember(object):
+class TestRemoveMember:
     def test_it_removes_current_user(
         self, shorthand_request, authenticated_userid, group_members_service
     ):

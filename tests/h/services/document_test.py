@@ -7,7 +7,7 @@ import pytest
 from h.services.document import DocumentService
 
 
-class TestFetchByGroupid(object):
+class TestFetchByGroupid:
     def test_it_returns_documents_annotated_within_group(
         self, svc, groups, annotations, matchers
     ):

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.models.organization import Organization
 
 
-class ListOrganizationsService(object):
+class ListOrganizationsService:
 
     """
     A service for providing a list of organizations.

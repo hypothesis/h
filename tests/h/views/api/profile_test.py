@@ -12,7 +12,7 @@ from h.services.group_list import GroupListService
 from h.views.api import profile as views
 
 
-class TestProfile(object):
+class TestProfile:
     def test_profile_view_proxies_to_session(self, session_profile, pyramid_request):
         result = views.profile(pyramid_request)
 
@@ -29,7 +29,7 @@ class TestProfile(object):
 
 
 @pytest.mark.usefixtures("user_service", "session_profile")
-class TestUpdatePreferences(object):
+class TestUpdatePreferences:
     def test_updates_preferences(self, pyramid_request, user, user_service):
         pyramid_request.json_body = {"preferences": {"show_sidebar_tutorial": True}}
 
@@ -66,7 +66,7 @@ class TestUpdatePreferences(object):
 
 
 @pytest.mark.usefixtures("group_list_service", "GroupContext", "GroupsJSONPresenter")
-class TestProfileGroups(object):
+class TestProfileGroups:
     def test_it_proxies_to_group_list_service(
         self, pyramid_request, group_list_service
     ):

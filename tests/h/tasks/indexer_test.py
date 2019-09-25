@@ -9,7 +9,7 @@ import pytest
 from h.tasks import indexer
 
 
-class FakeSettingsService(object):
+class FakeSettingsService:
     def __init__(self):
         self._data = {}
 
@@ -21,7 +21,7 @@ class FakeSettingsService(object):
 
 
 @pytest.mark.usefixtures("celery", "index", "settings_service")
-class TestAddAnnotation(object):
+class TestAddAnnotation:
     def test_it_fetches_the_annotation(self, fetch_annotation, annotation, celery):
         id_ = "test-annotation-id"
         fetch_annotation.return_value = annotation
@@ -112,7 +112,7 @@ class TestAddAnnotation(object):
 
 
 @pytest.mark.usefixtures("celery", "delete", "settings_service")
-class TestDeleteAnnotation(object):
+class TestDeleteAnnotation:
     def test_it_deletes_from_index(self, delete, celery):
         id_ = "test-annotation-id"
         indexer.delete_annotation(id_)
@@ -147,7 +147,7 @@ class TestDeleteAnnotation(object):
 
 
 @pytest.mark.usefixtures("celery")
-class TestReindexUserAnnotations(object):
+class TestReindexUserAnnotations:
     def test_it_creates_batch_indexer(self, batch_indexer, annotation_ids, celery):
         userid = list(annotation_ids.keys())[0]
 

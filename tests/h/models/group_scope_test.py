@@ -9,7 +9,7 @@ from sqlalchemy import inspect
 from h.models import GroupScope
 
 
-class TestGroupScope(object):
+class TestGroupScope:
     def test_save_and_retrieve_scope(self, db_session, factories):
         scope = "http://example.com"
         factories.GroupScope(scope=scope)

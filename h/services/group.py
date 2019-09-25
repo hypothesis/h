@@ -9,7 +9,7 @@ from h.models.group import ReadableBy
 from h.util import group as group_util
 
 
-class GroupService(object):
+class GroupService:
     def __init__(self, session, user_fetcher):
         """
         Create a new groups service.

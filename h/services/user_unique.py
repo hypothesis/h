@@ -13,7 +13,7 @@ class DuplicateUserError(Exception):
         super(DuplicateUserError, self).__init__(message)
 
 
-class UserUniqueService(object):
+class UserUniqueService:
 
     """
     A service for ensuring that data represents a unique user and will

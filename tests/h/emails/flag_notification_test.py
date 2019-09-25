@@ -7,7 +7,7 @@ import pytest
 from h.emails.flag_notification import generate
 
 
-class TestGenerate(object):
+class TestGenerate:
     def test_calls_renderers_with_appropriate_context(
         self, pyramid_request, html_renderer, text_renderer
     ):

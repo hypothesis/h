@@ -7,7 +7,7 @@ import sqlalchemy as sa
 from h.models import Flag
 
 
-class FlagCountService(object):
+class FlagCountService:
     def __init__(self, session):
         self._session = session
 

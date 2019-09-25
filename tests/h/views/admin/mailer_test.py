@@ -9,7 +9,7 @@ from pyramid.httpexceptions import HTTPSeeOther
 from h.views.admin.mailer import mailer_index, mailer_test
 
 
-class TestMailerIndex(object):
+class TestMailerIndex:
     def test_when_no_taskid(self, pyramid_request):
         result = mailer_index(pyramid_request)
 
@@ -24,7 +24,7 @@ class TestMailerIndex(object):
 
 
 @pytest.mark.usefixtures("mailer", "testmail", "routes")
-class TestMailerTest(object):
+class TestMailerTest:
     def test_doesnt_mail_when_no_recipient(self, mailer, pyramid_request):
         mailer_test(pyramid_request)
 
@@ -54,7 +54,7 @@ class TestMailerTest(object):
         assert result.location == "/adm/mailer?taskid=a1b2c3"
 
 
-class FakeResult(object):
+class FakeResult:
     def __init__(self):
         self.task_id = "a1b2c3"
 

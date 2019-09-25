@@ -15,7 +15,7 @@ from h.services.exceptions import ConflictError
 log = logging.getLogger(__name__)
 
 
-class UserSignupService(object):
+class UserSignupService:
 
     """A service for registering users."""
 

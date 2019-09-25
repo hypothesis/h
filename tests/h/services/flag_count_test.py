@@ -7,7 +7,7 @@ import pytest
 from h.services import flag_count
 
 
-class TestFlagCountService(object):
+class TestFlagCountService:
     def test_flag_count_returns_zero_for_unflagged_annotation(self, svc, unflagged):
         assert svc.flag_count(unflagged) == 0
 

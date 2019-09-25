@@ -8,7 +8,7 @@ from h.search import Search
 from h.search import Limiter, DeletedFilter, UserFilter, TopLevelAnnotationsFilter
 
 
-class AnnotationStatsService(object):
+class AnnotationStatsService:
     """A service for retrieving annotation stats for users and groups."""
 
     def __init__(self, request):

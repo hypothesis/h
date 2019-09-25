@@ -8,7 +8,7 @@ from h.emails.signup import generate
 
 
 @pytest.mark.usefixtures("routes")
-class TestGenerate(object):
+class TestGenerate:
     def test_calls_renderers_with_appropriate_context(
         self, pyramid_request, html_renderer, text_renderer
     ):

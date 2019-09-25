@@ -6,7 +6,7 @@ from functools import partial
 from h import session
 
 
-class GroupMembersService(object):
+class GroupMembersService:
 
     """A service for manipulating group membership."""
 

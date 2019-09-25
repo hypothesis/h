@@ -8,7 +8,7 @@ from h.formatters.interfaces import IAnnotationFormatter
 
 
 @implementer(IAnnotationFormatter)
-class AnnotationFlagFormatter(object):
+class AnnotationFlagFormatter:
     """
     Formatter for exposing a user's annotation flags.
 

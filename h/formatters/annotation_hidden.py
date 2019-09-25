@@ -8,7 +8,7 @@ from h.formatters.interfaces import IAnnotationFormatter
 
 
 @implementer(IAnnotationFormatter)
-class AnnotationHiddenFormatter(object):
+class AnnotationHiddenFormatter:
     """
     Formatter for dealing with annotations that a moderator has hidden.
 

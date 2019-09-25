@@ -10,7 +10,7 @@ from h.session import user_info
 
 
 @implementer(IAnnotationFormatter)
-class AnnotationUserInfoFormatter(object):
+class AnnotationUserInfoFormatter:
     def __init__(self, session, user_svc):
         self.session = session
         self.user_svc = user_svc

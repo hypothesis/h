@@ -14,7 +14,7 @@ from h.views.admin.oauthclients import (
 )
 
 
-class FakeForm(object):
+class FakeForm:
     """
     Fake implementation of `deform.form.Form`.
     """
@@ -51,7 +51,7 @@ def test_index_lists_authclients_sorted_by_name(pyramid_request, routes):
 
 
 @pytest.mark.usefixtures("routes")
-class TestAuthClientCreateController(object):
+class TestAuthClientCreateController:
     def test_get_sets_field_defaults(self, pyramid_request):
         ctrl = AuthClientCreateController(pyramid_request)
 
@@ -139,7 +139,7 @@ class TestAuthClientCreateController(object):
 
 
 @pytest.mark.usefixtures("routes")
-class TestAuthClientEditController(object):
+class TestAuthClientEditController:
     def test_read_renders_form(self, authclient, pyramid_request):
         ctrl = AuthClientEditController(authclient, pyramid_request)
 

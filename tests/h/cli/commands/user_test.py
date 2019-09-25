@@ -12,7 +12,7 @@ from h.services.delete_user import DeleteUserService
 from h.services.user_password import UserPasswordService
 
 
-class TestAddCommand(object):
+class TestAddCommand:
     def test_it_adds_user_with_default_authority(self, cli, cliconfig, signup_service):
         result = cli.invoke(
             user_cli.add,
@@ -63,7 +63,7 @@ class TestAddCommand(object):
         )
 
 
-class TestAdminCommand(object):
+class TestAdminCommand:
     def test_it_adds_admin(self, cli, cliconfig, non_admin_user, db_session):
         result = cli.invoke(
             user_cli.admin, [u"--on", non_admin_user.username], obj=cliconfig
@@ -164,7 +164,7 @@ class TestAdminCommand(object):
         return user
 
 
-class TestPasswordCommand(object):
+class TestPasswordCommand:
     def test_it_changes_password(
         self, cli, cliconfig, user, db_session, password_service
     ):
@@ -230,7 +230,7 @@ class TestPasswordCommand(object):
         return user
 
 
-class TestDeleteUserCommand(object):
+class TestDeleteUserCommand:
     def test_it_deletes_user(self, cli, cliconfig, user, db_session):
         result = cli.invoke(user_cli.delete, [user.username], obj=cliconfig)
 

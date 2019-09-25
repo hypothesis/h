@@ -12,7 +12,7 @@ from h.nipsa import subscribers
 FakeEvent = namedtuple("FakeEvent", ["request", "annotation", "annotation_dict"])
 
 
-class FakeAnnotation(object):
+class FakeAnnotation:
     def __init__(self, data):
         self.data = data
 
@@ -22,7 +22,7 @@ class FakeAnnotation(object):
 
 
 @pytest.mark.usefixtures("nipsa_service", "moderation_service")
-class TestTransformAnnotation(object):
+class TestTransformAnnotation:
     @pytest.mark.parametrize(
         "ann,flagged",
         [

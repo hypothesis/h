@@ -17,7 +17,7 @@ from h import search
 
 
 @pytest.mark.usefixtures("group_service")
-class TestSearch(object):
+class TestSearch:
     """Unit tests for search.Search when no separate_replies argument is given."""
 
     def test_it_defaults_separate_wildcard_uri_keys_to_true(
@@ -165,7 +165,7 @@ class TestSearch(object):
 
 
 @pytest.mark.usefixtures("group_service")
-class TestSearchWithSeparateReplies(object):
+class TestSearchWithSeparateReplies:
     """Unit tests for search.Search when separate_replies=True is given."""
 
     def test_it_returns_replies_separately_from_annotations(

@@ -17,7 +17,7 @@ SearchResult = namedtuple(
 )
 
 
-class Search(object):
+class Search:
     """
     Search is the primary way to initiate a search on the annotation index.
 

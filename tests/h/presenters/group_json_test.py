@@ -11,7 +11,7 @@ from h.services.group_links import GroupLinksService
 from h import traversal
 
 
-class TestGroupJSONPresenter(object):
+class TestGroupJSONPresenter:
     def test_private_group_asdict(self, factories, GroupContext, links_svc):
         group = factories.Group(
             name="My Group", pubid="mygroup", organization=factories.Organization()
@@ -190,7 +190,7 @@ class TestGroupJSONPresenter(object):
         assert presenter.asdict()["groupid"] == "group:abc123@example.com"
 
 
-class TestGroupsJSONPresenter(object):
+class TestGroupsJSONPresenter:
     def test_proxies_to_GroupJSONPresenter(
         self, factories, GroupJSONPresenter_, GroupContexts
     ):

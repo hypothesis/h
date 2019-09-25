@@ -11,7 +11,7 @@ from h.views.admin.staff import staff_add, staff_index, staff_remove
 
 
 @pytest.mark.usefixtures("routes")
-class TestStaffIndex(object):
+class TestStaffIndex:
     def test_when_no_staff(self, pyramid_request):
         result = staff_index(pyramid_request)
 
@@ -27,7 +27,7 @@ class TestStaffIndex(object):
 
 
 @pytest.mark.usefixtures("users", "routes")
-class TestStaffAddRemove(object):
+class TestStaffAddRemove:
     def test_add_makes_users_staff(self, pyramid_request, users):
         pyramid_request.params = {"add": "eva", "authority": "foo.org"}
 

@@ -9,14 +9,14 @@ import pytest
 from h import eventqueue
 
 
-class DummyEvent(object):
+class DummyEvent:
     def __init__(self, request):
         # EventQueue currently assumes that events have a `request` attribute.
         self.request = request
 
 
 @pytest.mark.usefixtures("pyramid_config")
-class TestEventQueue(object):
+class TestEventQueue:
     def test_init_adds_response_callback(self, pyramid_request):
         request = mock.Mock()
         queue = eventqueue.EventQueue(request)

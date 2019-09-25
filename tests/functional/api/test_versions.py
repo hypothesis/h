@@ -14,7 +14,7 @@ from __future__ import unicode_literals
 native_str = str
 
 
-class TestIndexEndpointVersions(object):
+class TestIndexEndpointVersions:
     def test_index_sets_version_response_header(self, app):
         """
         A custom response header should be present confirming the version of

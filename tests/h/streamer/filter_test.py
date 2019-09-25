@@ -5,7 +5,7 @@ import pytest
 from h.streamer.filter import FilterHandler
 
 
-class TestFilterHandler(object):
+class TestFilterHandler:
     @pytest.mark.parametrize(
         "query_uris,ann_uri,should_match",
         [

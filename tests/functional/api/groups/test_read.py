@@ -11,7 +11,7 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-class TestReadGroups(object):
+class TestReadGroups:
     # TODO: In subsequent versions of the API, this should really be a group
     # search endpoint and should have its own functional test module
 
@@ -58,7 +58,7 @@ class TestReadGroups(object):
         assert "scopes" in res.json[0]
 
 
-class TestReadGroup(object):
+class TestReadGroup:
     def test_it_returns_http_200_for_world_readable_group_pubid(
         self, app, factories, db_session
     ):

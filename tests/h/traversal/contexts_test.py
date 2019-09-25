@@ -18,7 +18,7 @@ from h.traversal.contexts import UserContext
 
 
 @pytest.mark.usefixtures("group_service", "links_service")
-class TestAnnotationContext(object):
+class TestAnnotationContext:
     def test_links(self, group_service, links_service):
         ann = mock.Mock()
         res = AnnotationContext(ann, group_service, links_service)
@@ -249,7 +249,7 @@ class TestAnnotationContext(object):
 
 
 @pytest.mark.usefixtures("links_svc")
-class TestGroupContext(object):
+class TestGroupContext:
     def test_it_returns_group_model_as_property(self, factories, pyramid_request):
         group = factories.Group()
 
@@ -302,7 +302,7 @@ class TestGroupContext(object):
 
 
 @pytest.mark.usefixtures("organization_routes")
-class TestOrganizationContext(object):
+class TestOrganizationContext:
     def test_it_returns_organization_model_as_property(
         self, factories, pyramid_request
     ):
@@ -370,7 +370,7 @@ class TestOrganizationContext(object):
 
 
 @pytest.mark.usefixtures("links_svc")
-class TestGroupUpsertContext(object):
+class TestGroupUpsertContext:
     def test_acl_applies_root_upsert_to_user_role_when_no_group(
         self, pyramid_config, pyramid_request
     ):
@@ -428,7 +428,7 @@ class TestGroupUpsertContext(object):
         assert not pyramid_request.has_permission("upsert", context)
 
 
-class TestUserContext(object):
+class TestUserContext:
     def test_acl_assigns_read_to_AuthClient_with_user_authority(self, factories):
         user = factories.User(username="fiona", authority="myauthority.com")
         res = UserContext(user)
@@ -446,7 +446,7 @@ class TestUserContext(object):
         assert not policy.permits(res, ["client_authority:example.com"], "read")
 
 
-class FakeGroup(object):
+class FakeGroup:
     # NB: Tests that use this do not validate that the principals are correct
     # for the indicated group. They validate that those principals are being
     # transferred over to the annotation as expected

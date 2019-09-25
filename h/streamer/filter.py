@@ -32,7 +32,7 @@ SCHEMA = {
 }
 
 
-class FilterHandler(object):
+class FilterHandler:
     def __init__(self, filter_json):
         self.filter = filter_json
 

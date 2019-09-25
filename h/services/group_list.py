@@ -6,7 +6,7 @@ from h import models
 from h.models import group
 
 
-class GroupListService(object):
+class GroupListService:
 
     """
     A service for providing filtered lists of groups.

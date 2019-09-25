@@ -10,7 +10,7 @@ pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 
 @pytest.mark.usefixtures("user_model")
-class TestForgotPasswordSchema(object):
+class TestForgotPasswordSchema:
     def test_it_is_invalid_with_no_user(self, pyramid_csrf_request, user_model):
         schema = ForgotPasswordSchema().bind(request=pyramid_csrf_request)
         user_model.get_by_email.return_value = None

@@ -10,7 +10,7 @@ from h import models
 from h import links
 
 
-class FakeAnnotation(object):
+class FakeAnnotation:
     def __init__(self):
         self.thread_root_id = "123"
         self.references = None
@@ -18,18 +18,18 @@ class FakeAnnotation(object):
         self.document = None
 
 
-class FakeDocumentURI(object):
+class FakeDocumentURI:
     def __init__(self):
         self.uri = "http://example.com/foo.pdf"
 
 
-class FakeDocument(object):
+class FakeDocument:
     def __init__(self):
         self.document_uris = []
 
 
 @pytest.mark.usefixtures("routes")
-class TestHTMLLink(object):
+class TestHTMLLink:
     def test_html_link_returns_links_for_first_party_annotations(
         self, annotation, pyramid_request
     ):

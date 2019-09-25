@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 
-class DocumentJSONPresenter(object):
+class DocumentJSONPresenter:
     def __init__(self, document):
         self.document = document
 

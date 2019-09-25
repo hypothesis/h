@@ -39,7 +39,7 @@ def update_annotation_schema_validate(
     [create_annotation_schema_validate, update_annotation_schema_validate],
     ids=["CreateAnnotationSchema.validate()", "UpdateAnnotationSchema.validate()"],
 )
-class TestCreateUpdateAnnotationSchema(object):
+class TestCreateUpdateAnnotationSchema:
 
     """Shared tests for CreateAnnotationSchema and UpdateAnnotationSchema."""
 
@@ -384,7 +384,7 @@ class TestCreateUpdateAnnotationSchema(object):
         assert not appstruct.get("extra")
 
 
-class TestCreateAnnotationSchema(object):
+class TestCreateAnnotationSchema:
     def test_it_raises_if_data_has_no_uri(self, pyramid_request):
         data = self.valid_data()
         del data["uri"]
@@ -491,7 +491,7 @@ class TestCreateAnnotationSchema(object):
         return data
 
 
-class TestUpdateAnnotationSchema(object):
+class TestUpdateAnnotationSchema:
     def test_you_cannot_change_an_annotations_group(self, pyramid_request):
         schema = UpdateAnnotationSchema(pyramid_request, "", "")
 
@@ -579,7 +579,7 @@ class TestUpdateAnnotationSchema(object):
         )
 
 
-class TestSearchParamsSchema(object):
+class TestSearchParamsSchema:
     def test_it_returns_only_known_params(self, schema):
         expected_params = MultiDict(
             {

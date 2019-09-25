@@ -12,7 +12,7 @@ from h.services.group_scope import GroupScopeService
 from h.models.group import Group
 
 
-class TestListGroupsSessionGroups(object):
+class TestListGroupsSessionGroups:
     def test_it_retrieves_world_group(self, svc, user, default_authority):
         groups = svc.session_groups(default_authority, user)
 
@@ -29,7 +29,7 @@ class TestListGroupsSessionGroups(object):
         assert sample_groups["private"] in groups
 
 
-class TestAssociatedGroups(object):
+class TestAssociatedGroups:
     def test_it_does_not_return_world_group(self, svc, sample_groups, user):
         groups = svc.associated_groups(user)
 
@@ -93,7 +93,7 @@ class TestAssociatedGroups(object):
         assert groups == [restricted_group]
 
 
-class TestListGroupsRequestGroups(object):
+class TestListGroupsRequestGroups:
     def test_it_returns_world_group(self, svc, default_authority, sample_groups):
         groups = svc.request_groups(authority=default_authority)
 
@@ -157,7 +157,7 @@ class TestListGroupsRequestGroups(object):
         ]
 
 
-class TestUserGroups(object):
+class TestUserGroups:
     def test_it_returns_all_user_groups_sorted_by_group_name(
         self, svc, user, user_groups
     ):
@@ -183,7 +183,7 @@ class TestUserGroups(object):
         ]
 
 
-class TestPrivateGroups(object):
+class TestPrivateGroups:
     def test_it_retrieves_all_user_groups(self, svc, user):
         svc.user_groups = mock.Mock(return_value=[])
 
@@ -210,7 +210,7 @@ class TestPrivateGroups(object):
         assert p_groups == []
 
 
-class TestScopedGroups(object):
+class TestScopedGroups:
     def test_it_fetches_matching_scopes_from_group_scope_service(
         self, svc, default_authority, document_uri, group_scope_service
     ):
@@ -254,7 +254,7 @@ class TestScopedGroups(object):
         assert len(results) == 2
 
 
-class TestWorldGroup(object):
+class TestWorldGroup:
     def test_it_returns_world_group_if_one_exists_for_authority(
         self, svc, default_authority
     ):
@@ -276,7 +276,7 @@ class TestWorldGroup(object):
         assert w_group is None
 
 
-class TestGroupListFactory(object):
+class TestGroupListFactory:
     def test_group_list_factory(self, pyramid_request, group_scope_service):
         svc = group_list_factory(None, pyramid_request)
 

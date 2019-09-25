@@ -20,7 +20,7 @@ from h.services.nipsa import NipsaService
     "update_aliased_index",
     "settings_service",
 )
-class TestReindex(object):
+class TestReindex:
     def test_sets_op_type_to_create(self, pyramid_request, es, BatchIndexer):
         reindex(mock.sentinel.session, es, pyramid_request)
 

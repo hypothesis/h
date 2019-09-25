@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 
-class AnnotationEvent(object):
+class AnnotationEvent:
     """An event representing an action on an annotation."""
 
     def __init__(self, request, annotation_id, action):
@@ -11,7 +11,7 @@ class AnnotationEvent(object):
         self.action = action
 
 
-class AnnotationTransformEvent(object):
+class AnnotationTransformEvent:
 
     """
     An event fired before an annotation is indexed or otherwise needs to be

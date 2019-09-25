@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 
-class TestAccountSettings(object):
+class TestAccountSettings:
     """Tests for the /account/settings page."""
 
     def test_submit_email_form_without_xhr_returns_full_html_page(self, app):

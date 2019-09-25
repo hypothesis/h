@@ -11,7 +11,7 @@ from h.paginator import paginate
 from h.paginator import paginate_query
 
 
-class TestPaginate(object):
+class TestPaginate:
     def test_current_page_defaults_to_1(self, pyramid_request):
         """If there's no 'page' request param it defaults to 1."""
         pyramid_request.params = {}
@@ -156,7 +156,7 @@ class TestPaginate(object):
 
 
 @pytest.mark.usefixtures("paginate")
-class TestPaginateQuery(object):
+class TestPaginateQuery:
 
     # The current page that will be returned by paginate().
     CURRENT_PAGE = 3

@@ -9,7 +9,7 @@ from h.services.organization import OrganizationService
 from h.services.organization import organization_factory
 
 
-class TestOrganizationService(object):
+class TestOrganizationService:
     def test_create_returns_organization(self, service):
         organization = service.create(
             name="Organization", authority="publisher.com", logo="<svg>H</svg>"
@@ -28,7 +28,7 @@ class TestOrganizationService(object):
         return OrganizationService(db_session)
 
 
-class TestOrganizationsFactory(object):
+class TestOrganizationsFactory:
     def test_returns_organizations_service(self, pyramid_request):
         svc = organization_factory(None, pyramid_request)
 

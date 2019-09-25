@@ -15,7 +15,7 @@ from h.streamer import websocket
 FakeMessage = namedtuple("FakeMessage", ["data"])
 
 
-class TestMessage(object):
+class TestMessage:
     def test_reply_adds_reply_to(self, socket):
         """Adds an appropriate `reply_to` field to the sent message."""
         message = websocket.Message(socket=socket, payload={"id": 123})
@@ -63,7 +63,7 @@ class TestMessage(object):
         return mock.Mock(spec_set=["send_json"])
 
 
-class TestWebSocket(object):
+class TestWebSocket:
     def test_stores_instance_list(self, fake_environ):
         clients = [
             websocket.WebSocket(mock.sentinel.sock1, environ=fake_environ),
@@ -196,7 +196,7 @@ class TestWebSocket(object):
 
 
 @pytest.mark.usefixtures("handlers")
-class TestHandleMessage(object):
+class TestHandleMessage:
     def test_uses_unknown_handler_for_missing_type(self, unknown_handler):
         """If the type is missing, call the `None` handler."""
         socket = mock.Mock(spec_set=["close"])
@@ -244,7 +244,7 @@ class TestHandleMessage(object):
         return handlers
 
 
-class TestHandleClientIDMessage(object):
+class TestHandleClientIDMessage:
     def test_sets_client_id(self, socket):
         """Updates the socket client_id if valid."""
         message = websocket.Message(
@@ -272,7 +272,7 @@ class TestHandleClientIDMessage(object):
         return socket
 
 
-class TestHandleFilterMessage(object):
+class TestHandleFilterMessage:
     def test_sets_socket_filter(self, socket):
         message = websocket.Message(
             socket=socket,
@@ -385,7 +385,7 @@ class TestHandleFilterMessage(object):
         return socket
 
 
-class TestHandlePingMessage(object):
+class TestHandlePingMessage:
     def test_pong(self):
         message = websocket.Message(
             socket=mock.sentinel.socket, payload={"type": "ping"}
@@ -397,7 +397,7 @@ class TestHandlePingMessage(object):
         mock_reply.assert_called_once_with({"type": "pong"})
 
 
-class TestHandleWhoamiMessage(object):
+class TestHandleWhoamiMessage:
     @pytest.mark.parametrize("userid", [None, "acct:foo@example.com"])
     def test_replies_with_whoyouare_message(self, socket, userid):
         """Send back a `whoyouare` message with a userid (which may be null)."""
@@ -416,7 +416,7 @@ class TestHandleWhoamiMessage(object):
         return socket
 
 
-class TestUnknownMessage(object):
+class TestUnknownMessage:
     def test_error(self, matchers):
         message = websocket.Message(
             socket=mock.sentinel.socket, payload={"type": "wibble"}

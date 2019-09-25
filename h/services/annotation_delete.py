@@ -7,7 +7,7 @@ from datetime import datetime
 from h.events import AnnotationEvent
 
 
-class AnnotationDeleteService(object):
+class AnnotationDeleteService:
     def __init__(self, request):
         self.request = request
 

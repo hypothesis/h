@@ -12,7 +12,7 @@ provides a more convenient interface to the interesting properties of events.
 from __future__ import unicode_literals
 
 
-class Event(object):
+class Event:
     """A decorator for a sentry_sdk event."""
 
     def __init__(self, event, hint):

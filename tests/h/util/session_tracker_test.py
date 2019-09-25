@@ -16,7 +16,7 @@ def generate_ann_id():
     return _get_urlsafe_from_hex(str(uuid4()))
 
 
-class TestTracker(object):
+class TestTracker:
     def test_uncommitted_changes_returns_unflushed_changes(
         self, tracker, session, expected_changes
     ):

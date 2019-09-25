@@ -6,7 +6,7 @@ Support for providing Angular-compatible routes for the client.
 from __future__ import unicode_literals
 
 
-class AngularRouteTemplater(object):
+class AngularRouteTemplater:
     """
     Create Angular-compatible templates for named routes.
 
@@ -21,7 +21,7 @@ class AngularRouteTemplater(object):
 
     """
 
-    class URLParameter(object):
+    class URLParameter:
         def __init__(self, name):
             self.name = name
 

@@ -9,7 +9,7 @@ from h.models.organization import Organization
 from h.traversal import OrganizationContext
 
 
-class TestOrganizationJSONPresenter(object):
+class TestOrganizationJSONPresenter:
     def test_organization_asdict_no_logo(self, factories, pyramid_request):
         organization = factories.Organization(name="My Org", logo=None)
         organization_context = OrganizationContext(organization, pyramid_request)

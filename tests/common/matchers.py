@@ -33,7 +33,7 @@ import re
 from pyramid import httpexceptions
 
 
-class Matcher(object):
+class Matcher:
     def __eq__(self, other):
         raise NotImplementedError("subclasses should provide an __eq__ method")
 

@@ -15,7 +15,7 @@ from h.services.exceptions import ConflictError
 
 
 @pytest.mark.usefixtures("pyramid_config", "routes", "user_signup_service")
-class TestSignupController(object):
+class TestSignupController:
     def test_post_returns_errors_when_validation_fails(
         self, invalid_form, pyramid_request
     ):

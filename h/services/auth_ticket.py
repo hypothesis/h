@@ -24,7 +24,7 @@ class AuthTicketNotLoadedError(Exception):
 
 
 @interface.implementer(interfaces.IAuthService)
-class AuthTicketService(object):
+class AuthTicketService:
     def __init__(self, session, user_service):
         self.session = session
         self.usersvc = user_service

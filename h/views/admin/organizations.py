@@ -44,7 +44,7 @@ def index(context, request):
     renderer="h:templates/admin/organizations_create.html.jinja2",
     permission="admin_organizations",
 )
-class OrganizationCreateController(object):
+class OrganizationCreateController:
     def __init__(self, request):
         self.schema = OrganizationSchema().bind(request=request)
         self.request = request
@@ -88,7 +88,7 @@ class OrganizationCreateController(object):
     permission="admin_organizations",
     renderer="h:templates/admin/organizations_edit.html.jinja2",
 )
-class OrganizationEditController(object):
+class OrganizationEditController:
     def __init__(self, org, request):
         self.org = org
         self.request = request

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 
-class TestModeration(object):
+class TestModeration:
     def test_moderator_flag_listing(
         self, app, group, flagged_annotation, moderator_with_token
     ):

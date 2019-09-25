@@ -8,7 +8,7 @@ from h import session
 from h.services.group_list import GroupListService
 
 
-class TestModel(object):
+class TestModel:
     def test_proxies_group_lookup_to_service(self, authenticated_request):
         svc = authenticated_request.find_service(name="group_list")
 
@@ -85,7 +85,7 @@ class TestModel(object):
             assert preferences["show_sidebar_tutorial"] is True
 
 
-class TestProfile(object):
+class TestProfile:
     def test_userid_unauthenticated(self, unauthenticated_request):
         assert session.profile(unauthenticated_request)["userid"] is None
 
@@ -219,7 +219,7 @@ class TestProfile(object):
         )
 
 
-class TestProfileWithScopedGroups(object):
+class TestProfileWithScopedGroups:
     def test_proxies_group_lookup_to_service(self, authenticated_request):
         svc = authenticated_request.find_service(name="group_list")
 
@@ -258,7 +258,7 @@ class TestProfileWithScopedGroups(object):
         assert profile["groups"][0]["url"]
 
 
-class TestUserInfo(object):
+class TestUserInfo:
     def test_returns_user_info_object(self, factories):
         user = factories.User.build(display_name="Jane Doe")
 
@@ -275,7 +275,7 @@ class TestUserInfo(object):
         assert session.user_info(None) == {}
 
 
-class FakeRequest(object):
+class FakeRequest:
     def __init__(self, authority, userid, user_authority, fake_feature):
         self.default_authority = authority
         self.authenticated_userid = userid

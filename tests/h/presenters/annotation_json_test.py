@@ -17,7 +17,7 @@ from h.traversal import AnnotationContext
 
 
 @implementer(IAnnotationFormatter)
-class FakeFormatter(object):
+class FakeFormatter:
     def __init__(self, data=None):
         self.data = data or {}
 
@@ -29,7 +29,7 @@ class FakeFormatter(object):
 
 
 @implementer(IAnnotationFormatter)
-class IDDuplicatingFormatter(object):
+class IDDuplicatingFormatter:
     """This formatter take the annotation's ID and adds it in another key.
 
     The main purpose of it is to confirm that the presenter is passing in the
@@ -43,7 +43,7 @@ class IDDuplicatingFormatter(object):
         return {"duplicated-id": annotation_resource.annotation.id}
 
 
-class TestAnnotationJSONPresenter(object):
+class TestAnnotationJSONPresenter:
     def test_asdict(self, document_asdict, group_service, fake_links_service):
         ann = mock.Mock(
             id="the-id",

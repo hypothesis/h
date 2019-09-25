@@ -23,7 +23,7 @@ SEARCH_PATHS = ["h:templates/deform/"]
 _ = i18n.TranslationString
 
 
-class Jinja2Renderer(object):
+class Jinja2Renderer:
     """An alternate Deform renderer that uses Jinja2 to render templates."""
 
     def __init__(self, env, system=None):

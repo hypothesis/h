@@ -14,7 +14,7 @@ from h.services.annotation_json_presentation import (
 
 
 @pytest.mark.usefixtures("presenters", "formatters")
-class TestAnnotationJSONPresentationService(object):
+class TestAnnotationJSONPresentationService:
     def test_initializes_flag_formatter(self, services, formatters, svc):
         formatters.AnnotationFlagFormatter.assert_called_once_with(
             services["flag"], mock.sentinel.user
@@ -169,7 +169,7 @@ class TestAnnotationJSONPresentationService(object):
 
 
 @pytest.mark.usefixtures("services")
-class TestAnnotationJSONPresentationServiceFactory(object):
+class TestAnnotationJSONPresentationServiceFactory:
     def test_returns_service(self, pyramid_request):
         svc = annotation_json_presentation_service_factory(None, pyramid_request)
 

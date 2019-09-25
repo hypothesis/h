@@ -7,7 +7,7 @@ import pytest
 from h.viewderivers import csp_protected_view
 
 
-class TestCSPProtectedView(object):
+class TestCSPProtectedView:
     def test_noop_by_default(self, pyramid_request, derive_view):
         view = derive_view(_dummy_view)
 

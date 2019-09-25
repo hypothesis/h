@@ -12,7 +12,7 @@ from h.formatters.annotation_user_info import AnnotationUserInfoFormatter
 FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation"])
 
 
-class TestAnnotationUserInfoFormatter(object):
+class TestAnnotationUserInfoFormatter:
     def test_preload_fetches_users_by_id(self, formatter, factories, user_svc):
         annotation_1 = factories.Annotation()
         annotation_2 = factories.Annotation()

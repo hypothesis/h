@@ -166,7 +166,7 @@ def test_deleting_tags_inline_is_persisted(db_session, factories):
     assert "foo" not in annotation.tags
 
 
-class TestThread(object):
+class TestThread:
     def test_empty_thread(self, root):
         assert root.thread == []
 

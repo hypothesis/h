@@ -5,7 +5,7 @@ from h.models import User
 from h.tasks.indexer import reindex_user_annotations
 
 
-class NipsaService(object):
+class NipsaService:
 
     """
     A service which provides access to the state of "not-in-public-site-areas"

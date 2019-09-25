@@ -26,7 +26,7 @@ from h.views.api.exceptions import OAuthAuthorizeError
 
 
 @pytest.mark.usefixtures("routes", "oauth_provider", "user_svc")
-class TestOAuthAuthorizeController(object):
+class TestOAuthAuthorizeController:
     @pytest.mark.usefixtures("authenticated_user")
     @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
     def test_get_validates_request(self, controller, pyramid_request, view_name):
@@ -283,7 +283,7 @@ class TestOAuthAuthorizeController(object):
 
 
 @pytest.mark.usefixtures("oauth_provider")
-class TestOAuthAccessTokenController(object):
+class TestOAuthAccessTokenController:
     def test_it_creates_token_response(
         self, pyramid_request, controller, oauth_provider
     ):
@@ -327,7 +327,7 @@ class TestOAuthAccessTokenController(object):
 
 
 @pytest.mark.usefixtures("oauth_provider")
-class TestOAuthRevocationController(object):
+class TestOAuthRevocationController:
     def test_it_creates_revocation_response(
         self, pyramid_request, controller, oauth_provider
     ):
@@ -367,7 +367,7 @@ class TestOAuthRevocationController(object):
         return svc
 
 
-class TestDebugToken(object):
+class TestDebugToken:
     def test_it_raises_error_when_token_is_missing(self, pyramid_request):
         pyramid_request.auth_token = None
 
@@ -456,7 +456,7 @@ class TestDebugToken(object):
         return factories.DeveloperToken()
 
 
-class TestAPITokenError(object):
+class TestAPITokenError:
     def test_it_sets_the_response_status_code(self, pyramid_request):
         context = OAuthTokenError("the error message", "error_type")
         views.api_token_error(context, pyramid_request)
