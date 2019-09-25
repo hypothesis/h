@@ -63,8 +63,15 @@ elsewhere in the Hypothesis application. URI expansion is handled by
 :py:func:`h.storage.expand_uri`.
 """
 import re
-
-from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus, urlparse
+from urllib.parse import (
+    SplitResult,
+    parse_qsl,
+    quote,
+    quote_plus,
+    unquote,
+    unquote_plus,
+    urlsplit,
+)
 
 URL_SCHEMES = set(["http", "https"])
 
@@ -143,7 +150,7 @@ def normalize(uristr):
             break
 
     # Try to extract the scheme
-    uri = urlparse.urlsplit(uristr)
+    uri = urlsplit(uristr)
 
     # If this isn't a URL, we don't perform any normalization
     if uri.scheme.lower() not in URL_SCHEMES:
@@ -159,7 +166,7 @@ def normalize(uristr):
     query = _normalize_query(uri)
     fragment = None
 
-    uri = urlparse.SplitResult(scheme, netloc, path, query, fragment)
+    uri = SplitResult(scheme, netloc, path, query, fragment)
 
     return uri.geturl()
 
@@ -170,8 +177,8 @@ def origin(url):
 
     ``url`` is assumed to be an HTTP(S) URL.
     """
-    url_parts = urlparse.urlsplit(url)
-    return urlparse.SplitResult(url_parts.scheme, url_parts.netloc, "", "", "").geturl()
+    url_parts = urlsplit(url)
+    return SplitResult(url_parts.scheme, url_parts.netloc, "", "", "").geturl()
 
 
 def _normalize_scheme(uri):
@@ -237,14 +244,14 @@ def _normalize_path(uri):
 
 
 def _normalize_pathsegment(segment):
-    return url_quote(url_unquote(segment), safe=UNRESERVED_PATHSEGMENT)
+    return quote(unquote(segment), safe=UNRESERVED_PATHSEGMENT)
 
 
 def _normalize_query(uri):
     query = uri.query
 
     try:
-        items = urlparse.parse_qsl(query, keep_blank_values=True, strict_parsing=True)
+        items = parse_qsl(query, keep_blank_values=True, strict_parsing=True)
     except ValueError:
         # If we can't parse the query string, we better preserve it as it was.
         return query
@@ -271,11 +278,11 @@ def _normalize_queryitems(items):
 
 
 def _normalize_queryname(name):
-    return url_quote_plus(url_unquote_plus(name), safe=UNRESERVED_QUERY_NAME)
+    return quote_plus(unquote_plus(name), safe=UNRESERVED_QUERY_NAME)
 
 
 def _normalize_queryvalue(value):
-    return url_quote_plus(url_unquote_plus(value), safe=UNRESERVED_QUERY_VALUE)
+    return quote_plus(unquote_plus(value), safe=UNRESERVED_QUERY_VALUE)
 
 
 def _blacklisted_query_param(s):
