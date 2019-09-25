@@ -7,7 +7,6 @@ from io import StringIO
 from urllib import parse as urlparse
 
 __all__ = (
-    "PY2",
     "text_type",
     "string_types",
     "configparser",
@@ -18,8 +17,6 @@ __all__ = (
     "url_unquote_plus",
     "StringIO",
 )
-
-PY2 = False  # We're only using Python 3 now.
 
 text_type = str
 string_types = (str,)
