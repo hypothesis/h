@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Custom SQLAlchemy types for use with the Annotations API database."""
-from h._compat import string_types
 import binascii
 import base64
 import uuid
@@ -95,9 +94,9 @@ def _get_hex_from_urlsafe(value):
     def _fail():
         raise InvalidUUID("{0!r} is not a valid encoded UUID".format(value))
 
-    if not isinstance(value, string_types):
+    if not isinstance(value, str):
         raise InvalidUUID(
-            "`value` is {}, expected one of {}".format(type(value), string_types)
+            "`value` is {}, expected str".format(type(value))
         )
 
     bytestr = value.encode()
