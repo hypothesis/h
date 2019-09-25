@@ -16,7 +16,6 @@ __all__ = (
 
 text_type = str
 string_types = (str,)
-unichr = chr
 
 url_quote = urlparse.quote
 url_quote_plus = urlparse.quote_plus
