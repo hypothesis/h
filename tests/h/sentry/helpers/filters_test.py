@@ -40,6 +40,46 @@ class TestFilterWS4PYHandshakeError(object):
         assert filters.filter_ws4py_handshake_error(unexpected_exception_event) is True
 
 
+class TestFilterRetryableError:
+    def test_it_doesnt_filter_non_retryable_errors(self, event):
+        assert filters.filter_retryable_error(event) is True
+
+    def test_it_checks_whether_the_error_is_retryable(
+        self, event, is_error_retryable, pyramid_request
+    ):
+        filters.filter_retryable_error(event)
+
+        is_error_retryable.assert_called_once_with(pyramid_request, event.exception)
+
+    def test_it_doesnt_filter_uncaught_errors(self, event, get_current_request):
+        get_current_request.return_value = None
+
+        assert filters.filter_retryable_error(event) is True
+
+    def test_it_filters_retryable_errors(self, event, is_error_retryable):
+        is_error_retryable.return_value = True
+
+        assert filters.filter_retryable_error(event) is False
+
+    @pytest.fixture
+    def event(self):
+        event = mock.create_autospec(Event, instance=True, spec_set=True)
+        event.exception = RuntimeError("Something went wrong")
+        return event
+
+    @pytest.fixture(autouse=True)
+    def get_current_request(self, patch, pyramid_request):
+        get_current_request = patch("h.sentry.helpers.filters.get_current_request")
+        get_current_request.return_value = pyramid_request
+        return get_current_request
+
+    @pytest.fixture(autouse=True)
+    def is_error_retryable(self, patch):
+        is_error_retryable = patch("h.sentry.helpers.filters.is_error_retryable")
+        is_error_retryable.return_value = False
+        return is_error_retryable
+
+
 @pytest.fixture
 def unexpected_logger_event():
     """Return an unexpected logger event that no filter should stop."""
