@@ -2,7 +2,7 @@
 
 """Activity pages views."""
 
-from h._compat import urlparse
+from urllib.parse import urlparse
 
 from jinja2 import Markup
 from pyramid import httpexceptions
@@ -368,7 +368,7 @@ class UserSearchController(SearchController):
         def domain(user):
             if not user.uri:
                 return None
-            return urlparse.urlparse(user.uri).netloc
+            return urlparse(user.uri).netloc
 
         annotation_count = self._get_total_user_annotations(result, self.request)
         result["stats"] = {"annotation_count": annotation_count}

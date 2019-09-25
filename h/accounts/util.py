@@ -2,8 +2,7 @@
 Helpers for account forms
 """
 import re
-
-from h._compat import urlparse
+from urllib.parse import urlparse
 
 
 def validate_url(url):
@@ -19,10 +18,10 @@ def validate_url(url):
 
     # Minimal URL validation with urlparse. This is extremely lenient, we might
     # want to use something like https://github.com/kvesteri/validators instead.
-    parsed_url = urlparse.urlparse(url)
+    parsed_url = urlparse(url)
 
     if not parsed_url.scheme:
-        parsed_url = urlparse.urlparse("http://" + url)
+        parsed_url = urlparse("http://" + url)
 
     if not re.match("https?", parsed_url.scheme):
         raise ValueError('Links must have an "http" or "https" prefix')
