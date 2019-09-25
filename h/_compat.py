@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import configparser
-from io import StringIO
 from urllib import parse as urlparse
 
 __all__ = (
@@ -15,7 +14,6 @@ __all__ = (
     "url_quote_plus",
     "url_unquote",
     "url_unquote_plus",
-    "StringIO",
 )
 
 text_type = str
