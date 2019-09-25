@@ -2,10 +2,11 @@
 
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import pyramid.authorization
 import pyramid.security
 import pytest
-import mock
 
 import h.auth
 from h.models import AuthClient

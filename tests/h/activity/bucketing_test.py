@@ -4,9 +4,10 @@ from __future__ import unicode_literals
 
 from h._compat import xrange
 
+from unittest.mock import Mock
 import datetime
+
 import pytest
-from mock import Mock
 
 from h.activity import bucketing
 from tests.common import factories

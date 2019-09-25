@@ -2,8 +2,8 @@
 
 from __future__ import unicode_literals
 from collections import namedtuple
+from unittest import mock
 
-import mock
 import pytest
 from gevent.queue import Queue
 from jsonschema import ValidationError

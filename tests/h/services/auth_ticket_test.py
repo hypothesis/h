@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 from datetime import datetime, timedelta
+from unittest import mock
 
-import mock
 import pytest
 
 from h import models

@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 
 from h._compat import xrange
 
-import mock
+from unittest import mock
+
 import pytest
 
 from h import models

@@ -2,10 +2,11 @@
 
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import datetime
 import json
 
-import mock
 import pytest
 
 from oauthlib.oauth2 import InvalidRequestFatalError

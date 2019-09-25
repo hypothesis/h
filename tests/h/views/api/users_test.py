@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import pytest
-import mock
 from pyramid.httpexceptions import HTTPConflict
 
 from h.views.api.exceptions import PayloadError

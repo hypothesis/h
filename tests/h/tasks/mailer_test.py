@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from smtplib import SMTPServerDisconnected
 
-import mock
+from smtplib import SMTPServerDisconnected
+from unittest import mock
+
 import pytest
 
 from h.tasks import mailer

@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 
 import logging
+from unittest import mock
 
-import mock
 import pytest
 
 from h.sentry.helpers.before_send import before_send

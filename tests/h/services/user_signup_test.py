@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import datetime
 
-import mock
+import datetime
+from unittest import mock
+
 import pytest
 
 from sqlalchemy.exc import IntegrityError

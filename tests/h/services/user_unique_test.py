@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import pytest
-import mock
 
 from h.services.user_unique import UserUniqueService, user_unique_factory
 from h.services.user_unique import DuplicateUserError

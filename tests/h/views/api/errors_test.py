@@ -2,7 +2,8 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
+from unittest.mock import Mock
+
 from pyramid.httpexceptions import HTTPExpectationFailed, HTTPNotFound
 
 from h.views.api import errors as views

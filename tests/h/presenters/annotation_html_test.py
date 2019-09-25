@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
 import datetime
+from unittest import mock
 
 import pytest
-import mock
 import jinja2
 
 from h.presenters.annotation_html import AnnotationHTMLPresenter

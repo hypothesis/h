@@ -2,7 +2,8 @@
 
 from __future__ import unicode_literals
 
-from mock import create_autospec, Mock
+from unittest.mock import create_autospec, Mock
+
 import pytest
 
 from h.models.auth_client import AuthClient, GrantType, ResponseType

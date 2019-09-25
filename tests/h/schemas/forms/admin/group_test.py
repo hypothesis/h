@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import colander
 import pytest
-import mock
 
 from h.models.group import (
     GROUP_NAME_MIN_LENGTH,

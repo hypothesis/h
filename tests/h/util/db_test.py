@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 import random
+from unittest import mock
 
-import mock
 import pytest
 
 from h.util.db import lru_cache_in_transaction, on_transaction_end

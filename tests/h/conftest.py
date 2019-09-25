@@ -8,9 +8,9 @@ from __future__ import unicode_literals
 
 import functools
 import os
+from unittest import mock
 
 import deform
-import mock
 import pytest
 
 import click.testing

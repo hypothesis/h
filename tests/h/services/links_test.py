@@ -2,7 +2,8 @@
 
 from __future__ import unicode_literals
 
-import mock
+from unittest import mock
+
 import pytest
 
 from h.services.links import LinksService, add_annotation_link_generator, links_factory

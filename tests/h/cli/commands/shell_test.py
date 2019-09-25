@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from unittest import mock
 
-import mock
 import pytest
 
 from h.cli.commands import shell

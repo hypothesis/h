@@ -5,8 +5,8 @@ from h._compat import url_quote_plus
 
 import itertools
 import re
+from unittest import mock
 
-import mock
 import pytest
 import elasticsearch
 

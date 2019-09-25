@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+from unittest.mock import Mock
+
 import colander
 import pytest
-from mock import Mock
 from pyramid.exceptions import BadCSRFToken
 
 from h.accounts import schemas

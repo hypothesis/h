@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import pytest
-import mock
 
 from h.events import AnnotationEvent
 from h.services.annotation_delete import annotation_delete_service_factory

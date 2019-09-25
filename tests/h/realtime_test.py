@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
 from datetime import datetime
+from unittest import mock
 
 import pytest
-import mock
 
 from h import realtime
 

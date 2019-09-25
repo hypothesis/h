@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
+
+from unittest import mock
+
 import pytest
-import mock
 
 from h import session
 from h.services.group_list import GroupListService

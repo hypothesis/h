@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
-import datetime
 
-import mock
+import datetime
+from unittest import mock
 
 from h import models
 from h.feeds import rss

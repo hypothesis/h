@@ -2,9 +2,9 @@
 
 from __future__ import unicode_literals
 
-from h.views import organizations
+from unittest import mock
 
-import mock
+from h.views import organizations
 
 
 class TestOrganizationLogo(object):

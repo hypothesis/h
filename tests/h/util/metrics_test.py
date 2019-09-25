@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
+from unittest import mock
+
 import pytest
-import mock
 from webob.multidict import MultiDict
 
 from h.util import metrics

@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 from collections import OrderedDict
+from unittest import mock
 
-import mock
 import pytest
 
 from h.renderers import json_sorted_factory

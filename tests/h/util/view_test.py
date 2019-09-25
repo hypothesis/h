@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals
 
+from unittest.mock import Mock
+
 import pytest
-from mock import Mock
 
 from h.util.view import handle_exception, json_view
 

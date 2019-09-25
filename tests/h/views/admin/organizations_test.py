@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
-from mock import Mock
+from unittest.mock import Mock
+
 import pytest
 
 from h.models import Organization

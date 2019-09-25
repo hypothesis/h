@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-import mock
+from unittest import mock
 
 from h.events import AnnotationEvent, AnnotationTransformEvent
 

@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import json
 from calendar import timegm
 from datetime import datetime, timedelta
+from unittest import mock
 
-import mock
 import pytest
 
 import jwt

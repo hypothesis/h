@@ -3,8 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
-
-import mock
+from unittest import mock
 
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
 from h.traversal import AnnotationContext
