@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-from h._compat import xrange
-
 from unittest import mock
 
 import pytest
@@ -60,7 +58,7 @@ class TestRenameUserService:
         assert db_session.query(models.User).get(user.id).username == "panda"
 
     def test_rename_deletes_auth_tickets(self, service, user, db_session, factories):
-        ids = [factories.AuthTicket(user=user).id for _ in xrange(3)]
+        ids = [factories.AuthTicket(user=user).id for _ in range(3)]
 
         service.rename(user, "panda")
 

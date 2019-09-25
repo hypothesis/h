@@ -2,10 +2,8 @@
 
 from __future__ import unicode_literals
 
-from h._compat import xrange
-
-from unittest.mock import Mock
 import datetime
+from unittest.mock import Mock
 
 import pytest
 
@@ -85,7 +83,7 @@ class TestDocumentBucket:
     def test_annotations_count_returns_count_of_annotations(self, db_session, document):
         bucket = bucketing.DocumentBucket(document)
 
-        for _ in xrange(7):
+        for _ in range(7):
             annotation = factories.Annotation()
             bucket.append(annotation)
 
@@ -95,7 +93,7 @@ class TestDocumentBucket:
         bucket = bucketing.DocumentBucket(document)
 
         annotations = []
-        for _ in xrange(7):
+        for _ in range(7):
             annotation = factories.Annotation()
             annotations.append(annotation)
             bucket.append(annotation)
@@ -126,7 +124,7 @@ class TestDocumentBucket:
         bucket_1 = bucketing.DocumentBucket(document)
         bucket_2 = bucketing.DocumentBucket(document)
 
-        for _ in xrange(5):
+        for _ in range(5):
             annotation = factories.Annotation()
             bucket_1.append(annotation)
             bucket_2.append(annotation)

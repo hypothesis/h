@@ -18,7 +18,6 @@ __all__ = (
 
 text_type = str
 string_types = (str,)
-xrange = range
 unichr = chr
 
 url_quote = urlparse.quote
