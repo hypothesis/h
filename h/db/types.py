@@ -95,9 +95,7 @@ def _get_hex_from_urlsafe(value):
         raise InvalidUUID("{0!r} is not a valid encoded UUID".format(value))
 
     if not isinstance(value, str):
-        raise InvalidUUID(
-            "`value` is {}, expected str".format(type(value))
-        )
+        raise InvalidUUID("`value` is {}, expected str".format(type(value)))
 
     bytestr = value.encode()
 

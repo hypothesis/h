@@ -19,8 +19,6 @@ from h.services.user import UserService
 from h.streamer import websocket
 import h.stats
 
-from h._compat import text_type
-
 log = logging.getLogger(__name__)
 
 
@@ -98,7 +96,7 @@ def handle_annotation_event(message, sockets, settings, session):
     nipsa_service = NipsaService(session)
     user_nipsad = nipsa_service.is_flagged(annotation.userid)
 
-    authority = text_type(settings.get("h.authority", "localhost"))
+    authority = settings.get("h.authority", "localhost")
     group_service = GroupfinderService(session, authority)
     user_service = UserService(authority, session)
     formatters = [AnnotationUserInfoFormatter(session, user_service)]

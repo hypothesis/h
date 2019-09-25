@@ -4,8 +4,6 @@ from urllib.parse import urlparse, unquote
 
 import jinja2
 
-from h._compat import text_type
-
 
 class DocumentHTMLPresenter:
     """Wraps Document model objects and adds some HTML properties."""
@@ -169,7 +167,7 @@ class DocumentHTMLPresenter:
         if title:
             # Convert non-string titles into strings.
             # We're assuming that title cannot be a byte string.
-            title = text_type(title)
+            title = str(title)
             return jinja2.escape(title)
 
         if self.filename:

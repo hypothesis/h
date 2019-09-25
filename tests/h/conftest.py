@@ -21,7 +21,6 @@ from webob.multidict import MultiDict
 from h import db
 from h import models
 from h.settings import database_url
-from h._compat import text_type
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
 
@@ -232,7 +231,7 @@ def pyramid_config(pyramid_settings, pyramid_request):
 def pyramid_request(db_session, fake_feature, pyramid_settings):
     """Dummy Pyramid request object."""
     request = testing.DummyRequest(db=db_session, feature=fake_feature)
-    request.default_authority = text_type(TEST_AUTHORITY)
+    request.default_authority = TEST_AUTHORITY
     request.create_form = mock.Mock()
     request.matched_route = mock.Mock()
     request.registry.settings = pyramid_settings

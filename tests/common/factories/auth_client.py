@@ -3,7 +3,6 @@
 import factory
 
 from h import models
-from h._compat import text_type
 
 from .base import FAKER, ModelFactory
 
@@ -23,5 +22,5 @@ class ConfidentialAuthClient(ModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     authority = "example.com"
-    secret = factory.LazyAttribute(lambda _: text_type(FAKER.sha256()))
+    secret = factory.LazyAttribute(lambda _: FAKER.sha256())
     redirect_uri = "https://example.com/auth/callback"

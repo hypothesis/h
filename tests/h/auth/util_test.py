@@ -10,7 +10,6 @@ from pyramid import security
 
 from h.auth import role
 from h.auth import util
-from h._compat import text_type
 from h.models.auth_client import GrantType
 from h.models import AuthClient
 from h.services.user import UserService
@@ -167,9 +166,9 @@ class TestAuthDomain:
         pyramid_request.registry.settings["h.authority"] = "foo.org"
         assert util.default_authority(pyramid_request) == "foo.org"
 
-    def test_it_returns_text_type(self, pyramid_request):
+    def test_it_returns_str(self, pyramid_request):
         pyramid_request.domain = str(pyramid_request.domain)
-        assert type(util.default_authority(pyramid_request)) == text_type
+        assert type(util.default_authority(pyramid_request)) == str
 
 
 class TestPrincipalsForAuthClient:

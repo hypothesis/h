@@ -8,7 +8,6 @@ import sqlalchemy as sa
 from pyramid import security
 
 from h.auth import role
-from h._compat import text_type
 from h.models.auth_client import GrantType, AuthClient
 
 
@@ -76,7 +75,7 @@ def default_authority(request):
 
     Falls back on returning request.domain if h.authority isn't set.
     """
-    return text_type(request.registry.settings.get("h.authority", request.domain))
+    return request.registry.settings.get("h.authority", request.domain)
 
 
 def client_authority(request):

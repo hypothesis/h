@@ -10,7 +10,6 @@ import sqlalchemy
 
 from h import db
 from h import search
-from h._compat import text_type
 
 log = logging.getLogger(__name__)
 
@@ -38,9 +37,7 @@ def _init_db(settings):
         engine.execute("select 1 from alembic_version")
     except sqlalchemy.exc.ProgrammingError:
         log.info("initializing database")
-        db.init(
-            engine, should_create=True, authority=text_type(settings["h.authority"])
-        )
+        db.init(engine, should_create=True, authority=settings["h.authority"])
 
         # Stamp the database with the current schema version so that future
         # migrations start from the correct point.
