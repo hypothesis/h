@@ -8,7 +8,6 @@ __all__ = (
     "PY2",
     "text_type",
     "string_types",
-    "configparser",
     "urlparse",
     "url_quote",
     "url_quote_plus",
@@ -28,11 +27,6 @@ else:
     string_types = (str, unicode)  # noqa
     xrange = xrange
     unichr = unichr
-
-try:
-    import ConfigParser as configparser
-except ImportError:
-    import configparser
 
 try:
     from urllib import parse as urlparse
