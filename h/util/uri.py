@@ -65,7 +65,6 @@ elsewhere in the Hypothesis application. URI expansion is handled by
 import re
 
 from h._compat import (
-    PY2,
     url_quote,
     url_quote_plus,
     url_unquote,
@@ -143,21 +142,6 @@ def normalize(uristr):
     :rtype: unicode
     """
 
-    # In Python 2 functions in urllib expect a byte string whereas in Python 3
-    # some functions in urllib work with a byte string or unicode but
-    # others (eg. `unquote`) require unicode.
-    #
-    # Hence we work with byte strings internally in Py 2 and unicode internally
-    # in Python 3. In both we always return unicode.
-    if PY2:
-        uristr = uristr.encode("utf-8")
-
-    def decode_result(result):
-        if PY2:
-            return result.decode("utf-8")
-        else:
-            return result
-
     # Strip proxy prefix for proxied URLs
     for scheme in URL_SCHEMES:
         if uristr.startswith(VIA_PREFIX + scheme + ":"):
@@ -169,11 +153,11 @@ def normalize(uristr):
 
     # If this isn't a URL, we don't perform any normalization
     if uri.scheme.lower() not in URL_SCHEMES:
-        return decode_result(uristr)
+        return uristr
 
     # Don't perform normalization on URLs with no hostname.
     if uri.hostname is None:
-        return decode_result(uristr)
+        return uristr
 
     scheme = _normalize_scheme(uri)
     netloc = _normalize_netloc(uri)
@@ -183,7 +167,7 @@ def normalize(uristr):
 
     uri = urlparse.SplitResult(scheme, netloc, path, query, fragment)
 
-    return decode_result(uri.geturl())
+    return uri.geturl()
 
 
 def origin(url):
