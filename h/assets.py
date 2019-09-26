@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import os
-import sys
 
 import json
 from pyramid.settings import asbool, aslist

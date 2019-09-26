@@ -26,10 +26,7 @@ class ExampleJSONSchema(JSONSchema):
     schema = {
         "$schema": "http://json-schema.org/draft-04/schema#",
         "type": "object",
-        "properties": {
-            "foo": {"type": "string"},
-            "bar": {"type": "integer"},
-        },
+        "properties": {"foo": {"type": "string"}, "bar": {"type": "integer"}},
         "required": ["foo", "bar"],
     }
 

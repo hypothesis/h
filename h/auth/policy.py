@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-import pyramid.compat
 from pyramid import interfaces
 from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.authentication import CallbackAuthenticationPolicy

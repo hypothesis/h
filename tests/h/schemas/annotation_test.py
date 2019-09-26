@@ -5,7 +5,6 @@ from copy import deepcopy
 from unittest import mock
 
 import pytest
-import re
 from webob.multidict import NestedMultiDict, MultiDict
 
 from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
