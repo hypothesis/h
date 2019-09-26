@@ -5,10 +5,10 @@ from unittest import mock
 
 import pytest
 import sqlalchemy as sa
-import transaction
 
 from h import models
 from h.models import document
+from h.models.document import ConcurrentUpdateError
 
 
 class TestDocumentFindByURIs:
@@ -130,7 +130,7 @@ class TestDocumentFindOrCreateByURIs:
 
         monkeypatch.setattr(db_session, "flush", err)
 
-        with pytest.raises(transaction.interfaces.TransientError):
+        with pytest.raises(ConcurrentUpdateError):
             with db_session.no_autoflush:  # prevent premature IntegrityError
                 document.Document.find_or_create_by_uris(
                     db_session,
@@ -458,7 +458,7 @@ class TestCreateOrUpdateDocumentURI:
 
         monkeypatch.setattr(db_session, "flush", err)
 
-        with pytest.raises(transaction.interfaces.TransientError):
+        with pytest.raises(ConcurrentUpdateError):
             with db_session.no_autoflush:  # prevent premature IntegrityError
                 document.create_or_update_document_uri(
                     session=db_session,
@@ -655,7 +655,7 @@ class TestCreateOrUpdateDocumentMeta:
 
         monkeypatch.setattr(db_session, "flush", err)
 
-        with pytest.raises(transaction.interfaces.TransientError):
+        with pytest.raises(ConcurrentUpdateError):
             with db_session.no_autoflush:  # prevent premature IntegrityError
                 document.create_or_update_document_meta(
                     session=db_session,
@@ -744,7 +744,7 @@ class TestMergeDocuments:
 
         monkeypatch.setattr(db_session, "flush", err)
 
-        with pytest.raises(transaction.interfaces.TransientError):
+        with pytest.raises(ConcurrentUpdateError):
             document.merge_documents(db_session, merge_data)
 
     @pytest.fixture
