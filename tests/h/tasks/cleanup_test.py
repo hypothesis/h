@@ -17,7 +17,7 @@ from h.tasks.cleanup import (
 
 
 @pytest.mark.usefixtures("celery")
-class TestPurgeDeletedAnnotations(object):
+class TestPurgeDeletedAnnotations:
     @pytest.mark.parametrize(
         "deleted,mins_ago,purged",
         [
@@ -52,7 +52,7 @@ class TestPurgeDeletedAnnotations(object):
 
 
 @pytest.mark.usefixtures("celery")
-class TestPurgeExpiredAuthTickets(object):
+class TestPurgeExpiredAuthTickets:
     def test_it_removes_expired_tickets(self, db_session, factories):
         tickets = [
             factories.AuthTicket(expires=datetime(2014, 5, 6, 7, 8, 9)),
@@ -77,7 +77,7 @@ class TestPurgeExpiredAuthTickets(object):
 
 
 @pytest.mark.usefixtures("celery")
-class TestPurgeExpiredAuthzCodes(object):
+class TestPurgeExpiredAuthzCodes:
     def test_it_removes_expired_authz_codes(self, db_session, factories):
         authz_codes = [
             factories.AuthzCode(expires=datetime(2014, 5, 6, 7, 8, 9)),
@@ -102,7 +102,7 @@ class TestPurgeExpiredAuthzCodes(object):
 
 
 @pytest.mark.usefixtures("celery")
-class TestPurgeExpiredTokens(object):
+class TestPurgeExpiredTokens:
     def test_it_removes_expired_tokens(self, db_session, factories):
         factories.DeveloperToken(
             expires=datetime(2014, 5, 6, 7, 8, 9),
@@ -149,7 +149,7 @@ class TestPurgeExpiredTokens(object):
 
 
 @pytest.mark.usefixtures("celery")
-class TestPurgeRemovedFeatures(object):
+class TestPurgeRemovedFeatures:
     def test_calls_remove_old_flags(self, db_session, patch):
         Feature = patch("h.tasks.cleanup.models.Feature")
 

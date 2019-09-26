@@ -7,7 +7,7 @@ import pytest
 from h.util import group as group_util
 
 
-class TestSplitGroupID(object):
+class TestSplitGroupID:
     @pytest.mark.parametrize(
         "groupid,authority_provided_id,authority",
         [
@@ -43,7 +43,7 @@ class TestSplitGroupID(object):
             group_util.split_groupid(groupid)
 
 
-class TestIsGroupid(object):
+class TestIsGroupid:
     @pytest.mark.parametrize(
         "maybe_groupid,result",
         [

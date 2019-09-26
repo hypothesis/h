@@ -8,7 +8,7 @@ from h import models
 from h._compat import PY2
 
 
-class TestUserIdentity(object):
+class TestUserIdentity:
     def test_you_can_save_and_then_retrieve_field_values(
         self, db_session, matchers, user
     ):

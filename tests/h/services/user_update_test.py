@@ -13,7 +13,7 @@ from h.services.user_update import UserUpdateService
 from h.services.user_update import user_update_factory
 
 
-class TestUserUpdate(object):
+class TestUserUpdate:
     def test_it_updates_valid_user_attrs(self, factories, svc):
         user = factories.User()
         data = {"display_name": "foobar", "email": "foobar@example.com"}
@@ -99,7 +99,7 @@ class TestUserUpdate(object):
             update_svc.update(user, username="fingers")
 
 
-class TestFactory(object):
+class TestFactory:
     def test_returns_user_update_service(self, pyramid_request):
         user_update_service = user_update_factory(None, pyramid_request)
 

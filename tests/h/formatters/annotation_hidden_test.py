@@ -12,7 +12,7 @@ from h.services.annotation_moderation import AnnotationModerationService
 FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation", "group"])
 
 
-class TestAnnotationHiddenFormatter(object):
+class TestAnnotationHiddenFormatter:
     def test_preload_sets_founds_hidden_annotations_to_true(
         self, annotations, formatter
     ):
@@ -36,7 +36,7 @@ class TestAnnotationHiddenFormatter(object):
         return {"hidden": hidden, "public": public}
 
 
-class TestAnonymousUserHiding(object):
+class TestAnonymousUserHiding:
     """An anonymous user will see redacted annotations when they're hidden."""
 
     def test_format_for_unhidden_annotation(self, formatter, annotation, group):
@@ -54,7 +54,7 @@ class TestAnonymousUserHiding(object):
         return None
 
 
-class TestNonAuthorHiding(object):
+class TestNonAuthorHiding:
     """Regular users see redacted annotations, unless they are a moderator."""
 
     def test_format_for_unhidden_annotation(self, formatter, annotation, group):
@@ -72,7 +72,7 @@ class TestNonAuthorHiding(object):
         assert formatter.format(resource) == {"hidden": True}
 
 
-class TestAuthorHiding(object):
+class TestAuthorHiding:
     """The author usually does not see their annotations have been hidden.
 
     The one exception is when they are also a moderator for the group.

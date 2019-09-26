@@ -14,7 +14,7 @@ from h.services.user import UserService
 from tests.common.matchers import Matcher
 
 
-class TestCreatePrivateGroup(object):
+class TestCreatePrivateGroup:
     def test_it_returns_group_model(self, creator, svc):
         group = svc.create_private_group("Anteater fans", creator.userid)
 
@@ -120,7 +120,7 @@ class TestCreatePrivateGroup(object):
         publish.assert_called_once_with("group-join", group.pubid, creator.userid)
 
 
-class TestCreateOpenGroup(object):
+class TestCreateOpenGroup:
     def test_it_returns_group_model(self, creator, svc, origins):
         group = svc.create_open_group("Anteater fans", creator.userid, scopes=origins)
 
@@ -252,7 +252,7 @@ class TestCreateOpenGroup(object):
             assert scope not in group.scopes
 
 
-class TestCreateRestrictedGroup(object):
+class TestCreateRestrictedGroup:
     def test_it_returns_group_model(self, creator, svc, origins):
         group = svc.create_restricted_group(
             "Anteater fans", creator.userid, scopes=origins
@@ -415,7 +415,7 @@ class TestCreateRestrictedGroup(object):
 
 
 @pytest.mark.usefixtures("user_service")
-class TestGroupCreateFactory(object):
+class TestGroupCreateFactory:
     def test_returns_group_create_service(self, pyramid_request):
         svc = group_create_factory(None, pyramid_request)
 

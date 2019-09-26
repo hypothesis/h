@@ -19,7 +19,7 @@ def _login_redirect_url(request):
 
 
 @view_defaults(route_name="signup", renderer="h:templates/accounts/signup.html.jinja2")
-class SignupController(object):
+class SignupController:
     def __init__(self, request):
 
         self.request = request

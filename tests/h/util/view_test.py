@@ -10,7 +10,7 @@ from h.util.view import handle_exception, json_view
 
 
 @pytest.mark.usefixtures("sys_exc_info")
-class TestHandleException(object):
+class TestHandleException:
     def test_sets_response_status_500(self, pyramid_request):
         handle_exception(pyramid_request, Mock())
 
@@ -41,7 +41,7 @@ class TestHandleException(object):
 
 
 @pytest.mark.usefixtures("view_config")
-class TestJsonView(object):
+class TestJsonView:
     def test_sets_accept(self):
         result = json_view()
 

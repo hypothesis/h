@@ -10,7 +10,7 @@ from h.search.client import get_client
 from h.search.client import Client
 
 
-class TestClient(object):
+class TestClient:
     def test_it_sets_the_index_property(self):
         client = Client(host="http://localhost:9200", index="hypothesis")
 
@@ -39,7 +39,7 @@ class TestClient(object):
             client.conn = "changed"
 
 
-class TestGetClient(object):
+class TestGetClient:
     def test_initializes_client_with_host(self, settings, patched_client):
         get_client(settings)
         args, _ = patched_client.call_args

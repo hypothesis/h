@@ -16,7 +16,7 @@ LIMIT_MAX = query.LIMIT_MAX
 OFFSET_MAX = query.OFFSET_MAX
 
 
-class TestLimiter(object):
+class TestLimiter:
     def test_it_limits_number_of_annotations(self, Annotation, search):
         dt = datetime.datetime
         ann_ids = [
@@ -100,7 +100,7 @@ class TestLimiter(object):
         return search
 
 
-class TestKeyValueMatcher(object):
+class TestKeyValueMatcher:
     def test_ands_multiple_key_values(self, Annotation, search):
         ann_ids = [Annotation().id, Annotation().id]
         reply1 = Annotation(references=[ann_ids[0]]).id
@@ -119,7 +119,7 @@ class TestKeyValueMatcher(object):
         return search
 
 
-class TestSorter(object):
+class TestSorter:
     @pytest.mark.parametrize(
         "sort_key,order,expected_order",
         [
@@ -263,7 +263,7 @@ class TestSorter(object):
         assert result.annotation_ids == ann_ids
 
 
-class TestTopLevelAnnotationsFilter(object):
+class TestTopLevelAnnotationsFilter:
     def test_it_filters_out_replies_but_leaves_annotations_in(self, Annotation, search):
         annotation = Annotation()
         Annotation(references=[annotation.id])
@@ -278,7 +278,7 @@ class TestTopLevelAnnotationsFilter(object):
         return search
 
 
-class TestAuthorityFilter(object):
+class TestAuthorityFilter:
     def test_it_filters_out_non_matching_authorities(self, Annotation, search):
         annotations_auth1 = [
             Annotation(userid="acct:foo@auth1").id,
@@ -298,7 +298,7 @@ class TestAuthorityFilter(object):
         return search
 
 
-class TestAuthFilter(object):
+class TestAuthFilter:
     def test_logged_out_user_can_not_see_private_annotations(self, search, Annotation):
         Annotation()
         Annotation()
@@ -347,7 +347,7 @@ class TestAuthFilter(object):
         return search
 
 
-class TestGroupFilter(object):
+class TestGroupFilter:
     def test_matches_only_annotations_from_specified_group(
         self, search, Annotation, group
     ):
@@ -372,7 +372,7 @@ class TestGroupFilter(object):
         return factories.OpenGroup(name="group1", pubid="group1id")
 
 
-class TestGroupAuthFilter(object):
+class TestGroupAuthFilter:
     def test_does_not_return_annotations_if_group_not_readable_by_user(
         self, search, Annotation, group_service
     ):
@@ -405,7 +405,7 @@ class TestGroupAuthFilter(object):
         return search
 
 
-class TestUserFilter(object):
+class TestUserFilter:
     def test_filters_annotations_by_user(self, search, Annotation):
         Annotation(userid="acct:foo@auth2", shared=True)
         expected_ids = [Annotation(userid="acct:bar@auth2", shared=True).id]
@@ -449,7 +449,7 @@ class TestUserFilter(object):
         return search
 
 
-class TestUriCombinedWildcardFilter(object):
+class TestUriCombinedWildcardFilter:
     # TODO - Explicit test of URL normalization (ie. that search normalizes input
     # URL using `h.util.uri.normalize` and queries with that).
 
@@ -668,7 +668,7 @@ class TestUriCombinedWildcardFilter(object):
         return patch("h.search.query.storage")
 
 
-class TestDeletedFilter(object):
+class TestDeletedFilter:
     def test_excludes_deleted_annotations(self, search, es_client, Annotation):
         deleted_ids = [Annotation(deleted=True).id]
         not_deleted_ids = [Annotation(deleted=False).id]
@@ -688,7 +688,7 @@ class TestDeletedFilter(object):
 
 
 @pytest.mark.usefixtures("pyramid_config")
-class TestHiddenFilter(object):
+class TestHiddenFilter:
     @pytest.mark.parametrize(
         "nipsa,hidden,should_show_annotation",
         [
@@ -792,7 +792,7 @@ class TestHiddenFilter(object):
         return group_service
 
 
-class TestAnyMatcher(object):
+class TestAnyMatcher:
     def test_matches_uriparts(self, search, Annotation):
         Annotation(target_uri="http://bar.com")
         matched_ids = [
@@ -878,7 +878,7 @@ class TestAnyMatcher(object):
         return AnnotationWithDefaults
 
 
-class TestTagsMatcher(object):
+class TestTagsMatcher:
     def test_matches_tag_key(self, search, Annotation):
         Annotation(shared=True)
         Annotation(shared=True, tags=["bar"])
@@ -928,7 +928,7 @@ class TestTagsMatcher(object):
         return search
 
 
-class TestRepliesMatcher(object):
+class TestRepliesMatcher:
     def test_matches_unnested_replies_to_annotations(self, Annotation, search):
         ann1 = Annotation()
         ann2 = Annotation()
@@ -965,7 +965,7 @@ class TestRepliesMatcher(object):
         assert sorted(result.annotation_ids) == sorted(expected_reply_ids)
 
 
-class TestTagsAggregation(object):
+class TestTagsAggregation:
     def test_it_returns_annotation_counts_by_tag(self, Annotation, search):
         for i in range(2):
             Annotation(tags=["tag_a"])
@@ -1005,7 +1005,7 @@ class TestTagsAggregation(object):
         assert count_for_tag_c == 2
 
 
-class TestUsersAggregation(object):
+class TestUsersAggregation:
     def test_it_returns_annotation_counts_by_user(self, Annotation, search):
         for i in range(2):
             Annotation(userid="acct:pa@example.com")

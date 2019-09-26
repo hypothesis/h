@@ -76,7 +76,7 @@ class Consumer(ConsumerMixin):
         self.statsd_client.timing("streamer.msg.queueing", delta_millis)
 
 
-class Publisher(object):
+class Publisher:
     """
     A realtime publisher for publishing messages to all subscribers.
 

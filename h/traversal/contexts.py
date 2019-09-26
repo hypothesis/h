@@ -29,7 +29,7 @@ from h.auth import role
 from h.models.organization import ORGANIZATION_DEFAULT_PUBID
 
 
-class AnnotationContext(object):
+class AnnotationContext:
     """Context for annotation-based views."""
 
     def __init__(self, annotation, group_service, links_service):
@@ -94,7 +94,7 @@ class AnnotationContext(object):
         return principals
 
 
-class OrganizationContext(object):
+class OrganizationContext:
     """Context for organization-based views."""
 
     def __init__(self, organization, request):
@@ -124,7 +124,7 @@ class OrganizationContext(object):
         return None
 
 
-class GroupContext(object):
+class GroupContext:
     """Context for group-based views."""
 
     def __init__(self, group, request):
@@ -147,7 +147,7 @@ class GroupContext(object):
         return None
 
 
-class GroupUpsertContext(object):
+class GroupUpsertContext:
     """Context for group UPSERT"""
 
     def __init__(self, group, request):
@@ -182,7 +182,7 @@ class GroupUpsertContext(object):
         return [(Allow, role.User, "upsert")]
 
 
-class UserContext(object):
+class UserContext:
     """
     Context for user-centered views
 

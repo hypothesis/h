@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 
-class FakeLinksService(object):
+class FakeLinksService:
     def __init__(self):
         self.last_annotation = None
 

@@ -15,7 +15,7 @@ from h.services.user_signup import UserSignupService, user_signup_service_factor
 from h.services.exceptions import ConflictError
 
 
-class TestUserSignupService(object):
+class TestUserSignupService:
     def test_signup_returns_user(self, svc):
         user = svc.signup(username="foo", email="foo@bar.com")
 
@@ -202,7 +202,7 @@ class TestUserSignupService(object):
 
 
 @pytest.mark.usefixtures("user_password_service")
-class TestUserSignupServiceFactory(object):
+class TestUserSignupServiceFactory:
     def test_returns_user_signup_service(self, pyramid_request):
         svc = user_signup_service_factory(None, pyramid_request)
 

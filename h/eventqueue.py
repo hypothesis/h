@@ -19,7 +19,7 @@ def _get_subscribers(registry, event):
     return registry.adapters.subscriptions([providedBy(event)], None)
 
 
-class EventQueue(object):
+class EventQueue:
     """
     EventQueue enables dispatching Pyramid events at the end of a request.
 

@@ -8,7 +8,7 @@ from h import models
 from h.cli.commands import authclient as authclient_cli
 
 
-class TestAddCommand(object):
+class TestAddCommand:
     def test_it_creates_a_public_authclient(self, cli, cliconfig, db_session):
         (authclient, _) = self._add_authclient(
             cli, cliconfig, db_session, type_=u"public"

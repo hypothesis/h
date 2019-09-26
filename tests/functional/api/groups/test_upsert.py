@@ -10,7 +10,7 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-class TestUpsertGroupUpdate(object):
+class TestUpsertGroupUpdate:
     def test_it_returns_http_404_if_no_authenticated_user(self, app, first_party_group):
         group = {"name": "My Group"}
         res = app.put_json(
@@ -209,7 +209,7 @@ class TestUpsertGroupUpdate(object):
         assert res.status_code == 409
 
 
-class TestUpsertGroupCreate(object):
+class TestUpsertGroupCreate:
     def test_it_allows_auth_client_with_forwarded_user(
         self, app, auth_client_header, third_party_user
     ):

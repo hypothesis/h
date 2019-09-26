@@ -14,7 +14,7 @@ from h.views.api import annotations as views
 
 
 @pytest.mark.usefixtures("presentation_service", "search_lib")
-class TestSearch(object):
+class TestSearch:
     def test_it_searches(self, pyramid_request, search_lib):
         pyramid_request.stats = mock.Mock()
 
@@ -89,7 +89,7 @@ class TestSearch(object):
     "presentation_service",
     "storage",
 )
-class TestCreate(object):
+class TestCreate:
     def test_it_raises_if_json_parsing_fails(self, pyramid_request):
         """It raises PayloadError if parsing of the request body fails."""
         # Make accessing the request.json_body property raise ValueError.
@@ -201,7 +201,7 @@ class TestCreate(object):
 
 
 @pytest.mark.usefixtures("presentation_service")
-class TestRead(object):
+class TestRead:
     def test_it_returns_presented_annotation(
         self, presentation_service, pyramid_request
     ):
@@ -215,7 +215,7 @@ class TestRead(object):
 
 
 @pytest.mark.usefixtures("AnnotationJSONLDPresenter", "links_service")
-class TestReadJSONLD(object):
+class TestReadJSONLD:
     def test_it_sets_correct_content_type(
         self, AnnotationJSONLDPresenter, pyramid_request
     ):
@@ -257,7 +257,7 @@ class TestReadJSONLD(object):
     "update_schema",
     "storage",
 )
-class TestUpdate(object):
+class TestUpdate:
     def test_it_inits_the_schema(self, pyramid_request, update_schema):
         context = mock.Mock()
 
@@ -387,7 +387,7 @@ class TestUpdate(object):
 @pytest.mark.usefixtures(
     "AnnotationEvent", "links_service", "annotation_delete_service"
 )
-class TestDelete(object):
+class TestDelete:
     def test_it_calls_the_annotation_delete_service(
         self, pyramid_request, annotation_delete_service
     ):

@@ -9,7 +9,7 @@ import pytest
 from h import form
 
 
-class TestJinja2Renderer(object):
+class TestJinja2Renderer:
     def test_call_fetches_correct_templates(self, jinja2_env):
         renderer = form.Jinja2Renderer(jinja2_env)
 
@@ -56,7 +56,7 @@ class TestJinja2Renderer(object):
         return mock.Mock(spec_set=["render"])
 
 
-class TestCreateEnvironment(object):
+class TestCreateEnvironment:
     def test_overlays_base_with_correct_args(self):
         base = mock.Mock(spec_set=["overlay"])
 
@@ -74,7 +74,7 @@ class TestCreateEnvironment(object):
         assert "templates/deform" in loader.searchpath[0]
 
 
-class TestCreateForm(object):
+class TestCreateForm:
     def test_returns_form_object(self, Form, pyramid_request):
         result = form.create_form(pyramid_request, mock.sentinel.schema)
 
@@ -110,7 +110,7 @@ class TestCreateForm(object):
         return pyramid_request
 
 
-class TestToXHRResponse(object):
+class TestToXHRResponse:
     """Unit tests for to_xhr_response()."""
 
     def test_returns_given_result_if_not_xhr(self, pyramid_request):
@@ -157,7 +157,7 @@ class TestToXHRResponse(object):
 
 
 @pytest.mark.usefixtures("to_xhr_response")
-class TestHandleFormSubmission(object):
+class TestHandleFormSubmission:
     def test_it_calls_validate(self, pyramid_request, matchers):
         form_ = mock.Mock(spec_set=["validate"])
 

@@ -10,7 +10,7 @@ from h.panels.back_link import back_link
 
 
 @pytest.mark.usefixtures("routes")
-class TestBackLink(object):
+class TestBackLink:
     def test_it_sets_back_location_from_referrer(self, pyramid_request):
         pyramid_request.referrer = "https://example.com/prev-page"
 

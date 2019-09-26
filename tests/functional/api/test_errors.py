@@ -17,7 +17,7 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-class Test400Errors(object):
+class Test400Errors:
     """Creating a group can raise all of the client errors we want to test"""
 
     def test_it_400s_if_invalid_payload(self, app, append_token_auth):
@@ -43,7 +43,7 @@ class Test400Errors(object):
         assert stripped == expected
 
 
-class Test404Errors(object):
+class Test404Errors:
     # TODO: Some of these 404s should really be 403s
     def test_it_404s_if_authz_fail_with_valid_accept(self, app, append_auth_client):
         headers = append_auth_client()
@@ -92,7 +92,7 @@ class Test404Errors(object):
         )
 
 
-class Test409Errors(object):
+class Test409Errors:
     def test_it_409s_on_create_group_if_groupid_is_duplicate(
         self, app, append_auth_client, third_party_user
     ):
@@ -110,7 +110,7 @@ class Test409Errors(object):
         )
 
 
-class Test406Errors(object):
+class Test406Errors:
     def test_it_406s_if_not_found_with_bad_accept(self, app):
         headers = {}
         headers[native_str("Accept")] = native_str("application/totally_random")

@@ -6,7 +6,7 @@ from h import models
 from h.presenters.document_json import DocumentJSONPresenter
 
 
-class TestDocumentJSONPresenter(object):
+class TestDocumentJSONPresenter:
     def test_asdict(self, db_session):
         document = models.Document(
             title="Foo",

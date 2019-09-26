@@ -11,7 +11,7 @@ WHITESPACE = " \t"
 
 
 @pytest.mark.usefixtures("routes")
-class TestLookup(object):
+class TestLookup:
     def test_none_when_empty(self, pyramid_request):
         result = lookup([], pyramid_request)
 
@@ -89,7 +89,7 @@ class TestLookup(object):
         pyramid_config.add_route("donkey", "/donkey")
 
 
-class TestParse(object):
+class TestParse:
     def test_basic(self):
         result = parse(["/foo exact http://giraffe.com/bar"])
 

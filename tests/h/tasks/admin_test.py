@@ -7,7 +7,7 @@ import pytest
 from h.tasks.admin import rename_user
 
 
-class TestRenameUser(object):
+class TestRenameUser:
     def test_it_raises_when_user_cannot_be_found(self, celery):
         with pytest.raises(ValueError) as err:
             rename_user(4, "panda")

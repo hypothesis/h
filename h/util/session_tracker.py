@@ -12,7 +12,7 @@ class ObjectState(Enum):
     CHANGED = "changed"
 
 
-class Tracker(object):
+class Tracker:
     """
     Observer which tracks whether a SQLAlchemy `Session` has uncommitted changes.
     """

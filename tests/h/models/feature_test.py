@@ -10,7 +10,7 @@ from h.models import Feature
 
 
 @pytest.mark.usefixtures("features_override", "features_pending_removal_override")
-class TestFeature(object):
+class TestFeature:
     def test_description_returns_hardcoded_description(self):
         feat = Feature(name="notification")
 

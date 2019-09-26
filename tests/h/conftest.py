@@ -35,7 +35,7 @@ TEST_DATABASE_URL = database_url(
 Session = sessionmaker()
 
 
-class DummyFeature(object):
+class DummyFeature:
 
     """
     A dummy feature flag looker-upper.
@@ -62,7 +62,7 @@ class DummyFeature(object):
         self.flags = {}
 
 
-class DummySession(object):
+class DummySession:
 
     """
     A dummy database session.
@@ -84,7 +84,7 @@ class DummySession(object):
 
 
 # A fake version of colander.Invalid
-class FakeInvalid(object):
+class FakeInvalid:
     def __init__(self, errors):
         self.errors = errors
 

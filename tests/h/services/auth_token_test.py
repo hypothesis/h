@@ -10,7 +10,7 @@ from h.services.auth_token import AuthTokenService
 from h.services.auth_token import auth_token_service_factory
 
 
-class TestAuthTokenService(object):
+class TestAuthTokenService:
     def test_validate_returns_database_token(self, svc, factories):
         token_model = factories.DeveloperToken(expires=self.time(1))
 
@@ -71,7 +71,7 @@ class TestAuthTokenService(object):
 
 
 @pytest.mark.usefixtures("pyramid_settings")
-class TestAuthTokenServiceFactory(object):
+class TestAuthTokenServiceFactory:
     def test_it_returns_service(self, pyramid_request):
         result = auth_token_service_factory(None, pyramid_request)
 

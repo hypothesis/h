@@ -7,7 +7,7 @@ from h import tweens
 from h.util.redirects import Redirect
 
 
-class TestRedirectTween(object):
+class TestRedirectTween:
     def test_it_loads_redirects(self, patch):
         open_ = patch("h.tweens.open")
         parse_redirects = patch("h.tweens.parse_redirects")
@@ -52,7 +52,7 @@ class TestRedirectTween(object):
         assert response.location == "http://bar"
 
 
-class TestSecurityHeaderTween(object):
+class TestSecurityHeaderTween:
     def test_it_adds_security_headers_to_the_response(self, pyramid_request):
         tween = tweens.security_header_tween_factory(
             lambda req: req.response, pyramid_request.registry
@@ -67,7 +67,7 @@ class TestSecurityHeaderTween(object):
         assert response.headers["X-XSS-Protection"] == "1; mode=block"
 
 
-class TestCacheHeaderTween(object):
+class TestCacheHeaderTween:
     @pytest.mark.parametrize(
         "content_type, expected_cc_header",
         [
@@ -95,7 +95,7 @@ class TestCacheHeaderTween(object):
         assert response.headers.get("Cache-Control") == expected_cc_header
 
 
-class TestEncodeHeadersTween(object):
+class TestEncodeHeadersTween:
     def test_it_converts_unicode_header_names_to_native_strings(
         self, pyramid_request, matchers, encode_headers_tween
     ):

@@ -10,7 +10,7 @@ from h.services.organization import organization_factory
 from h.models import Organization
 
 
-class TestListOrganizations(object):
+class TestListOrganizations:
     def test_returns_organizations_from_all_authorities_if_no_authority_specified(
         self, svc, organizations, default_orgs, alternate_organizations
     ):
@@ -34,7 +34,7 @@ class TestListOrganizations(object):
         assert results == alternate_organizations
 
 
-class TestListOrganizationsFactory(object):
+class TestListOrganizationsFactory:
     def test_list_organizations_factory(self, pyramid_request):
         svc = list_organizations_factory(None, pyramid_request)
 

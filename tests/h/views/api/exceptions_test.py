@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.views.api import exceptions
 
 
-class TestOAuthTokenError(object):
+class TestOAuthTokenError:
     def test_it_sets_type_and_message(self):
         exc = exceptions.OAuthTokenError("boom", "mytype")
 
@@ -18,7 +18,7 @@ class TestOAuthTokenError(object):
         assert exc.status_code == 401
 
 
-class TestPayloadError(object):
+class TestPayloadError:
     def test_it_sets_default_message_and_status(self):
         exc = exceptions.PayloadError()
 

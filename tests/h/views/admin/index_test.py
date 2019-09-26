@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.views.admin import index
 
 
-class TestIndex(object):
+class TestIndex:
     def test_release_info(self, pyramid_request):
         result = index.index(pyramid_request)
 

@@ -18,7 +18,7 @@ from h.services.user import user_service_factory
 from h.services.oauth_validator import Client
 
 
-class TestJWTAuthorizationGrantCreateTokenResponse(object):
+class TestJWTAuthorizationGrantCreateTokenResponse:
     def test_returns_error_when_validation_fails(
         self, grant, oauth_request, token_handler, authclient
     ):
@@ -86,7 +86,7 @@ class TestJWTAuthorizationGrantCreateTokenResponse(object):
         return handler
 
 
-class TestJWTAuthorizationGrantValidateTokenRequest(object):
+class TestJWTAuthorizationGrantValidateTokenRequest:
     def test_does_not_raise_for_valid_input(self, grant, oauth_request):
         grant.validate_token_request(oauth_request)
 

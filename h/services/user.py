@@ -15,7 +15,7 @@ class UserNotActivated(Exception):
     """Tried to log in to an unactivated user account."""
 
 
-class UserService(object):
+class UserService:
 
     """A service for retrieving and performing common operations on users."""
 

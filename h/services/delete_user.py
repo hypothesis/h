@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.models import Annotation, Group
 
 
-class DeleteUserService(object):
+class DeleteUserService:
     def __init__(self, request, annotation_delete_service):
         self.request = request
         self._annotation_delete_service = annotation_delete_service

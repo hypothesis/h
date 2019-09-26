@@ -12,7 +12,7 @@ from h import __version__
 
 
 @pytest.mark.usefixtures("routes", "pyramid_settings")
-class TestSidebarApp(object):
+class TestSidebarApp:
     def test_it_includes_client_config(self, pyramid_request):
         ctx = client.sidebar_app(pyramid_request)
         expected_config = {
@@ -46,7 +46,7 @@ class TestSidebarApp(object):
 
 
 @pytest.mark.usefixtures("routes", "pyramid_settings")
-class TestEmbedRedirect(object):
+class TestEmbedRedirect:
     def test_redirects_to_client_boot_script(self, pyramid_request):
         pyramid_request.feature.flags["embed_cachebuster"] = False
 

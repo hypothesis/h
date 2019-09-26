@@ -21,7 +21,7 @@ FakeUser = namedtuple("FakeUser", ["authority", "admin", "staff", "groups"])
 FakeGroup = namedtuple("FakeGroup", ["pubid"])
 
 
-class TestGroupfinder(object):
+class TestGroupfinder:
     def test_it_fetches_the_user(self, pyramid_request, user_service):
         util.groupfinder("acct:bob@example.org", pyramid_request)
         user_service.fetch.assert_called_once_with("acct:bob@example.org")
@@ -121,7 +121,7 @@ def test_translate_annotation_principals(p_in, p_out):
     assert set(result) == set(p_out)
 
 
-class TestClientAuthority(object):
+class TestClientAuthority:
     @pytest.mark.parametrize(
         "principals",
         [
@@ -158,7 +158,7 @@ class TestClientAuthority(object):
         assert util.client_authority(pyramid_request) == authority
 
 
-class TestAuthDomain(object):
+class TestAuthDomain:
     def test_it_returns_the_request_domain_if_authority_isnt_set(self, pyramid_request):
         # Make sure h.authority isn't set.
         pyramid_request.registry.settings.pop("h.authority", None)
@@ -174,7 +174,7 @@ class TestAuthDomain(object):
         assert type(util.default_authority(pyramid_request)) == text_type
 
 
-class TestPrincipalsForAuthClient(object):
+class TestPrincipalsForAuthClient:
     def test_it_sets_auth_client_principal(self, auth_client):
         principals = util.principals_for_auth_client(auth_client)
 
@@ -209,7 +209,7 @@ class TestPrincipalsForAuthClient(object):
         assert isinstance(principals, list)
 
 
-class TestPrincipalsForAuthClientUser(object):
+class TestPrincipalsForAuthClientUser:
     def test_it_proxies_to_principals_for_user(
         self, principals_for_user, factories, auth_client
     ):
@@ -257,7 +257,7 @@ class TestPrincipalsForAuthClientUser(object):
         assert role.AuthClient in principals
 
 
-class TestVerifyAuthClient(object):
+class TestVerifyAuthClient:
     def test_it_queries_for_auth_client_in_db(self, pyramid_request):
         pyramid_request.db.query.return_value.get.return_value = None
         util.verify_auth_client(

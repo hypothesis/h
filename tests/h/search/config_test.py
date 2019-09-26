@@ -90,7 +90,7 @@ def test_uri_part_tokenizer():
 
 
 @pytest.mark.usefixtures("client", "configure_index")
-class TestInit(object):
+class TestInit:
     def test_configures_index_when_index_missing(self, client, configure_index):
         """Calls configure_index when one doesn't exist."""
         init(client)
@@ -143,7 +143,7 @@ class TestInit(object):
         return configure_index
 
 
-class TestConfigureIndex(object):
+class TestConfigureIndex:
     def test_creates_randomly_named_index(self, client, matchers):
         configure_index(client)
 
@@ -168,7 +168,7 @@ class TestConfigureIndex(object):
         )
 
 
-class TestGetAliasedIndex(object):
+class TestGetAliasedIndex:
     def test_returns_underlying_index_name(self, client):
         """If ``index`` is an alias, return the name of the concrete index."""
         client.conn.indices.get_alias.return_value = {
@@ -196,7 +196,7 @@ class TestGetAliasedIndex(object):
             get_aliased_index(client)
 
 
-class TestUpdateAliasedIndex(object):
+class TestUpdateAliasedIndex:
     def test_updates_index_atomically(self, client):
         """Update the alias atomically."""
         client.conn.indices.get_alias.return_value = {
@@ -223,14 +223,14 @@ class TestUpdateAliasedIndex(object):
             update_aliased_index(client, "new-target")
 
 
-class TestDeleteIndex(object):
+class TestDeleteIndex:
     def test_deletes_index(self, client):
         delete_index(client, "unused-index")
 
         client.conn.indices.delete.assert_called_once_with(index="unused-index")
 
 
-class TestUpdateIndexSettings(object):
+class TestUpdateIndexSettings:
     def test_succesfully_updates_the_index_settings(self, client):
         client.conn.indices.get_alias.return_value = {
             "old-target": {"aliases": {"foo": {}}}

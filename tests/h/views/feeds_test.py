@@ -12,7 +12,7 @@ from h.views.feeds import stream_atom, stream_rss
 @pytest.mark.usefixtures(
     "fetch_ordered_annotations", "render_atom", "search_run", "routes"
 )
-class TestStreamAtom(object):
+class TestStreamAtom:
     def test_renders_atom(self, pyramid_request, render_atom):
         stream_atom(pyramid_request)
 
@@ -34,7 +34,7 @@ class TestStreamAtom(object):
 @pytest.mark.usefixtures(
     "fetch_ordered_annotations", "render_rss", "search_run", "routes"
 )
-class TestStreamRSS(object):
+class TestStreamRSS:
     def test_renders_rss(self, pyramid_request, render_rss):
         stream_rss(pyramid_request)
 

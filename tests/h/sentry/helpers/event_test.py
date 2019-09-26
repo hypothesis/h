@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from h.sentry.helpers.event import Event
 
 
-class TestEvent(object):
+class TestEvent:
     def test_parsing_logger_event(self):
         # The event dict as passed to us by Sentry.
         event_dict = {

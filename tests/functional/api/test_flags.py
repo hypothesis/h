@@ -13,7 +13,7 @@ import pytest
 native_str = str
 
 
-class TestPutFlag(object):
+class TestPutFlag:
     def test_it_returns_http_204_if_user_allowed_to_flag_shared_annotation(
         self, app, annotation, user_with_token
     ):

@@ -14,7 +14,7 @@ from h.notification.reply import Notification
 
 
 @pytest.mark.usefixtures("routes", "token_serializer", "html_renderer", "text_renderer")
-class TestGenerate(object):
+class TestGenerate:
     def test_gets_in_context_link(self, notification, links, pyramid_request):
         generate(pyramid_request, notification)
 

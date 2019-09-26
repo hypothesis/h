@@ -12,7 +12,7 @@ from pyramid import registry
 from h.streamer import messages
 
 
-class FakeSocket(object):
+class FakeSocket:
     client_id = None
     filter = None
     terminated = None
@@ -35,7 +35,7 @@ class FakeSocket(object):
 
 
 @pytest.mark.usefixtures("fake_stats")
-class TestProcessMessages(object):
+class TestProcessMessages:
     def test_creates_statsd_client(self, fake_stats, fake_consumer, queue):
         settings = {}
 
@@ -111,7 +111,7 @@ class TestProcessMessages(object):
         return Queue()
 
 
-class TestHandleMessage(object):
+class TestHandleMessage:
     def test_calls_handler_with_list_of_sockets(self, websocket):
         handler = mock.Mock(return_value=None)
         session = mock.sentinel.db_session
@@ -139,7 +139,7 @@ class TestHandleMessage(object):
     "links_service",
     "nipsa_service",
 )
-class TestHandleAnnotationEvent(object):
+class TestHandleAnnotationEvent:
     def test_it_fetches_the_annotation(self, fetch_annotation, presenter_asdict):
         message = {
             "annotation_id": "panda",
@@ -435,7 +435,7 @@ class TestHandleAnnotationEvent(object):
         return patch("h.streamer.messages.AnnotationContext")
 
 
-class TestHandleUserEvent(object):
+class TestHandleUserEvent:
     def test_sends_session_change_when_joining_or_leaving_group(self):
         session_model = mock.Mock()
         message = {

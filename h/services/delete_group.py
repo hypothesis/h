@@ -9,7 +9,7 @@ class DeletePublicGroupError(Exception):
     pass
 
 
-class DeleteGroupService(object):
+class DeleteGroupService:
     def __init__(self, request, annotation_delete_service):
         self.request = request
         self._annotation_delete_service = annotation_delete_service

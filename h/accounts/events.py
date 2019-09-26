@@ -2,24 +2,24 @@
 from __future__ import unicode_literals
 
 
-class ActivationEvent(object):
+class ActivationEvent:
     def __init__(self, request, user):
         self.request = request
         self.user = user
 
 
-class LoginEvent(object):
+class LoginEvent:
     def __init__(self, request, user):
         self.request = request
         self.user = user
 
 
-class LogoutEvent(object):
+class LogoutEvent:
     def __init__(self, request):
         self.request = request
 
 
-class PasswordResetEvent(object):
+class PasswordResetEvent:
     def __init__(self, request, user):
         self.request = request
         self.user = user

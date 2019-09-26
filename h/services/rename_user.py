@@ -10,7 +10,7 @@ class UserRenameError(Exception):
     pass
 
 
-class RenameUserService(object):
+class RenameUserService:
     """
     Renames a user and updates all its annotations.
 

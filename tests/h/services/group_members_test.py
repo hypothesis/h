@@ -13,7 +13,7 @@ from h.services.user import UserService
 from tests.common.matchers import Matcher
 
 
-class TestMemberJoin(object):
+class TestMemberJoin:
     def test_it_adds_user_to_group(self, group_members_service, factories):
         user = factories.User()
         group = factories.Group()
@@ -38,7 +38,7 @@ class TestMemberJoin(object):
         publish.assert_called_once_with("group-join", group.pubid, user.userid)
 
 
-class TestMemberLeave(object):
+class TestMemberLeave:
     def test_it_removes_user_from_group(
         self, group_members_service, factories, creator
     ):
@@ -70,7 +70,7 @@ class TestMemberLeave(object):
         publish.assert_called_once_with("group-leave", group.pubid, new_member.userid)
 
 
-class TestAddMembers(object):
+class TestAddMembers:
     def test_it_adds_users_in_userids(self, factories, group_members_service):
         group = factories.OpenGroup()
         users = [factories.User(), factories.User()]
@@ -94,7 +94,7 @@ class TestAddMembers(object):
         assert creator in group.members
 
 
-class TestUpdateMembers(object):
+class TestUpdateMembers:
     def test_it_adds_users_in_userids(self, factories, group_members_service):
         group = factories.OpenGroup()  # no members at outset
         new_members = [factories.User(), factories.User()]
@@ -166,7 +166,7 @@ class TestUpdateMembers(object):
 
 
 @pytest.mark.usefixtures("user_service")
-class TestFactory(object):
+class TestFactory:
     def test_returns_groups_service(self, pyramid_request):
         group_members_service = group_members_factory(None, pyramid_request)
 

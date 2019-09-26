@@ -11,7 +11,7 @@ from webob.acceptparse import create_accept_header
 from h.views.api.decorators.response import version_media_type_header
 
 
-class TestVersionMediaTypeHeader(object):
+class TestVersionMediaTypeHeader:
     def test_it_calls_wrapped_view_function(self, pyramid_request, testview):
         version_media_type_header(testview)(None, pyramid_request)
 

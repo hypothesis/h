@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import elasticsearch
 
 
-class Client(object):
+class Client:
 
     """
     A convenience wrapper around a connection to Elasticsearch.

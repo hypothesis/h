@@ -10,7 +10,7 @@ from h.models.auth_client import GrantType
 native_str = str
 
 
-class TestUpdateGroup(object):
+class TestUpdateGroup:
     def test_it_returns_http_200_with_valid_payload_and_user_token(
         self, app, token_auth_header, first_party_group
     ):

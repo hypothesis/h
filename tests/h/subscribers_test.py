@@ -9,7 +9,7 @@ from h import subscribers
 from h.events import AnnotationEvent
 
 
-class FakeMailer(object):
+class FakeMailer:
     def __init__(self):
         self.lastcall = None
 
@@ -18,7 +18,7 @@ class FakeMailer(object):
 
 
 @pytest.mark.usefixtures("routes")
-class TestAddRendererGlobals(object):
+class TestAddRendererGlobals:
     def test_adds_base_url(self, event):
         subscribers.add_renderer_globals(event)
 
@@ -95,7 +95,7 @@ class TestPublishAnnotationEvent:
 
 
 @pytest.mark.usefixtures("fetch_annotation")
-class TestSendReplyNotifications(object):
+class TestSendReplyNotifications:
     def test_calls_get_notification_with_request_annotation_and_action(
         self, fetch_annotation, pyramid_request
     ):

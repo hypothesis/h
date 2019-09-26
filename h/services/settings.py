@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.models import Setting
 
 
-class SettingsService(object):
+class SettingsService:
     """A service for fetching and manipulating settings."""
 
     def __init__(self, session):

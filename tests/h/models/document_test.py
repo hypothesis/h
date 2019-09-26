@@ -13,7 +13,7 @@ from h import models
 from h.models import document
 
 
-class TestDocumentFindByURIs(object):
+class TestDocumentFindByURIs:
     def test_with_one_matching_Document(self, db_session):
         # One Document with a non-matching DocumentURI pointing to it.
         # find_by_uris() should not return this Document.
@@ -60,7 +60,7 @@ class TestDocumentFindByURIs(object):
         assert actual.count() == 0
 
 
-class TestDocumentFindOrCreateByURIs(object):
+class TestDocumentFindOrCreateByURIs:
     def test_with_one_existing_Document(self, db_session):
         """
         When there's one matching Document it should return that Document.
@@ -141,7 +141,7 @@ class TestDocumentFindOrCreateByURIs(object):
                 )
 
 
-class TestDocumentWebURI(object):
+class TestDocumentWebURI:
     """Unit tests for Document.web_uri and Document.update_web_uri()."""
 
     def test_web_uri_is_initially_None(self, factories):
@@ -226,7 +226,7 @@ class TestDocumentWebURI(object):
         assert document.web_uri == expected_web_uri
 
 
-class TestDocumentURI(object):
+class TestDocumentURI:
     def test_type_defaults_to_empty_string(self, db_session):
         document_uri = document.DocumentURI(
             claimant="http://www.example.com",
@@ -319,7 +319,7 @@ class TestDocumentURI(object):
 
 
 @pytest.mark.usefixtures("log")
-class TestCreateOrUpdateDocumentURI(object):
+class TestCreateOrUpdateDocumentURI:
     def test_it_updates_the_existing_DocumentURI_if_there_is_one(self, db_session):
         claimant = "http://example.com/example_claimant.html"
         uri = "http://example.com/example_uri.html"
@@ -474,7 +474,7 @@ class TestCreateOrUpdateDocumentURI(object):
                 )
 
 
-class TestCreateOrUpdateDocumentMeta(object):
+class TestCreateOrUpdateDocumentMeta:
     def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(
         self, db_session
     ):
@@ -671,7 +671,7 @@ class TestCreateOrUpdateDocumentMeta(object):
 
 
 @pytest.mark.usefixtures("merge_data")
-class TestMergeDocuments(object):
+class TestMergeDocuments:
     def test_merge_documents_returns_master(self, db_session, merge_data):
         master, _, _ = merge_data
 
@@ -822,7 +822,7 @@ class TestMergeDocuments(object):
         return (master, duplicate_1, duplicate_2)
 
 
-class TestUpdateDocumentMetadata(object):
+class TestUpdateDocumentMetadata:
     def test_it_uses_the_target_uri_to_get_the_document(
         self, annotation, Document, session
     ):
@@ -1080,7 +1080,7 @@ def yesterday():
 def mock_db_session():
     """Return a mock db session object."""
 
-    class DB(object):
+    class DB:
         def add(self, obj):
             pass
 
@@ -1104,7 +1104,7 @@ def mock_document_meta(document=None):
     # real DocumentMeta class because that class may be patched in the tests
     # that are calling this function (so we'd end up using a mock object as a
     # spec instead, and get completely the wrong spec).
-    class DocumentMeta(object):
+    class DocumentMeta:
         def __init__(self):
             self.type = None
             self.value = None

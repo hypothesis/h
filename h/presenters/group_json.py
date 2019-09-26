@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from h.presenters.organization_json import OrganizationJSONPresenter
 
 
-class GroupJSONPresenter(object):
+class GroupJSONPresenter:
     """Present a group in the JSON format returned by API requests."""
 
     def __init__(self, group_context):
@@ -63,7 +63,7 @@ class GroupJSONPresenter(object):
         return model
 
 
-class GroupsJSONPresenter(object):
+class GroupsJSONPresenter:
     """Present a list of groups as JSON"""
 
     def __init__(self, group_contexts):

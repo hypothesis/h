@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 
-class ServiceLink(object):
+class ServiceLink:
     """Encapsulate metadata about an API service"""
 
     def __init__(self, name, route_name, method="GET", description=None):

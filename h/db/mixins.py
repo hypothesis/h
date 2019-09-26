@@ -9,7 +9,7 @@ import datetime
 import sqlalchemy as sa
 
 
-class Timestamps(object):
+class Timestamps:
     created = sa.Column(
         sa.DateTime,
         default=datetime.datetime.utcnow,

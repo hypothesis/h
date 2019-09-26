@@ -9,7 +9,7 @@ from h.schemas.forms.accounts import EditProfileSchema
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 
-class TestEditProfileSchema(object):
+class TestEditProfileSchema:
     def test_accepts_valid_input(self, pyramid_csrf_request):
         schema = EditProfileSchema().bind(request=pyramid_csrf_request)
         schema.deserialize(

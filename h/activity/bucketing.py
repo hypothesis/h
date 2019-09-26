@@ -17,7 +17,7 @@ from h import presenters
 _ = i18n.TranslationStringFactory(__package__)
 
 
-class DocumentBucket(object):
+class DocumentBucket:
     def __init__(self, document, annotations=None):
         self.annotations = []
         self.tags = set()
@@ -75,7 +75,7 @@ class DocumentBucket(object):
         )
 
 
-class Timeframe(object):
+class Timeframe:
     """
     A timeframe into which annotations can be bucketed.
 
@@ -132,7 +132,7 @@ class Timeframe(object):
         )
 
 
-class TimeframeGenerator(object):
+class TimeframeGenerator:
     def __init__(self):
         self.timeframes = [
             Timeframe(_("Last 7 days"), utcnow() - datetime.timedelta(days=7))

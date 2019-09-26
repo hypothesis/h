@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from h.views.api.helpers.angular import AngularRouteTemplater
 
 
-class TestAngularRouteTemplater(object):
+class TestAngularRouteTemplater:
     def test_static_route(self):
         def route_url(route_name, **kwargs):
             return "/" + route_name

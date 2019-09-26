@@ -9,7 +9,7 @@ from h.util.db import lru_cache_in_transaction
 PREFIX = "6879-"
 
 
-class DeveloperTokenService(object):
+class DeveloperTokenService:
     """A service for retrieving and performing common operations on developer tokens."""
 
     def __init__(self, session):

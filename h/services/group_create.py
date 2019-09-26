@@ -13,7 +13,7 @@ from h.models.group import (
 )
 
 
-class GroupCreateService(object):
+class GroupCreateService:
     def __init__(self, session, user_fetcher, publish):
         """
         Create a new GroupCreateService.

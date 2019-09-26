@@ -9,7 +9,7 @@ import pytest
 from h.services.links import LinksService, add_annotation_link_generator, links_factory
 
 
-class TestLinksService(object):
+class TestLinksService:
     def test_get_returns_link_text(self, registry):
         svc = LinksService(base_url="http://example.com", registry=registry)
 
@@ -62,7 +62,7 @@ class TestLinksService(object):
         assert "returnsnone" not in result
 
 
-class TestLinksFactory(object):
+class TestLinksFactory:
     def test_returns_links_service(self, pyramid_request):
         svc = links_factory(None, pyramid_request)
 

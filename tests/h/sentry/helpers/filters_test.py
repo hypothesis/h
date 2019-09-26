@@ -11,7 +11,7 @@ from h.sentry.helpers import filters
 from h.sentry.helpers.event import Event
 
 
-class TestFilterWS4PYErrorLogging(object):
+class TestFilterWS4PYErrorLogging:
     def test_it_filters_ws4py_logger_events(self):
         event = logger_event("ws4py", "Error when terminating the connection")
         assert filters.filter_ws4py_error_logging(event) is False
@@ -23,7 +23,7 @@ class TestFilterWS4PYErrorLogging(object):
         assert filters.filter_ws4py_error_logging(unexpected_exception_event) is True
 
 
-class TestFilterWS4PYHandshakeError(object):
+class TestFilterWS4PYHandshakeError:
     def test_it_filters_HandshakeError_HTTP_UPGRADE_events(self):
         event = exception_event(
             ws4py.exc.HandshakeError("Header HTTP_UPGRADE is not defined")

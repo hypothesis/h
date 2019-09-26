@@ -10,7 +10,7 @@ from h.views.home import index_redirect
 
 
 @pytest.mark.usefixtures("routes")
-class TestIndexRedirect(object):
+class TestIndexRedirect:
     def test_redirects_to_user_search_page_for_user(self, factories, pyramid_request):
         pyramid_request.user = factories.User(username="petronela")
 

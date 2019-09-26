@@ -14,7 +14,7 @@ from h import storage
 from h.schemas import ValidationError
 
 
-class FakeGroup(object):
+class FakeGroup:
     def __acl__(self):
         return []
 
@@ -23,7 +23,7 @@ class FakeGroup(object):
         return []
 
 
-class TestFetchAnnotation(object):
+class TestFetchAnnotation:
     def test_it_fetches_and_returns_the_annotation(self, db_session, factories):
         annotation = factories.Annotation()
 
@@ -34,7 +34,7 @@ class TestFetchAnnotation(object):
         assert storage.fetch_annotation(db_session, "foo") is None
 
 
-class TestFetchOrderedAnnotations(object):
+class TestFetchOrderedAnnotations:
     def test_it_returns_annotations_for_ids_in_the_same_order(
         self, db_session, factories
     ):
@@ -60,7 +60,7 @@ class TestFetchOrderedAnnotations(object):
         )
 
 
-class TestExpandURI(object):
+class TestExpandURI:
     def test_expand_uri_no_document(self, db_session):
         actual = storage.expand_uri(db_session, "http://example.com/")
         assert actual == ["http://example.com/"]
@@ -101,7 +101,7 @@ class TestExpandURI(object):
 
 
 @pytest.mark.usefixtures("models", "group_service", "update_document_metadata")
-class TestCreateAnnotation(object):
+class TestCreateAnnotation:
     def test_it_fetches_parent_annotation_for_replies(
         self, fetch_annotation, pyramid_config, pyramid_request, group_service
     ):
@@ -366,7 +366,7 @@ class TestCreateAnnotation(object):
 
 
 @pytest.mark.usefixtures("models", "update_document_metadata")
-class TestUpdateAnnotation(object):
+class TestUpdateAnnotation:
     def test_it_gets_the_annotation_model(
         self, pyramid_request, annotation_data, group_service, models
     ):

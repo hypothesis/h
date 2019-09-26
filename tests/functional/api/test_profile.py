@@ -13,7 +13,7 @@ import pytest
 native_str = str
 
 
-class TestGetProfile(object):
+class TestGetProfile:
     def test_it_returns_profile_with_single_group_when_not_authd(self, app):
         """
         Fetch an anonymous "profile".
@@ -57,7 +57,7 @@ class TestGetProfile(object):
         assert group_ids == []
 
 
-class TestGetProfileGroups(object):
+class TestGetProfileGroups:
     def test_it_returns_empty_list_when_not_authed(self, app):
         res = app.get("/api/profile/groups")
 
@@ -86,7 +86,7 @@ class TestGetProfileGroups(object):
             assert property in res.json[0]
 
 
-class TestPatchProfile(object):
+class TestPatchProfile:
     def test_it_allows_authenticated_user(self, app, user_with_token):
         """PATCH profile will always act on the auth'd user's profile."""
 

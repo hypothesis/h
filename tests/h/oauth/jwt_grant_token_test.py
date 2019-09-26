@@ -18,7 +18,7 @@ from h.oauth import InvalidJWTGrantTokenClaimError, MissingJWTGrantTokenClaimErr
 from h.oauth.jwt_grant_token import JWTGrantToken, VerifiedJWTGrantToken
 
 
-class TestJWTGrantToken(object):
+class TestJWTGrantToken:
     def test_init_decodes_token_without_verifying(self, patch):
         jwt_decode = patch("h.oauth.jwt_grant_token.jwt.decode")
 
@@ -67,7 +67,7 @@ class TestJWTGrantToken(object):
         assert actual == verified_token.return_value
 
 
-class TestVerifiedJWTGrantToken(object):
+class TestVerifiedJWTGrantToken:
     def test_init_returns_token_when_valid(self, claims):
         jwttok = jwt_token(claims)
 

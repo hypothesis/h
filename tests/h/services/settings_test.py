@@ -11,7 +11,7 @@ from h.services.settings import SettingsService
 from h.services.settings import settings_factory
 
 
-class TestSettingsService(object):
+class TestSettingsService:
     def test_get_returns_setting_value(self, factories, svc):
         # create one extra
         factories.Setting()
@@ -52,7 +52,7 @@ class TestSettingsService(object):
         svc.delete("missing")
 
 
-class TestSettingsFactory(object):
+class TestSettingsFactory:
     def test_returns_service(self):
         svc = settings_factory(mock.Mock(), mock.Mock())
 

@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 
-class GroupLinksService(object):
+class GroupLinksService:
 
     """
     A service for providing appropriate links (URLs) for a given group object

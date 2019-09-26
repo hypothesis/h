@@ -19,7 +19,7 @@ from h.services.annotation_delete import AnnotationDeleteService
 from h.services.list_organizations import ListOrganizationsService
 
 
-class FakeForm(object):
+class FakeForm:
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 
@@ -28,7 +28,7 @@ class FakeForm(object):
 
 
 @pytest.mark.usefixtures("group_svc")
-class TestIndex(object):
+class TestIndex:
     def test_it_paginates_results(self, pyramid_request, routes, paginate):
         groups.groups_index(None, pyramid_request)
 
@@ -45,7 +45,7 @@ class TestIndex(object):
 @pytest.mark.usefixtures(
     "group_create_svc", "group_members_svc", "list_orgs_svc", "routes", "user_svc"
 )
-class TestGroupCreateView(object):
+class TestGroupCreateView:
     def test_get_sets_form(self, pyramid_request):
         view = GroupCreateViews(pyramid_request)
 
@@ -195,7 +195,7 @@ class TestGroupCreateView(object):
     "group_members_svc",
     "list_orgs_svc",
 )
-class TestGroupEditViews(object):
+class TestGroupEditViews:
     def test_it_binds_schema(
         self, pyramid_request, group, user_svc, default_org, CreateAdminGroupSchema
     ):

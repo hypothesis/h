@@ -13,7 +13,7 @@ from h.services.group_update import GroupUpdateService
 from h.services.group_update import group_update_factory
 
 
-class TestGroupUpdate(object):
+class TestGroupUpdate:
     def test_it_updates_valid_group_attrs(self, factories, svc):
         group = factories.Group()
         data = {"name": "foobar", "description": "I am foobar"}
@@ -98,7 +98,7 @@ class TestGroupUpdate(object):
             update_svc.update(group, name="fingers")
 
 
-class TestFactory(object):
+class TestFactory:
     def test_returns_group_update_service(self, pyramid_request):
         group_update_service = group_update_factory(None, pyramid_request)
 

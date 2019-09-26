@@ -11,7 +11,7 @@ from h.services.developer_token import (
 )
 
 
-class TestDeveloperTokenService(object):
+class TestDeveloperTokenService:
     def test_fetch_returns_developer_token_for_userid(
         self, svc, developer_token, userid
     ):
@@ -61,7 +61,7 @@ class TestDeveloperTokenService(object):
         return "acct:john@doe.org"
 
 
-class TestDeveloperTokenServiceFactory(object):
+class TestDeveloperTokenServiceFactory:
     def test_it_returns_developer_token_service(self, pyramid_request):
         svc = developer_token_service_factory(None, pyramid_request)
         assert isinstance(svc, DeveloperTokenService)

@@ -9,7 +9,7 @@ from h.security import password_context
 from h.services.user_password import UserPasswordService
 
 
-class TestUserPasswordService(object):
+class TestUserPasswordService:
     def test_check_password_false_with_null_password(self, svc, user):
         assert not svc.check_password(user, "anything")
 

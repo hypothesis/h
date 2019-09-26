@@ -19,7 +19,7 @@ def test_database_url():
     assert database_url(url) == expected
 
 
-class TestSettingsManager(object):
+class TestSettingsManager:
     def test_set_does_not_warn_when_deprecated_setting_is_not_used(self, caplog):
         with caplog.at_level(logging.WARN):
             settings_manager = SettingsManager({}, {})

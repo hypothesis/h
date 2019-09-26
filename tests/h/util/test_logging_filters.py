@@ -7,7 +7,7 @@ from urllib3.exceptions import ReadTimeoutError
 from h.util.logging_filters import ExceptionFilter
 
 
-class TestExceptionFilter(object):
+class TestExceptionFilter:
     def test_raises_if_invalid_level_name(self):
         with pytest.raises(ValueError):
             ExceptionFilter((("ReadTimeoutError", "WARNI"),))

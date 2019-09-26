@@ -14,7 +14,7 @@ from h.services.user_password import UserPasswordService
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 
-class TestUnblacklistedUsername(object):
+class TestUnblacklistedUsername:
     def test(self, dummy_node):
         blacklist = set(["admin", "root", "postmaster"])
 
@@ -40,7 +40,7 @@ class TestUnblacklistedUsername(object):
 
 
 @pytest.mark.usefixtures("user_model")
-class TestUniqueEmail(object):
+class TestUniqueEmail:
     def test_it_looks_up_user_by_email(self, dummy_node, pyramid_request, user_model):
         with pytest.raises(colander.Invalid):
             schemas.unique_email(dummy_node, "foo@bar.com")
@@ -77,7 +77,7 @@ class TestUniqueEmail(object):
 
 
 @pytest.mark.usefixtures("user_model")
-class TestRegisterSchema(object):
+class TestRegisterSchema:
     def test_it_is_invalid_when_password_too_short(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
@@ -148,7 +148,7 @@ class TestRegisterSchema(object):
 
 
 @pytest.mark.usefixtures("models", "user_password_service")
-class TestEmailChangeSchema(object):
+class TestEmailChangeSchema:
     def test_it_returns_the_new_email_when_valid(self, schema):
         appstruct = schema.deserialize({"email": "foo@bar.com", "password": "flibble"})
 
@@ -264,7 +264,7 @@ class TestEmailChangeSchema(object):
 
 
 @pytest.mark.usefixtures("user_password_service")
-class TestPasswordChangeSchema(object):
+class TestPasswordChangeSchema:
     def test_it_is_invalid_if_passwords_dont_match(self, pyramid_csrf_request):
         user = Mock()
         pyramid_csrf_request.user = user
@@ -304,7 +304,7 @@ class TestPasswordChangeSchema(object):
 
 @pytest.fixture
 def dummy_node(pyramid_request):
-    class DummyNode(object):
+    class DummyNode:
         def __init__(self, request):
             self.bindings = {"request": request}
 

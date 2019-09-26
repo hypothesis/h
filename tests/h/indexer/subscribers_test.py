@@ -8,7 +8,7 @@ from h.indexer import subscribers
 
 
 @pytest.mark.usefixtures("add_annotation", "delete_annotation")
-class TestSubscribeAnnotationEvent(object):
+class TestSubscribeAnnotationEvent:
     @pytest.mark.parametrize("action", ["create", "update"])
     def test_it_enqueues_add_annotation_celery_task(
         self, action, add_annotation, delete_annotation, pyramid_request

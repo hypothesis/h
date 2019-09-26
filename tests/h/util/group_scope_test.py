@@ -6,7 +6,7 @@ import pytest
 from h.util import group_scope as scope_util
 
 
-class TestURLInScope(object):
+class TestURLInScope:
     @pytest.mark.parametrize(
         "url,in_origin,in_path,in_other",
         [
@@ -46,7 +46,7 @@ class TestURLInScope(object):
         }
 
 
-class TestParseURLFromScope(object):
+class TestParseURLFromScope:
     @pytest.mark.parametrize(
         "url,expected_scope",
         [
@@ -66,7 +66,7 @@ class TestParseURLFromScope(object):
         assert scope_util.parse_scope_from_url(url) == expected_scope
 
 
-class TestParseOrigin(object):
+class TestParseOrigin:
     @pytest.mark.parametrize(
         "url,expected_origin",
         [

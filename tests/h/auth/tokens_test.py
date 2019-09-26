@@ -14,7 +14,7 @@ from hypothesis import assume, given
 from h.auth import tokens
 
 
-class TestToken(object):
+class TestToken:
     def test_token_with_no_expiry_is_valid(self):
         token = tokens.Token(mock.Mock(expires=None, userid="acct:foo@example.com"))
 
@@ -50,7 +50,7 @@ INVALID_TOKEN_EXAMPLES = [
 ]
 
 
-class TestAuthToken(object):
+class TestAuthToken:
     def test_retrieves_token_for_request(self, pyramid_request):
         pyramid_request.headers["Authorization"] = "Bearer abcdef123"
 

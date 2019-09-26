@@ -8,7 +8,7 @@ from h.services.groupfinder import groupfinder_service_factory
 from h.services.groupfinder import GroupfinderService
 
 
-class TestGroupfinderService(object):
+class TestGroupfinderService:
     def test_returns_correct_group(self, svc, factories):
         group = factories.Group()
 
@@ -29,7 +29,7 @@ class TestGroupfinderService(object):
         return GroupfinderService(db_session, "example.com")
 
 
-class TestGroupfinderServiceFactory(object):
+class TestGroupfinderServiceFactory:
     def test_returns_groupfinder_service(self, pyramid_request):
         svc = groupfinder_service_factory(None, pyramid_request)
 

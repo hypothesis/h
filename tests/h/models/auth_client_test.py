@@ -9,7 +9,7 @@ from h.models import AuthClient
 from h.models.auth_client import GrantType
 
 
-class TestAuthClient(object):
+class TestAuthClient:
     def test_has_id(self, client):
         assert client.id
 

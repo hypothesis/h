@@ -7,7 +7,7 @@ import pytest
 from h.services.group_scope import group_scope_factory, GroupScopeService
 
 
-class TestFetchByScope(object):
+class TestFetchByScope:
     def test_it_returns_empty_list_if_origin_not_parseable(
         self, svc, scope_util, document_uri
     ):
@@ -37,7 +37,7 @@ class TestFetchByScope(object):
         assert "http://foo.com/bar/" in matching_scope_scopes
 
 
-class TestGroupScopeFactory(object):
+class TestGroupScopeFactory:
     def test_it_returns_group_scope_service_instance(self, pyramid_request):
         svc = group_scope_factory(None, pyramid_request)
 

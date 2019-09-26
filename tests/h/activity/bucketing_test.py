@@ -20,7 +20,7 @@ THIRD_MARCH_1968 = datetime.datetime(year=1968, month=3, day=3)
 FIFTH_NOVEMBER_1969 = datetime.datetime(year=1969, month=11, day=5)
 
 
-class timeframe_with(object):  # noqa: N801
+class timeframe_with:  # noqa: N801
     def __init__(self, label, document_buckets):
         self.label = label
         self.document_buckets = document_buckets
@@ -38,7 +38,7 @@ class timeframe_with(object):  # noqa: N801
 
 
 @pytest.mark.usefixtures("factories")
-class TestDocumentBucket(object):
+class TestDocumentBucket:
     def test_init_sets_the_document_title(self, db_session, document):
         title_meta = factories.DocumentMeta(
             type="title", value=["The Document Title"], document=document
@@ -212,7 +212,7 @@ class TestDocumentBucket(object):
 
 
 @pytest.mark.usefixtures("factories", "utcnow")
-class TestBucket(object):
+class TestBucket:
     def test_no_annotations(self):
         assert bucketing.bucket([]) == []
 

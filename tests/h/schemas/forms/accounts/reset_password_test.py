@@ -11,7 +11,7 @@ pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 
 @pytest.mark.usefixtures("user_model")
-class TestResetPasswordSchema(object):
+class TestResetPasswordSchema:
     def test_it_is_invalid_with_password_too_short(self, pyramid_csrf_request):
         schema = ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
@@ -67,7 +67,7 @@ class TestResetPasswordSchema(object):
 
         assert appstruct["user"] == user
 
-    class FakeSerializer(object):
+    class FakeSerializer:
         def dumps(self, obj):
             return "faketoken"
 

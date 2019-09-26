@@ -11,7 +11,7 @@ from h.views.admin.admins import admins_add, admins_index, admins_remove
 
 
 @pytest.mark.usefixtures("routes")
-class TestAdminsIndex(object):
+class TestAdminsIndex:
     def test_when_no_admins(self, pyramid_request):
         result = admins_index(pyramid_request)
 
@@ -27,7 +27,7 @@ class TestAdminsIndex(object):
 
 
 @pytest.mark.usefixtures("users", "routes")
-class TestAdminsAddRemove(object):
+class TestAdminsAddRemove:
     def test_add_makes_users_admins(self, pyramid_request, users):
         pyramid_request.params = {"add": "eva", "authority": "foo.org"}
 

@@ -13,7 +13,7 @@ from h.util.db import lru_cache_in_transaction
 # the interface.
 # FIXME: rename / split existing GroupService and rename this.
 @implementer(IGroupService)
-class GroupfinderService(object):
+class GroupfinderService:
     def __init__(self, session, authority):
         self.session = session
         self.authority = authority

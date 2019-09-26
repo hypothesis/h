@@ -22,7 +22,7 @@ from h.services.oauth_validator import (
 )
 
 
-class TestAuthenticateClient(object):
+class TestAuthenticateClient:
     def test_returns_true_when_client_secret_matches_request(
         self, svc, client, oauth_request
     ):
@@ -69,7 +69,7 @@ class TestAuthenticateClient(object):
         return factories.ConfidentialAuthClient()
 
 
-class TestAuthenticateClientId(object):
+class TestAuthenticateClientId:
     def test_returns_true_when_client_found(self, svc, client, oauth_request):
         assert svc.authenticate_client_id(client.id, oauth_request) is True
 
@@ -85,7 +85,7 @@ class TestAuthenticateClientId(object):
         )
 
 
-class TestClientAuthenticationRequired(object):
+class TestClientAuthenticationRequired:
     def test_returns_false_for_public_client(self, svc, oauth_request, factories):
         client = factories.AuthClient()
         oauth_request.client_id = client.id
@@ -115,7 +115,7 @@ class TestClientAuthenticationRequired(object):
         return OAuthRequest("/", body={"grant_type": "authorization_code"})
 
 
-class TestConfirmRedirectUri(object):
+class TestConfirmRedirectUri:
     def test_returns_true_for_matching_redirect_uris(self, svc, client):
         result = svc.confirm_redirect_uri(
             client.client_id, "test-authz-code", client.authclient.redirect_uri, client
@@ -139,7 +139,7 @@ class TestConfirmRedirectUri(object):
         return Client(factories.AuthClient())
 
 
-class TestFindAuthzCode(object):
+class TestFindAuthzCode:
     def test_returns_authz_code(self, svc, authz_code):
         assert svc.find_authz_code(authz_code.code) == authz_code
 
@@ -154,7 +154,7 @@ class TestFindAuthzCode(object):
         return factories.AuthzCode()
 
 
-class TestFindClient(object):
+class TestFindClient:
     def test_returns_client(self, svc, client):
         assert svc.find_client(client.id) == client
 
@@ -169,7 +169,7 @@ class TestFindClient(object):
         assert svc.find_client(None) is None
 
 
-class TestFindRefreshToken(object):
+class TestFindRefreshToken:
     def test_returns_token(self, svc, token):
         assert svc.find_refresh_token(token.refresh_token) == token
 
@@ -181,7 +181,7 @@ class TestFindRefreshToken(object):
         return factories.OAuth2Token()
 
 
-class TestGetDefaultRedirectUri(object):
+class TestGetDefaultRedirectUri:
     def test_returns_clients_redirect_uri(self, svc, client):
         actual = svc.get_default_redirect_uri(client.id, None)
         assert "https://example.org/auth/callback" == actual
@@ -196,7 +196,7 @@ class TestGetDefaultRedirectUri(object):
         return factories.AuthClient(redirect_uri=redirect_uri)
 
 
-class TestGetDefaultScopes(object):
+class TestGetDefaultScopes:
     def test_returns_default_scopes(self, svc):
         assert svc.get_default_scopes("something", None) == [
             "annotation:read",
@@ -204,7 +204,7 @@ class TestGetDefaultScopes(object):
         ]
 
 
-class TestGetOriginalScopes(object):
+class TestGetOriginalScopes:
     def test_returns_original_scopes_from_default_ones(self, svc):
         refresh_token = mock.Mock()
         oauth_request = mock.Mock()
@@ -213,7 +213,7 @@ class TestGetOriginalScopes(object):
         ) == svc.get_default_scopes("something", oauth_request)
 
 
-class TestInvalidateAuthorizationCode(object):
+class TestInvalidateAuthorizationCode:
     def test_it_deletes_authz_code(self, svc, oauth_request, factories, db_session):
         authz_code_1 = factories.AuthzCode()
         id_1 = authz_code_1.id
@@ -241,7 +241,7 @@ class TestInvalidateAuthorizationCode(object):
         assert db_session.query(models.AuthzCode).get(keep_code.id) is not None
 
 
-class TestInvalidateRefreshToken(object):
+class TestInvalidateRefreshToken:
     def test_it_shortens_refresh_token_expires(self, svc, oauth_request, token, utcnow):
         utcnow.return_value = datetime.datetime(2017, 8, 2, 18, 36, 53)
 
@@ -262,7 +262,7 @@ class TestInvalidateRefreshToken(object):
         return factories.OAuth2Token()
 
 
-class TestRevokeToken(object):
+class TestRevokeToken:
     def test_it_deletes_token_when_access_token(
         self, svc, factories, db_session, oauth_request
     ):
@@ -298,7 +298,7 @@ class TestRevokeToken(object):
         svc.revoke_token(tok, None, oauth_request)
 
 
-class TestSaveAuthorizationCode(object):
+class TestSaveAuthorizationCode:
     def test_it_raises_for_missing_client(self, svc, code, oauth_request):
         id_ = text_type(uuid.uuid1())
         with pytest.raises(InvalidClientIdError):
@@ -336,7 +336,7 @@ class TestSaveAuthorizationCode(object):
         return mock.Mock(user=factories.User(), spec_set=["user"])
 
 
-class TestSaveBearerToken(object):
+class TestSaveBearerToken:
     def test_it_saves_token(self, svc, db_session, token_payload, oauth_request):
         assert db_session.query(models.Token).count() == 0
         svc.save_bearer_token(token_payload, oauth_request)
@@ -418,7 +418,7 @@ class TestSaveBearerToken(object):
         }
 
 
-class TestValidateClientId(object):
+class TestValidateClientId:
     def test_returns_true_for_valid_client(self, svc, client):
         assert svc.validate_client_id(client.id, None) is True
 
@@ -427,7 +427,7 @@ class TestValidateClientId(object):
         assert svc.validate_client_id(id_, None) is False
 
 
-class TestValidateCode(object):
+class TestValidateCode:
     def test_returns_true_for_correct_code(
         self, svc, authz_code, client, oauth_request
     ):
@@ -478,7 +478,7 @@ class TestValidateCode(object):
         return Client(factories.AuthClient())
 
 
-class TestValidateGrantType(object):
+class TestValidateGrantType:
     def test_returns_false_when_client_does_not_have_grant_types(
         self, svc, client, oauth_request
     ):
@@ -524,7 +524,7 @@ class TestValidateGrantType(object):
         return Client(factories.AuthClient())
 
 
-class TestValidateRedirectUri(object):
+class TestValidateRedirectUri:
     def test_returns_true_for_valid_redirect_uri(self, svc, client):
         redirect_uri = "https://example.org/auth/callback"
         actual = svc.validate_redirect_uri(client.id, redirect_uri, None)
@@ -546,7 +546,7 @@ class TestValidateRedirectUri(object):
         return factories.AuthClient(redirect_uri=redirect_uri)
 
 
-class TestValidateRefreshToken(object):
+class TestValidateRefreshToken:
     def test_returns_false_when_token_not_found(self, svc, client, oauth_request):
         result = svc.validate_refresh_token("missing", client, oauth_request)
         assert result is False
@@ -603,7 +603,7 @@ class TestValidateRefreshToken(object):
         return Client(factories.AuthClient())
 
 
-class TestValidateResponseType(object):
+class TestValidateResponseType:
     def test_returns_true_when_matching(self, svc, client):
         actual = svc.validate_response_type(client.id, "code", None)
         assert actual is True
@@ -627,7 +627,7 @@ class TestValidateResponseType(object):
         return factories.AuthClient(response_type=AuthClientResponseType.code)
 
 
-class TestValidateScopes(object):
+class TestValidateScopes:
     def test_returns_true_for_default_scopes(self, svc):
         scopes = svc.get_default_scopes("something", None)
         assert svc.validate_scopes("something", scopes, None) is True
@@ -646,7 +646,7 @@ class TestValidateScopes(object):
 
 
 @pytest.mark.usefixtures("user_svc")
-class TestOAuthValidatorServiceFactory(object):
+class TestOAuthValidatorServiceFactory:
     def test_it_returns_oauth_service(self, pyramid_request):
         svc = oauth_validator_service_factory(None, pyramid_request)
         assert isinstance(svc, OAuthValidatorService)

@@ -3,7 +3,7 @@
 from h.cli.commands import annotation_id
 
 
-class TestConvertFromURLSafe(object):
+class TestConvertFromURLSafe:
     def test_converts_from_url_safe_id(self, cli):
         result = cli.invoke(annotation_id.from_urlsafe, ["3jgSANNlEeebpLMf36MACw"])
         assert result.exit_code == 0
@@ -15,7 +15,7 @@ class TestConvertFromURLSafe(object):
         assert not result.output
 
 
-class TestConvertToURLSafe(object):
+class TestConvertToURLSafe:
     def test_converts_to_url_safe_id(self, cli):
         result = cli.invoke(
             annotation_id.to_urlsafe, ["de381200-d365-11e7-9ba4-b31fdfa3000b"]

@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 @view_defaults(route_name="oauth_authorize")
-class OAuthAuthorizeController(object):
+class OAuthAuthorizeController:
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -178,7 +178,7 @@ class OAuthAuthorizeController(object):
         return {"code": params.get("code", [])[0], "origin": origin, "state": state}
 
 
-class OAuthAccessTokenController(object):
+class OAuthAccessTokenController:
     def __init__(self, request):
         self.request = request
 
@@ -198,7 +198,7 @@ class OAuthAccessTokenController(object):
             raise exception_response(status, body=body)
 
 
-class OAuthRevocationController(object):
+class OAuthRevocationController:
     def __init__(self, request):
         self.request = request
 

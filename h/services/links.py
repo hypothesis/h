@@ -11,7 +11,7 @@ from h.auth import default_authority
 LINK_GENERATORS_KEY = "h.links.link_generators"
 
 
-class LinksService(object):
+class LinksService:
 
     """A service for generating links to annotations."""
 

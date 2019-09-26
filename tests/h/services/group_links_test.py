@@ -9,7 +9,7 @@ from h.services.group_links import group_links_factory
 
 
 @pytest.mark.usefixtures("routes")
-class TestGroupLinks(object):
+class TestGroupLinks:
     def test_it_returns_activity_link_for_default_authority_group(
         self, pyramid_request, factories, svc
     ):
@@ -27,7 +27,7 @@ class TestGroupLinks(object):
         assert "html" not in links
 
 
-class TestGroupLinksFactory(object):
+class TestGroupLinksFactory:
     def test_group_links_factory(self, pyramid_request):
         svc = group_links_factory(None, pyramid_request)
 

@@ -7,7 +7,7 @@ from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.schemas import ValidationError
 
 
-class TestCreateUserAPISchema(object):
+class TestCreateUserAPISchema:
     def test_it_raises_when_authority_missing(self, schema, payload):
         del payload["authority"]
 
@@ -186,7 +186,7 @@ class TestCreateUserAPISchema(object):
         return CreateUserAPISchema()
 
 
-class TestUpdateUserAPISchema(object):
+class TestUpdateUserAPISchema:
     def test_it_raises_when_email_empty(self, schema, payload):
         payload["email"] = ""
 

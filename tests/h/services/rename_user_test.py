@@ -12,7 +12,7 @@ from h import models
 from h.services.rename_user import make_indexer, RenameUserService, UserRenameError
 
 
-class TestRenameUserService(object):
+class TestRenameUserService:
     def test_check_returns_true_when_new_username_does_not_exist(self, service, user):
         assert service.check(user, "panda") is True
 
@@ -125,7 +125,7 @@ class TestRenameUserService(object):
         return anns
 
 
-class TestMakeIndexer(object):
+class TestMakeIndexer:
     def test_it_indexes_the_given_ids(self, req, index):
         indexer = make_indexer(req)
         indexer([1, 2, 3])

@@ -9,7 +9,7 @@ from h import models
 
 
 @pytest.mark.usefixtures("flags")
-class TestFlagServiceFlagged(object):
+class TestFlagServiceFlagged:
     def test_it_returns_true_when_flag_exists(self, svc, flags):
         user = flags[-1].user
         annotation = flags[-1].annotation
@@ -44,7 +44,7 @@ class TestFlagServiceFlagged(object):
         return factories.Flag.create_batch(3)
 
 
-class TestFlagServiceCreate(object):
+class TestFlagServiceCreate:
     def test_it_creates_flag(self, svc, db_session, factories):
         user = factories.User()
         annotation = factories.Annotation(userid=user.userid)
@@ -74,7 +74,7 @@ class TestFlagServiceCreate(object):
         )
 
 
-class TestFlagServiceFactory(object):
+class TestFlagServiceFactory:
     def test_it_returns_flag_service(self, pyramid_request):
         svc = flag.flag_service_factory(None, pyramid_request)
         assert isinstance(svc, flag.FlagService)

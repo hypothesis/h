@@ -15,7 +15,7 @@ from h.services.group_create import GroupCreateService
 
 
 @pytest.mark.usefixtures("group_create_service", "handle_form_submission", "routes")
-class TestGroupCreateController(object):
+class TestGroupCreateController:
     def test_get_renders_form(self, controller):
         controller.form = form_validating_to({})
 
@@ -106,7 +106,7 @@ class TestGroupCreateController(object):
 
 
 @pytest.mark.usefixtures("routes")
-class TestGroupEditController(object):
+class TestGroupEditController:
     def test_get_reads_group_properties(self, pyramid_request):
         pyramid_request.create_form.return_value = FakeForm()
 
@@ -162,14 +162,14 @@ def test_read_noslug_redirects(pyramid_request):
     assert exc.value.location == "/g/abc123/some-slug"
 
 
-class FakeGroup(object):
+class FakeGroup:
     def __init__(self, pubid, slug, joinable_by=JoinableBy.authority):
         self.pubid = pubid
         self.slug = slug
         self.joinable_by = joinable_by
 
 
-class FakeForm(object):
+class FakeForm:
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 

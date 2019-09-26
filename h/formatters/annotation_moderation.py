@@ -8,7 +8,7 @@ from h.formatters.interfaces import IAnnotationFormatter
 
 
 @implementer(IAnnotationFormatter)
-class AnnotationModerationFormatter(object):
+class AnnotationModerationFormatter:
     """
     Formatter for exposing an annotation's moderation information.
 

@@ -16,7 +16,7 @@ from h.services.oauth_provider import (
 
 
 @pytest.mark.usefixtures("validator_service", "user_service")
-class TestOAuthProviderService(object):
+class TestOAuthProviderService:
     def test_load_client_id_sets_client_id_from_refresh_token(
         self, svc, oauth_request, factories, validator_service
     ):
@@ -80,7 +80,7 @@ class TestOAuthProviderService(object):
 
 
 @pytest.mark.usefixtures("validator_service", "user_service")
-class TestOAuthProviderServiceFactory(object):
+class TestOAuthProviderServiceFactory:
     def test_it_returns_oauth_provider_service(self, pyramid_request):
         svc = oauth_provider_service_factory(None, pyramid_request)
         assert isinstance(svc, OAuthProviderService)

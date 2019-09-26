@@ -9,7 +9,7 @@ from h.views.admin.nipsa import UserNotFoundError, nipsa_add, nipsa_index, nipsa
 
 
 @pytest.mark.usefixtures("nipsa_service", "routes", "users")
-class TestNipsaIndex(object):
+class TestNipsaIndex:
     def test_lists_flagged_usernames(self, pyramid_request):
         result = nipsa_index(pyramid_request)
 
@@ -26,7 +26,7 @@ class TestNipsaIndex(object):
 
 
 @pytest.mark.usefixtures("nipsa_service", "routes", "users")
-class TestNipsaAddRemove(object):
+class TestNipsaAddRemove:
     def test_add_flags_user(self, nipsa_service, pyramid_request, users):
         pyramid_request.params = {"add": "carl", "authority": "foo.org"}
 
@@ -83,7 +83,7 @@ class TestNipsaAddRemove(object):
         assert result.location == "/adm/nipsa"
 
 
-class FakeNipsaService(object):
+class FakeNipsaService:
     def __init__(self, users):
         self.flagged = set([u for u in users if u.nipsa])
 

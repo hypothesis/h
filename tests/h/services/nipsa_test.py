@@ -9,7 +9,7 @@ from h.services.nipsa import nipsa_factory
 
 
 @pytest.mark.usefixtures("users", "reindex_user_annotations")
-class TestNipsaService(object):
+class TestNipsaService:
     def test_fetch_all_flagged_userids_returns_set_of_userids(self, db_session):
         svc = NipsaService(db_session)
 

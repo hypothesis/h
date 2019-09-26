@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 
-class DocumentSearchIndexPresenter(object):
+class DocumentSearchIndexPresenter:
     def __init__(self, document):
         self.document = document
 

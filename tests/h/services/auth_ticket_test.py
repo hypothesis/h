@@ -18,7 +18,7 @@ from h.services.auth_ticket import (
 )
 
 
-class TestAuthTicketService(object):
+class TestAuthTicketService:
     def test_userid_raises_when_ticket_has_not_been_loaded_yet(self, svc):
         with pytest.raises(AuthTicketNotLoadedError) as exc:
             svc.userid()
@@ -202,7 +202,7 @@ class TestAuthTicketService(object):
 
 
 @pytest.mark.usefixtures("user_service")
-class TestAuthTicketServiceFactory(object):
+class TestAuthTicketServiceFactory:
     def test_it_returns_auth_ticket_service(self, pyramid_request):
         svc = auth_ticket_service_factory(None, pyramid_request)
         assert isinstance(svc, AuthTicketService)

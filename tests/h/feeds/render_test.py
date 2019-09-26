@@ -12,7 +12,7 @@ from h.feeds import render
 
 
 @pytest.mark.usefixtures("render_to_response")
-class TestRenderAtom(object):
+class TestRenderAtom:
     def test_it_sets_response_content_type(self, pyramid_request):
         response = render.render_atom(
             request=pyramid_request,
@@ -26,7 +26,7 @@ class TestRenderAtom(object):
 
 
 @pytest.mark.usefixtures("render_to_response")
-class TestRenderRSS(object):
+class TestRenderRSS:
     def test_it_sets_response_content_type(self, pyramid_request):
         response = render.render_rss(
             request=pyramid_request,

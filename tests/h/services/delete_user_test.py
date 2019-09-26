@@ -13,7 +13,7 @@ from h.services.annotation_delete import AnnotationDeleteService
 
 
 @pytest.mark.usefixtures("annotation_delete_service")
-class TestDeleteUserService(object):
+class TestDeleteUserService:
     def test_delete_disassociate_group_memberships(self, factories, svc):
         user = factories.User()
 

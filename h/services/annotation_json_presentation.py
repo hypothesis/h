@@ -12,7 +12,7 @@ from h import storage
 from h.interfaces import IGroupService
 
 
-class AnnotationJSONPresentationService(object):
+class AnnotationJSONPresentationService:
     def __init__(
         self,
         session,

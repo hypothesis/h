@@ -12,7 +12,7 @@ import jinja2
 from h.presenters.document_html import DocumentHTMLPresenter
 
 
-class TestDocumentHTMLPresenter(object):
+class TestDocumentHTMLPresenter:
     def test_filename_with_http_uri(self):
         presenter = self.presenter(
             document_uris=[mock.Mock(uri="http://example.com/example.html")]

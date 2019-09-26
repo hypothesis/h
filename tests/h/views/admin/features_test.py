@@ -18,7 +18,7 @@ from h.views.admin.features import (
 )
 
 
-class DummyFeature(object):
+class DummyFeature:
     def __init__(self, name):
         self.name = name
         self.everyone = False

@@ -8,7 +8,7 @@ from h._compat import text_type
 from h.security import password_context
 
 
-class UserPasswordService(object):
+class UserPasswordService:
 
     """
     A service for checking and updating user passwords.

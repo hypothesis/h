@@ -7,7 +7,7 @@ from pyramid import testing
 from h.views.api import links as views
 
 
-class TestLinks(object):
+class TestLinks:
     def test_it_returns_the_right_links(self, pyramid_config, pyramid_request):
         pyramid_config.add_route("account", "/account/settings")
         pyramid_config.add_route("forgot_password", "/forgot-password")

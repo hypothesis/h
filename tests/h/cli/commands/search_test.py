@@ -9,7 +9,7 @@ from h.cli.commands import search
 from h.search.client import Client
 
 
-class TestReindexCommand(object):
+class TestReindexCommand:
     @pytest.mark.usefixtures("reindex")
     def test_it_raises_timeout(self, cli, cliconfig):
         cli.invoke(search.reindex, [], obj=cliconfig)
@@ -29,7 +29,7 @@ class TestReindexCommand(object):
         return index.reindex
 
 
-class TestUpdateSettingsCommand(object):
+class TestUpdateSettingsCommand:
     def test_calls_update_index_settings(
         self, cli, cliconfig, pyramid_request, update_index_settings
     ):

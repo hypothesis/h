@@ -50,7 +50,7 @@ def test_og_no_document(pyramid_request, group_service, links_service, sidebar_a
 
 
 @pytest.mark.usefixtures("sidebar_app", "routes")
-class TestStreamUserRedirect(object):
+class TestStreamUserRedirect:
     def test_it_redirects_to_activity_page_with_tags(self, pyramid_request):
         pyramid_request.params["q"] = "tag:foo"
         pyramid_request.matchdict["tag"] = "foo"

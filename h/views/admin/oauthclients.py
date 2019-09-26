@@ -36,7 +36,7 @@ def index(request):
     permission="admin_oauthclients",
     renderer="h:templates/admin/oauthclients_create.html.jinja2",
 )
-class AuthClientCreateController(object):
+class AuthClientCreateController:
     def __init__(self, request, secret_gen=token_urlsafe):
         self.request = request
         self.schema = CreateAuthClientSchema().bind(request=request)
@@ -98,7 +98,7 @@ class AuthClientCreateController(object):
     permission="admin.oauthclients",
     renderer="h:templates/admin/oauthclients_edit.html.jinja2",
 )
-class AuthClientEditController(object):
+class AuthClientEditController:
     def __init__(self, client, request):
         self.request = request
         self.client = client

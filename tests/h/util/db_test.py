@@ -10,7 +10,7 @@ import pytest
 from h.util.db import lru_cache_in_transaction, on_transaction_end
 
 
-class TestLRUCacheInTransaction(object):
+class TestLRUCacheInTransaction:
     def test_caches_during_transaction(self, db_session, mock_transaction):
         """
         Return values should be cached during the transaction, and the cache
@@ -64,7 +64,7 @@ class TestLRUCacheInTransaction(object):
         assert random_float("c", with_keywords=True) == c
 
 
-class TestOnTransactionEnd(object):
+class TestOnTransactionEnd:
     def test_calls_wrapped_function_when_parent_transaction(
         self, db_session, mock_transaction
     ):

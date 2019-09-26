@@ -84,7 +84,7 @@ def error_validation(error, request):
 
 
 @view_defaults(route_name="login", renderer="h:templates/accounts/login.html.jinja2")
-class AuthController(object):
+class AuthController:
     def __init__(self, request):
         form_footer = '<a class="link" href="{href}">{text}</a>'.format(
             href=request.route_path("forgot_password"), text=_("Forgot your password?")
@@ -167,7 +167,7 @@ class AuthController(object):
     route_name="forgot_password",
     renderer="h:templates/accounts/forgot_password.html.jinja2",
 )
-class ForgotPasswordController(object):
+class ForgotPasswordController:
 
     """Controller for handling forgotten password forms."""
 
@@ -217,7 +217,7 @@ class ForgotPasswordController(object):
 @view_defaults(
     route_name="account_reset", renderer="h:templates/accounts/reset.html.jinja2"
 )
-class ResetController(object):
+class ResetController:
 
     """Controller for handling password reset forms."""
 
@@ -297,7 +297,7 @@ class ResetController(object):
 
 
 @view_defaults(route_name="activate")
-class ActivateController(object):
+class ActivateController:
     def __init__(self, request):
         self.request = request
 
@@ -393,7 +393,7 @@ class ActivateController(object):
     renderer="h:templates/accounts/account.html.jinja2",
     effective_principals=security.Authenticated,
 )
-class AccountController(object):
+class AccountController:
     def __init__(self, request):
         self.request = request
 
@@ -471,7 +471,7 @@ class AccountController(object):
     renderer="h:templates/accounts/profile.html.jinja2",
     effective_principals=security.Authenticated,
 )
-class EditProfileController(object):
+class EditProfileController:
     def __init__(self, request):
         self.request = request
         self.schema = EditProfileSchema().bind(request=self.request)
@@ -520,7 +520,7 @@ class EditProfileController(object):
     renderer="h:templates/accounts/notifications.html.jinja2",
     effective_principals=security.Authenticated,
 )
-class NotificationsController(object):
+class NotificationsController:
     def __init__(self, request):
         self.request = request
         self.schema = schemas.NotificationsSchema().bind(request=self.request)
@@ -575,7 +575,7 @@ class NotificationsController(object):
     renderer="h:templates/accounts/developer.html.jinja2",
     effective_principals=security.Authenticated,
 )
-class DeveloperController(object):
+class DeveloperController:
     def __init__(self, request):
         self.request = request
         self.svc = request.find_service(name="developer_token")

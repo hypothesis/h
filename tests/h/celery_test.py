@@ -9,7 +9,7 @@ from billiard.einfo import ExceptionInfo
 from h import celery
 
 
-class TestCelery(object):
+class TestCelery:
     def test_bootstrap_worker_bootstraps_application(self):
         sender = mock.Mock(spec=["app"])
 

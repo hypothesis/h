@@ -9,7 +9,7 @@ from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter
 from h.traversal import AnnotationContext
 
 
-class TestAnnotationJSONLDPresenter(object):
+class TestAnnotationJSONLDPresenter:
     def test_asdict(self, group_service, fake_links_service):
         annotation = mock.Mock(
             id="foobar",

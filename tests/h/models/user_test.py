@@ -8,7 +8,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from h import models
 
 
-class TestUserModelDataConstraints(object):
+class TestUserModelDataConstraints:
     """Unit tests for :py:module:`h.models.User` data integrity constraints"""
 
     def test_cannot_create_dot_variant_of_user(self, db_session):
@@ -111,7 +111,7 @@ class TestUserModelDataConstraints(object):
         db_session.flush()
 
 
-class TestUserModelUserId(object):
+class TestUserModelUserId:
     def test_userid_equals_query(self, db_session):
         fred = models.User(
             authority="example.net", username="fredbloggs", email="fred@example.com"
@@ -199,7 +199,7 @@ class TestUserModelUserId(object):
         assert result == []
 
 
-class TestUserModel(object):
+class TestUserModel:
     def test_User_activate_activates_user(self, db_session):
         user = models.User(
             authority="example.com", username="kiki", email="kiki@kiki.com"
@@ -219,7 +219,7 @@ class TestUserModel(object):
         assert getattr(models.User(), "privacy_accepted") is None
 
 
-class TestUserGetByEmail(object):
+class TestUserGetByEmail:
     def test_it_returns_a_user(self, db_session, users):
         user = users["meredith"]
         actual = models.User.get_by_email(db_session, user.email, user.authority)
@@ -266,7 +266,7 @@ class TestUserGetByEmail(object):
         return users
 
 
-class TestUserGetByUsername(object):
+class TestUserGetByUsername:
     def test_it_returns_a_user(self, db_session, users):
         user = users["meredith"]
 
@@ -297,7 +297,7 @@ class TestUserGetByUsername(object):
         return users
 
 
-class TestUserACL(object):
+class TestUserACL:
     def test_auth_client_with_matching_authority_may_update_user(
         self, user, authz_policy
     ):

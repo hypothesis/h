@@ -12,7 +12,7 @@ from h.views.api import moderation as views
 
 
 @pytest.mark.usefixtures("moderation_service")
-class TestCreate(object):
+class TestCreate:
     def test_it_hides_the_annotation(
         self, pyramid_request, resource, moderation_service
     ):
@@ -37,7 +37,7 @@ class TestCreate(object):
 
 
 @pytest.mark.usefixtures("moderation_service")
-class TestDelete(object):
+class TestDelete:
     def test_it_unhides_the_annotation(
         self, pyramid_request, resource, moderation_service
     ):

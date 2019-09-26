@@ -126,7 +126,7 @@ def test_cors_sets_max_age_for_preflight_when_set(headers):
     assert resp.headers["Access-Control-Max-Age"] == "42"
 
 
-class TestCorsViewDecorator(object):
+class TestCorsViewDecorator:
     def test_it_calls_wrapped_view_function(self, pyramid_request, testview):
         cors_policy = policy()
 
@@ -166,7 +166,7 @@ class TestCorsViewDecorator(object):
         return patch("h.views.api.helpers.cors.set_cors_headers")
 
 
-class TestAddPreflightView(object):
+class TestAddPreflightView:
     def test_it_adds_preflight_view(self, pyramid_config):
         def view(request):
             pass  # noop

@@ -12,7 +12,7 @@ from h.services.flag_count import FlagCountService
 FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation", "group"])
 
 
-class FakePermissionCheck(object):
+class FakePermissionCheck:
     def __init__(self):
         self._permissions = {}
 
@@ -23,7 +23,7 @@ class FakePermissionCheck(object):
         return self._permissions[(permission, context)]
 
 
-class TestAnnotationModerationFormatter(object):
+class TestAnnotationModerationFormatter:
     def test_preload_sets_flag_counts(self, formatter, flagged, unflagged):
         preload = formatter.preload([flagged.id, unflagged.id])
 

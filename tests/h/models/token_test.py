@@ -7,7 +7,7 @@ import datetime
 from h.models import Token
 
 
-class TestToken(object):
+class TestToken:
     def test_ttl_is_none_if_token_has_no_expires(self):
         assert Token().ttl is None
 

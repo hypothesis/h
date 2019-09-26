@@ -27,7 +27,7 @@ class QueryParamSchema(colander.Schema):
     )
 
 
-class TestValidateQueryParams(object):
+class TestValidateQueryParams:
     def test_it_deserializes_params(self):
         schema = QueryParamSchema()
         params = MultiDict()

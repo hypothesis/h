@@ -26,7 +26,7 @@ AUTH_CLIENT_API_WHITELIST = [
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class AuthenticationPolicy(object):
+class AuthenticationPolicy:
     def __init__(self, api_policy, fallback_policy):
         self.api_policy = api_policy
         self.fallback_policy = fallback_policy
@@ -59,7 +59,7 @@ class AuthenticationPolicy(object):
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class APIAuthenticationPolicy(object):
+class APIAuthenticationPolicy:
     """
     An authentication policy for Hypothesis API endpoints
 
@@ -126,7 +126,7 @@ class APIAuthenticationPolicy(object):
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
-class AuthClientPolicy(object):
+class AuthClientPolicy:
 
     """
     An authentication policy for registered AuthClients

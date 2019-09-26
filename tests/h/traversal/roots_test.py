@@ -27,7 +27,7 @@ from h.traversal.contexts import AnnotationContext
 from h.traversal.contexts import UserContext
 
 
-class TestRoot(object):
+class TestRoot:
     @pytest.mark.parametrize(
         "permission",
         [
@@ -88,7 +88,7 @@ class TestRoot(object):
 
 
 @pytest.mark.usefixtures("group_service", "links_service")
-class TestAnnotationRoot(object):
+class TestAnnotationRoot:
     def test_it_does_not_assign_create_permission_without_authenticated_user(
         self, pyramid_config, pyramid_request
     ):
@@ -181,7 +181,7 @@ class TestAnnotationRoot(object):
         return service
 
 
-class TestAuthClientRoot(object):
+class TestAuthClientRoot:
     def test_getitem_returns_the_right_AuthClient(self, db_session, pyramid_request):
         # Add a couple of noise AuthClients to the DB. It should not return these.
         db_session.add(AuthClient(authority="elifesciences.org"))
@@ -271,7 +271,7 @@ class TestAuthClientRoot(object):
 
 
 @pytest.mark.usefixtures("organizations")
-class TestOrganizationRoot(object):
+class TestOrganizationRoot:
     def test_it_returns_the_requested_organization(
         self, organizations, organization_factory
     ):
@@ -289,7 +289,7 @@ class TestOrganizationRoot(object):
 
 
 @pytest.mark.usefixtures("organizations")
-class TestOrganizationLogoRoot(object):
+class TestOrganizationLogoRoot:
     def test_it_returns_the_requested_organizations_logo(
         self, organizations, organization_logo_factory
     ):
@@ -313,7 +313,7 @@ class TestOrganizationLogoRoot(object):
         return OrganizationLogoRoot(pyramid_request)
 
 
-class TestProfileRoot(object):
+class TestProfileRoot:
     def test_it_assigns_update_permission_with_user_role(
         self, pyramid_config, pyramid_request
     ):
@@ -338,7 +338,7 @@ class TestProfileRoot(object):
 
 
 @pytest.mark.usefixtures("groups", "group_service")
-class TestGroupRoot(object):
+class TestGroupRoot:
     def test_it_assigns_create_permission_with_user_role(
         self, pyramid_config, pyramid_request
     ):
@@ -395,7 +395,7 @@ class TestGroupRoot(object):
 
 
 @pytest.mark.usefixtures("GroupRoot", "GroupUpsertContext")
-class TestGroupUpsertRoot(object):
+class TestGroupUpsertRoot:
     def test_getitem_returns_empty_upsert_context_if_missing_group(
         self, pyramid_request, GroupRoot, GroupUpsertContext
     ):
@@ -431,7 +431,7 @@ class TestGroupUpsertRoot(object):
 
 
 @pytest.mark.usefixtures("user_service", "client_authority")
-class TestUserRoot(object):
+class TestUserRoot:
     def test_it_does_not_assign_create_permission_without_auth_client_role(
         self, pyramid_config, pyramid_request
     ):
@@ -502,7 +502,7 @@ class TestUserRoot(object):
 
 
 @pytest.mark.usefixtures("user_service")
-class TestUserUserIDRoot(object):
+class TestUserUserIDRoot:
     def test_it_fetches_the_requested_user(
         self, pyramid_request, user_userid_root, user_service
     ):

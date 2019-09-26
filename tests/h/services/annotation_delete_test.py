@@ -10,7 +10,7 @@ from h.events import AnnotationEvent
 from h.services.annotation_delete import annotation_delete_service_factory
 
 
-class TestAnnotationDeleteService(object):
+class TestAnnotationDeleteService:
     def test_it_marks_the_annotation_as_deleted(
         self, svc, pyramid_request, factories, annotation
     ):

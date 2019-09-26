@@ -8,7 +8,7 @@ import colander
 from h.schemas.forms.group import unblacklisted_group_name_slug
 
 
-class TestUnblacklistedGroupNameSlug(object):
+class TestUnblacklistedGroupNameSlug:
     @pytest.mark.parametrize(
         "group_name",
         [
@@ -39,7 +39,7 @@ class TestUnblacklistedGroupNameSlug(object):
 
     @pytest.fixture
     def dummy_node(self, pyramid_request):
-        class DummyNode(object):
+        class DummyNode:
             def __init__(self, request):
                 self.bindings = {"request": request}
 

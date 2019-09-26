@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 
-class FeaturePredicate(object):
+class FeaturePredicate:
     """True if the request has the given feature flag enabled."""
 
     def __init__(self, feature, config):

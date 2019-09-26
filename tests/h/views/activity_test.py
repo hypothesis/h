@@ -18,7 +18,7 @@ GROUP_TYPE_OPTIONS = ("group", "open_group", "restricted_group")
 
 
 @pytest.mark.usefixtures("annotation_stats_service", "paginate", "query", "routes")
-class TestSearchController(object):
+class TestSearchController:
     def test_controller_populates_parsed_query_params(
         self, controller, pyramid_request, query
     ):
@@ -113,7 +113,7 @@ class TestSearchController(object):
     "routes",
     "search",
 )
-class TestGroupSearchController(object):
+class TestGroupSearchController:
 
     """Tests unique to GroupSearchController."""
 
@@ -942,7 +942,7 @@ class TestGroupSearchController(object):
 
 
 @pytest.mark.usefixtures("annotation_stats_service", "user_service", "routes", "search")
-class TestUserSearchController(object):
+class TestUserSearchController:
 
     """Tests unique to UserSearchController."""
 
@@ -1131,7 +1131,7 @@ class TestUserSearchController(object):
 
 
 @pytest.mark.usefixtures("routes", "search")
-class TestGroupAndUserSearchController(object):
+class TestGroupAndUserSearchController:
 
     """Tests common to both GroupSearchController and UserSearchController."""
 

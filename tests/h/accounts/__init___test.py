@@ -8,7 +8,7 @@ from h import accounts
 
 
 @pytest.mark.usefixtures("user_service")
-class TestGetUser(object):
+class TestGetUser:
     def test_fetches_user_using_service(
         self, factories, pyramid_config, pyramid_request, user_service
     ):

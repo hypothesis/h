@@ -15,7 +15,7 @@ from h.services.user import UserService
 from tests.common.matchers import Matcher
 
 
-class TestGroupServiceFetch(object):
+class TestGroupServiceFetch:
     def test_it_proxies_to_fetch_by_groupid_if_groupid_valid(self, svc):
         svc.fetch_by_groupid = mock.Mock()
 
@@ -33,7 +33,7 @@ class TestGroupServiceFetch(object):
         assert result == svc.fetch_by_pubid.return_value
 
 
-class TestGroupServiceFetchByPubid(object):
+class TestGroupServiceFetchByPubid:
     def test_it_returns_group_model(self, svc, factories):
         group = factories.Group()
 
@@ -48,7 +48,7 @@ class TestGroupServiceFetchByPubid(object):
         assert group is None
 
 
-class TestGroupServiceFetchByGroupid(object):
+class TestGroupServiceFetchByGroupid:
     def test_it_returns_group_model_of_matching_group(self, svc, factories):
         group = factories.Group(authority_provided_id="dingdong", authority="foo.com")
 
@@ -65,7 +65,7 @@ class TestGroupServiceFetchByGroupid(object):
 
 
 @pytest.mark.usefixtures("groups")
-class TestFilterByName(object):
+class TestFilterByName:
     def test_it_filters_by_name(self, svc):
         filtered_groups = svc.filter_by_name(name="Hello")
 
@@ -107,7 +107,7 @@ class TestFilterByName(object):
         ]
 
 
-class TestGroupServiceGroupIds(object):
+class TestGroupServiceGroupIds:
     """Unit tests for methods related to group IDs:
         - :py:meth:`GroupService.groupids_readable_by`
         - :py:meth:`GroupService.groupids_created_by`
@@ -168,7 +168,7 @@ class TestGroupServiceGroupIds(object):
 
 
 @pytest.mark.usefixtures("user_service")
-class TestGroupsFactory(object):
+class TestGroupsFactory:
     def test_returns_groups_service(self, pyramid_request):
         svc = groups_factory(None, pyramid_request)
 

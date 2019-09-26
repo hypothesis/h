@@ -21,7 +21,7 @@ from h.traversal import AnnotationContext
     "flag_notification_email",
     "incontext_link",
 )
-class TestCreate(object):
+class TestCreate:
     def test_it_flags_annotation(
         self, annotation_context, pyramid_request, flag_service
     ):

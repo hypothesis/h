@@ -14,7 +14,7 @@ class UnknownFeatureError(Exception):
     pass
 
 
-class FeatureRequestProperty(object):
+class FeatureRequestProperty:
     """
     Helper object for accessing feature flags.
 
@@ -35,7 +35,7 @@ class FeatureRequestProperty(object):
         return self.svc.all(user=self.request.user)
 
 
-class FeatureService(object):
+class FeatureService:
     """
     Manages access to feature flag status.
 

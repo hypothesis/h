@@ -6,7 +6,7 @@ import pytest
 from h.views.api.helpers import media_types
 
 
-class TestMediaTypeForVersion(object):
+class TestMediaTypeForVersion:
     @pytest.mark.parametrize(
         "version,expected",
         [
@@ -30,7 +30,7 @@ class TestMediaTypeForVersion(object):
         assert media_types.media_type_for_version(version, subtype) == expected
 
 
-class TestValidMediaTypes(object):
+class TestValidMediaTypes:
     def test_it_returns_list_containing_version_types(self):
         assert media_types.valid_media_types() == [
             "*/*",
@@ -40,7 +40,7 @@ class TestValidMediaTypes(object):
         ]
 
 
-class TestVersionMediaTypes(object):
+class TestVersionMediaTypes:
     def test_it_returns_media_types_for_versions(self):
         assert media_types.version_media_types(["foo", "bar"]) == [
             "application/vnd.hypothesis.foo+json",

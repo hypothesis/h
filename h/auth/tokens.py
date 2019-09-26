@@ -11,7 +11,7 @@ from h.auth.interfaces import IAuthenticationToken
 
 
 @implementer(IAuthenticationToken)
-class Token(object):
+class Token:
     r"""
     A long-lived API token for a user.
 

@@ -32,7 +32,7 @@ FIXTURE_DATA = {
 @pytest.mark.usefixtures(
     "authz_policy", "fetch_annotation", "subscription", "user_service"
 )
-class TestGetNotification(object):
+class TestGetNotification:
     def test_returns_correct_params_when_subscribed(
         self, parent, pyramid_request, reply, user_service
     ):

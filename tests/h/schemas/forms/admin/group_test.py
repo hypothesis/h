@@ -16,7 +16,7 @@ from h.schemas.forms.admin.group import CreateAdminGroupSchema
 from h.services.user import UserService
 
 
-class TestCreateGroupSchema(object):
+class TestCreateGroupSchema:
     def test_it_allows_with_valid_data(self, group_data, bound_schema):
         bound_schema.deserialize(group_data)
 

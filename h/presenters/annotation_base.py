@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 from h.util.datetime import utc_iso8601
 
 
-class AnnotationBasePresenter(object):
+class AnnotationBasePresenter:
     def __init__(self, annotation_resource):
         self.annotation_resource = annotation_resource
         self.annotation = annotation_resource.annotation

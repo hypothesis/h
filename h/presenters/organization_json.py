@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 
-class OrganizationJSONPresenter(object):
+class OrganizationJSONPresenter:
     """Present an organization in the JSON format returned by API requests."""
 
     def __init__(self, organization_context):

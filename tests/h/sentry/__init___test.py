@@ -7,7 +7,7 @@ from h.sentry import includeme, report_exception
 from h.sentry.helpers.before_send import before_send
 
 
-class TestReportException(object):
+class TestReportException:
     def test_it_reports_the_exception_to_Sentry(self, sentry_sdk):
         exc = ValueError("Test exception")
 
@@ -21,7 +21,7 @@ class TestReportException(object):
         sentry_sdk.capture_exception.assert_called_once_with(None)
 
 
-class TestIncludeMe(object):
+class TestIncludeMe:
     def test_it_initializes_sentry_sdk(self, pyramid_config, sentry_sdk):
         includeme(pyramid_config)
 

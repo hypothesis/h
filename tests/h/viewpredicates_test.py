@@ -7,7 +7,7 @@ from unittest import mock
 from h.viewpredicates import FeaturePredicate
 
 
-class TestFeaturePredicate(object):
+class TestFeaturePredicate:
     def test_text(self):
         predicate = FeaturePredicate("foo", mock.sentinel.config)
 

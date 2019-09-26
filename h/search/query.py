@@ -26,7 +26,7 @@ def popall(multidict, key):
     return values
 
 
-class KeyValueMatcher(object):
+class KeyValueMatcher:
     """
     Adds any parameters as straightforward key-value matchers.
 
@@ -40,7 +40,7 @@ class KeyValueMatcher(object):
         return search
 
 
-class Limiter(object):
+class Limiter:
     """
     Limits the number of annotations returned by the search.
 
@@ -77,7 +77,7 @@ class Limiter(object):
         return val
 
 
-class Sorter(object):
+class Sorter:
     """
     Sorts and returns annotations after search_after.
 
@@ -147,7 +147,7 @@ class Sorter(object):
                 pass
 
 
-class TopLevelAnnotationsFilter(object):
+class TopLevelAnnotationsFilter:
 
     """Matches top-level annotations only, filters out replies."""
 
@@ -155,7 +155,7 @@ class TopLevelAnnotationsFilter(object):
         return search.exclude("exists", field="references")
 
 
-class AuthorityFilter(object):
+class AuthorityFilter:
 
     """
     Match only annotations created by users belonging to a specific authority.
@@ -168,7 +168,7 @@ class AuthorityFilter(object):
         return search.filter("term", authority=self.authority)
 
 
-class AuthFilter(object):
+class AuthFilter:
 
     """
     A filter that selects only annotations the user is authorised to see.
@@ -195,7 +195,7 @@ class AuthFilter(object):
         )
 
 
-class GroupFilter(object):
+class GroupFilter:
 
     """
     Matches only those annotations belonging to the specified group.
@@ -210,7 +210,7 @@ class GroupFilter(object):
         return search
 
 
-class GroupAuthFilter(object):
+class GroupAuthFilter:
     """Filter out groups that the request isn't authorized to read."""
 
     def __init__(self, request):
@@ -222,7 +222,7 @@ class GroupAuthFilter(object):
         return search.filter("terms", group=groups)
 
 
-class UriCombinedWildcardFilter(object):
+class UriCombinedWildcardFilter:
 
     """
     A filter that selects only annotations where the uri matches.
@@ -319,7 +319,7 @@ class UriCombinedWildcardFilter(object):
         return wildcard_uri.replace("_", "?")
 
 
-class UserFilter(object):
+class UserFilter:
 
     """
     A filter that selects only annotations where the 'user' parameter matches.
@@ -334,7 +334,7 @@ class UserFilter(object):
         return search.filter("terms", user=users)
 
 
-class DeletedFilter(object):
+class DeletedFilter:
 
     """
     A filter that only returns non-deleted documents.
@@ -347,7 +347,7 @@ class DeletedFilter(object):
         return search.exclude("exists", field="deleted")
 
 
-class HiddenFilter(object):
+class HiddenFilter:
     """Return an Elasticsearch filter for filtering out moderated or NIPSA'd annotations."""
 
     def __init__(self, request):
@@ -374,7 +374,7 @@ class HiddenFilter(object):
         return search.filter(Q("bool", should=should_clauses))
 
 
-class AnyMatcher(object):
+class AnyMatcher:
 
     """
     Matches the contents of a selection of fields against the `any` parameter.
@@ -393,7 +393,7 @@ class AnyMatcher(object):
         )
 
 
-class TagsMatcher(object):
+class TagsMatcher:
 
     """Matches the tags field against 'tag' or 'tags' parameters."""
 
@@ -405,7 +405,7 @@ class TagsMatcher(object):
         return search
 
 
-class RepliesMatcher(object):
+class RepliesMatcher:
 
     """Matches any replies to any of the given annotation ids."""
 
@@ -418,7 +418,7 @@ class RepliesMatcher(object):
         )
 
 
-class TagsAggregation(object):
+class TagsAggregation:
     def __init__(self, limit=10):
         self.limit = limit
         self.name = "tags"
@@ -433,7 +433,7 @@ class TagsAggregation(object):
         ]
 
 
-class UsersAggregation(object):
+class UsersAggregation:
     def __init__(self, limit=10):
         self.limit = limit
         self.name = "users"

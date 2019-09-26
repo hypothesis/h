@@ -11,7 +11,7 @@ from h import models
 from h.views.admin.badge import badge_add, badge_index, badge_remove
 
 
-class TestBadgeIndex(object):
+class TestBadgeIndex:
     def test_when_nothing_blocked(self, pyramid_request):
         result = badge_index(pyramid_request)
 
@@ -24,7 +24,7 @@ class TestBadgeIndex(object):
 
 
 @pytest.mark.usefixtures("blocked_uris", "routes")
-class TestBadgeAddRemove(object):
+class TestBadgeAddRemove:
     def test_add_blocks_uri(self, pyramid_request):
         pyramid_request.params = {"add": "test_uri"}
 

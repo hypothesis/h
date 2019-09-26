@@ -9,7 +9,7 @@ from h.services.annotation_moderation import AnnotationModerationService
 from h.services.annotation_moderation import annotation_moderation_service_factory
 
 
-class TestAnnotationModerationServiceHidden(object):
+class TestAnnotationModerationServiceHidden:
     def test_it_returns_true_for_moderated_annotation(self, svc, factories):
         mod = factories.AnnotationModeration()
 
@@ -22,7 +22,7 @@ class TestAnnotationModerationServiceHidden(object):
 
 
 @pytest.mark.usefixtures("mods")
-class TestAnnotationModerationServiceAllHidden(object):
+class TestAnnotationModerationServiceAllHidden:
     def test_it_lists_moderated_annotation_ids(self, svc, mods):
         ids = [m.annotation.id for m in mods[0:-1]]
         assert svc.all_hidden(ids) == set(ids)
@@ -40,7 +40,7 @@ class TestAnnotationModerationServiceAllHidden(object):
         return factories.AnnotationModeration.create_batch(3)
 
 
-class TestAnnotationModerationServiceHide(object):
+class TestAnnotationModerationServiceHide:
     def test_it_creates_annotation_moderation(self, svc, factories, db_session):
         annotation = factories.Annotation()
         svc.hide(annotation)
@@ -69,7 +69,7 @@ class TestAnnotationModerationServiceHide(object):
         assert count == 1
 
 
-class TestAnnotationModerationServiceUnhide(object):
+class TestAnnotationModerationServiceUnhide:
     def test_it_unhides_given_annotation(self, svc, factories, db_session):
         mod = factories.AnnotationModeration()
         annotation = mod.annotation
@@ -95,7 +95,7 @@ class TestAnnotationModerationServiceUnhide(object):
         assert svc.hidden(annotation) is False
 
 
-class TestAnnotationNipsaServiceFactory(object):
+class TestAnnotationNipsaServiceFactory:
     def test_it_returns_service(self, pyramid_request):
         svc = annotation_moderation_service_factory(None, pyramid_request)
         assert isinstance(svc, AnnotationModerationService)

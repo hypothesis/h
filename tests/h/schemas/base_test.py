@@ -40,7 +40,7 @@ class ExampleJSONSchema(JSONSchema):
     }
 
 
-class TestCSRFSchema(object):
+class TestCSRFSchema:
     def test_raises_badcsrf_with_bad_csrf(self, pyramid_request):
         schema = ExampleCSRFSchema().bind(request=pyramid_request)
 
@@ -62,7 +62,7 @@ class TestCSRFSchema(object):
         schema.deserialize({})
 
 
-class TestJSONSchema(object):
+class TestJSONSchema:
     def test_it_returns_data_when_valid(self):
         data = {"foo": "baz", "bar": 123}
 
@@ -101,7 +101,7 @@ class Color(enum.Enum):
     blue = "#0000ff"
 
 
-class TestEnumType(object):
+class TestEnumType:
     def test_serialize_returns_a_string(self, color_type):
         node = Mock()
         assert color_type.serialize(node, Color.red) == "red"

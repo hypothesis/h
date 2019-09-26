@@ -17,7 +17,7 @@ AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
 DEFAULT_SCOPES = ["annotation:read", "annotation:write"]
 
 
-class Client(object):
+class Client:
     """A wrapper which responds to `client_id` which oauthlib expects in `request.client`."""
 
     def __init__(self, authclient):

@@ -8,7 +8,7 @@ from h import models
 from h.presenters.document_searchindex import DocumentSearchIndexPresenter
 
 
-class TestDocumentSearchIndexPresenter(object):
+class TestDocumentSearchIndexPresenter:
     @pytest.mark.parametrize(
         "document,expected",
         [

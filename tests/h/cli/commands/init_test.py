@@ -8,7 +8,7 @@ from h.cli.commands import init as init_cli
 
 
 @pytest.mark.usefixtures("alembic_config", "alembic_stamp", "db", "search")
-class TestInitCommand(object):
+class TestInitCommand:
     def test_initialises_database(
         self, cli, cliconfig, db, db_engine, pyramid_settings
     ):

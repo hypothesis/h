@@ -13,7 +13,7 @@ import pytest
 native_str = str
 
 
-class TestCorsPreflight(object):
+class TestCorsPreflight:
     def test_cors_preflight(self, app):
         # Simulate a CORS preflight request made by the browser from a client
         # hosted on a domain other than the one the service is running on.
@@ -35,7 +35,7 @@ class TestCorsPreflight(object):
             assert header in res.headers["Access-Control-Allow-Headers"]
 
 
-class TestCorsHeaders(object):
+class TestCorsHeaders:
     @pytest.mark.parametrize(
         "url, expect_errors",
         [

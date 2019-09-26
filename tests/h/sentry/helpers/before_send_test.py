@@ -10,7 +10,7 @@ from h.sentry.helpers.before_send import before_send
 
 
 @pytest.mark.usefixtures("Event", "filters")
-class TestBeforeSend(object):
+class TestBeforeSend:
     def test_it_creates_an_Event(self, Event):
         before_send(mock.sentinel.event_dict, mock.sentinel.hint_dict)
 

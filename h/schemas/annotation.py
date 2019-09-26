@@ -99,7 +99,7 @@ class AnnotationSchema(JSONSchema):
     }
 
 
-class CreateAnnotationSchema(object):
+class CreateAnnotationSchema:
 
     """Validate the POSTed data of a create annotation request."""
 
@@ -153,7 +153,7 @@ class CreateAnnotationSchema(object):
         return new_appstruct
 
 
-class UpdateAnnotationSchema(object):
+class UpdateAnnotationSchema:
 
     """Validate the POSTed data of an update annotation request."""
 

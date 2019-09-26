@@ -12,7 +12,7 @@ from h.services.flag import FlagService
 FakeAnnotationContext = namedtuple("FakeAnnotationContext", ["annotation"])
 
 
-class TestAnnotationFlagFormatter(object):
+class TestAnnotationFlagFormatter:
     def test_preload_sets_found_flags_to_true(self, flags, formatter, current_user):
         annotation_ids = [f.annotation_id for f in flags[current_user]]
 
