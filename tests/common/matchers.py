@@ -49,39 +49,6 @@ class AnyCallable(Matcher):
         return callable(other)
 
 
-class NativeString(Matcher):
-    """
-    Matches any native string with the given characters.
-
-    "Native string" means the ``str`` type which is a byte string in Python 2
-    and a unicode string in Python 3. Does not match unicode strings (type
-    ``unicode``) in Python 2, or byte strings (type ``bytes``) in Python 3,
-    even if they contain the same characters.
-
-    In Python 3 a ``bytes`` is never ``==`` to a ``str`` anyway, even if they
-    contain the same characters. But in Python 2 a ``str`` is equal to a
-    ``unicode`` if they contain the same characters, and that's why this
-    matcher is needed.
-
-    TODO: Delete this matcher once we no longer support Python 2.
-
-    """
-
-    def __init__(self, string):
-        self.string = str(string)
-
-    def __eq__(self, other):
-        if not isinstance(other, str):
-            return False
-        return other == self.string
-
-    def __repr__(self):
-        return '<native string matching "{string}">'.format(string=self.string)
-
-    def lower(self):
-        return NativeString(self.string.lower())
-
-
 class InstanceOf(Matcher):
     """An object __eq__ to any object which is an instance of `type_`."""
 
