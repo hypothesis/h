@@ -5,14 +5,6 @@ Test the versioning of our API using Accept headers
 
 from __future__ import unicode_literals
 
-# String type for request/response headers and metadata in WSGI.
-#
-# Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even
-# though it has different meanings.
-#
-# See https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
-native_str = str
-
 
 class TestIndexEndpointVersions:
     def test_index_sets_version_response_header(self, app):

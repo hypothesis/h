@@ -8,8 +8,6 @@ import base64
 
 from h.models.auth_client import GrantType
 
-native_str = str
-
 
 class TestReadGroups:
     # TODO: In subsequent versions of the API, this should really be a group
@@ -176,11 +174,7 @@ def auth_client_header(auth_client):
         client_id=auth_client.id, secret=auth_client.secret
     )
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
-    return {
-        native_str("Authorization"): native_str(
-            "Basic {creds}".format(creds=encoded.decode("ascii"))
-        )
-    }
+    return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
 
 
 @pytest.fixture
@@ -195,4 +189,4 @@ def user_with_token(db_session, factories):
 @pytest.fixture
 def token_auth_header(user_with_token):
     user, token = user_with_token
-    return {native_str("Authorization"): native_str("Bearer {}".format(token.value))}
+    return {"Authorization": "Bearer {}".format(token.value)}

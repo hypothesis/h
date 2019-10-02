@@ -8,8 +8,6 @@ import base64
 
 from h.models.auth_client import GrantType
 
-native_str = str
-
 
 class TestReadMembers:
     def test_it_returns_list_of_members_for_restricted_group_without_authn(
@@ -97,7 +95,7 @@ class TestAddMember:
         user2 = factories.User(authority="thirdparty.com")
         db_session.commit()
 
-        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
+        headers["X-Forwarded-User"] = third_party_user.userid
 
         res = app.post_json(
             "/api/groups/{pubid}/members/{userid}".format(
@@ -199,9 +197,7 @@ class TestRemoveMember:
     ):
 
         group_member, token = group_member_with_token
-        headers = {
-            native_str("Authorization"): native_str("Bearer {}".format(token.value))
-        }
+        headers = {"Authorization": "Bearer {}".format(token.value)}
 
         app.delete("/api/groups/{}/members/me".format(group.pubid), headers=headers)
 
@@ -240,11 +236,7 @@ def auth_client_header(auth_client):
         client_id=auth_client.id, secret=auth_client.secret
     )
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
-    return {
-        native_str("Authorization"): native_str(
-            "Basic {creds}".format(creds=encoded.decode("ascii"))
-        )
-    }
+    return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
 
 
 @pytest.fixture
@@ -289,4 +281,4 @@ def user_with_token(db_session, factories):
 @pytest.fixture
 def token_auth_header(user_with_token):
     user, token = user_with_token
-    return {native_str("Authorization"): native_str("Bearer {}".format(token.value))}
+    return {"Authorization": "Bearer {}".format(token.value)}

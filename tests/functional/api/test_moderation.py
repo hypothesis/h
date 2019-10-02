@@ -4,14 +4,6 @@ from __future__ import unicode_literals
 
 import pytest
 
-# String type for request/response headers and metadata in WSGI.
-#
-# Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even
-# though it has different meanings.
-#
-# See https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
-native_str = str
-
 
 class TestPutHide:
     def test_it_returns_http_204_for_group_creator(

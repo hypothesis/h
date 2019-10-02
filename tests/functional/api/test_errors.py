@@ -9,12 +9,9 @@ from __future__ import unicode_literals
 
 import pytest
 import base64
-import re
 
 
 from h.models.auth_client import GrantType
-
-native_str = str
 
 
 class Test400Errors:
@@ -26,8 +23,7 @@ class Test400Errors:
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
 
         assert res.status_code == 400
-        stripped = _strip_unicode_literal(res.json["reason"])
-        assert stripped == "'name' is a required property"
+        assert res.json["reason"] == "'name' is a required property"
 
     def test_it_400s_for_create_group_if_groupid_set_on_default_authority(
         self, app, append_token_auth
@@ -35,19 +31,19 @@ class Test400Errors:
         group = {"name": "My Group", "groupid": "3434kjkjk"}
         headers = append_token_auth()
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
-        stripped = _strip_unicode_literal(res.json["reason"])
+        reason = res.json["reason"]
         # FIXME: The `reason` is double-escaped
         expected = "groupid: '3434kjkjk' does not match \"^group:([a-zA-Z0-9._\\\\-+!~*()']{1,1024})@(.*)$\""
 
         assert res.status_code == 400
-        assert stripped == expected
+        assert reason == expected
 
 
 class Test404Errors:
     # TODO: Some of these 404s should really be 403s
     def test_it_404s_if_authz_fail_with_valid_accept(self, app, append_auth_client):
         headers = append_auth_client()
-        headers[native_str("Accept")] = native_str("application/json")
+        headers["Accept"] = "application/json"
         group = {"name": "My Group"}
 
         res = app.post_json("/api/groups", group, headers=headers, expect_errors=True)
@@ -72,7 +68,7 @@ class Test404Errors:
 
     def test_it_404s_if_not_found_with_valid_accept_and_no_authz(self, app):
         headers = {}
-        headers[native_str("Accept")] = native_str("application/json")
+        headers["Accept"] = "application/json"
 
         res = app.get("/api/not_a_thing", headers=headers, expect_errors=True)
 
@@ -97,7 +93,7 @@ class Test409Errors:
         self, app, append_auth_client, third_party_user
     ):
         headers = append_auth_client()
-        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
+        headers["X-Forwarded-User"] = third_party_user.userid
         group = {"name": "My Group", "groupid": "group:333vcdfkj~@thirdparty.com"}
 
         res = app.post_json("/api/groups", group, headers=headers)
@@ -113,7 +109,7 @@ class Test409Errors:
 class Test406Errors:
     def test_it_406s_if_not_found_with_bad_accept(self, app):
         headers = {}
-        headers[native_str("Accept")] = native_str("application/totally_random")
+        headers["Accept"] = "application/totally_random"
         res = app.get("/api/not_a_thing", headers=headers, expect_errors=True)
 
         assert res.status_code == 406
@@ -121,7 +117,7 @@ class Test406Errors:
 
     def test_it_406s_if_path_extant_but_bad_accept(self, app):
         headers = {}
-        headers[native_str("Accept")] = native_str("application/totally_random")
+        headers["Accept"] = "application/totally_random"
         res = app.get("/api/groups", headers=headers, expect_errors=True)
 
         assert res.status_code == 406
@@ -153,9 +149,7 @@ def append_auth_client(auth_client):
 
     def append_header(headers=None):
         headers = headers or {}
-        headers[native_str("Authorization")] = native_str(
-            "Basic {creds}".format(creds=encoded.decode("ascii"))
-        )
+        headers["Authorization"] = "Basic {creds}".format(creds=encoded.decode("ascii"))
         return headers
 
     return append_header
@@ -174,9 +168,7 @@ def append_token_auth(user_with_token):
     def append_header(headers=None):
         headers = headers or {}
         user, token = user_with_token
-        headers[native_str("Authorization")] = native_str(
-            "Bearer {}".format(token.value)
-        )
+        headers["Authorization"] = "Bearer {}".format(token.value)
         return headers
 
     return append_header
@@ -185,12 +177,5 @@ def append_token_auth(user_with_token):
 @pytest.fixture
 def valid_accept():
     headers = {}
-    headers[native_str("Accept")] = "application/json"
+    headers["Accept"] = "application/json"
     return headers
-
-
-def _strip_unicode_literal(original):
-    # Strip "u" literal prefixes that get added in front of property names in
-    # certain error messages in Python 2.
-    # See https://github.com/hypothesis/h/commit/992fa8005389ed52ebd076ae230d862b24449f2f
-    return re.sub(r"u(['\"])([^']+)'", "\\1\\2'", original)

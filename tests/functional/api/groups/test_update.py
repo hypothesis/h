@@ -7,8 +7,6 @@ import base64
 
 from h.models.auth_client import GrantType
 
-native_str = str
-
 
 class TestUpdateGroup:
     def test_it_returns_http_200_with_valid_payload_and_user_token(
@@ -123,7 +121,7 @@ class TestUpdateGroup:
         db_session.commit()
 
         headers = auth_client_header
-        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
+        headers["X-Forwarded-User"] = third_party_user.userid
         group_payload = {"name": "My Group"}
 
         path = "/api/groups/{id}".format(id=group.pubid)
@@ -172,7 +170,7 @@ class TestUpdateGroup:
         db_session.commit()
 
         headers = auth_client_header
-        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
+        headers["X-Forwarded-User"] = third_party_user.userid
         group_payload = {
             "name": "My Group",
             "groupid": "group:333vcdfkj~@thirdparty.com",
@@ -203,7 +201,7 @@ class TestUpdateGroup:
         db_session.commit()
 
         headers = auth_client_header
-        headers[native_str("X-Forwarded-User")] = native_str(third_party_user.userid)
+        headers["X-Forwarded-User"] = third_party_user.userid
         group_payload = {"groupid": "group:one@thirdparty.com"}
 
         # Attempting to set group2's `groupid` to one already taken by group1
@@ -244,7 +242,7 @@ def user_with_token(db_session, factories, first_party_user):
 @pytest.fixture
 def token_auth_header(user_with_token):
     user, token = user_with_token
-    return {native_str("Authorization"): native_str("Bearer {}".format(token.value))}
+    return {"Authorization": "Bearer {}".format(token.value)}
 
 
 @pytest.fixture
@@ -269,8 +267,4 @@ def auth_client_header(auth_client):
         client_id=auth_client.id, secret=auth_client.secret
     )
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
-    return {
-        native_str("Authorization"): native_str(
-            "Basic {creds}".format(creds=encoded.decode("ascii"))
-        )
-    }
+    return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
