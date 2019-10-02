@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-import pyramid.compat
 from pyramid import interfaces
 from pyramid.authentication import BasicAuthAuthenticationPolicy
 from pyramid.authentication import CallbackAuthenticationPolicy
@@ -295,13 +294,7 @@ class AuthClientPolicy:
     @staticmethod
     def _forwarded_userid(request):
         """Return forwarded userid or None"""
-        userid = request.headers.get("X-Forwarded-User", None)
-        if userid is not None:
-            # In Python 2 request header values are byte strings, so we need to
-            # decode them to get unicode.
-            # FIXME: Remove this once we've moved to Python 3.
-            userid = pyramid.compat.text_(userid)
-        return userid
+        return request.headers.get("X-Forwarded-User", None)
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)

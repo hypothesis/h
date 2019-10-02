@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import sys
 
 __all__ = (
-    "PY2",
     "text_type",
     "string_types",
     "configparser",

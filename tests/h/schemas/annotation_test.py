@@ -5,7 +5,6 @@ from copy import deepcopy
 from unittest import mock
 
 import pytest
-import re
 from webob.multidict import NestedMultiDict, MultiDict
 
 from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
@@ -183,10 +182,7 @@ class TestCreateUpdateAnnotationSchema:
         with pytest.raises(ValidationError) as exc:
             validate(pyramid_request, input_data)
 
-        # Strip "u" literal prefixes that get added in front of property names in
-        # certain error messages in Python 2.
         actual_msg = str(exc.value)
-        actual_msg = re.sub(r"u'([^']+)'", "'\\1'", actual_msg)
         assert actual_msg == error_message
 
     @pytest.mark.parametrize(
