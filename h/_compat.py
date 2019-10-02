@@ -7,13 +7,11 @@ import sys
 __all__ = (
     "text_type",
     "string_types",
-    "configparser",
     "urlparse",
     "url_quote",
     "url_quote_plus",
     "url_unquote",
     "url_unquote_plus",
-    "StringIO",
 )
 
 PY2 = sys.version_info[0] == 2
@@ -30,11 +28,6 @@ else:
     unichr = unichr
 
 try:
-    import ConfigParser as configparser
-except ImportError:
-    import configparser
-
-try:
     from urllib import parse as urlparse
 
     url_quote = urlparse.quote
@@ -49,11 +42,6 @@ except ImportError:
     url_quote_plus = urllib.quote_plus
     url_unquote = urllib.unquote
     url_unquote_plus = urllib.unquote_plus
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 
 # native() function adapted from Pyramid:

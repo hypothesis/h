@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import configparser
 import os
 
 import json
 from pyramid.settings import asbool, aslist
 from pyramid.static import static_view
-
-from h._compat import configparser
 
 
 class _CachedFile:
