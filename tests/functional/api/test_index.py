@@ -4,14 +4,6 @@ from __future__ import unicode_literals
 
 import pytest
 
-# String type for request/response headers and metadata in WSGI.
-#
-# Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even
-# though it has different meanings.
-#
-# See https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
-native_str = str
-
 
 class TestGetIndex:
     def test_it_returns_links(self, app):
@@ -25,11 +17,11 @@ class TestGetIndex:
         ["application/vnd.hypothesis.v1+json", "application/vnd.hypothesis.v2+json"],
     )
     def test_it_supports_versions(self, app, media_type):
-        headers = {native_str("accept"): native_str(media_type)}
+        headers = {"accept": media_type}
 
         res = app.get("/api/", headers=headers)
 
-        assert res.headers["Hypothesis-Media-Type"] == native_str(media_type)
+        assert res.headers["Hypothesis-Media-Type"] == media_type
 
     def test_it_returns_links_for_resources(self, app):
         res = app.get("/api/")
@@ -90,9 +82,7 @@ class TestGetIndex:
     def test_it_returns_expected_resource_service_links_for_v2(
         self, app, resource, expected_services
     ):
-        headers = {
-            native_str("accept"): native_str("application/vnd.hypothesis.v2+json")
-        }
+        headers = {"accept": "application/vnd.hypothesis.v2+json"}
         res = app.get("/api/", headers=headers)
 
         for service in expected_services:
@@ -107,9 +97,7 @@ class TestGetIndex:
     def test_it_returns_expected_nested_resource_service_links_for_v2(
         self, app, resource, nested_resource, expected_services
     ):
-        headers = {
-            native_str("accept"): native_str("application/vnd.hypothesis.v2+json")
-        }
+        headers = {"accept": "application/vnd.hypothesis.v2+json"}
         res = app.get("/api/", headers=headers)
 
         assert nested_resource in res.json["links"][resource]

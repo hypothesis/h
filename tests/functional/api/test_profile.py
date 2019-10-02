@@ -4,14 +4,6 @@ from __future__ import unicode_literals
 
 import pytest
 
-# String type for request/response headers and metadata in WSGI.
-#
-# Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even
-# though it has different meanings.
-#
-# See https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
-native_str = str
-
 
 class TestGetProfile:
     def test_it_returns_profile_with_single_group_when_not_authd(self, app):
@@ -92,7 +84,7 @@ class TestPatchProfile:
 
         user, token = user_with_token
 
-        headers = {"Authorization": native_str("Bearer {}".format(token.value))}
+        headers = {"Authorization": "Bearer {}".format(token.value)}
         profile = {"preferences": {"show_sidebar_tutorial": True}}
 
         res = app.patch_json("/api/profile", profile, headers=headers)
@@ -107,7 +99,7 @@ class TestPatchProfile:
 
         user, token = user_with_token
 
-        headers = {"Authorization": native_str("Bearer {}".format(token.value))}
+        headers = {"Authorization": "Bearer {}".format(token.value)}
         profile = {"preferences": {"show_sidebar_tutorial": False}}
 
         res = app.patch_json("/api/profile", profile, headers=headers)
@@ -136,7 +128,7 @@ class TestPatchProfile:
     def test_it_raises_http_400_for_disallowed_setting(self, app, user_with_token):
         _, token = user_with_token
         profile = {"preferences": {"foo": "bar"}}
-        headers = {"Authorization": native_str("Bearer {}".format(token.value))}
+        headers = {"Authorization": "Bearer {}".format(token.value)}
 
         res = app.patch_json(
             "/api/profile", profile, headers=headers, expect_errors=True

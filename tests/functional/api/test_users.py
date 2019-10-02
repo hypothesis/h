@@ -8,14 +8,6 @@ import base64
 
 from h.models.auth_client import GrantType
 
-# String type for request/response headers and metadata in WSGI.
-#
-# Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even
-# though it has different meanings.
-#
-# See https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
-native_str = str
-
 
 class TestReadUser:
     def test_it_returns_http_404_if_auth_client_missing(self, app, user):
@@ -184,11 +176,7 @@ def auth_client_header(auth_client):
         client_id=auth_client.id, secret=auth_client.secret
     )
     encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
-    return {
-        native_str("Authorization"): native_str(
-            "Basic {creds}".format(creds=encoded.decode("ascii"))
-        )
-    }
+    return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
 
 
 @pytest.fixture

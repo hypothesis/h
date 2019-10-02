@@ -4,21 +4,12 @@ from __future__ import unicode_literals
 
 import pytest
 
-# String type for request/response headers and metadata in WSGI.
-#
-# Per PEP-3333, this is intentionally `str` under both Python 2 and 3, even
-# though it has different meanings.
-#
-# See https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
-native_str = str
-
 
 class TestGetAnnotation:
     def test_it_returns_annotation_if_shared(self, app, annotation):
         """Unauthenticated users may view shared annotations assuming they have group access"""
         res = app.get(
-            "/api/annotations/" + annotation.id,
-            headers={native_str("accept"): native_str("application/json")},
+            "/api/annotations/" + annotation.id, headers={"accept": "application/json"}
         )
         data = res.json
         assert data["id"] == annotation.id
@@ -28,7 +19,7 @@ class TestGetAnnotation:
     ):
         res = app.get(
             "/api/annotations/" + private_annotation.id,
-            headers={native_str("accept"): native_str("application/json")},
+            headers={"accept": "application/json"},
             expect_errors=True,
         )
 
@@ -54,7 +45,7 @@ class TestGetAnnotationJSONLD:
         """Unauthenticated users may view shared annotations assuming they have group access"""
         res = app.get(
             "/api/annotations/" + annotation.id + ".jsonld",
-            headers={native_str("accept"): native_str("application/json")},
+            headers={"accept": "application/json"},
         )
         data = res.json
 
@@ -68,7 +59,7 @@ class TestGetAnnotationJSONLD:
     ):
         res = app.get(
             "/api/annotations/" + private_annotation.id + ".jsonld",
-            headers={native_str("accept"): native_str("application/json")},
+            headers={"accept": "application/json"},
             expect_errors=True,
         )
 
