@@ -13,9 +13,10 @@ class TestNipsaService:
     def test_fetch_all_flagged_userids_returns_set_of_userids(self, db_session):
         svc = NipsaService(db_session)
 
-        assert svc.fetch_all_flagged_userids() == set(
-            ["acct:renata@example.com", "acct:cecilia@example.com"]
-        )
+        assert svc.fetch_all_flagged_userids() == {
+            "acct:renata@example.com",
+            "acct:cecilia@example.com",
+        }
 
     def test_is_flagged_returns_true_for_flagged_users(self, db_session, users):
         svc = NipsaService(db_session)
@@ -79,9 +80,10 @@ class TestNipsaService:
 
         # Returns `True` because status is cached.
         assert svc.is_flagged("acct:renata@example.com")
-        assert svc.fetch_all_flagged_userids() == set(
-            ["acct:renata@example.com", "acct:cecilia@example.com"]
-        )
+        assert svc.fetch_all_flagged_userids() == {
+            "acct:renata@example.com",
+            "acct:cecilia@example.com",
+        }
 
     def test_flag_updates_cache(self, db_session, users):
         svc = NipsaService(db_session)

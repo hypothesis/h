@@ -21,9 +21,11 @@ class TestAdminsIndex:
     def test_context_contains_admin_usernames(self, pyramid_request):
         result = admins_index(pyramid_request)
 
-        assert set(result["admin_users"]) == set(
-            ["acct:agnos@example.com", "acct:bojan@example.com", "acct:cristof@foo.org"]
-        )
+        assert set(result["admin_users"]) == {
+            "acct:agnos@example.com",
+            "acct:bojan@example.com",
+            "acct:cristof@foo.org",
+        }
 
 
 @pytest.mark.usefixtures("users", "routes")

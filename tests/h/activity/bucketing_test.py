@@ -107,7 +107,7 @@ class TestDocumentBucket:
         bucket = bucketing.DocumentBucket(document)
         bucket.append(ann_1)
         bucket.append(ann_2)
-        assert bucket.tags == set(["foo", "bar", "baz"])
+        assert bucket.tags == {"foo", "bar", "baz"}
 
     def test_append_adds_unique_annotation_user_to_bucket(self, document):
         ann_1 = factories.Annotation(userid="luke")
@@ -118,7 +118,7 @@ class TestDocumentBucket:
         bucket.append(ann_1)
         bucket.append(ann_2)
         bucket.append(ann_3)
-        assert bucket.users == set(["luke", "alice"])
+        assert bucket.users == {"luke", "alice"}
 
     def test_eq(self, document):
         bucket_1 = bucketing.DocumentBucket(document)

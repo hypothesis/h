@@ -695,7 +695,7 @@ class TestNotificationsController:
         controller.get()
 
         controller.form.set_appstruct.assert_called_once_with(
-            {"notifications": set(["reply"])}
+            {"notifications": {"reply"}}
         )
 
     def test_it_does_not_render_form_if_user_has_no_email_address(
@@ -746,7 +746,7 @@ class TestNotificationsController:
         subs = [FakeSubscription("reply", True), FakeSubscription("foo", False)]
         subscriptions_model.get_subscriptions_for_uri.return_value = subs
         controller = views.NotificationsController(pyramid_request)
-        controller.form = form_validating_to({"notifications": set(["foo"])})
+        controller.form = form_validating_to({"notifications": {"foo"}})
 
         controller.post()
 

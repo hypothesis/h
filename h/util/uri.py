@@ -66,31 +66,29 @@ import re
 
 from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus, urlparse
 
-URL_SCHEMES = set(["http", "https"])
+URL_SCHEMES = {"http", "https"}
 
 # List of regular expressions matching the names of query parameters that we
 # strip from URLs as part of normalization.
 BLACKLISTED_QUERY_PARAMS = [
     re.compile(regex)
-    for regex in set(
-        [
-            # Google AdWords tracking identifier. Reference:
-            #
-            #    https://support.google.com/analytics/answer/2938246?hl=en
-            #
-            r"^gclid$",
-            # Google Analytics campaigns. Reference:
-            #
-            #     https://support.google.com/analytics/answer/1033867?hl=en
-            #
-            r"^utm_(campaign|content|medium|source|term)$",
-            # WebTrends Analytics query params. Reference:
-            #
-            #     http://help.webtrends.com/en/analytics10/#qpr_about.html
-            #
-            r"^WT\..+$",
-        ]
-    )
+    for regex in {
+        # Google AdWords tracking identifier. Reference:
+        #
+        #    https://support.google.com/analytics/answer/2938246?hl=en
+        #
+        r"^gclid$",
+        # Google Analytics campaigns. Reference:
+        #
+        #     https://support.google.com/analytics/answer/1033867?hl=en
+        #
+        r"^utm_(campaign|content|medium|source|term)$",
+        # WebTrends Analytics query params. Reference:
+        #
+        #     http://help.webtrends.com/en/analytics10/#qpr_about.html
+        #
+        r"^WT\..+$",
+    }
 ]
 
 # From RFC3986. The ABNF for path segments is

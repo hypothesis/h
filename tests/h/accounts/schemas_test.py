@@ -16,7 +16,7 @@ pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 class TestUnblacklistedUsername:
     def test(self, dummy_node):
-        blacklist = set(["admin", "root", "postmaster"])
+        blacklist = {"admin", "root", "postmaster"}
 
         # Should not raise for valid usernames
         schemas.unblacklisted_username(dummy_node, "john", blacklist)

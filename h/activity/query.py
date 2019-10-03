@@ -125,14 +125,12 @@ def execute(request, query, page_size):
     result.timeframes.extend(bucketing.bucket(anns))
 
     # Fetch all groups
-    group_pubids = set(
-        [
-            a.groupid
-            for t in result.timeframes
-            for b in t.document_buckets.values()
-            for a in b.annotations
-        ]
-    )
+    group_pubids = {
+        a.groupid
+        for t in result.timeframes
+        for b in t.document_buckets.values()
+        for a in b.annotations
+    }
     groups = {g.pubid: g for g in _fetch_groups(request.db, group_pubids)}
 
     # Add group information to buckets and present annotations

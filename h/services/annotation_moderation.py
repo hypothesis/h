@@ -38,7 +38,7 @@ class AnnotationModerationService:
             models.AnnotationModeration.annotation_id.in_(annotation_ids)
         )
 
-        return set([m.annotation_id for m in query])
+        return {m.annotation_id for m in query}
 
     def hide(self, annotation):
         """

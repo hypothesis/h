@@ -13,9 +13,11 @@ class TestNipsaIndex:
     def test_lists_flagged_usernames(self, pyramid_request):
         result = nipsa_index(pyramid_request)
 
-        assert set(result["userids"]) == set(
-            ["acct:kiki@example.com", "acct:ursula@foo.org", "acct:osono@example.com"]
-        )
+        assert set(result["userids"]) == {
+            "acct:kiki@example.com",
+            "acct:ursula@foo.org",
+            "acct:osono@example.com",
+        }
 
     def test_lists_flagged_usernames_no_results(self, nipsa_service, pyramid_request):
         nipsa_service.flagged = set([])
@@ -85,10 +87,10 @@ class TestNipsaAddRemove:
 
 class FakeNipsaService:
     def __init__(self, users):
-        self.flagged = set([u for u in users if u.nipsa])
+        self.flagged = {u for u in users if u.nipsa}
 
     def fetch_all_flagged_userids(self):
-        return set([u.userid for u in self.flagged])
+        return {u.userid for u in self.flagged}
 
     def flag(self, user):
         self.flagged.add(user)

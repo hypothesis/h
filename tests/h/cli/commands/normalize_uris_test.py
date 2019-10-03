@@ -176,7 +176,7 @@ def test_it_reindexes_changed_annotations(req, index, factories, db_session):
 
     normalize_uris.normalize_annotations(req)
 
-    indexer.index.assert_called_once_with(set([annotation_1.id, annotation_2.id]))
+    indexer.index.assert_called_once_with({annotation_1.id, annotation_2.id})
 
 
 def test_it_skips_reindexing_unaltered_annotations(req, index, factories, db_session):
@@ -190,7 +190,7 @@ def test_it_skips_reindexing_unaltered_annotations(req, index, factories, db_ses
 
     normalize_uris.normalize_annotations(req)
 
-    indexer.index.assert_called_once_with(set([annotation_2.id]))
+    indexer.index.assert_called_once_with({annotation_2.id})
 
 
 @pytest.fixture

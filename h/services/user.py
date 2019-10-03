@@ -8,7 +8,7 @@ from h.models import User, UserIdentity
 from h.util.user import split_user
 from h.util.db import on_transaction_end
 
-UPDATE_PREFS_ALLOWED_KEYS = set(["show_sidebar_tutorial"])
+UPDATE_PREFS_ALLOWED_KEYS = {"show_sidebar_tutorial"}
 
 
 class UserNotActivated(Exception):
