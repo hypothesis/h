@@ -2,8 +2,6 @@
 
 """Exceptions raised by :mod:`h.services`."""
 
-from __future__ import unicode_literals
-
 
 class ServiceError(Exception):
     """Base class for all :mod:`h.services` exception classes."""

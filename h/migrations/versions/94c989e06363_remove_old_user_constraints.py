@@ -9,8 +9,6 @@ Revises: b0e1a12de5e8
 Create Date: 2016-09-08 16:21:25.444258
 """
 
-from __future__ import unicode_literals
-
 from alembic import op
 
 

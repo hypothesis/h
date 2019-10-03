@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Database query utilities."""
-from __future__ import unicode_literals
-
 import sqlalchemy as sa
 
 

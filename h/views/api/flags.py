@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.views.api.config import api_config

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import jinja2
 
 from h._compat import text_type, urlparse, url_unquote

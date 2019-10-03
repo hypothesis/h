@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from webob.multidict import MultiDict
 
 from h.search import Search

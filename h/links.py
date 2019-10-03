@@ -3,8 +3,6 @@
 """
 Provides links to different representations of annotations.
 """
-from __future__ import unicode_literals
-
 
 from h._compat import urlparse, url_unquote
 

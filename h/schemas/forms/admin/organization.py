@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import colander
 from deform.widget import TextAreaWidget, TextInputWidget
 from xml.etree import ElementTree

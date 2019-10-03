@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from io import StringIO
 from sys import version_info
 from unittest.mock import patch

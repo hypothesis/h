@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from pyramid import httpexceptions
 from webob.multidict import MultiDict
 

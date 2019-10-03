@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 from dateutil.parser import parse
 from dateutil import tz
 from datetime import datetime as dt

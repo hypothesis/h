@@ -6,8 +6,6 @@ Revises: 140b450225cd
 Create Date: 2016-11-25 15:33:53.417103
 """
 
-from __future__ import unicode_literals
-
 from alembic import op
 
 revision = "8990247b876c"

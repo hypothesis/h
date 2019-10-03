@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 API_VERSIONS = ["v1", "v2"]
 """All of the app's known API versions"""
 

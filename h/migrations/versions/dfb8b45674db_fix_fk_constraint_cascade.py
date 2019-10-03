@@ -6,8 +6,6 @@ Revises: dba81a22ea75
 Create Date: 2017-07-18 13:32:04.515830
 """
 
-from __future__ import unicode_literals
-
 from alembic import op
 from sqlalchemy.dialects import postgresql
 

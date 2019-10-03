@@ -6,8 +6,6 @@ Revises: 8990247b876c
 Create Date: 2016-11-25 15:58:59.517470
 """
 
-from __future__ import unicode_literals
-
 import enum
 
 from alembic import op

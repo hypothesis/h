@@ -5,8 +5,6 @@ The query parser which converts our subset of the Apache Lucene syntax and
 transforms it into a MultiDict structure that h.search understands.
 """
 
-from __future__ import unicode_literals
-
 from collections import namedtuple
 
 import pyparsing as pp

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 
 class DocumentJSONPresenter:
     def __init__(self, document):

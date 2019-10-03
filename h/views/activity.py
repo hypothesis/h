@@ -2,8 +2,6 @@
 
 """Activity pages views."""
 
-from __future__ import unicode_literals
-
 from h._compat import urlparse
 
 from jinja2 import Markup

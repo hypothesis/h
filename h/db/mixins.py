@@ -2,8 +2,6 @@
 
 """Reusable mixins for SQLAlchemy declarative models."""
 
-from __future__ import unicode_literals
-
 import datetime
 
 import sqlalchemy as sa

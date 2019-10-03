@@ -5,8 +5,6 @@ Functional tests for client API errors
 Uses create-group endpoint as it can raise all relevant client error codes.
 """
 
-from __future__ import unicode_literals
-
 import pytest
 import base64
 

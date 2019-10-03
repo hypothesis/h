@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helpers for generating and retrieving service link metadata"""
 
-from __future__ import unicode_literals
-
 
 class ServiceLink:
     """Encapsulate metadata about an API service"""

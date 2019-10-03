@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Functions for generating Atom feeds."""
-from __future__ import unicode_literals
 from pyramid import i18n
 
 from h import presenters

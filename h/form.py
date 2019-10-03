@@ -5,7 +5,6 @@ Configure deform to use custom templates.
 Sets up the form handling and rendering library, deform, to use our own custom
 form templates in preference to the defaults.
 """
-from __future__ import unicode_literals
 import deform
 import jinja2
 from pyramid import httpexceptions

@@ -13,8 +13,6 @@ Revises: 7f3d80550fff
 Create Date: 2018-01-30 11:12:23.520717
 """
 
-from __future__ import unicode_literals
-
 from datetime import datetime
 import logging
 

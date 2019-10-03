@@ -2,8 +2,6 @@
 
 """Helpers for parsing settings from the environment."""
 
-from __future__ import unicode_literals
-
 import logging
 import os
 

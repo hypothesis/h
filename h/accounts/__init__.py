@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from itsdangerous import URLSafeTimedSerializer
 
 from h.security import derive_key

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 

@@ -3,8 +3,6 @@
 Test the versioning of our API using Accept headers
 """
 
-from __future__ import unicode_literals
-
 
 class TestIndexEndpointVersions:
     def test_index_sets_version_response_header(self, app):

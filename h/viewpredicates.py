@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Custom Pyramid view predicates."""
-from __future__ import unicode_literals
 
 
 class FeaturePredicate:

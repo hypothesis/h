@@ -5,8 +5,6 @@ Code responsible for rendering domain objects into various output
 formats.
 """
 
-from __future__ import unicode_literals
-
 from h.presenters.annotation_html import AnnotationHTMLPresenter
 from h.presenters.annotation_json import AnnotationJSONPresenter
 from h.presenters.annotation_jsonld import AnnotationJSONLDPresenter

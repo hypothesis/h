@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Functions for updating the search index."""
 
-from __future__ import division, unicode_literals
-
 import logging
 import time
 from collections import namedtuple

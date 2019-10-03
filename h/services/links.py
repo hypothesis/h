@@ -2,8 +2,6 @@
 
 """Tools for generating links to domain objects. """
 
-from __future__ import unicode_literals
-
 from pyramid.request import Request
 
 from h.auth import default_authority

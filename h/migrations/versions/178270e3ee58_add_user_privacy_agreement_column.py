@@ -4,8 +4,6 @@ Add user privacy agreement column
 Add a column to track user's most recent acceptance of privacy policy
 """
 
-from __future__ import unicode_literals
-
 from alembic import op
 import sqlalchemy as sa
 

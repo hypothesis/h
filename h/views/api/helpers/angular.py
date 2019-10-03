@@ -3,8 +3,6 @@
 Support for providing Angular-compatible routes for the client.
 """
 
-from __future__ import unicode_literals
-
 
 class AngularRouteTemplater:
     """

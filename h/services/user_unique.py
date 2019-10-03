@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from h.i18n import TranslationString as _  # noqa: N813
 from h import models
 

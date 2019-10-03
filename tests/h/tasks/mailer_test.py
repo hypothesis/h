@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from smtplib import SMTPServerDisconnected
 from unittest import mock
 

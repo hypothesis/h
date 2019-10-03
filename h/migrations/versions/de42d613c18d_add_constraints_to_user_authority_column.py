@@ -6,8 +6,6 @@ Revises: 2e2cc6a0c521
 Create Date: 2016-08-15 18:18:19.037667
 """
 
-from __future__ import unicode_literals
-
 from alembic import op
 
 

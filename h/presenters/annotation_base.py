@@ -4,8 +4,6 @@
 A base presenter for common properties needed when rendering annotations.
 """
 
-from __future__ import unicode_literals
-
 from h.util.datetime import utc_iso8601
 
 

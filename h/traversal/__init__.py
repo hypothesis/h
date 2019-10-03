@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from h.traversal.roots import Root
 from h.traversal.roots import AnnotationRoot
 from h.traversal.roots import AuthClientRoot

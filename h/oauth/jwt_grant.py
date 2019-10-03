@@ -35,8 +35,6 @@ For more information, see the `oauthlib documentation`_ on grant types.
 .. _`oauthlib documentation`: http://oauthlib.readthedocs.io/en/latest/oauth2/grants/grants.html
 """
 
-from __future__ import unicode_literals
-
 import json
 
 from oauthlib.oauth2.rfc6749 import errors

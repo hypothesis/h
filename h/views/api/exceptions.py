@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Exceptions raised by the h application."""
 
-from __future__ import unicode_literals
-
 from pyramid import httpexceptions
 
 from h.i18n import TranslationString as _  # noqa: N813

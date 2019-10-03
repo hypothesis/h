@@ -6,8 +6,6 @@ Revises: 467ea2898660
 Create Date: 2016-06-29 10:57:37.466053
 """
 
-from __future__ import unicode_literals
-
 revision = "ccebe818f8e0"
 down_revision = "467ea2898660"
 

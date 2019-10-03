@@ -12,8 +12,6 @@ and returned.
 
 """
 
-from __future__ import unicode_literals
-
 import re
 
 

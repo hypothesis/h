@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from h import models
 from h import security
 from h.util.db import lru_cache_in_transaction

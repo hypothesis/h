@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 """Add path column to groupscope, and a composite index for the (origin, path) columns"""
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import division
-
 from alembic import op
 import sqlalchemy as sa
 

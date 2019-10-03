@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Authorization configuration."""
-from __future__ import unicode_literals
-
 from pyramid.authorization import ACLAuthorizationPolicy
 
 __all__ = ()
