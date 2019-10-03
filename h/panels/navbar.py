@@ -2,8 +2,6 @@
 
 """The navigation bar displayed at the top of most pages."""
 
-from __future__ import unicode_literals
-
 from pyramid_layout.panel import panel_config
 
 from h.i18n import TranslationString as _  # noqa

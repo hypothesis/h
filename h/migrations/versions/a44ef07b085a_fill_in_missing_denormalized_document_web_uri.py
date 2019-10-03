@@ -6,8 +6,6 @@ Revises: 58bb601c390f
 Create Date: 2016-09-12 15:31:00.597582
 """
 
-from __future__ import unicode_literals
-
 from collections import namedtuple
 
 from alembic import op

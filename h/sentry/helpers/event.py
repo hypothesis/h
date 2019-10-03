@@ -9,8 +9,6 @@ whether the event is an exception raised or an error logged. This class
 provides a more convenient interface to the interesting properties of events.
 """
 
-from __future__ import unicode_literals
-
 
 class Event:
     """A decorator for a sentry_sdk event."""

@@ -6,9 +6,6 @@ Revises: 39b1935d9e7b
 Create Date: 2016-08-10 14:09:01.787927
 """
 
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import sys
 from collections import namedtuple
 

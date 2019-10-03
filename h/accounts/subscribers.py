@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from pyramid.events import subscriber
 
 from h.accounts import events

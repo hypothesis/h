@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Custom Colander validators."""
 
-from __future__ import unicode_literals
-
 import colander
 
 

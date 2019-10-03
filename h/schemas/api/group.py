@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Schema for validating API group resources"""
 
-from __future__ import unicode_literals
-
 from h.schemas.base import JSONSchema, ValidationError
 from h.models.group import (
     GROUP_NAME_MIN_LENGTH,

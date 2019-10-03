@@ -8,9 +8,6 @@ integrates it with the Pyramid application by attaching a bootstrapped fake
 "request" object to the application where it can be retrieved by tasks.
 """
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 from datetime import timedelta
 import logging
 import os

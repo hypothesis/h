@@ -6,8 +6,6 @@ Revises: a2295c2bbe29
 Create Date: 2017-07-26 10:47:38.895306
 """
 
-from __future__ import unicode_literals
-
 import enum
 
 import sqlalchemy as sa

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from unittest import mock
 
 from h.events import AnnotationEvent, AnnotationTransformEvent

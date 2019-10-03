@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """API view decorators for exception views"""
 
-from __future__ import unicode_literals
-
 from pyramid.httpexceptions import HTTPNotFound, HTTPNotAcceptable
 
 from h.views.api.helpers.media_types import valid_media_types

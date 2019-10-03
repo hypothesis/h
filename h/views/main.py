@@ -6,8 +6,6 @@ Core application views.
 Important views which don't form part of any other major feature package.
 """
 
-from __future__ import unicode_literals
-
 import logging
 
 from pyramid import httpexceptions

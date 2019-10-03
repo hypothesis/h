@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from h.views.api.config import api_config
 from h.views.api.helpers.angular import AngularRouteTemplater
 from h.views.api.helpers import links as link_helpers

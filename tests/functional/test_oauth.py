@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Functional tests for getting and using OAuth 2 access and refresh tokens."""
 
-from __future__ import unicode_literals
-
 import calendar
 import datetime
 

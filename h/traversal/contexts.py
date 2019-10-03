@@ -19,8 +19,6 @@ For such a route Pyramid will conveniently pass the found context object into
 the view callable as the ``context`` argument.
 
 """
-from __future__ import unicode_literals
-
 from pyramid.security import DENY_ALL
 from pyramid.security import Allow
 from pyramid.security import principals_allowed_by_permission

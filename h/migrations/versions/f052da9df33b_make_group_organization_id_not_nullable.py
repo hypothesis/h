@@ -1,6 +1,4 @@
 """Make group.organization_id not nullable."""
-from __future__ import unicode_literals
-
 from alembic import op
 
 

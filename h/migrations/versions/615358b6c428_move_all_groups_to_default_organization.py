@@ -26,8 +26,6 @@ non-nullable) and we can fix up the resulting organization names and logos
 later.
 
 """
-from __future__ import unicode_literals
-
 import logging
 import random
 

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Error tracking service API and setup."""
-from __future__ import unicode_literals
-
 import sentry_sdk
 import sentry_sdk.integrations.celery
 import sentry_sdk.integrations.pyramid

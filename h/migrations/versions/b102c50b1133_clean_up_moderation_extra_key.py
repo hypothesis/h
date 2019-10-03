@@ -6,8 +6,6 @@ Revises: 50df3e6782aa
 Create Date: 2017-04-10 14:58:14.472500
 """
 
-from __future__ import unicode_literals
-
 import logging
 
 import sqlalchemy as sa

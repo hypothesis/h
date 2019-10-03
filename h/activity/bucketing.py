@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Code for bucketing annotations by time frame and document."""
 
-from __future__ import unicode_literals
-
 import collections
 import datetime
 

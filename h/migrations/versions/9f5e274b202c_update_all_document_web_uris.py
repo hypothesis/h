@@ -6,8 +6,6 @@ Revises: e10ce4472966
 Create Date: 2017-01-20 16:07:03.442975
 """
 
-from __future__ import unicode_literals
-
 from collections import namedtuple
 import logging
 

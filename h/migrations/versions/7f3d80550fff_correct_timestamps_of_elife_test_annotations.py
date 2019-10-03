@@ -12,8 +12,6 @@ Revises: 9bcc39244e82
 Create Date: 2017-11-29 15:06:59.207780
 """
 
-from __future__ import unicode_literals
-
 from datetime import datetime
 import logging
 

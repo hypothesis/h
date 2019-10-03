@@ -2,8 +2,6 @@
 
 """A context-aware link to the previous page."""
 
-from __future__ import unicode_literals
-
 from pyramid_layout.panel import panel_config
 
 from h._compat import urlparse

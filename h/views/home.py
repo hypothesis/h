@@ -2,8 +2,6 @@
 
 """Views serving the homepage and related endpoints."""
 
-from __future__ import unicode_literals
-
 from pyramid import httpexceptions
 from pyramid.view import view_config
 

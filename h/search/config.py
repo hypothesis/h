@@ -8,8 +8,6 @@ into Elasticsearch. It also contains some helper functions to create and update
 these settings in an Elasticsearch instance.
 """
 
-from __future__ import unicode_literals
-
 import binascii
 import elasticsearch
 import logging

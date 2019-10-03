@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from h import models
 from h.celery import celery
 from h.celery import get_task_logger

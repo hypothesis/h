@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 
 def transform_annotation(event):
     """Add a {"nipsa": True} field on moderated annotations or those whose users are flagged."""

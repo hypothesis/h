@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from pyramid.httpexceptions import HTTPConflict
 
 from h.auth.util import client_authority

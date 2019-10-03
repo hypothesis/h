@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from h.models.user import (
     DISPLAY_NAME_MAX_LENGTH,
     EMAIL_MAX_LENGTH,

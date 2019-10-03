@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-from __future__ import unicode_literals
 from h import __version__
 from h import emails
 from h import storage

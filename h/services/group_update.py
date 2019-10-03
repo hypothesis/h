@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from sqlalchemy.exc import SQLAlchemyError
 
 from h.services.exceptions import ValidationError, ConflictError

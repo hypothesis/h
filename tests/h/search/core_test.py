@@ -7,8 +7,6 @@ Tests for filtering/matching/aggregating on specific annotation fields are in
 `query_test.py`.
 """
 
-from __future__ import unicode_literals
-
 import datetime
 import pytest
 from webob.multidict import MultiDict

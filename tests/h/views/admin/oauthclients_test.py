@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from unittest.mock import create_autospec, Mock
 
 import pytest

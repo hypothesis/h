@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Add the user_identity table."""
-from __future__ import unicode_literals
-
 from alembic import op
 import sqlalchemy as sa
 

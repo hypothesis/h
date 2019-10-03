@@ -5,8 +5,6 @@ Revision ID: 63e8b1fe1d4b
 Revises: 6d9257ad610d
 Create Date: 2016-09-15 15:26:31.286536
 """
-from __future__ import unicode_literals
-
 import logging
 
 from alembic import op

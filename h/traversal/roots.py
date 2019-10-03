@@ -60,8 +60,6 @@ shouldn't return model objects directly).
    * https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/traversal.html
 
 """
-from __future__ import unicode_literals
-
 
 from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow, Authenticated
 import sqlalchemy.exc

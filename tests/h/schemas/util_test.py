@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import colander
 from webob.multidict import MultiDict
 import pytest

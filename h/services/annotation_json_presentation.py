@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from sqlalchemy.orm import subqueryload
 
 from h import formatters

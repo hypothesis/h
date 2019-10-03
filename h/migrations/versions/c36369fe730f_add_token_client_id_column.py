@@ -6,8 +6,6 @@ Revises: e15e47228c43
 Create Date: 2016-10-19 15:24:13.387546
 """
 
-from __future__ import unicode_literals
-
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql

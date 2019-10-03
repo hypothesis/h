@@ -1,6 +1,4 @@
 """Functions for generating RSS feeds."""
-from __future__ import unicode_literals
-
 from calendar import timegm
 from email.utils import formatdate
 

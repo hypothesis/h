@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Classes for validating data passed to the annotations API."""
-from __future__ import unicode_literals
-
 import colander
 import copy
 from dateutil.parser import parse

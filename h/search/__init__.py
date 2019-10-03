@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 from h.search.client import get_client
 from h.search.config import init
 from h.search.core import Search

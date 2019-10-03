@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 """Add index to user.nipsa"""
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import division
-
 from alembic import op
 import sqlalchemy as sa
 

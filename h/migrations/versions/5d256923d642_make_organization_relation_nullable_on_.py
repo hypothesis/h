@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 """Make organization relation nullable on group"""
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import division
-
 from alembic import op
 
 

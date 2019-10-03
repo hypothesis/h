@@ -2,8 +2,6 @@
 
 """Configuration for the h application."""
 
-from __future__ import unicode_literals
-
 import logging
 import os
 

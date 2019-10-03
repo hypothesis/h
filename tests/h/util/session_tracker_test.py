@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from uuid import uuid4
 import pytest
 from sqlalchemy.orm.util import identity_key

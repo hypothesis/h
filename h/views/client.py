@@ -6,8 +6,6 @@ Hypothesis client views.
 Views which exist either to serve or support the Hypothesis client.
 """
 
-from __future__ import unicode_literals
-
 import json
 import time
 
