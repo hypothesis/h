@@ -53,7 +53,7 @@ shell: python
 	tox -q -e py36-dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
-sql:
+sql: python
 	@tox -q -e docker-compose -- exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
