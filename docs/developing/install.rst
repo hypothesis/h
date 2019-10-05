@@ -76,10 +76,13 @@ Hypothesis apps:
 
     make devdata
 
-This requires you to have a git SSH key set up that has access to the private
-https://github.com/hypothesis/devdata repo. Otherwise ``make devdata`` will
-crash. If you aren't a Hypothesis team member and don't have access to this
-repo, you can skip this step and continue without the dev data.
+.. seealso::
+
+   ``make devdata`` requires you to have a git SSH key set up that has access
+   to the private https://github.com/hypothesis/devdata repo.  Otherwise it'll
+   crash.  If you can't use ``make devdata`` (for example because you aren't a
+   Hypothesis team member and don't have access to this repo, or because you're
+   setting up a production instance) then see :doc:`integrating-client`.
 
 Start the development server
 ----------------------------
