@@ -65,6 +65,22 @@ Start the services that h requires using Docker Compose:
 
    make services
 
+Create the development data and settings
+----------------------------------------
+
+Create the database contents and environment variable settings needed to get h
+working nicely with your local development instances of the rest of the
+Hypothesis apps:
+
+.. code-block:: shell
+
+    make devdata
+
+This requires you to have a git SSH key set up that has access to the private
+https://github.com/hypothesis/devdata repo. Otherwise ``make devdata`` will
+crash. If you aren't a Hypothesis team member and don't have access to this
+repo, you can skip this step and continue without the dev data.
+
 Start the development server
 ----------------------------
 
