@@ -11,7 +11,7 @@ from h.cli.commands import authclient as authclient_cli
 class TestAddCommand:
     def test_it_creates_a_public_authclient(self, cli, cliconfig, db_session):
         (authclient, _) = self._add_authclient(
-            cli, cliconfig, db_session, type_=u"public"
+            cli, cliconfig, db_session, type_="public"
         )
 
         assert authclient.authority == "publisher.org"
@@ -22,10 +22,10 @@ class TestAddCommand:
         self, cli, cliconfig, db_session, patch
     ):
         token_urlsafe = patch("h.cli.commands.authclient.token_urlsafe")
-        token_urlsafe.return_value = u"fixed-secret-token"
+        token_urlsafe.return_value = "fixed-secret-token"
 
         (authclient, _) = self._add_authclient(
-            cli, cliconfig, db_session, type_=u"confidential"
+            cli, cliconfig, db_session, type_="confidential"
         )
 
         assert authclient.authority == "publisher.org"
@@ -34,7 +34,7 @@ class TestAddCommand:
 
     def test_it_prints_the_id_for_public_client(self, cli, cliconfig, db_session):
         (authclient, output) = self._add_authclient(
-            cli, cliconfig, db_session, type_=u"public"
+            cli, cliconfig, db_session, type_="public"
         )
         expected_id_and_secret = "Client ID: {}".format(authclient.id)
         assert expected_id_and_secret in output
@@ -43,7 +43,7 @@ class TestAddCommand:
         self, cli, cliconfig, db_session
     ):
         (authclient, output) = self._add_authclient(
-            cli, cliconfig, db_session, type_=u"confidential"
+            cli, cliconfig, db_session, type_="confidential"
         )
         expected_id_and_secret = "Client ID: {}\n".format(
             authclient.id
@@ -53,14 +53,7 @@ class TestAddCommand:
     def _add_authclient(self, cli, cliconfig, db_session, type_):
         result = cli.invoke(
             authclient_cli.add,
-            [
-                u"--name",
-                u"Publisher",
-                u"--authority",
-                u"publisher.org",
-                u"--type",
-                type_,
-            ],
+            ["--name", "Publisher", "--authority", "publisher.org", "--type", type_],
             obj=cliconfig,
         )
 
@@ -68,7 +61,7 @@ class TestAddCommand:
 
         authclient = (
             db_session.query(models.AuthClient)
-            .filter(models.AuthClient.authority == u"publisher.org")
+            .filter(models.AuthClient.authority == "publisher.org")
             .first()
         )
         return (authclient, result.output)

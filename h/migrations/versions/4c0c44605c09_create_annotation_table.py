@@ -30,7 +30,7 @@ def upgrade():
         sa.Column("updated", sa.DateTime, server_default=sa.func.now(), nullable=False),
         sa.Column("userid", sa.UnicodeText(), nullable=False),
         sa.Column(
-            "groupid", sa.UnicodeText(), server_default=u"__world__", nullable=False
+            "groupid", sa.UnicodeText(), server_default="__world__", nullable=False
         ),
         sa.Column("text", sa.UnicodeText(), nullable=True),
         sa.Column(
