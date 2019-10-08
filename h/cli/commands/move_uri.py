@@ -96,7 +96,7 @@ def _fetch_document_uri_canonical_self_claim(session, uri_):
         session.query(models.DocumentURI)
         .filter(
             models.DocumentURI.uri_normalized == uri.normalize(uri_),
-            models.DocumentURI.type.in_([u"self-claim", u"rel-canonical"]),
+            models.DocumentURI.type.in_(["self-claim", "rel-canonical"]),
         )
         .all()
     )

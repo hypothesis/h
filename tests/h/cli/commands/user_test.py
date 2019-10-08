@@ -17,12 +17,12 @@ class TestAddCommand:
         result = cli.invoke(
             user_cli.add,
             [
-                u"--username",
-                u"admin",
-                u"--email",
-                u"admin@localhost",
-                u"--password",
-                u"admin",
+                "--username",
+                "admin",
+                "--email",
+                "admin@localhost",
+                "--password",
+                "admin",
             ],
             obj=cliconfig,
         )
@@ -30,9 +30,9 @@ class TestAddCommand:
         assert result.exit_code == 0
 
         signup_service.signup.assert_called_with(
-            username=u"admin",
-            email=u"admin@localhost",
-            password=u"admin",
+            username="admin",
+            email="admin@localhost",
+            password="admin",
             require_activation=False,
         )
 
@@ -40,14 +40,14 @@ class TestAddCommand:
         result = cli.invoke(
             user_cli.add,
             [
-                u"--username",
-                u"admin",
-                u"--email",
-                u"admin@localhost",
-                u"--password",
-                u"admin",
-                u"--authority",
-                u"publisher.org",
+                "--username",
+                "admin",
+                "--email",
+                "admin@localhost",
+                "--password",
+                "admin",
+                "--authority",
+                "publisher.org",
             ],
             obj=cliconfig,
         )
@@ -55,10 +55,10 @@ class TestAddCommand:
         assert result.exit_code == 0
 
         signup_service.signup.assert_called_with(
-            username=u"admin",
-            email=u"admin@localhost",
-            password=u"admin",
-            authority=u"publisher.org",
+            username="admin",
+            email="admin@localhost",
+            password="admin",
+            authority="publisher.org",
             require_activation=False,
         )
 
@@ -66,7 +66,7 @@ class TestAddCommand:
 class TestAdminCommand:
     def test_it_adds_admin(self, cli, cliconfig, non_admin_user, db_session):
         result = cli.invoke(
-            user_cli.admin, [u"--on", non_admin_user.username], obj=cliconfig
+            user_cli.admin, ["--on", non_admin_user.username], obj=cliconfig
         )
 
         assert result.exit_code == 0
@@ -85,12 +85,12 @@ class TestAdminCommand:
     def test_it_adds_admin_with_specific_authority(
         self, cli, cliconfig, non_admin_user, db_session
     ):
-        non_admin_user.authority = u"partner.org"
+        non_admin_user.authority = "partner.org"
         db_session.flush()
 
         result = cli.invoke(
             user_cli.admin,
-            [u"--authority", u"partner.org", non_admin_user.username],
+            ["--authority", "partner.org", non_admin_user.username],
             obj=cliconfig,
         )
 
@@ -101,7 +101,7 @@ class TestAdminCommand:
 
     def test_it_removes_admin(self, cli, cliconfig, admin_user, db_session):
         result = cli.invoke(
-            user_cli.admin, [u"--off", admin_user.username], obj=cliconfig
+            user_cli.admin, ["--off", admin_user.username], obj=cliconfig
         )
 
         assert result.exit_code == 0
@@ -112,11 +112,11 @@ class TestAdminCommand:
     def test_it_removes_admin_with_specific_authority(
         self, cli, cliconfig, admin_user, db_session
     ):
-        admin_user.authority = u"partner.org"
+        admin_user.authority = "partner.org"
 
         result = cli.invoke(
             user_cli.admin,
-            [u"--off", u"--authority", u"partner.org", admin_user.username],
+            ["--off", "--authority", "partner.org", admin_user.username],
             obj=cliconfig,
         )
 
@@ -169,7 +169,7 @@ class TestPasswordCommand:
         self, cli, cliconfig, user, db_session, password_service
     ):
         result = cli.invoke(
-            user_cli.password, [user.username, u"--password", u"newpass"], obj=cliconfig
+            user_cli.password, [user.username, "--password", "newpass"], obj=cliconfig
         )
 
         assert result.exit_code == 0
@@ -180,12 +180,12 @@ class TestPasswordCommand:
     def test_it_changes_password_with_specific_authority(
         self, cli, cliconfig, user, db_session, password_service
     ):
-        user.authority = u"partner.org"
+        user.authority = "partner.org"
         db_session.flush()
 
         result = cli.invoke(
             user_cli.password,
-            [u"--authority", u"partner.org", user.username, u"--password", u"newpass"],
+            ["--authority", "partner.org", user.username, "--password", "newpass"],
             obj=cliconfig,
         )
 
@@ -199,7 +199,7 @@ class TestPasswordCommand:
     ):
         result = cli.invoke(
             user_cli.password,
-            ["bogus_%s" % user.username, u"--password", u"newpass"],
+            ["bogus_%s" % user.username, "--password", "newpass"],
             obj=cliconfig,
         )
 
@@ -214,7 +214,7 @@ class TestPasswordCommand:
 
         result = cli.invoke(
             user_cli.password,
-            ["--authority", "foo.com", user.username, u"--password", u"newpass"],
+            ["--authority", "foo.com", user.username, "--password", "newpass"],
             obj=cliconfig,
         )
 
@@ -240,12 +240,12 @@ class TestDeleteUserCommand:
     def test_it_deletes_user_with_specific_authority(
         self, cli, cliconfig, user, db_session
     ):
-        user.authority = u"partner.org"
+        user.authority = "partner.org"
         db_session.flush()
 
         result = cli.invoke(
             user_cli.delete,
-            [u"--authority", u"partner.org", user.username],
+            ["--authority", "partner.org", user.username],
             obj=cliconfig,
         )
 
