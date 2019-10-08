@@ -129,8 +129,8 @@ def _maybe_create_default_organization(engine, authority):
         default_org = models.Organization(
             name="Hypothesis", authority=authority, pubid="__default__"
         )
-        with resource_stream('h', 'static/images/icons/logo.svg') as h_logo:
-            default_org.logo = h_logo.read().decode('utf-8')
+        with resource_stream("h", "static/images/icons/logo.svg") as h_logo:
+            default_org.logo = h_logo.read().decode("utf-8")
         session.add(default_org)
 
     session.commit()
