@@ -47,7 +47,7 @@ class FlagService:
             models.Flag.annotation_id.in_(annotation_ids), models.Flag.user == user
         )
 
-        return set([f.annotation_id for f in query])
+        return {f.annotation_id for f in query}
 
     def create(self, user, annotation):
         """

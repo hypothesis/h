@@ -172,10 +172,10 @@ class TestThread:
         assert root.thread_ids == []
 
     def test_thread_with_replies(self, root, reply, subreply):
-        assert set(root.thread) == set([reply, subreply])
+        assert set(root.thread) == {reply, subreply}
 
     def test_thread_ids_with_replies(self, root, reply, subreply):
-        assert set(root.thread_ids) == set([reply.id, subreply.id])
+        assert set(root.thread_ids) == {reply.id, subreply.id}
 
     @pytest.mark.usefixtures("subreply")
     def test_reply_has_no_thread(self, reply):

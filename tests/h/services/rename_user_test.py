@@ -84,7 +84,7 @@ class TestRenameUserService:
         service.rename(user, "panda")
 
         userids = [ann.userid for ann in db_session.query(models.Annotation)]
-        assert set([user.userid]) == set(userids)
+        assert {user.userid} == set(userids)
 
     def test_rename_reindexes_the_users_annotations(
         self, service, user, annotations, indexer

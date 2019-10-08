@@ -19,9 +19,11 @@ class TestStaffIndex:
     def test_context_contains_staff_usernames(self, pyramid_request):
         result = staff_index(pyramid_request)
 
-        assert set(result["staff"]) == set(
-            ["acct:agnos@example.com", "acct:bojan@example.com", "acct:cristof@foo.org"]
-        )
+        assert set(result["staff"]) == {
+            "acct:agnos@example.com",
+            "acct:bojan@example.com",
+            "acct:cristof@foo.org",
+        }
 
 
 @pytest.mark.usefixtures("users", "routes")

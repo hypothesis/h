@@ -810,9 +810,11 @@ class TestTokenAuthenticationPolicy:
 
         result = policy.effective_principals(pyramid_request)
 
-        assert set(result) > set(
-            ["acct:foo@example.com", "acct:foo@example.com.foo", "group:donkeys"]
-        )
+        assert set(result) > {
+            "acct:foo@example.com",
+            "acct:foo@example.com.foo",
+            "group:donkeys",
+        }
 
     @pytest.fixture
     def fake_token(self):

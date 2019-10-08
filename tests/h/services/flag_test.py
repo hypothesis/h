@@ -25,7 +25,7 @@ class TestFlagServiceFlagged:
 
         all_flagged = svc.all_flagged(user, [f.annotation_id for f in flags])
 
-        assert all_flagged == set([flags[-1].annotation_id])
+        assert all_flagged == {flags[-1].annotation_id}
 
     @pytest.mark.usefixtures("flags")
     def test_it_handles_all_flagged_with_no_ids(self, svc, factories):

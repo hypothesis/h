@@ -20,7 +20,7 @@ _ = i18n.TranslationString
 
 def unblacklisted_group_name_slug(node, value):
     """Colander validator that ensures the "slugified" group name is not blacklisted."""
-    if slugify.slugify(value).lower() in set(["edit", "leave"]):
+    if slugify.slugify(value).lower() in {"edit", "leave"}:
         raise colander.Invalid(
             node,
             _("Sorry, this group name is not allowed. " "Please choose another one."),

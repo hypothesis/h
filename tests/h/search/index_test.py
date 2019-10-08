@@ -502,7 +502,7 @@ class TestBatchIndexer:
 
     def test_it_returns_errored_annotation_ids(self, batch_indexer, factories):
         annotations = factories.Annotation.create_batch(3)
-        expected_errored_ids = set([annotations[0].id, annotations[2].id])
+        expected_errored_ids = {annotations[0].id, annotations[2].id}
 
         elasticsearch.helpers.streaming_bulk = mock.Mock()
         elasticsearch.helpers.streaming_bulk.return_value = [
@@ -519,7 +519,7 @@ class TestBatchIndexer:
         self, db_session, es_client, factories, pyramid_request
     ):
         annotations = factories.Annotation.create_batch(3)
-        expected_errored_ids = set([annotations[1].id])
+        expected_errored_ids = {annotations[1].id}
 
         elasticsearch.helpers.streaming_bulk = mock.Mock()
         elasticsearch.helpers.streaming_bulk.return_value = [

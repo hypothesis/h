@@ -162,7 +162,7 @@ def document_uris_from_links(link_dicts, claimant):
 
         # Disregard Highwire PDF links as these are being added separately from
         # the highwire metadata later on.
-        if set(link_keys) == set(["href", "type"]):
+        if set(link_keys) == {"href", "type"}:
             if link["type"] == "application/pdf":
                 continue
 

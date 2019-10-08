@@ -78,7 +78,7 @@ def set_cors_headers(
         )
 
     # Always explicitly allow OPTIONS requests.
-    methods = set(["OPTIONS"])
+    methods = {"OPTIONS"}
     if allow_methods is not None:
         methods.update(allow_methods)
 

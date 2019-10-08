@@ -378,8 +378,8 @@ class TestGroupSearchController:
     ):
         result = controller.search()
 
-        actual = set([m["username"] for m in result["group_users_args"][1]])
-        expected = set([m.username for m in test_group.members])
+        actual = {m["username"] for m in result["group_users_args"][1]}
+        expected = {m.username for m in test_group.members}
         assert actual == expected
 
     @pytest.mark.parametrize(
@@ -392,8 +392,8 @@ class TestGroupSearchController:
     ):
         result = controller.search()
 
-        actual = set([m["userid"] for m in result["group_users_args"][1]])
-        expected = set([m.userid for m in test_group.members])
+        actual = {m["userid"] for m in result["group_users_args"][1]}
+        expected = {m.userid for m in test_group.members}
         assert actual == expected
 
     @pytest.mark.parametrize(
@@ -447,8 +447,8 @@ class TestGroupSearchController:
     ):
         result = controller.search()
 
-        actual = set([m["username"] for m in result["group_users_args"][1]])
-        expected = set([test_group.creator.username])
+        actual = {m["username"] for m in result["group_users_args"][1]}
+        expected = {test_group.creator.username}
         assert actual == expected
 
     @pytest.mark.parametrize(
@@ -461,8 +461,8 @@ class TestGroupSearchController:
     ):
         result = controller.search()
 
-        actual = set([m["userid"] for m in result["group_users_args"][1]])
-        expected = set([test_group.creator.userid])
+        actual = {m["userid"] for m in result["group_users_args"][1]}
+        expected = {test_group.creator.userid}
         assert actual == expected
 
     @pytest.mark.parametrize(

@@ -144,9 +144,10 @@ class TestGroupJSONPresenter:
 
         assert "scopes" in model
         assert model["scopes"]["enforced"] is False
-        assert set(model["scopes"]["uri_patterns"]) == set(
-            ["http://foo.com/bar*", "https://foo.com/baz*"]
-        )
+        assert set(model["scopes"]["uri_patterns"]) == {
+            "http://foo.com/bar*",
+            "https://foo.com/baz*",
+        }
 
     def test_expanded_scopes_uri_patterns_empty_if_no_scopes(
         self, factories, GroupContext

@@ -52,7 +52,7 @@ class TestFeature:
 
         Feature.remove_old_flags(db_session)
 
-        remaining = set([f.name for f in db_session.query(Feature).all()])
+        remaining = {f.name for f in db_session.query(Feature).all()}
         assert remaining == {"abouttoberemoved", "notification"}
 
     @pytest.fixture

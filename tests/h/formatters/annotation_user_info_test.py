@@ -18,7 +18,7 @@ class TestAnnotationUserInfoFormatter:
         formatter.preload([annotation_1.id, annotation_2.id])
 
         user_svc.fetch_all.assert_called_once_with(
-            set([annotation_1.userid, annotation_2.userid])
+            {annotation_1.userid, annotation_2.userid}
         )
 
     def test_preload_skips_fetching_for_empty_ids(self, formatter, user_svc):

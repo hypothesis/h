@@ -31,7 +31,7 @@ class NipsaService:
 
         # Filter using `is_` to match the index predicate for `User.nipsa`.
         query = self.session.query(User).filter(User.nipsa.is_(True))
-        self._flagged_userids = set([u.userid for u in query])
+        self._flagged_userids = {u.userid for u in query}
 
         return self._flagged_userids
 
