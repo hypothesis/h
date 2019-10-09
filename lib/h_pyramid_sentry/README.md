@@ -25,18 +25,21 @@ Usage
 -----
 
 To load the basic integration, in your Pyramid app config add:
-
-    # Hook into Pyramid
-    config.include("h_pyramid_sentry")
+```python
+# Hook into Pyramid
+config.include("h_pyramid_sentry")
+```
 
 To set some custom filters to exclude certain errors from logging to Sentry:
 
-    from h_pyramid_sentry import EventFilter
+```python
+from h_pyramid_sentry import EventFilter
 
-    EventFilter.set_filters([
-        # Filter out ValueErrors
-        lambda event: instanceof(event.exception, ValueError)
-    ]])
+EventFilter.set_filters([
+    # Filter out ValueErrors
+    lambda event: instanceof(event.exception, ValueError)
+]])
+```
 
 Sentry configuration
 --------------------
