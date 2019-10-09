@@ -50,10 +50,13 @@ class TestFilterRetryableError:
 
         is_error_retryable.assert_called_once_with(pyramid_request, event.exception)
 
-    def test_it_doesnt_filter_uncaught_errors(self, event, get_current_request):
+    def test_it_doesnt_filter_uncaught_errors(
+        self, event, get_current_request, is_error_retryable
+    ):
         get_current_request.return_value = None
 
         assert filters.filter_retryable_error(event) is True
+        is_error_retryable.assert_not_called()
 
     def test_it_filters_retryable_errors(self, event, is_error_retryable):
         is_error_retryable.return_value = True
