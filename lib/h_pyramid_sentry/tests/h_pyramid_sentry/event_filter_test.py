@@ -43,7 +43,7 @@ class TestEventFilter:
         with pytest.raises(ValueError):
             EventFilter.set_filters(["not a function"])
 
-    def test_it_passes_error_when_filter_function_returns_false(self):
+    def test_it_doesnt_filter_if_all_filter_functions_return_False(self):
         EventFilter.set_filters([self.never_filter, self.never_filter])
 
         assert (
