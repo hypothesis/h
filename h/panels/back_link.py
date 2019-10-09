@@ -2,9 +2,10 @@
 
 """A context-aware link to the previous page."""
 
+from urllib.parse import urlparse
+
 from pyramid_layout.panel import panel_config
 
-from h._compat import urlparse
 from h.i18n import TranslationString as _  # noqa
 
 
@@ -14,7 +15,7 @@ def back_link(context, request):
     A link which takes the user back to the previous page on the site.
     """
 
-    referrer_path = urlparse.urlparse(request.referrer or "").path
+    referrer_path = urlparse(request.referrer or "").path
     current_username = request.user.username
 
     if referrer_path == request.route_path(

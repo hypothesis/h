@@ -8,14 +8,13 @@ Create Date: 2017-01-20 16:07:03.442975
 
 from collections import namedtuple
 import logging
+from urllib.parse import urlparse
 
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import subqueryload
-
-from h._compat import urlparse
 
 
 revision = "9f5e274b202c"
@@ -46,7 +45,7 @@ class Document(Base):
                 uri = document_uri.uri
                 if type_ is not None and document_uri.type != type_:
                     continue
-                if urlparse.urlparse(uri).scheme not in ["http", "https"]:
+                if urlparse(uri).scheme not in ["http", "https"]:
                     continue
                 return document_uri.uri
 
