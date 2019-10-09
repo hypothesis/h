@@ -42,6 +42,8 @@ from gunicorn.workers.ggevent import GeventPyWSGIWorker, PyWSGIHandler, PyWSGISe
 from ws4py import format_addresses
 
 from h.config import configure
+from h.sentry_filters import SENTINEL_FILTERS
+from h_pyramid_sentry import EventFilter
 
 log = logging.getLogger(__name__)
 
@@ -157,7 +159,6 @@ def create_app(global_config, **settings):
     config.include("h.authz")
     config.include("h.db")
     config.include("h.session")
-    config.include("h.sentry")
     config.include("h.services")
     config.include("h.stats")
 
@@ -172,5 +173,9 @@ def create_app(global_config, **settings):
     config.add_route("api.annotation", "/api/annotations/{id}", static=True)
 
     config.include("h.streamer")
+
+    # Configure sentry
+    config.include("h_pyramid_sentry")
+    EventFilter.set_filters(SENTINEL_FILTERS)
 
     return config.make_wsgi_app()

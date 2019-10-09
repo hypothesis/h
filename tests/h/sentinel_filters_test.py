@@ -3,7 +3,7 @@ import ws4py
 
 from unittest import mock
 
-from h_pyramid_sentry import sentry_filters as f
+from h import sentry_filters as f
 from h_pyramid_sentry.event import Event
 
 
