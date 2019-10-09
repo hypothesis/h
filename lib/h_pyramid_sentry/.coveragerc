@@ -1,0 +1,10 @@
+[run]
+branch = True
+parallel = True
+source =
+    h_pyramid_sentry
+    tests
+
+[report]
+show_missing = True
+

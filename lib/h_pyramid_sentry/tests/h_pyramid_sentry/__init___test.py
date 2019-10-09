@@ -1,19 +1,19 @@
-# -*- coding: utf-8 -*-
 import pytest
 
-from h.sentry import includeme, report_exception
-from h.sentry.helpers.before_send import before_send
+from pyramid.testing import testConfig
+
+from h_pyramid_sentry import includeme, report_exception, EventFilter
 
 
 class TestReportException:
-    def test_it_reports_the_exception_to_Sentry(self, sentry_sdk):
+    def test_it_reports_the_exception_to_sentry(self, sentry_sdk):
         exc = ValueError("Test exception")
 
         report_exception(exc)
 
         sentry_sdk.capture_exception.assert_called_once_with(exc)
 
-    def test_exc_defaults_to_None(self, sentry_sdk):
+    def test_exc_defaults_to_none(self, sentry_sdk):
         report_exception()
 
         sentry_sdk.capture_exception.assert_called_once_with(None)
@@ -30,15 +30,15 @@ class TestIncludeMe:
             ],
             environment="test",
             send_default_pii=True,
-            before_send=before_send,
+            before_send=EventFilter.before_send,
         )
 
-    @pytest.fixture(autouse=True)
-    def pyramid_config(self, pyramid_config):
-        pyramid_config.registry.settings["h.sentry_environment"] = "test"
-        return pyramid_config
+    @pytest.fixture
+    def pyramid_config(self):
+        with testConfig(settings={"h.sentry_environment": "test"}) as config:
+            yield config
 
 
 @pytest.fixture(autouse=True)
 def sentry_sdk(patch):
-    return patch("h.sentry.sentry_sdk")
+    return patch("h_pyramid_sentry.sentry_sdk")

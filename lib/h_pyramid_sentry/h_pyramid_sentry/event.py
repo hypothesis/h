@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 """
 Decorator class for Sentry events.
 
 Centralizes Sentry event parsing in one reusable place. Sentry events don't
-have a very convenient interface in the form that sentry_sdk sends them to us in.
+have a very convenient interface in the form that sentry_sdk sends them to
+us in.
+
 They're dicts of dicts and tuples, and the structure changes depending on
 whether the event is an exception raised or an error logged. This class
 provides a more convenient interface to the interesting properties of events.

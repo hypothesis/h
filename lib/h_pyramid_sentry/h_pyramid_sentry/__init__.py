@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Error tracking service API and setup."""
 import sentry_sdk
-import sentry_sdk.integrations.celery
-import sentry_sdk.integrations.pyramid
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.pyramid import PyramidIntegration
 
-from h.sentry.helpers.before_send import before_send as _before_send
+from h_pyramid_sentry.event_filter import EventFilter
 
 
 def report_exception(exc=None):
@@ -20,14 +19,13 @@ def report_exception(exc=None):
     sentry_sdk.capture_exception(exc)
 
 
+# Pyramid integration point
 def includeme(config):
     """Set up the error tracking service."""
+
     sentry_sdk.init(
-        integrations=[
-            sentry_sdk.integrations.celery.CeleryIntegration(),
-            sentry_sdk.integrations.pyramid.PyramidIntegration(),
-        ],
+        integrations=[CeleryIntegration(), PyramidIntegration()],
         environment=config.registry.settings["h.sentry_environment"],
         send_default_pii=True,
-        before_send=_before_send,
+        before_send=EventFilter.before_send,
     )

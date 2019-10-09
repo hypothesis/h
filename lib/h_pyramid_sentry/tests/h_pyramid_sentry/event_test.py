@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-from h.sentry.helpers.event import Event
+from h_pyramid_sentry.event import Event
 
 
 class TestEvent:

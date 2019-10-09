@@ -1,42 +1,48 @@
-# -*- coding: utf-8 -*-
-from unittest import mock
-
 import pytest
-
 import ws4py
 
-from h.sentry.helpers import filters
-from h.sentry.helpers.event import Event
+from unittest import mock
+
+from h_pyramid_sentry import sentry_filters as f
+from h_pyramid_sentry.event import Event
 
 
 class TestFilterWS4PYErrorLogging:
     def test_it_filters_ws4py_logger_events(self):
         event = logger_event("ws4py", "Error when terminating the connection")
-        assert filters.filter_ws4py_error_logging(event) is False
+        assert f.filter_ws4py_error_logging(event) is True
 
-    def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
-        assert filters.filter_ws4py_error_logging(unexpected_logger_event) is True
+    def test_it_doesnt_filter_other_logger_events(
+            self, unexpected_logger_event):
+        assert f.filter_ws4py_error_logging(
+            unexpected_logger_event) is False
 
-    def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
-        assert filters.filter_ws4py_error_logging(unexpected_exception_event) is True
+    def test_it_doesnt_filter_exception_events(
+            self, unexpected_exception_event):
+        assert f.filter_ws4py_error_logging(
+            unexpected_exception_event) is False
 
 
 class TestFilterWS4PYHandshakeError:
-    def test_it_filters_HandshakeError_HTTP_UPGRADE_events(self):
+    def test_it_filters_handshake_error_http_upgrade_events(self):
         event = exception_event(
-            ws4py.exc.HandshakeError("Header HTTP_UPGRADE is not defined")
-        )
-        assert filters.filter_ws4py_handshake_error(event) is False
+            ws4py.exc.HandshakeError("Header HTTP_UPGRADE is not defined"))
 
-    def test_doesnt_filter_out_other_HandshakeErrors(self):
+        assert f.filter_ws4py_handshake_error(event) is True
+
+    def test_doesnt_filter_out_other_handshake_errors(self):
         event = exception_event(ws4py.exc.HandshakeError("Some other message"))
-        assert filters.filter_ws4py_handshake_error(event) is True
+        assert f.filter_ws4py_handshake_error(event) is False
 
-    def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
-        assert filters.filter_ws4py_handshake_error(unexpected_logger_event) is True
+    def test_it_doesnt_filter_other_logger_events(
+            self, unexpected_logger_event):
+        assert f.filter_ws4py_handshake_error(
+            unexpected_logger_event) is False
 
-    def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
-        assert filters.filter_ws4py_handshake_error(unexpected_exception_event) is True
+    def test_it_doesnt_filter_exception_events(
+            self, unexpected_exception_event):
+        assert f.filter_ws4py_handshake_error(
+            unexpected_exception_event) is False
 
 
 @pytest.fixture
@@ -77,5 +83,5 @@ def exception_event(exception):
 
 
 def _event():
-    """Return a mock :class:`h.sentry.helpers.event.Event`."""
+    """Return a mock :class:`h_pyramid_sentry.event.Event`."""
     return mock.create_autospec(Event, instance=True, spec_set=True)
