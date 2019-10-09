@@ -1,7 +1,7 @@
 """
 Functions for filtering out events we don't want to report to Sentry.
 
-This is intended to be passed to h_pyramid_sentry.EventFilter.add_filters
+These are intended to be passed to h_pyramid_sentry.EventFilter.add_filters
 """
 import ws4py.exc
 
