@@ -17,11 +17,10 @@ def filter_ws4py_handshake_error(event):
 
     See https://github.com/hypothesis/h/issues/5498
     """
-    return (isinstance(event.exception, ws4py.exc.HandshakeError)
-            and str(event.exception) == "Header HTTP_UPGRADE is not defined")
+    return (
+        isinstance(event.exception, ws4py.exc.HandshakeError)
+        and str(event.exception) == "Header HTTP_UPGRADE is not defined"
+    )
 
 
-SENTINEL_FILTERS = [
-    filter_ws4py_error_logging,
-    filter_ws4py_handshake_error,
-]
+SENTINEL_FILTERS = [filter_ws4py_error_logging, filter_ws4py_handshake_error]

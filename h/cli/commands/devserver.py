@@ -17,27 +17,27 @@ import click
 @click.option(
     "--web/--no-web",
     default=True,
-    help="Whether or not to run the Pyramid app process " "(default: --web).",
+    help="Whether or not to run the Pyramid app process (default: --web).",
 )
 @click.option(
     "--ws/--no-ws",
     default=True,
-    help="Whether or not to run the WebSocket process " "(default: --ws).",
+    help="Whether or not to run the WebSocket process (default: --ws).",
 )
 @click.option(
     "--worker/--no-worker",
     default=True,
-    help="Whether or not to run the Celery worker process " "(default: --worker).",
+    help="Whether or not to run the Celery worker process (default: --worker).",
 )
 @click.option(
     "--assets/--no-assets",
     default=True,
-    help="Whether or not to run the gulp watch process " "(default: --assets).",
+    help="Whether or not to run the gulp watch process (default: --assets).",
 )
 @click.option(
     "--beat/--no-beat",
     default=True,
-    help="Wheter or not to run the celery beat process " "(default: --beat).",
+    help="Whether or not to run the celery beat process (default: --beat).",
 )
 def devserver(https, web, ws, worker, assets, beat):
     """
