@@ -48,31 +48,19 @@ class TestAddRetryableErrorToSentryContext:
 
         add_retryable_error_to_sentry_context(event)
 
-    def test_it_doesnt_crash_if_theres_no_exception(self, event):
-        # I don't think this ever happens in our app because we have an
-        # exception view for Exception, but if an app raises a retryable
-        # exception that isn't handled by an exception view then pyramid_retry
-        # calls IBeforeRetry subscribers with request.exception = None.
-        # Let's be defensive and make sure it doesn't crash if that happens.
-        event.request.exception = None
-
-        add_retryable_error_to_sentry_context(event)
-
     @pytest.fixture
-    def event(self, pyramid_request):
-        return BeforeRetry(pyramid_request)
+    def event(self, exception, pyramid_request):
+        return BeforeRetry(pyramid_request, exception)
 
     @pytest.fixture(autouse=True)
     def exception(self, pyramid_request):
-        # Add an exception to request.exception as would happen with a real
-        # pyramid_retry retry. Do this with a try/except in order to create an
-        # exception object with an actual traceback.
+        # Use a try/except in order to create an exception object with an
+        # actual traceback.
         try:
             raise RuntimeError("Something went wrong")
         except RuntimeError as err:
-            pyramid_request.exception = err
-
-        return pyramid_request.exception
+            exception = err
+        return exception
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):

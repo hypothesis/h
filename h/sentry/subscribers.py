@@ -40,9 +40,9 @@ def add_retryable_error_to_sentry_context(event):
     """
     attempt = event.environ.get("retry.attempt")
     attempts = event.environ.get("retry.attempts")
-    exception = event.request.exception
+    exception = event.exception
 
-    if attempt is None or attempts is None or exception is None:
+    if attempt is None or attempts is None:
         return
 
     # The first attempt is numbered 0. Let's make it more human.
