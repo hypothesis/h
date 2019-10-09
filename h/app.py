@@ -10,7 +10,7 @@ from pyramid.settings import asbool
 from pyramid.tweens import EXCVIEW
 
 from h.config import configure
-from h.sentry_filters import SENTINEL_FILTERS
+from h.sentry_filters import SENTRY_FILTERS
 from h.views.client import DEFAULT_CLIENT_URL
 
 from h_pyramid_sentry import EventFilter
@@ -138,4 +138,4 @@ def includeme(config):
 
     # Configure sentry
     config.include("h_pyramid_sentry")
-    EventFilter.set_filters(SENTINEL_FILTERS)
+    EventFilter.set_filters(SENTRY_FILTERS)

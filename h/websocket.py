@@ -42,7 +42,7 @@ from gunicorn.workers.ggevent import GeventPyWSGIWorker, PyWSGIHandler, PyWSGISe
 from ws4py import format_addresses
 
 from h.config import configure
-from h.sentry_filters import SENTINEL_FILTERS
+from h.sentry_filters import SENTRY_FILTERS
 from h_pyramid_sentry import EventFilter
 
 log = logging.getLogger(__name__)
@@ -176,6 +176,6 @@ def create_app(global_config, **settings):
 
     # Configure sentry
     config.include("h_pyramid_sentry")
-    EventFilter.set_filters(SENTINEL_FILTERS)
+    EventFilter.set_filters(SENTRY_FILTERS)
 
     return config.make_wsgi_app()

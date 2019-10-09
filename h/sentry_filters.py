@@ -23,4 +23,4 @@ def filter_ws4py_handshake_error(event):
     )
 
 
-SENTINEL_FILTERS = [filter_ws4py_error_logging, filter_ws4py_handshake_error]
+SENTRY_FILTERS = [filter_ws4py_error_logging, filter_ws4py_handshake_error]
