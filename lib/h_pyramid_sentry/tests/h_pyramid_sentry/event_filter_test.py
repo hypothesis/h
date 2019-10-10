@@ -21,12 +21,12 @@ class TestEventFilter:
         Event.assert_called_once_with(sentinel.event_dict, sentinel.hint_dict)
 
     def test_adding_filters(self):
-        assert len(EventFilter.filters_functions) == 0
+        assert len(EventFilter.filter_functions) == 0
 
         EventFilter.add_filters([self.always_filter])
         EventFilter.add_filters([self.never_filter])
 
-        assert EventFilter.filters_functions == [self.always_filter, self.never_filter]
+        assert EventFilter.filter_functions == [self.always_filter, self.never_filter]
 
     def test_it_filters_when_filter_function_returns_true(self):
         EventFilter.set_filters(

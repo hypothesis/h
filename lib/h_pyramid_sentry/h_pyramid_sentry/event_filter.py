@@ -10,7 +10,7 @@ class EventFilter:
     them to :class:`Event` objects. If the filter returns a truthy value,
     then the event will be suppressed, otherwise it will be passed through.
 
-    This is intended to be used as part of a plugin to Pyramid
+    This is intended to be used with the Sentry SDK.
 
     As this is a singleton, the provided filters are global.
     """
@@ -18,7 +18,7 @@ class EventFilter:
     log = logging.getLogger(__name__)
     log_message_prefix = "Filtering out Sentry event"
     log_message_template = f"{log_message_prefix}: %s"
-    filters_functions = []
+    filter_functions = []
 
     @classmethod
     def set_filters(cls, filter_functions):
@@ -28,7 +28,7 @@ class EventFilter:
         :param filter_functions: A list of functions to add
         :raises ValueError: If any of the provided items are not functions
         """
-        cls.filters_functions = []
+        cls.filter_functions = []
         cls.add_filters(filter_functions)
 
     @classmethod
@@ -45,7 +45,7 @@ class EventFilter:
                     f"Filter function is not callable: {type(filter_function)}"
                 )
 
-            cls.filters_functions.append(filter_function)
+            cls.filter_functions.append(filter_function)
 
     @classmethod
     def before_send(cls, event_dict, hint_dict):
@@ -64,7 +64,7 @@ class EventFilter:
         """
         event = Event(event_dict, hint_dict)
 
-        if any(filter_fn(event) for filter_fn in cls.filters_functions):
+        if any(filter_fn(event) for filter_fn in cls.filter_functions):
             cls.log.info(cls.log_message_template, hint_dict)
             return None
 
