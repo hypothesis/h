@@ -10,13 +10,12 @@ class TestFilterRetryableError:
     def test_it_doesnt_filter_non_retryable_errors(self, Event):
         assert is_retryable_error(Event) is False
 
-    def test_it_checks_whether_the_error_is_retryable(
-        self, Event, is_error_retryable,
-    ):
+    def test_it_checks_whether_the_error_is_retryable(self, Event, is_error_retryable):
         is_retryable_error(Event)
 
         is_error_retryable.assert_called_once_with(
-            sentinel.pyramid_request, Event.exception)
+            sentinel.pyramid_request, Event.exception
+        )
 
     def test_it_doesnt_filter_uncaught_errors(
         self, Event, get_current_request, is_error_retryable
@@ -40,6 +39,7 @@ class TestFilterRetryableError:
     @pytest.fixture(autouse=True)
     def is_error_retryable(self, patch):
         is_error_retryable = patch(
-            self.TARGET_PACKAGE + "pyramid_retry.is_error_retryable")
+            self.TARGET_PACKAGE + "pyramid_retry.is_error_retryable"
+        )
         is_error_retryable.return_value = False
         return is_error_retryable

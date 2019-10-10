@@ -20,15 +20,12 @@ class AnyStringMatching:
 
 
 class TestAddRetryableErrorToSentryContext:
-    def test_it_adds_the_retryable_error_to_the_sentry_context(
-        self, event, scope
-    ):
+    def test_it_adds_the_retryable_error_to_the_sentry_context(self, event, scope):
         add_retryable_error_to_sentry_context(event)
 
         assert scope.set_extra.call_args_list == [
             mock.call(
-                "Exception from attempt 1/3",
-                "RuntimeError('Something went wrong',)"
+                "Exception from attempt 1/3", "RuntimeError('Something went wrong',)"
             ),
             mock.call(
                 "End of traceback from attempt 1/3",

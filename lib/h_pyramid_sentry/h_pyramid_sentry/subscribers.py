@@ -1,3 +1,4 @@
+"""A pyramid subscriber to add extra info to retryable events"""
 import traceback
 
 from pyramid.events import subscriber

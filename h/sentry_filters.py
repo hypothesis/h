@@ -25,8 +25,4 @@ def is_ws4py_handshake_error(event):
     )
 
 
-SENTRY_FILTERS = [
-    is_ws4py_error_logging,
-    is_ws4py_handshake_error,
-    is_retryable_error
-]
+SENTRY_FILTERS = [is_ws4py_error_logging, is_ws4py_handshake_error, is_retryable_error]
