@@ -31,3 +31,5 @@ def includeme(config):
         send_default_pii=True,
         before_send=_before_send,
     )
+
+    config.scan("h.sentry.subscribers")
