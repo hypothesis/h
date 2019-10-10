@@ -58,6 +58,7 @@ setup(
     version=get_version(major_version='1.0'),
     description="A Pyramid plugin for integrating Sentry logging",
     long_description=from_file('README.md'),
+    long_description_content_type='text/markdown',
 
     author="Hypothesis Engineering Team",
     author_email="eng@list.hypothes.is",
@@ -79,7 +80,7 @@ setup(
         'Topic :: System :: Logging',
     ],
 
-    license=from_file('LICENSE'),
+    license='License :: OSI Approved :: BSD License',
     platforms=['Operating System :: OS Independent'],
 
     # Contents and dependencies
@@ -94,6 +95,13 @@ setup(
 
     # Adding pytest support for `python setup.py test` (also see setup.cfg)
     test_suite="tests",
-    setup_requires=['pytest-runner'],
+    setup_requires=[
+        'pytest-runner',
+
+        # Try and prevent long-description bug when uploading to PyPI
+        'setuptools>=38.6.0',
+        'wheel>=0.31.0',
+        'twine>=1.11.0',
+    ],
     tests_require=TESTS_REQUIRE,
 )
