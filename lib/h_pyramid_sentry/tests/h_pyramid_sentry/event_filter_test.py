@@ -5,6 +5,7 @@ from unittest.mock import sentinel
 
 from h_pyramid_sentry.event_filter import EventFilter
 from h_pyramid_sentry.exceptions import FilterNotCallableError
+from h_pyramid_sentry.test import matcher
 
 
 class TestEventFilter:
@@ -57,7 +58,10 @@ class TestEventFilter:
             sentinel.event_dict, sentinel.hint_dict
         )
 
-        location, level, message = caplog.record_tuples[0]
-
-        assert level == logging.INFO
-        assert EventFilter.log_message_prefix in message
+        assert caplog.record_tuples == [
+            (
+                matcher.AnyString(),
+                logging.INFO,
+                matcher.AnyStringContaining(EventFilter.log_message_prefix),
+            )
+        ]

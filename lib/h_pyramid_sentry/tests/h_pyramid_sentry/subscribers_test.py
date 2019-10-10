@@ -1,4 +1,3 @@
-import re
 import pytest
 
 from unittest import mock
@@ -6,17 +5,7 @@ from pyramid import testing
 from pyramid_retry import BeforeRetry
 
 from h_pyramid_sentry.subscribers import add_retryable_error_to_sentry_context
-
-
-class AnyStringMatching:
-    def __init__(self, pattern, flags=0):
-        self.regex = re.compile(pattern, flags)
-
-    def __eq__(self, other):
-        return isinstance(other, str) and self.regex.match(other)
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} '{self.regex.pattern}'>"
+from h_pyramid_sentry.test.matcher import AnyStringMatching
 
 
 class TestAddRetryableErrorToSentryContext:
