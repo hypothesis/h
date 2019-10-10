@@ -15,7 +15,7 @@ class TestEventFilter:
     def never_filter(*args):
         return False
 
-    def test_it_creates_event(self, Event):
+    def test_it_creates_Event(self, Event):
         EventFilter.before_send(sentinel.event_dict, sentinel.hint_dict)
 
         Event.assert_called_once_with(sentinel.event_dict, sentinel.hint_dict)
@@ -28,7 +28,7 @@ class TestEventFilter:
 
         assert EventFilter.filter_functions == [self.always_filter, self.never_filter]
 
-    def test_it_filters_when_filter_function_returns_true(self):
+    def test_it_filters_when_filter_function_returns_True(self):
         EventFilter.set_filters(
             [
                 # Have one that works to ensure we check more
