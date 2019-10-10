@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from h._compat import urlparse
+from urllib.parse import SplitResult, urlsplit
 
 
 def url_in_scope(url, scope_urls):
@@ -35,7 +35,7 @@ def _parse_path(url):
     """Return the path component of a URL string"""
     if url is None:
         return None
-    parsed = urlparse.urlsplit(url)
+    parsed = urlsplit(url)
     return parsed.path
 
 
@@ -53,7 +53,7 @@ def parse_origin(url):
 
     if url is None:
         return None
-    parsed = urlparse.urlsplit(url)
+    parsed = urlsplit(url)
     # netloc contains both host and port
-    origin = urlparse.SplitResult(parsed.scheme, parsed.netloc, "", "", "")
+    origin = SplitResult(parsed.scheme, parsed.netloc, "", "", "")
     return origin.geturl() or None

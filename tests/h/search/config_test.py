@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from h._compat import url_quote_plus
+from urllib.parse import quote_plus
 
 import itertools
 import re
@@ -66,7 +66,7 @@ def test_uri_part_tokenizer():
         "stuff",
     ]
 
-    text = url_quote_plus(text)
+    text = quote_plus(text)
     assert re.split(pattern, "http://jump.to/?u=" + text) == [
         "http",
         "",

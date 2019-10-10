@@ -35,7 +35,7 @@ def upgrade():
             "value", postgresql.ARRAY(sa.UnicodeText, zero_indexes=True), nullable=False
         ),
         sa.Column("document_id", sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(["document_id"], [u"document.id"]),
+        sa.ForeignKeyConstraint(["document_id"], ["document.id"]),
         sa.UniqueConstraint("claimant_normalized", "type"),
     )
 
@@ -51,7 +51,7 @@ def upgrade():
         sa.Column("type", sa.UnicodeText, nullable=True),
         sa.Column("content_type", sa.UnicodeText, nullable=True),
         sa.Column("document_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(["document_id"], [u"document.id"]),
+        sa.ForeignKeyConstraint(["document_id"], ["document.id"]),
         sa.UniqueConstraint(
             "claimant_normalized", "uri_normalized", "type", "content_type"
         ),

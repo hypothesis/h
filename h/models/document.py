@@ -2,13 +2,13 @@
 
 from datetime import datetime
 import logging
+from urllib.parse import urlparse
 
 import sqlalchemy as sa
 import transaction
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from h._compat import urlparse
 from h.db import Base, mixins
 from h.models.annotation import Annotation
 from h.util.uri import normalize as uri_normalize
@@ -70,7 +70,7 @@ class Document(Base, mixins.Timestamps):
                 uri = document_uri.uri
                 if type_ is not None and document_uri.type != type_:
                     continue
-                if urlparse.urlparse(uri).scheme not in ["http", "https"]:
+                if urlparse(uri).scheme not in ["http", "https"]:
                     continue
                 return document_uri.uri
 
