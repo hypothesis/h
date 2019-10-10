@@ -7,47 +7,30 @@ from h_pyramid_sentry.exceptions import FilterNotCallableError
 
 class EventFilter:
     """
-    A singleton object which contains a list of filter functions and applies
+    A object which contains a list of filter functions and applies
     them to :class:`Event` objects. If the filter returns a truthy value,
     then the event will be suppressed, otherwise it will be passed through.
 
     This is intended to be used with the Sentry SDK.
-
-    As this is a singleton, the provided filters are global.
     """
 
     log = logging.getLogger(__name__)
     log_message_prefix = "Filtering out Sentry event"
     log_message_template = f"{log_message_prefix}: %s"
-    filter_functions = []
 
-    @classmethod
-    def set_filters(cls, filter_functions):
-        """
-        Set the filters in this object (discarding what was there before).
+    def __init__(self, filter_functions=None):
+        self.filters = []
 
-        :param filter_functions: A list of functions to add
-        :raises ValueError: If any of the provided items are not functions
-        """
-        cls.filter_functions = []
-        cls.add_filters(filter_functions)
+        if filter_functions is None:
+            return
 
-    @classmethod
-    def add_filters(cls, filter_functions):
-        """
-        Add filters to this object
-
-        :param filter_functions: A list of functions to add
-        :raises ValueError: If any of the provided items are not functions
-        """
         for filter_function in filter_functions:
             if not callable(filter_function):
                 raise FilterNotCallableError(filter_function)
 
-            cls.filter_functions.append(filter_function)
+            self.filters.append(filter_function)
 
-    @classmethod
-    def before_send(cls, event_dict, hint_dict):
+    def before_send(self, event_dict, hint_dict):
         """
         Decide whether the given Sentry event should be reported or not.
 
@@ -63,8 +46,8 @@ class EventFilter:
         """
         event = Event(event_dict, hint_dict)
 
-        if any(filter_fn(event) for filter_fn in cls.filter_functions):
-            cls.log.info(cls.log_message_template, hint_dict)
+        if any(filter_function(event) for filter_function in self.filters):
+            self.log.info(self.log_message_template, hint_dict)
             return None
 
         return event_dict

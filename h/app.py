@@ -13,8 +13,6 @@ from h.config import configure
 from h.sentry_filters import SENTRY_FILTERS
 from h.views.client import DEFAULT_CLIENT_URL
 
-from h_pyramid_sentry import EventFilter
-
 log = logging.getLogger(__name__)
 
 
@@ -135,5 +133,11 @@ def includeme(config):
     config.include("h.notification")
 
     # Configure sentry
+    config.add_settings(
+        {
+            "h_pyramid_sentry.filters": SENTRY_FILTERS,
+            "h_pyramid_sentry.retry_support": True,
+        }
+    )
+
     config.include("h_pyramid_sentry")
-    EventFilter.set_filters(SENTRY_FILTERS)

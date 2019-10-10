@@ -21,6 +21,19 @@ def report_exception(exc=None):
 
 def includeme(config):
     """Set up the error tracking service."""
+    filters = [
+        # Allow functions to be passed as strings: e.g. "module.function"
+        config.maybe_dotted(_filter)
+        for _filter in config.registry.settings.get("h_pyramid_sentry.filters", [])
+    ]
+
+    if config.registry.settings.get("h_pyramid_sentry.retry_support"):
+        from h_pyramid_sentry.filters.pyramid import is_retryable_error
+
+        filters.append(is_retryable_error)
+        config.scan("h_pyramid_sentry.subscribers")
+
+    event_filter = EventFilter(filters)
 
     sentry_sdk.init(
         integrations=[
@@ -31,7 +44,5 @@ def includeme(config):
         ],
         environment=config.registry.settings["h.sentry_environment"],
         send_default_pii=True,
-        before_send=EventFilter.before_send,
+        before_send=event_filter.before_send,
     )
-
-    config.scan("h_pyramid_sentry.subscribers")

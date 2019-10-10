@@ -43,7 +43,6 @@ from ws4py import format_addresses
 
 from h.config import configure
 from h.sentry_filters import SENTRY_FILTERS
-from h_pyramid_sentry import EventFilter
 
 log = logging.getLogger(__name__)
 
@@ -175,7 +174,13 @@ def create_app(global_config, **settings):
     config.include("h.streamer")
 
     # Configure sentry
+    config.add_settings(
+        {
+            "h_pyramid_sentry.filters": SENTRY_FILTERS,
+            "h_pyramid_sentry.retry_support": True,
+        }
+    )
+
     config.include("h_pyramid_sentry")
-    EventFilter.set_filters(SENTRY_FILTERS)
 
     return config.make_wsgi_app()

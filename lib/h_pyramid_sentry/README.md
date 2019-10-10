@@ -13,9 +13,8 @@ ground and therefore is not recommended for general use.
 How it works
 ------------
 
-The [EventFilter](h_pyramid_sentry/event_filter.py) object is a singleton
-which you can register filter functions with. All functions registered to
-the EventFilter object are global.
+In your Pyramid configuration you need to provide a list of filter functions
+in the parameter `h_pyramid_sentry.filters`.
 
 These functions are passed [Event](h_pyramid_sentry/event.py) objects which
 they can inspect. If the function returns `True`, then the event is logged
@@ -24,21 +23,16 @@ locally, but not sent to Sentry
 Usage
 -----
 
-To load the basic integration, in your Pyramid app config add:
 ```python
 # Hook into Pyramid
+config.add_settings({
+    "h_pyramid_sentry.filters": [
+        lambda event: instanceof(event.exception, ValueError)
+    ],
+    "h_pyramid_sentry.retry_support": True
+})
+
 config.include("h_pyramid_sentry")
-```
-
-To set some custom filters to exclude certain errors from logging to Sentry:
-
-```python
-from h_pyramid_sentry import EventFilter
-
-EventFilter.set_filters([
-    # Filter out ValueErrors
-    lambda event: instanceof(event.exception, ValueError)
-]])
 ```
 
 Sentry configuration
@@ -46,6 +40,8 @@ Sentry configuration
 
 The Sentry integration will listen to the following Pyramid deployment settings:
 
-| Pyramid setting        | Sentry option |
+| Pyramid setting        | Effect |
 |------------------------|---------------|
-| `h.sentry_environment` | [`environment`](https://docs.sentry.io/error-reporting/configuration/?platform=javascript#environment) |
+| `h.sentry_environment` | Sets the Sentry option: [`environment`](https://docs.sentry.io/error-reporting/configuration/?platform=javascript#environment) |
+| `h_pyramid_sentry.filters` | A list of functions to apply as filters |
+| `h_pyramid_sentry.retry_support` | Enable retry detection and filtering |

@@ -17,20 +17,18 @@ class TestEventFilter:
         return False
 
     def test_it_creates_Event(self, Event):
-        EventFilter.before_send(sentinel.event_dict, sentinel.hint_dict)
+        EventFilter().before_send(sentinel.event_dict, sentinel.hint_dict)
 
         Event.assert_called_once_with(sentinel.event_dict, sentinel.hint_dict)
 
-    def test_adding_filters(self):
-        assert not EventFilter.filter_functions
+    def test_we_can_instantiate(self):
+        filters = [self.always_filter, self.never_filter]
+        event_filter = EventFilter(filters)
 
-        EventFilter.add_filters([self.always_filter])
-        EventFilter.add_filters([self.never_filter])
-
-        assert EventFilter.filter_functions == [self.always_filter, self.never_filter]
+        assert event_filter.filters == filters
 
     def test_it_filters_when_filter_function_returns_True(self):
-        EventFilter.set_filters(
+        event_filter = EventFilter(
             [
                 # Have one that works to ensure we check more
                 self.never_filter,
@@ -38,25 +36,26 @@ class TestEventFilter:
             ]
         )
 
-        assert EventFilter.before_send(sentinel.event_dict, sentinel.hint_dict) is None
+        assert event_filter.before_send(sentinel.event_dict, sentinel.hint_dict) is None
 
     def test_we_do_not_accept_non_callable_objects_as_filters(self):
         with pytest.raises(FilterNotCallableError):
-            EventFilter.set_filters(["not a function"])
+            EventFilter(["not a function"])
 
     def test_it_doesnt_filter_if_all_filter_functions_return_False(self):
-        EventFilter.set_filters([self.never_filter, self.never_filter])
+        event_filter = EventFilter([self.never_filter, self.never_filter])
 
         assert (
-            EventFilter.before_send(sentinel.event_dict, sentinel.hint_dict)
+            event_filter.before_send(sentinel.event_dict, sentinel.hint_dict)
             == sentinel.event_dict
         )
 
     def test_it_logs_when_an_error_is_filtered(self, caplog):
         caplog.set_level(logging.INFO)
 
-        EventFilter.set_filters([self.always_filter])
-        EventFilter.before_send(sentinel.event_dict, sentinel.hint_dict)
+        EventFilter([self.always_filter]).before_send(
+            sentinel.event_dict, sentinel.hint_dict
+        )
 
         location, level, message = caplog.record_tuples[0]
 
