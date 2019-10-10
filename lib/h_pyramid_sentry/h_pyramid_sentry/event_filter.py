@@ -23,7 +23,7 @@ class EventFilter:
     @classmethod
     def set_filters(cls, filter_functions):
         """
-        Set the filters in this object (discarding what was there before)
+        Set the filters in this object (discarding what was there before).
 
         :param filter_functions: A list of functions to add
         :raises ValueError: If any of the provided items are not functions

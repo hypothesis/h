@@ -19,7 +19,6 @@ def report_exception(exc=None):
     sentry_sdk.capture_exception(exc)
 
 
-# Pyramid integration point
 def includeme(config):
     """Set up the error tracking service."""
 

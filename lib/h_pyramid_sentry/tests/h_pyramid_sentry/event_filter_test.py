@@ -21,7 +21,7 @@ class TestEventFilter:
         Event.assert_called_once_with(sentinel.event_dict, sentinel.hint_dict)
 
     def test_adding_filters(self):
-        assert len(EventFilter.filter_functions) == 0
+        assert not EventFilter.filters_functions
 
         EventFilter.add_filters([self.always_filter])
         EventFilter.add_filters([self.never_filter])
@@ -43,7 +43,7 @@ class TestEventFilter:
         with pytest.raises(ValueError):
             EventFilter.set_filters(["not a function"])
 
-    def test_it_passes_error_when_filter_function_returns_false(self):
+    def test_it_doesnt_filter_if_all_filter_functions_return_False(self):
         EventFilter.set_filters([self.never_filter, self.never_filter])
 
         assert (
