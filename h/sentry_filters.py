@@ -6,12 +6,12 @@ These are intended to be passed to h_pyramid_sentry.EventFilter.add_filters
 import ws4py.exc
 
 
-def filter_ws4py_error_logging(event):
+def is_ws4py_error_logging(event):
     """Filter out all error messages logged by ws4py."""
     return event.logger == "ws4py"
 
 
-def filter_ws4py_handshake_error(event):
+def is_ws4py_handshake_error(event):
     """
     Filter out ws4py's HandshakeError when no HTTP_UPGRADE header.
 
@@ -23,4 +23,4 @@ def filter_ws4py_handshake_error(event):
     )
 
 
-SENTRY_FILTERS = [filter_ws4py_error_logging, filter_ws4py_handshake_error]
+SENTRY_FILTERS = [is_ws4py_error_logging, is_ws4py_handshake_error]

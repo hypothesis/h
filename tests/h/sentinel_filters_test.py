@@ -3,20 +3,20 @@ import ws4py
 
 from unittest import mock
 
-from h import sentry_filters as f
+from h.sentry_filters import is_ws4py_error_logging, is_ws4py_handshake_error
 from h_pyramid_sentry.event import Event
 
 
 class TestFilterWS4PYErrorLogging:
     def test_it_filters_ws4py_logger_events(self):
         event = logger_event("ws4py", "Error when terminating the connection")
-        assert f.filter_ws4py_error_logging(event) is True
+        assert is_ws4py_error_logging(event) is True
 
     def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
-        assert f.filter_ws4py_error_logging(unexpected_logger_event) is False
+        assert is_ws4py_error_logging(unexpected_logger_event) is False
 
     def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
-        assert f.filter_ws4py_error_logging(unexpected_exception_event) is False
+        assert is_ws4py_error_logging(unexpected_exception_event) is False
 
 
 class TestFilterWS4PYHandshakeError:
@@ -25,17 +25,17 @@ class TestFilterWS4PYHandshakeError:
             ws4py.exc.HandshakeError("Header HTTP_UPGRADE is not defined")
         )
 
-        assert f.filter_ws4py_handshake_error(event) is True
+        assert is_ws4py_handshake_error(event) is True
 
     def test_doesnt_filter_out_other_handshake_errors(self):
         event = exception_event(ws4py.exc.HandshakeError("Some other message"))
-        assert f.filter_ws4py_handshake_error(event) is False
+        assert is_ws4py_handshake_error(event) is False
 
     def test_it_doesnt_filter_other_logger_events(self, unexpected_logger_event):
-        assert f.filter_ws4py_handshake_error(unexpected_logger_event) is False
+        assert is_ws4py_handshake_error(unexpected_logger_event) is False
 
     def test_it_doesnt_filter_exception_events(self, unexpected_exception_event):
-        assert f.filter_ws4py_handshake_error(unexpected_exception_event) is False
+        assert is_ws4py_handshake_error(unexpected_exception_event) is False
 
 
 @pytest.fixture
