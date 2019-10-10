@@ -4,8 +4,8 @@ from datetime import datetime
 import logging
 from urllib.parse import urlparse
 
+from pyramid_retry import mark_error_retryable
 import sqlalchemy as sa
-import transaction
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -16,8 +16,11 @@ from h.util.uri import normalize as uri_normalize
 log = logging.getLogger(__name__)
 
 
-class ConcurrentUpdateError(transaction.interfaces.TransientError):
+class ConcurrentUpdateError(Exception):
     """Raised when concurrent updates to document data conflict."""
+
+
+mark_error_retryable(ConcurrentUpdateError)
 
 
 class Document(Base, mixins.Timestamps):

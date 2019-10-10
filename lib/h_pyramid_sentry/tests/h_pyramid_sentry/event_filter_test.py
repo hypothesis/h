@@ -62,7 +62,3 @@ class TestEventFilter:
 
         assert level == logging.INFO
         assert EventFilter.log_message_prefix in message
-
-    @pytest.fixture
-    def Event(self, patch):
-        return patch("h_pyramid_sentry.event_filter.Event")

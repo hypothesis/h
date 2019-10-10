@@ -33,3 +33,5 @@ def includeme(config):
         send_default_pii=True,
         before_send=EventFilter.before_send,
     )
+
+    config.scan("h_pyramid_sentry.subscribers")

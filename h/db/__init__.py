@@ -106,10 +106,23 @@ def _session(request):
     # See: https://github.com/Pylons/pyramid_tm/issues/40
     @request.add_finished_callback
     def close_the_sqlalchemy_session(request):
-        changes = tracker.uncommitted_changes() if tracker else []
-        if changes:
-            msg = "closing a session with uncommitted changes %s"
-            log.warning(msg, changes, extra={"stack": True, "changes": changes})
+        if len(session.transaction._connections) > 1:
+            # There appear to still be open DB connections belonging to this
+            # request. This shouldn't happen.
+            changes = tracker.uncommitted_changes() if tracker else []
+            if changes:
+                msg = "closing a session with uncommitted changes %s"
+                log.warning(msg, changes, extra={"stack": True, "changes": changes})
+            else:
+                log.warning(
+                    "closing an unclosed DB session (no uncommitted changes)",
+                    extra={"stack": True},
+                )
+        # Close any unclosed DB connections.
+        # This is done outside of the `if` statement above just in case: it's
+        # okay to call `session.close()` even if the session does not need to
+        # be closed, so just call it unconditionally so that there's no chance
+        # of leaking any unclosed DB connections.
         session.close()
 
     return session

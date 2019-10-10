@@ -34,6 +34,7 @@ pyramid_layout
 pyramid-jinja2
 pyramid-services
 pyramid_mailer
+pyramid_retry
 pyramid_tm
 python-dateutil
 python-slugify < 1.2.0

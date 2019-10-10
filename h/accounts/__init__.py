@@ -47,9 +47,8 @@ def includeme(config):
     # important that responsibility for caching user lookups is left to the
     # UserService and not duplicated here.
     #
-    # This prevents retried requests (those that raise
-    # `transaction.interfaces.TransientError`) gaining access to a stale
-    # `User` instance.
+    # This prevents requests that are retried by pyramid_retry gaining access
+    # to a stale `User` instance.
     config.add_request_method(get_user, name="user", property=True)
 
     config.include(".schemas")

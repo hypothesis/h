@@ -5,6 +5,8 @@ These are intended to be passed to h_pyramid_sentry.EventFilter.add_filters
 """
 import ws4py.exc
 
+from h_pyramid_sentry.filters.pyramid import is_retryable_error
+
 
 def is_ws4py_error_logging(event):
     """Filter out all error messages logged by ws4py."""
@@ -23,4 +25,8 @@ def is_ws4py_handshake_error(event):
     )
 
 
-SENTRY_FILTERS = [is_ws4py_error_logging, is_ws4py_handshake_error]
+SENTRY_FILTERS = [
+    is_ws4py_error_logging,
+    is_ws4py_handshake_error,
+    is_retryable_error
+]

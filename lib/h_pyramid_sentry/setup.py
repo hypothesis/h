@@ -5,6 +5,7 @@ VERSION = "1.0.dev0"
 INSTALL_REQUIRES = [
     'sentry-sdk',
     'pyramid',
+    'pyramid_retry',
     'celery',
 ]
 TESTS_REQUIRE = INSTALL_REQUIRES + [

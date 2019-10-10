@@ -21,3 +21,8 @@ def _autopatcher(request, target, **kwargs):
 @pytest.fixture
 def patch(request):
     return functools.partial(_autopatcher, request)
+
+
+@pytest.fixture
+def Event(patch):
+    return patch("h_pyramid_sentry.event_filter.Event")
