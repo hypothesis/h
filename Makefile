@@ -115,7 +115,7 @@ checkdocstrings: python
 
 .PHONY: pip-compile
 pip-compile: python
-	tox -q -e py36-dev -- pip-compile
+	tox -q -e py36-pip-compile
 
 .PHONY: upgrade-package
 upgrade-package: python
