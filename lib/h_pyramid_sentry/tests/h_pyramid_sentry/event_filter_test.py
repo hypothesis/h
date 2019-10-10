@@ -4,6 +4,7 @@ import logging
 from unittest.mock import sentinel
 
 from h_pyramid_sentry.event_filter import EventFilter
+from h_pyramid_sentry.exceptions import FilterNotCallableError
 
 
 class TestEventFilter:
@@ -21,7 +22,7 @@ class TestEventFilter:
         Event.assert_called_once_with(sentinel.event_dict, sentinel.hint_dict)
 
     def test_adding_filters(self):
-        assert not EventFilter.filters_functions
+        assert not EventFilter.filter_functions
 
         EventFilter.add_filters([self.always_filter])
         EventFilter.add_filters([self.never_filter])
@@ -40,7 +41,7 @@ class TestEventFilter:
         assert EventFilter.before_send(sentinel.event_dict, sentinel.hint_dict) is None
 
     def test_we_do_not_accept_non_callable_objects_as_filters(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(FilterNotCallableError):
             EventFilter.set_filters(["not a function"])
 
     def test_it_doesnt_filter_if_all_filter_functions_return_False(self):

@@ -1,7 +1,7 @@
 """Error tracking service API and setup."""
 import sentry_sdk
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.pyramid import PyramidIntegration
+import sentry_sdk.integrations.celery
+import sentry_sdk.integrations.pyramid
 
 from h_pyramid_sentry.event_filter import EventFilter
 
@@ -23,7 +23,12 @@ def includeme(config):
     """Set up the error tracking service."""
 
     sentry_sdk.init(
-        integrations=[CeleryIntegration(), PyramidIntegration()],
+        integrations=[
+            # This looks a bit goofy, but makes mocking in the tests easier
+            # as you only have to mock the sentry_sdk package
+            sentry_sdk.integrations.celery.CeleryIntegration(),
+            sentry_sdk.integrations.pyramid.PyramidIntegration(),
+        ],
         environment=config.registry.settings["h.sentry_environment"],
         send_default_pii=True,
         before_send=EventFilter.before_send,

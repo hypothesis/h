@@ -2,6 +2,7 @@
 import logging
 
 from h_pyramid_sentry.event import Event
+from h_pyramid_sentry.exceptions import FilterNotCallableError
 
 
 class EventFilter:
@@ -41,9 +42,7 @@ class EventFilter:
         """
         for filter_function in filter_functions:
             if not callable(filter_function):
-                raise ValueError(
-                    f"Filter function is not callable: {type(filter_function)}"
-                )
+                raise FilterNotCallableError(filter_function)
 
             cls.filter_functions.append(filter_function)
 
