@@ -48,9 +48,6 @@ To run the backend test suite only call ``tox`` directly. For example:
    # Run the backend unit tests:
    tox
 
-   # Run the backend unit tests in Python 3:
-   tox -e py36-tests
-
    # Run the backend functional tests:
    tox -e py36-functests
 

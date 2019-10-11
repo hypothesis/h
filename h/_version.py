@@ -3,12 +3,7 @@
 import datetime
 import subprocess
 
-try:
-    from subprocess import DEVNULL  # Python 3
-except ImportError:
-    import os
-
-    DEVNULL = open(os.devnull, "wb")
+from subprocess import DEVNULL
 
 __all__ = ("get_version",)
 
