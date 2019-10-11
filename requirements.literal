@@ -1,3 +1,0 @@
-
-# Local libraries which we don't want pip-compile to try and understand
-lib/h_pyramid_sentry
