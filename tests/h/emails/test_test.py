@@ -2,7 +2,6 @@
 
 import pytest
 
-from h._compat import string_types
 from h.emails.test import generate
 
 from h import __version__
@@ -15,9 +14,9 @@ class TestGenerate:
         generate(pyramid_request, "meerkat@example.com")
 
         expected_context = {
-            "time": matchers.InstanceOf(string_types),
-            "hostname": matchers.InstanceOf(string_types),
-            "python_version": matchers.InstanceOf(string_types),
+            "time": matchers.InstanceOf(str),
+            "hostname": matchers.InstanceOf(str),
+            "python_version": matchers.InstanceOf(str),
             "version": __version__,
         }
         html_renderer.assert_(**expected_context)

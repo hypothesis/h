@@ -6,7 +6,6 @@ import string
 
 import sqlalchemy as sa
 
-from h._compat import text_type
 from h.db import Base
 
 
@@ -17,7 +16,7 @@ def _generate_random_string(length=12):
     for _ in range(length):
         word += random.choice(string.ascii_letters)
     msg.update(word.encode("ascii"))
-    return text_type(msg.hexdigest()[:length])
+    return msg.hexdigest()[:length]
 
 
 class Activation(Base):

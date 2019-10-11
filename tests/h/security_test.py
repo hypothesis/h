@@ -9,7 +9,6 @@ from hypothesis import assume
 from hypothesis import strategies as st
 from hypothesis import given
 
-from h._compat import text_type
 from h.security import derive_key
 from h.security import password_context
 from h.security import token_urlsafe
@@ -148,7 +147,7 @@ def test_token_urlsafe(nbytes):
     tok = token_urlsafe(nbytes)
 
     # Should be text
-    assert isinstance(tok, text_type)
+    assert isinstance(tok, str)
     # Always at least nbytes of data
     assert len(tok) > nbytes
 
@@ -156,5 +155,5 @@ def test_token_urlsafe(nbytes):
 def test_token_urlsafe_no_args():
     tok = token_urlsafe()
 
-    assert isinstance(tok, text_type)
+    assert isinstance(tok, str)
     assert len(tok) > 32

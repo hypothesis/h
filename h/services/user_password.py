@@ -2,7 +2,6 @@
 
 import datetime
 
-from h._compat import text_type
 from h.security import password_context
 
 
@@ -45,7 +44,7 @@ class UserPasswordService:
             return False
 
         if new_hash is not None:
-            user.password = text_type(new_hash)
+            user.password = new_hash
 
         return verified
 
@@ -54,7 +53,7 @@ class UserPasswordService:
         # Remove any existing explicit salt (the password context salts the
         # password automatically).
         user.salt = None
-        user.password = text_type(self.hasher.hash(new_password))
+        user.password = self.hasher.hash(new_password)
         user.password_updated = datetime.datetime.utcnow()
 
 

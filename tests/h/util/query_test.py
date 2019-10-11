@@ -6,7 +6,6 @@ import pytest
 
 import sqlalchemy as sa
 
-from h._compat import text_type
 from h.util.query import column_windows
 
 
@@ -41,7 +40,7 @@ class TestColumnWindows:
     )
     def test_basic_windowing(self, db_session, windowsize, expected):
         """Check that windowing returns the correct batches of rows."""
-        testdata = [{"name": text_type(l), "enabled": True} for l in ASCII_LOWERCASE]
+        testdata = [{"name": l, "enabled": True} for l in ASCII_LOWERCASE]
         db_session.execute(test_cw.insert().values(testdata))
 
         windows = column_windows(db_session, test_cw.c.name, windowsize=windowsize)
@@ -63,8 +62,8 @@ class TestColumnWindows:
         testdata = []
         enabled = ASCII_LOWERCASE[:13]
         disabled = ASCII_LOWERCASE[13:]
-        testdata.extend([{"name": text_type(l), "enabled": True} for l in enabled])
-        testdata.extend([{"name": text_type(l), "enabled": False} for l in disabled])
+        testdata.extend([{"name": l, "enabled": True} for l in enabled])
+        testdata.extend([{"name": l, "enabled": False} for l in disabled])
         db_session.execute(test_cw.insert().values(testdata))
 
         filter_ = test_cw.c.enabled

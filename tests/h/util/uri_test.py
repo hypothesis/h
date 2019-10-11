@@ -2,7 +2,6 @@
 
 import pytest
 
-from h._compat import text_type
 from h.util import uri
 
 TEST_URLS = [
@@ -159,7 +158,7 @@ def test_normalize(url_in, url_out):
 
 @pytest.mark.parametrize("url,_", TEST_URLS)
 def test_normalize_returns_unicode(url, _):
-    assert isinstance(uri.normalize(url), text_type)
+    assert isinstance(uri.normalize(url), str)
 
 
 @pytest.mark.parametrize(

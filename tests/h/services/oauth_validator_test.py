@@ -10,7 +10,6 @@ from oauthlib.common import Request as OAuthRequest
 from oauthlib.oauth2 import InvalidClientIdError
 
 from h import models
-from h._compat import text_type
 from h.models.auth_client import GrantType as AuthClientGrantType
 from h.models.auth_client import ResponseType as AuthClientResponseType
 from h.services.oauth_validator import (
@@ -78,9 +77,7 @@ class TestAuthenticateClientId:
         assert oauth_request.client.authclient == client
 
     def test_returns_false_when_client_missing(self, svc, oauth_request):
-        assert (
-            svc.authenticate_client_id(text_type(uuid.uuid1()), oauth_request) is False
-        )
+        assert svc.authenticate_client_id(str(uuid.uuid1()), oauth_request) is False
 
 
 class TestClientAuthenticationRequired:
@@ -160,7 +157,7 @@ class TestFindClient:
         assert svc.find_client("bogus") is None
 
     def test_returns_none_when_not_found(self, svc, client):
-        id_ = text_type(uuid.uuid1())
+        id_ = str(uuid.uuid1())
         assert svc.find_client(id_) is None
 
     def test_returns_none_when_id_none(self, svc):
@@ -185,7 +182,7 @@ class TestGetDefaultRedirectUri:
         assert "https://example.org/auth/callback" == actual
 
     def test_returns_none_when_client_missing(self, svc):
-        id_ = text_type(uuid.uuid1())
+        id_ = str(uuid.uuid1())
         assert svc.get_default_redirect_uri(id_, None) is None
 
     @pytest.fixture
@@ -298,7 +295,7 @@ class TestRevokeToken:
 
 class TestSaveAuthorizationCode:
     def test_it_raises_for_missing_client(self, svc, code, oauth_request):
-        id_ = text_type(uuid.uuid1())
+        id_ = str(uuid.uuid1())
         with pytest.raises(InvalidClientIdError):
             svc.save_authorization_code(id_, code, oauth_request)
 
@@ -421,7 +418,7 @@ class TestValidateClientId:
         assert svc.validate_client_id(client.id, None) is True
 
     def test_returns_false_for_missing_client(self, svc):
-        id_ = text_type(uuid.uuid1())
+        id_ = str(uuid.uuid1())
         assert svc.validate_client_id(id_, None) is False
 
 
@@ -611,7 +608,7 @@ class TestValidateResponseType:
         assert actual is False
 
     def test_returns_false_for_missing_client(self, svc):
-        id_ = text_type(uuid.uuid1())
+        id_ = str(uuid.uuid1())
         assert svc.validate_response_type(id_, "code", None) is False
 
     def test_returns_false_for_missing_client_response_type(self, svc, client):
