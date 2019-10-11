@@ -1,3 +1,5 @@
+"""Filters specifically for Pyramid"""
+
 # Import is_error_retryable indirectly to make importing from us less
 # confusing as we have a very similarly named function
 import pyramid_retry
