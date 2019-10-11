@@ -5,7 +5,7 @@ help:
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
 
-	@echo "make package           Create package in the dist/ directory"
+	@echo "make dist              Create package in the dist/ directory"
 	@echo "make publish           Publish packages created in the dist/ directory"
 	@echo "make test              Run the unit tests"
 	@echo "make coverage          Print the unit test coverage report"
@@ -31,9 +31,9 @@ format: python
 checkformatting: python
 	tox -q -e py36-checkformatting
 
-.PHONY: package
-package: python
-	tox -q -e py36-package
+.PHONY: dist
+dist: python
+	BUILD=$(BUILD) tox -q -e py36-package
 
 .PHONY: publish
 publish: python
