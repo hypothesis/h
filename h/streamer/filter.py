@@ -4,7 +4,6 @@ import unicodedata
 
 from jsonpointer import resolve_pointer
 from h.util.uri import normalize as normalize_uri
-from h._compat import text_type
 
 SCHEMA = {
     "type": "object",
@@ -95,10 +94,10 @@ def uni_fold(text):
     """
     # Convert bytes to text
     if isinstance(text, bytes):
-        text = text_type(text, "utf-8")
+        text = str(text, "utf-8")
 
     # Do not touch other types
-    if not isinstance(text, text_type):
+    if not isinstance(text, str):
         return text
 
     text = text.lower()

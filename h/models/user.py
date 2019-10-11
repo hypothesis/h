@@ -8,7 +8,6 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy.ext.declarative import declared_attr
 from pyramid import security
 
-from h._compat import string_types
 from h.db import Base
 from h.util.user import split_user
 
@@ -96,7 +95,7 @@ class UserIDComparator(Comparator):
         username and authority ourselves. If the string is not a well-formed
         userid, the comparison will always return False.
         """
-        if isinstance(other, string_types):
+        if isinstance(other, str):
             try:
                 val = split_user(other)
             except ValueError:

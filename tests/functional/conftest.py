@@ -5,7 +5,6 @@ import os
 import pytest
 from webtest import TestApp
 
-from h._compat import text_type
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
 from tests.common.fixtures.elasticsearch import ELASTICSEARCH_URL
@@ -31,7 +30,7 @@ def app(pyramid_app, db_engine):
     from h import db
 
     _clean_database(db_engine)
-    db.init(db_engine, authority=text_type(TEST_SETTINGS["h.authority"]))
+    db.init(db_engine, authority=TEST_SETTINGS["h.authority"])
 
     return TestApp(pyramid_app)
 
@@ -68,7 +67,7 @@ def factories(db_session):
 def init_db(db_engine):
     from h import db
 
-    authority = text_type(TEST_SETTINGS["h.authority"])
+    authority = TEST_SETTINGS["h.authority"]
     db.init(db_engine, should_drop=True, should_create=True, authority=authority)
 
 

@@ -5,7 +5,6 @@ import datetime
 import newrelic.agent
 from zope.interface import implementer
 
-from h._compat import text_type
 from h.auth.interfaces import IAuthenticationToken
 
 
@@ -56,7 +55,7 @@ def auth_token(request):
     if not header.startswith("Bearer "):
         return None
 
-    token = text_type(header[len("Bearer ") :]).strip()
+    token = str(header[len("Bearer ") :]).strip()
     # If the token is empty at this point, it is clearly invalid and we
     # should reject it.
     if not token:
