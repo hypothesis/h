@@ -1,8 +1,8 @@
 Hypothesis Pyramid Sentry Extension
 ===================================
 
-A small library intended to log messages to help [Sentry](https://sentry.io)
-with the ability to filter out unwanted messages.
+A library which integrates [Sentry](https://sentry.io) into Pyramid with the 
+ability to filter out unwanted messages.
 
 What should I use this for?
 ---------------------------
