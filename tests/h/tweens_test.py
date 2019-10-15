@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from unittest import mock
+from unittest.mock import MagicMock
+
 import pytest
 
 from h import tweens
@@ -91,3 +94,37 @@ class TestCacheHeaderTween:
         response = tween(pyramid_request)
 
         assert response.headers.get("Cache-Control") == expected_cc_header
+
+
+class TestDBRollbackSessionOnExceptionTween:
+    def test_it_does_nothing_usually(self, handler, pyramid_request):
+        tween = tweens.rollback_db_session_on_exception_factory(
+            handler, pyramid_request.registry
+        )
+
+        tween(pyramid_request)
+
+        handler.assert_called_once_with(pyramid_request)
+        pyramid_request.db.rollback.assert_not_called()
+
+    def test_it_calls_db_rollback_on_exception(self, handler, pyramid_request):
+        handler.side_effect = IOError
+
+        tween = tweens.rollback_db_session_on_exception_factory(
+            handler, pyramid_request.registry
+        )
+
+        with pytest.raises(IOError):
+            tween(pyramid_request)
+
+        handler.assert_called_once_with(pyramid_request)
+        pyramid_request.db.rollback.assert_called_once_with()
+
+    @pytest.fixture
+    def handler(self):
+        return mock.create_autospec(lambda request: None)
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request):
+        pyramid_request.db = MagicMock(spec_set=["rollback"])
+        return pyramid_request
