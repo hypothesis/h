@@ -6,7 +6,7 @@ Please be courteous and respectful in your communication on Slack (`request an i
 `archive`_), and `GitHub`_. Humor is appreciated, but remember that some nuance
 may be lost in the medium and plan accordingly.
 
-.. _`request an invite`: https://slack.hypothes.is
+.. _`request an invite`: https://join.slack.com/t/hypothesis-open/shared_invite/enQtMzAxMTEwODAwMTgxLWEwZWYyYjIwYjU3NmFmNDZkOTlmZTcwNzAzMTY5MjFkMTFlZGFiM2Y1NmQxMzQ3NzY4ZjhlMjE5ZjRjNmRlZjg
 .. _`log in once you've created an account`: https://hypothesis-open.slack.com/
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
 .. _freenode.net: http://freenode.net/

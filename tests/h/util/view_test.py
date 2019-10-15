@@ -25,7 +25,7 @@ class TestHandleException:
     @pytest.fixture
     def old_exception(self):
         try:
-            # Create exception and populate `__traceback__` in Python 3.
+            # Create exception and populate `__traceback__`.
             raise Exception("An earlier exception raised in thread")
         except Exception as exc:
             result = exc

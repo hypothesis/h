@@ -111,8 +111,8 @@ def group_organization_select_widget(node, kw):
         org_labels.append("{} ({})".format(org.name, org.authority))
         org_pubids.append(org.pubid)
 
-    # `zip` returns an iterator in Python 3. The `SelectWidget` constructor
-    # requires an actual list.
+    # `zip` returns an iterator. The `SelectWidget` constructor requires an
+    # actual list.
     return SelectWidget(values=list(zip(org_pubids, org_labels)))
 
 
