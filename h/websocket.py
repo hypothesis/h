@@ -175,6 +175,5 @@ def create_app(global_config, **settings):
 
     # Add support for logging exceptions whenever they arise
     config.include("pyramid_exclog")
-    config.add_settings({"exclog.extra_info": True})
 
     return config.make_wsgi_app()
