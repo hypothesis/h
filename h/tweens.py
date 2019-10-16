@@ -123,3 +123,23 @@ def cache_header_tween_factory(handler, registry):
         return resp
 
     return cache_header_tween
+
+
+def rollback_db_session_on_exception_factory(handler, registry):
+    """
+    Catches exceptions and rolls the database handle back so it can be reliably
+    used again regardless of what exception caused the error.
+    """
+
+    # Intended to be run before excview_tween_factory here:
+    # https://docs.pylonsproject.org/projects/pyramid/en/1.10-branch/_modules/pyramid/tweens.html#excview_tween_factory
+    def rollback_db_session_on_exception(request):
+        try:
+            return handler(request)
+
+        except Exception:
+            request.db.rollback()
+            # Pass off to excview_tween to start exception view processing
+            raise
+
+    return rollback_db_session_on_exception

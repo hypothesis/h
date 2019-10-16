@@ -53,6 +53,7 @@ def includeme(config):
     )
 
     config.add_tween("h.tweens.conditional_http_tween_factory", under=EXCVIEW)
+    config.add_tween("h.tweens.rollback_db_session_on_exception_factory", under=EXCVIEW)
     config.add_tween("h.tweens.redirect_tween_factory")
     config.add_tween("h.tweens.invalid_path_tween_factory")
     config.add_tween("h.tweens.security_header_tween_factory")
