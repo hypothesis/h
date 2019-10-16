@@ -32,6 +32,7 @@ psycopg2
 pyparsing >= 2.1.5
 pyramid
 pyramid_authsanity >= 1.0.0  # 1.0.0 fixes an IE bug: https://git.io/vH3mi
+pyramid_exclog
 pyramid_layout
 pyramid-jinja2
 pyramid-services
