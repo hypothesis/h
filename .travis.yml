@@ -9,6 +9,13 @@ matrix:
       script:
         make checkformatting
 
+    - env: ACTION=checkisort
+      language: python
+      python: '3.6'
+      install: pip install tox>=3.8.0
+      script:
+        make checkisort
+
     # Python (backend) tests
     - env: ACTION=tox
       language: python

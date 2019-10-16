@@ -13,6 +13,8 @@ help:
 	@echo "make analyze           Slower and more thorough code quality analysis (pylint)"
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
+	@echo "make isort             Correctly sort and group Python imports"
+	@echo "make checkisort        Crash if Python imports aren't correctly sorted and grouped"
 	@echo "make test              Run the unit tests"
 	@echo "make coverage          Print the unit test coverage report"
 	@echo "make codecov           Upload the coverage report to codecov.io"
@@ -74,11 +76,19 @@ analyze: python
 
 .PHONY: format
 format: python
-	tox -q -e py36-format
+	@tox -qe py36-format
 
 PHONY: checkformatting
 checkformatting: python
-	tox -q -e py36-checkformatting
+	@tox -qe py36-checkformatting
+
+.PHONY: isort
+isort: python
+	@tox -qe py36-isort
+
+PHONY: checkisort
+checkisort: python
+	@tox -qe py36-isort --run-command "isort --recursive --quiet --check-only h tests"
 
 .PHONY: test
 test: node_modules/.uptodate python
