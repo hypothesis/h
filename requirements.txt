@@ -23,7 +23,7 @@ enum34==1.1.6
 gevent==1.3.5
 greenlet==0.4.13
 gunicorn==19.9.0
-h-pyramid-sentry==1.0.0.1
+h-pyramid-sentry==1.0.20191014.105005
 hkdf==0.0.3
 hupper==1.8.1             # via pyramid
 iso8601==0.1.11           # via colander, deform
