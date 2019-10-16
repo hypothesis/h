@@ -12,6 +12,13 @@ from h.config import configure
         ("DB_SESSION_CHECKS", "False", "h.db_session_checks", False),
         ("SECRET_KEY", "dont_tell_anyone", "secret_key", b"dont_tell_anyone"),
         ("SECRET_SALT", "best_with_pepper", "secret_salt", b"best_with_pepper"),
+        ("SENTRY_ENVIRONMENT", "test-env", "h.sentry_environment", "test-env"),
+        (
+            "SENTRY_ENVIRONMENT",
+            "test-env",
+            "h_pyramid_sentry.init.environment",
+            "test-env",
+        ),
         # There are many other settings that can be updated from env vars.
         # These are not currently tested.
     ],
