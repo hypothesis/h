@@ -3,13 +3,11 @@ import contextlib
 import os
 
 import pytest
-from webtest import TestApp
 
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401
-from tests.common.fixtures.elasticsearch import ELASTICSEARCH_URL
-from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX
-
+from tests.common.fixtures.elasticsearch import ELASTICSEARCH_INDEX, ELASTICSEARCH_URL
+from webtest import TestApp
 
 TEST_SETTINGS = {
     "es.url": ELASTICSEARCH_URL,

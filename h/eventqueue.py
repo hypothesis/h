@@ -7,7 +7,6 @@ from zope.interface import providedBy
 
 from h.sentry import report_exception
 
-
 log = logging.getLogger(__name__)
 
 

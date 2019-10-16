@@ -1,7 +1,7 @@
 from unittest import mock
 
-from pyramid_retry import BeforeRetry
 import pytest
+from pyramid_retry import BeforeRetry
 
 from h.sentry.subscribers import add_retryable_error_to_sentry_context
 

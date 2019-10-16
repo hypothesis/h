@@ -6,11 +6,10 @@ Revises: c322c57b49db
 Create Date: 2017-03-08 15:32:27.288684
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 from h.db import types
-
 
 revision = "5655d56d7c29"
 down_revision = "c322c57b49db"

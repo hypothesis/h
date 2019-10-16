@@ -2,11 +2,11 @@
 
 from pyramid.httpexceptions import HTTPNoContent
 
-from h.views.api.config import api_config
-from h.emails import flag_notification
 from h import links
+from h.emails import flag_notification
 from h.interfaces import IGroupService
 from h.tasks import mailer
+from h.views.api.config import api_config
 
 
 @api_config(

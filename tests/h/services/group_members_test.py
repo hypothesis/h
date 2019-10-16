@@ -4,9 +4,8 @@ from unittest import mock
 
 import pytest
 
-from h.models import User, GroupScope
-from h.services.group_members import GroupMembersService
-from h.services.group_members import group_members_factory
+from h.models import GroupScope, User
+from h.services.group_members import GroupMembersService, group_members_factory
 from h.services.user import UserService
 from tests.common.matchers import Matcher
 

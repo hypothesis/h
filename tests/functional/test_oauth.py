@@ -4,9 +4,8 @@
 import calendar
 import datetime
 
-import pytest
-
 import jwt
+import pytest
 
 from h.models.auth_client import GrantType
 

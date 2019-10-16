@@ -1,6 +1,6 @@
 import colander
-from webob.multidict import MultiDict
 import pytest
+from webob.multidict import MultiDict
 
 from h.schemas.base import ValidationError
 from h.schemas.util import validate_query_params

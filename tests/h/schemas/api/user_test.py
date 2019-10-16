@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.schemas import ValidationError
+from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 
 
 class TestCreateUserAPISchema:

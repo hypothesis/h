@@ -7,8 +7,8 @@ import copy
 import colander
 import deform
 import jsonschema
-from pyramid.csrf import check_csrf_token, get_csrf_token
 from pyramid import httpexceptions
+from pyramid.csrf import check_csrf_token, get_csrf_token
 
 
 @colander.deferred

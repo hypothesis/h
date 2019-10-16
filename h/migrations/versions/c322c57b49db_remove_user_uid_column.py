@@ -6,9 +6,8 @@ Revises: 18dfed902c9e
 Create Date: 2017-03-03 12:24:19.739583
 """
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = "c322c57b49db"
 down_revision = "18dfed902c9e"

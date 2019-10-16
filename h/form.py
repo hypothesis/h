@@ -7,12 +7,11 @@ form templates in preference to the defaults.
 """
 import deform
 import jinja2
-from pyramid import httpexceptions
 import pyramid_jinja2
+from pyramid import httpexceptions
 from pyramid.path import AssetResolver
 
 from h import i18n
-
 
 ENVIRONMENT_KEY = "h.form.jinja2_environment"
 

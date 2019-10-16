@@ -7,9 +7,9 @@ returns ``True`` if the event should be reported to Sentry or ``False`` to
 filter it out. Every filter function gets called for every event and if any one
 filter returns ``False`` for a given event then the event is not reported.
 """
+import ws4py.exc
 from pyramid.threadlocal import get_current_request
 from pyramid_retry import is_error_retryable
-import ws4py.exc
 
 
 def filter_ws4py_error_logging(event):

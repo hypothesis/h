@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from h.views.api.config import api_config
-from h.views.api.helpers.angular import AngularRouteTemplater
 from h.views.api.helpers import links as link_helpers
+from h.views.api.helpers.angular import AngularRouteTemplater
 
 
 @api_config(versions=["v1"], route_name="api.index")

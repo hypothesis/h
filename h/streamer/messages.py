@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
 from gevent.queue import Full
 
-from h import presenters
-from h import realtime
-from h import storage
+import h.stats
+from h import presenters, realtime, storage
+from h.auth.util import translate_annotation_principals
 from h.formatters import AnnotationUserInfoFormatter
 from h.realtime import Consumer
-from h.traversal import AnnotationContext
-from h.auth.util import translate_annotation_principals
+from h.services.groupfinder import GroupfinderService
 from h.services.links import LinksService
 from h.services.nipsa import NipsaService
-from h.services.groupfinder import GroupfinderService
 from h.services.user import UserService
 from h.streamer import websocket
-import h.stats
+from h.traversal import AnnotationContext
 
 log = logging.getLogger(__name__)
 

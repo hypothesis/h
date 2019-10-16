@@ -4,7 +4,6 @@ import pytest
 
 from h.schemas.forms.accounts import EditProfileSchema
 
-
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 

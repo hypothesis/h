@@ -85,6 +85,14 @@ test: node_modules/.uptodate python
 	tox
 	$(GULP) test
 
+.PHONY: isort
+isort: python
+	@tox -qe py36-tests --run-command "isort --recursive --quiet --atomic h tests"
+
+.PHONY: checkisort
+checkisort: python
+	@tox -qe py36-tests --run-command "isort --recursive --quiet --check-only h tests"
+
 .PHONY: coverage
 coverage: python
 	tox -q -e py36-coverage

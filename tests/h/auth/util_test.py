@@ -5,13 +5,11 @@ from unittest import mock
 
 import pytest
 import sqlalchemy as sa
-
 from pyramid import security
 
-from h.auth import role
-from h.auth import util
-from h.models.auth_client import GrantType
+from h.auth import role, util
 from h.models import AuthClient
+from h.models.auth_client import GrantType
 from h.services.user import UserService
 
 FakeUser = namedtuple("FakeUser", ["authority", "admin", "staff", "groups"])

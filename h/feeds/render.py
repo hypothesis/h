@@ -1,7 +1,6 @@
 from pyramid import renderers
 
-from h.feeds import atom
-from h.feeds import rss
+from h.feeds import atom, rss
 
 
 def render_atom(request, annotations, atom_url, html_url, title, subtitle):

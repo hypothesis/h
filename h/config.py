@@ -8,7 +8,7 @@ import os
 from pyramid.config import Configurator
 from pyramid.settings import asbool, aslist
 
-from h.settings import database_url, SettingsManager
+from h.settings import SettingsManager, database_url
 from h.util.logging_filters import ExceptionFilter
 
 __all__ = ("configure",)

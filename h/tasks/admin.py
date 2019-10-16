@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from h import models
-from h.celery import celery
-from h.celery import get_task_logger
-
+from h.celery import celery, get_task_logger
 
 log = get_task_logger(__name__)
 

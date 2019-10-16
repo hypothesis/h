@@ -4,13 +4,12 @@ import datetime
 from unittest import mock
 
 import pytest
-
 from sqlalchemy.exc import IntegrityError
 
 from h.models import Activation, Subscriptions, User
+from h.services.exceptions import ConflictError
 from h.services.user_password import UserPasswordService
 from h.services.user_signup import UserSignupService, user_signup_service_factory
-from h.services.exceptions import ConflictError
 
 
 class TestUserSignupService:

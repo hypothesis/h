@@ -4,12 +4,11 @@
 from unittest import mock
 
 import pytest
-
 from pyramid import httpexceptions
 
+from h.services.exceptions import ConflictError
 from h.services.user_signup import UserSignupService
 from h.views import account_signup as views
-from h.services.exceptions import ConflictError
 
 
 @pytest.mark.usefixtures("pyramid_config", "routes", "user_signup_service")

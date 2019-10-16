@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Add the user_identity table."""
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "5dd2dd5547a2"
 down_revision = "178270e3ee58"

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pyramid import interfaces
-from pyramid.authentication import BasicAuthAuthenticationPolicy
-from pyramid.authentication import CallbackAuthenticationPolicy
+from pyramid.authentication import (
+    BasicAuthAuthenticationPolicy,
+    CallbackAuthenticationPolicy,
+)
 from pyramid.security import Authenticated
 from zope import interface
 

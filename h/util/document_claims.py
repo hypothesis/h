@@ -14,7 +14,6 @@ and returned.
 
 import re
 
-
 # Pattern that matches DOIs (eg. "10.1000/123456").
 #
 # See https://www.doi.org/doi_handbook/2_Numbering.html#2.2 The registrant code

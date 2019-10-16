@@ -4,8 +4,7 @@ import datetime
 
 import pytest
 
-from h.services.auth_token import AuthTokenService
-from h.services.auth_token import auth_token_service_factory
+from h.services.auth_token import AuthTokenService, auth_token_service_factory
 
 
 class TestAuthTokenService:

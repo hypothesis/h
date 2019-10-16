@@ -2,8 +2,8 @@
 
 import datetime
 
-from pyramid_authsanity import interfaces
 import sqlalchemy as sa
+from pyramid_authsanity import interfaces
 from zope import interface
 
 from h import models

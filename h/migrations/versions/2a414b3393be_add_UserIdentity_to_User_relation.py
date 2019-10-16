@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Add UserIdentity (many) -> User (one) relation."""
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "2a414b3393be"
 down_revision = "5dd2dd5547a2"

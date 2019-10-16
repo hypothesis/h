@@ -5,10 +5,9 @@ from unittest import mock
 
 import pytest
 
-from h.models import User, Group, GroupScope
+from h.models import Group, GroupScope, User
 from h.models.group import ReadableBy
-from h.services.group import GroupService
-from h.services.group import groups_factory
+from h.services.group import GroupService, groups_factory
 from h.services.user import UserService
 from tests.common.matchers import Matcher
 

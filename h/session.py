@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.csrf import SessionCSRFStoragePolicy
-from pyramid.session import SignedCookieSessionFactory, JSONSerializer
+from pyramid.session import JSONSerializer, SignedCookieSessionFactory
 
 from h.security import derive_key
 

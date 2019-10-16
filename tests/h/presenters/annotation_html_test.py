@@ -3,8 +3,8 @@
 import datetime
 from unittest import mock
 
-import pytest
 import jinja2
+import pytest
 
 from h.presenters.annotation_html import AnnotationHTMLPresenter
 

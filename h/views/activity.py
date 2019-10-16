@@ -5,10 +5,8 @@
 from urllib.parse import urlparse
 
 from jinja2 import Markup
-from pyramid import httpexceptions
-from pyramid import security
-from pyramid.view import view_config
-from pyramid.view import view_defaults
+from pyramid import httpexceptions, security
+from pyramid.view import view_config, view_defaults
 
 from h import util
 from h.activity import query
@@ -17,11 +15,10 @@ from h.links import pretty_link
 from h.models.group import ReadableBy
 from h.paginator import paginate
 from h.search import parser
+from h.traversal import OrganizationContext
+from h.util.datetime import utc_us_style_date
 from h.util.user import split_user
 from h.views.groups import check_slug
-from h.util.datetime import utc_us_style_date
-from h.traversal import OrganizationContext
-
 
 PAGE_SIZE = 200
 

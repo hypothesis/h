@@ -3,9 +3,8 @@
 from calendar import timegm
 from datetime import datetime, timedelta
 
-import pytest
-
 import jwt
+import pytest
 from oauthlib.oauth2 import (
     InvalidClientError,
     InvalidGrantError,

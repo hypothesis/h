@@ -2,11 +2,11 @@
 
 import json
 
-from pyramid.httpexceptions import HTTPFound
 import pytest
+from pyramid.httpexceptions import HTTPFound
 
-from h.views import client
 from h import __version__
+from h.views import client
 
 
 @pytest.mark.usefixtures("routes", "pyramid_settings")

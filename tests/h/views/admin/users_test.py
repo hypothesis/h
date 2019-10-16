@@ -2,13 +2,13 @@
 
 from unittest import mock
 
-from pyramid import httpexceptions
 import pytest
+from pyramid import httpexceptions
 
+from h.models import Annotation
 from h.services.annotation_stats import AnnotationStatsService
 from h.services.delete_user import DeleteUserService
 from h.services.user import UserService
-from h.models import Annotation
 from h.views.admin.users import (
     UserNotFoundError,
     users_activate,

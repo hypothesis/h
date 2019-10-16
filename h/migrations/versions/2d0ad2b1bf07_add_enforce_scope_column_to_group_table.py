@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """Add enforce_scope column to group table"""
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = "2d0ad2b1bf07"
 down_revision = "5ed9c8c105f6"

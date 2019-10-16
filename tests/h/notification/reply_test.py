@@ -4,11 +4,8 @@ from unittest import mock
 
 import pytest
 
-from h.models import Annotation
-from h.models import Document, DocumentMeta
-from h.models import Subscriptions
-from h.notification.reply import Notification
-from h.notification.reply import get_notification
+from h.models import Annotation, Document, DocumentMeta, Subscriptions
+from h.notification.reply import Notification, get_notification
 from h.services.user import UserService
 
 FIXTURE_DATA = {

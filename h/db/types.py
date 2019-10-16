@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Custom SQLAlchemy types for use with the Annotations API database."""
-import binascii
 import base64
+import binascii
 import uuid
 
 from sqlalchemy import types
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import DontWrapMixin
-
 
 # A magic byte (expressed as two hexadecimal nibbles) which we use to expand a
 # 15-byte ElasticSearch flake ID into a 16-byte UUID.

@@ -6,11 +6,10 @@ Revises: e554d862135f
 Create Date: 2017-03-29 15:15:36.092486
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 from h.db import types
-
 
 revision = "50df3e6782aa"
 down_revision = "e554d862135f"

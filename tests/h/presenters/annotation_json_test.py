@@ -4,7 +4,6 @@ import datetime
 from unittest import mock
 
 import pytest
-
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 from zope.interface import implementer

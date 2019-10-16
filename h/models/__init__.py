@@ -29,8 +29,8 @@ from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort
 from h.models.flag import Flag
 from h.models.group import Group
-from h.models.organization import Organization
 from h.models.group_scope import GroupScope
+from h.models.organization import Organization
 from h.models.setting import Setting
 from h.models.subscriptions import Subscriptions
 from h.models.token import Token

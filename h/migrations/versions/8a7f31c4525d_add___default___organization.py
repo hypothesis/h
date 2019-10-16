@@ -8,8 +8,8 @@ Create Date: 2018-03-27 16:50:20.959215
 """
 import logging
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 

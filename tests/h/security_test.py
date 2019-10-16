@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from binascii import hexlify, unhexlify
 import string
+from binascii import hexlify, unhexlify
 
-from passlib.context import CryptContext
 import pytest
-from hypothesis import assume
+from hypothesis import assume, given
 from hypothesis import strategies as st
-from hypothesis import given
+from passlib.context import CryptContext
 
-from h.security import derive_key
-from h.security import password_context
-from h.security import token_urlsafe
+from h.security import derive_key, password_context, token_urlsafe
 
 REASONABLE_INFO = st.text(alphabet=string.printable)
 REASONABLE_KEY_MATERIAL = st.binary(min_size=8, max_size=128)

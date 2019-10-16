@@ -3,23 +3,22 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.httpexceptions import (
-    HTTPNoContent,
     HTTPBadRequest,
-    HTTPNotFound,
     HTTPConflict,
+    HTTPNoContent,
+    HTTPNotFound,
 )
 
-from h.views.api import groups as views
-from h.services.group_list import GroupListService
+from h import traversal
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
-from h.services.group_update import GroupUpdateService
-from h.services.group_members import GroupMembersService
-from h.services.user import UserService
 from h.services.group_links import GroupLinksService
-from h import traversal
+from h.services.group_list import GroupListService
+from h.services.group_members import GroupMembersService
+from h.services.group_update import GroupUpdateService
+from h.services.user import UserService
+from h.views.api import groups as views
 
 pytestmark = pytest.mark.usefixtures("GroupsJSONPresenter")
 

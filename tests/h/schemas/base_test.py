@@ -3,15 +3,13 @@
 import enum
 from unittest.mock import Mock
 
-import pytest
-
 import colander
+import pytest
 from pyramid import csrf
 from pyramid.exceptions import BadCSRFToken
 
 from h.schemas import ValidationError
-from h.schemas.base import enum_type, CSRFSchema, JSONSchema
-
+from h.schemas.base import CSRFSchema, JSONSchema, enum_type
 
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 

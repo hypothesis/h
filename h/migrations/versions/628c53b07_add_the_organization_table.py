@@ -6,8 +6,8 @@ Revises: 7bf167611bc3
 Create Date: 2018-03-15 11:00:50.420618
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "628c53b07"
 down_revision = "7bf167611bc3"

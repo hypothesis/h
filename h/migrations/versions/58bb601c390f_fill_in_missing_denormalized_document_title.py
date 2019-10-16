@@ -8,12 +8,10 @@ Create Date: 2016-09-12 12:21:40.904620
 
 from collections import namedtuple
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import subqueryload
-
+from sqlalchemy.orm import sessionmaker, subqueryload
 
 revision = "58bb601c390f"
 down_revision = "3e1727613916"

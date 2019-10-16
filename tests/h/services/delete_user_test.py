@@ -6,8 +6,8 @@ import pytest
 import sqlalchemy
 
 from h.models import Annotation, Document
-from h.services.delete_user import delete_user_service_factory
 from h.services.annotation_delete import AnnotationDeleteService
+from h.services.delete_user import delete_user_service_factory
 
 
 @pytest.mark.usefixtures("annotation_delete_service")

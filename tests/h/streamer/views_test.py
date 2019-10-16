@@ -2,8 +2,7 @@
 
 import pytest
 
-from h.streamer import views
-from h.streamer import streamer
+from h.streamer import streamer, views
 
 
 def test_websocket_view_adds_auth_state_to_environ(pyramid_config, pyramid_request):

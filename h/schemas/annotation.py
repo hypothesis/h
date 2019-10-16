@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Classes for validating data passed to the annotations API."""
-import colander
 import copy
+
+import colander
 from dateutil.parser import parse
 from pyramid import i18n
 

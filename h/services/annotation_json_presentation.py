@@ -2,11 +2,7 @@
 
 from sqlalchemy.orm import subqueryload
 
-from h import formatters
-from h import models
-from h import presenters
-from h import traversal
-from h import storage
+from h import formatters, models, presenters, storage, traversal
 from h.interfaces import IGroupService
 
 

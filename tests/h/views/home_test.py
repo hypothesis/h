@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from pyramid.httpexceptions import HTTPFound
 
 from h.views.home import index_redirect

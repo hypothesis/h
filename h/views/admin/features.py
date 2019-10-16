@@ -3,8 +3,7 @@
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
-from h import models
-from h import paginator
+from h import models, paginator
 from h.i18n import TranslationString as _  # noqa: N813
 
 

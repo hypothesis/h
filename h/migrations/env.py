@@ -4,10 +4,9 @@ import os
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from h import models  # noqa
 from h import db
 from h.settings import database_url
-
-from h import models  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

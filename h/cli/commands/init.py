@@ -3,13 +3,12 @@
 import logging
 import os
 
-import alembic.config
 import alembic.command
+import alembic.config
 import click
 import sqlalchemy
 
-from h import db
-from h import search
+from h import db, search
 
 log = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote, urlparse
 
 import jinja2
 

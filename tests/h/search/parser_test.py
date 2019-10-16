@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from hypothesis import strategies as st
 from hypothesis import given, settings
+from hypothesis import strategies as st
 from webob.multidict import MultiDict
 
 from h.search import parser

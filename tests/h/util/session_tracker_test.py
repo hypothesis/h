@@ -1,10 +1,11 @@
 from uuid import uuid4
+
 import pytest
 from sqlalchemy.orm.util import identity_key
 
 from h.db.types import _get_urlsafe_from_hex
 from h.models import Annotation, Document
-from h.util.session_tracker import Tracker, ObjectState
+from h.util.session_tracker import ObjectState, Tracker
 
 
 def generate_ann_id():

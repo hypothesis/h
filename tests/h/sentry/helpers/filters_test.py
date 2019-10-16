@@ -2,7 +2,6 @@
 from unittest import mock
 
 import pytest
-
 import ws4py
 
 from h.sentry.helpers import filters

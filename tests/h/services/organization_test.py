@@ -3,8 +3,7 @@
 import pytest
 
 from h.models import Organization
-from h.services.organization import OrganizationService
-from h.services.organization import organization_factory
+from h.services.organization import OrganizationService, organization_factory
 
 
 class TestOrganizationService:

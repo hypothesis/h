@@ -2,8 +2,8 @@
 
 import pytest
 
-from h.presenters.organization_json import OrganizationJSONPresenter
 from h.models.organization import Organization
+from h.presenters.organization_json import OrganizationJSONPresenter
 from h.traversal import OrganizationContext
 
 

@@ -2,8 +2,9 @@
 import logging
 from collections import namedtuple
 from contextlib import contextmanager
-from elasticsearch.exceptions import ConnectionTimeout
+
 import elasticsearch_dsl
+from elasticsearch.exceptions import ConnectionTimeout
 from webob.multidict import MultiDict
 
 from h.search import query

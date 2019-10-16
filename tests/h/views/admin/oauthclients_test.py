@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from unittest.mock import create_autospec, Mock
+from unittest.mock import Mock, create_autospec
 
 import pytest
 
 from h.models.auth_client import AuthClient, GrantType, ResponseType
 from h.views.admin.oauthclients import (
-    index,
     AuthClientCreateController,
     AuthClientEditController,
+    index,
 )
 
 

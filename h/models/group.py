@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from collections import namedtuple
-
 import enum
 import re
+from collections import namedtuple
+
+import slugify
 import sqlalchemy as sa
 from pyramid import security
-import slugify
 
-from h.db import Base
-from h.db import mixins
 from h import pubid
 from h.auth import role
+from h.db import Base, mixins
 from h.util.group import split_groupid
-
 
 GROUP_NAME_MIN_LENGTH = 3
 GROUP_NAME_MAX_LENGTH = 25

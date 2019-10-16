@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from h.sentry.helpers.event import Event
 from h.sentry.helpers import filters
-
+from h.sentry.helpers.event import Event
 
 log = logging.getLogger(__name__)
 

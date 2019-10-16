@@ -3,7 +3,6 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.httpexceptions import HTTPBadRequest
 
 from h.services.group_list import GroupListService

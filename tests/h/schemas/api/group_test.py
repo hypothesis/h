@@ -2,18 +2,17 @@
 import pytest
 
 from h.models.group import (
-    GROUP_NAME_MIN_LENGTH,
-    GROUP_NAME_MAX_LENGTH,
-    GROUP_DESCRIPTION_MAX_LENGTH,
     AUTHORITY_PROVIDED_ID_MAX_LENGTH,
-)
-
-from h.schemas.api.group import (
-    GroupAPISchema,
-    CreateGroupAPISchema,
-    UpdateGroupAPISchema,
+    GROUP_DESCRIPTION_MAX_LENGTH,
+    GROUP_NAME_MAX_LENGTH,
+    GROUP_NAME_MIN_LENGTH,
 )
 from h.schemas import ValidationError
+from h.schemas.api.group import (
+    CreateGroupAPISchema,
+    GroupAPISchema,
+    UpdateGroupAPISchema,
+)
 
 
 class TestGroupAPISchema:

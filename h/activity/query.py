@@ -6,18 +6,16 @@ import newrelic.agent
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import subqueryload
 
-from h import links
-from h import presenters
-from h import storage
+from h import links, presenters, storage
 from h.activity import bucketing
 from h.models import Annotation, Group
-from h.search import Search
-from h.search import parser
 from h.search import (
-    TopLevelAnnotationsFilter,
     AuthorityFilter,
+    Search,
     TagsAggregation,
+    TopLevelAnnotationsFilter,
     UsersAggregation,
+    parser,
 )
 
 

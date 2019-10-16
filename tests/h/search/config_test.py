@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from urllib.parse import quote_plus
-
 import itertools
 import re
 from unittest import mock
+from urllib.parse import quote_plus
 
-import pytest
 import elasticsearch
+import pytest
 
 from h.search.client import Client
 from h.search.config import (
-    ANNOTATION_MAPPING,
     ANALYSIS_SETTINGS,
-    init,
+    ANNOTATION_MAPPING,
     configure_index,
     delete_index,
     get_aliased_index,
+    init,
     update_aliased_index,
     update_index_settings,
 )

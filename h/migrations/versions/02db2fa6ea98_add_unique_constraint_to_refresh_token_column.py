@@ -6,9 +6,8 @@ Revises: c739ee2ae59c
 Create Date: 2017-01-31 17:24:03.855420
 """
 
-from alembic import op
 import sqlalchemy
-
+from alembic import op
 
 revision = "02db2fa6ea98"
 down_revision = "c739ee2ae59c"

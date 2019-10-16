@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """Schema for validating API group resources"""
 
-from h.schemas.base import JSONSchema, ValidationError
-from h.models.group import (
-    GROUP_NAME_MIN_LENGTH,
-    GROUP_NAME_MAX_LENGTH,
-    GROUP_DESCRIPTION_MAX_LENGTH,
-)
-from h.util.group import GROUPID_PATTERN, split_groupid
 from h.i18n import TranslationString as _
+from h.models.group import (
+    GROUP_DESCRIPTION_MAX_LENGTH,
+    GROUP_NAME_MAX_LENGTH,
+    GROUP_NAME_MIN_LENGTH,
+)
+from h.schemas.base import JSONSchema, ValidationError
+from h.util.group import GROUPID_PATTERN, split_groupid
 
 GROUP_SCHEMA_PROPERTIES = {
     "name": {

@@ -5,8 +5,7 @@ import datetime
 import sqlalchemy
 from sqlalchemy.dialects import postgresql
 
-from h.db import Base
-from h.db import mixins
+from h.db import Base, mixins
 
 
 class Token(Base, mixins.Timestamps):
