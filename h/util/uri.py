@@ -100,7 +100,7 @@ BLACKLISTED_QUERY_PARAMS = [
         #
         #     https://docs.aws.amazon.com/general/latest/gr/sigv4-add-signature-to-request.html
         #
-        r"^x-amz-security-token$",
+        r"(?i)^x-amz-security-token$",
     }
 ]
 
