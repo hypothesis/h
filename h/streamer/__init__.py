@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+from h.streamer.tweens import close_db_session_tween_factory
+
+__all__ = ["close_db_session_tween_factory"]
 
 
 def includeme(config):

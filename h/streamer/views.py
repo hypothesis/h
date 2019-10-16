@@ -21,10 +21,6 @@ def websocket_view(request):
         }
     )
 
-    # ...and ensure that any persistent connections associated with this
-    # WebSocket connection are closed.
-    request.db.close()
-
     app = WebSocketWSGIApplication(handler_cls=websocket.WebSocket)
     return request.get_response(app)
 

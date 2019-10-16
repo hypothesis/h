@@ -39,6 +39,7 @@ import logging
 
 from gevent.pool import Pool
 from gunicorn.workers.ggevent import GeventPyWSGIWorker, PyWSGIHandler, PyWSGIServer
+import pyramid
 from ws4py import format_addresses
 
 from h.config import configure
@@ -148,6 +149,12 @@ class Worker(GeventPyWSGIWorker):
 
 def create_app(global_config, **settings):
     config = configure(settings=settings)
+
+    config.add_tween(
+        "h.streamer.close_db_session_tween_factory",
+        over=["pyramid_exclog.exclog_tween_factory", pyramid.tweens.EXCVIEW],
+    )
+
     config.include("pyramid_services")
 
     config.include("h.auth")
