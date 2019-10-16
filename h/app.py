@@ -94,9 +94,7 @@ def includeme(config):
 
     # Add support for logging exceptions whenever they arise
     config.include("pyramid_exclog")
-    config.add_settings({
-        'exclog.extra_info': True
-    })
+    config.add_settings({"exclog.extra_info": True})
 
     # Define the global default Content Security Policy
     client_url = settings.get("h.client_url", DEFAULT_CLIENT_URL)
