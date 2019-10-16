@@ -58,6 +58,13 @@ def includeme(config):
     config.add_tween("h.tweens.security_header_tween_factory")
     config.add_tween("h.tweens.cache_header_tween_factory")
 
+    # While exclog is working it can access the database to add extra details
+    # like the user id. If we happen after pyramid_tm the connection will have
+    # already closed, we'll open another, and then get an unclosed handle.
+    config.add_tween(
+        "pyramid_exclog.exclog_tween_factory", under="pyramid_tm.tm_tween_factory"
+    )
+
     config.add_request_method(in_debug_mode, "debug", reify=True)
 
     config.include("pyramid_jinja2")
