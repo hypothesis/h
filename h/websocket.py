@@ -37,9 +37,9 @@ license distributed with the ws4py project. Such code remains copyright (c)
 """
 import logging
 
+import pyramid
 from gevent.pool import Pool
 from gunicorn.workers.ggevent import GeventPyWSGIWorker, PyWSGIHandler, PyWSGIServer
-import pyramid
 from ws4py import format_addresses
 
 from h.config import configure

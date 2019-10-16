@@ -7,10 +7,9 @@ from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h.activity.query import ActivityResults
-from h.views import activity
 from h.models import Organization
 from h.services.annotation_stats import AnnotationStatsService
-
+from h.views import activity
 
 GROUP_TYPE_OPTIONS = ("group", "open_group", "restricted_group")
 

@@ -5,8 +5,7 @@ from unittest import mock
 
 import pytest
 
-from h.renderers import json_sorted_factory
-from h.renderers import SVGRenderer
+from h.renderers import SVGRenderer, json_sorted_factory
 
 
 class TestSortedJSONRenderer:

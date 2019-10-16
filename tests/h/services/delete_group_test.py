@@ -4,12 +4,12 @@ from unittest import mock
 
 import pytest
 
+from h.services.annotation_delete import AnnotationDeleteService
 from h.services.delete_group import (
-    delete_group_service_factory,
     DeleteGroupService,
     DeletePublicGroupError,
+    delete_group_service_factory,
 )
-from h.services.annotation_delete import AnnotationDeleteService
 
 
 @pytest.mark.usefixtures("annotation_delete_service")

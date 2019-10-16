@@ -6,8 +6,8 @@ Revises: ddb5f0baa429
 Create Date: 2016-09-16 17:03:25.264475
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy import orm
 
 from h.util.user import split_user

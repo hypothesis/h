@@ -10,7 +10,6 @@ from pyramid import security
 
 from h.streamer import websocket
 
-
 FakeMessage = namedtuple("FakeMessage", ["data"])
 
 

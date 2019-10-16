@@ -3,7 +3,6 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.config import Configurator
 
 from h.views.api import index as views

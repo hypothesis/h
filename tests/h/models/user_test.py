@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
-from sqlalchemy import exc
 from pyramid.authorization import ACLAuthorizationPolicy
+from sqlalchemy import exc
 
 from h import models
 

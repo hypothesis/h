@@ -1,10 +1,10 @@
-import pytest
-import ws4py
-
 from unittest import mock
 
-from h.sentry_filters import is_ws4py_error_logging, is_ws4py_handshake_error
+import pytest
+import ws4py
 from h_pyramid_sentry.event import Event
+
+from h.sentry_filters import is_ws4py_error_logging, is_ws4py_handshake_error
 
 
 class TestFilterWS4PYErrorLogging:

@@ -10,10 +10,9 @@ Create Date: 2016-01-06 19:12:14.402260
 revision = "6f6a853fa2a"
 down_revision = "1ef80156ee4"
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy import orm
-
 
 Session = orm.sessionmaker()
 

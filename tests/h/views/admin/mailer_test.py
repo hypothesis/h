@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from pyramid.httpexceptions import HTTPSeeOther
 
 from h.views.admin.mailer import mailer_index, mailer_test

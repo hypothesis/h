@@ -12,8 +12,8 @@ down_revision = None
 
 import datetime
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.orm import sessionmaker
 
 Session = sessionmaker()

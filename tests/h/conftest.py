@@ -8,18 +8,16 @@ import functools
 import os
 from unittest import mock
 
+import click.testing
 import deform
 import pytest
-
-import click.testing
 import sqlalchemy
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 from sqlalchemy.orm import sessionmaker
 from webob.multidict import MultiDict
 
-from h import db
-from h import models
+from h import db, models
 from h.settings import database_url
 from tests.common.fixtures import es_client  # noqa: F401
 from tests.common.fixtures import init_elasticsearch  # noqa: F401

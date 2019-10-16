@@ -22,8 +22,8 @@ from pyramid import i18n
 
 from h import models, schemas
 from h.db import types
-from h.util.group_scope import url_in_scope
 from h.models.document import update_document_metadata
+from h.util.group_scope import url_in_scope
 
 _ = i18n.TranslationStringFactory(__package__)
 

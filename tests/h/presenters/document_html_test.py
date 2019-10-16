@@ -2,8 +2,8 @@
 
 from unittest import mock
 
-import pytest
 import jinja2
+import pytest
 
 from h.presenters.document_html import DocumentHTMLPresenter
 

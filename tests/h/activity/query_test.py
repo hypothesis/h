@@ -3,11 +3,10 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.httpexceptions import HTTPFound
 from webob.multidict import MultiDict
 
-from h.activity.query import execute, extract, check_url, fetch_annotations
+from h.activity.query import check_url, execute, extract, fetch_annotations
 
 
 class TestExtract:

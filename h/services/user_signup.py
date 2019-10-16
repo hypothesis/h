@@ -7,8 +7,8 @@ from sqlalchemy.exc import IntegrityError
 
 from h.emails import signup
 from h.models import Activation, Subscriptions, User, UserIdentity
-from h.tasks import mailer
 from h.services.exceptions import ConflictError
+from h.tasks import mailer
 
 log = logging.getLogger(__name__)
 

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from unittest import mock
+
 import pytest
 
-from h.streamer import messages
-from h.streamer import streamer
-from h.streamer import websocket
+from h.streamer import messages, streamer, websocket
 
 
 def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(session):

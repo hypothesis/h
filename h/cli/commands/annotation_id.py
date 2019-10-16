@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import click
-
 from uuid import UUID
+
+import click
 
 from h.db.types import _get_hex_from_urlsafe, _get_urlsafe_from_hex
 

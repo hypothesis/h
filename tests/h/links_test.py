@@ -4,8 +4,7 @@ from unittest import mock
 
 import pytest
 
-from h import models
-from h import links
+from h import links, models
 
 
 class FakeAnnotation:

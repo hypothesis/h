@@ -13,16 +13,15 @@ Revises: 7f3d80550fff
 Create Date: 2018-01-30 11:12:23.520717
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from h.db import types
-
 
 revision = "c943c3f8a7e5"
 down_revision = "7f3d80550fff"

@@ -4,9 +4,12 @@ from unittest import mock
 
 import pytest
 
-from h.services.user_unique import UserUniqueService, user_unique_factory
-from h.services.user_unique import DuplicateUserError
 from h.services.user import UserService
+from h.services.user_unique import (
+    DuplicateUserError,
+    UserUniqueService,
+    user_unique_factory,
+)
 
 
 class TestUserUniqueEnsureUnique:

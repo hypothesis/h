@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from h import links
-
 from pyramid.renderers import render
+
+from h import links
 
 
 def generate(request, notification):

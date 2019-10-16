@@ -3,12 +3,10 @@
 from unittest import mock
 
 import pytest
-
 from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h.views.badge import badge
-
 
 badge_fixtures = pytest.mark.usefixtures("models", "search_lib")
 

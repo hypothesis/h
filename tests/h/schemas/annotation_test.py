@@ -3,9 +3,8 @@ from copy import deepcopy
 from unittest import mock
 
 import pytest
-from webob.multidict import NestedMultiDict, MultiDict
+from webob.multidict import MultiDict, NestedMultiDict
 
-from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
 from h.schemas import ValidationError
 from h.schemas.annotation import (
     CreateAnnotationSchema,
@@ -13,6 +12,7 @@ from h.schemas.annotation import (
     UpdateAnnotationSchema,
 )
 from h.schemas.util import validate_query_params
+from h.search.query import LIMIT_DEFAULT, LIMIT_MAX, OFFSET_MAX
 
 
 def create_annotation_schema_validate(request, data):

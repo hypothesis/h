@@ -2,9 +2,8 @@
 """Functions for generating Atom feeds."""
 from pyramid import i18n
 
-from h import presenters
-from h import util
 import h.feeds.util
+from h import presenters, util
 
 _ = i18n.TranslationStringFactory(__package__)
 

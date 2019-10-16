@@ -3,11 +3,9 @@
 import string
 
 import pytest
-
 import sqlalchemy as sa
 
 from h.util.query import column_windows
-
 
 meta = sa.MetaData()
 

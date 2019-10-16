@@ -7,12 +7,11 @@ Create Date: 2016-09-14 15:17:23.096224
 """
 import logging
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
 
 revision = "6964a8237c88"
 down_revision = "5e535a075f16"

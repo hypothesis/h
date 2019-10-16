@@ -6,8 +6,8 @@ Revises: 6f86796f64e0
 Create Date: 2016-07-08 17:54:57.399139
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 

@@ -9,13 +9,12 @@ Create Date: 2016-08-10 14:09:01.787927
 import sys
 from collections import namedtuple
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from h.util import markdown
-
 
 revision = "d536d9a342f3"
 down_revision = "39b1935d9e7b"

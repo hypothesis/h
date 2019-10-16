@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 from jinja2 import Markup
-from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import HTTPFound
+from pyramid.view import view_config, view_defaults
 from sqlalchemy import func
 
-from h import form
-from h import i18n
-from h import models
+from h import form, i18n, models, paginator
 from h.models.organization import Organization
-from h import paginator
 from h.schemas.forms.admin.organization import OrganizationSchema
 
 _ = i18n.TranslationString

@@ -8,12 +8,11 @@ integrates it with the Pyramid application by attaching a bootstrapped fake
 "request" object to the application where it can be retrieved by tasks.
 """
 
-from datetime import timedelta
 import logging
 import os
+from datetime import timedelta
 
-from celery import Celery
-from celery import signals
+from celery import Celery, signals
 from celery.utils.log import get_task_logger
 from kombu import Exchange, Queue
 

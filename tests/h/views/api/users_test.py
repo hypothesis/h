@@ -5,14 +5,14 @@ from unittest import mock
 import pytest
 from pyramid.httpexceptions import HTTPConflict
 
-from h.views.api.exceptions import PayloadError
 from h.models.auth_client import GrantType
 from h.schemas import ValidationError
 from h.services.user_signup import UserSignupService
+from h.services.user_unique import DuplicateUserError, UserUniqueService
 from h.services.user_update import UserUpdateService
-from h.services.user_unique import UserUniqueService, DuplicateUserError
 from h.traversal import UserContext
-from h.views.api.users import read, create, update
+from h.views.api.exceptions import PayloadError
+from h.views.api.users import create, read, update
 
 
 class TestRead:

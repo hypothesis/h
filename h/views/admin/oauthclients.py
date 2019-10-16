@@ -3,8 +3,7 @@
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
-from h import form
-from h import i18n
+from h import form, i18n
 from h.models import AuthClient
 from h.models.auth_client import GrantType, ResponseType
 from h.schemas.auth_client import CreateAuthClientSchema, EditAuthClientSchema

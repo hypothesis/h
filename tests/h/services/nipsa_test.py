@@ -2,8 +2,7 @@
 
 import pytest
 
-from h.services.nipsa import NipsaService
-from h.services.nipsa import nipsa_factory
+from h.services.nipsa import NipsaService, nipsa_factory
 
 
 @pytest.mark.usefixtures("users", "reindex_user_annotations")

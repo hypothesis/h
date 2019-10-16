@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import pytest
-
 from sqlalchemy.exc import IntegrityError
 
 from h.models import AuthClient

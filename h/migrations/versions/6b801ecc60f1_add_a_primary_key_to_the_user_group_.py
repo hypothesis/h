@@ -6,9 +6,8 @@ Revises: e17d3ce4fcd2
 Create Date: 2016-07-08 17:42:20.891383
 """
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = "6b801ecc60f1"
 down_revision = "e17d3ce4fcd2"

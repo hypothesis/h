@@ -2,7 +2,6 @@
 """Make organization relation nullable on group"""
 from alembic import op
 
-
 revision = "5d256923d642"
 down_revision = "7fe5d688edd9"
 

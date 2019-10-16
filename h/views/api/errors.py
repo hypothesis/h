@@ -7,17 +7,15 @@ Views rendered by the web application in response to exceptions thrown within
 API views.
 """
 
-from pyramid.view import forbidden_view_config
-from pyramid.view import notfound_view_config
-from pyramid.view import view_config
 from pyramid import httpexceptions
+from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 
 from h.i18n import TranslationString as _  # noqa: N813
 from h.util.view import handle_exception, json_view
 from h.views.api.config import cors_policy
 from h.views.api.decorators import (
-    unauthorized_to_not_found,
     normalize_not_found,
+    unauthorized_to_not_found,
     validate_media_types,
 )
 from h.views.api.exceptions import OAuthAuthorizeError

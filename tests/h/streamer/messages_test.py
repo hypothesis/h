@@ -4,8 +4,7 @@ from unittest import mock
 
 import pytest
 from gevent.queue import Queue
-from pyramid import security
-from pyramid import registry
+from pyramid import registry, security
 
 from h.streamer import messages
 

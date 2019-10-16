@@ -3,7 +3,7 @@
 """
 Provides links to different representations of annotations.
 """
-from urllib.parse import urlparse, unquote, urljoin
+from urllib.parse import unquote, urljoin, urlparse
 
 
 def pretty_link(url):

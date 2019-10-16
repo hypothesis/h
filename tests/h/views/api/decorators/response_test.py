@@ -2,7 +2,6 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.response import Response
 from webob.acceptparse import create_accept_header
 

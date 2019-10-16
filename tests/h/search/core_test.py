@@ -8,6 +8,7 @@ Tests for filtering/matching/aggregating on specific annotation fields are in
 """
 
 import datetime
+
 import pytest
 from webob.multidict import MultiDict
 

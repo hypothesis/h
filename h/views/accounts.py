@@ -7,27 +7,26 @@ from urllib.parse import urlparse
 import colander
 import deform
 import jinja2
-from pyramid import httpexceptions
-from pyramid import security
+from pyramid import httpexceptions, security
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
 
-from h import accounts
-from h import form
-from h import i18n
-from h import models
-from h import session
+from h import accounts, form, i18n, models, session
 from h.accounts import schemas
-from h.schemas.forms.accounts import EditProfileSchema
-from h.schemas.forms.accounts import ForgotPasswordSchema
-from h.schemas.forms.accounts import LoginSchema
-from h.schemas.forms.accounts import ResetCode
-from h.schemas.forms.accounts import ResetPasswordSchema
-from h.accounts.events import ActivationEvent
-from h.accounts.events import PasswordResetEvent
-from h.accounts.events import LogoutEvent
-from h.accounts.events import LoginEvent
+from h.accounts.events import (
+    ActivationEvent,
+    LoginEvent,
+    LogoutEvent,
+    PasswordResetEvent,
+)
 from h.emails import reset_password
+from h.schemas.forms.accounts import (
+    EditProfileSchema,
+    ForgotPasswordSchema,
+    LoginSchema,
+    ResetCode,
+    ResetPasswordSchema,
+)
 from h.tasks import mailer
 from h.util.view import json_view
 

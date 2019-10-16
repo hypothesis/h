@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from h import models
-from h.services.rename_user import make_indexer, RenameUserService, UserRenameError
+from h.services.rename_user import RenameUserService, UserRenameError, make_indexer
 
 
 class TestRenameUserService:

@@ -4,10 +4,8 @@ import datetime
 from unittest import mock
 
 import jwt
-
-
-from hypothesis import strategies as st
 from hypothesis import assume, given
+from hypothesis import strategies as st
 
 from h.auth import tokens
 

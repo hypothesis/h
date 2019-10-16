@@ -5,8 +5,7 @@ from unittest import mock
 import pytest
 
 from h.models import Setting
-from h.services.settings import SettingsService
-from h.services.settings import settings_factory
+from h.services.settings import SettingsService, settings_factory
 
 
 class TestSettingsService:

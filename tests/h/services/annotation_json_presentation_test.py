@@ -5,8 +5,8 @@ from unittest import mock
 import pytest
 
 from h.interfaces import IGroupService
-from h.services.annotation_json_presentation import AnnotationJSONPresentationService
 from h.services.annotation_json_presentation import (
+    AnnotationJSONPresentationService,
     annotation_json_presentation_service_factory,
 )
 

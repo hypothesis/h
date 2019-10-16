@@ -8,12 +8,11 @@ Important views which don't form part of any other major feature package.
 
 import logging
 
-from pyramid import httpexceptions
-from pyramid import response
+from pyramid import httpexceptions, response
 from pyramid.view import view_config
 
-from h.views.client import sidebar_app
 from h.util.user import split_user
+from h.views.client import sidebar_app
 
 log = logging.getLogger(__name__)
 

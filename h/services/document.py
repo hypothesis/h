@@ -2,7 +2,7 @@
 
 import sqlalchemy as sa
 
-from h.models import Document, Annotation
+from h.models import Annotation, Document
 
 MAX_DOCUMENT_COUNT = 100
 

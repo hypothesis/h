@@ -4,9 +4,9 @@ from unittest import mock
 
 import pytest
 
+from h import traversal
 from h.presenters.group_json import GroupJSONPresenter, GroupsJSONPresenter
 from h.services.group_links import GroupLinksService
-from h import traversal
 
 
 class TestGroupJSONPresenter:

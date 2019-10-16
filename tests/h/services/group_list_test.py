@@ -4,10 +4,9 @@ from unittest import mock
 
 import pytest
 
-from h.services.group_list import GroupListService
-from h.services.group_list import group_list_factory
-from h.services.group_scope import GroupScopeService
 from h.models.group import Group
+from h.services.group_list import GroupListService, group_list_factory
+from h.services.group_scope import GroupScopeService
 
 
 class TestListGroupsSessionGroups:

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.view import forbidden_view_config
-from pyramid.view import notfound_view_config
-from pyramid.view import view_config
+from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 from ws4py.exc import HandshakeError
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 

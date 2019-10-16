@@ -3,8 +3,10 @@
 import pytest
 
 from h import models
-from h.services.annotation_moderation import AnnotationModerationService
-from h.services.annotation_moderation import annotation_moderation_service_factory
+from h.services.annotation_moderation import (
+    AnnotationModerationService,
+    annotation_moderation_service_factory,
+)
 
 
 class TestAnnotationModerationServiceHidden:

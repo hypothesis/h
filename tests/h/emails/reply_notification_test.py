@@ -6,8 +6,7 @@ from unittest import mock
 import pytest
 
 from h.emails.reply_notification import generate
-from h.models import Annotation
-from h.models import Document
+from h.models import Annotation, Document
 from h.notification.reply import Notification
 
 

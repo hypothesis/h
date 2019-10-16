@@ -3,8 +3,8 @@
 import copy
 
 from pyramid import security
-from zope.interface.verify import verifyObject
 from zope.interface.exceptions import DoesNotImplement
+from zope.interface.verify import verifyObject
 
 from h.formatters.interfaces import IAnnotationFormatter
 from h.presenters.annotation_base import AnnotationBasePresenter

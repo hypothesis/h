@@ -2,10 +2,9 @@ import colander
 import pytest
 
 from h.schemas.forms.admin.organization import (
-    OrganizationSchema,
     ORGANIZATION_LOGO_MAX_CHARS,
+    OrganizationSchema,
 )
-
 
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 

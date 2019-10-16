@@ -1,12 +1,9 @@
 import venusian
 
-from h.views.api.helpers import cors
-from h.views.api.helpers import links
-from h.views.api.helpers.media_types import media_type_for_version
+from h.views.api import API_VERSION_DEFAULT, API_VERSIONS
 from h.views.api.decorators.response import version_media_type_header
-
-from h.views.api import API_VERSIONS, API_VERSION_DEFAULT
-
+from h.views.api.helpers import cors, links
+from h.views.api.helpers.media_types import media_type_for_version
 
 #: Decorator that adds CORS headers to API responses.
 #:

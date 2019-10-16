@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.view import view_config
 from pyramid import i18n
+from pyramid.view import view_config
 from webob.multidict import MultiDict
 
 from h import search
 from h.feeds import render_atom, render_rss
 from h.storage import fetch_ordered_annotations
-
 
 _ = i18n.TranslationStringFactory(__package__)
 

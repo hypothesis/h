@@ -10,9 +10,10 @@ import logging
 
 import sqlalchemy as sa
 from alembic import op
-from h.db import types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from h.db import types
 
 # revision identifiers, used by Alembic.
 revision = "9e6b4f70f588"

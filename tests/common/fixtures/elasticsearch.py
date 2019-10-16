@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import elasticsearch_dsl
 
+import elasticsearch_dsl
 import pytest
 
 from h import search

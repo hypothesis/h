@@ -2,19 +2,19 @@
 
 from pyramid import security
 from pyramid.httpexceptions import (
-    HTTPNoContent,
     HTTPBadRequest,
-    HTTPNotFound,
     HTTPConflict,
+    HTTPNoContent,
+    HTTPNotFound,
 )
 
 from h.auth.util import client_authority
-from h.views.api.exceptions import PayloadError
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
 from h.traversal import GroupContext
 from h.views.api.config import api_config
+from h.views.api.exceptions import PayloadError
 
 
 @api_config(

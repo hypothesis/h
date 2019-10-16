@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 import base64
 
+import pytest
 
 from h.models.auth_client import GrantType
 

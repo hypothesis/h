@@ -5,16 +5,16 @@ from unittest import mock
 import pytest
 
 from h.models import Organization
-from h.views.admin import groups
-from h.views.admin.groups import GroupCreateViews, GroupEditViews
-from h.services.user import UserService
+from h.services.annotation_delete import AnnotationDeleteService
+from h.services.delete_group import DeleteGroupService
 from h.services.group import GroupService
 from h.services.group_create import GroupCreateService
-from h.services.group_update import GroupUpdateService
 from h.services.group_members import GroupMembersService
-from h.services.delete_group import DeleteGroupService
-from h.services.annotation_delete import AnnotationDeleteService
+from h.services.group_update import GroupUpdateService
 from h.services.list_organizations import ListOrganizationsService
+from h.services.user import UserService
+from h.views.admin import groups
+from h.views.admin.groups import GroupCreateViews, GroupEditViews
 
 
 class FakeForm:

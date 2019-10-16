@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """Add path column to groupscope, and a composite index for the (origin, path) columns"""
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = "8bd83598ad77"
 down_revision = "2d0ad2b1bf07"

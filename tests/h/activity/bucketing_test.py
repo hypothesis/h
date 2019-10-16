@@ -8,7 +8,6 @@ import pytest
 from h.activity import bucketing
 from tests.common import factories
 
-
 UTCNOW = datetime.datetime(year=1970, month=2, day=21, hour=19, minute=30)
 FIVE_MINS_AGO = UTCNOW - datetime.timedelta(minutes=5)
 YESTERDAY = UTCNOW - datetime.timedelta(days=1)

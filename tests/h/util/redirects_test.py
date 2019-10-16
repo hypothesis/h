@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from hypothesis import strategies as st
 from hypothesis import given
+from hypothesis import strategies as st
 
 from h.util.redirects import ParseError, Redirect, lookup, parse
 

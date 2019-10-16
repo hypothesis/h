@@ -3,8 +3,7 @@ import functools
 import logging
 
 import click
-from pyramid import paster
-from pyramid import path
+from pyramid import paster, path
 from pyramid.request import Request
 
 from h import __version__

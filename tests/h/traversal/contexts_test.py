@@ -8,11 +8,13 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from h.auth import role
 from h.models import Organization
 from h.services.group_links import GroupLinksService
-from h.traversal.contexts import AnnotationContext
-from h.traversal.contexts import GroupContext
-from h.traversal.contexts import GroupUpsertContext
-from h.traversal.contexts import OrganizationContext
-from h.traversal.contexts import UserContext
+from h.traversal.contexts import (
+    AnnotationContext,
+    GroupContext,
+    GroupUpsertContext,
+    OrganizationContext,
+    UserContext,
+)
 
 
 @pytest.mark.usefixtures("group_service", "links_service")

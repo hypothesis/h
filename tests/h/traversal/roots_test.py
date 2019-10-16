@@ -7,22 +7,23 @@ import pyramid.security
 import pytest
 
 import h.auth
-from h.models import AuthClient
 from h.auth import role
+from h.models import AuthClient
 from h.services.group import GroupService
 from h.services.user import UserService
-from h.traversal.roots import Root
-from h.traversal.roots import AnnotationRoot
-from h.traversal.roots import AuthClientRoot
-from h.traversal.roots import OrganizationRoot
-from h.traversal.roots import OrganizationLogoRoot
-from h.traversal.roots import GroupRoot
-from h.traversal.roots import GroupUpsertRoot
-from h.traversal.roots import ProfileRoot
-from h.traversal.roots import UserRoot
-from h.traversal.roots import UserUserIDRoot
-from h.traversal.contexts import AnnotationContext
-from h.traversal.contexts import UserContext
+from h.traversal.contexts import AnnotationContext, UserContext
+from h.traversal.roots import (
+    AnnotationRoot,
+    AuthClientRoot,
+    GroupRoot,
+    GroupUpsertRoot,
+    OrganizationLogoRoot,
+    OrganizationRoot,
+    ProfileRoot,
+    Root,
+    UserRoot,
+    UserUserIDRoot,
+)
 
 
 class TestRoot:

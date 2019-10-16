@@ -63,7 +63,6 @@ elsewhere in the Hypothesis application. URI expansion is handled by
 :py:func:`h.storage.expand_uri`.
 """
 import re
-
 from urllib.parse import (
     SplitResult,
     parse_qsl,

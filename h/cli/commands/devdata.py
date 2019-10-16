@@ -5,13 +5,14 @@ Usage:
 
     bin/hypothesis --dev devdata
 """
-import click
 import json
 import os.path
 import pathlib
 import shutil
 import subprocess
 import tempfile
+
+import click
 
 import h
 from h import models

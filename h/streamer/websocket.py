@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from collections import namedtuple
 import copy
 import json
 import logging
 import weakref
+from collections import namedtuple
 
-from gevent.queue import Full
 import jsonschema
+from gevent.queue import Full
 from ws4py.websocket import WebSocket as _WebSocket
 
 from h import storage
