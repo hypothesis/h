@@ -144,10 +144,16 @@ TEST_URLS = [
     ("http://example.com?a=1&utm_term=foo&b=2", "httpx://example.com?a=1&b=2"),
     ("http://example.com?WT.mc_id=TWT_NatureNews", "httpx://example.com"),
     ("http://example.com?WT.foo=bar", "httpx://example.com"),
+    ("http://example.com?a=1&x-amz-security-token=abcde", "httpx://example.com?a=1"),
+    ("http://example.com?a=1&X-Amz-Security-Token=abcde", "httpx://example.com?a=1"),
     # but don't be over-eager and remove close matches
     ("http://example.com?gclid_foo=abcde", "httpx://example.com?gclid_foo=abcde"),
     ("http://example.com?bar_gclid=abcde", "httpx://example.com?bar_gclid=abcde"),
     ("http://example.com?WT=abcde", "httpx://example.com?WT=abcde"),
+    (
+        "http://example.com?x-amz-security-token-foo=abcde",
+        "httpx://example.com?x-amz-security-token-foo=abcde",
+    ),
 ]
 
 

@@ -96,6 +96,11 @@ BLACKLISTED_QUERY_PARAMS = [
         #     http://help.webtrends.com/en/analytics10/#qpr_about.html
         #
         r"^WT\..+$",
+        # Amazon security access token. Reference:
+        #
+        #     https://docs.aws.amazon.com/general/latest/gr/sigv4-add-signature-to-request.html
+        #
+        r"(?i)^x-amz-security-token$",
     }
 ]
 
