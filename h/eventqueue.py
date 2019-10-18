@@ -5,7 +5,7 @@ import logging
 
 from zope.interface import providedBy
 
-from h.sentry import report_exception
+from h_pyramid_sentry import report_exception
 
 
 log = logging.getLogger(__name__)

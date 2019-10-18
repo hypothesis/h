@@ -108,11 +108,18 @@ def configure(environ=None, settings=None):
     # Where should logged-out users visiting the homepage be redirected?
     settings_manager.set("h.homepage_redirect_url", "HOMEPAGE_REDIRECT_URL")
     settings_manager.set("h.proxy_auth", "PROXY_AUTH", type_=asbool)
+
     # Sentry DSNs for frontend code should be of the public kind, lacking the
     # password component in the DSN URI.
     settings_manager.set("h.sentry_dsn_client", "SENTRY_DSN_CLIENT")
     settings_manager.set("h.sentry_dsn_frontend", "SENTRY_DSN_FRONTEND")
+    # Used in the front-end
     settings_manager.set("h.sentry_environment", "SENTRY_ENVIRONMENT", default="dev")
+    # Used in the back-end via the h-pyramid-sentry plugin
+    settings_manager.set(
+        "h_pyramid_sentry.init.environment", "SENTRY_ENVIRONMENT", default="dev"
+    )
+
     settings_manager.set("h.websocket_url", "WEBSOCKET_URL")
 
     # Debug/development settings

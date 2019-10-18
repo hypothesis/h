@@ -1,3 +1,5 @@
+h_pyramid_sentry
+
 PyJWT
 SQLAlchemy >= 1.1.4
 alembic
@@ -39,7 +41,6 @@ pyramid_retry
 pyramid_tm
 python-dateutil
 python-slugify < 1.2.0
-sentry-sdk
 statsd
 supervisor >= 4.0.0
 transaction

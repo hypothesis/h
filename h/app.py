@@ -10,6 +10,7 @@ from pyramid.settings import asbool
 from pyramid.tweens import EXCVIEW
 
 from h.config import configure
+from h.sentry_filters import SENTRY_FILTERS
 from h.views.client import DEFAULT_CLIENT_URL
 
 log = logging.getLogger(__name__)
@@ -130,7 +131,6 @@ def includeme(config):
     config.include("h.renderers")
     config.include("h.routes")
     config.include("h.search")
-    config.include("h.sentry")
     config.include("h.services")
     config.include("h.session")
     config.include("h.stats")
@@ -143,3 +143,13 @@ def includeme(config):
     config.include("h.links")
     config.include("h.nipsa")
     config.include("h.notification")
+
+    # Configure sentry
+    config.add_settings(
+        {
+            "h_pyramid_sentry.filters": SENTRY_FILTERS,
+            "h_pyramid_sentry.retry_support": True,
+        }
+    )
+
+    config.include("h_pyramid_sentry")
