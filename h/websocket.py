@@ -43,6 +43,7 @@ import pyramid
 from ws4py import format_addresses
 
 from h.config import configure
+from h.sentry_filters import SENTRY_FILTERS
 
 log = logging.getLogger(__name__)
 
@@ -164,7 +165,6 @@ def create_app(global_config, **settings):
     config.include("h.authz")
     config.include("h.db")
     config.include("h.session")
-    config.include("h.sentry")
     config.include("h.services")
     config.include("h.stats")
 
@@ -179,6 +179,16 @@ def create_app(global_config, **settings):
     config.add_route("api.annotation", "/api/annotations/{id}", static=True)
 
     config.include("h.streamer")
+
+    # Configure sentry
+    config.add_settings(
+        {
+            "h_pyramid_sentry.filters": SENTRY_FILTERS,
+            "h_pyramid_sentry.retry_support": False,
+        }
+    )
+
+    config.include("h_pyramid_sentry")
 
     # Add support for logging exceptions whenever they arise
     config.include("pyramid_exclog")
