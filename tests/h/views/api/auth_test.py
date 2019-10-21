@@ -23,7 +23,7 @@ from h.views.api import auth as views
 from h.views.api.exceptions import OAuthAuthorizeError
 
 
-@pytest.mark.usefixtures("routes", "oauth_provider", "user_svc")
+@pytest.mark.usefixtures("routes", "oauth_provider", "user_svc", "render_url_template")
 class TestOAuthAuthorizeController:
     @pytest.mark.usefixtures("authenticated_user")
     @pytest.mark.parametrize("view_name", ["get", "get_web_message"])
@@ -137,6 +137,20 @@ class TestOAuthAuthorizeController:
             "origin": "http://client.com",
             "state": "foobar",
         }
+
+    @pytest.mark.usefixtures("authenticated_user")
+    def test_get_web_message_supports_redirect_url_templates(
+        self, controller, auth_client, render_url_template
+    ):
+        auth_client.trusted = True
+
+        def render_url(url, request):
+            return url.replace("http://client.com", "https://client-alias.com")
+
+        render_url_template.side_effect = render_url
+        response = controller.get_web_message()
+
+        assert response["origin"] == "https://client-alias.com"
 
     @pytest.mark.usefixtures("authenticated_user")
     def test_get_web_message_allows_empty_state_in_context_for_trusted_clients(
@@ -278,6 +292,17 @@ class TestOAuthAuthorizeController:
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route("login", "/login")
+
+    @pytest.fixture
+    def render_url_template(self, patch):
+        mock = patch("h.views.api.auth.render_url_template")
+
+        def render(url, request):
+            return url
+
+        mock.side_effect = render
+
+        return mock
 
 
 @pytest.mark.usefixtures("oauth_provider")

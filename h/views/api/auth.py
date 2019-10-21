@@ -13,6 +13,7 @@ from h import models
 from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 from h.services.oauth_validator import DEFAULT_SCOPES
 from h.util.datetime import utc_iso8601
+from h.util.view import render_url_template
 from h.views.api.config import api_config
 
 log = logging.getLogger(__name__)
@@ -164,6 +165,7 @@ class OAuthAuthorizeController:
             )
 
     def _render_web_message_response(self, redirect_uri):
+        redirect_uri = render_url_template(redirect_uri, self.request)
         location = urlparse(redirect_uri)
         params = parse_qs(location.query)
         origin = "{url.scheme}://{url.netloc}".format(url=location)
