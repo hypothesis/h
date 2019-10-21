@@ -50,6 +50,9 @@ class UserService:
 
         :returns: a user instance, if found
         :rtype: h.models.User or None
+        :raises ValueError: If no value is passed for ``authority`` and
+                            ``userid_or_username`` is not a
+                            properly-formatted ``userid``.
 
         """
         if authority is not None:

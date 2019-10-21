@@ -508,6 +508,14 @@ class TestUserUserIDRoot:
 
         user_service.fetch.assert_called_once_with("acct:bob@example.com")
 
+    def test_it_raises_KeyError_if_userid_malformed_and_service_raises(
+        self, user_userid_root, user_service
+    ):
+        user_service.fetch.side_effect = ValueError("nope")
+
+        with pytest.raises(KeyError):
+            user_userid_root["acct:bob@example.com"]
+
     def test_it_raises_KeyError_if_the_user_does_not_exist(
         self, user_userid_root, user_service
     ):

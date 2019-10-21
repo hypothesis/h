@@ -284,7 +284,11 @@ class UserUserIDRoot:
         self.user_svc = self.request.find_service(name="user")
 
     def __getitem__(self, userid):
-        user = self.user_svc.fetch(userid)
+        try:
+            user = self.user_svc.fetch(userid)
+        except ValueError:
+            # If the `userid` is malformed
+            raise KeyError()
 
         if not user:
             raise KeyError()
