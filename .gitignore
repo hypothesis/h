@@ -37,3 +37,4 @@ celerybeat-schedule.*
 tests/py3-actual-failures.txt
 
 .devdata.env
+.idea/
