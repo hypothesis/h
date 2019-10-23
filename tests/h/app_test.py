@@ -1,10 +1,10 @@
-import pytest
-
 from unittest import mock
+
+import pytest
 from pyramid_jinja2 import Environment as JinjaEnvironment
 
-from h.assets import Environment
 from h.app import includeme
+from h.assets import Environment
 from h.sentry_filters import SENTRY_FILTERS
 
 

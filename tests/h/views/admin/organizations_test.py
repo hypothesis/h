@@ -4,9 +4,9 @@ import pytest
 
 from h.models import Organization
 from h.views.admin.organizations import (
-    index,
     OrganizationCreateController,
     OrganizationEditController,
+    index,
 )
 
 

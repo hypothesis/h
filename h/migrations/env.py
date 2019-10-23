@@ -4,11 +4,10 @@ import os
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from h import db
-from h.settings import database_url
-
 # Import all model modules here in order to populate the metadata
 from h import models  # noqa
+from h import db
+from h.settings import database_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

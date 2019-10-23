@@ -2,7 +2,6 @@
 """Logging Filters."""
 import logging
 
-
 # logging levels from https://docs.python.org/2/library/logging.html#logging-levels
 LEVELS = {
     "CRITICAL": 50,

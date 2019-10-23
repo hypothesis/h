@@ -5,9 +5,9 @@ import colander
 import pytest
 
 from h.models.group import (
-    GROUP_NAME_MIN_LENGTH,
-    GROUP_NAME_MAX_LENGTH,
     GROUP_DESCRIPTION_MAX_LENGTH,
+    GROUP_NAME_MAX_LENGTH,
+    GROUP_NAME_MIN_LENGTH,
 )
 from h.models.organization import Organization
 from h.schemas.forms.admin.group import CreateAdminGroupSchema

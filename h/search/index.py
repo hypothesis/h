@@ -9,8 +9,7 @@ import sqlalchemy as sa
 from elasticsearch import helpers as es_helpers
 from sqlalchemy.orm import subqueryload
 
-from h import models
-from h import presenters
+from h import models, presenters
 from h.events import AnnotationTransformEvent
 from h.util.query import column_windows
 

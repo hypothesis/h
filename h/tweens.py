@@ -6,8 +6,8 @@ from codecs import open
 from pyramid import httpexceptions
 from pyramid.util import DottedNameResolver
 
-from h.util.redirects import parse as parse_redirects
 from h.util.redirects import lookup as lookup_redirects
+from h.util.redirects import parse as parse_redirects
 
 log = logging.getLogger(__name__)
 resolver = DottedNameResolver(None)

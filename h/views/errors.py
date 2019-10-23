@@ -7,9 +7,7 @@ Views rendered by the web application in response to exceptions thrown within
 views.
 """
 
-from pyramid.view import forbidden_view_config
-from pyramid.view import notfound_view_config
-from pyramid.view import view_config
+from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 
 from h.i18n import TranslationString as _  # noqa: N813
 from h.util.view import handle_exception, json_view

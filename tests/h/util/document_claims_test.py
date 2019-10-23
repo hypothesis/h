@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 import re
+
 import pytest
 
 from h.util import document_claims

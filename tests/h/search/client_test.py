@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import elasticsearch
 import pytest
 
-import elasticsearch
-
-from h.search.client import get_client
-from h.search.client import Client
+from h.search.client import Client, get_client
 
 
 class TestClient:

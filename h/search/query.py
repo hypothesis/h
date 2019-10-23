@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from dateutil.parser import parse
-from dateutil import tz
 from datetime import datetime as dt
 
-from h import storage
-from h.util import uri
+from dateutil import tz
+from dateutil.parser import parse
 from elasticsearch_dsl import Q
 from elasticsearch_dsl.query import SimpleQueryString
+
+from h import storage
 from h.search.util import add_default_scheme, wildcard_uri_is_valid
+from h.util import uri
 
 LIMIT_DEFAULT = 20
 # Elasticsearch requires offset + limit must be <= 10,000.

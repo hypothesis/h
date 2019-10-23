@@ -9,12 +9,10 @@ Create Date: 2016-09-12 15:31:00.597582
 from collections import namedtuple
 from urllib.parse import urlparse
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import subqueryload
-
+from sqlalchemy.orm import sessionmaker, subqueryload
 
 revision = "a44ef07b085a"
 down_revision = "58bb601c390f"

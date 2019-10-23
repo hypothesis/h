@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
 from h import storage
 from h.models import Subscriptions

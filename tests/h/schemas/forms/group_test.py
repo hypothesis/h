@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import pytest
-
 import colander
+import pytest
 
 from h.schemas.forms.group import unblacklisted_group_name_slug
 

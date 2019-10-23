@@ -3,13 +3,15 @@
 """Authentication configuration."""
 import logging
 
-from pyramid.authentication import RemoteUserAuthenticationPolicy
 import pyramid_authsanity
+from pyramid.authentication import RemoteUserAuthenticationPolicy
 
-from h.auth.policy import AuthenticationPolicy
-from h.auth.policy import APIAuthenticationPolicy
-from h.auth.policy import AuthClientPolicy
-from h.auth.policy import TokenAuthenticationPolicy
+from h.auth.policy import (
+    APIAuthenticationPolicy,
+    AuthClientPolicy,
+    AuthenticationPolicy,
+    TokenAuthenticationPolicy,
+)
 from h.auth.util import default_authority, groupfinder
 from h.security import derive_key
 

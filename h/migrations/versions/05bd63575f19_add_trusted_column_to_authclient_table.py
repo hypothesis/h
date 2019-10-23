@@ -6,8 +6,8 @@ Revises: dfb8b45674db
 Create Date: 2017-07-18 13:45:12.301240
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "05bd63575f19"
 down_revision = "dfb8b45674db"

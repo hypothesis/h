@@ -16,9 +16,8 @@ IDs.
 ``authority_provided_id`` must be unique per authority; ergo the
 unique-enforced index
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 revision = "5ed9c8c105f6"
 down_revision = "5d256923d642"

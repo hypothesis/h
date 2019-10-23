@@ -2,9 +2,8 @@
 
 import pytest
 
-from h.emails.test import generate
-
 from h import __version__
+from h.emails.test import generate
 
 
 class TestGenerate:

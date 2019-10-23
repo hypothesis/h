@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from codecs import open
 import logging
+from codecs import open
 
 import colander
 import deform

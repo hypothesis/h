@@ -4,8 +4,8 @@ from unittest import mock
 import pytest
 
 import h.search.index
-from h.services.group import GroupService
 from h.services.annotation_moderation import AnnotationModerationService
+from h.services.group import GroupService
 
 
 @pytest.fixture

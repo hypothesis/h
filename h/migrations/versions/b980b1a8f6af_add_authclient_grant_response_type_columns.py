@@ -8,8 +8,8 @@ Create Date: 2017-07-11 11:43:01.120391
 
 import enum
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "b980b1a8f6af"
 down_revision = "1c995723a271"

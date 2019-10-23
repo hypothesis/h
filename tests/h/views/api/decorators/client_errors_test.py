@@ -2,14 +2,13 @@
 from unittest import mock
 
 import pytest
-
+from pyramid.httpexceptions import HTTPForbidden, HTTPNotAcceptable, HTTPNotFound
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPForbidden, HTTPNotFound, HTTPNotAcceptable
 from webob.acceptparse import create_accept_header
 
 from h.views.api.decorators.client_errors import (
-    unauthorized_to_not_found,
     normalize_not_found,
+    unauthorized_to_not_found,
     validate_media_types,
 )
 

@@ -2,8 +2,8 @@
 
 from unittest import mock
 
-from pyramid import httpexceptions
 import pytest
+from pyramid import httpexceptions
 
 from h.models import Annotation
 from h.traversal import AnnotationContext

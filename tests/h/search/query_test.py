@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+
 import elasticsearch_dsl
 import pytest
 import webob

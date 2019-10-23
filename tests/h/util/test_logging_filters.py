@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-import pytest
 import logging
+
+import pytest
 from urllib3.exceptions import ReadTimeoutError
+
 from h.util.logging_filters import ExceptionFilter
 
 

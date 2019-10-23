@@ -6,18 +6,16 @@ Revises: addee5d1686f
 Create Date: 2016-09-22 16:02:42.284670
 """
 
-from collections import namedtuple
 import logging
+from collections import namedtuple
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm import sessionmaker, subqueryload
 
 from h.db import types
 from h.util.uri import normalize as uri_normalize
-
 
 revision = "bcdd81e23920"
 down_revision = "addee5d1686f"

@@ -6,14 +6,14 @@ from unittest import mock
 import pytest
 
 from h import models
-from h.services.user import UserService
 from h.services.auth_ticket import (
-    auth_ticket_service_factory,
-    AuthTicketNotLoadedError,
-    AuthTicketService,
     TICKET_REFRESH_INTERVAL,
     TICKET_TTL,
+    AuthTicketNotLoadedError,
+    AuthTicketService,
+    auth_ticket_service_factory,
 )
+from h.services.user import UserService
 
 
 class TestAuthTicketService:

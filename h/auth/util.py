@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import re
-
 import hmac
+import re
 
 import sqlalchemy as sa
 from pyramid import security
 
 from h.auth import role
-from h.models.auth_client import GrantType, AuthClient
+from h.models.auth_client import AuthClient, GrantType
 
 
 def groupfinder(userid, request):

@@ -7,6 +7,7 @@ Create Date: 2017-04-18 12:19:33.863557
 """
 
 import enum
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.ext.declarative import declarative_base

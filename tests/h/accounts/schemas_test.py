@@ -8,7 +8,6 @@ from pyramid.exceptions import BadCSRFToken
 from h.accounts import schemas
 from h.services.user_password import UserPasswordService
 
-
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 

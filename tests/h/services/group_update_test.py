@@ -3,12 +3,10 @@
 from unittest import mock
 
 import pytest
-
 from sqlalchemy.exc import SQLAlchemyError
 
 from h.services.exceptions import ConflictError, ValidationError
-from h.services.group_update import GroupUpdateService
-from h.services.group_update import group_update_factory
+from h.services.group_update import GroupUpdateService, group_update_factory
 
 
 class TestGroupUpdate:

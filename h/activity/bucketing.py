@@ -8,9 +8,7 @@ from urllib.parse import urlparse
 import newrelic.agent
 from pyramid import i18n
 
-from h import links
-from h import presenters
-
+from h import links, presenters
 
 _ = i18n.TranslationStringFactory(__package__)
 

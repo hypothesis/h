@@ -5,10 +5,9 @@ from unittest import mock
 
 import pytest
 
+from h import storage
 from h.models.annotation import Annotation
 from h.models.document import Document, DocumentURI
-
-from h import storage
 from h.schemas import ValidationError
 
 

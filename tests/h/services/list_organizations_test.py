@@ -2,10 +2,12 @@
 
 import pytest
 
-from h.services.list_organizations import ListOrganizationsService
-from h.services.list_organizations import list_organizations_factory
-from h.services.organization import organization_factory
 from h.models import Organization
+from h.services.list_organizations import (
+    ListOrganizationsService,
+    list_organizations_factory,
+)
+from h.services.organization import organization_factory
 
 
 class TestListOrganizations:

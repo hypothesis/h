@@ -5,8 +5,7 @@ from unittest import mock
 import pytest
 from webob.multidict import NestedMultiDict
 
-from h.paginator import paginate
-from h.paginator import paginate_query
+from h.paginator import paginate, paginate_query
 
 
 class TestPaginate:

@@ -2,8 +2,7 @@
 
 import sqlalchemy as sa
 
-from h.db import Base
-from h.db import mixins
+from h.db import Base, mixins
 
 
 class Setting(Base, mixins.Timestamps):

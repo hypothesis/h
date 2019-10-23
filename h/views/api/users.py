@@ -3,12 +3,12 @@
 from pyramid.httpexceptions import HTTPConflict
 
 from h.auth.util import client_authority
-from h.views.api.exceptions import PayloadError
-from h.views.api.config import api_config
 from h.presenters import TrustedUserJSONPresenter
-from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.schemas import ValidationError
+from h.schemas.api.user import CreateUserAPISchema, UpdateUserAPISchema
 from h.services.user_unique import DuplicateUserError
+from h.views.api.config import api_config
+from h.views.api.exceptions import PayloadError
 
 
 @api_config(

@@ -5,7 +5,6 @@ from itsdangerous import BadData, SignatureExpired
 
 from h.schemas.forms.accounts import ResetPasswordSchema
 
-
 pytestmark = pytest.mark.usefixtures("pyramid_config")
 
 

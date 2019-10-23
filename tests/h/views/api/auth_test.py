@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from unittest import mock
-
 import datetime
 import json
+from unittest import mock
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-
-from oauthlib.oauth2 import InvalidRequestFatalError
 from oauthlib.common import Request as OAuthRequest
+from oauthlib.oauth2 import InvalidRequestFatalError
 from pyramid import httpexceptions
 
-from h.views.api.exceptions import OAuthTokenError
 from h.models.auth_client import ResponseType
 from h.services.auth_token import auth_token_service_factory
 from h.services.oauth_provider import OAuthProviderService
@@ -20,7 +17,7 @@ from h.services.oauth_validator import DEFAULT_SCOPES
 from h.services.user import user_service_factory
 from h.util.datetime import utc_iso8601
 from h.views.api import auth as views
-from h.views.api.exceptions import OAuthAuthorizeError
+from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 
 
 @pytest.mark.usefixtures("routes", "oauth_provider", "user_svc")

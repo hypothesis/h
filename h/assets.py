@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import configparser
+import json
 import os
 
-import json
 from pyramid.settings import asbool, aslist
 from pyramid.static import static_view
 

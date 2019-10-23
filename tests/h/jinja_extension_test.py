@@ -2,8 +2,8 @@
 
 import datetime
 
-from jinja2 import Markup
 import pytest
+from jinja2 import Markup
 
 from h import jinja_extensions as ext
 

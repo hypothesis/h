@@ -5,9 +5,9 @@ Functional tests for client API errors
 Uses create-group endpoint as it can raise all relevant client error codes.
 """
 
-import pytest
 import base64
 
+import pytest
 
 from h.models.auth_client import GrantType
 

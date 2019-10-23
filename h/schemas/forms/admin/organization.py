@@ -1,11 +1,12 @@
+from xml.etree import ElementTree
+
 import colander
 from deform.widget import TextAreaWidget, TextInputWidget
-from xml.etree import ElementTree
 
 import h.i18n
 from h.models.organization import (
-    ORGANIZATION_NAME_MIN_CHARS,
     ORGANIZATION_NAME_MAX_CHARS,
+    ORGANIZATION_NAME_MIN_CHARS,
 )
 from h.schemas import validators
 from h.schemas.base import CSRFSchema

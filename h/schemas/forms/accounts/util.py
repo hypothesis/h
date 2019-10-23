@@ -4,7 +4,6 @@ import deform
 
 from h.schemas import validators
 
-
 PASSWORD_MIN_LENGTH = 2  # FIXME: this is ridiculous
 
 

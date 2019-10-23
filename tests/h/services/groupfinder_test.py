@@ -2,8 +2,7 @@
 
 import pytest
 
-from h.services.groupfinder import groupfinder_service_factory
-from h.services.groupfinder import GroupfinderService
+from h.services.groupfinder import GroupfinderService, groupfinder_service_factory
 
 
 class TestGroupfinderService:

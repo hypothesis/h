@@ -6,10 +6,9 @@ Revises: e15e47228c43
 Create Date: 2016-10-19 15:24:13.387546
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision = "c36369fe730f"
 down_revision = "e15e47228c43"

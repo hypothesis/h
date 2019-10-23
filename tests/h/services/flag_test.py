@@ -2,8 +2,8 @@
 
 import pytest
 
-from h.services import flag
 from h import models
+from h.services import flag
 
 
 @pytest.mark.usefixtures("flags")

@@ -3,8 +3,7 @@
 import datetime
 from unittest import mock
 
-from h.presenters.annotation_base import AnnotationBasePresenter
-from h.presenters.annotation_base import utc_iso8601
+from h.presenters.annotation_base import AnnotationBasePresenter, utc_iso8601
 
 
 class TestAnnotationBasePresenter:

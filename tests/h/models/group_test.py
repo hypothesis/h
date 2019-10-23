@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from h.auth import role
 from h import models
+from h.auth import role
 from h.models.group import (
+    AUTHORITY_PROVIDED_ID_MAX_LENGTH,
     JoinableBy,
     ReadableBy,
     WriteableBy,
-    AUTHORITY_PROVIDED_ID_MAX_LENGTH,
 )
 
 

@@ -9,10 +9,10 @@ these settings in an Elasticsearch instance.
 """
 
 import binascii
-import elasticsearch
 import logging
 import os
 
+import elasticsearch
 
 log = logging.getLogger(__name__)
 

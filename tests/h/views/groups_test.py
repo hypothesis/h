@@ -6,10 +6,10 @@ import deform
 import pytest
 from pyramid.httpexceptions import HTTPMovedPermanently
 
-from h.views import groups as views
 from h.models import Group, User
 from h.models.group import JoinableBy
 from h.services.group_create import GroupCreateService
+from h.views import groups as views
 
 
 @pytest.mark.usefixtures("group_create_service", "handle_form_submission", "routes")

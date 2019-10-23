@@ -3,8 +3,8 @@
 import sqlalchemy as sa
 
 from h.models import User, UserIdentity
-from h.util.user import split_user
 from h.util.db import on_transaction_end
+from h.util.user import split_user
 
 UPDATE_PREFS_ALLOWED_KEYS = {"show_sidebar_tutorial"}
 

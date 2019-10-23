@@ -4,10 +4,14 @@ from unittest import mock
 
 import pytest
 
-from h.services.annotation_stats import AnnotationStatsService
-from h.services.annotation_stats import annotation_stats_factory
-from h.search import Search
-from h.search import Limiter, DeletedFilter, UserFilter, TopLevelAnnotationsFilter
+from h.search import (
+    DeletedFilter,
+    Limiter,
+    Search,
+    TopLevelAnnotationsFilter,
+    UserFilter,
+)
+from h.services.annotation_stats import AnnotationStatsService, annotation_stats_factory
 
 
 class TestAnnotationStatsService:

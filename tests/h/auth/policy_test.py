@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
+import base64
 from unittest import mock
 
 import pytest
-import base64
-
 from pyramid.interfaces import IAuthenticationPolicy
-from pyramid.security import Everyone, Authenticated
+from pyramid.security import Authenticated, Everyone
 
-from h.auth.policy import AuthenticationPolicy
-from h.auth.policy import TokenAuthenticationPolicy
-from h.auth.policy import APIAuthenticationPolicy
-from h.auth.policy import AuthClientPolicy
-from h.auth.policy import AUTH_CLIENT_API_WHITELIST
-
+from h.auth.policy import (
+    AUTH_CLIENT_API_WHITELIST,
+    APIAuthenticationPolicy,
+    AuthClientPolicy,
+    AuthenticationPolicy,
+    TokenAuthenticationPolicy,
+)
 from h.services.user import UserService
 
 API_PATHS = ("/api", "/api/foo", "/api/annotations/abc123")

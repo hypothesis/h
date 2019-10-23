@@ -6,7 +6,6 @@ from pyramid.httpexceptions import HTTPInternalServerError
 
 from h.util.view import json_view
 
-
 log = logging.getLogger(__name__)
 
 

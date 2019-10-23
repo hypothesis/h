@@ -3,6 +3,7 @@
 import unicodedata
 
 from jsonpointer import resolve_pointer
+
 from h.util.uri import normalize as normalize_uri
 
 SCHEMA = {

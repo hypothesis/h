@@ -2,7 +2,7 @@
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from h.services.exceptions import ValidationError, ConflictError
+from h.services.exceptions import ConflictError, ValidationError
 
 
 class GroupUpdateService:

@@ -3,7 +3,7 @@
 from unittest import mock
 
 import pytest
-from webob.multidict import NestedMultiDict, MultiDict
+from webob.multidict import MultiDict, NestedMultiDict
 
 from h.schemas import ValidationError
 from h.search.core import SearchResult

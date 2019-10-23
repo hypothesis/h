@@ -17,10 +17,9 @@ import logging
 import sqlalchemy
 import zope.sqlalchemy
 import zope.sqlalchemy.datamanager
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import exc
-from sqlalchemy.orm import sessionmaker
 from pkg_resources import resource_stream
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import exc, sessionmaker
 
 from h.util.session_tracker import Tracker
 

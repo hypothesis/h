@@ -20,18 +20,18 @@ from pyramid import i18n
 
 from h import search as search_lib
 from h import storage
-from h.views.api.exceptions import PayloadError
 from h.events import AnnotationEvent
 from h.interfaces import IGroupService
 from h.presenters import AnnotationJSONLDPresenter
-from h.traversal import AnnotationContext
-from h.schemas.util import validate_query_params
 from h.schemas.annotation import (
     CreateAnnotationSchema,
     SearchParamsSchema,
     UpdateAnnotationSchema,
 )
+from h.schemas.util import validate_query_params
+from h.traversal import AnnotationContext
 from h.views.api.config import api_config
+from h.views.api.exceptions import PayloadError
 
 _ = i18n.TranslationStringFactory(__package__)
 

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from urllib.parse import urlparse
 
-from pyramid_retry import mark_error_retryable
 import sqlalchemy as sa
+from pyramid_retry import mark_error_retryable
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 

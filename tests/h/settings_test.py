@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import logging
+
 import pytest
 
-from h.settings import SettingsManager, SettingError, database_url
+from h.settings import SettingError, SettingsManager, database_url
 
 
 def asutf8(string):

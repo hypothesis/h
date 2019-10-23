@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from dateutil import parser
-
 import jinja2
+from dateutil import parser
 
 from h.presenters.document_html import DocumentHTMLPresenter
 

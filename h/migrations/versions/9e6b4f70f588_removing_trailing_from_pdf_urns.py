@@ -8,16 +8,17 @@ Create Date: 2016-06-21 17:50:14.261947
 # pylint: disable=invalid-name, wrong-import-position
 import logging
 
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+from h.db import types
+
 # revision identifiers, used by Alembic.
 revision = "9e6b4f70f588"
 down_revision = "ccebe818f8e0"
 
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-
-from h.db import types
 
 Base = declarative_base()
 Session = sessionmaker()

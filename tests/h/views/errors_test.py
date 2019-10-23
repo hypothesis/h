@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 
-from h.views.errors import notfound, error, json_error
+from h.views.errors import error, json_error, notfound
 
 
 def test_notfound_view(pyramid_request):

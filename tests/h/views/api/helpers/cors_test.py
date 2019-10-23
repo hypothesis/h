@@ -2,10 +2,9 @@
 from unittest import mock
 
 import pytest
-
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.request import Request
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPBadRequest
 
 from h.views.api.helpers.cors import add_preflight_view, policy, set_cors_headers
 

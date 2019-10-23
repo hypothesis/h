@@ -3,13 +3,12 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.httpexceptions import HTTPNoContent
 
-from h.views.api import flags as views
 from h.services.flag import FlagService
 from h.services.groupfinder import GroupfinderService
 from h.traversal import AnnotationContext
+from h.views.api import flags as views
 
 
 @pytest.mark.usefixtures(

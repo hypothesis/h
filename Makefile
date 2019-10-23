@@ -74,11 +74,11 @@ analyze: python
 
 .PHONY: format
 format: python
-	tox -q -e py36-format
+	@tox -qe py36-format
 
 PHONY: checkformatting
 checkformatting: python
-	tox -q -e py36-checkformatting
+	@tox -qe py36-checkformatting
 
 .PHONY: test
 test: node_modules/.uptodate python

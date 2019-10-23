@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import enum
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 

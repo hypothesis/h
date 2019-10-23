@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-
 from sqlalchemy import inspect
 
 from h.models import GroupScope

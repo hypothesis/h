@@ -2,8 +2,13 @@
 
 from webob.multidict import MultiDict
 
-from h.search import Search
-from h.search import Limiter, DeletedFilter, UserFilter, TopLevelAnnotationsFilter
+from h.search import (
+    DeletedFilter,
+    Limiter,
+    Search,
+    TopLevelAnnotationsFilter,
+    UserFilter,
+)
 
 
 class AnnotationStatsService:

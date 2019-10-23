@@ -2,18 +2,16 @@
 
 import colander
 import deform
-
 import slugify
 
 from h import i18n
-from h.schemas import validators
 from h.accounts.schemas import CSRFSchema
 from h.models.group import (
     GROUP_DESCRIPTION_MAX_LENGTH,
-    GROUP_NAME_MIN_LENGTH,
     GROUP_NAME_MAX_LENGTH,
+    GROUP_NAME_MIN_LENGTH,
 )
-
+from h.schemas import validators
 
 _ = i18n.TranslationString
 

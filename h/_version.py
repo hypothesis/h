@@ -2,7 +2,6 @@
 
 import datetime
 import subprocess
-
 from subprocess import DEVNULL
 
 __all__ = ("get_version",)

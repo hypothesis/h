@@ -2,8 +2,7 @@
 
 import pytest
 
-from h.services.group_links import GroupLinksService
-from h.services.group_links import group_links_factory
+from h.services.group_links import GroupLinksService, group_links_factory
 
 
 @pytest.mark.usefixtures("routes")

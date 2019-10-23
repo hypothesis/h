@@ -61,16 +61,15 @@ shouldn't return model objects directly).
 
 """
 
-from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow, Authenticated
 import sqlalchemy.exc
 import sqlalchemy.orm.exc
+from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow, Authenticated
 
 from h import storage
-from h.models import AuthClient
-from h.models import Organization
 from h.auth import role
 from h.auth.util import client_authority
 from h.interfaces import IGroupService
+from h.models import AuthClient, Organization
 from h.traversal import contexts
 
 

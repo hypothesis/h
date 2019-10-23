@@ -29,11 +29,10 @@ later.
 import logging
 import random
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
 
 revision = "615358b6c428"
 down_revision = "8a7f31c4525d"

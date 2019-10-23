@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import deform
-from pyramid import httpexceptions
-from pyramid import security
+from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults
 
-from h import form
-from h import i18n
+from h import form, i18n
 from h.schemas.forms.group import group_schema
 
 _ = i18n.TranslationString

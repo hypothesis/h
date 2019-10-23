@@ -12,16 +12,15 @@ Revises: 9bcc39244e82
 Create Date: 2017-11-29 15:06:59.207780
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from h.db import types
-
 
 revision = "7f3d80550fff"
 down_revision = "9bcc39244e82"

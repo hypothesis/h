@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 from unittest import mock
 
 import elasticsearch
 import elasticsearch_dsl
-import logging
 import pytest
 
 import h.search.index
-
 from tests.common.matchers import Matcher
 
 

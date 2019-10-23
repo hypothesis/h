@@ -5,10 +5,8 @@ import sys
 
 import gevent
 
-from h import db
-from h import stats
-from h.streamer import messages
-from h.streamer import websocket
+from h import db, stats
+from h.streamer import messages, websocket
 
 log = logging.getLogger(__name__)
 

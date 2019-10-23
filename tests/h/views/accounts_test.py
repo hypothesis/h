@@ -3,9 +3,8 @@
 
 from unittest import mock
 
-import pytest
 import colander
-
+import pytest
 from pyramid import httpexceptions
 
 from h.services.developer_token import developer_token_service_factory

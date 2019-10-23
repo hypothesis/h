@@ -3,7 +3,6 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.response import Response
 
 from h.feeds import render

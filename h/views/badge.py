@@ -4,8 +4,8 @@ from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
 from h import models, search
-from h.util.view import json_view
 from h.util.uri import normalize
+from h.util.view import json_view
 
 
 def _has_uri_ever_been_annotated(db, uri):

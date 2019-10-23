@@ -2,7 +2,7 @@
 
 import pytest
 
-from h.presenters.user_json import UserJSONPresenter, TrustedUserJSONPresenter
+from h.presenters.user_json import TrustedUserJSONPresenter, UserJSONPresenter
 
 
 class TestUserJSONPresenter:

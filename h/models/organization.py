@@ -2,9 +2,8 @@
 
 import sqlalchemy as sa
 
-from h.db import Base
-from h.db import mixins
 from h import pubid
+from h.db import Base, mixins
 
 ORGANIZATION_DEFAULT_PUBID = "__default__"
 ORGANIZATION_NAME_MIN_CHARS = 1

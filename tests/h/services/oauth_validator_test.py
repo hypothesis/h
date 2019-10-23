@@ -5,7 +5,6 @@ import uuid
 from unittest import mock
 
 import pytest
-
 from oauthlib.common import Request as OAuthRequest
 from oauthlib.oauth2 import InvalidClientIdError
 

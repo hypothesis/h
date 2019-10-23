@@ -3,10 +3,8 @@
 import collections
 import logging
 
-from zope.interface import providedBy
-
 from h_pyramid_sentry import report_exception
-
+from zope.interface import providedBy
 
 log = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import Mock
 
-import pytest
 import colander
+import pytest
 
 from h.schemas.validators import Email
 

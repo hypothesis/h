@@ -6,16 +6,14 @@ Revises: e10ce4472966
 Create Date: 2017-01-20 16:07:03.442975
 """
 
-from collections import namedtuple
 import logging
+from collections import namedtuple
 from urllib.parse import urlparse
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import subqueryload
-
+from sqlalchemy.orm import sessionmaker, subqueryload
 
 revision = "9f5e274b202c"
 down_revision = "e10ce4472966"

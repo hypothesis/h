@@ -2,7 +2,7 @@
 
 import pytest
 
-from h.services.group_scope import group_scope_factory, GroupScopeService
+from h.services.group_scope import GroupScopeService, group_scope_factory
 
 
 class TestFetchByScope:

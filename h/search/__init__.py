@@ -4,12 +4,12 @@ from h.search.client import get_client
 from h.search.config import init
 from h.search.core import Search
 from h.search.query import (
-    TopLevelAnnotationsFilter,
+    AuthorityFilter,
     DeletedFilter,
     Limiter,
-    UserFilter,
-    AuthorityFilter,
     TagsAggregation,
+    TopLevelAnnotationsFilter,
+    UserFilter,
     UsersAggregation,
 )
 

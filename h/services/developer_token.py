@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from h import models
-from h import security
+from h import models, security
 from h.util.db import lru_cache_in_transaction
 
 PREFIX = "6879-"

@@ -3,8 +3,8 @@ import colander
 import deform
 
 from h import i18n
-from h.services.user import UserNotActivated
 from h.schemas.base import CSRFSchema
+from h.services.user import UserNotActivated
 
 _ = i18n.TranslationString
 

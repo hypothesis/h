@@ -3,7 +3,6 @@
 from unittest import mock
 
 import pytest
-
 from pyramid.httpexceptions import HTTPNoContent
 
 from h.views.api import moderation as views
