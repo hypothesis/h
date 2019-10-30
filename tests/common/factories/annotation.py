@@ -18,8 +18,8 @@ class Annotation(ModelFactory):
     class Meta:
         model = models.Annotation
         sqlalchemy_session_persistence = (
-            "flush"
-        )  # Always flush the db to generate annotation.id.
+            "flush"  # Always flush the db to generate annotation.id.
+        )
 
     tags = factory.LazyFunction(lambda: FAKER.words(nb=random.randint(0, 5)))
     target_uri = factory.Faker("uri")

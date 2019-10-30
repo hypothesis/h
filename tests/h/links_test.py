@@ -86,7 +86,7 @@ def test_incontext_link_appends_schemaless_uri_if_present(
 
 
 def test_incontext_link_appends_first_schemaless_uri_for_pdfs_with_document(
-    pyramid_request
+    pyramid_request,
 ):
     doc = FakeDocument()
     docuri1 = FakeDocumentURI()

@@ -20,7 +20,7 @@ def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(s
 
 
 def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_messages(
-    session
+    session,
 ):
     message = messages.Message(topic="user", payload="bar")
     queue = [message]
@@ -39,7 +39,7 @@ def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_message
 
 
 def test_process_work_queue_sends_websocket_messages_to_websocket_handle_message(
-    session
+    session,
 ):
     message = websocket.Message(socket=mock.sentinel.SOCKET, payload="bar")
     queue = [message]
