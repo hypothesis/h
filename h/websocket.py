@@ -184,7 +184,7 @@ def create_app(global_config, **settings):
     config.add_settings(
         {
             "h_pyramid_sentry.filters": SENTRY_FILTERS,
-            "h_pyramid_sentry.retry_support": False,
+            "h_pyramid_sentry.celery_support": True,
         }
     )
 
