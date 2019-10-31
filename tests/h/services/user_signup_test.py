@@ -140,7 +140,7 @@ class TestUserSignupService:
 
         assert (
             "concurrent account signup conflict error occured during user "
-            "signup (psycopg2.IntegrityError) duplicate key value violates unique "
+            "signup (psycopg2.errors.UniqueViolation) duplicate key value violates unique "
             "constraint" in log.warning.call_args[0][0]
         )
 
