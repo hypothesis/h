@@ -36,7 +36,7 @@ mako==1.1.0               # via alembic
 markupsafe==0.23          # via jinja2, mako, pyramid-jinja2
 meld3==2.0.0              # via supervisor
 mistune==0.8.3
-newrelic==4.10.0.112
+newrelic==5.2.1.129
 oauthlib==2.0.2
 passlib==1.7.1
 pastedeploy==2.0.1        # via plaster-pastedeploy
