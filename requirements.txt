@@ -58,7 +58,7 @@ pyramid-services==0.4
 pyramid-tm==2.3
 pyramid==1.10.4
 python-dateutil==2.5.3
-python-editor==1.0.1      # via alembic
+python-editor==1.0.4      # via alembic
 python-slugify==4.0.0
 pytz==2016.6.1            # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
