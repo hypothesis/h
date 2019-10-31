@@ -12,7 +12,7 @@ billiard==3.6.1.0         # via celery
 bleach==3.0.2
 celery==4.3.0
 certifi==2018.8.24
-cffi==1.11.5
+cffi==1.13.1
 chameleon==2.24           # via deform
 click==6.6
 colander==1.7.0           # via deform
