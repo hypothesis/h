@@ -15,7 +15,7 @@ class TestClient:
     def test_it_sets_the_version_property(self):
         client = Client(host="http://localhost:9200", index="hypothesis")
 
-        assert client.version == (6, 3, 1)
+        assert client.version >= (6, 4, 0) and client.version < (7, 0, 0)
 
     def test_it_sets_the_conn_property(self):
         client = Client(host="http://localhost:9200", index="hypothesis")
