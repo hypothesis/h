@@ -34,7 +34,7 @@ jsonschema==2.5.1
 kombu==4.5.0
 mako==1.1.0               # via alembic
 markupsafe==0.23          # via jinja2, mako, pyramid-jinja2
-meld3==1.0.2              # via supervisor
+meld3==2.0.0              # via supervisor
 mistune==0.8.3
 newrelic==4.10.0.112
 oauthlib==2.0.2
