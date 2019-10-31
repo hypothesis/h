@@ -26,7 +26,7 @@ gunicorn==19.9.0
 h-pyramid-sentry==1.1.20191029.175008
 hkdf==0.0.3
 hupper==1.8.1             # via pyramid
-iso8601==0.1.11           # via colander, deform
+iso8601==0.1.12           # via colander, deform
 itsdangerous==0.24
 jinja2==2.10.3            # via pyramid-jinja2
 jsonpointer==1.0
