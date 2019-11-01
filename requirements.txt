@@ -59,7 +59,7 @@ pyramid==1.10.4
 python-dateutil==2.5.3
 python-editor==1.0.4      # via alembic
 python-slugify==4.0.0
-pytz==2016.6.1            # via celery
+pytz==2019.3              # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
 sentry-sdk==0.12.3        # via h-pyramid-sentry
 six==1.10.0               # via bcrypt, bleach, elasticsearch-dsl, python-dateutil
