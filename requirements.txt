@@ -33,7 +33,7 @@ jsonpointer==1.0
 jsonschema==2.5.1
 kombu==4.5.0
 mako==1.1.0               # via alembic
-markupsafe==0.23          # via jinja2, mako, pyramid-jinja2
+markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.3
 newrelic==5.2.1.129
 oauthlib==2.0.2
