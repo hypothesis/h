@@ -93,16 +93,13 @@ def _session(request):
 
     # pyramid_tm doesn't always close the database session for us.
     #
-    # For example if an exception view accesses the session and causes a new
-    # transaction to be opened, pyramid_tm won't close this connection because
-    # pyramid_tm's transaction has already ended before exception views are
-    # executed.
-    # Connections opened by NewResponse and finished callbacks aren't closed by
-    # pyramid_tm either.
+    # If anything that executes later in the Pyramid request processing cycle
+    # than pyramid_tm tween egress opens a new DB session (for example a tween
+    # above the pyramid_tm tween, a response callback, or a NewResponse
+    # subscriber) then pyramid_tm won't close that DB session for us.
     #
-    # So add our own callback here to make sure db sessions are always closed.
-    #
-    # See: https://github.com/Pylons/pyramid_tm/issues/40
+    # So as a precaution add our own callback here to make sure db sessions are
+    # always closed.
     @request.add_finished_callback
     def close_the_sqlalchemy_session(request):
         if len(session.transaction._connections) > 1:

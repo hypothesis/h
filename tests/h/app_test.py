@@ -15,6 +15,7 @@ class TestIncludeMe:
         settings = pyramid_config.registry.settings
 
         assert settings["h_pyramid_sentry.retry_support"] is True
+        assert settings["h_pyramid_sentry.celery_support"] is True
         assert settings["h_pyramid_sentry.filters"] == SENTRY_FILTERS
 
         pyramid_config.include.assert_any_call("h_pyramid_sentry")
