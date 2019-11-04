@@ -39,7 +39,7 @@ newrelic==5.2.1.129
 oauthlib==2.0.2
 passlib==1.7.1
 pastedeploy==2.0.1        # via plaster-pastedeploy
-peppercorn==0.5           # via deform
+peppercorn==0.6           # via deform
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 psycogreen==1.0.1
