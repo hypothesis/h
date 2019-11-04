@@ -19,7 +19,7 @@ greenlet==0.4.15  # Pinned dependency of gevent. See https://git.io/fN8Wf
 gunicorn >= 19.9.0
 hkdf
 itsdangerous
-jsonpointer == 1.0
+jsonpointer == 2.0
 jsonschema
 kombu >= 4.2.1
 mistune
