@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h import form
 
@@ -78,15 +79,13 @@ class TestCreateForm:
 
         assert result == Form.return_value
 
-    def test_passes_args_including_renderer_to_form_ctor(
-        self, Form, matchers, pyramid_request
-    ):
+    def test_passes_args_including_renderer_to_form_ctor(self, Form, pyramid_request):
         form.create_form(pyramid_request, mock.sentinel.schema, foo="bar")
 
         Form.assert_called_once_with(
             mock.sentinel.schema,
             foo="bar",
-            renderer=matchers.InstanceOf(form.Jinja2Renderer),
+            renderer=Any.instance_of(form.Jinja2Renderer),
         )
 
     def test_adds_feature_client_to_system_context(self, Form, patch, pyramid_request):
@@ -156,14 +155,14 @@ class TestToXHRResponse:
 
 @pytest.mark.usefixtures("to_xhr_response")
 class TestHandleFormSubmission:
-    def test_it_calls_validate(self, pyramid_request, matchers):
+    def test_it_calls_validate(self, pyramid_request):
         form_ = mock.Mock(spec_set=["validate"])
 
         form.handle_form_submission(
             pyramid_request, form_, mock_callable(), mock.sentinel.on_failure
         )
 
-        post_items = matchers.IterableWith(list(pyramid_request.POST.items()))
+        post_items = Any.iterable.containing(list(pyramid_request.POST.items())).only()
         form_.validate.assert_called_once_with(post_items)
 
     def test_if_validation_fails_it_calls_on_failure(

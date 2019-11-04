@@ -4,6 +4,7 @@ from datetime import datetime
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h import realtime
 
@@ -57,7 +58,7 @@ class TestConsumer:
         handler.assert_called_once_with(body)
 
     def test_handle_message_records_queue_time_if_timestamp_present(
-        self, handler, matchers, statsd_client
+        self, handler, statsd_client
     ):
         consumer = realtime.Consumer(
             mock.sentinel.connection, "annotation", handler, statsd_client=statsd_client
@@ -68,7 +69,7 @@ class TestConsumer:
         consumer.handle_message({}, message)
 
         statsd_client.timing.assert_called_once_with(
-            "streamer.msg.queueing", matchers.InstanceOf(int)
+            "streamer.msg.queueing", Any.instance_of(int)
         )
 
     def test_handle_message_doesnt_explode_if_timestamp_missing(
@@ -104,9 +105,7 @@ class TestConsumer:
 
 
 class TestPublisher:
-    def test_publish_annotation(
-        self, matchers, producer_pool, pyramid_request, retry_policy
-    ):
+    def test_publish_annotation(self, producer_pool, pyramid_request, retry_policy):
         payload = {"action": "create", "annotation": {"id": "foobar"}}
         producer = producer_pool["foobar"].acquire().__enter__()
         exchange = realtime.get_exchange()
@@ -114,13 +113,12 @@ class TestPublisher:
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_annotation(payload)
 
-        expected_headers = matchers.MappingContaining("timestamp")
         producer.publish.assert_called_once_with(
             payload,
             exchange=exchange,
             declare=[exchange],
             routing_key="annotation",
-            headers=expected_headers,
+            headers=Any.dict.containing(["timestamp"]),
             retry=True,
             retry_policy=retry_policy,
         )
@@ -133,13 +131,12 @@ class TestPublisher:
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_user(payload)
 
-        expected_headers = matchers.MappingContaining("timestamp")
         producer.publish.assert_called_once_with(
             payload,
             exchange=exchange,
             declare=[exchange],
             routing_key="user",
-            headers=expected_headers,
+            headers=Any.dict.containing(["timestamp"]),
             retry=True,
             retry_policy=retry_policy,
         )

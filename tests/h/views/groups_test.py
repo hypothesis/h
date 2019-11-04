@@ -4,6 +4,7 @@ from unittest import mock
 
 import deform
 import pytest
+from h_matchers import Any
 from pyramid.httpexceptions import HTTPMovedPermanently
 
 from h.models import Group, User
@@ -22,15 +23,12 @@ class TestGroupCreateController:
         assert result == {"form": "valid form"}
 
     def test_post_calls_handle_form_submission(
-        self, controller, handle_form_submission, matchers
+        self, controller, handle_form_submission
     ):
         controller.post()
 
         handle_form_submission.assert_called_once_with(
-            controller.request,
-            controller.form,
-            matchers.AnyCallable(),
-            matchers.AnyCallable(),
+            controller.request, controller.form, Any.callable(), Any.callable(),
         )
 
     def test_post_returns_handle_form_submission(

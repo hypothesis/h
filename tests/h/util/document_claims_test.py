@@ -3,6 +3,7 @@
 import re
 
 import pytest
+from h_matchers import Any
 
 from h.util import document_claims
 from h.util.document_claims import doi_uri_from_string
@@ -702,7 +703,6 @@ class TestDocumentURIsFromData:
         document_uris_from_highwire_doi,
         document_uris_from_dc,
         document_uri_self_claim,
-        matchers,
     ):
         document_uris_from_links.return_value = [
             {"uri": " from_link_1"},
@@ -729,22 +729,25 @@ class TestDocumentURIsFromData:
             {}, "http://example.com/claimant"
         )
 
-        assert document_uris == matchers.UnorderedList(
-            [
-                {"uri": "from_link_1"},
-                {"uri": "from_link_2"},
-                {"uri": "from_link_3"},
-                {"uri": "highwire_1"},
-                {"uri": "highwire_2"},
-                {"uri": "highwire_3"},
-                {"uri": "doi_1"},
-                {"uri": "doi_2"},
-                {"uri": "doi_3"},
-                {"uri": "dc_1"},
-                {"uri": "dc_2"},
-                {"uri": "dc_3"},
-                document_uri_self_claim.return_value,
-            ]
+        assert (
+            document_uris
+            == Any.list.containing(
+                [
+                    {"uri": "from_link_1"},
+                    {"uri": "from_link_2"},
+                    {"uri": "from_link_3"},
+                    {"uri": "highwire_1"},
+                    {"uri": "highwire_2"},
+                    {"uri": "highwire_3"},
+                    {"uri": "doi_1"},
+                    {"uri": "doi_2"},
+                    {"uri": "doi_3"},
+                    {"uri": "dc_1"},
+                    {"uri": "dc_2"},
+                    {"uri": "dc_3"},
+                    document_uri_self_claim.return_value,
+                ]
+            ).only()
         )
 
     def test_it_strips_whitespace_from_self_claim_uris(

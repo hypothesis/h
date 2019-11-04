@@ -7,6 +7,7 @@ from urllib.parse import quote_plus
 
 import elasticsearch
 import pytest
+from h_matchers import Any
 
 from h.search.client import Client
 from h.search.config import (
@@ -142,23 +143,23 @@ class TestInit:
 
 
 class TestConfigureIndex:
-    def test_creates_randomly_named_index(self, client, matchers):
+    def test_creates_randomly_named_index(self, client):
         configure_index(client)
 
         client.conn.indices.create.assert_called_once_with(
-            matchers.Regex("foo-[0-9a-f]{8}"), body=mock.ANY
+            Any.string.matching("foo-[0-9a-f]{8}"), body=Any()
         )
 
-    def test_returns_index_name(self, client, matchers):
+    def test_returns_index_name(self, client):
         name = configure_index(client)
 
-        assert name == matchers.Regex("foo-[0-9a-f]{8}")
+        assert name == Any.string.matching("foo-[0-9a-f]{8}")
 
     def test_sets_correct_mappings_and_settings(self, client):
         configure_index(client)
 
         client.conn.indices.create.assert_called_once_with(
-            mock.ANY,
+            Any(),
             body={
                 "mappings": {"annotation": ANNOTATION_MAPPING},
                 "settings": {"analysis": ANALYSIS_SETTINGS},

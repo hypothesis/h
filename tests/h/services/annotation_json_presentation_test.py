@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h.interfaces import IGroupService
 from h.services.annotation_json_presentation import (
@@ -21,11 +22,9 @@ class TestAnnotationJSONPresentationService:
     def test_it_configures_flag_formatter(self, services, formatters, svc):
         assert formatters.AnnotationFlagFormatter.return_value in svc.formatters
 
-    def test_initializes_hidden_formatter(self, matchers, services, formatters, svc):
+    def test_initializes_hidden_formatter(self, services, formatters, svc):
         formatters.AnnotationHiddenFormatter.assert_called_once_with(
-            services["annotation_moderation"],
-            matchers.AnyCallable(),
-            mock.sentinel.user,
+            services["annotation_moderation"], Any.callable(), mock.sentinel.user,
         )
 
     def test_hidden_status_included_if_user_can_moderate_group(
