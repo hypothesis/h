@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
@@ -55,9 +56,7 @@ def test_badge_returns_0_if_blocked(
 
     result = badge(pyramid_request)
 
-    models.Blocklist.is_blocked.assert_called_with(
-        mock.ANY, "http://blocked-domain.com"
-    )
+    models.Blocklist.is_blocked.assert_called_with(Any(), "http://blocked-domain.com")
     assert not search_run.called
     assert result == {"total": 0}
 

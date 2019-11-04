@@ -61,7 +61,7 @@ class TestCreateEnvironment:
 
         form.create_environment(base)
 
-        base.overlay.assert_called_once_with(autoescape=True, loader=mock.ANY)
+        base.overlay.assert_called_once_with(autoescape=True, loader=Any())
 
     def test_loader_has_correct_paths(self):
         base = mock.Mock(spec_set=["overlay"])

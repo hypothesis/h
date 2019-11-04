@@ -3,6 +3,7 @@ import datetime
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
@@ -64,7 +65,7 @@ class TestSearchController:
 
         controller.search()
 
-        paginate.assert_called_once_with(pyramid_request, mock.ANY, page_size=100)
+        paginate.assert_called_once_with(pyramid_request, Any(), page_size=100)
 
     def test_search_generates_tag_links(self, controller):
         result = controller.search()

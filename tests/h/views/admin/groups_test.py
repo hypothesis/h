@@ -31,7 +31,7 @@ class TestIndex:
     def test_it_paginates_results(self, pyramid_request, routes, paginate):
         groups.groups_index(None, pyramid_request)
 
-        paginate.assert_called_once_with(pyramid_request, mock.ANY, mock.ANY)
+        paginate.assert_called_once_with(pyramid_request, Any(), Any())
 
     def test_it_filters_groups_with_name_param(self, pyramid_request, group_svc):
         pyramid_request.params["q"] = "fingers"
