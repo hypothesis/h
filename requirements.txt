@@ -38,7 +38,7 @@ markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.4
 more-itertools==7.2.0     # via zipp
 newrelic==5.2.3.131
-oauthlib==2.0.3
+oauthlib==3.1.0
 passlib==1.7.2
 pastedeploy==2.0.1        # via plaster-pastedeploy
 peppercorn==0.6           # via deform
