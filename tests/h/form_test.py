@@ -249,7 +249,7 @@ class TestHandleFormSubmission:
         )
 
     def test_if_validation_succeeds_it_passes_on_success_result_to_to_xhr_response(
-        self, form_validating_to, matchers, pyramid_request, to_xhr_response
+        self, form_validating_to, pyramid_request, to_xhr_response
     ):
         """
         A result from on_success() is passed to to_xhr_response().

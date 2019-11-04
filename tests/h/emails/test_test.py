@@ -9,7 +9,7 @@ from h.emails.test import generate
 
 class TestGenerate:
     def test_calls_renderers_with_appropriate_context(
-        self, pyramid_request, html_renderer, text_renderer, matchers
+        self, pyramid_request, html_renderer, text_renderer
     ):
         generate(pyramid_request, "meerkat@example.com")
 

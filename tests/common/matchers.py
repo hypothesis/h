@@ -3,6 +3,7 @@
 Implements some matching objects in the style of h_matchers library for
 comparing with other objects in tests.
 """
+# pylint: disable=too-few-public-methods
 from h_matchers.matcher.core import Matcher
 from pyramid.httpexceptions import HTTPFound, HTTPSeeOther
 

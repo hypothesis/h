@@ -42,7 +42,7 @@ class TestReindex:
             mock.call(["abc123", "def456"]),
         ]
 
-    def test_creates_new_index(self, pyramid_request, es, configure_index, matchers):
+    def test_creates_new_index(self, pyramid_request, es, configure_index):
         """Creates a new target index."""
         reindex(mock.sentinel.session, es, pyramid_request)
 

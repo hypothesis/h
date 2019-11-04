@@ -123,7 +123,7 @@ class TestPublisher:
             retry_policy=retry_policy,
         )
 
-    def test_publish_user(self, matchers, producer_pool, pyramid_request, retry_policy):
+    def test_publish_user(self, producer_pool, pyramid_request, retry_policy):
         payload = {"action": "create", "user": {"id": "foobar"}}
         producer = producer_pool["foobar"].acquire().__enter__()
         exchange = realtime.get_exchange()

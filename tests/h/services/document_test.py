@@ -17,7 +17,7 @@ class TestFetchByGroupid:
         )
 
     def test_it_does_not_return_documents_annotated_in_other_groups(
-        self, groups, annotations, other_annotations, svc, matchers
+        self, groups, annotations, other_annotations, svc
     ):
         docs = svc.fetch_by_groupid(groupid=groups["target_group"].pubid)
         for other_anno in other_annotations:
@@ -69,7 +69,7 @@ class TestFetchByGroupid:
         )
 
     def test_it_returns_documents_ordered_by_last_activity_desc(
-        self, svc, annotations, groups, factories, db_session, matchers
+        self, svc, annotations, groups, factories, db_session
     ):
         # Update the document associated with ``annotations[1]``...
         annotations[1].document.title = "Bleep bloop"
