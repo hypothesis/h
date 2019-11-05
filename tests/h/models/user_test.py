@@ -126,7 +126,7 @@ class TestUserModelUserId:
         assert result == fred
 
     def test_userid_equals_query_with_invalid_userid(self, db_session):
-        # This is to ensure that we don't expose the ValueError that could
+        # This is to ensure that we don't expose the InvalidUserId that could
         # potentially be thrown by split_user.
 
         result = (
@@ -166,7 +166,7 @@ class TestUserModelUserId:
         assert alice in result
 
     def test_userid_in_query_with_invalid_userid_mixed_in(self, db_session):
-        # This is to ensure that we don't expose the ValueError that could
+        # This is to ensure that we don't expose the InvalidUserId that could
         # potentially be thrown by split_user.
 
         fred = models.User(
@@ -185,7 +185,7 @@ class TestUserModelUserId:
         assert fred in result
 
     def test_userid_in_query_with_only_invalid_userid(self, db_session):
-        # This is to ensure that we don't expose the ValueError that could
+        # This is to ensure that we don't expose the InvalidUserId that could
         # potentially be thrown by split_user.
 
         result = (
