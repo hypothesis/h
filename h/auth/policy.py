@@ -9,9 +9,10 @@ from pyramid.security import Authenticated
 from zope import interface
 
 from h.auth import util
-
 #: List of route name-method combinations that should
 #: allow AuthClient authentication
+from h.exceptions import InvalidUserId
+
 AUTH_CLIENT_API_WHITELIST = [
     ("api.groups", "POST"),
     ("api.group", "PATCH"),
@@ -281,7 +282,7 @@ class AuthClientPolicy:
         user_service = request.find_service(name="user")
         try:
             user = user_service.fetch(forwarded_userid)
-        except ValueError:  # raised if userid is invalid format
+        except InvalidUserId:  # raised if userid is invalid format
             return None  # invalid user, so we are failing here
 
         if user and user.authority == client.authority:
