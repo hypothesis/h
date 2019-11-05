@@ -560,18 +560,6 @@ class TestAuthClientAuthenticationPolicy:
 
         assert principals is None
 
-    def test_check_returns_None_if_username_is_invalid(
-        self, pyramid_request, verify_auth_client, user_service
-    ):
-        user_service.fetch.side_effect = InvalidUserId("badly_formatted")
-        pyramid_request.headers["X-Forwarded-User"] = "badly_formatted"
-
-        principals = AuthClientPolicy.check(
-            mock.sentinel.username, mock.sentinel.password, pyramid_request
-        )
-
-        assert principals is None
-
     def test_check_proxies_to_principals_for_auth_client_if_no_forwarded_user(
         self, pyramid_request, verify_auth_client, principals_for_auth_client
     ):
@@ -608,15 +596,14 @@ class TestAuthClientAuthenticationPolicy:
 
         user_service.fetch.assert_called_once_with("acct:flop@woebang.baz")
 
-    def test_check_returns_None_if_user_fetch_raises_valueError(
+    def test_check_returns_None_if_username_is_invalid(
         self, pyramid_request, verify_auth_client, user_service
     ):
-
-        pyramid_request.headers["X-Forwarded-User"] = "flop@woebang.baz"
-        user_service.fetch.side_effect = ValueError("whoops")
+        pyramid_request.headers["X-Forwarded-User"] = "badly_formatted"
+        user_service.fetch.side_effect = InvalidUserId("badly_formatted")
 
         principals = AuthClientPolicy.check(
-            "someusername", "somepassword", pyramid_request
+            mock.sentinel.username, mock.sentinel.password, pyramid_request
         )
 
         assert principals is None
