@@ -3,7 +3,6 @@ h_pyramid_sentry
 PyJWT
 SQLAlchemy >= 1.1.4
 alembic
-backports.functools_lru_cache
 bcrypt
 bleach
 celery >= 4.3
