@@ -9,10 +9,10 @@ from pyramid.security import Authenticated
 from zope import interface
 
 from h.auth import util
-#: List of route name-method combinations that should
-#: allow AuthClient authentication
 from h.exceptions import InvalidUserId
 
+#: List of route name-method combinations that should
+#: allow AuthClient authentication
 AUTH_CLIENT_API_WHITELIST = [
     ("api.groups", "POST"),
     ("api.group", "PATCH"),
