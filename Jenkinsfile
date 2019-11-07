@@ -13,7 +13,7 @@ node {
     stage('test') {
         hostIp = sh(script: 'facter ipaddress_eth0', returnStdout: true).trim()
 
-        postgres = docker.image('postgres:9.4').run('-P -e POSTGRES_DB=htest')
+        postgres = docker.image('postgres:11.5').run('-P -e POSTGRES_DB=htest')
         databaseUrl = "postgresql://postgres@${hostIp}:${containerPort(postgres, 5432)}/htest"
 
         elasticsearch = docker.image('hypothesis/elasticsearch').run('-P -e "discovery.type=single-node"')

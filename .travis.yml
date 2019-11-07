@@ -14,6 +14,7 @@ matrix:
       language: python
       python: '3.6'
       addons:
+        # TODO - Switch to Postgres 11 once we have rolled out PG 11 in production.
         postgresql: "9.4"
       before_install:
         - ./scripts/elasticsearch.sh
