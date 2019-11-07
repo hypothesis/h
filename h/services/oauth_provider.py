@@ -69,6 +69,40 @@ class OAuthProviderService(AuthorizationEndpoint, RevocationEndpoint, TokenEndpo
         )
         RevocationEndpoint.__init__(self, oauth_validator)
 
+    def validate_revocation_request(self, request):
+        # WARNING! - Don't think because this is here it should be. This is
+        # almost certainly a hack on a hack here to prevent the overloaded
+        # method from throwing a fit. If you can get rid of this you should.
+
+        """Ensure the request is valid.
+
+        We are overriding the base class here to ensure that client_id is in
+        place to allow 'unauthenticated' access to the revocation end-point.
+        This is because it doesn't really add any security.
+
+        The user can attempt to revoke two types of token: access and refresh
+
+         * If the user has the access token they can obviously pass it as
+           the bearer token, so this provides no extra protection
+         * If the user has the refresh token, they can use it to get an access
+           token, putting us in the previous situation.
+        """
+
+        # Read our token and use it to add the client_id to the request to
+        # allow authenticate_client_id(request.client_id) to pass in the parent
+        if request.token:
+            token = self.oauth_validator.find_token(request.token)
+
+            if token:
+                request.client_id = token.authclient.id
+
+        # Mark this request as a revocation request so we can know _not_
+        # to trigger full client validation later on in
+        # OAuthValidatorService.client_authentication_required()
+        request.h_revoke_request = True
+
+        return super().validate_revocation_request(request)
+
     def load_client_id_from_refresh_token(self, request):
         """
         Custom validator which sets the client_id from a given refresh token
