@@ -54,7 +54,7 @@ pyramid-retry==2.1
 pyramid-services==0.4
 pyramid-tm==2.3
 pyramid==1.10.4
-python-dateutil==2.5.3
+python-dateutil==2.8.1
 python-editor==1.0.4      # via alembic
 python-slugify==4.0.0
 pytz==2019.3              # via celery
