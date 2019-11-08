@@ -511,7 +511,7 @@ class TestUserUserIDRoot:
 
         user_service.fetch.assert_called_once_with("acct:bob@example.com")
 
-    def test_it_fails_with_bad_request_with_invalid_ids(
+    def test_it_fails_with_bad_request_if_the_userid_is_invalid(
         self, pyramid_request, user_userid_root, user_service
     ):
         user_service.fetch.side_effect = InvalidUserId("dummy id")

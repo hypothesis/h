@@ -288,8 +288,8 @@ class UserUserIDRoot:
         try:
             user = self.user_svc.fetch(userid)
         except InvalidUserId as e:
-            # In this context we failed because the user provided a bad id
-            # We need to tell them that so they can attempt to resolve it
+            # In this context we failed because the user provided a userid
+            # we cannot parse, not because it could not be found
             raise HTTPBadRequest(e.args[0]) from e
 
         if not user:

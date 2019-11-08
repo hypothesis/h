@@ -49,7 +49,7 @@ class UserService:
           user_service.fetch('foo', 'example.com')
 
         :returns: a user instance, if found
-        :raises InvalidUserId: If the username cannot be parsed
+        :raises InvalidUserId: If the userid cannot be parsed
         :rtype: h.models.User or None
 
         """

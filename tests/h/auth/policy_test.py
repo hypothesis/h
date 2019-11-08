@@ -596,7 +596,7 @@ class TestAuthClientAuthenticationPolicy:
 
         user_service.fetch.assert_called_once_with("acct:flop@woebang.baz")
 
-    def test_check_returns_None_if_username_is_invalid(
+    def test_check_returns_None_if_userid_is_invalid(
         self, pyramid_request, verify_auth_client, user_service
     ):
         pyramid_request.headers["X-Forwarded-User"] = "badly_formatted"
