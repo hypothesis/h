@@ -4,15 +4,10 @@ import datetime
 import json
 from functools import partial
 from urllib.parse import unquote
+from xml.etree import ElementTree
 
 from jinja2 import Markup
 from jinja2.ext import Extension
-
-try:
-    from xml.etree import cElementTree as ElementTree
-except ImportError:
-    from xml.etree import ElementTree
-
 
 SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg"
 
