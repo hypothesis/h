@@ -5,9 +5,11 @@ from unittest import mock
 import pyramid.authorization
 import pyramid.security
 import pytest
+from pyramid.httpexceptions import HTTPBadRequest
 
 import h.auth
 from h.auth import role
+from h.exceptions import InvalidUserId
 from h.models import AuthClient
 from h.services.group import GroupService
 from h.services.user import UserService
@@ -508,6 +510,14 @@ class TestUserUserIDRoot:
         user_userid_root["acct:bob@example.com"]
 
         user_service.fetch.assert_called_once_with("acct:bob@example.com")
+
+    def test_it_fails_with_bad_request_if_the_userid_is_invalid(
+        self, pyramid_request, user_userid_root, user_service
+    ):
+        user_service.fetch.side_effect = InvalidUserId("dummy id")
+
+        with pytest.raises(HTTPBadRequest):
+            user_userid_root["total_nonsense"]
 
     def test_it_raises_KeyError_if_the_user_does_not_exist(
         self, user_userid_root, user_service

@@ -11,6 +11,7 @@ import logging
 from pyramid import httpexceptions, response
 from pyramid.view import view_config
 
+from h.exceptions import InvalidUserId
 from h.util.user import split_user
 from h.views.client import sidebar_app
 
@@ -107,7 +108,7 @@ def stream_user_redirect(request):
     if user.startswith("acct:"):
         try:
             user = split_user(user)["username"]
-        except ValueError:
+        except InvalidUserId:
             # If it's not a valid userid, catch the exception and just treat
             # the parameter as a literal username.
             pass

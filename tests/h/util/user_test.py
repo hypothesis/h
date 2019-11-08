@@ -2,6 +2,7 @@
 
 import pytest
 
+from h.exceptions import InvalidUserId
 from h.util import user as user_util
 
 
@@ -11,5 +12,5 @@ def test_split_user():
 
 
 def test_split_user_no_match():
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidUserId):
         user_util.split_user("donkeys")
