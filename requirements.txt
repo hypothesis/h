@@ -22,7 +22,7 @@ elasticsearch==6.4.0
 gevent==1.4.0
 greenlet==0.4.15          # via gevent
 gunicorn==19.9.0
-h-pyramid-sentry==1.1.20191029.175008
+h_pyramid_sentry==1.2.0
 hkdf==0.0.3
 hupper==1.8.1             # via pyramid
 importlib-metadata==0.23  # via jsonschema
