@@ -1,4 +1,5 @@
 h_pyramid_sentry
+h_matchers
 
 PyJWT
 SQLAlchemy >= 1.1.4
