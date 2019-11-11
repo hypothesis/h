@@ -47,7 +47,7 @@ psycogreen==1.0.1
 psycopg2==2.8.4
 pycparser==2.19           # via cffi
 pyjwt==1.7.1
-pyparsing==2.4.3
+pyparsing==2.4.5
 pyramid-authsanity==1.0.0
 pyramid-exclog==1.0
 pyramid-jinja2==2.8
