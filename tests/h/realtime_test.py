@@ -69,7 +69,7 @@ class TestConsumer:
         consumer.handle_message({}, message)
 
         statsd_client.timing.assert_called_once_with(
-            "streamer.msg.queueing", Any.instance_of(int)
+            "streamer.msg.queueing", Any.int()
         )
 
     def test_handle_message_doesnt_explode_if_timestamp_missing(
