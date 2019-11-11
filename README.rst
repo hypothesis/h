@@ -4,9 +4,6 @@ h
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
    :target: https://travis-ci.org/hypothesis/h
    :alt: Build Status
-.. image:: https://codecov.io/github/hypothesis/h/coverage.svg?branch=master
-   :target: https://codecov.io/github/hypothesis/h?branch=master
-   :alt: Code Coverage
 .. image:: https://img.shields.io/badge/IRC-%23hypothes.is-blue.svg
    :target: `#hypothes.is`_
    :alt: #hypothes.is IRC channel

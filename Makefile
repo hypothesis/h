@@ -15,7 +15,6 @@ help:
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
 	@echo "make test              Run the unit tests"
 	@echo "make coverage          Print the unit test coverage report"
-	@echo "make codecov           Upload the coverage report to codecov.io"
 	@echo "make functests         Run the functional tests"
 	@echo "make docs              Build docs website and serve it locally"
 	@echo "make checkdocs         Crash if building the docs website fails"
@@ -88,10 +87,6 @@ test: node_modules/.uptodate python
 .PHONY: coverage
 coverage: python
 	tox -q -e py36-coverage
-
-.PHONY: codecov
-codecov: python
-	tox -q -e py36-codecov
 
 .PHONY: functests
 functests: build/manifest.json python
