@@ -48,7 +48,6 @@ psycopg2==2.8.4
 pycparser==2.19           # via cffi
 pyjwt==1.7.1
 pyparsing==2.4.5
-pyramid-authsanity==1.0.0
 pyramid-exclog==1.0
 pyramid-jinja2==2.8
 pyramid-layout==1.0
@@ -57,6 +56,7 @@ pyramid-retry==2.1
 pyramid-services==0.4
 pyramid-tm==2.3
 pyramid==1.10.4
+pyramid_authsanity==1.1.0
 pyrsistent==0.15.5        # via jsonschema
 python-dateutil==2.8.1
 python-editor==1.0.4      # via alembic
