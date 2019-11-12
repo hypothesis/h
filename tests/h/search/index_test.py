@@ -6,6 +6,7 @@ from unittest import mock
 import elasticsearch
 import elasticsearch_dsl
 import pytest
+from h_matchers import Any
 
 import h.search.index
 from tests.common.matchers import Matcher
@@ -130,7 +131,7 @@ class TestIndex:
         event = AnnotationTransformEvent.return_value
 
         AnnotationTransformEvent.assert_called_once_with(
-            pyramid_request, annotation, mock.ANY
+            pyramid_request, annotation, Any()
         )
         notify.assert_called_once_with(event)
 

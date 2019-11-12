@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+from h_matchers import Any
 from sqlalchemy import inspect
 
 from h.models import GroupScope
@@ -58,7 +59,7 @@ class TestGroupScope:
             factories.GroupScope(group=group),
         ]
 
-        assert group.scopes == matchers.UnorderedList(scopes)
+        assert group.scopes == Any.list.containing(scopes).only()
 
     def test_deleting_a_group_deletes_its_groupscopes(self, db_session, factories):
         group = factories.OpenGroup()

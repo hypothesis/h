@@ -4,6 +4,7 @@ from unittest import mock
 
 import pytest
 from gevent.queue import Queue
+from h_matchers import Any
 from pyramid import registry, security
 
 from h.streamer import messages
@@ -44,9 +45,9 @@ class TestProcessMessages:
         messages.process_messages({}, "foobar", queue, raise_error=False)
 
         fake_consumer.assert_called_once_with(
-            connection=mock.ANY,
-            routing_key=mock.ANY,
-            handler=mock.ANY,
+            connection=Any(),
+            routing_key=Any(),
+            handler=Any(),
             statsd_client=fake_stats.get_client.return_value,
         )
 
@@ -54,10 +55,7 @@ class TestProcessMessages:
         messages.process_messages({}, "foobar", queue, raise_error=False)
 
         fake_consumer.assert_called_once_with(
-            connection=mock.ANY,
-            routing_key="foobar",
-            handler=mock.ANY,
-            statsd_client=mock.ANY,
+            connection=Any(), routing_key="foobar", handler=Any(), statsd_client=Any(),
         )
 
     def test_initializes_new_connection(self, fake_realtime, fake_consumer, queue):
@@ -71,9 +69,9 @@ class TestProcessMessages:
 
         fake_consumer.assert_called_once_with(
             connection=fake_realtime.get_connection.return_value,
-            routing_key=mock.ANY,
-            handler=mock.ANY,
-            statsd_client=mock.ANY,
+            routing_key=Any(),
+            handler=Any(),
+            statsd_client=Any(),
         )
 
     def test_runs_consumer(self, fake_consumer, queue):

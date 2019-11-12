@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+from h_matchers import Any
 
 from h.services.document import DocumentService
 
 
 class TestFetchByGroupid:
     def test_it_returns_documents_annotated_within_group(
-        self, svc, groups, annotations, matchers
+        self, svc, groups, annotations
     ):
         docs = svc.fetch_by_groupid(groupid=groups["target_group"].pubid)
 
-        assert docs == matchers.UnorderedList([anno.document for anno in annotations])
+        assert (
+            docs == Any.list.containing([anno.document for anno in annotations]).only()
+        )
 
     def test_it_does_not_return_documents_annotated_in_other_groups(
-        self, groups, annotations, other_annotations, svc, matchers
+        self, groups, annotations, other_annotations, svc
     ):
         docs = svc.fetch_by_groupid(groupid=groups["target_group"].pubid)
         for other_anno in other_annotations:
@@ -42,7 +45,7 @@ class TestFetchByGroupid:
         assert docs == [annotations[0].document]
 
     def test_it_returns_only_documents_with_visible_annotations_for_user(
-        self, svc, annotations, groups, target_user, other_user, db_session, matchers
+        self, svc, annotations, groups, target_user, other_user, db_session
     ):
         # This makes an "only me" annotation, associated with our target user
         annotations[1].shared = False
@@ -58,12 +61,15 @@ class TestFetchByGroupid:
 
         # The "only me" annotation for THIS user should be returned, but not the
         # "only me" annotation associated with another user
-        assert docs == matchers.UnorderedList(
-            [annotations[0].document, annotations[1].document]
+        assert (
+            docs
+            == Any.list.containing(
+                [annotations[0].document, annotations[1].document]
+            ).only()
         )
 
     def test_it_returns_documents_ordered_by_last_activity_desc(
-        self, svc, annotations, groups, factories, db_session, matchers
+        self, svc, annotations, groups, factories, db_session
     ):
         # Update the document associated with ``annotations[1]``...
         annotations[1].document.title = "Bleep bloop"
