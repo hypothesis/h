@@ -22,7 +22,7 @@ matrix:
       before_script: createdb htest
       script: tox
       after_success:
-        make coverage codecov
+        make coverage
 
     # Test web application frontend
     - env: ACTION=gulp
