@@ -22,10 +22,10 @@ elasticsearch==6.4.0
 gevent==1.4.0
 greenlet==0.4.15          # via gevent
 gunicorn==19.9.0
-h_pyramid_sentry==1.2.0
 h-matchers==1.2.0
+h-pyramid-sentry==1.2.0
 hkdf==0.0.3
-hupper==1.8.1             # via pyramid
+hupper==1.9               # via pyramid
 importlib-metadata==0.23  # via jsonschema
 iso8601==0.1.12           # via colander, deform
 itsdangerous==1.1.0
@@ -49,6 +49,7 @@ psycopg2==2.8.4
 pycparser==2.19           # via cffi
 pyjwt==1.7.1
 pyparsing==2.4.5
+pyramid-authsanity==1.1.0
 pyramid-exclog==1.0
 pyramid-jinja2==2.8
 pyramid-layout==1.0
@@ -57,7 +58,6 @@ pyramid-retry==2.1
 pyramid-services==0.4
 pyramid-tm==2.3
 pyramid==1.10.4
-pyramid_authsanity==1.1.0
 pyrsistent==0.15.5        # via jsonschema
 python-dateutil==2.8.1
 python-editor==1.0.4      # via alembic
