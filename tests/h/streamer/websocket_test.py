@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 from gevent.queue import Queue
+from h_matchers import Any
 from jsonschema import ValidationError
 from pyramid import security
 
@@ -253,15 +254,13 @@ class TestHandleClientIDMessage:
 
         assert socket.client_id == "abcd1234"
 
-    def test_missing_value_error(self, matchers, socket):
+    def test_missing_value_error(self, socket):
         message = websocket.Message(socket=socket, payload={"messageType": "client_id"})
 
         with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_client_id_message(message)
 
-        mock_reply.assert_called_once_with(
-            matchers.MappingContaining("error"), ok=False
-        )
+        mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)
 
     @pytest.fixture
     def socket(self):
@@ -352,18 +351,16 @@ class TestHandleFilterMessage:
 
         expand_uri.assert_called_once_with(session, "http://example.com")
 
-    def test_missing_filter_error(self, matchers, socket):
+    def test_missing_filter_error(self, socket):
         message = websocket.Message(socket=socket, payload={"type": "filter"})
 
         with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_filter_message(message)
 
-        mock_reply.assert_called_once_with(
-            matchers.MappingContaining("error"), ok=False
-        )
+        mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)
 
     @mock.patch("h.streamer.websocket.jsonschema.validate")
-    def test_invalid_filter_error(self, validate, matchers, socket):
+    def test_invalid_filter_error(self, validate, socket):
         message = websocket.Message(
             socket=socket, payload={"type": "filter", "filter": {"wibble": "giraffe"}}
         )
@@ -372,9 +369,7 @@ class TestHandleFilterMessage:
         with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_filter_message(message)
 
-        mock_reply.assert_called_once_with(
-            matchers.MappingContaining("error"), ok=False
-        )
+        mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)
 
     @pytest.fixture
     def socket(self):
@@ -415,7 +410,7 @@ class TestHandleWhoamiMessage:
 
 
 class TestUnknownMessage:
-    def test_error(self, matchers):
+    def test_error(self):
         message = websocket.Message(
             socket=mock.sentinel.socket, payload={"type": "wibble"}
         )
@@ -423,6 +418,4 @@ class TestUnknownMessage:
         with mock.patch.object(websocket.Message, "reply") as mock_reply:
             websocket.handle_unknown_message(message)
 
-        mock_reply.assert_called_once_with(
-            matchers.MappingContaining("error"), ok=False
-        )
+        mock_reply.assert_called_once_with(Any.dict.containing(["error"]), ok=False)

@@ -10,6 +10,7 @@ Tests for filtering/matching/aggregating on specific annotation fields are in
 import datetime
 
 import pytest
+from h_matchers import Any
 from webob.multidict import MultiDict
 
 from h import search
@@ -41,9 +42,7 @@ class TestSearch:
             pyramid_request, separate_keys
         )
 
-    def test_it_returns_replies_in_annotations_ids(
-        self, matchers, pyramid_request, Annotation
-    ):
+    def test_it_returns_replies_in_annotations_ids(self, pyramid_request, Annotation):
         """Without separate_replies it returns replies in annotation_ids.
 
         Test that if no separate_replies argument is given then it returns the
@@ -56,8 +55,9 @@ class TestSearch:
 
         result = search.Search(pyramid_request).run(MultiDict({}))
 
-        assert result.annotation_ids == matchers.UnorderedList(
-            [annotation.id, reply_1.id, reply_2.id]
+        assert (
+            result.annotation_ids
+            == Any.list.containing([annotation.id, reply_1.id, reply_2.id]).only()
         )
 
     def test_replies_that_dont_match_the_search_arent_included(
@@ -168,7 +168,7 @@ class TestSearchWithSeparateReplies:
     """Unit tests for search.Search when separate_replies=True is given."""
 
     def test_it_returns_replies_separately_from_annotations(
-        self, matchers, pyramid_request, Annotation
+        self, pyramid_request, Annotation
     ):
         """If separate_replies=True replies and annotations are returned separately."""
         annotation = Annotation(shared=True)
@@ -180,7 +180,7 @@ class TestSearchWithSeparateReplies:
         )
 
         assert result.annotation_ids == [annotation.id]
-        assert result.reply_ids == matchers.UnorderedList([reply_1.id, reply_2.id])
+        assert result.reply_ids == Any.list.containing([reply_1.id, reply_2.id]).only()
 
     def test_replies_are_ordered_most_recently_updated_first(
         self, Annotation, pyramid_request

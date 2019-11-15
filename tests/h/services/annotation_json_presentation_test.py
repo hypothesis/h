@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h.interfaces import IGroupService
 from h.services.annotation_json_presentation import (
@@ -21,11 +22,9 @@ class TestAnnotationJSONPresentationService:
     def test_it_configures_flag_formatter(self, services, formatters, svc):
         assert formatters.AnnotationFlagFormatter.return_value in svc.formatters
 
-    def test_initializes_hidden_formatter(self, matchers, services, formatters, svc):
+    def test_initializes_hidden_formatter(self, services, formatters, svc):
         formatters.AnnotationHiddenFormatter.assert_called_once_with(
-            services["annotation_moderation"],
-            matchers.AnyCallable(),
-            mock.sentinel.user,
+            services["annotation_moderation"], Any.function(), mock.sentinel.user,
         )
 
     def test_hidden_status_included_if_user_can_moderate_group(
@@ -61,7 +60,7 @@ class TestAnnotationJSONPresentationService:
         svc.present(annotation_resource)
 
         presenters.AnnotationJSONPresenter.assert_called_once_with(
-            annotation_resource, mock.ANY
+            annotation_resource, Any()
         )
 
     def test_present_adds_formatters(self, svc, annotation_resource, presenters):
@@ -70,7 +69,7 @@ class TestAnnotationJSONPresentationService:
 
         svc.present(annotation_resource)
 
-        presenters.AnnotationJSONPresenter.assert_called_once_with(mock.ANY, formatters)
+        presenters.AnnotationJSONPresenter.assert_called_once_with(Any(), formatters)
 
     def test_present_returns_presenter_dict(self, svc, presenters):
         presenter = presenters.AnnotationJSONPresenter.return_value
@@ -83,7 +82,7 @@ class TestAnnotationJSONPresentationService:
         svc.present_all(["id-1", "id-2"])
 
         storage.fetch_ordered_annotations.assert_called_once_with(
-            svc.session, ["id-1", "id-2"], query_processor=mock.ANY
+            svc.session, ["id-1", "id-2"], query_processor=Any()
         )
 
     def test_present_all_initialises_annotation_resources(

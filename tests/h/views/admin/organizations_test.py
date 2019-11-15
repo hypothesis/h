@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+from h_matchers import Any
 
 from h.models import Organization
 from h.views.admin.organizations import (
@@ -161,9 +162,7 @@ class TestOrganizationEditController:
         list_url = pyramid_request.route_path("admin.organizations")
         assert response == matchers.Redirect302To(list_url)
 
-    def test_delete_fails_if_org_has_groups(
-        self, factories, matchers, org, pyramid_request
-    ):
+    def test_delete_fails_if_org_has_groups(self, factories, org, pyramid_request):
         factories.Group(name="Test", organization=org)
         ctrl = OrganizationEditController(org, pyramid_request)
 
@@ -172,7 +171,7 @@ class TestOrganizationEditController:
         assert org not in pyramid_request.db.deleted
         assert pyramid_request.response.status_int == 400
         pyramid_request.session.flash.assert_called_with(
-            matchers.Regex(".*Cannot delete.*1 groups"), "error"
+            Any.string.matching(".*Cannot delete.*1 groups"), "error"
         )
         assert ctx["form"] == self._expected_form(org)
 

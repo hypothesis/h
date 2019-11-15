@@ -63,11 +63,13 @@ shouldn't return model objects directly).
 
 import sqlalchemy.exc
 import sqlalchemy.orm.exc
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.security import ALL_PERMISSIONS, DENY_ALL, Allow, Authenticated
 
 from h import storage
 from h.auth import role
 from h.auth.util import client_authority
+from h.exceptions import InvalidUserId
 from h.interfaces import IGroupService
 from h.models import AuthClient, Organization
 from h.traversal import contexts
@@ -283,7 +285,12 @@ class UserUserIDRoot:
         self.user_svc = self.request.find_service(name="user")
 
     def __getitem__(self, userid):
-        user = self.user_svc.fetch(userid)
+        try:
+            user = self.user_svc.fetch(userid)
+        except InvalidUserId as e:
+            # In this context we failed because the user provided a userid
+            # we cannot parse, not because it could not be found
+            raise HTTPBadRequest(e.args[0]) from e
 
         if not user:
             raise KeyError()

@@ -195,6 +195,7 @@ def invalid_form():
 
 @pytest.fixture
 def matchers():
+    # pylint: disable=redefined-outer-name
     from ..common import matchers
 
     return matchers

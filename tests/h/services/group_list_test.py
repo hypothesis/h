@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h.models.group import Group
 from h.services.group_list import GroupListService, group_list_factory
@@ -225,12 +226,15 @@ class TestScopedGroups:
         assert results == []
 
     def test_it_returns_matching_public_groups(
-        self, svc, sample_groups, document_uri, default_authority, matchers
+        self, svc, sample_groups, document_uri, default_authority
     ):
         results = svc.scoped_groups(default_authority, document_uri)
 
-        assert results == matchers.UnorderedList(
-            [sample_groups["restricted"], sample_groups["open"]]
+        assert (
+            results
+            == Any.list.containing(
+                [sample_groups["restricted"], sample_groups["open"]]
+            ).only()
         )
 
     def test_it_returns_matches_from_authority_only(

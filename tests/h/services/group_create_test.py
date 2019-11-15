@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h.models import Group, GroupScope, User
 from h.models.group import JoinableBy, ReadableBy, WriteableBy
@@ -222,20 +223,19 @@ class TestCreateOpenGroup:
 
         publish.assert_not_called()
 
-    def test_it_sets_scopes(self, svc, matchers, creator):
+    def test_it_sets_scopes(self, svc, creator):
         origins = ["https://biopub.org", "http://example.com", "https://wikipedia.com"]
 
         group = svc.create_open_group(
             name="test_group", userid=creator.userid, scopes=origins
         )
 
-        assert group.scopes == matchers.UnorderedList(
-            [GroupScopeWithOrigin(h) for h in origins]
+        assert (
+            group.scopes
+            == Any.list.containing([GroupScopeWithOrigin(h) for h in origins]).only()
         )
 
-    def test_it_always_creates_new_scopes(
-        self, db_session, factories, svc, creator, matchers
-    ):
+    def test_it_always_creates_new_scopes(self, db_session, factories, svc, creator):
         # It always creates a new scope, even if a scope with the given origin
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
@@ -370,15 +370,16 @@ class TestCreateRestrictedGroup:
 
         publish.assert_called_once_with("group-join", group.pubid, creator.userid)
 
-    def test_it_sets_scopes(self, svc, matchers, creator):
+    def test_it_sets_scopes(self, svc, creator):
         origins = ["https://biopub.org", "http://example.com", "https://wikipedia.com"]
 
         group = svc.create_restricted_group(
             name="test_group", userid=creator.userid, scopes=origins
         )
 
-        assert group.scopes == matchers.UnorderedList(
-            [GroupScopeWithOrigin(h) for h in origins]
+        assert (
+            group.scopes
+            == Any.list.containing([GroupScopeWithOrigin(h) for h in origins]).only()
         )
 
     def test_it_with_mismatched_authorities_raises_value_error(
@@ -394,9 +395,7 @@ class TestCreateRestrictedGroup:
                 organization=org,
             )
 
-    def test_it_always_creates_new_scopes(
-        self, db_session, factories, svc, creator, matchers
-    ):
+    def test_it_always_creates_new_scopes(self, db_session, factories, svc, creator):
         # It always creates a new scope, even if a scope with the given origin
         # already exists (this is because a single scope can only belong to
         # one group, so the existing scope can't be reused with the new group).
@@ -490,9 +489,7 @@ class GroupScopeWithOrigin(Matcher):
     """Matches any GroupScope with the given origin."""
 
     def __init__(self, origin):
-        self.origin = origin
-
-    def __eq__(self, group_scope):
-        if not isinstance(group_scope, GroupScope):
-            return False
-        return group_scope.origin == self.origin
+        super().__init__(
+            f"* any group with origin: {origin} *",
+            lambda other: isinstance(other, GroupScope) and other.origin == origin,
+        )

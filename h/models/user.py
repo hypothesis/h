@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
 from h.db import Base
+from h.exceptions import InvalidUserId
 from h.util.user import split_user
 
 USERNAME_MIN_LENGTH = 3
@@ -98,7 +99,7 @@ class UserIDComparator(Comparator):
         if isinstance(other, str):
             try:
                 val = split_user(other)
-            except ValueError:
+            except InvalidUserId:
                 # The value being compared isn't a valid userid
                 return False
             else:
@@ -110,7 +111,7 @@ class UserIDComparator(Comparator):
         for userid in userids:
             try:
                 val = split_user(userid)
-            except ValueError:
+            except InvalidUserId:
                 continue
 
             other = sa.tuple_(_normalise_username(val["username"]), val["domain"])

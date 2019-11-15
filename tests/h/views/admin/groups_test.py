@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h.models import Organization
 from h.services.annotation_delete import AnnotationDeleteService
@@ -30,7 +31,7 @@ class TestIndex:
     def test_it_paginates_results(self, pyramid_request, routes, paginate):
         groups.groups_index(None, pyramid_request)
 
-        paginate.assert_called_once_with(pyramid_request, mock.ANY, mock.ANY)
+        paginate.assert_called_once_with(pyramid_request, Any(), Any())
 
     def test_it_filters_groups_with_name_param(self, pyramid_request, group_svc):
         pyramid_request.params["q"] = "fingers"
@@ -66,14 +67,14 @@ class TestGroupCreateView:
         assert call_kwargs["organizations"] == {default_org.pubid: default_org}
 
     def test_post_handles_form_submission(
-        self, pyramid_request, handle_form_submission, matchers
+        self, pyramid_request, handle_form_submission
     ):
         view = GroupCreateViews(pyramid_request)
 
         view.post()
 
         handle_form_submission.assert_called_once_with(
-            view.request, view.form, matchers.AnyCallable(), view._template_context
+            view.request, view.form, Any.function(), view._template_context
         )
 
     def test_post_redirects_to_list_view_on_success(

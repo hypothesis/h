@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 from pyramid.httpexceptions import HTTPFound
 from webob.multidict import MultiDict
 
@@ -392,12 +393,12 @@ class TestExecute:
         assert result.timeframes == bucketing.bucket.return_value
 
     def test_it_fetches_the_groups_from_the_database(
-        self, _fetch_groups, group_pubids, matchers, pyramid_request
+        self, _fetch_groups, group_pubids, pyramid_request
     ):
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         _fetch_groups.assert_called_once_with(
-            pyramid_request.db, matchers.UnorderedList(group_pubids)
+            pyramid_request.db, Any.iterable.containing(group_pubids).only()
         )
 
     def test_it_returns_each_annotation_presented(self, annotations, pyramid_request):

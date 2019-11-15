@@ -188,7 +188,7 @@ class TestAuthClientEditController:
         assert authclient.secret == old_secret
         assert ctx["form"] == self._expected_form(authclient)
 
-    def test_delete_removes_authclient(self, authclient, matchers, pyramid_request):
+    def test_delete_removes_authclient(self, authclient, pyramid_request):
         pyramid_request.db.delete = create_autospec(
             pyramid_request.db.delete, return_value=None
         )
