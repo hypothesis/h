@@ -26,13 +26,13 @@ h-matchers==1.2.0
 h-pyramid-sentry==1.2.0
 hkdf==0.0.3
 hupper==1.9.1             # via pyramid
-importlib-metadata==0.23  # via jsonschema
+importlib-metadata==0.23  # via jsonschema, kombu
 iso8601==0.1.12           # via colander, deform
 itsdangerous==1.1.0
 jinja2==2.10.3            # via pyramid-jinja2
 jsonpointer==2.0
 jsonschema==3.1.1
-kombu==4.5.0
+kombu==4.6.6
 mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.4
