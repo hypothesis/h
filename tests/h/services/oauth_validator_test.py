@@ -256,7 +256,7 @@ class TestFindToken:
         assert token.value == token.value
 
     def test_it_returns_None_when_token_is_missing(self, svc, token):
-        result = svc.find_token('missing-value')
+        result = svc.find_token("missing-value")
 
         assert result is None
 
