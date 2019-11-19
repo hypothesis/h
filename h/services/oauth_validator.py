@@ -44,6 +44,10 @@ class OAuthValidatorService(RequestValidator):
             self._find_refresh_token
         )
 
+        self._cached_find_token = lru_cache_in_transaction(self.session)(
+            self._find_token
+        )
+
     def authenticate_client(self, request, *args, **kwargs):
         """Authenticates a client, returns True if the client exists and its secret matches the request."""
         client = self.find_client(request.client_id)
@@ -87,6 +91,12 @@ class OAuthValidatorService(RequestValidator):
             # `authenticate_client_id` will not authenticate a missing client.
             return False
 
+        # A hacky sentinel on the request to let us know we are part of a
+        # revocation request. We expect a client_id at this point, but we
+        # don't want to trigger full client authentication
+        if hasattr(request, "h_revoke_request") and request.h_revoke_request:
+            return False
+
         if (
             request.grant_type == "refresh_token"
             and client.grant_type == AuthClientGrantType.jwt_bearer
@@ -124,6 +134,9 @@ class OAuthValidatorService(RequestValidator):
 
     def find_refresh_token(self, value):
         return self._cached_find_refresh_token(value)
+
+    def find_token(self, value):
+        return self._cached_find_token(value)
 
     def get_default_redirect_uri(self, client_id, request, *args, **kwargs):
         """Returns the ``redirect_uri`` stored on the client with the given id."""
@@ -344,6 +357,21 @@ class OAuthValidatorService(RequestValidator):
         return (
             self.session.query(models.Token)
             .filter_by(refresh_token=value)
+            .order_by(models.Token.created.desc())
+            .first()
+        )
+
+    def _find_token(self, value):
+        """Retrieve a token without knowing which kind it is"""
+
+        if value is None:
+            return None
+
+        return (
+            self.session.query(models.Token)
+            .filter(
+                (models.Token.refresh_token == value) | (models.Token.value == value)
+            )
             .order_by(models.Token.created.desc())
             .first()
         )

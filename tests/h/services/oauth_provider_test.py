@@ -4,7 +4,9 @@ from unittest import mock
 
 import pytest
 from oauthlib.common import Request as OAuthRequest
+from oauthlib.oauth2 import InvalidRequestError
 
+from h.models import Token
 from h.oauth.errors import InvalidRefreshTokenError
 from h.services.oauth_provider import (
     OAuthProviderService,
@@ -62,6 +64,32 @@ class TestOAuthProviderService:
     def test_generate_refresh_token(self, svc, token_urlsafe):
         token_urlsafe.return_value = "top-secret"
         assert svc.generate_refresh_token(None) == "4657-top-secret"
+
+    def test_validate_revocation_request_adds_revoke_marker(self, svc, oauth_request):
+        try:
+            svc.validate_revocation_request(oauth_request)
+
+        except InvalidRequestError:
+            # Not here to test this
+            pass
+
+        finally:
+            assert oauth_request.h_revoke_request is True
+
+    def test_validate_revocation_request_looks_up_token(
+        self, svc, oauth_request, token
+    ):
+        oauth_request.token = mock.sentinel.token
+        svc.oauth_validator.find_token.return_value = token
+
+        svc.validate_revocation_request(oauth_request)
+
+        svc.oauth_validator.find_token.assert_called_once_with(mock.sentinel.token)
+        assert oauth_request.client_id == token.authclient.id
+
+    @pytest.fixture
+    def token(self):
+        return mock.create_autospec(Token, instance=True)
 
     @pytest.fixture
     def svc(self, pyramid_request):

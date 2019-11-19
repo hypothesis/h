@@ -95,14 +95,23 @@ class TestClientAuthenticationRequired:
         assert svc.client_authentication_required(oauth_request) is False
 
     def test_returns_false_for_refresh_token_with_jwt_client(
-        self, svc, oauth_request, factories
+        self, svc, oauth_request, factories, client
     ):
-        client = factories.ConfidentialAuthClient(
-            grant_type=AuthClientGrantType.jwt_bearer
-        )
         oauth_request.client_id = client.id
         oauth_request.grant_type = "refresh_token"
         assert svc.client_authentication_required(oauth_request) is False
+
+    def test_returns_false_for_revoke_token(self, svc, oauth_request, client):
+        oauth_request.client_id = client.id
+        oauth_request.h_revoke_request = True
+
+        assert svc.client_authentication_required(oauth_request) is False
+
+    @pytest.fixture
+    def client(self, factories):
+        return factories.ConfidentialAuthClient(
+            grant_type=AuthClientGrantType.jwt_bearer
+        )
 
     @pytest.fixture
     def oauth_request(self):
@@ -233,6 +242,27 @@ class TestInvalidateAuthorizationCode:
         db_session.flush()
 
         assert db_session.query(models.AuthzCode).get(keep_code.id) is not None
+
+
+class TestFindToken:
+    def test_it_can_get_token_by_refresh_value(self, svc, token):
+        token = svc.find_token(token.refresh_token)
+
+        assert token.refresh_token == token.refresh_token
+
+    def test_it_can_get_token_by_value(self, svc, token):
+        token = svc.find_token(token.value)
+
+        assert token.value == token.value
+
+    def test_it_returns_None_when_token_is_missing(self, svc, token):
+        result = svc.find_token("missing-value")
+
+        assert result is None
+
+    @pytest.fixture
+    def token(self, factories):
+        return factories.OAuth2Token()
 
 
 class TestInvalidateRefreshToken:
