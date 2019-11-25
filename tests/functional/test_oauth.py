@@ -114,11 +114,11 @@ class TestOAuth:
         )
 
     def assert_is_authorized(self, app, userid, access_token):
-        headers = {"Authorization": f"Bearer {access_token}"}
-
-        app.get("/api/profile", headers=headers, status=200)
-
-        results = app.get("/api/profile", headers=headers, status=200)
+        results = app.get(
+            "/api/profile",
+            headers={"Authorization": f"Bearer {access_token}"},
+            status=200,
+        )
 
         assert results.json_body["userid"] == userid
 
