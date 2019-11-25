@@ -100,11 +100,6 @@ class TestOAuth:
         # Check the token doesn't work after
         self.assert_is_not_authorised(app, access_token=access_token)
 
-    def test_wat(self, app):
-        app.post("/oauth/revoke", {"token": 'boooooo'}, headers={
-            'Authorization': 'Bearer wooooooooooooo'
-        }, status=200)
-
     @pytest.mark.parametrize(
         "method, path", [("POST", "/api/token"), ("POST", "/oauth/revoke")]
     )
