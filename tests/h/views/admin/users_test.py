@@ -173,7 +173,7 @@ def test_users_activate_calls_notify(ActivationEvent, notify, pyramid_request):
 
     users_activate(pyramid_request)
 
-    notify.assert_called_once_with(ActivationEvent.return_value)
+    notify.assert_called_with(ActivationEvent.return_value)
 
 
 @users_activate_fixtures
