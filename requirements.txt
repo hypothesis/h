@@ -39,7 +39,7 @@ mistune==0.8.4
 more-itertools==7.2.0     # via zipp
 newrelic==5.2.3.131
 oauthlib==2.0.3
-passlib==1.7.1
+passlib==1.7.2
 pastedeploy==2.0.1        # via plaster-pastedeploy
 peppercorn==0.6           # via deform
 plaster-pastedeploy==0.7  # via pyramid
@@ -85,4 +85,4 @@ zope.interface==4.3.2
 zope.sqlalchemy==1.1
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.6.0        # via jsonschema, plaster, pyramid, repoze.sendmail, zope.deprecation, zope.interface, zope.sqlalchemy
+# setuptools==42.0.0        # via jsonschema, plaster, pyramid, repoze.sendmail, zope.deprecation, zope.interface, zope.sqlalchemy
