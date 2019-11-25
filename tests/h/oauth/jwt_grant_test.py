@@ -37,8 +37,7 @@ class TestJWTAuthorizationGrantCreateTokenResponse:
         grant.create_token_response(oauth_request, token_handler)
 
         token_handler.create_token.assert_called_once_with(
-            oauth_request, refresh_token=True, save_token=False
-        )
+            oauth_request, refresh_token=True)
 
     def test_saves_token(
         self, grant, oauth_request, token_handler, db_session, request_validator
