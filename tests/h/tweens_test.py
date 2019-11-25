@@ -16,7 +16,9 @@ class TestRedirectTween:
 
         tweens.redirect_tween_factory(handler=None, registry=None)
 
-        open_.assert_called_once_with(Any.string.matching('^.*h/redirects$'), encoding="utf-8")
+        open_.assert_called_once_with(
+            Any.string.matching("^.*h/redirects$"), encoding="utf-8"
+        )
         # Parse redirects is called with the value returned by the context manager
         parse_redirects.assert_called_once_with(
             open_.return_value.__enter__.return_value
