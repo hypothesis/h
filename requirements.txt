@@ -31,7 +31,7 @@ iso8601==0.1.12           # via colander, deform
 itsdangerous==1.1.0
 jinja2==2.10.3            # via pyramid-jinja2
 jsonpointer==2.0
-jsonschema==3.1.1
+jsonschema==3.2.0
 kombu==4.6.6
 mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
@@ -85,4 +85,4 @@ zope.interface==4.3.2
 zope.sqlalchemy==1.1
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==42.0.0        # via jsonschema, plaster, pyramid, repoze.sendmail, zope.deprecation, zope.interface, zope.sqlalchemy
+# setuptools==42.0.1        # via jsonschema, plaster, pyramid, repoze.sendmail, zope.deprecation, zope.interface, zope.sqlalchemy
