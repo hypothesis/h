@@ -185,9 +185,13 @@ class TestFindRefreshToken:
 
 
 class TestGetDefaultRedirectUri:
-    def test_returns_clients_redirect_uri(self, svc, client):
-        actual = svc.get_default_redirect_uri(client.id, None)
-        assert "https://example.org/auth/callback" == actual
+    def test_returns_clients_redirect_uri(self, svc, client, pyramid_request):
+        pyramid_request.domain = 'example.org'
+        pyramid_request.scheme = 'ftps'
+
+        actual = svc.get_default_redirect_uri(client.id, pyramid_request)
+
+        assert "ftps://example.org/auth/callback" == actual
 
     def test_returns_none_when_client_missing(self, svc):
         id_ = str(uuid.uuid1())
@@ -195,7 +199,7 @@ class TestGetDefaultRedirectUri:
 
     @pytest.fixture
     def client(self, factories):
-        redirect_uri = "https://example.org/auth/callback"
+        redirect_uri = "{current_scheme}://{current_host}/auth/callback"
         return factories.AuthClient(redirect_uri=redirect_uri)
 
 
