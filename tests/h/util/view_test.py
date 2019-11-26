@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from h.util.view import handle_exception, json_view, render_url_template
+from h.util.view import handle_exception, json_view
 
 
 @pytest.mark.usefixtures("sys_exc_info")
@@ -74,26 +74,3 @@ class TestJsonView:
         view_config = patch("h.util.view.view_config")
         view_config.side_effect = _return_kwargs
         return view_config
-
-
-class TestRenderUrlTemplate:
-    @pytest.mark.parametrize(
-        "url_template,scheme,domain,expected",
-        [
-            (
-                "https://hypothes.is/path",
-                "http",
-                "example.com",
-                "https://hypothes.is/path",
-            ),
-            (
-                "{current_scheme}://{current_host}:5000/app.html",
-                "https",
-                "localhost",
-                "https://localhost:5000/app.html",
-            ),
-        ],
-    )
-    def test_replaces_params(self, url_template, scheme, domain, expected):
-        request = Mock(scheme=scheme, domain=domain)
-        assert render_url_template(url_template, request) == expected

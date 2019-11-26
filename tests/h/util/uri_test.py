@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from unittest.mock import Mock
 
 import pytest
 
@@ -178,3 +179,26 @@ def test_normalize_returns_unicode(url, _):
 )
 def test_origin(url_in, url_out):
     assert uri.origin(url_in) == url_out
+
+
+class TestRenderUrlTemplate:
+    @pytest.mark.parametrize(
+        "url_template,scheme,domain,expected",
+        [
+            (
+                "https://hypothes.is/path",
+                "http",
+                "example.com",
+                "https://hypothes.is/path",
+            ),
+            (
+                "{current_scheme}://{current_host}:5000/app.html",
+                "https",
+                "localhost",
+                "https://localhost:5000/app.html",
+            ),
+        ],
+    )
+    def test_replaces_params(self, url_template, scheme, domain, expected):
+        request = Mock(scheme=scheme, domain=domain)
+        assert uri.render_uri_template(url_template, request) == expected

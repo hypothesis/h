@@ -9,7 +9,7 @@ from h import __version__
 from h.views import client
 
 
-@pytest.mark.usefixtures("routes", "pyramid_settings", "render_url_template")
+@pytest.mark.usefixtures("routes", "pyramid_settings", "render_uri_template")
 class TestSidebarApp:
     def test_it_includes_client_config(self, pyramid_request):
         ctx = client.sidebar_app(pyramid_request)
@@ -43,17 +43,17 @@ class TestSidebarApp:
         )
 
 
-@pytest.mark.usefixtures("routes", "pyramid_settings", "render_url_template")
+@pytest.mark.usefixtures("routes", "pyramid_settings", "render_uri_template")
 class TestEmbedRedirect:
     def test_redirects_to_client_boot_script(
-        self, pyramid_request, render_url_template
+        self, pyramid_request, render_uri_template
     ):
         pyramid_request.feature.flags["embed_cachebuster"] = False
 
         rsp = client.embed_redirect(pyramid_request)
 
         assert isinstance(rsp, HTTPFound)
-        render_url_template.assert_called_with(
+        render_uri_template.assert_called_with(
             "https://cdn.hypothes.is/hypothesis", pyramid_request
         )
         assert rsp.location == "https://cdn.hypothes.is/hypothesis"
@@ -86,8 +86,8 @@ def pyramid_settings(pyramid_settings):
 
 
 @pytest.fixture
-def render_url_template(patch):
-    mock = patch("h.views.client.render_url_template")
+def render_uri_template(patch):
+    mock = patch("h.views.client.render_uri_template")
 
     def render(url, request):
         return url

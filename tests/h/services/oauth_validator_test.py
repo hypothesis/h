@@ -186,8 +186,8 @@ class TestFindRefreshToken:
 
 class TestGetDefaultRedirectUri:
     def test_returns_clients_redirect_uri(self, svc, client, pyramid_request):
-        pyramid_request.domain = 'example.org'
-        pyramid_request.scheme = 'ftps'
+        pyramid_request.domain = "example.org"
+        pyramid_request.scheme = "ftps"
 
         actual = svc.get_default_redirect_uri(client.id, pyramid_request)
 
