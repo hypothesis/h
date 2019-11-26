@@ -85,6 +85,15 @@ class TestOAuth:
 
         self.assert_is_not_authorised(app, access_token=refresh_token)
 
+    def test_oauth_authorize_redirects(self, app, auth_code_authclient):
+        app.get("/oauth/authorize", {
+            "client_id": auth_code_authclient.id,
+            "origin": "http://example.com",
+            "response_mode": "web_message",
+            "response_type": "code",
+            "state": "80750c691329aedd"
+        }, status=302)
+
     def test_revoke_token(self, app, authclient, userid):
         response = self.get_access_token(app, authclient, userid)
         refresh_token = response["refresh_token"]
@@ -159,7 +168,21 @@ class TestOAuth:
 
     @pytest.fixture
     def authclient(self, db_session, factories):
-        authclient = factories.ConfidentialAuthClient(grant_type=GrantType.jwt_bearer)
+        authclient = factories.ConfidentialAuthClient(
+            grant_type=GrantType.jwt_bearer,
+        )
+        db_session.commit()
+        return authclient
+
+    @pytest.fixture
+    def auth_code_authclient(self, db_session, factories):
+        authclient = factories.ConfidentialAuthClient(
+            grant_type=GrantType.authorization_code,
+            secret=None,
+            response_type="code",
+            trusted=False,
+            redirect_uri="{current_scheme}://{current_host}:5000/app.html"
+        )
         db_session.commit()
         return authclient
 
