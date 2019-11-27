@@ -9,7 +9,7 @@ from h import __version__
 from h.views import client
 
 
-@pytest.mark.usefixtures("routes", "pyramid_settings", "render_uri_template")
+@pytest.mark.usefixtures("routes", "pyramid_settings")
 class TestSidebarApp:
     def test_it_includes_client_config(self, pyramid_request):
         ctx = client.sidebar_app(pyramid_request)
@@ -39,24 +39,19 @@ class TestSidebarApp:
 
         assert (
             csp_header
-            == "script-src 'self' https://cdn.hypothes.is https://www.google-analytics.com; style-src https://cdn.hypothes.is 'unsafe-inline'"
+            == "script-src 'self' http://example.com https://www.google-analytics.com; style-src http://example.com 'unsafe-inline'"
         )
 
 
-@pytest.mark.usefixtures("routes", "pyramid_settings", "render_uri_template")
+@pytest.mark.usefixtures("routes", "pyramid_settings")
 class TestEmbedRedirect:
-    def test_redirects_to_client_boot_script(
-        self, pyramid_request, render_uri_template
-    ):
+    def test_redirects_to_client_boot_script(self, pyramid_request):
         pyramid_request.feature.flags["embed_cachebuster"] = False
 
         rsp = client.embed_redirect(pyramid_request)
 
         assert isinstance(rsp, HTTPFound)
-        render_uri_template.assert_called_with(
-            "https://cdn.hypothes.is/hypothesis", pyramid_request
-        )
-        assert rsp.location == "https://cdn.hypothes.is/hypothesis"
+        assert rsp.location == "http://example.com/client_url"
 
     def test_adds_cachebuster(self, pyramid_request):
         pyramid_request.feature.flags["embed_cachebuster"] = True
@@ -78,23 +73,12 @@ def pyramid_settings(pyramid_settings):
             "h.sentry_environment": "dev",
             "h.websocket_url": "wss://example.com/ws",
             "h.client_rpc_allowed_origins": "https://lti.hypothes.is",
+            "h.client_url": "{current_scheme}://{current_host}/client_url",
             "authority": "example.com",
         }
     )
 
     return pyramid_settings
-
-
-@pytest.fixture
-def render_uri_template(patch):
-    mock = patch("h.views.client.render_uri_template")
-
-    def render(url, request):
-        return url
-
-    mock.side_effect = render
-
-    return mock
 
 
 @pytest.fixture

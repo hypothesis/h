@@ -183,22 +183,19 @@ def test_origin(url_in, url_out):
 
 class TestRenderUrlTemplate:
     @pytest.mark.parametrize(
-        "url_template,scheme,domain,expected",
+        "url_template,example_url,expected",
         [
             (
                 "https://hypothes.is/path",
-                "http",
-                "example.com",
+                "ftps://example.com",
                 "https://hypothes.is/path",
             ),
             (
                 "{current_scheme}://{current_host}:5000/app.html",
-                "https",
-                "localhost",
-                "https://localhost:5000/app.html",
+                "ftps://example.com",
+                "ftps://example.com:5000/app.html",
             ),
         ],
     )
-    def test_replaces_params(self, url_template, scheme, domain, expected):
-        request = Mock(scheme=scheme, domain=domain)
-        assert uri.render_uri_template(url_template, request) == expected
+    def test_replaces_params(self, url_template, example_url, expected):
+        assert uri.render_url_template(url_template, example_url) == expected

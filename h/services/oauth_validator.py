@@ -10,7 +10,7 @@ from h import models
 from h.models.auth_client import GrantType as AuthClientGrantType
 from h.services.oauth_provider import ACCESS_TOKEN_PREFIX, REFRESH_TOKEN_PREFIX
 from h.util.db import lru_cache_in_transaction
-from h.util.uri import render_uri_template
+from h.util.uri import render_url_template
 
 AUTHZ_CODE_TTL = datetime.timedelta(minutes=10)
 DEFAULT_SCOPES = ["annotation:read", "annotation:write"]
@@ -144,7 +144,7 @@ class OAuthValidatorService(RequestValidator):
 
         client = self.find_client(client_id)
         if client is not None:
-            return render_uri_template(client.redirect_uri, values=request)
+            return render_url_template(client.redirect_uri, example_url=request.uri)
 
     def get_default_scopes(self, client_id, request, *args, **kwargs):
         """Return the default scopes for the provided client."""
