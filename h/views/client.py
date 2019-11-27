@@ -25,7 +25,7 @@ def _client_url(request):
     Return the configured URL for the client.
     """
     url = request.registry.settings.get("h.client_url", DEFAULT_CLIENT_URL)
-    url = render_url_template(url, request.url)
+    url = render_url_template(url, example_url=request.url)
 
     if request.feature("embed_cachebuster"):
         url += "?cachebuster=" + str(int(time.time()))
