@@ -70,6 +70,7 @@ from urllib.parse import (
     quote_plus,
     unquote,
     unquote_plus,
+    urlparse,
     urlsplit,
 )
 
@@ -291,3 +292,19 @@ def _normalize_queryvalue(value):
 def _blacklisted_query_param(s):
     """Return True if the given string matches any BLACKLISTED_QUERY_PARAMS."""
     return any(re.match(patt, s) for patt in BLACKLISTED_QUERY_PARAMS)
+
+
+def render_url_template(template, example_url):
+    """
+    Update a URL template to have the same scheme and host as the example.
+
+    This function is primarily used in development to support creating
+    absolute links to h or other Hypothesis services which work when h is
+    accessed from the same system (where the h dev server is "localhost:<port>")
+    or a different device (when the h dev server is "machine-name.local:<port>").
+    """
+    parsed = urlparse(example_url)
+
+    url = template.replace("{current_host}", parsed.hostname)
+    url = url.replace("{current_scheme}", parsed.scheme)
+    return url

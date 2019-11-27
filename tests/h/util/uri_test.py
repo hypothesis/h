@@ -178,3 +178,23 @@ def test_normalize_returns_unicode(url, _):
 )
 def test_origin(url_in, url_out):
     assert uri.origin(url_in) == url_out
+
+
+class TestRenderUrlTemplate:
+    @pytest.mark.parametrize(
+        "url_template,example_url,expected",
+        [
+            (
+                "https://hypothes.is/path",
+                "ftps://example.com",
+                "https://hypothes.is/path",
+            ),
+            (
+                "{current_scheme}://{current_host}:5000/app.html",
+                "ftps://example.com",
+                "ftps://example.com:5000/app.html",
+            ),
+        ],
+    )
+    def test_replaces_params(self, url_template, example_url, expected):
+        assert uri.render_url_template(url_template, example_url) == expected

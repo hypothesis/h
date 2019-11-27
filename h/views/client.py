@@ -13,8 +13,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from h import __version__
-from h.util.uri import origin
-from h.util.view import render_url_template
+from h.util.uri import origin, render_url_template
 
 # Default URL for the client, which points to the latest version of the client
 # that was published to npm.
@@ -26,7 +25,7 @@ def _client_url(request):
     Return the configured URL for the client.
     """
     url = request.registry.settings.get("h.client_url", DEFAULT_CLIENT_URL)
-    url = render_url_template(url, request)
+    url = render_url_template(url, example_url=request.url)
 
     if request.feature("embed_cachebuster"):
         url += "?cachebuster=" + str(int(time.time()))
