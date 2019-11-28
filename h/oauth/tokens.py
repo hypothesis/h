@@ -12,7 +12,7 @@ class BearerToken(OAuthlibBearerToken):
         refresh_token_generator=None,
         refresh_token_expires_in=None,
     ):
-        super(BearerToken, self).__init__(
+        super().__init__(
             request_validator=request_validator,
             token_generator=token_generator,
             expires_in=expires_in,
@@ -21,13 +21,11 @@ class BearerToken(OAuthlibBearerToken):
 
         self.refresh_token_expires_in = refresh_token_expires_in
 
-    def create_token(self, request, refresh_token=False, save_token=True):
+    def create_token(self, request, refresh_token=False, **kwargs):
         if request.extra_credentials is None:
             request.extra_credentials = {}
         request.extra_credentials[
             "refresh_token_expires_in"
         ] = self.refresh_token_expires_in
 
-        return super(BearerToken, self).create_token(
-            request, refresh_token=refresh_token, save_token=save_token
-        )
+        return super().create_token(request, refresh_token=refresh_token)

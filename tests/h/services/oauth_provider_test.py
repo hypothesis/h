@@ -81,6 +81,7 @@ class TestOAuthProviderService:
     ):
         oauth_request.token = mock.sentinel.token
         svc.oauth_validator.find_token.return_value = token
+        oauth_request.http_method = "POST"
 
         svc.validate_revocation_request(oauth_request)
 

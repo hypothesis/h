@@ -19,7 +19,7 @@ from h.services.oauth_validator import (
 
 
 class TestAuthenticateClient:
-    def test_returns_true_when_client_secret_matches_request(
+    def test_returns_True_when_client_secret_matches_request(
         self, svc, client, oauth_request
     ):
         oauth_request.client_id = client.id
@@ -37,24 +37,24 @@ class TestAuthenticateClient:
         assert oauth_request.client.client_id == client.id
         assert oauth_request.client.authclient == client
 
-    def test_returns_false_for_missing_client_id_request_param(
+    def test_returns_False_for_missing_client_id_request_param(
         self, svc, client, oauth_request
     ):
         assert svc.authenticate_client(oauth_request) is False
 
-    def test_returns_false_for_missing_client_secret_request_param(
+    def test_returns_False_for_missing_client_secret_request_param(
         self, svc, client, oauth_request
     ):
         oauth_request.client_id = client.id
         assert svc.authenticate_client(oauth_request) is False
 
-    def test_returns_false_for_missing_client(self, svc, client, oauth_request):
+    def test_returns_False_for_missing_client(self, svc, client, oauth_request):
         oauth_request.client_id = uuid.uuid1()
         oauth_request.client_secret = client.secret
 
         assert svc.authenticate_client(oauth_request) is False
 
-    def test_returns_false_when_secrets_do_not_match(self, svc, client, oauth_request):
+    def test_returns_False_when_secrets_do_not_match(self, svc, client, oauth_request):
         oauth_request.client_id = client.id
         oauth_request.client_secret = "this-is-invalid"
 
@@ -66,7 +66,7 @@ class TestAuthenticateClient:
 
 
 class TestAuthenticateClientId:
-    def test_returns_true_when_client_found(self, svc, client, oauth_request):
+    def test_returns_True_when_client_found(self, svc, client, oauth_request):
         assert svc.authenticate_client_id(client.id, oauth_request) is True
 
     def test_sets_client_on_request_when_found(self, svc, client, oauth_request):
@@ -75,33 +75,33 @@ class TestAuthenticateClientId:
         assert oauth_request.client.client_id == client.id
         assert oauth_request.client.authclient == client
 
-    def test_returns_false_when_client_missing(self, svc, oauth_request):
+    def test_returns_False_when_client_missing(self, svc, oauth_request):
         assert svc.authenticate_client_id(str(uuid.uuid1()), oauth_request) is False
 
 
 class TestClientAuthenticationRequired:
-    def test_returns_false_for_public_client(self, svc, oauth_request, factories):
+    def test_returns_False_for_public_client(self, svc, oauth_request, factories):
         client = factories.AuthClient()
         oauth_request.client_id = client.id
         assert svc.client_authentication_required(oauth_request) is False
 
-    def test_returns_true_for_confidential_client(self, svc, oauth_request, factories):
+    def test_returns_True_for_confidential_client(self, svc, oauth_request, factories):
         client = factories.ConfidentialAuthClient()
         oauth_request.client_id = client.id
         assert svc.client_authentication_required(oauth_request) is True
 
-    def test_returns_false_for_missing_client(self, svc, oauth_request):
+    def test_returns_False_for_missing_client(self, svc, oauth_request):
         oauth_request.client = None
         assert svc.client_authentication_required(oauth_request) is False
 
-    def test_returns_false_for_refresh_token_with_jwt_client(
+    def test_returns_False_for_refresh_token_with_jwt_client(
         self, svc, oauth_request, factories, client
     ):
         oauth_request.client_id = client.id
         oauth_request.grant_type = "refresh_token"
         assert svc.client_authentication_required(oauth_request) is False
 
-    def test_returns_false_for_revoke_token(self, svc, oauth_request, client):
+    def test_returns_False_for_revoke_token(self, svc, oauth_request, client):
         oauth_request.client_id = client.id
         oauth_request.h_revoke_request = True
 
@@ -119,23 +119,42 @@ class TestClientAuthenticationRequired:
 
 
 class TestConfirmRedirectUri:
-    def test_returns_true_for_matching_redirect_uris(self, svc, client):
+    @pytest.mark.parametrize(
+        "db_uri,redirect_uri",
+        (
+            ("{current_scheme}://{current_host}/abcd", "https://example.com/abcd"),
+            ("{current_scheme}://{current_host}/abcd", "ftps://example.co.uk/abcd"),
+            ("http://example.com/abcd", "http://example.com/abcd"),
+        ),
+    )
+    def test_returns_True_for_matching_uris(self, svc, client, db_uri, redirect_uri):
+        client.authclient.redirect_uri = db_uri
         result = svc.confirm_redirect_uri(
-            client.client_id, "test-authz-code", client.authclient.redirect_uri, client
+            client.client_id, "test-authz-code", redirect_uri, client
         )
         assert result is True
 
-    def test_returns_true_when_redirect_uri_not_provided(self, svc, client):
+    @pytest.mark.parametrize(
+        "db_uri,redirect_uri",
+        [
+            ("{current_scheme}://{current_host}/abcd", "https://example.com/bad_path"),
+            ("http://example.com/abcd", "https://different.com/abcd"),
+        ],
+    )
+    def test_returns_False_when_templated_uris_do_not_match(
+        self, svc, client, db_uri, redirect_uri
+    ):
+        client.authclient.redirect_uri = db_uri
+        result = svc.confirm_redirect_uri(
+            client.client_id, "test-authz-code", redirect_uri, client
+        )
+        assert result is False
+
+    def test_returns_True_when_redirect_uri_not_provided(self, svc, client):
         result = svc.confirm_redirect_uri(
             client.client_id, "test-authz-code", None, client
         )
         assert result is True
-
-    def test_returns_false_when_redirect_uris_do_not_match(self, svc, client):
-        result = svc.confirm_redirect_uri(
-            client.client_id, "test-authz-code", "invalid", client
-        )
-        assert result is False
 
     @pytest.fixture
     def client(self, factories):
@@ -446,16 +465,16 @@ class TestSaveBearerToken:
 
 
 class TestValidateClientId:
-    def test_returns_true_for_valid_client(self, svc, client):
+    def test_returns_True_for_valid_client(self, svc, client):
         assert svc.validate_client_id(client.id, None) is True
 
-    def test_returns_false_for_missing_client(self, svc):
+    def test_returns_False_for_missing_client(self, svc):
         id_ = str(uuid.uuid1())
         assert svc.validate_client_id(id_, None) is False
 
 
 class TestValidateCode:
-    def test_returns_true_for_correct_code(
+    def test_returns_True_for_correct_code(
         self, svc, authz_code, client, oauth_request
     ):
         result = svc.validate_code(
@@ -475,11 +494,11 @@ class TestValidateCode:
             client.client_id, oauth_request
         )
 
-    def test_returns_false_for_missing_code(self, svc, client, oauth_request):
+    def test_returns_False_for_missing_code(self, svc, client, oauth_request):
         result = svc.validate_code(client.client_id, "missing", client, oauth_request)
         assert result is False
 
-    def test_returns_false_when_clients_do_not_match(
+    def test_returns_False_when_clients_do_not_match(
         self, svc, client, oauth_request, factories
     ):
         authz_code = factories.AuthzCode()
@@ -488,7 +507,7 @@ class TestValidateCode:
         )
         assert result is False
 
-    def test_returns_false_when_expired(self, svc, authz_code, client, oauth_request):
+    def test_returns_False_when_expired(self, svc, authz_code, client, oauth_request):
         authz_code.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
 
         result = svc.validate_code(
@@ -506,7 +525,7 @@ class TestValidateCode:
 
 
 class TestValidateGrantType:
-    def test_returns_false_when_client_does_not_have_grant_types(
+    def test_returns_False_when_client_does_not_have_grant_types(
         self, svc, client, oauth_request
     ):
         client.authclient.grant_type = None
@@ -516,7 +535,7 @@ class TestValidateGrantType:
         )
         assert result is False
 
-    def test_returns_true_when_grant_type_matches_client(
+    def test_returns_True_when_grant_type_matches_client(
         self, svc, client, oauth_request
     ):
         client.authclient.grant_type = AuthClientGrantType.authorization_code
@@ -526,7 +545,7 @@ class TestValidateGrantType:
         )
         assert result is True
 
-    def test_returns_true_when_refresh_token_and_client_does_not_match(
+    def test_returns_True_when_refresh_token_and_client_does_not_match(
         self, svc, client, oauth_request
     ):
         client.authclient.grant_type = AuthClientGrantType.authorization_code
@@ -536,7 +555,7 @@ class TestValidateGrantType:
         )
         assert result is True
 
-    def test_returns_false_when_grant_type_does_not_match_client(
+    def test_returns_False_when_grant_type_does_not_match_client(
         self, svc, client, oauth_request
     ):
         client.authclient.grant_type = AuthClientGrantType.client_credentials
@@ -552,33 +571,51 @@ class TestValidateGrantType:
 
 
 class TestValidateRedirectUri:
-    def test_returns_true_for_valid_redirect_uri(self, svc, client):
-        redirect_uri = "https://example.org/auth/callback"
+    @pytest.mark.parametrize(
+        "db_uri,redirect_uri",
+        (
+            ("{current_scheme}://{current_host}/abcd", "https://example.com/abcd"),
+            ("{current_scheme}://{current_host}/abcd", "ftps://example.co.uk/abcd"),
+            ("http://example.com/abcd", "http://example.com/abcd"),
+        ),
+    )
+    def test_returns_True_for_valid_redirect_uri(
+        self, svc, client, db_uri, redirect_uri
+    ):
+        client.redirect_uri = db_uri
         actual = svc.validate_redirect_uri(client.id, redirect_uri, None)
         assert actual is True
 
-    def test_returns_false_for_invalid_redirect_uri(self, svc, client):
-        redirect_uri = "https://example.com"
+    @pytest.mark.parametrize(
+        "db_uri,redirect_uri",
+        [
+            ("{current_scheme}://{current_host}/abcd", "https://example.com/bad_path"),
+            ("http://example.com/abcd", "https://different.com/abcd"),
+        ],
+    )
+    def test_returns_False_for_invalid_redirect_uri(
+        self, svc, client, db_uri, redirect_uri
+    ):
+        client.redirect_uri = db_uri
         actual = svc.validate_redirect_uri(client.id, redirect_uri, None)
         assert actual is False
 
-    def test_returns_false_for_missing_clint(self, svc):
+    def test_returns_False_for_missing_client(self, svc):
         redirect_uri = "https://example.com"
         actual = svc.validate_redirect_uri("something", redirect_uri, None)
         assert actual is False
 
     @pytest.fixture
     def client(self, factories):
-        redirect_uri = "https://example.org/auth/callback"
-        return factories.AuthClient(redirect_uri=redirect_uri)
+        return factories.AuthClient()
 
 
 class TestValidateRefreshToken:
-    def test_returns_false_when_token_not_found(self, svc, client, oauth_request):
+    def test_returns_False_when_token_not_found(self, svc, client, oauth_request):
         result = svc.validate_refresh_token("missing", client, oauth_request)
         assert result is False
 
-    def test_returns_false_when_refresh_token_expired(
+    def test_returns_False_when_refresh_token_expired(
         self, svc, client, oauth_request, token
     ):
         token.refresh_token_expires = datetime.datetime.utcnow() - datetime.timedelta(
@@ -587,7 +624,7 @@ class TestValidateRefreshToken:
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert result is False
 
-    def test_returns_false_when_token_client_does_not_match_request_client(
+    def test_returns_False_when_token_client_does_not_match_request_client(
         self, svc, oauth_request, token, factories
     ):
         request_client = Client(factories.AuthClient())
@@ -596,11 +633,11 @@ class TestValidateRefreshToken:
         )
         assert result is False
 
-    def test_returns_true_when_token_valid(self, svc, client, oauth_request, token):
+    def test_returns_True_when_token_valid(self, svc, client, oauth_request, token):
         result = svc.validate_refresh_token(token.refresh_token, client, oauth_request)
         assert result is True
 
-    def test_returns_true_when_access_token_expired(
+    def test_returns_True_when_access_token_expired(
         self, svc, client, oauth_request, token
     ):
         token.expires = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
@@ -631,19 +668,19 @@ class TestValidateRefreshToken:
 
 
 class TestValidateResponseType:
-    def test_returns_true_when_matching(self, svc, client):
+    def test_returns_True_when_matching(self, svc, client):
         actual = svc.validate_response_type(client.id, "code", None)
         assert actual is True
 
-    def test_returns_false_when_not_matchind(self, svc, client):
+    def test_returns_False_when_not_matchind(self, svc, client):
         actual = svc.validate_response_type(client.id, "token", None)
         assert actual is False
 
-    def test_returns_false_for_missing_client(self, svc):
+    def test_returns_False_for_missing_client(self, svc):
         id_ = str(uuid.uuid1())
         assert svc.validate_response_type(id_, "code", None) is False
 
-    def test_returns_false_for_missing_client_response_type(self, svc, client):
+    def test_returns_False_for_missing_client_response_type(self, svc, client):
         client.response_type = None
 
         actual = svc.validate_response_type(client.id, "code", None)
@@ -655,19 +692,19 @@ class TestValidateResponseType:
 
 
 class TestValidateScopes:
-    def test_returns_true_for_default_scopes(self, svc):
+    def test_returns_True_for_default_scopes(self, svc):
         scopes = svc.get_default_scopes("something", None)
         assert svc.validate_scopes("something", scopes, None) is True
 
-    def test_returns_false_for_other_scopes(self, svc):
+    def test_returns_False_for_other_scopes(self, svc):
         scopes = ["user:delete"]
         assert svc.validate_scopes("something", scopes, None) is False
 
-    def test_returns_false_for_empty_scopes(self, svc):
+    def test_returns_False_for_empty_scopes(self, svc):
         scopes = []
         assert svc.validate_scopes("something", scopes, None) is False
 
-    def test_returns_false_for_none_scopes(self, svc):
+    def test_returns_False_for_none_scopes(self, svc):
         scopes = None
         assert svc.validate_scopes("something", scopes, None) is False
 

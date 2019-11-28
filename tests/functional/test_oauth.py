@@ -17,18 +17,10 @@ class TestOAuth:
         response = self.get_access_token(app, authclient, userid)
         access_token = response["access_token"]
 
-        # Test that you can use the access token to authorize with the API.
-        app.get(
-            "/api/debug-token",
-            headers={"Authorization": str("Bearer {}".format(access_token))},
-        )
+        self.assert_is_authorized(app, userid, access_token)
 
     def test_request_fails_if_access_token_wrong(self, app, authclient, userid):
-        app.get(
-            "/api/debug-token",
-            headers={"Authorization": str("Bearer wrong")},
-            status=401,
-        )
+        self.assert_is_not_authorised(app, access_token="wrong")
 
     def test_request_fails_if_access_token_expired(
         self, app, authclient, db_session, factories, userid
@@ -39,11 +31,7 @@ class TestOAuth:
         token = token.value
         db_session.commit()
 
-        app.get(
-            "/api/debug-token",
-            headers={"Authorization": str("Bearer {}".format(token))},
-            status=401,
-        )
+        self.assert_is_not_authorised(app, token)
 
     def test_using_a_refresh_token(self, app, authclient, userid):
         """Get a new access token by POSTing a refresh token to /api/token."""
@@ -60,16 +48,10 @@ class TestOAuth:
         new_access_token = response.json_body["access_token"]
 
         # Test that the new access token works.
-        app.get(
-            "/api/debug-token",
-            headers={"Authorization": str("Bearer {}".format(new_access_token))},
-        )
+        self.assert_is_authorized(app, userid, new_access_token)
 
         # Test that the old access token still works, too.
-        app.get(
-            "/api/debug-token",
-            headers={"Authorization": str("Bearer {}".format(old_access_token))},
-        )
+        self.assert_is_authorized(app, userid, old_access_token)
 
     def test_refresh_token_request_fails_if_refresh_token_wrong(
         self, app, authclient, userid
@@ -101,17 +83,22 @@ class TestOAuth:
         response = self.get_access_token(app, authclient, userid)
         refresh_token = response["refresh_token"]
 
-        app.get(
-            "/api/debug-token",
-            headers={"Authorization": str("Bearer {}".format(refresh_token))},
-            status=401,
-        )
+        self.assert_is_not_authorised(app, access_token=refresh_token)
 
     def test_revoke_token(self, app, authclient, userid):
         response = self.get_access_token(app, authclient, userid)
         refresh_token = response["refresh_token"]
+        access_token = response["access_token"]
 
-        app.post("/oauth/revoke", {"token": refresh_token}, status=200)
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        # Check the token works before we revoke it
+        self.assert_is_authorized(app, userid, access_token=access_token)
+
+        app.post("/oauth/revoke", {"token": refresh_token}, headers=headers, status=200)
+
+        # Check the token doesn't work after
+        self.assert_is_not_authorised(app, access_token=access_token)
 
     @pytest.mark.parametrize(
         "method, path", [("POST", "/api/token"), ("POST", "/oauth/revoke")]
@@ -120,11 +107,28 @@ class TestOAuth:
         app.options(
             path,
             headers={
-                "Origin": str("https://third-party-client.herokuapp.com"),
+                "Origin": "https://third-party-client.herokuapp.com",
                 "Access-Control-Request-Method": str(method),
             },
             status=200,
         )
+
+    def assert_is_authorized(self, app, userid, access_token):
+        results = app.get(
+            "/api/profile",
+            headers={"Authorization": f"Bearer {access_token}"},
+            status=200,
+        )
+
+        assert results.json_body["userid"] == userid
+
+    def assert_is_not_authorised(self, app, access_token):
+        headers = {"Authorization": f"Bearer {access_token}"}
+        app.get("/api/debug-token", headers=headers, status=401)
+
+        results = app.get("/api/profile", headers=headers, status=200)
+
+        assert results.json_body["userid"] is None
 
     def get_access_token(self, app, authclient, userid):
         """Get an access token by POSTing a grant token to /api/token."""

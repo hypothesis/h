@@ -3,6 +3,7 @@ import collections
 import logging
 from codecs import open
 
+from pkg_resources import resource_filename
 from pyramid import httpexceptions
 from pyramid.util import DottedNameResolver
 
@@ -75,7 +76,7 @@ def redirect_tween_factory(handler, registry, redirects=None):
         # N.B. If we fail to load or parse the redirects file, the application
         # will fail to boot. This is deliberate: a missing/corrupt redirects
         # file should result in a healthcheck failure.
-        with open("h/redirects", encoding="utf-8") as fp:
+        with open(resource_filename("h", "redirects"), encoding="utf-8") as fp:
             redirects = parse_redirects(fp)
 
     def redirect_tween(request):

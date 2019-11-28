@@ -77,10 +77,9 @@ class JWTAuthorizationGrant(GrantTypeBase):
         except errors.OAuth2Error as e:
             return headers, e.json, e.status_code
 
-        token = token_handler.create_token(
-            request, refresh_token=True, save_token=False
-        )
+        token = token_handler.create_token(request, refresh_token=True)
         self.request_validator.save_token(token, request)
+
         return headers, json.dumps(token), 200
 
     def validate_token_request(self, request):
