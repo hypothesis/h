@@ -45,7 +45,7 @@ class TestLoginFlow:
             params={
                 "client_id": params["client_id"],
                 "code": code,
-                "grant_type": GrantType.authorization_code,
+                "grant_type": GrantType.authorization_code.value,
             },
             status=200,
         )
