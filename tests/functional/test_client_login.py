@@ -50,7 +50,16 @@ class TestLoginFlow:
             status=200,
         )
 
-        # TODO - Fill out the rest once we get this far
+        assert response.headers["Content-Type"] == Any.string.matching(
+            "application/json"
+        )
+        assert response.json == Any.dict.containing(
+            {
+                "token_type": "Bearer",
+                "access_token": Any.string(),
+                "refresh_token": Any.string(),
+            }
+        )
 
     @classmethod
     def _approve_authorize_request(cls, response):
