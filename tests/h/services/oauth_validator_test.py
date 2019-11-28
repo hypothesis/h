@@ -120,30 +120,33 @@ class TestClientAuthenticationRequired:
 
 class TestConfirmRedirectUri:
     @pytest.mark.parametrize(
-        "db_url,req_url",
+        "db_uri,redirect_uri",
         (
             ("{current_scheme}://{current_host}/abcd", "https://example.com/abcd"),
             ("{current_scheme}://{current_host}/abcd", "ftps://example.co.uk/abcd"),
             ("http://example.com/abcd", "http://example.com/abcd"),
         ),
     )
-    def test_returns_True_for_matching_uris(self, svc, client, db_url, req_url):
-        client.authclient.redirect_uri = db_url
+    def test_returns_True_for_matching_uris(self, svc, client, db_uri, redirect_uri):
+        client.authclient.redirect_uri = db_uri
         result = svc.confirm_redirect_uri(
-            client.client_id, "test-authz-code", req_url, client
+            client.client_id, "test-authz-code", redirect_uri, client
         )
         assert result is True
 
     @pytest.mark.parametrize(
-        "url",
+        "db_uri,redirect_uri",
         [
             ("{current_scheme}://{current_host}/abcd", "https://example.com/bad_path"),
             ("http://example.com/abcd", "https://different.com/abcd"),
         ],
     )
-    def test_returns_False_when_templated_uris_do_not_match(self, svc, client, url):
+    def test_returns_False_when_templated_uris_do_not_match(
+        self, svc, client, db_uri, redirect_uri
+    ):
+        client.authclient.redirect_uri = db_uri
         result = svc.confirm_redirect_uri(
-            client.client_id, "test-authz-code", url, client
+            client.client_id, "test-authz-code", redirect_uri, client
         )
         assert result is False
 
@@ -568,25 +571,43 @@ class TestValidateGrantType:
 
 
 class TestValidateRedirectUri:
-    def test_returns_True_for_valid_redirect_uri(self, svc, client):
-        redirect_uri = "https://example.org/auth/callback"
+    @pytest.mark.parametrize(
+        "db_uri,redirect_uri",
+        (
+            ("{current_scheme}://{current_host}/abcd", "https://example.com/abcd"),
+            ("{current_scheme}://{current_host}/abcd", "ftps://example.co.uk/abcd"),
+            ("http://example.com/abcd", "http://example.com/abcd"),
+        ),
+    )
+    def test_returns_True_for_valid_redirect_uri(
+        self, svc, client, db_uri, redirect_uri
+    ):
+        client.redirect_uri = db_uri
         actual = svc.validate_redirect_uri(client.id, redirect_uri, None)
         assert actual is True
 
-    def test_returns_False_for_invalid_redirect_uri(self, svc, client):
-        redirect_uri = "https://example.com"
+    @pytest.mark.parametrize(
+        "db_uri,redirect_uri",
+        [
+            ("{current_scheme}://{current_host}/abcd", "https://example.com/bad_path"),
+            ("http://example.com/abcd", "https://different.com/abcd"),
+        ],
+    )
+    def test_returns_False_for_invalid_redirect_uri(
+        self, svc, client, db_uri, redirect_uri
+    ):
+        client.redirect_uri = db_uri
         actual = svc.validate_redirect_uri(client.id, redirect_uri, None)
         assert actual is False
 
-    def test_returns_False_for_missing_clint(self, svc):
+    def test_returns_False_for_missing_client(self, svc):
         redirect_uri = "https://example.com"
         actual = svc.validate_redirect_uri("something", redirect_uri, None)
         assert actual is False
 
     @pytest.fixture
     def client(self, factories):
-        redirect_uri = "https://example.org/auth/callback"
-        return factories.AuthClient(redirect_uri=redirect_uri)
+        return factories.AuthClient()
 
 
 class TestValidateRefreshToken:

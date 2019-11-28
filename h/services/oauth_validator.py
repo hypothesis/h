@@ -125,7 +125,11 @@ class OAuthValidatorService(RequestValidator):
         if not redirect_uri:
             return True
 
-        return redirect_uri == client.authclient.redirect_uri
+        # Check that we match after a potentially templated redirect_uri
+        # has been templated out by our uri
+        return redirect_uri == render_url_template(
+            client.authclient.redirect_uri, example_url=redirect_uri
+        )
 
     def find_authz_code(self, code):
         return self._cached_find_authz_code(code)
@@ -289,7 +293,13 @@ class OAuthValidatorService(RequestValidator):
 
         client = self.find_client(client_id)
         if client is not None:
-            return client.redirect_uri == redirect_uri
+            # Check that we match after a potentially templated redirect_uri
+            # has been templated out by our uri
+
+            return redirect_uri == render_url_template(
+                client.redirect_uri, example_url=redirect_uri
+            )
+
         return False
 
     def validate_refresh_token(self, refresh_token, client, request, *args, **kwargs):
