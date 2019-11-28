@@ -159,7 +159,7 @@ class TestOAuth:
 
     @pytest.fixture
     def authclient(self, db_session, factories):
-        authclient = factories.ConfidentialAuthClient(grant_type=GrantType.jwt_bearer,)
+        authclient = factories.ConfidentialAuthClient(grant_type=GrantType.jwt_bearer)
         db_session.commit()
         return authclient
 
