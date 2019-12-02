@@ -40,7 +40,7 @@
     "postcss-url": "^7.3.1",
     "query-string": "^3.0.1",
     "raven-js": "^3.7.0",
-    "sass": "^1.14.3",
+    "sass": "^1.23.7",
     "scroll-into-view": "^1.7.1",
     "through2": "^2.0.1",
     "uglifyify": "^4.0.5",
