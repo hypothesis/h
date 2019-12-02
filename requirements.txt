@@ -37,7 +37,7 @@ mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.4
 more-itertools==7.2.0     # via zipp
-newrelic==5.2.3.131
+newrelic==5.4.0.132
 oauthlib==3.1.0
 passlib==1.7.2
 pastedeploy==2.0.1        # via plaster-pastedeploy
@@ -86,4 +86,4 @@ zope.interface==4.3.2
 zope.sqlalchemy==1.1
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==42.0.1        # via jsonschema, plaster, pyramid, repoze.sendmail, zope.deprecation, zope.interface, zope.sqlalchemy
+# setuptools
