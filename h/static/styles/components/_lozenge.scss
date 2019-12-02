@@ -1,7 +1,10 @@
+@use "../core/color";
+@use "../core/reset";
+
 .lozenge {
   display: flex;
-  background-color: $grey-3;
-  color: $grey-6;
+  background-color: color.$grey-3;
+  color: color.$grey-6;
   border-radius: 2px;
   margin-left: 10px;
   margin-top: 15px;
@@ -24,20 +27,20 @@
 }
 
 .lozenge__close {
-  @include reset-button;
+  @include reset.reset-button;
 
-  color: $grey-6;
+  color: color.$grey-6;
   font-weight: bold;
   padding: 0px 5px 0px 5px;
   cursor: default;
   border-radius: 0 2px 2px 0;
 
   &:hover {
-    background-color: $grey-4;
+    background-color: color.$grey-4;
   }
 
   &:focus {
-    background-color: $grey-6;
+    background-color: color.$grey-6;
     color: white;
   }
 }

@@ -1,3 +1,5 @@
+@use "../core/reset";
+
 // Text links
 // ----------
 
@@ -33,7 +35,7 @@
 // A variant of `link` used when the style is applied to a button rather than
 // an anchor.
 .link--btn {
-  @include reset-button;
+  @include reset.reset-button;
   @include link;
   @include link-underline(solid);
 }

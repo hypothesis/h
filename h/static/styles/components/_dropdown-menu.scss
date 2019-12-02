@@ -1,3 +1,7 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 // Dropdown menu
 // -------------
 // Specs: https://trello.com/c/atjT8T9p
@@ -25,10 +29,10 @@
     right: 0;
     top: calc(100% + 5px);
     display: none;
-    z-index: $zindex-dropdown-menu;
+    z-index: layout.$zindex-dropdown-menu;
 
-    background-color: $white;
-    border: 1px solid $grey-3;
+    background-color: color.$white;
+    border: 1px solid color.$grey-3;
     border-radius: 2px;
   }
 
@@ -38,26 +42,26 @@
 
   // Title displayed at the top of the menu
   .dropdown-menu__title {
-    @include font-small;
+    @include typography.font-small;
     @include menu-item;
 
-    color: $grey-5;
+    color: color.$grey-5;
     font-weight: bold;
   }
 
   .dropdown-menu__item {
     @include menu-item;
 
-    color: $grey-6;
+    color: color.$grey-6;
     white-space: nowrap;
   }
 
   .dropdown-menu__item:hover {
-    background-color: $grey-2;
+    background-color: color.$grey-2;
   }
 
   // Item at the bottom of the menu which is separated from the rest by a border
   .dropdown-menu__item--footer {
-    border-top: 1px solid $grey-3;
+    border-top: 1px solid color.$grey-3;
   }
 }

@@ -1,9 +1,13 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 // Input field in the nav bar for searching annotations
 // ----------------------------------------------------
 // Specs: https://trello.com/c/atjT8T9p
 
 .search-bar {
-  border: 1px solid $grey-3;
+  border: 1px solid color.$grey-3;
   border-radius: 2px;
   display: flex;
   flex-wrap: wrap;
@@ -37,7 +41,7 @@
 
 .search-bar__input:hover,
 .search-bar__input:focus {
-  border-color: $grey-4;
+  border-color: color.$grey-4;
   outline: none;
 }
 
@@ -53,20 +57,20 @@
   height: 14px;
   margin-left: 7px;
   margin-top: 18px;
-  color: $grey-5;
+  color: color.$grey-5;
 }
 
 .search-bar__input:hover + .search-bar__icon,
 .search-bar__input:focus + .search-bar__icon {
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 .search-bar__dropdown-menu-container {
   background: white;
-  border: 1px solid $grey-2;
+  border: 1px solid color.$grey-2;
   border-top: none;
   box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.15);
-  color: $grey-4;
+  color: color.$grey-4;
   display: none;
   padding: 20px 0 0 0;
   position: absolute;
@@ -74,7 +78,7 @@
   left: 0;
   margin-top: 1px;
   width: 100%;
-  z-index: $zindex-dropdown-menu;
+  z-index: layout.$zindex-dropdown-menu;
   max-width: 650px;
 }
 
@@ -92,17 +96,17 @@
 }
 
 .js-search-bar-dropdown-menu-item--active {
-  background-color: $grey-2;
+  background-color: color.$grey-2;
 }
 
 .search-bar__dropdown-menu-title {
-  color: $grey-6;
+  color: color.$grey-6;
   font-weight: bold;
 }
 
 .search-bar__dropdown-menu-relationship {
   margin-left: 5px;
-  color: $grey-4;
+  color: color.$grey-4;
   font-weight: bold;
 }
 
@@ -118,8 +122,8 @@
   display: none;
 }
 
-@include touch-input {
+@include layout.touch-input {
   .search-bar__input {
-    font-size: $touch-input-font-size;
+    font-size: typography.$touch-input-font-size;
   }
 }

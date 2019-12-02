@@ -1,3 +1,7 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 // Form input fields
 // -----------------
 // Specs: https://goo.gl/pEV9E1
@@ -29,11 +33,11 @@
     margin-bottom: 15px;
     position: relative;
 
-    background-color: $white;
+    background-color: color.$white;
   }
 
   .form-input.is-editing {
-    z-index: $zindex-modal-content;
+    z-index: layout.$zindex-modal-content;
   }
 
   .form-input.is-hidden {
@@ -42,11 +46,11 @@
 
   .form-input.is-error {
     & > .form-input__label {
-      color: $brand;
+      color: color.$brand;
     }
 
     & > .form-input__input {
-      color: $brand;
+      color: color.$brand;
     }
 
     & > .form-input__error-list {
@@ -56,13 +60,13 @@
 
   // Descriptive label above the input field
   .form-input__label {
-    @include font-normal;
+    @include typography.font-normal;
 
     position: absolute;
     top: 10px;
     left: $h-padding;
 
-    color: $grey-5;
+    color: color.$grey-5;
 
     display: flex;
     // The label is a sibling of the <input> field. Raise it above the <input>
@@ -71,7 +75,7 @@
   }
 
   .form-input__character-counter {
-    @include font-normal;
+    @include typography.font-normal;
 
     // Show fallback "counter" if loading js times out.
     .env-js-timeout & {
@@ -91,7 +95,7 @@
     }
 
     &.is-too-long {
-      color: $brand;
+      color: color.$brand;
       font-weight: bold;
     }
 
@@ -99,11 +103,11 @@
     bottom: 10px;
     right: $h-padding;
 
-    color: $grey-5;
+    color: color.$grey-5;
   }
 
   .form-input__required {
-    color: $brand;
+    color: color.$brand;
   }
 
   .form-input__hint-icon {
@@ -122,9 +126,9 @@
   }
 
   .form-input__hint {
-    @include font-normal;
+    @include typography.font-normal;
 
-    color: $grey-5;
+    color: color.$grey-5;
     margin-top: -10px;
 
     .env-js-capable & {
@@ -143,10 +147,10 @@
     width: 100%;
 
     background: none;
-    color: $grey-6;
-    font-size: $input-font-size;
+    color: color.$grey-6;
+    font-size: typography.$input-font-size;
     outline: none;
-    border: 1px solid $grey-3;
+    border: 1px solid color.$grey-3;
     border-radius: 3px;
   }
 
@@ -179,7 +183,7 @@
   }
 
   .form-input__input:hover {
-    border: 1px solid $grey-4;
+    border: 1px solid color.$grey-4;
   }
 
   // Thicker border used when input field has focus or has a validation error
@@ -206,12 +210,12 @@
   .form-input__input:focus,
   .form-input.is-focused > .form-input__input {
     @include thick-border;
-    border-color: $grey-6;
+    border-color: color.$grey-6;
   }
 
   .form-input.is-error > .form-input__input {
     @include thick-border;
-    border-color: $brand;
+    border-color: color.$brand;
     padding-right: $validation-message-width + 10px;
   }
 
@@ -233,18 +237,18 @@
     right: $h-padding;
     top: $h-padding;
 
-    color: $brand;
+    color: color.$brand;
   }
 
-  @include touch-input {
+  @include layout.touch-input {
     .form-input__input {
-      font-size: $touch-input-font-size;
+      font-size: typography.$touch-input-font-size;
     }
   }
 
   // On narrow screens, display validation error messages underneath the
   // input field.
-  @media screen and (max-width: $max-phone-width) {
+  @media screen and (max-width: layout.$max-phone-width) {
     .form-input.is-error > .form-input__input {
       padding-bottom: $bottom-padding + 25px;
       padding-right: $h-padding - 1px;

@@ -1,3 +1,4 @@
+@use "sass:color";
 // Core: Color
 // ============================================================================
 
@@ -24,9 +25,9 @@ $group-organization-color: #6d676d;
 
 // Tint/shade functions from https://css-tricks.com/snippets/sass/tint-shade-functions
 @function tint($color, $percent){
-  @return mix(white, $color, $percent);
+  @return color.mix(white, $color, $percent);
 }
 
 @function shade($color, $percent){
-  @return mix(black, $color, $percent);
+  @return color.mix(black, $color, $percent);
 }

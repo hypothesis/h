@@ -1,18 +1,22 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 .tabs__link {
   color: inherit;
 }
 
 .tabs__item {
   display: inline;
-  color: $grey-4;
-  font-size: $title-font-size;
+  color: color.$grey-4;
+  font-size: typography.$title-font-size;
 
   &:not(:last-of-type)::after {
     content: " / ";
   }
 
   .is-active {
-    color: $grey-6;
+    color: color.$grey-6;
   }
 }
 
@@ -21,8 +25,8 @@
   padding-bottom: 30px;
 }
 
-@media screen and (max-width: $max-phone-width) {
+@media screen and (max-width: layout.$max-phone-width) {
   .tabs__item {
-    font-size: $input-font-size;
+    font-size: typography.$input-font-size;
   }
 }

@@ -1,12 +1,14 @@
+@use "../core/color";
+
 .join-group-form__label {
-  color: $grey-5;
+  color: color.$grey-5;
   margin-bottom: 15px;
 }
 
 .join-group-form__container {
-  border: 1px solid $grey-3;
+  border: 1px solid color.$grey-3;
   padding: 15px 20px;
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 .join-group-form__group-name {

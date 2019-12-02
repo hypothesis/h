@@ -1,3 +1,5 @@
+@use "../core/layout";
+
 // Form footer
 // -----------
 // Styles for the bar at the bottom of forms defining the overall actions
@@ -12,7 +14,7 @@
   flex-direction: row;
   align-items: center;
   position: relative;
-  z-index: $zindex-modal-content;
+  z-index: layout.$zindex-modal-content;
 
   &.is-hidden {
     display: none;

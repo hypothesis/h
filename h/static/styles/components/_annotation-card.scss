@@ -1,11 +1,14 @@
+@use "../core/color";
+@use "../core/typography";
+
 // Annotation card
 // ---------------
 // Styles for the annotation card which is displayed in the
 // results of activity queries.
 
 .annotation-card {
-  @include font-normal;
-  border: 1px solid $grey-2;
+  @include typography.font-normal;
+  border: 1px solid color.$grey-2;
   list-style: none;
   padding: 15px;
   margin-bottom: 10px;
@@ -18,12 +21,12 @@
   box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.15);
 
   .annotation-card__quote {
-    border-left: $highlight 3px solid;
-    color: $grey-5;
+    border-left: color.$highlight 3px solid;
+    color: color.$grey-5;
   }
 
   .annotation-card__timestamp {
-    color: $grey-5;
+    color: color.$grey-5;
   }
 }
 
@@ -52,13 +55,13 @@
 
 .annotation-card__tag {
   text-decoration: none;
-  border: 1px solid $grey-3;
+  border: 1px solid color.$grey-3;
   border-radius: 2px;
   padding: 0 5px 2px;
-  color: $grey-5;
-  background: $grey-1;
+  color: color.$grey-5;
+  background: color.$grey-1;
   margin: 0 5px 5px 0;
-  font-size: $small-font-size;
+  font-size: typography.$small-font-size;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -74,7 +77,7 @@
 
 .annotation-card__footer-link {
   margin-left: 15px;
-  color: $grey-4;
+  color: color.$grey-4;
   height: 16px;
   width: 16px;
 }
@@ -88,16 +91,16 @@
 }
 
 .annotation-card__incontext-link:visited {
-  color: $grey-5;
+  color: color.$grey-5;
 }
 
 .annotation-card__username {
-  color: $grey-7;
+  color: color.$grey-7;
   font-weight: bold;
 }
 
 .annotation-card__is-private {
-  color: $grey-5;
+  color: color.$grey-5;
 }
 
 .annotation-card__is-private-icon {
@@ -106,40 +109,40 @@
 }
 
 .annotation-card__groupname {
-  color: $grey-6;
+  color: color.$grey-6;
   margin-right: 5px;
 }
 
 .annotation-card__groupname:visited {
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 .annotation-card__groups-icon {
   height: 10px;
   width: 10px;
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 .annotation-card__timestamp {
-  @include font-small;
-  color: $grey-4;
+  @include typography.font-small;
+  color: color.$grey-4;
 }
 
 .annotation-card__quote {
   padding: 0 10px;
   overflow-wrap: break-word;
-  color: $grey-4;
+  color: color.$grey-4;
   font-family: sans-serif;
   font-size: 12px;
   font-style: italic;
   letter-spacing: 0.1px;
-  border-left: 3px solid $grey-3;
+  border-left: 3px solid color.$grey-3;
   margin-bottom: 10px;
   margin-left: 0;
   margin-right: 0;
 }
 
 .annotation-card__text {
-  @include styled-text;
+  @include typography.styled-text;
   overflow-wrap: break-word;
 }

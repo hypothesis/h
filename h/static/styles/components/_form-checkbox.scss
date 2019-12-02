@@ -1,8 +1,11 @@
+@use "../core/color";
+@use "../core/typography";
+
 .form-checkbox {
-  @include font-normal;
-  border: 1px solid $grey-3;
+  @include typography.font-normal;
+  border: 1px solid color.$grey-3;
   border-radius: 3px;
-  color: $grey-6;
+  color: color.$grey-6;
 
   max-width: 600px;
   margin-left: auto;
@@ -10,7 +13,7 @@
 }
 
 .form-checkbox--inline {
-  color: $grey-4;
+  color: color.$grey-4;
   border: none;
   display: flex;
 }

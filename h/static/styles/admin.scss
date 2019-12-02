@@ -4,26 +4,26 @@
 // Core
 // ----------------------------------------------------------------------------
 
-@import 'core/color';
-@import 'core/typography';
-@import 'core/layout';
-@import 'core/icons';
-@import 'core/utilities';
+@use 'core/color';
+@use 'core/typography';
+@use 'core/layout';
+@use 'core/icons';
+@use 'core/utilities';
 
 // Components
 // ----------------------------------------------------------------------------
 
-@import 'components/admin-navbar';
-@import 'components/btn';
-@import 'components/form';
-@import 'components/form-actions';
-@import 'components/form-checkbox';
-@import 'components/form-container';
-@import 'components/form-input';
-@import 'components/list-input';
-@import 'components/search-form';
-@import 'components/tooltip';
-@import 'components/warning-box';
+@use 'components/admin-navbar';
+@use 'components/btn';
+@use 'components/form';
+@use 'components/form-actions';
+@use 'components/form-checkbox';
+@use 'components/form-container';
+@use 'components/form-input';
+@use 'components/list-input';
+@use 'components/search-form';
+@use 'components/tooltip';
+@use 'components/warning-box';
 
 // Rules
 // ----------------------------------------------------------------------------

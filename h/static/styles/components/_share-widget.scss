@@ -1,3 +1,7 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 // Share widget
 // ---------------
 // The widget that allows social linking and the ability to
@@ -22,11 +26,11 @@
   top: 0;
   left: 0;
   z-index: 1;
-  background: $white;
-  border: 1px solid $grey-3;
+  background: color.$white;
+  border: 1px solid color.$grey-3;
   border-radius: 2px;
   width: 200px;
-  font-size: $normal-font-size;
+  font-size: typography.$normal-font-size;
   cursor: default;
   box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.15);
 
@@ -45,21 +49,21 @@
 
   &:after {
     border-color: rgba(255, 255, 255, 0);
-    border-top-color: $white;
+    border-top-color: color.$white;
     border-width: 5px;
     margin-right: -5px;
   }
 
   &:before {
     border-color: rgba(211, 211, 211, 0);
-    border-top-color: $grey-3;
+    border-top-color: color.$grey-3;
     border-width: 6px;
     margin-right: -6px;
   }
 }
 
 .share-widget-msg {
-  color: $grey-5;
+  color: color.$grey-5;
   margin: -5px 10px 10px 10px;
   line-height: 15px;
   font-size: 11px;
@@ -73,13 +77,13 @@
 .share-widget-link {
   position: relative;
 
-  font-size: $normal-font-size;
+  font-size: typography.$normal-font-size;
   margin: 10px;
   padding: 5px;
-  color: $grey-5;
-  border: 1px solid $grey-3;
+  color: color.$grey-5;
+  border: 1px solid color.$grey-3;
   border-radius: 2px;
-  background: $grey-1;
+  background: color.$grey-1;
   white-space: nowrap;
   overflow: hidden;
   display: flex;
@@ -87,14 +91,14 @@
 }
 
 .share-widget-link:hover {
-  color: $grey-7;
+  color: color.$grey-7;
 }
 
 .share-widget-link__text {
   overflow: hidden;
   border: none;
   width: 100%;
-  background: $white;
+  background: color.$white;
 }
 
 .share-widget-link__btn {
@@ -114,11 +118,11 @@
 
 // share actions are items set to have hover feedback
 .share-widget-action {
-  color: $grey-4;
+  color: color.$grey-4;
 }
 
 .share-widget-action:hover {
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 // The targets are direct links to other social media locations
@@ -126,30 +130,30 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  border-bottom: 1px solid $grey-3;
-  font-size: $normal-font-size;
+  border-bottom: 1px solid color.$grey-3;
+  font-size: typography.$normal-font-size;
   padding: 10px;
 }
 
 .share-widget-target__label {
   font-weight: bold;
-  color: $grey-4;
+  color: color.$grey-4;
 }
 
 .share-widget-target__icon {
-  color: $grey-5;
+  color: color.$grey-5;
   text-decoration: none;
   font-size: 20px;
   cursor: pointer;
 }
 
 .share-widget-target__icon:hover {
-  color: $grey-7;
+  color: color.$grey-7;
 }
 
-@include touch-input {
+@include layout.touch-input {
   // prevent zoom on smaller devices
   .share-widget-link input {
-    font-size: $touch-input-font-size;
+    font-size: typography.$touch-input-font-size;
   }
 }

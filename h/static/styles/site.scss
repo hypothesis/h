@@ -4,41 +4,41 @@
 // Core
 // ----------------------------------------------------------------------------
 
-@import 'core/reset';
-@import 'core/color';
-@import 'core/typography';
-@import 'core/layout';
-@import 'core/icons';
-@import 'core/utilities';
+@use 'core/reset';
+@use 'core/color';
+@use 'core/typography';
+@use 'core/layout';
+@use 'core/icons';
+@use 'core/utilities';
 
 // Components
 // ----------------------------------------------------------------------------
 
-@import 'components/api-token';
-@import 'components/annotation-card';
-@import 'components/brand';
-@import 'components/btn';
-@import 'components/dropdown-menu';
-@import 'components/footer';
-@import 'components/form';
-@import 'components/form-actions';
-@import 'components/form-checkbox';
-@import 'components/form-container';
-@import 'components/form-input';
-@import 'components/group-invite';
-@import 'components/join-group-form';
-@import 'components/link';
-@import 'components/list-input';
-@import 'components/lozenge';
-@import 'components/masthead';
-@import 'components/nav-bar';
-@import 'components/pager';
-@import 'components/search';
-@import 'components/search-bar';
-@import 'components/search-result-sidebar';
-@import 'components/share-widget';
-@import 'components/tooltip';
-@import 'components/tabs';
+@use 'components/api-token';
+@use 'components/annotation-card';
+@use 'components/brand';
+@use 'components/btn';
+@use 'components/dropdown-menu';
+@use 'components/footer';
+@use 'components/form';
+@use 'components/form-actions';
+@use 'components/form-checkbox';
+@use 'components/form-container';
+@use 'components/form-input';
+@use 'components/group-invite';
+@use 'components/join-group-form';
+@use 'components/link';
+@use 'components/list-input';
+@use 'components/lozenge';
+@use 'components/masthead';
+@use 'components/nav-bar';
+@use 'components/pager';
+@use 'components/search';
+@use 'components/search-bar';
+@use 'components/search-result-sidebar';
+@use 'components/share-widget';
+@use 'components/tooltip';
+@use 'components/tabs';
 
 // Rules
 // ----------------------------------------------------------------------------
@@ -46,8 +46,8 @@
 // This rule causes adverse effects in the admin and help pages, so it's
 // included here until we can tackle typography generally
 body {
-  @include font-normal;
-  font-family: $sans-font-family;
+  @include typography.font-normal;
+  font-family: typography.$sans-font-family;
 }
 
 .content {
