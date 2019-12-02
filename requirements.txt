@@ -11,7 +11,7 @@ bcrypt==3.1.7
 billiard==3.6.1.0         # via celery
 bleach==3.1.0
 celery==4.3.0
-certifi==2019.9.11
+certifi==2019.11.28
 cffi==1.13.2
 chameleon==3.6.2          # via deform
 click==7.0
