@@ -10,6 +10,12 @@ if 'GUNICORN_TIMEOUT' in os.environ:
 if 'heroku' in os.environ.get('LD_LIBRARY_PATH', ''):
     forwarded_allow_ips = '*'
 
+if 'H_GUNICORN_CERTFILE' in os.environ:
+    certfile = os.environ['H_GUNICORN_CERTFILE']
+
+if 'H_GUNICORN_KEYFILE' in os.environ:
+    keyfile = os.environ['H_GUNICORN_KEYFILE']
+
 if not os.environ.get('GUNICORN_STATS_DISABLE', None):
     if 'STATSD_PORT_8125_UDP_ADDR' in os.environ and \
        'STATSD_PORT_8125_UDP_PORT' in os.environ:
