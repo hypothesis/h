@@ -81,7 +81,7 @@ def devserver(https, web, ws, worker, assets, beat):
         os.environ["APP_URL"] = "https://localhost:5000"
         os.environ["WEBSOCKET_URL"] = "wss://localhost:5001/ws"
     else:
-        # These variables are read in 'h/config.py'
+        # These variables are read in h/config.py.
         os.environ["APP_URL"] = "http://localhost:5000"
         os.environ["WEBSOCKET_URL"] = "ws://localhost:5001/ws"
 
