@@ -73,27 +73,27 @@ def devserver(https, web, ws, worker, assets, beat):
 
     os.environ["PYTHONUNBUFFERED"] = "true"
     if https:
-        gunicorn_args = "--certfile=.tlscert.pem --keyfile=.tlskey.pem"
+        # These variable are read by our custom code in 'gunicorn.conf.py'
+        os.environ['H_GUNICORN_CERTFILE'] = '.tlscert.pem'
+        os.environ['H_GUNICORN_KEYFILE'] = '.tlskey.pem'
+
+        # These variables are read in 'h/config.py'
         os.environ["APP_URL"] = "https://localhost:5000"
         os.environ["WEBSOCKET_URL"] = "wss://localhost:5001/ws"
     else:
-        gunicorn_args = ""
+        # These variables are read in 'h/config.py'
         os.environ["APP_URL"] = "http://localhost:5000"
         os.environ["WEBSOCKET_URL"] = "ws://localhost:5001/ws"
 
     m = Manager()
     if web:
         m.add_process(
-            "web",
-            "newrelic-admin run-program gunicorn --name web --reload --paste conf/development-app.ini %s"
-            % gunicorn_args,
+            "web", "newrelic-admin run-program pserve --reload conf/development-app.ini"
         )
 
     if ws:
         m.add_process(
-            "ws",
-            "newrelic-admin run-program gunicorn --name websocket --reload --paste conf/development-websocket.ini %s"
-            % gunicorn_args,
+            "ws", "newrelic-admin run-program pserve --reload conf/development-websocket.ini"
         )
 
     if worker:
