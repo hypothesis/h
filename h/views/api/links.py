@@ -10,6 +10,9 @@ from h.views.api.helpers.angular import AngularRouteTemplater
     link_name="links",
     renderer="json_sorted",
     description="URL templates for generating URLs for HTML pages",
+    # nb. We assume that the returned URLs and URL templates are the same for all users,
+    # regardless of authorization.
+    http_cache=(60 * 5, {"public": True}),
 )
 def links(context, request):
     templater = AngularRouteTemplater(request.route_url, params=["user"])
