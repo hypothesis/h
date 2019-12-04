@@ -73,7 +73,7 @@ def devserver(https, web, ws, worker, assets, beat):
 
     os.environ["PYTHONUNBUFFERED"] = "true"
     if https:
-        # These variable are read by our custom code in 'gunicorn.conf.py'
+        # These variables are read by our custom code in gunicorn.conf.py.
         os.environ["H_GUNICORN_CERTFILE"] = ".tlscert.pem"
         os.environ["H_GUNICORN_KEYFILE"] = ".tlskey.pem"
 
