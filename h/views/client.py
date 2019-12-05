@@ -12,7 +12,6 @@ import time
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
-from h import __version__
 from h.util.uri import origin, render_url_template
 
 # Default URL for the client, which points to the latest version of the client
