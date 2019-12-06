@@ -22,11 +22,8 @@
   <body>
     <hypothesis-app></hypothesis-app>
 
-    {# The `js-hypothesis-settings` class should be removed once
-       https://github.com/hypothesis/client/pull/243 is released.
-     #}
     <!-- App Configuration !-->
-    <script class="js-hypothesis-config js-hypothesis-settings" type="application/json">
+    <script class="js-hypothesis-config" type="application/json">
       {{ app_config | safe }}
     </script>
 
