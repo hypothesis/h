@@ -5,7 +5,6 @@ import json
 import pytest
 from pyramid.httpexceptions import HTTPFound
 
-from h import __version__
 from h.views import client
 
 
