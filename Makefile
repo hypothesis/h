@@ -37,30 +37,30 @@ help:
 .PHONY: services
 services: args?=up -d
 services: python
-	@tox -q -e docker-compose -- $(args)
+	@tox -qe docker-compose -- $(args)
 
 .PHONY: dev
 dev: build/manifest.json python
-	tox -q -e py36-dev
+	tox -qe dev
 
 .PHONY: devdata
 devdata: python
-	@tox -q -e py36-dev -- sh bin/hypothesis --dev devdata
+	@tox -qe dev -- sh bin/hypothesis --dev devdata
 
 .PHONY: shell
 shell: python
-	tox -q -e py36-dev -- sh bin/hypothesis --dev shell
+	tox -qe dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
 sql: python
-	@tox -q -e docker-compose -- exec postgres psql --pset expanded=auto -U postgres
+	@tox -qe docker-compose -- exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
 lint: backend-lint frontend-lint
 
 .PHONY: backend-lint
 backend-lint: python
-	tox -q -e py36-lint
+	tox -qe lint
 
 .PHONY: frontend-lint
 frontend-lint: node_modules/.uptodate
@@ -69,52 +69,52 @@ frontend-lint: node_modules/.uptodate
 
 .PHONY: analyze
 analyze: python
-	tox -qq -e py36-analyze
+	tox -qe analyze
 
 .PHONY: format
 format: python
-	@tox -qe py36-format
+	@tox -qe format
 
 PHONY: checkformatting
 checkformatting: python
-	@tox -qe py36-checkformatting
+	@tox -qe checkformatting
 
 .PHONY: test
 test: node_modules/.uptodate python
-	tox
+	tox -q
 	$(GULP) test
 
 .PHONY: coverage
 coverage: python
-	tox -q -e py36-coverage
+	tox -qe coverage
 
 .PHONY: functests
 functests: build/manifest.json python
-	tox -q -e py36-functests
+	tox -qe functests
 
 .PHONY: docs
 docs: python
-	tox -q -e py36-docs
+	tox -qe docs
 
 .PHONY: checkdocs
 checkdocs: python
-	tox -q -e py36-checkdocs
+	tox -qe checkdocs
 
 .PHONY: docstrings
 docstrings: python
-	tox -q -e py36-docstrings
+	tox -qe docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings: python
-	tox -q -e py36-checkdocstrings
+	tox -qe checkdocstrings
 
 .PHONY: pip-compile
 pip-compile: python
-	tox -q -e py36-pip-compile
+	tox -qe pip-compile
 
 .PHONY: upgrade-package
 upgrade-package: python
-	@tox -qe py36-pip-compile -- --upgrade-package $(name)
+	@tox -qe pip-compile -- --upgrade-package $(name)
 
 .PHONY: docker
 docker:

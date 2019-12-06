@@ -9,7 +9,7 @@ or use an existing one, and then promote that user to be an ``admin``:
 
 .. code-block:: bash
 
-  tox -e py36-dev -- sh bin/hypothesis --dev add user
+  tox -qe dev -- sh bin/hypothesis --dev add user
 
 This will prompt you to enter the user's 
 
@@ -30,7 +30,7 @@ user to ``admin``.
 
 .. code-block:: bash
 
-  tox -e py36-dev -- sh bin/hypothesis --dev user admin <username>
+  tox -qe dev -- sh bin/hypothesis --dev user admin <username>
 
 When this user signs in they can now access the administration panel at
 ``/admin``. The administration panel has options for managing users and optional
