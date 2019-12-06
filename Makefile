@@ -41,7 +41,7 @@ services: python
 
 .PHONY: dev
 dev: build/manifest.json python
-	tox -qe dev
+	@tox -qe dev
 
 .PHONY: devdata
 devdata: python
@@ -49,7 +49,7 @@ devdata: python
 
 .PHONY: shell
 shell: python
-	tox -qe dev -- sh bin/hypothesis --dev shell
+	@tox -qe dev -- sh bin/hypothesis --dev shell
 
 .PHONY: sql
 sql: python
@@ -60,16 +60,16 @@ lint: backend-lint frontend-lint
 
 .PHONY: backend-lint
 backend-lint: python
-	tox -qe lint
+	@tox -qe lint
 
 .PHONY: frontend-lint
 frontend-lint: node_modules/.uptodate
-	npm run-script lint
-	npm run-script checkformatting
+	@npm run-script lint
+	@npm run-script checkformatting
 
 .PHONY: analyze
 analyze: python
-	tox -qe analyze
+	@tox -qe analyze
 
 .PHONY: format
 format: python
@@ -81,36 +81,36 @@ checkformatting: python
 
 .PHONY: test
 test: node_modules/.uptodate python
-	tox -q
-	$(GULP) test
+	@tox -q
+	@$(GULP) test
 
 .PHONY: coverage
 coverage: python
-	tox -qe coverage
+	@tox -qe coverage
 
 .PHONY: functests
 functests: build/manifest.json python
-	tox -qe functests
+	@tox -qe functests
 
 .PHONY: docs
 docs: python
-	tox -qe docs
+	@tox -qe docs
 
 .PHONY: checkdocs
 checkdocs: python
-	tox -qe checkdocs
+	@tox -qe checkdocs
 
 .PHONY: docstrings
 docstrings: python
-	tox -qe docstrings
+	@tox -qe docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings: python
-	tox -qe checkdocstrings
+	@tox -qe checkdocstrings
 
 .PHONY: pip-compile
 pip-compile: python
-	tox -qe pip-compile
+	@tox -qe pip-compile
 
 .PHONY: upgrade-package
 upgrade-package: python
@@ -118,7 +118,7 @@ upgrade-package: python
 
 .PHONY: docker
 docker:
-	git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
+	@git archive --format=tar.gz HEAD | docker build -t hypothesis/hypothesis:$(DOCKER_TAG) -
 
 .PHONY: run-docker
 run-docker:
@@ -128,7 +128,7 @@ run-docker:
 	# variable set.
 	#
 	# If you don't intend to use the client with the container, you can skip this.
-	docker run \
+	@docker run \
 		--net h_default \
 		-e "APP_URL=http://localhost:5000" \
 		-e "AUTHORITY=localhost" \
@@ -145,17 +145,17 @@ run-docker:
 
 .PHONY: clean
 clean:
-	find . -type f -name "*.py[co]" -delete
-	find . -type d -name "__pycache__" -delete
-	rm -f node_modules/.uptodate
-	rm -rf build
+	@find . -type f -name "*.py[co]" -delete
+	@find . -type d -name "__pycache__" -delete
+	@rm -f node_modules/.uptodate
+	@rm -rf build
 
 DOCKER_TAG = dev
 
 GULP := node_modules/.bin/gulp
 
 build/manifest.json: node_modules/.uptodate
-	$(GULP) build
+	@$(GULP) build
 
 node_modules/.uptodate: package.json
 	@echo installing javascript dependencies
@@ -168,4 +168,4 @@ python:
 
 .PHONY: gulp
 gulp: node_modules/.uptodate
-	$(GULP) $(args)
+	@$(GULP) $(args)
