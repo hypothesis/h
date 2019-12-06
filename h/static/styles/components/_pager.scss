@@ -1,3 +1,5 @@
+@use "../core/color";
+
 .pager {
   display: flex;
   flex-direction: row;
@@ -17,16 +19,16 @@
 .pager__item {
   display: inline-block;
   border-radius: 2px;
-  color: $grey-6;
+  color: color.$grey-6;
   padding: 7px 10px 7px 10px;
 }
 
 .pager__item:not(.is-disabled):hover {
-  background-color: $grey-3;
+  background-color: color.$grey-3;
 }
 
 .pager__item--more {
-  color: $grey-4;
+  color: color.$grey-4;
 }
 
 .pager__item--begin,
@@ -38,19 +40,19 @@
 
 
 .pager__item--begin {
-  background-color: $grey-3;
+  background-color: color.$grey-3;
   margin-right: 10px;
 }
 
 .pager__item--end {
-  background-color: $grey-3;
+  background-color: color.$grey-3;
   margin-left: 10px;
 }
 
 .pager__item--end:not(.is-disabled):hover,
 .pager__item--begin:not(.is-disabled):hover {
-  background-color: $brand;
-  color: $white;
+  background-color: color.$brand;
+  color: color.$white;
 }
 
 .pager__item--link {
@@ -58,9 +60,9 @@
 }
 
 .pager__item.is-highlighted {
-  background-color: $grey-3;
+  background-color: color.$grey-3;
 }
 
 .pager__item.is-disabled {
-  color: $grey-4;
+  color: color.$grey-4;
 }

@@ -1,3 +1,7 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 // Navigation bar displayed at the top of the page
 // -----------------------------------------------
 // Specs: https://trello.com/c/atjT8T9p
@@ -5,7 +9,7 @@
 .nav-bar {
   position: relative;
 
-  border-bottom: 1px solid $grey-3;
+  border-bottom: 1px solid color.$grey-3;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -16,10 +20,10 @@
   display: flex;
   flex-direction: row;
 
-  padding-left: $content-padding-left;
-  padding-right: $content-padding-right;
+  padding-left: layout.$content-padding-left;
+  padding-right: layout.$content-padding-right;
 
-  max-width: $content-max-width;
+  max-width: layout.$content-max-width;
   margin-left: auto;
   margin-right: auto;
 }
@@ -32,7 +36,7 @@
 
 .nav-bar__logo {
   margin-right: 30px;
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 .nav-bar__search {
@@ -74,8 +78,8 @@
   flex-direction: row;
   align-items: center;
 
-  @include font-normal;
-  color: $grey-5;
+  @include typography.font-normal;
+  color: color.$grey-5;
 }
 
 // Dropdown arrow indicator shown to the right of the 'Groups' and 'Settings'
@@ -84,8 +88,8 @@
   display: inline-block;
   margin-left: 5px;
 
-  @include font-small;
-  color: $grey-4;
+  @include typography.font-small;
+  color: color.$grey-4;
 }
 
 .nav-bar-links__item:first-child {
@@ -96,16 +100,16 @@
   margin-right: 0;
 }
 
-@media screen and (max-width: $tablet-width) {
+@media screen and (max-width: layout.$tablet-width) {
   // Reduce horizontal margins on smaller screens to provide more space for
   // search bar
   .nav-bar__content {
-    padding-left: $content-padding-left-on-small-screens;
-    padding-right: $content-padding-right-on-small-screens;
+    padding-left: layout.$content-padding-left-on-small-screens;
+    padding-right: layout.$content-padding-right-on-small-screens;
   }
 }
 
-@media screen and (max-width: $max-phone-width) {
+@media screen and (max-width: layout.$max-phone-width) {
 
   // In order to make the search bar flow below the other
   // two sections of the nav, we need to change the flow order

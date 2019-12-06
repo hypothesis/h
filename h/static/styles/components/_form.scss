@@ -1,3 +1,7 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 // Components: Form
 // ============================================================================
 
@@ -31,9 +35,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: $zindex-modal-backdrop;
+  z-index: layout.$zindex-modal-backdrop;
 
-  background-color: $white;
+  background-color: color.$white;
   opacity: 0.5;
 }
 
@@ -41,7 +45,7 @@
 // a validation error. When there is a validation error, the response is updated
 // markup for the form which replaces the original.
 .form__submit-error {
-  color: $brand;
+  color: color.$brand;
   display: none;
   font-weight: bold;
   margin-top: 5px;
@@ -60,9 +64,9 @@
   margin-top: 55px;
   margin-bottom: 30px;
 
-  color: $grey-6;
+  color: color.$grey-6;
   font-weight: normal;
-  font-size: $title-font-size;
+  font-size: typography.$title-font-size;
 }
 
 .form-header--center {
@@ -72,7 +76,7 @@
 }
 
 .form-header__logo {
-  color: $grey-6;
+  color: color.$grey-6;
   margin-left: 5px;
   vertical-align: middle;
 }
@@ -80,7 +84,7 @@
 .form-description {
   margin-bottom: 30px;
 
-  color: $grey-5;
+  color: color.$grey-5;
 }
 
 /**
@@ -90,18 +94,18 @@
  * want the user to read before they submit the form.
  */
 .form-presubmit-footer {
-  @include font-small;
+  @include typography.font-small;
 
   display: flex;
   justify-content: flex-end;
   padding-bottom: 10px;
 
-  color: $grey-4;
+  color: color.$grey-4;
 }
 
 @mixin form-footer {
-  @include font-normal;
-  color: $grey-5;
+  @include typography.font-normal;
+  color: color.$grey-5;
 }
 
 .form-footer {
@@ -109,7 +113,7 @@
 
   margin-top: 80px;
 
-  border-top: 1px solid $grey-3;
+  border-top: 1px solid color.$grey-3;
   padding-top: 15px;
 }
 
@@ -129,7 +133,7 @@
   flex-direction: column;
   justify-content: center;
 
-  border-top: 1px solid $grey-3;
+  border-top: 1px solid color.$grey-3;
   padding-top: 20px;
   padding-left: 15px;
   padding-right: 15px;
@@ -144,7 +148,7 @@
 }
 
 .form-help-text {
-  color: $grey-5;
+  color: color.$grey-5;
 }
 
 .form-footer__required {
@@ -153,6 +157,6 @@
 }
 
 .form-footer__symbol {
-  color: $brand;
+  color: color.$brand;
   margin-right: 3px;
 }

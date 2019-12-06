@@ -1,5 +1,9 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 @mixin tooltip-arrow($rotation) {
-  background: $grey-7;
+  background: color.$grey-7;
   border-bottom: 1px solid rgba(0,0,0,0.20);
   border-right: 1px solid rgba(0,0,0,0.20);
   content: "";
@@ -23,14 +27,14 @@
 }
 
 .tooltip {
-  @include font-small;
+  @include typography.font-small;
 
   // Override the opacity set by Bootstrap's "tooltip" class when this component
   // is used in /admin pages. The rest of the site does not use Bootstrap.
   opacity: initial;
 
   border-radius: 2px;
-  background-color: $grey-7;
+  background-color: color.$grey-7;
   color: white;
   display: none;
   font-style: normal;
@@ -41,7 +45,7 @@
   position: absolute;
   left: calc(100% - 12px);
   width: 220px;
-  z-index: $zindex-tooltip;
+  z-index: layout.$zindex-tooltip;
 
   .env-js-capable & {
     display: block;

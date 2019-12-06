@@ -1,3 +1,5 @@
+@use "../core/color";
+
 /* The "brand" component is our name for the "h" logo plus the name
    "Hypothesis" together as a single component. */
 .brand {
@@ -6,7 +8,7 @@
 }
 
 .brand__icon {
-  color: $brand;
+  color: color.$brand;
 
   /* The arrow at the bottom of the speech bubble icon is 4px tall.
      Push the icon 4px down so that the square of the speech bubble, not

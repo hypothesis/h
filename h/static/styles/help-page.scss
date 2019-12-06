@@ -4,11 +4,12 @@
 // Core
 // ----------------------------------------------------------------------------
 
-@import 'core/reset';
-@import 'core/color';
-@import 'core/typography';
-@import 'core/layout';
-@import 'core/icons';
+@use "sass:meta";
+@use 'core/reset';
+@use 'core/color';
+@use 'core/typography';
+@use 'core/layout';
+@use 'core/icons';
 
 // Mixins
 // ----------------------------------------------------------------------------
@@ -26,13 +27,13 @@
 // Components
 // ----------------------------------------------------------------------------
 
-@import 'components/masthead';
+@include meta.load-css('components/masthead');
 
 // Rules
 // ----------------------------------------------------------------------------
 
 a {
-  color: $brand;
+  color: color.$brand;
 }
 
 .columns {
@@ -51,7 +52,7 @@ a {
 }
 
 .styled-text {
-  @include styled-text;
+  @include typography.styled-text;
 }
 
 .help-page {
@@ -59,13 +60,13 @@ a {
   padding-bottom: 2.5em;
 
   background: white;
-  color: $grey-6;
+  color: color.$grey-6;
 
-  font-family: 'Lato', $sans-font-family;
+  font-family: 'Lato', typography.$sans-font-family;
   font-weight: 300;
   line-height: 22px;
 
-  @include breakpoint(920px) {
+  @include layout.breakpoint(920px) {
     padding-right: 460px;
   }
 
@@ -80,17 +81,17 @@ a {
   padding: 0 20px;
   min-width: 480px;
 
-  @include breakpoint(1160px) {
+  @include layout.breakpoint(1160px) {
     padding: 0 5% 0 10%;
   }
 
-  @include breakpoint(1400px) {
+  @include layout.breakpoint(1400px) {
     padding: 0 10% 0 20%;
   }
 }
 
 .help-page-heading {
-  color: $grey-6;
+  color: color.$grey-6;
   margin-bottom: 1em;
   font-weight: 400;
   font-size: 1.1em;
@@ -119,8 +120,8 @@ a {
   width: 380px;
   display: block;
 
-  @include breakpoint(920px) {
-    border: $grey-3 dotted 2px;
+  @include layout.breakpoint(920px) {
+    border: color.$grey-3 dotted 2px;
     border-radius: 3px;
   }
 }
@@ -130,10 +131,10 @@ a {
   top: 60px;
   right: 60px;
   width: 210px;
-  color: $grey-4;
+  color: color.$grey-4;
   text-align: right;
 
-  @include icons {
+  @include icons.icons {
     @include help-icon;
     font-size: 14px;
   }
@@ -169,7 +170,7 @@ a {
     left: 0;
     width: 2.125em;
     height: 1.8125em;
-    border: .125em solid $brand;
+    border: .125em solid color.$brand;
     border-radius: 50%;
     text-align: center;
     padding-top: .3125em; // 24px == Line height of text.
@@ -181,7 +182,7 @@ a {
 }
 
 .feature-heading {
-  color: $grey-6;
+  color: color.$grey-6;
   font-size: 1em;
   font-weight: 400;
   margin-bottom: .555em;
@@ -198,14 +199,14 @@ a {
 
 .bookmarklet {
   white-space: nowrap;
-  color: $grey-6;
+  color: color.$grey-6;
   padding: 2px 4px;
   border: 1px solid;
   border-radius: 2px;
   font-size: 13px;
   cursor: move;
 
-  @include icons {
+  @include icons.icons {
     font-size: 12px;
   }
 }

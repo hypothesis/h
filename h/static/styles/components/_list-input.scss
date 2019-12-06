@@ -1,3 +1,5 @@
+@use "../core/color";
+
 .list-input {
   /**
    * Add padding to position list items below the absolutely-positioned field
@@ -25,7 +27,7 @@
 .list-input__remove-btn {
   background: none;
   border: none;
-  color: $grey-4;
+  color: color.$grey-4;
   margin-left: 5px;
   margin-top: 5px;
   margin-bottom: 5px;
@@ -33,7 +35,7 @@
 }
 
 .list-input__remove-btn:hover {
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 .list-input__error-list {
@@ -43,5 +45,5 @@
 }
 
 .list-input__error-item {
-  color: $brand;
+  color: color.$brand;
 }

@@ -1,13 +1,16 @@
+@use "../core/color";
+@use "../core/typography";
+
 /**
  * The dark navbar shown at the top of `/admin` pages.
  */
 
 .admin-navbar {
-  background-color: $grey-7;
+  background-color: color.$grey-7;
   color: white;
   display: flex;
   flex-direction: row;
-  font-size: $subtitle-font-size;
+  font-size: typography.$subtitle-font-size;
   justify-content: center;
   min-height: 50px;
 }
@@ -32,7 +35,7 @@
 }
 
 .admin-navbar__logo {
-  color: $brand;
+  color: color.$brand;
 }
 
 .admin-navbar__tab-list {
@@ -63,7 +66,7 @@
   // The `open` class here is applied by Bootstrap's dropdown menu.
   // `is-active` is applied statically when the page is rendered.
   &.is-active, &.open {
-    background-color: $grey-5;
+    background-color: color.$grey-5;
     --link-color: white;
   }
 

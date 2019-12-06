@@ -1,6 +1,10 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 .group-invite__container {
   position: relative;
-  max-width: $search-result-sidebar-width;
+  max-width: layout.$search-result-sidebar-width;
 }
 
 .group-invite__input {
@@ -10,12 +14,12 @@
   padding-top: 0;
   margin-top: 5px;
   margin-bottom: 8px;
-  border: 1px solid $grey-3;
+  border: 1px solid color.$grey-3;
   border-radius: 2px;
   width: 100%;
   height: 31px;
   text-overflow: ellipsis;
-  color: $grey-6;
+  color: color.$grey-6;
 }
 
 .group-invite__clipboard-button {
@@ -49,25 +53,25 @@
   width: 13px;
   height: 16px;
 
-  color: $grey-4;
+  color: color.$grey-4;
 }
 
 .group-invite__clipboard-button:hover > .group-invite__clipboard-image {
-  color: $grey-7;
+  color: color.$grey-7;
 }
 
 // On mobile, increase the size of the 'Copy to clipboard' button to make it
 // easier to tap.
-@include touch-input {
+@include layout.touch-input {
   .group-invite__input {
-    font-size: $touch-input-font-size;
+    font-size: typography.$touch-input-font-size;
   }
 
   .group-invite__input {
-    padding-right: $touch-target-size;
+    padding-right: layout.$touch-target-size;
   }
 
   .group-invite__clipboard-button {
-    width: $touch-target-size;
+    width: layout.$touch-target-size;
   }
 }

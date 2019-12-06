@@ -1,22 +1,26 @@
+@use "../core/color";
+@use "../core/layout";
+@use "../core/typography";
+
 // Form buttons
 // ------------
 
 .btn {
-  @include font-normal;
+  @include typography.font-normal;
 
   min-height: 30px;
 
-  background-color: $grey-6;
+  background-color: color.$grey-6;
   border: none;
   border-radius: 2px;
-  color: $white;
+  color: color.$white;
   font-weight: bold;
   padding-left: 15px;
   padding-right: 15px;
   white-space: nowrap;
 
   &:hover {
-    background-color: $brand;
+    background-color: color.$brand;
   }
 }
 
@@ -25,21 +29,21 @@
 }
 
 .btn--cancel {
-  color: $grey-6;
+  color: color.$grey-6;
   background-color: white;
 
   &:hover {
     background-color: white;
-    color: $brand;
+    color: color.$brand;
   }
 }
 
 .btn--danger {
-  background-color: $brand;
+  background-color: color.$brand;
 }
 
-@include touch-input {
+@include layout.touch-input {
   .btn {
-    min-height: $touch-target-size;
+    min-height: layout.$touch-target-size;
   }
 }
