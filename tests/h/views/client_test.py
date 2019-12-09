@@ -5,7 +5,6 @@ import json
 import pytest
 from pyramid.httpexceptions import HTTPFound
 
-from h import __version__
 from h.views import client
 
 
@@ -16,7 +15,6 @@ class TestSidebarApp:
         expected_config = {
             "apiUrl": "http://example.com/api",
             "websocketUrl": "wss://example.com/ws",
-            "release": __version__,
             "sentry": {"dsn": "test-sentry-dsn", "environment": "dev"},
             "authDomain": "example.com",
             "googleAnalytics": "UA-4567",
