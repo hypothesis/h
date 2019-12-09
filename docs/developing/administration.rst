@@ -9,7 +9,7 @@ or use an existing one, and then promote that user to be an ``admin``:
 
 .. code-block:: bash
 
-  tox -qe dev -- sh bin/hypothesis --dev add user
+  tox -qe dev -- sh bin/hypothesis --dev user add
 
 This will prompt you to enter the user's 
 
