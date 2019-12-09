@@ -36,7 +36,7 @@ kombu==4.6.6
 mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.4
-more-itertools==8.0.0     # via zipp
+more-itertools==8.0.2     # via zipp
 newrelic==5.4.0.132
 oauthlib==3.1.0
 passlib==1.7.2
