@@ -32,7 +32,7 @@ itsdangerous==1.1.0
 jinja2==2.10.3            # via pyramid-jinja2
 jsonpointer==2.0
 jsonschema==3.2.0
-kombu==4.6.6
+kombu==4.6.7
 mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.4
