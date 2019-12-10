@@ -18,6 +18,10 @@
               href="{{ link.href }}"/>
       {% endfor %}
     {% endif %}
+
+    <!-- Prefetch non-authenticated API routes which client will need. !-->
+    <link rel="preload" as="fetch" href="{{ request.route_url("api.index") }}" crossorigin="anonymous">
+    <link rel="preload" as="fetch" href="{{ request.route_url("api.links") }}" crossorigin="anonymous">
   </head>
   <body>
     <hypothesis-app></hypothesis-app>
