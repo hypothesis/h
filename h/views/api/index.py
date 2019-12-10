@@ -5,7 +5,13 @@ from h.views.api.helpers import links as link_helpers
 from h.views.api.helpers.angular import AngularRouteTemplater
 
 
-@api_config(versions=["v1"], route_name="api.index")
+@api_config(
+    versions=["v1"],
+    route_name="api.index",
+    # nb. We assume that the API index document is the same for all users,
+    # regardless of authorization.
+    http_cache=(60 * 5, {"public": True}),
+)
 def index(context, request):
     """Return the API descriptor document.
 
@@ -25,7 +31,14 @@ def index(context, request):
     return {"links": link_helpers.format_nested_links(api_links, templater)}
 
 
-@api_config(versions=["v2"], route_name="api.index", link_name="index")
+@api_config(
+    versions=["v2"],
+    route_name="api.index",
+    link_name="index",
+    # nb. We assume that the API index document is the same for all users,
+    # regardless of authorization.
+    http_cache=(60 * 5, {"public": True}),
+)
 def index_v2(context, request):
     """Return the API descriptor document.
 

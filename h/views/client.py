@@ -35,6 +35,7 @@ def _client_url(request):
     route_name="sidebar_app",
     renderer="h:templates/app.html.jinja2",
     csp_insecure_optout=True,
+    http_cache=(60 * 5, {"public": True}),
 )
 def sidebar_app(request, extra=None):
     """
