@@ -18,6 +18,7 @@ FEATURES = {
     ),
     "overlay_highlighter": "Use the new overlay highlighter?",
     "client_display_names": "Render display names instead of user names in the client",
+    "client_preact_annotation": "Render the migrated/preact variant of annotations",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
