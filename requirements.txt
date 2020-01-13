@@ -56,8 +56,8 @@ pyramid-layout==1.0
 pyramid-mailer==0.15.1
 pyramid-retry==2.1
 pyramid-services==2.2
-pyramid-tm==2.3
 pyramid==1.10.4
+pyramid_tm==2.4
 pyrsistent==0.15.7        # via jsonschema
 python-dateutil==2.8.1
 python-editor==1.0.4      # via alembic
