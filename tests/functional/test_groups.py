@@ -60,8 +60,10 @@ def user(db_session, factories):
     user = factories.User(
         password="$2b$12$21I1LjTlGJmLXzTDrQA8gusckjHEMepTmLY5WN3Kx8hSaqEEKj9V6"
     )
+    username = user.username
     db_session.commit()
-    return user
+    from h import models
+    return db_session.query(models.User).filter_by(username=username).one()
 
 
 @pytest.fixture
