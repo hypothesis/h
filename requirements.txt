@@ -56,8 +56,8 @@ pyramid-layout==1.0
 pyramid-mailer==0.15.1
 pyramid-retry==2.1
 pyramid-services==2.2
+pyramid-tm==2.4
 pyramid==1.10.4
-pyramid_tm==2.4
 pyrsistent==0.15.7        # via jsonschema
 python-dateutil==2.8.1
 python-editor==1.0.4      # via alembic
@@ -80,7 +80,7 @@ webob==1.8.5              # via pyramid
 wired==0.2.1              # via pyramid-services
 ws4py==0.5.1
 wsaccel==0.6.2
-zipp==0.6.0               # via importlib-metadata
+zipp==2.0.0               # via importlib-metadata
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
 zope.interface==4.3.2
 zope.sqlalchemy==1.1
