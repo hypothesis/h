@@ -80,7 +80,7 @@ webob==1.8.5              # via pyramid
 wired==0.2.1              # via pyramid-services
 ws4py==0.5.1
 wsaccel==0.6.2
-zipp==0.6.0               # via importlib-metadata
+zipp==2.0.0               # via importlib-metadata
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
 zope.interface==4.3.2
 zope.sqlalchemy==1.1
