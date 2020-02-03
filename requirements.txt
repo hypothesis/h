@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-alembic==1.3.2
+alembic==1.3.3
 amqp==2.5.2               # via kombu
 attrs==19.3.0             # via jsonschema
 bcrypt==3.1.7
