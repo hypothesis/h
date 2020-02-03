@@ -22,8 +22,8 @@ elasticsearch==6.4.0
 gevent==1.4.0
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4
-h-matchers==1.2.0
 h-pyramid-sentry==1.2.0
+h_matchers==1.2.1
 hkdf==0.0.3
 hupper==1.9.1             # via pyramid
 importlib-metadata==1.4.0  # via jsonschema, kombu
