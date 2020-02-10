@@ -12,7 +12,7 @@ billiard==3.6.1.0         # via celery
 bleach==3.1.0
 celery==4.4.0
 certifi==2019.11.28
-cffi==1.13.2
+cffi==1.14.0
 chameleon==3.6.2          # via deform
 click==7.0
 colander==1.7.0           # via deform
@@ -22,8 +22,8 @@ elasticsearch==6.4.0
 gevent==1.4.0
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4
+h-matchers==1.2.1
 h-pyramid-sentry==1.2.0
-h_matchers==1.2.1
 hkdf==0.0.3
 hupper==1.9.1             # via pyramid
 importlib-metadata==1.4.0  # via jsonschema, kombu
