@@ -22,8 +22,8 @@ elasticsearch==6.4.0
 gevent==1.4.0
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4
+h-matchers==1.2.1
 h-pyramid-sentry==1.2.0
-h_matchers==1.2.1
 hkdf==0.0.3
 hupper==1.9.1             # via pyramid
 importlib-metadata==1.4.0  # via jsonschema, kombu
@@ -37,7 +37,7 @@ mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.4
 more-itertools==8.1.0     # via zipp
-newrelic==5.4.1.134
+newrelic==5.6.0.135
 oauthlib==3.1.0
 passlib==1.7.2
 pastedeploy==2.0.1        # via plaster-pastedeploy
