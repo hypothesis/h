@@ -1,0 +1,113 @@
+# Bulk API design
+
+# Overview
+
+## Approach
+
+When designing the API we should think about things we need:
+
+ * Right now - so we can implement them
+ * Things we might want in future - so we don't rule them out of make them awkward
+
+Just because something is designed or discussed here _does not_ imply we intend
+to actually implement it now. Features like this will be marked with "_(future)_".
+
+## See also
+
+ * [Current API research](research/current-api.md) - Details of relevant parts of our existing V1 API
+
+# Features
+
+## We need
+
+* Specify item type, action, payload
+* Support multiple actions
+* Upsert everywhere
+* New items can reference each other, even when they don't ids yet
+* We need to be able to associate return bodies with the original items
+ 
+## Nice to have
+
+
+* Stream line by line without having to hold the full request in memory
+* It might be nice to know if we updated or created something for upserts _(future)_
+* Allow the caller to declare _(future)_:
+  * They don't care about the answer (it can be processed at our leasure)
+  * That particular things can be skipped on error (delete if there)
+
+
+# Basic decisions
+
+## Path /bulk
+
+Why be fancy. This does the job.
+
+## Method POST
+
+We don't want people to have to change the method depending on the blend of 
+actions they've taken. `POST` also advertises that it's not safe to resend the
+same request: in the general case it won't be.
+
+There are some decent reasons to rule out some other methods too:
+
+ * `PUT` - Implies this is idempotent. It could be, but it probably isn't. Also 
+   the semantics of PUT are that you are putting the resource at the URL. We
+   aren't "PUT"-ing the "/bulk".
+ * `GET` - This could be semantically correct if all actions are gets, but many
+   clients refuse to send a body with a get
+ * `PATCH` - Kind of right sometimes, but generally weird and some clients 
+   can't emit PATCH verbs (Java, I'm looking at you)
+
+
+
+# Problems and solutions
+
+* [How to structure the large scale request](solutions/global-structuring.md)
+  * __New line delimited JSON (NDJSON) with atomic actions on new lines__
+  * Supports streaming behavior
+* [How to specify individual actions](solutions/individual-actions.md)
+  * __Lists with positional arguments__
+  * Compact and readable
+  * Doesn't preclude or require processing instructions 
+* [How to reference items before we know the id](solutions/referencing-items.md)
+  * __The caller assigns a `$id` and can refer to it with `{"$ref": "#assigned_id"}`__
+  * Follows JSON Schema `$id` and `$ref` semantics
+* How to represent each item
+* [Specification of processing behavior](solutions/processing-instructions.md) _(future)_
+  * ___Currently undecided___
+  * Possibly separate processing instructions in the stream
+  * Possibly per item instructions
+  * Possibly a mix of both
+  
+  
+# Changes to existing capabilities
+
+## Add upsert
+
+We need a new upsert ability under the hood.
+
+Currently to effect an upsert our code has to:
+
+ * Look up the item
+ * Catch a lookup error and then:
+     * Create it if there was an error
+     * ... or update it if there wasn't
+     
+This is two calls and requires conditional behavior. This will be a nightmare 
+for any simple serial series of bulk actions. We don't want to have to build
+any conditional logic into our API.
+
+## User id should be formatted and returned
+
+The user object should return an id. 
+
+Many calls require the caller to provide
+a user id, but we never give them one. They are expected to concatentate
+
+    acct:<username>@<authority>
+    
+This should be in the return data, then the consumer never needs to do this
+work and our instructions come "use the user id" rather than "here is how to
+build it".
+
+We could then remove code in LMS that replicates this behavior.
