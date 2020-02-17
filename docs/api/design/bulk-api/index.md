@@ -16,7 +16,8 @@
 * Upsert everywhere
 * New items can reference each other, even when they don't ids yet
 * We need to be able to associate return bodies with the original items
- 
+* Some limits or handling of pagination
+
 ## Nice to have
 
 * Stream line by line without having to hold the full request in memory
@@ -24,6 +25,7 @@
 * Allow the caller to declare _(future)_:
   * They don't care about the answer (it can be processed at our leasure)
   * That particular things can be skipped on error (delete if there)
+* Be able to request no content, specific fields or partial return content _(future)_
 
 # Basic decisions
 
@@ -47,6 +49,21 @@ There are some decent reasons to rule out some other methods too:
  * `PATCH` - Kind of right sometimes, but generally weird and some clients 
    can't emit PATCH verbs (Java, I'm looking at you)
 
+## Mime type
+
+The existing API uses:
+
+    application/vnd.hypothesis.v1+json
+    
+If we stay with plain JSON responses, there is no reason to change this. If we
+use NDJSON however this will become inaccurate. The NDJSON mime type is:
+
+    application/x-ndjson
+    
+Meaning the the new type would likely become:
+
+    application/vnd.hypothesis.v1+x-ndjson
+
 # Problems and solutions
 
 * [How to structure the large scale request](solutions/global-structuring.md)
@@ -60,9 +77,17 @@ There are some decent reasons to rule out some other methods too:
   * __The caller assigns a `$id` and can refer to it with `{"$ref": "#assigned_id"}`__
   * Follows JSON Schema `$id` and `$ref` semantics
 * [How to represent items](solutions/representing-items.md)
-  * __JSON objects for each item__
+  * __JSON objects for each item__ - See below for the wrapper
   * Following old conventions where we can
   * Inventing new objects where we must
+* [The specific schema for each item](schema/index.md)
+  * _WIP_
+* [How to package returned items](solutions/packaging-response.md)
+  * __NDJSON rows with [JSON API](https://jsonapi.org/format/#document-top-level) style return values in each__
+  * Allows separation of metadata from data, and 100% compatibility with existing objects
+  * Does not bind future implementers hands 
+* How to handle large requests
+* Specifying partial return or specific fields _(future)_
 * [Specification of processing behavior](solutions/processing-instructions.md) _(future)_
   * ___Currently undecided___
   * Possibly separate processing instructions in the stream
