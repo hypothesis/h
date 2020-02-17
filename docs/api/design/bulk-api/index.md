@@ -86,7 +86,12 @@ Meaning the the new type would likely become:
   * __NDJSON rows with [JSON API](https://jsonapi.org/format/#document-top-level) style return values in each__
   * Allows separation of metadata from data, and 100% compatibility with existing objects
   * Does not bind future implementers hands 
-* How to handle large requests
+* [How to handle large requests](solutions/handling-large-requests.md)
+  * __Fixed request limit size__
+  * __Content-Length checking (time permitting)__
+  * Protects against most current performance and correctness problems
+* [How to specify upserts](solutions/specifying-upserts.md)
+  * _WIP_
 * Specifying partial return or specific fields _(future)_
 * [Specification of processing behavior](solutions/processing-instructions.md) _(future)_
   * ___Currently undecided___

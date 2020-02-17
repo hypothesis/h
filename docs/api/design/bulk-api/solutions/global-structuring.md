@@ -50,6 +50,9 @@ Not so nice:
 
  * There may be advantages to grouping (mark a set of actions as parallelisable)
  * Requires a little more effort for producer and consumer than raw JSON
+ * Introduces the possibility of truncation in transit being undetectable
+    * This could happen if the transmission is truncated exactly between two docs
+    * See [How to handle large requests](handling-large-requests.md) for more details
  
 ## <a name='solution_2'></a>Outer list wrapper (❌)
 
