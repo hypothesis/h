@@ -2,15 +2,6 @@
 
 # Overview
 
-## Approach
-
-When designing the API we should think about things we need:
-
- * Right now - so we can implement them
- * Things we might want in future - so we don't rule them out of make them awkward
-
-Just because something is designed or discussed here _does not_ imply we intend
-to actually implement it now. Features like this will be marked with "_(future)_".
 
 ## See also
 
@@ -28,13 +19,11 @@ to actually implement it now. Features like this will be marked with "_(future)_
  
 ## Nice to have
 
-
 * Stream line by line without having to hold the full request in memory
 * It might be nice to know if we updated or created something for upserts _(future)_
 * Allow the caller to declare _(future)_:
   * They don't care about the answer (it can be processed at our leasure)
   * That particular things can be skipped on error (delete if there)
-
 
 # Basic decisions
 
@@ -58,8 +47,6 @@ There are some decent reasons to rule out some other methods too:
  * `PATCH` - Kind of right sometimes, but generally weird and some clients 
    can't emit PATCH verbs (Java, I'm looking at you)
 
-
-
 # Problems and solutions
 
 * [How to structure the large scale request](solutions/global-structuring.md)
@@ -72,12 +59,15 @@ There are some decent reasons to rule out some other methods too:
 * [How to reference items before we know the id](solutions/referencing-items.md)
   * __The caller assigns a `$id` and can refer to it with `{"$ref": "#assigned_id"}`__
   * Follows JSON Schema `$id` and `$ref` semantics
-* How to represent each item
+* [How to represent items](solutions/representing-items.md)
+  * __JSON objects for each item__
+  * Following old conventions where we can
+  * Inventing new objects where we must
 * [Specification of processing behavior](solutions/processing-instructions.md) _(future)_
   * ___Currently undecided___
   * Possibly separate processing instructions in the stream
   * Possibly per item instructions
-  * Possibly a mix of both
+  * Probably a mix of both
   
   
 # Changes to existing capabilities

@@ -64,7 +64,7 @@ A simpler approach is to:
 
 # <a name='alternatives'></a>Alternatives
 
-## <a name='solution_1'></a>User supplied references with cheaty `$id` and `$ref`
+## <a name='solution_1'></a>User supplied references with cheaty `$id` and `$ref` (✔️)
 Taking a inspiration from [JSON schema $id and $ref](https://json-schema.org/understanding-json-schema/structuring.html#using-id-with-ref) 
 we can slightly cheat by expanding the concept to cover multiple documents.
 
@@ -94,7 +94,7 @@ Not so nice:
    possible)
  
 
-## <a name='solution_2'></a>Generic user supplied references
+## <a name='solution_2'></a>Generic user supplied references (❌)
 
 It's on the user to provide a temporary id that we can then leverage:
 
@@ -121,7 +121,7 @@ Not so nice:
  * The user has to generate some kind of id for everything
  * Bloats the call a little
 
-## <a name='solution_3'></a>Implicit ids
+## <a name='solution_3'></a>Implicit ids (❌)
 
 We could generate ids based on the nth time an object has been seen.
 
@@ -145,7 +145,7 @@ Not so nice:
  * User has to infer what the ids we allocate will be
  * If we change our minds about how these work, the client is broken
 
-## <a name='solution_4'></a>JSON references, pointers, links etc.
+## <a name='solution_4'></a>JSON references, pointers, links etc. (❌)
 
 I put this here because you might think about using standard `$ref` links, or
 paths etc. but you really can't with NDJSON as the navigation is between 
@@ -155,7 +155,7 @@ This would be easier if you had a single document, but it's still not very nice
 and kind of analogous to the solution above.
  
 
-## <a name='solution_5'></a>Using some known portion of the object for reference
+## <a name='solution_5'></a>Using some known portion of the object for reference (❌)
 
     ["user", "create", {"name": "burt", ... payload ...}]
     ["user", "create", {"name": "sally", ... payload ...}]
@@ -172,7 +172,7 @@ Not so nice:
  * What can you use as a reference, what can't you? When you reference a user
    what field is it again? 
 
-## <a name='solution_6'></a>Guessing the id the resource will get
+## <a name='solution_6'></a>Guessing the id the resource will get (❌)
 
 Just no. 
 

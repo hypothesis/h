@@ -3,10 +3,12 @@
 * [Overview](#overview)
 * [Alternatives](#alternatives)
     * [Additional inline job instructions](#solution_1)
-    * [Query parameters](#solution_2)
-    * [Entry in a wrapper JSON object](#solution_3)
-    * [Additional headers](#solution_4)
-    * [Path parameters](#solution_5)
+    * [Inline parameters](#solution_2)
+    * [Query parameters](#solution_3)
+    * [Entry in a wrapper JSON object](#solution_4)
+    * [Additional headers](#solution_5)
+    * [Path parameters](#solution_6)
+    
 * [Conclusions](#conclusions)
 
 # <a name='overview'></a>Overview
@@ -47,7 +49,23 @@ Not so nice:
  * Mixes payload and metadata
  * Doesn't allow for item specific config (all options apply to all actions)
 
-## <a name='solution_2'></a>Query parameters (❌)
+## <a name='solution_2'></a>Inline parameters (✔)
+
+We could include instructions inside each payload
+
+    {"user": {"create": { ... payload ... }, "async": true}}
+    
+Nice:
+
+ * Good local instruction binding
+ 
+Not so nice:
+
+ * Doesn't really make sense for global options
+ * Might lead to lots of repetition
+
+
+## <a name='solution_3'></a>Query parameters (❌)
 
     /bulk?async=1&blind=1
     
@@ -63,7 +81,7 @@ Not so nice:
 
  * Maybe a little semantically odd. Not convinced...
 
-## <a name='solution_3'></a>Entry in a wrapper JSON object (❌)
+## <a name='solution_4'></a>Entry in a wrapper JSON object (❌)
 
 If we use a dict wrapper for the payload then we can easily add extra keys.
 
@@ -85,7 +103,7 @@ Not so nice:
  * As mentioned in [How to structure the large scale request](global-structuring.md),
   this would preclude using NDJSON, the favoroured approach.
 
-## <a name='solution_4'></a>Additional headers (❌)
+## <a name='solution_5'></a>Additional headers (❌)
 
     X-Processing: do-this, do-that
     Accept: application/x-async
@@ -104,7 +122,7 @@ Not so nice:
  * If you don't want them to get stripped you end up abusing existing headers
  * Doesn't easily support a large number of instructions
  
-## <a name='solution_5'></a>Path parameters (❌)
+## <a name='solution_6'></a>Path parameters (❌)
 
     /bulk
     /bulk/async
@@ -122,21 +140,6 @@ Not so nice:
  * Horrible if you have lots of different options
  * Routing is a nightmare 
  * Doesn't support a large number of instructions
-
-## <a name='solution_6'></a>Inline parameters (X)
-
-We could include instructions inside each payload
-
-    {"user": {"create": { ... payload ... }, "async": true}}
-    
-Nice:
-
- * Good local instruction binding
- 
-Not so nice:
-
- * Doesn't really make sense for global options
- * Might lead to lots of repetition
 
 # <a name='conclusions'></a>Conclusions
 
