@@ -2,13 +2,16 @@
 
 * [Overview](#overview)
 * [Alternatives](#alternatives)
+   * [List wrapper](#solution_1) ✔
+   * [Variable keys in dict](#solution_2)
+   * [Static keys in dict](#solution_3)
 * [Conclusions](#conclusions)
 
 # <a name='overview'></a>Overview
 
 # <a name='alternatives'></a>Alternatives
 
-## List wrapper (✔️)
+## <a name='solution_1'>List wrapper (✔️)
  
     [
         "user", 
@@ -30,7 +33,7 @@ Not so nice:
 
  * Optional last argument is a little annoying 
   
-## Variable keys in dict (❌)
+## <a name='solution_2'>Variable keys in dict (❌)
 
     {
         "user": {
@@ -52,7 +55,7 @@ Not so nice:
  * Extra options are kind of shoe horned in (no obvious home)
  * Without nesting in the extra options key ordering can result in hard to read NDJSON
  
-## Static keys in dict (❌)
+## <a name='solution_3'>Static keys in dict (❌)
 
     {
         "item": "user",

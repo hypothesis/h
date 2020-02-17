@@ -2,7 +2,7 @@
 
 * [Overview](#overview)
 * [Alternatives](#alternatives)
-    * [NDJSON](#solution_1)
+    * [NDJSON](#solution_1) ✔️
     * [Outer list wrapper](#solution_2)
     * [Outer dict wrapper](#solution_3)
     * [Grouped items](#solution_4)

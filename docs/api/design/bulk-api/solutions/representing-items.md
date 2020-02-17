@@ -2,7 +2,7 @@
 
 * [Overview](#overview)
 * [Alternatives](#alternatives)
-    * [JSON objects](#solution_1)
+    * [Plain JSON objects](#solution_1) ✔
     * [Keep the path + JSON objects](#solution_2) 
     * [HAL `_links` + JSON objects](#solution_3)
 * [Conclusions](#conclusions)
@@ -52,7 +52,7 @@ The user for example can be retrieved with a mixture of items in the URL.
 
 # <a name='alternatives'></a>Alternatives
 
-## <a name='solution_1'></a>JSON objects (✔️)
+## <a name='solution_1'></a>Plain JSON objects (✔️)
 
 Fully encode all the relevant data into the object. Make objects with no body
 explicit. 
@@ -77,6 +77,10 @@ Not so nice
 
  * Our conventions are a mess, which makes this difficult
  * Breaks with the previous API
+
+Note: [How we package the response](packaging-response.md) could solve some problems here
+by using [JSON API](https://jsonapi.org/format/#document-top-level) style wrapper
+which allows metadata to be separated from the payload.
 
 ## <a name='solution_2'></a>Keep the path + JSON objects (❌️)
 

@@ -2,7 +2,7 @@
 
 * [Overview](#overview)
 * [Alternatives](#alternatives)
-    * [User supplied references with cheaty `$id` and `$ref`](#solution_1)
+    * [User supplied references with cheaty `$id` and `$ref`](#solution_1) ✔
     * [Generic user supplied references](#solution_2)
     * [Implicit ids](#solution_3)
     * [JSON references, pointers, links etc.](#solution_4)

@@ -2,8 +2,8 @@
 
 * [Overview](#overview)
 * [Alternatives](#alternatives)
-    * [Additional inline job instructions](#solution_1)
-    * [Inline parameters](#solution_2)
+    * [Additional inline job instructions](#solution_1) ✔️
+    * [Inline parameters](#solution_2) ✔
     * [Query parameters](#solution_3)
     * [Entry in a wrapper JSON object](#solution_4)
     * [Additional headers](#solution_5)
