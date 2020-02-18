@@ -233,6 +233,6 @@ We reply:
     {"$id": "#user_1", ...}
     {"$id": "#user_2", ...}
     
-Note: As mentioned in [How to package the response](packaging-response.md), we 
+Note: As mentioned in [How to package the response](response-structure.md), we 
 may use JSON API style return values, which allow a `meta` field which would be
 a natural home for this.

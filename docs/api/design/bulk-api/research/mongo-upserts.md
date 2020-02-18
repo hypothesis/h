@@ -84,8 +84,11 @@ context. This is probably a biggy! Don't design this twice if we think we will w
  * 'setOnInsert' - As above, but only on upserts
  * 'replaceWith' - Just replace the whole thing with this
  
+There are some things which appear missing here conceptually:
 
-Note 'unset_on_insert' makes no sense
+ * 'unset_on_insert' makes no sense
+ * 'set_on_update' actually does make sense, and is missing from Mongo.
+   Whether anyone would actually need it is a different thing.
 
 ----
 
@@ -98,9 +101,16 @@ Note 'unset_on_insert' makes no sense
         // "replaceWith" could just be "replace"
         "replace": { ... just do this ...}
         
-        // "set" seems decent
+        // "set" seems decent and is nice and short
         "set": { ... take what's there but add these ... }
         
-        // Again, "setOnInsert" is a decent name, but snakified 
+        // Again, "setOnInsert" is an ok name snakified 
         "set_on_insert": { ... add some more if it was a create... }
     }
+
+For our purposes I'd say:
+
+ * The whole single item with sometimes nested key words brings a
+  data/instruction confusion we can do without
+ * `query` and `set` (semantics and all) are pretty good first attempts
+ * `set_on_insert` and `replace` aren't really needed yet

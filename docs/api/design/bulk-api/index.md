@@ -66,10 +66,10 @@ Meaning the the new type would likely become:
 
 # Problems and solutions
 
-* [How to structure the large scale request](solutions/global-structuring.md)
+* [How to structure the large scale request](solutions/request-structure.md)
   * __New line delimited JSON (NDJSON) with atomic actions on new lines__
   * Supports streaming behavior
-* [How to specify individual actions](solutions/individual-actions.md)
+* [How to specify individual actions](solutions/specifying-actions.md)
   * __Lists with positional arguments__
   * Compact and readable
   * Doesn't preclude or require processing instructions 
@@ -82,18 +82,19 @@ Meaning the the new type would likely become:
   * Inventing new objects where we must
 * [The specific schema for each item](schema/index.md)
   * _WIP_
-* [How to package returned items](solutions/packaging-response.md)
+* [How to package returned items](solutions/response-structure.md)
   * __NDJSON rows with [JSON API](https://jsonapi.org/format/#document-top-level) style return values in each__
   * Allows separation of metadata from data, and 100% compatibility with existing objects
   * Does not bind future implementers hands 
-* [How to handle large requests](solutions/handling-large-requests.md)
+* [How to handle large requests](solutions/limits-and-pagination.md)
   * __Fixed request limit size__
   * __Content-Length checking (time permitting)__
   * Protects against most current performance and correctness problems
 * [How to specify upserts](solutions/specifying-upserts.md)
-  * _WIP_
+  * __Dict with `query` and `set` fields__
+   * __with an option to mix query into set__
 * Specifying partial return or specific fields _(future)_
-* [Specification of processing behavior](solutions/processing-instructions.md) _(future)_
+* [Specification of processing behavior](solutions/specifying-processing-instructions.md) _(future)_
   * ___Currently undecided___
   * Possibly separate processing instructions in the stream
   * Possibly per item instructions

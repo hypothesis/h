@@ -31,7 +31,7 @@ _The names and fields specified here are for discussion only, not the final thin
             "query": {
                 "email": "user@example.com"
             }, 
-            "update": {
+            "set": {
                 "name": "New name here",
             }
         },
@@ -49,7 +49,7 @@ Nice:
  
 Not so nice:
 
- * Bloats call with `query` and `update` fields or similar wrappings
+ * Bloats call with `query` and `set` fields or similar wrappings
  * If we aren't careful, we might allow more power than we intend
 
 ## <a name='solution_2'></a>Separate query and body (❌)
@@ -60,7 +60,7 @@ Not so nice:
             "query": {
                 "email": "user@example.com"
             }, 
-            "update": {
+            "set": {
                 "email": "user@example.com",
                 "name": "New name here",
             }
@@ -124,14 +124,12 @@ Set different things depending on whether this is an update or not:
         "query": {
             "email": "old@example.com",
         }
-        "update": {
+        "set": {
             "name": "Some new name",
             "email": "old@example.com",
-        },
-        "on_update": {
             "confirmed": true,
         },
-        "on_insert": {
+        "set_on_insert": {
             "confirmed": false,
         }
     }]
@@ -144,51 +142,24 @@ Update multiple things:
             "query": {
                 "setting": "old_value",
             }
-            "update": {
+            "set": {
                "setting": "new_value",
             }
         }, 
         {"insert_multiple": True}
     ]
 
-### There are lots of different ways to represent this
+### There's a lot of complexity in this behavior
 
-Assuming we are going to have separate queries and such then there are a lot of
-choices left to be made about how to represent this.
+We might not need it all right now, but if we want to avoid boxing ourselves
+into a corner we will need to think about it.
 
-One possible source of inspiration is Mongo DB which deal with similar problems (JSON updates and upserts of objects):
-* [MongoDB's bulk upsert methods](https://docs.mongodb.com/manual/reference/method/Bulk.find.upsert/)
-* [findAnyModify()](https://docs.mongodb.com/manual/reference/command/findAndModify/#dbcmd.findAndModify)
-* [Upsert behavior](https://docs.mongodb.com/manual/reference/method/db.collection.update/#upsert-behavior)
+### Lets pick the bits we need right now
 
-This includes a bunch of rules/operations/syntax inspiration we might not think
- of such as having a single body which mutates how it behaves with special key.
-
-As a quicky, for a replacement of the full document the Mongo equivalent would be:
-
-    {
-        findAndModify: "collection-name",
-        query: {
-            "email": "old@example.com"
-        },
-        update: {
-            "name": "Some new name",
-            "email": "old@example.com",
-            ... every other fields or they disappear ...
-        },
-        "upsert": true
-    }
+Inspired by some [research into how MongoDB handles upserts](../research/mongo-upserts.md)
+we can take some of the semantics and words from there:
  
-Whereas to copy all existing contents (more like what we want)
-  
-    {
-    findAndModify: "collection-name",
-        query: {
-            "email": "old@example.com"
-        },
-        update: {
-            $set: {
-                "name": "Some new name",
-            }
-        }
-    }
+ * Think of upsert as a specialised update (to prevent repeat work in future)
+ * `query` - For the query (no brainer)
+ * `set` - Preserves the existing document with these additions
+ * For now, most other behavior isn't required

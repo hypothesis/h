@@ -116,7 +116,7 @@ Not so nice:
 
  * Mixes processing instructions and content
     * Not a problem if you are already doing this as a part of 
-    [handling processing instructions](processing-instructions.md)
+    [handling processing instructions](specifying-processing-instructions.md)
  * Kind of ugly
  * Non-standard
  * Behavior slightly undefined if we get truncated _during_ the sentinel

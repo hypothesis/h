@@ -28,7 +28,7 @@ be combined. The two questions at play here are:
 
 ## <a name='solution_1'></a>NDJSON return values (✔️)
 
-The currently solution for [How to structure the large scale request](global-structuring.md)
+The currently solution for [How to structure the large scale request](request-structure.md)
 is to use separate each requested item as a row in a NDJSON document. It seems
 reasonable if we accept this that we should return like this for similar reasons:
 

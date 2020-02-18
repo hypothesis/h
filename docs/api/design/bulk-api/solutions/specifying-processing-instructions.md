@@ -100,7 +100,7 @@ Not so nice:
 
  * Doesn't allow specific options for specific actions
  * Mixes payload and metadata
- * As mentioned in [How to structure the large scale request](global-structuring.md),
+ * As mentioned in [How to structure the large scale request](request-structure.md),
   this would preclude using NDJSON, the favoroured approach.
 
 ## <a name='solution_5'></a>Additional headers (❌)

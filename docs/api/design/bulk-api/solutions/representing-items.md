@@ -78,7 +78,7 @@ Not so nice
  * Our conventions are a mess, which makes this difficult
  * Breaks with the previous API
 
-Note: [How we package the response](packaging-response.md) could solve some problems here
+Note: [How we package the response](response-structure.md) could solve some problems here
 by using [JSON API](https://jsonapi.org/format/#document-top-level) style wrapper
 which allows metadata to be separated from the payload.
 
