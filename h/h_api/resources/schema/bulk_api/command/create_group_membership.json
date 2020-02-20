@@ -1,0 +1,38 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "allOf": [
+        {"$ref": "../../json_api.json#/$defs/document"},
+        {
+            "properties": {
+                "data": {
+                    "additionalProperties": false,
+
+                    "properties": {
+                        "type": {"const": "group_membership"},
+
+                        "relationships": {
+                            "properties": {
+                                "member": {
+                                    "properties": {
+                                        "type": {"const": "user"},
+                                        "id": {"$ref": "../../core.json#/$defs/userId"}
+                                    }
+                                },
+                                "group": {
+                                    "properties": {
+                                        "type": {"const": "group"},
+                                        "id": {"required": ["$ref"]}
+                                    }
+                                }
+                            },
+
+                            "required": ["member", "group"]
+                        }
+                    },
+                    "required": ["type", "relationships"]
+                }
+            }
+        }
+    ]
+}

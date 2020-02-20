@@ -6,7 +6,6 @@
 
  * [Current API research](research/current-api.md) - Details of relevant parts of our existing V1 API
  * [Visual summary](summary.md) - A quick summary of decisions
- * [Instruction schema](schema/bulk_api/instruction.json) - JSON schema for this
 
 # Features
 

@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "type": "array",
+    "items": [
+        {"enum":  ["create", "upsert", "configure"]},
+        {"type":  "object"}
+    ],
+    "if": {
+        "items": [
+            {"enum": ["configure"]}
+        ],
+        "additionalItems": true
+    },
+    "then": {
+        "items": [
+            {"const": "configure"},
+            {}
+        ]
+    },
+    "else": {
+        "items": [
+            {},
+            {"$ref": "../json_api.json#/$defs/document"}
+        ]
+    }
+}

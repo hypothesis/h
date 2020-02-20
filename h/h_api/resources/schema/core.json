@@ -2,6 +2,21 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
 
     "$defs": {
+        "anchor": {
+            "$comment": "http://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.2.3",
+            "type": "string",
+            "pattern": "^[A-z][0-9A-z_:.-]*$"
+        },
+
+        "anchorReference": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "$ref": {"$ref": "#/$defs/anchor"}
+            },
+            "required": ["$ref"]
+        },
+
         "groupId": {
             "type": "string",
             "pattern": "^[1-9ABDEGJ-NP-RV-Zabdegi-km-rv-z]{8}$"
@@ -65,7 +80,8 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "name": {"type": "string"}
+                "name": {"type": "string"},
+                "groupid": {"$ref":  "#/$defs/groupGroupId"}
             },
             "required": ["name"]
         }
