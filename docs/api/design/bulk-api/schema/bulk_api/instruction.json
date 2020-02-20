@@ -1,0 +1,127 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "$defs": {
+        "anchor": {
+            "$comment": "http://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.2.3",
+            "type": "string",
+            "pattern": "^[A-z][0-9A-z_:.-]*$"
+        },
+
+        "anchorReference": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "$ref": {"$ref": "#/$defs/anchor"}
+            },
+            "required": ["$ref"]
+        },
+
+        "upsertUser": {
+            "type": "object",
+            "additionalProperties": false,
+
+            "properties": {
+                "type": {"type":  "string", "enum":  ["user"]},
+                "id": {"$ref":  "../core.json#/$defs/userId"},
+                "attributes": {"$ref":  "../core.json#/$defs/user"}
+            },
+            "required": ["type", "id", "attributes"]
+        },
+
+        "upsertGroup": {
+            "type": "object",
+            "additionalProperties": false,
+
+            "properties": {
+                "type": {"const": "group"},
+                "attributes": {"$ref":  "../core.json#/$defs/group"},
+
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "query": {
+                            "type": "object",
+                            "properties": {
+                                "groupid": {"$ref":  "../core.json#/$defs/groupGroupId"}
+                            }
+                        },
+                        "$anchor": {"$ref": "#/$defs/anchor"}
+                    },
+                    "required": ["query"]
+                }
+            },
+            "required": ["type", "attributes", "meta"]
+        },
+
+        "createGroupMembership": {
+            "type": "object",
+            "additionalProperties": false,
+
+            "properties": {
+                "type": {"const": "group_membership"},
+
+                "relationships": {
+                    "type": "object",
+                    "additionalProperties": false,
+
+                    "properties": {
+                        "member": {
+                            "type": "object",
+                            "properties": {
+                                "type": {"type": "string", "enum": ["user"]},
+                                "id": {"$ref": "../core.json#/$defs/userId"}
+                            }
+                        },
+                        "group": {
+                            "type": "object",
+                            "properties": {
+                                "type": {"type": "string", "enum": ["group"]},
+                                "id": {"$ref": "#/$defs/anchorReference"}
+                            }
+                        }
+                    },
+
+                    "required": ["member", "group"]
+                }
+            },
+            "required": ["type", "relationships"]
+        }
+    },
+
+    "type": "array",
+    "oneOf": [
+        {
+            "items": [
+                {"const": "configure"},
+                {"$ref": "./configuration.json#"}
+            ]
+        },
+        {
+            "items": [
+                {"const": "upsert"},
+                {
+                    "type":  "object",
+                    "properties": {
+                        "data": {"oneOf": [
+                            {"$ref": "#/$defs/upsertUser"},
+                            {"$ref": "#/$defs/upsertGroup"}
+                        ]}
+                    }
+                }
+            ]
+        },
+        {
+            "items": [
+                {"const": "create"},
+                {
+                    "type": "object",
+                    "properties": {
+                        "data": {"$ref":  "#/$defs/createGroupMembership"}
+                    }
+                }
+            ]
+        }
+    ]
+}

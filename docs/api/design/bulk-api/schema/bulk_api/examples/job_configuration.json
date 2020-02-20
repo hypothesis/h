@@ -1,0 +1,19 @@
+[
+    "configure",
+    {
+        "view": null,
+
+        "user": {
+            "effective": "acct:user@example.com"
+        },
+
+        "instructions": {
+            "total": 11
+        },
+
+        "defaults": [
+            ["create", "*", {"on_duplicate": "continue"}],
+            ["upsert", "*", {"merge_query": true}]
+        ]
+    }
+]
