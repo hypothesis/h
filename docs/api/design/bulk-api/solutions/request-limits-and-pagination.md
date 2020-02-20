@@ -3,9 +3,10 @@
 * [Overview](#overview)
 * [Alternatives](#alternatives)
     * [Size limits](#solution_1) ✔
-    * [Content-Length checks](#solution_2) ✔
-    * [Pagination and async jobs](#solution_3)
-    * [Sentinel to mark the end of the request](#solution_3)
+    * [Content-Length checks](#solution_2)
+    * [Custom Content-Lines header](#solution_3) ✔
+    * [Pagination and async jobs](#solution_4)
+    * [Sentinel to mark the end of the request](#solution_5)
 * [Conclusions](#conclusions)
 
 # <a name='overview'></a>Overview
@@ -40,7 +41,7 @@ Not so nice:
  * What if you want more than this?
  * Just make multiple requests?
 
-## <a name='solution_2'></a>Content-Length checks (✔️)
+## <a name='solution_2'></a>Content-Length checks (?)
 
 With large requests it's entirely possible for the request to be cut-off before
 we have received all of it. 
@@ -75,6 +76,29 @@ Not so nice:
    * Bytes vs. Unicode chars (it's bytes)
    * New lines in general (`\n` vs `\n\r` etc.)
    * Confusion about HTTP wrapping (whether to include bare lines before etc.)
+
+## <a name='solution_3'></a>Custom Content-Lines header (✔️)
+
+Similar to `Content-Length` we could declare a number of `Content-Lines` 
+which would indicate the number of rows of NDJSON to expect.
+
+A similar alternative would be to declare this value early in the body somehow,
+for example as part of [processing instructions](specifying-processing-instructions.md).
+
+Nice:
+
+ * Semantically similar to `Content-Length`, with similar protection
+ * Extremely easy to calculate for sender and consumer
+ * Can be calculated without reifying the content (good for streaming)
+ * Allows you to reject jobs with too many instructions (rather than just 
+   one long one)
+
+Not so nice:
+
+ * Non-standard
+ * Usual hoo-ha with intermediaries discarding headers
+ * Doesn't protect against JSON compatible chunks missing from individual requests
+ * Behavior slightly undefined if we get truncated during the last instruction
 
 ## <a name='solution_3'></a>Pagination and async jobs (?)
 
@@ -155,6 +179,14 @@ events as for it to be an issue they need to:
 
  * Occur at all (this isn't going to be common)
  * Occur in such a way as to leave the JSON valid
+
+### Given the above `Content-Lines` is easy and effective
+
+`Content-Lines` would give us marginally less protection, but is dirt cheap
+to implement and streaming friendly. 
+
+Given the expected low probability of errors in general, the number that should
+get past this would be very low.
 
 ### Pagination and async jobs are overkill for now
 

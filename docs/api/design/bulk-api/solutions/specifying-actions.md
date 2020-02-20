@@ -32,7 +32,19 @@ Nice:
 Not so nice:
 
  * Optional last argument is a little annoying 
-  
+ 
+__HOT OFF THE PRESS!__
+
+If we end-up using JSON API, we don't need the final extra options, as they
+can be acommodatated in the payload in the `meta` variable.
+
+We also don't need the object type up-front meaning it would look more like this
+
+    ["create", {"data": {"type": "user", ...}]
+    
+This loses much of the readability of the list structure, but unifies input and
+output.
+
 ## <a name='solution_2'>Variable keys in dict (❌)
 
     {
@@ -108,6 +120,8 @@ Not so nice:
 
 # <a name='conclusions'></a>Conclusions
 
+_Warning: Some of this is out of date, if we use JSON-API objects!_
+
 #### There is a clear readability gap (list > var dict > static dict)
 
 For the sake argument we will imagine that keys are jiggled randomly in dicts
@@ -175,8 +189,6 @@ List:
 Specifying extra processing options is different from the main structure and
 can be considered separately. It's nice in some ways and interacts with this
 decision, but is covered in more detail here:
-
-
     
 #### Using lists seems to have the most upsides right now
 

@@ -2,10 +2,11 @@
 
 # Overview
 
-
 ## See also
 
  * [Current API research](research/current-api.md) - Details of relevant parts of our existing V1 API
+ * [Visual summary](summary.md) - A quick summary of decisions
+ * [Instruction schema](schema/bulk_api/instruction.json) - JSON schema for this
 
 # Features
 
@@ -14,7 +15,6 @@
 * Specify item type, action, payload
 * Support multiple actions
 * Upsert everywhere
-* New items can reference each other, even when they don't ids yet
 * We need to be able to associate return bodies with the original items
 * Some limits or handling of pagination
 
@@ -26,6 +26,9 @@
   * They don't care about the answer (it can be processed at our leasure)
   * That particular things can be skipped on error (delete if there)
 * Be able to request no content, specific fields or partial return content _(future)_
+* New items can reference each other, even when they don't ids yet _(future)_
+  * We'll get away with this for now, as we predict ids 
+  * This is no good for anyone else
 
 # Basic decisions
 
@@ -73,27 +76,29 @@ Meaning the the new type would likely become:
   * __Lists with positional arguments__
   * Compact and readable
   * Doesn't preclude or require processing instructions 
-* [How to reference items before we know the id](solutions/referencing-items.md)
-  * __The caller assigns a `$id` and can refer to it with `{"$ref": "#assigned_id"}`__
-  * Follows JSON Schema `$id` and `$ref` semantics
 * [How to represent items](solutions/representing-items.md)
-  * __JSON objects for each item__ - See below for the wrapper
+  * __JSON API objects for each item__
+  * __Exact existing contents for user and group__
   * Following old conventions where we can
   * Inventing new objects where we must
-* [The specific schema for each item](schema/index.md)
-  * _WIP_
+* [How to represent the group membership](solutions/representing-group-membership.md)
+  * __Empty JSON API object with relationships__
 * [How to package returned items](solutions/response-structure.md)
   * __NDJSON rows with [JSON API](https://jsonapi.org/format/#document-top-level) style return values in each__
   * Allows separation of metadata from data, and 100% compatibility with existing objects
   * Does not bind future implementers hands 
-* [How to handle large requests](solutions/limits-and-pagination.md)
+* [How to handle large requests](solutions/request-limits-and-pagination.md)
   * __Fixed request limit size__
-  * __Content-Length checking (time permitting)__
+  * __Custom Content-Lines declaration__
   * Protects against most current performance and correctness problems
 * [How to specify upserts](solutions/specifying-upserts.md)
-  * __Dict with `query` and `set` fields__
-   * __with an option to mix query into set__
+  * __JSON API object (unless we don't use it elsewhere)__
 * Specifying partial return or specific fields _(future)_
+  * __No response required can be declared as a processing instruction__
+  * Specific fields aren't required now
+* [How to reference items before we know the id](solutions/referencing-items.md)
+  * __The caller assigns an `$anchor` and can refer to it with `{"$ref": "assigned_id"}`__
+  * Follows JSON Schema `$anchor` and `$ref` semantics
 * [Specification of processing behavior](solutions/specifying-processing-instructions.md) _(future)_
   * ___Currently undecided___
   * Possibly separate processing instructions in the stream

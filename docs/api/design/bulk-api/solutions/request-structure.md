@@ -52,11 +52,11 @@ Not so nice:
  * Requires a little more effort for producer and consumer than raw JSON
  * Introduces the possibility of truncation in transit being undetectable
     * This could happen if the transmission is truncated exactly between two docs
-    * See [How to handle large requests](limits-and-pagination.md) for more details
+    * See [How to handle large requests](request-limits-and-pagination.md) for more details
  
 ## <a name='solution_2'></a>Outer list wrapper (❌)
 
-Baiscally as NDJSON but in a list
+Basically as NDJSON but in a list
 
     [
         { ... payload 1 ....},

@@ -1,0 +1,60 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "title": "Job configuration",
+    "description": "Configuration for a number of bulk items",
+
+    "type": "object",
+    "properties": {
+        "view": {"enum": [null]},
+
+        "user": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "effective": {"$ref": "../core.json#/$defs/userId"}
+            },
+            "required": ["effective"]
+        },
+
+        "instructions": {
+            "type": "object",
+            "additionalProperties": false,
+
+            "properties": {
+                "total": {
+                   "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                }
+            },
+            "required": ["total"]
+        },
+
+        "defaults": {
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": [
+                    {
+                        "type": "string",
+                        "enum": ["create", "upsert", "*"]
+                    },
+                    {
+                        "type": "string",
+                        "enum": ["user", "group", "group_membership", "*"]
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "on_duplicate": {"const": "continue"},
+                            "merge_query": {"const": true}
+                        }
+                    }
+                ]
+            }
+        }
+    },
+
+    "required": ["user", "instructions", "defaults"]
+}

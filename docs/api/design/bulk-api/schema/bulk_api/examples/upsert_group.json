@@ -1,0 +1,17 @@
+[
+    "upsert",
+    {
+        "data": {
+            "type": "group",
+            "meta": {
+                "$anchor": "my_group_1",
+                "query": {
+                    "groupid": "group:somegroup@example.com"
+                }
+            },
+            "attributes": {
+                "name": "{name}"
+            }
+        }
+    }
+]

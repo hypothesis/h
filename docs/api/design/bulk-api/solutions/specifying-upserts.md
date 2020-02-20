@@ -2,8 +2,9 @@
 
 * [Overview](#overview)
 * [Alternatives](#alternatives)
-    * [Separate query and body, with merge option](#solution_1) ✔
-    * [Separate query and body](#solution_2)
+    * [Separate query and body, with merge option](#solution_1) ✔ ?
+    * [A JSON API style object](#solution_2) ✔ ?
+    * [Separate query and body](#solution_3)
     * [Guess which fields to search on](#solution_3)
 * [Conclusions](#conclusions)
 
@@ -23,7 +24,7 @@ But how should that be represented?
 
 _The names and fields specified here are for discussion only, not the final thing._
 
-## <a name='solution_1'></a>Separate query and body, with merge option (✔️)
+## <a name='solution_1'></a>Separate query and body, with merge option (✔️ ?)
 
     [
         "user", "upsert",
@@ -52,7 +53,64 @@ Not so nice:
  * Bloats call with `query` and `set` fields or similar wrappings
  * If we aren't careful, we might allow more power than we intend
 
-## <a name='solution_2'></a>Separate query and body (❌)
+## <a name='soluition_2'></a>A JSON API style object (✔️ ?)
+
+JSON API seems pretty mum on the subject of searching and upserting. But we
+might be suggesting it's use elsewhere, so we should think about how we might
+do it.
+
+A basic JSON API update provides some useful places to keep things:
+
+    {
+        "meta": {...}            // optional, freeform
+        "data": {
+            "type": "object",    // mandatory
+            "id":                // mandatory for update, optional for create
+            "attributes": {...}  // optional
+        }
+    }
+
+The semantics of `attributes` in an update are basically the same as `set` for
+our point of view, so that's the place for that. `query`, `merge_query` or 
+`set_on_insert` can all be accomodated in the `meta`:
+
+    {
+        "meta": {
+            "query": {
+                "email": "user@example.com"
+            },
+            "merge_query": true
+        }
+        "data": {
+            "type": "user",
+            "attributes": {
+                "name": "New name here"
+            }
+        }
+    }
+
+We could assume `meta.query` if an `id` is provided, as the query is obvious:
+
+    {
+        "data": {
+            "id": "user:my_group@example.com"
+            "type": "user",
+            "attributes": {
+                "email": "user@example.com",
+                "name": "New name here"
+            }
+        }
+    }
+
+This actually boils down to just supplying a plain JSON-API object! But also
+provides a graceful path out of there if we need something fancier in future.
+
+This might be the ticket for now.
+
+_Nope!_ We don't use the group id to find groups, we use the `groupid`, which
+ is different. We'll still need a query in this case.
+
+## <a name='solution_3'></a>Separate query and body (❌)
 
     [
         "user", "upsert",
@@ -78,7 +136,7 @@ Not so nice:
  * Most of downsides of "Separate query and body, with merge option" above
  * Duplicate fields unnecessarily
   
-## <a name='solution_3'></a>Guess which fields to search on (❌)
+## <a name='solution_5'></a>Guess which fields to search on (❌)
 
     [
         "user", "upsert",
@@ -99,7 +157,23 @@ Not so nice:
  * Can't easily express in a schema which fields are which
  * Can't accommodate more complicated patterns (like multiple updates, or complete replacements)
  * Binds our hands in the future
- 
+
+### Evaluation
+
+Nice:
+
+ * We can pretty much get what we want by adhering close to the JSON-API spec
+ * Our input will match our output if we use JSON-API for return values
+ * Our current use-case boils down to a simple JSON-API object with a few assumptions
+ * Extra hidey-holes (`meta` etc.) give us enough breathing room to implement 
+   fancy things in future
+ * Schema friendly 
+
+Not so nice:
+
+ * Our input will not match our output if we don't use JSON-API for return values
+ * Introduces the most JSON bloat of all
+
 # <a name='conclusions'></a>Conclusions
 
 ### We will bind our hands forever if we don't separate query and update
@@ -163,3 +237,13 @@ we can take some of the semantics and words from there:
  * `query` - For the query (no brainer)
  * `set` - Preserves the existing document with these additions
  * For now, most other behavior isn't required
+ 
+### JSON-API looms over this decision
+
+If other parts of the API are moving towards JSON-API then this should too. It
+seems to do most of what we want and can be extended to future things.
+
+It also magically makes creates and upserts identical for the exact case we
+need in LMS, which is nice.
+
+If not, then our own home grown version is fine.

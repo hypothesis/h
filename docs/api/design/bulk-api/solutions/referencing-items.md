@@ -64,13 +64,13 @@ A simpler approach is to:
 
 # <a name='alternatives'></a>Alternatives
 
-## <a name='solution_1'></a>User supplied references with cheaty `$id` and `$ref` (✔️)
+## <a name='solution_1'></a>User supplied references with cheaty `$anchor` and `$ref` (✔️)
 Taking a inspiration from [JSON schema $id and $ref](https://json-schema.org/understanding-json-schema/structuring.html#using-id-with-ref) 
 we can slightly cheat by expanding the concept to cover multiple documents.
 
-    ["user", "create", {"$id": "#user_1", ... payload ...}]
-    ["user", "create", {"$id": "#user_2", ... payload ...}]
-    ["group_membership", "create", {"group": ..., "user": {"$ref": "#user_2"}}]
+    ["user", "create", {"$anchor": "user_1", ... payload ...}]
+    ["user", "create", {"$anchor": "user_2", ... payload ...}]
+    ["group_membership", "create", {"group": ..., "user": {"$ref": "user_2"}}]
 
 Alternatives:
 
@@ -88,11 +88,11 @@ Not so nice:
  * Bloats the call a little
  * Still requires users to create and track ids
  * Kind of a more elaborate version of the user generated ids
- * Are we actually going to police that people use '#words' when really any
-   identifier would work?
- * This might make writing a schema a little confusing (although it's totally 
-   possible)
  
+___Note___ A new draft of the JSON schema is phasing out using `$id` as an 
+anchor, so I've swapped this over to the new `$anchor`.
+
+https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.2.3
 
 ## <a name='solution_2'></a>Generic user supplied references (❌)
 
@@ -205,7 +205,7 @@ a lot of work to index objects by field or anything generic.
 
 Ids are explicit and easy to code.
 
-#### JSON style $id and $ref are explicit and familiar
+#### JSON style $anchor and $ref are explicit and familiar
 
 But user supplied generic ids and anchor style ids are very similar solutions.
 
@@ -225,13 +225,13 @@ any id assigning method with the following rules:
  
 You send:
 
-    ["user", "create", {"$id": "#user_1", ...}]
-    ["user", "create", {"$id": "#user_2", ...}]
+    ["user", "create", {"$anchor": "user_1", ...}]
+    ["user", "create", {"$anchor": "user_2", ...}]
     
 We reply:
 
-    {"$id": "#user_1", ...}
-    {"$id": "#user_2", ...}
+    {"$anchor": "user_1", ...}
+    {"$anchor": "user_2", ...}
     
 Note: As mentioned in [How to package the response](response-structure.md), we 
 may use JSON API style return values, which allow a `meta` field which would be
