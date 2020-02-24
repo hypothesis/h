@@ -44,7 +44,7 @@ pastedeploy==2.0.1        # via plaster-pastedeploy
 peppercorn==0.6           # via deform
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
-psycogreen==1.0.1
+psycogreen==1.0.2
 psycopg2==2.8.4
 pycparser==2.19           # via cffi
 pyjwt==1.7.1
