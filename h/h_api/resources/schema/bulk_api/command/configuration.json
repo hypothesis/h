@@ -5,6 +5,7 @@
     "description": "Configuration for a number of bulk items",
 
     "type": "object",
+    "additionalProperties": false,
     "properties": {
         "view": {"enum": [null]},
 
@@ -56,5 +57,24 @@
         }
     },
 
-    "required": ["user", "instructions", "defaults"]
+    "required": ["user", "instructions", "defaults"],
+
+    "examples": [
+         {
+            "view": null,
+
+            "user": {
+                "effective": "acct:user@example.com"
+            },
+
+            "instructions": {
+                "total": 11
+            },
+
+            "defaults": [
+                ["create", "*", {"on_duplicate": "continue"}],
+                ["upsert", "*", {"merge_query": true}]
+            ]
+        }
+    ]
 }
