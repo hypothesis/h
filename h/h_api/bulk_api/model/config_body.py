@@ -9,7 +9,7 @@ from h.h_api.schema import Schema
 
 
 class Configuration(Model):
-    schema = Schema.get_validator("bulk_api/command/configuration.json")
+    validator = Schema.get_validator("bulk_api/command/configuration.json")
 
     WILD_CARD = "*"
 

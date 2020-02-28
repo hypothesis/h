@@ -36,7 +36,7 @@ class TestCommand:
 
     def test_if_body_is_a_model_we_apply_its_validation(self, model):
         class CommandWithModelBody(Command):
-            schema = None
+            validator = None
             body = model
 
         command = CommandWithModelBody(CommandType.UPSERT, {})

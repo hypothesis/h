@@ -28,20 +28,23 @@ class CommandBuilder:
             Configuration.create(effective_user, total_instructions),
         )
 
-    @classmethod
-    def upsert_user(cls, user_id, attributes):
-        return UpsertCommand.create(
-            CommandType.UPSERT, UpsertUser.create(user_id, attributes)
-        )
+    class user:
+        @classmethod
+        def upsert(cls, user_id, attributes):
+            return UpsertCommand.create(
+                CommandType.UPSERT, UpsertUser.create(user_id, attributes)
+            )
 
-    @classmethod
-    def upsert_group(cls, attributes, id_reference):
-        return UpsertCommand.create(
-            CommandType.UPSERT, UpsertGroup.create(attributes, id_reference)
-        )
+    class group:
+        @classmethod
+        def upsert(cls, attributes, id_reference):
+            return UpsertCommand.create(
+                CommandType.UPSERT, UpsertGroup.create(attributes, id_reference)
+            )
 
-    @classmethod
-    def create_group_membership(cls, user_id, group_ref):
-        return CreateCommand.create(
-            CommandType.CREATE, CreateGroupMembership.create(user_id, group_ref)
-        )
+    class group_membership:
+        @classmethod
+        def create(cls, user_id, group_ref):
+            return CreateCommand.create(
+                CommandType.CREATE, CreateGroupMembership.create(user_id, group_ref)
+            )

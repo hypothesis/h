@@ -7,7 +7,7 @@ class Model:
     """
 
     # An optional schema to apply to the contents when set
-    schema = None
+    validator = None
 
     # Custom message to add to any validation errors
     validation_error_title = None
@@ -34,8 +34,8 @@ class Model:
         if error_title is None:
             error_title = self.validation_error_title
 
-        if self.schema is not None:
-            self.schema.validate_all(self.raw, error_title)
+        if self.validator is not None:
+            self.validator.validate_all(self.raw, error_title)
 
     @classmethod
     def extract_raw(cls, item):

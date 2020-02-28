@@ -59,6 +59,10 @@ class JSONAPIData(Model):
         return self.raw["data"]
 
     @property
+    def id(self):
+        return self._data["id"]
+
+    @property
     def type(self):
         """
         The data type of this object

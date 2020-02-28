@@ -14,8 +14,8 @@ from h.h_api.schema import Schema
 class Command(Model):
     """A single abstract command provided to the API."""
 
-    schema = Schema.get_validator("bulk_api/wrapper.json")
-    validation_error_title = "Command wrapper is malformed: cannot interpret command"
+    validator = Schema.get_validator("bulk_api/wrapper.json")
+    validation_error_title = "Cannot interpret command as the wrapper is malformed"
 
     def validate(self):
         super().validate()

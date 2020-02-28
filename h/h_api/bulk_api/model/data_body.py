@@ -8,7 +8,7 @@ from h.h_api.schema import Schema
 class UpsertUser(JSONAPIData):
     """The data to upsert a user."""
 
-    schema = Schema.get_validator("bulk_api/command/upsert_user.json")
+    validator = Schema.get_validator("bulk_api/command/upsert_user.json")
 
     @classmethod
     def create(cls, _id, attributes):
@@ -25,7 +25,7 @@ class UpsertUser(JSONAPIData):
 class UpsertGroup(JSONAPIData):
     """The data to upsert a group."""
 
-    schema = Schema.get_validator("bulk_api/command/upsert_group.json")
+    validator = Schema.get_validator("bulk_api/command/upsert_group.json")
 
     @classmethod
     def create(cls, attributes, id_reference):
@@ -48,7 +48,7 @@ class UpsertGroup(JSONAPIData):
 class CreateGroupMembership(JSONAPIData):
     """The data to add a user to a group."""
 
-    schema = Schema.get_validator("bulk_api/command/create_group_membership.json")
+    validator = Schema.get_validator("bulk_api/command/create_group_membership.json")
 
     @classmethod
     def create(cls, user_id, group_ref):
@@ -68,3 +68,23 @@ class CreateGroupMembership(JSONAPIData):
                 },
             },
         )
+
+    @property
+    def member_id(self):
+        return self.relationships["member"]["data"]["id"]
+
+    @property
+    def group_id(self):
+        _group_id = self._group_id
+        if "$ref" in _group_id:
+            return None
+
+        return _group_id
+
+    @property
+    def group_ref(self):
+        return self._group_id.get("$ref")
+
+    @property
+    def _group_id(self):
+        return self.relationships["group"]["data"]["id"]
