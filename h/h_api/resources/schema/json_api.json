@@ -1,6 +1,9 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
 
+    "title": "JSON API objects",
+    "description": "JSON API schema with a few custom additions",
+
     "$defs": {
         "document": {
             "type": "object",
@@ -13,7 +16,18 @@
                 "relationships": {"$ref": "#/$defs/relationships"}
             },
             "required": ["data"],
-            "additionalProperties": false
+            "additionalProperties": false,
+
+            "examples": [
+                {
+                    "data": {
+                        "type": "my_type"
+                    },
+                    "meta": {
+                        "custom": "values"
+                    }
+                }
+            ]
         },
 
         "relationships": {
@@ -25,7 +39,15 @@
                 },
                 "additionalProperties": false,
                 "required": ["data"]
-            }
+            },
+
+            "examples": [
+                {
+                    "custom_relation": {
+                        "data": {"type":  "some_type", "id": "12325"}
+                    }
+                }
+            ]
         },
 
         "resourceObject": {
@@ -36,11 +58,30 @@
                 "attributes": {"type": "object"},
                 "meta": {"$ref": "#/$defs/metaData"}
             },
-            "required": ["type"]
+            "required": ["type"],
+
+            "examples": [
+                {
+                    "id": "123556",
+                    "type": "my_type",
+                    "attributes": {
+                        "custom": "values"
+                    },
+                    "meta": {
+                        "custom": "values"
+                    }
+                }
+            ]
         },
 
         "metaData": {
-            "type": "object"
+            "type": "object",
+
+            "examples": [
+                {
+                    "custom": "values"
+                }
+            ]
         },
 
         "resourceIdentifier": {
@@ -57,7 +98,13 @@
                 },
                 "type": {"type": "string"}
             },
-            "required": ["id", "type"]
+            "required": ["id", "type"],
+
+            "examples": [
+                {"type":  "my_type", "id": "concrete"},
+
+                {"type":  "my_type", "id": {"$ref": "our_addition"}}
+            ]
         }
     }
 }

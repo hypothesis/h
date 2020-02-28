@@ -1,5 +1,9 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "title": "Upsert user",
+    "description": "The body for a user upsert command",
+
     "allOf": [
         {"$ref": "../../json_api.json#/$defs/document"},
         {
@@ -13,6 +17,26 @@
                     "required": ["type", "id", "attributes"]
                 },
                 "additionalProperties": false
+            }
+        }
+    ],
+
+    "examples": [
+        {
+            "data": {
+                "type": "user",
+                "id": "acct:user@example.com",
+                "attributes": {
+                    "username": "user",
+                    "display_name": "display name",
+                    "authority": "example.com",
+                    "identities": [
+                        {
+                            "provider": "provider string",
+                            "provider_unique_id": "provider unique id"
+                        }
+                    ]
+                }
             }
         }
     ]

@@ -1,11 +1,17 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
 
+    "title": "Core schema",
+    "description": "Re-usable components for the H-API",
+
     "$defs": {
         "anchor": {
             "$comment": "http://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.8.2.3",
             "type": "string",
-            "pattern": "^[A-z][0-9A-z_:.-]*$"
+            "pattern": "^[A-z][0-9A-z_:.-]*$",
+            "examples": [
+                "id_reference"
+            ]
         },
 
         "anchorReference": {
@@ -14,22 +20,34 @@
             "properties": {
                 "$ref": {"$ref": "#/$defs/anchor"}
             },
-            "required": ["$ref"]
+            "required": ["$ref"],
+            "examples": [
+                {"$ref": "id_reference"}
+            ]
         },
 
         "groupId": {
             "type": "string",
-            "pattern": "^[1-9ABDEGJ-NP-RV-Zabdegi-km-rv-z]{8}$"
+            "pattern": "^[1-9ABDEGJ-NP-RV-Zabdegi-km-rv-z]{8}$",
+            "examples": [
+                "19Ba4bkm"
+            ]
         },
 
         "groupGroupId": {
             "type": "string",
-            "pattern": "group:[a-zA-Z0-9._\\-+!~*()']{1,1024}@.*$"
+            "pattern": "group:[a-zA-Z0-9._\\-+!~*()']{1,1024}@.*$",
+            "examples": [
+                "group:group_name@example.com"
+            ]
         },
 
         "userId": {
             "type": "string",
-            "pattern": "^acct:.+$"
+            "pattern": "^acct:.+$",
+            "examples": [
+                "acct:user@example.com"
+            ]
         },
 
         "user": {
@@ -73,6 +91,19 @@
             },
             "required": [
                 "username", "display_name", "authority", "identities"
+            ],
+            "examples": [
+                {
+                    "username": "username",
+                    "display_name": "my name",
+                    "authority": "example.com",
+                    "identities": [
+                        {
+                            "provider": "provider name",
+                            "provider_unique_id": "provider@example.com"
+                        }
+                    ]
+                }
             ]
         },
 
@@ -83,7 +114,14 @@
                 "name": {"type": "string"},
                 "groupid": {"$ref":  "#/$defs/groupGroupId"}
             },
-            "required": ["name"]
+            "required": ["name"],
+
+            "examples": [
+                {
+                    "name": "group_name",
+                    "groupid": "group:group_name@example.com"
+                }
+            ]
         }
     }
 }
