@@ -12,7 +12,7 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "effective": {"$ref": "../core.json#/$defs/userId"}
+                "effective": {"$ref": "../../core.json#/$defs/userId"}
             },
             "required": ["effective"]
         },
@@ -24,7 +24,7 @@
             "properties": {
                 "total": {
                    "type": "integer",
-                    "minimum": 1,
+                    "minimum": 2,
                     "maximum": 1000
                 }
             },
