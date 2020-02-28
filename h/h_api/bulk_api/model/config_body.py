@@ -3,7 +3,7 @@
 from collections import defaultdict
 from functools import lru_cache
 
-from h.h_api.enums import CommandType
+from h.h_api.enums import CommandType, DataType
 from h.h_api.model.base import Model
 from h.h_api.schema import Schema
 
@@ -12,6 +12,20 @@ class Configuration(Model):
     schema = Schema.get_validator("bulk_api/command/configuration.json")
 
     WILD_CARD = "*"
+
+    @classmethod
+    def create(cls, effective_user, total_instructions):
+        return cls(
+            {
+                "view": None,
+                "user": {"effective": effective_user},
+                "instructions": {"total": int(total_instructions)},
+                "defaults": [
+                    ["create", "*", {"on_duplicate": "continue"}],
+                    ["upsert", "*", {"merge_query": True}],
+                ],
+            }
+        )
 
     @property
     def view(self):
@@ -25,19 +39,6 @@ class Configuration(Model):
     def total_instructions(self):
         return self.raw["instructions"]["total"]
 
-    @property
-    @lru_cache(1)
-    def command_defaults(self):
-        config = defaultdict(dict)
-
-        for command_type, data_type, defaults in self.raw["defaults"]:
-            if command_type != self.WILD_CARD:
-                command_type = CommandType(command_type)
-
-            config[command_type][data_type] = defaults
-
-        return config
-
     def defaults_for(self, command_type, data_type):
         """
         Provide default configuration for the given command and data type.
@@ -49,12 +50,13 @@ class Configuration(Model):
         :param data_type: Data type being modified
         :return: A dict of config
         """
-        defaults = self.command_defaults
+        defaults = self._command_defaults
 
         config = {}
 
         wild = defaults.get(self.WILD_CARD, {})
-        specific = defaults.get(command_type, {})
+        specific = defaults.get(CommandType(command_type), {})
+        data_type = DataType(data_type)
 
         for container in (wild, specific):
             if self.WILD_CARD in container:
@@ -65,16 +67,18 @@ class Configuration(Model):
 
         return config
 
-    @classmethod
-    def create(cls, effective_user, total_instructions):
-        return cls(
-            {
-                "view": None,
-                "user": {"effective": effective_user},
-                "instructions": {"total": total_instructions},
-                "defaults": [
-                    ["create", "*", {"on_duplicate": "continue"}],
-                    ["upsert", "*", {"merge_query": True}],
-                ],
-            }
-        )
+    @property
+    @lru_cache(1)
+    def _command_defaults(self):
+        config = defaultdict(dict)
+
+        for command_type, data_type, defaults in self.raw["defaults"]:
+            if command_type != self.WILD_CARD:
+                command_type = CommandType(command_type)
+
+            if data_type != self.WILD_CARD:
+                data_type = DataType(data_type)
+
+            config[command_type][data_type] = defaults
+
+        return config

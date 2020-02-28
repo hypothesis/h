@@ -3,7 +3,7 @@ from unittest.mock import create_autospec
 import pytest
 
 from h.h_api.bulk_api.model.command import Command, ConfigCommand, DataCommand
-from h.h_api.bulk_api.model.configure_body import Configuration
+from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.bulk_api.model.data_body import UpsertUser
 from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import SchemaValidationError
@@ -97,13 +97,3 @@ class TestDataCommand:
             data_classes = {DataType.USER: UpsertUser}
 
         return UpsertUserCommand
-
-
-class TestCreateCommand:
-    def test_it_understands_registered_type(self):
-        raise NotImplementedError()
-
-
-class UpsertCommand:
-    def test_woo(self):
-        raise NotImplementedError()

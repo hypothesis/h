@@ -1,5 +1,5 @@
 from h.h_api.bulk_api.model.command import ConfigCommand, CreateCommand, UpsertCommand
-from h.h_api.bulk_api.model.configure_body import Configuration
+from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.bulk_api.model.data_body import (
     CreateGroupMembership,
     UpsertGroup,
