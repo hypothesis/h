@@ -15,6 +15,26 @@ class JSONAPIException(Exception):
         return JSONAPIError.create(self._error_bodies()).raw
 
 
+class SimpleJSONAPIException(JSONAPIException):
+    """
+    A convenience exception which will convert itself to JSON API format.
+
+    This takes the type of this exception and the stringification as the
+    message.
+    """
+
+    http_status = None
+
+    def _error_bodies(self):
+        yield JSONAPIErrorBody.create(self, status=self.http_status)
+
+
+class CommandSequenceException(SimpleJSONAPIException):
+    """The sequence of commands is incorrect."""
+
+    http_status = 400
+
+
 class SchemaValidationError(JSONAPIException):
     """Represent a number of schema validation errors.
 
