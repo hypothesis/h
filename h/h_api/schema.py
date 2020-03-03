@@ -19,13 +19,14 @@ class Validator(Draft7Validator):
         :return: None
         :raise SchemaValidationError: When errors are found
         """
-        error_set = SchemaValidationError(error_title)
+
+        errors = []
 
         for error in self.iter_errors(instance):
-            error_set.add_error(error)
+            errors.append(error)
 
-        if error_set.has_errors():
-            raise error_set
+        if errors:
+            raise SchemaValidationError(errors, title=error_title)
 
 
 class Schema:

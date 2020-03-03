@@ -20,11 +20,8 @@ class TestJSONAPIExcepion:
 
 
 class TestSchemaValidationError:
-    def test_add_error(self, json_schema_error, JSONAPIErrorBody):
-        error = SchemaValidationError()
-
-        assert error.error_bodies == []
-        error.add_error(json_schema_error)
+    def test_creation(self, json_schema_error, JSONAPIErrorBody):
+        error = SchemaValidationError([json_schema_error])
 
         assert error.error_bodies == [JSONAPIErrorBody.create.return_value]
 
@@ -33,14 +30,8 @@ class TestSchemaValidationError:
             detail=Any.string(),
             meta={"schema": {"pointer": "properties/a/type"}, "context": []},
             pointer="a",
+            status=400,
         )
-
-    def test_has_errors(self, json_schema_error):
-        error = SchemaValidationError()
-
-        assert not error.has_errors()
-        error.add_error(json_schema_error)
-        assert error.has_errors()
 
     @pytest.fixture
     def JSONAPIErrorBody(self, patch):

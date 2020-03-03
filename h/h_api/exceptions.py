@@ -24,37 +24,31 @@ class SchemaValidationError(JSONAPIException):
 
     http_status = 400
 
-    def __init__(self, title=None):
+    def __init__(self, errors, title=None):
+        """
+        :param errors: List of jsonschema.exceptions.ValidationError` errors
+        :param title: Custom title for the exception
+        """
         if title is None:
             title = "The provided data does not match the schema"
 
         super().__init__(title)
-        self.error_bodies = []
+        self.error_bodies = [self._format_error(error) for error in errors]
 
-    def add_error(self, error):
-        """
-        Add an error to this exception.
-
-        :param error: A `jsonschema.exceptions.ValidationError` error
-        """
-        self.error_bodies.append(
-            JSONAPIErrorBody.create(
-                self,
-                detail=error.message,
-                pointer=self._path_to_string(error.path),
-                meta={
-                    "schema": {"pointer": self._path_to_string(error.schema_path)},
-                    "context": [context.message for context in error.context],
-                },
-            )
+    def _format_error(self, error):
+        return JSONAPIErrorBody.create(
+            self,
+            detail=error.message,
+            pointer=self._path_to_string(error.path),
+            meta={
+                "schema": {"pointer": self._path_to_string(error.schema_path)},
+                "context": [context.message for context in error.context],
+            },
+            status=self.http_status,
         )
 
     def _error_bodies(self):
         return self.error_bodies
-
-    def has_errors(self):
-        """Determine if this exception contains any errors."""
-        return bool(self.error_bodies)
 
     @staticmethod
     def _path_to_string(path):
