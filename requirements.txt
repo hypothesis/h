@@ -4,86 +4,86 @@
 #
 #    pip-compile
 #
-alembic==1.4.0
+alembic==1.4.0            # via -r requirements.in (line 6)
 amqp==2.5.2               # via kombu
 attrs==19.3.0             # via jsonschema
-bcrypt==3.1.7
+bcrypt==3.1.7             # via -r requirements.in (line 7)
 billiard==3.6.1.0         # via celery
-bleach==3.1.1
-celery==4.4.0
-certifi==2019.11.28
-cffi==1.14.0
+bleach==3.1.1             # via -r requirements.in (line 8)
+celery==4.4.0             # via -r requirements.in (line 9)
+certifi==2019.11.28       # via -r requirements.in (line 10), sentry-sdk
+cffi==1.14.0              # via -r requirements.in (line 11), bcrypt
 chameleon==3.6.2          # via deform
-click==7.0
+click==7.0                # via -r requirements.in (line 12)
 colander==1.7.0           # via deform
-deform==2.0.8
-elasticsearch-dsl==6.3.1
-elasticsearch==6.4.0
-gevent==1.4.0
+deform==2.0.8             # via -r requirements.in (line 13)
+elasticsearch-dsl==6.3.1  # via -r requirements.in (line 15)
+elasticsearch==6.4.0      # via -r requirements.in (line 14), elasticsearch-dsl
+gevent==1.4.0             # via -r requirements.in (line 16)
 greenlet==0.4.15          # via gevent
-gunicorn==20.0.4
-h-pyramid-sentry==1.2.0
-h_matchers==1.2.4
-hkdf==0.0.3
+gunicorn==20.0.4          # via -r requirements.in (line 17)
+h-matchers==1.2.4         # via -r requirements.in (line 2)
+h-pyramid-sentry==1.2.0   # via -r requirements.in (line 1)
+hkdf==0.0.3               # via -r requirements.in (line 18)
 hupper==1.9.1             # via pyramid
 importlib-metadata==1.4.0  # via jsonschema, kombu
 iso8601==0.1.12           # via colander, deform
-itsdangerous==1.1.0
+itsdangerous==1.1.0       # via -r requirements.in (line 19)
 jinja2==2.10.3            # via pyramid-jinja2
-jsonpointer==2.0
-jsonschema==3.2.0
-kombu==4.6.7
+jsonpointer==2.0          # via -r requirements.in (line 20)
+jsonschema==3.2.0         # via -r requirements.in (line 21)
+kombu==4.6.7              # via -r requirements.in (line 22), celery
 mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
-mistune==0.8.4
+mistune==0.8.4            # via -r requirements.in (line 23)
 more-itertools==8.1.0     # via zipp
-newrelic==5.6.0.135
-oauthlib==3.1.0
-passlib==1.7.2
+newrelic==5.8.0.136       # via -r requirements.in (line 24)
+oauthlib==3.1.0           # via -r requirements.in (line 25)
+passlib==1.7.2            # via -r requirements.in (line 26)
 pastedeploy==2.0.1        # via plaster-pastedeploy
 peppercorn==0.6           # via deform
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
-psycogreen==1.0.2
-psycopg2==2.8.4
+psycogreen==1.0.2         # via -r requirements.in (line 27)
+psycopg2==2.8.4           # via -r requirements.in (line 28)
 pycparser==2.19           # via cffi
-pyjwt==1.7.1
-pyparsing==2.4.6
-pyramid-authsanity==1.1.0
-pyramid-exclog==1.0
-pyramid-jinja2==2.8
-pyramid-layout==1.0
-pyramid-mailer==0.15.1
-pyramid-retry==2.1
-pyramid-services==2.2
-pyramid-tm==2.4
-pyramid==1.10.4
+pyjwt==1.7.1              # via -r requirements.in (line 4)
+pyparsing==2.4.6          # via -r requirements.in (line 29)
+pyramid-authsanity==1.1.0  # via -r requirements.in (line 31)
+pyramid-exclog==1.0       # via -r requirements.in (line 32)
+pyramid-jinja2==2.8       # via -r requirements.in (line 34)
+pyramid-layout==1.0       # via -r requirements.in (line 33)
+pyramid-mailer==0.15.1    # via -r requirements.in (line 36)
+pyramid-retry==2.1        # via -r requirements.in (line 37)
+pyramid-services==2.2     # via -r requirements.in (line 35), pyramid-authsanity
+pyramid-tm==2.4           # via -r requirements.in (line 38)
+pyramid==1.10.4           # via -r requirements.in (line 30), h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-services, pyramid-tm
 pyrsistent==0.15.7        # via jsonschema
-python-dateutil==2.8.1
+python-dateutil==2.8.1    # via -r requirements.in (line 39), alembic, elasticsearch-dsl
 python-editor==1.0.4      # via alembic
-python-slugify==4.0.0
+python-slugify==4.0.0     # via -r requirements.in (line 40)
 pytz==2019.3              # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
 sentry-sdk==0.14.0        # via h-pyramid-sentry
 six==1.14.0               # via bcrypt, bleach, elasticsearch-dsl, jsonschema, pyrsistent, python-dateutil
-sqlalchemy==1.3.13
-statsd==3.3.0
-supervisor==4.1.0
+sqlalchemy==1.3.13        # via -r requirements.in (line 5), alembic, zope.sqlalchemy
+statsd==3.3.0             # via -r requirements.in (line 41)
+supervisor==4.1.0         # via -r requirements.in (line 42)
 text-unidecode==1.3       # via python-slugify
-transaction==2.4.0
+transaction==2.4.0        # via -r requirements.in (line 43), pyramid-mailer, pyramid-tm, repoze.sendmail, zope.sqlalchemy
 translationstring==1.3    # via colander, deform, pyramid
 urllib3==1.25.7           # via elasticsearch, sentry-sdk
-venusian==3.0.0
+venusian==3.0.0           # via -r requirements.in (line 44), pyramid
 vine==1.3.0               # via amqp, celery
 webencodings==0.5.1       # via bleach
 webob==1.8.5              # via pyramid
 wired==0.2.1              # via pyramid-services
-ws4py==0.5.1
-wsaccel==0.6.2
+ws4py==0.5.1              # via -r requirements.in (line 46)
+wsaccel==0.6.2            # via -r requirements.in (line 45)
 zipp==2.0.0               # via importlib-metadata
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
-zope.interface==4.3.2
-zope.sqlalchemy==1.1
+zope.interface==4.3.2     # via -r requirements.in (line 47), pyramid, pyramid-authsanity, pyramid-retry, pyramid-services, repoze.sendmail, transaction, wired, zope.sqlalchemy
+zope.sqlalchemy==1.1      # via -r requirements.in (line 48)
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
