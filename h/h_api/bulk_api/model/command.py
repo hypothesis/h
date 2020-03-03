@@ -1,3 +1,4 @@
+from copy import deepcopy
 from functools import lru_cache
 
 from h.h_api.bulk_api.model.config_body import Configuration
@@ -117,6 +118,10 @@ class DataCommand(Command):
         # it's still valid
         return klass(body, validate=False)
 
+    @classmethod
+    def prepare_for_execute(cls, batch, default_config):
+        pass
+
 
 class CreateCommand(DataCommand):
     """A command to create an object in the database."""
@@ -131,3 +136,21 @@ class UpsertCommand(DataCommand):
         DataType.GROUP: UpsertGroup,
         DataType.USER: UpsertUser,
     }
+
+    @classmethod
+    def prepare_for_execute(cls, batch, default_config):
+        # Pop out this command as it's just for us
+        merge_query = default_config.pop("merge_query", None)
+
+        if not merge_query:
+            return
+
+        for command in batch:
+            query = command.body.meta.get("query")
+            if not query:
+                continue
+
+            new_attrs = deepcopy(query)
+            new_attrs.update(command.body.attributes)
+
+            command.body.attributes = new_attrs

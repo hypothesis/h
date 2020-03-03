@@ -17,3 +17,15 @@ class CommandType(Enum):
     CONFIGURE = "configure"
     UPSERT = "upsert"
     CREATE = "create"
+
+
+class CommandStatus(Enum):
+    """BulkAPI command processing statuses."""
+
+    AS_RECEIVED = "as_received"
+    POST_EXECUTE = "post_execute"
+
+
+class CommandResult(Enum):
+    CREATED = "created"
+    UPDATED = "updated"

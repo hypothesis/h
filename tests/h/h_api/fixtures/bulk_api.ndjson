@@ -1,0 +1,4 @@
+["configure", {"view": null, "user": {"effective": "acct:user@example.com"}, "instructions": {"total": 4}, "defaults": [["create", "*", {"on_duplicate": "continue"}], ["upsert", "*", {"merge_query": true}]]}]
+["upsert", {"data": {"type": "user", "id": "acct:user@wat.com", "attributes": {"username": "username", "display_name": "display name", "authority": "authority", "identities": [{"provider": "provider", "provider_unique_id": "provider_unique_id"}]}}}]
+["upsert", {"data": {"type": "group", "attributes": {"name": "group:name@example.com"}, "meta": {"query": {"groupid": "group:groupid@example.com"}, "$anchor": "group_ref"}}}]
+["create", {"data": {"type": "group_membership", "relationships": {"member": {"type": "user", "id": "acct:user@wat.com"}, "group": {"type": "group", "id": {"$ref": "group_ref"}}}}}]
