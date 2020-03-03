@@ -4,8 +4,7 @@ import datetime
 from unittest import mock
 
 import jwt
-from hypothesis import assume, given
-from hypothesis import strategies as st
+import pytest
 
 from h.auth import tokens
 
@@ -66,16 +65,17 @@ class TestAuthToken:
 
         assert result is None
 
-    def test_returns_none_for_malformed_header(self, pyramid_request):
-        pyramid_request.headers["Authorization"] = "abcdef123"
-
-        result = tokens.auth_token(pyramid_request)
-
-        assert result is None
-
-    @given(header=st.text())
-    def test_returns_none_for_malformed_header_fuzz(self, header, pyramid_request):
-        assume(not header.startswith("Bearer "))
+    @pytest.mark.parametrize(
+        "header",
+        [
+            "",
+            "abcdef123",
+            "\x10",
+            ".\x00\"Ħ(\x12'𨳂\x05\U000df02a\U00095c2c셀",
+            "\U000f022b\t\x07\x1c0\x04\x06",
+        ],
+    )
+    def test_returns_none_for_malformed_header(self, header, pyramid_request):
         pyramid_request.headers["Authorization"] = header
 
         result = tokens.auth_token(pyramid_request)
