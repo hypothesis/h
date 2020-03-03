@@ -35,6 +35,17 @@ class CommandSequenceException(SimpleJSONAPIException):
     http_status = 400
 
 
+class UnpopulatedReferenceError(SimpleJSONAPIException):
+    """The client used an id reference which was not created."""
+
+    http_status = 400
+
+    def __init__(self, data_type, reference):
+        super().__init__(
+            f"No concrete id found for '{data_type}' reference '{reference}'"
+        )
+
+
 class SchemaValidationError(JSONAPIException):
     """Represent a number of schema validation errors.
 
