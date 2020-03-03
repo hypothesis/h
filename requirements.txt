@@ -32,7 +32,7 @@ itsdangerous==1.1.0       # via -r requirements.in (line 19)
 jinja2==2.10.3            # via pyramid-jinja2
 jsonpointer==2.0          # via -r requirements.in (line 20)
 jsonschema==3.2.0         # via -r requirements.in (line 21)
-kombu==4.6.7              # via -r requirements.in (line 22), celery
+kombu==4.6.8              # via -r requirements.in (line 22), celery
 mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mistune==0.8.4            # via -r requirements.in (line 23)
