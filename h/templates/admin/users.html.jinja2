@@ -27,13 +27,14 @@
           <tr><th>Username</th><td>{{ user.username }}</td></tr>
           <tr><th>Authority</th><td>{{ user.authority }}</td></tr>
           <tr><th>Email</th><td>{{ user.email }}</td></tr>
-          <tr><th>Registered</th><td>{{ user.registered_date }}</td></tr>
-          <tr><th>Last login</th><td>{{ user.last_login_date }}</td></tr>
+          <tr><th>Registered</th><td>{{ format_date(user.registered_date) }}</td></tr>
+          <tr><th>Last login</th><td>{{ format_date(user.last_login_date) }}</td></tr>
           <tr>
             <th>Is activated?</th>
             <td>
               {% if user.is_activated %}
                 &#x2714;
+                {% if user.activation_date %}({{ format_date(user.activation_date) }}){% endif %}
               {% else %}
                 &#x2718;
                 <form action="{{request.route_path('admin.users_activate')}}"
