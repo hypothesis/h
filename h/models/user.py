@@ -245,6 +245,7 @@ class User(Base):
         server_default=sa.func.now(),
         nullable=False,
     )
+    activated_date = sa.Column(sa.TIMESTAMP(timezone=False), nullable=True)
 
     # Activation foreign key
     activation_id = sa.Column(sa.Integer, sa.ForeignKey("activation.id"))
@@ -260,6 +261,8 @@ class User(Base):
     def activate(self):
         """Activate the user by deleting any activation they have."""
         session = sa.orm.object_session(self)
+
+        self.activated_date = datetime.datetime.utcnow()
         session.delete(self.activation)
 
     #: Hashed password
