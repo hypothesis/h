@@ -15,6 +15,13 @@ class UserNotFoundError(Exception):
     pass
 
 
+def format_date(date):
+    """Format a date for presentation in the UI."""
+
+    # Format here is "2012-01-29 21:19"
+    return date.strftime("%Y-%m-%d %H:%M")
+
+
 @view_config(
     route_name="admin.users",
     request_method="GET",
@@ -44,6 +51,7 @@ def users_index(request):
         "authority": authority,
         "user": user,
         "user_meta": user_meta,
+        "format_date": format_date,
     }
 
 

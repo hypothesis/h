@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
+
 import pytest
 from pyramid.authorization import ACLAuthorizationPolicy
 from sqlalchemy import exc
@@ -198,23 +200,36 @@ class TestUserModelUserId:
 
 
 class TestUserModel:
-    def test_User_activate_activates_user(self, db_session):
-        user = models.User(
-            authority="example.com", username="kiki", email="kiki@kiki.com"
-        )
-        activation = models.Activation()
-        user.activation = activation
-        db_session.add(user)
-        db_session.flush()
-
+    def test_activate_activates_user(self, user, db_session):
         user.activate()
-        db_session.commit()
+        db_session.flush()
 
         assert user.is_activated
 
-    def test_privacy_accepted_defaults_to_None(self, db_session):
+    def test_activate_updates_activation_date(self, user):
+        assert user.activation_date is None
+
+        user.activate()
+
+        assert isinstance(user.activation_date, datetime)
+
+        # We can't test for the exact time, but this should be close
+        assert user.activation_date - datetime.utcnow() < timedelta(seconds=1)
+
+    def test_privacy_accepted_defaults_to_None(self):
         # nullable
         assert getattr(models.User(), "privacy_accepted") is None
+
+    @pytest.fixture
+    def user(self, db_session):
+        user = models.User(
+            authority="example.com", username="kiki", email="kiki@kiki.com"
+        )
+        user.activation = models.Activation()
+        db_session.add(user)
+        db_session.flush()
+
+        return user
 
 
 class TestUserGetByEmail:

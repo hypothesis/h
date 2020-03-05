@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from datetime import datetime
 from unittest import mock
 
 import pytest
@@ -11,12 +11,19 @@ from h.services.delete_user import DeleteUserService
 from h.services.user import UserService
 from h.views.admin.users import (
     UserNotFoundError,
+    format_date,
     users_activate,
     users_delete,
     users_index,
 )
 
 users_index_fixtures = pytest.mark.usefixtures("models", "annotation_stats_service")
+
+
+def test_format_date():
+    date = datetime(2001, 11, 29, 21, 50, 59, 999999)
+
+    assert format_date(date) == "2001-11-29 21:50"
 
 
 @users_index_fixtures
@@ -29,6 +36,7 @@ def test_users_index(pyramid_request):
         "authority": None,
         "user": None,
         "user_meta": {},
+        "format_date": format_date,
     }
 
 
@@ -94,6 +102,7 @@ def test_users_index_no_user_found(models, pyramid_request):
         "authority": "foo.org",
         "user": None,
         "user_meta": {},
+        "format_date": format_date,
     }
 
 
@@ -111,6 +120,7 @@ def test_users_index_user_found(models, pyramid_request, db_session, factories):
         "authority": "foo.org",
         "user": user,
         "user_meta": {"annotations_count": 0},
+        "format_date": format_date,
     }
 
 
