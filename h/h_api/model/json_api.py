@@ -36,7 +36,7 @@ class JSONAPIErrorBody(Model):
 
 
 class JSONAPIData(Model):
-    """A single JSON API data object (call or response)."""
+    """A single JSON API data object (request or response)."""
 
     # TODO! - This would be nice but introduces a circular dependency with
     # Schema as it needs the error stuff above via SchemaValdiationError
