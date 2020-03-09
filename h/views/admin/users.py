@@ -18,6 +18,9 @@ class UserNotFoundError(Exception):
 def format_date(date):
     """Format a date for presentation in the UI."""
 
+    if date is None:
+        return ""
+
     # Format here is "2012-01-29 21:19"
     return date.strftime("%Y-%m-%d %H:%M")
 

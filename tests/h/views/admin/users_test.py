@@ -20,10 +20,12 @@ from h.views.admin.users import (
 users_index_fixtures = pytest.mark.usefixtures("models", "annotation_stats_service")
 
 
-def test_format_date():
-    date = datetime(2001, 11, 29, 21, 50, 59, 999999)
-
-    assert format_date(date) == "2001-11-29 21:50"
+@pytest.mark.parametrize(
+    "input,expected",
+    ((datetime(2001, 11, 29, 21, 50, 59, 999999), "2001-11-29 21:50"), (None, "")),
+)
+def test_format_date(input, expected):
+    assert format_date(input) == expected
 
 
 @users_index_fixtures

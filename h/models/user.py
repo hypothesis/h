@@ -233,12 +233,7 @@ class User(Base):
 
     email = sa.Column(sa.UnicodeText())
 
-    last_login_date = sa.Column(
-        sa.TIMESTAMP(timezone=False),
-        default=datetime.datetime.utcnow,
-        server_default=sa.func.now(),
-        nullable=False,
-    )
+    last_login_date = sa.Column(sa.TIMESTAMP(timezone=False), nullable=True)
     registered_date = sa.Column(
         sa.TIMESTAMP(timezone=False),
         default=datetime.datetime.utcnow,
