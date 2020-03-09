@@ -45,7 +45,13 @@ class TestSchema:
         # Check something that should pass
         validator.validate_all(upsert_group_body)
 
-        # Modify one value which proves we are loading chained schema
+    def test_get_validator_configured_to_load_referenced_schema(
+        self, upsert_group_body
+    ):
+        validator = Schema.get_validator("bulk_api/command/upsert_group.json")
+
+        # Modify one value which proves we configured the Validator to load
+        # chained schema
         upsert_group_body["data"]["meta"]["query"]["groupid"] = "wrong_pattern"
 
         with pytest.raises(SchemaValidationError):

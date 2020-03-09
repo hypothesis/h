@@ -1,4 +1,4 @@
-"""Classes relating to loading and parsing JSON schema."""
+"""Classes for loading and parsing JSON schema."""
 
 from functools import lru_cache
 

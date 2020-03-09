@@ -2,7 +2,7 @@ import pytest
 from h_matchers import Any
 from jsonschema import Draft7Validator
 
-from h.h_api.exceptions import JSONAPIException, SchemaValidationError
+from h.h_api.exceptions import JSONAPIError, SchemaValidationError
 from h.h_api.model.json_api import JSONAPIErrorBody
 
 
@@ -10,7 +10,7 @@ class TestJSONAPIExcepion:
     def test_subclassing(self):
         body = JSONAPIErrorBody.create(KeyError("test"))
 
-        class TestError(JSONAPIException):
+        class TestError(JSONAPIError):
             def _error_bodies(self):
                 yield body
 

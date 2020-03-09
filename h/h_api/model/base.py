@@ -1,5 +1,5 @@
 class Model:
-    """Represents an object backed by a plain data structure.
+    """An object backed by a plain data structure.
 
     For compatibility with JSON serialisation it's important that the inner
     data structure not contain anything which cannot be serialised. This is

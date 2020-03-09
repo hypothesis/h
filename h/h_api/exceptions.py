@@ -1,8 +1,13 @@
-from h.h_api.model.json_api import JSONAPIError, JSONAPIErrorBody
+from h.h_api.model.json_api import JSONAPIError as JSONAPIErrorModel
+from h.h_api.model.json_api import JSONAPIErrorBody
 
 
-class JSONAPIException(Exception):
-    """An exception which can turn itself into a a JSON API error response."""
+class HAPIError(Exception):
+    """An abstract exception for all error situations in HAPI."""
+
+
+class JSONAPIError(HAPIError):
+    """An error which can turn itself into a a JSON API error response."""
 
     http_status = None
 
@@ -12,21 +17,17 @@ class JSONAPIException(Exception):
 
     def as_dict(self):
         """Get a JSON API compatible dict representing this error."""
-        return JSONAPIError.create(self._error_bodies()).raw
+        return JSONAPIErrorModel.create(self._error_bodies()).raw
 
 
-class SchemaValidationError(JSONAPIException):
-    """Represent a number of schema validation errors.
-
-    This class can be used to build up the errors and then check if the
-    exception should be raised.
-    """
+class SchemaValidationError(JSONAPIError):
+    """The provided data did not match the schema."""
 
     http_status = 400
 
     def __init__(self, errors, title=None):
         """
-        :param errors: List of jsonschema.exceptions.ValidationError` errors
+        :param errors: List of jsonschema.exceptions.ValidationError errors
         :param title: Custom title for the exception
         """
         if title is None:
