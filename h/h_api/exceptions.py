@@ -20,6 +20,26 @@ class JSONAPIError(HAPIError):
         return JSONAPIErrorModel.create(self._error_bodies()).raw
 
 
+class SimpleJSONAPIError(JSONAPIError):
+    """
+    An error with a single message which can be formatted as JSON API data.
+
+    This takes the type of this exception and the stringification as the
+    message, and is intended to make it easy to create simple exceptions.
+    """
+
+    http_status = None
+
+    def _error_bodies(self):
+        yield JSONAPIErrorBody.create(self, status=self.http_status)
+
+
+class CommandSequenceError(SimpleJSONAPIError):
+    """The sequence of commands is incorrect."""
+
+    http_status = 400
+
+
 class SchemaValidationError(JSONAPIError):
     """The provided data did not match the schema."""
 
