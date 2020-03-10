@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import create_autospec
 
 import pytest
 from h_matchers import Any
@@ -92,10 +92,10 @@ class TestCommandBatch:
 
     @pytest.fixture
     def on_flush(self):
-        def _on_flush(command_type, data_type, batch):
+        def on_flush(command_type, data_type, batch):
             pass
 
-        return Mock(spec=_on_flush)
+        return create_autospec(on_flush)
 
     @pytest.fixture
     def batch(self, on_flush):
