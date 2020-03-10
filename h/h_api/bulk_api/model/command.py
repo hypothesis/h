@@ -23,15 +23,15 @@ class Command(Model):
             self.body.validate()
 
     @classmethod
-    def create(cls, _type, body):
+    def create(cls, type_, body):
         """
         Create a command.
 
-        :param _type: The CommandType of the command
+        :param type_: The CommandType of the command
         :param body: The payload for the command
         :return: An instance of Command
         """
-        return cls([CommandType(_type).value, cls.extract_raw(body)])
+        return cls([CommandType(type_).value, cls.extract_raw(body)])
 
     @property
     def type(self):
@@ -106,7 +106,7 @@ class DataCommand(Command):
         data_type = DataType(body["data"]["type"])
 
         try:
-            klass = self.data_classes[data_type]
+            class_ = self.data_classes[data_type]
 
         except KeyError:
             # TODO! A custom error would be nice here
@@ -115,7 +115,7 @@ class DataCommand(Command):
         # Don't validate this all the time, we did it on the way in. If we have
         # mutated it it might not match the schema we except from clients, but
         # it's still valid
-        return klass(body, validate=False)
+        return class_(body, validate=False)
 
 
 class CreateCommand(DataCommand):
