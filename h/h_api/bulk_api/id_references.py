@@ -25,7 +25,7 @@ class IdReferences:
     REF_KEY = "$ref"
 
     def __init__(self):
-        self.id_refs = defaultdict(dict)
+        self._ref_to_concrete = defaultdict(dict)
 
     def fill_out(self, body):
         """
@@ -54,12 +54,12 @@ class IdReferences:
         """
         data_type = DataType(data_type)
 
-        self.id_refs[data_type][id_ref] = concrete_id
+        self._ref_to_concrete[data_type][id_ref] = concrete_id
 
     def _get_concrete_id(self, data_type, id_ref):
         data_type = DataType(data_type)
         try:
-            return self.id_refs[data_type][id_ref]
+            return self._ref_to_concrete[data_type][id_ref]
         except KeyError:
             raise UnpopulatedReferenceError(data_type, id_ref)
 
