@@ -71,10 +71,14 @@ class CreateGroupMembership(JSONAPIData):
 
     @property
     def member_id(self):
+        """The user which is a member of this group."""
+
         return self.relationships["member"]["data"]["id"]
 
     @property
     def group_id(self):
+        """The group the user is a member of."""
+
         _group_id = self._group_id
         if "$ref" in _group_id:
             return None
@@ -83,6 +87,11 @@ class CreateGroupMembership(JSONAPIData):
 
     @property
     def group_ref(self):
+        """
+        A client provided reference for this group.
+
+        If you don't know the group id yet, you can use your own reference.
+        """
         return self._group_id.get("$ref")
 
     @property

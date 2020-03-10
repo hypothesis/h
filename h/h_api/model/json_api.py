@@ -97,5 +97,8 @@ class JSONAPIData(Model):
     def id_reference(self):
         """An id reference.
 
-        This is a custom extension to JSON API."""
+        This is a custom extension to JSON API which allows you to give an item
+        a reference which you can refer to in the same call. This is intended
+        to allow you to refer to something which you don't yet know the id for.
+        """
         return self.meta.get("$anchor")
