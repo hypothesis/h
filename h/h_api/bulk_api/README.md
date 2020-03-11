@@ -14,7 +14,6 @@
   * [Comparison with client](#comparison-with-client)
 - [Implementation details](#implementation-details)
   * [Our models contain the data privately](#our-models-contain-the-data-privately)
-    + [A short rant about why POJOs suck](#a-short-rant-about-why-pojos-suck)
     + [A POJO tries to _be_ the data, these models _have_ the data](#a-pojo-tries-to--be--the-data--these-models--have--the-data)
   * [How we apply our schema](#how-we-apply-our-schema)
     + [Applying a single schema up front isn't nice for consumers](#applying-a-single-schema-up-front-isn-t-nice-for-consumers)
@@ -247,24 +246,6 @@ We do not take this approach. Our objects:
  * Apply strict schema to this data on creation and on demand
  * Only give access as a last resort
  * Has methods for related logic attached to the model
- 
-### A short rant about why POJOs suck
-
-We don't have models, so we don't have POJOs, but it's a common way to go and I
-want to say why I think they're awful.
-
- * They don't manage state, and are therefore the anti-thesis of encapsulation
- * A POJO can be in any and all states possible as you've no idea who mutated it or how
- * As they make no attempt to manage state you:
-    * At best, have a companion logic object that duplicates and follows them around
-    * At worst, have logic distributed all over your app about mutating them
- * You spend a lot of time writing accessors you never actually access in your code
- * They couple your code completely to your chosen data structure
- * They are bad at simply transporting data
- 
-Most APIs tend not to actually change the data they handle very much. We often
-just read one or two fields to decide where something should go, and then hoy it
-in a database.
 
 ### A POJO tries to _be_ the data, these models _have_ the data
 
