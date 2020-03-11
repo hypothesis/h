@@ -5,6 +5,7 @@ from h.h_api.bulk_api.model.data_body import (
     UpsertGroup,
     UpsertUser,
 )
+from h.h_api.exceptions import SchemaValidationError
 
 
 class TestUpsertUser:
@@ -29,7 +30,7 @@ class TestUpsertUser:
         }
 
     def test_create_can_fail(self):
-        with pytest.raises(Exception):
+        with pytest.raises(SchemaValidationError):
             UpsertUser.create("bad", {})
 
 
@@ -67,9 +68,24 @@ class TestCreateGroupMembership:
             }
         }
 
-    def test_create_can_fail(self,):
-        with pytest.raises(Exception):
+    def test_create_can_fail(self):
+        with pytest.raises(SchemaValidationError):
             CreateGroupMembership.create("bad", None)
+
+    def test_validation_can_fail(self):
+        with pytest.raises(SchemaValidationError):
+            CreateGroupMembership(
+                {
+                    "data": {
+                        "type": "group_membership",
+                        "relationships": {
+                            # This isn't good enough, these should have bodies
+                            "member": {},
+                            "group": {},
+                        },
+                    }
+                }
+            )
 
     def test_accessors(self, create_group_membership_body):
         data = CreateGroupMembership(create_group_membership_body)

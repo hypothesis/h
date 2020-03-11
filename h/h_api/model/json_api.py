@@ -39,8 +39,8 @@ class JSONAPIData(Model):
     """A single JSON API data object (request or response)."""
 
     # TODO! - This would be nice but introduces a circular dependency with
-    # Schema as it needs the error stuff above via SchemaValdiationError
-    # schema = Schema.get_validator('json_api.json#/$defs/resourceObject')
+    # Schema as it needs the error stuff above via SchemaValidationError
+    # schema = Schema.get_validator('json_api.json#/$defs/document')
 
     @classmethod
     def create(
