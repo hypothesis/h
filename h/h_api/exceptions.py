@@ -40,6 +40,12 @@ class CommandSequenceError(SimpleJSONAPIError):
     http_status = 400
 
 
+class InvalidDeclarationError(SimpleJSONAPIError):
+    """The client has declared statement which is false or out of bounds."""
+
+    http_status = 400
+
+
 class UnpopulatedReferenceError(SimpleJSONAPIError):
     """The client used an id reference which was not created."""
 
