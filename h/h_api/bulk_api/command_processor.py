@@ -82,8 +82,8 @@ class CommandProcessor:
     def _add_to_batch(self, command):
         """Add a single command to the batch.
 
-        When the batch size reaches maximum, or the task switches this will
-        trigger the commands to be flushed to the executor.
+This may cause the CommandBatch to call the on_flush() callback that we passed to it
+(self._execute_batch()) if it decides that it's time to execute the next batch.
         """
 
         if self.config is None:
