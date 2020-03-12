@@ -21,24 +21,24 @@ class Executor:
 
         The implementer is expected to:
 
-         * Full-fill the action
+         * Execute the actions
          * Respect the configuration passed
          * Return a list of `Report` objects in the same order as the items
            in the batch
 
-        :param command_type: The CommandType being (e.g. UPSERT)
-        :param data_type: The DataType being modified
+        :param command_type: The CommandType being executed (e.g. CommandType.UPSERT)
+        :param data_type: The DataType being modified, e.g. DataType.USER
         :param default_config: Configuration which applies to all actions
-        :param batch: A list of command objects
+        :param batch: A list of Command models
         :return: A list of `Report` objects
         """
         raise NotImplementedError()
 
     def get_items(self, data_type, ids, config):
         """
-        Retrieve a number of items to report back to the caller.
+        Return the items identified by `ids`.
 
-        The objects returned should be in the same order as sent.
+        The items returned should be in the same order as requested in `ids`.
 
         :param data_type: The data type to retrieve
         :param ids: The ids of the objects to retrieve

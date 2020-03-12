@@ -15,7 +15,7 @@ class Report:
         :param id_: The id of the resource update
         """
         if id_ is None:
-            raise ValueError("Id is required for successful outcomes")
+            raise ValueError("id_ is required for successful outcomes")
 
         self.outcome = self.CommandResult(outcome)
         self.id = id_
