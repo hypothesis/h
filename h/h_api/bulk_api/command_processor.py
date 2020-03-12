@@ -32,8 +32,8 @@ class CommandProcessor:
         self.executor = executor
         self.observer = observer or Observer()
 
-        # Pass a reference to the command batch to our execute batch command
-        # so it can call us back when the batch is ready
+        # Pass _execute_batch() to the CommandBatch so it can call us back
+        # when the batch is ready.
         self.batch = CommandBatch(on_flush=self._execute_batch, batch_size=batch_size)
 
         # A container for any custom references to objects
