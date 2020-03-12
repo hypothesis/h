@@ -10,8 +10,11 @@ class Executor:
         """
         Configure the job from the provided config object.
 
-        :param config: A config object
-        :return:
+        This is an opportunity for the executor to setup any global options
+        required to process subsequent actions correctly. Typically this is
+        the first command and only happens once.
+
+        :param config: A `Configuration` object
         """
         pass
 
@@ -40,9 +43,13 @@ class Executor:
 
         The items returned should be in the same order as requested in `ids`.
 
+        The config here is a dict of options which modify the behavior of the
+        whole batch. For example `{"on_duplicate": "continue"}` for a create
+        command.
+
         :param data_type: The data type to retrieve
         :param ids: The ids of the objects to retrieve
-        :param config: Any additional config
+        :param config: A dict of configuration options to modify processing
         :return: An iterable of data objects
         """
 
