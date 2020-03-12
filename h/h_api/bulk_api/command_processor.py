@@ -43,10 +43,7 @@ class CommandProcessor:
         self.command_count = 0
 
     def process(self, commands):
-        """Process the given commands.
-
-        :param commands: An iterable of Command objects
-        """
+        """Process an iterable of Command objects."""
 
         for command in commands:
             self._process_single_command(command)
