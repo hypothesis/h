@@ -2,11 +2,22 @@ from copy import deepcopy
 
 import pytest
 
+from h.h_api.bulk_api.command_builder import CommandBuilder
 from h.h_api.schema import Schema
 
 
 def get_schema_example(schema_path):
     return deepcopy(Schema.get_schema(schema_path)["examples"][0])
+
+
+@pytest.fixture
+def group_command(group_attributes):
+    return CommandBuilder.group.upsert(group_attributes, "id_ref")
+
+
+@pytest.fixture
+def user_command(user_attributes):
+    return CommandBuilder.user.upsert("acct:user@example.com", user_attributes)
 
 
 @pytest.fixture
