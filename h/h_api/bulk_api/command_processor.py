@@ -18,7 +18,7 @@ class CommandProcessor:
 
      * Checking the correctness of commands and their order
      * Batching similar commands together for batch processing
-     * Dispatching these batches to an `Executor` to make changes
+     * Dispatching batches of commands to an `Executor` to execute them
      * Reporting each command to an `Observer` to look at
     """
 
