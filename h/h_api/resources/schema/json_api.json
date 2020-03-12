@@ -12,8 +12,7 @@
                     "$comment": "Data can be an array, but we never do that",
                     "$ref":  "#/$defs/resourceObject"
                 },
-                "meta": {"$ref": "#/$defs/metaData"},
-                "relationships": {"$ref": "#/$defs/relationships"}
+                "meta": {"$ref": "#/$defs/metaData"}
             },
             "required": ["data"],
             "additionalProperties": false,
@@ -56,9 +55,11 @@
                 "id": {"type": "string"},
                 "type": {"type": "string"},
                 "attributes": {"type": "object"},
+                "relationships": {"$ref": "#/$defs/relationships"},
                 "meta": {"$ref": "#/$defs/metaData"}
             },
             "required": ["type"],
+            "additionalProperties": false,
 
             "examples": [
                 {
