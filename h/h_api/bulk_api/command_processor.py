@@ -1,7 +1,7 @@
 """Interface for processing batches of commands."""
 from collections import defaultdict
 
-from h.h_api.bulk_api.command_batch import CommandBatch
+from h.h_api.bulk_api.command_batcher import CommandBatcher
 from h.h_api.bulk_api.id_references import IdReferences
 from h.h_api.bulk_api.model.command import ConfigCommand
 from h.h_api.bulk_api.model.report import Report
@@ -32,9 +32,11 @@ class CommandProcessor:
         self.executor = executor
         self.observer = observer or Observer()
 
-        # Pass _execute_batch() to the CommandBatch so it can call us back
+        # Pass _execute_batch() to the CommandBatcher so it can call us back
         # when the batch is ready.
-        self.batch = CommandBatch(on_flush=self._execute_batch, batch_size=batch_size)
+        self.batcher = CommandBatcher(
+            on_flush=self._execute_batch, batch_size=batch_size
+        )
 
         # A container for any custom references to objects
         self.id_refs = IdReferences()
@@ -49,7 +51,7 @@ class CommandProcessor:
             self._process_single_command(command)
 
         # Flush out the last batch of commands (if any)
-        self.batch.flush()
+        self.batcher.flush()
 
         self._check_command_count(final=True)
 
@@ -82,14 +84,14 @@ class CommandProcessor:
     def _add_to_batch(self, command):
         """Add a single command to the batch.
 
-This may cause the CommandBatch to call the on_flush() callback that we passed to it
+This may cause the CommandBatcher to call the on_flush() callback that we passed to it
 (self._execute_batch()) if it decides that it's time to execute the next batch.
         """
 
         if self.config is None:
             raise CommandSequenceError("Not configured yet")
 
-        with self.batch.add(command):
+        with self.batcher.add(command):
             # If we have any id references like `"id": {"$ref": ...}` we need
             # to fill these out before we pass them to the executor. We do this
             # now to get the earliest warning if we have any id references
@@ -121,7 +123,7 @@ This may cause the CommandBatch to call the on_flush() callback that we passed t
     def _execute_batch(self, command_type, data_type, batch):
         """Prepare and execute a batch of commands.
 
-        This is passed to the `CommandBatch` object which will call us back
+        This is passed to the `CommandBatcher` object which will call us back
         here when a batch is ready.
         """
 

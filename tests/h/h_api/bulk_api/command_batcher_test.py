@@ -3,11 +3,11 @@ from unittest.mock import create_autospec
 import pytest
 from h_matchers import Any
 
-from h.h_api.bulk_api.command_batch import CommandBatch
+from h.h_api.bulk_api.command_batcher import CommandBatcher
 from h.h_api.exceptions import CommandSequenceError
 
 
-class TestCommandBatch:
+class TestCommandBatcher:
     def test_flushing_does_nothing_with_an_empty_batch(self, batch, on_flush):
         batch.flush()
 
@@ -98,4 +98,4 @@ class TestCommandBatch:
 
     @pytest.fixture
     def batch(self, on_flush):
-        return CommandBatch(on_flush)
+        return CommandBatcher(on_flush)
