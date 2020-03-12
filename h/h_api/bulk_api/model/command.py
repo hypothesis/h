@@ -1,3 +1,4 @@
+from copy import deepcopy
 from functools import lru_cache
 
 from h.h_api.bulk_api.model.config_body import Configuration
@@ -19,6 +20,7 @@ class Command(Model):
 
     def validate(self):
         super().validate()
+
         if isinstance(self.body, Model):
             self.body.validate()
 
@@ -117,6 +119,19 @@ class DataCommand(Command):
         # it's still valid
         return class_(body, validate=False)
 
+    @classmethod
+    def prepare_for_execute(cls, batch, default_config):
+        """Modify the commands and config in place before execution.
+
+        An opportunity for this class to perform any modifications required
+        before the objects can be sent for execution.
+
+        :param batch: A list of instances of this class
+        :param default_config: A dict of configuration global to all commands
+                               in the batch
+        """
+        pass
+
 
 class CreateCommand(DataCommand):
     """A command to create an object in the database."""
@@ -131,3 +146,21 @@ class UpsertCommand(DataCommand):
         DataType.GROUP: UpsertGroup,
         DataType.USER: UpsertUser,
     }
+
+    @classmethod
+    def prepare_for_execute(cls, batch, default_config):
+        # Pop out this command as it's just for us
+        merge_query = default_config.pop("merge_query", None)
+
+        if not merge_query:
+            return
+
+        for command in batch:
+            query = command.body.meta.get("query")
+            if not query:
+                continue
+
+            new_attrs = deepcopy(query)
+            new_attrs.update(command.body.attributes)
+
+            command.body.attributes = new_attrs

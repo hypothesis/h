@@ -4,7 +4,6 @@ import pytest
 from h_matchers import Any
 
 from h.h_api.bulk_api.command_batch import CommandBatch
-from h.h_api.bulk_api.command_builder import CommandBuilder
 from h.h_api.exceptions import CommandSequenceError
 
 
@@ -83,12 +82,12 @@ class TestCommandBatch:
                 pass
 
     @pytest.fixture
-    def command(self, user_attributes):
-        return CommandBuilder.user.upsert("acct:user@example.com", user_attributes)
+    def command(self, user_command):
+        return user_command
 
     @pytest.fixture
-    def other_command(self, group_attributes):
-        return CommandBuilder.group.upsert(group_attributes, "id_ref")
+    def other_command(self, group_command):
+        return group_command
 
     @pytest.fixture
     def on_flush(self):

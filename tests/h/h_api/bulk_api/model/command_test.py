@@ -2,7 +2,12 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from h.h_api.bulk_api.model.command import Command, ConfigCommand, DataCommand
+from h.h_api.bulk_api.model.command import (
+    Command,
+    ConfigCommand,
+    DataCommand,
+    UpsertCommand,
+)
 from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.bulk_api.model.data_body import UpsertUser
 from h.h_api.enums import CommandType, DataType
@@ -97,3 +102,26 @@ class TestDataCommand:
             data_classes = {DataType.USER: UpsertUser}
 
         return UpsertUserCommand
+
+
+class TestUpsertCommand:
+    def test_prepare_for_execute_pops_merge_query_from_config(self, user_command):
+        config = {"merge_query": True, "another": True}
+
+        UpsertCommand.prepare_for_execute([user_command], config)
+
+        assert config == {"another": True}
+
+    def test_prepare_for_execute_merges_queries(self, user_command, group_command):
+        # You don't get mixed command types, but it's helpful here as one has
+        # a query and the other doesn't
+
+        assert "groupid" in group_command.body.meta["query"]
+        assert "groupid" not in group_command.body.attributes
+
+        UpsertCommand.prepare_for_execute(
+            [user_command, group_command], {"merge_query": True}
+        )
+
+        assert "groupid" in group_command.body.meta["query"]
+        assert "groupid" in group_command.body.attributes
