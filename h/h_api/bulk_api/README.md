@@ -340,7 +340,7 @@ Major classes:
    * `bulk_api.command_builder.CommandBuilder` - Creates `Command` objects from raw data or provided convenience methods
  * __Main loop__:
    * `bulk_api.bulk_job.BulkJob` - Entry point for main algorithm
-   * `bulk_api.command_batch.CommandBatch` - Represents a group of commands and logic for when the group needs to be executed
+   * `bulk_api.command_batcher.CommandBatcher` - Represents a group of commands and logic for when the group needs to be executed
    * `bulk_api.id_references.IdReferences` - Keeps tabs on user provided references, concrete ids and subbing one for the other
  * __Entry points__ into the main loop:
    * `bulk_api.executor.Executor` - Abstract classes responsible for making changes to DB and reporting back
@@ -356,7 +356,7 @@ This is largely the same for the client and the server:
  * The `Obvserver` is informed about each command going through 
    * Opportunity to serialise here for client
    * Mostly just absolute gold dust for debugging
- * The `BulkJob` stores commands in a `CommandBatch` until the batch decides commands must be dealt with
+ * The `BulkJob` stores commands in a `CommandBatcher` until the batch decides commands must be dealt with
    * This happens if the list gets too long, or we swap from one type of command to another
    * This then calls the `BulkJob` back to let it know, which in turn calls the `Executor`
  * The `Executor` would actually put things in the DB in response and report on created ids
@@ -372,7 +372,7 @@ This is largely the same for the client and the server:
  1. Model for configuration body
  1. Models for command wrappers (`UpsertCommand` etc.)
  1. Command builder (`CommandBuilder`)
- 1. Command batches (`CommandBatch`)
+ 1. Command batches (`CommandBatcher`)
  1. Id reference store and de-referencer (`IdReferences`)
  1. Bulk Job and collaborators (`BulkJob`, `Executor`, `Observer`)
  1. Convenience wrappers (`BulkAPI`)

@@ -5,8 +5,8 @@ from contextlib import contextmanager
 from h.h_api.exceptions import CommandSequenceError
 
 
-class CommandBatch:
-    """A batch of commands.
+class CommandBatcher:
+    """Collects together similar commands, passing them to a callback.
 
     This object will group similar commands together and decide when they
     should be executed. The number of commands should always be a number we
