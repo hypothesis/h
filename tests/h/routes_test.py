@@ -14,7 +14,7 @@ def test_includeme():
     # up-to-date is hopefully pretty low (run the tests with -vv, copy the new
     # expected value, strip out any Unicode prefixes) and it serves as a check
     # to ensure that any changes made to the routes were intended.
-    assert config.add_route.mock_calls == [
+    calls = [
         call("index", "/"),
         call("robots", "/robots.txt"),
         call("via_redirect", "/via"),
@@ -127,6 +127,7 @@ def test_includeme():
             factory="h.traversal:AnnotationRoot",
             traverse="/{id}",
         ),
+        call("api.bulk", "/api/bulk", request_method="POST"),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
             "api.group_upsert",
@@ -236,3 +237,11 @@ def test_includeme():
             "wordpress-plugin", "https://wordpress.org/plugins/hypothesis/", static=True
         ),
     ]
+
+    # Test each one one at a time to make it a bit easier to spot which one
+    # isn't in the list
+    for single_call in calls:
+        assert single_call in config.add_route.mock_calls
+
+    # Then we can assert the order here
+    assert config.add_route.mock_calls == calls

@@ -10,6 +10,7 @@ API views.
 from pyramid import httpexceptions
 from pyramid.view import forbidden_view_config, notfound_view_config, view_config
 
+from h.h_api.exceptions import JSONAPIError
 from h.i18n import TranslationString as _  # noqa: N813
 from h.util.view import handle_exception, json_view
 from h.views.api.config import cors_policy
@@ -55,6 +56,14 @@ def api_error(context, request):
     """Handle an expected/deliberately thrown API exception."""
     request.response.status_code = context.status_code
     return {"status": "failure", "reason": context.detail}
+
+
+@json_view(context=JSONAPIError, path_info="/api/bulk", decorator=cors_policy)
+def bulk_api_error(context, request):
+    """Handle JSONAPIErrors produced by the Bulk API."""
+
+    request.response.status_code = context.http_status
+    return context.as_dict()
 
 
 @json_view(context=Exception, path_info="/api/", decorator=cors_policy)
