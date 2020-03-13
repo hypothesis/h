@@ -9,11 +9,13 @@
         {"enum":  ["create", "upsert", "configure"]},
         {"type":  "object"}
     ],
+    "minItems": 2,
+    "maxItems": 2,
+
     "if": {
         "items": [
             {"enum": ["configure"]}
-        ],
-        "additionalItems": true
+        ]
     },
     "then": {
         "items": [

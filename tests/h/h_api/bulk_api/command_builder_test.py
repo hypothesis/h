@@ -61,6 +61,11 @@ class TestCommandBuilderFromData:
         with pytest.raises(SchemaValidationError):
             CommandBuilder.from_data([CONFIGURE, configuration_body])
 
+    @pytest.mark.parametrize("data", ([], ["configure"]))
+    def test_we_get_schema_errors_with_malformed_commands(self, data):
+        with pytest.raises(SchemaValidationError):
+            CommandBuilder.from_data(data)
+
 
 class TestCommandBuilderCreation:
     def test_configure(self):

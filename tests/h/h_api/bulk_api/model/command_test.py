@@ -29,6 +29,8 @@ class TestCommand:
     @pytest.mark.parametrize(
         "raw",
         (
+            [],
+            ["create"],
             {},
             ["wrong", {}],
             [CommandType.CREATE.value, {}],
