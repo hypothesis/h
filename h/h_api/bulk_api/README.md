@@ -20,7 +20,6 @@
     + [We apply our schema in two phases](#we-apply-our-schema-in-two-phases)
   * [How the Bulk API is structured](#how-the-bulk-api-is-structured)
   * [Overview of data flow:](#overview-of-data-flow-)
-- [How upcoming PRs are broken down](#how-upcoming-prs-are-broken-down)
 
 ## Overview
 
@@ -339,7 +338,7 @@ Major classes:
    * `enums.*` - Various enums like `DataType` and `CommandType`
    * `bulk_api.command_builder.CommandBuilder` - Creates `Command` objects from raw data or provided convenience methods
  * __Main loop__:
-   * `bulk_api.bulk_job.BulkJob` - Entry point for main algorithm
+   * `bulk_api.command_processor.CommandProcessor` - Entry point for main algorithm
    * `bulk_api.command_batcher.CommandBatcher` - Represents a group of commands and logic for when the group needs to be executed
    * `bulk_api.id_references.IdReferences` - Keeps tabs on user provided references, concrete ids and subbing one for the other
  * __Entry points__ into the main loop:
@@ -352,27 +351,15 @@ Major classes:
 This is largely the same for the client and the server:
 
  * `Commands` are created using the `CommandBuilder`
- * Each `Command` is sent to the `BulkJob` one by one
- * The `Obvserver` is informed about each command going through 
+ * Each `Command` is sent to the `CommandProcessor` one by one
+ * The `Observer` is informed about each command going through 
    * Opportunity to serialise here for client
    * Mostly just absolute gold dust for debugging
- * The `BulkJob` stores commands in a `CommandBatcher` until the batch decides commands must be dealt with
+ * The `CommandProcessor` stores commands in a `CommandBatcher` until the batch decides commands must be dealt with
    * This happens if the list gets too long, or we swap from one type of command to another
-   * This then calls the `BulkJob` back to let it know, which in turn calls the `Executor`
+   * This then calls the `CommandProcessor` back to let it know, which in turn calls the `Executor`
  * The `Executor` would actually put things in the DB in response and report on created ids
- * The `BulkJob` uses the returned ids to de-reference any future objects using the `IdReferences`
+ * The `CommandProcessor` uses the returned ids to de-reference any future objects using the `IdReferences`
  * At the end the `Executor` is asked to retrieve items if they are needed (`view != None`)
    * This part isn't done yet but we would probably call the `Observer` with the return bodies
    * This would form the reply stream (in the case of the server, disabled for client)
-   
-# How upcoming PRs are broken down
-
- 1. Schema and validators
- 1. Model classes for data bodies (`UpsertUser`, `UpsertGroup`, `CreateGroupMembership`)
- 1. Model for configuration body
- 1. Models for command wrappers (`UpsertCommand` etc.)
- 1. Command builder (`CommandBuilder`)
- 1. Command batches (`CommandBatcher`)
- 1. Id reference store and de-referencer (`IdReferences`)
- 1. Bulk Job and collaborators (`BulkJob`, `Executor`, `Observer`)
- 1. Convenience wrappers (`BulkAPI`)
