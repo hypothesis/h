@@ -24,6 +24,10 @@ class TestCommandProcessor:
         with pytest.raises(CommandSequenceError):
             command_processor.process([config_command, config_command])
 
+    def test_if_fails_with_no_commands(self, command_processor):
+        with pytest.raises(CommandSequenceError):
+            command_processor.process([])
+
     def test_it_fails_with_too_many_commands(
         self, command_processor, commands, user_command
     ):
