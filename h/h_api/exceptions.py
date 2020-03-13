@@ -46,6 +46,12 @@ class InvalidDeclarationError(SimpleJSONAPIError):
     http_status = 400
 
 
+class InvalidJSONError(SimpleJSONAPIError):
+    """The client sent a string we cannot interpret as JSON."""
+
+    http_status = 400
+
+
 class UnpopulatedReferenceError(SimpleJSONAPIError):
     """The client used an id reference which was not created."""
 

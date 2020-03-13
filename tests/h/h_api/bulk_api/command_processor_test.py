@@ -6,7 +6,6 @@ from h_matchers import Any
 # Import... ALL OF THE THINGS
 from h.h_api.bulk_api.command_builder import CommandBuilder
 from h.h_api.bulk_api.command_processor import CommandProcessor
-from h.h_api.bulk_api.executor import AutomaticReportExecutor, Executor
 from h.h_api.bulk_api.model.report import Report
 from h.h_api.bulk_api.observer import Observer
 from h.h_api.enums import CommandResult, CommandStatus, CommandType, DataType
@@ -179,15 +178,6 @@ class TestCommandProcessor:
     @pytest.fixture
     def command_processor(self, executor, observer):
         return CommandProcessor(executor, observer)
-
-    @pytest.fixture
-    def executor(self):
-        executor = create_autospec(Executor, instance=True)
-        fake_report_executor = AutomaticReportExecutor()
-
-        executor.execute_batch.side_effect = fake_report_executor.execute_batch
-
-        return executor
 
     @pytest.fixture
     def observer(self):
