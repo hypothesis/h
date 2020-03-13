@@ -20,7 +20,7 @@ class TestBulkAPIFunctional:
         fixture = resource_filename("tests", "h/h_api/fixtures/bulk_api.ndjson")
 
         with open(fixture) as lines:
-            BulkAPI.from_stream(lines, executor=executor, observer=Observer())
+            BulkAPI.from_lines(lines, executor=executor, observer=Observer())
 
         executor.configure.assert_called_with(config=Any.instance_of(Configuration))
 

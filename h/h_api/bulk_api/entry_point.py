@@ -15,7 +15,7 @@ class BulkAPI:
     """Convenience methods for streaming to and from the BulkAPI."""
 
     @classmethod
-    def from_stream(cls, lines, executor, observer=None):
+    def from_lines(cls, lines, executor, observer=None):
         """
         Read from a stream of lines where each line is one command.
 
@@ -41,12 +41,20 @@ class BulkAPI:
         """
         Read from a string of NDJSON.
 
-        Convenience wrapper for `from_stream`.
+        Convenience wrapper for `from_lines`.
         """
 
-        lines = (line for line in string.strip().split("\n"))
+        cls.from_lines(cls._string_to_lines(string), executor, observer)
 
-        cls.from_stream(lines, executor, observer)
+    @classmethod
+    def from_byte_stream(cls, byte_stream, executor, observer=None):
+        """
+        Read from a stream of NDJSON bytes.
+
+        Convenience wrapper for `from_lines`.
+        """
+
+        cls.from_lines(cls._bytes_to_lines(byte_stream), executor, observer)
 
     @classmethod
     def to_stream(cls, handle, commands):
@@ -79,6 +87,11 @@ class BulkAPI:
 
     @staticmethod
     def _commands_from_ndjson(lines):
+        """Turn multiple lines of JSON into Command objects.
+
+        :param lines: An iterable of JSON strings
+        :return: A generator of `Command` objects
+        """
         for line_number, line in enumerate(lines):
             try:
                 data = json.loads(line)
@@ -89,3 +102,40 @@ class BulkAPI:
 
             # Try catch JSON errors here
             yield CommandBuilder.from_data(data)
+
+    @staticmethod
+    def _string_to_lines(string):
+        """Split a string on new-lines.
+
+        :param string: A string to split
+        :return: A generator of strings containing single lines
+        """
+        return (line for line in string.strip().split("\n"))
+
+    @staticmethod
+    def _bytes_to_lines(stream, chunk_size=16384):
+        """Split a stream of bytes on new-lines.
+
+        :param stream: A file-like object
+        :return: A generator of strings containing single lines
+        """
+        line = b""
+
+        while True:
+            block = stream.read(chunk_size)
+            if not len(block):
+                break
+
+            # As long as our block contains new lines, split strings out of it
+            while b"\n" in block:
+                head, block = block.split(b"\n", 1)
+
+                if line:
+                    yield line + head
+
+                line = b""
+
+            line += block
+
+        if line:
+            yield line

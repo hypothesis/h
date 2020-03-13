@@ -1,5 +1,5 @@
 import json
-from io import StringIO
+from io import BytesIO, StringIO
 from types import GeneratorType
 
 import pytest
@@ -17,7 +17,7 @@ class TestBulkAPI:
     # interfaces
 
     def test_from_stream(self, lines, executor, CommandProcessor):
-        BulkAPI.from_stream(lines, executor)
+        BulkAPI.from_lines(lines, executor)
 
         CommandProcessor.assert_called_once_with(
             executor=executor, observer=Any.instance_of(Observer)
@@ -34,6 +34,15 @@ class TestBulkAPI:
 
         self._assert_process_called_with_generator_of_commands(CommandProcessor)
 
+    def test_from_byte_stream(self, nd_json_byte_stream, executor, CommandProcessor):
+        BulkAPI.from_byte_stream(nd_json_byte_stream, executor)
+
+        CommandProcessor.assert_called_once_with(
+            executor=executor, observer=Any.instance_of(Observer)
+        )
+
+        self._assert_process_called_with_generator_of_commands(CommandProcessor)
+
     @pytest.mark.parametrize(
         "kwargs",
         (
@@ -41,7 +50,7 @@ class TestBulkAPI:
             pytest.param({"observer": "not an observer"}, id="bad observer"),
         ),
     )
-    @pytest.mark.parametrize("method", (BulkAPI.from_stream, BulkAPI.from_string))
+    @pytest.mark.parametrize("method", (BulkAPI.from_lines, BulkAPI.from_string))
     def test_we_reject_bad_arguments(self, method, kwargs, executor):
         kwargs.setdefault("executor", executor)
 
@@ -91,6 +100,10 @@ class TestBulkAPI:
         return resource_string("tests", "h/h_api/fixtures/bulk_api.ndjson").decode(
             "utf-8"
         )
+
+    @pytest.fixture
+    def nd_json_byte_stream(self, nd_json):
+        return BytesIO(nd_json.encode("utf-8"))
 
     @pytest.fixture
     def lines(self, nd_json):
