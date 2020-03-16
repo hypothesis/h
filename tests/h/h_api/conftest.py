@@ -1,8 +1,10 @@
 from copy import deepcopy
+from unittest.mock import create_autospec
 
 import pytest
 
 from h.h_api.bulk_api.command_builder import CommandBuilder
+from h.h_api.bulk_api.executor import AutomaticReportExecutor, Executor
 from h.h_api.schema import Schema
 
 
@@ -62,3 +64,13 @@ def user_attributes(upsert_user_body):
 @pytest.fixture
 def group_attributes():
     return {"name": "name", "groupid": "group:name@example.com"}
+
+
+@pytest.fixture
+def executor():
+    executor = create_autospec(Executor, instance=True)
+    fake_report_executor = AutomaticReportExecutor()
+
+    executor.execute_batch.side_effect = fake_report_executor.execute_batch
+
+    return executor
