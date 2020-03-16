@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import base64
-
 import pytest
-
-from h.models.auth_client import GrantType
 
 
 class TestReadMembers:
@@ -14,21 +10,19 @@ class TestReadMembers:
         group = factories.RestrictedGroup()
         group.members = [factories.User(), factories.User(), factories.User()]
         db_session.commit()
-        res = app.get("/api/groups/{pubid}/members".format(pubid=group.pubid))
+
+        res = app.get(f"/api/groups/{group.pubid}/members")
 
         assert res.status_code == 200
         assert len(res.json) == 3
 
     def test_it_returns_list_of_members_if_user_has_access_to_private_group(
-        self, app, factories, db_session, group, user_with_token, token_auth_header
+        self, app, factories, db_session, group, user, token_auth_header
     ):
-        user, _ = user_with_token
         group.members.append(user)
         db_session.commit()
-        res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
-            headers=token_auth_header,
-        )
+
+        res = app.get(f"/api/groups/{group.pubid}/members", headers=token_auth_header,)
 
         returned_usernames = [member["username"] for member in res.json]
         assert user.username in returned_usernames
@@ -37,12 +31,14 @@ class TestReadMembers:
         assert res.status_code == 200
 
     def test_it_returns_404_if_user_does_not_have_read_access_to_group(
-        self, app, group, user_with_token, token_auth_header
+        self, app, user_3rd_party, db_session, factories, user, token_auth_header
     ):
+        group = factories.Group(creator=user_3rd_party)
+        db_session.commit()
+
         # This user is not a member of the group
-        user, _ = user_with_token
         res = app.get(
-            "/api/groups/{pubid}/members".format(pubid=group.pubid),
+            f"/api/groups/{group.pubid}/members",
             headers=token_auth_header,
             expect_errors=True,
         )
@@ -56,112 +52,81 @@ class TestReadMembers:
 
 
 class TestAddMember:
-    def test_it_returns_http_204_when_successful(
-        self, app, third_party_user, third_party_group, auth_client_header
-    ):
+    def test_it_returns_http_204_when_successful(self, app, user, group, auth_header):
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=third_party_group.pubid, userid=third_party_user.userid
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{user.userid}", headers=auth_header,
         )
 
         assert res.status_code == 204
 
-    def test_it_adds_member_to_group(
-        self, app, third_party_user, third_party_group, auth_client_header
-    ):
+    def test_it_adds_member_to_group(self, app, user, group, auth_header):
         app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=third_party_group.pubid, userid=third_party_user.userid
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{user.userid}", headers=auth_header,
         )
 
-        assert third_party_user in third_party_group.members
+        assert user in group.members
 
     def test_it_ignores_forwarded_user_header(
-        self,
-        app,
-        third_party_user,
-        factories,
-        third_party_group,
-        db_session,
-        auth_client_header,
+        self, app, user, factories, group, db_session, auth_header,
     ):
-        headers = auth_client_header
-        user2 = factories.User(authority="thirdparty.com")
+        headers = auth_header
+        user2 = factories.User(authority="thirdparty.example.com")
         db_session.commit()
 
-        headers["X-Forwarded-User"] = third_party_user.userid
+        headers["X-Forwarded-User"] = user.userid
 
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=third_party_group.pubid, userid=third_party_user.userid
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{user.userid}", headers=auth_header,
         )
 
-        assert third_party_user in third_party_group.members
-        assert user2 not in third_party_group.members
+        assert user in group.members
+        assert user2 not in group.members
         assert res.status_code == 204
 
-    def test_it_is_idempotent(
-        self, app, third_party_user, third_party_group, auth_client_header
-    ):
+    def test_it_is_idempotent(self, app, user, group, auth_header):
         app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=third_party_group.pubid, userid=third_party_user.userid
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{user.userid}", headers=auth_header,
         )
 
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=third_party_group.pubid, userid=third_party_user.userid
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{user.userid}", headers=auth_header,
         )
 
-        assert third_party_user in third_party_group.members
+        assert user in group.members
         assert res.status_code == 204
 
     def test_it_returns_404_if_authority_mismatch_on_user(
-        self, app, factories, group, auth_client_header
+        self, app, factories, group, auth_header
     ):
         user = factories.User(authority="somewhere-else.org")
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=group.pubid, userid=user.userid
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{user.userid}",
+            headers=auth_header,
             expect_errors=True,
         )
 
         assert res.status_code == 404
 
     def test_it_returns_404_if_malformed_userid(
-        self, app, factories, group, auth_client_header
+        self, app, factories, group, auth_header
     ):
+        bad_user_id = "foo@bar.com"
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=group.pubid, userid="foo@bar.com"
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{bad_user_id}",
+            headers=auth_header,
             expect_errors=True,
         )
 
         assert res.status_code == 404
 
     def test_it_returns_404_if_authority_mismatch_on_group(
-        self, app, factories, user, auth_client_header
+        self, app, factories, auth_header
     ):
+        bad_user = factories.User(authority="bad.example.com")
         group = factories.Group(authority="somewhere-else.org")
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=group.pubid, userid=user.userid
-            ),
-            headers=auth_client_header,
+            f"/api/groups/{group.pubid}/members/{bad_user.userid}",
+            headers=auth_header,
             expect_errors=True,
         )
 
@@ -169,19 +134,14 @@ class TestAddMember:
 
     def test_it_returns_404_if_missing_auth(self, app, user, group):
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=group.pubid, userid=user.userid
-            ),
-            expect_errors=True,
+            f"/api/groups/{group.pubid}/members/{user.userid}", expect_errors=True,
         )
 
         assert res.status_code == 404
 
     def test_it_returns_404_with_token_auth(self, app, token_auth_header, user, group):
         res = app.post_json(
-            "/api/groups/{pubid}/members/{userid}".format(
-                pubid=group.pubid, userid=user.userid
-            ),
+            f"/api/groups/{group.pubid}/members/{user.userid}",
             headers=token_auth_header,
             expect_errors=True,
         )
@@ -195,60 +155,14 @@ class TestRemoveMember:
     ):
 
         group_member, token = group_member_with_token
-        headers = {"Authorization": "Bearer {}".format(token.value)}
+        headers = {"Authorization": f"Bearer {token.value}"}
 
-        app.delete("/api/groups/{}/members/me".format(group.pubid), headers=headers)
+        app.delete(f"/api/groups/{group.pubid}/members/me", headers=headers)
 
         # We currently have no elegant way to check this via the API, but in a
         # future version we should be able to make a GET request here for the
         # group information and check it 404s
         assert group_member not in group.members
-
-
-@pytest.fixture
-def user(db_session, factories):
-    user = factories.User(authority="example.com")
-    db_session.commit()
-    return user
-
-
-@pytest.fixture
-def third_party_user(db_session, factories):
-    user = factories.User(authority="thirdparty.com")
-    db_session.commit()
-    return user
-
-
-@pytest.fixture
-def auth_client(db_session, factories):
-    auth_client = factories.ConfidentialAuthClient(
-        authority="thirdparty.com", grant_type=GrantType.client_credentials
-    )
-    db_session.commit()
-    return auth_client
-
-
-@pytest.fixture
-def auth_client_header(auth_client):
-    user_pass = "{client_id}:{secret}".format(
-        client_id=auth_client.id, secret=auth_client.secret
-    )
-    encoded = base64.standard_b64encode(user_pass.encode("utf-8"))
-    return {"Authorization": "Basic {creds}".format(creds=encoded.decode("ascii"))}
-
-
-@pytest.fixture
-def group(db_session, factories):
-    group = factories.Group()
-    db_session.commit()
-    return group
-
-
-@pytest.fixture
-def third_party_group(db_session, factories):
-    group = factories.Group(authority="thirdparty.com")
-    db_session.commit()
-    return group
 
 
 @pytest.fixture
@@ -265,18 +179,3 @@ def group_member_with_token(group_member, db_session, factories):
     db_session.add(token)
     db_session.commit()
     return (group_member, token)
-
-
-@pytest.fixture
-def user_with_token(db_session, factories):
-    user = factories.User()
-    token = factories.DeveloperToken(userid=user.userid)
-    db_session.add(token)
-    db_session.commit()
-    return (user, token)
-
-
-@pytest.fixture
-def token_auth_header(user_with_token):
-    user, token = user_with_token
-    return {"Authorization": "Bearer {}".format(token.value)}
