@@ -110,7 +110,7 @@ class BulkAPI:
         :param string: A string to split
         :return: A generator of strings containing single lines
         """
-        return (line for line in string.strip().split("\n"))
+        return string.strip().split("\n")
 
     @staticmethod
     def _bytes_to_lines(stream, chunk_size=16384):
