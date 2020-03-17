@@ -1,5 +1,10 @@
 """Tools for deserialising and creating command objects."""
-from h.h_api.bulk_api.model.command import ConfigCommand, CreateCommand, UpsertCommand
+from h.h_api.bulk_api.model.command import (
+    Command,
+    ConfigCommand,
+    CreateCommand,
+    UpsertCommand,
+)
 from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.bulk_api.model.data_body import (
     CreateGroupMembership,
@@ -19,15 +24,16 @@ class CommandBuilder:
         :param raw: The data to decode
         :returns: An appropriate child of `Command`
         """
-        command_type = CommandType(raw[0])
 
-        if command_type is CommandType.CONFIGURE:
+        command = Command(raw)
+
+        if command.type is CommandType.CONFIGURE:
             return ConfigCommand(raw)
 
-        if command_type is CommandType.CREATE:
+        if command.type is CommandType.CREATE:
             return CreateCommand(raw)
 
-        elif command_type is CommandType.UPSERT:
+        elif command.type is CommandType.UPSERT:
             return UpsertCommand(raw)
 
     @classmethod

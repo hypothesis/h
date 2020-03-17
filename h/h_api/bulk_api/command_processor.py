@@ -104,20 +104,24 @@ This may cause the CommandBatcher to call the on_flush() callback that we passed
         :param final: This is the final count check, not incremental
         """
 
+        total = self.config.total_instructions if self.config else None
+
+        if final:
+            if not self.command_count:
+                raise CommandSequenceError("No instructions received")
+
+            if self.command_count != total:
+                raise InvalidDeclarationError(
+                    f"Expected more instructions. Found {self.command_count} expected {total}"
+                )
+            return
+
         if not self.config:
             return
 
-        total = self.config.total_instructions
-
-        if not final:
-            if self.command_count > total:
-                raise InvalidDeclarationError(
-                    f"More instructions ({self.command_count}) received than declared ({total})"
-                )
-
-        elif self.command_count != total:
+        if self.command_count > total:
             raise InvalidDeclarationError(
-                f"Expected more instructions. Found {self.command_count} expected {total}"
+                f"More instructions ({self.command_count}) received than declared ({total})"
             )
 
     def _execute_batch(self, command_type, data_type, batch):
