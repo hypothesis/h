@@ -9,6 +9,7 @@ from pyramid.httpexceptions import (
 )
 
 from h.auth.util import client_authority
+from h.exceptions import InvalidUserId
 from h.i18n import TranslationString as _  # noqa: N813
 from h.presenters import GroupJSONPresenter, GroupsJSONPresenter, UserJSONPresenter
 from h.schemas.api.group import CreateGroupAPISchema, UpdateGroupAPISchema
@@ -245,7 +246,7 @@ def add_member(group, request):
 
     try:
         user = user_svc.fetch(request.matchdict["userid"])
-    except ValueError:
+    except (ValueError, InvalidUserId):
         raise HTTPNotFound()
 
     if user is None:
