@@ -110,8 +110,6 @@ This may cause the CommandBatcher to call the on_flush() callback that we passed
             if not self.command_count:
                 raise CommandSequenceError("No instructions received")
 
-            total = self.config.total_instructions
-
             if self.command_count != total:
                 raise InvalidDeclarationError(
                     f"Expected more instructions. Found {self.command_count} expected {total}"
