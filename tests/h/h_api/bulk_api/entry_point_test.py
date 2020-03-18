@@ -16,7 +16,7 @@ class TestBulkAPI:
     # This is a glue library, so there's not much to do here but test the
     # interfaces
 
-    def test_from_stream(self, lines, executor, CommandProcessor):
+    def test_from_lines(self, lines, executor, CommandProcessor):
         BulkAPI.from_lines(lines, executor)
 
         CommandProcessor.assert_called_once_with(

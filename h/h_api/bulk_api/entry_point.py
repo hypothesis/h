@@ -93,6 +93,9 @@ class BulkAPI:
         :return: A generator of `Command` objects
         """
         for line_number, line in enumerate(lines):
+            if not line:
+                continue
+
             try:
                 data = json.loads(line)
             except JSONDecodeError as e:
