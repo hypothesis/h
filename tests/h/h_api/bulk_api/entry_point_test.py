@@ -43,6 +43,20 @@ class TestBulkAPI:
 
         self._assert_process_called_with_generator_of_commands(CommandProcessor)
 
+    def test__bytes_to_lines(self):
+        bytes = BytesIO(b"\nline_1\n\nlong_middle_line_2\nline_3")
+
+        lines = BulkAPI._bytes_to_lines(bytes, chunk_size=8)
+
+        assert isinstance(lines, GeneratorType)
+        assert list(lines) == [b"line_1", b"long_middle_line_2", b"line_3"]
+
+    def test__string_to_lines(self):
+        lines = BulkAPI._string_to_lines("\nline_1\n\nlong_middle_line_2\nline_3")
+
+        assert isinstance(lines, GeneratorType)
+        assert list(lines) == ["line_1", "long_middle_line_2", "line_3"]
+
     @pytest.mark.parametrize(
         "kwargs",
         (

@@ -1,9 +1,10 @@
 import json
+from io import BytesIO
 from unittest.mock import call
 
 import pytest
 from h_matchers import Any
-from pkg_resources import resource_filename
+from pkg_resources import resource_string
 
 from h.h_api.bulk_api import BulkAPI, CommandBuilder
 from h.h_api.bulk_api.executor import AutomaticReportExecutor
@@ -14,13 +15,10 @@ from h.h_api.enums import CommandStatus, CommandType, DataType
 
 
 class TestBulkAPIFunctional:
-    def test_command_parsing_ok(self, executor):
+    def test_command_parsing_ok(self, executor, ndjson_bytes):
         """Sanity test that hits most elements of parsing."""
 
-        fixture = resource_filename("tests", "h/h_api/fixtures/bulk_api.ndjson")
-
-        with open(fixture) as lines:
-            BulkAPI.from_lines(lines, executor=executor, observer=Observer())
+        BulkAPI.from_byte_stream(ndjson_bytes, executor=executor, observer=Observer())
 
         executor.configure.assert_called_with(config=Any.instance_of(Configuration))
 
@@ -70,8 +68,8 @@ class TestBulkAPIFunctional:
 
         original_raw = [command.raw for command in commands]
 
-        BulkAPI.from_string(
-            BulkAPI.to_string(commands),
+        BulkAPI.from_byte_stream(
+            BytesIO(BulkAPI.to_string(commands).encode("utf-8")),
             executor=AutomaticReportExecutor(),
             observer=collecting_observer,
         )
@@ -99,3 +97,7 @@ class TestBulkAPIFunctional:
             group_command,
             membership_command,
         )
+
+    @pytest.fixture
+    def ndjson_bytes(self):
+        return BytesIO(resource_string("tests", "h/h_api/fixtures/bulk_api.ndjson"))
