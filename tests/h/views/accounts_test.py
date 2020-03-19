@@ -475,11 +475,14 @@ class TestActivateController:
         activation_model.get_by_code.return_value = None
 
         result = views.ActivateController(pyramid_request).get_when_not_logged_in()
-        error_flash = pyramid_request.session.peek_flash("error")
 
         assert isinstance(result, httpexceptions.HTTPFound)
-        assert error_flash
-        assert error_flash[0].startswith("We didn't recognize that activation link.")
+        assert result.location == "http://example.com/login"
+        assert pyramid_request.session.peek_flash("error") == [
+            Any.string.containing(
+                "We didn't recognize that activation link. Have you already activated "
+            ),
+        ]
 
     def test_get_when_not_logged_in_looks_up_user_by_activation(
         self, activation_model, pyramid_request, user_model
@@ -537,10 +540,10 @@ class TestActivateController:
         user_model.get_by_activation.return_value.id = 123
 
         views.ActivateController(pyramid_request).get_when_not_logged_in()
-        success_flash = pyramid_request.session.peek_flash("success")
 
-        assert success_flash
-        assert success_flash[0].startswith("Your account has been activated")
+        assert pyramid_request.session.peek_flash("success") == [
+            Any.string.containing("Your account has been activated")
+        ]
 
     def test_get_when_not_logged_in_successful_creates_ActivationEvent(
         self, pyramid_request, user_model, ActivationEvent

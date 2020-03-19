@@ -294,10 +294,9 @@ class ResetController:
         self.request.session.flash(
             jinja2.Markup(
                 _(
-                    "Your password has been reset. "
-                    'You can now <a href="{url}">login</a> with your new '
-                    "password."
-                ).format(url=self.request.route_url("login"))
+                    "Your password has been reset. You can now login with "
+                    "your new password."
+                )
             ),
             "success",
         )
@@ -333,9 +332,9 @@ class ActivateController:
                     _(
                         "We didn't recognize that activation link. "
                         "Have you already activated your account? "
-                        'If so, try <a href="{url}">logging in</a> using the username '
+                        "If so, try logging in using the username "
                         "and password that you provided."
-                    ).format(url=self.request.route_url("login"))
+                    ),
                 ),
                 "error",
             )
@@ -351,9 +350,8 @@ class ActivateController:
             jinja2.Markup(
                 _(
                     "Your account has been activated! "
-                    'You can now <a href="{url}">log in</a> using the password you '
-                    "provided."
-                ).format(url=self.request.route_url("login"))
+                    "You can now log in using the password you provided."
+                ),
             ),
             "success",
         )
