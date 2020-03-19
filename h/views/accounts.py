@@ -294,7 +294,7 @@ class ResetController:
         self.request.session.flash(
             jinja2.Markup(
                 _(
-                    "Your password has been reset. You can now login with "
+                    "Your password has been reset. You can now log in with "
                     "your new password."
                 )
             ),
