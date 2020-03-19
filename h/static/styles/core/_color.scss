@@ -20,6 +20,22 @@ $brand: #d00032;
 $highlight: #58cef4;
 $group-organization-color: #6d676d;
 
+$success-bg: #d4edda;
+$success-border: #c3e6cb;
+
+$error-bg: #fff3cd;
+$error-border: #ffeeba;
+
+@mixin success {
+  background-color: $success-bg;
+  border-color: $success-border;
+}
+
+@mixin error {
+  background-color: $error-bg;
+  border-color: $error-border;
+}
+
 // Functions
 // ----------------------------------------------------------------------------
 

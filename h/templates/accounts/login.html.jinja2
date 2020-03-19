@@ -8,6 +8,8 @@
 
 {% block content %}
   <div class="form-container content">
+    {% include "h:templates/includes/flash-messages.html.jinja2" %}
+
     <h1 class="form-header">Log in</h1>
 
     {{ form }}
