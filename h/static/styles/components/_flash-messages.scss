@@ -1,0 +1,31 @@
+@use "core/color";
+@use "core/typography";
+
+.flash-message {
+  @include typography.font-big;
+
+  border-radius: 3px;
+  border-style: solid;
+  border-width: 1px;
+  padding-bottom: 15px;
+  padding-top: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 15px;
+}
+
+.flash-message *:first-child {
+  margin-top: 0;
+}
+
+.flash-message *:last-child {
+  margin-bottom: 0;
+}
+
+.flash-message__success {
+  @include color.success;
+}
+
+.flash-message__error {
+  @include color.error;
+}

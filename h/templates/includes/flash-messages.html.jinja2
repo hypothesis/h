@@ -1,0 +1,26 @@
+{#
+  Flash messages component.
+
+  This will display any current flash messages in any of the flash queues that
+  we use.
+
+  It will render nothing if there are no flash messages.
+
+  Usage:
+
+    {% include "h:templates/includes/flash-messages.html.jinja2" %}
+
+  Flash messages are a way to display a one-time message to the user on the
+  next page load, see:
+
+  https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/sessions.html#flash-messages
+#}
+{% for queue in ["success", "error"] %}
+  {% if request.session.peek_flash(queue) %}
+    {% for message in request.session.pop_flash(queue) %}
+      <div class="flash-message flash-message__{{ queue }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endfor %}

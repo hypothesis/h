@@ -13,6 +13,9 @@ $mono-font-family: Open Sans Mono, Menlo, DejaVu Sans Mono, monospace !default;
 $normal-font-size: 13px;
 $normal-line-height: 15px;
 
+$big-font-size: 17px;
+$big-line-height: 22px;
+
 $small-font-size: 11px;
 $small-line-height: 12px;
 
@@ -40,6 +43,11 @@ $touch-input-font-size: 16px;
   font-size: $normal-font-size;
   line-height: $normal-line-height;
   font-weight: 400;
+}
+
+@mixin font-big {
+  font-size: $big-font-size;
+  line-height: $big-line-height;
 }
 
 @mixin styled-text() {

@@ -28,13 +28,7 @@
           {% endfor %}
         </ul>
       </nav>
-      {% if request.session.peek_flash('success') -%}
-        <div class="form-flash">
-          {% for message in request.session.pop_flash('success') %}
-            <p>{{ message }}</p>
-          {%- endfor %}
-        </div>
-      {%- endif %}
+      {% include "h:templates/includes/flash-messages.html.jinja2" %}
       {{ self.page_content() }}
 
       <footer class="form-footer--no-border">
