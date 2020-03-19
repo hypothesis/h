@@ -111,7 +111,11 @@ class AuthController:
         """Render the login page, including the login form."""
         self._redirect_if_logged_in()
 
-        return {"form": self.form.render()}
+        return {
+            "form": self.form.render(
+                {"username": self.request.params.get("username", "")}
+            )
+        }
 
     @view_config(request_method="POST")
     @view_config(
@@ -329,7 +333,7 @@ class ActivateController:
                 ),
                 "error",
             )
-            return httpexceptions.HTTPFound(location=self.request.route_url("index"))
+            return httpexceptions.HTTPFound(location=self.request.route_url("login"))
 
         user = models.User.get_by_activation(self.request.db, activation)
         if user is None or user.id != id_:
@@ -350,7 +354,9 @@ class ActivateController:
 
         self.request.registry.notify(ActivationEvent(self.request, user))
 
-        return httpexceptions.HTTPFound(location=self.request.route_url("index"))
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url("login", _query={"username": user.username})
+        )
 
     @view_config(request_method="GET", effective_principals=security.Authenticated)
     def get_when_logged_in(self):

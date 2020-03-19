@@ -5,6 +5,7 @@ from unittest import mock
 
 import colander
 import pytest
+from h_matchers import Any
 from pyramid import httpexceptions
 
 from h.services.developer_token import developer_token_service_factory
@@ -68,6 +69,43 @@ class TestBadCSRFTokenHTML:
 
 @pytest.mark.usefixtures("routes")
 class TestAuthController:
+    def test_get(self, pyramid_request, LoginSchema):
+        template_vars = views.AuthController(pyramid_request).get()
+
+        # It initializes and binds the schema.
+        LoginSchema.assert_called_once_with()
+        schema = LoginSchema.return_value
+        schema.bind.assert_called_once_with(request=pyramid_request)
+        bound_schema = schema.bind.return_value
+
+        # It initializes the form.
+        pyramid_request.create_form.assert_called_once_with(
+            bound_schema,
+            buttons=("Log in",),
+            footer=Any.string.containing("Forgot your password?"),
+            show_cancel_button=False,
+        )
+        form = pyramid_request.create_form.return_value
+
+        # It returns the rendered form.
+        form.render.assert_called_once_with(
+            {
+                # The username form field is not pre-filled by default.
+                "username": ""
+            }
+        )
+        assert template_vars == {"form": form.render.return_value}
+
+    def test_get_prefills_the_username_field(self, pyramid_request, LoginSchema):
+        # If there's a ?username=example_username query param then the username
+        # form field gets pre-filled with "example_username".
+        pyramid_request.params["username"] = "example_username"
+
+        views.AuthController(pyramid_request).get()
+
+        form = pyramid_request.create_form.return_value
+        form.render.assert_called_once_with({"username": "example_username"})
+
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
         pyramid_request.user = mock.Mock(username="janedoe")
@@ -912,3 +950,8 @@ def user_password_service(pyramid_config):
     service = mock.Mock(spec_set=UserPasswordService())
     pyramid_config.register_service(service, name="user_password")
     return service
+
+
+@pytest.fixture(autouse=True)
+def LoginSchema(patch):
+    return patch("h.views.accounts.LoginSchema")
