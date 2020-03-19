@@ -273,9 +273,15 @@ class ResetController:
                 self.form.set_widgets({"user": deform.widget.HiddenWidget()})
             return {"form": self.form.render()}
 
-        self._reset_password(appstruct["user"], appstruct["password"])
+        user = appstruct["user"]
 
-        return httpexceptions.HTTPFound(location=self.request.route_path("index"))
+        self._reset_password(user, appstruct["password"])
+
+        return httpexceptions.HTTPFound(
+            location=self.request.route_path(
+                "login", _query={"username": user.username}
+            )
+        )
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
