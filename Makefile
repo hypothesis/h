@@ -20,6 +20,7 @@ help:
 	@echo "make checkdocs         Crash if building the docs website fails"
 	@echo "make docstrings        View all the docstrings locally as HTML"
 	@echo "make checkdocstrings   Crash if building the docstrings fails"
+	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
 	@echo "make pip-compile       Compile requirements.in to requirements.txt."
 	@echo "                       Use this command after editing requirements.in, for"
 	@echo "                       example after adding or removing a requirement."
@@ -107,6 +108,9 @@ docstrings: python
 .PHONY: checkdocstrings
 checkdocstrings: python
 	@tox -qe checkdocstrings
+
+.PHONY: sure
+sure: checkformatting lint test coverage functests
 
 .PHONY: pip-compile
 pip-compile: python
