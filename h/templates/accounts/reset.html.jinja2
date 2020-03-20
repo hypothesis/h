@@ -1,28 +1,14 @@
-{% extends "h:templates/layouts/base.html.jinja2" %}
+{% extends "h:templates/accounts/base.html.jinja2" %}
 
-{% block header %}
-  {% include "h:templates/includes/logo-header.html.jinja2" %}
-{% endblock %}
+{% block page_title %}New password{% endblock %}
 
-{% block page_title %}
-Reset your password
-{% endblock %}
-
-{% block content %}
-<div class="form-container content">
-  <h1 class="form-header">New password</h1>
+{% block form_message %}
   {% if not has_code %}
-  <div class="form-description">
-  {% trans %}
-  Please check your email. We've sent you a reset code that you must enter
-  below in order to set your new password.
-  {% endtrans %}
-  </div>
+    {% trans %}
+      Please check your email. We've sent you a reset code that you must enter
+      below in order to set your new password.
+    {% endtrans %}
   {% endif %}
-  {{ form }}
-  <footer class="form-footer">
-    Already know your password?
-    <a class="link--footer" href="{{ request.route_path('login') }}">Log in</a>
-  </footer>
-</div>
-{% endblock content %}
+{% endblock %}
+
+{% set login_message = "Already know your password?" %}

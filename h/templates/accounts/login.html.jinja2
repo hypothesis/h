@@ -1,22 +1,5 @@
-{% extends "h:templates/layouts/base.html.jinja2" %}
-
-{% block header %}
-  {% include "h:templates/includes/logo-header.html.jinja2" %}
-{% endblock %}
+{% extends "h:templates/accounts/base.html.jinja2" %}
 
 {% block page_title %}Log in{% endblock %}
 
-{% block content %}
-  <div class="form-container content">
-    {% include "h:templates/includes/flash-messages.html.jinja2" %}
-
-    <h1 class="form-header">Log in</h1>
-
-    {{ form }}
-
-    <footer class="form-footer">
-      Don't have a Hypothesis account?
-      <a class="link--footer" href="{{ request.route_path('signup') }}">Sign up</a>
-    </footer>
-  </div>
-{% endblock content %}
+{% set signup_message = "Don't have a Hypothesis account?" %}
