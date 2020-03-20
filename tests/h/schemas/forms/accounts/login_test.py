@@ -90,6 +90,25 @@ class TestLoginSchema:
         assert "password" in errors
         assert "Wrong password" in errors["password"]
 
+    @pytest.mark.parametrize(
+        "params,value",
+        [
+            # If a ?username=foobob query param is given then the username field in
+            # the login form is pre-filled with "foobob".
+            ({"username": "foobob"}, "foobob"),
+            # If the foobob query param is missing or has no value then the
+            # username field isn't pre-filled.
+            ({"username": ""}, ""),
+            ({}, ""),
+        ],
+    )
+    def test_default_values_prefills_username_from_username_query_param(
+        self, pyramid_request, params, value
+    ):
+        pyramid_request.params = params
+
+        assert LoginSchema.default_values(pyramid_request)["username"] == value
+
 
 @pytest.fixture
 def user_service(db_session, pyramid_config):
