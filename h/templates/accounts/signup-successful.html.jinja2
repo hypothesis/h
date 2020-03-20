@@ -1,0 +1,15 @@
+{% extends "h:templates/accounts/base.html.jinja2" %}
+
+{% block page_title %}{{ heading|default("Sign up for Hypothesis") }}{% endblock %}
+
+{% block form_message %}
+  {% if not form %}
+    {% if message %}<p>{{ message }}</p>{% endif %}
+
+    <p>Please check your email and open the link to activate your account. If you
+    don't receive your activation link within a few minutes, send an email to
+    <a href="mailto:support@hypothes.is">support@hypothes.is</a></p>
+  {% endif %}
+{% endblock %}
+
+{% set login_message = "Already activated your account?" %}

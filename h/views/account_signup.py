@@ -17,7 +17,7 @@ def _login_redirect_url(request):
     return request.route_url("activity.user_search", username=request.user.username)
 
 
-@view_defaults(route_name="signup", renderer="h:templates/accounts/signup.html.jinja2")
+@view_defaults(route_name="signup")
 class SignupController:
     def __init__(self, request):
 
@@ -29,14 +29,19 @@ class SignupController:
             css_class="js-disable-on-submit",
         )
 
-    @view_config(request_method="GET")
+    @view_config(
+        request_method="GET", renderer="h:templates/accounts/signup.html.jinja2"
+    )
     def get(self):
         """Render the empty registration form."""
         self._redirect_if_logged_in()
 
         return {"form": self.form.render()}
 
-    @view_config(request_method="POST")
+    @view_config(
+        request_method="POST",
+        renderer="h:templates/accounts/signup-successful.html.jinja2",
+    )
     def post(self):
         """Handle submission of the new user registration form."""
         self._redirect_if_logged_in()
