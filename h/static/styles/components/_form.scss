@@ -82,6 +82,8 @@
 }
 
 .form-description {
+  @include typography.font-big;
+
   margin-bottom: 30px;
 
   color: color.$grey-5;
