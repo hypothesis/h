@@ -38,12 +38,7 @@ class SignupController:
 
     @view_config(request_method="POST")
     def post(self):
-        """
-        Handle submission of the new user registration form.
-
-        Validates the form data, creates a new activation for the user, sends
-        the activation mail, and then redirects the user to the index.
-        """
+        """Handle submission of the new user registration form."""
         self._redirect_if_logged_in()
 
         try:
