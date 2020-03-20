@@ -111,11 +111,7 @@ class AuthController:
         """Render the login page, including the login form."""
         self._redirect_if_logged_in()
 
-        return {
-            "form": self.form.render(
-                {"username": self.request.params.get("username", "")}
-            )
-        }
+        return {"form": self.form.render(LoginSchema.default_values(self.request))}
 
     @view_config(request_method="POST")
     @view_config(

@@ -88,23 +88,9 @@ class TestAuthController:
         form = pyramid_request.create_form.return_value
 
         # It returns the rendered form.
-        form.render.assert_called_once_with(
-            {
-                # The username form field is not pre-filled by default.
-                "username": ""
-            }
-        )
+        LoginSchema.default_values.assert_called_once_with(pyramid_request)
+        form.render.assert_called_once_with(LoginSchema.default_values.return_value)
         assert template_vars == {"form": form.render.return_value}
-
-    def test_get_prefills_the_username_field(self, pyramid_request, LoginSchema):
-        # If there's a ?username=example_username query param then the username
-        # form field gets pre-filled with "example_username".
-        pyramid_request.params["username"] = "example_username"
-
-        views.AuthController(pyramid_request).get()
-
-        form = pyramid_request.create_form.return_value
-        form.render.assert_called_once_with({"username": "example_username"})
 
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
         pyramid_config.testing_securitypolicy("acct:jane@doe.org")
