@@ -34,6 +34,7 @@ def add_api_view(
     link_name=None,
     description=None,
     enable_preflight=True,
+    subtype="json",
     **settings
 ):
 
@@ -66,7 +67,7 @@ def add_api_view(
     :param dict settings: Arguments to pass on to ``config.add_view``
     """
     settings.setdefault("renderer", "json")
-    settings.setdefault("decorator", (cors_policy, version_media_type_header))
+    settings.setdefault("decorator", (cors_policy, version_media_type_header(subtype)))
 
     if link_name:
         link = links.ServiceLink(
@@ -92,7 +93,7 @@ def add_api_view(
 
         # config.add_view only allows one, string value for `accept`, so we
         # have to re-invoke it to add additional accept headers
-        settings["accept"] = media_type_for_version(version)
+        settings["accept"] = media_type_for_version(version, subtype=subtype)
         config.add_view(view=view, **settings)
 
     if enable_preflight:

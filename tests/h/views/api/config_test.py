@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 
 from h.views.api import config as api_config
-from h.views.api.decorators.response import version_media_type_header
 
 
 @pytest.mark.usefixtures("cors")
@@ -57,14 +56,17 @@ class TestAddApiView:
         (_, kwargs) = pyramid_config.add_view.call_args_list[0]
         assert kwargs["renderer"] == "xml"
 
-    def test_it_sets_default_decorators(self, pyramid_config, view):
+    def test_it_sets_default_decorators(
+        self, pyramid_config, view, version_media_type_header
+    ):
         api_config.add_api_view(
             pyramid_config, view, versions=["v1"], route_name="thing.read"
         )
-        (_, kwargs) = pyramid_config.add_view.call_args_list[0]
+        _, kwargs = pyramid_config.add_view.call_args_list[0]
+
         assert kwargs["decorator"] == (
             api_config.cors_policy,
-            version_media_type_header,
+            version_media_type_header("json"),
         )
 
     def test_it_adds_cors_preflight_view(self, pyramid_config, view, cors):
@@ -107,7 +109,7 @@ class TestAddApiView:
         )
         (_, kwargs) = pyramid_config.add_view.call_args_list[1]
 
-        media_type_for_version.assert_called_once_with("v1")
+        media_type_for_version.assert_called_once_with("v1", subtype="json")
         assert kwargs["accept"] == media_type_for_version.return_value
 
     def test_it_raises_ValueError_on_unrecognized_version(self, pyramid_config, view):
@@ -183,3 +185,7 @@ class TestAddApiView:
     @pytest.fixture
     def view(self):
         return mock.Mock()
+
+    @pytest.fixture
+    def version_media_type_header(self, patch):
+        return patch("h.views.api.config.version_media_type_header")
