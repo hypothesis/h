@@ -10,16 +10,18 @@ from h.views.api.decorators.response import version_media_type_header
 
 class TestVersionMediaTypeHeader:
     def test_it_calls_wrapped_view_function(self, pyramid_request, testview):
-        version_media_type_header(testview)(None, pyramid_request)
+        version_media_type_header("json")(testview)(None, pyramid_request)
 
         assert testview.called
 
+    @pytest.mark.parametrize("subtype", ("json", "x-ndjson"))
     def test_it_sets_response_header_to_default_media_type_if_accept_not_set(
-        self, pyramid_request, testview
+        self, pyramid_request, testview, subtype
     ):
-        res = version_media_type_header(testview)(None, pyramid_request)
+        res = version_media_type_header(subtype)(testview)(None, pyramid_request)
         assert (
-            res.headers["Hypothesis-Media-Type"] == "application/vnd.hypothesis.v1+json"
+            res.headers["Hypothesis-Media-Type"]
+            == f"application/vnd.hypothesis.v1+{subtype}"
         )
 
     @pytest.mark.parametrize(
@@ -44,7 +46,7 @@ class TestVersionMediaTypeHeader:
     ):
         pyramid_request.accept = create_accept_header(accept)
 
-        res = version_media_type_header(testview)(None, pyramid_request)
+        res = version_media_type_header("json")(testview)(None, pyramid_request)
 
         assert res.headers["Hypothesis-Media-Type"] == expected_header
 
