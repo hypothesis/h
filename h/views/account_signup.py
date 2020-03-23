@@ -40,7 +40,7 @@ class SignupController:
 
     @view_config(
         request_method="POST",
-        renderer="h:templates/accounts/signup-successful.html.jinja2",
+        renderer="h:templates/accounts/signup-post.html.jinja2",
     )
     def post(self):
         """Handle submission of the new user registration form."""
