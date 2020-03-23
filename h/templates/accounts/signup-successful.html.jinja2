@@ -2,7 +2,7 @@
 
 {% block page_title %}{{ heading|default("Sign up for Hypothesis") }}{% endblock %}
 
-{% block form_message %}
+{% set form_message %}
   {% if not form %}
     {% if message %}<p>{{ message }}</p>{% endif %}
 
@@ -10,6 +10,6 @@
     don't receive your activation link within a few minutes, send an email to
     <a href="mailto:support@hypothes.is">support@hypothes.is</a></p>
   {% endif %}
-{% endblock %}
+{% endset %}
 
 {% set login_message = "Already activated your account?" %}
