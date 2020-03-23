@@ -12,9 +12,9 @@
       {% block page_title %}{% endblock %}
     </h1>
 
-    <div class="form-description">
-      {% block form_message %}{% endblock %}
-    </div>
+    {% if form_message %}
+      <div class="form-description">{{ form_message }}</div>
+    {% endif %}
 
     {% if form %}<p>{{ form }}</p>{% endif %}
 
