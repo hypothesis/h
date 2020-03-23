@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-alembic==1.4.1            # via -r requirements.in
+alembic==1.4.2            # via -r requirements.in
 amqp==2.5.2               # via kombu
 attrs==19.3.0             # via jsonschema
 bcrypt==3.1.7             # via -r requirements.in
@@ -54,10 +54,10 @@ pyramid-exclog==1.0       # via -r requirements.in
 pyramid-jinja2==2.8       # via -r requirements.in
 pyramid-layout==1.0       # via -r requirements.in
 pyramid-mailer==0.15.1    # via -r requirements.in
+pyramid-retry==2.1.1      # via -r requirements.in
 pyramid-services==2.2     # via -r requirements.in, pyramid-authsanity
 pyramid-tm==2.4           # via -r requirements.in
 pyramid==1.10.4           # via -r requirements.in, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-services, pyramid-tm
-pyramid_retry==2.1.1      # via -r requirements.in
 pyrsistent==0.15.7        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements.in, alembic, elasticsearch-dsl
 python-editor==1.0.4      # via alembic
