@@ -75,7 +75,14 @@ from h.models import AuthClient, Organization
 from h.traversal import contexts
 
 
-class Root:
+class RootFactory:
+    """Abstract interface for root resource factories."""
+    
+    def __init__(self, request):
+        self.request = request
+
+
+class Root(RootFactory):
     """This app's default root factory."""
 
     __acl__ = [
@@ -88,17 +95,11 @@ class Root:
         DENY_ALL,
     ]
 
-    def __init__(self, request):
-        self.request = request
 
-
-class AnnotationRoot:
+class AnnotationRoot(RootFactory):
     """Root factory for routes whose context is an :py:class:`h.traversal.AnnotationContext`."""
 
     __acl__ = [(Allow, Authenticated, "create")]
-
-    def __init__(self, request):
-        self.request = request
 
     def __getitem__(self, id):
         annotation = storage.fetch_annotation(self.request.db, id)
@@ -110,7 +111,7 @@ class AnnotationRoot:
         return contexts.AnnotationContext(annotation, group_service, links_service)
 
 
-class AuthClientRoot:
+class AuthClientRoot(RootFactory):
     """
     Root factory for routes whose context is an :py:class:`h.traversal.AuthClientContext`.
 
@@ -118,9 +119,6 @@ class AuthClientRoot:
     objects.
 
     """
-
-    def __init__(self, request):
-        self.request = request
 
     def __getitem__(self, client_id):
         try:
@@ -142,7 +140,7 @@ class AuthClientRoot:
         return client
 
 
-class OrganizationRoot:
+class OrganizationRoot(RootFactory):
     """
     Root factory for routes whose context is an :py:class:`h.traversal.OrganizationContext`.
 
@@ -150,9 +148,6 @@ class OrganizationRoot:
     objects.
 
     """
-
-    def __init__(self, request):
-        self.request = request
 
     def __getitem__(self, pubid):
         try:
@@ -166,7 +161,7 @@ class OrganizationRoot:
             raise KeyError()
 
 
-class OrganizationLogoRoot:
+class OrganizationLogoRoot(RootFactory):
     """
     Root factory for routes whose context is an :py:class:`h.traversal.OrganizationLogoContext`.
 
@@ -176,7 +171,7 @@ class OrganizationLogoRoot:
     """
 
     def __init__(self, request):
-        self.request = request
+        super().__init__(request)
         self.organization_factory = OrganizationRoot(self.request)
 
     def __getitem__(self, pubid):
@@ -189,7 +184,7 @@ class OrganizationLogoRoot:
         return organization.logo
 
 
-class GroupRoot:
+class GroupRoot(RootFactory):
     """
     Root factory for routes whose context is an :py:class:`h.traversal.GroupContext`.
 
@@ -200,7 +195,7 @@ class GroupRoot:
     __acl__ = [(Allow, role.User, "create")]  # Any authn'd user may create a group
 
     def __init__(self, request):
-        self.request = request
+        super().__init__(request)
         self.group_service = request.find_service(name="group")
 
     def __getitem__(self, pubid_or_groupid):
@@ -210,7 +205,7 @@ class GroupRoot:
         return group
 
 
-class GroupUpsertRoot:
+class GroupUpsertRoot(RootFactory):
     """
     Root factory for group "UPSERT" API
 
@@ -224,7 +219,7 @@ class GroupUpsertRoot:
     __acl__ = GroupRoot.__acl__
 
     def __init__(self, request):
-        self._request = request
+        super().__init__(request)
         self._group_root = GroupRoot(request)
 
     def __getitem__(self, pubid_or_groupid):
@@ -233,21 +228,18 @@ class GroupUpsertRoot:
         except KeyError:
             group = None
 
-        return contexts.GroupUpsertContext(group=group, request=self._request)
+        return contexts.GroupUpsertContext(group=group, request=self.request)
 
 
-class ProfileRoot:
+class ProfileRoot(RootFactory):
     """
     Simple Root for API profile endpoints
     """
 
     __acl__ = [(Allow, role.User, "update")]
 
-    def __init__(self, request):
-        self.request = request
 
-
-class UserRoot:
+class UserRoot(RootFactory):
     """
     Root factory for routes which traverse Users by ``username``
 
@@ -258,7 +250,7 @@ class UserRoot:
     __acl__ = [(Allow, role.AuthClient, "create")]
 
     def __init__(self, request):
-        self.request = request
+        super().__init__(request)
         self.user_svc = self.request.find_service(name="user")
 
     def __getitem__(self, username):
@@ -271,7 +263,7 @@ class UserRoot:
         return user
 
 
-class UserUserIDRoot:
+class UserUserIDRoot(RootFactory):
     """
     Root factory for routes whose context is a :class:`h.traversal.UserContext`.
 
@@ -281,7 +273,7 @@ class UserUserIDRoot:
     __acl__ = [(Allow, role.AuthClient, "create")]
 
     def __init__(self, request):
-        self.request = request
+        super().__init__(request)
         self.user_svc = self.request.find_service(name="user")
 
     def __getitem__(self, userid):
