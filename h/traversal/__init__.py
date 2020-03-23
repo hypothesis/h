@@ -9,6 +9,7 @@ from h.traversal.contexts import (
 from h.traversal.roots import (
     AnnotationRoot,
     AuthClientRoot,
+    BulkAPIRoot,
     GroupRoot,
     GroupUpsertRoot,
     OrganizationLogoRoot,
@@ -23,6 +24,7 @@ __all__ = (
     "Root",
     "AnnotationRoot",
     "AuthClientRoot",
+    "BulkAPIRoot",
     "OrganizationRoot",
     "OrganizationLogoRoot",
     "GroupRoot",
