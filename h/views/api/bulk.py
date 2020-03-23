@@ -17,13 +17,13 @@ class FakeBulkAPI(BulkAPI):
     now it doesn't and we need something to prove we can build a return value.
     """
 
-    boo = 1
+    return_content = True
 
     @classmethod
     def from_byte_stream(cls, byte_stream, executor, observer=None):
         super().from_byte_stream(byte_stream, executor, observer=None)
 
-        if cls.boo:
+        if cls.return_content:
             yield b'["Line 1"]\n'
             yield b'["Line 2"]\n'
         else:
@@ -39,7 +39,18 @@ class FakeBulkAPI(BulkAPI):
     subtype="x-ndjson",
 )
 def bulk(request):
-    """Retrieve the groups for this request's user."""
+    """
+    Perform a bulk request which can modify multiple records in on go.
+
+    This end-point can:
+
+     * Upsert users
+     * Upsert groups
+     * Add users to groups
+
+    This end-point is intended to be called using the classes provided by
+    `h.h_api.bulk_api`.
+    """
 
     results = FakeBulkAPI.from_byte_stream(
         request.body_file, executor=AutomaticReportExecutor()
