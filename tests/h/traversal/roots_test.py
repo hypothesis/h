@@ -41,11 +41,9 @@ class TestRoot:
         ],
     )
     def test_it_denies_all_permissions_for_unauthed_request(
-        self, pyramid_config, pyramid_request, permission
+        self, set_permissions, pyramid_request, permission
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(None)
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions(None, principals=None)
 
         context = Root(pyramid_request)
 
@@ -62,26 +60,18 @@ class TestRoot:
         ],
     )
     def test_it_assigns_admin_permissions_to_requests_with_staff_role(
-        self, pyramid_config, pyramid_request, permission
+        self, set_permissions, pyramid_request, permission
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[role.Staff]
-        )
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions("acct:adminuser@foo", principals=[role.Staff])
 
         context = Root(pyramid_request)
 
         assert pyramid_request.has_permission(permission, context)
 
     def test_it_assigns_all_permissions_to_requests_with_admin_role(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[role.Admin]
-        )
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions("acct:adminuser@foo", principals=[role.Admin])
 
         context = Root(pyramid_request)
 
@@ -91,26 +81,20 @@ class TestRoot:
 @pytest.mark.usefixtures("group_service", "links_service")
 class TestAnnotationRoot:
     def test_it_does_not_assign_create_permission_without_authenticated_user(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            None, groupids=[pyramid.security.Everyone]
-        )
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions()
 
         context = AnnotationRoot(pyramid_request)
 
         assert not pyramid_request.has_permission("create", context)
 
     def test_it_assigns_create_permission_to_authenticated_request(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[pyramid.security.Authenticated]
+        set_permissions(
+            "acct:adminuser@foo", principals=[pyramid.security.Authenticated]
         )
-        pyramid_config.set_authorization_policy(policy)
 
         context = AnnotationRoot(pyramid_request)
 
@@ -316,22 +300,18 @@ class TestOrganizationLogoRoot:
 
 class TestProfileRoot:
     def test_it_assigns_update_permission_with_user_role(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy("acct:adminuser@foo", [role.User])
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions("acct:adminuser@foo", principals=[role.User])
 
         context = ProfileRoot(pyramid_request)
 
         assert pyramid_request.has_permission("update", context)
 
     def test_it_does_not_assign_update_permission_without_user_role(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy("acct:adminuser@foo", ["whatever"])
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions("acct:adminuser@foo", principals=["whatever"])
 
         context = ProfileRoot(pyramid_request)
 
@@ -341,22 +321,18 @@ class TestProfileRoot:
 @pytest.mark.usefixtures("groups", "group_service")
 class TestGroupRoot:
     def test_it_assigns_create_permission_with_user_role(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy("acct:adminuser@foo", [role.User])
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions("acct:adminuser@foo", principals=[role.User])
 
         context = GroupRoot(pyramid_request)
 
         assert pyramid_request.has_permission("create", context)
 
     def test_it_does_not_assign_create_permission_without_user_role(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy("acct:adminuser@foo", ["whatever"])
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions("acct:adminuser@foo", principals=["whatever"])
 
         context = GroupRoot(pyramid_request)
 
@@ -445,13 +421,9 @@ class TestUserRoot:
         assert not pyramid_request.has_permission("create", context)
 
     def test_it_assigns_create_permission_to_auth_client_role(
-        self, pyramid_config, pyramid_request
+        self, set_permissions, pyramid_request
     ):
-        policy = pyramid.authorization.ACLAuthorizationPolicy()
-        pyramid_config.testing_securitypolicy(
-            "acct:adminuser@foo", groupids=[role.AuthClient]
-        )
-        pyramid_config.set_authorization_policy(policy)
+        set_permissions("acct:adminuser@foo", principals=[role.AuthClient])
 
         context = UserRoot(pyramid_request)
 
@@ -557,3 +529,18 @@ def user_service(pyramid_config):
 def organizations(factories):
     # Add a handful of organizations to the DB to make the test realistic.
     return [factories.Organization() for _ in range(3)]
+
+
+@pytest.fixture
+def set_permissions(pyramid_config):
+    default = object()
+
+    def request_with_permissions(user_id=None, principals=default):
+        if principals is default:
+            principals = [pyramid.security.Everyone]
+
+        policy = pyramid.authorization.ACLAuthorizationPolicy()
+        pyramid_config.testing_securitypolicy(user_id, groupids=principals)
+        pyramid_config.set_authorization_policy(policy)
+
+    return request_with_permissions
