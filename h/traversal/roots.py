@@ -76,7 +76,7 @@ from h.traversal import contexts
 
 
 class RootFactory:
-    """Abstract interface for root resource factories."""
+    """Base class for all root resource factories."""
 
     def __init__(self, request):
         self.request = request
