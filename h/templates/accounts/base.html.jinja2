@@ -16,7 +16,7 @@
       <div class="form-description">{{ form_message }}</div>
     {% endif %}
 
-    {% if form %}<p>{{ form }}</p>{% endif %}
+    {% if form %}{{ form }}{% endif %}
 
     <footer class="form-footer">
       {% block form_footer %}{% endblock %}
