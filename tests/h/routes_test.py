@@ -127,7 +127,12 @@ def test_includeme():
             factory="h.traversal:AnnotationRoot",
             traverse="/{id}",
         ),
-        call("api.bulk", "/api/bulk", request_method="POST"),
+        call(
+            "api.bulk",
+            "/api/bulk",
+            request_method="POST",
+            factory="h.traversal.BulkAPIRoot",
+        ),
         call("api.groups", "/api/groups", factory="h.traversal.GroupRoot"),
         call(
             "api.group_upsert",

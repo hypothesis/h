@@ -110,7 +110,6 @@ def bulk(request):
         return Response(status=204)
 
     # An NDJSON response is required
-
     if results:
         # When we get an iterator we must force the first return value to be
         # created to be sure input validation has occurred. Otherwise we might

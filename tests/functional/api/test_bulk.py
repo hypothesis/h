@@ -4,7 +4,6 @@ import pytest
 from h_matchers import Any
 
 from h.h_api.bulk_api import CommandBuilder
-from h.h_api.exceptions import InvalidDeclarationError
 
 
 class TestBulk:
