@@ -1,27 +1,36 @@
 from h.h_api.bulk_api.executor import AutomaticReportExecutor
-from h.h_api.enums import DataType
+from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import InvalidDeclarationError
+from h.services.bulk_executor.bulk_user import BulkUserUpsert
 
 
-class BulkExecutorService:
-    def __init__(self, context, request):
-        self.db = request.db
+class DBExecutor(AutomaticReportExecutor):
+    def __init__(self, db):
+        self.db = db
+        self.effective_user = None
 
-    def get_executor(self):
-        return AuthorityCheckingExecutor()
+    def configure(self, config):
+        self.effective_user = config.effective_user
+
+    def execute_batch(self, command_type, data_type, default_config, batch):
+        if data_type == DataType.USER and command_type == CommandType.UPSERT:
+            return BulkUserUpsert(self.db).upsert_users(batch)
+
+        return super().execute_batch(command_type, data_type, default_config, batch)
 
 
-class AuthorityCheckingExecutor(AutomaticReportExecutor):
+class AuthorityCheckingExecutor(DBExecutor):
     """A bulk executor which checks the authority."""
 
-    def __init__(self, authority="lms.hypothes.is"):
-        self.effective_user = None
+    def __init__(self, db, authority="lms.hypothes.is"):
         self.authority = authority
+
+        super().__init__(db)
 
     def configure(self, config):
         self._assert_authority("effective user", config.effective_user, embedded=True)
 
-        self.effective_user = config.effective_user
+        super().configure(config)
 
     def execute_batch(self, command_type, data_type, default_config, batch):
         for command in batch:

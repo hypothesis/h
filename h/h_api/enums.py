@@ -20,6 +20,7 @@ class CommandType(Enum):
 
 
 class CommandResult(Enum):
+    UPSERTED = "upserted"
     CREATED = "created"
     UPDATED = "updated"
 

@@ -19,3 +19,6 @@ class Report:
 
         self.outcome = self.CommandResult(outcome)
         self.id = id_
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.outcome.value}: '{self.id}'>"
