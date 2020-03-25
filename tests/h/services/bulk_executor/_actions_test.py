@@ -10,8 +10,12 @@ from h.h_api.exceptions import (
     ConflictingDataError,
     UnsupportedOperationError,
 )
-from h.models import Group, User
-from h.services.bulk_executor._actions import GroupUpsertAction, UserUpsertAction
+from h.models import Group, GroupMembership, User
+from h.services.bulk_executor._actions import (
+    GroupMembershipCreateAction,
+    GroupUpsertAction,
+    UserUpsertAction,
+)
 from tests.h.services.bulk_executor.conftest import CommandFactory
 
 
@@ -196,3 +200,92 @@ class TestBulkGroupUpsert:
     @pytest.fixture
     def commands(self):
         return [CommandFactory.group_upsert(i) for i in range(3)]
+
+
+class TestBulkGroupMembershipCreate:
+    def test_it_can_insert_new_records(self, db_session, commands):
+        reports = GroupMembershipCreateAction(db_session).execute(commands)
+
+        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+
+        self.assert_membership_matches_commands(db_session, commands)
+
+    def test_it_can_continue_with_existing_records(self, db_session, commands):
+        GroupMembershipCreateAction(db_session).execute(commands)
+        reports = GroupMembershipCreateAction(db_session).execute(
+            commands, on_duplicate="continue"
+        )
+
+        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+
+        self.assert_membership_matches_commands(db_session, commands)
+
+    def test_it_fails_without_continue(self, db_session, commands):
+        with pytest.raises(UnsupportedOperationError):
+            GroupMembershipCreateAction(db_session).execute(
+                commands, on_duplicate="fail"
+            )
+
+    def test_the_reports_match_the_command_order(self, db_session, commands):
+        initial_reports = GroupMembershipCreateAction(db_session).execute(commands)
+        initial_ids = [report.id for report in initial_reports]
+
+        reports = GroupMembershipCreateAction(db_session).execute(
+            list(reversed(commands))
+        )
+        final_ids = [report.id for report in reports]
+
+        assert final_ids == list(reversed(initial_ids))
+
+    def test_it_raises_conflict_with_bad_user_foreign_key(self, db_session, groups):
+        with pytest.raises(ConflictingDataError):
+            GroupMembershipCreateAction(db_session).execute(
+                [CommandFactory.group_membership_create(99999, groups[0].id)]
+            )
+
+    def test_it_raises_conflict_with_bad_group_foreign_key(self, db_session, user):
+        with pytest.raises(ConflictingDataError):
+            GroupMembershipCreateAction(db_session).execute(
+                [CommandFactory.group_membership_create(user.id, 999999)]
+            )
+
+    @pytest.mark.xfail
+    def test_it_fails_with_mismatched_queries(self):
+        raise NotImplementedError()
+
+    @pytest.mark.xfail
+    def test_if_fails_with_unsupported_queries(self):
+        raise NotImplementedError()
+
+    def assert_membership_matches_commands(self, db_session, commands):
+        rel_tuples = [
+            (rel.user_id, rel.group_id) for rel in db_session.query(GroupMembership)
+        ]
+        command_tuples = [
+            (command.body.member.id, command.body.group.id) for command in commands
+        ]
+
+        assert rel_tuples == command_tuples
+
+    @pytest.fixture
+    def commands(self, db_session, user, groups):
+        return [
+            CommandFactory.group_membership_create(user.id, group.id)
+            for group in groups
+        ]
+
+    @pytest.fixture
+    def groups(self, db_session):
+        groups = [
+            Group(
+                name=f"group_{i}",
+                authority="lms.hypothes.is",
+                authority_provided_id=f"ap_id_{i}",
+            )
+            for i in range(3)
+        ]
+
+        db_session.add_all(groups)
+        db_session.flush()
+
+        return groups
