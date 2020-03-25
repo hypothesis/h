@@ -14,7 +14,6 @@ FEATURES = {
         "using a cached version?"
     ),
     "client_display_names": "Render display names instead of user names in the client",
-    "client_preact_annotation": "Render the migrated/preact variant of annotations",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -35,7 +34,9 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {}
+FEATURES_PENDING_REMOVAL = {
+    "client_preact_annotation": "Render the migrated/preact variant of annotations",
+}
 
 
 class Feature(Base):
