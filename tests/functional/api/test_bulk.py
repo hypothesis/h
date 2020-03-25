@@ -7,14 +7,15 @@ from h.h_api.bulk_api import CommandBuilder
 
 
 class TestBulk:
-    @pytest.mark.skip
-    def test_it_requires_authentication(self, app):
-        response = app.post("/api/bulk", b"dummy", headers=None, expect_errors=True)
+    def test_it_requires_authentication(self, app, bad_header):
+        response = app.post(
+            "/api/bulk", b"dummy", headers=bad_header, expect_errors=True
+        )
 
         assert response.status_int == 404
 
-    def test_it_accepts_a_valid_request(self, app, nd_json, auth_header):
-        response = app.post("/api/bulk", nd_json, headers=auth_header)
+    def test_it_accepts_a_valid_request(self, app, nd_json, lms_auth_header):
+        response = app.post("/api/bulk", nd_json, headers=lms_auth_header)
 
         assert response.status_int == 200
         assert response.content_type == "application/x-ndjson"
@@ -23,9 +24,9 @@ class TestBulk:
             == "application/vnd.hypothesis.v1+x-ndjson"
         )
 
-    def test_it_raises_errors_for_invalid_request(self, app, auth_header):
+    def test_it_raises_errors_for_invalid_request(self, app, lms_auth_header):
         response = app.post(
-            "/api/bulk", '["some-mince"]', headers=auth_header, expect_errors=True
+            "/api/bulk", '["some-mince"]', headers=lms_auth_header, expect_errors=True
         )
 
         assert response.status_int == 400
@@ -39,14 +40,16 @@ class TestBulk:
 
     @pytest.fixture
     def commands(self):
+        authority = "lms.hypothes.is"
+
         return [
-            CommandBuilder.configure("acct:user1@example.com", total_instructions=4),
+            CommandBuilder.configure(f"acct:user1@{authority}", total_instructions=4),
             CommandBuilder.user.upsert(
-                "acct:user2@example.com",
+                f"acct:user2@{authority}",
                 {
                     "username": "user2",
                     "display_name": "display_name",
-                    "authority": "example.com",
+                    "authority": authority,
                     "identities": [
                         {
                             "provider": "provider",
@@ -56,10 +59,10 @@ class TestBulk:
                 },
             ),
             CommandBuilder.group.upsert(
-                {"groupid": "group:name@example.com", "name": "name"}, "group_ref"
+                {"groupid": f"group:name@{authority}", "name": "name"}, "group_ref"
             ),
             CommandBuilder.group_membership.create(
-                "acct:user2@example.com", "group_ref"
+                f"acct:user2@{authority}", "group_ref"
             ),
         ]
 
@@ -67,8 +70,12 @@ class TestBulk:
     def nd_json(self, commands):
         return "\n".join(json.dumps(command.raw) for command in commands)
 
+    @pytest.fixture(params=[None, "token", "non_lms_auth"])
+    def bad_header(self, request, token_auth_header, auth_header):
+        yield {"token": token_auth_header, "non_lms_auth": auth_header}.get(
+            request.param, request.param
+        )
 
-@pytest.fixture
-def auth_header():
-    # When authentication is on, this should be enabled
-    return
+    @pytest.fixture
+    def lms_auth_header(self, auth_header_for_authority):
+        return auth_header_for_authority("lms.hypothes.is")

@@ -140,6 +140,13 @@ class AuthClientRoot(RootFactory):
         return client
 
 
+class BulkAPIRoot(RootFactory):
+    """Root factory for the Bulk API."""
+
+    # Currently only LMS uses this end-point
+    __acl__ = [(Allow, "client_authority:lms.hypothes.is", "bulk_action")]
+
+
 class OrganizationRoot(RootFactory):
     """
     Root factory for routes whose context is an :py:class:`h.traversal.OrganizationContext`.

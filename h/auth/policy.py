@@ -22,6 +22,7 @@ AUTH_CLIENT_API_WHITELIST = [
     ("api.users", "POST"),
     ("api.user_read", "GET"),
     ("api.user", "PATCH"),
+    ("api.bulk", "POST"),
 ]
 
 
