@@ -2,86 +2,25 @@ from io import BytesIO
 from unittest.mock import create_autospec
 
 import pytest
-from h_matchers import Any
-from pytest import param
 from webob import Response
 
-from h.h_api.bulk_api import CommandBuilder
-from h.h_api.bulk_api.model.config_body import Configuration
-from h.h_api.exceptions import InvalidDeclarationError, SchemaValidationError
-from h.views.api.bulk import AuthorityCheckingExecutor, bulk
-
-AUTHORITY = "lms.hypothes.is"
-
-
-def make_group_command(authority=AUTHORITY, query_authority=AUTHORITY):
-    command = CommandBuilder.group.upsert(
-        {
-            "name": "name",
-            "authority": query_authority,
-            "authority_provided_id": "authority_provided_id",
-        },
-        "id_ref",
-    )
-
-    # Fake the effect of merging in the query
-    command.body.attributes["authority"] = authority
-
-    return command
-
-
-def make_user_commmand(authority=AUTHORITY, query_authority=AUTHORITY):
-    command = CommandBuilder.user.upsert(
-        {
-            "username": "username",
-            "display_name": "display_name",
-            "authority": query_authority,
-            "identities": [{"provider": "p", "provider_unique_id": "pid"}],
-        },
-        "id_ref",
-    )
-
-    # Fake the effect of merging in the query
-    command.body.attributes["authority"] = authority
-
-    return command
-
-
-class TestAuthorityCheckingExecutor:
-    def test_it_raises_InvalidDeclarationError_with_non_lms_authority(self):
-        config = Configuration.create(
-            effective_user="acct:user@bad_authority.com", total_instructions=2
-        )
-
-        with pytest.raises(InvalidDeclarationError):
-            AuthorityCheckingExecutor().configure(config)
-
-    @pytest.mark.parametrize(
-        "command",
-        (
-            param(make_user_commmand(authority="bad"), id="bad user attr"),
-            param(make_user_commmand(query_authority="bad"), id="bad user query"),
-            param(make_group_command(authority="bad"), id="bad group attr"),
-            param(make_group_command(query_authority="bad"), id="bad group query"),
-        ),
-    )
-    def test_it_raises_InvalidDeclarationError_with_called_with_non_lms_authority(
-        self, command
-    ):
-        with pytest.raises(InvalidDeclarationError):
-            AuthorityCheckingExecutor().execute_batch(
-                command.type, command.body.type, {}, [command]
-            )
+from h.h_api.exceptions import SchemaValidationError
+from h.services.bulk_executor import BulkExecutorService
+from h.views.api.bulk import bulk
 
 
 class TestBulk:
-    def test_it_calls_bulk_api_correctly(self, pyramid_request, BulkAPI):
+    def test_it_calls_bulk_api_correctly(
+        self, pyramid_request, BulkAPI, bulk_executor_service
+    ):
         bulk(pyramid_request)
 
         BulkAPI.from_byte_stream.assert_called_once_with(
             pyramid_request.body_file,
-            executor=Any.instance_of(AuthorityCheckingExecutor),
+            executor=bulk_executor_service.get_executor.return_value,
         )
+
+        bulk_executor_service.get_executor.assert_called_once_with()
 
     def test_it_formats_responses_correctly(self, pyramid_request, return_lines):
         result = bulk(pyramid_request)
@@ -132,3 +71,10 @@ class TestBulk:
     @pytest.fixture
     def no_return_content(self, BulkAPI):
         BulkAPI.from_byte_stream.return_value = None
+
+    @pytest.fixture(autouse=True)
+    def bulk_executor_service(self, pyramid_config):
+        service = create_autospec(BulkExecutorService, spec_set=True, instance=True)
+        pyramid_config.register_service(service, name="bulk_executor")
+
+        return service
