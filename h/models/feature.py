@@ -34,9 +34,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    "client_preact_annotation": "Render the migrated/preact variant of annotations",
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
