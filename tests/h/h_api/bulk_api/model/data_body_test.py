@@ -16,7 +16,7 @@ class TestUpsertUser:
                 "type": "user",
                 "meta": {
                     "$anchor": "user_ref",
-                    "query": {"authority": "example.com", "username": "username",},
+                    "query": {"authority": "example.com", "username": "username"},
                 },
                 "attributes": {
                     "identities": [
