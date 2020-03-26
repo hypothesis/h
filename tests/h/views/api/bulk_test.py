@@ -22,7 +22,6 @@ def make_group_command(groupid, query_groupid):
 
 
 class TestAuthorityCheckingExecutor:
-    good_user_id = "acct:user@lms.hypothes.is"
     good_groupid = "group:name@lms.hypothes.is"
     good_authority = "lms.hypothes.is"
     good_user_attrs = {
@@ -32,9 +31,7 @@ class TestAuthorityCheckingExecutor:
         "identities": [{"provider": "p", "provider_unique_id": "pid"}],
     }
 
-    def test_it_raises_InvalidDeclarationError_when_configured_with_non_lms_authority(
-        self,
-    ):
+    def test_it_raises_InvalidDeclarationError_with_non_lms_authority(self,):
         config = Configuration.create(
             effective_user="acct:user@bad_authority.com", total_instructions=2
         )
@@ -45,9 +42,8 @@ class TestAuthorityCheckingExecutor:
     @pytest.mark.parametrize(
         "command",
         (
-            CommandBuilder.user.upsert("acct:user@bad_authority", good_user_attrs),
             CommandBuilder.user.upsert(
-                good_user_id, dict(good_user_attrs, authority="bad_authority")
+                dict(good_user_attrs, authority="bad_authority"), "id_ref"
             ),
             make_group_command(
                 groupid=good_groupid, query_groupid="group:name@bad_authority"
@@ -55,7 +51,6 @@ class TestAuthorityCheckingExecutor:
             make_group_command(
                 groupid="group:name@bad_authority", query_groupid=good_groupid
             ),
-            CommandBuilder.group_membership.create("acct:user@bad_authority", "id_ref"),
         ),
     )
     def test_it_raises_InvalidDeclarationError_with_called_with_non_lms_authority(
