@@ -19,8 +19,17 @@ class UpsertUser(JSONAPIData):
         :param attributes: User attributes
         :return:
         """
+
+        authority = attributes.pop("authority", None)
+        username = attributes.pop("username", None)
+
         return super().create(
-            DataType.USER, attributes=attributes, meta={"$anchor": id_reference}
+            DataType.USER,
+            attributes=attributes,
+            meta={
+                "query": {"authority": authority, "username": username},
+                "$anchor": id_reference,
+            },
         )
 
 

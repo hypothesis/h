@@ -13,19 +13,20 @@ class TestUpsertUser:
         data = UpsertUser.create(user_attributes, "user_ref")
         assert data.raw == {
             "data": {
+                "type": "user",
+                "meta": {
+                    "$anchor": "user_ref",
+                    "query": {"authority": "example.com", "username": "username",},
+                },
                 "attributes": {
-                    "authority": "example.com",
-                    "display_name": "display name",
                     "identities": [
                         {
                             "provider": "provider string",
-                            "provider_unique_id": "provider " "unique id",
+                            "provider_unique_id": "provider unique id",
                         }
                     ],
-                    "username": "user",
+                    "display_name": "display name",
                 },
-                "meta": {"$anchor": "user_ref"},
-                "type": "user",
             }
         }
 
