@@ -21,7 +21,8 @@
                                 "query": {
                                     "type": "object",
                                     "properties": {
-                                        "groupid": {"$ref":  "../../core.json#/$defs/groupGroupId"}
+                                        "authority_provided_id": {"$ref": "../../core.json#/$defs/authorityProvidedId"},
+                                        "authority": {"$ref": "../../core.json#/$defs/authority"}
                                     }
                                 },
                                 "$anchor": {"$ref": "../../core.json#/$defs/anchor"}
@@ -42,7 +43,8 @@
                 "meta": {
                     "$anchor": "my_group_1",
                     "query": {
-                        "groupid": "group:name@example.com"
+                        "authority_provided_id": "authority_provided_id",
+                        "authority": "example.com"
                     }
                 },
                 "attributes": {

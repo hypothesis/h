@@ -34,14 +34,6 @@
             ]
         },
 
-        "groupGroupId": {
-            "type": "string",
-            "pattern": "group:[a-zA-Z0-9._\\-+!~*()']{1,1024}@.*$",
-            "examples": [
-                "group:group_name@example.com"
-            ]
-        },
-
         "userId": {
             "type": "string",
             "pattern": "^acct:.+$",
@@ -59,6 +51,11 @@
 
         "authority": {
             "type": "string"
+        },
+
+        "authorityProvidedId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9._\\-+!~*()']{1,1024}$"
         },
 
         "user": {
@@ -116,14 +113,16 @@
             "additionalProperties": false,
             "properties": {
                 "name": {"type": "string"},
-                "groupid": {"$ref":  "#/$defs/groupGroupId"}
+                "authority_provided_id": {"$ref": "#/$defs/authorityProvidedId"},
+                "authority": {"$ref": "#/$defs/authority"}
             },
             "required": ["name"],
 
             "examples": [
                 {
                     "name": "group_name",
-                    "groupid": "group:group_name@example.com"
+                    "authority_provided_id": "authority_provided_id",
+                    "authority": "example.com"
                 }
             ]
         }
