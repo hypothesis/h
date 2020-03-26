@@ -40,7 +40,7 @@ class UpsertGroup(UpsertBody):
 
     validator = Schema.get_validator("bulk_api/command/upsert_group.json")
     data_type = DataType.GROUP
-    query_fields = ["groupid"]
+    query_fields = ["authority", "authority_provided_id"]
 
 
 class CreateGroupMembership(JSONAPIData):

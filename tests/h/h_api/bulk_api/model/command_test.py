@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest.mock import create_autospec
 
 import pytest
@@ -114,16 +115,19 @@ class TestUpsertCommand:
 
         assert config == {"another": True}
 
-    def test_prepare_for_execute_merges_queries(self, user_command, group_command):
-        # You don't get mixed command types, but it's helpful here as one has
-        # a query and the other doesn't
+    def test_prepare_for_execute_merges_queries(self, upsert_command):
+        query = deepcopy(upsert_command.body.meta["query"])
+        assert query
 
-        assert "groupid" in group_command.body.meta["query"]
-        assert "groupid" not in group_command.body.attributes
+        for key in query.keys():
+            assert key not in upsert_command.body.attributes
 
-        UpsertCommand.prepare_for_execute(
-            [user_command, group_command], {"merge_query": True}
-        )
+        UpsertCommand.prepare_for_execute([upsert_command], {"merge_query": True})
 
-        assert "groupid" in group_command.body.meta["query"]
-        assert "groupid" in group_command.body.attributes
+        for key in query.keys():
+            assert key in upsert_command.body.meta["query"]
+            assert key in upsert_command.body.attributes
+
+    @pytest.fixture(params=[0, 1])
+    def upsert_command(self, request, user_command, group_command):
+        return [user_command, group_command][request.param]

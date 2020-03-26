@@ -75,7 +75,10 @@ class TestUpsertGroup:
                 "attributes": {"name": "name"},
                 "meta": {
                     "$anchor": "reference",
-                    "query": {"groupid": "group:name@example.com"},
+                    "query": {
+                        "authority": "example.com",
+                        "authority_provided_id": "authority_provided_id",
+                    },
                 },
                 "type": "group",
             }
