@@ -50,23 +50,27 @@
             ]
         },
 
+        "userName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30,
+            "pattern": "^[A-Za-z0-9._]+$"
+        },
+
+        "authority": {
+            "type": "string"
+        },
+
         "user": {
             "type": "object",
             "additionalProperties": false,
 
             "properties": {
-                "username": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 30,
-                    "pattern": "^[A-Za-z0-9._]+$"
-                },
+                "username": {"$ref": "#/$defs/userName"},
+                "authority": {"$ref": "#/$defs/authority"},
                 "display_name": {
                     "type": "string",
                     "maxLength": 30
-                },
-                "authority": {
-                    "type": "string"
                 },
                 "identities": {
                     "type": "array",
@@ -90,7 +94,7 @@
                 }
             },
             "required": [
-                "username", "display_name", "authority", "identities"
+                "display_name", "identities"
             ],
             "examples": [
                 {

@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from io import BytesIO, StringIO
 from types import GeneratorType
 
@@ -74,14 +75,18 @@ class TestBulkAPI:
     def test_to_stream(self, commands):
         handle = StringIO()
 
+        expected = deepcopy([command.raw for command in commands])
+
         BulkAPI.to_stream(handle, commands)
 
-        self._assert_nd_json_matches_commands(handle.getvalue(), commands)
+        assert self._decode_ndjson(handle.getvalue()) == expected
 
     def test_to_string(self, commands):
+        expected = deepcopy([command.raw for command in commands])
+
         nd_json = BulkAPI.to_string(commands)
 
-        self._assert_nd_json_matches_commands(nd_json, commands)
+        assert self._decode_ndjson(nd_json) == expected
 
     def test_we_catch_json_parsing_errors(self, config_command, executor):
         bad_string = json.dumps(config_command.raw) + '\n["Nonsense'
@@ -97,9 +102,8 @@ class TestBulkAPI:
             4
         )
 
-    def _assert_nd_json_matches_commands(self, nd_json, commands):
-        data = [json.loads(data) for data in nd_json.strip().split("\n")]
-        assert data == [command.raw for command in commands]
+    def _decode_ndjson(self, nd_json):
+        return [json.loads(data) for data in nd_json.strip().split("\n")]
 
     @pytest.fixture
     def commands(self, config_command, user_command):

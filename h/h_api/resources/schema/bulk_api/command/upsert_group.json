@@ -42,11 +42,11 @@
                 "meta": {
                     "$anchor": "my_group_1",
                     "query": {
-                        "groupid": "group:somegroup@example.com"
+                        "groupid": "group:name@example.com"
                     }
                 },
                 "attributes": {
-                    "name": "group name"
+                    "name": "name"
                 }
             }
         }
