@@ -59,7 +59,12 @@ class TestBulk:
                 "user_ref",
             ),
             CommandBuilder.group.upsert(
-                {"groupid": f"group:name@{authority}", "name": "name"}, "group_ref"
+                {
+                    "authority": authority,
+                    "authority_provided_id": "name",
+                    "name": "name",
+                },
+                "group_ref",
             ),
             CommandBuilder.group_membership.create("user_ref", "group_ref"),
         ]

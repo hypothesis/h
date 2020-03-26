@@ -40,7 +40,7 @@ class AuthorityCheckingExecutor(AutomaticReportExecutor):
         self.authority = authority
 
     def configure(self, config):
-        self._assert_authority("effective user", config.effective_user)
+        self._assert_authority("effective user", config.effective_user, embedded=True)
 
         self.effective_user = config.effective_user
 
@@ -50,7 +50,7 @@ class AuthorityCheckingExecutor(AutomaticReportExecutor):
 
         return super().execute_batch(command_type, data_type, default_config, batch)
 
-    def _assert_authority(self, field, value, embedded=True):
+    def _assert_authority(self, field, value, embedded=False):
         if embedded and value.endswith(f"@{self.authority}"):
             return
 
@@ -62,15 +62,9 @@ class AuthorityCheckingExecutor(AutomaticReportExecutor):
         )
 
     def _check_authority(self, data_type, body):
-        if data_type == DataType.USER:
-            self._assert_authority(
-                "authority", body.attributes["authority"], embedded=False
-            )
-            self._assert_authority("query authority", body.meta["query"]["authority"])
-
-        elif data_type == DataType.GROUP:
-            self._assert_authority("groupid", body.attributes["groupid"])
-            self._assert_authority("query groupid", body.meta["query"]["groupid"])
+        if data_type in (DataType.USER, DataType.GROUP):
+            self._assert_authority("authority", body.attributes["authority"])
+            self._assert_authority("query authority", body.query["authority"])
 
 
 @api_config(
