@@ -16,7 +16,24 @@ def make_group_command(groupid, query_groupid):
         {"name": "name", "groupid": query_groupid}, "id_ref"
     )
 
+    # Fake the effect of merging in the query
     command.body.attributes["groupid"] = groupid
+
+    return command
+
+
+def make_user_commmand(authority, query_authority):
+    attributes = {
+        "username": "username",
+        "display_name": "display_name",
+        "authority": query_authority,
+        "identities": [{"provider": "p", "provider_unique_id": "pid"}],
+    }
+
+    command = CommandBuilder.user.upsert(attributes, "id_ref")
+
+    # Fake the effect of merging in the query
+    command.body.attributes["authority"] = authority
 
     return command
 
@@ -42,8 +59,11 @@ class TestAuthorityCheckingExecutor:
     @pytest.mark.parametrize(
         "command",
         (
-            CommandBuilder.user.upsert(
-                dict(good_user_attrs, authority="bad_authority"), "id_ref"
+            make_user_commmand(
+                authority="bad_authority", query_authority=good_authority
+            ),
+            make_user_commmand(
+                authority=good_authority, query_authority="bad_authority"
             ),
             make_group_command(
                 groupid=good_groupid, query_groupid="group:name@bad_authority"

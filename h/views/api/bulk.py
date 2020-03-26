@@ -66,6 +66,7 @@ class AuthorityCheckingExecutor(AutomaticReportExecutor):
             self._assert_authority(
                 "authority", body.attributes["authority"], embedded=False
             )
+            self._assert_authority("query authority", body.meta["query"]["authority"])
 
         elif data_type == DataType.GROUP:
             self._assert_authority("groupid", body.attributes["groupid"])
