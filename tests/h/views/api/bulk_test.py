@@ -3,6 +3,7 @@ from unittest.mock import create_autospec
 
 import pytest
 from h_matchers import Any
+from pytest import param
 from webob import Response
 
 from h.h_api.bulk_api import CommandBuilder
@@ -10,27 +11,35 @@ from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.exceptions import InvalidDeclarationError, SchemaValidationError
 from h.views.api.bulk import AuthorityCheckingExecutor, bulk
 
+AUTHORITY = "lms.hypothes.is"
 
-def make_group_command(groupid, query_groupid):
+
+def make_group_command(authority=AUTHORITY, query_authority=AUTHORITY):
     command = CommandBuilder.group.upsert(
-        {"name": "name", "groupid": query_groupid}, "id_ref"
+        {
+            "name": "name",
+            "authority": query_authority,
+            "authority_provided_id": "authority_provided_id",
+        },
+        "id_ref",
     )
 
     # Fake the effect of merging in the query
-    command.body.attributes["groupid"] = groupid
+    command.body.attributes["authority"] = authority
 
     return command
 
 
-def make_user_commmand(authority, query_authority):
-    attributes = {
-        "username": "username",
-        "display_name": "display_name",
-        "authority": query_authority,
-        "identities": [{"provider": "p", "provider_unique_id": "pid"}],
-    }
-
-    command = CommandBuilder.user.upsert(attributes, "id_ref")
+def make_user_commmand(authority=AUTHORITY, query_authority=AUTHORITY):
+    command = CommandBuilder.user.upsert(
+        {
+            "username": "username",
+            "display_name": "display_name",
+            "authority": query_authority,
+            "identities": [{"provider": "p", "provider_unique_id": "pid"}],
+        },
+        "id_ref",
+    )
 
     # Fake the effect of merging in the query
     command.body.attributes["authority"] = authority
@@ -39,16 +48,7 @@ def make_user_commmand(authority, query_authority):
 
 
 class TestAuthorityCheckingExecutor:
-    good_groupid = "group:name@lms.hypothes.is"
-    good_authority = "lms.hypothes.is"
-    good_user_attrs = {
-        "username": "username",
-        "display_name": "display_name",
-        "authority": good_authority,
-        "identities": [{"provider": "p", "provider_unique_id": "pid"}],
-    }
-
-    def test_it_raises_InvalidDeclarationError_with_non_lms_authority(self,):
+    def test_it_raises_InvalidDeclarationError_with_non_lms_authority(self):
         config = Configuration.create(
             effective_user="acct:user@bad_authority.com", total_instructions=2
         )
@@ -59,18 +59,10 @@ class TestAuthorityCheckingExecutor:
     @pytest.mark.parametrize(
         "command",
         (
-            make_user_commmand(
-                authority="bad_authority", query_authority=good_authority
-            ),
-            make_user_commmand(
-                authority=good_authority, query_authority="bad_authority"
-            ),
-            make_group_command(
-                groupid=good_groupid, query_groupid="group:name@bad_authority"
-            ),
-            make_group_command(
-                groupid="group:name@bad_authority", query_groupid=good_groupid
-            ),
+            param(make_user_commmand(authority="bad"), id="bad user attr"),
+            param(make_user_commmand(query_authority="bad"), id="bad user query"),
+            param(make_group_command(authority="bad"), id="bad group attr"),
+            param(make_group_command(query_authority="bad"), id="bad group query"),
         ),
     )
     def test_it_raises_InvalidDeclarationError_with_called_with_non_lms_authority(
