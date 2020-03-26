@@ -21,18 +21,19 @@ def config_command():
 
 @pytest.fixture
 def group_command(group_attributes):
-    return CommandBuilder.group.upsert(group_attributes, "id_ref")
+    return CommandBuilder.group.upsert(group_attributes, "group_ref")
 
 
 @pytest.fixture
 def user_command(user_attributes):
-    return CommandBuilder.user.upsert("acct:user@example.com", user_attributes)
+    return CommandBuilder.user.upsert(user_attributes, "user_ref")
 
 
 @pytest.fixture
 def membership_command(user_command, group_command):
     return CommandBuilder.group_membership.create(
-        user_id=user_command.body.id, group_ref=group_command.body.id_reference
+        user_ref=user_command.body.id_reference,
+        group_ref=group_command.body.id_reference,
     )
 
 
