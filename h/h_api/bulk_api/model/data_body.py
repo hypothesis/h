@@ -5,55 +5,42 @@ from h.h_api.model.json_api import JSONAPIData
 from h.h_api.schema import Schema
 
 
-class UpsertUser(JSONAPIData):
+class UpsertBody(JSONAPIData):
+    data_type = None
+    query_fields = []
+
+    @classmethod
+    def create(cls, attributes, id_reference):
+        query = {field: attributes.pop(field, None) for field in cls.query_fields}
+
+        return super().create(
+            data_type=cls.data_type,
+            attributes=attributes,
+            meta={"query": query},
+            id_reference=id_reference,
+        )
+
+    @property
+    def query(self):
+        """The query used to select which item to update."""
+
+        return self.meta["query"]
+
+
+class UpsertUser(UpsertBody):
     """The data to upsert a user."""
 
     validator = Schema.get_validator("bulk_api/command/upsert_user.json")
-
-    @classmethod
-    def create(cls, attributes, id_reference):
-        """
-        Create an upsert user body.
-
-        :param _id: User id
-        :param attributes: User attributes
-        :return:
-        """
-
-        authority = attributes.pop("authority", None)
-        username = attributes.pop("username", None)
-
-        return super().create(
-            DataType.USER,
-            attributes=attributes,
-            meta={
-                "query": {"authority": authority, "username": username},
-                "$anchor": id_reference,
-            },
-        )
+    data_type = DataType.USER
+    query_fields = ["authority", "username"]
 
 
-class UpsertGroup(JSONAPIData):
+class UpsertGroup(UpsertBody):
     """The data to upsert a group."""
 
     validator = Schema.get_validator("bulk_api/command/upsert_group.json")
-
-    @classmethod
-    def create(cls, attributes, id_reference):
-        """
-        Create an upsert group body.
-
-        :param attributes: Group attributes
-        :param id_reference: A custom reference for this group
-        :return:
-        """
-        group_id = attributes.pop("groupid", None)
-
-        return super().create(
-            DataType.GROUP,
-            attributes=attributes,
-            meta={"query": {"groupid": group_id}, "$anchor": id_reference},
-        )
+    data_type = DataType.GROUP
+    query_fields = ["groupid"]
 
 
 class CreateGroupMembership(JSONAPIData):
