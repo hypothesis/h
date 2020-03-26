@@ -63,7 +63,6 @@ class AuthorityCheckingExecutor(AutomaticReportExecutor):
 
     def _check_authority(self, data_type, body):
         if data_type == DataType.USER:
-            self._assert_authority("id", body.id)
             self._assert_authority(
                 "authority", body.attributes["authority"], embedded=False
             )
@@ -71,11 +70,6 @@ class AuthorityCheckingExecutor(AutomaticReportExecutor):
         elif data_type == DataType.GROUP:
             self._assert_authority("groupid", body.attributes["groupid"])
             self._assert_authority("query groupid", body.meta["query"]["groupid"])
-
-        elif data_type == DataType.GROUP_MEMBERSHIP:
-            self._assert_authority(
-                "member id", body.relationships["member"]["data"]["id"]
-            )
 
 
 @api_config(
