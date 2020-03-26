@@ -23,7 +23,7 @@ class TestCommandBuilderFromData:
         assert isinstance(command.body, UpsertUser)
 
     def test_deserialise_user_can_fail(self, upsert_user_body):
-        del upsert_user_body["data"]["id"]
+        del upsert_user_body["data"]["attributes"]["display_name"]
 
         with pytest.raises(SchemaValidationError):
             CommandBuilder.from_data([UPSERT, upsert_user_body])
@@ -77,12 +77,12 @@ class TestCommandBuilderCreation:
         assert command.body.total_instructions == 2
 
     def test_user_upsert(self, user_attributes):
-        command = CommandBuilder.user.upsert("acct:user@example.com", user_attributes)
+        command = CommandBuilder.user.upsert(user_attributes, "user_ref")
 
         assert isinstance(command, UpsertCommand)
         assert isinstance(command.body, UpsertUser)
-        assert command.body.id == "acct:user@example.com"
         assert command.body.attributes == user_attributes
+        assert command.body.meta["$anchor"] == "user_ref"
 
     def test_group_upsert(self, group_attributes):
         command = CommandBuilder.group.upsert(group_attributes, "id_ref")
@@ -93,11 +93,9 @@ class TestCommandBuilderCreation:
         assert command.body.attributes == group_attributes
 
     def test_group_membership_create(self):
-        command = CommandBuilder.group_membership.create(
-            "acct:user@example.com", "id_ref"
-        )
+        command = CommandBuilder.group_membership.create("user_ref", "group_ref")
 
         assert isinstance(command, CreateCommand)
         assert isinstance(command.body, CreateGroupMembership)
-        assert command.body.member_id == "acct:user@example.com"
-        assert command.body.group_ref == "id_ref"
+        assert command.body.member_ref == "user_ref"
+        assert command.body.group_ref == "group_ref"

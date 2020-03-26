@@ -1,8 +1,10 @@
 
+
 ["configure", {"view": null, "user": {"effective": "acct:user@example.com"}, "instructions": {"total": 4}, "defaults": [["create", "*", {"on_duplicate": "continue"}], ["upsert", "*", {"merge_query": true}]]}]
 
 
-["upsert", {"data": {"type": "user", "id": "acct:user@wat.com", "attributes": {"username": "username", "display_name": "display name", "authority": "authority", "identities": [{"provider": "provider", "provider_unique_id": "provider_unique_id"}]}}}]
-["upsert", {"data": {"type": "group", "attributes": {"name": "group:name@example.com"}, "meta": {"query": {"groupid": "group:groupid@example.com"}, "$anchor": "group_ref"}}}]
-["create", {"data": {"type": "group_membership", "relationships": {"member": {"data": {"type": "user", "id": "acct:user@wat.com"}}, "group": {"data": {"type": "group", "id": {"$ref": "group_ref"}}}}}}]
+["upsert", {"data": {"type": "user", "attributes": {"username": "user", "display_name": "display name", "authority": "example.com", "identities": [{"provider": "provider string", "provider_unique_id": "provider unique id"}]}, "meta": {"$anchor": "user_ref"}}}]
+["upsert", {"data": {"type": "group", "attributes": {"name": "name"}, "meta": {"query": {"groupid": "group:name@example.com"}, "$anchor": "group_ref"}}}]
+
+["create", {"data": {"type": "group_membership", "relationships": {"member": {"data": {"type": "user", "id": {"$ref": "user_ref"}}}, "group": {"data": {"type": "group", "id": {"$ref": "group_ref"}}}}}}]
 

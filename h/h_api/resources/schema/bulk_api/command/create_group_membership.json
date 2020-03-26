@@ -20,7 +20,7 @@
                                 "member": {"properties": {
                                     "data": {"properties": {
                                         "type": {"const": "user"},
-                                        "id": {"$ref": "../../core.json#/$defs/userId"}
+                                        "id": {"required": ["$ref"]}
                                     }}
                                 }},
                                 "group": {"properties": {
