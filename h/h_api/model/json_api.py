@@ -44,8 +44,20 @@ class JSONAPIData(Model):
 
     @classmethod
     def create(
-        cls, data_type, _id=None, attributes=None, meta=None, relationships=None
+        cls,
+        data_type,
+        _id=None,
+        attributes=None,
+        meta=None,
+        relationships=None,
+        id_reference=None,
     ):
+        if id_reference is not None:
+            if meta is None:
+                meta = {}
+
+            meta["$anchor"] = id_reference
+
         return cls(
             {
                 "data": cls.dict_from_populated(
