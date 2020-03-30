@@ -78,7 +78,7 @@ class CreateGroupMembership(JSONAPIData):
         """The user which is a member of this group."""
 
         _member_id = self._member_id
-        if "$ref" in _member_id:
+        if isinstance(_member_id, dict) and "$ref" in _member_id:
             return None
 
         return _member_id
@@ -88,7 +88,7 @@ class CreateGroupMembership(JSONAPIData):
         """The group the user is a member of."""
 
         _group_id = self._group_id
-        if "$ref" in _group_id:
+        if isinstance(_group_id, dict) and "$ref" in _group_id:
             return None
 
         return _group_id

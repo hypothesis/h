@@ -88,8 +88,9 @@ class TestCreateGroupMembership:
             )
 
     def test_accessors(self, create_group_membership_body):
-        data = CreateGroupMembership(create_group_membership_body)
+        body = CreateGroupMembership(create_group_membership_body)
 
-        assert data.member_id == "acct:user@example.com"
-        assert data.group_id is None
-        assert data.group_ref == "thing"
+        assert body.member_id is None
+        assert body.member_ref == "user_ref"
+        assert body.group_id is None
+        assert body.group_ref == "group_ref"
