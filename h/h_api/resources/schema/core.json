@@ -38,7 +38,7 @@
             "type": "string",
             "pattern": "^acct:.+$",
             "examples": [
-                "acct:user@example.com"
+                "acct:user@lms.hypothes.is"
             ]
         },
 
@@ -97,11 +97,11 @@
                 {
                     "username": "username",
                     "display_name": "my name",
-                    "authority": "example.com",
+                    "authority": "lms.hypothes.is",
                     "identities": [
                         {
                             "provider": "provider name",
-                            "provider_unique_id": "provider@example.com"
+                            "provider_unique_id": "provider_unique_id"
                         }
                     ]
                 }
@@ -122,7 +122,7 @@
                 {
                     "name": "group_name",
                     "authority_provided_id": "authority_provided_id",
-                    "authority": "example.com"
+                    "authority": "lms.hypothes.is"
                 }
             ]
         }

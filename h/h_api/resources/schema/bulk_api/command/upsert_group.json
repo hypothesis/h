@@ -44,7 +44,7 @@
                     "$anchor": "my_group_1",
                     "query": {
                         "authority_provided_id": "authority_provided_id",
-                        "authority": "example.com"
+                        "authority": "lms.hypothes.is"
                     }
                 },
                 "attributes": {
