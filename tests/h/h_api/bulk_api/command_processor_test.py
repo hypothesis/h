@@ -64,8 +64,8 @@ class TestCommandProcessor:
 
         command_processor.process([config_command, membership_command])
 
-        assert membership_command.body.group_id == "group_id"
-        assert membership_command.body.member_id == "user_id"
+        assert membership_command.body.group.id == "group_id"
+        assert membership_command.body.member.id == "user_id"
 
     def test_it_passes_commands_to_the_observer(
         self, command_processor, observer, config_command, user_command

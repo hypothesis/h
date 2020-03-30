@@ -97,5 +97,8 @@ class TestCommandBuilderCreation:
 
         assert isinstance(command, CreateCommand)
         assert isinstance(command.body, CreateGroupMembership)
-        assert command.body.member_ref == "user_ref"
-        assert command.body.group_ref == "group_ref"
+
+        assert command.body.member.id is None
+        assert command.body.member.ref == "user_ref"
+        assert command.body.group.id is None
+        assert command.body.group.ref == "group_ref"

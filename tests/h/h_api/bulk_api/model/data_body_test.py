@@ -90,7 +90,7 @@ class TestCreateGroupMembership:
     def test_accessors(self, create_group_membership_body):
         body = CreateGroupMembership(create_group_membership_body)
 
-        assert body.member_id is None
-        assert body.member_ref == "user_ref"
-        assert body.group_id is None
-        assert body.group_ref == "group_ref"
+        assert body.member.id is None
+        assert body.member.ref == "user_ref"
+        assert body.group.id is None
+        assert body.group.ref == "group_ref"

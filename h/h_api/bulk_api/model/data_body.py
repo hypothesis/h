@@ -74,47 +74,27 @@ class CreateGroupMembership(JSONAPIData):
         )
 
     @property
-    def member_id(self):
-        """The user which is a member of this group."""
+    def member(self):
+        """The user which is a member of this group.
 
-        _member_id = self._member_id
-        if isinstance(_member_id, dict) and "$ref" in _member_id:
-            return None
-
-        return _member_id
-
-    @property
-    def group_id(self):
-        """The group the user is a member of."""
-
-        _group_id = self._group_id
-        if isinstance(_group_id, dict) and "$ref" in _group_id:
-            return None
-
-        return _group_id
-
-    @property
-    def group_ref(self):
+        :return: A value object with `id` and `ref` properties.
         """
-        A client provided reference for this group.
-
-        If you don't know the group id yet, you can use your own reference.
-        """
-        return self._group_id.get("$ref")
+        return _IdRef(self.relationships["member"]["data"]["id"])
 
     @property
-    def member_ref(self):
+    def group(self):
+        """The group which this user is a member of.
+
+        :return: A value object with `id` and `ref` properties.
         """
-        A client provided reference for this member.
+        return _IdRef(self.relationships["group"]["data"]["id"])
 
-        If you don't know the member id yet, you can use your own reference.
-        """
-        return self._member_id.get("$ref")
 
-    @property
-    def _member_id(self):
-        return self.relationships["member"]["data"]["id"]
+class _IdRef:
+    """A value object which represents an id reference or concrete id."""
 
-    @property
-    def _group_id(self):
-        return self.relationships["group"]["data"]["id"]
+    def __init__(self, value):
+        if isinstance(value, dict):
+            self.id, self.ref = None, value.get("$ref")
+        else:
+            self.id, self.ref = value, None
