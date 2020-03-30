@@ -8,7 +8,7 @@ from h.h_api.bulk_api.command_builder import CommandBuilder
 from h.h_api.bulk_api.command_processor import CommandProcessor
 from h.h_api.bulk_api.model.report import Report
 from h.h_api.bulk_api.observer import Observer
-from h.h_api.enums import CommandResult, CommandStatus, CommandType, DataType
+from h.h_api.enums import CommandResult, CommandStatus, CommandType, DataType, ViewType
 from h.h_api.exceptions import CommandSequenceError, InvalidDeclarationError
 
 
@@ -160,11 +160,10 @@ class TestCommandProcessor:
         with pytest.raises(exception):
             command_processor.process(commands)
 
-    @pytest.mark.xfail
     def test_reports_are_stored_if_view_is_not_None(
         self, command_processor, commands, config_command
     ):
-        config_command.body.raw["view"] = "to_be_decided"
+        config_command.body.raw["view"] = ViewType.BASIC
 
         command_processor.process(commands)
 
@@ -175,11 +174,15 @@ class TestCommandProcessor:
     def test_reports_are_not_stored_if_view_is_None(
         self, command_processor, commands, config_command
     ):
-        assert config_command.body.view is None
+        assert config_command.body.view is ViewType.NONE
 
         command_processor.process(commands)
 
         assert not command_processor.reports
+
+    @pytest.mark.xfail
+    def test_it_generates_basic_reports(self):
+        raise NotImplementedError()
 
     @pytest.fixture
     def commands(self, config_command, user_command):

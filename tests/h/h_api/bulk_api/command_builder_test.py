@@ -8,7 +8,7 @@ from h.h_api.bulk_api.model.data_body import (
     UpsertGroup,
     UpsertUser,
 )
-from h.h_api.enums import CommandType
+from h.h_api.enums import CommandType, ViewType
 from h.h_api.exceptions import SchemaValidationError
 
 UPSERT = CommandType.UPSERT.value
@@ -69,12 +69,13 @@ class TestCommandBuilderFromData:
 
 class TestCommandBuilderCreation:
     def test_configure(self):
-        command = CommandBuilder.configure("acct:user@example.com", 2)
+        command = CommandBuilder.configure("acct:user@example.com", 2, "basic")
 
         assert isinstance(command, ConfigCommand)
         assert isinstance(command.body, Configuration)
         assert command.body.effective_user == "acct:user@example.com"
         assert command.body.total_instructions == 2
+        assert command.body.view == ViewType.BASIC
 
     def test_user_upsert(self, user_attributes):
         command = CommandBuilder.user.upsert(user_attributes, "user_ref")

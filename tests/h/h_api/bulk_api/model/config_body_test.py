@@ -1,7 +1,7 @@
 import pytest
 
 from h.h_api.bulk_api.model.config_body import Configuration
-from h.h_api.enums import CommandType, DataType
+from h.h_api.enums import CommandType, DataType, ViewType
 from h.h_api.exceptions import SchemaValidationError
 
 
@@ -38,7 +38,7 @@ class TestConfiguration:
             effective_user="acct:user@example.com", total_instructions=100
         )
 
-        assert config.view is None
+        assert config.view is ViewType.NONE
         assert config.effective_user == "acct:user@example.com"
         assert config.total_instructions == 100
 
