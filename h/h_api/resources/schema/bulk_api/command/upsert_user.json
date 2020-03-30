@@ -44,7 +44,7 @@
                     "$anchor": "my_user_ref",
                     "query": {
                         "username": "username",
-                        "authority": "example.com"
+                        "authority": "lms.hypothes.is"
                     }
                 },
                 "attributes": {
