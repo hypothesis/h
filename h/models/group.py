@@ -34,6 +34,18 @@ class WriteableBy(enum.Enum):
     members = "members"
 
 
+class GroupMembership(Base):
+    __tablename__ = "user_group"
+
+    __table_args__ = (sa.UniqueConstraint("user_id", "group_id"),)
+
+    id = sa.Column("id", sa.Integer, autoincrement=True, primary_key=True)
+    user_id = sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False)
+    group_id = sa.Column(
+        "group_id", sa.Integer, sa.ForeignKey("group.id"), nullable=False
+    )
+
+
 class Group(Base, mixins.Timestamps):
     __tablename__ = "group"
 
@@ -320,14 +332,4 @@ PRIVATE_GROUP_TYPE_FLAGS = TypeFlags(
 
 RESTRICTED_GROUP_TYPE_FLAGS = TypeFlags(
     joinable_by=None, readable_by=ReadableBy.world, writeable_by=WriteableBy.members
-)
-
-
-USER_GROUP_TABLE = sa.Table(
-    "user_group",
-    Base.metadata,
-    sa.Column("id", sa.Integer, autoincrement=True, primary_key=True),
-    sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=False),
-    sa.Column("group_id", sa.Integer, sa.ForeignKey("group.id"), nullable=False),
-    sa.UniqueConstraint("user_id", "group_id"),
 )
