@@ -29,3 +29,10 @@ class CommandStatus(Enum):
 
     AS_RECEIVED = "as_received"
     POST_EXECUTE = "post_execute"
+
+
+class ViewType(Enum):
+    """Type of view of the data requested."""
+
+    NONE = None
+    BASIC = "basic"

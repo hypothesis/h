@@ -11,7 +11,7 @@ from h.h_api.bulk_api.model.data_body import (
     UpsertGroup,
     UpsertUser,
 )
-from h.h_api.enums import CommandType
+from h.h_api.enums import CommandType, ViewType
 
 
 class CommandBuilder:
@@ -37,7 +37,7 @@ class CommandBuilder:
             return UpsertCommand(raw)
 
     @classmethod
-    def configure(cls, effective_user, total_instructions):
+    def configure(cls, effective_user, total_instructions, view=ViewType.NONE):
         """
         Create a configuration command.
 
@@ -46,7 +46,7 @@ class CommandBuilder:
         :rtype: ConfigCommand
         """
         return ConfigCommand.create(
-            Configuration.create(effective_user, total_instructions),
+            Configuration.create(effective_user, total_instructions, view=view),
         )
 
     class user:

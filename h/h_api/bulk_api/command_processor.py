@@ -6,8 +6,9 @@ from h.h_api.bulk_api.id_references import IdReferences
 from h.h_api.bulk_api.model.command import ConfigCommand
 from h.h_api.bulk_api.model.report import Report
 from h.h_api.bulk_api.observer import Observer
-from h.h_api.enums import CommandStatus
+from h.h_api.enums import CommandStatus, ViewType
 from h.h_api.exceptions import CommandSequenceError, InvalidDeclarationError
+from h.h_api.model.json_api import JSONAPIData
 
 
 class CommandProcessor:
@@ -55,7 +56,7 @@ class CommandProcessor:
 
         self._check_command_count(final=True)
 
-        self._report_back()
+        return self._report_back()
 
     def _process_single_command(self, command):
         """Process a single command."""
@@ -175,15 +176,20 @@ This may cause the CommandBatcher to call the on_flush() callback that we passed
             if reference is not None:
                 self.id_refs.add_concrete_id(data_type, reference, report.id)
 
-        if self.config.view is not None:
+        if self.config.view is not ViewType.NONE:
             # Store reports for each item, so we ask for the objects to produce
             # our final response
-            self.reports[data_type].append(reports)
+            self.reports[data_type].extend(reports)
 
     def _report_back(self):
         if not self.reports:
             # Nothing to report!
             return
 
-        # TODO! Implement reporting back
-        raise NotImplementedError()
+        if self.config.view is not ViewType.BASIC:
+            # TODO! Implement reporting back
+            raise NotImplementedError()
+
+        for data_type, reports in self.reports.items():
+            for report in reports:
+                yield JSONAPIData.create(data_type=data_type, _id=report.public_id).raw

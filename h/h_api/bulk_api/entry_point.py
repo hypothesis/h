@@ -32,7 +32,7 @@ class BulkAPI:
         if not isinstance(executor, Executor):
             raise TypeError(f"Expected 'Executor' instance not '{type(executor)}'")
 
-        CommandProcessor(executor=executor, observer=observer).process(
+        return CommandProcessor(executor=executor, observer=observer).process(
             cls._commands_from_ndjson(lines)
         )
 
@@ -54,7 +54,7 @@ class BulkAPI:
         Convenience wrapper for `from_lines`.
         """
 
-        cls.from_lines(cls._bytes_to_lines(byte_stream), executor, observer)
+        return cls.from_lines(cls._bytes_to_lines(byte_stream), executor, observer)
 
     @classmethod
     def to_stream(cls, handle, commands):
