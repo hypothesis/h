@@ -44,7 +44,7 @@ class BulkAPI:
         Convenience wrapper for `from_lines`.
         """
 
-        cls.from_lines(cls._string_to_lines(string), executor, observer)
+        return cls.from_lines(cls._string_to_lines(string), executor, observer)
 
     @classmethod
     def from_byte_stream(cls, byte_stream, executor, observer=None):

@@ -1,3 +1,4 @@
+from types import GeneratorType
 from unittest.mock import call, create_autospec
 
 import pytest
@@ -180,9 +181,15 @@ class TestCommandProcessor:
 
         assert not command_processor.reports
 
-    @pytest.mark.xfail
-    def test_it_generates_basic_reports(self):
-        raise NotImplementedError()
+    def test_it_generates_basic_reports(
+        self, command_processor, commands, config_command
+    ):
+        config_command.body.raw["view"] = "basic"
+        results = command_processor.process(commands)
+
+        assert isinstance(results, GeneratorType)
+        # Our commands below only include a user object
+        assert list(results) == [{"data": {"id": Any(), "type": "user"}}]
 
     @pytest.fixture
     def commands(self, config_command, user_command):

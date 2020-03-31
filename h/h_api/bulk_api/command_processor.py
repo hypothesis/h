@@ -182,13 +182,13 @@ This may cause the CommandBatcher to call the on_flush() callback that we passed
             self.reports[data_type].extend(reports)
 
     def _report_back(self):
-        if not self.reports:
+        if not self.reports or self.config.view is ViewType.NONE:
             # Nothing to report!
             return
 
         if self.config.view is not ViewType.BASIC:
-            # TODO! Implement reporting back
-            raise NotImplementedError()
+            # This shouldn't be possible, but belt and braces
+            raise ValueError(f"Unknown configuration view type {self.config.view}")
 
         for data_type, reports in self.reports.items():
             for report in reports:

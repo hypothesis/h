@@ -2,6 +2,7 @@ import json
 from copy import deepcopy
 from io import BytesIO, StringIO
 from types import GeneratorType
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
@@ -17,31 +18,22 @@ class TestBulkAPI:
     # This is a glue library, so there's not much to do here but test the
     # interfaces
 
-    def test_from_lines(self, lines, executor, CommandProcessor):
-        BulkAPI.from_lines(lines, executor)
+    @pytest.mark.parametrize(
+        "input_data,bulk_method",
+        (
+            ("lines", BulkAPI.from_lines),
+            ("nd_json", BulkAPI.from_string),
+            ("nd_json_byte_stream", BulkAPI.from_byte_stream),
+        ),
+        indirect=["input_data"],
+    )
+    def test_from_input(self, input_data, executor, bulk_method, CommandProcessor):
+        result = bulk_method(input_data, executor)
 
         CommandProcessor.assert_called_once_with(
             executor=executor, observer=Any.instance_of(Observer)
         )
-
-        self._assert_process_called_with_generator_of_commands(CommandProcessor)
-
-    def test_from_string(self, nd_json, executor, CommandProcessor):
-        BulkAPI.from_string(nd_json, executor)
-
-        CommandProcessor.assert_called_once_with(
-            executor=executor, observer=Any.instance_of(Observer)
-        )
-
-        self._assert_process_called_with_generator_of_commands(CommandProcessor)
-
-    def test_from_byte_stream(self, nd_json_byte_stream, executor, CommandProcessor):
-        BulkAPI.from_byte_stream(nd_json_byte_stream, executor)
-
-        CommandProcessor.assert_called_once_with(
-            executor=executor, observer=Any.instance_of(Observer)
-        )
-
+        assert result == sentinel.reports
         self._assert_process_called_with_generator_of_commands(CommandProcessor)
 
     def test__bytes_to_lines(self):
@@ -111,7 +103,15 @@ class TestBulkAPI:
 
     @pytest.fixture
     def CommandProcessor(self, patch):
-        return patch("h.h_api.bulk_api.entry_point.CommandProcessor")
+        CommandProcessor = patch("h.h_api.bulk_api.entry_point.CommandProcessor")
+
+        CommandProcessor.return_value.process.return_value = sentinel.reports
+
+        return CommandProcessor
+
+    @pytest.fixture
+    def input_data(self, request):
+        return request.getfixturevalue(request.param)
 
     @pytest.fixture
     def nd_json(self):
