@@ -17,10 +17,12 @@
                             "properties": {
                                 "query": {
                                     "type": "object",
+                                    "additionalProperties": false,
                                     "properties": {
                                         "username": {"$ref": "../../core.json#/$defs/userName"},
                                         "authority": {"$ref": "../../core.json#/$defs/authority"}
-                                    }
+                                    },
+                                    "required": ["username", "authority"]
                                 },
                                 "$anchor": {"$ref": "../../core.json#/$defs/anchor"}
                             },
