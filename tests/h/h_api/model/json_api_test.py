@@ -47,7 +47,7 @@ class TestJSONAPIError:
 class TestJSONAPIData:
     def test_create(self):
         attributes = {"attrs": 1}
-        meta = {"$anchor": "my_ref"}
+        meta = {"some_meta": "value"}
         relationships = {"rel_type": {"data": {"type": "foo", "id": "1"}}}
 
         data = JSONAPIData.create(
@@ -55,6 +55,7 @@ class TestJSONAPIData:
             "my_id",
             attributes=attributes,
             meta=meta,
+            id_reference="my_ref",
             relationships=relationships,
         )
 
@@ -71,7 +72,7 @@ class TestJSONAPIData:
 
         assert data.id == "my_id"
         assert data.type == DataType.GROUP
-        assert data.meta == meta
+        assert data.meta == {"some_meta": "value", "$anchor": "my_ref"}
         assert data.attributes == attributes
         assert data.relationships == relationships
         assert data.id_reference == "my_ref"

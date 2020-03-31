@@ -2,16 +2,47 @@ import pytest
 
 from h.h_api.bulk_api.model.data_body import (
     CreateGroupMembership,
+    UpsertBody,
     UpsertGroup,
     UpsertUser,
 )
+from h.h_api.enums import DataType
 from h.h_api.exceptions import SchemaValidationError
+
+
+class TestUpsertBody:
+    class Subclass(UpsertBody):
+        data_type = DataType.GROUP
+        query_fields = ["query_field"]
+
+    def test_create_ok(self, body):
+        assert body.raw == {
+            "data": {
+                "type": "group",
+                "meta": {"query": {"query_field": "query"}, "$anchor": "id_ref"},
+                "attributes": {"non_query_field": "non_query"},
+            }
+        }
+
+    def test_query(self, body):
+        assert body.query == {"query_field": "query"}
+
+    @pytest.fixture
+    def body(self):
+        class SubClass(UpsertBody):
+            data_type = DataType.GROUP
+            query_fields = ["query_field"]
+
+        return SubClass.create(
+            {"query_field": "query", "non_query_field": "non_query"}, "id_ref"
+        )
 
 
 class TestUpsertUser:
     def test_create_ok(self, user_attributes):
-        data = UpsertUser.create(user_attributes, "user_ref")
-        assert data.raw == {
+        body = UpsertUser.create(user_attributes, "user_ref")
+
+        assert body.raw == {
             "data": {
                 "type": "user",
                 "meta": {
@@ -32,14 +63,14 @@ class TestUpsertUser:
 
     def test_create_can_fail(self):
         with pytest.raises(SchemaValidationError):
-            UpsertUser.create({}, "id_ref")
+            UpsertUser.create({}, None)
 
 
 class TestUpsertGroup:
     def test_create_ok(self, group_attributes):
-        data = UpsertGroup.create(group_attributes, "reference")
+        body = UpsertGroup.create(group_attributes, "reference")
 
-        assert data.raw == {
+        assert body.raw == {
             "data": {
                 "attributes": {"name": "name"},
                 "meta": {
@@ -57,9 +88,9 @@ class TestUpsertGroup:
 
 class TestCreateGroupMembership:
     def test_create_ok(self):
-        data = CreateGroupMembership.create("user_ref", "group_ref")
+        body = CreateGroupMembership.create("user_ref", "group_ref")
 
-        assert data.raw == {
+        assert body.raw == {
             "data": {
                 "relationships": {
                     "member": {"data": {"id": {"$ref": "user_ref"}, "type": "user"}},
