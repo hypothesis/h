@@ -11,7 +11,7 @@ class UpsertUser(JSONAPIData):
     validator = Schema.get_validator("bulk_api/command/upsert_user.json")
 
     @classmethod
-    def create(cls, _id, attributes):
+    def create(cls, attributes, id_reference):
         """
         Create an upsert user body.
 
@@ -19,7 +19,9 @@ class UpsertUser(JSONAPIData):
         :param attributes: User attributes
         :return:
         """
-        return super().create(DataType.USER, _id=_id, attributes=attributes)
+        return super().create(
+            DataType.USER, attributes=attributes, meta={"$anchor": id_reference}
+        )
 
 
 class UpsertGroup(JSONAPIData):
@@ -51,18 +53,20 @@ class CreateGroupMembership(JSONAPIData):
     validator = Schema.get_validator("bulk_api/command/create_group_membership.json")
 
     @classmethod
-    def create(cls, user_id, group_ref):
+    def create(cls, user_ref, group_ref):
         """
         Create a create group membership body for adding users to groups.
 
-        :param user_id: User id
+        :param user_ref: Custom user reference
         :param group_ref: Custom group reference
         :return:
         """
         return super().create(
             DataType.GROUP_MEMBERSHIP,
             relationships={
-                "member": {"data": {"type": DataType.USER.value, "id": user_id}},
+                "member": {
+                    "data": {"type": DataType.USER.value, "id": {"$ref": user_ref}}
+                },
                 "group": {
                     "data": {"type": DataType.GROUP.value, "id": {"$ref": group_ref}}
                 },
@@ -70,30 +74,27 @@ class CreateGroupMembership(JSONAPIData):
         )
 
     @property
-    def member_id(self):
-        """The user which is a member of this group."""
+    def member(self):
+        """The user which is a member of this group.
 
-        return self.relationships["member"]["data"]["id"]
-
-    @property
-    def group_id(self):
-        """The group the user is a member of."""
-
-        _group_id = self._group_id
-        if "$ref" in _group_id:
-            return None
-
-        return _group_id
-
-    @property
-    def group_ref(self):
+        :return: A value object with `id` and `ref` properties.
         """
-        A client provided reference for this group.
-
-        If you don't know the group id yet, you can use your own reference.
-        """
-        return self._group_id.get("$ref")
+        return _IdRef(self.relationships["member"]["data"]["id"])
 
     @property
-    def _group_id(self):
-        return self.relationships["group"]["data"]["id"]
+    def group(self):
+        """The group which this user is a member of.
+
+        :return: A value object with `id` and `ref` properties.
+        """
+        return _IdRef(self.relationships["group"]["data"]["id"])
+
+
+class _IdRef:
+    """A value object which represents an id reference or concrete id."""
+
+    def __init__(self, value):
+        if isinstance(value, dict):
+            self.id, self.ref = None, value.get("$ref")
+        else:
+            self.id, self.ref = value, None

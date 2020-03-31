@@ -44,10 +44,18 @@ class TestCommandProcessor:
             command_processor.process(commands)
 
     def test_id_references_are_dereferenced(
-        self, command_processor, config_command, membership_command, group_command
+        self,
+        command_processor,
+        config_command,
+        membership_command,
+        group_command,
+        user_command,
     ):
         command_processor.id_refs.add_concrete_id(
-            DataType.GROUP, group_command.body.id_reference, "concrete_id"
+            DataType.GROUP, group_command.body.id_reference, "group_id"
+        )
+        command_processor.id_refs.add_concrete_id(
+            DataType.USER, user_command.body.id_reference, "user_id"
         )
 
         assert membership_command.body.relationships["group"]["data"]["id"] == {
@@ -56,10 +64,8 @@ class TestCommandProcessor:
 
         command_processor.process([config_command, membership_command])
 
-        assert (
-            membership_command.body.relationships["group"]["data"]["id"]
-            == "concrete_id"
-        )
+        assert membership_command.body.group.id == "group_id"
+        assert membership_command.body.member.id == "user_id"
 
     def test_it_passes_commands_to_the_observer(
         self, command_processor, observer, config_command, user_command

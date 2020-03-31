@@ -20,7 +20,7 @@
                                 "member": {"properties": {
                                     "data": {"properties": {
                                         "type": {"const": "user"},
-                                        "id": {"$ref": "../../core.json#/$defs/userId"}
+                                        "id": {"required": ["$ref"]}
                                     }}
                                 }},
                                 "group": {"properties": {
@@ -46,10 +46,10 @@
                 "type": "group_membership",
                 "relationships": {
                     "member": {
-                        "data": {"type": "user", "id": "acct:user@example.com"}
+                        "data": {"type": "user", "id": {"$ref": "user_ref"}}
                     },
                     "group": {
-                        "data": {"type": "group", "id": {"$ref": "thing"}}
+                        "data": {"type": "group", "id": {"$ref": "group_ref"}}
                     }
                 }
             }

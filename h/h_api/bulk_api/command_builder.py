@@ -53,16 +53,16 @@ class CommandBuilder:
         """User commands."""
 
         @classmethod
-        def upsert(cls, user_id, attributes):
+        def upsert(cls, attributes, id_reference):
             """
             Create a user upsert command.
 
-            :param user_id: Users id (e.g. 'acct:user@example.com')
             :param attributes: Dict of user fields and values
+            :param id_reference: Custom reference to this user
             :rtype: UpsertCommand
             """
             return UpsertCommand.create(
-                CommandType.UPSERT, UpsertUser.create(user_id, attributes)
+                CommandType.UPSERT, UpsertUser.create(attributes, id_reference)
             )
 
     class group:
@@ -85,18 +85,18 @@ class CommandBuilder:
         """Group membership commands."""
 
         @classmethod
-        def create(cls, user_id, group_ref):
+        def create(cls, user_ref, group_ref):
             """
             Create a group membership create.
 
-            As the group id is not known at command creation time, a custom
-            reference can be supplied to the group which is then used here to
-            link the two.
+            As the group and user ids are not known at command creation time,
+            a custom reference can be supplied to the group which is then used
+            here to link the two.
 
-            :param user_id: The user id
+            :param user_ref: Custom reference to the user
             :param group_ref: Custom reference to the group
             :rtype: CreateCommand
             """
             return CreateCommand.create(
-                CommandType.CREATE, CreateGroupMembership.create(user_id, group_ref)
+                CommandType.CREATE, CreateGroupMembership.create(user_ref, group_ref)
             )

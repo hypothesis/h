@@ -10,7 +10,7 @@ from h.h_api.exceptions import SchemaValidationError
 
 class TestUpsertUser:
     def test_create_ok(self, user_attributes):
-        data = UpsertUser.create("acct:user@example.com", user_attributes)
+        data = UpsertUser.create(user_attributes, "user_ref")
         assert data.raw == {
             "data": {
                 "attributes": {
@@ -24,14 +24,14 @@ class TestUpsertUser:
                     ],
                     "username": "user",
                 },
-                "id": "acct:user@example.com",
+                "meta": {"$anchor": "user_ref"},
                 "type": "user",
             }
         }
 
     def test_create_can_fail(self):
         with pytest.raises(SchemaValidationError):
-            UpsertUser.create("bad", {})
+            UpsertUser.create({}, "id_ref")
 
 
 class TestUpsertGroup:
@@ -56,13 +56,13 @@ class TestUpsertGroup:
 
 class TestCreateGroupMembership:
     def test_create_ok(self):
-        data = CreateGroupMembership.create("acct:user@example.com", "reference")
+        data = CreateGroupMembership.create("user_ref", "group_ref")
 
         assert data.raw == {
             "data": {
                 "relationships": {
-                    "group": {"data": {"id": {"$ref": "reference"}, "type": "group"}},
-                    "member": {"data": {"id": "acct:user@example.com", "type": "user"}},
+                    "member": {"data": {"id": {"$ref": "user_ref"}, "type": "user"}},
+                    "group": {"data": {"id": {"$ref": "group_ref"}, "type": "group"}},
                 },
                 "type": "group_membership",
             }
@@ -88,8 +88,9 @@ class TestCreateGroupMembership:
             )
 
     def test_accessors(self, create_group_membership_body):
-        data = CreateGroupMembership(create_group_membership_body)
+        body = CreateGroupMembership(create_group_membership_body)
 
-        assert data.member_id == "acct:user@example.com"
-        assert data.group_id is None
-        assert data.group_ref == "thing"
+        assert body.member.id is None
+        assert body.member.ref == "user_ref"
+        assert body.group.id is None
+        assert body.group.ref == "group_ref"

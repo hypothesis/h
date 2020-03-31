@@ -45,7 +45,6 @@ class TestBulk:
         return [
             CommandBuilder.configure(f"acct:user1@{authority}", total_instructions=4),
             CommandBuilder.user.upsert(
-                f"acct:user2@{authority}",
                 {
                     "username": "user2",
                     "display_name": "display_name",
@@ -57,13 +56,12 @@ class TestBulk:
                         }
                     ],
                 },
+                "user_ref",
             ),
             CommandBuilder.group.upsert(
                 {"groupid": f"group:name@{authority}", "name": "name"}, "group_ref"
             ),
-            CommandBuilder.group_membership.create(
-                f"acct:user2@{authority}", "group_ref"
-            ),
+            CommandBuilder.group_membership.create("user_ref", "group_ref"),
         ]
 
     @pytest.fixture
