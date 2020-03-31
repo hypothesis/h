@@ -28,7 +28,7 @@ from h.models.document import Document, DocumentMeta, DocumentURI
 from h.models.feature import Feature
 from h.models.feature_cohort import FeatureCohort
 from h.models.flag import Flag
-from h.models.group import Group
+from h.models.group import Group, GroupMembership
 from h.models.group_scope import GroupScope
 from h.models.organization import Organization
 from h.models.setting import Setting
@@ -52,6 +52,7 @@ __all__ = (
     "FeatureCohort",
     "Flag",
     "Group",
+    "GroupMembership",
     "GroupScope",
     "Organization",
     "Setting",
