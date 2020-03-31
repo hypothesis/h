@@ -15,8 +15,18 @@
                         "meta": {
                             "additionalProperties": false,
                             "properties": {
+                                "query": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "username": {"$ref": "../../core.json#/$defs/userName"},
+                                        "authority": {"$ref": "../../core.json#/$defs/authority"}
+                                    },
+                                    "required": ["username", "authority"]
+                                },
                                 "$anchor": {"$ref": "../../core.json#/$defs/anchor"}
-                            }
+                            },
+                            "required": ["query"]
                         }
                     },
                     "required": ["type", "attributes", "meta"]
@@ -31,12 +41,14 @@
             "data": {
                 "type": "user",
                 "meta": {
-                    "$anchor": "my_user_ref"
+                    "$anchor": "my_user_ref",
+                    "query": {
+                        "username": "username",
+                        "authority": "example.com"
+                    }
                 },
                 "attributes": {
-                    "username": "user",
                     "display_name": "display name",
-                    "authority": "example.com",
                     "identities": [
                         {
                             "provider": "provider string",

@@ -59,12 +59,18 @@ def create_group_membership_body():
 
 @pytest.fixture
 def user_attributes(upsert_user_body):
-    return upsert_user_body["data"]["attributes"]
+    return dict(
+        upsert_user_body["data"]["attributes"],
+        **upsert_user_body["data"]["meta"]["query"]
+    )
 
 
 @pytest.fixture
-def group_attributes():
-    return {"name": "name", "groupid": "group:name@example.com"}
+def group_attributes(upsert_group_body):
+    return dict(
+        upsert_group_body["data"]["attributes"],
+        **upsert_group_body["data"]["meta"]["query"]
+    )
 
 
 @pytest.fixture
