@@ -47,7 +47,7 @@ class TestUpsertUser:
                 "type": "user",
                 "meta": {
                     "$anchor": "user_ref",
-                    "query": {"authority": "example.com", "username": "username"},
+                    "query": {"authority": "lms.hypothes.is", "username": "username"},
                 },
                 "attributes": {
                     "identities": [
@@ -75,7 +75,10 @@ class TestUpsertGroup:
                 "attributes": {"name": "name"},
                 "meta": {
                     "$anchor": "reference",
-                    "query": {"groupid": "group:name@example.com"},
+                    "query": {
+                        "authority": "lms.hypothes.is",
+                        "authority_provided_id": "authority_provided_id",
+                    },
                 },
                 "type": "group",
             }

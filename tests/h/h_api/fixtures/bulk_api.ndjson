@@ -1,10 +1,10 @@
 
 
-["configure", {"view": null, "user": {"effective": "acct:user@example.com"}, "instructions": {"total": 4}, "defaults": [["create", "*", {"on_duplicate": "continue"}], ["upsert", "*", {"merge_query": true}]]}]
+["configure", {"view": null, "user": {"effective": "acct:user@lms.hypothes.is"}, "instructions": {"total": 4}, "defaults": [["create", "*", {"on_duplicate": "continue"}], ["upsert", "*", {"merge_query": true}]]}]
 
-["upsert", {"data": {"type": "user", "attributes": {"display_name": "display name", "identities": [{"provider": "provider string", "provider_unique_id": "provider unique id"}]}, "meta": {"query": {"authority": "example.com", "username": "user"}, "$anchor": "user_ref"}}}]
+["upsert", {"data": {"type": "user", "attributes": {"display_name": "display name", "identities": [{"provider": "provider string", "provider_unique_id": "provider unique id"}]}, "meta": {"query": {"authority": "lms.hypothes.is", "username": "username"}, "$anchor": "user_ref"}}}]
 
-
-["upsert", {"data": {"type": "group", "attributes": {"name": "group name"}, "meta": {"query": {"groupid": "group:somegroup@example.com"}, "$anchor": "group_ref"}}}]
+["upsert", {"data": {"type": "group", "attributes": {"name": "name"}, "meta": {"query": {"authority": "lms.hypothes.is", "authority_provided_id": "authority_provided_id"}, "$anchor": "group_ref"}}}]
 ["create", {"data": {"type": "group_membership", "relationships": {"member": {"data": {"type": "user", "id": {"$ref": "user_ref"}}}, "group": {"data": {"type": "group", "id": {"$ref": "group_ref"}}}}}}]
+
 

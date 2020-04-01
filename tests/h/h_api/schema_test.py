@@ -52,7 +52,7 @@ class TestSchema:
 
         # Modify one value which proves we configured the Validator to load
         # chained schema
-        upsert_group_body["data"]["meta"]["query"]["groupid"] = "wrong_pattern"
+        upsert_group_body["data"]["attributes"]["NOT A KEY"] = "WRONG"
 
         with pytest.raises(SchemaValidationError):
             validator.validate_all(upsert_group_body)
