@@ -143,7 +143,7 @@ class TestCommandProcessor:
             ("string", TypeError),
             (["not_a_report_class"], TypeError),
             ([], IndexError),
-            ([Report(id_="foo"), Report(id_="foo"),], IndexError,),
+            ([Report(id_="foo"), Report(id_="foo")], IndexError),
         ),
     )
     def test_we_require_a_report_for_each_object(

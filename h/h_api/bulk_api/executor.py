@@ -1,6 +1,5 @@
 """Implementations of an 'Executor' responsible for running bulk commands."""
 from h.h_api.bulk_api.model.report import Report
-from h.h_api.enums import CommandType
 
 
 class Executor:

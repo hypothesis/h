@@ -1,5 +1,3 @@
-import pytest
-
 from h.h_api.bulk_api.model.report import Report
 
 
