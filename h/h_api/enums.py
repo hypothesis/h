@@ -19,13 +19,15 @@ class CommandType(Enum):
     CREATE = "create"
 
 
-class CommandResult(Enum):
-    CREATED = "created"
-    UPDATED = "updated"
-
-
 class CommandStatus(Enum):
     """BulkAPI command processing statuses."""
 
     AS_RECEIVED = "as_received"
     POST_EXECUTE = "post_execute"
+
+
+class ViewType(Enum):
+    """Type of view of the data requested."""
+
+    NONE = None
+    BASIC = "basic"

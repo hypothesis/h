@@ -3,7 +3,7 @@
 from collections import defaultdict
 from functools import lru_cache
 
-from h.h_api.enums import CommandType, DataType
+from h.h_api.enums import CommandType, DataType, ViewType
 from h.h_api.model.base import Model
 from h.h_api.schema import Schema
 
@@ -14,7 +14,7 @@ class Configuration(Model):
     WILD_CARD = "*"
 
     @classmethod
-    def create(cls, effective_user, total_instructions):
+    def create(cls, effective_user, total_instructions, view=None):
         """
         Create a configuration object.
 
@@ -23,7 +23,7 @@ class Configuration(Model):
         """
         return cls(
             {
-                "view": None,
+                "view": ViewType(view).value,
                 "user": {"effective": effective_user},
                 "instructions": {"total": int(total_instructions)},
                 "defaults": [
@@ -36,7 +36,7 @@ class Configuration(Model):
     @property
     def view(self):
         """The return type of view requested by the user."""
-        return self.raw["view"]
+        return ViewType(self.raw["view"])
 
     @property
     def effective_user(self):

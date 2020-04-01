@@ -7,7 +7,7 @@
     "type": "object",
     "additionalProperties": false,
     "properties": {
-        "view": {"enum": [null]},
+        "view": {"enum": [null, "basic"]},
 
         "user": {
             "type": "object",
@@ -64,7 +64,7 @@
             "view": null,
 
             "user": {
-                "effective": "acct:user@example.com"
+                "effective": "acct:user@lms.hypothes.is"
             },
 
             "instructions": {
