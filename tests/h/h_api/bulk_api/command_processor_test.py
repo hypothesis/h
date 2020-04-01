@@ -9,7 +9,7 @@ from h.h_api.bulk_api.command_builder import CommandBuilder
 from h.h_api.bulk_api.command_processor import CommandProcessor
 from h.h_api.bulk_api.model.report import Report
 from h.h_api.bulk_api.observer import Observer
-from h.h_api.enums import CommandResult, CommandStatus, CommandType, DataType, ViewType
+from h.h_api.enums import CommandStatus, CommandType, DataType, ViewType
 from h.h_api.exceptions import CommandSequenceError, InvalidDeclarationError
 
 
@@ -143,13 +143,7 @@ class TestCommandProcessor:
             ("string", TypeError),
             (["not_a_report_class"], TypeError),
             ([], IndexError),
-            (
-                [
-                    Report(CommandResult.CREATED, id_="foo"),
-                    Report(CommandResult.CREATED, id_="foo"),
-                ],
-                IndexError,
-            ),
+            ([Report(id_="foo"), Report(id_="foo"),], IndexError,),
         ),
     )
     def test_we_require_a_report_for_each_object(

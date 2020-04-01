@@ -1,6 +1,6 @@
 """Implementations of an 'Executor' responsible for running bulk commands."""
 from h.h_api.bulk_api.model.report import Report
-from h.h_api.enums import CommandResult, CommandType
+from h.h_api.enums import CommandType
 
 
 class Executor:
@@ -69,10 +69,4 @@ class AutomaticReportExecutor(Executor):
     def execute_batch(self, command_type, data_type, default_config, batch):
         """Return fake ids for all items in the batch with id references."""
 
-        fake_status = (
-            CommandResult.CREATED
-            if command_type is CommandType.CREATE
-            else CommandResult.UPDATED
-        )
-
-        return [Report(fake_status, id_=index) for index in range(len(batch))]
+        return [Report(id_=index) for index in range(len(batch))]

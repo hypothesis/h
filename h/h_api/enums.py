@@ -19,11 +19,6 @@ class CommandType(Enum):
     CREATE = "create"
 
 
-class CommandResult(Enum):
-    CREATED = "created"
-    UPDATED = "updated"
-
-
 class CommandStatus(Enum):
     """BulkAPI command processing statuses."""
 
