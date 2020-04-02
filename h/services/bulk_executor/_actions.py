@@ -7,8 +7,12 @@ from sqlalchemy.exc import ProgrammingError
 from zope.sqlalchemy import mark_changed
 
 from h.h_api.bulk_api import Report
-from h.h_api.exceptions import ConflictingDataError, UnsupportedOperationError
-from h.models import User, UserIdentity
+from h.h_api.exceptions import (
+    CommandSequenceError,
+    ConflictingDataError,
+    UnsupportedOperationError,
+)
+from h.models import Group, User, UserIdentity
 
 
 class DBAction:
@@ -25,6 +29,7 @@ class DBAction:
 
         The commands are assumed to be appropriate for this action type.
         """
+
         raise NotImplementedError()
 
     @staticmethod
@@ -64,6 +69,46 @@ class DBAction:
         mark_changed(self.db)
 
         return result
+
+
+class GroupUpsertAction(DBAction):
+    """Perform a bulk group upsert."""
+
+    def execute(self, batch, effective_user_id=None, **_):
+        if effective_user_id is None:
+            raise CommandSequenceError(
+                "Effective user must be configured before upserting groups"
+            )
+
+        # Check that we can actually process this batch
+        self._check_upsert_queries(
+            batch, expected_keys=["authority", "authority_provided_id"]
+        )
+
+        # Prep the query
+        values = [command.body.attributes for command in batch]
+        for value in values:
+            value["creator_id"] = effective_user_id
+
+        stmt = insert(Group).values(values)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["authority", "authority_provided_id"],
+            set_={"name": stmt.excluded.name},
+        ).returning(Group.id, Group.authority, Group.authority_provided_id)
+
+        # Upsert the data
+        group_rows = self._execute_statement(stmt).fetchall()
+
+        # Report back
+        return [
+            Report(
+                id_,
+                public_id=Group(
+                    authority=authority, authority_provided_id=authority_provided_id
+                ).groupid,
+            )
+            for id_, authority, authority_provided_id in group_rows
+        ]
 
 
 class UserUpsertAction(DBAction):

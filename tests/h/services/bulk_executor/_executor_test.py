@@ -15,12 +15,7 @@ class TestDBExecutor:
         "command_type,data_type,handler",
         (
             (CommandType.UPSERT, DataType.USER, "UserUpsertAction"),
-            param(
-                CommandType.UPSERT,
-                DataType.GROUP,
-                "GroupUpsertAction",
-                marks=pytest.mark.xfail(reason="Not implemented"),
-            ),
+            (CommandType.UPSERT, DataType.GROUP, "GroupUpsertAction"),
             param(
                 CommandType.CREATE,
                 DataType.GROUP_MEMBERSHIP,
@@ -92,6 +87,25 @@ class TestDBExecutor:
         with pytest.raises(InvalidDeclarationError):
             BulkExecutor(sentinel.db).execute_batch(
                 command.type, command.body.type, {}, [command]
+            )
+
+    def test_configure_looks_up_the_effective_user(self, db_session, user):
+        executor = BulkExecutor(db_session)
+
+        assert executor.effective_user_id is None
+
+        executor.configure(
+            Configuration.create(effective_user=user.userid, total_instructions=2)
+        )
+
+        assert executor.effective_user_id == user.id
+
+    def test_configure_raises_if_the_effective_user_does_not_exist(self, db_session):
+        with pytest.raises(InvalidDeclarationError):
+            BulkExecutor(db_session).configure(
+                Configuration.create(
+                    effective_user="acct:fake@lms.hypothes.is", total_instructions=2
+                )
             )
 
     @pytest.fixture

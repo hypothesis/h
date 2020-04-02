@@ -1,4 +1,7 @@
+import pytest
+
 from h.h_api.bulk_api import CommandBuilder
+from h.models import User
 
 
 class CommandFactory:
@@ -43,6 +46,18 @@ class CommandFactory:
             CommandBuilder.group.upsert(attrs, f"group_ref_{number}",), authority,
         )
 
+    @classmethod
+    def group_membership_create(cls, user_id, group_id):
+        # The builder is only really setup for creating what we need when
+        # calling, which doesn't include the real ids. So we have to bodge it
+        command = CommandBuilder.group_membership.create("temp", "temp")
+
+        rels = command.body.raw["data"]["relationships"]
+        rels["member"]["data"]["id"] = user_id
+        rels["group"]["data"]["id"] = group_id
+
+        return command
+
     @staticmethod
     def _add_extras(base, extras):
         if extras:
@@ -56,3 +71,12 @@ class CommandFactory:
         command.body.attributes["authority"] = authority
 
         return command
+
+
+@pytest.fixture
+def user(db_session):
+    user = User(_username="username", authority="lms.hypothes.is")
+    db_session.add(user)
+    db_session.flush()
+
+    return user
