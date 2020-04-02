@@ -19,11 +19,10 @@ class TestDBExecutor:
         (
             (CommandType.UPSERT, DataType.USER, "UserUpsertAction"),
             (CommandType.UPSERT, DataType.GROUP, "GroupUpsertAction"),
-            param(
+            (
                 CommandType.CREATE,
                 DataType.GROUP_MEMBERSHIP,
                 "GroupMembershipCreateAction",
-                marks=pytest.mark.xfail(reason="Not implemented"),
             ),
         ),
         indirect=["handler"],
