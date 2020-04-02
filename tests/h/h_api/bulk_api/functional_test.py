@@ -51,6 +51,7 @@ class TestBulkAPIFunctional:
         This is a happy path check. We expect this to work."""
 
         ndjson = BulkAPI.to_string(commands)
+        print(ndjson)
         lines = ndjson.strip().split("\n")
         command_data = [json.loads(line) for line in lines]
 
@@ -92,7 +93,7 @@ class TestBulkAPIFunctional:
     @pytest.fixture
     def commands(self, user_command, group_command, membership_command):
         return (
-            CommandBuilder.configure("acct:user@example.com", total_instructions=4),
+            CommandBuilder.configure("acct:user@lms.hypothes.is", total_instructions=4),
             user_command,
             group_command,
             membership_command,
