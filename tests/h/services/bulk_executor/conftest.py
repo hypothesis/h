@@ -1,5 +1,8 @@
-"""Create commands for the bulk tests."""
+"""Re-usable fixtures for the bulk executor tests."""
+import pytest
+
 from h.h_api.bulk_api import CommandBuilder
+from h.models import User
 
 AUTHORITY = "lms.hypothes.is"
 
@@ -31,3 +34,12 @@ def group_upsert_command(n=0, authority=AUTHORITY, query_authority=AUTHORITY, **
     command.body.attributes["authority"] = authority
 
     return command
+
+
+@pytest.fixture
+def user(db_session):
+    user = User(_username="username", authority="lms.hypothes.is")
+    db_session.add(user)
+    db_session.flush()
+
+    return user
