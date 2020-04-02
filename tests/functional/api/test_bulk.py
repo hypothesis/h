@@ -47,6 +47,7 @@ class TestBulk:
         )
 
         self._assert_response_has_expected_values(response)
+        self._assert_db_has_expected_rows(db_session)
 
     @staticmethod
     def _assert_response_has_expected_values(response):
@@ -54,7 +55,7 @@ class TestBulk:
         lines = [json.loads(line) for line in lines if line]
 
         assert lines == [
-            {"data": {"id": Any(), "type": "user"}},
+            {"data": {"id": "acct:user2@lms.hypothes.is", "type": "user"}},
             {"data": {"id": Any(), "type": "group"}},
             {"data": {"id": Any(), "type": "group"}},
             {"data": {"id": Any(), "type": "group"}},
@@ -62,6 +63,16 @@ class TestBulk:
             {"data": {"id": Any(), "type": "group_membership"}},
             {"data": {"id": Any(), "type": "group_membership"}},
         ]
+
+    @classmethod
+    def _assert_db_has_expected_rows(cls, db_session):
+        users = list(
+            db_session.query(User).filter(
+                User.authority == cls.AUTHORITY, User.username == "user2"
+            )
+        )
+        assert len(users) == 1
+        assert users[0].userid == "acct:user2@lms.hypothes.is"
 
     @pytest.fixture
     def commands(self, user):

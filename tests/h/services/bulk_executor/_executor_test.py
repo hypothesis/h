@@ -14,12 +14,7 @@ class TestDBExecutor:
     @pytest.mark.parametrize(
         "command_type,data_type,handler",
         (
-            param(
-                CommandType.UPSERT,
-                DataType.USER,
-                "UserUpsertAction",
-                marks=pytest.mark.xfail(reason="Not implemented"),
-            ),
+            (CommandType.UPSERT, DataType.USER, "UserUpsertAction"),
             param(
                 CommandType.UPSERT,
                 DataType.GROUP,
