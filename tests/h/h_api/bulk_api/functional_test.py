@@ -92,7 +92,7 @@ class TestBulkAPIFunctional:
     @pytest.fixture
     def commands(self, user_command, group_command, membership_command):
         return (
-            CommandBuilder.configure("acct:user@example.com", total_instructions=4),
+            CommandBuilder.configure("acct:user@lms.hypothes.is", total_instructions=4),
             user_command,
             group_command,
             membership_command,
