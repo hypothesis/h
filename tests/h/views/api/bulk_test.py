@@ -1,37 +1,37 @@
+import json
 from io import BytesIO
 from unittest.mock import create_autospec
 
 import pytest
-from h_matchers import Any
 from webob import Response
 
-
 from h.h_api.exceptions import SchemaValidationError
-from h.services.bulk_executor import BulkExecutor
 from h.views.api.bulk import bulk
 
 
 class TestBulk:
-    def test_it_calls_bulk_api_correctly(self, pyramid_request, BulkAPI):
+    def test_it_calls_bulk_api_correctly(self, pyramid_request, BulkAPI, bulk_executor):
         bulk(pyramid_request)
 
         BulkAPI.from_byte_stream.assert_called_once_with(
-            pyramid_request.body_file,
-            executor=Any.instance_of(BulkExecutor),
+            pyramid_request.body_file, executor=bulk_executor.return_value,
         )
 
-    def test_it_formats_responses_correctly(self, pyramid_request, return_lines):
+        bulk_executor.assert_called_once_with(pyramid_request.db)
+
+    def test_it_formats_responses_correctly(self, pyramid_request, return_values):
         result = bulk(pyramid_request)
 
         assert isinstance(result, Response)
         assert result.status == "200 OK"
         assert result.content_type == "application/x-ndjson"
-        assert result.body == b"".join(return_lines)
+
+        lines = result.body.decode("utf-8").split("\n")
+        lines = [json.loads(line) for line in lines if line]
+        assert lines == return_values
 
     @pytest.mark.usefixtures("no_return_content")
-    def test_it_returns_204_if_no_content_is_to_be_returned(
-        self, pyramid_request, return_lines
-    ):
+    def test_it_returns_204_if_no_content_is_to_be_returned(self, pyramid_request):
         result = bulk(pyramid_request)
 
         assert result.status == "204 No Content"
@@ -42,7 +42,7 @@ class TestBulk:
             # Looks like this doesn't do anything, but it turns this into a
             # generator. Unless the first item is retrieved the above is not
             # executed.
-            yield "good!"
+            yield {}
 
         BulkAPI.from_byte_stream.side_effect = bad_generator
 
@@ -56,16 +56,20 @@ class TestBulk:
         return pyramid_request
 
     @pytest.fixture
-    def return_lines(self):
-        return [b"line_1\n", b"line_2\n"]
+    def return_values(self):
+        return [{f"row_{i}": "value"} for i in range(3)]
 
     @pytest.fixture(autouse=True)
-    def BulkAPI(self, patch, return_lines):
-        BulkAPI = patch("h.views.api.bulk.FakeBulkAPI")
-        BulkAPI.from_byte_stream.return_value = (line for line in return_lines)
+    def BulkAPI(self, patch, return_values):
+        BulkAPI = patch("h.views.api.bulk.BulkAPI")
+        BulkAPI.from_byte_stream.return_value = (value for value in return_values)
 
         return BulkAPI
 
     @pytest.fixture
     def no_return_content(self, BulkAPI):
         BulkAPI.from_byte_stream.return_value = None
+
+    @pytest.fixture(autouse=True)
+    def bulk_executor(self, patch):
+        return patch("h.views.api.bulk.BulkExecutor")
