@@ -1,36 +1,58 @@
 from h.h_api.bulk_api import CommandBuilder
 
-AUTHORITY = "lms.hypothes.is"
 
+class CommandFactory:
+    """Create commands for the bulk tests."""
 
-def make_group_command(authority=AUTHORITY, query_authority=AUTHORITY):
-    command = CommandBuilder.group.upsert(
-        {
-            "name": "name",
-            "authority": query_authority,
-            "authority_provided_id": "authority_provided_id",
-        },
-        "id_ref",
-    )
+    AUTHORITY = "lms.hypothes.is"
 
-    # Fake the effect of merging in the query
-    command.body.attributes["authority"] = authority
+    @classmethod
+    def user_upsert(
+        cls, number=0, authority=AUTHORITY, query_authority=AUTHORITY, extras=None
+    ):
+        attrs = cls._add_extras(
+            {
+                "username": f"user_{number}",
+                "display_name": f"display_name_{number}",
+                "authority": query_authority,
+                "identities": [
+                    {"provider": "provider", "provider_unique_id": f"pid_{number}"}
+                ],
+            },
+            extras,
+        )
 
-    return command
+        return cls._merge_query(
+            CommandBuilder.user.upsert(attrs, f"user_ref_{number}"), authority
+        )
 
+    @classmethod
+    def group_upsert(
+        cls, number=0, authority=AUTHORITY, query_authority=AUTHORITY, extras=None
+    ):
+        attrs = cls._add_extras(
+            {
+                "name": f"name_{number}",
+                "authority": query_authority,
+                "authority_provided_id": f"ap_id_{number}",
+            },
+            extras,
+        )
 
-def make_user_commmand(authority=AUTHORITY, query_authority=AUTHORITY):
-    command = CommandBuilder.user.upsert(
-        {
-            "username": "username",
-            "display_name": "display_name",
-            "authority": query_authority,
-            "identities": [{"provider": "p", "provider_unique_id": "pid"}],
-        },
-        "id_ref",
-    )
+        return cls._merge_query(
+            CommandBuilder.group.upsert(attrs, f"group_ref_{number}",), authority,
+        )
 
-    # Fake the effect of merging in the query
-    command.body.attributes["authority"] = authority
+    @staticmethod
+    def _add_extras(base, extras):
+        if extras:
+            base.update(extras)
 
-    return command
+        return base
+
+    @staticmethod
+    def _merge_query(command, authority):
+        command.body.attributes.update(command.body.query)
+        command.body.attributes["authority"] = authority
+
+        return command

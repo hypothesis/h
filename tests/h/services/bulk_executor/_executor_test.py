@@ -81,10 +81,14 @@ class TestDBExecutor:
     @pytest.mark.parametrize(
         "command",
         (
-            param(make_user_commmand(authority="bad"), id="bad user attr"),
-            param(make_user_commmand(query_authority="bad"), id="bad user query"),
-            param(make_group_command(authority="bad"), id="bad group attr"),
-            param(make_group_command(query_authority="bad"), id="bad group query"),
+            param(CommandFactory.user_upsert(authority="bad"), id="bad user attr"),
+            param(
+                CommandFactory.user_upsert(query_authority="bad"), id="bad user query"
+            ),
+            param(CommandFactory.group_upsert(authority="bad"), id="bad group attr"),
+            param(
+                CommandFactory.group_upsert(query_authority="bad"), id="bad group query"
+            ),
         ),
     )
     def test_it_raises_InvalidDeclarationError_with_called_with_non_lms_authority(
