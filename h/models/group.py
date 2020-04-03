@@ -251,6 +251,17 @@ class Group(Base, mixins.Timestamps):
             # The creator may update this group in an upsert context
             terms.append((security.Allow, self.creator.userid, "upsert"))
 
+        # Temporary hack to allow the LMS app's machine user to upsert all LMS
+        # groups, even if the machine user isn't the group's creator.
+        # We can remove this once we've either:
+        #
+        # * Run a DB migration to change the creators of all LMS groups to the
+        #   LMS app's machine user: https://github.com/hypothesis/lms/issues/1401
+        # * Or changed the LMS app to use h's new bulk API instead of using the
+        #   group upsert API: https://github.com/hypothesis/lms/issues/1506
+        if self.authority == "lms.hypothes.is":
+            terms.append((security.Allow, "acct:lms@lms.hypothes.is", "upsert"))
+
         # This authority principal may be used to grant auth clients
         # permissions for groups within their authority
         authority_principal = "client_authority:{}".format(self.authority)
