@@ -6,8 +6,9 @@ from h_matchers import Any
 from webob import Response
 
 
-from h.h_api.exceptions import  SchemaValidationError
-from h.views.api.bulk import AuthorityCheckingExecutor, bulk
+from h.h_api.exceptions import SchemaValidationError
+from h.services.bulk_executor import BulkExecutor
+from h.views.api.bulk import bulk
 
 
 class TestBulk:
@@ -16,7 +17,7 @@ class TestBulk:
 
         BulkAPI.from_byte_stream.assert_called_once_with(
             pyramid_request.body_file,
-            executor=Any.instance_of(AuthorityCheckingExecutor),
+            executor=Any.instance_of(BulkExecutor),
         )
 
     def test_it_formats_responses_correctly(self, pyramid_request, return_lines):

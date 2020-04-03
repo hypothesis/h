@@ -1,23 +1,56 @@
+"""Bulk executor for use with h.h_api.bulk_api."""
+
 from h.h_api.bulk_api.executor import AutomaticReportExecutor
-from h.h_api.enums import DataType
-from h.h_api.exceptions import InvalidDeclarationError
+from h.h_api.enums import CommandType, DataType
+from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 
 
-class AuthorityCheckingExecutor(AutomaticReportExecutor):
-    """A bulk executor which checks the authority."""
+class BulkExecutor(AutomaticReportExecutor):
+    """Executor of command objects which will modify the database in bulk."""
 
-    def __init__(self, authority="lms.hypothes.is"):
-        self.effective_user = None
+    FAKE = object()
+
+    def __init__(self, db, authority="lms.hypothes.is"):
+        """
+        :param db: DB session object
+        :param authority: Restrict all request to this authority
+        """
+        self.db = db
         self.authority = authority
 
-    def configure(self, config):
-        self._assert_authority("effective user", config.effective_user, embedded=True)
+        self.handlers = {
+            (CommandType.UPSERT, DataType.USER): self.FAKE,
+            (CommandType.UPSERT, DataType.GROUP): self.FAKE,
+            (CommandType.CREATE, DataType.GROUP_MEMBERSHIP): self.FAKE,
+        }
 
+        self.effective_user_id = None
+
+    def configure(self, config):
+        """Process a configuration instruction."""
+        self._assert_authority("effective user", config.effective_user, embedded=True)
         self.effective_user = config.effective_user
 
     def execute_batch(self, command_type, data_type, default_config, batch):
+        """Execute a batch of instructions of the same type."""
+
+        # Check the commands for the correct authority
         for command in batch:
-            self._check_authority(data_type, command.body)
+            if data_type in (DataType.USER, DataType.GROUP):
+                self._assert_authority(
+                    "authority", command.body.attributes["authority"]
+                )
+                self._assert_authority(
+                    "query authority", command.body.query["authority"]
+                )
+
+        # Get a handler for this action
+        handler = self.handlers.get((command_type, data_type), None)
+
+        if handler is None:
+            raise UnsupportedOperationError(
+                f"No implementation for {command_type.value} {data_type.value}"
+            )
 
         return super().execute_batch(command_type, data_type, default_config, batch)
 
@@ -31,8 +64,3 @@ class AuthorityCheckingExecutor(AutomaticReportExecutor):
         raise InvalidDeclarationError(
             f"The {field} '{value}' does not match the expected authority"
         )
-
-    def _check_authority(self, data_type, body):
-        if data_type in (DataType.USER, DataType.GROUP):
-            self._assert_authority("authority", body.attributes["authority"])
-            self._assert_authority("query authority", body.query["authority"])

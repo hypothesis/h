@@ -3,7 +3,7 @@ from itertools import chain
 from pyramid.response import Response
 
 from h.h_api.bulk_api import BulkAPI
-from h.services.bulk_executor._executor import  AuthorityCheckingExecutor
+from h.services.bulk_executor import BulkExecutor
 from h.views.api.config import api_config
 
 
@@ -51,7 +51,7 @@ def bulk(request):
     """
 
     results = FakeBulkAPI.from_byte_stream(
-        request.body_file, executor=AuthorityCheckingExecutor()
+        request.body_file, executor=BulkExecutor(request.db)
     )
 
     # No return view is required
