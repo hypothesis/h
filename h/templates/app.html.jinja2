@@ -4,11 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Hypothesis</title>
-    {# the <base> tag is required by Angular JS when HTML 5 history is
-     enabled. We shouldn't really need this because a given instance of the app
-     only ever displays a single route.
-     #}
-    <base target="_top" href="/" />
     {% for attrs in meta_attrs -%}
       <meta {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
