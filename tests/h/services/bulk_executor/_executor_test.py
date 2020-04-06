@@ -7,7 +7,7 @@ from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from h.services.bulk_executor._executor import BulkExecutor
-from tests.common.factories import BulkAPICommand
+from tests.common.factories import GroupUpsertCommand, UserUpsertCommand
 
 
 class TestDBExecutor:
@@ -82,19 +82,19 @@ class TestDBExecutor:
         "command",
         (
             param(
-                BulkAPICommand.user_upsert(authority="bad"),
+                UserUpsertCommand(authority="bad"),
                 id="User: bad authority in attributes",
             ),
             param(
-                BulkAPICommand.user_upsert(query_authority="bad"),
+                UserUpsertCommand(query_authority="bad"),
                 id="User: bad authority in query",
             ),
             param(
-                BulkAPICommand.group_upsert(authority="bad"),
+                GroupUpsertCommand(authority="bad"),
                 id="Group: bad authority in attributes",
             ),
             param(
-                BulkAPICommand.group_upsert(query_authority="bad"),
+                GroupUpsertCommand(query_authority="bad"),
                 id="User: bad authority in query",
             ),
         ),
@@ -113,4 +113,4 @@ class TestDBExecutor:
 
     @pytest.fixture
     def commands(self, factories):
-        return [factories.BulkAPICommand.user_upsert()]
+        return [factories.GroupUpsertCommand()]
