@@ -58,7 +58,7 @@ class DBAction:
     def _execute_statement(self, stmt):
         result = self.db.execute(stmt)
 
-        # Let SQL Alchemy know that something has changed, otherwise it will
+        # Let SQLAlchemy know that something has changed, otherwise it will
         # never commit the transaction we are working on and it will get rolled
         # back
         mark_changed(self.db)
@@ -69,7 +69,7 @@ class DBAction:
 class UserUpsertAction(DBAction):
     """Perform a bulk user upsert.
 
-    :raises ConflictingDataError: If two users attempt to use the same identity
+    :raise ConflictingDataError: If two users attempt to use the same identity
     """
 
     def execute(self, batch, **_):
