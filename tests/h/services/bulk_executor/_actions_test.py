@@ -1,28 +1,76 @@
 from copy import deepcopy
+from operator import attrgetter
 
 import pytest
 from h_matchers import Any
+from h_matchers.decorator import fluent_entrypoint
+from h_matchers.matcher.core import Matcher
 
 from h.h_api.bulk_api import Report
 from h.h_api.exceptions import ConflictingDataError, UnsupportedOperationError
-from h.models import User
+from h.models import User, UserIdentity
 from h.services.bulk_executor._actions import UserUpsertAction
 from tests.h.services.bulk_executor.conftest import upsert_user_command
 
 
-def assert_models_match_data(models_by_name, attrs_by_name, handlers=None):
-    assert set(models_by_name.keys()) == set(attrs_by_name.keys())
+# TODO! - Move this to h-matchers and test it
+class AnyObject(Matcher):
+    def __init__(self, class_=None, attributes=None):
+        self.class_ = class_
+        self.attributes = attributes
+        super().__init__("dummy", self._matches_object)
 
-    for name, model in models_by_name.items():
-        expected_attrs = attrs_by_name[name]
+    @fluent_entrypoint
+    def of_class(self, class_):
+        self.class_ = class_
 
-        for field, value in expected_attrs.items():
-            found = getattr(model, field)
+        return self
 
-            if handlers and field in handlers:
-                found = handlers[field](found)
+    @fluent_entrypoint
+    def with_attrs(self, attributes):
+        self.attributes = attributes
 
-            assert found == value
+        return self
+
+    def _matches_object(self, other):
+        if self.class_ is None:
+            if not isinstance(other, object):
+                return False
+
+        elif self.class_ != type(other):
+            return False
+
+        if self.attributes is not None:
+            for key, value in self.attributes.items():
+                if not hasattr(other, key):
+                    return False
+
+                if getattr(other, key) != value:
+                    return False
+
+        return True
+
+    def __getattr__(self, item):
+        """Allow our attributes spec to be accessed as attributes."""
+
+        if self.attributes is not None and item in self.attributes:
+            return self.attributes[item]
+
+        return super().__getattribute__(item)
+
+    def __str__(self):
+        extras = f" with attributes {self.attributes}" if self.attributes else ""
+
+        return f"<Any instance of {self.class_} {extras}>"
+
+
+class UserMatcher(AnyObject):
+    def __init__(self, attributes):
+        attributes["identities"] = [
+            AnyObject(UserIdentity, identity) for identity in attributes["identities"]
+        ]
+
+        super().__init__(User, attributes)
 
 
 class TestBulkUserUpsert:
@@ -85,26 +133,14 @@ class TestBulkUserUpsert:
             UserUpsertAction(db_session).execute([command])
 
     def assert_users_match_commands(self, db_session, commands):
-        attrs_by_name = {
-            command.body.attributes["username"]: command.body.attributes
-            for command in commands
-        }
+        users = list(db_session.query(User).order_by(User.display_name))
 
-        models_by_name = {user.username: user for user in db_session.query(User)}
-
-        assert_models_match_data(
-            models_by_name,
-            attrs_by_name,
-            {
-                "identities": lambda found: [
-                    {
-                        "provider": identity.provider,
-                        "provider_unique_id": identity.provider_unique_id,
-                    }
-                    for identity in found
-                ]
-            },
+        expected_users = sorted(
+            [UserMatcher(command.body.attributes) for command in commands],
+            key=attrgetter("display_name"),
         )
+
+        assert users == expected_users
 
     @pytest.fixture
     def commands(self):
