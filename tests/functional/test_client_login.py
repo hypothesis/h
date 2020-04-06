@@ -72,7 +72,7 @@ class TestLoginFlow:
         result = response.form.submit()
         js_settings = result.html.find("script", class_="js-hypothesis-settings")
 
-        return json.loads(js_settings.text)
+        return json.loads(js_settings.string)
 
     @classmethod
     def _parse_url(cls, url):
