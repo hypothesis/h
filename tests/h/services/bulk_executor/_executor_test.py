@@ -7,7 +7,7 @@ from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from h.services.bulk_executor._executor import BulkExecutor
-from tests.h.services.bulk_executor.conftest import CommandFactory
+from tests.common.factories import BulkAPICommand
 
 
 class TestDBExecutor:
@@ -81,13 +81,21 @@ class TestDBExecutor:
     @pytest.mark.parametrize(
         "command",
         (
-            param(CommandFactory.user_upsert(authority="bad"), id="bad user attr"),
             param(
-                CommandFactory.user_upsert(query_authority="bad"), id="bad user query"
+                BulkAPICommand.user_upsert(authority="bad"),
+                id="User: bad authority in attributes",
             ),
-            param(CommandFactory.group_upsert(authority="bad"), id="bad group attr"),
             param(
-                CommandFactory.group_upsert(query_authority="bad"), id="bad group query"
+                BulkAPICommand.user_upsert(query_authority="bad"),
+                id="User: bad authority in query",
+            ),
+            param(
+                BulkAPICommand.group_upsert(authority="bad"),
+                id="Group: bad authority in attributes",
+            ),
+            param(
+                BulkAPICommand.group_upsert(query_authority="bad"),
+                id="User: bad authority in query",
             ),
         ),
     )
@@ -104,5 +112,5 @@ class TestDBExecutor:
         return patch(f"h.services.bulk_executor._executor.{request.param}")
 
     @pytest.fixture
-    def commands(self):
-        return [CommandFactory.user_upsert()]
+    def commands(self, factories):
+        return [factories.BulkAPICommand.user_upsert()]
