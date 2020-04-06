@@ -20,7 +20,6 @@ from tests.h.services.bulk_executor.factories_b import (
 # The tests should run fine with either provide of factories
 
 
-
 class TestDBExecutor:
     @pytest.mark.parametrize(
         "command_type,data_type,handler",
