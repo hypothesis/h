@@ -8,7 +8,6 @@ from .auth_client import AuthClient, ConfidentialAuthClient
 from .auth_ticket import AuthTicket
 from .authz_code import AuthzCode
 from .base import set_session
-from .bulk_api_command import GroupUpsertCommand, UserUpsertCommand
 from .document import Document, DocumentMeta, DocumentURI
 from .feature import Feature
 from .flag import Flag
@@ -44,7 +43,4 @@ __all__ = (
     "User",
     "UserIdentity",
     "set_session",
-    # Specific to bulk api tests
-    "GroupUpsertCommand",
-    "UserUpsertCommand",
 )

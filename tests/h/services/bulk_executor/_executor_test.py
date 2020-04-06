@@ -7,7 +7,18 @@ from h.h_api.bulk_api.model.config_body import Configuration
 from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from h.services.bulk_executor._executor import BulkExecutor
-from tests.common.factories import GroupUpsertCommand, UserUpsertCommand
+# from tests.h.services.bulk_executor.factories_a import (
+#     GroupUpsertCommand,
+#     UserUpsertCommand,
+# )
+from tests.h.services.bulk_executor.factories_b import (
+    GroupUpsertCommand,
+    UserUpsertCommand,
+)
+
+# TODO! - Remove when we pick
+# The tests should run fine with either provide of factories
+
 
 
 class TestDBExecutor:
@@ -112,5 +123,5 @@ class TestDBExecutor:
         return patch(f"h.services.bulk_executor._executor.{request.param}")
 
     @pytest.fixture
-    def commands(self, factories):
-        return [factories.GroupUpsertCommand()]
+    def commands(self):
+        return [GroupUpsertCommand()]
