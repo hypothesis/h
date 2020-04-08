@@ -63,6 +63,12 @@ class UnpopulatedReferenceError(SimpleJSONAPIError):
         )
 
 
+class UnsupportedOperationError(SimpleJSONAPIError):
+    """The client has a well formed request, but we cannot do what they ask."""
+
+    http_status = 422
+
+
 class SchemaValidationError(JSONAPIError):
     """The provided data did not match the schema."""
 
