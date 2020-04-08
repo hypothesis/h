@@ -110,7 +110,6 @@ class TestBulk:
     def user(self, db_session):
         user = User(authority=self.AUTHORITY, _username="username")
         db_session.add(user)
-        db_session.flush()
 
         return user
 
