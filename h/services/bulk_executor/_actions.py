@@ -29,11 +29,24 @@ class DBAction:
 
     @staticmethod
     def _check_upsert_queries(batch, expected_keys):
-        """Check that the query matches expectations and the attributes.
+        """Validate the query for each command in `batch`.
+
+        This method allows you to assert that:
+
+         * Only the expected fields are present in the query
+         * The value in the query matches the value in the attributes
+
+        Our current upserting method requires the values we create to conflict
+        with existing records to work. Therefore if we can't try to update with
+        different values than those we create with. The methods are also
+        hard coded to expect certain values which we can mandate here.
 
         :param batch: A collection of command objects
-        :param expected_keys: The keys which must be in the query and match
-                              the attributes with the same name.
+        :param expected_keys: The list of valid keys that are allowed in
+                              command queries
+
+        :raise UnsupportedOperationError: if any of the conditions above are
+                                          not satisfied
         """
 
         for command in batch:
