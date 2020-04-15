@@ -28,7 +28,7 @@ from tests.h.services.bulk_executor.conftest import (
 
 
 # TODO! - Move this to h-matchers and test it
-class AnyObject(Matcher):
+class AnyObject(Matcher):  # pragma: no cover
     def __init__(self, class_=None, attributes=None):
         self.class_ = class_
         self.attributes = attributes

@@ -164,7 +164,7 @@ class GroupMembershipCreateAction(DBAction):
 
         except IntegrityError as err:
             # https://www.postgresql.org/docs/9.1/errcodes-appendix.html
-            # 23503	= foreign_key_violation
+            # 23503 = foreign_key_violation
             if err.orig.pgcode == "23503":
                 raise ConflictingDataError(
                     "Cannot insert group membership as either the user or "
