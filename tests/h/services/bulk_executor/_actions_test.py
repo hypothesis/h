@@ -1,5 +1,6 @@
 from copy import deepcopy
 from operator import attrgetter
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
@@ -7,10 +8,18 @@ from h_matchers.decorator import fluent_entrypoint
 from h_matchers.matcher.core import Matcher
 
 from h.h_api.bulk_api import Report
-from h.h_api.exceptions import ConflictingDataError, UnsupportedOperationError
-from h.models import User, UserIdentity
-from h.services.bulk_executor._actions import UserUpsertAction
-from tests.h.services.bulk_executor.conftest import upsert_user_command
+from h.h_api.exceptions import (
+    CommandSequenceError,
+    ConflictingDataError,
+    UnsupportedOperationError,
+)
+from h.models import Group, User, UserIdentity
+from h.services.bulk_executor._actions import GroupUpsertAction, UserUpsertAction
+from tests.h.services.bulk_executor.conftest import (
+    AUTHORITY,
+    group_upsert_command,
+    upsert_user_command,
+)
 
 
 # TODO! - Move this to h-matchers and test it
@@ -132,7 +141,8 @@ class TestBulkUserUpsert:
         with pytest.raises(UnsupportedOperationError):
             UserUpsertAction(db_session).execute([command])
 
-    def assert_users_match_commands(self, db_session, commands):
+    @staticmethod
+    def assert_users_match_commands(db_session, commands):
         users = list(db_session.query(User).order_by(User.display_name))
 
         expected_users = sorted(
@@ -145,3 +155,86 @@ class TestBulkUserUpsert:
     @pytest.fixture
     def commands(self):
         return [upsert_user_command(i) for i in range(3)]
+
+
+class TestBulkGroupUpsert:
+    def test_it_can_insert_new_records(self, db_session, commands, user):
+        reports = GroupUpsertAction(db_session).execute(
+            commands, effective_user_id=user.id
+        )
+
+        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+
+        self.assert_groups_match_commands(db_session, commands)
+
+    def test_it_can_update_records(self, db_session, commands, user):
+        update_commands = [
+            group_upsert_command(i, name=f"changed_{i}") for i in range(3)
+        ]
+
+        GroupUpsertAction(db_session).execute(commands, effective_user_id=user.id)
+        reports = GroupUpsertAction(db_session).execute(
+            update_commands, effective_user_id=user.id
+        )
+
+        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+
+        self.assert_groups_match_commands(db_session, update_commands)
+
+    def test_it_returns_in_the_same_order_as_the_commands(
+        self, db_session, commands, user
+    ):
+        # Insert the values to set db order, then update them in reverse
+        action = GroupUpsertAction(db_session)
+        reports = action.execute(commands, effective_user_id=user.id)
+        reversed_reports = action.execute(
+            list(reversed(deepcopy(commands))), effective_user_id=user.id
+        )
+
+        ids = [report.id for report in reports]
+        reversed_ids = [report.id for report in reversed_reports]
+
+        assert reversed_ids == list(reversed(ids))
+
+    def test_it_fails_with_no_effective_user(self, db_session):
+        with pytest.raises(CommandSequenceError):
+            GroupUpsertAction(db_session).execute(
+                sentinel.batch, effective_user_id=None
+            )
+
+    @pytest.mark.parametrize("field", ["authority", "authority_provided_id"])
+    def test_it_fails_with_mismatched_queries(self, db_session, field, user):
+        command = group_upsert_command(**{field: "value"})
+        command.body.query[field] = "DIFFERENT"
+
+        with pytest.raises(UnsupportedOperationError):
+            GroupUpsertAction(db_session).execute([command], effective_user_id=user.id)
+
+    def test_if_fails_with_unsupported_queries(self, db_session, user):
+        command = group_upsert_command()
+        command.body.query["something_new"] = "foo"
+
+        with pytest.raises(UnsupportedOperationError):
+            GroupUpsertAction(db_session).execute([command], effective_user_id=user.id)
+
+    @staticmethod
+    def assert_groups_match_commands(db_session, commands):
+        groups = list(
+            db_session.query(Group)
+            .filter(Group.authority == AUTHORITY)
+            .order_by(Group.name)
+        )
+
+        expected_groups = sorted(
+            [
+                AnyObject.of_class(Group).with_attrs(command.body.attributes)
+                for command in commands
+            ],
+            key=attrgetter("name"),
+        )
+
+        assert groups == expected_groups
+
+    @pytest.fixture
+    def commands(self):
+        return [group_upsert_command(i) for i in range(3)]

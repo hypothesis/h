@@ -5,7 +5,7 @@ from h_matchers import Any
 
 from h.h_api.bulk_api import CommandBuilder
 from h.h_api.enums import ViewType
-from h.models import User
+from h.models import Group, User
 
 
 class TestBulk:
@@ -56,9 +56,9 @@ class TestBulk:
 
         assert lines == [
             {"data": {"id": "acct:user2@lms.hypothes.is", "type": "user"}},
-            {"data": {"id": Any(), "type": "group"}},
-            {"data": {"id": Any(), "type": "group"}},
-            {"data": {"id": Any(), "type": "group"}},
+            {"data": {"id": "group:id_0@lms.hypothes.is", "type": "group"}},
+            {"data": {"id": "group:id_1@lms.hypothes.is", "type": "group"}},
+            {"data": {"id": "group:id_2@lms.hypothes.is", "type": "group"}},
             {"data": {"id": Any(), "type": "group_membership"}},
             {"data": {"id": Any(), "type": "group_membership"}},
             {"data": {"id": Any(), "type": "group_membership"}},
@@ -73,6 +73,14 @@ class TestBulk:
         )
         assert len(users) == 1
         assert users[0].userid == "acct:user2@lms.hypothes.is"
+
+        groups = list(db_session.query(Group).filter(Group.authority == cls.AUTHORITY))
+        assert len(groups) == 3
+        assert [group.groupid for group in groups] == [
+            "group:id_0@lms.hypothes.is",
+            "group:id_1@lms.hypothes.is",
+            "group:id_2@lms.hypothes.is",
+        ]
 
     @pytest.fixture
     def commands(self, user):

@@ -1,9 +1,12 @@
 """Bulk executor for use with h.h_api.bulk_api."""
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from h.h_api.bulk_api.executor import AutomaticReportExecutor
 from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
-from h.services.bulk_executor._actions import UserUpsertAction
+from h.models import User
+from h.services.bulk_executor._actions import GroupUpsertAction, UserUpsertAction
 
 
 class BulkExecutor(AutomaticReportExecutor):
@@ -21,7 +24,7 @@ class BulkExecutor(AutomaticReportExecutor):
 
         self.handlers = {
             (CommandType.UPSERT, DataType.USER): UserUpsertAction(self.db),
-            (CommandType.UPSERT, DataType.GROUP): self.FAKE,
+            (CommandType.UPSERT, DataType.GROUP): GroupUpsertAction(self.db),
             (CommandType.CREATE, DataType.GROUP_MEMBERSHIP): self.FAKE,
         }
 
@@ -30,7 +33,18 @@ class BulkExecutor(AutomaticReportExecutor):
     def configure(self, config):
         """Process a configuration instruction."""
         self._assert_authority("effective user", config.effective_user, embedded=True)
-        self.effective_user = config.effective_user
+
+        try:
+            user = (
+                self.db.query(User).filter(User.userid == config.effective_user).one()
+            )
+
+        except NoResultFound:
+            raise InvalidDeclarationError(
+                f"No user found for effective user: '{config.effective_user}'"
+            )
+
+        self.effective_user_id = user.id
 
     def execute_batch(self, command_type, data_type, default_config, batch):
         """Execute a batch of instructions of the same type."""
