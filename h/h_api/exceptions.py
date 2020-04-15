@@ -46,6 +46,12 @@ class InvalidDeclarationError(SimpleJSONAPIError):
     http_status = 400
 
 
+class ConflictingDataError(SimpleJSONAPIError):
+    """The client has requested changes which conflict with existing data."""
+
+    http_status = 409
+
+
 class InvalidJSONError(SimpleJSONAPIError):
     """The client sent a string we cannot interpret as JSON."""
 

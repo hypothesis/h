@@ -3,6 +3,7 @@
 from h.h_api.bulk_api.executor import AutomaticReportExecutor
 from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
+from h.services.bulk_executor._actions import UserUpsertAction
 
 
 class BulkExecutor(AutomaticReportExecutor):
@@ -19,7 +20,7 @@ class BulkExecutor(AutomaticReportExecutor):
         self.authority = authority
 
         self.handlers = {
-            (CommandType.UPSERT, DataType.USER): self.FAKE,
+            (CommandType.UPSERT, DataType.USER): UserUpsertAction(self.db),
             (CommandType.UPSERT, DataType.GROUP): self.FAKE,
             (CommandType.CREATE, DataType.GROUP_MEMBERSHIP): self.FAKE,
         }
@@ -52,7 +53,13 @@ class BulkExecutor(AutomaticReportExecutor):
                 f"No implementation for {command_type.value} {data_type.value}"
             )
 
-        return super().execute_batch(command_type, data_type, default_config, batch)
+        if handler is self.FAKE:
+            return super().execute_batch(command_type, data_type, default_config, batch)
+
+        # Do it
+        return handler.execute(
+            batch, effective_user_id=self.effective_user_id, **default_config
+        )
 
     def _assert_authority(self, field, value, embedded=False):
         if embedded and value.endswith(f"@{self.authority}"):
