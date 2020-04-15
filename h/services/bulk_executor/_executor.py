@@ -2,17 +2,19 @@
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from h.h_api.bulk_api.executor import AutomaticReportExecutor
+from h.h_api.bulk_api.executor import Executor
 from h.h_api.enums import CommandType, DataType
 from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from h.models import User
-from h.services.bulk_executor._actions import GroupUpsertAction, UserUpsertAction
+from h.services.bulk_executor._actions import (
+    GroupMembershipCreateAction,
+    GroupUpsertAction,
+    UserUpsertAction,
+)
 
 
-class BulkExecutor(AutomaticReportExecutor):
+class BulkExecutor(Executor):
     """Executor of command objects which will modify the database in bulk."""
-
-    FAKE = object()
 
     def __init__(self, db, authority="lms.hypothes.is"):
         """
@@ -25,7 +27,10 @@ class BulkExecutor(AutomaticReportExecutor):
         self.handlers = {
             (CommandType.UPSERT, DataType.USER): UserUpsertAction(self.db),
             (CommandType.UPSERT, DataType.GROUP): GroupUpsertAction(self.db),
-            (CommandType.CREATE, DataType.GROUP_MEMBERSHIP): self.FAKE,
+            (
+                CommandType.CREATE,
+                DataType.GROUP_MEMBERSHIP,
+            ): GroupMembershipCreateAction(self.db),
         }
 
         self.effective_user_id = None
@@ -66,9 +71,6 @@ class BulkExecutor(AutomaticReportExecutor):
             raise UnsupportedOperationError(
                 f"No implementation for {command_type.value} {data_type.value}"
             )
-
-        if handler is self.FAKE:
-            return super().execute_batch(command_type, data_type, default_config, batch)
 
         # Do it
         return handler.execute(

@@ -92,7 +92,7 @@ class TestCommandBatcher:
     @pytest.fixture
     def on_flush(self):
         def on_flush(command_type, data_type, batch):
-            pass
+            pass  # pragma: no cover
 
         return create_autospec(on_flush)
 

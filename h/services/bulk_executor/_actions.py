@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 from zope.sqlalchemy import mark_changed
 
 from h.h_api.bulk_api import Report
@@ -12,7 +12,7 @@ from h.h_api.exceptions import (
     ConflictingDataError,
     UnsupportedOperationError,
 )
-from h.models import Group, User, UserIdentity
+from h.models import Group, GroupMembership, User, UserIdentity
 
 
 class DBAction:
@@ -122,6 +122,58 @@ class GroupUpsertAction(DBAction):
             )
             for id_, authority, authority_provided_id in group_rows
         ]
+
+
+class GroupMembershipCreateAction(DBAction):
+    """Perform a bulk group membership create.
+
+    :raises ConflictingDataError: Upon trying to create a membership to a user
+                                  or group that does not exist
+    """
+
+    def execute(self, batch, on_duplicate="continue", **_):
+        """
+        :param on_duplicate: Specify behavior when a record already exists. The
+                             default is "continue"
+        """
+        if on_duplicate != "continue":
+            raise UnsupportedOperationError(
+                "Create modes other than 'continue' have not been implemented"
+            )
+
+        values = [
+            {"user_id": command.body.member.id, "group_id": command.body.group.id}
+            for command in batch
+        ]
+
+        stmt = insert(GroupMembership).values(values)
+
+        if on_duplicate == "continue":
+            # This update doesn't change the row, but it does count as it being
+            # 'updated' which means we can get the values in the "RETURNING"
+            # clause and do the select in one go
+            stmt = stmt.on_conflict_do_update(
+                index_elements=["user_id", "group_id"],
+                set_={"user_id": stmt.excluded.user_id},
+            )
+
+        stmt = stmt.returning(GroupMembership.id)
+
+        try:
+            membership_rows = self._execute_statement(stmt).fetchall()
+
+        except IntegrityError as err:
+            # https://www.postgresql.org/docs/9.1/errcodes-appendix.html
+            # 23503 = foreign_key_violation
+            if err.orig.pgcode == "23503":
+                raise ConflictingDataError(
+                    "Cannot insert group membership as either the user or "
+                    f"group specified does not exist: {err.params}"
+                )
+
+            raise
+
+        return [Report(id_) for (id_,) in membership_rows]
 
 
 class UserUpsertAction(DBAction):

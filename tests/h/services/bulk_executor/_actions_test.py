@@ -13,17 +13,22 @@ from h.h_api.exceptions import (
     ConflictingDataError,
     UnsupportedOperationError,
 )
-from h.models import Group, User, UserIdentity
-from h.services.bulk_executor._actions import GroupUpsertAction, UserUpsertAction
+from h.models import Group, GroupMembership, User, UserIdentity
+from h.services.bulk_executor._actions import (
+    GroupMembershipCreateAction,
+    GroupUpsertAction,
+    UserUpsertAction,
+)
 from tests.h.services.bulk_executor.conftest import (
     AUTHORITY,
+    group_membership_create,
     group_upsert_command,
     upsert_user_command,
 )
 
 
 # TODO! - Move this to h-matchers and test it
-class AnyObject(Matcher):
+class AnyObject(Matcher):  # pragma: no cover
     def __init__(self, class_=None, attributes=None):
         self.class_ = class_
         self.attributes = attributes
@@ -238,3 +243,93 @@ class TestBulkGroupUpsert:
     @pytest.fixture
     def commands(self):
         return [group_upsert_command(i) for i in range(3)]
+
+
+class TestBulkGroupMembershipCreate:
+    def test_it_can_insert_new_records(self, db_session, commands):
+        reports = GroupMembershipCreateAction(db_session).execute(commands)
+
+        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+
+        self.assert_membership_matches_commands(db_session, commands)
+
+    def test_it_can_continue_with_existing_records(self, db_session, commands):
+        GroupMembershipCreateAction(db_session).execute(commands)
+        reports = GroupMembershipCreateAction(db_session).execute(
+            commands, on_duplicate="continue"
+        )
+
+        assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
+
+        self.assert_membership_matches_commands(db_session, commands)
+
+    def test_it_fails_without_continue(self, db_session, commands):
+        with pytest.raises(UnsupportedOperationError):
+            GroupMembershipCreateAction(db_session).execute(
+                commands, on_duplicate="fail"
+            )
+
+    def test_the_reports_match_the_command_order(self, db_session, commands):
+        initial_reports = GroupMembershipCreateAction(db_session).execute(commands)
+        initial_ids = [report.id for report in initial_reports]
+
+        reports = GroupMembershipCreateAction(db_session).execute(
+            list(reversed(commands))
+        )
+        final_ids = [report.id for report in reports]
+
+        assert final_ids == list(reversed(initial_ids))
+
+    def test_it_raises_conflict_with_bad_user_foreign_key(self, db_session, groups):
+        with pytest.raises(ConflictingDataError):
+            GroupMembershipCreateAction(db_session).execute(
+                [group_membership_create(99999, groups[0].id)]
+            )
+
+    def test_it_raises_conflict_with_bad_group_foreign_key(self, db_session, user):
+        with pytest.raises(ConflictingDataError):
+            GroupMembershipCreateAction(db_session).execute(
+                [group_membership_create(user.id, 999999)]
+            )
+
+    @staticmethod
+    def assert_membership_matches_commands(db_session, commands):
+        # Sort by `group_id` as these tests always use the same `user_id`
+        memberships = list(
+            db_session.query(GroupMembership).order_by(GroupMembership.group_id)
+        )
+
+        expected_memberships = sorted(
+            [
+                AnyObject.of_class(GroupMembership).with_attrs(
+                    {
+                        "user_id": command.body.member.id,
+                        "group_id": command.body.group.id,
+                    }
+                )
+                for command in commands
+            ],
+            key=attrgetter("group_id"),
+        )
+
+        assert memberships == expected_memberships
+
+    @pytest.fixture
+    def commands(self, db_session, user, groups):
+        return [group_membership_create(user.id, group.id) for group in groups]
+
+    @pytest.fixture
+    def groups(self, db_session):
+        groups = [
+            Group(
+                name=f"group_{i}",
+                authority="lms.hypothes.is",
+                authority_provided_id=f"ap_id_{i}",
+            )
+            for i in range(3)
+        ]
+
+        db_session.add_all(groups)
+        db_session.flush()
+
+        return groups

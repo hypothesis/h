@@ -5,7 +5,7 @@ from h_matchers import Any
 
 from h.h_api.bulk_api import CommandBuilder
 from h.h_api.enums import ViewType
-from h.models import Group, User
+from h.models import Group, GroupMembership, User
 
 
 class TestBulk:
@@ -81,6 +81,12 @@ class TestBulk:
             "group:id_1@lms.hypothes.is",
             "group:id_2@lms.hypothes.is",
         ]
+
+        memberships = list(db_session.query(GroupMembership))
+        assert len(memberships) == 3
+
+        memberships = [(rel.user_id, rel.group_id) for rel in memberships]
+        assert memberships == [(users[0].id, group.id) for group in groups]
 
     @pytest.fixture
     def commands(self, user):
