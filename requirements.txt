@@ -22,6 +22,7 @@ elasticsearch==6.8.1      # via -r requirements.in, elasticsearch-dsl
 gevent==1.5.0             # via -r requirements.in
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
+h-api==1.0.0              # via -r requirements.in
 h-matchers==1.2.5         # via -r requirements.in
 h-pyramid-sentry==1.2.0   # via -r requirements.in
 hkdf==0.0.3               # via -r requirements.in
@@ -31,7 +32,7 @@ iso8601==0.1.12           # via colander, deform
 itsdangerous==1.1.0       # via -r requirements.in
 jinja2==2.10.3            # via pyramid-jinja2
 jsonpointer==2.0          # via -r requirements.in
-jsonschema==3.2.0         # via -r requirements.in
+jsonschema==3.2.0         # via -r requirements.in, h-api
 kombu==4.6.8              # via -r requirements.in, celery
 mako==1.1.0               # via alembic
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
