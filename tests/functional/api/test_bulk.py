@@ -1,10 +1,10 @@
 import json
 
 import pytest
+from h_api.bulk_api import CommandBuilder
+from h_api.enums import ViewType
 from h_matchers import Any
 
-from h.h_api.bulk_api import CommandBuilder
-from h.h_api.enums import ViewType
 from h.models import Group, GroupMembership, User
 
 

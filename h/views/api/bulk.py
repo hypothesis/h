@@ -1,9 +1,9 @@
 import json
 from itertools import chain
 
+from h_api.bulk_api import BulkAPI
 from pyramid.response import Response
 
-from h.h_api.bulk_api import BulkAPI
 from h.services.bulk_executor import BulkExecutor
 from h.views.api.config import api_config
 
@@ -28,7 +28,7 @@ def bulk(request):
      * Add users to groups
 
     This end-point is intended to be called using the classes provided by
-    `h.h_api.bulk_api`.
+    `h_api.bulk_api`.
     """
 
     results = BulkAPI.from_byte_stream(

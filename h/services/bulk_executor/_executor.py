@@ -1,10 +1,10 @@
-"""Bulk executor for use with h.h_api.bulk_api."""
+"""Bulk executor for use with h_api.bulk_api."""
 
+from h_api.bulk_api.executor import Executor
+from h_api.enums import CommandType, DataType
+from h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from sqlalchemy.orm.exc import NoResultFound
 
-from h.h_api.bulk_api.executor import Executor
-from h.h_api.enums import CommandType, DataType
-from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from h.models import User
 from h.services.bulk_executor._actions import (
     GroupMembershipCreateAction,

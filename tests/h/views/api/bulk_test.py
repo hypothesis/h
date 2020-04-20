@@ -3,9 +3,9 @@ from io import BytesIO
 from unittest.mock import create_autospec
 
 import pytest
+from h_api.exceptions import SchemaValidationError
 from webob import Response
 
-from h.h_api.exceptions import SchemaValidationError
 from h.views.api.bulk import bulk
 
 

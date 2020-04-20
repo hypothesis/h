@@ -1,17 +1,17 @@
 """Individual actions for modifying the DB in bulk."""
 from copy import deepcopy
 
+from h_api.bulk_api import Report
+from h_api.exceptions import (
+    CommandSequenceError,
+    ConflictingDataError,
+    UnsupportedOperationError,
+)
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from zope.sqlalchemy import mark_changed
 
-from h.h_api.bulk_api import Report
-from h.h_api.exceptions import (
-    CommandSequenceError,
-    ConflictingDataError,
-    UnsupportedOperationError,
-)
 from h.models import Group, GroupMembership, User, UserIdentity
 from h.models.group import PRIVATE_GROUP_TYPE_FLAGS
 
