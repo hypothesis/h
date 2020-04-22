@@ -14,6 +14,7 @@ from h.h_api.exceptions import (
     UnsupportedOperationError,
 )
 from h.models import Group, GroupMembership, User, UserIdentity
+from h.models.group import PRIVATE_GROUP_TYPE_FLAGS
 from h.services.bulk_executor._actions import (
     GroupMembershipCreateAction,
     GroupUpsertAction,
@@ -171,6 +172,7 @@ class TestBulkGroupUpsert:
         assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
 
         self.assert_groups_match_commands(db_session, commands)
+        self.assert_groups_are_private_and_owned_by_user(db_session, user)
 
     def test_it_can_update_records(self, db_session, commands, user):
         update_commands = [
@@ -185,6 +187,7 @@ class TestBulkGroupUpsert:
         assert reports == Any.iterable.comprised_of(Any.instance_of(Report)).of_size(3)
 
         self.assert_groups_match_commands(db_session, update_commands)
+        self.assert_groups_are_private_and_owned_by_user(db_session, user)
 
     def test_it_returns_in_the_same_order_as_the_commands(
         self, db_session, commands, user
@@ -221,6 +224,19 @@ class TestBulkGroupUpsert:
 
         with pytest.raises(UnsupportedOperationError):
             GroupUpsertAction(db_session).execute([command], effective_user_id=user.id)
+
+    @staticmethod
+    def assert_groups_are_private_and_owned_by_user(db_session, user):
+        groups = list(db_session.query(Group).filter(Group.authority == AUTHORITY))
+
+        for group in groups:
+            # Check the groups are private
+            assert group.joinable_by == PRIVATE_GROUP_TYPE_FLAGS.joinable_by
+            assert group.readable_by == PRIVATE_GROUP_TYPE_FLAGS.readable_by
+            assert group.writeable_by == PRIVATE_GROUP_TYPE_FLAGS.writeable_by
+
+            # Check they are owned by
+            assert group.creator_id == user.id
 
     @staticmethod
     def assert_groups_match_commands(db_session, commands):
