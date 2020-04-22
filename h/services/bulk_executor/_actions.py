@@ -13,6 +13,7 @@ from h.h_api.exceptions import (
     UnsupportedOperationError,
 )
 from h.models import Group, GroupMembership, User, UserIdentity
+from h.models.group import PRIVATE_GROUP_TYPE_FLAGS
 
 
 class DBAction:
@@ -87,6 +88,8 @@ class DBAction:
 class GroupUpsertAction(DBAction):
     """Perform a bulk group upsert."""
 
+    type_flags = PRIVATE_GROUP_TYPE_FLAGS
+
     def execute(self, batch, effective_user_id=None, **_):
         if effective_user_id is None:
             raise CommandSequenceError(
@@ -98,10 +101,19 @@ class GroupUpsertAction(DBAction):
             batch, expected_keys=["authority", "authority_provided_id"]
         )
 
+        static_values = {
+            # Set the group to be owned by the effective user
+            "creator_id": effective_user_id,
+            # Set the group to match the specified type (private in this case)
+            "joinable_by": self.type_flags.joinable_by,
+            "readable_by": self.type_flags.readable_by,
+            "writeable_by": self.type_flags.writeable_by,
+        }
+
         # Prep the query
         values = [command.body.attributes for command in batch]
         for value in values:
-            value["creator_id"] = effective_user_id
+            value.update(static_values)
 
         stmt = insert(Group).values(values)
         stmt = stmt.on_conflict_do_update(
