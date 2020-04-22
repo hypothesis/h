@@ -1,11 +1,11 @@
 from unittest.mock import sentinel
 
 import pytest
+from h_api.bulk_api.model.config_body import Configuration
+from h_api.enums import CommandType, DataType
+from h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from pytest import param
 
-from h.h_api.bulk_api.model.config_body import Configuration
-from h.h_api.enums import CommandType, DataType
-from h.h_api.exceptions import InvalidDeclarationError, UnsupportedOperationError
 from h.services.bulk_executor._executor import BulkExecutor
 from tests.h.services.bulk_executor.conftest import (
     group_upsert_command,

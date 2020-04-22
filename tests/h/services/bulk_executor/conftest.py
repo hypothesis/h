@@ -1,7 +1,7 @@
 """Re-usable fixtures for the bulk executor tests."""
 import pytest
+from h_api.bulk_api import CommandBuilder
 
-from h.h_api.bulk_api import CommandBuilder
 from h.models import User
 
 AUTHORITY = "lms.hypothes.is"
