@@ -4,8 +4,7 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
-from h_matchers.decorator import fluent_entrypoint
-from h_matchers.matcher.core import Matcher
+from h_matchers.matcher.object import AnyObject
 
 from h.h_api.bulk_api import Report
 from h.h_api.exceptions import (
@@ -26,57 +25,6 @@ from tests.h.services.bulk_executor.conftest import (
     group_upsert_command,
     upsert_user_command,
 )
-
-
-# TODO! - Move this to h-matchers and test it
-class AnyObject(Matcher):  # pragma: no cover
-    def __init__(self, class_=None, attributes=None):
-        self.class_ = class_
-        self.attributes = attributes
-        super().__init__("dummy", self._matches_object)
-
-    @fluent_entrypoint
-    def of_class(self, class_):
-        self.class_ = class_
-
-        return self
-
-    @fluent_entrypoint
-    def with_attrs(self, attributes):
-        self.attributes = attributes
-
-        return self
-
-    def _matches_object(self, other):
-        if self.class_ is None:
-            if not isinstance(other, object):
-                return False
-
-        elif self.class_ != type(other):
-            return False
-
-        if self.attributes is not None:
-            for key, value in self.attributes.items():
-                if not hasattr(other, key):
-                    return False
-
-                if getattr(other, key) != value:
-                    return False
-
-        return True
-
-    def __getattr__(self, item):
-        """Allow our attributes spec to be accessed as attributes."""
-
-        if self.attributes is not None and item in self.attributes:
-            return self.attributes[item]
-
-        return super().__getattribute__(item)
-
-    def __str__(self):
-        extras = f" with attributes {self.attributes}" if self.attributes else ""
-
-        return f"<Any instance of {self.class_} {extras}>"
 
 
 class UserMatcher(AnyObject):
@@ -248,7 +196,7 @@ class TestBulkGroupUpsert:
 
         expected_groups = sorted(
             [
-                AnyObject.of_class(Group).with_attrs(command.body.attributes)
+                AnyObject.of_type(Group).with_attrs(command.body.attributes)
                 for command in commands
             ],
             key=attrgetter("name"),
@@ -317,7 +265,7 @@ class TestBulkGroupMembershipCreate:
 
         expected_memberships = sorted(
             [
-                AnyObject.of_class(GroupMembership).with_attrs(
+                AnyObject.of_type(GroupMembership).with_attrs(
                     {
                         "user_id": command.body.member.id,
                         "group_id": command.body.group.id,
