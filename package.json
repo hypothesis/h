@@ -29,7 +29,7 @@
     "gulp-postcss": "^6.1.0",
     "gulp-svgmin": "^2.2.0",
     "gulplog": "^1.0.0",
-    "jquery": "^3.4.0",
+    "jquery": "^3.5.0",
     "js-polyfills": "^0.1.16",
     "keyboardevent-key-polyfill": "^1.0.2",
     "mkdirp": "^0.5.1",
