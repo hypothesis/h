@@ -17,8 +17,9 @@ from h.views.api.helpers.angular import AngularRouteTemplater
 def links(context, request):
     templater = AngularRouteTemplater(request.route_url, params=["user"])
 
-    tag_search_url = request.route_url("activity.search", _query={"q": "_query_"})
-    tag_search_url = tag_search_url.replace("_query_", 'tag:":tag"')
+
+    tag_search_url = request.route_url("activity.search", _query={"q": 'tag:"__tag__"'})
+    tag_search_url = tag_search_url.replace("__tag__", ':tag')
 
     oauth_authorize_url = request.route_url("oauth_authorize")
     oauth_revoke_url = request.route_url("oauth_revoke")
