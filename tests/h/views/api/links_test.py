@@ -27,7 +27,7 @@ class TestLinks:
             "help": host + "/docs/help",
             "oauth.authorize": host + "/oauth/authorize",
             "oauth.revoke": host + "/oauth/revoke",
-            "search.tag": host + '/search?q=tag%3A%22:tag%22',
+            "search.tag": host + "/search?q=tag%3A%22:tag%22",
             "signup": host + "/signup",
             "user": host + "/u/:user",
         }
