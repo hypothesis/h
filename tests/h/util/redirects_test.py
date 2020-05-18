@@ -147,7 +147,7 @@ class TestParse:
 
     @given(lines=st.lists(st.text()))
     def test_ignores_comment_lines(self, lines):
-        result = parse(["#" + l for l in lines])
+        result = parse(["#" + line for line in lines])
 
         assert result == []
 

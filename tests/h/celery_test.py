@@ -55,7 +55,7 @@ class TestCelery:
         # Make a fake ExceptionInfo object
         try:
             raise RuntimeError("asplode!")
-        except:
+        except RuntimeError:
             einfo = ExceptionInfo()
 
         celery.report_failure(sender, "abc123", (), {}, einfo)
@@ -71,7 +71,7 @@ class TestCelery:
         # Make a fake ExceptionInfo object
         try:
             raise RuntimeError("asplode!")
-        except:
+        except RuntimeError:
             einfo = ExceptionInfo()
 
         celery.report_failure(sender, "abc123", (), {}, einfo)

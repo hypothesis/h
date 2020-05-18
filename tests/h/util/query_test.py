@@ -33,12 +33,12 @@ class TestColumnWindows:
             (13, ["abcdefghijklm", "nopqrstuvwxyz"]),
             (10, ["abcdefghij", "klmnopqrst", "uvwxyz"]),
             (5, ["abcde", "fghij", "klmno", "pqrst", "uvwxy", "z"]),
-            (1, [l for l in ASCII_LOWERCASE]),
+            (1, [char for char in ASCII_LOWERCASE]),
         ],
     )
     def test_basic_windowing(self, db_session, windowsize, expected):
         """Check that windowing returns the correct batches of rows."""
-        testdata = [{"name": l, "enabled": True} for l in ASCII_LOWERCASE]
+        testdata = [{"name": char, "enabled": True} for char in ASCII_LOWERCASE]
         db_session.execute(test_cw.insert().values(testdata))
 
         windows = column_windows(db_session, test_cw.c.name, windowsize=windowsize)
@@ -52,7 +52,7 @@ class TestColumnWindows:
             (13, ["abcdefghijklm"]),
             (10, ["abcdefghij", "klm"]),
             (3, ["abc", "def", "ghi", "jkl", "m"]),
-            (1, [l for l in ASCII_LOWERCASE[:13]]),
+            (1, [char for char in ASCII_LOWERCASE[:13]]),
         ],
     )
     def test_filtered_windowing(self, db_session, windowsize, expected):
@@ -60,8 +60,8 @@ class TestColumnWindows:
         testdata = []
         enabled = ASCII_LOWERCASE[:13]
         disabled = ASCII_LOWERCASE[13:]
-        testdata.extend([{"name": l, "enabled": True} for l in enabled])
-        testdata.extend([{"name": l, "enabled": False} for l in disabled])
+        testdata.extend([{"name": char, "enabled": True} for char in enabled])
+        testdata.extend([{"name": char, "enabled": False} for char in disabled])
         db_session.execute(test_cw.insert().values(testdata))
 
         filter_ = test_cw.c.enabled

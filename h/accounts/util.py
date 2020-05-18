@@ -45,7 +45,7 @@ def validate_orcid(orcid):
     orcid_regex = r"\A[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]\Z"
 
     if not re.match(orcid_regex, orcid):
-        raise ValueError("The format of this ORCID is incorrect".format(orcid))
+        raise ValueError("The format of this ORCID is incorrect: {}".format(orcid))
 
     if _orcid_checksum_digit(orcid[:-1]) != orcid[-1:]:
         raise ValueError("{} is not a valid ORCID".format(orcid))
