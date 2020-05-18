@@ -35,7 +35,7 @@ def get_blacklist():
         except (IOError, ValueError):
             log.exception("unable to load blacklist")
             blacklist = []
-        USERNAME_BLACKLIST = set(l.strip().lower() for l in blacklist)
+        USERNAME_BLACKLIST = set(line.strip().lower() for line in blacklist)
     return USERNAME_BLACKLIST
 
 
