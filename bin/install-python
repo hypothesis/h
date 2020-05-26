@@ -34,5 +34,6 @@ do
     if ! "$(pyenv root)/versions/$python_version/bin/tox" --version > /dev/null 2>&1
     then
         "$(pyenv root)/versions/$python_version/bin/pip" install --quiet --disable-pip-version-check tox > /dev/null
+        pyenv rehash
     fi
 done < .python-version
