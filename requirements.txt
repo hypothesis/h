@@ -84,7 +84,7 @@ ws4py==0.5.1              # via -r requirements.in
 wsaccel==0.6.2            # via -r requirements.in
 zipp==2.0.0               # via importlib-metadata
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
-zope.interface==4.3.2     # via -r requirements.in, pyramid, pyramid-authsanity, pyramid-retry, pyramid-services, repoze.sendmail, transaction, wired, zope.sqlalchemy
+zope.interface==5.1.0     # via -r requirements.in, pyramid, pyramid-authsanity, pyramid-retry, pyramid-services, repoze.sendmail, transaction, wired, zope.sqlalchemy
 zope.sqlalchemy==1.1      # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
