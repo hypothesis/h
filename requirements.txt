@@ -64,7 +64,7 @@ pyrsistent==0.15.7        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements.in, alembic, elasticsearch-dsl
 python-editor==1.0.4      # via alembic
 python-slugify==4.0.0     # via -r requirements.in
-pytz==2019.3              # via celery
+pytz==2020.1              # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
 sentry-sdk==0.14.0        # via h-pyramid-sentry
 six==1.15.0               # via bcrypt, bleach, elasticsearch-dsl, jsonschema, packaging, pyrsistent, python-dateutil
