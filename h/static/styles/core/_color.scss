@@ -6,7 +6,6 @@
 // ----------------------------------------------------------------------------
 
 $white: white;
-$black: black;
 
 $grey-1: #f2f2f2;
 $grey-2: #ececec;
@@ -34,16 +33,4 @@ $error-border: #ffeeba;
 @mixin error {
   background-color: $error-bg;
   border-color: $error-border;
-}
-
-// Functions
-// ----------------------------------------------------------------------------
-
-// Tint/shade functions from https://css-tricks.com/snippets/sass/tint-shade-functions
-@function tint($color, $percent){
-  @return color.mix(white, $color, $percent);
-}
-
-@function shade($color, $percent){
-  @return color.mix(black, $color, $percent);
 }
