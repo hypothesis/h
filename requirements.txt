@@ -60,7 +60,7 @@ pyramid-retry==2.1.1      # via -r requirements.in
 pyramid-services==2.2     # via -r requirements.in, pyramid-authsanity
 pyramid-tm==2.4           # via -r requirements.in
 pyramid==1.10.4           # via -r requirements.in, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-services, pyramid-tm
-pyrsistent==0.15.7        # via jsonschema
+pyrsistent==0.16.0        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements.in, alembic, elasticsearch-dsl
 python-editor==1.0.4      # via alembic
 python-slugify==4.0.0     # via -r requirements.in
