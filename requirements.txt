@@ -27,7 +27,7 @@ h-matchers==1.2.5         # via -r requirements.in
 h-pyramid-sentry==1.2.0   # via -r requirements.in
 hkdf==0.0.3               # via -r requirements.in
 hupper==1.10.2            # via pyramid
-importlib-metadata==1.4.0  # via jsonschema, kombu
+importlib-metadata==1.6.0  # via jsonschema, kombu
 iso8601==0.1.12           # via colander, deform
 itsdangerous==1.1.0       # via -r requirements.in
 jinja2==2.10.3            # via pyramid-jinja2
