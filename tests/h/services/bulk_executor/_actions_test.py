@@ -158,6 +158,13 @@ class TestBulkGroupUpsert:
                 sentinel.batch, effective_user_id=None
             )
 
+    def test_it_fails_with_duplicate_groups(self, db_session, user):
+        command = group_upsert_command(0)
+        action = GroupUpsertAction(db_session)
+
+        with pytest.raises(ConflictingDataError):
+            action.execute([command, command], effective_user_id=user.id)
+
     @pytest.mark.parametrize("field", ["authority", "authority_provided_id"])
     def test_it_fails_with_mismatched_queries(self, db_session, field, user):
         command = group_upsert_command(**{field: "value"})
