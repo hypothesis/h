@@ -48,7 +48,7 @@ plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 psycogreen==1.0.2         # via -r requirements.in
 psycopg2==2.8.5           # via -r requirements.in
-pycparser==2.19           # via cffi
+pycparser==2.20           # via cffi
 pyjwt==1.7.1              # via -r requirements.in
 pyparsing==2.4.7          # via -r requirements.in, packaging
 pyramid-authsanity==1.1.0  # via -r requirements.in
