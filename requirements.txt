@@ -42,7 +42,7 @@ newrelic==5.12.1.141      # via -r requirements.in
 oauthlib==3.1.0           # via -r requirements.in
 packaging==20.4           # via bleach
 passlib==1.7.2            # via -r requirements.in
-pastedeploy==2.0.1        # via plaster-pastedeploy
+pastedeploy==2.1.0        # via plaster-pastedeploy
 peppercorn==0.6           # via deform
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
