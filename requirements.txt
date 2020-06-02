@@ -30,7 +30,7 @@ hupper==1.10.2            # via pyramid
 importlib-metadata==1.6.0  # via jsonschema, kombu
 iso8601==0.1.12           # via colander, deform
 itsdangerous==1.1.0       # via -r requirements.in
-jinja2==2.10.3            # via pyramid-jinja2
+jinja2==2.11.2            # via pyramid-jinja2
 jsonpointer==2.0          # via -r requirements.in
 jsonschema==3.2.0         # via -r requirements.in, h-api
 kombu==4.6.9              # via -r requirements.in, celery
