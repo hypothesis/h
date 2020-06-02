@@ -19,7 +19,7 @@ colander==1.7.0           # via deform
 deform==2.0.8             # via -r requirements.in
 elasticsearch-dsl==6.3.1  # via -r requirements.in
 elasticsearch==6.8.1      # via -r requirements.in, elasticsearch-dsl
-gevent==20.5.0            # via -r requirements.in
+gevent==20.5.2            # via -r requirements.in
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
 h-api==1.0.0              # via -r requirements.in
@@ -84,7 +84,8 @@ ws4py==0.5.1              # via -r requirements.in
 wsaccel==0.6.2            # via -r requirements.in
 zipp==2.0.0               # via importlib-metadata
 zope.deprecation==4.1.2   # via deform, pyramid, pyramid-jinja2
-zope.interface==5.1.0     # via -r requirements.in, pyramid, pyramid-authsanity, pyramid-retry, pyramid-services, repoze.sendmail, transaction, wired, zope.sqlalchemy
+zope.event==4.4           # via gevent
+zope.interface==5.1.0     # via -r requirements.in, gevent, pyramid, pyramid-authsanity, pyramid-retry, pyramid-services, repoze.sendmail, transaction, wired, zope.sqlalchemy
 zope.sqlalchemy==1.1      # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
