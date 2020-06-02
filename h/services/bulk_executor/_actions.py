@@ -31,7 +31,7 @@ class DBAction:
         The commands are assumed to be appropriate for this action type.
         """
 
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     @staticmethod
     def _check_upsert_queries(batch, expected_keys):
