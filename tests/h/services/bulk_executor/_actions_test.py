@@ -1,6 +1,6 @@
 from copy import deepcopy
 from operator import attrgetter
-from unittest.mock import sentinel
+from unittest.mock import Mock, patch, sentinel
 
 import pytest
 from h_api.bulk_api import Report
@@ -11,6 +11,7 @@ from h_api.exceptions import (
 )
 from h_matchers import Any
 from h_matchers.matcher.object import AnyObject
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from h.models import Group, GroupMembership, User, UserIdentity
 from h.models.group import PRIVATE_GROUP_TYPE_FLAGS
@@ -68,6 +69,19 @@ class TestBulkUserUpsert:
 
         with pytest.raises(ConflictingDataError):
             UserUpsertAction(db_session).execute(commands)
+
+    def test_other_db_errors_are_raised_directly(self, db_session, programming_error):
+        action = UserUpsertAction(db_session)
+
+        fake_execute_result = Mock(spec_set=["fetchall"])
+        fake_execute_result.fetchall.return_value = [["id", "authority", "username"]]
+
+        with patch.object(action, "_execute_statement") as _execute_statement:
+            # We need the second call to fail during _upsert_identities
+            _execute_statement.side_effect = [fake_execute_result, programming_error]
+
+            with pytest.raises(ProgrammingError):
+                action.execute([upsert_user_command(0)])
 
     def test_it_returns_in_the_same_order_as_the_commands(self, db_session, commands):
         # Insert the values to set db order, then update them in reverse
@@ -157,6 +171,24 @@ class TestBulkGroupUpsert:
             GroupUpsertAction(db_session).execute(
                 sentinel.batch, effective_user_id=None
             )
+
+    def test_it_fails_with_duplicate_groups(self, db_session, user):
+        command = group_upsert_command(0)
+
+        with pytest.raises(ConflictingDataError):
+            GroupUpsertAction(db_session).execute(
+                [command, command], effective_user_id=user.id
+            )
+
+    def test_other_db_errors_are_raised_directly(
+        self, db_session, user, programming_error
+    ):
+        action = GroupUpsertAction(db_session)
+        with patch.object(action, "_execute_statement") as _execute_statement:
+            _execute_statement.side_effect = programming_error
+
+            with pytest.raises(ProgrammingError):
+                action.execute([group_upsert_command(0)], effective_user_id=user.id)
 
     @pytest.mark.parametrize("field", ["authority", "authority_provided_id"])
     def test_it_fails_with_mismatched_queries(self, db_session, field, user):
@@ -256,6 +288,14 @@ class TestBulkGroupMembershipCreate:
                 [group_membership_create(user.id, 999999)]
             )
 
+    def test_other_db_errors_are_raised_directly(self, db_session, integrity_error):
+        action = GroupMembershipCreateAction(db_session)
+        with patch.object(action, "_execute_statement") as _execute_statement:
+            _execute_statement.side_effect = integrity_error
+
+            with pytest.raises(IntegrityError):
+                action.execute([group_membership_create(1, 2)])
+
     @staticmethod
     def assert_membership_matches_commands(db_session, commands):
         # Sort by `group_id` as these tests always use the same `user_id`
@@ -297,3 +337,13 @@ class TestBulkGroupMembershipCreate:
         db_session.flush()
 
         return groups
+
+
+@pytest.fixture
+def programming_error():
+    return ProgrammingError("statement", "params", orig=Mock())
+
+
+@pytest.fixture
+def integrity_error():
+    return IntegrityError("statement", "params", orig=Mock())

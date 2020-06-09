@@ -31,7 +31,7 @@ class DBAction:
         The commands are assumed to be appropriate for this action type.
         """
 
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     @staticmethod
     def _check_upsert_queries(batch, expected_keys):
@@ -122,7 +122,18 @@ class GroupUpsertAction(DBAction):
         ).returning(Group.id, Group.authority, Group.authority_provided_id)
 
         # Upsert the data
-        group_rows = self._execute_statement(stmt).fetchall()
+        try:
+            group_rows = self._execute_statement(stmt).fetchall()
+
+        except ProgrammingError as err:
+            # https://www.postgresql.org/docs/9.4/errcodes-appendix.html
+            # 21000 == cardinality violation
+            if err.orig.pgcode == "21000":
+                raise ConflictingDataError(
+                    "Attempted to create two groups with the same authority and id"
+                )
+
+            raise
 
         # Report back
         return [
