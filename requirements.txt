@@ -10,7 +10,7 @@ attrs==19.3.0             # via jsonschema
 bcrypt==3.1.7             # via -r requirements.in
 billiard==3.6.3.0         # via celery
 bleach==3.1.5             # via -r requirements.in
-celery==4.4.3             # via -r requirements.in
+celery==4.4.5             # via -r requirements.in
 certifi==2020.6.20        # via -r requirements.in, sentry-sdk
 cffi==1.14.0              # via -r requirements.in, bcrypt
 chameleon==3.7.4          # via deform
@@ -19,6 +19,7 @@ colander==1.7.0           # via deform
 deform==2.0.8             # via -r requirements.in
 elasticsearch-dsl==6.3.1  # via -r requirements.in
 elasticsearch==6.8.1      # via -r requirements.in, elasticsearch-dsl
+future==0.18.2            # via celery
 gevent==20.6.2            # via -r requirements.in
 greenlet==0.4.16          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
