@@ -13,7 +13,7 @@ bleach==3.1.5             # via -r requirements.in
 celery==4.4.3             # via -r requirements.in
 certifi==2020.6.20        # via -r requirements.in, sentry-sdk
 cffi==1.14.0              # via -r requirements.in, bcrypt
-chameleon==3.7.2          # via deform
+chameleon==3.7.4          # via deform
 click==7.1.2              # via -r requirements.in
 colander==1.7.0           # via deform
 deform==2.0.8             # via -r requirements.in
