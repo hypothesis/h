@@ -133,7 +133,6 @@ def includeme(config):
     config.include("h.search")
     config.include("h.services")
     config.include("h.session")
-    config.include("h.stats")
     config.include("h.viewderivers")
     config.include("h.viewpredicates")
     config.include("h.views")

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
 from unittest import mock
 
 import pytest
-from h_matchers import Any
 
 from h import realtime
 
@@ -57,25 +55,8 @@ class TestConsumer:
 
         handler.assert_called_once_with(body)
 
-    def test_handle_message_records_queue_time_if_timestamp_present(
-        self, handler, statsd_client
-    ):
-        consumer = realtime.Consumer(
-            mock.sentinel.connection, "annotation", handler, statsd_client=statsd_client
-        )
-        message = mock.Mock()
-        message.headers = {"timestamp": datetime.utcnow().isoformat() + "Z"}
-
-        consumer.handle_message({}, message)
-
-        statsd_client.timing.assert_called_once_with("streamer.msg.queueing", Any.int())
-
-    def test_handle_message_doesnt_explode_if_timestamp_missing(
-        self, handler, statsd_client
-    ):
-        consumer = realtime.Consumer(
-            mock.sentinel.connection, "annotation", handler, statsd_client=statsd_client
-        )
+    def test_handle_message_doesnt_explode_if_timestamp_missing(self, handler):
+        consumer = realtime.Consumer(mock.sentinel.connection, "annotation", handler)
         message = mock.Mock()
         message.headers = {}
 
@@ -92,10 +73,6 @@ class TestConsumer:
     @pytest.fixture
     def handler(self):
         return mock.Mock(spec_set=[])
-
-    @pytest.fixture
-    def statsd_client(self):
-        return mock.Mock(spec_set=["timing"])
 
     @pytest.fixture
     def generate_queue_name(self, patch):
@@ -116,7 +93,6 @@ class TestPublisher:
             exchange=exchange,
             declare=[exchange],
             routing_key="annotation",
-            headers=Any.dict.containing(["timestamp"]),
             retry=True,
             retry_policy=retry_policy,
         )
@@ -134,7 +110,6 @@ class TestPublisher:
             exchange=exchange,
             declare=[exchange],
             routing_key="user",
-            headers=Any.dict.containing(["timestamp"]),
             retry=True,
             retry_policy=retry_policy,
         )

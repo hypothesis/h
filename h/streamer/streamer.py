@@ -5,7 +5,7 @@ import sys
 
 import gevent
 
-from h import db, stats
+from h import db
 from h.streamer import messages, websocket
 
 log = logging.getLogger(__name__)
@@ -40,8 +40,6 @@ def start(event):
         # Start greenlets to process messages from RabbitMQ
         gevent.spawn(messages.process_messages, settings, ANNOTATION_TOPIC, WORK_QUEUE),
         gevent.spawn(messages.process_messages, settings, USER_TOPIC, WORK_QUEUE),
-        # A greenlet to periodically report to statsd
-        gevent.spawn(report_stats, settings),
         # And one to process the queued work
         gevent.spawn(process_work_queue, settings, WORK_QUEUE),
     ]
@@ -62,7 +60,6 @@ def process_work_queue(settings, queue, session_factory=None):
     """
     if session_factory is None:
         session_factory = _get_session
-    s = stats.get_client(settings).pipeline()
     session = session_factory(settings)
     topic_handlers = {
         ANNOTATION_TOPIC: messages.handle_annotation_event,
@@ -70,8 +67,6 @@ def process_work_queue(settings, queue, session_factory=None):
     }
 
     for msg in queue:
-        t_total = s.timer("streamer.msg.handler_total")
-        t_total.start()
         try:
             # All access to the database in the streamer is currently
             # read-only, so enforce that:
@@ -83,11 +78,9 @@ def process_work_queue(settings, queue, session_factory=None):
             )
 
             if isinstance(msg, messages.Message):
-                with s.timer("streamer.msg.handler_message"):
-                    messages.handle_message(msg, settings, session, topic_handlers)
+                messages.handle_message(msg, settings, session, topic_handlers)
             elif isinstance(msg, websocket.Message):
-                with s.timer("streamer.msg.handler_websocket"):
-                    websocket.handle_message(msg, session)
+                websocket.handle_message(msg, session)
             else:
                 raise UnknownMessageType(repr(msg))
 
@@ -101,16 +94,6 @@ def process_work_queue(settings, queue, session_factory=None):
             session.commit()
         finally:
             session.close()
-        t_total.stop()
-        s.send()
-
-
-def report_stats(settings):
-    client = stats.get_client(settings)
-    while True:
-        client.gauge("streamer.connected_clients", len(websocket.WebSocket.instances))
-        client.gauge("streamer.queue_length", WORK_QUEUE.qsize())
-        gevent.sleep(10)
 
 
 def supervise(greenlets):

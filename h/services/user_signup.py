@@ -18,13 +18,7 @@ class UserSignupService:
     """A service for registering users."""
 
     def __init__(
-        self,
-        default_authority,
-        mailer,
-        session,
-        signup_email,
-        password_service,
-        stats=None,
+        self, default_authority, mailer, session, signup_email, password_service,
     ):
         """
         Create a new user signup service.
@@ -34,14 +28,12 @@ class UserSignupService:
         :param session: the SQLAlchemy session object
         :param signup_email: a function for generating a signup email
         :param password_service: the user password service
-        :param stats: the stats service
         """
         self.default_authority = default_authority
         self.mailer = mailer
         self.session = session
         self.signup_email = signup_email
         self.password_service = password_service
-        self.stats = stats
 
     def signup(self, require_activation=True, **kwargs):
         """
@@ -115,10 +107,6 @@ class UserSignupService:
         sub = Subscriptions(uri=user.userid, type="reply", active=True)
         self.session.add(sub)
 
-        # Record a registration with the stats service
-        if self.stats is not None:
-            self.stats.incr("auth.local.register")
-
         return user
 
     def _require_activation(self, user):
@@ -145,5 +133,4 @@ def user_signup_service_factory(context, request):
         session=request.db,
         signup_email=partial(signup.generate, request),
         password_service=request.find_service(name="user_password"),
-        stats=request.stats,
     )

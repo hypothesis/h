@@ -59,12 +59,6 @@ def fetch_ordered_annotations(patch):
 
 
 @pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.stats = None
-    return pyramid_request
-
-
-@pytest.fixture
 def pyramid_settings(pyramid_settings):
     settings = {}
     settings.update(pyramid_settings)

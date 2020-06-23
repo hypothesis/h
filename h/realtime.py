@@ -3,7 +3,6 @@
 import base64
 import random
 import struct
-from datetime import datetime
 
 import kombu
 from kombu.mixins import ConsumerMixin
@@ -22,12 +21,11 @@ class Consumer(ConsumerMixin):
     :param handler: the function which gets called when a messages arrives
     """
 
-    def __init__(self, connection, routing_key, handler, statsd_client=None):
+    def __init__(self, connection, routing_key, handler):
         self.connection = connection
         self.routing_key = routing_key
         self.handler = handler
         self.exchange = get_exchange()
-        self.statsd_client = statsd_client
 
     def get_consumers(self, consumer_factory, channel):
         name = self.generate_queue_name()
@@ -48,8 +46,6 @@ class Consumer(ConsumerMixin):
         Handles a realtime message by acknowledging it and then calling the
         wrapped handler.
         """
-        if self.statsd_client:
-            self._record_time_in_queue(message)
         message.ack()
         self.handler(body)
 
@@ -57,22 +53,6 @@ class Consumer(ConsumerMixin):
         """Generate a short random string"""
         data = struct.pack("Q", random.getrandbits(64))
         return base64.urlsafe_b64encode(data).strip(b"=")
-
-    def _record_time_in_queue(self, message):
-        """Send a very rough estimate of time-in-queue to the stats client."""
-        # N.B. This gives only a *rough approximation* of the time spent in the
-        # message queue. Using wall clocks like this is NOT going to be very
-        # accurate.
-        if "timestamp" not in message.headers:
-            return
-
-        timestamp = datetime.strptime(
-            message.headers["timestamp"], "%Y-%m-%dT%H:%M:%S.%fZ"
-        )
-        delta = datetime.utcnow() - timestamp
-        delta_millis = int(delta.total_seconds() * 1000)
-
-        self.statsd_client.timing("streamer.msg.queueing", delta_millis)
 
 
 class Publisher:
@@ -98,7 +78,6 @@ class Publisher:
         self._publish("user", payload)
 
     def _publish(self, routing_key, payload):
-        headers = {"timestamp": datetime.utcnow().isoformat() + "Z"}
         retry_policy = {"max_retries": 5, "interval_start": 0.2, "interval_step": 0.3}
 
         with producer_pool[self.connection].acquire(block=True) as producer:
@@ -107,7 +86,6 @@ class Publisher:
                 exchange=self.exchange,
                 declare=[self.exchange],
                 routing_key=routing_key,
-                headers=headers,
                 retry=True,
                 retry_policy=retry_policy,
             )

@@ -122,13 +122,6 @@ class TestUserSignupService:
 
         assert sub.active
 
-    def test_signup_records_stats_if_present(self, svc, stats):
-        svc.stats = stats
-
-        svc.signup(username="foo", email="foo@bar.com")
-
-        stats.incr.assert_called_once_with("auth.local.register")
-
     def test_signup_logs_conflict_error_when_account_with_email_already_exists(
         self, svc, db_session, patch
     ):
@@ -193,10 +186,6 @@ class TestUserSignupService:
         )
         return signup_email
 
-    @pytest.fixture
-    def stats(self):
-        return mock.Mock(spec_set=["incr"])
-
 
 @pytest.mark.usefixtures("user_password_service")
 class TestUserSignupServiceFactory:
@@ -232,17 +221,6 @@ class TestUserSignupServiceFactory:
         password_svc = pyramid_request.find_service(name="user_password")
 
         assert svc.password_service == password_svc
-
-    def test_provides_request_stats_as_stats(self, pyramid_request):
-        svc = user_signup_service_factory(None, pyramid_request)
-
-        assert svc.stats == pyramid_request.stats
-
-
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.stats = mock.Mock(spec_set=["incr"])
-    return pyramid_request
 
 
 @pytest.fixture

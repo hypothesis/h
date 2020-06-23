@@ -89,9 +89,3 @@ def mark_uri_as_annotated(factories, pyramid_request):
         pyramid_request.db.flush()
 
     return mark
-
-
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.stats = mock.Mock()
-    return pyramid_request

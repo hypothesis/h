@@ -15,12 +15,12 @@ from h.services.annotation_stats import AnnotationStatsService, annotation_stats
 
 
 class TestAnnotationStatsService:
-    def test_total_user_annotation_count_calls_search_with_request_and_stats(
+    def test_total_user_annotation_count_calls_search_with_request(
         self, svc, search, pyramid_request
     ):
         svc.total_user_annotation_count("userid")
 
-        search.assert_called_with(pyramid_request, stats=pyramid_request.stats)
+        search.assert_called_with(pyramid_request)
 
     def test_total_user_annotation_count_calls_run_with_userid_and_limit(
         self, svc, search
@@ -52,12 +52,12 @@ class TestAnnotationStatsService:
 
         assert anns == 3
 
-    def test_user_annotation_count_calls_search_with_request_and_stats(
+    def test_user_annotation_count_calls_search_with_request(
         self, svc, search, pyramid_request
     ):
         svc.user_annotation_count("userid")
 
-        search.assert_called_with(pyramid_request, stats=pyramid_request.stats)
+        search.assert_called_with(pyramid_request)
 
     def test_user_annotation_count_calls_run_with_userid_and_limit(self, svc, search):
         svc.user_annotation_count("userid")
@@ -80,12 +80,12 @@ class TestAnnotationStatsService:
 
         assert anns == 3
 
-    def test_group_annotation_count_calls_search_with_request_and_stats(
+    def test_group_annotation_count_calls_search_with_request(
         self, svc, search, pyramid_request
     ):
         svc.group_annotation_count("groupid")
 
-        search.assert_called_with(pyramid_request, stats=pyramid_request.stats)
+        search.assert_called_with(pyramid_request)
 
     def test_group_annotation_count_calls_run_with_groupid_and_limit(self, svc, search):
         svc.group_annotation_count("groupid")
@@ -125,12 +125,6 @@ class TestAnnotationStatsFactory:
 @pytest.fixture
 def svc(pyramid_request):
     return AnnotationStatsService(request=pyramid_request)
-
-
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.stats = mock.Mock()
-    return pyramid_request
 
 
 @pytest.fixture

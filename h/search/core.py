@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 from collections import namedtuple
-from contextlib import contextmanager
 
 import elasticsearch_dsl
-from elasticsearch.exceptions import ConnectionTimeout
 from webob.multidict import MultiDict
 
 from h.search import query
@@ -34,10 +32,6 @@ class Search:
         If False, uri/url parameters are expected to contain both wildcard and exact
         matches.
     :type separate_wildcard_uri_keys: bool
-
-    :param stats: An optional statsd client to which some metrics will be
-        published.
-    :type stats: statsd.client.StatsClient
     """
 
     def __init__(
@@ -45,12 +39,10 @@ class Search:
         request,
         separate_replies=False,
         separate_wildcard_uri_keys=True,
-        stats=None,
         _replies_limit=200,
     ):
         self.es = request.es
         self.separate_replies = separate_replies
-        self.stats = stats
         self._replies_limit = _replies_limit
         # Order matters! The KeyValueMatcher must be run last,
         # after all other modifiers have popped off the params.
@@ -118,11 +110,7 @@ class Search:
         for qual in modifiers:
             search = qual(search, params)
 
-        response = None
-        with self._instrument():
-            response = search.execute()
-
-        return response
+        return search.execute()
 
     def _search_annotations(self, params):
         # If separate_replies is True, don't return any replies to annotations.
@@ -168,24 +156,3 @@ class Search:
         for agg in self._aggregations:
             results[agg.name] = agg.parse_result(aggregations)
         return results
-
-    @contextmanager
-    def _instrument(self):
-        if not self.stats:
-            yield
-            return
-
-        s = self.stats.pipeline()
-        timer = s.timer("search.query").start()
-        try:
-            yield
-            s.incr("search.query.success")
-        except ConnectionTimeout:
-            s.incr("search.query.timeout")
-            raise
-        except:  # noqa: E722
-            s.incr("search.query.error")
-            raise
-        finally:
-            timer.stop()
-            s.send()

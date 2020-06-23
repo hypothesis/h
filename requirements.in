@@ -39,7 +39,6 @@ pyramid_retry
 pyramid_tm
 python-dateutil
 python-slugify < 4.1.0
-statsd
 supervisor >= 4.0.0
 transaction
 venusian

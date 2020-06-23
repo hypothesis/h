@@ -49,9 +49,7 @@ def search(request):
 
     separate_replies = params.pop("_separate_replies", False)
 
-    stats = getattr(request, "stats", None)
-
-    search = search_lib.Search(request, separate_replies=separate_replies, stats=stats)
+    search = search_lib.Search(request, separate_replies=separate_replies)
     result = search.run(params)
 
     svc = request.find_service(name="annotation_json_presentation")
@@ -126,9 +124,6 @@ def read_jsonld(context, request):
 )
 def update(context, request):
     """Update the specified annotation with data from the PATCH payload."""
-    if request.method == "PUT" and hasattr(request, "stats"):
-        request.stats.incr("api.deprecated.put_update_annotation")
-
     schema = UpdateAnnotationSchema(
         request, context.annotation.target_uri, context.annotation.groupid
     )

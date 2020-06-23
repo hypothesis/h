@@ -36,7 +36,7 @@ class AnnotationStatsService:
         """
         params = MultiDict({"limit": 0, "user": userid})
 
-        search = Search(self.request, stats=self.request.stats)
+        search = Search(self.request)
         search.clear()
         search.append_modifier(Limiter())
         search.append_modifier(DeletedFilter())
@@ -53,7 +53,7 @@ class AnnotationStatsService:
         return self._search(params)
 
     def _search(self, params):
-        search = Search(self.request, stats=self.request.stats)
+        search = Search(self.request)
         search.append_modifier(TopLevelAnnotationsFilter())
 
         search_result = search.run(params)

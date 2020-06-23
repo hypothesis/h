@@ -225,13 +225,10 @@ class TestExecute:
     PAGE_SIZE = 23
 
     def test_it_creates_a_search_query(self, pyramid_request, Search):
-        pyramid_request.stats = mock.Mock()
         execute(pyramid_request, MultiDict(), self.PAGE_SIZE)
 
         Search.assert_called_once_with(
-            pyramid_request,
-            stats=pyramid_request.stats,
-            separate_wildcard_uri_keys=False,
+            pyramid_request, separate_wildcard_uri_keys=False,
         )
 
     def test_it_only_returns_top_level_annotations(
@@ -637,7 +634,6 @@ class TestExecute:
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.stats = None
         return pyramid_request
 
 
