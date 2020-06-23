@@ -18,8 +18,6 @@ help:
 	@echo "make functests         Run the functional tests"
 	@echo "make docs              Build docs website and serve it locally"
 	@echo "make checkdocs         Crash if building the docs website fails"
-	@echo "make docstrings        View all the docstrings locally as HTML"
-	@echo "make checkdocstrings   Crash if building the docstrings fails"
 	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
 	@echo "make pip-compile       Compile requirements.in to requirements.txt."
 	@echo "                       Use this command after editing requirements.in, for"
@@ -100,14 +98,6 @@ docs: python
 .PHONY: checkdocs
 checkdocs: python
 	@tox -qe checkdocs
-
-.PHONY: docstrings
-docstrings: python
-	@tox -qe docstrings
-
-.PHONY: checkdocstrings
-checkdocstrings: python
-	@tox -qe checkdocstrings
 
 .PHONY: sure
 sure: checkformatting lint test coverage functests
