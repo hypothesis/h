@@ -10,7 +10,7 @@ attrs==19.3.0             # via jsonschema
 bcrypt==3.1.7             # via -r requirements.in
 billiard==3.6.3.0         # via celery
 bleach==3.1.5             # via -r requirements.in
-celery==4.4.5             # via -r requirements.in
+celery==4.4.6             # via -r requirements.in
 certifi==2020.6.20        # via -r requirements.in, sentry-sdk
 cffi==1.14.0              # via -r requirements.in, bcrypt
 chameleon==3.7.4          # via deform
