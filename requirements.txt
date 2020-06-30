@@ -63,7 +63,7 @@ pyramid==1.10.4           # via -r requirements.in, h-pyramid-sentry, pyramid-au
 pyrsistent==0.16.0        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements.in, alembic, elasticsearch-dsl
 python-editor==1.0.4      # via alembic
-python-slugify==4.0.0     # via -r requirements.in
+python-slugify==4.0.1     # via -r requirements.in
 pytz==2020.1              # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
 sentry-sdk==0.15.1        # via h-pyramid-sentry
