@@ -14,6 +14,9 @@ FEATURES = {
         "using a cached version?"
     ),
     "client_display_names": "Render display names instead of user names in the client",
+    "client_do_not_separate_replies": (
+        "Disable separating replies when loading annotations in the client"
+    ),
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
