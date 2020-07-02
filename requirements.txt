@@ -24,8 +24,8 @@ gevent==20.6.2            # via -r requirements.in
 greenlet==0.4.16          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
 h-api==1.0.0              # via -r requirements.in
-h-matchers==1.2.5         # via -r requirements.in
-h_pyramid_sentry==1.2.1   # via -r requirements.in
+h-pyramid-sentry==1.2.1   # via -r requirements.in
+h_matchers==1.2.6         # via -r requirements.in
 hkdf==0.0.3               # via -r requirements.in
 hupper==1.10.2            # via pyramid
 importlib-metadata==1.7.0  # via jsonschema, kombu
