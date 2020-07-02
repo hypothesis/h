@@ -150,6 +150,7 @@ def includeme(config):
             "h_pyramid_sentry.filters": SENTRY_FILTERS,
             "h_pyramid_sentry.retry_support": True,
             "h_pyramid_sentry.celery_support": True,
+            "h_pyramid_sentry.sqlalchemy_support": True,
         }
     )
 
