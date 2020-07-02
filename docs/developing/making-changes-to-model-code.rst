@@ -40,14 +40,14 @@ previous to your new schema.
 We use `Alembic <https://alembic.readthedocs.io/en/latest/>`_ to create and run
 migration scripts. See the Alembic docs (and look at existing scripts in
 `h/migrations/versions <https://github.com/hypothesis/h/tree/master/h/migrations/versions>`_)
-for details. The ``hypothesis migrate`` command is a wrapper around Alembic. The
+for details. The ``make db`` command is a wrapper around Alembic. The
 steps to create a new migration script for h are:
 
-1. Create the revision script by running ``bin/hypothesis migrate revision``, for example:
+1. Create the revision script by running ``makge db args=revision``, for example:
 
    .. code-block:: bash
 
-      tox -qe dev -- sh bin/hypothesis migrate revision -m "Add the foobar table"
+      make db args='revision -m "Add the foobar table"'
 
    This will create a new script in ``h/migrations/versions/``.
 
@@ -71,7 +71,7 @@ steps to create a new migration script for h are:
 
    .. code-block:: bash
 
-      tox -qe dev -- sh bin/hypothesis migrate upgrade head
+      make db
 
    After running this command inspect your database's schema to check that it's
    as expected, and run h to check that everything is working.
@@ -86,14 +86,14 @@ steps to create a new migration script for h are:
 
    .. code-block:: bash
 
-      tox -qe dev -- sh bin/hypothesis migrate downgrade -1
+      make db args='downgrade -1'
 
    After running this command inspect your database's schema to check that it's
    as expected. You can then upgrade it again:
 
    .. code-block:: bash
 
-      tox -qe dev -- sh bin/hypothesis migrate upgrade +1
+      make db args='upgrade +1'
 
 Batch deletes and updates in migration scripts
 ==============================================

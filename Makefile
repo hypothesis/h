@@ -3,6 +3,7 @@ help:
 	@echo "make help              Show this help message"
 	@echo 'make services          Run the services that `make dev` requires'
 	@echo "                       (Postgres, Elasticsearch, etc) in Docker Compose"
+	@echo 'make db                Upgrade the DB schema to the latest version'
 	@echo "make dev               Run the app in the development server"
 	@echo "make devdata           Upsert standard development data into the DB, and set"
 	@echo "                       standard environment variables for a development"
@@ -37,6 +38,12 @@ help:
 services: args?=up -d
 services: python
 	@tox -qe docker-compose -- $(args)
+
+.PHONY: db
+db: args?=upgrade head
+db: python
+	@tox -qqe dev --run-command 'sh bin/hypothesis --dev init'
+	@tox -qe dev --run-command 'sh bin/hypothesis --dev migrate $(args)'
 
 .PHONY: dev
 dev: build/manifest.json python
