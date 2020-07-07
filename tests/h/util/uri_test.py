@@ -279,6 +279,7 @@ class TestURINormalise:
                 "http://example.com?x-amz-security-token-foo=abcde",
                 "httpx://example.com?x-amz-security-token-foo=abcde",
             ),
+            ("http://example.com?authuser=0", "httpx://example.com"),
         ),
     )
     def test_it_black_lists_invalid_params(self, url_in, url_out):
