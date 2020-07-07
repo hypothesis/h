@@ -91,6 +91,11 @@ BLACKLISTED_QUERY_PARAMS = [
         #    https://support.google.com/analytics/answer/1033867?hl=en
         #
         r"^utm_(campaign|content|medium|source|term)$",
+        # Google authuser, use across a number of services. See ticket:
+        #
+        #    https://github.com/hypothesis/h/issues/6033
+        #
+        "^authuser$",
         # WebTrends Analytics query params. Reference:
         #
         #    http://help.webtrends.com/en/analytics10/#qpr_about.html
