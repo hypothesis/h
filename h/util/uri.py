@@ -80,7 +80,7 @@ URL_SCHEMES = {"http", "https"}
 # strip from URLs as part of normalization.
 BLACKLISTED_QUERY_PARAMS = [
     re.compile(regex)
-    for regex in {
+    for regex in (
         # Google AdWords tracking identifier. Reference:
         #
         #    https://support.google.com/analytics/answer/2938246?hl=en
@@ -88,20 +88,20 @@ BLACKLISTED_QUERY_PARAMS = [
         r"^gclid$",
         # Google Analytics campaigns. Reference:
         #
-        #     https://support.google.com/analytics/answer/1033867?hl=en
+        #    https://support.google.com/analytics/answer/1033867?hl=en
         #
         r"^utm_(campaign|content|medium|source|term)$",
         # WebTrends Analytics query params. Reference:
         #
-        #     http://help.webtrends.com/en/analytics10/#qpr_about.html
+        #    http://help.webtrends.com/en/analytics10/#qpr_about.html
         #
         r"^WT\..+$",
         # Amazon security access token. Reference:
         #
-        #     https://docs.aws.amazon.com/general/latest/gr/sigv4-add-signature-to-request.html
+        #    https://docs.aws.amazon.com/general/latest/gr/sigv4-add-signature-to-request.html
         #
         r"(?i)^x-amz-security-token$",
-    }
+    )
 ]
 
 # From RFC3986. The ABNF for path segments is
@@ -291,7 +291,7 @@ def _normalize_queryvalue(value):
 
 def _blacklisted_query_param(s):
     """Return True if the given string matches any BLACKLISTED_QUERY_PARAMS."""
-    return any(re.match(patt, s) for patt in BLACKLISTED_QUERY_PARAMS)
+    return any(patt.match(s) for patt in BLACKLISTED_QUERY_PARAMS)
 
 
 def render_url_template(template, example_url):
