@@ -15,7 +15,6 @@ SUBCOMMANDS = (
     "h.cli.commands.authclient.authclient",
     "h.cli.commands.celery.celery",
     "h.cli.commands.devdata.devdata",
-    "h.cli.commands.devserver.devserver",
     "h.cli.commands.init.init",
     "h.cli.commands.initdb.initdb",
     "h.cli.commands.migrate.migrate",
