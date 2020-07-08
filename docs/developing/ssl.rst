@@ -16,9 +16,9 @@ To serve your local dev instance of h over HTTPS:
 
     openssl x509 -req -in .tlscsr.pem -signkey .tlskey.pem -out .tlscert.pem
 
-3. Run ``hypothesis devserver`` with the ``--https`` option::
+3. Run the dev server with SSL::
 
-    tox -qe dev -- sh bin/hypothesis devserver --https
+    make devssl
 
 4. Since the certificate is self-signed, you will need to instruct your browser to
    trust it explicitly by visiting https://localhost:5000 and selecting the option

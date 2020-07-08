@@ -49,6 +49,14 @@ db: python
 dev: build/manifest.json python
 	@tox -qe dev
 
+.PHONY: devssl
+devssl: export H_GUNICORN_CERTFILE=.tlscert.pem
+devssl: export H_GUNICORN_KEYFILE=.tlskey.pem
+devssl: export APP_URL=https://localhost:5000
+devssl: export WEBSOCKET_URL=wss://localhost:5001/ws
+devssl: build/manifest.json python
+	@tox -qe dev
+
 .PHONY: devdata
 devdata: python
 	@tox -qe dev -- sh bin/hypothesis --dev devdata
