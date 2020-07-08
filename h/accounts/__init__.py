@@ -52,7 +52,6 @@ def includeme(config):
     config.add_request_method(get_user, name="user", property=True)
 
     config.include(".schemas")
-    config.include(".subscribers")
 
     secret = config.registry.settings["secret_key"]
     salt = config.registry.settings["secret_salt"]

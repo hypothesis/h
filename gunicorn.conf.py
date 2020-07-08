@@ -16,22 +16,6 @@ if 'H_GUNICORN_CERTFILE' in os.environ:
 if 'H_GUNICORN_KEYFILE' in os.environ:
     keyfile = os.environ['H_GUNICORN_KEYFILE']
 
-if not os.environ.get('GUNICORN_STATS_DISABLE', None):
-    if 'STATSD_PORT_8125_UDP_ADDR' in os.environ and \
-       'STATSD_PORT_8125_UDP_PORT' in os.environ:
-            _host = os.environ['STATSD_PORT_8125_UDP_ADDR']
-            _port = os.environ['STATSD_PORT_8125_UDP_PORT']
-            statsd_host = '{}:{}'.format(_host, _port)
-
-    elif 'STATSD_HOST' in os.environ:
-        _host = os.environ['STATSD_HOST']
-        _port = os.environ.get('STATSD_PORT', '8125')
-        statsd_host = '{}:{}'.format(_host, _port)
-
-    if 'STATSD_PREFIX' in os.environ:
-        statsd_prefix = os.environ['STATSD_PREFIX']
-
-
 def post_fork(server, worker):
     # Support back-ported SSL changes on Debian / Ubuntu
     import _ssl

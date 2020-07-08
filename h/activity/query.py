@@ -172,7 +172,7 @@ def fetch_annotations(session, ids):
 def _execute_search(request, query, page_size):
     # Wildcards and exact url matches are specified in the url facet so set
     # separate_wildcard_uri_keys to False.
-    search = Search(request, stats=request.stats, separate_wildcard_uri_keys=False)
+    search = Search(request, separate_wildcard_uri_keys=False)
     search.append_modifier(AuthorityFilter(authority=request.default_authority))
     search.append_modifier(TopLevelAnnotationsFilter())
     for agg in aggregations_for(query):

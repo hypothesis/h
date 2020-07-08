@@ -14,14 +14,10 @@ from h.views.api import annotations as views
 @pytest.mark.usefixtures("presentation_service", "search_lib")
 class TestSearch:
     def test_it_searches(self, pyramid_request, search_lib):
-        pyramid_request.stats = mock.Mock()
-
         views.search(pyramid_request)
 
         search = search_lib.Search.return_value
-        search_lib.Search.assert_called_with(
-            pyramid_request, separate_replies=False, stats=pyramid_request.stats
-        )
+        search_lib.Search.assert_called_with(pyramid_request, separate_replies=False)
 
         expected_params = MultiDict(
             [("sort", "updated"), ("limit", 20), ("order", "desc"), ("offset", 0)]
@@ -360,16 +356,6 @@ class TestUpdate:
         returned = views.update(mock.Mock(), pyramid_request)
 
         assert returned == presentation_service.present.return_value
-
-    def test_it_tracks_deprecated_put_requests(self, pyramid_request):
-        pyramid_request.method = "PUT"
-        pyramid_request.stats = mock.Mock(spec_set=["incr"])
-
-        views.update(mock.Mock(), pyramid_request)
-
-        pyramid_request.stats.incr.assert_called_once_with(
-            "api.deprecated.put_update_annotation"
-        )
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):

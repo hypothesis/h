@@ -32,30 +32,12 @@ class FakeSocket:
         self.send_json_payloads.append(payload)
 
 
-@pytest.mark.usefixtures("fake_stats")
 class TestProcessMessages:
-    def test_creates_statsd_client(self, fake_stats, fake_consumer, queue):
-        settings = {}
-
-        messages.process_messages(settings, "foobar", queue, raise_error=False)
-
-        fake_stats.get_client.assert_called_once_with(settings)
-
-    def test_passes_stats_client_to_consumer(self, fake_stats, fake_consumer, queue):
-        messages.process_messages({}, "foobar", queue, raise_error=False)
-
-        fake_consumer.assert_called_once_with(
-            connection=Any(),
-            routing_key=Any(),
-            handler=Any(),
-            statsd_client=fake_stats.get_client.return_value,
-        )
-
     def test_passes_routing_key_to_consumer(self, fake_consumer, queue):
         messages.process_messages({}, "foobar", queue, raise_error=False)
 
         fake_consumer.assert_called_once_with(
-            connection=Any(), routing_key="foobar", handler=Any(), statsd_client=Any(),
+            connection=Any(), routing_key="foobar", handler=Any()
         )
 
     def test_initializes_new_connection(self, fake_realtime, fake_consumer, queue):
@@ -71,7 +53,6 @@ class TestProcessMessages:
             connection=fake_realtime.get_connection.return_value,
             routing_key=Any(),
             handler=Any(),
-            statsd_client=Any(),
         )
 
     def test_runs_consumer(self, fake_consumer, queue):
@@ -88,10 +69,6 @@ class TestProcessMessages:
 
         assert result.topic == "foobar"
         assert result.payload == {"foo": "bar"}
-
-    @pytest.fixture
-    def fake_stats(self, patch):
-        return patch("h.stats")
 
     @pytest.fixture
     def fake_consumer(self, patch):

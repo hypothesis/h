@@ -253,7 +253,6 @@ def user_signup_service(db_session, pyramid_config, user):
             session=None,
             password_service=None,
             signup_email=None,
-            stats=None,
         )
     )
     service.signup.return_value = user

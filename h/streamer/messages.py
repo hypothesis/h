@@ -5,7 +5,6 @@ from collections import namedtuple
 
 from gevent.queue import Full
 
-import h.stats
 from h import presenters, realtime, storage
 from h.auth.util import translate_annotation_principals
 from h.formatters import AnnotationUserInfoFormatter
@@ -45,13 +44,7 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
             )
 
     conn = realtime.get_connection(settings)
-    statsd_client = h.stats.get_client(settings)
-    consumer = Consumer(
-        connection=conn,
-        routing_key=routing_key,
-        handler=_handler,
-        statsd_client=statsd_client,
-    )
+    consumer = Consumer(connection=conn, routing_key=routing_key, handler=_handler,)
     consumer.run()
 
     if raise_error:

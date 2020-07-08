@@ -20,9 +20,6 @@ LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install system build and runtime dependencies.
 RUN apk add --no-cache \
-    collectd \
-    collectd-disk \
-    collectd-nginx \
     libffi \
     libpq \
     nginx \
@@ -37,11 +34,6 @@ RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
 
 # Copy nginx config
 COPY conf/nginx.conf /etc/nginx/nginx.conf
-
-# Copy collectd config
-COPY conf/collectd.conf /etc/collectd/collectd.conf
-RUN mkdir /etc/collectd/collectd.conf.d \
- && chown hypothesis:hypothesis /etc/collectd/collectd.conf.d
 
 # Copy minimal data to allow installation of dependencies.
 COPY requirements.txt ./
