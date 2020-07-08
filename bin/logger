@@ -77,25 +77,28 @@ class Colours:
             "yellow": "33",
             "green": "32",
             "magenta": "35",
-            "red": "31",
             "blue": "34",
             "intense_cyan": "36;1",
             "intense_yellow": "33;1",
             "intense_green": "32;1",
             "intense_magenta": "35;1",
-            "intense_red": "31;1",
             "intense_blue": "34;1",
         }.values()
     )
 
+    intense_red = "31;1"
+
     def __init__(self):
         self._process_colours = {}
 
-    def colour(self, process_name, s):
-        colour = self._process_colours.get(process_name)
+    def colour(self, process_name, s, error=False):
+        if error:
+            colour = self.intense_red
+        else:
+            colour = self._process_colours.get(process_name)
 
-        if not colour:
-            colour = self._process_colours[process_name] = next(self.colours)
+            if not colour:
+                colour = self._process_colours[process_name] = next(self.colours)
 
         return self._colour_string(colour, s)
 
@@ -138,15 +141,15 @@ def _parse_header(data):
 def _log_payload(payload, err=False):
     headerdata, data = payload.split('\n', 1)
     header = _parse_header(headerdata)
-    name = full_name = header['processname']
+    name = header['processname']
     if err:
-        full_name += ' (stderr)'
-    prefix = '{full_name:{width}} | '.format(full_name=full_name, width=WIDTH)
+        name += ' (stderr)'
+    prefix = '{name:{width}} | '.format(name=name, width=WIDTH)
     for line in data.splitlines():
         output_line = prefix + line + '\n'
 
         if '--dev' in sys.argv:
-            output_line = colours.colour(name, output_line)
+            output_line = colours.colour(name, output_line, error=err)
 
         sys.stderr.write(output_line)
     sys.stderr.flush()
