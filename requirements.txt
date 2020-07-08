@@ -24,8 +24,8 @@ gevent==20.6.2            # via -r requirements.in
 greenlet==0.4.16          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
 h-api==1.0.0              # via -r requirements.in
+h-matchers==1.2.6         # via -r requirements.in
 h-pyramid-sentry==1.2.1   # via -r requirements.in
-h_matchers==1.2.6         # via -r requirements.in
 hkdf==0.0.3               # via -r requirements.in
 hupper==1.10.2            # via pyramid
 importlib-metadata==1.7.0  # via jsonschema, kombu
@@ -66,7 +66,7 @@ python-editor==1.0.4      # via alembic
 python-slugify==4.0.1     # via -r requirements.in
 pytz==2020.1              # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
-sentry-sdk==0.15.1        # via h-pyramid-sentry
+sentry-sdk==0.16.0        # via h-pyramid-sentry
 six==1.15.0               # via bcrypt, bleach, elasticsearch-dsl, jsonschema, packaging, pyrsistent, python-dateutil
 sqlalchemy==1.3.18        # via -r requirements.in, alembic, zope.sqlalchemy
 supervisor==4.2.0         # via -r requirements.in
