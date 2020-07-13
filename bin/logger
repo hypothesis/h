@@ -70,8 +70,8 @@ import sys
 WIDTH = 20
 
 
-class Colours:
-    colours = itertools.cycle(
+class Colors:
+    colors = itertools.cycle(
         {
             "cyan": "36",
             "yellow": "33",
@@ -89,29 +89,29 @@ class Colours:
     intense_red = "31;1"
 
     def __init__(self):
-        self._process_colours = {}
+        self._process_colors = {}
 
-    def colour(self, process_name, s, error=False):
+    def color(self, process_name, s, error=False):
         if error:
-            colour = self.intense_red
+            color = self.intense_red
         else:
-            colour = self._process_colours.get(process_name)
+            color = self._process_colors.get(process_name)
 
-            if not colour:
-                colour = self._process_colours[process_name] = next(self.colours)
+            if not color:
+                color = self._process_colors[process_name] = next(self.colors)
 
-        return self._colour_string(colour, s)
+        return self._color_string(color, s)
 
     @staticmethod
     def _ansi(code):
         return "\033[{0}m".format(code)
 
     @classmethod
-    def _colour_string(cls, colour, s):
-        return "{0}{1}{2}{3}".format(cls._ansi(0), cls._ansi(colour), s, cls._ansi(0))
+    def _color_string(cls, color, s):
+        return "{0}{1}{2}{3}".format(cls._ansi(0), cls._ansi(color), s, cls._ansi(0))
 
 
-colours = Colours()
+colors = Colors()
 
 
 def main():
@@ -149,7 +149,7 @@ def _log_payload(payload, err=False):
         output_line = prefix + line + '\n'
 
         if '--dev' in sys.argv:
-            output_line = colours.colour(name, output_line, error=err)
+            output_line = colors.color(name, output_line, error=err)
 
         sys.stderr.write(output_line)
     sys.stderr.flush()
