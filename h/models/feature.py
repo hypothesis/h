@@ -34,11 +34,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    "client_do_not_separate_replies": (
-        "Disable separating replies when loading annotations in the client"
-    ),
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
