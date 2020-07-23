@@ -14,6 +14,7 @@ FEATURES = {
         "using a cached version?"
     ),
     "client_display_names": "Render display names instead of user names in the client",
+    "client_filter_status": "Show consolidated filter status component in client",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
