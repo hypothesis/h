@@ -12,7 +12,7 @@ billiard==3.6.3.0         # via celery
 bleach==3.1.5             # via -r requirements.in
 celery==4.4.6             # via -r requirements.in
 certifi==2020.6.20        # via -r requirements.in, sentry-sdk
-cffi==1.14.0              # via -r requirements.in, bcrypt
+cffi==1.14.1              # via -r requirements.in, bcrypt
 chameleon==3.8.1          # via deform
 click==7.1.2              # via -r requirements.in
 colander==1.7.0           # via deform
