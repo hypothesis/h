@@ -60,6 +60,13 @@ def set_cors_headers(
         response.headers["Access-Control-Allow-Origin"] = "*"
         return response
 
+    def raise_bad_request(missing_header):
+        if request.exception:
+            # Don't raise an exception if Pyramid is already processing an
+            # exception view, because that will cause Pyramid to crash.
+            return response
+        raise HTTPBadRequest(f"CORS preflight request lacks {missing_header} header.")
+
     # Otherwise, we're dealing with a CORS preflight request, which,
     # according to the spec:
     #
@@ -68,14 +75,12 @@ def set_cors_headers(
     # ...MUST have an Origin header.
     origin = request.headers.get("Origin")
     if origin is None:
-        raise HTTPBadRequest("CORS preflight request lacks Origin header.")
+        return raise_bad_request("Origin")
 
     # ...MUST have an Access-Control-Request-Method header.
     request_method = request.headers.get("Access-Control-Request-Method")
     if request_method is None:
-        raise HTTPBadRequest(
-            "CORS preflight request lacks " "Access-Control-Request-Method header."
-        )
+        return raise_bad_request("Access-Control-Request-Method")
 
     # Always explicitly allow OPTIONS requests.
     methods = {"OPTIONS"}

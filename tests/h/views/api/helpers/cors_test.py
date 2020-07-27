@@ -48,6 +48,32 @@ def test_cors_400s_for_preflight_without_reqmethod(headers):
         set_cors_headers(request, resp)
 
 
+@pytest.mark.parametrize(
+    "headers",
+    [{"Access-Control-Request-Method": "PUT"}, {"Origin": "http://example.com"}],
+)
+def test_cors_does_nothing_if_already_processing_an_exception_view(headers):
+    # Normally when a Pyramid view or view decorator raises an exception
+    # Pyramid searches for a matching exception view and invokes it -
+    # exception views "catch" exceptions raised during view processing.
+    #
+    # But if an *exception view* or a view decorator applied to an exception
+    # view raises an exeption then Pyramid just crashes. Exception views can't
+    # catch exceptions raised by exception views as that could create an
+    # infinite loop.
+    #
+    # So the set_cors_headers() function, which is part of the cors_policy view
+    # decorator, can't raise exception when it's being used to decorate an
+    # exception view or Pyramid will crash.
+    request = Request.blank("/", method="OPTIONS", headers=headers)
+    request.exception = HTTPBadRequest()
+
+    resp = request.get_response(wsgi_testapp)
+    resp = set_cors_headers(request, resp)
+
+    assert "Access-Control-Allow-Origin" not in resp.headers
+
+
 def test_cors_sets_allow_origin_for_preflight(headers):
     request = Request.blank("/", method="OPTIONS", headers=headers)
 
