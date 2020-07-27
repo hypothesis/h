@@ -1,9 +1,7 @@
 h
 =
 
-.. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
-   :target: https://travis-ci.org/hypothesis/h
-   :alt: Build Status
+.. image:: https://github.com/hypothesis/h/workflows/Continuous%20integration/badge.svg?branch=master
 .. image:: https://img.shields.io/badge/IRC-%23hypothes.is-blue.svg
    :target: `#hypothes.is`_
    :alt: #hypothes.is IRC channel

@@ -79,7 +79,6 @@ backend-lint: python
 .PHONY: frontend-lint
 frontend-lint: node_modules/.uptodate
 	@npm run-script lint
-	@npm run-script checkformatting
 
 .PHONY: analyze
 analyze: python
@@ -90,8 +89,15 @@ format: python
 	@tox -qe format
 
 PHONY: checkformatting
-checkformatting: python
+checkformatting: backend-checkformatting frontend-checkformatting
+
+.PHONY: backend-checkformatting
+backend-checkformatting: python
 	@tox -qe checkformatting
+
+.PHONY: frontend-checkformatting
+frontend-checkformatting: node_modules/.uptodate
+	@npm run-script checkformatting
 
 .PHONY: test
 test: node_modules/.uptodate python

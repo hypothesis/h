@@ -15,11 +15,10 @@
 #
 # $ ./bin/install-python
 
-# Exit if we're running on Travis CI.
-# On Travis we just want to use the versions of Python provided in the Travis
-# VM, even though they may not have be the same patch versions as in
-# .python-version.
-if [ "$TRAVIS" = "true" ]
+# Exit if we're running on GitHub Actions.
+# On GitHub Actions we just want to use the versions of Python provided in the
+# GitHub Actions VM.
+if [ "$GITHUB_ACTIONS" = "true" ]
 then
   exit
 fi

@@ -15,6 +15,3 @@ indent_size = 4
 
 [Makefile]
 indent_style = tab
-
-[{.travis.yml}]
-indent_size = 2
