@@ -2,19 +2,20 @@ h
 =
 
 .. image:: https://github.com/hypothesis/h/workflows/Continuous%20integration/badge.svg?branch=master
-.. image:: https://img.shields.io/badge/IRC-%23hypothes.is-blue.svg
-   :target: `#hypothes.is`_
-   :alt: #hypothes.is IRC channel
+   :target: https://github.com/hypothesis/h/actions?query=branch%3Amaster
+   :alt: Continuous integration
 .. image:: https://img.shields.io/badge/license-BSD-blue.svg
    :target: https://github.com/hypothesis/h/blob/master/LICENSE
-   :alt: License badge
+   :alt: BSD licensed
 .. image:: https://img.shields.io/badge/python-3.6-blue.svg
-   :alt: Python version badge
+   :target: https://www.python.org/
+   :alt: Python 3.6
 .. image:: https://readthedocs.org/projects/h/badge/?version=latest
    :target: https://h.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+   :alt: Docs
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/ambv/black
+   :alt: Code style: Black
 
 h is the web app that serves most of the https://hypothes.is/ website,
 including the web annotations API at https://hypothes.is/api/.
