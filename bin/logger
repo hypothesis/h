@@ -116,17 +116,17 @@ colors = Colors()
 
 def main():
     while True:
-        _write('READY\n')
+        _write("READY\n")
         header = _parse_header(sys.stdin.readline())
-        payload = sys.stdin.read(int(header['len']))
+        payload = sys.stdin.read(int(header["len"]))
 
         # Only handle PROCESS_LOG_* events and just ACK anything else.
-        if header['eventname'] == 'PROCESS_LOG_STDOUT':
+        if header["eventname"] == "PROCESS_LOG_STDOUT":
             _log_payload(payload)
-        elif header['eventname'] == 'PROCESS_LOG_STDERR':
+        elif header["eventname"] == "PROCESS_LOG_STDERR":
             _log_payload(payload, err=True)
 
-        _write('RESULT 2\nOK')
+        _write("RESULT 2\nOK")
 
 
 def _write(s):
@@ -135,25 +135,36 @@ def _write(s):
 
 
 def _parse_header(data):
-    return dict([x.split(':') for x in data.split()])
+    return dict([x.split(":") for x in data.split()])
+
+
+# Patterns in log lines that identify them as not being errors, even if the
+# log line was written to stderr.
+NON_ERROR_MARKERS = ["[gunicorn.error:INFO]", "Starting monitor"]
 
 
 def _log_payload(payload, err=False):
-    headerdata, data = payload.split('\n', 1)
+    headerdata, data = payload.split("\n", 1)
     header = _parse_header(headerdata)
-    name = header['processname']
+    name = header["processname"]
     if err:
-        name += ' (stderr)'
-    prefix = '{name:{width}} | '.format(name=name, width=WIDTH)
-    for line in data.splitlines():
-        output_line = prefix + line + '\n'
+        name += " (stderr)"
+    prefix = "{name:{width}} | ".format(name=name, width=WIDTH)
 
-        if '--dev' in sys.argv:
-            output_line = colors.color(name, output_line, error=err)
+    for line in data.splitlines():
+        format_as_error = err
+        for marker in NON_ERROR_MARKERS:
+            format_as_error = format_as_error and (marker not in line)
+
+        output_line = prefix + line + "\n"
+
+        if "--dev" in sys.argv:
+            output_line = colors.color(name, output_line, error=format_as_error)
 
         sys.stderr.write(output_line)
+
     sys.stderr.flush()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
