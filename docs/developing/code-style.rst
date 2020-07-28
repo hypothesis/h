@@ -51,10 +51,10 @@ plugin for your editor to get live feedback as you make changes.
 Automated code formatting
 `````````````````````````
 
-You can use `YAPF <https://github.com/google/yapf>`_ (along with the YAPF
-configuration in this git repo) to automatically reformat Python code.
-We don't strictly adhere to YAPF-generated formatting but it can be a useful
-convenience.
+Hypothesis projects use `Black <https://github.com/psf/black>`_ for automated
+code formatting. Formatting is checked as part of continuous integration builds
+and can be run locally using ``make format``. You may find it helpful to use
+a Black plugin for your editor to enable automated formatting as you work.
 
 Additional reading
 ``````````````````
