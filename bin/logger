@@ -152,9 +152,9 @@ def _log_payload(payload, err=False):
     prefix = "{name:{width}} | ".format(name=name, width=WIDTH)
 
     for line in data.splitlines():
-        format_as_error = err
-        for marker in NON_ERROR_MARKERS:
-            format_as_error = format_as_error and (marker not in line)
+        format_as_error = err and all(
+            [marker not in line for marker in NON_ERROR_MARKERS]
+        )
 
         output_line = prefix + line + "\n"
 
