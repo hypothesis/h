@@ -298,8 +298,8 @@ def create_or_update_document_uri(
         session.add(docuri)
     elif not docuri.document == document:
         log.warning(
-            "Found DocumentURI (id: %d)'s document_id (%d) doesn't match "
-            "given Document's id (%d)",
+            "Found DocumentURI (id: %s)'s document_id (%s) doesn't match "
+            "given Document's id (%s)",
             docuri.id,
             docuri.document_id,
             document.id,
@@ -381,8 +381,8 @@ def create_or_update_document_meta(
         existing_dm.updated = updated
         if not existing_dm.document == document:
             log.warning(
-                "Found DocumentMeta (id: %d)'s document_id (%d) doesn't "
-                "match given Document's id (%d)",
+                "Found DocumentMeta (id: %s)'s document_id (%s) doesn't "
+                "match given Document's id (%s)",
                 existing_dm.id,
                 existing_dm.document_id,
                 document.id,
