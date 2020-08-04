@@ -412,6 +412,8 @@ def merge_documents(session, documents, updated=None):
     duplicates = documents[1:]
     duplicate_ids = [doc.id for doc in duplicates]
 
+    log.info("Merging %s documents", len(duplicate_ids) + 1)
+
     for doc in duplicates:
         for _ in range(len(doc.document_uris)):
             u = doc.document_uris.pop()
@@ -498,7 +500,7 @@ def update_document_metadata(
             document=document,
             created=created,
             updated=updated,
-            **document_uri_dict
+            **document_uri_dict,
         )
 
     document.update_web_uri()
@@ -509,7 +511,7 @@ def update_document_metadata(
             document=document,
             created=created,
             updated=updated,
-            **document_meta_dict
+            **document_meta_dict,
         )
 
     return document
