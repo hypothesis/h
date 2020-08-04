@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import logging
 from unittest import mock
 
 import pytest
@@ -746,6 +747,15 @@ class TestMergeDocuments:
 
         with pytest.raises(ConcurrentUpdateError):
             document.merge_documents(db_session, merge_data)
+
+    def test_merge_documents_logs_when_its_called(self, caplog, db_session, merge_data):
+        caplog.set_level(logging.INFO)
+
+        document.merge_documents(db_session, merge_data)
+
+        assert caplog.record_tuples == [
+            ("h.models.document", 20, "Merging 3 documents")
+        ]
 
     @pytest.fixture
     def merge_data(self, db_session, request):
