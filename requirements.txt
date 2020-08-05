@@ -15,7 +15,7 @@ certifi==2020.6.20        # via -r requirements.in, sentry-sdk
 cffi==1.14.1              # via -r requirements.in, bcrypt
 chameleon==3.8.1          # via deform
 click==7.1.2              # via -r requirements.in
-colander==1.7.0           # via deform
+colander==1.8.0           # via deform
 deform==2.0.10            # via -r requirements.in
 elasticsearch-dsl==6.3.1  # via -r requirements.in
 elasticsearch==6.8.1      # via -r requirements.in, elasticsearch-dsl
