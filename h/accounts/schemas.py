@@ -162,6 +162,16 @@ class RegisterSchema(CSRFSchema):
         ),
     )
 
+    comms_opt_in = colander.SchemaNode(
+        colander.Boolean(),
+        description=_("I would like to receive news about annotation and Hypothesis"),
+        widget=deform.widget.CheckboxWidget(
+            omit_label=True, css_class="form-checkbox--inline"
+        ),
+        missing=None,
+        default=False,
+    )
+
 
 class EmailChangeSchema(CSRFSchema):
     email = email_node(title=_("Email address"))
