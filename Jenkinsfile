@@ -36,8 +36,6 @@ node {
 
                 // Unit tests
                 sh 'cd /var/lib/hypothesis && tox'
-                // Coverage
-                sh 'cd /var/lib/hypothesis && tox -e coverage'
                 // Functional tests
                 sh 'cd /var/lib/hypothesis && tox -e functests'
             }
