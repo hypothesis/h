@@ -2,9 +2,11 @@ import os
 
 
 bind = "localhost:5000"
+proc_name = "web"
+
+# Specific to dev
 timeout = 0
 graceful_timeout = 0
-proc_name = "web"
 reload = True
 
 
