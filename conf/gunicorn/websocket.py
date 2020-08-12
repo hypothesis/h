@@ -4,8 +4,10 @@ import os
 bind = "unix:/tmp/gunicorn-websocket.sock"
 worker_class = "h.websocket.Worker"
 graceful_timeout = 0
-worker_connections = 4096
 proc_name = "websocket"
+
+# Specific to production
+worker_connections = 4096
 
 
 if "GUNICORN_TIMEOUT" in os.environ:
