@@ -205,9 +205,6 @@ class User(Base):
     #: A NULL value in this column indicates the user has never accepted a privacy policy.
     privacy_accepted = sa.Column(sa.DateTime, nullable=True)
 
-    # Has the user opted-in for news etc.
-    comms_opt_in = sa.Column(sa.Boolean, nullable=True)
-
     identities = sa.orm.relationship(
         "UserIdentity", backref="user", cascade="all, delete-orphan"
     )
