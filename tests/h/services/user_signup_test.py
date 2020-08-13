@@ -63,6 +63,11 @@ class TestUserSignupService:
 
         assert user.privacy_accepted == now
 
+    def test_signup_passes_through_comms_opt_in(self, svc):
+        user = svc.signup(username="foo", email="foo@bar.com", comms_opt_in=True)
+
+        assert user.comms_opt_in
+
     def test_signup_sets_provided_user_identities(self, svc):
         identity_data = [
             {"provider": "someprovider", "provider_unique_id": 1},

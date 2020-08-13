@@ -134,13 +134,17 @@ class TestRegisterSchema:
         user_model.get_by_email.return_value = None
 
         schema = schemas.RegisterSchema().bind(request=pyramid_csrf_request)
-        schema.deserialize(
-            {
-                "username": "filbert",
-                "email": "foo@bar.com",
-                "password": "sdlkfjlk3j3iuei",
-                "privacy_accepted": "true",
-            }
+        params = {
+            "username": "filbert",
+            "email": "foo@bar.com",
+            "password": "sdlkfjlk3j3iuei",
+            "privacy_accepted": "true",
+        }
+
+        result = schema.deserialize(params)
+
+        assert result == dict(
+            params, privacy_accepted=True, comms_opt_in=None, csrf_token=None
         )
 
 
