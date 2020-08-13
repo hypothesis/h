@@ -34,7 +34,6 @@ class TestSignupController:
                 "email": "bob@example.com",
                 "password": "s3crets",
                 "random_other_field": "something else",
-                "comms_opt_in": True,
             }
         )
 
@@ -45,7 +44,6 @@ class TestSignupController:
             email="bob@example.com",
             password="s3crets",
             privacy_accepted=datetime.datetime.utcnow.return_value,
-            comms_opt_in=True,
         )
 
     def test_post_does_not_create_user_when_validation_fails(
@@ -59,18 +57,27 @@ class TestSignupController:
         assert not user_signup_service.signup.called
 
     def test_post_displays_heading_and_message_on_success(
-        self, controller, pyramid_request
+        self, form_validating_to, pyramid_request
     ):
+        controller = views.SignupController(pyramid_request)
+        controller.form = form_validating_to(
+            {"username": "bob", "email": "bob@example.com", "password": "s3crets"}
+        )
+
         result = controller.post()
 
         assert result["heading"] == "Account registration successful"
         assert "message" not in result
 
     def test_post_displays_heading_and_message_on_conflict_error(
-        self, controller, pyramid_request, user_signup_service
+        self, form_validating_to, pyramid_request, user_signup_service
     ):
         user_signup_service.signup.side_effect = ConflictError(
             "The account bob@example.com is already registered."
+        )
+        controller = views.SignupController(pyramid_request)
+        controller.form = form_validating_to(
+            {"username": "bob", "email": "bob@example.com", "password": "s3crets"}
         )
 
         result = controller.post()
@@ -93,20 +100,6 @@ class TestSignupController:
 
         with pytest.raises(httpexceptions.HTTPRedirection):
             controller.get()
-
-    @pytest.fixture
-    def controller(self, form_validating_to, pyramid_request):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to(
-            {
-                "username": "bob",
-                "email": "bob@example.com",
-                "password": "s3crets",
-                "comms_opt_in": True,
-            }
-        )
-
-        return controller
 
 
 @pytest.fixture

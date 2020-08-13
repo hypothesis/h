@@ -59,7 +59,6 @@ class SignupController:
                 email=appstruct["email"],
                 password=appstruct["password"],
                 privacy_accepted=datetime.datetime.utcnow(),
-                comms_opt_in=appstruct["comms_opt_in"],
             )
         except ConflictError as e:
             template_context["heading"] = _("Account already registered")
