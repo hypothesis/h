@@ -40,7 +40,7 @@ def bootstrap(app_url, dev=False):
         else:
             raise click.ClickException("the app URL must be set in production mode!")
 
-    config = "conf/app-dev.ini" if dev else "conf/app.ini"
+    config = "conf/development-app.ini" if dev else "conf/app.ini"
 
     paster.setup_logging(config)
     request = Request.blank("/", base_url=app_url)

@@ -2,12 +2,10 @@ import os
 
 
 bind = "localhost:5001"
-worker_class = "h.websocket.Worker"
-graceful_timeout = 0
-proc_name = "websocket"
-
-# Specific to dev
 timeout = 0
+graceful_timeout = 0
+worker_class = "h.websocket.Worker"
+proc_name = "websocket"
 reload = True
 
 
