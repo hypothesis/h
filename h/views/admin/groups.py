@@ -8,7 +8,7 @@ from h import i18n, models, paginator
 from h.models.annotation import Annotation
 from h.models.group_scope import GroupScope
 from h.models.organization import Organization
-from h.schemas.forms.admin.group import CreateAdminGroupSchema
+from h.schemas.forms.admin.group import AdminGroupSchema
 
 _ = i18n.TranslationString
 
@@ -48,7 +48,7 @@ class GroupCreateViews:
         self.organizations = {o.pubid: o for o in self.list_org_svc.organizations()}
         self.default_org_id = Organization.default(self.request.db).pubid
 
-        self.schema = CreateAdminGroupSchema().bind(
+        self.schema = AdminGroupSchema().bind(
             request=request, organizations=self.organizations, user_svc=self.user_svc
         )
         self.form = _create_form(self.request, self.schema, (_("Create New Group"),))
@@ -142,7 +142,7 @@ class GroupEditViews:
             o.pubid: o for o in self.list_org_svc.organizations(self.group.authority)
         }
 
-        self.schema = CreateAdminGroupSchema().bind(
+        self.schema = AdminGroupSchema().bind(
             request=self.request,
             group=self.group,
             organizations=self.organizations,

@@ -58,11 +58,11 @@ class TestGroupCreateView:
         list_orgs_svc.organizations.assert_called_with()
 
     def test_init_binds_schema_with_organizations(
-        self, pyramid_request, default_org, CreateAdminGroupSchema, list_orgs_svc
+        self, pyramid_request, default_org, AdminGroupSchema, list_orgs_svc
     ):
         GroupCreateViews(pyramid_request)
 
-        schema = CreateAdminGroupSchema.return_value
+        schema = AdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
         assert call_kwargs["organizations"] == {default_org.pubid: default_org}
 
@@ -196,12 +196,12 @@ class TestGroupCreateView:
 )
 class TestGroupEditViews:
     def test_it_binds_schema(
-        self, pyramid_request, group, user_svc, default_org, CreateAdminGroupSchema
+        self, pyramid_request, group, user_svc, default_org, AdminGroupSchema
     ):
 
         GroupEditViews(group, pyramid_request)
 
-        schema = CreateAdminGroupSchema.return_value
+        schema = AdminGroupSchema.return_value
         schema.bind.assert_called_with(
             request=pyramid_request,
             group=group,
@@ -232,12 +232,12 @@ class TestGroupEditViews:
         assert ctx["form"] == self._expected_form(group)
 
     def test_read_lists_organizations_in_groups_authority(
-        self, pyramid_request, group, default_org, CreateAdminGroupSchema, list_orgs_svc
+        self, pyramid_request, group, default_org, AdminGroupSchema, list_orgs_svc
     ):
         GroupEditViews(group, pyramid_request)
 
         list_orgs_svc.organizations.assert_called_with(group.authority)
-        schema = CreateAdminGroupSchema.return_value
+        schema = AdminGroupSchema.return_value
         (_, call_kwargs) = schema.bind.call_args
         assert call_kwargs["organizations"] == {default_org.pubid: default_org}
 
@@ -458,11 +458,11 @@ def annotation_delete_svc(pyramid_config):
 
 
 @pytest.fixture
-def CreateAdminGroupSchema(patch):
+def AdminGroupSchema(patch):
     schema = mock.Mock(spec_set=["bind"])
-    CreateAdminGroupSchema = patch("h.views.admin.groups.CreateAdminGroupSchema")
-    CreateAdminGroupSchema.return_value = schema
-    return CreateAdminGroupSchema
+    AdminGroupSchema = patch("h.views.admin.groups.AdminGroupSchema")
+    AdminGroupSchema.return_value = schema
+    return AdminGroupSchema
 
 
 @pytest.fixture

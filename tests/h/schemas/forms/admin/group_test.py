@@ -10,11 +10,11 @@ from h.models.group import (
     GROUP_NAME_MIN_LENGTH,
 )
 from h.models.organization import Organization
-from h.schemas.forms.admin.group import CreateAdminGroupSchema
+from h.schemas.forms.admin.group import AdminGroupSchema
 from h.services.user import UserService
 
 
-class TestCreateGroupSchema:
+class TestAdminGroupSchema:
     def test_it_allows_with_valid_data(self, group_data, bound_schema):
         bound_schema.deserialize(group_data)
 
@@ -82,7 +82,7 @@ class TestCreateGroupSchema:
     ):
         group = mock.Mock(type="open")
         group_data["group_type"] = "restricted"
-        schema = CreateAdminGroupSchema().bind(
+        schema = AdminGroupSchema().bind(
             request=pyramid_csrf_request,
             group=group,
             user_svc=user_svc,
@@ -97,7 +97,7 @@ class TestCreateGroupSchema:
     ):
         group = mock.Mock(type="open")
         group_data["group_type"] = "open"
-        schema = CreateAdminGroupSchema().bind(
+        schema = AdminGroupSchema().bind(
             request=pyramid_csrf_request,
             group=group,
             user_svc=user_svc,
@@ -224,7 +224,7 @@ def third_party_org(db_session):
 
 @pytest.fixture
 def bound_schema(pyramid_csrf_request, org, third_party_org, user_svc):
-    schema = CreateAdminGroupSchema().bind(
+    schema = AdminGroupSchema().bind(
         request=pyramid_csrf_request,
         user_svc=user_svc,
         organizations={org.pubid: org, third_party_org.pubid: third_party_org},
