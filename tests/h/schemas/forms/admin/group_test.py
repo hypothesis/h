@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 from unittest import mock
+from unittest.mock import call
 
 import colander
 import pytest
@@ -108,9 +108,28 @@ class TestCreateGroupSchema:
 
     def test_it_raises_if_member_invalid(self, group_data, bound_schema, user_svc):
         user_svc.fetch.return_value = None
-        group_data["members"] = ["user_who_does_not_exist"]
-        with pytest.raises(colander.Invalid, match="members.*Username not found"):
+
+        group_data["members"] = ["valid_user", "invalid_user"]
+        with pytest.raises(colander.Invalid, match="members.1"):
             bound_schema.deserialize(group_data)
+
+    def test_it_passes_through_the_authority_when_checking_users(
+        self, group_data, bound_schema, user_svc, third_party_org
+    ):
+        group_data["organization"] = third_party_org.pubid
+        group_data["members"] = ["valid_user"]
+        group_data["creator"] = "valid_creator"
+
+        bound_schema.deserialize(group_data)
+
+        user_svc.fetch.assert_has_calls(
+            (
+                # It's a bit of a shame to enshrine the order, as it really
+                # doesn't matter, but it's the easiest thing to do
+                call("valid_user", third_party_org.authority),
+                call("valid_creator", third_party_org.authority),
+            )
+        )
 
     def test_it_allows_when_creator_exists_at_authority(self, group_data, bound_schema):
         bound_schema.deserialize(group_data)
@@ -135,23 +154,25 @@ class TestCreateGroupSchema:
         organization selected in the form.
 
         """
-        user_svc.fetch.return_value = None
-        with pytest.raises(
-            colander.Invalid, match="^{'creator':.*'User not found.* at authority"
-        ):
+        group_data["creator"] = "invalid_creator"
+        with pytest.raises(colander.Invalid, match="creator"):
             bound_schema.deserialize(group_data)
 
-    def test_it_lists_organizations(self, bound_schema, org):
+    def test_it_lists_organizations(self, bound_schema, org, third_party_org):
         for child in bound_schema.children:
             if child.name == "organization":
                 org_node = child
         assert org_node.widget.values == [
-            (org.pubid, "{} ({})".format(org.name, org.authority))
+            (org.pubid, f"{org.name} ({org.authority})"),
+            (
+                third_party_org.pubid,
+                f"{third_party_org.name} ({third_party_org.authority})",
+            ),
         ]
 
 
 @pytest.fixture
-def group_data(factories):
+def group_data(factories, org):
     """
     Return a serialized representation of the "Create Group" form.
 
@@ -162,18 +183,27 @@ def group_data(factories):
     return {
         "name": "My Group",
         "group_type": "open",
-        "creator": factories.User().username,
+        "creator": "valid_creator",
         "description": "Lorem ipsum dolor sit amet consectetuer",
-        "organization": "__default__",
+        "organization": org.pubid,
         "scopes": ["http://www.foo.com", "https://www.foo.com"],
         "enforce_scope": True,
     }
 
 
 @pytest.fixture
-def user_svc(pyramid_config):
+def user_svc(pyramid_config, factories):
     svc = mock.create_autospec(UserService, spec_set=True, instance=True)
     pyramid_config.register_service(svc, name="user")
+
+    def fetch(username, authority):
+        if "invalid" in username:
+            return False
+
+        return factories.User()
+
+    svc.fetch.side_effect = fetch
+
     return svc
 
 
@@ -183,8 +213,20 @@ def org(db_session):
 
 
 @pytest.fixture
-def bound_schema(pyramid_csrf_request, org, user_svc):
+def third_party_org(db_session):
+    third_party_org = Organization(
+        name="3rd_party", pubid="3rd_party_id", authority="3rd_party_authority"
+    )
+    db_session.add(third_party_org)
+
+    return third_party_org
+
+
+@pytest.fixture
+def bound_schema(pyramid_csrf_request, org, third_party_org, user_svc):
     schema = CreateAdminGroupSchema().bind(
-        request=pyramid_csrf_request, user_svc=user_svc, organizations={org.pubid: org}
+        request=pyramid_csrf_request,
+        user_svc=user_svc,
+        organizations={org.pubid: org, third_party_org.pubid: third_party_org},
     )
     return schema
