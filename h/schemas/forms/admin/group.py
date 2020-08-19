@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import colander
 from deform.widget import (
     CheckboxWidget,
@@ -24,56 +22,65 @@ _ = i18n.TranslationString
 VALID_GROUP_TYPES = (("restricted", _("Restricted")), ("open", _("Open")))
 
 
-@colander.deferred
-def group_creator_validator(node, kw):
-    def validate(form, value):
-        """
-        Validate that the creator username exists in the organization's authority.
+def username_validator(form, value):
+    """
+    Validate that the usernames exist in the organization's authority.
 
-        The creator of a group must belong to the same authority as the group
-        and the group's organization.  Validate that there is a user matching
-        the given creator username with the same authority as the chosen
-        organization.
+    The creator and members of a group must belong to the same authority as the
+    group and the group's organization.
+    """
+    user_svc = form.bindings["user_svc"]
 
-        """
-        user_svc = kw["user_svc"]
+    # Get the authority from the list of organisations based on the one
+    # actually picked in the form
+    authority = form.bindings["organizations"][value["organization"]].authority
 
-        # A {pubid: models.Organization} dict of all the organizations
-        # available to choose from in the form.
-        organizations = kw["organizations"]
+    exc = colander.Invalid(form, None)
 
-        # The pubid of the organization that the user has selected in the form.
-        selected_pubid = value["organization"]
+    _validate_members(form, value["members"], authority, user_svc, exc)
+    _validate_creator(value["creator"], authority, user_svc, exc)
 
-        # The models.Organization object for the selected organization.
-        selected_organization = organizations[selected_pubid]
-
-        # The authority that the new group will belong to if it is created.
-        authority = selected_organization.authority
-
-        # The username string that was entered for the group creator.
-        creator_username = value["creator"]
-
-        # The models.User object for the group creator user, or None.
-        user = user_svc.fetch(creator_username, authority)
-
-        if not user:
-            # Either the username doesn't exist at all, or it has a different
-            # authority than the chosen organization.
-            exc = colander.Invalid(form, _("User not found"))
-            exc["creator"] = _(
-                "User {creator} not found at authority {authority}"
-            ).format(creator=creator_username, authority=authority)
-            raise exc
-
-    return validate
+    if exc.children:
+        raise exc
 
 
-def member_exists_validator(node, val):
-    user_svc = node.bindings["request"].find_service(name="user")
-    authority = node.bindings["request"].default_authority
-    if user_svc.fetch(val, authority) is None:
-        raise colander.Invalid(node, _("Username not found"))
+def _validate_members(form, members_value, authority, user_svc, parent_exc):
+    if not members_value:
+        return
+
+    members_node = form.get("members")
+    member_node = members_node.get("member")
+    members_error = colander.Invalid(members_node, None)
+
+    for pos, node_value in enumerate(members_value):
+        if not user_svc.fetch(node_value, authority):
+            # If we don't attach errors in the right position, they don't
+            # appear. For a list type value the correct position is the index
+            # of the value in the list
+            members_error.add(
+                colander.Invalid(
+                    member_node,
+                    _("User '{username}' not found at authority '{authority}'").format(
+                        username=node_value, authority=authority
+                    ),
+                ),
+                pos=pos,
+            )
+
+    if members_error.children:
+        # For non-lists the correct position is the index within the flat list
+        # of children that colander stores internally for the parent node
+        parent_exc.add(members_error, pos=form.children.index(members_node))
+
+
+def _validate_creator(creator_username, authority, user_svc, parent_exc):
+    if not user_svc.fetch(creator_username, authority):
+        # Either the username doesn't exist at all, or it has a different
+        # authority than the chosen organization.
+
+        parent_exc["creator"] = _(
+            "User '{username}' not found at authority '{authority}'"
+        ).format(username=creator_username, authority=authority)
 
 
 def url_with_origin_validator(node, val):
@@ -119,7 +126,7 @@ def group_organization_select_widget(node, kw):
 class CreateAdminGroupSchema(CSRFSchema):
     def __init__(self, *args):
         super(CreateAdminGroupSchema, self).__init__(
-            validator=group_creator_validator, *args
+            validator=username_validator, *args
         )
 
     group_type = colander.SchemaNode(
@@ -194,9 +201,7 @@ class CreateAdminGroupSchema(CSRFSchema):
 
     members = colander.SequenceSchema(
         colander.Sequence(),
-        colander.SchemaNode(
-            colander.String(), name="member", validator=member_exists_validator
-        ),
+        colander.SchemaNode(colander.String(), name="member"),
         title=_("Members"),
         hint=_("Add more members by their username to this group"),
         widget=SequenceWidget(add_subitem_text_template=_("Add member")),
