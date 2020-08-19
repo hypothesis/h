@@ -29,6 +29,11 @@ def username_validator(form, value):
     The creator and members of a group must belong to the same authority as the
     group and the group's organization.
     """
+    # Unlike other validators, this one is applied at the root level of the
+    # form. This us because we need to read the value from the organisation
+    # to get the right authority to check the users. This isn't possible in
+    # a specific validator, as it has no access to the global form data.
+
     user_svc = form.bindings["user_svc"]
 
     # Get the authority from the list of organisations based on the one
