@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import json
 import logging
+from functools import wraps
 from urllib.parse import parse_qs, urlparse
 
 from oauthlib.oauth2 import OAuth2Error
@@ -16,6 +15,23 @@ from h.views.api.config import api_config
 from h.views.api.exceptions import OAuthAuthorizeError, OAuthTokenError
 
 log = logging.getLogger(__name__)
+
+
+def handles_oauth_errors(wrapped):
+    """Catch oauthlib errors and raise an appropriate exception.
+
+    This prevents unhandled errors from crashing the app.
+    """
+
+    @wraps(wrapped)
+    def inner(*args, **kwargs):
+        try:
+            return wrapped(*args, **kwargs)
+
+        except OAuth2Error as err:
+            raise OAuthAuthorizeError(err.description) from err
+
+    return inner
 
 
 @view_defaults(route_name="oauth_authorize")
@@ -142,6 +158,7 @@ class OAuthAuthorizeController:
             "state": state,
         }
 
+    @handles_oauth_errors
     def _authorized_response(self):
         # We don't support scopes at the moment, but oauthlib does need a scope,
         # so we're explicitly overwriting whatever the client provides.
@@ -184,6 +201,7 @@ class OAuthAccessTokenController:
         self.oauth = self.request.find_service(name="oauth_provider")
 
     @api_config(versions=["v1", "v2"], route_name="token", request_method="POST")
+    @handles_oauth_errors
     def post(self):
         headers, body, status = self.oauth.create_token_response(
             self.request.url,
@@ -204,6 +222,7 @@ class OAuthRevocationController:
         self.oauth = self.request.find_service(name="oauth_provider")
 
     @api_config(versions=["v1", "v2"], route_name="oauth_revoke", request_method="POST")
+    @handles_oauth_errors
     def post(self):
         headers, body, status = self.oauth.create_revocation_response(
             self.request.url,

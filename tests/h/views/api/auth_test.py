@@ -174,11 +174,11 @@ class TestOAuthAuthorizeController:
             "boom!"
         )
 
-        with pytest.raises(InvalidRequestFatalError) as exc:
+        with pytest.raises(OAuthAuthorizeError) as exc:
             view = getattr(controller, view_name)
             view()
 
-        assert exc.value.description == "boom!"
+        assert exc.value.args[0] == "boom!"
 
     def test_post_redirects_to_client(self, controller, auth_client):
         response = controller.post()
@@ -305,6 +305,16 @@ class TestOAuthAccessTokenController:
 
         assert exc.value.body == body.encode()
 
+    def test_get_raises_for_invalid_request(self, controller):
+        controller.oauth.create_token_response.side_effect = InvalidRequestFatalError(
+            "boom!"
+        )
+
+        with pytest.raises(OAuthAuthorizeError) as exc:
+            controller.post()
+
+        assert exc.value.detail == "boom!"
+
     @pytest.fixture
     def controller(self, pyramid_request):
         pyramid_request.method = "POST"
@@ -346,6 +356,16 @@ class TestOAuthRevocationController:
             controller.post()
 
         assert exc.value.body == body.encode()
+
+    def test_get_raises_for_invalid_request(self, controller):
+        controller.oauth.create_revocation_response.side_effect = InvalidRequestFatalError(
+            "boom!"
+        )
+
+        with pytest.raises(OAuthAuthorizeError) as exc:
+            controller.post()
+
+        assert exc.value.detail == "boom!"
 
     @pytest.fixture
     def controller(self, pyramid_request):
