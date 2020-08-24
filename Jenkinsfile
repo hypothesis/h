@@ -34,8 +34,6 @@ node {
                 sh 'apk add --no-cache python3 python3-dev'
                 sh 'pip install -q tox>=3.8.0'
 
-                // Unit tests
-                sh 'cd /var/lib/hypothesis && tox'
                 // Functional tests
                 sh 'cd /var/lib/hypothesis && tox -e functests'
             }
