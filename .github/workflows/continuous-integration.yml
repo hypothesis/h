@@ -1,5 +1,5 @@
 name: Continuous integration
-on: [push]
+on: pull_request
 env:
   TOX_PARALLEL_NO_SPINNER: 1
   PYTEST_ADDOPTS: --exitfirst
