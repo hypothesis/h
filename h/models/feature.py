@@ -14,7 +14,6 @@ FEATURES = {
         "using a cached version?"
     ),
     "client_display_names": "Render display names instead of user names in the client",
-    "client_filter_status": "Show consolidated filter status component in client",
     "client_search_input": "Show redesigned search/filter input in client",
 }
 
@@ -36,7 +35,9 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {}
+FEATURES_PENDING_REMOVAL = {
+    "client_filter_status": "Show consolidated filter status component in client",
+}
 
 
 class Feature(Base):
