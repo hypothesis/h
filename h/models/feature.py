@@ -35,9 +35,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    "client_filter_status": "Show consolidated filter status component in client",
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
