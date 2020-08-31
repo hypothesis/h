@@ -13,14 +13,22 @@ class TestBulk:
 
     def test_it_requires_authentication(self, app, bad_header):
         response = app.post(
-            "/api/bulk", b"dummy", headers=bad_header, expect_errors=True
+            "/api/bulk",
+            b"dummy",
+            headers=bad_header,
+            expect_errors=True,
+            content_type="application/x-ndjson",
         )
 
         assert response.status_int == 404
 
     def test_it_raises_errors_for_invalid_request(self, app, lms_auth_header):
         response = app.post(
-            "/api/bulk", '["some-mince"]', headers=lms_auth_header, expect_errors=True
+            "/api/bulk",
+            '["some-mince"]',
+            headers=lms_auth_header,
+            expect_errors=True,
+            content_type="application/x-ndjson",
         )
 
         assert response.status_int == 400
@@ -35,9 +43,12 @@ class TestBulk:
     def test_it_accepts_a_valid_request(
         self, app, nd_json, lms_auth_header, db_session
     ):
-        app.post("/api/bulk", nd_json, headers=lms_auth_header)
-
-        response = app.post("/api/bulk", nd_json, headers=lms_auth_header)
+        response = app.post(
+            "/api/bulk",
+            nd_json,
+            headers=lms_auth_header,
+            content_type="application/x-ndjson",
+        )
 
         assert response.status_int == 200
         assert response.content_type == "application/x-ndjson"
