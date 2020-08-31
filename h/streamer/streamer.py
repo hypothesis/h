@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 # The maxsize ensures that memory used by this queue is bounded. Producers
 # writing to the queue must consider their behaviour when the queue is full,
 # using .put(...) with a timeout or .put_nowait(...) as appropriate.
-WORK_QUEUE = gevent.queue.Queue(maxsize=4096)
+WORK_QUEUE = gevent.queue.Queue(maxsize=8192)
 
 # Message queues that the streamer processes messages from
 ANNOTATION_TOPIC = "annotation"
