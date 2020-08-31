@@ -154,3 +154,6 @@ def includeme(config):
     )
 
     config.include("h_pyramid_sentry")
+
+    # pyramid-sanity should be activated as late as possible
+    config.include("pyramid_sanity")
