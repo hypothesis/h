@@ -1,7 +1,10 @@
+# Hypothesis packages
 h_pyramid_sentry
 h_matchers
 h-api
+pyramid-sanity
 
+# 3rd-party packages
 PyJWT
 SQLAlchemy >= 1.1.4
 alembic
