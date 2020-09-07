@@ -1,0 +1,5 @@
+coverage
+pytest
+factory-boy
+hypothesis
+-r requirements.txt

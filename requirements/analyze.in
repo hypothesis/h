@@ -1,0 +1,6 @@
+pytest
+factory-boy
+hypothesis
+webtest
+pylint
+-r requirements.txt

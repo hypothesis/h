@@ -1,0 +1,4 @@
+pytest
+factory-boy
+webtest
+-r requirements.txt

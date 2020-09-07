@@ -20,11 +20,6 @@ help:
 	@echo "make docs              Build docs website and serve it locally"
 	@echo "make checkdocs         Crash if building the docs website fails"
 	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
-	@echo "make pip-compile       Compile requirements.in to requirements.txt."
-	@echo "                       Use this command after editing requirements.in, for"
-	@echo "                       example after adding or removing a requirement."
-	@echo "make upgrade-package   Upgrade the version of a package in requirements.txt."
-	@echo '                       Usage: `make upgrade-package name=some-package`.'
 	@echo "make docker            Make the app's Docker image"
 	@echo "make run-docker        Run the app's Docker image locally. "
 	@echo "                       This command exists for conveniently testing "
@@ -37,7 +32,7 @@ help:
 .PHONY: services
 services: args?=up -d
 services: python
-	@tox -qe docker-compose -- $(args)
+	@tox -qe dockercompose -- $(args)
 
 .PHONY: db
 db: args?=upgrade head
@@ -67,7 +62,7 @@ shell: python
 
 .PHONY: sql
 sql: python
-	@tox -qe docker-compose -- exec postgres psql --pset expanded=auto -U postgres
+	@tox -qe dockercompose -- exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
 lint: backend-lint frontend-lint
@@ -122,14 +117,6 @@ checkdocs: python
 
 .PHONY: sure
 sure: checkformatting lint test coverage functests
-
-.PHONY: pip-compile
-pip-compile: python
-	@tox -qe pip-compile
-
-.PHONY: upgrade-package
-upgrade-package: python
-	@tox -qe pip-compile -- --upgrade-package $(name)
 
 .PHONY: docker
 docker:
