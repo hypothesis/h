@@ -36,7 +36,7 @@ RUN chown -R hypothesis:hypothesis /var/log/nginx /var/lib/nginx /var/tmp/nginx
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 # Copy minimal data to allow installation of dependencies.
-COPY requirements.txt ./
+COPY requirements/requirements.txt ./
 
 # Install build deps, build, and then clean up.
 RUN apk add --no-cache --virtual build-deps \
