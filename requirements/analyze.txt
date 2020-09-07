@@ -57,7 +57,7 @@ plaster-pastedeploy==0.7  # via -r requirements/requirements.txt, pyramid
 plaster==1.0              # via -r requirements/requirements.txt, plaster-pastedeploy, pyramid
 pluggy==0.13.1            # via pytest
 psycogreen==1.0.2         # via -r requirements/requirements.txt
-psycopg2==2.8.5           # via -r requirements/requirements.txt
+psycopg2==2.8.6           # via -r requirements/requirements.txt
 py==1.9.0                 # via pytest
 pycparser==2.20           # via -r requirements/requirements.txt, cffi
 pyjwt==1.7.1              # via -r requirements/requirements.txt
