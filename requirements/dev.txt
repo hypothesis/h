@@ -6,7 +6,7 @@
 #
 alembic==1.4.2            # via -r requirements/requirements.txt
 amqp==2.6.1               # via -r requirements/requirements.txt, kombu
-attrs==20.1.0             # via -r requirements/requirements.txt, jsonschema
+attrs==20.2.0             # via -r requirements/requirements.txt, jsonschema
 backcall==0.2.0           # via ipython
 bcrypt==3.2.0             # via -r requirements/requirements.txt
 billiard==3.6.3.0         # via -r requirements/requirements.txt, celery

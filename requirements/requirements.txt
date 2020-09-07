@@ -6,7 +6,7 @@
 #
 alembic==1.4.2            # via -r requirements/requirements.in
 amqp==2.6.1               # via kombu
-attrs==20.1.0             # via jsonschema
+attrs==20.2.0             # via jsonschema
 bcrypt==3.2.0             # via -r requirements/requirements.in
 billiard==3.6.3.0         # via celery
 bleach==3.1.5             # via -r requirements/requirements.in
