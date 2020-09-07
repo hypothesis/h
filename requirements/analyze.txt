@@ -7,7 +7,7 @@
 alembic==1.4.2            # via -r requirements/requirements.txt
 amqp==2.6.1               # via -r requirements/requirements.txt, kombu
 astroid==2.4.2            # via pylint
-attrs==20.1.0             # via -r requirements/requirements.txt, hypothesis, jsonschema, pytest
+attrs==20.2.0             # via -r requirements/requirements.txt, hypothesis, jsonschema, pytest
 bcrypt==3.2.0             # via -r requirements/requirements.txt
 beautifulsoup4==4.9.1     # via webtest
 billiard==3.6.3.0         # via -r requirements/requirements.txt, celery
