@@ -12,7 +12,7 @@ cffi==1.14.2              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
 cryptography==3.1         # via paramiko
 distro==1.5.0             # via docker-compose
-docker-compose==1.26.2    # via -r requirements/dockercompose.in
+docker-compose==1.27.0    # via -r requirements/dockercompose.in
 docker[ssh]==4.3.1        # via docker-compose
 dockerpty==0.4.1          # via docker-compose
 docopt==0.6.2             # via docker-compose
@@ -26,7 +26,7 @@ pyrsistent==0.16.0        # via jsonschema
 python-dotenv==0.14.0     # via docker-compose
 pyyaml==5.3.1             # via docker-compose
 requests==2.24.0          # via docker, docker-compose
-six==1.15.0               # via bcrypt, cryptography, docker, docker-compose, dockerpty, jsonschema, pynacl, pyrsistent, websocket-client
+six==1.15.0               # via bcrypt, cryptography, docker, dockerpty, jsonschema, pynacl, pyrsistent, websocket-client
 texttable==1.6.3          # via docker-compose
 urllib3==1.25.10          # via requests
 websocket-client==0.57.0  # via docker, docker-compose
