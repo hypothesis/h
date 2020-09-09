@@ -3,6 +3,13 @@ import pytest
 from h.streamer.filter import FilterHandler
 
 
+class FakeAnnotation:
+    def __init__(self, id, uri, references=[]):
+        self.id = id
+        self.target_uri = uri
+        self.references = references
+
+
 class TestFilterHandler:
     @pytest.mark.parametrize(
         "query_uris,ann_uri,should_match",
@@ -33,7 +40,7 @@ class TestFilterHandler:
         }
         handler = FilterHandler(query)
 
-        ann = {"id": "123", "uri": ann_uri}
+        ann = FakeAnnotation("123", uri=ann_uri)
         assert handler.match(ann) is should_match
 
     def test_it_matches_id(self):
@@ -44,10 +51,10 @@ class TestFilterHandler:
         }
         handler = FilterHandler(query)
 
-        ann = {"id": "123", "uri": "https://example.com"}
+        ann = FakeAnnotation("123", uri="https://example.com")
         assert handler.match(ann) is True
 
-        ann = {"id": "456", "uri": "https://example.net"}
+        ann = FakeAnnotation("456", uri="https://example.net")
         assert handler.match(ann) is False
 
     def test_it_matches_parent_id(self):
@@ -58,8 +65,8 @@ class TestFilterHandler:
         }
         handler = FilterHandler(query)
 
-        ann = {"id": "abc", "uri": "https://example.com", "references": ["123"]}
+        ann = FakeAnnotation("abc", uri="https://example.com", references=["123"])
         assert handler.match(ann) is True
 
-        ann = {"id": "abc", "uri": "https://example.com", "references": ["456"]}
+        ann = FakeAnnotation("abc", uri="https://example.com", references=["456"])
         assert handler.match(ann) is False

@@ -129,8 +129,8 @@ def _generate_annotation_event(
     if message["src_client_id"] == socket.client_id:
         return None
 
-    # We don't send anything until we have received a filter from the client
-    if socket.filter is None:
+    # Don't send anything unless the client has configured a matching filter
+    if socket.filter is None or not socket.filter.match(annotation):
         return None
 
     # Don't sent annotations from NIPSA'd users to anyone other than that
@@ -149,9 +149,6 @@ def _generate_annotation_event(
 
     permissions = serialized.get("permissions")
     if not _authorized_to_read(socket.effective_principals, permissions):
-        return None
-
-    if not socket.filter.match(serialized, action):
         return None
 
     notification["payload"] = [serialized]

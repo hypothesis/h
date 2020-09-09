@@ -2,8 +2,6 @@
 
 import unicodedata
 
-from jsonpointer import resolve_pointer
-
 from h.util.uri import normalize as normalize_uri
 
 SCHEMA = {
@@ -34,8 +32,20 @@ class FilterHandler:
     def __init__(self, filter_json):
         self.filter = filter_json
 
-    def evaluate_clause(self, clause, target):
-        field_value = resolve_pointer(target, clause["field"], None)
+    def evaluate_clause(self, clause, annotation):
+        field_path = clause["field"]
+
+        # Extract the annotation property that corresponds to the "field"
+        # path in the filter. This only supports a small set of paths
+        # which are actually used by the Hypothesis client.
+        field_value = None
+        if field_path == "/uri":
+            field_value = annotation.target_uri
+        elif field_path == "/references":
+            field_value = annotation.references
+        elif field_path == "/id":
+            field_value = annotation.id
+
         if field_value is None:
             return False
 
@@ -46,7 +56,7 @@ class FilterHandler:
             normalized = uni_fold(term)
 
             # Apply field-specific normalization.
-            if clause["field"] == "/uri":
+            if field_path == "/uri":
                 normalized = normalize_uri(term)
 
             return normalized
@@ -73,15 +83,15 @@ class FilterHandler:
         else:
             return field_value == filter_term
 
-    def include_any(self, target):
+    def include_any(self, annotation):
         for clause in self.filter["clauses"]:
-            if self.evaluate_clause(clause, target):
+            if self.evaluate_clause(clause, annotation):
                 return True
         return False
 
-    def match(self, target, action=None):
+    def match(self, annotation):
         if len(self.filter["clauses"]) > 0:
-            return self.include_any(target)
+            return self.include_any(annotation)
         else:
             return True
 
