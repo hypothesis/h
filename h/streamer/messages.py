@@ -84,6 +84,12 @@ def handle_annotation_event(message, sockets, settings, session):
         log.warning("received annotation event for missing annotation: %s", id_)
         return
 
+    # Find connected clients which are interested in this annotation.
+    # This is done early to minimize the work done if there are no such clients.
+    matching_sockets = [s for s in sockets if s.filter and s.filter.match(annotation)]
+    if not matching_sockets:
+        return
+
     nipsa_service = NipsaService(session)
     user_nipsad = nipsa_service.is_flagged(annotation.userid)
 
@@ -92,7 +98,7 @@ def handle_annotation_event(message, sockets, settings, session):
     user_service = UserService(authority, session)
     formatters = [AnnotationUserInfoFormatter(session, user_service)]
 
-    for socket in sockets:
+    for socket in matching_sockets:
         reply = _generate_annotation_event(
             message, socket, annotation, user_nipsad, group_service, formatters
         )
@@ -127,10 +133,6 @@ def _generate_annotation_event(
         return None
 
     if message["src_client_id"] == socket.client_id:
-        return None
-
-    # Don't send anything unless the client has configured a matching filter
-    if socket.filter is None or not socket.filter.match(annotation):
         return None
 
     # Don't sent annotations from NIPSA'd users to anyone other than that
