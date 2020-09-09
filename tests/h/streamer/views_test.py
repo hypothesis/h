@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-import pytest
-
 from h.streamer import streamer, views
 
 
@@ -32,8 +28,3 @@ def test_websocket_view_adds_work_queue_to_environ(pyramid_request):
     env = pyramid_request.environ
 
     assert env["h.ws.streamer_work_queue"] == streamer.WORK_QUEUE
-
-
-@pytest.fixture
-def pyramid_request(pyramid_request):
-    return pyramid_request
