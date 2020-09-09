@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.models import User
 from h.tasks.indexer import reindex_user_annotations
 

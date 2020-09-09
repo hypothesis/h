@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid import interfaces
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy,

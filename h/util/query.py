@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Database query utilities."""
 import sqlalchemy as sa
 

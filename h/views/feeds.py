@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid import i18n
 from pyramid.view import view_config
 from webob.multidict import MultiDict

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Code responsible for rendering domain objects into various output
 formats.

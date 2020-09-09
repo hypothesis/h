@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from h.views.api.helpers.angular import AngularRouteTemplater
 
 

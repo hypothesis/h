@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from h.traversal.contexts import (
     AnnotationContext,
     GroupContext,

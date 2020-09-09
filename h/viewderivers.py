@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def csp_protected_view(view, info):
     """
     A view deriver which adds Content-Security-Policy headers to responses.

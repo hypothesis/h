@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.indexer.reindexer import reindex
 
 __all__ = ("reindex",)

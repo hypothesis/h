@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Help and documentation views."""
 
 import binascii

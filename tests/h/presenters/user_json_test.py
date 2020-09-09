@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from h.presenters.user_json import TrustedUserJSONPresenter, UserJSONPresenter

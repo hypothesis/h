@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import subprocess
 from subprocess import DEVNULL

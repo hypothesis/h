@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Add index to user.nipsa"""
 import sqlalchemy as sa
 from alembic import op

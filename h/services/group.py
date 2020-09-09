@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import sqlalchemy as sa
 
 from h.models import Group, User

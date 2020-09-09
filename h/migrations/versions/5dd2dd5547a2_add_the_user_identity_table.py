@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Add the user_identity table."""
 import sqlalchemy as sa
 from alembic import op

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def includeme(config):
     # Core
     config.add_route("index", "/")

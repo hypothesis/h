@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from webob.cookies import SignedSerializer
 
 from ..security import derive_key

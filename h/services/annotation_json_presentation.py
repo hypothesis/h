@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from sqlalchemy.orm import subqueryload
 
 from h import formatters, models, presenters, storage, traversal

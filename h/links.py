@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Provides links to different representations of annotations.
 """

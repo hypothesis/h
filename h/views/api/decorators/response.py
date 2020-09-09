@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """API view decorators for response headers"""
 
 from h.views.api import API_VERSION_DEFAULT

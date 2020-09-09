@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """A context-aware link to the previous page."""
 
 from urllib.parse import urlparse

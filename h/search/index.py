@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Functions for updating the search index."""
 
 import logging

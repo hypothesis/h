@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 from pyramid import security
 from pyramid.authorization import ACLAuthorizationPolicy

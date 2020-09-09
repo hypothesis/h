@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import jinja2
 from pyramid import httpexceptions
 from pyramid.view import view_config

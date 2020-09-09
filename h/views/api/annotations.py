@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 HTTP/REST API for storage and retrieval of annotation data.
 

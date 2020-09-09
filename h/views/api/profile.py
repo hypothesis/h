@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid.httpexceptions import HTTPBadRequest
 
 from h import session as h_session

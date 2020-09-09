@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from itsdangerous import URLSafeTimedSerializer
 
 from h.security import derive_key

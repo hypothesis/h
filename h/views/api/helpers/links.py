@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helpers for generating and retrieving service link metadata"""
 
 

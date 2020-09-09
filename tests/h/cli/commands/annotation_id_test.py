@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.cli.commands import annotation_id
 
 

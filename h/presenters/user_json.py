@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class UserJSONPresenter:
     """Present a user.
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Tools for dealing with URIs within the Hypothesis API.
 

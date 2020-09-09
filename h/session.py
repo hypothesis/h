@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid.csrf import SessionCSRFStoragePolicy
 from pyramid.session import JSONSerializer, SignedCookieSessionFactory
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Shared utility functions for manipulating dates and times."""
 
 

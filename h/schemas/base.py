@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Shared functionality for schemas."""
 
 import copy

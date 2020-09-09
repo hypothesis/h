@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class OrganizationJSONPresenter:
     """Present an organization in the JSON format returned by API requests."""
 

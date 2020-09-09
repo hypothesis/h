@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 A base presenter for common properties needed when rendering annotations.
 """

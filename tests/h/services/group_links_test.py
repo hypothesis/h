@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from h.services.group_links import GroupLinksService, group_links_factory

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Index mappings and analysis settings for Elasticsearch, and associated tools.
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Make user.email nullable."""
 from alembic import op
 

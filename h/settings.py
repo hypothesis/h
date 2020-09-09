@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Helpers for parsing settings from the environment."""
 
 import logging

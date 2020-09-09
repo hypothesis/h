@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from h import __version__, emails, storage
 from h.notification import reply
 from h.tasks import mailer

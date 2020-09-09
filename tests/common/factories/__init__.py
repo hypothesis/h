@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Factory classes for easily generating test objects."""
 from .activation import Activation
 from .annotation import Annotation

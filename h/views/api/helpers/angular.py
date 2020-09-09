@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Support for providing Angular-compatible routes for the client.
 """

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid.renderers import render
 
 from h.i18n import TranslationString as _  # noqa: N813

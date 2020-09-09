@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h import models
 from h.celery import celery, get_task_logger
 

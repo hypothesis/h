@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import jinja2
 from dateutil import parser
 

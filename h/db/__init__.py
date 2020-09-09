@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Configure and expose the application database session.
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from unittest.mock import Mock
 
 from h.views.errors import error, json_error, notfound

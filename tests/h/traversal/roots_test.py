@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from unittest import mock
 
 import pyramid.authorization

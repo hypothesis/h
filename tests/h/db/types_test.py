@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 from sqlalchemy.dialects.postgresql import dialect
 

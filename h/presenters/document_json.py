@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class DocumentJSONPresenter:
     def __init__(self, document):
         self.document = document

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.presenters.annotation_base import AnnotationBasePresenter
 
 

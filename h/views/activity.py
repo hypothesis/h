@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Activity pages views."""
 
 from urllib.parse import urlparse

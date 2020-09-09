@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from unittest.mock import Mock
 
 from pyramid.httpexceptions import HTTPExpectationFailed, HTTPNotFound

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pyramid.renderers
 
 json_sorted_factory = pyramid.renderers.JSON(sort_keys=True)
