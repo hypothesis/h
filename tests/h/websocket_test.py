@@ -18,6 +18,22 @@ class TestIncludeMe:
             }
         )
 
+    @pytest.mark.usefixtures("with_kill_switch_on")
+    def test_it_respects_the_kill_switch(self, configure, config):
+        create_app(None)
+
+        config.add_settings.assert_not_called()
+        config.add_tween.assert_not_called()
+        config.set_authentication_policy.assert_not_called()
+        config.add_route.assert_not_called()
+
+        config.include.assert_called_once_with("h.streamer.kill_switch_views")
+
+    @pytest.fixture
+    def with_kill_switch_on(self, patch):
+        os = patch("h.websocket.os")
+        os.environ.get.side_effect = {"KILL_SWITCH_WEBSOCKET": 1}.get
+
     @pytest.fixture
     def config(self):
         return mock.create_autospec(Configurator, instance=True)
