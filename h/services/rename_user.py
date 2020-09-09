@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h import models
 from h.search import index
 

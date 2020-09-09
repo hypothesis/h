@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pytest
 
 from h.util import group_scope as scope_util

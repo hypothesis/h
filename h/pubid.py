@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Generate random strings for use as identifiers in URLs (and other places).
 

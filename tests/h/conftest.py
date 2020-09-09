@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 """
 The `conftest` module is automatically loaded by pytest and serves as a place

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Add authority_provided_id field, index to group
 

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def includeme(config):
     # Register the transform_annotation subscriber so that nipsa fields are
     # written into annotations on save.

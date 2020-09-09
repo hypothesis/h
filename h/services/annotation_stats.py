@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from webob.multidict import MultiDict
 
 from h.search import (

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from oauthlib.oauth2 import BearerToken as OAuthlibBearerToken
 
 

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class AnnotationEvent:
     """An event representing an action on an annotation."""
 

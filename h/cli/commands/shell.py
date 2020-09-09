@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Command to run an interactive shell with application context."""
 
 import click

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from h.views.api.decorators.client_errors import (
     normalize_not_found,
     unauthorized_to_not_found,

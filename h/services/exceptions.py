@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Exceptions raised by :mod:`h.services`."""
 
 

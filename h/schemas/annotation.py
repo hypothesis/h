@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Classes for validating data passed to the annotations API."""
 import copy
 

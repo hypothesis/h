@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import click
 
 from h.celery import start

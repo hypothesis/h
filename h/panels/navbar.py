@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The navigation bar displayed at the top of most pages."""
 
 from pyramid_layout.panel import panel_config

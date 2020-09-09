@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.models.user import (
     DISPLAY_NAME_MAX_LENGTH,
     EMAIL_MAX_LENGTH,

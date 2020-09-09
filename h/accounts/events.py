@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class ActivationEvent:
     def __init__(self, request, user):
         self.request = request

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid import security
 from pyramid.httpexceptions import (
     HTTPBadRequest,

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 The query parser which converts our subset of the Apache Lucene syntax and
 transforms it into a MultiDict structure that h.search understands.

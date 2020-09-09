@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class DocumentSearchIndexPresenter:
     def __init__(self, document):
         self.document = document

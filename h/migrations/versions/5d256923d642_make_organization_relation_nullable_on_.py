@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Make organization relation nullable on group"""
 from alembic import op
 

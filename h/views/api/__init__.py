@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 API_VERSIONS = ["v1", "v2"]
 """All of the app's known API versions"""
 

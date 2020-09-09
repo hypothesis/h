@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def transform_annotation(event):
     """Add a {"nipsa": True} field on moderated annotations or those whose users are flagged."""
     payload = event.annotation_dict

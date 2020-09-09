@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 
 from h.util.datetime import utc_iso8601, utc_us_style_date

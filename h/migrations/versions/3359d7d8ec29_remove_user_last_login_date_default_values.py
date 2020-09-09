@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Remove user last login date default values."""
 import datetime
 

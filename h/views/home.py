@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Views serving the homepage and related endpoints."""
 
 from pyramid import httpexceptions

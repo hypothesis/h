@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import deform
 from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults

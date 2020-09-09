@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from smtplib import SMTPServerDisconnected
 from unittest import mock
 

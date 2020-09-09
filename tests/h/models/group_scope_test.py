@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 from h_matchers import Any
 from sqlalchemy import inspect

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.util.uri import normalize as normalize_uri
 
 FILTER_SCHEMA = {

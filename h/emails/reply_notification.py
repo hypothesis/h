@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid.renderers import render
 
 from h import links

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import itertools
 from urllib.parse import urlparse

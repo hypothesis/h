@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Schema for validating API group resources"""
 
 from h.i18n import TranslationString as _

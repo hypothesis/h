@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 import re
 from unittest import mock

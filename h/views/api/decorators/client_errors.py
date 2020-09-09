@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """API view decorators for exception views"""
 
 from pyramid.httpexceptions import HTTPNotAcceptable, HTTPNotFound

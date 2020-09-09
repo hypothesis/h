@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tools for generating links to domain objects. """
 
 from pyramid.request import Request

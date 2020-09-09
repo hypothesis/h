@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Exceptions raised by the h application."""
 
 from pyramid import httpexceptions

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #: Administrators. These users have super cow powers.
 Admin = "group:__admin__"
 

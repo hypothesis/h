@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from h.services.nipsa import NipsaService, nipsa_factory

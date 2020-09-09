@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from h.services.groupfinder import GroupfinderService, groupfinder_service_factory

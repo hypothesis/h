@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.models import GroupScope
 from h.util import group_scope as scope_util
 

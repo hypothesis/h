@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h import models, security
 from h.util.db import lru_cache_in_transaction
 

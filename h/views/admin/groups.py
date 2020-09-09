@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from jinja2 import Markup
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults

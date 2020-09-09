@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 A module into which all ORM classes are imported.
 

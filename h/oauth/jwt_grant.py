@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Provides an oauthlib compatible JWT Authorization grant type.
 

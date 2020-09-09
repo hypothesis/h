@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.models import Annotation, Group
 
 

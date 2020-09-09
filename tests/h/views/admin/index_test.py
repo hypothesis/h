@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from h.views.admin import index
 
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Configure deform to use custom templates.
 

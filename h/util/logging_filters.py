@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Logging Filters."""
 import logging
 

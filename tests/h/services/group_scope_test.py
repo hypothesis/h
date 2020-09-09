@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 from h.services.group_scope import GroupScopeService, group_scope_factory

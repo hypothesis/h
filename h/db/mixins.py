@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Reusable mixins for SQLAlchemy declarative models."""
 
 import datetime

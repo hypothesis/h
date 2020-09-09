@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Utilities for processing a set of redirect specifications from a text file.
 

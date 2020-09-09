@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Code for bucketing annotations by time frame and document."""
 
 import collections

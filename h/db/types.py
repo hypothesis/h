@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Custom SQLAlchemy types for use with the Annotations API database."""
 import base64
 import binascii

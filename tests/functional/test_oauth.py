@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Functional tests for getting and using OAuth 2 access and refresh tokens."""
 
 import calendar

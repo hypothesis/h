@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Configuration for the h application."""
 
 import logging

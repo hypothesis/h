@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Test the versioning of our API using Accept headers
 """

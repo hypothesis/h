@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Add user activation date"""
 import sqlalchemy as sa
 from alembic import op

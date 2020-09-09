@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pytest
 
 from h.views.api.helpers import media_types

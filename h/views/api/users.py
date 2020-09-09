@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid.httpexceptions import HTTPConflict
 
 from h.auth.util import client_authority

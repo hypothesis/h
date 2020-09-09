@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Some shared utility functions for manipulating group data."""
 import re
 

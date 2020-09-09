@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid import testing
 
 from h.views.api import links as views

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 "Context resource" objects for Pyramid views.
 
