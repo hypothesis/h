@@ -36,6 +36,7 @@ license distributed with the ws4py project. Such code remains copyright (c)
 2011-2015, Sylvain Hellegouarch.
 """
 import logging
+import os
 
 import pyramid
 from gevent.pool import Pool
@@ -148,8 +149,20 @@ class Worker(GeventPyWSGIWorker):
     use_psycogreen = True
 
 
-def create_app(global_config, **settings):
+def create_app(_global_config, **settings):
     config = configure(settings=settings)
+
+    if os.environ.get("KILL_SWITCH_WEBSOCKET"):
+        log.warning("Websocket kill switch has been enabled.")
+        log.warning("The switch is the environment variable 'KILL_SWITCH_WEBSOCKET'")
+        log.warning("No websocket functionality will work until the switch is disabled")
+
+        # Add views to return messages so we don't get confused between
+        # disabled and missing end-points in the logs
+        config.include("h.streamer.kill_switch_views")
+
+        # Quit out early without configuring any routes etc.
+        return config.make_wsgi_app()
 
     config.add_tween(
         "h.streamer.close_db_session_tween_factory",
