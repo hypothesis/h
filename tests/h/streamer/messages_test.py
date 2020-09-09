@@ -325,35 +325,42 @@ class TestHandleAnnotationEvent:
 
         assert len(socket.send_json_payloads) == 1
 
-    def test_no_send_if_not_in_group(self, presenter_asdict):
+    def test_no_send_if_not_in_group(
+        self, annotation_resource, presenters, principals_allowed_by_permission
+    ):
         """Users shouldn't see annotations in groups they aren't members of."""
         message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
         socket = FakeSocket("giraffe")
         socket.authenticated_userid = "fred"
         session = mock.sentinel.db_session
         settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation(
-            {"permissions": {"read": ["group:private-group"]}}
-        )
+        principals_allowed_by_permission.return_value = ["group:private-group"]
 
         messages.handle_annotation_event(message, [socket], settings, session)
 
+        principals_allowed_by_permission.assert_called_with(
+            annotation_resource.return_value, "read"
+        )
         assert socket.send_json_payloads == []
 
-    def test_sends_if_in_group(self, presenter_asdict):
+    def test_sends_if_in_group(
+        self, annotation_resource, presenters, principals_allowed_by_permission
+    ):
         """Users should see annotations in groups they are members of."""
         message = {"action": "_", "src_client_id": "_", "annotation_id": "_"}
         socket = FakeSocket("giraffe")
         socket.authenticated_userid = "fred"
-        socket.effective_principals.append("group:private-group")
         session = mock.sentinel.db_session
         settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation(
-            {"permissions": {"read": ["group:private-group"]}}
-        )
+
+        principals_allowed_by_permission.return_value = ["group:private-group"]
+        socket.effective_principals.append("group:private-group")
 
         messages.handle_annotation_event(message, [socket], settings, session)
 
+        principals_allowed_by_permission.assert_called_with(
+            annotation_resource.return_value, "read"
+        )
         assert len(socket.send_json_payloads) == 1
 
     def serialized_annotation(self, data=None):
@@ -414,6 +421,10 @@ class TestHandleAnnotationEvent:
     @pytest.fixture
     def annotation_resource(self, patch):
         return patch("h.streamer.messages.AnnotationContext")
+
+    @pytest.fixture
+    def principals_allowed_by_permission(self, patch):
+        return patch("h.streamer.messages.principals_allowed_by_permission")
 
 
 class TestHandleUserEvent:
