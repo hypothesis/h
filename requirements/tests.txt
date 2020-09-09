@@ -36,7 +36,6 @@ iniconfig==1.0.1          # via pytest
 iso8601==0.1.12           # via -r requirements/requirements.txt, colander, deform
 itsdangerous==1.1.0       # via -r requirements/requirements.txt
 jinja2==2.11.2            # via -r requirements/requirements.txt, pyramid-jinja2
-jsonpointer==2.0          # via -r requirements/requirements.txt
 jsonschema==3.2.0         # via -r requirements/requirements.txt, h-api
 kombu==4.6.11             # via -r requirements/requirements.txt, celery
 mako==1.1.3               # via -r requirements/requirements.txt, alembic

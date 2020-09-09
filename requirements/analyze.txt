@@ -38,7 +38,6 @@ iso8601==0.1.12           # via -r requirements/requirements.txt, colander, defo
 isort==5.5.1              # via pylint
 itsdangerous==1.1.0       # via -r requirements/requirements.txt
 jinja2==2.11.2            # via -r requirements/requirements.txt, pyramid-jinja2
-jsonpointer==2.0          # via -r requirements/requirements.txt
 jsonschema==3.2.0         # via -r requirements/requirements.txt, h-api
 kombu==4.6.11             # via -r requirements/requirements.txt, celery
 lazy-object-proxy==1.4.3  # via astroid
