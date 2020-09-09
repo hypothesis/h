@@ -4,7 +4,9 @@ import logging
 from collections import namedtuple
 from itertools import chain
 
+import pyramid.scripting
 from gevent.queue import Full
+from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
 from h.auth.util import translate_annotation_principals
@@ -149,23 +151,32 @@ def _generate_annotation_event(
     if user_nipsad and socket.authenticated_userid != annotation.userid:
         return None
 
-    notification = {"type": "annotation-notification", "options": {"action": action}}
+    # The `prepare` function sets the active registry which is an implicit
+    # dependency of some of the authorization logic used to look up annotation
+    # and group permissions.
+    with pyramid.scripting.prepare(registry=socket.registry):
+        notification = {
+            "type": "annotation-notification",
+            "options": {"action": action},
+        }
 
-    base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
-    links_service = LinksService(base_url, socket.registry)
-    resource = AnnotationContext(annotation, group_service, links_service)
-    serialized = presenters.AnnotationJSONPresenter(
-        resource, formatters=formatters
-    ).asdict()
+        base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
+        links_service = LinksService(base_url, socket.registry)
+        resource = AnnotationContext(annotation, group_service, links_service)
 
-    permissions = serialized.get("permissions")
-    if not _authorized_to_read(socket.effective_principals, permissions):
-        return None
+        # Check whether client is authorized to read this annotation.
+        read_principals = principals_allowed_by_permission(resource, "read")
+        if not set(read_principals).intersection(socket.effective_principals):
+            return None
 
-    notification["payload"] = [serialized]
-    if action == "delete":
-        notification["payload"] = [{"id": annotation.id}]
-    return notification
+        serialized = presenters.AnnotationJSONPresenter(
+            resource, formatters=formatters
+        ).asdict()
+
+        notification["payload"] = [serialized]
+        if action == "delete":
+            notification["payload"] = [{"id": annotation.id}]
+        return notification
 
 
 def _generate_user_event(message, socket):
@@ -189,16 +200,3 @@ def _generate_user_event(message, socket):
         "action": message["type"],
         "model": message["session_model"],
     }
-
-
-def _authorized_to_read(effective_principals, permissions):
-    """Return True if the passed request is authorized to read the annotation.
-
-    If the annotation belongs to a private group, this will return False if the
-    authenticated user isn't a member of that group.
-    """
-    read_permissions = permissions.get("read", [])
-    read_principals = translate_annotation_principals(read_permissions)
-    if set(read_principals).intersection(effective_principals):
-        return True
-    return False
