@@ -1,6 +1,8 @@
+import datetime
 from unittest import mock
 
 import pytest
+from h_matchers import Any
 
 from h.tasks import indexer
 
@@ -159,6 +161,42 @@ class TestReindexUserAnnotations:
                 a.id for a in factories.Annotation.create_batch(2, userid=userid2)
             ],
         }
+
+
+class TestReindexAnnotationsInDateRange:
+    def test_it(self, BatchIndexer, celery, matching_annotations_ids):
+        indexer.reindex_annotations_in_date_range(
+            datetime.datetime.utcnow() - datetime.timedelta(days=7),
+            datetime.datetime.utcnow(),
+        )
+
+        BatchIndexer.assert_called_once_with(
+            celery.request.db, celery.request.es, celery.request,
+        )
+        BatchIndexer.return_value.index.assert_called_once_with(Any())
+        indexed_annotations = list(BatchIndexer.return_value.index.call_args[0][0])
+        assert sorted(indexed_annotations) == sorted(matching_annotations_ids)
+
+    @pytest.fixture(autouse=True)
+    def matching_annotations_ids(self, factories):
+        """Annotations that're within the timeframe that we're reindexing."""
+        return [
+            annotation.id
+            for annotation in factories.Annotation.create_batch(
+                3, updated=datetime.datetime.utcnow() - datetime.timedelta(days=3)
+            )
+        ]
+
+    @pytest.fixture(autouse=True)
+    def not_matching_annotations(self, factories):
+        """Annotations that're outside the timeframe that we're reindexing."""
+        before_annotations = factories.Annotation.build_batch(
+            3, updated=datetime.datetime.utcnow() - datetime.timedelta(days=14)
+        )
+        after_annotations = factories.Annotation.build_batch(
+            3, updated=datetime.datetime.utcnow() + datetime.timedelta(days=14)
+        )
+        return before_annotations + after_annotations
 
 
 pytestmark = pytest.mark.usefixtures("settings_service")

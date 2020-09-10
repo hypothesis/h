@@ -82,6 +82,7 @@ def includeme(config):
     config.add_route("admin.users_activate", "/admin/users/activate")
     config.add_route("admin.users_delete", "/admin/users/delete")
     config.add_route("admin.users_rename", "/admin/users/rename")
+    config.add_route("admin.search", "/admin/search")
 
     # Annotations & stream
     config.add_route(
