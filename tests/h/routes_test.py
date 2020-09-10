@@ -88,6 +88,7 @@ def test_includeme():
         call("admin.users_activate", "/admin/users/activate"),
         call("admin.users_delete", "/admin/users/delete"),
         call("admin.users_rename", "/admin/users/rename"),
+        call("admin.search", "/admin/search"),
         call(
             "annotation",
             "/a/{id}",
