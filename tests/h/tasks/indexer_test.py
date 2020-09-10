@@ -18,40 +18,37 @@ class FakeSettingsService:
         self._data[key] = value
 
 
-@pytest.mark.usefixtures("celery", "index", "settings_service")
 class TestAddAnnotation:
-    def test_it_fetches_the_annotation(self, fetch_annotation, annotation, celery):
+    def test_it_fetches_the_annotation(self, storage, annotation, celery):
         id_ = "test-annotation-id"
-        fetch_annotation.return_value = annotation
+        storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation(id_)
 
-        fetch_annotation.assert_called_once_with(celery.request.db, id_)
+        storage.fetch_annotation.assert_called_once_with(celery.request.db, id_)
 
-    def test_it_calls_index_with_annotation(
-        self, fetch_annotation, annotation, index, celery
-    ):
+    def test_it_calls_index_with_annotation(self, storage, annotation, index, celery):
         id_ = "test-annotation-id"
-        fetch_annotation.return_value = annotation
+        storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation(id_)
 
         index.assert_any_call(celery.request.es, annotation, celery.request)
 
     def test_it_skips_indexing_when_annotation_cannot_be_loaded(
-        self, fetch_annotation, index, celery
+        self, storage, index, celery
     ):
-        fetch_annotation.return_value = None
+        storage.fetch_annotation.return_value = None
 
         indexer.add_annotation("test-annotation-id")
 
         assert index.called is False
 
     def test_during_reindex_adds_to_current_index(
-        self, fetch_annotation, annotation, index, celery, settings_service
+        self, storage, annotation, index, celery, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
-        fetch_annotation.return_value = annotation
+        storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation("test-annotation-id")
 
@@ -63,10 +60,10 @@ class TestAddAnnotation:
         )
 
     def test_during_reindex_adds_to_new_index(
-        self, fetch_annotation, annotation, index, celery, settings_service
+        self, storage, annotation, index, celery, settings_service
     ):
         settings_service.put("reindex.new_index", "hypothesis-xyz123")
-        fetch_annotation.return_value = annotation
+        storage.fetch_annotation.return_value = annotation
 
         indexer.add_annotation("test-annotation-id")
 
@@ -77,20 +74,12 @@ class TestAddAnnotation:
             target_index="hypothesis-xyz123",
         )
 
-    def test_it_indexes_thread_root(self, fetch_annotation, reply, delay):
-        fetch_annotation.return_value = reply
+    def test_it_indexes_thread_root(self, storage, reply, delay):
+        storage.fetch_annotation.return_value = reply
 
         indexer.add_annotation("test-annotation-id")
 
         delay.assert_called_once_with("root-id")
-
-    @pytest.fixture
-    def index(self, patch):
-        return patch("h.tasks.indexer.index")
-
-    @pytest.fixture
-    def fetch_annotation(self, patch):
-        return patch("h.tasks.indexer.storage.fetch_annotation")
 
     @pytest.fixture
     def annotation(self):
@@ -109,7 +98,6 @@ class TestAddAnnotation:
         return patch("h.tasks.indexer.add_annotation.delay")
 
 
-@pytest.mark.usefixtures("celery", "delete", "settings_service")
 class TestDeleteAnnotation:
     def test_it_deletes_from_index(self, delete, celery):
         id_ = "test-annotation-id"
@@ -139,35 +127,26 @@ class TestDeleteAnnotation:
             celery.request.es, "test-annotation-id", target_index="hypothesis-xyz123"
         )
 
-    @pytest.fixture
-    def delete(self, patch):
-        return patch("h.tasks.indexer.delete")
 
-
-@pytest.mark.usefixtures("celery")
 class TestReindexUserAnnotations:
-    def test_it_creates_batch_indexer(self, batch_indexer, annotation_ids, celery):
+    def test_it_creates_batch_indexer(self, BatchIndexer, annotation_ids, celery):
         userid = list(annotation_ids.keys())[0]
 
         indexer.reindex_user_annotations(userid)
 
-        batch_indexer.assert_any_call(
+        BatchIndexer.assert_any_call(
             celery.request.db, celery.request.es, celery.request
         )
 
-    def test_it_reindexes_users_annotations(self, batch_indexer, annotation_ids):
+    def test_it_reindexes_users_annotations(self, BatchIndexer, annotation_ids):
         userid = list(annotation_ids.keys())[0]
 
         indexer.reindex_user_annotations(userid)
 
-        args, _ = batch_indexer.return_value.index.call_args
+        args, _ = BatchIndexer.return_value.index.call_args
         actual = args[0]
         expected = annotation_ids[userid]
         assert sorted(expected) == sorted(actual)
-
-    @pytest.fixture
-    def batch_indexer(self, patch):
-        return patch("h.tasks.indexer.BatchIndexer")
 
     @pytest.fixture
     def annotation_ids(self, factories):
@@ -184,11 +163,29 @@ class TestReindexUserAnnotations:
         }
 
 
-@pytest.fixture
+pytestmark = pytest.mark.usefixtures("settings_service")
+
+
+@pytest.fixture(autouse=True)
+def BatchIndexer(patch):
+    return patch("h.tasks.indexer.BatchIndexer")
+
+
+@pytest.fixture(autouse=True)
 def celery(patch, pyramid_request):
     cel = patch("h.tasks.indexer.celery")
     cel.request = pyramid_request
     return cel
+
+
+@pytest.fixture(autouse=True)
+def delete(patch):
+    return patch("h.tasks.indexer.delete")
+
+
+@pytest.fixture(autouse=True)
+def index(patch):
+    return patch("h.tasks.indexer.index")
 
 
 @pytest.fixture
@@ -202,3 +199,8 @@ def settings_service(pyramid_config):
     service = FakeSettingsService()
     pyramid_config.register_service(service, name="settings")
     return service
+
+
+@pytest.fixture(autouse=True)
+def storage(patch):
+    return patch("h.tasks.indexer.storage")
