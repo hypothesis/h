@@ -92,30 +92,6 @@ def test_principals_for_user(user, principals):
         assert set(principals) == set(result)
 
 
-@pytest.mark.parametrize(
-    "p_in,p_out",
-    [
-        # The basics
-        ([], []),
-        (["acct:donna@example.com"], ["acct:donna@example.com"]),
-        (["group:foo"], ["group:foo"]),
-        # Remove pyramid principals
-        (["system.Everyone"], []),
-        # Remap annotatator principal names
-        (["group:__world__"], [security.Everyone]),
-        # Normalise multiple principals
-        (
-            ["me", "myself", "me", "group:__world__", "group:foo", "system.Admins"],
-            ["me", "myself", security.Everyone, "group:foo"],
-        ),
-    ],
-)
-def test_translate_annotation_principals(p_in, p_out):
-    result = util.translate_annotation_principals(p_in)
-
-    assert set(result) == set(p_out)
-
-
 class TestClientAuthority:
     @pytest.mark.parametrize(
         "principals",
