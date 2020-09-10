@@ -9,7 +9,6 @@ from gevent.queue import Full
 from pyramid.security import principals_allowed_by_permission
 
 from h import presenters, realtime, storage
-from h.auth.util import translate_annotation_principals
 from h.formatters import AnnotationUserInfoFormatter
 from h.realtime import Consumer
 from h.services.groupfinder import GroupfinderService
