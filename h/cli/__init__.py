@@ -22,6 +22,7 @@ SUBCOMMANDS = (
     "h.cli.commands.search.search",
     "h.cli.commands.shell.shell",
     "h.cli.commands.user.user",
+    "h.cli.commands.create_annotations.create_annotations",
 )
 
 
