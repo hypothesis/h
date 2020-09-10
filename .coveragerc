@@ -7,6 +7,7 @@ source =
 omit =
     h/debug.py
     h/migrations/*
+    h/cli/commands/create_annotations.py
 
 [report]
 show_missing = True

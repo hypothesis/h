@@ -25,7 +25,7 @@ class Annotation(ModelFactory):
     text = factory.Faker("paragraph")
     userid = factory.LazyFunction(
         lambda: "acct:{username}@{authority}".format(
-            username=FAKER.user_name(), authority=FAKER.domain_name(levels=1)
+            username=FAKER.user_name(), authority="localhost"
         )
     )
     document = factory.SubFactory(Document)

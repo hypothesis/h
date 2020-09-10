@@ -99,6 +99,7 @@ zope.deprecation==4.1.2   # via -r requirements/requirements.txt, deform, pyrami
 zope.event==4.4           # via -r requirements/requirements.txt, gevent
 zope.interface==5.1.0     # via -r requirements/requirements.txt, gevent, pyramid, pyramid-authsanity, pyramid-retry, pyramid-services, repoze.sendmail, transaction, wired, zope.sqlalchemy
 zope.sqlalchemy==1.1      # via -r requirements/requirements.txt
+factory_boy
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
