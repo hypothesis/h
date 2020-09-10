@@ -8,13 +8,9 @@ import pyramid.scripting
 from gevent.queue import Full
 from pyramid.security import principals_allowed_by_permission
 
-from h import presenters, realtime, storage
-from h.formatters import AnnotationUserInfoFormatter
+from h import realtime, storage
+from h.interfaces import IGroupService
 from h.realtime import Consumer
-from h.services.groupfinder import GroupfinderService
-from h.services.links import LinksService
-from h.services.nipsa import NipsaService
-from h.services.user import UserService
 from h.streamer import websocket
 from h.streamer.filter import SocketFilter
 from h.traversal import AnnotationContext
@@ -100,18 +96,8 @@ def handle_annotation_event(message, sockets, settings, session):
     # Create a generator which has the first socket back again
     matching_sockets = chain((first_socket,), matching_sockets)
 
-    nipsa_service = NipsaService(session)
-    user_nipsad = nipsa_service.is_flagged(annotation.userid)
-
-    authority = settings.get("h.authority", "localhost")
-    group_service = GroupfinderService(session, authority)
-    user_service = UserService(authority, session)
-    formatters = [AnnotationUserInfoFormatter(session, user_service)]
-
     for socket in matching_sockets:
-        reply = _generate_annotation_event(
-            message, socket, annotation, user_nipsad, group_service, formatters
-        )
+        reply = _generate_annotation_event(message, socket, annotation)
         if reply is None:
             continue
         socket.send_json(reply)
@@ -125,9 +111,7 @@ def handle_user_event(message, sockets, settings, session):
         socket.send_json(reply)
 
 
-def _generate_annotation_event(
-    message, socket, annotation, user_nipsad, group_service, formatters
-):
+def _generate_annotation_event(message, socket, annotation):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -145,22 +129,28 @@ def _generate_annotation_event(
     if message["src_client_id"] == socket.client_id:
         return None
 
-    # Don't sent annotations from NIPSA'd users to anyone other than that
-    # user.
-    if user_nipsad and socket.authenticated_userid != annotation.userid:
-        return None
-
     # The `prepare` function sets the active registry which is an implicit
     # dependency of some of the authorization logic used to look up annotation
     # and group permissions.
-    with pyramid.scripting.prepare(registry=socket.registry):
+    with pyramid.scripting.prepare(registry=socket.registry) as env:
         notification = {
             "type": "annotation-notification",
             "options": {"action": action},
         }
+        request = env["request"]
+        nipsa_service = request.find_service(name="nipsa")
+        user_nipsad = nipsa_service.is_flagged(annotation.userid)
 
-        base_url = socket.registry.settings.get("h.app_url", "http://localhost:5000")
-        links_service = LinksService(base_url, socket.registry)
+        # Don't sent annotations from NIPSA'd users to anyone other than that
+        # user.
+        if user_nipsad and socket.authenticated_userid != annotation.userid:
+            return None
+
+        # Construct an `AnnotationContext` resource and serialize the annotation
+        # in the same way as it would be serialized when fetching the annotation
+        # via the API.
+        group_service = request.find_service(IGroupService)
+        links_service = request.find_service(name="links")
         resource = AnnotationContext(annotation, group_service, links_service)
 
         # Check whether client is authorized to read this annotation.
@@ -168,9 +158,8 @@ def _generate_annotation_event(
         if not set(read_principals).intersection(socket.effective_principals):
             return None
 
-        serialized = presenters.AnnotationJSONPresenter(
-            resource, formatters=formatters
-        ).asdict()
+        presenter = request.find_service(name="annotation_json_presentation")
+        serialized = presenter.present(resource)
 
         notification["payload"] = [serialized]
         if action == "delete":
