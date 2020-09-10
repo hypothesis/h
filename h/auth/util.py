@@ -52,22 +52,6 @@ def principals_for_user(user):
     return list(principals)
 
 
-def translate_annotation_principals(principals):
-    """
-    Translate a list of annotation principals to a list of pyramid principals.
-    """
-    result = set([])
-    for principal in principals:
-        # Ignore suspicious principals from annotations
-        if principal.startswith("system."):
-            continue
-        if principal == "group:__world__":
-            result.add(security.Everyone)
-        else:
-            result.add(principal)
-    return list(result)
-
-
 def default_authority(request):
     """
     Return the value of the h.authority config settings.
