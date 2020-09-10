@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 import sqlalchemy as sa
-from pyramid import security
 
 from h.auth import role, util
 from h.models import AuthClient
