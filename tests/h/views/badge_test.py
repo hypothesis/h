@@ -1,91 +1,96 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 from unittest import mock
 
 import pytest
-from h_matchers import Any
 from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
-from h.views.badge import badge
-
-badge_fixtures = pytest.mark.usefixtures("models", "search_lib")
+from h.views.badge import Blocklist, badge
 
 
-@badge_fixtures
-def test_badge_returns_number_from_search(
-    models, pyramid_request, search_run, mark_uri_as_annotated
-):
-    mark_uri_as_annotated("http://example.com")
+class TestBlocklist:
+    @pytest.mark.parametrize("bad_part", Blocklist.BLOCKED_URL_PARTS)
+    @pytest.mark.parametrize("prefix", ("http:", "https:"))
+    def test_it_blocks(self, bad_part, prefix):
+        url = f"{prefix}{bad_part}/path?a=b"
 
-    pyramid_request.params["uri"] = "http://example.com"
-    models.Blocklist.is_blocked.return_value = False
-    search_run.return_value = mock.Mock(total=29)
+        assert Blocklist.is_blocked(url)
 
-    result = badge(pyramid_request)
+    def test_it_allows_non_blocked_items(self):
+        assert not Blocklist.is_blocked("http://example.com/this/is/fine")
 
-    search_run.assert_called_once_with(
-        MultiDict({"uri": "http://example.com", "limit": 0})
-    )
-    assert result == {"total": 29}
+    def test_its_fast(self):
+        # Check any modifications haven't made this significantly slower
+        reps = 10000
 
+        start = datetime.utcnow()
+        for _ in range(reps):
+            Blocklist.is_blocked("http://example.com/this/is/fine")
 
-@badge_fixtures
-def test_badge_does_not_search_if_uri_never_annotated(
-    models, pyramid_request, search_run
-):
-    pyramid_request.params["uri"] = "http://example.com"
-    models.Blocklist.is_blocked.return_value = False
+        diff = datetime.utcnow() - start
 
-    result = badge(pyramid_request)
+        seconds = diff.seconds + diff.microseconds / 1000000
+        calls_per_second = int(reps // seconds)
+        print(
+            f"Calls per second: {calls_per_second}, {1000000 / calls_per_second:.03f} μs/call"
+        )
 
-    assert result == {"total": 0}
-    models.Blocklist.is_blocked.assert_not_called()
-    search_run.assert_not_called()
-
-
-@badge_fixtures
-def test_badge_returns_0_if_blocked(
-    models, pyramid_request, search_run, mark_uri_as_annotated
-):
-    mark_uri_as_annotated("http://blocked-domain.com")
-
-    pyramid_request.params["uri"] = "http://blocked-domain.com"
-    models.Blocklist.is_blocked.return_value = True
-    search_run.return_value = {"total": 29}
-
-    result = badge(pyramid_request)
-
-    models.Blocklist.is_blocked.assert_called_with(Any(), "http://blocked-domain.com")
-    assert not search_run.called
-    assert result == {"total": 0}
+        # It should be above this number by quite a margin (20x), but we don't want flaky tests
+        assert calls_per_second > 50000
 
 
-@badge_fixtures
-def test_badge_raises_if_no_uri():
-    with pytest.raises(httpexceptions.HTTPBadRequest):
-        badge(mock.Mock(params={}))
+class TestBadge:
+    def test_it_returns_0_if_blocked(
+        self, badge_request, Blocklist, search_run,
+    ):
+        result = badge_request("http://example.com", annotated=True, blocked=True)
 
+        Blocklist.is_blocked.assert_called_with("http://example.com")
+        search_run.assert_not_called()
+        assert result == {"total": 0}
 
-@pytest.fixture
-def models(patch):
-    return patch("h.views.badge.models")
+    def test_it_returns_0_if_uri_never_annotated(self, badge_request, search_run):
+        result = badge_request("http://example.com", annotated=False, blocked=False)
 
+        search_run.assert_not_called()
+        assert result == {"total": 0}
 
-@pytest.fixture
-def search_lib(patch):
-    return patch("h.views.badge.search")
+    def test_it_returns_number_from_search(self, badge_request, search_run):
+        result = badge_request("http://example.com", annotated=True, blocked=False)
 
+        search_run.assert_called_once_with(
+            MultiDict({"uri": "http://example.com", "limit": 0})
+        )
+        assert result == {"total": search_run.return_value.total}
 
-@pytest.fixture
-def search_run(search_lib):
-    return search_lib.Search.return_value.run
+    def test_it_raises_if_no_uri(self):
+        with pytest.raises(httpexceptions.HTTPBadRequest):
+            badge(mock.Mock(params={}))
 
+    @pytest.fixture
+    def badge_request(self, pyramid_request, factories, Blocklist):
+        def caller(uri, annotated=True, blocked=False):
+            if annotated:
+                factories.DocumentURI(uri=uri)
+                pyramid_request.db.flush()
 
-@pytest.fixture
-def mark_uri_as_annotated(factories, pyramid_request):
-    def mark(uri):
-        factories.DocumentURI(uri=uri)
-        pyramid_request.db.flush()
+            Blocklist.is_blocked.return_value = blocked
 
-    return mark
+            pyramid_request.params["uri"] = uri
+            return badge(pyramid_request)
+
+        return caller
+
+    @pytest.fixture(autouse=True)
+    def Blocklist(self, patch):
+        return patch("h.views.badge.Blocklist")
+
+    @pytest.fixture(autouse=True)
+    def search_run(self, patch):
+        search_lib = patch("h.views.badge.search")
+
+        search_run = search_lib.Search.return_value.run
+        search_run.return_value = mock.Mock(total=29)
+        return search_run
