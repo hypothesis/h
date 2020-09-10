@@ -126,7 +126,7 @@ class BatchIndexer:
         :returns: a set of errored ids
         :rtype: set
         """
-        if not annotation_ids:
+        if annotation_ids is None:
             annotations = _all_annotations(session=self.session, windowsize=windowsize)
         else:
             annotations = _filtered_annotations(
