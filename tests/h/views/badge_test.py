@@ -61,6 +61,17 @@ class TestBadge:
         search_run.assert_not_called()
         assert result == {"total": 0}
 
+    def test_it_sets_cache_headers_if_blocked(
+        self, badge_request, Blocklist, pyramid_request
+    ):
+        badge_request("http://example.com", annotated=True, blocked=True)
+
+        cache_control = pyramid_request.response.cache_control
+
+        assert cache_control.prevent_auto
+        assert cache_control.public
+        assert cache_control.max_age > 0
+
     def test_it_returns_0_if_uri_never_annotated(self, badge_request, search_run):
         result = badge_request("http://example.com", annotated=False, blocked=False)
 
