@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # import newrelic.agent
+import re
+
 from pyramid import httpexceptions
 from webob.multidict import MultiDict
 
@@ -23,24 +25,22 @@ def _has_uri_ever_been_annotated(db, uri):
 class Blocklist:
     """Block URLs which we know are not worth replying to for the badge."""
 
-    BLOCKED_URL_PARTS = (
-        "//facebook.com",
-        "//mail.google.com",
-        "//www.facebook.com",
-    )
+    BLOCKED_DOMAINS = {"facebook.com", "www.facebook.com", "mail.google.com"}
+
+    # This is much faster to do with a regex than URL lib. This might
+    # change if the number of domains to block becomes very large. In which case
+    # a Trie might be more efficient.
+
+    # The main OR clause which looks like this (?:option_1)|(?:option_2)...
+    _DOMAIN_PATTERN = "|".join(f"(?:{re.escape(part)})" for part in BLOCKED_DOMAINS)
+    # The above wrapped in something which allows http prefixes and asserts a boundary
+    _DOMAIN_PATTERN = re.compile(rf"^(?:http[sx]?:)?//(?:{_DOMAIN_PATTERN})[/$]")
 
     @classmethod
     def is_blocked(cls, url):
         """Check if a URL is blocked."""
 
-        # Dumb is fast here. I can't find a better way of doing this for now
-        url = url.lower()
-
-        for part in cls.BLOCKED_URL_PARTS:
-            if part in url:
-                return True
-
-        return False
+        return cls._DOMAIN_PATTERN.match(url)
 
 
 @json_view(route_name="badge")
