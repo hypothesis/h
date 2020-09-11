@@ -205,17 +205,20 @@ class TestHandleAnnotationEvent:
             "options": {"action": "update"},
         }
 
-    def test_notification_format_delete(self, fetch_annotation, presenter_asdict):
+    def test_notification_format_delete(
+        self, fetch_annotation, presenter_asdict, principals_allowed_by_permission
+    ):
         """Check the format of the returned notification for deletes."""
         message = {"annotation_id": "_", "action": "delete", "src_client_id": "pigeon"}
         annotation = fetch_annotation.return_value
         socket = FakeSocket("giraffe")
         session = mock.sentinel.db_session
         settings = {"foo": "bar"}
-        presenter_asdict.return_value = self.serialized_annotation()
+        principals_allowed_by_permission.return_value = socket.effective_principals
 
         messages.handle_annotation_event(message, [socket], settings, session)
 
+        presenter_asdict.assert_not_called()
         assert socket.send_json_payloads[0] == {
             "payload": [{"id": annotation.id}],
             "type": "annotation-notification",
@@ -361,13 +364,62 @@ class TestHandleAnnotationEvent:
         )
         assert len(socket.send_json_payloads) == 1
 
+    @pytest.mark.parametrize(
+        "is_shared,socket_principals,expect_send",
+        [
+            # Only members of a private group get notified when shared annotations
+            # in that group are deleted.
+            (True, ["user:bob", "group:foobar"], True),
+            (True, ["group:foobar"], True),
+            (True, [security.Everyone], False),
+            # Only creators of private annotations get notified when they are
+            # deleted.
+            (False, ["user:bob", "group:foobar"], True),
+            (False, ["group:foobar"], False),
+            (False, [security.Everyone], False),
+        ],
+    )
+    def test_sends_annotation_delete_if_permissions_correct(
+        self,
+        fetch_annotation,
+        annotation_resource,
+        principals_allowed_by_permission,
+        is_shared,
+        socket_principals,
+        expect_send,
+    ):
+        message = {"annotation_id": "_", "action": "delete", "src_client_id": "pigeon"}
+        annotation = fetch_annotation.return_value
+        annotation.userid = "user:bob"
+        socket = FakeSocket("giraffe")
+        session = mock.sentinel.db_session
+        settings = {"foo": "bar"}
+
+        def principals(resource, permission):
+            if (
+                resource == annotation_resource.return_value.group
+                and permission == "read"
+            ):
+                return ["group:foobar"]
+            else:
+                return []
+
+        principals_allowed_by_permission.side_effect = principals
+
+        annotation.shared = is_shared
+        socket.effective_principals = socket_principals
+
+        messages.handle_annotation_event(message, [socket], settings, session)
+
+        assert bool(socket.send_json_payloads) == expect_send
+
     def serialized_annotation(self):
         return {"permissions": {"read": ["group:__world__"]}}
 
     @pytest.fixture
     def fetch_annotation(self, factories, patch):
         fetch = patch("h.streamer.messages.storage.fetch_annotation")
-        fetch.return_value = factories.Annotation()
+        fetch.return_value = factories.Annotation(shared=True)
         return fetch
 
     @pytest.fixture(autouse=True)

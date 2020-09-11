@@ -161,18 +161,26 @@ def _generate_annotation_event(
         links_service = LinksService(base_url, socket.registry)
         resource = AnnotationContext(annotation, group_service, links_service)
 
-        # Check whether client is authorized to read this annotation.
-        read_principals = principals_allowed_by_permission(resource, "read")
-        if not set(read_principals).intersection(socket.effective_principals):
+        if action == "delete":
+            if not annotation.shared:
+                required_principals = [annotation.userid]
+            else:
+                required_principals = principals_allowed_by_permission(
+                    resource.group, "read"
+                )
+        else:
+            required_principals = principals_allowed_by_permission(resource, "read")
+        if not set(required_principals).intersection(socket.effective_principals):
             return None
 
-        serialized = presenters.AnnotationJSONPresenter(
-            resource, formatters=formatters
-        ).asdict()
-
-        notification["payload"] = [serialized]
         if action == "delete":
             notification["payload"] = [{"id": annotation.id}]
+        else:
+            serialized = presenters.AnnotationJSONPresenter(
+                resource, formatters=formatters
+            ).asdict()
+            notification["payload"] = [serialized]
+
         return notification
 
 
