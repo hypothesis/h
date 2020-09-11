@@ -63,13 +63,6 @@ def badge(request):
 
     if Blocklist.is_blocked(uri):
         count = 0
-
-        # Blocked things stay blocked, so we can calm down the traffic to us
-        cache_control = request.response.cache_control
-        cache_control.prevent_auto = True
-        cache_control.public = True
-        cache_control.max_age = 86400  # 1 day
-
     elif not _has_uri_ever_been_annotated(request.db, uri):
         # Do a cheap check to see if this URI has ever been annotated. If not,
         # and most haven't, then we can skip the costs of a blocklist lookup or
