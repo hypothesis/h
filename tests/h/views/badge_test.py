@@ -11,15 +11,23 @@ from h.views.badge import Blocklist, badge
 
 
 class TestBlocklist:
-    @pytest.mark.parametrize("bad_part", Blocklist.BLOCKED_URL_PARTS)
-    @pytest.mark.parametrize("prefix", ("http:", "https:"))
+    @pytest.mark.parametrize("bad_part", Blocklist.BLOCKED_DOMAINS)
+    @pytest.mark.parametrize("prefix", ("http://", "https://", "httpx://", "//"))
     def test_it_blocks(self, bad_part, prefix):
         url = f"{prefix}{bad_part}/path?a=b"
 
         assert Blocklist.is_blocked(url)
 
-    def test_it_allows_non_blocked_items(self):
-        assert not Blocklist.is_blocked("http://example.com/this/is/fine")
+    @pytest.mark.parametrize(
+        "acceptable_url",
+        (
+            "http://example.com/this/is/fine",
+            "http://example.com//facebook.com",
+            "http://facebook.com.om.nom",
+        ),
+    )
+    def test_it_allows_non_blocked_items(self, acceptable_url):
+        assert not Blocklist.is_blocked(acceptable_url)
 
     def test_its_fast(self):
         # Check any modifications haven't made this significantly slower
@@ -33,9 +41,11 @@ class TestBlocklist:
 
         seconds = diff.seconds + diff.microseconds / 1000000
         calls_per_second = int(reps // seconds)
-        print(
-            f"Calls per second: {calls_per_second}, {1000000 / calls_per_second:.03f} μs/call"
-        )
+
+        # Handy to know while tinkering
+        # print(
+        #     f"Calls per second: {calls_per_second}, {1000000 / calls_per_second:.03f} μs/call"
+        # )
 
         # It should be above this number by quite a margin (20x), but we don't want flaky tests
         assert calls_per_second > 50000
