@@ -3,13 +3,6 @@ import pytest
 from h.streamer.filter import FilterHandler
 
 
-class FakeAnnotation:
-    def __init__(self, id, uri, references=[]):
-        self.id = id
-        self.target_uri = uri
-        self.references = references
-
-
 class TestFilterHandler:
     @pytest.mark.parametrize(
         "query_uris,ann_uri,should_match",
@@ -32,7 +25,7 @@ class TestFilterHandler:
             (["http://example.com"], "https://example.com/?", True),
         ],
     )
-    def test_it_matches_uri(self, query_uris, ann_uri, should_match):
+    def test_it_matches_uri(self, factories, query_uris, ann_uri, should_match):
         query = {
             "match_policy": "include_any",
             "actions": {},
@@ -40,33 +33,42 @@ class TestFilterHandler:
         }
         handler = FilterHandler(query)
 
-        ann = FakeAnnotation("123", uri=ann_uri)
+        ann = factories.Annotation(target_uri=ann_uri)
         assert handler.match(ann) is should_match
 
-    def test_it_matches_id(self):
+    def test_it_matches_id(self, factories):
+        ann_a = factories.Annotation(target_uri="https://example.com")
+        ann_b = factories.Annotation(target_uri="https://example.net")
+
         query = {
             "match_policy": "include_any",
             "actions": {},
-            "clauses": [{"field": "/id", "operator": "equals", "value": "123"}],
+            "clauses": [{"field": "/id", "operator": "equals", "value": ann_a.id}],
         }
         handler = FilterHandler(query)
 
-        ann = FakeAnnotation("123", uri="https://example.com")
-        assert handler.match(ann) is True
+        assert handler.match(ann_a) is True
+        assert handler.match(ann_b) is False
 
-        ann = FakeAnnotation("456", uri="https://example.net")
-        assert handler.match(ann) is False
+    def test_it_matches_parent_id(self, factories):
+        parent_ann = factories.Annotation()
+        other_ann = factories.Annotation()
 
-    def test_it_matches_parent_id(self):
         query = {
             "match_policy": "include_any",
             "actions": {},
-            "clauses": [{"field": "/references", "operator": "one_of", "value": "123"}],
+            "clauses": [
+                {"field": "/references", "operator": "one_of", "value": parent_ann.id}
+            ],
         }
         handler = FilterHandler(query)
 
-        ann = FakeAnnotation("abc", uri="https://example.com", references=["123"])
+        ann = factories.Annotation(
+            target_uri="https://example.com", references=[parent_ann.id]
+        )
         assert handler.match(ann) is True
 
-        ann = FakeAnnotation("abc", uri="https://example.com", references=["456"])
+        ann = factories.Annotation(
+            target_uri="https://example.com", references=[other_ann.id]
+        )
         assert handler.match(ann) is False
