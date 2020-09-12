@@ -32,7 +32,7 @@ hkdf==0.0.3               # via -r requirements/requirements.txt
 hupper==1.10.2            # via -r requirements/requirements.txt, pyramid
 importlib-metadata==1.7.0  # via -r requirements/requirements.txt, jsonschema, kombu, pluggy, pytest
 iniconfig==1.0.1          # via pytest
-iso8601==0.1.12           # via -r requirements/requirements.txt, colander, deform
+iso8601==0.1.13           # via -r requirements/requirements.txt, colander, deform
 itsdangerous==1.1.0       # via -r requirements/requirements.txt
 jinja2==2.11.2            # via -r requirements/requirements.txt, pyramid-jinja2
 jsonpointer==2.0          # via -r requirements/requirements.txt
