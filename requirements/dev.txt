@@ -33,7 +33,7 @@ importlib-metadata==1.7.0  # via -r requirements/requirements.txt, jsonschema, k
 ipdb==0.13.3              # via -r requirements/dev.in
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.16.1           # via -r requirements/dev.in, ipdb
-iso8601==0.1.12           # via -r requirements/requirements.txt, colander, deform
+iso8601==0.1.13           # via -r requirements/requirements.txt, colander, deform
 itsdangerous==1.1.0       # via -r requirements/requirements.txt
 jedi==0.17.2              # via ipython
 jinja2==2.11.2            # via -r requirements/requirements.txt, pyramid-jinja2

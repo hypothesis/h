@@ -28,7 +28,7 @@ h-pyramid-sentry==1.2.1   # via -r requirements/requirements.in
 hkdf==0.0.3               # via -r requirements/requirements.in
 hupper==1.10.2            # via pyramid
 importlib-metadata==1.7.0  # via jsonschema, kombu
-iso8601==0.1.12           # via colander, deform
+iso8601==0.1.13           # via colander, deform
 itsdangerous==1.1.0       # via -r requirements/requirements.in
 jinja2==2.11.2            # via pyramid-jinja2
 jsonpointer==2.0          # via -r requirements/requirements.in
