@@ -4,4 +4,4 @@
 #
 #    pip-compile requirements/coverage.in
 #
-coverage==5.2.1           # via -r requirements/coverage.in
+coverage==5.3             # via -r requirements/coverage.in
