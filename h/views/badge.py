@@ -34,7 +34,7 @@ class Blocklist:
     # The main OR clause which looks like this (?:option_1)|(?:option_2)...
     _DOMAIN_PATTERN = "|".join(f"(?:{re.escape(part)})" for part in BLOCKED_DOMAINS)
     # The above wrapped in something which allows http prefixes and asserts a boundary
-    _DOMAIN_PATTERN = re.compile(rf"^(?:http[sx]?:)?//(?:{_DOMAIN_PATTERN})[/$]")
+    _DOMAIN_PATTERN = re.compile(rf"^(?:http[sx]?:)?//(?:{_DOMAIN_PATTERN})(?:/|$)")
 
     @classmethod
     def is_blocked(cls, url):
@@ -70,6 +70,14 @@ def badge(request):
         cache_control.public = True
         cache_control.max_age = 86400  # 1 day
 
+        # `pyramid_authsanity` sets a response callback which adds Vary=Cookie
+        # which will totally break our caching. To get around this we add
+        # another callback which should be called after to disable it.
+        def disable_vary_header(_request, response):
+            response.vary = None
+
+        request.add_response_callback(disable_vary_header)
+
     elif not _has_uri_ever_been_annotated(request.db, uri):
         # Do a cheap check to see if this URI has ever been annotated. If not,
         # and most haven't, then we can skip the costs of a blocklist lookup or
@@ -77,6 +85,7 @@ def badge(request):
         # involves several DB queries to expand URIs and enumerate group IDs
         # readable by the current user.
         count = 0
+
     else:
         query = MultiDict({"uri": uri, "limit": 0})
         s = search.Search(request)
