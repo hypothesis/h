@@ -37,18 +37,20 @@ class TestFilterHandler:
         assert handler.match(ann) is should_match
 
     def test_it_matches_id(self, factories):
-        ann_a = factories.Annotation(target_uri="https://example.com")
-        ann_b = factories.Annotation(target_uri="https://example.net")
+        ann_matching = factories.Annotation(target_uri="https://example.com")
+        ann_non_matching = factories.Annotation(target_uri="https://example.net")
 
         query = {
             "match_policy": "include_any",
             "actions": {},
-            "clauses": [{"field": "/id", "operator": "equals", "value": ann_a.id}],
+            "clauses": [
+                {"field": "/id", "operator": "equals", "value": ann_matching.id}
+            ],
         }
         handler = FilterHandler(query)
 
-        assert handler.match(ann_a) is True
-        assert handler.match(ann_b) is False
+        assert handler.match(ann_matching) is True
+        assert handler.match(ann_non_matching) is False
 
     def test_it_matches_parent_id(self, factories):
         parent_ann = factories.Annotation()
