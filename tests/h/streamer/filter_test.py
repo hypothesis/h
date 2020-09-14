@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from h.streamer.filter import FilterHandler
@@ -74,3 +76,30 @@ class TestFilterHandler:
             target_uri="https://example.com", references=[other_ann.id]
         )
         assert handler.match(ann) is False
+
+    @pytest.mark.skip(reason="For dev purposes only")
+    def test_speed(self, factories):
+        query = {
+            "match_policy": "include_any",
+            "actions": {},
+            "clauses": [
+                {
+                    "field": "/uri",
+                    "operator": "one_of",
+                    "value": ["https://example.com", "https://example.org"],
+                }
+            ],
+        }
+
+        ann = factories.Annotation(target_uri="https://example.org")
+        handler = FilterHandler(query)
+
+        start = datetime.utcnow()
+
+        # I think the max number connected at once is 4096
+        for _ in range(4096):
+            handler.match(ann)
+
+        diff = datetime.utcnow() - start
+        ms = diff.seconds * 1000 + diff.microseconds / 1000
+        print(ms, "ms")
