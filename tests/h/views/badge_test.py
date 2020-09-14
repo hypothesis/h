@@ -11,12 +11,11 @@ from h.views.badge import Blocklist, badge
 
 
 class TestBlocklist:
-    @pytest.mark.parametrize("bad_part", Blocklist.BLOCKED_DOMAINS)
+    @pytest.mark.parametrize("domain", Blocklist.BLOCKED_DOMAINS)
     @pytest.mark.parametrize("prefix", ("http://", "https://", "httpx://", "//"))
-    def test_it_blocks(self, bad_part, prefix):
-        url = f"{prefix}{bad_part}/path?a=b"
-
-        assert Blocklist.is_blocked(url)
+    @pytest.mark.parametrize("suffix", ("", "/", "/path?a=b"))
+    def test_it_blocks(self, domain, prefix, suffix):
+        assert Blocklist.is_blocked(f"{prefix}{domain}{suffix}")
 
     @pytest.mark.parametrize(
         "acceptable_url",
