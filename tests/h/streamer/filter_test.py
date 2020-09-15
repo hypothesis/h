@@ -78,7 +78,7 @@ class TestFilterHandler:
         assert handler.match(ann) is False
 
     @pytest.mark.skip(reason="For dev purposes only")
-    def test_speed(self, factories):
+    def test_speed(self, factories):  # pragma: no cover
         query = {
             "match_policy": "include_any",
             "actions": {},

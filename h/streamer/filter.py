@@ -49,26 +49,15 @@ class FilterHandler:
             if clause_filter
         ]
 
-    def evaluate_clause(self, clause, annotation):
-        clause_filter = self._get_filter(clause)
+    def match(self, annotation):
+        if not self._clause_filters:
+            return True
 
-        if clause_filter is None:
-            return None
-
-        return clause_filter(annotation)
-
-    def include_any(self, annotation):
         for clause_filter in self._clause_filters:
             if clause_filter(annotation):
                 return True
 
         return False
-
-    def match(self, annotation):
-        if not self._clause_filters:
-            return True
-
-        return self.include_any(annotation)
 
     @classmethod
     def _get_filter(cls, clause):
