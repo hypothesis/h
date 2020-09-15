@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import unicodedata
+from functools import lru_cache
 from operator import attrgetter
 
 from h.util.uri import normalize as normalize_uri
@@ -29,11 +29,25 @@ SCHEMA = {
 }
 
 
+def _normalize_uri_multi(items):
+    """
+    Normalise uri's for comparison.
+
+    :param items: A list or single item
+    :return: A list of mapped values, or a single value (if passed)
+    """
+    if isinstance(items, list):
+        return [normalize_uri(item) for item in items]
+
+    return normalize_uri(items)
+
+
 class FilterHandler:
-    FIELD_GETTERS = {
-        "/uri": attrgetter("target_uri"),
-        "/references": attrgetter("references"),
-        "/id": attrgetter("id"),
+    FIELDS = {
+        # Fields we accept mapped to a getter, and a normalization function
+        "/uri": [attrgetter("target_uri"), _normalize_uri_multi],
+        "/references": [attrgetter("references"), None],
+        "/id": [attrgetter("id"), None],
     }
 
     def __init__(self, filter_json):
@@ -70,23 +84,13 @@ class FilterHandler:
         field_path = clause["field"]
 
         try:
-            field_getter = cls.FIELD_GETTERS[field_path]
+            field_getter, normalize = cls.FIELDS[field_path]
         except KeyError:
             return
 
-        def normalize(term, known_term=False):
-            if not known_term and isinstance(term, list):
-                return [normalize(sub_term, known_term=True) for sub_term in term]
-
-            # Notice closure around field_path here
-            if field_path == "/uri":
-                # Apply field-specific normalization.
-                return normalize_uri(term)
-
-            # Apply generic normalization.
-            return uni_fold(term)
-
-        filter_term = normalize(clause["value"])
+        filter_term = clause["value"]
+        if normalize is not None:
+            filter_term = normalize(filter_term)
 
         def clause_filter(annotation):
             # Extract the annotation property that corresponds to the "field"
@@ -96,7 +100,8 @@ class FilterHandler:
             if field_value is None:
                 return False
 
-            field_value = normalize(field_value)
+            if normalize:
+                field_value = normalize(field_value)
 
             if clause["operator"] == "one_of":
                 # The `one_of` operator behaves differently depending on
@@ -113,21 +118,33 @@ class FilterHandler:
         return clause_filter
 
 
-def uni_fold(text):
+class NormalizedAnnotation:
+    """A normalized and caching version of an annotation.
+
+    This version proxies, normalises and caches the fields used in the filter
+    algorithm to speed up processing. The result can be quite dramatic over
+    a large number of clients.
+
+    The intended use is to wrap an annotation before passing to a filter
+    `match()` method.
     """
-    Return a case-folded and Unicode-normalized copy of ``text``.
 
-    This is used to ensure matching of filters against annotations ignores
-    differences in case or different ways of representing the same characters.
-    """
-    # Convert bytes to text
-    if isinstance(text, bytes):
-        text = str(text, "utf-8")
+    def __init__(self, annotation):
+        self._annotation = annotation
 
-    # Do not touch other types
-    if not isinstance(text, str):
-        return text
+    @property
+    @lru_cache(1)
+    def target_uri(self):
+        return normalize_uri(self._annotation.target_uri)
 
-    text = text.lower()
-    text = unicodedata.normalize("NFKD", text)
-    return "".join([c for c in text if not unicodedata.combining(c)])
+    @property
+    @lru_cache(1)
+    def references(self):
+        # Ids require no normalisation, so just pass through
+        return self._annotation.references
+
+    @property
+    @lru_cache(1)
+    def id(self):
+        # Ids require no normalisation, so just pass through
+        return self._annotation.id
