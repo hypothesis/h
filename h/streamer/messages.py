@@ -14,6 +14,7 @@ from h.services.links import LinksService
 from h.services.nipsa import NipsaService
 from h.services.user import UserService
 from h.streamer import websocket
+from h.streamer.filter import NormalizedAnnotation
 from h.traversal import AnnotationContext
 
 log = logging.getLogger(__name__)
@@ -84,9 +85,15 @@ def handle_annotation_event(message, sockets, settings, session):
         log.warning("received annotation event for missing annotation: %s", id_)
         return
 
+    # Create a version of the annotation which compiles and caches normalised
+    # versions of the fields for speed
+    normalized_annotation = NormalizedAnnotation(annotation)
+
     # Find connected clients which are interested in this annotation.
     # This is done early to minimize the work done if there are no such clients.
-    matching_sockets = [s for s in sockets if s.filter and s.filter.match(annotation)]
+    matching_sockets = [
+        s for s in sockets if s.filter and s.filter.match(normalized_annotation)
+    ]
     if not matching_sockets:
         return
 
