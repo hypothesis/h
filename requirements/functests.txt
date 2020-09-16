@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/functests.in
 #
-alembic==1.4.2            # via -r requirements/requirements.txt
+alembic==1.4.3            # via -r requirements/requirements.txt
 amqp==2.6.1               # via -r requirements/requirements.txt, kombu
 attrs==20.2.0             # via -r requirements/requirements.txt, jsonschema, pytest
 bcrypt==3.2.0             # via -r requirements/requirements.txt

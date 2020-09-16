@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/requirements.in
 #
-alembic==1.4.2            # via -r requirements/requirements.in
+alembic==1.4.3            # via -r requirements/requirements.in
 amqp==2.6.1               # via kombu
 attrs==20.2.0             # via jsonschema
 bcrypt==3.2.0             # via -r requirements/requirements.in
