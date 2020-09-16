@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Celery worker bootstrap and configuration.
 
@@ -10,7 +8,6 @@ integrates it with the Pyramid application by attaching a bootstrapped fake
 
 import logging
 import os
-from datetime import timedelta
 
 from celery import Celery, signals
 from celery.utils.log import get_task_logger
@@ -26,28 +23,6 @@ celery.conf.update(
         "CELERY_BROKER_URL",
         os.environ.get("BROKER_URL", "amqp://guest:guest@localhost:5672//"),
     ),
-    beat_schedule={
-        "purge-deleted-annotations": {
-            "task": "h.tasks.cleanup.purge_deleted_annotations",
-            "schedule": timedelta(hours=1),
-        },
-        "purge-expired-authtickets": {
-            "task": "h.tasks.cleanup.purge_expired_auth_tickets",
-            "schedule": timedelta(hours=1),
-        },
-        "purge-expired-authzcodes": {
-            "task": "h.tasks.cleanup.purge_expired_authz_codes",
-            "schedule": timedelta(hours=1),
-        },
-        "purge-expired-tokens": {
-            "task": "h.tasks.cleanup.purge_expired_tokens",
-            "schedule": timedelta(hours=1),
-        },
-        "purge-removed-features": {
-            "task": "h.tasks.cleanup.purge_removed_features",
-            "schedule": timedelta(hours=6),
-        },
-    },
     accept_content=["json"],
     # Enable at-least-once delivery mode. This probably isn't actually what we
     # want for all of our queues, but it makes the failure-mode behaviour of
