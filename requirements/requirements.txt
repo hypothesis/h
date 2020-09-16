@@ -59,14 +59,14 @@ pyramid-sanity==1.0.1     # via -r requirements/requirements.in
 pyramid-services==2.2     # via -r requirements/requirements.in, pyramid-authsanity
 pyramid-tm==2.4           # via -r requirements/requirements.in
 pyramid==1.10.4           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-authsanity, pyramid-exclog, pyramid-jinja2, pyramid-layout, pyramid-mailer, pyramid-retry, pyramid-sanity, pyramid-services, pyramid-tm
-pyrsistent==0.16.0        # via jsonschema
+pyrsistent==0.17.3        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements/requirements.in, alembic, elasticsearch-dsl
 python-editor==1.0.4      # via alembic
 python-slugify==4.0.1     # via -r requirements/requirements.in
 pytz==2020.1              # via celery
 repoze.sendmail==4.3      # via pyramid-mailer
 sentry-sdk==0.17.6        # via h-pyramid-sentry
-six==1.15.0               # via bcrypt, bleach, elasticsearch-dsl, jsonschema, packaging, pyrsistent, python-dateutil
+six==1.15.0               # via bcrypt, bleach, elasticsearch-dsl, jsonschema, packaging, python-dateutil
 sqlalchemy==1.3.19        # via -r requirements/requirements.in, alembic, zope.sqlalchemy
 supervisor==4.2.1         # via -r requirements/requirements.in
 text-unidecode==1.3       # via python-slugify
